@@ -33,10 +33,12 @@ TaskParameterSpace::TaskParameterSpace(Set<TaskParameter> const& parameters, Rea
 }
 
 TaskParameterPoint TaskParameterSpace::make_point(ParameterBindingsMap const& bindings) const {
+    ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     return TaskParameterPoint(*this,bindings);
 }
 
 TaskParameterPoint TaskParameterSpace::make_point(Map<RealVariable,Nat> const& bindings) const {
+    ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
         Nat v = bindings.find(p.variable())->second;

@@ -27,11 +27,6 @@
 
 namespace Ariadne {
 
-template <typename E>
-constexpr typename std::underlying_type<E>::type to_underlying(E e) {
-    return static_cast<typename std::underlying_type<E>::type>(e);
-}
-
 TaskParameterPoint::TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings)
     : _space(space.clone()), _bindings(bindings) { }
 
@@ -45,7 +40,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) cons
         auto space = this->space();
 
         while(true) {
-            Nat offset = (Nat)rand() % (total_breadth-1);
+            Nat offset = (Nat)rand() % total_breadth;
             Nat current_breadth = 0;
             ParameterBindingsMap shifted_bindings;
             Bool shifted = false;
@@ -80,7 +75,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) co
     Set<TaskParameterPoint> result;
     auto space = this->space();
     Set<Nat> offsets;
-    do offsets.insert((Nat)rand() % (total_breadth-1)); while (offsets.size() < amount);
+    do offsets.insert((Nat)rand() % total_breadth); while (offsets.size() < amount);
 
     Nat num_points = 1;
     for (Nat offset : offsets) {
@@ -115,13 +110,18 @@ Nat TaskParameterPoint::hash_code() const {
     return result;
 }
 
-Real TaskParameterPoint::time_cost_estimate() const {
+Map<TaskParameter,Real> TaskParameterPoint::values(Map<RealVariable,Real> const & external_values) const {
+    Map<TaskParameter,Real> result;
+    for (auto binding : _bindings) {
+        result.insert(Pair<TaskParameter,Real>(binding.first,binding.first.value(binding.second,external_values)));
+    }
+    return result;
+}
+
+Real TaskParameterPoint::time_cost_estimate(Map<RealVariable,Real> const& external_variables) const {
     Map<Identifier,Real> values;
     for (auto binding : _bindings) {
-        Map<Identifier,Real> conversion_variables;
-        conversion_variables.insert(Pair<Identifier,Real>(binding.first.variable().name(),binding.second));
-        Real converted_value = evaluate(binding.first.integer_conversion(), Valuation<Real,Real>(conversion_variables));
-        values.insert(Pair<Identifier,Real>(binding.first.variable().name(),converted_value));
+        values.insert(Pair<Identifier,Real>(binding.first.variable().name(),binding.first.value(binding.second,external_variables)));
     }
     return evaluate(_space->time_cost_estimator(),Valuation<Real,Real>(values));
 }
@@ -159,7 +159,7 @@ Nat TaskParameterPoint::distance(TaskParameterPoint const& p) const {
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
         Nat const v1 = iter->second;
         Nat const v2 = p._bindings.at(iter->first);
-        if (iter->first.is_metric()) result += (v1 > v2 ? v1 - v2 : v2 - v1);
+        if (iter->first.kind() == TaskParameterKind::METRIC) result += (v1 > v2 ? v1 - v2 : v2 - v1);
         else result += (v1 == v2 ? 0 : 1);
     }
     return result;
@@ -174,7 +174,7 @@ OutputStream& TaskParameterPoint::_write(OutputStream& os) const {
 List<Nat> TaskParameterPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
         for (auto iter = _bindings.begin(); iter != _bindings.end(); ++iter) {
-            if (not iter->first.is_metric()) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
+            if (iter->first.kind() != TaskParameterKind::METRIC) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
             else if (iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
             else if (iter->second == 0) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down

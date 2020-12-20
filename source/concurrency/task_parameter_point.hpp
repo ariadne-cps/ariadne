@@ -44,11 +44,13 @@ class TaskParameterPoint : public WritableInterface {
     //! \brief The parameter space
     TaskParameterSpace const& space() const { return *_space; }
 
-    //! \brief The values in the space, according to the space ordering
-    List<Nat> values() const { return _bindings.values(); }
+    //! \brief The coordinates in the natural space, according to the space ordering
+    List<Nat> coordinates() const { return _bindings.values(); }
+    //! \brief The values in the real space, possibly using some \a external_values
+    Map<TaskParameter,Real> values(Map<RealVariable,Real> const & external_values = Map<RealVariable,Real>()) const;
 
-    //! \brief Provide a time cost estimate given the space's estimator
-    Real time_cost_estimate() const;
+    //! \brief Provide a time cost estimate, where the \a external_values bind constants to their values
+    Real time_cost_estimate(Map<RealVariable,Real> const & external_values = Map<RealVariable,Real>()) const;
 
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
@@ -71,8 +73,7 @@ class TaskParameterPoint : public WritableInterface {
     //! \details Distance between values for non-metric parameters is either 1 or 0
     Nat distance(TaskParameterPoint const& p) const;
 
-    //! \brief Compute the breadth of possible
-    //! shifts of the point for each parameter
+    //! \brief Compute the breadth of possible shifts of the point for each parameter
     List<Nat> shift_breadths() const;
 
     //! \brief A positive number uniquely identifying the point in the space

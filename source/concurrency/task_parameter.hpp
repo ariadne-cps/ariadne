@@ -39,43 +39,53 @@
 
 namespace Ariadne {
 
+enum class TaskParameterKind { BOOLEAN, ENUMERATION, METRIC };
+
+std::ostream& operator<<(std::ostream& os, const TaskParameterKind kind);
+
 class TaskParameterInterface {
   public:
     virtual Identifier const& name() const = 0;
     virtual RealVariable variable() const = 0;
 
-    virtual Bool is_metric() const = 0;
+    virtual TaskParameterKind kind() const = 0;
     virtual Nat upper_bound() const = 0;
     //! \brief Randomly get the result from shifting the given \a value
     virtual Nat shifted_value_from(Nat value) const = 0;
-
-    virtual RealExpression integer_conversion() const = 0;
+    //! \brief The expression that provides the parameter value from its integer representation along with any constant
+    //! \details Both the integer representation and any constants are defined as RealVariable to comply with the Expression class
+    virtual RealExpression value_expression() const = 0;
+    //! \brief Compute the Real value from the \a integer_value, using the \a external_values if external variables are present
+    virtual Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const = 0;
 
     virtual TaskParameterInterface* clone() const = 0;
     virtual ~TaskParameterInterface() = default;
 };
 
-class TaskParameterBase : public TaskParameterInterface {
+class TaskParameterBase : public TaskParameterInterface, WritableInterface {
 protected:
-    TaskParameterBase(RealVariable const& variable, RealExpression const& conversion) : _variable(variable), _conversion(conversion) { }
+    TaskParameterBase(RealVariable const& variable, RealExpression const& value_expression) : _variable(variable), _value_expression(value_expression) { }
 public:
     Identifier const& name() const override { return _variable.name(); }
     RealVariable variable() const override { return _variable; }
-    RealExpression integer_conversion() const override { return _conversion; }
+    RealExpression value_expression() const override { return _value_expression; }
+    Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const override;
 private:
     const RealVariable _variable;
-    const RealExpression _conversion;
+    const RealExpression _value_expression;
 };
 
 class MetricTaskParameter : public TaskParameterBase {
   public:
     MetricTaskParameter(RealVariable const& variable, Nat const& upper_bound) : TaskParameterBase(variable,variable), _ub(upper_bound) { }
-    MetricTaskParameter(RealVariable const& variable, RealExpression const& conversion, Nat const& upper_bound) : TaskParameterBase(variable,conversion), _ub(upper_bound) { }
+    MetricTaskParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& upper_bound) : TaskParameterBase(variable, value_expression), _ub(upper_bound) { }
 
-    Bool is_metric() const override { return true; }
+    TaskParameterKind kind() const override { return TaskParameterKind::METRIC; }
     Nat upper_bound() const override { return _ub; }
     Nat shifted_value_from(Nat value) const override;
     MetricTaskParameter* clone() const override { return new MetricTaskParameter(*this); }
+
+    OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "', upper_bound: " << _ub << ")"; return os; }
 
   private:
     const Nat _ub;
@@ -85,10 +95,12 @@ class BooleanTaskParameter : public TaskParameterBase {
 public:
     BooleanTaskParameter(RealVariable const& variable) : TaskParameterBase(variable,variable) { }
 
-    Bool is_metric() const override { return false; }
+    TaskParameterKind kind() const override { return TaskParameterKind::BOOLEAN; }
     Nat upper_bound() const override { return 1; }
     Nat shifted_value_from(Nat value) const override;
     BooleanTaskParameter* clone() const override { return new BooleanTaskParameter(*this); }
+
+    OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "')"; return os; }
 };
 
 template<class E>
@@ -98,15 +110,15 @@ public:
         ARIADNE_PRECONDITION(elements.size() > 1);
     }
 
-    Bool is_metric() const override { return false; }
+    TaskParameterKind kind() const override { return TaskParameterKind::ENUMERATION; }
+    List<E> elements() const { return _elements; }
     Nat upper_bound() const override { return _elements.size()-1; }
     Nat shifted_value_from(Nat value) const override {
         Nat result = (Nat)rand() % upper_bound();
-        if (result == value) result = upper_bound();
-        return result;
+        return (result == value ? upper_bound() : result);
     }
-
     EnumerationTaskParameter* clone() const override { return new EnumerationTaskParameter(*this); }
+    OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "', size: " << _elements.size() << ")"; return os; }
   private:
     const List<E> _elements;
 };
@@ -121,10 +133,13 @@ class TaskParameter : public WritableInterface {
     Bool operator==(TaskParameter const& p) const;
     Bool operator<(TaskParameter const& p) const;
 
+    TaskParameterInterface* ptr() const { return _impl.get(); }
+
     Identifier const& name() const { return _impl->name(); }
     RealVariable variable() const { return _impl->variable(); }
-    RealExpression integer_conversion() const { return _impl->integer_conversion(); }
-    Bool is_metric() const { return _impl->is_metric(); }
+    RealExpression value_expression() const { return _impl->value_expression(); }
+    Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const { return _impl->value(integer_value, external_values); }
+    TaskParameterKind kind() const { return _impl->kind(); }
     Nat upper_bound() const { return _impl->upper_bound(); }
     Nat shifted_value_from(Nat value) const { return _impl->shifted_value_from(value); }
 

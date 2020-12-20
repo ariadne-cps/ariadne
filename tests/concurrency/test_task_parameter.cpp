@@ -74,8 +74,9 @@ class TestTaskParameter {
     Void test_enumeration_task_parameter() {
         RealVariable tc("integrator");
         TaskParameter p = EnumerationTaskParameter<TestInterface>(tc,{A(),B(),C(),D()});
+        auto etp_ptr = dynamic_cast<EnumerationTaskParameter<TestInterface>*>(p.ptr());
+        ARIADNE_TEST_EQUALS(etp_ptr->elements().size(),4);
         ARIADNE_TEST_PRINT(p);
-        ARIADNE_TEST_ASSERT(not p.is_metric());
         ARIADNE_TEST_EQUALS(p.upper_bound(),3);
     }
 
@@ -123,14 +124,18 @@ class TestTaskParameter {
 
     Void test_parameter_point_time_cost_estimation() {
         RealVariable mss("maximum_step_size"), st("sweep_threshold"), mto("maximum_temporal_order"), rsp("relative_set_parameters");
-        TaskParameterSpace space({MetricTaskParameter(mss,exp(-mss),10),
+        RealVariable lip("lipschitz_step");
+        TaskParameterSpace space({MetricTaskParameter(mss,lip*exp(-mss),10),
                                   MetricTaskParameter(st,exp(-st),10),
                                   MetricTaskParameter(mto,10),
                                   MetricTaskParameter(rsp,6)
                                   },(st*mto+rsp)/mss);
 
         TaskParameterPoint point = space.make_point({{mss,2},{mto,6},{rsp,3},{st,8}});
-        auto estimate = point.time_cost_estimate();
+        Map<RealVariable,Real> constant_values;
+        constant_values[lip] =0.2_decimal;
+        auto estimate = point.time_cost_estimate(constant_values);
+        ARIADNE_TEST_PRINT(point.values(constant_values));
         ARIADNE_TEST_PRINT(estimate);
         ARIADNE_TEST_PRINT(estimate.get(DoublePrecision()));
     }
@@ -215,21 +220,15 @@ class TestTaskParameter {
     }
 
     Void test_parameter_point_adjacent_set_shift() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
+        RealVariable b("use_subdivisions"), m1("sweep_threshold"), m2("maximum_step_size"), e("integrator");
         TaskParameterSpace space({BooleanTaskParameter(b),
-                                  MetricTaskParameter(m,6),
+                                  MetricTaskParameter(m1,6),
+                                  MetricTaskParameter(m2,6),
                                   EnumerationTaskParameter<TestInterface>(e,{A(),B(),C(),D()})},
-                                 b*m+e);
+                                 b*m1+m2+e);
 
-        TaskParameterPoint point1 = space.make_point({{b,1},{m,5},{e,2}});
-        TaskParameterPoint point2 = space.make_point({{b,1},{m,5},{e,3}});
-        TaskParameterPoint point3 = space.make_point({{b,0},{m,5},{e,2}});
-        TaskParameterPoint point4 = space.make_point({{b,1},{m,5},{e,0}});
-        TaskParameterPoint point5 = space.make_point({{b,1},{m,8},{e,2}});
-        TaskParameterPoint point6 = space.make_point({{b,0},{m,4},{e,0}});
-        TaskParameterPoint point7 = space.make_point({{b,0},{m,6},{e,1}});
-        TaskParameterPoint point8 = space.make_point({{b,0},{m,8},{e,1}});
-        Set<TaskParameterPoint> points = {point1,point2,point3,point4,point5,point6,point7,point8};
+        TaskParameterPoint starting_point = space.make_point({{b,1},{m1,5},{m2,2},{e,2}});
+        Set<TaskParameterPoint> points = starting_point.make_random_shifted(8);
         ARIADNE_TEST_PRINT(points);
         auto all_points = make_adjacent_set_shifted_from(points,1);
         ARIADNE_TEST_EQUALS(all_points.size(),16);

@@ -26,9 +26,29 @@
 
 namespace Ariadne {
 
-template <typename E>
-constexpr typename std::underlying_type<E>::type to_underlying(E e) {
-    return static_cast<typename std::underlying_type<E>::type>(e);
+std::ostream& operator<<(std::ostream& os, const TaskParameterKind kind) {
+    switch(kind) {
+    case TaskParameterKind::BOOLEAN:
+        os << "Boolean";
+        break;
+    case TaskParameterKind::ENUMERATION:
+        os << "Enumeration";
+        break;
+    case TaskParameterKind::METRIC:
+        os << "Metric";
+        break;
+    default:
+        ARIADNE_FAIL_MSG("Unhandled value " << kind << " in TaskParameterKind for printing.");
+    }
+    return os;
+}
+
+Real TaskParameterBase::value(Nat integer_value, Map<RealVariable,Real> const& constant_values) const {
+    Map<Identifier,Real> conversion_variables;
+    for (auto entry : constant_values) conversion_variables[entry.first.name()] = entry.second;
+    conversion_variables.insert(Pair<Identifier,Real>(_variable.name(),integer_value));
+
+    return evaluate(_value_expression, Valuation<Real,Real>(conversion_variables));
 }
 
 Nat MetricTaskParameter::shifted_value_from(Nat value) const {
@@ -43,7 +63,8 @@ Nat BooleanTaskParameter::shifted_value_from(Nat value) const {
 }
 
 Bool TaskParameter::operator==(TaskParameter const& p) const {
-    return _impl->name() == p._impl->name() and _impl->is_metric() == p._impl->is_metric() and _impl->upper_bound() == p._impl->upper_bound();
+    // FIXME: enumeration tasks should be distinguished
+    return _impl->name() == p._impl->name() and _impl->kind() == p._impl->kind() and _impl->upper_bound() == p._impl->upper_bound();
 }
 
 Bool TaskParameter::operator<(TaskParameter const& p) const {
@@ -51,7 +72,7 @@ Bool TaskParameter::operator<(TaskParameter const& p) const {
 }
 
 OutputStream& TaskParameter::_write(OutputStream& os) const {
-    return os << "(" << name() << ", metric? " << is_metric() << ", ub: " + to_string(upper_bound()) + ")";
+    return os << "(" << name() << ", " << kind() << ", ub: " + to_string(upper_bound()) + ")";
 }
 
 } // namespace Ariadne

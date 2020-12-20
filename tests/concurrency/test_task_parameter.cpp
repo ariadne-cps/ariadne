@@ -23,7 +23,8 @@
  */
 
 #include "symbolic/expression_set.hpp"
-#include "concurrency/task_parameter.hpp"
+#include "concurrency/task_parameter_point.hpp"
+#include "concurrency/task_parameter_space.hpp"
 
 #include "../test.hpp"
 
@@ -213,6 +214,28 @@ class TestTaskParameter {
         }
     }
 
+    Void test_parameter_point_adjacent_set_shift() {
+        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
+        TaskParameterSpace space({BooleanTaskParameter(b),
+                                  MetricTaskParameter(m,6),
+                                  EnumerationTaskParameter<TestInterface>(e,{A(),B(),C(),D()})},
+                                 b*m+e);
+
+        TaskParameterPoint point1 = space.make_point({{b,1},{m,5},{e,2}});
+        TaskParameterPoint point2 = space.make_point({{b,1},{m,5},{e,3}});
+        TaskParameterPoint point3 = space.make_point({{b,0},{m,5},{e,2}});
+        TaskParameterPoint point4 = space.make_point({{b,1},{m,5},{e,0}});
+        TaskParameterPoint point5 = space.make_point({{b,1},{m,8},{e,2}});
+        TaskParameterPoint point6 = space.make_point({{b,0},{m,4},{e,0}});
+        TaskParameterPoint point7 = space.make_point({{b,0},{m,6},{e,1}});
+        TaskParameterPoint point8 = space.make_point({{b,0},{m,8},{e,1}});
+        Set<TaskParameterPoint> points = {point1,point2,point3,point4,point5,point6,point7,point8};
+        ARIADNE_TEST_PRINT(points);
+        auto all_points = make_adjacent_set_shifted_from(points,1);
+        ARIADNE_TEST_EQUALS(all_points.size(),16);
+        ARIADNE_TEST_PRINT(all_points);
+    }
+
     Void test() {
         ARIADNE_TEST_CALL(test_boolean_task_parameter());
         ARIADNE_TEST_CALL(test_boolean_task_parameter_shift());
@@ -227,6 +250,7 @@ class TestTaskParameter {
         ARIADNE_TEST_CALL(test_parameter_point_distance());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_shift());
         ARIADNE_TEST_CALL(test_parameter_point_random_shift());
+        ARIADNE_TEST_CALL(test_parameter_point_adjacent_set_shift());
     }
 };
 

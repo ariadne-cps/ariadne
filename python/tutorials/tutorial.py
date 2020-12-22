@@ -179,7 +179,7 @@ print("\n")
 ## [Calculus demonstration]
 
 # Create a box to act as the domain of a Taylor function
-dom=ExactBoxType([{4:7},{1:6},{-1:+1}])
+dom=BoxDomainType([{4:7},{1:6},{-1:+1}])
 print("dom:",dom)
 
 # Create a sweeper to control the accuracy of a Taylor function
@@ -262,14 +262,14 @@ print()
 # Non-arithmetic functions
 
 # Restrict to a subdomain
-d1=ExactBoxType([{-1:1},{-1:1}])
-d2=ExactBoxType([{dy(-0.125):dy(0.125)},{dy(0.5):dy(0.75)}])
+d1=BoxDomainType([{-1:1},{-1:1}])
+d2=BoxDomainType([{dy(-0.125):dy(0.125)},{dy(0.5):dy(0.75)}])
 w=T(d1,0)*T(d1,1)
 rw=restrict(w,d2)
 print("restrict(w,d2):",rw)
 
 # Embed the domain of tx in a space of higher dimension
-dom=ExactBoxType([{-1:+1}])
+dom=BoxDomainType([{-1:+1}])
     #etx=embed(tx,dom)
     #print("embed(tx,dom):",etx)
 
@@ -282,7 +282,7 @@ print("combine(tx,ty):",tg)
 print
 
 # Function composition
-dom=ExactBoxType([{4:7},{1:6},{-1:1}])
+dom=BoxDomainType([{4:7},{1:6},{-1:1}])
 th=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(dom,swp)
 cd=th.codomain()
 
@@ -317,24 +317,24 @@ print()
 # Solution of parameterised algebraic equations
 
 # Compute the solution h to the vector equation f(x,h(x))=0
-dom=ExactBoxType([{-1:+1},{-1:+1},{-1:+1}])
+dom=BoxDomainType([{-1:+1},{-1:+1},{-1:+1}])
 x=EffectiveScalarMultivariateFunction.coordinate(3,0)
 y0=EffectiveScalarMultivariateFunction.coordinate(3,1)
 y1=EffectiveScalarMultivariateFunction.coordinate(3,2)
 f=join(x+4*y0+y1,y0+y1)
 slv=IntervalNewtonSolver(1e-8,6)
 print("f:",f)
-h=slv.implicit(f,ExactBoxType([{-1:+1}]),ExactBoxType([{-1:+1},{-1:+1}]))
+h=slv.implicit(f,BoxDomainType([{-1:+1}]),BoxDomainType([{-1:+1},{-1:+1}]))
 print("implicit(f):",h)
 
 # Compute the solution h to the scalar equation g(x,h(x))=0
 # with f(x,y)=4+x-y^2, so y=sqrt(4+x)
-dom=ExactBoxType([{-1:+1},{-1:+1}])
+dom=BoxDomainType([{-1:+1},{-1:+1}])
 x=EffectiveScalarMultivariateFunction.coordinate(2,0)
 y=EffectiveScalarMultivariateFunction.coordinate(2,1)
 g=x-4*y+y*y
 print("g:",g)
-h=slv.implicit(g, ExactBoxType([{-1:+1}]),ExactIntervalType({-1:+1}))
+h=slv.implicit(g, BoxDomainType([{-1:+1}]),IntervalDomainType({-1:+1}))
 print("implicit(g):",h)
 print()
 
@@ -359,8 +359,8 @@ print("antiderivative(f,1):",Itf1)
 print()
 
 # Compute the flow of the Taylor function f starting in the domain dom for time interval [-h,+h]
-dom=ExactBoxType([{-1:+1}])
-bbx=ExactBoxType([{-4:+4}])
+dom=BoxDomainType([{-1:+1}])
+bbx=BoxDomainType([{-4:+4}])
 h=1/two
 o=8 # Temporal order
 f=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(bbx,swp)
@@ -404,8 +404,8 @@ print("refinement(f1,f2):",g)
 print()
 
 # Set up algebraic equation
-dom1=ExactBoxType([{-1:1}])
-dom2=ExactIntervalType(-1,1)
+dom1=BoxDomainType([{-1:1}])
+dom2=IntervalDomainType(-1,1)
 dom=product(dom1,dom2)
 x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom,0,swp)
 y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom,1,swp)
@@ -422,14 +422,14 @@ print()
 
 
 # Set up differential equation
-bbx=ExactBoxType([{-1:1},{-1:1}])
+bbx=BoxDomainType([{-1:1},{-1:1}])
 o=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(bbx,1,swp)
 x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bbx,0,swp)
 y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bbx,1,swp)
 f=join(o,x) # [dot(x),dot(y)]=[1,x]
-dom=ExactBoxType([{0:dy(0.125)},{0:dy(0.125)}])
+dom=BoxDomainType([{0:dy(0.125)},{0:dy(0.125)}])
 h=Dyadic(exact(0.5))
-dom0=product(dom,ExactIntervalType(-h,+h))
+dom0=product(dom,IntervalDomainType(-h,+h))
 x0=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom0,0,swp)
 y0=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom0,1,swp)
 t=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom0,2,swp)

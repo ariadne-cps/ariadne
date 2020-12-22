@@ -12,15 +12,15 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.14.6 + AppleClang 10
+    - name: macOS 10.15.7 + AppleClang 10
       os: osx
-      osx_image: xcode11.4
+      osx_image: xcode12.2
       env: COMPILER=clang++
       
-    - name: macOS 10.14 + GCC 9 [NoCairo]
+    - name: macOS 10.15.7 + GCC 10 [NoCairo]
       os: osx
-      osx_image: xcode11.4
-      env: COMPILER=gcc COMPILER_VERSION=9 DISABLE_CAIRO=ON
+      osx_image: xcode12.2
+      env: COMPILER=gcc COMPILER_VERSION=10 DISABLE_CAIRO=ON
 
     - name: Ubuntu 20.04 + Clang 10
       os: linux
@@ -38,19 +38,24 @@ before_install:
   - |
     if [[ "$COMPILER" == "gcc" ]]; then
       COMPILER_CMD="g++-$COMPILER_VERSION"
-      COMPILER_PKG="g++-$COMPILER_VERSION"
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then COMPILER_PKG="gcc@$COMPILER_VERSION"; else COMPILER_PKG="g++-$COMPILER_VERSION"; fi
     fi
   - |
     if [[ "$COMPILER" == "clang" ]]; then
-      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then COMPILER_CMD="clang++"; else COMPILER_CMD="clang++-$COMPILER_VERSION"; fi
-      COMPILER_PKG="clang-$COMPILER_VERSION"
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        COMPILER_CMD="clang++"
+        COMPILER_PKG=""
+      else
+        COMPILER_CMD="clang++-$COMPILER_VERSION"
+        COMPILER_PKG="clang-$COMPILER_VERSION"
+      fi
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       NPROC="sysctl -n hw.ncpu"
       brew cask uninstall --force oclint
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
-      brew install gcc@8 python mpfr gmp $CAIRO_PKG
+      brew install $COMPILER_PKG python mpfr gmp $CAIRO_PKG
       export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
       sudo easy_install pip
       sudo pip3 install --upgrade pip

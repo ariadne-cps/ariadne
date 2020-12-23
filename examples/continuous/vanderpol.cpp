@@ -49,29 +49,27 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN(evolver.configuration());
 
-    Real x0(1.40_dec);
-    Real y0(2.40_dec);
+    Real x0 = 1.4_dec;
+    Real y0 = 2.4_dec;
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
-    RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
-
+    auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+    initial_set.configuration().set_reconditioning_num_blocks(4);
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
-    Real evolution_time(7.0_dec);
+    ARIADNE_LOG_PRINTLN(initial_set.configuration());
+
+    Real evolution_time = 7;
 
     StopWatch sw;
     ARIADNE_LOG_PRINTLN("Computing orbit... ");
-    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER));
+    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER));
     sw.click();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
     sw.reset();
     ARIADNE_LOG_PRINTLN("Plotting...");
-    Axes2d axes(-2.5<=x<=2.5,-3.0<=y<=3.0);
-    LabelledFigure fig=LabelledFigure(axes);
-    fig << line_colour(0.0,0.0,0.0);
-    fig << line_style(false);
-    fig << fill_colour(0.5,0.5,0.5);
+    LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");

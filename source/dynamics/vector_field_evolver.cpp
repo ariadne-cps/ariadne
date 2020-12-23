@@ -125,15 +125,27 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
+    return EnclosureType(box,this->system().state_space(),config);
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
+    return EnclosureType(box,this->system().state_space(),config);
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
+    return EnclosureType(box,this->system().state_space(),config);
 }
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
@@ -274,9 +286,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG_PRINTLN("box = "<<current_set_model.bounding_box());
     ARIADNE_LOG_PRINTLN("radius = "<<current_set_model.euclidean_set().bounding_box().radius());
-    //const SizeType nd=initial_set_model.result_size();
-    //const SizeType ng=initial_set_model.argument_size();
-
 
     // Test to see if set requires reconditioning
     if(this->_configuration->enable_reconditioning() &&
@@ -293,24 +302,17 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Set evolution parameters
     const StepSizeType maximum_step_size=this->_configuration->maximum_step_size();
-    //const FloatDP maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
-    //const FloatDP zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
     auto current_set_bounds=cast_exact_box(current_set_model.euclidean_set().bounding_box());
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
-
     // Compute flow model
-    // TODO: Modify this for general integrator interface
-    //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG_PRINTLN("step_size = "<<step_size);
     ARIADNE_LOG_PRINTLN_AT(1,"flow_model = "<<flow_model);
-    FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
-    ARIADNE_LOG_PRINTLN_AT(1,"flow_step_model = "<<flow_step_model);
 
     // Compute the integration time model
     TimeStepType next_time=current_time+TimeStepType(step_size);

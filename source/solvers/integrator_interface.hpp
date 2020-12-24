@@ -78,27 +78,27 @@ class IntegratorInterface
     //! \f$h_{eval}\f$ if the time step for Lipschitz evaluation and \f$h_{\max}\f$ is
     //! the \a maximum_time_step to bound the final value.
     virtual StepSizeType
-    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
-                       const BoxDomainType& state_domain,
-                       const StepSizeType& evaluation_time_step,
-                       const StepSizeType& maximum_time_step) const = 0;
+    starting_time_step_size(const ValidatedVectorMultivariateFunction& vector_field,
+                            const BoxDomainType& state_domain,
+                            const StepSizeType& evaluation_time_step,
+                            const StepSizeType& maximum_time_step) const = 0;
 
     //! \brief Compute the starting time step to be used for flow_bounds, calculating the Lipschitz time step as a bound.
     //! <br>
     //! Arguments: \f$f\f$ is the \a differential_equation, \f$D\f$ is the \a state_domain, \f$t\f$ is the \a starting_time,
     //! \f$A\f$ is the \a parameter_domain, \f$h_{eval}\f$ if the time step for Lipschitz evaluation and \f$h_{st}\f$ is
-    //! the \a starting_time_step for possible refinement.
+    //! the \a starting_time_step_size for possible refinement.
     virtual StepSizeType
-    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
-                       const BoxDomainType& state_domain,
-                       const BoxDomainType& parameter_domain,
-                       const StepSizeType& evaluation_time_step,
-                       const StepSizeType& starting_time_step) const = 0;
+    starting_time_step_size(const ValidatedVectorMultivariateFunction& vector_field,
+                            const BoxDomainType& state_domain,
+                            const BoxDomainType& parameter_domain,
+                            const StepSizeType& evaluation_time_step,
+                            const StepSizeType& starting_time_step) const = 0;
 
     //! \brief Compute a pair \f$(h,B)\f$ consisting of a bound \a B for the flow
     //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
     //! <br>
-    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{st}\f$ is the \a starting_time_step.
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{st}\f$ is the \a starting_time_step_size.
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
@@ -108,7 +108,7 @@ class IntegratorInterface
     //! of \f$\dt{x}=f(x,t,a)\f$ starting in \f$D\f$ at time \f$t\f$ over parameter domain \f$A\f$ for time step \f$h\leq h_{\max}\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a differential_equation, \f$D\f$ is the \a state_domain, \f$t\f$ is the \a starting_time,
-    //! \f$A\f$ is the \a parameter_domain and \f$h_{st}\f$ is the \a starting_time_step.
+    //! \f$A\f$ is the \a parameter_domain and \f$h_{st}\f$ is the \a starting_time_step_size.
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& differential_equation,
                 const ExactBoxType& state_domain,

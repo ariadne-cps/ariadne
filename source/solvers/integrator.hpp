@@ -68,6 +68,7 @@ struct MinimumSpacialOrder : Attribute<DegreeType> { MinimumSpacialOrder(DegreeT
 struct MinimumTemporalOrder : Attribute<DegreeType> { MinimumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct StartingStepSizeNumRefinements : Attribute<DegreeType> { StartingStepSizeNumRefinements(DegreeType v) : Attribute<DegreeType>(v) { } };
 
 static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
@@ -100,8 +101,8 @@ class IntegratorBase
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l);
-    IntegratorBase(MaximumError e, LipschitzConstant l);
+    IntegratorBase(MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l, StartingStepSizeNumRefinements nr);
+    IntegratorBase(MaximumError e, LipschitzConstant l, StartingStepSizeNumRefinements nr);
   public:
     //! \brief A threshold for the error estimate of the approximation.
     virtual Void set_maximum_error(ApproximateDouble e) { assert(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
@@ -110,6 +111,10 @@ class IntegratorBase
     //! The convergence of the Picard iteration is approximately Lf*h.
     Void set_lipschitz_tolerance(ApproximateDouble lt) { _lipschitz_tolerance = cast_exact(lt); }
     ExactDouble lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
+
+    //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
+    Void set_starting_step_size_num_refinements(StartingStepSizeNumRefinements nr) { _starting_step_size_num_refinements = nr; }
+    DegreeType starting_step_size_num_refinements() const { return _starting_step_size_num_refinements; }
 
     //! \brief The class which constructs functions for representing the flow.
     const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
@@ -122,17 +127,17 @@ class IntegratorBase
     Void set_bounder(const BounderInterface& bounder);
 
     virtual StepSizeType
-    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
-                       const BoxDomainType& state_domain,
-                       const StepSizeType& evaluation_time_step,
-                       const StepSizeType& maximum_time_step) const;
+    starting_time_step_size(const ValidatedVectorMultivariateFunction& vector_field,
+                            const BoxDomainType& state_domain,
+                            const StepSizeType& evaluation_time_step,
+                            const StepSizeType& maximum_time_step) const;
 
     virtual StepSizeType
-    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
-                       const BoxDomainType& state_domain,
-                       const BoxDomainType& parameter_domain,
-                       const StepSizeType& evaluation_time_step,
-                       const StepSizeType& maximum_time_step) const;
+    starting_time_step_size(const ValidatedVectorMultivariateFunction& vector_field,
+                            const BoxDomainType& state_domain,
+                            const BoxDomainType& parameter_domain,
+                            const StepSizeType& evaluation_time_step,
+                            const StepSizeType& maximum_time_step) const;
 
 
     virtual Pair<StepSizeType,UpperBoxType>
@@ -196,6 +201,7 @@ class IntegratorBase
   public:
     ExactDouble _maximum_error;
     ExactDouble _lipschitz_tolerance;
+    DegreeType _starting_step_size_num_refinements;
     FunctionFactoryPointer _function_factory_ptr;
     BounderPointer _bounder_ptr;
 };
@@ -213,7 +219,10 @@ class TaylorPicardIntegrator
     TaylorPicardIntegrator(MaximumError err);
 
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr);
+
+    //! \brief Constructor.
+    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,
                            StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in time.

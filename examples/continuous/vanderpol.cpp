@@ -34,14 +34,17 @@ int main(int argc, const char* argv[])
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
-    RealConstant mu("mu",1.0_dec);
+    RealConstant mu("mu",1);
     RealVariable x("x"), y("y");
 
-    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+    VectorField dynamics({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
 
     MaximumError max_err=1e-6;
-
-    TaylorPicardIntegrator integrator(max_err);
+    StartingStepSizeNumRefinements num_ref=2;
+    TaylorPicardIntegrator integrator(max_err,
+                                      ThresholdSweeperDP(DoublePrecision(),max_err.value()/1024),
+                                      LipschitzConstant(0.5),
+                                      num_ref);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);

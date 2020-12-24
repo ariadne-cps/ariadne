@@ -63,7 +63,7 @@ class __attribute__ ((visibility ("default"))) result_object {
   private:
     template<class T> T convert_to() { 
         if (pybind11::detail::cast_is_temporary_value_reference<T>::value) { 
-            static detail::overload_caster_t<T> caster; 
+            static detail::override_caster_t<T> caster;
             return detail::cast_ref<T>(std::move(_obj), caster); 
         } else {
             return detail::cast_safe<T>(std::move(_obj));

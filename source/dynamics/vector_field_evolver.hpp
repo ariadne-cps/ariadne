@@ -137,7 +137,7 @@ class VectorFieldEvolver
 
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                 const TimedEnclosureType& current_set, const TimeType& time,
+                                 const TimedEnclosureType& current_set, StepSizeType& last_step_size, const TimeType& time,
                                  Semantics semantics, Bool reach) const;
 
     virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;

@@ -213,6 +213,9 @@ _evolution(EnclosureListType& final_sets,
         _append_initial_set(working_sets,initial_time,initial_set);
     }
 
+    // Track the previous step size used to properly find the starting step size
+    StepSizeType previous_step_size = 0;
+
     ProgressIndicator initials_indicator(working_sets.size());
     ProgressIndicator time_indicator(maximum_time.get_d());
 
@@ -238,7 +241,7 @@ _evolution(EnclosureListType& final_sets,
             // Compute evolution
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
-                                  current_timed_set,maximum_time,
+                                  current_timed_set,previous_step_size,maximum_time,
                                   semantics,reach);
         }
 
@@ -268,6 +271,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
                 const TimedEnclosureType& working_timed_set_model,
+                StepSizeType& previous_step_size,
                 const TimeType& maximum_time,
                 Semantics semantics,
                 Bool reach) const
@@ -310,9 +314,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     // Compute flow model
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
-    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
+    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,previous_step_size,step_size);
     ARIADNE_LOG_PRINTLN("step_size = "<<step_size);
     ARIADNE_LOG_PRINTLN_AT(1,"flow_model = "<<flow_model);
+    previous_step_size = step_size;
 
     // Compute the integration time model
     TimeStepType next_time=current_time+TimeStepType(step_size);

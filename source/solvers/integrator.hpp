@@ -121,17 +121,31 @@ class IntegratorBase
     //! \brief Set the class that computes bounds.
     Void set_bounder(const BounderInterface& bounder);
 
+    virtual StepSizeType
+    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
+                       const BoxDomainType& state_domain,
+                       const StepSizeType& evaluation_time_step,
+                       const StepSizeType& maximum_time_step) const;
+
+    virtual StepSizeType
+    starting_time_step(const ValidatedVectorMultivariateFunction& vector_field,
+                       const BoxDomainType& state_domain,
+                       const BoxDomainType& parameter_domain,
+                       const StepSizeType& evaluation_time_step,
+                       const StepSizeType& maximum_time_step) const;
+
+
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const StepSizeType& maximum_time_step) const;
+                const StepSizeType& starting_time_step) const;
 
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const ExactBoxType& parameter_domain,
-                const StepSizeType& maximum_time_step) const;
+                const StepSizeType& starting_time_step) const;
 
 
     virtual Pair<StepSizeType,UpperBoxType>
@@ -139,11 +153,12 @@ class IntegratorBase
                 const ExactBoxType& state_domain,
                 const StepSizeType& starting_time,
                 const ExactBoxType& parameter_domain,
-                const StepSizeType& maximum_time_step) const;
+                const StepSizeType& starting_time_step) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
+              const StepSizeType& evaluation_time_step,
               StepSizeType& suggested_time_step) const;
 
     virtual FlowStepModelType

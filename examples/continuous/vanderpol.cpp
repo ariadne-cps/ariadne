@@ -45,7 +45,7 @@ int main(int argc, const char* argv[])
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
+    evolver.configuration().set_maximum_step_size(1e20);
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN(evolver.configuration());
 
@@ -54,8 +54,9 @@ int main(int argc, const char* argv[])
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
-    auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
-    initial_set.configuration().set_reconditioning_num_blocks(4);
+    EnclosureConfiguration enclosure_config(evolver.function_factory());
+    enclosure_config.set_reconditioning_num_blocks(4);
+    auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0},enclosure_config);
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
     ARIADNE_LOG_PRINTLN(initial_set.configuration());
 

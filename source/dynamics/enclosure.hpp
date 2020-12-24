@@ -140,7 +140,6 @@ class Enclosure
 
     //! \brief The classes used to work with the set.
     const EnclosureConfiguration& configuration() const;
-    ConfigurationType& configuration();
     //! \brief The class used to create new function instances.
     const ValidatedFunctionModelDPFactory& function_factory() const;
     //! \brief The class used to discretise the set.

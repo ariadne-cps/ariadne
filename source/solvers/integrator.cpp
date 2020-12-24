@@ -118,6 +118,22 @@ IntegratorBase::bounder() const
     return *this->_bounder_ptr;
 }
 
+StepSizeType
+IntegratorBase::starting_time_step(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
+
+    FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step)))))).upper();
+    ARIADNE_LOG_PRINTLN("lipschitz_step="<<static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance/lipschitz)));
+    ARIADNE_LOG_PRINTLN("maximum_step="<<maximum_time_step);
+    return min(static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance/lipschitz)), maximum_time_step);
+}
+
+StepSizeType
+IntegratorBase::starting_time_step(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, BoxDomainType const& parameter_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
+
+    FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step), parameter_domain))))).upper();
+    return min(static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance/lipschitz)), maximum_time_step);
+}
+
 Pair<StepSizeType,UpperBoxType>
 IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
     return this->_bounder_ptr->compute(vf,D,hsug);
@@ -207,11 +223,12 @@ IntegratorBase::flow(const ValidatedVectorMultivariateFunction& vf, const ExactB
 
 
 FlowStepModelType
-IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
+IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hev, StepSizeType& hsug) const
 {
-    StepSizeType& h=hmax;
+    StepSizeType& h=hsug;
+    h = starting_time_step(vf,dx,hev,h);
     UpperBoxType bx;
-    make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
+    make_lpair(h,bx)=this->flow_bounds(vf,dx,h);
     while(true) {
         try {
             return this->flow_step(vf,dx,h,bx);

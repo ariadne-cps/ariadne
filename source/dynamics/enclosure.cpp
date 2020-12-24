@@ -173,11 +173,6 @@ Enclosure::configuration() const {
     return this->_configuration;
 }
 
-EnclosureConfiguration&
-Enclosure::configuration() {
-    return this->_configuration;
-}
-
 ValidatedFunctionModelDPFactory const&
 Enclosure::function_factory() const {
     return this->_configuration._function_factory;

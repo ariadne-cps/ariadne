@@ -224,7 +224,7 @@ class HybridEvolverBase
     _evolution_step(EvolutionData& evolution_data,
                     EffectiveVectorMultivariateFunction const& dynamic,
                     Map<DiscreteEvent,TransitionData> const& transitions,
-                    Real const& final_time) const;
+                    Real const& final_time, StepSizeType& previous_step_size) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
     //! \details For some systems, extracting the information about the
@@ -236,13 +236,16 @@ class HybridEvolverBase
 
     //! \brief Compute the flow of the \a vector_field, starting in the
     //! given \a initial_set, and with a time step as large as
-    //! \a maximum_time_set if possible. The result is a function patch
+    //! \a maximum_step_size if possible. The result is a function patch
     //! defined on a domain \f$B\times [0,h]\f$, where \f$B\f$ is the bounding
-    //! box for the set, and \f$h\f$ is the step size actually used.
+    //! box for the set, and \f$h\f$ is the step size actually used. The
+    //! \a previous_step_size is used to properly identify the starting step size
+    //! when the maximum_step_size is too large.
     virtual
     ValidatedVectorMultivariateFunctionModelDP
     _compute_flow(EffectiveVectorMultivariateFunction vector_field,
                   ExactBoxType const& initial_set,
+                  StepSizeType& previous_step_size,
                   const StepSizeType& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with

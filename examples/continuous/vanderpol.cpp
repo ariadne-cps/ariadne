@@ -42,7 +42,7 @@ int main(int argc, const char* argv[])
     MaximumError max_err=1e-6;
     StartingStepSizeNumRefinements num_ref=2;
     TaylorPicardIntegrator integrator(max_err,
-                                      ThresholdSweeperDP(DoublePrecision(),max_err.value()/1024),
+                                      ThresholdSweeper<FloatDP>(DoublePrecision(),max_err.value()/1024),
                                       LipschitzConstant(0.5),
                                       num_ref);
 

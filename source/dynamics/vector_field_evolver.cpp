@@ -33,6 +33,7 @@
 #include "../algebra/vector.hpp"
 #include "../function/function.hpp"
 #include "../function/constraint.hpp"
+#include "../function/taylor_function.hpp"
 #include "../dynamics/enclosure.hpp"
 #include "../dynamics/orbit.hpp"
 
@@ -225,6 +226,7 @@ _evolution(EnclosureListType& final_sets,
         TimeStepType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
         FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
+
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
@@ -294,11 +296,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     // Test to see if set requires reconditioning
     if(this->_configuration->enable_reconditioning() &&
        possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
-
         ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set_model.state_function().errors());
         current_set_model.recondition();
-        working_sets.append(make_pair(current_time,current_set_model));
-        return;
     }
 
     /////////////// Main Evolution ////////////////////////////////
@@ -312,7 +311,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Compute flow model
-    IntegratorInterface const* integrator=this->_integrator.operator->();
+    IntegratorBase* integrator=dynamic_cast<IntegratorBase*>(this->_integrator.operator->());
     StepSizeType step_size=maximum_step_size;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,previous_step_size,step_size);
     ARIADNE_LOG_PRINTLN("step_size = "<<step_size);

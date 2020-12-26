@@ -59,6 +59,8 @@
 
 namespace Ariadne {
 
+class LoggableSmartThread;
+
 inline unsigned int get_verbosity(int argc, const char* argv[]) {
     if(argc>1) {
         if(std::strcmp(argv[1],"-v")==0) {
@@ -226,16 +228,18 @@ class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
     virtual unsigned int current_level() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
-    void create_data_instance(SmartThread const& thread);
+    void create_data_instance(LoggableSmartThread const& thread);
+    void kill_data_instance(LoggableSmartThread const& thread);
+    void remove_data_instance(LoggableSmartThread const& thread);
     unsigned int num_queues() const;
     ~ConcurrentLoggerScheduler();
   private:
     SharedPointer<LoggerData> _local_data() const;
     std::pair<std::thread::id,unsigned int> _largest_queue();
-    void _dequeue_msgs();
+    void _consume_msgs();
   private:
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
-    SmartThread _dequeueing_thread = SmartThread([this]() { _dequeue_msgs(); });
+    SmartThread _dequeueing_thread = SmartThread([this]() { _consume_msgs(); });
     std::atomic<bool> _terminate;
 };
 
@@ -320,7 +324,8 @@ class Logger {
     static void use_immediate_scheduler();
     static void use_concurrent_scheduler();
 
-    static void register_thread(SmartThread const& thread);
+    static void register_thread(LoggableSmartThread const& thread);
+    static void unregister_thread(LoggableSmartThread const& thread);
 
     static void println(unsigned int level_increase, std::string text);
     static void hold(std::string scope, std::string text);

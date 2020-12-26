@@ -25,7 +25,7 @@
 #include "config.hpp"
 #include "../test.hpp"
 
-#include "concurrency/smart_thread.hpp"
+#include "concurrency/loggable_smart_thread.hpp"
 #include "output/logging.hpp"
 
 using namespace Ariadne;
@@ -117,9 +117,9 @@ class TestLogging {
         Logger::configuration().set_verbosity(3);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        SmartThread thread1("thread1",[]() { print_something1(); }),
-                    thread2("thread2",[]() { print_something2(); }),
-                    thread3("thread3",[]() { print_something3(); });
+        LoggableSmartThread thread1("thread1",[]() { print_something1(); }),
+                            thread2("thread2",[]() { print_something2(); }),
+                            thread3("thread3",[]() { print_something3(); });
         Logger::register_thread(thread1);
         Logger::register_thread(thread2);
         Logger::register_thread(thread3);

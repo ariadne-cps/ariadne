@@ -42,6 +42,8 @@
 #include "../output/logging.hpp"
 #include "../output/progress_indicator.hpp"
 
+#include "../concurrency/loggable_smart_thread.hpp"
+
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
 
@@ -193,6 +195,71 @@ Void test_print() {
     ARIADNE_LOG_PRINTLN("test\r\n");
 }
 
+class ConcurrentRunner {
+  public:
+    ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size);
+
+    Void init(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
+              TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size);
+
+    Tuple<LabelledEnclosure,LabelledEnclosure,Dyadic,Dyadic> execute();
+
+  private:
+
+    Void _run() {
+        FlowStepModelType flow_model = _integrator->flow_step(_dynamic, _current_set_bounds, _previous_step_size,_chosen_step_size);
+        ARIADNE_LOG_PRINTLN("step_size = " << _chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
+        _next_time += _chosen_step_size;
+        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << _next_time);
+        _reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << _reach_set);
+        _next_set.apply_fixed_evolve_step(flow_model, _chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << _next_set);
+    }
+
+  private:
+    // Constants
+    EffectiveVectorMultivariateFunction const _dynamic;
+    Dyadic const _maximum_step_size;
+    // Variables for each computation
+    FloatDPExactBox _current_set_bounds;
+    SharedPointer<TaylorPicardIntegrator> _integrator;
+    Dyadic _previous_step_size;
+    // Outputs
+    LabelledEnclosure _next_set;
+    LabelledEnclosure _reach_set;
+    Dyadic _next_time;
+    Dyadic _chosen_step_size;
+};
+
+ConcurrentRunner::ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size)
+    :  _dynamic(dynamic), _maximum_step_size(maximum_step_size) { }
+
+Void
+ConcurrentRunner::init(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
+                       TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size)
+{
+    // Init inputs
+    _current_set_bounds = current_set_bounds;
+    _integrator.reset(integrator.clone());
+    _previous_step_size = previous_step_size;
+    // Init outputs
+    _next_set = current_set;
+    _reach_set = current_set;
+    _next_time = current_time;
+    _chosen_step_size = _maximum_step_size;
+}
+
+Tuple<LabelledEnclosure, LabelledEnclosure, Dyadic, Dyadic>
+ConcurrentRunner::execute() {
+    {
+        LoggableSmartThread thread("step", [this]() { _run(); });
+        thread.activate();
+    }
+    return std::make_tuple(_next_set,_reach_set,_next_time,_chosen_step_size);
+}
+
 
 Void
 VectorFieldEvolver::
@@ -220,6 +287,8 @@ _evolution(EnclosureListType& final_sets,
     ProgressIndicator initials_indicator(working_sets.size());
     ProgressIndicator time_indicator(maximum_time.get_d());
 
+    ConcurrentRunner runner(_sys_ptr->dynamic_function(),_configuration->maximum_step_size());
+
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();
@@ -244,7 +313,7 @@ _evolution(EnclosureListType& final_sets,
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   current_timed_set,previous_step_size,maximum_time,
-                                  semantics,reach);
+                                  semantics,reach,runner);
         }
 
         ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
@@ -263,76 +332,61 @@ _evolution(EnclosureListType& final_sets,
 }
 
 
-
-
-
 Void
 VectorFieldEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
-                const TimedEnclosureType& working_timed_set_model,
+                const TimedEnclosureType& working_timed_set,
                 StepSizeType& previous_step_size,
                 const TimeType& maximum_time,
                 Semantics semantics,
-                Bool reach) const
+                Bool reach,
+                ConcurrentRunner& runner) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    typedef EffectiveVectorMultivariateFunction FunctionType;
-
-    EnclosureType current_set_model;
+    EnclosureType current_set;
     TimeStepType current_time;
-    ARIADNE_LOG_PRINTLN_AT(1,"working_timed_set_model = "<<working_timed_set_model);
-    make_lpair(current_time,current_set_model)=working_timed_set_model;
+    ARIADNE_LOG_PRINTLN_AT(1,"working_timed_set_model = "<<working_timed_set);
+    make_lpair(current_time,current_set)=working_timed_set;
 
     ARIADNE_LOG_PRINTLN("current_time = "<<current_time);
-    ARIADNE_LOG_PRINTLN("current_set_model = "<<current_set_model);
+    ARIADNE_LOG_PRINTLN("current_set_model = "<<current_set);
 
-    ARIADNE_LOG_PRINTLN("box = "<<current_set_model.bounding_box());
-    ARIADNE_LOG_PRINTLN("radius = "<<current_set_model.euclidean_set().bounding_box().radius());
+    ARIADNE_LOG_PRINTLN("box = "<<current_set.bounding_box());
+    ARIADNE_LOG_PRINTLN("radius = "<<current_set.euclidean_set().bounding_box().radius());
 
     // Test to see if set requires reconditioning
     if(this->_configuration->enable_reconditioning() &&
-       possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
-        ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set_model.state_function().errors());
-        current_set_model.recondition();
+       possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+        ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set.state_function().errors());
+        current_set.recondition();
     }
 
     /////////////// Main Evolution ////////////////////////////////
-    const FunctionType& dynamic=_sys_ptr->function();
-
-    // Set evolution parameters
-    const StepSizeType maximum_step_size=this->_configuration->maximum_step_size();
 
     // Get bounding boxes for time and space bounding_box
-    auto current_set_bounds=cast_exact_box(current_set_model.euclidean_set().bounding_box());
+    auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
-    // Compute flow model
-    IntegratorBase* integrator=dynamic_cast<IntegratorBase*>(this->_integrator.operator->());
-    StepSizeType step_size=maximum_step_size;
-    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,previous_step_size,step_size);
-    ARIADNE_LOG_PRINTLN("step_size = "<<step_size);
-    ARIADNE_LOG_PRINTLN_AT(1,"flow_model = "<<flow_model);
-    previous_step_size = step_size;
+    TaylorPicardIntegrator* integrator=dynamic_cast<TaylorPicardIntegrator*>(this->_integrator.operator->());
 
-    // Compute the integration time model
-    TimeStepType next_time=current_time+TimeStepType(step_size);
-    ARIADNE_LOG_PRINTLN_AT(1,"next_time = "<<next_time);
-    // Compute the flow tube (reachable set) model and the final set
-    EnclosureType reach_set_model=current_set_model;
-    reach_set_model.apply_full_reach_step(flow_model);
-    ARIADNE_LOG_PRINTLN_AT(1,"reach_set_model = "<<reach_set_model);
-    EnclosureType next_set_model=current_set_model;
-    next_set_model.apply_fixed_evolve_step(flow_model,step_size);
-    ARIADNE_LOG_PRINTLN_AT(1,"next_set_model = "<<next_set_model);
+    // Init outputs
+    runner.init(current_set,current_set_bounds,current_time,*integrator,previous_step_size);
 
-    reach_sets.adjoin(reach_set_model);
+    // Bind outputs
+    EnclosureType next_set, reach_set;
+    TimeStepType next_time;
+    StepSizeType chosen_step_size;
+    make_ltuple(next_set,reach_set,next_time,chosen_step_size) = runner.execute();
 
-    intermediate_sets.adjoin(EnclosureType(next_set_model));
-    working_sets.push_back(make_pair(next_time,next_set_model));
+    // Save outputs
+    previous_step_size = chosen_step_size;
+    reach_sets.adjoin(reach_set);
+    intermediate_sets.adjoin(next_set);
+    working_sets.push_back(make_pair(next_time,next_set));
 }
 
 

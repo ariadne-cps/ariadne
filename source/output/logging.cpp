@@ -31,6 +31,7 @@
 #include "../output/logging.hpp"
 #include "../utility/writable.hpp"
 #include "../utility/macros.hpp"
+#include "../concurrency/loggable_smart_thread.hpp"
 
 namespace Ariadne {
 
@@ -144,6 +145,11 @@ protected:
     void increase_level(unsigned int i);
     void decrease_level(unsigned int i);
 
+    //! \brief Set the object to be removed as soon as empty because it's detached from its thread
+    void kill();
+    //! \brief Notifies if the related thread has been joined and the object can be safely removed as soon as empty
+    Bool is_dead() const;
+
     unsigned int current_level() const;
     std::string thread_name() const;
 
@@ -153,6 +159,7 @@ private:
     std::string _thread_name;
     std::queue<LogThinRawMessage> _raw_messages;
     std::mutex _queue_mutex;
+    Bool _is_dead;
 };
 
 LogScopeManager::LogScopeManager(std::string scope)
@@ -187,7 +194,7 @@ RawMessageKind LogThinRawMessage::kind() const {
 }
 
 LoggerData::LoggerData(unsigned int current_level, std::string const& thread_name)
-    : _current_level(current_level), _thread_name(thread_name)
+    : _current_level(current_level), _thread_name(thread_name), _is_dead(false)
 { }
 
 unsigned int LoggerData::current_level() const {
@@ -218,6 +225,14 @@ LogThinRawMessage LoggerData::dequeue() {
     LogThinRawMessage result = _raw_messages.front();
     _raw_messages.pop();
     return result;
+}
+
+void LoggerData::kill() {
+    _is_dead = true;
+}
+
+Bool LoggerData::is_dead() const {
+    return _is_dead;
 }
 
 void LoggerData::increase_level(unsigned int i) {
@@ -268,8 +283,18 @@ ConcurrentLoggerScheduler::~ConcurrentLoggerScheduler() {
     _terminate = true;
 }
 
-void ConcurrentLoggerScheduler::create_data_instance(SmartThread const& thread) {
+void ConcurrentLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
     _data.insert({thread.id(),SharedPointer<LoggerData>(new LoggerData(current_level(),thread.name()))});
+}
+
+void ConcurrentLoggerScheduler::kill_data_instance(LoggableSmartThread const& thread) {
+    auto entry = _data.find(thread.id());
+    if (entry != _data.end()) entry->second->kill();
+}
+
+void ConcurrentLoggerScheduler::remove_data_instance(LoggableSmartThread const& thread) {
+    auto entry = _data.find(thread.id());
+    if (entry != _data.end() and entry->second->is_dead()) _data.erase(entry);
 }
 
 unsigned int ConcurrentLoggerScheduler::num_queues() const {
@@ -316,7 +341,7 @@ std::pair<std::thread::id,unsigned int> ConcurrentLoggerScheduler::_largest_queu
     return result;
 }
 
-void ConcurrentLoggerScheduler::_dequeue_msgs() {
+void ConcurrentLoggerScheduler::_consume_msgs() {
     while(true) {
         auto largest_queue = _largest_queue();
         if (largest_queue.second>0) {
@@ -465,10 +490,14 @@ void Logger::use_concurrent_scheduler() {
     _scheduler.reset(new ConcurrentLoggerScheduler());
 }
 
-void Logger::register_thread(SmartThread const& thread) {
+void Logger::register_thread(LoggableSmartThread const& thread) {
     ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
-    if (cl != nullptr)
-        cl->create_data_instance(thread);
+    if (cl != nullptr) cl->create_data_instance(thread);
+}
+
+void Logger::unregister_thread(LoggableSmartThread const& thread) {
+    ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
+    if (cl != nullptr) cl->kill_data_instance(thread);
 }
 
 void Logger::increase_level(unsigned int i) {

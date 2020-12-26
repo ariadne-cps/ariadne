@@ -47,14 +47,12 @@
 
 namespace Ariadne {
 
-template<class Sys, class BS, class TRM> class Evolver;
-
 class VectorField;
 template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
 
-class EvolutionProfiler;
+class ConcurrentRunner;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
@@ -138,7 +136,7 @@ class VectorFieldEvolver
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, StepSizeType& last_step_size, const TimeType& time,
-                                 Semantics semantics, Bool reach) const;
+                                 Semantics semantics, Bool reach, ConcurrentRunner& runner) const;
 
     virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 

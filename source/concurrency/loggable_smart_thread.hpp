@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.hpp
+ *            concurrency/loggable_smart_thread.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,13 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/smart_thread.hpp
- *  \brief A wrapper for smart handling of a thread.
- *  \details Used only for the logger, use LoggableSmartThread for all purposes.
+/*! \file concurrency/loggable_smart_thread.hpp
+ *  \brief A wrapper for smart handling of a thread
  */
 
-#ifndef ARIADNE_SMART_THREAD_HPP
-#define ARIADNE_SMART_THREAD_HPP
+#ifndef ARIADNE_LOGGABLE_SMART_THREAD_HPP
+#define ARIADNE_LOGGABLE_SMART_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -36,12 +35,14 @@
 #include <mutex>
 #include <atomic>
 #include <string>
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
-class SmartThread {
+class LoggableSmartThread {
   public:
-    SmartThread(std::function<void(void)> task) {
+    LoggableSmartThread(std::string name, std::function<void(void)> task) {
+        _name = name;
         _thread = std::thread([=]() {
                     _id = std::this_thread::get_id();
                     _start_promise.set_value();
@@ -49,10 +50,15 @@ class SmartThread {
                     if(_active) task();
                 });
         _start_future.get();
+        Logger::register_thread(*this);
     }
 
     std::thread::id id() const {
         return _id;
+    }
+
+    std::string name() const {
+        return _name;
     }
 
     void activate()  {
@@ -60,13 +66,15 @@ class SmartThread {
         _active = true;
     }
 
-    ~SmartThread() {
+    ~LoggableSmartThread() {
         if(!_active) _activate_promise.set_value();
         _thread.join();
+        Logger::unregister_thread(*this);
     }
 
   private:
     std::thread::id _id;
+    std::string _name;
     std::atomic<bool> _active = false;
     std::thread _thread;
     std::promise<void> _activate_promise;
@@ -77,4 +85,4 @@ class SmartThread {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SMART_THREAD_HPP
+#endif // ARIADNE_LOGGABLE_SMART_THREAD_HPP

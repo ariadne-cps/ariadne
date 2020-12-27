@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_task_parameter
+    test_producer_consumer
 )
 
 foreach(TEST ${UNIT_TESTS})

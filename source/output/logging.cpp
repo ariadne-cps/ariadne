@@ -548,6 +548,10 @@ unsigned int Logger::cached_last_printed_level() {
     return _cached_last_printed_level;
 }
 
+std::string Logger::cached_last_printed_thread_name() {
+    return _cached_last_printed_thread_name;
+}
+
 void Logger::println(unsigned int level_increase, std::string text) {
     _scheduler->println(level_increase, text);
 }
@@ -721,28 +725,32 @@ std::string Logger::_apply_theme_for_keywords(std::string const& text) {
 
 void Logger::_print_preamble_for_firstline(unsigned int level, std::string thread_name) {
     auto theme = _configuration.theme();
-    bool level_printed = not(_configuration.prints_level_on_change_only() and _cached_last_printed_level == level);
+    bool thread_name_changed = (_cached_last_printed_thread_name != thread_name);
+    bool level_changed = (_cached_last_printed_level != level);
+    bool always_print_level = not(_configuration.prints_level_on_change_only());
+
     if (_can_print_thread_name() and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::BEFORE) {
-        if (level_printed) {
+        if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << thread_name << theme.at() << "@" << TerminalTextStyle::RESET;
             else std::clog << thread_name << "@";
         } else std::clog << std::string(thread_name.size()+1, ' ');
     }
-    if (level_printed) {
+
+    if (thread_name_changed or always_print_level or level_changed) {
         if (theme.level_number.is_styled()) std::clog << theme.level_number() << level << TerminalTextStyle::RESET;
         else std::clog << level;
-    } else {
-        std::clog << (level>9 ? "  " : " ");
-    }
+    } else std::clog << (level>9 ? "  " : " ");
+
     if (_can_print_thread_name() and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::AFTER) {
-        if (level_printed) {
+        if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << theme.at() << "@" << TerminalTextStyle::RESET << thread_name;
             else std::clog << thread_name << "@";
         } else std::clog << std::string(thread_name.size()+1, ' ');
     }
-    if (not level_printed and theme.level_hidden_separator.is_styled()) {
+
+    if (not level_changed and _configuration.prints_level_on_change_only() and theme.level_hidden_separator.is_styled()) {
         std::clog << theme.level_hidden_separator() << "|" << TerminalTextStyle::RESET;
-    } else if (level_printed and theme.level_shown_separator.is_styled()) {
+    } else if (level_changed and theme.level_shown_separator.is_styled()) {
         std::clog << theme.level_shown_separator() << "|" << TerminalTextStyle::RESET;
     } else {
         std::clog << "|";
@@ -885,6 +893,7 @@ void Logger::_println(LogRawMessage const& msg) {
     }
 
     _cached_last_printed_level = msg.level;
+    _cached_last_printed_thread_name = msg.identifier;
 }
 
 void Logger::_hold(LogRawMessage const& msg) {

@@ -342,6 +342,7 @@ class Logger {
 
     static unsigned int current_level();
     static unsigned int cached_last_printed_level();
+    static std::string cached_last_printed_thread_name();
 
     static LoggerConfiguration& configuration();
 
@@ -364,6 +365,7 @@ class Logger {
     inline static std::vector<LogRawMessage> _current_held_stack;
     inline static unsigned int _cached_num_held_columns = 0;
     inline static unsigned int _cached_last_printed_level = 0;
+    inline static std::string _cached_last_printed_thread_name = std::string();
     inline static SharedPointer<LoggerSchedulerInterface> _scheduler = SharedPointer<LoggerSchedulerInterface>(new ConcurrentLoggerScheduler());
     inline static LoggerConfiguration _configuration;
 };

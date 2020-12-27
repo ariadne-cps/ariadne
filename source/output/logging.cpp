@@ -281,72 +281,89 @@ ConcurrentLoggerScheduler::ConcurrentLoggerScheduler() {
 
 ConcurrentLoggerScheduler::~ConcurrentLoggerScheduler() {
     _terminate = true;
+    _termination_future.get();
 }
 
 void ConcurrentLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    auto it = _data.find(thread.id());
+    // Replace an old dead instance if it already existed
+    if (it != _data.end() and it->second->is_dead()) _data.erase(it);
+    // Won't replace if it already exists
     _data.insert({thread.id(),SharedPointer<LoggerData>(new LoggerData(current_level(),thread.name()))});
 }
 
 void ConcurrentLoggerScheduler::kill_data_instance(LoggableSmartThread const& thread) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
     auto entry = _data.find(thread.id());
     if (entry != _data.end()) entry->second->kill();
-}
-
-void ConcurrentLoggerScheduler::remove_data_instance(LoggableSmartThread const& thread) {
-    auto entry = _data.find(thread.id());
-    if (entry != _data.end() and entry->second->is_dead()) _data.erase(entry);
 }
 
 unsigned int ConcurrentLoggerScheduler::num_queues() const {
     return _data.size();
 }
 
-SharedPointer<LoggerData> ConcurrentLoggerScheduler::_local_data() const {
-    return _data.find(std::this_thread::get_id())->second;
-}
-
 unsigned int ConcurrentLoggerScheduler::current_level() const {
-    return _local_data()->current_level();
+    return _data.find(std::this_thread::get_id())->second->current_level();
 }
 
 void ConcurrentLoggerScheduler::increase_level(unsigned int i) {
-    _local_data()->increase_level(i);
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second->increase_level(i);
 }
 
 void ConcurrentLoggerScheduler::decrease_level(unsigned int i) {
-    _local_data()->decrease_level(i);
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second->decrease_level(i);
 }
 
 void ConcurrentLoggerScheduler::println(unsigned int level_increase, std::string text) {
-    _local_data()->enqueue_println(level_increase,text);
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second->enqueue_println(level_increase,text);
 }
 
 void ConcurrentLoggerScheduler::hold(std::string scope, std::string text) {
-    _local_data()->enqueue_hold(scope,text);
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second->enqueue_hold(scope,text);
 }
 
 void ConcurrentLoggerScheduler::release(std::string scope) {
-    _local_data()->enqueue_release(scope);
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second->enqueue_release(scope);
 }
 
-std::pair<std::thread::id,unsigned int> ConcurrentLoggerScheduler::_largest_queue() {
-
-    std::map<std::thread::id,SharedPointer<LoggerData>>::const_iterator it = _data.begin();
-
-    std::pair<std::thread::id,unsigned int> result = std::make_pair(it->first,it->second->queue_size());
-    for (++it; it != _data.end(); ++it) {
-        if (it->second->queue_size() > result.second)
-            result = std::make_pair(it->first,it->second->queue_size());
+SharedPointer<LogRawMessage> ConcurrentLoggerScheduler::_dequeue_and_cleanup() {
+    // TODO: address cleanup that causes segfaults
+    SharedPointer<LogRawMessage> result;
+    SharedPointer<LoggerData> largest_data;
+    SizeType largest_size = 0;
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    auto it = _data.begin();
+    while (it != _data.end()) {
+        SizeType size = it->second->queue_size();
+        if (size == 0 and it->second->is_dead()) {
+            //_data.erase(it);
+            ++it;
+            //--it;
+        } else {
+            if (size > largest_size) {
+                largest_data = it->second;
+                largest_size = size;
+            }
+            ++it;
+        }
     }
+    if (largest_size > 0)
+        result.reset(new LogRawMessage(largest_data->thread_name(),largest_data->dequeue()));
+
     return result;
 }
 
 void ConcurrentLoggerScheduler::_consume_msgs() {
     while(true) {
-        auto largest_queue = _largest_queue();
-        if (largest_queue.second>0) {
-            auto data = _data.find(largest_queue.first)->second;
-            LogRawMessage msg(data->thread_name(), data->dequeue());
+        auto msg_ptr = _dequeue_and_cleanup();
+        if (msg_ptr != nullptr) {
+            LogRawMessage msg = *msg_ptr;
             switch (msg.kind()) {
                 case RawMessageKind::PRINTLN : Logger::_println(msg); break;
                 case RawMessageKind::HOLD : Logger::_hold(msg); break;
@@ -357,7 +374,10 @@ void ConcurrentLoggerScheduler::_consume_msgs() {
             // Allow the thread to sleep, for a larger time in the case of high verbosity (for verbosity 1, a 50ms sleep)
             // The current level is used as an average of the levels printed
             if (not _terminate) std::this_thread::sleep_for(std::chrono::microseconds(std::max(1,100000>>Logger::cached_last_printed_level())));
-            else break;
+            else {
+                _termination_promise.set_value();
+                break;
+            }
         }
     }
 }
@@ -375,7 +395,7 @@ OutputStream& operator<<(OutputStream& os, const ThreadNamePrintingPolicy& p) {
 LoggerConfiguration::LoggerConfiguration() :
         _verbosity(0), _indents_based_on_level(true), _prints_level_on_change_only(true), _prints_scope_entrance(false),
         _prints_scope_exit(false), _handles_multiline_output(true), _discards_newlines_and_indentation(false),
-        _thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE),
+        _thread_name_printing_policy(ThreadNamePrintingPolicy::NEVER),
         _theme(TT_THEME_NONE)
 { }
 
@@ -546,8 +566,8 @@ bool Logger::_is_holding() {
 
 bool Logger::_can_print_thread_name() {
     ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
-    // Only if we use a concurrent scheduler, we have the right printing policy and there is more than one thread registered
-    if (cl != nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER and cl->num_queues()>1)
+    // Only if we use a concurrent scheduler and we have the right printing policy
+    if (cl != nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER)
         return true;
     else return false;
 }

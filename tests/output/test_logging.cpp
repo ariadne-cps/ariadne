@@ -115,6 +115,7 @@ class TestLogging {
     Void test_multiple_threads() {
         Logger::use_concurrent_scheduler();
         Logger::configuration().set_verbosity(3);
+        Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         LoggableSmartThread thread1("thread1",[]() { print_something1(); }),

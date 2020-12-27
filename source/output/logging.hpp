@@ -230,17 +230,19 @@ class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
     void kill_data_instance(LoggableSmartThread const& thread);
-    void remove_data_instance(LoggableSmartThread const& thread);
     unsigned int num_queues() const;
     ~ConcurrentLoggerScheduler();
   private:
-    SharedPointer<LoggerData> _local_data() const;
-    std::pair<std::thread::id,unsigned int> _largest_queue();
+    //! \brief Extracts one message from the largest queue, also removing dead data instances
+    SharedPointer<LogRawMessage> _dequeue_and_cleanup();
     void _consume_msgs();
   private:
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
     SmartThread _dequeueing_thread = SmartThread([this]() { _consume_msgs(); });
     std::atomic<bool> _terminate;
+    std::promise<void> _termination_promise;
+    std::future<void> _termination_future = _termination_promise.get_future();
+    std::mutex _data_mutex;
 };
 
 //! \brief The policy for printing the thread id with respect to the log level: NEVER, BEFORE or AFTER

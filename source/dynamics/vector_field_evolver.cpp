@@ -199,14 +199,27 @@ class ConcurrentRunner {
   public:
     ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size);
 
-    Void init(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
+    ~ConcurrentRunner();
+
+    Void process(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
               TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size);
 
-    Tuple<LabelledEnclosure,LabelledEnclosure,Dyadic,Dyadic> execute();
+    Tuple<LabelledEnclosure,LabelledEnclosure,Dyadic,Dyadic> yield();
 
   private:
 
-    Void _run() {
+    Void _loop() {
+        ARIADNE_LOG_SCOPE_CREATE;
+        while(true) {
+            std::unique_lock<std::mutex> locker(input_mutex);
+            input_condition.wait(locker);
+            if (_terminate) break;
+            _task();
+            output_condition.notify_all();
+        }
+    }
+
+    Void _task() {
         FlowStepModelType flow_model = _integrator->flow_step(_dynamic, _current_set_bounds, _previous_step_size,_chosen_step_size);
         ARIADNE_LOG_PRINTLN("step_size = " << _chosen_step_size);
         ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
@@ -231,13 +244,28 @@ class ConcurrentRunner {
     LabelledEnclosure _reach_set;
     Dyadic _next_time;
     Dyadic _chosen_step_size;
+    // Synchronization
+    LoggableSmartThread _thread;
+    std::atomic<bool> _terminate;
+    std::mutex input_mutex;
+    std::condition_variable input_condition;
+    std::mutex output_mutex;
+    std::condition_variable output_condition;
 };
 
 ConcurrentRunner::ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size)
-    :  _dynamic(dynamic), _maximum_step_size(maximum_step_size) { }
+    :  _dynamic(dynamic), _maximum_step_size(maximum_step_size), _thread("step", [this]() { _loop(); }), _terminate(false)
+{
+    _thread.activate();
+}
+
+ConcurrentRunner::~ConcurrentRunner() {
+    _terminate = true;
+    input_condition.notify_all();
+}
 
 Void
-ConcurrentRunner::init(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
+ConcurrentRunner::process(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
                        TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size)
 {
     // Init inputs
@@ -249,14 +277,13 @@ ConcurrentRunner::init(LabelledEnclosure const& current_set, FloatDPExactBox con
     _reach_set = current_set;
     _next_time = current_time;
     _chosen_step_size = _maximum_step_size;
+    input_condition.notify_all();
 }
 
 Tuple<LabelledEnclosure, LabelledEnclosure, Dyadic, Dyadic>
-ConcurrentRunner::execute() {
-    {
-        LoggableSmartThread thread("step", [this]() { _run(); });
-        thread.activate();
-    }
+ConcurrentRunner::yield() {
+    std::unique_lock<std::mutex> locker(output_mutex);
+    output_condition.wait(locker);
     return std::make_tuple(_next_set,_reach_set,_next_time,_chosen_step_size);
 }
 
@@ -329,6 +356,7 @@ _evolution(EnclosureListType& final_sets,
         if (initials_indicator.final_value() > 1) { ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << initials_indicator.percentage() << "% of sets, " << time_indicator.percentage() << "% of current set"); }
         else ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << time_indicator.percentage() << "%");
     }
+    ARIADNE_LOG_PRINTLN("Finished evolution");
 }
 
 
@@ -374,13 +402,13 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     TaylorPicardIntegrator* integrator=dynamic_cast<TaylorPicardIntegrator*>(this->_integrator.operator->());
 
     // Init outputs
-    runner.init(current_set,current_set_bounds,current_time,*integrator,previous_step_size);
+    runner.process(current_set,current_set_bounds,current_time,*integrator,previous_step_size);
 
     // Bind outputs
     EnclosureType next_set, reach_set;
     TimeStepType next_time;
     StepSizeType chosen_step_size;
-    make_ltuple(next_set,reach_set,next_time,chosen_step_size) = runner.execute();
+    make_ltuple(next_set,reach_set,next_time,chosen_step_size) = runner.yield();
 
     // Save outputs
     previous_step_size = chosen_step_size;

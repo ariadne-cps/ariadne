@@ -43,6 +43,7 @@
 #include "../output/progress_indicator.hpp"
 
 #include "../concurrency/loggable_smart_thread.hpp"
+#include "../concurrency/buffer.hpp"
 
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
@@ -190,101 +191,127 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
     }
 }
 
-Void test_print() {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("test\r\n");
-}
+class FlowStepInput {
+  public:
+    FlowStepInput(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time, Dyadic const& previous_step_size) :
+                  _current_set(current_set), _current_set_bounds(current_set_bounds), _current_time(current_time), _previous_step_size(previous_step_size) { }
+    LabelledEnclosure const& _current_set;
+    FloatDPExactBox const& _current_set_bounds;
+    Dyadic const& _current_time;
+    Dyadic const& _previous_step_size;
+};
+
+class FlowStepPoint {
+
+};
+
+class FlowStepConfiguration {
+  public:
+    FlowStepConfiguration(TaylorPicardIntegrator const& integrator) : _integrator(integrator.clone()){ }
+    TaylorPicardIntegrator* _integrator;
+};
+
+class FlowStepOutput {
+  public:
+    FlowStepOutput(LabelledEnclosure const& evolve, LabelledEnclosure const& reach, Dyadic const& time, Dyadic const& step_size_used) :
+                   _evolve(evolve), _reach(reach), _time(time), _step_size_used(step_size_used) { }
+    LabelledEnclosure const _evolve;
+    LabelledEnclosure const _reach;
+    Dyadic const _time;
+    Dyadic const _step_size_used;
+};
 
 class ConcurrentRunner {
   public:
-    ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size);
+    ConcurrentRunner(FlowStepPoint const& initial_point, EffectiveVectorMultivariateFunction const& dynamic, TaylorPicardIntegrator const& integrator, Dyadic const& maximum_step_size);
 
     ~ConcurrentRunner();
 
-    Void process(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
-              TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size);
+    Void push(FlowStepInput const& input);
 
-    Tuple<LabelledEnclosure,LabelledEnclosure,Dyadic,Dyadic> yield();
+    FlowStepOutput pull();
 
   private:
 
     Void _loop() {
         ARIADNE_LOG_SCOPE_CREATE;
         while(true) {
-            std::unique_lock<std::mutex> locker(input_mutex);
-            input_condition.wait(locker);
+            std::unique_lock<std::mutex> locker(_input_mutex);
+            _input_availability.wait(locker);
             if (_terminate) break;
-            _task();
-            output_condition.notify_all();
+            auto pkg = _input_buffer.pop();
+            _output_buffer.push(_task(pkg.first,pkg.second));
+            _output_availability.notify_all();
         }
     }
 
-    Void _task() {
-        FlowStepModelType flow_model = _integrator->flow_step(_dynamic, _current_set_bounds, _previous_step_size,_chosen_step_size);
-        ARIADNE_LOG_PRINTLN("step_size = " << _chosen_step_size);
+    FlowStepConfiguration _convert_to_configuration(FlowStepPoint const& p) {
+        FlowStepConfiguration result(_integrator);
+        return result;
+    }
+
+    FlowStepOutput _task(FlowStepInput const& in, FlowStepConfiguration const& cfg) {
+
+        LabelledEnclosure next_set = in._current_set;
+        LabelledEnclosure reach_set = in._current_set;
+        Dyadic next_time = in._current_time;
+        Dyadic chosen_step_size = _maximum_step_size;
+        FlowStepModelType flow_model = cfg._integrator->flow_step(_dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
+        ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
         ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
-        _next_time += _chosen_step_size;
-        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << _next_time);
-        _reach_set.apply_full_reach_step(flow_model);
-        ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << _reach_set);
-        _next_set.apply_fixed_evolve_step(flow_model, _chosen_step_size);
-        ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << _next_set);
+        next_time += chosen_step_size;
+        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time);
+        reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
+        next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << next_set);
+
+        return FlowStepOutput(next_set,reach_set,next_time,chosen_step_size);
     }
 
   private:
+    // Initial point
+    FlowStepPoint const _initial_point;
     // Constants
     EffectiveVectorMultivariateFunction const _dynamic;
+    TaylorPicardIntegrator const& _integrator;
     Dyadic const _maximum_step_size;
-    // Variables for each computation
-    FloatDPExactBox _current_set_bounds;
-    SharedPointer<TaylorPicardIntegrator> _integrator;
-    Dyadic _previous_step_size;
-    // Outputs
-    LabelledEnclosure _next_set;
-    LabelledEnclosure _reach_set;
-    Dyadic _next_time;
-    Dyadic _chosen_step_size;
     // Synchronization
     LoggableSmartThread _thread;
+    Buffer<Pair<FlowStepInput,FlowStepConfiguration>> _input_buffer;
+    Buffer<FlowStepOutput> _output_buffer;
     std::atomic<bool> _terminate;
-    std::mutex input_mutex;
-    std::condition_variable input_condition;
-    std::mutex output_mutex;
-    std::condition_variable output_condition;
+    std::mutex _input_mutex;
+    std::condition_variable _input_availability;
+    std::mutex _output_mutex;
+    std::condition_variable _output_availability;
 };
 
-ConcurrentRunner::ConcurrentRunner(EffectiveVectorMultivariateFunction const& dynamic, Dyadic const& maximum_step_size)
-    :  _dynamic(dynamic), _maximum_step_size(maximum_step_size), _thread("step", [this]() { _loop(); }), _terminate(false)
+ConcurrentRunner::ConcurrentRunner(FlowStepPoint const& initial_point, EffectiveVectorMultivariateFunction const& dynamic, TaylorPicardIntegrator const& integrator, Dyadic const& maximum_step_size)
+    :  _initial_point(initial_point), _dynamic(dynamic), _integrator(integrator), _maximum_step_size(maximum_step_size), _thread("step", [this]() { _loop(); }),
+       _input_buffer(Buffer<Pair<FlowStepInput,FlowStepConfiguration>>(1)),_output_buffer(Buffer<FlowStepOutput>(1)), _terminate(false)
 {
     _thread.activate();
 }
 
 ConcurrentRunner::~ConcurrentRunner() {
     _terminate = true;
-    input_condition.notify_all();
+    _input_availability.notify_all();
 }
 
 Void
-ConcurrentRunner::process(LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time,
-                       TaylorPicardIntegrator const& integrator, Dyadic const& previous_step_size)
+ConcurrentRunner::push(FlowStepInput const& input)
 {
-    // Init inputs
-    _current_set_bounds = current_set_bounds;
-    _integrator.reset(integrator.clone());
-    _previous_step_size = previous_step_size;
-    // Init outputs
-    _next_set = current_set;
-    _reach_set = current_set;
-    _next_time = current_time;
-    _chosen_step_size = _maximum_step_size;
-    input_condition.notify_all();
+    auto config = _convert_to_configuration(_initial_point);
+    _input_buffer.push({input,config});
+    _input_availability.notify_all();
 }
 
-Tuple<LabelledEnclosure, LabelledEnclosure, Dyadic, Dyadic>
-ConcurrentRunner::yield() {
-    std::unique_lock<std::mutex> locker(output_mutex);
-    output_condition.wait(locker);
-    return std::make_tuple(_next_set,_reach_set,_next_time,_chosen_step_size);
+FlowStepOutput
+ConcurrentRunner::pull() {
+    std::unique_lock<std::mutex> locker(_output_mutex);
+    _output_availability.wait(locker);
+    return _output_buffer.pop();
 }
 
 
@@ -314,7 +341,9 @@ _evolution(EnclosureListType& final_sets,
     ProgressIndicator initials_indicator(working_sets.size());
     ProgressIndicator time_indicator(maximum_time.get_d());
 
-    ConcurrentRunner runner(_sys_ptr->dynamic_function(),_configuration->maximum_step_size());
+    ConcurrentRunner runner(FlowStepPoint(),_sys_ptr->dynamic_function(),
+                            *dynamic_cast<TaylorPicardIntegrator*>(this->_integrator.operator->()),
+                            _configuration->maximum_step_size());
 
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
@@ -399,22 +428,15 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
-    TaylorPicardIntegrator* integrator=dynamic_cast<TaylorPicardIntegrator*>(this->_integrator.operator->());
-
-    // Init outputs
-    runner.process(current_set,current_set_bounds,current_time,*integrator,previous_step_size);
-
-    // Bind outputs
-    EnclosureType next_set, reach_set;
-    TimeStepType next_time;
-    StepSizeType chosen_step_size;
-    make_ltuple(next_set,reach_set,next_time,chosen_step_size) = runner.yield();
-
+    // Push inputs
+    runner.push(FlowStepInput(current_set,current_set_bounds,current_time,previous_step_size));
+    // Pull outputs
+    auto out = runner.pull();
     // Save outputs
-    previous_step_size = chosen_step_size;
-    reach_sets.adjoin(reach_set);
-    intermediate_sets.adjoin(next_set);
-    working_sets.push_back(make_pair(next_time,next_set));
+    reach_sets.adjoin(out._reach);
+    intermediate_sets.adjoin(out._evolve);
+    working_sets.push_back(make_pair(out._time,out._evolve));
+    previous_step_size = out._step_size_used;
 }
 
 

@@ -237,7 +237,7 @@ class ConcurrentRunner {
         ARIADNE_LOG_SCOPE_CREATE;
         while(true) {
             std::unique_lock<std::mutex> locker(_input_mutex);
-            _input_availability.wait(locker);
+            _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
             if (_terminate) break;
             auto pkg = _input_buffer.pop();
             _output_buffer.push(_task(pkg.first,pkg.second));
@@ -260,7 +260,7 @@ class ConcurrentRunner {
         ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
         ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
         next_time += chosen_step_size;
-        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time);
+        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time)
         reach_set.apply_full_reach_step(flow_model);
         ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
         next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
@@ -289,7 +289,8 @@ class ConcurrentRunner {
 
 ConcurrentRunner::ConcurrentRunner(FlowStepPoint const& initial_point, EffectiveVectorMultivariateFunction const& dynamic, TaylorPicardIntegrator const& integrator, Dyadic const& maximum_step_size)
     :  _initial_point(initial_point), _dynamic(dynamic), _integrator(integrator), _maximum_step_size(maximum_step_size), _thread("step", [this]() { _loop(); }),
-       _input_buffer(Buffer<Pair<FlowStepInput,FlowStepConfiguration>>(1)),_output_buffer(Buffer<FlowStepOutput>(1)), _terminate(false)
+       _input_buffer(Buffer<Pair<FlowStepInput,FlowStepConfiguration>>(1)),_output_buffer(Buffer<FlowStepOutput>(1)),
+       _terminate(false)
 {
     _thread.activate();
 }
@@ -310,7 +311,7 @@ ConcurrentRunner::push(FlowStepInput const& input)
 FlowStepOutput
 ConcurrentRunner::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
-    _output_availability.wait(locker);
+    _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
     return _output_buffer.pop();
 }
 

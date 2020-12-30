@@ -62,8 +62,8 @@ class LoggableSmartThread {
     }
 
     void activate()  {
-        _activate_promise.set_value();
         _active = true;
+        _activate_promise.set_value();
     }
 
     ~LoggableSmartThread() {

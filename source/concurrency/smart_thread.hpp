@@ -56,8 +56,8 @@ class SmartThread {
     }
 
     void activate()  {
-        _activate_promise.set_value();
         _active = true;
+        _activate_promise.set_value();
     }
 
     ~SmartThread() {

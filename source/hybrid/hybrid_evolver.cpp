@@ -1626,7 +1626,7 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 Void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const ApproximateRealType value)
 {
-    _evolver._integrator_ptr=std::shared_ptr<GradedTaylorSeriesIntegrator>(new GradedTaylorSeriesIntegrator(MaximumError(cast_exact(value))));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(MaximumError(cast_exact(value))));
     _flow_accuracy = cast_exact(value);
 }
 

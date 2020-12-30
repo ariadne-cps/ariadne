@@ -85,8 +85,8 @@ class IntegratorWrapper
         return this->get_override("maximum_error")(); }
     Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
-    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
-        return this->get_override("flow_step")(vf,D,h); }
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hst, StepSizeType& hsug) const {
+        return this->get_override("flow_step")(vf,D,hst,hsug); }
     FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
     FlowStepModelType flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
@@ -137,7 +137,7 @@ Void export_integrators(pybind11::module& module)
 
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");
     integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
-    integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&, StepSizeType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("flow_to",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
     integrator_interface_class.def("flow",(FlowModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);

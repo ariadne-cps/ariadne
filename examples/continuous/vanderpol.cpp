@@ -31,6 +31,7 @@ using namespace Ariadne;
 int main(int argc, const char* argv[])
 {
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_theme(TT_THEME_DARK);
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 

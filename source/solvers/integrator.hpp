@@ -219,7 +219,14 @@ class TaylorPicardIntegrator
     TaylorPicardIntegrator(MaximumError err);
 
     //! \brief Constructor.
+    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
+
+    //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr);
+
+    //! \brief Constructor.
+    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                                                   StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,

@@ -121,6 +121,8 @@ class TestReachabilityAnalyser
           safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
           reach_time(3.0_x)
     {
+        Logger::configuration().set_verbosity(3);
+
         cout << "Done creating initial and safe sets\n" << endl;
 
         cout << "system=" << system << endl;

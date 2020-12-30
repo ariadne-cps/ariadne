@@ -248,8 +248,16 @@ TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err)
     : TaylorPicardIntegrator(err,ThresholdSweeper<FloatDP>(DP(),err.value()/1024),LipschitzConstant(0.5),StartingStepSizeNumRefinements(0),
                              StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr) :
-TaylorPicardIntegrator(err,sweeper,lip,nr,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip)
+    : TaylorPicardIntegrator(err,sweeper,lip,0,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+
+TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr)
+    : TaylorPicardIntegrator(err,sweeper,lip,nr,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+
+TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                                               StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,sweeper,lip,0), _step_maximum_error(cast_exact(lerr.value())), _sweeper(sweeper)
+        , _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
 TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,
                                                StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)

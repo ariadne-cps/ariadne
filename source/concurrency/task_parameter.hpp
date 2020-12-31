@@ -80,8 +80,8 @@ private:
 
 class MetricTaskParameter : public TaskParameterBase {
   public:
-    MetricTaskParameter(RealVariable const& variable, Nat const& upper_bound, Nat const& initial) : TaskParameterBase(variable,variable), _ub(upper_bound), _initial(initial) { }
-    MetricTaskParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& initial, Nat const& upper_bound) : TaskParameterBase(variable, value_expression), _ub(upper_bound), _initial(initial) { }
+    MetricTaskParameter(RealVariable const& variable, Nat const& upper_bound, Nat const& initial) : TaskParameterBase(variable,variable), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial<=upper_bound); }
+    MetricTaskParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskParameterBase(variable, value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial<=upper_bound); }
 
     TaskParameterKind kind() const override { return TaskParameterKind::METRIC; }
     Nat upper_bound() const override { return _ub; }

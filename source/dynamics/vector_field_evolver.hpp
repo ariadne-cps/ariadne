@@ -52,7 +52,7 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
 
-class ConcurrentRunner;
+class ParameterExplorationRunner;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
@@ -84,6 +84,9 @@ class VectorFieldEvolver
     //! \brief Get the internal system.
     virtual const SystemType& system() const { return *_sys_ptr; }
 
+    //! \brief Get the internal integrator.
+    const IntegratorInterface* integrator() const { return _integrator.get(); }
+
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
     EnclosureType enclosure(RealBox const&, EnclosureConfiguration const&) const;
@@ -106,6 +109,8 @@ class VectorFieldEvolver
     const FunctionFactoryType& function_factory() const;
 
     //!@}
+
+    Void set_runner(SharedPointer<ParameterExplorationRunner> const& runner) { this->_runner = runner; }
 
     //!@{
     //! \name Evolution using abstract sets.
@@ -136,14 +141,15 @@ class VectorFieldEvolver
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, StepSizeType& last_step_size, const TimeType& time,
-                                 Semantics semantics, Bool reach, ConcurrentRunner& runner) const;
+                                 Semantics semantics, Bool reach) const;
 
     virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    std::shared_ptr< IntegratorInterface > _integrator;
-    std::shared_ptr< ConfigurationType > _configuration;
+    SharedPointer<SystemType> _sys_ptr;
+    SharedPointer<IntegratorInterface> _integrator;
+    SharedPointer<ConfigurationType> _configuration;
+    SharedPointer<ParameterExplorationRunner> _runner;
 };
 
 

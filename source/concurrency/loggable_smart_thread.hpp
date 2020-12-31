@@ -50,7 +50,6 @@ class LoggableSmartThread {
                     if(_active) task();
                 });
         _start_future.get();
-        Logger::register_thread(*this);
     }
 
     std::thread::id id() const {
@@ -63,6 +62,7 @@ class LoggableSmartThread {
 
     void activate()  {
         _active = true;
+        Logger::register_thread(*this);
         _activate_promise.set_value();
     }
 

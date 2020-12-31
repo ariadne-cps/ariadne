@@ -118,6 +118,16 @@ Map<TaskParameter,Real> TaskParameterPoint::values(Map<RealVariable,Real> const 
     return result;
 }
 
+Real TaskParameterPoint::value(Identifier const& var, Map<RealVariable,Real> const& external_values) const {
+    auto iter = _bindings.begin();
+    for (;iter!=_bindings.end();++iter) {
+        if (iter->first.name() == var) break;
+    }
+    if (iter == _bindings.end())
+        ARIADNE_FAIL_MSG("Variable '" << var << "' could not be found in the space.");
+    return iter->first.value(iter->second,external_values);
+}
+
 Real TaskParameterPoint::time_cost_estimate(Map<RealVariable,Real> const& external_variables) const {
     Map<Identifier,Real> values;
     for (auto binding : _bindings) {

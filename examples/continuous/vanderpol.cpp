@@ -25,6 +25,9 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "utility/stopwatch.hpp"
+#include "concurrency/task_parameter.hpp"
+#include "concurrency/task_parameter_space.hpp"
+#include "concurrency/parameter_exploration_runner.hpp"
 
 using namespace Ariadne;
 
@@ -52,6 +55,13 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(1e20);
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN(evolver.configuration());
+
+    RealVariable sssnr("starting_step_size_num_refinements"), st("sweep_threshold"), mto("maximum_temporal_order");
+    TaskParameterSpace space({MetricTaskParameter(sssnr,5,2),
+                              MetricTaskParameter(st,exp(-st*log(RealConstant(10))),12,9),
+                              MetricTaskParameter(mto,15,12)
+                             },(st*mto)/sssnr);
+    evolver.set_runner(SharedPointer<ParameterExplorationRunner>(new ParameterExplorationRunner(space,evolver)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

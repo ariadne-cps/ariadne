@@ -47,7 +47,9 @@ class TaskParameterPoint : public WritableInterface {
     //! \brief The coordinates in the natural space, according to the space ordering
     List<Nat> coordinates() const { return _bindings.values(); }
     //! \brief The values in the real space, possibly using some \a external_values
-    Map<TaskParameter,Real> values(Map<RealVariable,Real> const & external_values = Map<RealVariable,Real>()) const;
+    Map<TaskParameter,Real> values(Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
+    //! \brief The value for a given parameter, possibly using some \a external values
+    Real value(Identifier const& var, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
 
     //! \brief Provide a time cost estimate, where the \a external_values bind constants to their values
     Real time_cost_estimate(Map<RealVariable,Real> const & external_values = Map<RealVariable,Real>()) const;

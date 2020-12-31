@@ -72,7 +72,7 @@ Bool TaskParameter::operator<(TaskParameter const& p) const {
 }
 
 OutputStream& TaskParameter::_write(OutputStream& os) const {
-    return os << "(" << name() << ", " << kind() << ", ub: " + to_string(upper_bound()) + ")";
+    return os << "('" << name() << "', kind: " << kind() << ", upper_bound: " + to_string(upper_bound()) + ", initial: " << to_string(initial()) << ")";
 }
 
 } // namespace Ariadne

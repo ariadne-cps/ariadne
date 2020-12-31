@@ -47,6 +47,14 @@ TaskParameterPoint TaskParameterSpace::make_point(Map<RealVariable,Nat> const& b
     return TaskParameterPoint(*this,pb);
 }
 
+TaskParameterPoint TaskParameterSpace::initial_point() const {
+    ParameterBindingsMap pb;
+    for (auto p : _parameters) {
+        pb.insert(Pair<TaskParameter,Nat>(p,p.initial()));
+    }
+    return TaskParameterPoint(*this,pb);
+}
+
 Nat TaskParameterSpace::index(TaskParameter const& p) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i) == p) return i;
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");

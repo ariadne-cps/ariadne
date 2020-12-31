@@ -44,6 +44,7 @@
 
 #include "../concurrency/loggable_smart_thread.hpp"
 #include "../concurrency/buffer.hpp"
+#include "../concurrency/task_parameter_point.hpp"
 
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
@@ -222,6 +223,8 @@ class FlowStepOutput {
 };
 
 class ConcurrentRunner {
+    typedef Buffer<Pair<FlowStepInput,FlowStepPoint>> InputBufferType;
+    typedef Buffer<Pair<FlowStepOutput,FlowStepPoint>> OutputBufferType;
   public:
     ConcurrentRunner(FlowStepPoint const& initial_point, EffectiveVectorMultivariateFunction const& dynamic, TaylorPicardIntegrator const& integrator, Dyadic const& maximum_step_size);
 
@@ -240,12 +243,12 @@ class ConcurrentRunner {
             _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
             if (_terminate) break;
             auto pkg = _input_buffer.pop();
-            _output_buffer.push(_task(pkg.first,pkg.second));
+            _output_buffer.push({_task(pkg.first,_to_configuration(pkg.second)),pkg.second});
             _output_availability.notify_all();
         }
     }
 
-    FlowStepConfiguration _convert_to_configuration(FlowStepPoint const& p) {
+    FlowStepConfiguration _to_configuration(FlowStepPoint const& p) {
         FlowStepConfiguration result(_integrator);
         return result;
     }
@@ -278,8 +281,8 @@ class ConcurrentRunner {
     Dyadic const _maximum_step_size;
     // Synchronization
     LoggableSmartThread _thread;
-    Buffer<Pair<FlowStepInput,FlowStepConfiguration>> _input_buffer;
-    Buffer<FlowStepOutput> _output_buffer;
+    InputBufferType _input_buffer;
+    OutputBufferType _output_buffer;
     std::atomic<bool> _terminate;
     std::mutex _input_mutex;
     std::condition_variable _input_availability;
@@ -289,7 +292,7 @@ class ConcurrentRunner {
 
 ConcurrentRunner::ConcurrentRunner(FlowStepPoint const& initial_point, EffectiveVectorMultivariateFunction const& dynamic, TaylorPicardIntegrator const& integrator, Dyadic const& maximum_step_size)
     :  _initial_point(initial_point), _dynamic(dynamic), _integrator(integrator), _maximum_step_size(maximum_step_size), _thread("step", [this]() { _loop(); }),
-       _input_buffer(Buffer<Pair<FlowStepInput,FlowStepConfiguration>>(1)),_output_buffer(Buffer<FlowStepOutput>(1)),
+       _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
        _terminate(false)
 {
     _thread.activate();
@@ -303,8 +306,7 @@ ConcurrentRunner::~ConcurrentRunner() {
 Void
 ConcurrentRunner::push(FlowStepInput const& input)
 {
-    auto config = _convert_to_configuration(_initial_point);
-    _input_buffer.push({input,config});
+    _input_buffer.push({input,_initial_point});
     _input_availability.notify_all();
 }
 
@@ -312,7 +314,8 @@ FlowStepOutput
 ConcurrentRunner::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
-    return _output_buffer.pop();
+    auto result = _output_buffer.pop();
+    return result.first;
 }
 
 

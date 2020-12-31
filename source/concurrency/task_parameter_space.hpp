@@ -42,6 +42,7 @@ class TaskParameterSpace : public WritableInterface {
 
     TaskParameterPoint make_point(Map<RealVariable,Nat> const& bindings) const;
     TaskParameterPoint make_point(ParameterBindingsMap const& bindings) const;
+    TaskParameterPoint initial_point() const;
 
     List<TaskParameter> const& parameters() const { return _parameters; }
     RealExpression const& time_cost_estimator() const { return _time_cost_estimator; }

@@ -55,7 +55,8 @@ before_install:
       NPROC="sysctl -n hw.ncpu"
       brew cask uninstall --force oclint
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
-      brew install $COMPILER_PKG python mpfr gmp $CAIRO_PKG
+      brew upgrade python@3.9
+      brew install $COMPILER_PKG python3 mpfr gmp $CAIRO_PKG
       export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
       sudo easy_install pip
       sudo pip3 install --upgrade pip

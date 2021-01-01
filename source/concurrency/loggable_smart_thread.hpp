@@ -61,9 +61,11 @@ class LoggableSmartThread {
     }
 
     void activate()  {
-        _active = true;
-        Logger::register_thread(*this);
-        _activate_promise.set_value();
+        if (!_active) {
+            _active = true;
+            Logger::register_thread(*this);
+            _activate_promise.set_value();
+        }
     }
 
     ~LoggableSmartThread() {

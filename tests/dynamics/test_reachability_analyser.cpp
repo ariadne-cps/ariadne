@@ -100,6 +100,7 @@ class TestReachabilityAnalyser
         TaylorPicardIntegrator integrator(MaximumError(1e-2_pr));
 
         EvolverType evolver(system,integrator);
+        evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepConcurrentRunner()));
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

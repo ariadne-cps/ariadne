@@ -185,7 +185,7 @@ struct LogThinRawMessage {
 //! \brief Full log message information in raw form, before formatting for actual output
 struct LogRawMessage : public LogThinRawMessage {
     LogRawMessage(std::string id, LogThinRawMessage msg) : LogThinRawMessage(msg), identifier(id) { }
-    LogRawMessage(std::string scope, unsigned int level, std::string text) : LogThinRawMessage(scope, level, text), identifier("") { }
+    LogRawMessage(std::string scp, unsigned int lvl, std::string txt) : LogThinRawMessage(scp,lvl,txt), identifier("") { }
     std::string identifier;
 };
 

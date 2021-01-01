@@ -42,7 +42,7 @@ namespace Ariadne {
 class SmartThread {
   public:
     SmartThread(std::function<void(void)> task) {
-        _thread = std::thread([=]() {
+        _thread = std::thread([=,this]() {
                     _id = std::this_thread::get_id();
                     _start_promise.set_value();
                     _activate_future.get();

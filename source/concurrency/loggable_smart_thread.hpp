@@ -43,7 +43,7 @@ class LoggableSmartThread {
   public:
     LoggableSmartThread(std::string name, std::function<void(void)> task) {
         _name = name;
-        _thread = std::thread([=]() {
+        _thread = std::thread([=,this]() {
                     _id = std::this_thread::get_id();
                     _start_promise.set_value();
                     _activate_future.get();

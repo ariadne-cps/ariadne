@@ -41,7 +41,10 @@
 #include "../function/function_interface.hpp"
 #include "../solvers/configuration_interface.hpp"
 #include "../solvers/integrator_interface.hpp"
+#include "../solvers/integrator.hpp"
 #include "../dynamics/evolver_base.hpp"
+
+#include "../concurrency/task_runner_interface.hpp"
 
 #include "../output/logging.hpp"
 
@@ -52,15 +55,55 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
 
-class ParameterExplorationRunner;
+struct FlowStepRunnerInput {
+    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic, LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time, Dyadic const& previous_step_size) :
+            _dynamic(dynamic), _current_set(current_set), _current_set_bounds(current_set_bounds), _current_time(current_time), _previous_step_size(previous_step_size) { }
+    EffectiveVectorMultivariateFunction const& _dynamic;
+    LabelledEnclosure const& _current_set;
+    FloatDPExactBox const& _current_set_bounds;
+    Dyadic const& _current_time;
+    Dyadic const& _previous_step_size;
+};
+
+struct FlowStepRunnerConfiguration {
+    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator) : integrator(integrator){ }
+    SharedPointer<TaylorPicardIntegrator> integrator;
+};
+
+struct FlowStepRunnerOutput {
+    FlowStepRunnerOutput(LabelledEnclosure const& evolve, LabelledEnclosure const& reach, Dyadic const& time, Dyadic const& step_size_used) :
+            evolve(evolve), reach(reach), time(time), step_size_used(step_size_used) { }
+    LabelledEnclosure const evolve;
+    LabelledEnclosure const reach;
+    Dyadic const time;
+    Dyadic const step_size_used;
+};
+
+inline TaskParameterSpace make_flow_step_runner_space() {
+    RealVariable sssnr("starting_step_size_num_refinements"), st("sweep_threshold"), mto("maximum_temporal_order");
+    return TaskParameterSpace({MetricTaskParameter(sssnr,5,2),
+                              MetricTaskParameter(st,exp(-st*log(RealConstant(10))),12,9),
+                              MetricTaskParameter(mto,15,12)
+                             },(st*mto)/sssnr);
+}
+
+struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> {
+    VectorFieldEvolverFlowStepSerialRunner(VectorFieldEvolver const& evolver) : SerialRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput>(evolver,make_flow_step_runner_space()) { }
+};
+
+struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> {
+    VectorFieldEvolverFlowStepConcurrentRunner(VectorFieldEvolver const& evolver) : ConcurrentRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput>("step",evolver,make_flow_step_runner_space()) { }
+};
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
+    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >,
+      protected TaskRunnableInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>
 {
   public:
+    typedef TaskRunnerInterface<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> RunnerType;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;
@@ -79,10 +122,10 @@ class VectorFieldEvolver
             const IntegratorInterface& integrator);
 
     //! \brief Make a dynamically-allocated copy.
-    VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
+    VectorFieldEvolver* clone() const override { return new VectorFieldEvolver(*this); }
 
     //! \brief Get the internal system.
-    virtual const SystemType& system() const { return *_sys_ptr; }
+    virtual const SystemType& system() const override { return *_sys_ptr; }
 
     //! \brief Get the internal integrator.
     const IntegratorInterface* integrator() const { return _integrator.get(); }
@@ -110,12 +153,18 @@ class VectorFieldEvolver
 
     //!@}
 
-    Void set_runner(SharedPointer<ParameterExplorationRunner> const& runner) { this->_runner = runner; }
+    //!@{
+    //! \name Running tasks for the class.
+    Void set_runner(SharedPointer<RunnerType> const& runner) { this->_runner = runner; }
+    FlowStepRunnerConfiguration to_configuration(TaskParameterPoint const& p) const override;
+    //! \brief The task to be performed, taking \a in as input and \cfg as a configuration of the parameters
+    FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override;
+    //!@}
 
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const override;
 
     using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
     using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
@@ -136,7 +185,7 @@ class VectorFieldEvolver
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, Bool reach) const;
+                            Semantics semantics, Bool reach) const override;
 
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -149,7 +198,7 @@ class VectorFieldEvolver
     SharedPointer<SystemType> _sys_ptr;
     SharedPointer<IntegratorInterface> _integrator;
     SharedPointer<ConfigurationType> _configuration;
-    SharedPointer<ParameterExplorationRunner> _runner;
+    SharedPointer<RunnerType> _runner;
 };
 
 

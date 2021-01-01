@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_reachability_analysis.cpp
+ *            test_infinite_time_reachability.cpp
  *
  *  Copyright  2006-20  Pieter Collins
  *
@@ -56,7 +56,6 @@ Colour safe_set_colour(0.50,1.00,0.50);
 
 class TestReachabilityAnalyser
 {
-
     typedef VectorFieldEvolver EvolverType;
     typedef EvolverType::SystemType SystemType;
     typedef SystemType::TimeType TimeType;
@@ -129,67 +128,6 @@ class TestReachabilityAnalyser
         cout << "safe_set=" << safe_set << endl;
     }
 
-    Void test_lower_reach_lower_evolve() {
-        cout << "Computing timed reachable set" << endl;
-        auto lower_reach=analyser.lower_reach(initial_set,reach_time);
-        ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
-
-        cout << "Computing timed evolve set" << endl;
-        auto lower_evolve=analyser.lower_evolve(initial_set,reach_time);
-        ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
-
-        cout << "Reached " << lower_reach.size() << " cells " << endl;
-        cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
-
-        plot("test_reachability_analyser-lower_reach_lower_evolve.png",Projection2d(2,0,1),graphics_box,
-             reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
-    }
-
-    Void test_lower_reach_evolve() {
-        cout << "Computing timed reach-evolve set" << endl;
-        Pair<StorageType,StorageType> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        StorageType& lower_reach=reach_evolve_set.first;
-        StorageType& lower_evolve=reach_evolve_set.second;
-        cout << "Reached " << lower_reach.size() << " cells " << endl;
-        cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
-
-        ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
-        ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
-
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",Projection2d(2,0,1),graphics_box,
-             reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
-    }
-
-    Void test_upper_reach_upper_evolve() {
-        cout << "Computing timed reachable set" << endl;
-        StorageType upper_reach_set=analyser.upper_reach(initial_set,reach_time);
-        ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
-
-        cout << "Computing timed evolve set" << endl;
-        StorageType upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
-        ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
-
-        cout << "Reached " << upper_reach_set.size() << " cells " << endl;
-        cout << "Evolved to " << upper_evolve_set.size() << " cells " << endl << endl;
-
-        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",Projection2d(2,0,1),graphics_box,
-             reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
-    }
-
-    Void test_upper_reach_evolve() {
-        cout << "Computing timed reach-evolve set" << endl;
-        Pair<StorageType,StorageType> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
-
-        ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
-        ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
-
-        cout << "Reached " << reach_evolve_set.first.size() << " cells " << endl;
-        cout << "Evolved to " << reach_evolve_set.second.size() << " cells " << endl << endl;
-
-        plot("test_reachability_analyser-map_upper_reach_evolve.png",Projection2d(2,0,1),graphics_box,
-             reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
-    }
-
     Void test_infinite_time_lower_reach() {
         analyser.configuration().set_transient_time(4.0_dec);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
@@ -246,11 +184,6 @@ class TestReachabilityAnalyser
     }
 
     Void test() {
-        ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
-        ARIADNE_TEST_CALL(test_lower_reach_evolve());
-        ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
-        ARIADNE_TEST_CALL(test_upper_reach_evolve());
-
         ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
         ARIADNE_TEST_CALL(test_outer_chain_reach());
         ARIADNE_TEST_CALL(test_verify_safety());

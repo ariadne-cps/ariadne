@@ -42,9 +42,9 @@ def test_integrators():
 
     vf=EffectiveVectorMultivariateFunction([fo,fx])
     integrator=TaylorPicardIntegrator(1e-8)
-    integrator.flow_step(vf,d,h)
+    integrator.flow_step(vf,d,0,h)
 
     vf=ValidatedVectorMultivariateFunction([fo,fx])
     integrator=GradedTaylorSeriesIntegrator(1e-8)
-    integrator.flow_step(vf,d,h)
+    integrator.flow_step(vf,d,0,h)
 

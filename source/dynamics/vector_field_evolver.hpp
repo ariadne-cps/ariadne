@@ -56,13 +56,17 @@ template<class ES> class Orbit;
 class VectorFieldEvolverConfiguration;
 
 struct FlowStepRunnerInput {
-    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic, LabelledEnclosure const& current_set, FloatDPExactBox const& current_set_bounds, Dyadic const& current_time, Dyadic const& previous_step_size) :
-            _dynamic(dynamic), _current_set(current_set), _current_set_bounds(current_set_bounds), _current_time(current_time), _previous_step_size(previous_step_size) { }
+    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic, IntegratorInterface const& integrator, LabelledEnclosure const& current_set,
+                        FloatDPExactBox const& current_set_bounds, Dyadic const& current_time, Dyadic const& previous_step_size, Dyadic const& maximum_step_size) :
+            _dynamic(dynamic), _integrator(integrator), _current_set(current_set), _current_set_bounds(current_set_bounds),
+            _current_time(current_time), _previous_step_size(previous_step_size), _maximum_step_size(maximum_step_size) { }
     EffectiveVectorMultivariateFunction const& _dynamic;
+    IntegratorInterface const& _integrator;
     LabelledEnclosure const& _current_set;
     FloatDPExactBox const& _current_set_bounds;
     Dyadic const& _current_time;
     Dyadic const& _previous_step_size;
+    Dyadic const& _maximum_step_size;
 };
 
 struct FlowStepRunnerConfiguration {
@@ -87,12 +91,80 @@ inline TaskParameterSpace make_flow_step_runner_space() {
                              },(st*mto)/sssnr);
 }
 
-struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> {
-    VectorFieldEvolverFlowStepSerialRunner(VectorFieldEvolver const& evolver) : SerialRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput>(evolver,make_flow_step_runner_space()) { }
+struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+    VectorFieldEvolverFlowStepSerialRunner() : SerialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
+
+    FlowStepRunnerConfiguration
+    to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override {
+        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in._integrator);
+        SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
+                MaximumError(default_integrator.maximum_error()),
+                ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
+                LipschitzConstant(default_integrator.lipschitz_tolerance()),
+                StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
+                StepMaximumError(default_integrator.step_maximum_error()),
+                MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
+                MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
+        ));
+        return FlowStepRunnerConfiguration(integrator);
+    }
+
+    FlowStepRunnerOutput
+    run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
+        LabelledEnclosure next_set = in._current_set;
+        LabelledEnclosure reach_set = in._current_set;
+        Dyadic next_time = in._current_time;
+        Dyadic chosen_step_size = in._maximum_step_size;
+        FlowStepModelType flow_model = cfg.integrator->flow_step(in._dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
+        ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
+        next_time += chosen_step_size;
+        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time)
+        reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
+        next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << next_set);
+
+        return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
+    }
 };
 
-struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> {
-    VectorFieldEvolverFlowStepConcurrentRunner(VectorFieldEvolver const& evolver) : ConcurrentRunnerBase<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput>("step",evolver,make_flow_step_runner_space()) { }
+struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+    VectorFieldEvolverFlowStepConcurrentRunner() : ConcurrentRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step",make_flow_step_runner_space()) { }
+
+    FlowStepRunnerConfiguration
+    to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override {
+        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in._integrator);
+        SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
+                MaximumError(default_integrator.maximum_error()),
+                ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
+                LipschitzConstant(default_integrator.lipschitz_tolerance()),
+                StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
+                StepMaximumError(default_integrator.step_maximum_error()),
+                MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
+                MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
+        ));
+        return FlowStepRunnerConfiguration(integrator);
+    }
+
+    FlowStepRunnerOutput
+    run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
+        LabelledEnclosure next_set = in._current_set;
+        LabelledEnclosure reach_set = in._current_set;
+        Dyadic next_time = in._current_time;
+        Dyadic chosen_step_size = in._maximum_step_size;
+        FlowStepModelType flow_model = cfg.integrator->flow_step(in._dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
+        ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
+        next_time += chosen_step_size;
+        ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time)
+        reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
+        next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << next_set);
+
+        return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
+    }
 };
 
 //! \brief A class for computing the evolution of a vector_field system.
@@ -100,10 +172,10 @@ struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunne
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
     : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >,
-      protected TaskRunnableInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>
+      public TaskRunnableInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>
 {
   public:
-    typedef TaskRunnerInterface<VectorFieldEvolver,FlowStepRunnerInput,FlowStepRunnerOutput> RunnerType;
+    typedef TaskRunnerInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> RunnerType;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;
@@ -153,13 +225,8 @@ class VectorFieldEvolver
 
     //!@}
 
-    //!@{
-    //! \name Running tasks for the class.
-    Void set_runner(SharedPointer<RunnerType> const& runner) { this->_runner = runner; }
-    FlowStepRunnerConfiguration to_configuration(TaskParameterPoint const& p) const override;
-    //! \brief The task to be performed, taking \a in as input and \cfg as a configuration of the parameters
-    FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override;
-    //!@}
+    //! \brief Set the runner for the internal task
+    void set_runner(SharedPointer<RunnerType> runner) override { this->_runner = runner; }
 
     //!@{
     //! \name Evolution using abstract sets.

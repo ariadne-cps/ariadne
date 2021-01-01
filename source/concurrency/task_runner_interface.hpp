@@ -40,25 +40,26 @@ namespace Ariadne {
 
 //! \brief Interface for the runner of a task.
 //! \details This will usually be first implemented into an abstract base class.
-template<class RB, class I, class O>
+template<class I, class O, class C>
 class TaskRunnerInterface {
   public:
-    typedef RB RunnableType;
     typedef I InputType;
     typedef O OutputType;
+    typedef C ConfigurationType;
 
-    //! \brief The runnable object for the runner
-    virtual RunnableType const& runnable() const = 0;
     //! \brief Activates the runner, activating and threads and consequently properly setting the verbosity level
     virtual void activate() = 0;
     //! \brief Push input to the runner
     virtual void push(InputType const& input) = 0;
     //! \brief Pull output from the runner
     virtual OutputType pull() = 0;
+    //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
+    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const = 0;
+    //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
+    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
 };
 
 //! \brief Interface for a class that supports a runnable task.
-//! \details All methods are stateless.
 template<class I, class O, class C>
 class TaskRunnableInterface {
   public:
@@ -66,58 +67,51 @@ class TaskRunnableInterface {
     typedef O OutputType;
     typedef C ConfigurationType;
 
-    //! \brief Convert a task parameter point into a configuration of values for the task
-    virtual ConfigurationType to_configuration(TaskParameterPoint const& p) const = 0;
-    //! \brief The task to be performed, taking \a in as input and \cfg as a configuration of the parameters
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
+    //! \brief Set a new runner, useful to override the default runner
+    virtual void set_runner(SharedPointer<TaskRunnerInterface<InputType,OutputType,ConfigurationType>> runner) = 0;
 };
 
 class TaskParameterSpace;
 
-template<class RB, class I, class O>
-class SerialRunnerBase : public TaskRunnerInterface<RB, I, O> {
-    typedef typename TaskRunnerInterface<RB,I,O>::RunnableType RunnableType;
-    typedef typename TaskRunnerInterface<RB,I,O>::InputType InputType;
-    typedef typename TaskRunnerInterface<RB,I,O>::OutputType OutputType;
-public:
-    SerialRunnerBase(RunnableType const& runnable, TaskParameterSpace const& space);
+template<class I, class O, class C>
+class SerialRunnerBase : public TaskRunnerInterface<I,O,C> {
+  public:
+    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
+    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
+
+    SerialRunnerBase(TaskParameterSpace const& space);
     virtual ~SerialRunnerBase() = default;
 
-    RunnableType const& runnable() const override final;
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
+    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
+
 private:
-    RunnableType const& _runnable;
     SharedPointer<OutputType> _last_output;
     // Parameter space
     SharedPointer<TaskParameterSpace> const _parameter_space;
 };
 
-template<class RB, class I, class O>
-SerialRunnerBase<RB,I,O>::SerialRunnerBase(RunnableType const& runnable, TaskParameterSpace const& space)
-        :  _runnable(runnable), _parameter_space(space.clone()) { }
+template<class I, class O, class C>
+SerialRunnerBase<I,O,C>::SerialRunnerBase(TaskParameterSpace const& space)
+        :  _parameter_space(space.clone()) { }
 
-template<class RB, class I, class O>
-typename SerialRunnerBase<RB,I,O>::RunnableType const&
-SerialRunnerBase<RB,I,O>::runnable() const
-{
-    return _runnable;
-}
-
-template<class RB, class I, class O>
+template<class I, class O, class C>
 Void
-SerialRunnerBase<RB,I,O>::activate()
+SerialRunnerBase<I,O,C>::activate()
 {
     ARIADNE_LOG_SCOPE_CREATE;
 }
 
-template<class RB, class I, class O>
+    template<class I, class O, class C>
 Void
-SerialRunnerBase<RB,I,O>::push(InputType const& input)
+SerialRunnerBase<I,O,C>::push(InputType const& input)
 {
-    _last_output.reset(new OutputType(runnable().run_task(input,runnable().to_configuration(_parameter_space->initial_point()))));
+    _last_output.reset(new OutputType(run_task(input,to_configuration(input,_parameter_space->initial_point()))));
 }
 
 template<class RB, class I, class O>
@@ -126,22 +120,24 @@ SerialRunnerBase<RB,I,O>::pull() {
     return *_last_output;
 }
 
-template<class RB, class I, class O>
-class ConcurrentRunnerBase : public TaskRunnerInterface<RB, I, O> {
-    typedef typename TaskRunnerInterface<RB,I,O>::RunnableType RunnableType;
-    typedef typename TaskRunnerInterface<RB,I,O>::InputType InputType;
-    typedef typename TaskRunnerInterface<RB,I,O>::OutputType OutputType;
+template<class I, class O, class C>
+class ConcurrentRunnerBase : public TaskRunnerInterface<I,O,C> {
+  public:
+    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
+    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
     typedef Buffer<Pair<InputType,TaskParameterPoint>> InputBufferType;
     typedef Buffer<Pair<OutputType,TaskParameterPoint>> OutputBufferType;
-public:
 
-    ConcurrentRunnerBase(String const& thread_name, RunnableType const& runnable, TaskParameterSpace const& space);
+    ConcurrentRunnerBase(String const& thread_name, TaskParameterSpace const& space);
     virtual ~ConcurrentRunnerBase();
 
-    RunnableType const& runnable() const override final;
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
+
+    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
 
 private:
 
@@ -152,13 +148,12 @@ private:
             _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
             if (_terminate) break;
             auto pkg = _input_buffer.pop();
-            _output_buffer.push({runnable().run_task(pkg.first,runnable().to_configuration(pkg.second)),pkg.second});
+            _output_buffer.push({run_task(pkg.first,to_configuration(pkg.first,pkg.second)),pkg.second});
             _output_availability.notify_all();
         }
     }
 
 private:
-    RunnableType const& _runnable;
     // Parameter space
     SharedPointer<TaskParameterSpace> const _parameter_space;
     // Synchronization
@@ -172,43 +167,36 @@ private:
     std::condition_variable _output_availability;
 };
 
-template<class RB, class I, class O>
-ConcurrentRunnerBase<RB,I,O>::ConcurrentRunnerBase(String const& thread_name, RunnableType const& runnable, TaskParameterSpace const& space)
-        :  _runnable(runnable), _parameter_space(space.clone()), _thread(thread_name, [this]() { _loop(); }),
+template<class I, class O, class C>
+ConcurrentRunnerBase<I,O,C>::ConcurrentRunnerBase(String const& thread_name, TaskParameterSpace const& space)
+        :  _parameter_space(space.clone()), _thread(thread_name, [this]() { _loop(); }),
            _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
            _terminate(false) { }
 
-template<class RB, class I, class O>
-ConcurrentRunnerBase<RB,I,O>::~ConcurrentRunnerBase() {
+template<class I, class O, class C>
+ConcurrentRunnerBase<I,O,C>::~ConcurrentRunnerBase() {
     _terminate = true;
     _input_availability.notify_all();
 }
 
-template<class RB, class I, class O>
-typename ConcurrentRunnerBase<RB,I,O>::RunnableType const&
-ConcurrentRunnerBase<RB,I,O>::runnable() const
-{
-    return _runnable;
-}
-
-template<class RB, class I, class O>
+template<class I, class O, class C>
 Void
-ConcurrentRunnerBase<RB,I,O>::activate()
+ConcurrentRunnerBase<I,O,C>::activate()
 {
     _thread.activate();
 }
 
-template<class RB, class I, class O>
+template<class I, class O, class C>
 Void
-ConcurrentRunnerBase<RB,I,O>::push(InputType const& input)
+ConcurrentRunnerBase<I,O,C>::push(InputType const& input)
 {
     _input_buffer.push({input,_parameter_space->initial_point()});
     _input_availability.notify_all();
 }
 
-template<class RB, class I, class O>
-typename ConcurrentRunnerBase<RB,I,O>::OutputType
-ConcurrentRunnerBase<RB,I,O>::pull() {
+template<class I, class O, class C>
+typename ConcurrentRunnerBase<I,O,C>::OutputType
+ConcurrentRunnerBase<I,O,C>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
     auto result = _output_buffer.pop();

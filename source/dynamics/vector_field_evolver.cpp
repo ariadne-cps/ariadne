@@ -117,7 +117,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepSerialRunner(*this)));
+    set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepSerialRunner()));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
@@ -146,40 +146,6 @@ typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const R
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
     return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
-}
-
-FlowStepRunnerConfiguration
-VectorFieldEvolver::to_configuration(TaskParameterPoint const& p) const {
-    TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(*_integrator);
-    SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
-            MaximumError(default_integrator.maximum_error()),
-            ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
-            LipschitzConstant(default_integrator.lipschitz_tolerance()),
-            StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
-            StepMaximumError(default_integrator.step_maximum_error()),
-            MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
-            MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
-        ));
-    return FlowStepRunnerConfiguration(integrator);
-}
-
-FlowStepRunnerOutput
-VectorFieldEvolver::run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const {
-    LabelledEnclosure next_set = in._current_set;
-    LabelledEnclosure reach_set = in._current_set;
-    Dyadic next_time = in._current_time;
-    Dyadic chosen_step_size = _configuration->maximum_step_size();
-    FlowStepModelType flow_model = cfg.integrator->flow_step(in._dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
-    ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
-    ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
-    next_time += chosen_step_size;
-    ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time)
-    reach_set.apply_full_reach_step(flow_model);
-    ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
-    next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
-    ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << next_set);
-
-    return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
 }
 
 
@@ -330,7 +296,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Push inputs
-    _runner->push(FlowStepRunnerInput(system().dynamic_function(), current_set, current_set_bounds, current_time, previous_step_size));
+    _runner->push(FlowStepRunnerInput(system().dynamic_function(),*_integrator, current_set, current_set_bounds,
+                                            current_time, previous_step_size, _configuration->maximum_step_size()));
     // Pull outputs
     auto out = _runner->pull();
     // Save outputs

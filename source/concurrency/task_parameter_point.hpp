@@ -41,6 +41,9 @@ class TaskParameterPoint : public WritableInterface {
   protected:
     TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings);
   public:
+    TaskParameterPoint(TaskParameterPoint const& p);
+    ~TaskParameterPoint() = default;
+
     //! \brief The parameter space
     TaskParameterSpace const& space() const { return *_space; }
 

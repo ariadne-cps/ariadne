@@ -30,6 +30,13 @@ namespace Ariadne {
 TaskParameterPoint::TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings)
     : _space(space.clone()), _bindings(bindings) { }
 
+TaskParameterPoint::TaskParameterPoint(TaskParameterPoint const& p) {
+    this->_bindings.clear();
+    this->_bindings.adjoin(p._bindings);
+    this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
+    this->_space.reset(p.space().clone());
+}
+
 Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) const {
     Set<TaskParameterPoint> result;
     TaskParameterPoint current_point = *this;

@@ -52,7 +52,7 @@ class TestProducerConsumer {
                 try {
                     auto i = ib.pop();
                     ob.push(i);
-                } catch (std::exception e) {
+                } catch (std::exception& e) {
                     break;
                 }
             }

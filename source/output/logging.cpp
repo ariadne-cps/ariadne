@@ -725,23 +725,24 @@ std::string Logger::_apply_theme_for_keywords(std::string const& text) {
 
 void Logger::_print_preamble_for_firstline(unsigned int level, std::string thread_name) {
     auto theme = _configuration.theme();
+    bool can_print_thread_name = _can_print_thread_name();
     bool thread_name_changed = (_cached_last_printed_thread_name != thread_name);
     bool level_changed = (_cached_last_printed_level != level);
     bool always_print_level = not(_configuration.prints_level_on_change_only());
 
-    if (_can_print_thread_name() and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::BEFORE) {
+    if (can_print_thread_name and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::BEFORE) {
         if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << thread_name << theme.at() << "@" << TerminalTextStyle::RESET;
             else std::clog << thread_name << "@";
         } else std::clog << std::string(thread_name.size()+1, ' ');
     }
 
-    if (thread_name_changed or always_print_level or level_changed) {
+    if ((can_print_thread_name and thread_name_changed) or always_print_level or level_changed) {
         if (theme.level_number.is_styled()) std::clog << theme.level_number() << level << TerminalTextStyle::RESET;
         else std::clog << level;
     } else std::clog << (level>9 ? "  " : " ");
 
-    if (_can_print_thread_name() and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::AFTER) {
+    if (can_print_thread_name and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::AFTER) {
         if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << theme.at() << "@" << TerminalTextStyle::RESET << thread_name;
             else std::clog << thread_name << "@";

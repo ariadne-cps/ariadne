@@ -56,27 +56,27 @@ template<class ES> class Orbit;
 class VectorFieldEvolverConfiguration;
 
 struct FlowStepRunnerInput {
-    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic, IntegratorInterface const& integrator, LabelledEnclosure const& current_set,
-                        FloatDPExactBox const& current_set_bounds, Dyadic const& current_time, Dyadic const& previous_step_size, Dyadic const& maximum_step_size) :
-            _dynamic(dynamic), _integrator(integrator), _current_set(current_set), _current_set_bounds(current_set_bounds),
-            _current_time(current_time), _previous_step_size(previous_step_size), _maximum_step_size(maximum_step_size) { }
-    EffectiveVectorMultivariateFunction const& _dynamic;
-    IntegratorInterface const& _integrator;
-    LabelledEnclosure const& _current_set;
-    FloatDPExactBox const& _current_set_bounds;
-    Dyadic const& _current_time;
-    Dyadic const& _previous_step_size;
-    Dyadic const& _maximum_step_size;
+    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
+                        FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
+            dynamic(dynamic_), integrator(integrator_), current_set(current_set_), current_set_bounds(current_set_bounds_),
+            current_time(current_time_), previous_step_size(previous_step_size_), maximum_step_size(maximum_step_size_) { }
+    EffectiveVectorMultivariateFunction const& dynamic;
+    IntegratorInterface const& integrator;
+    LabelledEnclosure const& current_set;
+    FloatDPExactBox const& current_set_bounds;
+    Dyadic const& current_time;
+    Dyadic const& previous_step_size;
+    Dyadic const& maximum_step_size;
 };
 
 struct FlowStepRunnerConfiguration {
-    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator) : integrator(integrator){ }
+    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
     SharedPointer<TaylorPicardIntegrator> integrator;
 };
 
 struct FlowStepRunnerOutput {
-    FlowStepRunnerOutput(LabelledEnclosure const& evolve, LabelledEnclosure const& reach, Dyadic const& time, Dyadic const& step_size_used) :
-            evolve(evolve), reach(reach), time(time), step_size_used(step_size_used) { }
+    FlowStepRunnerOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
+            evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
     Dyadic const time;
@@ -96,7 +96,7 @@ struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<Fl
 
     FlowStepRunnerConfiguration
     to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override {
-        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in._integrator);
+        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
         SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
                 MaximumError(default_integrator.maximum_error()),
                 ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
@@ -111,11 +111,11 @@ struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<Fl
 
     FlowStepRunnerOutput
     run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
-        LabelledEnclosure next_set = in._current_set;
-        LabelledEnclosure reach_set = in._current_set;
-        Dyadic next_time = in._current_time;
-        Dyadic chosen_step_size = in._maximum_step_size;
-        FlowStepModelType flow_model = cfg.integrator->flow_step(in._dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
+        LabelledEnclosure next_set = in.current_set;
+        LabelledEnclosure reach_set = in.current_set;
+        Dyadic next_time = in.current_time;
+        Dyadic chosen_step_size = in.maximum_step_size;
+        FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
         ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
         ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
         next_time += chosen_step_size;
@@ -134,7 +134,7 @@ struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunne
 
     FlowStepRunnerConfiguration
     to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override {
-        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in._integrator);
+        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
         SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
                 MaximumError(default_integrator.maximum_error()),
                 ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
@@ -149,11 +149,11 @@ struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunne
 
     FlowStepRunnerOutput
     run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
-        LabelledEnclosure next_set = in._current_set;
-        LabelledEnclosure reach_set = in._current_set;
-        Dyadic next_time = in._current_time;
-        Dyadic chosen_step_size = in._maximum_step_size;
-        FlowStepModelType flow_model = cfg.integrator->flow_step(in._dynamic, in._current_set_bounds, in._previous_step_size,chosen_step_size);
+        LabelledEnclosure next_set = in.current_set;
+        LabelledEnclosure reach_set = in.current_set;
+        Dyadic next_time = in.current_time;
+        Dyadic chosen_step_size = in.maximum_step_size;
+        FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
         ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
         ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
         next_time += chosen_step_size;

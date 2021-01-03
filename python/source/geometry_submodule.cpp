@@ -265,13 +265,9 @@ template<class T> class LocatedSetWrapper<ValidatedTag,T>
 using namespace Ariadne;
 
 
-template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
+template<class IVL> IVL interval_from_pair(pybind11::handle lh, pybind11::handle uh) {
     typedef typename IVL::LowerBoundType LB;
     typedef typename IVL::UpperBoundType UB;
-    assert(dct.size()==1);
-    pybind11::detail::dict_iterator::reference item = *dct.begin();
-    pybind11::handle lh = item.first;
-    pybind11::handle uh = item.second;
     if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value) {
         typedef PrecisionType<UB> PR; PR pr;
         try {
@@ -285,7 +281,21 @@ template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
     LB lb = pybind11::cast<LB>(lh);
     UB ub = pybind11::cast<UB>(uh);
     return IVL(lb,ub);
+}
 
+template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
+    assert(dct.size()==1);
+    pybind11::detail::dict_iterator::reference item = *dct.begin();
+    pybind11::handle lh = item.first;
+    pybind11::handle uh = item.second;
+    return interval_from_pair<IVL>(lh,uh);
+}
+
+template<class IVL> IVL interval_from_list(pybind11::list lst) {
+    assert(lst.size()==2);
+    pybind11::handle lh = lst[0];
+    pybind11::handle uh = lst[1];
+    return interval_from_pair<IVL>(lh,uh);
 }
 
 template<class BX> BX box_from_list(pybind11::list lst) {
@@ -426,7 +436,9 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def(pybind11::init<MidpointType>());
     interval_class.def(pybind11::init<LowerBoundType,UpperBoundType>());
     interval_class.def(pybind11::init([](pybind11::dict pydct){return interval_from_dict<IntervalType>(pydct);}));
+    interval_class.def(pybind11::init([](pybind11::list pylst){return interval_from_list<IntervalType>(pylst);}));
     pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
+    pybind11::implicitly_convertible<pybind11::list, IntervalType>();
 
     if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
         interval_class.def(pybind11::init<DyadicInterval>());

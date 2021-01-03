@@ -272,13 +272,17 @@ void export_builtins(pymodule& module)
 {
     pybind11::class_<ApproximateDouble> approximate_double_class(module,"ApproximateDouble");
     approximate_double_class.def(init<double>());
+    approximate_double_class.def("__neg__", &__neg__<ApproximateDouble>);
     approximate_double_class.def("__str__", &__cstr__<ApproximateDouble>);
     implicitly_convertible<double,ApproximateDouble>();
+    approximate_double_class.def("__hash__", [](ApproximateDouble const& ad){std::hash<double> hasher; return hasher(ad.get_d());});
 
     pybind11::class_<ExactDouble> exact_double_class(module,"ExactDouble");
     exact_double_class.def(init<double>());
     exact_double_class.def(init<ExactDouble>());
+    exact_double_class.def("__neg__", &__neg__<ExactDouble>);
     exact_double_class.def("__str__", &__cstr__<ExactDouble>);
+    exact_double_class.def("__hash__", [](ExactDouble const& xd){std::hash<double> hasher; return hasher(xd.get_d());});
 
     module.def("exact", (ExactDouble(*)(double)) &cast_exact);
 }
@@ -321,6 +325,7 @@ void export_dyadic(pymodule& module)
     dyadic_class.def("__repr__", &__repr__<Dyadic>);
     dyadic_class.def("__rmul__", &__rmul__<Dyadic,Dyadic>);
 
+    dyadic_class.def("__str__", &__cstr__<Dyadic>);
     define_infinitary(module,dyadic_class);
     define_arithmetic(module,dyadic_class);
     define_lattice(module,dyadic_class);
@@ -333,6 +338,7 @@ void export_dyadic(pymodule& module)
     implicitly_convertible<Int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
     implicitly_convertible<TwoExp,Dyadic>();
+    implicitly_convertible<ExactDouble,Dyadic>();
 
     pybind11::class_<Two> two_class(module,"Two");
     two_class.def("__pow__", &__pow__<Two,Int>);
@@ -486,6 +492,7 @@ template<class X, class Y> void implicitly_convertible_to() {
 void export_numbers(pymodule& module)
 {
     pybind11::class_<ExactNumber> exact_number_class(module,class_name<ExactNumber>().c_str());
+    exact_number_class.def(init<ExactDouble>());
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
     exact_number_class.def("get", (FloatDPBounds(*)(ExactNumber const&, DoublePrecision const&)) &get);
@@ -581,6 +588,7 @@ void export_numbers(pymodule& module)
     implicitly_convertible_to<Rational,ExactNumber>();
     implicitly_convertible_to<Decimal,ExactNumber>();
     implicitly_convertible_to<Dyadic,ExactNumber>();
+    implicitly_convertible_to<ExactDouble,ExactNumber>();
     implicitly_convertible_to<Integer,ExactNumber>();
     implicitly_convertible_to<Int,ExactNumber>();
 

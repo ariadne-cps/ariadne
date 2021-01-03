@@ -63,6 +63,7 @@ class DrawableWrapper
 template<class P, class T> class OpenSetWrapper;
 template<class P, class T> class ClosedSetWrapper;
 template<class P, class T> class OvertSetWrapper;
+template<class P, class T> class BoundedSetWrapper;
 template<class P, class T> class CompactSetWrapper;
 template<class P, class T> class RegularSetWrapper;
 template<class P, class T> class LocatedSetWrapper;
@@ -103,17 +104,31 @@ template<class T> class OvertSetWrapper<EffectiveTag,T>
 };
 
 
+template<class T> class BoundedSetWrapper<EffectiveTag,T>
+  : public pybind11::wrapper<BoundedSetInterface<EffectiveTag,T>>
+{
+  public:
+    typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
+    BoundedSetInterface<EffectiveTag,T>* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+};
+
 template<class T> class CompactSetWrapper<EffectiveTag,T>
   : public pybind11::wrapper<CompactSetInterface<EffectiveTag,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     CompactSetInterface<EffectiveTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(); }
     LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
@@ -135,13 +150,14 @@ template<class T> class LocatedSetWrapper<EffectiveTag,T>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     LocatedSetInterface<EffectiveTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean overlaps(const BasicSetType& r) const { return this->get_override("overlaps")(r); }
     LowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(r); }
     LowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
@@ -184,17 +200,32 @@ template<class T> class OvertSetWrapper<ValidatedTag,T>
 };
 
 
+template<class T> class BoundedSetWrapper<ValidatedTag,T>
+  : public pybind11::wrapper<BoundedSetInterface<ValidatedTag,T>>
+{
+  public:
+    typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
+    BoundedSetInterface<ValidatedTag,T>* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
+};
+
+
 template<class T> class CompactSetWrapper<ValidatedTag,T>
   : public pybind11::wrapper<CompactSetInterface<ValidatedTag,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     CompactSetInterface<ValidatedTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(); }
     ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
@@ -216,13 +247,14 @@ template<class T> class LocatedSetWrapper<ValidatedTag,T>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
     LocatedSetInterface<ValidatedTag,T>* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean overlaps(const BasicSetType& r) const { return this->get_override("overlaps")(r); }
     ValidatedLowerKleenean separated(const BasicSetType& r) const { return this->get_override("separated")(r); }
     ValidatedLowerKleenean inside(const BasicSetType& r) const { return this->get_override("inside")(r); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    BoundingSetType bounding_box() const { return this->get_override("bounding_box")(); }
     OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
@@ -275,6 +307,7 @@ Void export_drawable_interface(pybind11::module& module) {
 Void export_set_interface(pybind11::module& module) {
     using P=EffectiveTag; using T=RealVector;
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
+    typedef typename SetInterfaceBase<T>::BoundingSetType BoundingSetType;
 
     pybind11::class_<OvertSetInterface<P,T>, OvertSetWrapper<P,T>> overt_set_interface_class(module,"OvertSet");
     overt_set_interface_class.def("overlaps",(LowerKleenean(OvertSetInterface<P,T>::*)(const BasicSetType& bx)const) &OvertSetInterface<P,T>::overlaps);
@@ -285,9 +318,9 @@ Void export_set_interface(pybind11::module& module) {
     pybind11::class_<ClosedSetInterface<P,T>, ClosedSetWrapper<P,T>> closed_set_interface_class(module,"ClosedSet");
     closed_set_interface_class.def("separated",(LowerKleenean(ClosedSetInterface<P,T>::*)(const BasicSetType& bx)const) &ClosedSetInterface<P,T>::separated);
 
-    pybind11::class_<BoundedSetInterface<P,T>> bounded_set_interface_class(module,"BoundedSet",bounded_set_interface_class);
+    pybind11::class_<BoundedSetInterface<P,T>, BoundedSetWrapper<P,T>> bounded_set_interface_class(module,"BoundedSet");
     bounded_set_interface_class.def("inside",(LowerKleenean(BoundedSetInterface<P,T>::*)(const BasicSetType& bx)const) &BoundedSetInterface<P,T>::inside);
-    bounded_set_interface_class.def("bounding_box", (UpperBoxType(BoundedSetInterface<P,T>::*)()const)&BoundedSetInterface<P,T>::bounding_box);
+    bounded_set_interface_class.def("bounding_box", (BoundingSetType(BoundedSetInterface<P,T>::*)()const)&BoundedSetInterface<P,T>::bounding_box);
 
     pybind11::class_<CompactSetInterface<P,T>, CompactSetWrapper<P,T>, ClosedSetInterface<P,T>, BoundedSetInterface<P,T>> compact_set_interface_class(module,"CompactSet", pybind11::multiple_inheritance());
 
@@ -304,9 +337,9 @@ Void export_set_interface(pybind11::module& module) {
     pybind11::class_<ClosedSetInterface<ValidatedTag,T>, ClosedSetWrapper<ValidatedTag,T>> validated_closed_set_interface_class(module,"ValidatedClosedSet");
     validated_closed_set_interface_class.def("separated",(ValidatedLowerKleenean(ClosedSetInterface<ValidatedTag,T>::*)(const BasicSetType& bx)const) &ClosedSetInterface<ValidatedTag,T>::separated);
 
-    pybind11::class_<BoundedSetInterface<ValidatedTag,T>> validated_bounded_set_interface_class(module,"ValidatedBoundedSet",validated_bounded_set_interface_class);
+    pybind11::class_<BoundedSetInterface<ValidatedTag,T>, BoundedSetWrapper<ValidatedTag,T>> validated_bounded_set_interface_class(module,"ValidatedBoundedSet");
     validated_bounded_set_interface_class.def("inside",(ValidatedLowerKleenean(BoundedSetInterface<ValidatedTag,T>::*)(const BasicSetType& bx)const) &BoundedSetInterface<ValidatedTag,T>::inside);
-    validated_bounded_set_interface_class.def("bounding_box", (UpperBoxType(BoundedSetInterface<ValidatedTag,T>::*)()const)&BoundedSetInterface<ValidatedTag,T>::bounding_box);
+    validated_bounded_set_interface_class.def("bounding_box", (BoundingSetType(BoundedSetInterface<ValidatedTag,T>::*)()const)&BoundedSetInterface<ValidatedTag,T>::bounding_box);
 
     pybind11::class_<CompactSetInterface<ValidatedTag,T>, CompactSetWrapper<ValidatedTag,T>, ClosedSetInterface<ValidatedTag,T>, BoundedSetInterface<ValidatedTag,T>> validated_compact_set_interface_class(module,"ValidatedCompactSet", pybind11::multiple_inheritance());
 

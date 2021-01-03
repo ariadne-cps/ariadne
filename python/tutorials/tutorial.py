@@ -263,7 +263,7 @@ print()
 
 # Restrict to a subdomain
 d1=BoxDomainType([{-1:1},{-1:1}])
-d2=BoxDomainType([{dy(-0.125):dy(0.125)},{dy(0.5):dy(0.75)}])
+d2=BoxDomainType([{exact(-0.125):exact(0.125)},{exact(0.5):exact(0.75)}])
 w=T(d1,0)*T(d1,1)
 rw=restrict(w,d2)
 print("restrict(w,d2):",rw)
@@ -427,7 +427,7 @@ o=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(bbx,1,swp)
 x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bbx,0,swp)
 y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bbx,1,swp)
 f=join(o,x) # [dot(x),dot(y)]=[1,x]
-dom=BoxDomainType([{0:dy(0.125)},{0:dy(0.125)}])
+dom=BoxDomainType([{0:exact(0.125)},{0:exact(0.125)}])
 h=Dyadic(exact(0.5))
 dom0=product(dom,IntervalDomainType(-h,+h))
 x0=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom0,0,swp)

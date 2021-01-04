@@ -1232,6 +1232,24 @@ Void export_complex_numbers(pymodule& module) {
 }
 */
 
+/*
+namespace Ariadne {
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Value<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Value<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatMP,FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Bounds<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Bounds<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<UpperBound<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<UpperBound<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<LowerBound<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<LowerBound<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Approximation<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<Approximation<FloatMP>> const&);
+}
+*/
+
 Void numeric_submodule(pymodule& module) {
     export_effort(module);
     export_accuracy(module);

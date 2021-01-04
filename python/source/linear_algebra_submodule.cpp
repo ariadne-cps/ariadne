@@ -24,6 +24,7 @@
 
 #include "pybind11.hpp"
 #include "utilities.hpp"
+#include "numeric_submodule.hpp"
 
 #include "config.hpp"
 

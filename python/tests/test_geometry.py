@@ -32,6 +32,7 @@ def test_interval():
     dp = DoublePrecision()
     mp = MultiplePrecision(64)
 
+    xd=ExactDouble(0)
     w=Dyadic(0)
 
     wivl=DyadicInterval(-w,w)
@@ -42,7 +43,7 @@ def test_interval():
     l=FloatDPLowerBound(0,dp)
     a=FloatDPApproximation(0,dp)
 
-    xivl=FloatDPExactInterval({-x:x})
+    xivl=FloatDPExactInterval({-xd:xd})
     xivl=FloatDPExactInterval(-x,x)
     uivl=FloatDPUpperInterval(-u,u)
     livl=FloatDPLowerInterval(-l,l)
@@ -80,9 +81,13 @@ def test_box():
     dp = DoublePrecision()
     mp = MultiplePrecision(64)
 
+    ad=ApproximateDouble(0)
+    xd=ExactDouble(0)
     w=Dyadic(0)
 
-    wbx=DyadicBox([{-w:w},{-w:w}])
+    wbx=DyadicBox([{-xd:xd},{-xd:xd}])
+    wbx=DyadicBox([[-xd,xd],[-xd,xd]])
+    wbx=DyadicBox([[-w,w],[-w,w]])
     rbx=RealBox(wbx)
 
     x=FloatDPValue(0,dp)
@@ -90,16 +95,22 @@ def test_box():
     l=FloatDPLowerBound(0,dp)
     a=FloatDPApproximation(0,dp)
 
-    xbx=FloatDPExactBox([{-x:x},{-x:x}])
-    ubx=FloatDPUpperBox([{-u:u},{-u:u}])
-    lbx=FloatDPLowerBox([{-l:l},{-l:l}])
-    abx=FloatDPApproximateBox([{-a:a},{-a:a}])
+    xbx=FloatDPExactBox([{-xd:xd},{-xd:xd}])
+    ubx=FloatDPUpperBox([{-xd:xd},{-xd:xd}])
+    lbx=FloatDPLowerBox([{-xd:xd},{-xd:xd}])
+    abx=FloatDPApproximateBox([{-xd:xd},{-xd:xd}])
+#    abx=FloatDPApproximateBox([{-ad:ad},{-ad:ad}])
+
+    xbx=FloatDPExactBox([[-x,x],[-x,x]])
+    ubx=FloatDPUpperBox([[-u,u],[-u,u]])
+    lbx=FloatDPLowerBox([[-l,l],[-l,l]])
+    abx=FloatDPApproximateBox([[-a,a],[-a,a]])
 
     xbx=FloatDPExactBox(wbx)
     ubx=FloatDPUpperBox(rbx)
 
     xpt=FloatDPValuePoint([x,x])
-    xivl=FloatDPExactInterval({-x:x})
+    xivl=FloatDPExactInterval(-x,x)
 
     xbx.dimension()
     xbx.centre()

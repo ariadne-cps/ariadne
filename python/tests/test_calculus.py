@@ -29,7 +29,7 @@ def test_calculus():
     cy=ValidatedNumber(2)
     cx=FloatDPBounds(2,dp)
 
-    bx=BoxDomainType([{Dyadic(1):3},{-1:2},{-3:3}])
+    bx=BoxDomainType([{1:3},{-1:2},{-3:3}])
 
     swp = ThresholdSweeper(dp,1e-8);
 

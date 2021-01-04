@@ -24,8 +24,6 @@ from ariadne import *
 
 print(dir(FloatDPBoundsVector))
 
-def exact(x): return Dyadic(ExactDouble(x))
-
 Precision=DoublePrecision
 ApproximateScalar=FloatDPApproximation
 ValidatedScalar=FloatDPBounds
@@ -56,18 +54,18 @@ def test_vector():
 
     (+va,-va,va+va,va-va,xa*va,va*xa,va/xa)
     (+vb,-vb,vb+vb,vb-vb,xb*vb,vb*xb,vb/xb)
-    
+
     # Mixed vector operations
     # Disallowed mixed ValidatedVector - ApproximateScalar operations
     (va+vb,va-vb,va*xb,va/xb)
     (vb+va,vb-va)
-    
+
     # NOTE: No GenericScalar - ConcreteVector operations
 #    (va*n,va/n)
 #    (va*d,va/d)
 #    (vb*n,vb/n)
- 
- 
+
+
 def test_covector():
     ua=ApproximateCovector([1.125,xa],pr)
     ua=ApproximateCovector([1.125,2.125],pr)
@@ -79,7 +77,7 @@ def test_covector():
 
     (ua+ub,ua-ub,ua*xb,ua/xb)
     (ub+ua,ub-ua)
-    
+
 #    (ua*n,ua/n)
 #    (ua*d,ua/d)
 #    (ub*n,ub/n)

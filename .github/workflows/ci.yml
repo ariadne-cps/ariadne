@@ -1,0 +1,115 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+      - working
+      - actions
+  pull_request:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "macOS 10.15 AppleClang",
+            os: macos-10.15,
+            cxx: "clang++"
+          }
+          - {
+            name: "macOS 10.15 GCC 10",
+            os: macos-10.15,
+            cxx: "g++-10"
+          }
+          - {
+            name: "Ubuntu 20.04 Clang 10",
+            os: ubuntu-20.04,
+            cxx: "clang++-10"
+          }
+          - {
+            name: "Ubuntu 20.04 GCC 10",
+            os: ubuntu-20.04,
+            cxx: "g++-10"
+          }
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get macOS Concurrency
+      if: runner.os == 'macOS'
+      run: |
+        echo NPROC="sysctl -n hw.ncpu" >> $GITHUB_ENV
+        echo "Running on $(sysctl -n hw.ncpu) threads ..."
+
+    - name: Get Linux Concurrency
+      if: runner.os == 'Linux'
+      run: |
+        echo NPROC="nproc" >> $GITHUB_ENV
+        echo "Running on $(nproc) threads ..."
+
+    - name: Set Up macOS Dependencies
+      if: runner.os == 'macOS'
+      run: |
+        brew install gcc@10 python3 mpfr gmp cairo
+        export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
+        sudo easy_install pip
+        sudo pip3 install --upgrade pip
+        sudo pip3 install pytest
+
+    - name: Set Up Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt install -y cmake pkg-config clang-10 g++-10 libcairo2-dev libmpfr-dev python3-pip python3-dev
+        sudo pip3 install pytest
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
+
+    - name: Build Library, Tests and Examples
+      working-directory: ${{runner.workspace}}/build
+      run: make -j $($NPROC)
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: ctest -j $($NPROC)
+
+    - name: Prepare Environment for Tutorials
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        sudo make install
+        cp -Rf $GITHUB_WORKSPACE/tutorials ${{runner.workspace}}/tutorials
+        mkdir ${{runner.workspace}}/tutorials/python
+        cp -Rf $GITHUB_WORKSPACE/python/tutorials/* ${{runner.workspace}}/tutorials/python
+
+    - name: Check Rigorous Numerics Tutorial
+      working-directory: ${{runner.workspace}}/tutorials/rigorous_numerics
+      run: |
+        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
+        make -j $($NPROC)
+        ./rigorous_numerics_tutorial -v 0 > /dev/null
+
+    - name: Check Hybrid Evolution Tutorial
+      working-directory: ${{runner.workspace}}/tutorials/hybrid_evolution
+      run: |
+        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
+        make -j $($NPROC)
+        ./hybrid_evolution_tutorial -v 0 > /dev/null
+
+    - name: Check Python Tutorial
+      working-directory: ${{runner.workspace}}/tutorials/python
+      run: |
+        export LD_LIBRARY_PATH=/usr/local/lib
+        python3 tutorial.py > /dev/null

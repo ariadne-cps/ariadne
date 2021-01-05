@@ -273,7 +273,7 @@ void ImmediateLoggerScheduler::release(std::string scope) {
     Logger::_release(LogRawMessage(scope, _current_level, std::string()));
 }
 
-ConcurrentLoggerScheduler::ConcurrentLoggerScheduler() {
+ConcurrentLoggerScheduler::ConcurrentLoggerScheduler() : _dequeueing_thread(SmartThread([this]() { _consume_msgs(); })) {
     _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,"main"))});
     _dequeueing_thread.activate();
     _terminate = false;

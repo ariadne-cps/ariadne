@@ -238,7 +238,7 @@ class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
     void _consume_msgs();
   private:
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
-    SmartThread _dequeueing_thread = SmartThread([this]() { _consume_msgs(); });
+    SmartThread _dequeueing_thread;
     std::atomic<bool> _terminate;
     std::promise<void> _termination_promise;
     std::future<void> _termination_future = _termination_promise.get_future();

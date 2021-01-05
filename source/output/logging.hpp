@@ -37,7 +37,8 @@
 #include <queue>
 #include <map>
 #include <sstream>
-#include "concurrency/smart_thread.hpp"
+#include <thread>
+#include <future>
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/writable.hpp"
@@ -240,8 +241,6 @@ class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
     std::thread _dequeueing_thread;
     std::atomic<bool> _terminate;
-    std::promise<void> _termination_promise;
-    std::future<void> _termination_future = _termination_promise.get_future();
     std::mutex _data_mutex;
 };
 

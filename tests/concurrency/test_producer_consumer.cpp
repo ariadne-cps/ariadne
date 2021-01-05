@@ -25,7 +25,7 @@
 #include <atomic>
 #include <thread>
 #include "concurrency/buffer.hpp"
-#include "concurrency/smart_thread.hpp"
+#include "concurrency/loggable_smart_thread.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -47,7 +47,7 @@ class TestProducerConsumer {
         Buffer<unsigned int> ib(2);
         Buffer<unsigned int> ob(2);
 
-        SmartThread thread([&ib,&ob]() {
+        LoggableSmartThread thread("test",[&ib,&ob]() {
             while (true) {
                 try {
                     auto i = ib.pop();

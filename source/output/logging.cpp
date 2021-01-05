@@ -374,10 +374,7 @@ void ConcurrentLoggerScheduler::_consume_msgs() {
             // Allow the thread to sleep, for a larger time in the case of high verbosity (for verbosity 1, a 50ms sleep)
             // The current level is used as an average of the levels printed
             if (not _terminate) std::this_thread::sleep_for(std::chrono::microseconds(std::max(1,100000>>Logger::cached_last_printed_level())));
-            else {
-                _termination_promise.set_value();
-                break;
-            }
+            else break;
         }
     }
 }

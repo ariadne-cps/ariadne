@@ -573,9 +573,10 @@ bool Logger::_can_print_thread_name() {
 }
 
 unsigned int Logger::_get_window_columns() {
+    const unsigned int DEFAULT_COLUMNS = 80;
     struct winsize ws;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-    return ws.ws_col;
+    return (ws.ws_col > 0 ? ws.ws_col : DEFAULT_COLUMNS);
 }
 
 std::string Logger::_apply_theme(std::string const& text) {

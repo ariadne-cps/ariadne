@@ -76,15 +76,17 @@ class TaskRunnableInterface {
 
 class TaskParameterSpace;
 
+//! \brief Run a task sequentially.
+//! \details Used to provide a sequential alternative to any thread-based implementation.
 template<class I, class O, class C>
-class SerialRunnerBase : public TaskRunnerInterface<I,O,C> {
+class SequentialRunnerBase : public TaskRunnerInterface<I,O,C> {
   public:
     typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
 
-    SerialRunnerBase(TaskParameterSpace const& space);
-    virtual ~SerialRunnerBase() = default;
+    SequentialRunnerBase(TaskParameterSpace const& space);
+    virtual ~SequentialRunnerBase() = default;
 
     Void activate() override final;
     Void push(InputType const& input) override final;
@@ -100,31 +102,32 @@ private:
 };
 
 template<class I, class O, class C>
-SerialRunnerBase<I,O,C>::SerialRunnerBase(TaskParameterSpace const& space)
+SequentialRunnerBase<I,O,C>::SequentialRunnerBase(TaskParameterSpace const& space)
         :  _parameter_space(space.clone()) { }
 
 template<class I, class O, class C>
 Void
-SerialRunnerBase<I,O,C>::activate()
+SequentialRunnerBase<I,O,C>::activate()
 {
     ARIADNE_LOG_SCOPE_CREATE;
 }
 
     template<class I, class O, class C>
 Void
-SerialRunnerBase<I,O,C>::push(InputType const& input)
+SequentialRunnerBase<I,O,C>::push(InputType const& input)
 {
     _last_output.reset(new OutputType(run_task(input,to_configuration(input,_parameter_space->initial_point()))));
 }
 
 template<class RB, class I, class O>
-typename SerialRunnerBase<RB,I,O>::OutputType
-SerialRunnerBase<RB,I,O>::pull() {
+typename SequentialRunnerBase<RB,I,O>::OutputType
+SequentialRunnerBase<RB,I,O>::pull() {
     return *_last_output;
 }
 
+//! \brief Run a task in a detached thread, allowing concurrent processing.
 template<class I, class O, class C>
-class ConcurrentRunnerBase : public TaskRunnerInterface<I,O,C> {
+class DetachedRunnerBase : public TaskRunnerInterface<I,O,C> {
   public:
     typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
@@ -132,8 +135,8 @@ class ConcurrentRunnerBase : public TaskRunnerInterface<I,O,C> {
     typedef Buffer<Pair<InputType,TaskParameterPoint>> InputBufferType;
     typedef Buffer<Pair<OutputType,TaskParameterPoint>> OutputBufferType;
 
-    ConcurrentRunnerBase(String const& thread_name, TaskParameterSpace const& space);
-    virtual ~ConcurrentRunnerBase();
+    DetachedRunnerBase(String const& thread_name, TaskParameterSpace const& space);
+    virtual ~DetachedRunnerBase();
 
     Void activate() override final;
     Void push(InputType const& input) override final;
@@ -171,35 +174,35 @@ private:
 };
 
 template<class I, class O, class C>
-ConcurrentRunnerBase<I,O,C>::ConcurrentRunnerBase(String const& thread_name, TaskParameterSpace const& space)
+DetachedRunnerBase<I,O,C>::DetachedRunnerBase(String const& thread_name, TaskParameterSpace const& space)
         :  _parameter_space(space.clone()), _thread(thread_name, [this]() { _loop(); }),
            _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
            _terminate(false) { }
 
 template<class I, class O, class C>
-ConcurrentRunnerBase<I,O,C>::~ConcurrentRunnerBase() {
+DetachedRunnerBase<I,O,C>::~DetachedRunnerBase() {
     _terminate = true;
     _input_availability.notify_all();
 }
 
 template<class I, class O, class C>
 Void
-ConcurrentRunnerBase<I,O,C>::activate()
+DetachedRunnerBase<I,O,C>::activate()
 {
     _thread.activate();
 }
 
 template<class I, class O, class C>
 Void
-ConcurrentRunnerBase<I,O,C>::push(InputType const& input)
+DetachedRunnerBase<I,O,C>::push(InputType const& input)
 {
     _input_buffer.push({input,_parameter_space->initial_point()});
     _input_availability.notify_all();
 }
 
 template<class I, class O, class C>
-typename ConcurrentRunnerBase<I,O,C>::OutputType
-ConcurrentRunnerBase<I,O,C>::pull() {
+typename DetachedRunnerBase<I,O,C>::OutputType
+DetachedRunnerBase<I,O,C>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
     auto result = _output_buffer.pop();

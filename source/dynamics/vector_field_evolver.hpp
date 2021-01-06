@@ -124,14 +124,14 @@ run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) 
     return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
 }
 
-struct VectorFieldEvolverFlowStepSerialRunner final : public SerialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
-    VectorFieldEvolverFlowStepSerialRunner() : SerialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
+struct VectorFieldEvolverFlowStepSerialRunner final : public SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+    VectorFieldEvolverFlowStepSerialRunner() : SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
     FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override { return Ariadne::to_configuration(in,p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
 };
 
-struct VectorFieldEvolverFlowStepConcurrentRunner final : public ConcurrentRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
-    VectorFieldEvolverFlowStepConcurrentRunner() : ConcurrentRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step",make_flow_step_runner_space()) { }
+struct VectorFieldEvolverFlowStepConcurrentRunner final : public DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+    VectorFieldEvolverFlowStepConcurrentRunner() : DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step", make_flow_step_runner_space()) { }
     FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override { return Ariadne::to_configuration(in,p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
 };

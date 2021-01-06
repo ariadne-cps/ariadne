@@ -823,7 +823,8 @@ void Logger::_cover_held_columns_with_whitespaces(unsigned int printed_columns) 
 }
 
 void Logger::_println(LogRawMessage const& msg) {
-    const unsigned int preamble_columns = (msg.level>9 ? 3:2)+msg.identifier.size()+1+msg.level;
+
+    const unsigned int preamble_columns = (msg.level>9 ? 3:2)+(_can_print_thread_name() ? msg.identifier.size()+1 : 0)+msg.level;
 
     // If holding, we must write over the held line first
     if (_is_holding()) std::clog << '\r';

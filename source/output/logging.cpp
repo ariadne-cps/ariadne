@@ -286,9 +286,6 @@ ConcurrentLoggerScheduler::~ConcurrentLoggerScheduler() {
 
 void ConcurrentLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
     std::lock_guard<std::mutex> lock(_data_mutex);
-    auto it = _data.find(thread.id());
-    // Replace an old dead instance if it already existed
-    if (it != _data.end() and it->second->is_dead()) _data.erase(it);
     // Won't replace if it already exists
     _data.insert({thread.id(),SharedPointer<LoggerData>(new LoggerData(current_level(),thread.name()))});
 }

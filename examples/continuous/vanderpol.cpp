@@ -25,8 +25,8 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "utility/stopwatch.hpp"
-#include "concurrency/task_parameter.hpp"
-#include "concurrency/task_parameter_space.hpp"
+#include "concurrency/task_search_parameter.hpp"
+#include "concurrency/task_search_space.hpp"
 
 using namespace Ariadne;
 

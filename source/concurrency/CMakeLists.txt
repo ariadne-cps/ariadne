@@ -1,9 +1,9 @@
 set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
-    task_parameter.cpp
-    task_parameter_space.cpp
-    task_parameter_point.cpp
+        task_search_parameter.cpp
+        task_search_space.cpp
+        task_search_point.cpp
 )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

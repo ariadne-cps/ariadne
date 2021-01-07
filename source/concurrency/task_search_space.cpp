@@ -22,45 +22,45 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_parameter_point.hpp"
-#include "task_parameter_space.hpp"
+#include "task_search_point.hpp"
+#include "task_search_space.hpp"
 
 namespace Ariadne {
 
-TaskParameterSpace::TaskParameterSpace(Set<TaskParameter> const& parameters, RealExpression const& time_cost_estimator)
+TaskSearchSpace::TaskSearchSpace(Set<TaskSearchParameter> const& parameters, RealExpression const& time_cost_estimator)
         : _parameters(parameters), _time_cost_estimator(time_cost_estimator) {
     ARIADNE_PRECONDITION(not _parameters.empty());
 }
 
-TaskParameterPoint TaskParameterSpace::make_point(ParameterBindingsMap const& bindings) const {
+TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
-    return TaskParameterPoint(*this,bindings);
+    return TaskSearchPoint(*this, bindings);
 }
 
-TaskParameterPoint TaskParameterSpace::make_point(Map<RealVariable,Nat> const& bindings) const {
+TaskSearchPoint TaskSearchSpace::make_point(Map<RealVariable,Nat> const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
         Nat v = bindings.find(p.variable())->second;
-        pb.insert(Pair<TaskParameter,Nat>(p,v));
+        pb.insert(Pair<TaskSearchParameter,Nat>(p, v));
     }
-    return TaskParameterPoint(*this,pb);
+    return TaskSearchPoint(*this, pb);
 }
 
-TaskParameterPoint TaskParameterSpace::initial_point() const {
+TaskSearchPoint TaskSearchSpace::initial_point() const {
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        pb.insert(Pair<TaskParameter,Nat>(p,p.initial()));
+        pb.insert(Pair<TaskSearchParameter,Nat>(p, p.initial()));
     }
-    return TaskParameterPoint(*this,pb);
+    return TaskSearchPoint(*this, pb);
 }
 
-Nat TaskParameterSpace::index(TaskParameter const& p) const {
+Nat TaskSearchSpace::index(TaskSearchParameter const& p) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i) == p) return i;
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");
 }
 
-OutputStream& TaskParameterSpace::_write(OutputStream& os) const {
+OutputStream& TaskSearchSpace::_write(OutputStream& os) const {
     return os << "{variables: "<< _parameters << ", time_cost_estimate: " << _time_cost_estimator << "}";
 }
 

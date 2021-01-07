@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter.hpp
+ *            concurrency/task_search_parameter.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_parameter.hpp
- *  \brief Classes for handling tool parameters for a task.
+/*! \file concurrency/task_search_parameter.hpp
+ *  \brief Classes for handling tool search parameters for a task.
  */
 
-#ifndef ARIADNE_TASK_PARAMETER_HPP
-#define ARIADNE_TASK_PARAMETER_HPP
+#ifndef ARIADNE_TASK_SEARCH_PARAMETER_HPP
+#define ARIADNE_TASK_SEARCH_PARAMETER_HPP
 
 #include "utility/typedefs.hpp"
 #include "utility/container.hpp"
@@ -39,16 +39,16 @@
 
 namespace Ariadne {
 
-enum class TaskParameterKind { BOOLEAN, ENUMERATION, METRIC };
+enum class TaskSearchParameterKind { BOOLEAN, ENUMERATION, METRIC };
 
-std::ostream& operator<<(std::ostream& os, const TaskParameterKind kind);
+std::ostream& operator<<(std::ostream& os, const TaskSearchParameterKind kind);
 
-class TaskParameterInterface {
+class TaskSearchParameterInterface {
   public:
     virtual Identifier const& name() const = 0;
     virtual RealVariable variable() const = 0;
 
-    virtual TaskParameterKind kind() const = 0;
+    virtual TaskSearchParameterKind kind() const = 0;
     //! \brief Upper bound on the integer value
     virtual Nat upper_bound() const = 0;
     //! \brief Initial integer value
@@ -61,13 +61,13 @@ class TaskParameterInterface {
     //! \brief Compute the Real value from the \a integer_value, using the \a external_values if external variables are present
     virtual Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const = 0;
 
-    virtual TaskParameterInterface* clone() const = 0;
-    virtual ~TaskParameterInterface() = default;
+    virtual TaskSearchParameterInterface* clone() const = 0;
+    virtual ~TaskSearchParameterInterface() = default;
 };
 
-class TaskParameterBase : public TaskParameterInterface, WritableInterface {
+class TaskSearchParameterBase : public TaskSearchParameterInterface, WritableInterface {
 protected:
-    TaskParameterBase(RealVariable const& variable, RealExpression const& value_expression) : _variable(variable), _value_expression(value_expression) { }
+    TaskSearchParameterBase(RealVariable const& variable, RealExpression const& value_expression) : _variable(variable), _value_expression(value_expression) { }
 public:
     Identifier const& name() const override { return _variable.name(); }
     RealVariable variable() const override { return _variable; }
@@ -78,16 +78,16 @@ private:
     const RealExpression _value_expression;
 };
 
-class MetricTaskParameter : public TaskParameterBase {
+class MetricSearchParameter : public TaskSearchParameterBase {
   public:
-    MetricTaskParameter(RealVariable const& variable, Nat const& upper_bound, Nat const& initial) : TaskParameterBase(variable,variable), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial<=upper_bound); }
-    MetricTaskParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskParameterBase(variable, value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial<=upper_bound); }
+    MetricSearchParameter(RealVariable const& variable, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(variable, variable), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
+    MetricSearchParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(variable, value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
 
-    TaskParameterKind kind() const override { return TaskParameterKind::METRIC; }
+    TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::METRIC; }
     Nat upper_bound() const override { return _ub; }
     Nat initial() const override { return _initial; }
     Nat shifted_value_from(Nat value) const override;
-    MetricTaskParameter* clone() const override { return new MetricTaskParameter(*this); }
+    MetricSearchParameter* clone() const override { return new MetricSearchParameter(*this); }
 
     OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "', upper_bound: " << _ub << ")"; return os; }
 
@@ -96,15 +96,15 @@ class MetricTaskParameter : public TaskParameterBase {
     const Nat _initial;
 };
 
-class BooleanTaskParameter : public TaskParameterBase {
+class BooleanSearchParameter : public TaskSearchParameterBase {
 public:
-    BooleanTaskParameter(RealVariable const& variable, Bool const& initial) : TaskParameterBase(variable,variable), _initial(initial) { }
+    BooleanSearchParameter(RealVariable const& variable, Bool const& initial) : TaskSearchParameterBase(variable, variable), _initial(initial) { }
 
-    TaskParameterKind kind() const override { return TaskParameterKind::BOOLEAN; }
+    TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::BOOLEAN; }
     Nat upper_bound() const override { return 1; }
     Nat initial() const override { if (_initial) return 1; else return 0; }
     Nat shifted_value_from(Nat value) const override;
-    BooleanTaskParameter* clone() const override { return new BooleanTaskParameter(*this); }
+    BooleanSearchParameter* clone() const override { return new BooleanSearchParameter(*this); }
 
     OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "')"; return os; }
 
@@ -113,9 +113,9 @@ public:
 };
 
 template<class E>
-class EnumerationTaskParameter : public TaskParameterBase {
+class EnumerationSearchParameter : public TaskSearchParameterBase {
 public:
-    EnumerationTaskParameter(RealVariable const& variable, List<E> const& elements, E const& initial) : TaskParameterBase(variable,variable), _elements(elements) {
+    EnumerationSearchParameter(RealVariable const& variable, List<E> const& elements, E const& initial) : TaskSearchParameterBase(variable, variable), _elements(elements) {
         ARIADNE_PRECONDITION(elements.size() > 1);
         Nat index = elements.size();
         for (SizeType i=0; i<elements.size();++i) {
@@ -129,7 +129,7 @@ public:
         _initial = index;
     }
 
-    TaskParameterKind kind() const override { return TaskParameterKind::ENUMERATION; }
+    TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::ENUMERATION; }
     List<E> elements() const { return _elements; }
     Nat upper_bound() const override { return _elements.size()-1; }
     Nat initial() const override { return _initial; }
@@ -137,30 +137,30 @@ public:
         Nat result = (Nat)rand() % upper_bound();
         return (result == value ? upper_bound() : result);
     }
-    EnumerationTaskParameter* clone() const override { return new EnumerationTaskParameter(*this); }
+    EnumerationSearchParameter* clone() const override { return new EnumerationSearchParameter(*this); }
     OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "', size: " << _elements.size() << ")"; return os; }
   private:
     const List<E> _elements;
     Nat _initial;
 };
 
-class TaskParameter : public WritableInterface {
+class TaskSearchParameter : public WritableInterface {
   private:
-    SharedPointer<TaskParameterInterface> _impl;
+    SharedPointer<TaskSearchParameterInterface> _impl;
   public:
-    TaskParameter(TaskParameterInterface const& other) : _impl(other.clone()) { }
-    TaskParameter(TaskParameter const& other) : _impl(other._impl) { }
+    TaskSearchParameter(TaskSearchParameterInterface const& other) : _impl(other.clone()) { }
+    TaskSearchParameter(TaskSearchParameter const& other) : _impl(other._impl) { }
   public:
-    Bool operator==(TaskParameter const& p) const;
-    Bool operator<(TaskParameter const& p) const;
+    Bool operator==(TaskSearchParameter const& p) const;
+    Bool operator<(TaskSearchParameter const& p) const;
 
-    TaskParameterInterface* ptr() const { return _impl.get(); }
+    TaskSearchParameterInterface* ptr() const { return _impl.get(); }
 
     Identifier const& name() const { return _impl->name(); }
     RealVariable variable() const { return _impl->variable(); }
     RealExpression value_expression() const { return _impl->value_expression(); }
     Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const { return _impl->value(integer_value, external_values); }
-    TaskParameterKind kind() const { return _impl->kind(); }
+    TaskSearchParameterKind kind() const { return _impl->kind(); }
     Nat initial() const { return _impl->initial(); }
     Nat upper_bound() const { return _impl->upper_bound(); }
     Nat shifted_value_from(Nat value) const { return _impl->shifted_value_from(value); }
@@ -170,4 +170,4 @@ class TaskParameter : public WritableInterface {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TASK_PARAMETER_HPP
+#endif // ARIADNE_TASK_SEARCH_PARAMETER_HPP

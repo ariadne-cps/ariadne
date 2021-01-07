@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter_space.hpp
+ *            concurrency/task_search_space.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,43 +22,43 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_parameter_space.hpp
- *  \brief Class for handling a space of tool parameters for a task.
+/*! \file concurrency/task_search_space.hpp
+ *  \brief Class for handling a search space of tool parameters for a task.
  */
 
-#ifndef ARIADNE_TASK_PARAMETER_SPACE_HPP
-#define ARIADNE_TASK_PARAMETER_SPACE_HPP
+#ifndef ARIADNE_TASK_SEARCH_SPACE_HPP
+#define ARIADNE_TASK_SEARCH_SPACE_HPP
 
 namespace Ariadne {
 
-class TaskParameter;
-class TaskParameterPoint;
+class TaskSearchParameter;
+class TaskSearchPoint;
 
-using ParameterBindingsMap = Map<TaskParameter,Nat>;
+using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
 
-class TaskParameterSpace : public WritableInterface {
+class TaskSearchSpace : public WritableInterface {
   public:
-    TaskParameterSpace(Set<TaskParameter> const& parameters, RealExpression const& time_cost_estimator);
+    TaskSearchSpace(Set<TaskSearchParameter> const& parameters, RealExpression const& time_cost_estimator);
 
-    TaskParameterPoint make_point(Map<RealVariable,Nat> const& bindings) const;
-    TaskParameterPoint make_point(ParameterBindingsMap const& bindings) const;
-    TaskParameterPoint initial_point() const;
+    TaskSearchPoint make_point(Map<RealVariable,Nat> const& bindings) const;
+    TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
+    TaskSearchPoint initial_point() const;
 
-    List<TaskParameter> const& parameters() const { return _parameters; }
+    List<TaskSearchParameter> const& parameters() const { return _parameters; }
     RealExpression const& time_cost_estimator() const { return _time_cost_estimator; }
 
     Nat dimension() const { return _parameters.size(); }
-    Nat index(TaskParameter const& p) const;
+    Nat index(TaskSearchParameter const& p) const;
 
-    TaskParameterSpace* clone() const { return new TaskParameterSpace(*this); }
+    TaskSearchSpace* clone() const { return new TaskSearchSpace(*this); }
 
     virtual OutputStream& _write(OutputStream& os) const;
 
   private:
-    const List<TaskParameter> _parameters;
+    const List<TaskSearchParameter> _parameters;
     const RealExpression _time_cost_estimator;
 };
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TASK_PARAMETER_SPACE_HPP
+#endif // ARIADNE_TASK_SEARCH_SPACE_HPP

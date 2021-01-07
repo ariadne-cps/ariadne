@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter_point.hpp
+ *            concurrency/task_search_point.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,35 +22,35 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_parameter_point.hpp
- *  \brief Class for handling points of tool parameters for a task.
+/*! \file concurrency/task_search_point.hpp
+ *  \brief Class for handling search points of tool parameters for a task.
  */
 
-#ifndef ARIADNE_TASK_PARAMETER_POINT_HPP
-#define ARIADNE_TASK_PARAMETER_POINT_HPP
+#ifndef ARIADNE_SEARCH_POINT_HPP
+#define ARIADNE_SEARCH_POINT_HPP
 
-#include "task_parameter.hpp"
+#include "task_search_parameter.hpp"
 
 namespace Ariadne {
 
-class TaskParameterSpace;
-using ParameterBindingsMap = Map<TaskParameter,Nat>;
+class TaskSearchSpace;
+using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
 
-class TaskParameterPoint : public WritableInterface {
-    friend class TaskParameterSpace;
+class TaskSearchPoint : public WritableInterface {
+    friend class TaskSearchSpace;
   protected:
-    TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings);
+    TaskSearchPoint(TaskSearchSpace const& space, ParameterBindingsMap const& bindings);
   public:
-    TaskParameterPoint(TaskParameterPoint const& p);
-    ~TaskParameterPoint() = default;
+    TaskSearchPoint(TaskSearchPoint const& p);
+    ~TaskSearchPoint() = default;
 
     //! \brief The parameter space
-    TaskParameterSpace const& space() const { return *_space; }
+    TaskSearchSpace const& space() const { return *_space; }
 
     //! \brief The coordinates in the natural space, according to the space ordering
     List<Nat> coordinates() const { return _bindings.values(); }
     //! \brief The values in the real space, possibly using some \a external_values
-    Map<TaskParameter,Real> values(Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
+    Map<TaskSearchParameter,Real> values(Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
     //! \brief The value for a given parameter, possibly using some \a external values
     Real value(Identifier const& var, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
 
@@ -59,24 +59,24 @@ class TaskParameterPoint : public WritableInterface {
 
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
-    Set<TaskParameterPoint> make_adjacent_shifted(Nat amount) const;
+    Set<TaskSearchPoint> make_adjacent_shifted(Nat amount) const;
     //! \brief Generate an \a amount of new points by shifting one parameter each from the current point,
     //! then the next point to shift from is a random one from those already generated
     //! \details Guarantees that all points are different
-    Set<TaskParameterPoint> make_random_shifted(Nat amount) const;
+    Set<TaskSearchPoint> make_random_shifted(Nat amount) const;
 
     ParameterBindingsMap const& bindings() const { return _bindings; }
-    Nat const& operator[](TaskParameter const& p) const { return _bindings.at(p); }
+    Nat const& operator[](TaskSearchParameter const& p) const { return _bindings.at(p); }
 
-    TaskParameterPoint& operator=(TaskParameterPoint const& p);
+    TaskSearchPoint& operator=(TaskSearchPoint const& p);
     //! \brief Equality check is performed under the assumption that we always work with the same parameters,
     //! hence no space check is performed.
-    Bool operator==(TaskParameterPoint const& p) const;
+    Bool operator==(TaskSearchPoint const& p) const;
     //! \brief Ordering is based on point value
-    Bool operator<(TaskParameterPoint const& p) const;
+    Bool operator<(TaskSearchPoint const& p) const;
     //! \brief The distance with respect to another point
     //! \details Distance between values for non-metric parameters is either 1 or 0
-    Nat distance(TaskParameterPoint const& p) const;
+    Nat distance(TaskSearchPoint const& p) const;
 
     //! \brief Compute the breadth of possible shifts of the point for each parameter
     List<Nat> shift_breadths() const;
@@ -87,7 +87,7 @@ class TaskParameterPoint : public WritableInterface {
     virtual OutputStream& _write(OutputStream& os) const;
   private:
 
-    SharedPointer<TaskParameterSpace> _space;
+    SharedPointer<TaskSearchSpace> _space;
     ParameterBindingsMap _bindings;
 
     mutable List<Nat> _CACHED_SHIFT_BREADTHS;
@@ -96,8 +96,8 @@ class TaskParameterPoint : public WritableInterface {
 //! \brief Generate an \a amount of new points from each point in \a sources, by shifting one parameter each
 //! \return The original points plus the shifted ones
 //! \details Guarantees that all points are different and with distance equal to 1 to the related source point
-Set<TaskParameterPoint> make_adjacent_set_shifted_from(Set<TaskParameterPoint> const& sources, Nat amount);
+Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount);
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TASK_PARAMETER_POINT_HPP
+#endif // ARIADNE_SEARCH_POINT_HPP

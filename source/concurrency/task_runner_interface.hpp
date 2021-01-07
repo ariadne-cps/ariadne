@@ -33,8 +33,8 @@
 #include "../utility/pointer.hpp"
 #include "../concurrency/loggable_smart_thread.hpp"
 #include "../concurrency/buffer.hpp"
-#include "../concurrency/task_parameter_point.hpp"
-#include "../concurrency/task_parameter_space.hpp"
+#include "../concurrency/task_search_point.hpp"
+#include "../concurrency/task_search_space.hpp"
 
 namespace Ariadne {
 
@@ -57,7 +57,7 @@ class TaskRunnerInterface {
     //! \brief Pull output from the runner
     virtual OutputType pull() = 0;
     //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
-    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const = 0;
+    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
 };
@@ -74,7 +74,7 @@ class TaskRunnableInterface {
     virtual void set_runner(SharedPointer<TaskRunnerInterface<InputType,OutputType,ConfigurationType>> runner) = 0;
 };
 
-class TaskParameterSpace;
+class TaskSearchSpace;
 
 //! \brief Run a task sequentially.
 //! \details Used to provide a sequential alternative to any thread-based implementation.
@@ -85,24 +85,24 @@ class SequentialRunnerBase : public TaskRunnerInterface<I,O,C> {
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
 
-    SequentialRunnerBase(TaskParameterSpace const& space);
+    SequentialRunnerBase(TaskSearchSpace const& space);
     virtual ~SequentialRunnerBase() = default;
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
-    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
 
 private:
     SharedPointer<OutputType> _last_output;
     // Parameter space
-    SharedPointer<TaskParameterSpace> const _parameter_space;
+    SharedPointer<TaskSearchSpace> const _parameter_space;
 };
 
 template<class I, class O, class C>
-SequentialRunnerBase<I,O,C>::SequentialRunnerBase(TaskParameterSpace const& space)
+SequentialRunnerBase<I,O,C>::SequentialRunnerBase(TaskSearchSpace const& space)
         :  _parameter_space(space.clone()) { }
 
 template<class I, class O, class C>
@@ -132,17 +132,17 @@ class DetachedRunnerBase : public TaskRunnerInterface<I,O,C> {
     typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
-    typedef Buffer<Pair<InputType,TaskParameterPoint>> InputBufferType;
+    typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
-    DetachedRunnerBase(String const& thread_name, TaskParameterSpace const& space);
+    DetachedRunnerBase(String const& thread_name, TaskSearchSpace const& space);
     virtual ~DetachedRunnerBase();
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
-    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
 
 private:
@@ -161,7 +161,7 @@ private:
 
 private:
     // Parameter space
-    SharedPointer<TaskParameterSpace> const _parameter_space;
+    SharedPointer<TaskSearchSpace> const _parameter_space;
     // Synchronization
     LoggableSmartThread _thread;
     InputBufferType _input_buffer;
@@ -174,7 +174,7 @@ private:
 };
 
 template<class I, class O, class C>
-DetachedRunnerBase<I,O,C>::DetachedRunnerBase(String const& thread_name, TaskParameterSpace const& space)
+DetachedRunnerBase<I,O,C>::DetachedRunnerBase(String const& thread_name, TaskSearchSpace const& space)
         :  _parameter_space(space.clone()), _thread(thread_name, [this]() { _loop(); }),
            _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
            _terminate(false) { }
@@ -213,7 +213,7 @@ typedef std::chrono::microseconds DurationType;
 template<class D>
 class ParameterSearchOutput {
   public:
-    ParameterSearchOutput(D const& data, DurationType const& duration, TaskParameterPoint const& point) : _data(data), _point(point), _duration(duration) { }
+    ParameterSearchOutput(D const& data, DurationType const& duration, TaskSearchPoint const& point) : _data(data), _point(point), _duration(duration) { }
     ParameterSearchOutput& operator=(ParameterSearchOutput<D> const& p) {
         _data = p._data;
         _point = p._point;
@@ -221,11 +221,11 @@ class ParameterSearchOutput {
         return *this;
     };
     D const& data() const { return _data; }
-    TaskParameterPoint const& point() const { return _point; }
+    TaskSearchPoint const& point() const { return _point; }
     DurationType const& duration() const { return _duration; }
   private:
     D _data;
-    TaskParameterPoint _point;
+    TaskSearchPoint _point;
     DurationType _duration;
 };
 
@@ -236,19 +236,19 @@ public:
     typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
-    typedef Pair<InputType,TaskParameterPoint> InputBufferContentType;
+    typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
     typedef ParameterSearchOutput<O> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
 
-    ParameterSearchRunnerBase(String const& thread_base_name, TaskParameterSpace const& space, Nat concurrency);
+    ParameterSearchRunnerBase(String const& thread_base_name, TaskSearchSpace const& space, Nat concurrency);
     virtual ~ParameterSearchRunnerBase();
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
-    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
 
 private:
@@ -273,11 +273,11 @@ private:
 
 private:
     // Parameter space
-    SharedPointer<TaskParameterSpace> const _parameter_space;
+    SharedPointer<TaskSearchSpace> const _parameter_space;
     // Concurrency
     Nat const _concurrency;
-    std::queue<TaskParameterPoint> _points;
-    List<TaskParameterPoint> _best_points;
+    std::queue<TaskSearchPoint> _points;
+    List<TaskSearchPoint> _best_points;
     // Synchronization
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;
@@ -290,7 +290,7 @@ private:
 };
 
 template<class I, class O, class C>
-ParameterSearchRunnerBase<I,O,C>::ParameterSearchRunnerBase(String const& thread_base_name, TaskParameterSpace const& space, Nat concurrency)
+ParameterSearchRunnerBase<I,O,C>::ParameterSearchRunnerBase(String const& thread_base_name, TaskSearchSpace const& space, Nat concurrency)
         :  _parameter_space(space.clone()), _concurrency(concurrency),
            _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
            _terminate(false)

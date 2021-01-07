@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter_point.cpp
+ *            concurrency/task_search_point.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,24 +22,24 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_parameter_point.hpp"
-#include "task_parameter_space.hpp"
+#include "task_search_point.hpp"
+#include "task_search_space.hpp"
 
 namespace Ariadne {
 
-TaskParameterPoint::TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings)
+TaskSearchPoint::TaskSearchPoint(TaskSearchSpace const& space, ParameterBindingsMap const& bindings)
     : _space(space.clone()), _bindings(bindings) { }
 
-TaskParameterPoint::TaskParameterPoint(TaskParameterPoint const& p) {
+TaskSearchPoint::TaskSearchPoint(TaskSearchPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);
     this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
     this->_space.reset(p.space().clone());
 }
 
-Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) const {
-    Set<TaskParameterPoint> result;
-    TaskParameterPoint current_point = *this;
+Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
+    Set<TaskSearchPoint> result;
+    TaskSearchPoint current_point = *this;
     for (Nat num_points=1; num_points<=amount; ++num_points) {
         List<Nat> breadths = current_point.shift_breadths();
         Nat total_breadth = 0;
@@ -59,7 +59,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) cons
                     value = param.shifted_value_from(binding.second);
                     shifted = true;
                 }
-                shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
+                shifted_bindings.insert(std::pair<TaskSearchParameter,Nat>(param, value));
             }
             result.insert(space.make_point(shifted_bindings));
 
@@ -74,12 +74,12 @@ Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) cons
     return result;
 }
 
-Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) const {
+Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
     List<Nat> breadths = this->shift_breadths();
     Nat total_breadth = 0;
     for (Nat b : breadths) total_breadth += b;
     ARIADNE_PRECONDITION(total_breadth >= amount);
-    Set<TaskParameterPoint> result;
+    Set<TaskSearchPoint> result;
     auto space = this->space();
     Set<Nat> offsets;
     do offsets.insert((Nat)rand() % total_breadth); while (offsets.size() < amount);
@@ -98,7 +98,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) co
                     value = param.shifted_value_from(binding.second);
                     shifted = true;
                 }
-                shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
+                shifted_bindings.insert(std::pair<TaskSearchParameter,Nat>(param, value));
             }
             result.insert(space.make_point(shifted_bindings));
         } while (result.size() < num_points);
@@ -107,7 +107,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) co
     return result;
 }
 
-Nat TaskParameterPoint::hash_code() const {
+Nat TaskSearchPoint::hash_code() const {
     Nat result=0;
     Nat prod=1;
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
@@ -117,15 +117,15 @@ Nat TaskParameterPoint::hash_code() const {
     return result;
 }
 
-Map<TaskParameter,Real> TaskParameterPoint::values(Map<RealVariable,Real> const & external_values) const {
-    Map<TaskParameter,Real> result;
+Map<TaskSearchParameter,Real> TaskSearchPoint::values(Map<RealVariable,Real> const & external_values) const {
+    Map<TaskSearchParameter,Real> result;
     for (auto binding : _bindings) {
-        result.insert(Pair<TaskParameter,Real>(binding.first,binding.first.value(binding.second,external_values)));
+        result.insert(Pair<TaskSearchParameter,Real>(binding.first, binding.first.value(binding.second, external_values)));
     }
     return result;
 }
 
-Real TaskParameterPoint::value(Identifier const& var, Map<RealVariable,Real> const& external_values) const {
+Real TaskSearchPoint::value(Identifier const& var, Map<RealVariable,Real> const& external_values) const {
     auto iter = _bindings.begin();
     for (;iter!=_bindings.end();++iter) {
         if (iter->first.name() == var) break;
@@ -135,7 +135,7 @@ Real TaskParameterPoint::value(Identifier const& var, Map<RealVariable,Real> con
     return iter->first.value(iter->second,external_values);
 }
 
-Real TaskParameterPoint::time_cost_estimate(Map<RealVariable,Real> const& external_variables) const {
+Real TaskSearchPoint::time_cost_estimate(Map<RealVariable,Real> const& external_variables) const {
     Map<Identifier,Real> values;
     for (auto binding : _bindings) {
         values.insert(Pair<Identifier,Real>(binding.first.variable().name(),binding.first.value(binding.second,external_variables)));
@@ -143,7 +143,7 @@ Real TaskParameterPoint::time_cost_estimate(Map<RealVariable,Real> const& extern
     return evaluate(_space->time_cost_estimator(),Valuation<Real,Real>(values));
 }
 
-TaskParameterPoint& TaskParameterPoint::operator=(TaskParameterPoint const& p) {
+TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);
     this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
@@ -151,7 +151,7 @@ TaskParameterPoint& TaskParameterPoint::operator=(TaskParameterPoint const& p) {
     return *this;
 }
 
-Bool TaskParameterPoint::operator==(TaskParameterPoint const& p) const {
+Bool TaskSearchPoint::operator==(TaskSearchPoint const& p) const {
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
         if (p._bindings.at(iter->first) != iter->second)
             return false;
@@ -159,7 +159,7 @@ Bool TaskParameterPoint::operator==(TaskParameterPoint const& p) const {
     return true;
 }
 
-Bool TaskParameterPoint::operator<(TaskParameterPoint const& p) const {
+Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
     // ASSUMPTION: they have the same space
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
         Nat const this_value = iter->second;
@@ -170,13 +170,13 @@ Bool TaskParameterPoint::operator<(TaskParameterPoint const& p) const {
     return false; // They are equal
 }
 
-Nat TaskParameterPoint::distance(TaskParameterPoint const& p) const {
+Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
     // ASSUMPTION: they have the same space
     Nat result = 0;
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
         Nat const v1 = iter->second;
         Nat const v2 = p._bindings.at(iter->first);
-        if (iter->first.kind() == TaskParameterKind::METRIC) result += (v1 > v2 ? v1 - v2 : v2 - v1);
+        if (iter->first.kind() == TaskSearchParameterKind::METRIC) result += (v1 > v2 ? v1 - v2 : v2 - v1);
         else result += (v1 == v2 ? 0 : 1);
     }
     return result;
@@ -184,14 +184,14 @@ Nat TaskParameterPoint::distance(TaskParameterPoint const& p) const {
 }
 
 
-OutputStream& TaskParameterPoint::_write(OutputStream& os) const {
+OutputStream& TaskSearchPoint::_write(OutputStream& os) const {
     return os << _bindings.values();
 }
 
-List<Nat> TaskParameterPoint::shift_breadths() const {
+List<Nat> TaskSearchPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
         for (auto iter = _bindings.begin(); iter != _bindings.end(); ++iter) {
-            if (iter->first.kind() != TaskParameterKind::METRIC) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
+            if (iter->first.kind() != TaskSearchParameterKind::METRIC) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
             else if (iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
             else if (iter->second == 0) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down
@@ -200,10 +200,10 @@ List<Nat> TaskParameterPoint::shift_breadths() const {
     return _CACHED_SHIFT_BREADTHS;
 }
 
-Set<TaskParameterPoint> make_adjacent_set_shifted_from(Set<TaskParameterPoint> const& sources, Nat amount) {
-    Set<TaskParameterPoint> result;
+Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount) {
+    Set<TaskSearchPoint> result;
     result.adjoin(sources);
-    for (TaskParameterPoint source: sources) {
+    for (TaskSearchPoint source: sources) {
         SizeType previous_size = result.size();
         Nat remaining_amount = amount;
         do {

@@ -22,28 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_parameter.hpp"
+#include "task_search_parameter.hpp"
 
 namespace Ariadne {
 
-std::ostream& operator<<(std::ostream& os, const TaskParameterKind kind) {
+std::ostream& operator<<(std::ostream& os, const TaskSearchParameterKind kind) {
     switch(kind) {
-    case TaskParameterKind::BOOLEAN:
+    case TaskSearchParameterKind::BOOLEAN:
         os << "Boolean";
         break;
-    case TaskParameterKind::ENUMERATION:
+    case TaskSearchParameterKind::ENUMERATION:
         os << "Enumeration";
         break;
-    case TaskParameterKind::METRIC:
+    case TaskSearchParameterKind::METRIC:
         os << "Metric";
         break;
     default:
-        ARIADNE_FAIL_MSG("Unhandled value " << kind << " in TaskParameterKind for printing.");
+        ARIADNE_FAIL_MSG("Unhandled value " << kind << " in TaskSearchParameterKind for printing.");
     }
     return os;
 }
 
-Real TaskParameterBase::value(Nat integer_value, Map<RealVariable,Real> const& constant_values) const {
+Real TaskSearchParameterBase::value(Nat integer_value, Map<RealVariable,Real> const& constant_values) const {
     Map<Identifier,Real> conversion_variables;
     for (auto entry : constant_values) conversion_variables[entry.first.name()] = entry.second;
     conversion_variables.insert(Pair<Identifier,Real>(_variable.name(),integer_value));
@@ -51,27 +51,27 @@ Real TaskParameterBase::value(Nat integer_value, Map<RealVariable,Real> const& c
     return evaluate(_value_expression, Valuation<Real,Real>(conversion_variables));
 }
 
-Nat MetricTaskParameter::shifted_value_from(Nat value) const {
+Nat MetricSearchParameter::shifted_value_from(Nat value) const {
     if (value == 0) return 1;
     if (value == upper_bound()) return value-1;
     if (rand() % 2 == 0) return value-1;
     else return value+1;
 }
 
-Nat BooleanTaskParameter::shifted_value_from(Nat value) const {
+Nat BooleanSearchParameter::shifted_value_from(Nat value) const {
     return (value == 1 ? 0 : 1);
 }
 
-Bool TaskParameter::operator==(TaskParameter const& p) const {
+Bool TaskSearchParameter::operator==(TaskSearchParameter const& p) const {
     // FIXME: enumeration tasks should be distinguished
     return _impl->name() == p._impl->name() and _impl->kind() == p._impl->kind() and _impl->upper_bound() == p._impl->upper_bound();
 }
 
-Bool TaskParameter::operator<(TaskParameter const& p) const {
+Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
     return name() < p.name();
 }
 
-OutputStream& TaskParameter::_write(OutputStream& os) const {
+OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
     return os << "('" << name() << "', kind: " << kind() << ", upper_bound: " + to_string(upper_bound()) + ", initial: " << to_string(initial()) << ")";
 }
 

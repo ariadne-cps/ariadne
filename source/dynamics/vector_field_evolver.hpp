@@ -83,16 +83,16 @@ struct FlowStepRunnerOutput {
     Dyadic const step_size_used;
 };
 
-inline TaskParameterSpace make_flow_step_runner_space() {
+inline TaskSearchSpace make_flow_step_runner_space() {
     RealVariable sssnr("starting_step_size_num_refinements"), st("sweep_threshold"), mto("maximum_temporal_order");
-    return TaskParameterSpace({MetricTaskParameter(sssnr,5,2),
-                              MetricTaskParameter(st,exp(-st*log(RealConstant(10))),12,9),
-                              MetricTaskParameter(mto,15,12)
+    return TaskSearchSpace({MetricSearchParameter(sssnr, 5, 2),
+                            MetricSearchParameter(st, exp(-st * log(RealConstant(10))), 12, 9),
+                            MetricSearchParameter(mto, 15, 12)
                              },(st*mto)/sssnr);
 }
 
 inline FlowStepRunnerConfiguration
-to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) {
+to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) {
     TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
     SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
             MaximumError(default_integrator.maximum_error()),
@@ -126,19 +126,19 @@ run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) 
 
 struct VectorFieldEvolverFlowStepSerialRunner final : public SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepSerialRunner() : SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override { return Ariadne::to_configuration(in,p); }
+    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
 };
 
 struct VectorFieldEvolverFlowStepDetachedRunner final : public DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepDetachedRunner() : DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step", make_flow_step_runner_space()) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override { return Ariadne::to_configuration(in,p); }
+    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
 };
 
 struct VectorFieldEvolverFlowStepParameterSearchRunner final : public ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepParameterSearchRunner(Nat concurrency) : ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("stp", make_flow_step_runner_space(),concurrency) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskParameterPoint const& p) const override { return Ariadne::to_configuration(in,p); }
+    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
 };
 

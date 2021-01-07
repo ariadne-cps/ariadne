@@ -133,7 +133,7 @@ class DetachedRunnerBase : public TaskRunnerInterface<I,O,C> {
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
     typedef Buffer<Pair<InputType,TaskParameterPoint>> InputBufferType;
-    typedef Buffer<Pair<OutputType,TaskParameterPoint>> OutputBufferType;
+    typedef Buffer<OutputType> OutputBufferType;
 
     DetachedRunnerBase(String const& thread_name, TaskParameterSpace const& space);
     virtual ~DetachedRunnerBase();
@@ -154,7 +154,7 @@ private:
             _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
             if (_terminate) break;
             auto pkg = _input_buffer.pop();
-            _output_buffer.push({run_task(pkg.first,to_configuration(pkg.first,pkg.second)),pkg.second});
+            _output_buffer.push(run_task(pkg.first,to_configuration(pkg.first,pkg.second)));
             _output_availability.notify_all();
         }
     }
@@ -205,8 +205,160 @@ typename DetachedRunnerBase<I,O,C>::OutputType
 DetachedRunnerBase<I,O,C>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
-    auto result = _output_buffer.pop();
-    return result.first;
+    return _output_buffer.pop();
+}
+
+typedef std::chrono::microseconds DurationType;
+
+template<class D>
+class ParameterSearchOutput {
+  public:
+    ParameterSearchOutput(D const& data, DurationType const& duration, TaskParameterPoint const& point) : _data(data), _point(point), _duration(duration) { }
+    ParameterSearchOutput& operator=(ParameterSearchOutput<D> const& p) {
+        _data = p._data;
+        _point = p._point;
+        _duration = p._duration;
+        return *this;
+    };
+    D const& data() const { return _data; }
+    TaskParameterPoint const& point() const { return _point; }
+    DurationType const& duration() const { return _duration; }
+  private:
+    D _data;
+    TaskParameterPoint _point;
+    DurationType _duration;
+};
+
+//! \brief Run a task by concurrent search into the parameter space.
+template<class I, class O, class C>
+class ParameterSearchRunnerBase : public TaskRunnerInterface<I,O,C> {
+public:
+    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
+    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
+    typedef Pair<InputType,TaskParameterPoint> InputBufferContentType;
+    typedef ParameterSearchOutput<O> OutputBufferContentType;
+    typedef Buffer<InputBufferContentType> InputBufferType;
+    typedef Buffer<OutputBufferContentType> OutputBufferType;
+
+    ParameterSearchRunnerBase(String const& thread_base_name, TaskParameterSpace const& space, Nat concurrency);
+    virtual ~ParameterSearchRunnerBase();
+
+    Void activate() override final;
+    Void push(InputType const& input) override final;
+    OutputType pull() override final;
+
+    virtual ConfigurationType to_configuration(InputType const& in, TaskParameterPoint const& p) const override = 0;
+    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
+
+private:
+
+    Void _loop() {
+        ARIADNE_LOG_SCOPE_CREATE;
+        while(true) {
+            std::unique_lock<std::mutex> locker(_input_mutex);
+            _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
+            if (_terminate) break;
+            auto pkg = _input_buffer.pop();
+            auto cfg = to_configuration(pkg.first,pkg.second);
+            auto start = std::chrono::high_resolution_clock::now();
+            auto result = run_task(pkg.first,cfg);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<DurationType>(end-start);
+            ARIADNE_LOG_PRINTLN("duration: " << duration.count() << " us");
+            _output_buffer.push(OutputBufferContentType(result,duration,pkg.second));
+            _output_availability.notify_all();
+        }
+    }
+
+private:
+    // Parameter space
+    SharedPointer<TaskParameterSpace> const _parameter_space;
+    // Concurrency
+    Nat const _concurrency;
+    std::queue<TaskParameterPoint> _points;
+    List<TaskParameterPoint> _best_points;
+    // Synchronization
+    List<SharedPointer<LoggableSmartThread>> _threads;
+    InputBufferType _input_buffer;
+    OutputBufferType _output_buffer;
+    std::atomic<bool> _terminate;
+    std::mutex _input_mutex;
+    std::condition_variable _input_availability;
+    std::mutex _output_mutex;
+    std::condition_variable _output_availability;
+};
+
+template<class I, class O, class C>
+ParameterSearchRunnerBase<I,O,C>::ParameterSearchRunnerBase(String const& thread_base_name, TaskParameterSpace const& space, Nat concurrency)
+        :  _parameter_space(space.clone()), _concurrency(concurrency),
+           _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
+           _terminate(false)
+{
+    for (Nat i=0; i<concurrency; ++i)
+        _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(thread_base_name + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
+
+    auto initial = _parameter_space->initial_point();
+    _points.push(initial);
+    if (_concurrency>1) {
+        auto shifted = initial.make_random_shifted(_concurrency-1);
+        for (auto point : shifted)
+            _points.push(point);
+    }
+}
+
+template<class I, class O, class C>
+ParameterSearchRunnerBase<I,O,C>::~ParameterSearchRunnerBase() {
+    ARIADNE_LOG_PRINTLN("Best points: " << _best_points);
+    _terminate = true;
+    _input_availability.notify_all();
+}
+
+template<class I, class O, class C>
+Void
+ParameterSearchRunnerBase<I,O,C>::activate()
+{
+    for (auto thread : _threads)
+        thread->activate();
+}
+
+template<class I, class O, class C>
+Void
+ParameterSearchRunnerBase<I,O,C>::push(InputType const& input)
+{
+    for (SizeType i=0; i<_concurrency; ++i) {
+        _input_buffer.push({input,_points.front()});
+        _points.pop();
+    }
+    _input_availability.notify_all();
+}
+
+template<class I, class O, class C>
+typename ParameterSearchRunnerBase<I,O,C>::OutputType
+ParameterSearchRunnerBase<I,O,C>::pull() {
+    std::unique_lock<std::mutex> locker(_output_mutex);
+    _output_availability.wait(locker, [this]() { return _output_buffer.size()==_concurrency; });
+
+    List<OutputBufferContentType> result;
+    result.push_back(_output_buffer.pop());
+    while (_output_buffer.size() > 0) {
+        auto current = _output_buffer.pop();
+        auto execution_time = current.duration();
+        if (execution_time < result.back().duration()) {
+            result.pop_back();
+            result.push_back(current);
+        }
+    }
+    _best_points.push_back(result.back().point());
+
+    _points.push(result.back().point());
+    if (_concurrency>1) {
+        auto shifted = result.back().point().make_adjacent_shifted(_concurrency-1);
+        for (auto point : shifted)
+            _points.push(point);
+    }
+
+    return result.back().data();
 }
 
 } // namespace Ariadne

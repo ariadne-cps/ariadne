@@ -38,6 +38,8 @@
 
 namespace Ariadne {
 
+template<class I, class O> class TaskIOData;
+
 //! \brief Interface for the runner of a task.
 //! \details This will usually be first implemented into an abstract base class.
 template<class I, class O, class C>
@@ -60,6 +62,8 @@ class TaskRunnerInterface {
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
+    //! \brief Evaluate the scores of points from the related data, comprising input, output and execution time
+    virtual Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<I,O>> const& data) const = 0;
 };
 
 //! \brief Interface for a class that supports a runnable task.
@@ -94,6 +98,7 @@ class SequentialRunnerBase : public TaskRunnerInterface<I,O,C> {
 
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
+    virtual Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
 
 private:
     SharedPointer<OutputType> _last_output;
@@ -144,6 +149,7 @@ class DetachedRunnerBase : public TaskRunnerInterface<I,O,C> {
 
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
+    virtual Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
 
 private:
 
@@ -210,23 +216,45 @@ DetachedRunnerBase<I,O,C>::pull() {
 
 typedef std::chrono::microseconds DurationType;
 
-template<class D>
-class ParameterSearchOutput {
+template<class I, class O>
+class TaskIOData {
   public:
-    ParameterSearchOutput(D const& data, DurationType const& duration, TaskSearchPoint const& point) : _data(data), _point(point), _duration(duration) { }
-    ParameterSearchOutput& operator=(ParameterSearchOutput<D> const& p) {
-        _data = p._data;
-        _point = p._point;
-        _duration = p._duration;
+    TaskIOData(I const& input, O const& output, DurationType const& execution_time) : _input(input), _output(output), _execution_time(execution_time) { }
+    TaskIOData& operator=(TaskIOData<I,O> const& p) {
+        _input = p._input;
+        _output = p._output;
+        _execution_time = p._execution_time;
         return *this;
     };
-    D const& data() const { return _data; }
-    TaskSearchPoint const& point() const { return _point; }
-    DurationType const& duration() const { return _duration; }
+    I const& input() const { return _input; }
+    O const& output() const { return _output; }
+    DurationType const& execution_time() const { return _execution_time; }
   private:
-    D _data;
+    I _input;
+    O _output;
+    DurationType _execution_time;
+};
+
+template<class I, class O>
+class ParameterSearchOutputBufferData {
+  public:
+    ParameterSearchOutputBufferData(I const& input, O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _input(input), _output(output), _execution_time(execution_time), _point(point) { }
+    ParameterSearchOutputBufferData& operator=(ParameterSearchOutputBufferData<I,O> const& p) {
+        _input = p._input;
+        _output = p._output;
+        _execution_time = p._execution_time;
+        _point = p._point;
+        return *this;
+    };
+    I const& input() const { return _input; }
+    O const& output() const { return _output; }
+    DurationType const& execution_time() const { return _execution_time; }
+    TaskSearchPoint const& point() const { return _point; }
+  private:
+    I _input;
+    O _output;
+    DurationType _execution_time;
     TaskSearchPoint _point;
-    DurationType _duration;
 };
 
 //! \brief Run a task by concurrent search into the parameter space.
@@ -237,7 +265,7 @@ public:
     typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
     typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
-    typedef ParameterSearchOutput<O> OutputBufferContentType;
+    typedef ParameterSearchOutputBufferData<I,O> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
 
@@ -250,6 +278,7 @@ public:
 
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
+    virtual Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
 
 private:
 
@@ -264,9 +293,9 @@ private:
             auto start = std::chrono::high_resolution_clock::now();
             auto result = run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<DurationType>(end-start);
-            ARIADNE_LOG_PRINTLN("duration: " << duration.count() << " us");
-            _output_buffer.push(OutputBufferContentType(result,duration,pkg.second));
+            auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
+            ARIADNE_LOG_PRINTLN("execution_time: " << execution_time.count() << " us");
+            _output_buffer.push(OutputBufferContentType(pkg.first,result,execution_time,pkg.second));
             _output_availability.notify_all();
         }
     }
@@ -339,26 +368,20 @@ ParameterSearchRunnerBase<I,O,C>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()==_concurrency; });
 
-    List<OutputBufferContentType> result;
-    result.push_back(_output_buffer.pop());
+    Map<TaskSearchPoint,TaskIOData<I,O>> outputs;
     while (_output_buffer.size() > 0) {
-        auto current = _output_buffer.pop();
-        auto execution_time = current.duration();
-        if (execution_time < result.back().duration()) {
-            result.pop_back();
-            result.push_back(current);
-        }
+        auto iodata = _output_buffer.pop();
+        outputs.insert(Pair<TaskSearchPoint,TaskIOData<I,O>>(iodata.point(),TaskIOData<I,O>(iodata.input(),iodata.output(),
+                                                                                            iodata.execution_time())));
     }
-    _best_points.push_back(result.back().point());
-
-    _points.push(result.back().point());
-    if (_concurrency>1) {
-        auto shifted = result.back().point().make_adjacent_shifted(_concurrency-1);
-        for (auto point : shifted)
-            _points.push(point);
+    auto evals = evaluate(outputs);
+    for (auto e : evals) {
+        ARIADNE_LOG_PRINTLN_AT(1,"point: " << e.point() << ", cost: " << e.score());
+        _points.push(e.point());
     }
-
-    return result.back().data();
+    auto best = evals.begin()->point();
+    _best_points.push_back(best);
+    return outputs.get(best).output();
 }
 
 } // namespace Ariadne

@@ -98,6 +98,20 @@ class TaskSearchPoint : public WritableInterface {
 //! \details Guarantees that all points are different and with distance equal to 1 to the related source point
 Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount);
 
+typedef double ScoreType;
+
+class TaskSearchPointCost {
+  public:
+    TaskSearchPointCost(TaskSearchPoint const& p, ScoreType const& s);
+    TaskSearchPoint const& point() const;
+    ScoreType const& score() const;
+    //! \brief Ordering is based on score value
+    Bool operator<(TaskSearchPointCost const& s) const;
+private:
+    TaskSearchPoint _point;
+    ScoreType _score;
+};
+
 } // namespace Ariadne
 
 #endif // ARIADNE_SEARCH_POINT_HPP

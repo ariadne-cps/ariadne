@@ -124,22 +124,35 @@ run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) 
     return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
 }
 
+inline Set<TaskSearchPointCost>
+evaluate(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) {
+    Set<TaskSearchPointCost> result;
+    for (auto entry : data) {
+        ScoreType score = entry.second.execution_time().count();
+        result.insert(TaskSearchPointCost(entry.first, score));
+    }
+    return result;
+}
+
 struct VectorFieldEvolverFlowStepSerialRunner final : public SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepSerialRunner() : SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
     FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
+    Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::evaluate(data); }
 };
 
 struct VectorFieldEvolverFlowStepDetachedRunner final : public DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepDetachedRunner() : DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step", make_flow_step_runner_space()) { }
     FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
+    Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::evaluate(data); }
 };
 
 struct VectorFieldEvolverFlowStepParameterSearchRunner final : public ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
     VectorFieldEvolverFlowStepParameterSearchRunner(Nat concurrency) : ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("stp", make_flow_step_runner_space(),concurrency) { }
     FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
     FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
+    Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::evaluate(data); }
 };
 
 //! \brief A class for computing the evolution of a vector_field system.

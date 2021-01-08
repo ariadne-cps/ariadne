@@ -215,4 +215,20 @@ Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& 
     return result;
 }
 
+TaskSearchPointCost::TaskSearchPointCost(TaskSearchPoint const& p, ScoreType const& s) : _point(p), _score(s) { }
+
+TaskSearchPoint const&
+TaskSearchPointCost::point() const {
+    return _point;
+}
+
+ScoreType const&
+TaskSearchPointCost::score() const {
+    return _score;
+}
+
+Bool TaskSearchPointCost::operator<(TaskSearchPointCost const& s) const {
+    return this->_score < s._score;
+}
+
 } // namespace Ariadne

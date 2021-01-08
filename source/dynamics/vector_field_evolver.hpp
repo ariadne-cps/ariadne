@@ -127,9 +127,13 @@ run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) 
 inline Set<TaskSearchPointCost>
 evaluate(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) {
     Set<TaskSearchPointCost> result;
+
+    Nat max_x = 0;
+    for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.execution_time().count());
     for (auto entry : data) {
-        ScoreType score = entry.second.execution_time().count();
-        result.insert(TaskSearchPointCost(entry.first, score));
+        CostType x = CostType(entry.second.execution_time().count())/max_x;
+        CostType p = entry.second.output().step_size_used.get_d();
+        result.insert(TaskSearchPointCost(entry.first, x/p));
     }
     return result;
 }

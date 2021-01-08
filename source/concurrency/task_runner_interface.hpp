@@ -375,10 +375,24 @@ ParameterSearchRunnerBase<I,O,C>::pull() {
                                                                                             iodata.execution_time())));
     }
     auto evals = evaluate(outputs);
+    ARIADNE_LOG_PRINTLN("previous points:");
     for (auto e : evals) {
-        ARIADNE_LOG_PRINTLN_AT(1,"point: " << e.point() << ", cost: " << e.score());
-        _points.push(e.point());
+        ARIADNE_LOG_PRINTLN(e.point() << ", cost: " << e.cost());
     }
+
+    Set<TaskSearchPoint> kept_points;
+    SizeType cnt = 0;
+    for (auto e : evals) {
+        kept_points.insert(e.point());
+        ++cnt;
+        if (cnt >= _concurrency/2) break;
+    }
+    Set<TaskSearchPoint> new_points;
+    if (_concurrency>1) new_points = make_adjacent_set_shifted_from(kept_points, 1);
+    new_points.adjoin(kept_points);
+    for (auto p : new_points) _points.push(p);
+    ARIADNE_LOG_PRINTLN("new points: " << new_points);
+
     auto best = evals.begin()->point();
     _best_points.push_back(best);
     return outputs.get(best).output();

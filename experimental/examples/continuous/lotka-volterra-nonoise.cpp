@@ -55,7 +55,7 @@ int main(int argc, const char* argv[])
 
     auto bbx = orbit.final().bounding_box();
     double volume = (bbx[x].width()*bbx[y].width()).get_d();
-    std::cout << "Volume score: " << 1.0/std::pow(volume,1.0/bbx.dimension()) << std::endl;
+    std::cout << "Volume cost: " << 1.0/std::pow(volume,1.0/bbx.dimension()) << std::endl;
 
     Axes2d axes(0.7<=x<=1.4,0.7<=y<=1.4);
     LabelledFigure fig=LabelledFigure(axes);

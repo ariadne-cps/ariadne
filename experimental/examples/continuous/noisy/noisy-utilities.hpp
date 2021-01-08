@@ -71,7 +71,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
         partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper());
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
-    std::cout << "score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s" << std::endl;
+    std::cout << "cost: " << score(evolve_set) << ", time: " << sw.elapsed() << " s" << std::endl;
 
     if (draw) {
         std::cout << "plotting..." << std::endl;

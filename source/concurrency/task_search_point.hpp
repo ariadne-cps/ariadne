@@ -93,23 +93,24 @@ class TaskSearchPoint : public WritableInterface {
     mutable List<Nat> _CACHED_SHIFT_BREADTHS;
 };
 
-//! \brief Generate an \a amount of new points from each point in \a sources, by shifting one parameter each
+//! \brief Generate an \a amount of new points from \a sources, by shifting one parameter each
 //! \return The original points plus the shifted ones
-//! \details Guarantees that all points are different and with distance equal to 1 to the related source point
+//! \details If \a amount is lower than \a sources size, only the first \a amount sources will be shifted
+//! Guarantees that all points are different and with distance equal to 1 to the related source point
 Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount);
 
-typedef double ScoreType;
+typedef double CostType;
 
 class TaskSearchPointCost {
   public:
-    TaskSearchPointCost(TaskSearchPoint const& p, ScoreType const& s);
+    TaskSearchPointCost(TaskSearchPoint const& p, CostType const& s);
     TaskSearchPoint const& point() const;
-    ScoreType const& score() const;
-    //! \brief Ordering is based on score value
+    CostType const& cost() const;
+    //! \brief Ordering is based on cost value
     Bool operator<(TaskSearchPointCost const& s) const;
 private:
     TaskSearchPoint _point;
-    ScoreType _score;
+    CostType _cost;
 };
 
 } // namespace Ariadne

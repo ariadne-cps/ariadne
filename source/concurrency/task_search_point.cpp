@@ -24,6 +24,7 @@
 
 #include "task_search_point.hpp"
 #include "task_search_space.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -203,32 +204,32 @@ List<Nat> TaskSearchPoint::shift_breadths() const {
 Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount) {
     Set<TaskSearchPoint> result;
     result.adjoin(sources);
-    for (TaskSearchPoint source: sources) {
-        SizeType previous_size = result.size();
-        Nat remaining_amount = amount;
-        do {
-            result.adjoin(source.make_adjacent_shifted(amount));
-            remaining_amount = amount-(result.size()-previous_size);
-            previous_size = result.size();
-        } while (remaining_amount > 0);
-    }
+    SizeType original_size = result.size();
+
+    auto source = sources.begin();
+    do {
+        result.adjoin(source->make_adjacent_shifted(1));
+        ++source; // Will move to next source even if no shift has been found
+        if (source == sources.end()) source = sources.begin();
+    } while (result.size()-original_size < amount);
+
     return result;
 }
 
-TaskSearchPointCost::TaskSearchPointCost(TaskSearchPoint const& p, ScoreType const& s) : _point(p), _score(s) { }
+TaskSearchPointCost::TaskSearchPointCost(TaskSearchPoint const& p, CostType const& s) : _point(p), _cost(s) { }
 
 TaskSearchPoint const&
 TaskSearchPointCost::point() const {
     return _point;
 }
 
-ScoreType const&
-TaskSearchPointCost::score() const {
-    return _score;
+CostType const&
+TaskSearchPointCost::cost() const {
+    return _cost;
 }
 
 Bool TaskSearchPointCost::operator<(TaskSearchPointCost const& s) const {
-    return this->_score < s._score;
+    return this->_cost < s._cost;
 }
 
 } // namespace Ariadne

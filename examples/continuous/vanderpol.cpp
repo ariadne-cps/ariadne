@@ -57,7 +57,7 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_AT(1,evolver.configuration());
 
-    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(8)));
+    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(4)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -71,19 +71,15 @@ int main(int argc, const char* argv[])
 
     Real evolution_time = 7;
 
-    StopWatch sw;
+    auto start = std::chrono::high_resolution_clock::now();
     ARIADNE_LOG_PRINTLN("Computing orbit... ");
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    sw.click();
-    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+    auto end = std::chrono::high_resolution_clock::now();
+    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
 
-    sw.reset();
     ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");
-
-    sw.click();
-    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 }

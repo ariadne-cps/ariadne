@@ -287,6 +287,7 @@ private:
         while(true) {
             std::unique_lock<std::mutex> locker(_input_mutex);
             _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
+            locker.unlock();
             if (_terminate) break;
             auto pkg = _input_buffer.pop();
             auto cfg = to_configuration(pkg.first,pkg.second);

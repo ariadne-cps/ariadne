@@ -1,5 +1,5 @@
 set(UNIT_TESTS
-    test_task_parameter
+    test_task_search_parameter
     test_producer_consumer
 )
 

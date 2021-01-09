@@ -380,16 +380,14 @@ ParameterSearchRunnerBase<I,O,C>::pull() {
         ARIADNE_LOG_PRINTLN(e.point() << ", cost: " << e.cost());
     }
 
-    Set<TaskSearchPoint> kept_points;
+    Set<TaskSearchPoint> new_points;
     SizeType cnt = 0;
     for (auto e : evals) {
-        kept_points.insert(e.point());
+        new_points.insert(e.point());
         ++cnt;
         if (cnt >= _concurrency/2) break;
     }
-    Set<TaskSearchPoint> new_points;
-    if (_concurrency>1) new_points = make_adjacent_set_shifted_from(kept_points, 1);
-    new_points.adjoin(kept_points);
+    if (_concurrency>1) new_points = make_adjacent_set_shifted_from(new_points, _concurrency - _concurrency/2);
     for (auto p : new_points) _points.push(p);
     ARIADNE_LOG_PRINTLN("new points: " << new_points);
 

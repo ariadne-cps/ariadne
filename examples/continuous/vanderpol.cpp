@@ -57,7 +57,7 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_AT(1,evolver.configuration());
 
-    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(1)));
+    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(8)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -69,7 +69,7 @@ int main(int argc, const char* argv[])
     auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0},enclosure_config);
     ARIADNE_LOG_PRINTLN_AT(1,"Initial set: " << initial_set);
 
-    Real evolution_time = 1;
+    Real evolution_time = 7;
 
     StopWatch sw;
     ARIADNE_LOG_PRINTLN("Computing orbit... ");

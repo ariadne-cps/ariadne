@@ -53,6 +53,10 @@
 #define ARIADNE_LOG_PRINTLN(text) { if (!Logger::is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::println(0,logger_stream.str()); } }
 // Print one line at an increased level with respect to the current one; the text shouldn't have carriage returns, but for efficiency purposes this is not checked.
 #define ARIADNE_LOG_PRINTLN_AT(level,text) { if (!Logger::is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::println(level,logger_stream.str()); } }
+// Print variable in one line at the current level, using the formatting convention.
+#define ARIADNE_LOG_PRINTLN_VAR(var) { if (!Logger::is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::println(0,logger_stream.str()); } }
+// Print variable in one line at the increased level with respect to the current one, using the formatting convention.
+#define ARIADNE_LOG_PRINTLN_VAR_AT(level,var) { if (!Logger::is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::println(level,logger_stream.str()); } }
 // Print a text at the bottom line, holding it until the function scope ends; this requires creation of the scope.
 // Nested calls in separate functions append to the held line.
 // The text for obvious reasons shouldn't have newlines and carriage returns; for efficiency purposes this is not checked.

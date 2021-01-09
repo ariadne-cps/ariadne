@@ -44,7 +44,7 @@
 #include "../solvers/integrator.hpp"
 #include "../dynamics/evolver_base.hpp"
 
-#include "../concurrency/task_runner_interface.hpp"
+#include "../concurrency/task_runner.hpp"
 
 #include "../output/logging.hpp"
 
@@ -113,14 +113,14 @@ run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) 
     Dyadic next_time = in.current_time;
     Dyadic chosen_step_size = in.maximum_step_size;
     FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
-    ARIADNE_LOG_PRINTLN("step_size = " << chosen_step_size);
-    ARIADNE_LOG_PRINTLN_AT(1, "flow_model = " << flow_model);
+    ARIADNE_LOG_PRINTLN_VAR(chosen_step_size);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
     next_time += chosen_step_size;
-    ARIADNE_LOG_PRINTLN_AT(1, "next_time = " << next_time)
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);
     reach_set.apply_full_reach_step(flow_model);
-    ARIADNE_LOG_PRINTLN_AT(1, "reach_set = " << reach_set);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
     next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
-    ARIADNE_LOG_PRINTLN_AT(1, "next_set = " << next_set);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
     return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
 }
 

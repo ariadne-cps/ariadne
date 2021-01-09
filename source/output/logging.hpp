@@ -186,6 +186,7 @@ struct LogThinRawMessage {
 //! \brief Full log message information in raw form, before formatting for actual output
 struct LogRawMessage : public LogThinRawMessage {
     LogRawMessage(std::string id, LogThinRawMessage msg) : LogThinRawMessage(msg), identifier(id) { }
+    LogRawMessage(std::string id, std::string scp, unsigned int lvl, std::string txt) : LogRawMessage(id,LogThinRawMessage(scp,lvl,txt)) { }
     LogRawMessage(std::string scp, unsigned int lvl, std::string txt) : LogThinRawMessage(scp,lvl,txt), identifier("") { }
     std::string identifier;
 };
@@ -204,7 +205,7 @@ class LoggerSchedulerInterface {
 };
 
 //! \brief A Logger scheduler that prints immediately. Not designed for concurrency, since
-//! the current level should change based on the thread. Also clearly the outputs can overlap arbitrarily.
+//! the current level should be different for each thread that prints. Also the outputs can overlap arbitrarily.
 class ImmediateLoggerScheduler : public LoggerSchedulerInterface {
 public:
     ImmediateLoggerScheduler();
@@ -219,10 +220,28 @@ private:
 };
 
 //! \brief A Logger scheduler that enqueues messages and prints them sequentially.
-//! The order of printing takes into account the queue for each thread.
-class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
+//! The order of printing respects the order of submission, thus blocking other submitters.
+class BlockingLoggerScheduler : public LoggerSchedulerInterface {
+public:
+    BlockingLoggerScheduler();
+    virtual void println(unsigned int level_increase, std::string text) override;
+    virtual void hold(std::string scope, std::string text) override;
+    virtual void release(std::string scope) override;
+    virtual unsigned int current_level() const override;
+    virtual void increase_level(unsigned int i) override;
+    virtual void decrease_level(unsigned int i) override;
+    void create_data_instance(LoggableSmartThread const& thread);
+    ~BlockingLoggerScheduler() = default;
+private:
+    std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
+    std::mutex _data_mutex;
+};
+
+//! \brief A Logger scheduler that enqueues messages and prints them in a dedicated thread.
+//! The order of printing is respected only within a given thread.
+class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
   public:
-    ConcurrentLoggerScheduler();
+    NonblockingLoggerScheduler();
     virtual void println(unsigned int level_increase, std::string text) override;
     virtual void hold(std::string scope, std::string text) override;
     virtual void release(std::string scope) override;
@@ -231,8 +250,7 @@ class ConcurrentLoggerScheduler : public LoggerSchedulerInterface {
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
     void kill_data_instance(LoggableSmartThread const& thread);
-    unsigned int num_queues() const;
-    ~ConcurrentLoggerScheduler();
+    ~NonblockingLoggerScheduler();
   private:
     //! \brief Extracts one message from the largest queue, also removing dead data instances
     SharedPointer<LogRawMessage> _dequeue_and_cleanup();
@@ -319,11 +337,13 @@ class LoggerConfiguration : public WritableInterface {
 //! Configuration and final printing is done here, while scheduling is
 //! done in a separate class.
 class Logger {
-    friend class ConcurrentLoggerScheduler;
     friend class ImmediateLoggerScheduler;
+    friend class BlockingLoggerScheduler;
+    friend class NonblockingLoggerScheduler;
   public:
     static void use_immediate_scheduler();
-    static void use_concurrent_scheduler();
+    static void use_blocking_scheduler();
+    static void use_nonblocking_scheduler();
 
     static void register_thread(LoggableSmartThread const& thread);
     static void unregister_thread(LoggableSmartThread const& thread);
@@ -365,7 +385,7 @@ class Logger {
     inline static unsigned int _cached_num_held_columns = 0;
     inline static unsigned int _cached_last_printed_level = 0;
     inline static std::string _cached_last_printed_thread_name = std::string();
-    inline static SharedPointer<LoggerSchedulerInterface> _scheduler = SharedPointer<LoggerSchedulerInterface>(new ConcurrentLoggerScheduler());
+    inline static SharedPointer<LoggerSchedulerInterface> _scheduler = SharedPointer<LoggerSchedulerInterface>(new NonblockingLoggerScheduler());
     inline static LoggerConfiguration _configuration;
 };
 

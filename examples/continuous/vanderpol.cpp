@@ -35,6 +35,7 @@ int main(int argc, const char* argv[])
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
     Logger::configuration().set_theme(TT_THEME_DARK);
     Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
+    Logger::use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
@@ -56,7 +57,7 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_AT(1,evolver.configuration());
 
-    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(4)));
+    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(1)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

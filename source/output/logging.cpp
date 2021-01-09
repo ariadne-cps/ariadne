@@ -132,7 +132,7 @@ OutputStream& TerminalTextTheme::_write(OutputStream& os) const {
 
 //! \brief Thread-based enqueued log data
 class LoggerData {
-    friend class ConcurrentLoggerScheduler;
+    friend class NonblockingLoggerScheduler;
 protected:
     LoggerData(unsigned int current_level, std::string const& thread_name);
 
@@ -273,63 +273,98 @@ void ImmediateLoggerScheduler::release(std::string scope) {
     Logger::_release(LogRawMessage(scope, _current_level, std::string()));
 }
 
-ConcurrentLoggerScheduler::ConcurrentLoggerScheduler() {
+BlockingLoggerScheduler::BlockingLoggerScheduler() {
+    _data.insert({std::this_thread::get_id(),std::make_pair<unsigned int,std::string>(1,"main")});
+}
+
+void BlockingLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    // Won't replace if it already exists
+    _data.insert({thread.id(),std::make_pair<unsigned int,std::string>(current_level(),thread.name())});
+}
+
+unsigned int BlockingLoggerScheduler::current_level() const {
+    return _data.find(std::this_thread::get_id())->second.first;
+}
+
+void BlockingLoggerScheduler::increase_level(unsigned int i) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second.first += i;
+}
+
+void BlockingLoggerScheduler::decrease_level(unsigned int i) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _data.find(std::this_thread::get_id())->second.first -= i;
+}
+
+void BlockingLoggerScheduler::println(unsigned int level_increase, std::string text) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    Logger::_println(LogRawMessage(_data.find(std::this_thread::get_id())->second.second, std::string(), _data.find(std::this_thread::get_id())->second.first + level_increase, text));
+}
+
+void BlockingLoggerScheduler::hold(std::string scope, std::string text) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    Logger::_hold(LogRawMessage(_data.find(std::this_thread::get_id())->second.second, scope, _data.find(std::this_thread::get_id())->second.first, text));
+}
+
+void BlockingLoggerScheduler::release(std::string scope) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    Logger::_release(LogRawMessage(_data.find(std::this_thread::get_id())->second.second, scope, _data.find(std::this_thread::get_id())->second.first, std::string()));
+}
+
+NonblockingLoggerScheduler::NonblockingLoggerScheduler() {
     _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,"main"))});
-    _dequeueing_thread = std::thread(&ConcurrentLoggerScheduler::_consume_msgs, this);
+    _dequeueing_thread = std::thread(&NonblockingLoggerScheduler::_consume_msgs, this);
     _terminate = false;
 }
 
-ConcurrentLoggerScheduler::~ConcurrentLoggerScheduler() {
+NonblockingLoggerScheduler::~NonblockingLoggerScheduler() {
     _terminate = true;
     _dequeueing_thread.join();
 }
 
-void ConcurrentLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
+void NonblockingLoggerScheduler::create_data_instance(LoggableSmartThread const& thread) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     // Won't replace if it already exists
     _data.insert({thread.id(),SharedPointer<LoggerData>(new LoggerData(current_level(),thread.name()))});
 }
 
-void ConcurrentLoggerScheduler::kill_data_instance(LoggableSmartThread const& thread) {
+void NonblockingLoggerScheduler::kill_data_instance(LoggableSmartThread const& thread) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     auto entry = _data.find(thread.id());
     if (entry != _data.end()) entry->second->kill();
 }
 
-unsigned int ConcurrentLoggerScheduler::num_queues() const {
-    return _data.size();
-}
-
-unsigned int ConcurrentLoggerScheduler::current_level() const {
+unsigned int NonblockingLoggerScheduler::current_level() const {
     return _data.find(std::this_thread::get_id())->second->current_level();
 }
 
-void ConcurrentLoggerScheduler::increase_level(unsigned int i) {
+void NonblockingLoggerScheduler::increase_level(unsigned int i) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->increase_level(i);
 }
 
-void ConcurrentLoggerScheduler::decrease_level(unsigned int i) {
+void NonblockingLoggerScheduler::decrease_level(unsigned int i) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->decrease_level(i);
 }
 
-void ConcurrentLoggerScheduler::println(unsigned int level_increase, std::string text) {
+void NonblockingLoggerScheduler::println(unsigned int level_increase, std::string text) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_println(level_increase,text);
 }
 
-void ConcurrentLoggerScheduler::hold(std::string scope, std::string text) {
+void NonblockingLoggerScheduler::hold(std::string scope, std::string text) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_hold(scope,text);
 }
 
-void ConcurrentLoggerScheduler::release(std::string scope) {
+void NonblockingLoggerScheduler::release(std::string scope) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_release(scope);
 }
 
-SharedPointer<LogRawMessage> ConcurrentLoggerScheduler::_dequeue_and_cleanup() {
+SharedPointer<LogRawMessage> NonblockingLoggerScheduler::_dequeue_and_cleanup() {
     // TODO: address cleanup that causes segfaults
     SharedPointer<LogRawMessage> result;
     SharedPointer<LoggerData> largest_data;
@@ -356,7 +391,7 @@ SharedPointer<LogRawMessage> ConcurrentLoggerScheduler::_dequeue_and_cleanup() {
     return result;
 }
 
-void ConcurrentLoggerScheduler::_consume_msgs() {
+void NonblockingLoggerScheduler::_consume_msgs() {
     while(true) {
         auto msg_ptr = _dequeue_and_cleanup();
         if (msg_ptr != nullptr) {
@@ -500,18 +535,24 @@ void Logger::use_immediate_scheduler() {
     _scheduler.reset(new ImmediateLoggerScheduler());
 }
 
-void Logger::use_concurrent_scheduler() {
-    _scheduler.reset(new ConcurrentLoggerScheduler());
+void Logger::use_blocking_scheduler() {
+    _scheduler.reset(new BlockingLoggerScheduler());
+}
+
+void Logger::use_nonblocking_scheduler() {
+    _scheduler.reset(new NonblockingLoggerScheduler());
 }
 
 void Logger::register_thread(LoggableSmartThread const& thread) {
-    ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
-    if (cl != nullptr) cl->create_data_instance(thread);
+    NonblockingLoggerScheduler* nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
+    BlockingLoggerScheduler* bls = dynamic_cast<BlockingLoggerScheduler*>(_scheduler.get());
+    if (nbls != nullptr) nbls->create_data_instance(thread);
+    else if (bls != nullptr) bls->create_data_instance(thread);
 }
 
 void Logger::unregister_thread(LoggableSmartThread const& thread) {
-    ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
-    if (cl != nullptr) cl->kill_data_instance(thread);
+    NonblockingLoggerScheduler* nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
+    if (nbls != nullptr) nbls->kill_data_instance(thread);
 }
 
 void Logger::increase_level(unsigned int i) {
@@ -563,7 +604,7 @@ bool Logger::_is_holding() {
 }
 
 bool Logger::_can_print_thread_name() {
-    ConcurrentLoggerScheduler* cl = dynamic_cast<ConcurrentLoggerScheduler*>(_scheduler.get());
+    NonblockingLoggerScheduler* cl = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
     // Only if we use a concurrent scheduler and we have the right printing policy
     if (cl != nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER)
         return true;

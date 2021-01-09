@@ -253,6 +253,12 @@ unsigned int ImmediateLoggerScheduler::current_level() const {
     return _current_level;
 }
 
+std::string ImmediateLoggerScheduler::current_thread_name() const {
+    std::stringstream ss;
+    ss << std::this_thread::get_id();
+    return ss.str();
+}
+
 void ImmediateLoggerScheduler::increase_level(unsigned int i) {
     _current_level+=i;
 }
@@ -285,6 +291,10 @@ void BlockingLoggerScheduler::create_data_instance(LoggableSmartThread const& th
 
 unsigned int BlockingLoggerScheduler::current_level() const {
     return _data.find(std::this_thread::get_id())->second.first;
+}
+
+std::string BlockingLoggerScheduler::current_thread_name() const {
+    return _data.find(std::this_thread::get_id())->second.second;
 }
 
 void BlockingLoggerScheduler::increase_level(unsigned int i) {
@@ -337,6 +347,10 @@ void NonblockingLoggerScheduler::kill_data_instance(LoggableSmartThread const& t
 
 unsigned int NonblockingLoggerScheduler::current_level() const {
     return _data.find(std::this_thread::get_id())->second->current_level();
+}
+
+std::string NonblockingLoggerScheduler::current_thread_name() const {
+    return _data.find(std::this_thread::get_id())->second->thread_name();
 }
 
 void NonblockingLoggerScheduler::increase_level(unsigned int i) {
@@ -577,6 +591,10 @@ bool Logger::is_muted_at(unsigned int i) {
 
 unsigned int Logger::current_level() {
     return _scheduler->current_level();
+}
+
+std::string Logger::current_thread_name() {
+    return _scheduler->current_thread_name();
 }
 
 unsigned int Logger::cached_last_printed_level() {

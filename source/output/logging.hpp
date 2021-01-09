@@ -199,6 +199,7 @@ class LoggerSchedulerInterface {
     virtual void hold(std::string scope, std::string text) = 0;
     virtual void release(std::string scope) = 0;
     virtual unsigned int current_level() const = 0;
+    virtual std::string current_thread_name() const = 0;
     virtual void increase_level(unsigned int i) = 0;
     virtual void decrease_level(unsigned int i) = 0;
     virtual ~LoggerSchedulerInterface() = default;
@@ -213,6 +214,7 @@ public:
     virtual void hold(std::string scope, std::string text) override;
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
+    virtual std::string current_thread_name() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
 private:
@@ -228,6 +230,7 @@ public:
     virtual void hold(std::string scope, std::string text) override;
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
+    virtual std::string current_thread_name() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
@@ -246,6 +249,7 @@ class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
     virtual void hold(std::string scope, std::string text) override;
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
+    virtual std::string current_thread_name() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
@@ -360,6 +364,7 @@ class Logger {
     static bool is_muted_at(unsigned int i);
 
     static unsigned int current_level();
+    static std::string current_thread_name();
     static unsigned int cached_last_printed_level();
     static std::string cached_last_printed_thread_name();
 

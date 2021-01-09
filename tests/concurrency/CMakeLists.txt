@@ -1,6 +1,6 @@
 set(UNIT_TESTS
     test_task_search_parameter
-    test_producer_consumer
+    test_buffer
 )
 
 foreach(TEST ${UNIT_TESTS})

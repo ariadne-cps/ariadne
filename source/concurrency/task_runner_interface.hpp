@@ -60,8 +60,8 @@ class TaskRunnerInterface {
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
-    //! \brief Evaluate the scores of points from the related data, comprising input, output and execution time
-    virtual Set<TaskSearchPointCost> evaluate(Map<TaskSearchPoint,TaskIOData<I,O>> const& data) const = 0;
+    //! \brief Evaluate the costs of points from the related data, comprising input, output and execution time
+    virtual Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<I,O>> const& data) const = 0;
 };
 
 //! \brief Interface for a class that supports a runnable task.

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_producer_consumer.cpp
+ *            test_buffer.cpp
  *
  *  Copyright  2008-20  Luca Geretti
  *
@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <atomic>
 #include <thread>
 #include "concurrency/buffer.hpp"
 #include "concurrency/loggable_smart_thread.hpp"
@@ -30,7 +29,7 @@
 
 using namespace Ariadne;
 
-class TestProducerConsumer {
+class TestBuffer {
   public:
 
     void test_single_buffer() {
@@ -74,6 +73,6 @@ class TestProducerConsumer {
 };
 
 int main() {
-    TestProducerConsumer().test();
+    TestBuffer().test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -622,9 +622,9 @@ bool Logger::_is_holding() {
 }
 
 bool Logger::_can_print_thread_name() {
-    NonblockingLoggerScheduler* cl = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
-    // Only if we use a concurrent scheduler and we have the right printing policy
-    if (cl != nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER)
+    ImmediateLoggerScheduler* sch = dynamic_cast<ImmediateLoggerScheduler*>(_scheduler.get());
+    // Only if we don't use an immediate scheduler and we have the right printing policy
+    if (sch == nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER)
         return true;
     else return false;
 }

@@ -388,7 +388,7 @@ ParameterSearchRunnerBase<I,O,C>::pull() {
         ++cnt;
         if (cnt >= _concurrency/2) break;
     }
-    if (_concurrency>1) new_points = make_adjacent_set_shifted_from(new_points, _concurrency - _concurrency/2);
+    new_points = make_extended_set_by_shifting(new_points, _concurrency);
     for (auto p : new_points) _points.push(p);
     ARIADNE_LOG_PRINTLN("new points: " << new_points);
 

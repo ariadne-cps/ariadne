@@ -235,7 +235,7 @@ class TestTaskSearchParameter {
         TaskSearchPoint starting_point = space.make_point({{b, 1}, {m1, 5}, {m2, 2}, {e, 2}});
         Set<TaskSearchPoint> points = starting_point.make_random_shifted(8);
         ARIADNE_TEST_PRINT(points);
-        auto all_points = make_adjacent_set_shifted_from(points,5);
+        auto all_points = make_extended_set_by_shifting(points, 13);
         ARIADNE_TEST_EQUALS(all_points.size(),13);
         ARIADNE_TEST_PRINT(all_points);
     }

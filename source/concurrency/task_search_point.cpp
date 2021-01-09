@@ -201,17 +201,19 @@ List<Nat> TaskSearchPoint::shift_breadths() const {
     return _CACHED_SHIFT_BREADTHS;
 }
 
-Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount) {
+Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, Nat size) {
+    ARIADNE_PRECONDITION(size>=sources.size());
+    auto amount = size-sources.size();
     Set<TaskSearchPoint> result;
     result.adjoin(sources);
     SizeType original_size = result.size();
 
     auto source = sources.begin();
-    do {
+    while (result.size()-original_size < amount) {
         result.adjoin(source->make_adjacent_shifted(1));
         ++source; // Will move to next source even if no shift has been found
         if (source == sources.end()) source = sources.begin();
-    } while (result.size()-original_size < amount);
+    }
 
     return result;
 }

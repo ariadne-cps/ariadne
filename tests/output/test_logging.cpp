@@ -113,7 +113,7 @@ class TestLogging {
     }
 
     Void test_multiple_threads() {
-        Logger::use_concurrent_scheduler();
+        Logger::use_nonblocking_scheduler();
         Logger::configuration().set_verbosity(3);
         Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
@@ -121,9 +121,6 @@ class TestLogging {
         LoggableSmartThread thread1("thread1",[]() { print_something1(); }),
                             thread2("thread2",[]() { print_something2(); }),
                             thread3("thread3",[]() { print_something3(); });
-        Logger::register_thread(thread1);
-        Logger::register_thread(thread2);
-        Logger::register_thread(thread3);
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         thread1.activate();

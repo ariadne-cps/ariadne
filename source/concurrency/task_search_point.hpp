@@ -95,9 +95,9 @@ class TaskSearchPoint : public WritableInterface {
 
 //! \brief Generate an \a amount of new points from \a sources, by shifting one parameter each
 //! \return The original points plus the shifted ones
-//! \details If \a amount is lower than \a sources size, only the first \a amount sources will be shifted
-//! Guarantees that all points are different and with distance equal to 1 to the related source point
-Set<TaskSearchPoint> make_adjacent_set_shifted_from(Set<TaskSearchPoint> const& sources, Nat amount);
+//! \details \a size must be greater or equal than \a sources size, shifting points are chosen by rotation,
+//! skipping to the next if the generated point is not new
+Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, Nat size);
 
 typedef double CostType;
 

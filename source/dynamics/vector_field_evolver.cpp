@@ -292,8 +292,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Push inputs
-    _runner->push(FlowStepRunnerInput(system().dynamic_function(),*_integrator, current_set, current_set_bounds,
-                                            current_time, previous_step_size, _configuration->maximum_step_size()));
+    _runner->push(FlowStepInput(system().dynamic_function(), *_integrator, current_set, current_set_bounds,
+                                current_time, previous_step_size, _configuration->maximum_step_size()));
     // Pull outputs
     auto out = _runner->pull();
     // Save outputs

@@ -46,9 +46,9 @@
 
 namespace Ariadne {
 
-struct FlowStepRunnerInput {
-    FlowStepRunnerInput(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
-                        FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
+struct FlowStepInput {
+    FlowStepInput(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
+                  FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
             dynamic(dynamic_), integrator(integrator_), current_set(current_set_), current_set_bounds(current_set_bounds_),
             current_time(current_time_), previous_step_size(previous_step_size_), maximum_step_size(maximum_step_size_) { }
     EffectiveVectorMultivariateFunction const& dynamic;
@@ -60,8 +60,8 @@ struct FlowStepRunnerInput {
     Dyadic const& maximum_step_size;
 };
 
-struct FlowStepRunnerOutput {
-    FlowStepRunnerOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
+struct FlowStepOutput {
+    FlowStepOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
             evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
@@ -69,17 +69,17 @@ struct FlowStepRunnerOutput {
     Dyadic const step_size_used;
 };
 
-struct FlowStepRunnerConfiguration {
-    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
+struct FlowStepConfiguration {
+    FlowStepConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
     SharedPointer<TaylorPicardIntegrator> integrator;
 };
 
-struct FlowStepTask final: public TaskInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+struct FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,FlowStepConfiguration> {
     std::string name() const override { return "stp"; }
     TaskSearchSpace const& search_space() const override { return _space; }
 
-    FlowStepRunnerConfiguration
-    to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override {
+    FlowStepConfiguration
+    to_configuration(FlowStepInput const& in, TaskSearchPoint const& p) const override {
         TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
         SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
                 MaximumError(default_integrator.maximum_error()),
@@ -90,11 +90,11 @@ struct FlowStepTask final: public TaskInterface<FlowStepRunnerInput,FlowStepRunn
                 MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
                 MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
         ));
-        return FlowStepRunnerConfiguration(integrator);
+        return FlowStepConfiguration(integrator);
     }
 
-    FlowStepRunnerOutput
-    run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
+    FlowStepOutput
+    run_task(FlowStepInput const& in, FlowStepConfiguration const& cfg) const override {
         LabelledEnclosure next_set = in.current_set;
         LabelledEnclosure reach_set = in.current_set;
         Dyadic next_time = in.current_time;
@@ -108,11 +108,11 @@ struct FlowStepTask final: public TaskInterface<FlowStepRunnerInput,FlowStepRunn
         ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
         next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
         ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
-        return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
+        return FlowStepOutput(next_set, reach_set, next_time, chosen_step_size);
     }
 
     Set<TaskSearchPointCost>
-    appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override {
+    appraise(Map<TaskSearchPoint,TaskIOData<FlowStepInput,FlowStepOutput>> const& data) const override {
         Set<TaskSearchPointCost> result;
 
         Nat max_x = 0;

@@ -49,6 +49,8 @@ class TaskSearchParameterInterface {
     virtual RealVariable variable() const = 0;
 
     virtual TaskSearchParameterKind kind() const = 0;
+    //! \brief Lower bound on the integer value
+    virtual Nat lower_bound() const = 0;
     //! \brief Upper bound on the integer value
     virtual Nat upper_bound() const = 0;
     //! \brief Initial integer value
@@ -80,18 +82,20 @@ private:
 
 class MetricSearchParameter : public TaskSearchParameterBase {
   public:
-    MetricSearchParameter(String const& name, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
-    MetricSearchParameter(String const& name, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
+    MetricSearchParameter(String const& name, Nat const& lower_bound, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _lb(lower_bound), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
+    MetricSearchParameter(String const& name, RealExpression const& value_expression, Nat const& lower_bound, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), value_expression), _lb(lower_bound), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
 
     TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::METRIC; }
+    Nat lower_bound() const override { return _lb; }
     Nat upper_bound() const override { return _ub; }
     Nat initial() const override { return _initial; }
     Nat shifted_value_from(Nat value) const override;
     MetricSearchParameter* clone() const override { return new MetricSearchParameter(*this); }
 
-    OutputStream& _write(OutputStream& os) const override { os << "('" << name() << "', upper_bound: " << _ub << ")"; return os; }
+    OutputStream& _write(OutputStream& os) const override { os << "{'" << name() << "', [" << _lb << "," << _ub << "]->" << _initial << "}"; return os; }
 
   private:
+    const Nat _lb;
     const Nat _ub;
     const Nat _initial;
 };
@@ -101,6 +105,7 @@ public:
     BooleanSearchParameter(String const& name, Bool const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _initial(initial) { }
 
     TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::BOOLEAN; }
+    Nat lower_bound() const override { return 0; }
     Nat upper_bound() const override { return 1; }
     Nat initial() const override { if (_initial) return 1; else return 0; }
     Nat shifted_value_from(Nat value) const override;
@@ -131,6 +136,7 @@ public:
 
     TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::ENUMERATION; }
     List<E> elements() const { return _elements; }
+    Nat lower_bound() const override { return 0; }
     Nat upper_bound() const override { return _elements.size()-1; }
     Nat initial() const override { return _initial; }
     Nat shifted_value_from(Nat value) const override {
@@ -162,6 +168,7 @@ class TaskSearchParameter : public WritableInterface {
     Real value(Nat integer_value, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const { return _impl->value(integer_value, external_values); }
     TaskSearchParameterKind kind() const { return _impl->kind(); }
     Nat initial() const { return _impl->initial(); }
+    Nat lower_bound() const { return _impl->lower_bound(); }
     Nat upper_bound() const { return _impl->upper_bound(); }
     Nat shifted_value_from(Nat value) const { return _impl->shifted_value_from(value); }
 

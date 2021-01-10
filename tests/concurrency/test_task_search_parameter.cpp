@@ -59,12 +59,12 @@ class TestTaskSearchParameter {
 
     Void test_metric_task_parameter() {
         TaskSearchParameter metric = MetricSearchParameter("sweep_threshold",
-                                                           RealVariable("sweep_threshold"), 10, 8);
+                                                           RealVariable("sweep_threshold"), 5, 10, 8);
         ARIADNE_TEST_PRINT(metric);
     }
 
     Void test_metric_task_parameter_shift() {
-        MetricSearchParameter metric("sweep_threshold", 10, 8);
+        MetricSearchParameter metric("sweep_threshold", 0, 10, 8);
         ARIADNE_TEST_EQUALS(metric.shifted_value_from(0),1);
         auto from_1 = metric.shifted_value_from(1);
         ARIADNE_TEST_ASSERT(from_1 == 0 or from_1 == 2);
@@ -96,7 +96,7 @@ class TestTaskSearchParameter {
 
     Void test_parameter_space() {
         BooleanSearchParameter bp("use_subdivisions", false);
-        MetricSearchParameter mp("sweep_threshold", 10, 8);
+        MetricSearchParameter mp("sweep_threshold", 5, 10, 8);
         EnumerationSearchParameter<TestInterfaceBase> ep("integrator", {A(), B(), C(), D()}, B());
         TaskSearchSpace space({bp, mp, ep});
         ARIADNE_TEST_PRINT(space);
@@ -109,7 +109,7 @@ class TestTaskSearchParameter {
 
     Void test_parameter_point_creation() {
         TaskSearchSpace space({BooleanSearchParameter("use_subdivisions", false),
-                               MetricSearchParameter("sweep_threshold", 10, 8),
+                               MetricSearchParameter("sweep_threshold", 5, 10, 8),
                                EnumerationSearchParameter<TestInterfaceBase>("integrator", {A(), B(), C(), D()}, B())});
         ARIADNE_TEST_PRINT(space.initial_point());
         Map<RealVariable,Nat> bindings = {{RealVariable("use_subdivisions"),1},
@@ -124,7 +124,7 @@ class TestTaskSearchParameter {
     Void test_parameter_point_equality() {
         RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
         TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 10, 8),
+                               MetricSearchParameter(m.name(), 1, 10, 8),
                                EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
 
         TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
@@ -137,7 +137,7 @@ class TestTaskSearchParameter {
     Void test_parameter_point_distance() {
         RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
         TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 10, 8),
+                               MetricSearchParameter(m.name(), 3, 10, 8),
                                EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
 
         TaskSearchPoint point = space.make_point({{b, 1}, {m, 5}, {e, 2}});
@@ -162,7 +162,7 @@ class TestTaskSearchParameter {
     Void test_parameter_point_adjacent_shift() {
         RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
         TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 10, 8),
+                               MetricSearchParameter(m.name(), 5, 10, 8),
                                EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
 
         TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
@@ -185,7 +185,7 @@ class TestTaskSearchParameter {
     Void test_parameter_point_random_shift() {
         RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
         TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 10, 8),
+                               MetricSearchParameter(m.name(), 5, 10, 8),
                                EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
 
         TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
@@ -199,8 +199,8 @@ class TestTaskSearchParameter {
     Void test_parameter_point_adjacent_set_shift() {
         RealVariable b("use_subdivisions"), m1("sweep_threshold"), m2("maximum_step_size"), e("integrator");
         TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m1.name(), 10, 8),
-                               MetricSearchParameter(m2.name(), 6, 0),
+                               MetricSearchParameter(m1.name(), 3, 10, 8),
+                               MetricSearchParameter(m2.name(), 1, 6, 0),
                                EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
 
         TaskSearchPoint starting_point = space.make_point({{b, 1}, {m1, 5}, {m2, 2}, {e, 2}});

@@ -77,9 +77,9 @@ struct FlowStepConfiguration {
 class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,FlowStepConfiguration> {
   private:
     TaskSearchSpace const _space = TaskSearchSpace(
-            {MetricSearchParameter("starting_step_size_num_refinements", 5, 2),
-             MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 12, 9),
-             MetricSearchParameter("maximum_temporal_order", 15, 12)
+            {MetricSearchParameter("starting_step_size_num_refinements", 0, 5, 2),
+             MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 6, 12, 9),
+             MetricSearchParameter("maximum_temporal_order", 2, 15, 12)
             });
   public:
     std::string name() const override { return "stp"; }

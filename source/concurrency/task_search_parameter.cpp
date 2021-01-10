@@ -52,7 +52,7 @@ Real TaskSearchParameterBase::value(Nat integer_value, Map<RealVariable,Real> co
 }
 
 Nat MetricSearchParameter::shifted_value_from(Nat value) const {
-    if (value == 0) return 1;
+    if (value == lower_bound()) return value+1;
     if (value == upper_bound()) return value-1;
     if (rand() % 2 == 0) return value-1;
     else return value+1;
@@ -72,7 +72,7 @@ Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
 }
 
 OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
-    return os << "('" << name() << "', kind: " << kind() << ", upper_bound: " + to_string(upper_bound()) + ", initial: " << to_string(initial()) << ")";
+    return os << "{'" << name() << "', kind: " << kind() << ", [" << to_string(lower_bound()) << "," + to_string(upper_bound()) + "]->" << to_string(initial()) << "}";
 }
 
 } // namespace Ariadne

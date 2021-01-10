@@ -108,16 +108,6 @@ Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
     return result;
 }
 
-Nat TaskSearchPoint::hash_code() const {
-    Nat result=0;
-    Nat prod=1;
-    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
-        result += iter->second*prod;
-        prod *= iter->first.upper_bound()+1;
-    }
-    return result;
-}
-
 Map<TaskSearchParameter,Real> TaskSearchPoint::values(Map<RealVariable,Real> const & external_values) const {
     Map<TaskSearchParameter,Real> result;
     for (auto binding : _bindings) {
@@ -186,7 +176,7 @@ List<Nat> TaskSearchPoint::shift_breadths() const {
         for (auto iter = _bindings.begin(); iter != _bindings.end(); ++iter) {
             if (iter->first.kind() != TaskSearchParameterKind::METRIC) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
             else if (iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
-            else if (iter->second == 0) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
+            else if (iter->second == iter->first.lower_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down
         }
     }

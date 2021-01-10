@@ -78,9 +78,6 @@ class TaskSearchPoint : public WritableInterface {
     //! \brief Compute the breadth of possible shifts of the point for each parameter
     List<Nat> shift_breadths() const;
 
-    //! \brief A positive number uniquely identifying the point in the space
-    Nat hash_code() const;
-
     virtual OutputStream& _write(OutputStream& os) const;
   private:
 

@@ -204,6 +204,7 @@ class LoggerSchedulerInterface {
     virtual void release(std::string scope) = 0;
     virtual unsigned int current_level() const = 0;
     virtual std::string current_thread_name() const = 0;
+    virtual SizeType largest_thread_name_size() const = 0;
     virtual void increase_level(unsigned int i) = 0;
     virtual void decrease_level(unsigned int i) = 0;
     virtual ~LoggerSchedulerInterface() = default;
@@ -219,6 +220,7 @@ public:
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
     virtual std::string current_thread_name() const override;
+    virtual SizeType largest_thread_name_size() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
 private:
@@ -235,6 +237,7 @@ public:
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
     virtual std::string current_thread_name() const override;
+    virtual SizeType largest_thread_name_size() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
@@ -254,6 +257,7 @@ class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
     virtual void release(std::string scope) override;
     virtual unsigned int current_level() const override;
     virtual std::string current_thread_name() const override;
+    virtual SizeType largest_thread_name_size() const override;
     virtual void increase_level(unsigned int i) override;
     virtual void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);

@@ -259,6 +259,10 @@ std::string ImmediateLoggerScheduler::current_thread_name() const {
     return ss.str();
 }
 
+SizeType ImmediateLoggerScheduler::largest_thread_name_size() const {
+    return current_thread_name().size();
+}
+
 void ImmediateLoggerScheduler::increase_level(unsigned int i) {
     _current_level+=i;
 }
@@ -295,6 +299,12 @@ unsigned int BlockingLoggerScheduler::current_level() const {
 
 std::string BlockingLoggerScheduler::current_thread_name() const {
     return _data.find(std::this_thread::get_id())->second.second;
+}
+
+SizeType BlockingLoggerScheduler::largest_thread_name_size() const {
+    SizeType result = 0;
+    for (auto entry : _data) result = std::max(result,entry.second.second.size());
+    return result;
 }
 
 void BlockingLoggerScheduler::increase_level(unsigned int i) {
@@ -351,6 +361,12 @@ unsigned int NonblockingLoggerScheduler::current_level() const {
 
 std::string NonblockingLoggerScheduler::current_thread_name() const {
     return _data.find(std::this_thread::get_id())->second->thread_name();
+}
+
+SizeType NonblockingLoggerScheduler::largest_thread_name_size() const {
+    SizeType result = 0;
+    for (auto entry : _data) result = std::max(result,entry.second->thread_name().size());
+    return result;
 }
 
 void NonblockingLoggerScheduler::increase_level(unsigned int i) {
@@ -782,12 +798,14 @@ void Logger::_print_preamble_for_firstline(unsigned int level, std::string threa
     bool thread_name_changed = (_cached_last_printed_thread_name != thread_name);
     bool level_changed = (_cached_last_printed_level != level);
     bool always_print_level = not(_configuration.prints_level_on_change_only());
+    auto largest_thread_name_size = _scheduler->largest_thread_name_size();
+    std::string thread_name_prefix = std::string(largest_thread_name_size-thread_name.size(),' ');
 
     if (can_print_thread_name and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::BEFORE) {
         if (thread_name_changed) {
-            if (theme.at.is_styled()) std::clog << thread_name << theme.at() << "@" << TerminalTextStyle::RESET;
-            else std::clog << thread_name << "@";
-        } else std::clog << std::string(thread_name.size()+1, ' ');
+            if (theme.at.is_styled()) std::clog << thread_name_prefix << thread_name << theme.at() << "@" << TerminalTextStyle::RESET;
+            else std::clog << thread_name_prefix << thread_name << "@";
+        } else std::clog << std::string(largest_thread_name_size+1, ' ');
     }
 
     if ((can_print_thread_name and thread_name_changed) or always_print_level or level_changed) {
@@ -799,7 +817,7 @@ void Logger::_print_preamble_for_firstline(unsigned int level, std::string threa
         if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << theme.at() << "@" << TerminalTextStyle::RESET << thread_name;
             else std::clog << thread_name << "@";
-        } else std::clog << std::string(thread_name.size()+1, ' ');
+        } else std::clog << std::string(largest_thread_name_size+1, ' ');
     }
 
     if (not level_changed and _configuration.prints_level_on_change_only() and theme.level_hidden_separator.is_styled()) {
@@ -815,7 +833,7 @@ void Logger::_print_preamble_for_firstline(unsigned int level, std::string threa
 void Logger::_print_preamble_for_extralines(unsigned int level, std::string thread_name) {
     auto theme = _configuration.theme();
     std::clog << (level>9 ? "  " : " ");
-    if (_can_print_thread_name()) std::clog << std::string(thread_name.size() + 1, ' ');
+    if (_can_print_thread_name()) std::clog << std::string(_scheduler->largest_thread_name_size() + 1, ' ');
     if (theme.multiline_separator.is_styled()) std::clog << theme.multiline_separator() << "·" << TerminalTextStyle::RESET;
     else std::clog << "·";
 
@@ -883,7 +901,7 @@ void Logger::_cover_held_columns_with_whitespaces(unsigned int printed_columns) 
 
 void Logger::_println(LogRawMessage const& msg) {
 
-    const unsigned int preamble_columns = (msg.level>9 ? 3:2)+(_can_print_thread_name() ? msg.identifier.size()+1 : 0)+msg.level;
+    const unsigned int preamble_columns = (msg.level>9 ? 3:2)+(_can_print_thread_name() ? _scheduler->largest_thread_name_size()+1 : 0)+msg.level;
 
     // If holding, we must write over the held line first
     if (_is_holding()) std::clog << '\r';

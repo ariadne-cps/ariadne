@@ -226,4 +226,8 @@ Bool TaskSearchPointCost::operator<(TaskSearchPointCost const& s) const {
     return this->_cost < s._cost;
 }
 
+OutputStream& TaskSearchPointCost::_write(OutputStream& os) const {
+    return os << "{" << _point << ":" << _cost << "}";
+}
+
 } // namespace Ariadne

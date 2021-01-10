@@ -124,7 +124,7 @@ IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction cons
 
     FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step)))))).upper();
     auto lipschitz_step = static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance/lipschitz));
-    ARIADNE_LOG_PRINTLN("lipschitz_step="<<lipschitz_step);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,lipschitz_step);
     for (SizeType i=0; i<_starting_step_size_num_refinements; ++i)
         lipschitz_step = hlf(lipschitz_step);
     return min(lipschitz_step, maximum_time_step);
@@ -157,7 +157,7 @@ FlowStepModelType
 IntegratorBase::flow_to(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx0, const Real& tmax) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("vf="<<vf);
+    ARIADNE_LOG_PRINTLN_VAR(vf);
     ARIADNE_LOG_PRINTLN("dom(x0)="<<dx0<<" tmax="<<tmax);
     const SizeType n=dx0.size(); // Dimension of the state space
     FlowStepModelType flow_function=this->function_factory().create_identity(dx0);
@@ -309,30 +309,30 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
     FlowStepModelType phi0=this->function_factory().create_projection(wdom,range(0,nx));
-    ARIADNE_LOG_PRINTLN_AT(1,"phi0="<<phi0);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,phi0);
     FlowStepModelType phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"phi="<<phi);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,phi);
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool below_maximum_error=(phi.error().raw()<this->step_maximum_error());
         FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        ARIADNE_LOG_PRINTLN_AT(2,"fphi="<<fphi);
+        ARIADNE_LOG_PRINTLN_VAR_AT(2,fphi);
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
         phi=antiderivative(fphi,nx)+phi0;
-        ARIADNE_LOG_PRINTLN_AT(2,"phi="<<phi);
+        ARIADNE_LOG_PRINTLN_VAR_AT(2,phi);
         if(below_maximum_error && k>=this->_minimum_temporal_order) { break; }
     }
     if(phi.error().raw()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error());
     }
 
-    FlowStepModelType res=restriction(phi,dom);
+    FlowStepModelType result=restriction(phi,dom);
 
-    ARIADNE_LOG_PRINTLN("result="<<res);
-    return res;
+    ARIADNE_LOG_PRINTLN_VAR(result);
+    return result;
 
 }
 
@@ -568,7 +568,7 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
     FlowStepTaylorModelType tf(rs,dom,swp);
 
     Vector<Differential<FloatBounds<DP>>> ds=scale(Differential<FloatBounds<DP>>::variables(deg,Vector<FloatBounds<DP>>(as,dp)),dom);
-    ARIADNE_LOG_PRINTLN_AT(1,"ds="<<ds<<"\rs");
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,ds);
     Vector<Differential<FloatBounds<DP>>> dfs = compose(df,ds);
 
     for(SizeType i=0; i!=rs; ++i) {

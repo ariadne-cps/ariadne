@@ -107,7 +107,7 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
         Dyadic next_time = in.current_time;
         Dyadic chosen_step_size = in.maximum_step_size;
         FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
-        ARIADNE_LOG_PRINTLN_VAR(chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, chosen_step_size);
         ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
         next_time += chosen_step_size;
         ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);

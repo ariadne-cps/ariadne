@@ -98,13 +98,15 @@ Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& s
 
 typedef double CostType;
 
-class TaskSearchPointCost {
+class TaskSearchPointCost : public WritableInterface {
   public:
     TaskSearchPointCost(TaskSearchPoint const& p, CostType const& s);
     TaskSearchPoint const& point() const;
     CostType const& cost() const;
     //! \brief Ordering is based on cost value
     Bool operator<(TaskSearchPointCost const& s) const;
+
+    virtual OutputStream& _write(OutputStream& os) const;
 private:
     TaskSearchPoint _point;
     CostType _cost;

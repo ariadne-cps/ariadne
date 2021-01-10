@@ -216,6 +216,13 @@ _evolution(EnclosureListType& final_sets,
         EnclosureType current_set_model=current_timed_set.second;
         FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
 
+        ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<std::left<<working_sets.size()+1
+                                 <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                                 <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
+                                 <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
+                                 <<" r="<<std::setw(7)<<current_set_model.radius()
+                                 <<" c="<<current_set_model.centre());
+
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
@@ -235,14 +242,6 @@ _evolution(EnclosureListType& final_sets,
                                   current_timed_set,previous_step_size,maximum_time,
                                   semantics,reach);
         }
-
-        ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
-                            <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                            <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
-                            <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
-                            <<" r="<<std::setw(7)<<current_set_model.radius()
-                            <<" c="<<current_set_model.centre());
-
 
         initials_indicator.update_current(final_sets.size());
         time_indicator.update_current(current_time.get_d());

@@ -171,7 +171,7 @@ ParameterSearchRunner<T>::_loop() {
             auto result = this->_task->run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
-            ARIADNE_LOG_PRINTLN("task completed in " << execution_time.count() << " us");
+            ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");
             _output_buffer.push(OutputBufferContentType(pkg.first,result,execution_time,pkg.second));
         } catch (std::exception& e) {
             ++_failures;
@@ -227,7 +227,7 @@ typename ParameterSearchRunner<T>::OutputType
 ParameterSearchRunner<  T>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>=_concurrency-_failures; });
-    ARIADNE_LOG_PRINTLN("received " << _concurrency-_failures << " completed tasks.");
+    ARIADNE_LOG_PRINTLN("received " << _concurrency-_failures << " completed tasks");
     _failures=0;
 
     Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> outputs;
@@ -237,10 +237,7 @@ ParameterSearchRunner<  T>::pull() {
                 io_data.point(),TaskIOData<InputType,OutputType>(io_data.input(),io_data.output(),io_data.execution_time())));
     }
     auto appraisals = this->_task->appraise(outputs);
-    ARIADNE_LOG_PRINTLN("previous points:");
-    for (auto a : appraisals) {
-        ARIADNE_LOG_PRINTLN(a.point() << ", cost: " << a.cost());
-    }
+    ARIADNE_LOG_PRINTLN_VAR(appraisals);
 
     Set<TaskSearchPoint> new_points;
     SizeType cnt = 0;
@@ -251,7 +248,7 @@ ParameterSearchRunner<  T>::pull() {
     }
     new_points = make_extended_set_by_shifting(new_points, _concurrency);
     for (auto p : new_points) _points.push(p);
-    ARIADNE_LOG_PRINTLN("new points: " << new_points);
+    ARIADNE_LOG_PRINTLN_VAR(new_points);
 
     auto best = appraisals.begin()->point();
     _best_points.push_back(best);

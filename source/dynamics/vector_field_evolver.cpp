@@ -108,16 +108,12 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-using std::shared_ptr;
-
-class DegenerateCrossingException { };
-
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _sys_ptr(system.clone())
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepSerialRunner()));
+    set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new FlowStepSequentialRunner()));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {

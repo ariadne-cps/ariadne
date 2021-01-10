@@ -56,7 +56,7 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
 
-    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new VectorFieldEvolverFlowStepParameterSearchRunner(4)));
+    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new FlowStepParameterSearchRunner(4)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

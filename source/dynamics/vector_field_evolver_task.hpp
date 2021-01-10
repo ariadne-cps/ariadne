@@ -60,11 +60,6 @@ struct FlowStepRunnerInput {
     Dyadic const& maximum_step_size;
 };
 
-struct FlowStepRunnerConfiguration {
-    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
-    SharedPointer<TaylorPicardIntegrator> integrator;
-};
-
 struct FlowStepRunnerOutput {
     FlowStepRunnerOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
             evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
@@ -74,81 +69,75 @@ struct FlowStepRunnerOutput {
     Dyadic const step_size_used;
 };
 
-inline TaskSearchSpace make_flow_step_runner_space() {
-    RealVariable sssnr("starting_step_size_num_refinements"), st("sweep_threshold"), mto("maximum_temporal_order");
-    return TaskSearchSpace({MetricSearchParameter(sssnr, 5, 2),
-                            MetricSearchParameter(st, exp(-st * log(RealConstant(10))), 12, 9),
-                            MetricSearchParameter(mto, 15, 12)
-                             },(st*mto)/sssnr);
-}
+struct FlowStepRunnerConfiguration {
+    FlowStepRunnerConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
+    SharedPointer<TaylorPicardIntegrator> integrator;
+};
 
-inline FlowStepRunnerConfiguration
-to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) {
-    TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
-    SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
-            MaximumError(default_integrator.maximum_error()),
-            ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
-            LipschitzConstant(default_integrator.lipschitz_tolerance()),
-            StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
-            StepMaximumError(default_integrator.step_maximum_error()),
-            MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
-            MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
-    ));
-    return FlowStepRunnerConfiguration(integrator);
-}
+struct FlowStepTask final: public TaskInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
+    std::string name() const override { return "stp"; }
+    TaskSearchSpace const& search_space() const override { return _space; }
 
-inline FlowStepRunnerOutput
-run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) {
-    LabelledEnclosure next_set = in.current_set;
-    LabelledEnclosure reach_set = in.current_set;
-    Dyadic next_time = in.current_time;
-    Dyadic chosen_step_size = in.maximum_step_size;
-    FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
-    ARIADNE_LOG_PRINTLN_VAR(chosen_step_size);
-    ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
-    next_time += chosen_step_size;
-    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);
-    reach_set.apply_full_reach_step(flow_model);
-    ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
-    next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
-    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
-    return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
-}
-
-inline Set<TaskSearchPointCost>
-appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) {
-    Set<TaskSearchPointCost> result;
-
-    Nat max_x = 0;
-    for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.execution_time().count());
-    for (auto entry : data) {
-        CostType x = CostType(entry.second.execution_time().count())/max_x;
-        CostType p = entry.second.output().step_size_used.get_d();
-        result.insert(TaskSearchPointCost(entry.first, x/p));
+    FlowStepRunnerConfiguration
+    to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override {
+        TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
+        SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
+                MaximumError(default_integrator.maximum_error()),
+                ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
+                LipschitzConstant(default_integrator.lipschitz_tolerance()),
+                StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
+                StepMaximumError(default_integrator.step_maximum_error()),
+                MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
+                MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
+        ));
+        return FlowStepRunnerConfiguration(integrator);
     }
-    return result;
-}
 
-struct VectorFieldEvolverFlowStepSerialRunner final : public SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
-    VectorFieldEvolverFlowStepSerialRunner() : SequentialRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>(make_flow_step_runner_space()) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
-    FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
-    Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::appraise(data); }
+    FlowStepRunnerOutput
+    run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override {
+        LabelledEnclosure next_set = in.current_set;
+        LabelledEnclosure reach_set = in.current_set;
+        Dyadic next_time = in.current_time;
+        Dyadic chosen_step_size = in.maximum_step_size;
+        FlowStepModelType flow_model = cfg.integrator->flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR(chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
+        next_time += chosen_step_size;
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);
+        reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
+        next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
+        return FlowStepRunnerOutput(next_set, reach_set, next_time, chosen_step_size);
+    }
+
+    Set<TaskSearchPointCost>
+    appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override {
+        Set<TaskSearchPointCost> result;
+
+        Nat max_x = 0;
+        for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.execution_time().count());
+        for (auto entry : data) {
+            CostType x = CostType(entry.second.execution_time().count())/max_x;
+            CostType p = entry.second.output().step_size_used.get_d();
+            result.insert(TaskSearchPointCost(entry.first, x/p));
+        }
+        return result;
+    }
+
+  private:
+    TaskSearchSpace make_flow_step_runner_space() {
+        RealVariable sssnr("starting_step_size_num_refinements"), st("sweep_threshold"), mto("maximum_temporal_order");
+        return TaskSearchSpace({MetricSearchParameter(sssnr, 5, 2),
+                                MetricSearchParameter(st, exp(-st * log(RealConstant(10))), 12, 9),
+                                MetricSearchParameter(mto, 15, 12)
+                               },(st*mto)/sssnr); }
+    TaskSearchSpace const _space = make_flow_step_runner_space();
 };
 
-struct VectorFieldEvolverFlowStepDetachedRunner final : public DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
-    VectorFieldEvolverFlowStepDetachedRunner() : DetachedRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("step", make_flow_step_runner_space()) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
-    FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
-    Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::appraise(data); }
-};
-
-struct VectorFieldEvolverFlowStepParameterSearchRunner final : public ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> {
-    VectorFieldEvolverFlowStepParameterSearchRunner(Nat concurrency) : ParameterSearchRunnerBase<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>("stp", make_flow_step_runner_space(),concurrency) { }
-    FlowStepRunnerConfiguration to_configuration(FlowStepRunnerInput const& in, TaskSearchPoint const& p) const override { return Ariadne::to_configuration(in, p); }
-    FlowStepRunnerOutput run_task(FlowStepRunnerInput const& in, FlowStepRunnerConfiguration const& cfg) const override { return Ariadne::run_task(in,cfg); }
-    Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<FlowStepRunnerInput,FlowStepRunnerOutput>> const& data) const override { return Ariadne::appraise(data); }
-};
+using FlowStepSequentialRunner = SequentialRunner<FlowStepTask>;
+using FlowStepDetachedRunner = DetachedRunner<FlowStepTask>;
+using FlowStepParameterSearchRunner = ParameterSearchRunner<FlowStepTask>;
 
 } // namespace Ariadne
 

@@ -59,11 +59,11 @@ class VectorFieldEvolverConfiguration;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >,
-      public TaskRunnableInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration>
+    : public EvolverBase<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
+      public TaskRunnableInterface<FlowStepTask>
 {
   public:
-    typedef TaskRunnerInterface<FlowStepRunnerInput,FlowStepRunnerOutput,FlowStepRunnerConfiguration> RunnerType;
+    typedef TaskRunnerInterface<FlowStepTask> RunnerType;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;

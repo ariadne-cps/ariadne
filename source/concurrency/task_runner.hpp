@@ -39,56 +39,46 @@ namespace Ariadne {
 
 //! \brief Run a task sequentially.
 //! \details Used to provide a sequential alternative to any thread-based implementation.
-template<class I, class O, class C>
-class SequentialRunnerBase : public TaskRunnerInterface<I,O,C> {
+template<class T>
+class SequentialRunner final : public TaskRunnerInterface<T> {
   public:
-    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
-    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerInterface<T>::InputType InputType;
+    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
 
-    SequentialRunnerBase(TaskSearchSpace const& space);
-    virtual ~SequentialRunnerBase() = default;
+    SequentialRunner();
+    virtual ~SequentialRunner() = default;
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
-    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
-    virtual Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
-
 private:
+    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
     SharedPointer<OutputType> _last_output;
-    // Parameter space
-    SharedPointer<TaskSearchSpace> const _parameter_space;
 };
 
 //! \brief Run a task in a detached thread, allowing concurrent processing.
-template<class I, class O, class C>
-class DetachedRunnerBase : public TaskRunnerInterface<I,O,C> {
+template<class T>
+class DetachedRunner final : public TaskRunnerInterface<T> {
   public:
-    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
-    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerInterface<T>::InputType InputType;
+    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
     typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
-    DetachedRunnerBase(String const& thread_name, TaskSearchSpace const& space);
-    virtual ~DetachedRunnerBase();
+    DetachedRunner();
+    virtual ~DetachedRunner();
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
-
-    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
-    virtual Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
 
 private:
     Void _loop();
 private:
-    // Parameter space
-    SharedPointer<TaskSearchSpace> const _parameter_space;
+    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
     // Synchronization
     LoggableSmartThread _thread;
     InputBufferType _input_buffer;
@@ -106,32 +96,28 @@ template<class I, class O> class TaskIOData;
 template<class I, class O> class ParameterSearchOutputBufferData;
 
 //! \brief Run a task by concurrent search into the parameter space.
-template<class I, class O, class C>
-class ParameterSearchRunnerBase : public TaskRunnerInterface<I,O,C> {
+template<class T>
+class ParameterSearchRunner final : public TaskRunnerInterface<T> {
 public:
-    typedef typename TaskRunnerInterface<I,O,C>::InputType InputType;
-    typedef typename TaskRunnerInterface<I,O,C>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<I,O,C>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerInterface<T>::InputType InputType;
+    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
     typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
-    typedef ParameterSearchOutputBufferData<I,O> OutputBufferContentType;
+    typedef ParameterSearchOutputBufferData<InputType,OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
 
-    ParameterSearchRunnerBase(String const& thread_base_name, TaskSearchSpace const& space, Nat concurrency);
-    virtual ~ParameterSearchRunnerBase();
+    ParameterSearchRunner(Nat concurrency);
+    virtual ~ParameterSearchRunner();
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
-    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const override = 0;
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const override = 0;
-    virtual Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> const& data) const override = 0;
 private:
     Void _loop();
 private:
-    // Parameter space
-    SharedPointer<TaskSearchSpace> const _parameter_space;
+    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
     // Concurrency
     Nat const _concurrency;
     std::queue<TaskSearchPoint> _points;

@@ -56,7 +56,7 @@ private:
     SharedPointer<OutputType> _last_output;
 };
 
-//! \brief Run a task in a detached thread, allowing concurrent processing.
+//! \brief Run a task in a detached thread, allowing other processing between pushing and pulling.
 template<class T>
 class DetachedRunner final : public TaskRunnerBase<T> {
   public:
@@ -91,7 +91,7 @@ typedef std::chrono::microseconds DurationType;
 template<class I, class O> class TaskIOData;
 template<class I, class O> class ParameterSearchOutputBufferData;
 
-//! \brief Run a task by concurrent search into the parameter space.
+//! \brief Run a task by detached concurrent search into the parameter space.
 template<class T>
 class ParameterSearchRunner final : public TaskRunnerBase<T> {
 public:
@@ -113,7 +113,8 @@ public:
 private:
     Void _loop();
 private:
-    Nat const _concurrency;
+    Nat const _concurrency; // Number of threads to be used
+    std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
     std::queue<TaskSearchPoint> _points;
     List<TaskSearchPoint> _best_points;
     // Synchronization

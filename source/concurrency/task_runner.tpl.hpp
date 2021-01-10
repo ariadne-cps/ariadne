@@ -167,21 +167,25 @@ ParameterSearchRunner<T>::_loop() {
         auto pkg = _input_buffer.pop();
         auto cfg = this->_task->to_configuration(pkg.first,pkg.second);
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = this->_task->run_task(pkg.first,cfg);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
-        ARIADNE_LOG_PRINTLN("execution_time: " << execution_time.count() << " us");
-        _output_buffer.push(OutputBufferContentType(pkg.first,result,execution_time,pkg.second));
+        try {
+            auto result = this->_task->run_task(pkg.first,cfg);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
+            ARIADNE_LOG_PRINTLN("task completed in " << execution_time.count() << " us");
+            _output_buffer.push(OutputBufferContentType(pkg.first,result,execution_time,pkg.second));
+        } catch (std::exception& e) {
+            ++_failures;
+            ARIADNE_LOG_PRINTLN("task failed: " << e.what());
+        }
         _output_availability.notify_all();
     }
 }
 
 template<class T>
 ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
-        :  _concurrency(concurrency),
+        :  _concurrency(concurrency), _failures(0),
            _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
-           _terminate(false)
-{
+           _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
 
@@ -196,23 +200,21 @@ ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
 
 template<class T>
 ParameterSearchRunner<T>::~ParameterSearchRunner() {
-    ARIADNE_LOG_PRINTLN("Best points: " << _best_points);
+    ARIADNE_LOG_PRINTLN_VAR(_best_points);
     _terminate = true;
     _input_availability.notify_all();
 }
 
 template<class T>
 Void
-ParameterSearchRunner<T>::activate()
-{
+ParameterSearchRunner<T>::activate() {
     for (auto thread : _threads)
         thread->activate();
 }
 
 template<class T>
 Void
-ParameterSearchRunner<T>::push(InputType const& input)
-{
+ParameterSearchRunner<T>::push(InputType const& input) {
     for (SizeType i=0; i<_concurrency; ++i) {
         _input_buffer.push({input,_points.front()});
         _points.pop();
@@ -224,13 +226,15 @@ template<class T>
 typename ParameterSearchRunner<T>::OutputType
 ParameterSearchRunner<  T>::pull() {
     std::unique_lock<std::mutex> locker(_output_mutex);
-    _output_availability.wait(locker, [this]() { return _output_buffer.size()==_concurrency; });
+    _output_availability.wait(locker, [this]() { return _output_buffer.size()>=_concurrency-_failures; });
+    ARIADNE_LOG_PRINTLN("received " << _concurrency-_failures << " completed tasks.");
+    _failures=0;
 
     Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> outputs;
     while (_output_buffer.size() > 0) {
-        auto iodata = _output_buffer.pop();
-        outputs.insert(Pair<TaskSearchPoint,TaskIOData<InputType,OutputType>>(iodata.point(),TaskIOData<InputType,OutputType>(iodata.input(),iodata.output(),
-                                                                                            iodata.execution_time())));
+        auto io_data = _output_buffer.pop();
+        outputs.insert(Pair<TaskSearchPoint,TaskIOData<InputType,OutputType>>(
+                io_data.point(),TaskIOData<InputType,OutputType>(io_data.input(),io_data.output(),io_data.execution_time())));
     }
     auto appraisals = this->_task->appraise(outputs);
     ARIADNE_LOG_PRINTLN("previous points:");

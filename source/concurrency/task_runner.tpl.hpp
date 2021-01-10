@@ -31,8 +31,17 @@
 namespace Ariadne {
 
 template<class T>
-SequentialRunner<T>::SequentialRunner()
-        :  _task(new T()) { }
+class TaskRunnerBase : public TaskRunnerInterface<T> {
+public:
+    typedef typename TaskRunnerInterface<T>::InputType InputType;
+    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
+
+    TaskRunnerBase() : _task(new T()) { }
+    virtual ~TaskRunnerBase() = default;
+protected:
+    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
+};
 
 template<class T>
 Void
@@ -45,7 +54,7 @@ template<class T>
 Void
 SequentialRunner<T>::push(InputType const& input)
 {
-    _last_output.reset(new OutputType(_task->run_task(input,_task->to_configuration(input,_task->search_space().initial_point()))));
+    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->to_configuration(input,this->_task->search_space().initial_point()))));
 }
 
 template<class T>
@@ -63,14 +72,14 @@ DetachedRunner<T>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(_task->run_task(pkg.first,_task->to_configuration(pkg.first,pkg.second)));
+        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->to_configuration(pkg.first,pkg.second)));
         _output_availability.notify_all();
     }
 }
 
 template<class T>
 DetachedRunner<T>::DetachedRunner()
-        :  _task(new T()), _thread(_task->name(), [this]() { _loop(); }),
+        :  _thread(this->_task->name(), [this]() { _loop(); }),
            _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
            _terminate(false) { }
 
@@ -91,7 +100,7 @@ template<class T>
 Void
 DetachedRunner<T>::push(InputType const& input)
 {
-    _input_buffer.push({input,_task->search_space().initial_point()});
+    _input_buffer.push({input,this->_task->search_space().initial_point()});
     _input_availability.notify_all();
 }
 
@@ -156,9 +165,9 @@ ParameterSearchRunner<T>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = _task->to_configuration(pkg.first,pkg.second);
+        auto cfg = this->_task->to_configuration(pkg.first,pkg.second);
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = _task->run_task(pkg.first,cfg);
+        auto result = this->_task->run_task(pkg.first,cfg);
         auto end = std::chrono::high_resolution_clock::now();
         auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
         ARIADNE_LOG_PRINTLN("execution_time: " << execution_time.count() << " us");
@@ -169,14 +178,14 @@ ParameterSearchRunner<T>::_loop() {
 
 template<class T>
 ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
-        :  _task(new T()), _concurrency(concurrency),
+        :  _concurrency(concurrency),
            _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
            _terminate(false)
 {
     for (Nat i=0; i<concurrency; ++i)
-        _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
+        _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
 
-    auto initial = _task->search_space().initial_point();
+    auto initial = this->_task->search_space().initial_point();
     _points.push(initial);
     if (_concurrency>1) {
         auto shifted = initial.make_random_shifted(_concurrency-1);
@@ -223,7 +232,7 @@ ParameterSearchRunner<  T>::pull() {
         outputs.insert(Pair<TaskSearchPoint,TaskIOData<InputType,OutputType>>(iodata.point(),TaskIOData<InputType,OutputType>(iodata.input(),iodata.output(),
                                                                                             iodata.execution_time())));
     }
-    auto appraisals = _task->appraise(outputs);
+    auto appraisals = this->_task->appraise(outputs);
     ARIADNE_LOG_PRINTLN("previous points:");
     for (auto a : appraisals) {
         ARIADNE_LOG_PRINTLN(a.point() << ", cost: " << a.cost());

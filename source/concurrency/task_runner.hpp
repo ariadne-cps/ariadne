@@ -37,34 +37,32 @@
 
 namespace Ariadne {
 
+template<class T> class TaskRunnerBase;
+
 //! \brief Run a task sequentially.
 //! \details Used to provide a sequential alternative to any thread-based implementation.
 template<class T>
-class SequentialRunner final : public TaskRunnerInterface<T> {
+class SequentialRunner final : public TaskRunnerBase<T> {
   public:
-    typedef typename TaskRunnerInterface<T>::InputType InputType;
-    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
-
-    SequentialRunner();
-    virtual ~SequentialRunner() = default;
+    typedef typename TaskRunnerBase<T>::InputType InputType;
+    typedef typename TaskRunnerBase<T>::OutputType OutputType;
+    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
 
     Void activate() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
 private:
-    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
     SharedPointer<OutputType> _last_output;
 };
 
 //! \brief Run a task in a detached thread, allowing concurrent processing.
 template<class T>
-class DetachedRunner final : public TaskRunnerInterface<T> {
+class DetachedRunner final : public TaskRunnerBase<T> {
   public:
-    typedef typename TaskRunnerInterface<T>::InputType InputType;
-    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerBase<T>::InputType InputType;
+    typedef typename TaskRunnerBase<T>::OutputType OutputType;
+    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
     typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
@@ -78,8 +76,6 @@ class DetachedRunner final : public TaskRunnerInterface<T> {
 private:
     Void _loop();
 private:
-    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
-    // Synchronization
     LoggableSmartThread _thread;
     InputBufferType _input_buffer;
     OutputBufferType _output_buffer;
@@ -97,11 +93,11 @@ template<class I, class O> class ParameterSearchOutputBufferData;
 
 //! \brief Run a task by concurrent search into the parameter space.
 template<class T>
-class ParameterSearchRunner final : public TaskRunnerInterface<T> {
+class ParameterSearchRunner final : public TaskRunnerBase<T> {
 public:
-    typedef typename TaskRunnerInterface<T>::InputType InputType;
-    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerBase<T>::InputType InputType;
+    typedef typename TaskRunnerBase<T>::OutputType OutputType;
+    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
     typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
     typedef ParameterSearchOutputBufferData<InputType,OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
@@ -117,8 +113,6 @@ public:
 private:
     Void _loop();
 private:
-    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
-    // Concurrency
     Nat const _concurrency;
     std::queue<TaskSearchPoint> _points;
     List<TaskSearchPoint> _best_points;

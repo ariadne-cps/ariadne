@@ -38,14 +38,13 @@ using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
 
 class TaskSearchSpace : public WritableInterface {
   public:
-    TaskSearchSpace(Set<TaskSearchParameter> const& parameters, RealExpression const& time_cost_estimator);
+    TaskSearchSpace(Set<TaskSearchParameter> const& parameters);
 
     TaskSearchPoint make_point(Map<RealVariable,Nat> const& bindings) const;
     TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
     TaskSearchPoint initial_point() const;
 
     List<TaskSearchParameter> const& parameters() const { return _parameters; }
-    RealExpression const& time_cost_estimator() const { return _time_cost_estimator; }
 
     Nat dimension() const { return _parameters.size(); }
     Nat index(TaskSearchParameter const& p) const;
@@ -56,7 +55,6 @@ class TaskSearchSpace : public WritableInterface {
 
   private:
     const List<TaskSearchParameter> _parameters;
-    const RealExpression _time_cost_estimator;
 };
 
 } // namespace Ariadne

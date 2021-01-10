@@ -80,8 +80,8 @@ private:
 
 class MetricSearchParameter : public TaskSearchParameterBase {
   public:
-    MetricSearchParameter(RealVariable const& variable, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(variable, variable), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
-    MetricSearchParameter(RealVariable const& variable, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(variable, value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
+    MetricSearchParameter(String const& name, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
+    MetricSearchParameter(String const& name, RealExpression const& value_expression, Nat const& upper_bound, Nat const& initial) : TaskSearchParameterBase(RealVariable(name), value_expression), _ub(upper_bound), _initial(initial) { ARIADNE_PRECONDITION(initial <= upper_bound); }
 
     TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::METRIC; }
     Nat upper_bound() const override { return _ub; }
@@ -98,7 +98,7 @@ class MetricSearchParameter : public TaskSearchParameterBase {
 
 class BooleanSearchParameter : public TaskSearchParameterBase {
 public:
-    BooleanSearchParameter(RealVariable const& variable, Bool const& initial) : TaskSearchParameterBase(variable, variable), _initial(initial) { }
+    BooleanSearchParameter(String const& name, Bool const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _initial(initial) { }
 
     TaskSearchParameterKind kind() const override { return TaskSearchParameterKind::BOOLEAN; }
     Nat upper_bound() const override { return 1; }
@@ -115,7 +115,7 @@ public:
 template<class E>
 class EnumerationSearchParameter : public TaskSearchParameterBase {
 public:
-    EnumerationSearchParameter(RealVariable const& variable, List<E> const& elements, E const& initial) : TaskSearchParameterBase(variable, variable), _elements(elements) {
+    EnumerationSearchParameter(String const& name, List<E> const& elements, E const& initial) : TaskSearchParameterBase(RealVariable(name), RealVariable(name)), _elements(elements) {
         ARIADNE_PRECONDITION(elements.size() > 1);
         Nat index = elements.size();
         for (SizeType i=0; i<elements.size();++i) {

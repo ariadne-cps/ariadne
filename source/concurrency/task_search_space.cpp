@@ -27,8 +27,8 @@
 
 namespace Ariadne {
 
-TaskSearchSpace::TaskSearchSpace(Set<TaskSearchParameter> const& parameters, RealExpression const& time_cost_estimator)
-        : _parameters(parameters), _time_cost_estimator(time_cost_estimator) {
+TaskSearchSpace::TaskSearchSpace(Set<TaskSearchParameter> const& parameters)
+        : _parameters(parameters) {
     ARIADNE_PRECONDITION(not _parameters.empty());
 }
 
@@ -61,7 +61,7 @@ Nat TaskSearchSpace::index(TaskSearchParameter const& p) const {
 }
 
 OutputStream& TaskSearchSpace::_write(OutputStream& os) const {
-    return os << "{variables: "<< _parameters << ", time_cost_estimate: " << _time_cost_estimator << "}";
+    return os << _parameters;
 }
 
 } // namespace Ariadne

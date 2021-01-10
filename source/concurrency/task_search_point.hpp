@@ -54,9 +54,6 @@ class TaskSearchPoint : public WritableInterface {
     //! \brief The value for a given parameter, possibly using some \a external values
     Real value(Identifier const& var, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
 
-    //! \brief Provide a time cost estimate, where the \a external_values bind constants to their values
-    Real time_cost_estimate(Map<RealVariable,Real> const & external_values = Map<RealVariable,Real>()) const;
-
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
     Set<TaskSearchPoint> make_adjacent_shifted(Nat amount) const;

@@ -136,14 +136,6 @@ Real TaskSearchPoint::value(Identifier const& var, Map<RealVariable,Real> const&
     return iter->first.value(iter->second,external_values);
 }
 
-Real TaskSearchPoint::time_cost_estimate(Map<RealVariable,Real> const& external_variables) const {
-    Map<Identifier,Real> values;
-    for (auto binding : _bindings) {
-        values.insert(Pair<Identifier,Real>(binding.first.variable().name(),binding.first.value(binding.second,external_variables)));
-    }
-    return evaluate(_space->time_cost_estimator(),Valuation<Real,Real>(values));
-}
-
 TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);

@@ -88,8 +88,7 @@ private:
 
 typedef std::chrono::microseconds DurationType;
 
-template<class I, class O> class TaskIOData;
-template<class I, class O> class ParameterSearchOutputBufferData;
+template<class O> class ParameterSearchOutputBufferData;
 
 //! \brief Run a task by detached concurrent search into the parameter space.
 template<class T>
@@ -99,7 +98,7 @@ public:
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
     typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
     typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
-    typedef ParameterSearchOutputBufferData<InputType,OutputType> OutputBufferContentType;
+    typedef ParameterSearchOutputBufferData<OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
 
@@ -115,6 +114,7 @@ private:
 private:
     Nat const _concurrency; // Number of threads to be used
     std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
+    Buffer<InputType> _last_used_input;
     std::queue<TaskSearchPoint> _points;
     List<TaskSearchPoint> _best_points;
     // Synchronization

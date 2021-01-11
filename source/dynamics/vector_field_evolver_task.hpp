@@ -119,19 +119,23 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
     }
 
     Set<TaskSearchPointCost>
-    appraise(Map<TaskSearchPoint,TaskIOData<FlowStepInput,FlowStepOutput>> const& data) const override {
+    appraise(Map<TaskSearchPoint,Pair<FlowStepOutput,DurationType>> const& data, FlowStepInput const& input) const override {
         Set<TaskSearchPointCost> result;
 
         Nat max_x = 0;
-        for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.execution_time().count());
+        for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.second.count());
         for (auto entry : data) {
-            CostType x = CostType(entry.second.execution_time().count())/max_x;
-            CostType p = entry.second.output().step_size_used.get_d();
+            CostType x = CostType(entry.second.second.count())/max_x;
+            CostType p = entry.second.first.step_size_used.get_d();
             result.insert(TaskSearchPointCost(entry.first, x/p));
         }
         return result;
     }
 };
+
+template class SequentialRunner<FlowStepTask>;
+template class DetachedRunner<FlowStepTask>;
+template class ParameterSearchRunner<FlowStepTask>;
 
 using FlowStepSequentialRunner = SequentialRunner<FlowStepTask>;
 using FlowStepDetachedRunner = DetachedRunner<FlowStepTask>;

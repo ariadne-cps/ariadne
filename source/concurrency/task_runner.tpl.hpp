@@ -112,44 +112,20 @@ DetachedRunner<T>::pull() {
     return _output_buffer.pop();
 }
 
-typedef std::chrono::microseconds DurationType;
-
-template<class I, class O>
-class TaskIOData {
-  public:
-    TaskIOData(I const& input, O const& output, DurationType const& execution_time) : _input(input), _output(output), _execution_time(execution_time) { }
-    TaskIOData& operator=(TaskIOData<I,O> const& p) {
-        _input = p._input;
-        _output = p._output;
-        _execution_time = p._execution_time;
-        return *this;
-    };
-    I const& input() const { return _input; }
-    O const& output() const { return _output; }
-    DurationType const& execution_time() const { return _execution_time; }
-  private:
-    I _input;
-    O _output;
-    DurationType _execution_time;
-};
-
-template<class I, class O>
+template<class O>
 class ParameterSearchOutputBufferData {
   public:
-    ParameterSearchOutputBufferData(I const& input, O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _input(input), _output(output), _execution_time(execution_time), _point(point) { }
-    ParameterSearchOutputBufferData& operator=(ParameterSearchOutputBufferData<I,O> const& p) {
-        _input = p._input;
+    ParameterSearchOutputBufferData(O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _output(output), _execution_time(execution_time), _point(point) { }
+    ParameterSearchOutputBufferData& operator=(ParameterSearchOutputBufferData<O> const& p) {
         _output = p._output;
         _execution_time = p._execution_time;
         _point = p._point;
         return *this;
     };
-    I const& input() const { return _input; }
     O const& output() const { return _output; }
     DurationType const& execution_time() const { return _execution_time; }
     TaskSearchPoint const& point() const { return _point; }
   private:
-    I _input;
     O _output;
     DurationType _execution_time;
     TaskSearchPoint _point;
@@ -172,7 +148,7 @@ ParameterSearchRunner<T>::_loop() {
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");
-            _output_buffer.push(OutputBufferContentType(pkg.first,result,execution_time,pkg.second));
+            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second));
         } catch (std::exception& e) {
             ++_failures;
             ARIADNE_LOG_PRINTLN("task failed: " << e.what());
@@ -183,7 +159,7 @@ ParameterSearchRunner<T>::_loop() {
 
 template<class T>
 ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
-        :  _concurrency(concurrency), _failures(0),
+        :  _concurrency(concurrency), _failures(0), _last_used_input(1),
            _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
            _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
@@ -219,6 +195,7 @@ ParameterSearchRunner<T>::push(InputType const& input) {
         _input_buffer.push({input,_points.front()});
         _points.pop();
     }
+    _last_used_input.push(input);
     _input_availability.notify_all();
 }
 
@@ -230,13 +207,14 @@ ParameterSearchRunner<  T>::pull() {
     ARIADNE_LOG_PRINTLN("received " << _concurrency-_failures << " completed tasks");
     _failures=0;
 
-    Map<TaskSearchPoint,TaskIOData<InputType,OutputType>> outputs;
+    InputType input = _last_used_input.pop();
+    Map<TaskSearchPoint,Pair<OutputType,DurationType>> outputs;
     while (_output_buffer.size() > 0) {
         auto io_data = _output_buffer.pop();
-        outputs.insert(Pair<TaskSearchPoint,TaskIOData<InputType,OutputType>>(
-                io_data.point(),TaskIOData<InputType,OutputType>(io_data.input(),io_data.output(),io_data.execution_time())));
+        outputs.insert(Pair<TaskSearchPoint,Pair<OutputType,DurationType>>(
+                io_data.point(),{io_data.output(),io_data.execution_time()}));
     }
-    auto appraisals = this->_task->appraise(outputs);
+    auto appraisals = this->_task->appraise(outputs,input);
     ARIADNE_LOG_PRINTLN_VAR(appraisals);
 
     Set<TaskSearchPoint> new_points;
@@ -252,7 +230,7 @@ ParameterSearchRunner<  T>::pull() {
 
     auto best = appraisals.begin()->point();
     _best_points.push_back(best);
-    return outputs.get(best).output();
+    return outputs.get(best).first;
 }
 
 } // namespace Ariadne

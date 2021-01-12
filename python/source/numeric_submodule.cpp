@@ -1077,6 +1077,8 @@ template<class PR> void export_float_approximation(pymodule& module)
     float_approximation_class.def("__str__", &__cstr__<FloatApproximation<PR>>);
     float_approximation_class.def("__repr__", &__repr__<FloatApproximation<PR>>);
 
+    float_approximation_class.def_static("set_output_places",&FloatApproximation<PR>::set_output_places);
+
     //NOTE: Conversion to FloatMP needs precision, so disallow conversion to FloatDP as well
     //implicitly_convertible<double,FloatApproximation<PR>>();
     implicitly_convertible<FloatValue<PR>,FloatApproximation<PR>>();

@@ -1012,12 +1012,12 @@ void Logger::_release(LogRawMessage const& msg) {
 
 } // namespace Ariadne
 
-inline bool startup_function() {
+inline bool startup_logging() {
     std::cerr << std::boolalpha;
     std::cout << std::boolalpha;
     std::clog << std::boolalpha;
     return true;
 }
 
-static const bool startup = startup_function();
+static const bool startup_logging_ = startup_logging();
 

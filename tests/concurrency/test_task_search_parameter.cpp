@@ -45,8 +45,6 @@ struct E : public TestInterfaceBase { E() : TestInterfaceBase(4) { }};
 class TestTaskSearchParameter {
   public:
 
-    TestTaskSearchParameter() { srand (time(NULL)); }
-
     Void test_boolean_task_parameter() {
         TaskSearchParameter p = BooleanSearchParameter("use_subdivisions", false);
         ARIADNE_TEST_PRINT(p);
@@ -240,7 +238,7 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_CALL(test_boolean_task_parameter());
         ARIADNE_TEST_CALL(test_boolean_task_parameter_shift());
         ARIADNE_TEST_CALL(test_metric_task_parameter());
-        ARIADNE_TEST_CALL(test_metric_task_parameter_invalid_bounds()); 
+        ARIADNE_TEST_CALL(test_metric_task_parameter_invalid_bounds());
         ARIADNE_TEST_CALL(test_metric_task_parameter_invalid_initial());
         ARIADNE_TEST_CALL(test_metric_task_parameter_shift());
         ARIADNE_TEST_CALL(test_enumeration_task_parameter());

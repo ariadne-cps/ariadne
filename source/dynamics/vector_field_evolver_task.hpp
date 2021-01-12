@@ -46,6 +46,8 @@
 
 namespace Ariadne {
 
+using std::min, std::max;
+
 struct FlowStepInput {
     FlowStepInput(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
                   FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
@@ -122,12 +124,47 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
     appraise(Map<TaskSearchPoint,Pair<FlowStepOutput,DurationType>> const& data, FlowStepInput const& input) const override {
         Set<TaskSearchPointCost> result;
 
-        Nat max_x = 0;
-        for (auto entry : data) max_x = std::max(max_x,(Nat)entry.second.second.count());
+        auto dim = input.current_set_bounds.dimension();
+        auto initial_widths = input.current_set_bounds.widths();
+
+        auto data_iter = data.cbegin();
+
+        // Get the minimum and maximum execution time
+        Nat min_x((Nat)data_iter->second.second.count()), max_x((Nat)data_iter->second.second.count());
+        // Get the minimum and maximum step size
+        StepSizeType min_step_size(data_iter->second.first.step_size_used), max_step_size(data_iter->second.first.step_size_used);
+        // Get the minimum and maximum differences of widths
+        Vector<CostType> min_width_diffs(dim), max_width_diffs(dim);
+        auto final_widths = data_iter->second.first.evolve.bounding_box().continuous_set().widths();
+        for (SizeType i=0; i<dim; ++i) {
+            min_width_diffs[i] = (final_widths[i]-initial_widths[i]).get_d();
+            max_width_diffs[i] = (final_widths[i]-initial_widths[i]).get_d();
+        }
+
+        ++data_iter;
+        while (data_iter != data.cend()) {
+            min_x = min(min_x,(Nat)data_iter->second.second.count());
+            max_x = max(max_x,(Nat)data_iter->second.second.count());
+            min_step_size = min(min_step_size,data_iter->second.first.step_size_used);
+            max_step_size = max(max_step_size,data_iter->second.first.step_size_used);
+            final_widths = data_iter->second.first.evolve.bounding_box().continuous_set().widths();
+            for (SizeType i=0; i<dim; ++i) {
+                min_width_diffs[i] = min(min_width_diffs[i],(final_widths[i]-initial_widths[i]).get_d());
+                max_width_diffs[i] = max(max_width_diffs[i],(final_widths[i]-initial_widths[i]).get_d());
+            }
+            ++data_iter;
+        }
+
         for (auto entry : data) {
-            CostType x = CostType(entry.second.second.count())/max_x;
-            CostType p = entry.second.first.step_size_used.get_d();
-            result.insert(TaskSearchPointCost(entry.first, x/p));
+            final_widths = entry.second.first.evolve.bounding_box().continuous_set().widths();
+            CostType a = 0;
+            for (SizeType i=0; i<dim; ++i) {
+                a += (max_width_diffs[i] != min_width_diffs[i] ? CostType(((final_widths[i]-initial_widths[i]-min_width_diffs[i])/(max_width_diffs[i]-min_width_diffs[i])).get_d()) : 0);
+            }
+            a/=dim;
+            auto x = (max_x != min_x ? (CostType(entry.second.second.count())-min_x)/(max_x-min_x) : 0);
+            auto p = (max_step_size != min_step_size ? ((entry.second.first.step_size_used-min_step_size)/(max_step_size-min_step_size)).get_d() : 0.0);
+            result.insert(TaskSearchPointCost(entry.first, 1*a+1*x-2*p));
         }
         return result;
     }

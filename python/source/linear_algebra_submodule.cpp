@@ -460,6 +460,12 @@ Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<
 
 
 
+Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Real>>& matrix_class)
+{
+    using X=Real;
+    define_matrix_class<X>(module,matrix_class);
+}
+
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Value<F>>>& matrix_class)
 {
     using X=Value<F>;
@@ -537,17 +543,21 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
-    //diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
-    diagonal_matrix_class.def("__add__", &__add__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__sub__", &__sub__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X> , Return<Vector<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
-    //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
-    diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
 
-    //module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+    diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
+
+    if constexpr (IsSame<ArithmeticType<X>,X>::value) {
+        diagonal_matrix_class.def("__add__", &__add__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__sub__", &__sub__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X>>, pybind11::is_operator());
+        //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+
+        module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+    }
 }
 
 Void export_pivot_matrix(pybind11::module& module)
@@ -586,9 +596,17 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_matrix<FloatMPValue>(module);
 
     export_pivot_matrix(module);
+
     export_diagonal_matrix<FloatDPApproximation>(module);
+    export_diagonal_matrix<FloatDPBounds>(module);
+    export_diagonal_matrix<FloatDPValue>(module);
+    export_diagonal_matrix<FloatMPApproximation>(module);
+    export_diagonal_matrix<FloatMPBounds>(module);
+//    export_diagonal_matrix<FloatMPValue>(module);
 
     export_vector<Real>(module);
+    export_covector<Real>(module);
+    export_matrix<Real>(module);
 
     export_vector<Rational>(module);
     export_covector<Rational>(module);

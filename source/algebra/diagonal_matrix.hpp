@@ -52,6 +52,11 @@ struct DiagonalMatrixOperations {
         return A._write(os);
     }
 
+    template<class X> friend DiagonalMatrix<NegationType<X>> operator-(DiagonalMatrix<X> A) {
+        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=-A.at(i,i); }
+        return A;
+    }
+
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }

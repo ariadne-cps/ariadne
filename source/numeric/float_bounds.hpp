@@ -241,9 +241,9 @@ template<class F> class Bounds
     friend Bounds<F> tan(Bounds<F> const& x) {
         return mul(sin(x),rec(cos(x))); }
     friend Bounds<F> asin(Bounds<F> const& x) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return Bounds<F>(asin(down,x.lower_raw()),asin(up,x.upper_raw())); }
     friend Bounds<F> acos(Bounds<F> const& x) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return Bounds<F>(acos(down,x.upper_raw()),acos(up,x.lower_raw())); }
     friend Bounds<F> atan(Bounds<F> const& x) {
         return Bounds<F>(atan(down,x._l),atan(up,x._u)); }
 

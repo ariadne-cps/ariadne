@@ -183,7 +183,7 @@ class TaskSearchParameter : public WritableInterface {
     Nat upper_bound() const { return _impl->upper_bound(); }
     Nat shifted_value_from(Nat value) const { return _impl->shifted_value_from(value); }
 
-    virtual OutputStream& _write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const override;
 };
 
 } // namespace Ariadne

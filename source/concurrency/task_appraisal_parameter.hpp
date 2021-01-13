@@ -66,8 +66,6 @@ public:
     virtual String const& name() const = 0;
     virtual TaskAppraisalParameterOptimisation optimisation() const = 0;
     virtual Bool is_scalar() const = 0;
-    virtual Bool uses_threshold() const = 0;
-    virtual CostType const& threshold() const = 0;
     virtual CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const = 0;
     virtual SizeType dimension(InputType const& input,OutputType const& output) const = 0;
 
@@ -81,24 +79,17 @@ public:
     typedef I InputType;
     typedef O OutputType;
     TaskAppraisalParameterBase(String const& name, TaskAppraisalParameterOptimisation const& opt)
-            : _name(name), _optimisation(opt), _uses_threshold(false), _threshold(0) { }
-
-    TaskAppraisalParameterBase(String const& name, TaskAppraisalParameterOptimisation const& opt, CostType const& threshold)
-            : _name(name), _optimisation(opt), _uses_threshold(true), _threshold(threshold) { }
+            : _name(name), _optimisation(opt) { }
 
     String const& name() const override { return _name; }
     TaskAppraisalParameterOptimisation optimisation() const override { return _optimisation; }
-    Bool uses_threshold() const override { return _uses_threshold; }
-    CostType const& threshold() const override { return _threshold; }
 
     OutputStream& _write(OutputStream& os) const override {
-        os << "{'" << name() << "'," << optimisation() << "," << (this->is_scalar() ? "SCALAR":"VECTOR") << (_uses_threshold ? ","+to_string(_threshold) : "") << "}"; return os; }
+        os << "{'" << name() << "'," << optimisation() << "," << (this->is_scalar() ? "SCALAR":"VECTOR") << "}"; return os; }
 
 private:
     String const _name;
     TaskAppraisalParameterOptimisation const _optimisation;
-    Bool const _uses_threshold;
-    CostType const _threshold;
 };
 
 template<class I, class O>
@@ -108,9 +99,6 @@ class ScalarAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
     typedef O OutputType;
     ScalarAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const afunc)
         : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc) { }
-
-    ScalarAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const afunc, CostType const& threshold)
-        : TaskAppraisalParameterBase<I,O>(name,opt,threshold), _afunc(afunc) { }
 
     Bool is_scalar() const override { return true; };
     SizeType dimension(InputType const& input,OutputType const& output) const override { return 1; }
@@ -128,9 +116,6 @@ public:
     typedef O OutputType;
     VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&,OutputType const&)> const dfunc)
             : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc), _dfunc(dfunc) { }
-
-    VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&,OutputType const&)> const dfunc, CostType const& threshold)
-            : TaskAppraisalParameterBase<I,O>(name,opt,threshold), _afunc(afunc), _dfunc(dfunc) { }
 
     Bool is_scalar() const override { return false; };
 
@@ -159,8 +144,6 @@ public:
     String const& name() const { return _impl->name(); }
     TaskAppraisalParameterOptimisation optimisation() const { return _impl->optimisation(); };
     Bool is_scalar() const { return _impl->is_scalar(); };
-    Bool uses_threshold() const { return _impl->uses_threshold(); }
-    CostType const& threshold() const { return _impl->threshold(); }
     CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const { _impl->appraise(input,output,duration,idx); }
     SizeType dimension(InputType const& input,OutputType const& output) const { return _impl->dimension(input,output); }
 

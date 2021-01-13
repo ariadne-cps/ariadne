@@ -200,24 +200,31 @@ Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& s
     return result;
 }
 
-TaskSearchPointCost::TaskSearchPointCost(TaskSearchPoint const& p, CostType const& s) : _point(p), _cost(s) { }
+TaskSearchPointAppraisal::TaskSearchPointAppraisal(TaskSearchPoint const& p, CostType const& s, Nat const& threshold_failures) : _point(p), _cost(s), _threshold_failures(threshold_failures) { }
 
 TaskSearchPoint const&
-TaskSearchPointCost::point() const {
+TaskSearchPointAppraisal::point() const {
     return _point;
 }
 
 CostType const&
-TaskSearchPointCost::cost() const {
+TaskSearchPointAppraisal::cost() const {
     return _cost;
 }
 
-Bool TaskSearchPointCost::operator<(TaskSearchPointCost const& s) const {
-    return this->_cost < s._cost;
+Nat const&
+TaskSearchPointAppraisal::threshold_failures() const {
+    return _threshold_failures;
 }
 
-OutputStream& TaskSearchPointCost::_write(OutputStream& os) const {
-    return os << "{" << _point << ":" << _cost << "}";
+Bool TaskSearchPointAppraisal::operator<(TaskSearchPointAppraisal const& s) const {
+    if (this->_threshold_failures < s._threshold_failures) return true;
+    else if (this->_threshold_failures > s._threshold_failures) return false;
+    else return this->_cost < s._cost;
+}
+
+OutputStream& TaskSearchPointAppraisal::_write(OutputStream& os) const {
+    return os << "{" << _point << ":" << _cost << (_threshold_failures > 0 ? (" ("+to_string(_threshold_failures))+" failure)" : "") << "}";
 }
 
 } // namespace Ariadne

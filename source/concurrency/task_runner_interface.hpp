@@ -35,7 +35,7 @@
 namespace Ariadne {
 
 class TaskSearchPoint;
-class TaskSearchPointCost;
+class TaskSearchPointAppraisal;
 class TaskSearchSpace;
 template<class I, class O> class TaskIOData;
 
@@ -58,7 +58,7 @@ class TaskInterface {
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
-    virtual Set<TaskSearchPointCost> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
+    virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
 };
 
 //! \brief Interface for the runner of a task.

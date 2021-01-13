@@ -46,7 +46,6 @@ class TestTaskAppraisalParameter {
         ARIADNE_TEST_ASSERT(p.is_scalar());
         ARIADNE_TEST_EQUALS(cost,7);
         ARIADNE_TEST_EQUALS(p.dimension(2,5),1);
-        ARIADNE_TEST_ASSERT(not p.uses_threshold());
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MAXIMISE);
     }
 
@@ -54,8 +53,7 @@ class TestTaskAppraisalParameter {
         VectorAppraisalParameter<Array<int>,int> p("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
                                             [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) {
                                                 return output + duration.count() + input[idx]; },
-                                            [](Array<int> const& input, int const& output) { return input.size(); },
-                                            2.2);
+                                            [](Array<int> const& input, int const& output) { return input.size(); });
         Array<int> input = {1,-3};
         int output = 5;
 
@@ -64,18 +62,16 @@ class TestTaskAppraisalParameter {
         ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,0),6);
         ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,1),2);
         ARIADNE_TEST_EQUALS(p.dimension(input,output),2);
-        ARIADNE_TEST_ASSERT(p.uses_threshold());
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MINIMISE);
     }
 
     Void test_task_appraisal_set() {
         TaskAppraisalParameter<Array<int>,int> p1 = ScalarAppraisalParameter<Array<int>,int>("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-            [](Array<int> const& input, int const& output, DurationType const& duration) { return output + duration.count() + input[0]; },1.5);
+            [](Array<int> const& input, int const& output, DurationType const& duration) { return output + duration.count() + input[0]; });
 
         TaskAppraisalParameter<Array<int>,int> p2 = VectorAppraisalParameter<Array<int>,int>("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
             [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) { return output + duration.count() + input[idx]; },
-            [](Array<int> const& input, int const& output) { return input.size(); },
-            2.2);
+            [](Array<int> const& input, int const& output) { return input.size(); });
 
         Set<TaskAppraisalParameter<Array<int>,int>> ps = {p1,p2};
 

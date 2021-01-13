@@ -95,18 +95,20 @@ Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& s
 
 typedef double CostType;
 
-class TaskSearchPointCost : public WritableInterface {
+class TaskSearchPointAppraisal : public WritableInterface {
   public:
-    TaskSearchPointCost(TaskSearchPoint const& p, CostType const& s);
+    TaskSearchPointAppraisal(TaskSearchPoint const& p, CostType const& s, Nat const& threshold_failures);
     TaskSearchPoint const& point() const;
     CostType const& cost() const;
-    //! \brief Ordering is based on cost value
-    Bool operator<(TaskSearchPointCost const& s) const;
+    Nat const& threshold_failures() const;
+    //! \brief Ordering is based on number of failures, followed by cost
+    Bool operator<(TaskSearchPointAppraisal const& s) const;
 
     virtual OutputStream& _write(OutputStream& os) const;
 private:
-    TaskSearchPoint _point;
-    CostType _cost;
+    TaskSearchPoint const _point;
+    CostType const _cost;
+    Nat const _threshold_failures;
 };
 
 } // namespace Ariadne

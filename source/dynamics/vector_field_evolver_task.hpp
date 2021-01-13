@@ -120,9 +120,9 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
         return FlowStepOutput(next_set, reach_set, next_time, chosen_step_size);
     }
 
-    Set<TaskSearchPointCost>
+    Set<TaskSearchPointAppraisal>
     appraise(Map<TaskSearchPoint,Pair<FlowStepOutput,DurationType>> const& data, FlowStepInput const& input) const override {
-        Set<TaskSearchPointCost> result;
+        Set<TaskSearchPointAppraisal> result;
 
         auto dim = input.current_set_bounds.dimension();
         auto initial_widths = input.current_set_bounds.widths();
@@ -164,7 +164,7 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
             a/=dim;
             auto x = (max_x != min_x ? (CostType(entry.second.second.count())-min_x)/(max_x-min_x) : 0);
             auto p = (max_step_size != min_step_size ? ((entry.second.first.step_size_used-min_step_size)/(max_step_size-min_step_size)).get_d() : 0.0);
-            result.insert(TaskSearchPointCost(entry.first, 1*a+1*x-2*p));
+            result.insert(TaskSearchPointAppraisal(entry.first, 1 * a + 1 * x - 2 * p,0));
         }
         return result;
     }

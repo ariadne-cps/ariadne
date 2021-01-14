@@ -41,7 +41,7 @@ unsigned int ConcurrencyManager::concurrency() const {
 }
 
 void ConcurrencyManager::set_concurrency(unsigned int value) {
-    ARIADNE_PRECONDITION(value <= _maximum_concurrency);
+    ARIADNE_PRECONDITION(value <= _maximum_concurrency and value > 0);
     _concurrency = value;
 }
 

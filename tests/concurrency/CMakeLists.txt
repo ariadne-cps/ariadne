@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_task_search_parameter
     test_task_appraisal_parameter
     test_buffer
+    test_concurrency_manager
 )
 
 foreach(TEST ${UNIT_TESTS})

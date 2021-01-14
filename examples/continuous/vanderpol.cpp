@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
     Logger::configuration().set_theme(TT_THEME_DARK);
     Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
 
-    ConcurrencyManager::get_instance().set_concurrency(4);
+    ConcurrencyManager::instance().set_concurrency(4);
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 

@@ -43,7 +43,7 @@ class ConcurrencyManager {
     ConcurrencyManager(ConcurrencyManager const&) = delete;
     void operator=(ConcurrencyManager const&) = delete;
 
-    static ConcurrencyManager& get_instance() {
+    static ConcurrencyManager& instance() {
         static ConcurrencyManager instance;
         return instance;
     }

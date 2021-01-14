@@ -116,7 +116,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    ConcurrencyManager::get_instance().set_runner(*this);
+    ConcurrencyManager::instance().set_runner(*this);
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {

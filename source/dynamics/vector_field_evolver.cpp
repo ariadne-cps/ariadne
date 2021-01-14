@@ -41,8 +41,11 @@
 
 #include "../output/progress_indicator.hpp"
 
+#include "../concurrency/concurrency_manager.hpp"
+
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
+
 
 namespace Ariadne {
 
@@ -113,7 +116,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new FlowStepSequentialRunner()));
+    ConcurrencyManager::get_instance().set_runner(*this);
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {

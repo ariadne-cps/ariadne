@@ -57,6 +57,7 @@ class TaskRunnerInterface {
 //! \brief Interface for a class that supports a runnable task.
 template<class T>
 class TaskRunnableInterface {
+    friend class ConcurrencyManager;
   public:
     typedef T TaskType;
 

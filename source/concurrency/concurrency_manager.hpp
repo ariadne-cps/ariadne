@@ -32,6 +32,7 @@
 #include <thread>
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
+#include "../concurrency/task_runner.hpp"
 
 namespace Ariadne {
 
@@ -45,6 +46,15 @@ class ConcurrencyManager {
     static ConcurrencyManager& get_instance() {
         static ConcurrencyManager instance;
         return instance;
+    }
+
+    template<class T> void set_runner(TaskRunnableInterface<T>& runnable) const {
+        SharedPointer<TaskRunnerInterface<T>> runner;
+        if (_concurrency > 1)
+            runner.reset(new ParameterSearchRunner<T>(_concurrency));
+        else
+            runner.reset(new SequentialRunner<T>());
+        runnable.set_runner(runner);
     }
 
     unsigned int maximum_concurrency() const;

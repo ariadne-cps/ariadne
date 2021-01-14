@@ -113,9 +113,6 @@ class VectorFieldEvolver
 
     //!@}
 
-    //! \brief Set the runner for the internal task
-    void set_runner(SharedPointer<RunnerType> runner) override { this->_runner = runner; }
-
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
@@ -138,6 +135,9 @@ class VectorFieldEvolver
     //!@}
 
   protected:
+
+    void set_runner(SharedPointer<RunnerType> runner) override { this->_runner = runner; }
+
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, Bool reach) const override;

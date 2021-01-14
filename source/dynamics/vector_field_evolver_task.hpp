@@ -128,14 +128,6 @@ class FlowStepTask final: public ParameterSearchTaskBase<FlowStepInput,FlowStepO
     }
 };
 
-template class SequentialRunner<FlowStepTask>;
-template class DetachedRunner<FlowStepTask>;
-template class ParameterSearchRunner<FlowStepTask>;
-
-using FlowStepSequentialRunner = SequentialRunner<FlowStepTask>;
-using FlowStepDetachedRunner = DetachedRunner<FlowStepTask>;
-using FlowStepParameterSearchRunner = ParameterSearchRunner<FlowStepTask>;
-
 } // namespace Ariadne
 
 #endif // ARIADNE_VECTOR_FIELD_EVOLVER_TASK_HPP

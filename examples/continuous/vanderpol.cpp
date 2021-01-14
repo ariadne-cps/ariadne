@@ -32,6 +32,8 @@ int main(int argc, const char* argv[])
     Logger::configuration().set_theme(TT_THEME_DARK);
     Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
 
+    ConcurrencyManager::get_instance().set_concurrency(4);
+
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
     RealConstant mu("mu",1);
@@ -51,8 +53,6 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(1e20);
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
-
-    evolver.set_runner(SharedPointer<typename VectorFieldEvolver::RunnerType>(new FlowStepParameterSearchRunner(4)));
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

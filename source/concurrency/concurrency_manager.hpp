@@ -47,10 +47,14 @@ class ConcurrencyManager {
         return instance;
     }
 
+    unsigned int maximum_concurrency() const;
     unsigned int concurrency() const;
 
+    void set_concurrency(unsigned int value);
+
   private:
-    const unsigned int _concurrency;
+    const unsigned int _maximum_concurrency;
+    unsigned int _concurrency;
 };
 
 } // namespace Ariadne

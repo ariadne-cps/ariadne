@@ -25,14 +25,24 @@
 #include <cstdlib>
 #include <time.h>
 
+#include "../utility/macros.hpp"
 #include "../concurrency/concurrency_manager.hpp"
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _concurrency(std::thread::hardware_concurrency()) { }
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(maximum_concurrency()) { }
+
+unsigned int ConcurrencyManager::maximum_concurrency() const {
+    return _maximum_concurrency;
+}
 
 unsigned int ConcurrencyManager::concurrency() const {
     return _concurrency;
+}
+
+void ConcurrencyManager::set_concurrency(unsigned int value) {
+    ARIADNE_PRECONDITION(value <= _maximum_concurrency);
+    _concurrency = value;
 }
 
 }

@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-//! \brief Manages threads and returns runners based on concurrency availability.
+//! \brief Manages threads and sets runners based on concurrency availability.
 class ConcurrencyManager {
   public:
     ConcurrencyManager();

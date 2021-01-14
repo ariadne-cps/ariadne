@@ -30,7 +30,9 @@
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(maximum_concurrency()) { }
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(maximum_concurrency()) {
+    srand(time(NULL));
+}
 
 unsigned int ConcurrencyManager::maximum_concurrency() const {
     return _maximum_concurrency;
@@ -46,10 +48,3 @@ void ConcurrencyManager::set_concurrency(unsigned int value) {
 }
 
 }
-
-inline bool startup_concurrency() {
-    srand(time(NULL));
-    return true;
-}
-
-static const bool startup_concurrency_ = startup_concurrency();

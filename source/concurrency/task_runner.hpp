@@ -43,6 +43,9 @@ template<class T> class TaskRunnerBase;
 //! \details Used to provide a sequential alternative to any thread-based implementation.
 template<class T>
 class SequentialRunner final : public TaskRunnerBase<T> {
+    friend class ConcurrencyManager;
+  protected:
+    SequentialRunner() = default;
   public:
     typedef typename TaskRunnerBase<T>::InputType InputType;
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
@@ -59,6 +62,9 @@ private:
 //! \brief Run a task in a detached thread, allowing other processing between pushing and pulling.
 template<class T>
 class DetachedRunner final : public TaskRunnerBase<T> {
+    friend class ConcurrencyManager;
+  protected:
+    DetachedRunner();
   public:
     typedef typename TaskRunnerBase<T>::InputType InputType;
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
@@ -66,7 +72,6 @@ class DetachedRunner final : public TaskRunnerBase<T> {
     typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
-    DetachedRunner();
     virtual ~DetachedRunner();
 
     Void activate() override final;
@@ -93,7 +98,10 @@ template<class O> class ParameterSearchOutputBufferData;
 //! \brief Run a task by detached concurrent search into the parameter space.
 template<class T>
 class ParameterSearchRunner final : public TaskRunnerBase<T> {
-public:
+    friend class ConcurrencyManager;
+  protected:
+    ParameterSearchRunner(Nat concurrency);
+  public:
     typedef typename TaskRunnerBase<T>::InputType InputType;
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
     typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
@@ -102,7 +110,6 @@ public:
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
 
-    ParameterSearchRunner(Nat concurrency);
     virtual ~ParameterSearchRunner();
 
     Void activate() override final;

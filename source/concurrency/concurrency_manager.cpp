@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/concurrency.cpp
+ *            concurrency/concurrency_manager.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -25,8 +25,20 @@
 #include <cstdlib>
 #include <time.h>
 
+#include "../concurrency/concurrency_manager.hpp"
+
+namespace Ariadne {
+
+ConcurrencyManager::ConcurrencyManager() : _concurrency(std::thread::hardware_concurrency()) { }
+
+unsigned int ConcurrencyManager::concurrency() const {
+    return _concurrency;
+}
+
+}
+
 inline bool startup_concurrency() {
-    srand (time(NULL));
+    srand(time(NULL));
     return true;
 }
 

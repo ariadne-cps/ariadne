@@ -59,6 +59,8 @@ namespace Ariadne {
 #include "solvers/integrator.hpp"
 #include "solvers/solver.hpp"
 
+#include "concurrency/concurrency_manager.hpp"
+
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/hybrid_set.hpp"

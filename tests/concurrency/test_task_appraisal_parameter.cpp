@@ -45,7 +45,7 @@ class TestTaskAppraisalParameter {
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_scalar());
         ARIADNE_TEST_EQUALS(cost,7);
-        ARIADNE_TEST_EQUALS(p.dimension(2,5),1);
+        ARIADNE_TEST_EQUALS(p.dimension(2),1);
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MAXIMISE);
     }
 
@@ -61,7 +61,7 @@ class TestTaskAppraisalParameter {
         ARIADNE_TEST_ASSERT(not p.is_scalar());
         ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,0),6);
         ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,1),2);
-        ARIADNE_TEST_EQUALS(p.dimension(input,output),2);
+        ARIADNE_TEST_EQUALS(p.dimension(input),2);
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MINIMISE);
     }
 

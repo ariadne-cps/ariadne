@@ -150,6 +150,9 @@ public:
     OutputStream& _write(OutputStream& os) const override { return _impl->_write(os); }
 };
 
+//! \brief Template instance of the commonly-used execution time parameter for appraisal
+template<class I, class O> ScalarAppraisalParameter<I,O> execution_time_appraisal_parameter("execution_time",TaskAppraisalParameterOptimisation::MINIMISE,[](I const& i,O const& o,DurationType const& d) { return d.count(); });
+
 } // namespace Ariadne
 
 #endif // ARIADNE_TASK_APPRAISAL_PARAMETER_HPP

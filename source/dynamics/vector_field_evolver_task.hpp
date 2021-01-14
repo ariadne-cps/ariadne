@@ -87,7 +87,7 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
         MetricSearchParameter("maximum_temporal_order", 9, 15)
     });
     TaskAppraisalSpace<I,O> const _appraisal_space = TaskAppraisalSpace<I,O>({
-        ScalarAppraisalParameter<I,O>("execution_time",TaskAppraisalParameterOptimisation::MINIMISE,[](I const& i,O const& o,DurationType const& d) { return d.count(); }),
+        execution_time_appraisal_parameter<I,O>,
         ScalarAppraisalParameter<I,O>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),
         VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
                                       [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },

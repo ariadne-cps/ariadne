@@ -41,15 +41,9 @@ namespace Ariadne {
 enum class TaskAppraisalParameterOptimisation { MINIMISE, MAXIMISE };
 inline std::ostream& operator<<(std::ostream& os, const TaskAppraisalParameterOptimisation opt) {
     switch (opt) {
-        case TaskAppraisalParameterOptimisation::MAXIMISE :
-            os << "MAXIMISE";
-            break;
-        case TaskAppraisalParameterOptimisation::MINIMISE:
-            os << "MINIMISE";
-            break;
-        default:
-            ARIADNE_FAIL_MSG("Unhandled TaskAppraisalParameterOptimisation value.");
-
+        case TaskAppraisalParameterOptimisation::MAXIMISE: os << "MAXIMISE"; break;
+        case TaskAppraisalParameterOptimisation::MINIMISE: os << "MINIMISE"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled TaskAppraisalParameterOptimisation value.");
     }
     return os;
 }
@@ -66,6 +60,7 @@ public:
     virtual String const& name() const = 0;
     virtual TaskAppraisalParameterOptimisation optimisation() const = 0;
     virtual Bool is_scalar() const = 0;
+    virtual CostType weight() const = 0;
     virtual CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const = 0;
     virtual SizeType dimension(InputType const& input,OutputType const& output) const = 0;
 
@@ -78,18 +73,21 @@ class TaskAppraisalParameterBase : public TaskAppraisalParameterInterface<I,O> {
 public:
     typedef I InputType;
     typedef O OutputType;
-    TaskAppraisalParameterBase(String const& name, TaskAppraisalParameterOptimisation const& opt)
-            : _name(name), _optimisation(opt) { }
+    TaskAppraisalParameterBase(String const& name, TaskAppraisalParameterOptimisation const& opt, CostType const& weight)
+            : _name(name), _optimisation(opt), _weight(weight) { ARIADNE_PRECONDITION(weight>0); }
 
     String const& name() const override { return _name; }
     TaskAppraisalParameterOptimisation optimisation() const override { return _optimisation; }
+    CostType weight() const override { return _weight; }
 
     OutputStream& _write(OutputStream& os) const override {
-        os << "{'" << name() << "'," << optimisation() << "," << (this->is_scalar() ? "SCALAR":"VECTOR") << "}"; return os; }
+        os << "{'" << name() << "'," << optimisation() << "," << (this->is_scalar() ? "SCALAR":"VECTOR") <<
+        (_weight!=1.0 ? ",weight="+to_string(_weight) : "") << "}"; return os; }
 
 private:
     String const _name;
     TaskAppraisalParameterOptimisation const _optimisation;
+    CostType const _weight;
 };
 
 template<class I, class O>
@@ -97,8 +95,8 @@ class ScalarAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
   public:
     typedef I InputType;
     typedef O OutputType;
-    ScalarAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const afunc)
-        : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc) { }
+    ScalarAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const afunc, CostType const& weight = CostType(1.0))
+        : TaskAppraisalParameterBase<I,O>(name,opt,weight), _afunc(afunc) { }
 
     Bool is_scalar() const override { return true; };
     SizeType dimension(InputType const& input,OutputType const& output) const override { return 1; }
@@ -114,8 +112,8 @@ class VectorAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
 public:
     typedef I InputType;
     typedef O OutputType;
-    VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&,OutputType const&)> const dfunc)
-            : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc), _dfunc(dfunc) { }
+    VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&,OutputType const&)> const dfunc, CostType const& weight = CostType(1.0))
+            : TaskAppraisalParameterBase<I,O>(name,opt,weight), _afunc(afunc), _dfunc(dfunc) { }
 
     Bool is_scalar() const override { return false; };
 
@@ -144,6 +142,7 @@ public:
     String const& name() const { return _impl->name(); }
     TaskAppraisalParameterOptimisation optimisation() const { return _impl->optimisation(); };
     Bool is_scalar() const { return _impl->is_scalar(); };
+    CostType weight() const { return _impl->weight(); }
     CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const { _impl->appraise(input,output,duration,idx); }
     SizeType dimension(InputType const& input,OutputType const& output) const { return _impl->dimension(input,output); }
 

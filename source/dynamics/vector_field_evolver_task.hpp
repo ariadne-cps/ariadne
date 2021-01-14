@@ -43,6 +43,7 @@
 #include "../solvers/integrator.hpp"
 
 #include "../concurrency/task_runner.tpl.hpp"
+#include "../concurrency/task_appraisal_space.hpp"
 
 namespace Ariadne {
 
@@ -77,18 +78,27 @@ struct FlowStepConfiguration {
 };
 
 class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,FlowStepConfiguration> {
-  private:
-    TaskSearchSpace const _space = TaskSearchSpace(
-            {MetricSearchParameter("starting_step_size_num_refinements", 2, 5),
-             MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12),
-             MetricSearchParameter("maximum_temporal_order", 9, 15)
-            });
+    typedef FlowStepInput I;
+    typedef FlowStepOutput O;
+    typedef FlowStepConfiguration C;
+    TaskSearchSpace const _search_space = TaskSearchSpace({
+        MetricSearchParameter("starting_step_size_num_refinements", 2, 5),
+        MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12),
+        MetricSearchParameter("maximum_temporal_order", 9, 15)
+    });
+    TaskAppraisalSpace<I,O> const _appraisal_space = TaskAppraisalSpace<I,O>({
+        ScalarAppraisalParameter<I,O>("execution_time",TaskAppraisalParameterOptimisation::MINIMISE,[](I const& i,O const& o,DurationType const& d) { return d.count(); }),
+        ScalarAppraisalParameter<I,O>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),
+        VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+                                      [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
+                                      [](I const& i,O const& o){ return i.current_set_bounds.dimension(); })
+    });
   public:
     std::string name() const override { return "stp"; }
-    TaskSearchSpace const& search_space() const override { return _space; }
+    TaskSearchSpace const& search_space() const override { return _search_space; }
+    TaskAppraisalSpace<I,O> const& appraisal_space() const override { return _appraisal_space; }
 
-    FlowStepConfiguration
-    to_configuration(FlowStepInput const& in, TaskSearchPoint const& p) const override {
+    C to_configuration(I const& in, TaskSearchPoint const& p) const override {
         TaylorPicardIntegrator const& default_integrator = static_cast<TaylorPicardIntegrator const&>(in.integrator);
         SharedPointer<TaylorPicardIntegrator> integrator(new TaylorPicardIntegrator(
                 MaximumError(default_integrator.maximum_error()),
@@ -99,11 +109,10 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
                 MinimumTemporalOrder(default_integrator.minimum_temporal_order()),
                 MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
         ));
-        return FlowStepConfiguration(integrator);
+        return C(integrator);
     }
 
-    FlowStepOutput
-    run_task(FlowStepInput const& in, FlowStepConfiguration const& cfg) const override {
+    O run_task(I const& in, C const& cfg) const override {
         LabelledEnclosure next_set = in.current_set;
         LabelledEnclosure reach_set = in.current_set;
         Dyadic next_time = in.current_time;
@@ -121,7 +130,7 @@ class FlowStepTask final: public TaskInterface<FlowStepInput,FlowStepOutput,Flow
     }
 
     Set<TaskSearchPointAppraisal>
-    appraise(Map<TaskSearchPoint,Pair<FlowStepOutput,DurationType>> const& data, FlowStepInput const& input) const override {
+    appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& input) const override {
         Set<TaskSearchPointAppraisal> result;
 
         auto dim = input.current_set_bounds.dimension();

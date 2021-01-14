@@ -39,7 +39,7 @@
 namespace Ariadne {
 
 enum class TaskAppraisalParameterOptimisation { MINIMISE, MAXIMISE };
-std::ostream& operator<<(std::ostream& os, const TaskAppraisalParameterOptimisation opt) {
+inline std::ostream& operator<<(std::ostream& os, const TaskAppraisalParameterOptimisation opt) {
     switch (opt) {
         case TaskAppraisalParameterOptimisation::MAXIMISE :
             os << "MAXIMISE";

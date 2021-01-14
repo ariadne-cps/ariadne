@@ -37,7 +37,7 @@ namespace Ariadne {
 class TaskSearchPoint;
 class TaskSearchPointAppraisal;
 class TaskSearchSpace;
-template<class I, class O> class TaskIOData;
+template<class I, class O> class TaskAppraisalSpace;
 
 typedef std::chrono::microseconds DurationType;
 
@@ -52,6 +52,8 @@ class TaskInterface {
     virtual std::string name() const = 0;
     //! \brief Return the parameter space for the task
     virtual TaskSearchSpace const& search_space() const = 0;
+    //! \brief Return the appraisal space for the task
+    virtual TaskAppraisalSpace<InputType,OutputType> const& appraisal_space() const = 0;
 
     //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
     virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;

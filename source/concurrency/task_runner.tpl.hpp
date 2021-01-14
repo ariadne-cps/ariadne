@@ -27,6 +27,7 @@
  */
 
 #include "../concurrency/task_runner.hpp"
+#include "../concurrency/task_interface.hpp"
 
 namespace Ariadne {
 

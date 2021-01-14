@@ -34,35 +34,6 @@
 
 namespace Ariadne {
 
-class TaskSearchPoint;
-class TaskSearchPointAppraisal;
-class TaskSearchSpace;
-template<class I, class O> class TaskAppraisalSpace;
-
-typedef std::chrono::microseconds DurationType;
-
-template<class I, class O, class C>
-class TaskInterface {
-  public:
-    typedef I InputType;
-    typedef O OutputType;
-    typedef C ConfigurationType;
-
-    //! \brief The name of the task, to be used for thread naming
-    virtual std::string name() const = 0;
-    //! \brief Return the parameter space for the task
-    virtual TaskSearchSpace const& search_space() const = 0;
-    //! \brief Return the appraisal space for the task
-    virtual TaskAppraisalSpace<InputType,OutputType> const& appraisal_space() const = 0;
-
-    //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
-    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;
-    //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
-    //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
-    virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
-};
-
 //! \brief Interface for the runner of a task.
 //! \details This will usually be first implemented into an abstract base class.
 template<class T>

@@ -53,7 +53,7 @@ class TestTaskAppraisalParameter {
         VectorAppraisalParameter<Array<int>,int> p("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
                                             [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) {
                                                 return output + duration.count() + input[idx]; },
-                                            [](Array<int> const& input, int const& output) { return input.size(); });
+                                            [](Array<int> const& input) { return input.size(); });
         Array<int> input = {1,-3};
         int output = 5;
 
@@ -83,7 +83,7 @@ class TestTaskAppraisalParameter {
 
         TaskAppraisalParameter<Array<int>,int> p2 = VectorAppraisalParameter<Array<int>,int>("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
             [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) { return output + duration.count() + input[idx]; },
-            [](Array<int> const& input, int const& output) { return input.size(); });
+            [](Array<int> const& input) { return input.size(); });
 
         Set<TaskAppraisalParameter<Array<int>,int>> ps = {p1,p2};
 

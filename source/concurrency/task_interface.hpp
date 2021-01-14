@@ -53,14 +53,14 @@ class TaskInterface {
     //! \brief Return the parameter space for the task
     virtual TaskSearchSpace const& search_space() const = 0;
     //! \brief Return the appraisal space for the task
-    virtual TaskAppraisalSpace<InputType,OutputType> const& appraisal_space() const = 0;
+    virtual TaskAppraisalSpace<I,O> const& appraisal_space() const = 0;
 
     //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
-    virtual ConfigurationType to_configuration(InputType const& in, TaskSearchPoint const& p) const = 0;
+    virtual C to_configuration(I const& in, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
+    virtual O run_task(I const& in, C const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
-    virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
+    virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& in) const = 0;
 };
 
 //! \brief The base for parameter search tasks
@@ -71,16 +71,17 @@ class ParameterSearchTaskBase : public TaskInterface<I,O,C> {
     typedef I InputType;
     typedef O OutputType;
   protected:
-    ParameterSearchTaskBase(String const& name, TaskSearchSpace const& search_space, TaskAppraisalSpace<InputType,OutputType> const& appraisal_space)
+    ParameterSearchTaskBase(String const& name, TaskSearchSpace const& search_space, TaskAppraisalSpace<I,O> const& appraisal_space)
         : _name(name), _search_space(search_space), _appraisal_space(appraisal_space) {}
   public:
     String name() const override { return _name; }
     TaskSearchSpace const& search_space() const override { return _search_space; }
-    TaskAppraisalSpace<InputType,OutputType> const& appraisal_space() const override { return _appraisal_space; }
+    TaskAppraisalSpace<I,O> const& appraisal_space() const override { return _appraisal_space; }
+    Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& input) const override { return _appraisal_space.appraise(data,input); }
   private:
     String const _name;
     TaskSearchSpace const _search_space;
-    TaskAppraisalSpace<InputType,OutputType> const _appraisal_space;
+    TaskAppraisalSpace<I,O> const _appraisal_space;
 };
 
 } // namespace Ariadne

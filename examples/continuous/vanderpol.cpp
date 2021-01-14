@@ -22,11 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
 #include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
-#include "concurrency/task_search_parameter.hpp"
-#include "concurrency/task_search_space.hpp"
 
 using namespace Ariadne;
 

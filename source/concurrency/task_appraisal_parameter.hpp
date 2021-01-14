@@ -62,7 +62,7 @@ public:
     virtual Bool is_scalar() const = 0;
     virtual CostType weight() const = 0;
     virtual CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const = 0;
-    virtual SizeType dimension(InputType const& input,OutputType const& output) const = 0;
+    virtual SizeType dimension(InputType const& input) const = 0;
 
     virtual TaskAppraisalParameterInterface* clone() const = 0;
     virtual ~TaskAppraisalParameterInterface() = default;
@@ -99,7 +99,7 @@ class ScalarAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
         : TaskAppraisalParameterBase<I,O>(name,opt,weight), _afunc(afunc) { }
 
     Bool is_scalar() const override { return true; };
-    SizeType dimension(InputType const& input,OutputType const& output) const override { return 1; }
+    SizeType dimension(InputType const& input) const override { return 1; }
     CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const override { return _afunc(input,output,duration); }
 
     ScalarAppraisalParameter* clone() const override { return new ScalarAppraisalParameter(*this); }
@@ -112,18 +112,18 @@ class VectorAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
 public:
     typedef I InputType;
     typedef O OutputType;
-    VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&,OutputType const&)> const dfunc, CostType const& weight = CostType(1.0))
+    VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&)> const dfunc, CostType const& weight = CostType(1.0))
             : TaskAppraisalParameterBase<I,O>(name,opt,weight), _afunc(afunc), _dfunc(dfunc) { }
 
     Bool is_scalar() const override { return false; };
 
-    SizeType dimension(InputType const& input,OutputType const& output) const override { return _dfunc(input,output); }
+    SizeType dimension(InputType const& input) const override { return _dfunc(input); }
     CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx) const override { return _afunc(input,output,duration,idx); }
 
     VectorAppraisalParameter* clone() const override { return new VectorAppraisalParameter(*this); }
 private:
     std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const _afunc;
-    std::function<SizeType(InputType const&,OutputType const&)> const _dfunc;
+    std::function<SizeType(InputType const&)> const _dfunc;
 };
 
 template<class I, class O>
@@ -143,8 +143,8 @@ public:
     TaskAppraisalParameterOptimisation optimisation() const { return _impl->optimisation(); };
     Bool is_scalar() const { return _impl->is_scalar(); };
     CostType weight() const { return _impl->weight(); }
-    CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const { _impl->appraise(input,output,duration,idx); }
-    SizeType dimension(InputType const& input,OutputType const& output) const { return _impl->dimension(input,output); }
+    CostType appraise(InputType const& input,OutputType const& output,DurationType const& duration,SizeType const& idx = 0) const { return _impl->appraise(input,output,duration,idx); }
+    SizeType dimension(InputType const& input) const { return _impl->dimension(input); }
 
     OutputStream& _write(OutputStream& os) const override { return _impl->_write(os); }
 };

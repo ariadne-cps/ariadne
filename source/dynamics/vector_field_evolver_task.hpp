@@ -47,9 +47,9 @@
 
 namespace Ariadne {
 
-struct FlowStepInput {
-    FlowStepInput(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
-                  FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
+struct VectorFieldFlowStepIn {
+    VectorFieldFlowStepIn(EffectiveVectorMultivariateFunction const& dynamic_, IntegratorInterface const& integrator_, LabelledEnclosure const& current_set_,
+                          FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_, Dyadic const& maximum_step_size_) :
             dynamic(dynamic_), integrator(integrator_), current_set(current_set_), current_set_bounds(current_set_bounds_),
             current_time(current_time_), previous_step_size(previous_step_size_), maximum_step_size(maximum_step_size_) { }
     EffectiveVectorMultivariateFunction const& dynamic;
@@ -61,8 +61,8 @@ struct FlowStepInput {
     Dyadic const& maximum_step_size;
 };
 
-struct FlowStepOutput {
-    FlowStepOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
+struct VectorFieldFlowStepOut {
+    VectorFieldFlowStepOut(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
             evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
@@ -70,17 +70,17 @@ struct FlowStepOutput {
     Dyadic const step_size_used;
 };
 
-struct FlowStepConfiguration {
-    FlowStepConfiguration(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
+struct VectorFieldFlowStepConfig {
+    VectorFieldFlowStepConfig(SharedPointer<TaylorPicardIntegrator> const& integrator_) : integrator(integrator_){ }
     SharedPointer<TaylorPicardIntegrator> integrator;
 };
 
-class FlowStepTask final: public ParameterSearchTaskBase<FlowStepInput,FlowStepOutput,FlowStepConfiguration> {
-    typedef FlowStepInput I;
-    typedef FlowStepOutput O;
-    typedef FlowStepConfiguration C;
+class VectorFieldFlowStepTask final: public ParameterSearchTaskBase<VectorFieldFlowStepIn,VectorFieldFlowStepOut,VectorFieldFlowStepConfig> {
+    typedef VectorFieldFlowStepIn I;
+    typedef VectorFieldFlowStepOut O;
+    typedef VectorFieldFlowStepConfig C;
   public:
-    FlowStepTask() : ParameterSearchTaskBase<I,O,C>(
+    VectorFieldFlowStepTask() : ParameterSearchTaskBase<I,O,C>(
         "stp",
         TaskSearchSpace({
             MetricSearchParameter("starting_step_size_num_refinements", 2, 5),

@@ -54,6 +54,8 @@ class TaskInterface {
     virtual TaskSearchSpace const& search_space() const = 0;
     //! \brief Return the appraisal space for the task
     virtual TaskAppraisalSpace<I,O> const& appraisal_space() const = 0;
+    //! \brief Set the appraisal space for the task
+    virtual Void set_appraisal_space(TaskAppraisalSpace<I,O> const& space) = 0;
 
     //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
     virtual C to_configuration(I const& in, TaskSearchPoint const& p) const = 0;
@@ -72,16 +74,17 @@ class ParameterSearchTaskBase : public TaskInterface<I,O,C> {
     typedef O OutputType;
   protected:
     ParameterSearchTaskBase(String const& name, TaskSearchSpace const& search_space, TaskAppraisalSpace<I,O> const& appraisal_space)
-        : _name(name), _search_space(search_space), _appraisal_space(appraisal_space) {}
+        : _name(name), _search_space(search_space), _appraisal_space(appraisal_space.clone()) {}
   public:
     String name() const override { return _name; }
     TaskSearchSpace const& search_space() const override { return _search_space; }
-    TaskAppraisalSpace<I,O> const& appraisal_space() const override { return _appraisal_space; }
-    Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& input) const override { return _appraisal_space.appraise(data,input); }
+    TaskAppraisalSpace<I,O> const& appraisal_space() const override { return *_appraisal_space; }
+    Void set_appraisal_space(TaskAppraisalSpace<I,O> const& space) override { _appraisal_space.reset(space.clone()); };
+    Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& input) const override { return _appraisal_space->appraise(data,input); }
   private:
     String const _name;
     TaskSearchSpace const _search_space;
-    TaskAppraisalSpace<I,O> const _appraisal_space;
+    SharedPointer<TaskAppraisalSpace<I,O>> _appraisal_space;
 };
 
 } // namespace Ariadne

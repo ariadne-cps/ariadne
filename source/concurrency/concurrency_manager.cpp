@@ -30,7 +30,7 @@
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(maximum_concurrency()) {
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(1) {
     srand(time(NULL));
 }
 

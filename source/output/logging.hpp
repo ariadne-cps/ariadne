@@ -46,21 +46,21 @@
 // Automatic level increase/decrease in a scope; meant to be used once within a function, at top scope; necessary for print holding.
 #define ARIADNE_LOG_SCOPE_CREATE auto logscopemanager = LogScopeManager(ARIADNE_PRETTY_FUNCTION);
 // Managed level increase/decrease around the function fn; if the function throws, manual decrease of the proper level is required.
-#define ARIADNE_LOG_RUN_AT(level,fn) Logger::increase_level(level); fn; Logger::decrease_level(level);
+#define ARIADNE_LOG_RUN_AT(level,fn) Logger::instance().increase_level(level); fn; Logger::instance().decrease_level(level);
 // Mute the logger for the function fn; if the function throws, manual decrease of the proper level is required.
-#define ARIADNE_LOG_RUN_MUTED(fn) Logger::mute_increase_level(); fn; Logger::mute_decrease_level();
+#define ARIADNE_LOG_RUN_MUTED(fn) Logger::instance().mute_increase_level(); fn; Logger::instance().mute_decrease_level();
 // Print one line at the current level; the text shouldn't have carriage returns, but for efficiency purposes this is not checked.
-#define ARIADNE_LOG_PRINTLN(text) { if (!Logger::is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::println(0,logger_stream.str()); } }
+#define ARIADNE_LOG_PRINTLN(text) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().println(0,logger_stream.str()); } }
 // Print one line at an increased level with respect to the current one; the text shouldn't have carriage returns, but for efficiency purposes this is not checked.
-#define ARIADNE_LOG_PRINTLN_AT(level,text) { if (!Logger::is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::println(level,logger_stream.str()); } }
+#define ARIADNE_LOG_PRINTLN_AT(level,text) { if (!Logger::instance().is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().println(level,logger_stream.str()); } }
 // Print variable in one line at the current level, using the formatting convention.
-#define ARIADNE_LOG_PRINTLN_VAR(var) { if (!Logger::is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::println(0,logger_stream.str()); } }
+#define ARIADNE_LOG_PRINTLN_VAR(var) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::instance().println(0,logger_stream.str()); } }
 // Print variable in one line at the increased level with respect to the current one, using the formatting convention.
-#define ARIADNE_LOG_PRINTLN_VAR_AT(level,var) { if (!Logger::is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::println(level,logger_stream.str()); } }
+#define ARIADNE_LOG_PRINTLN_VAR_AT(level,var) { if (!Logger::instance().is_muted_at(level)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << #var << " = " << var; Logger::instance().println(level,logger_stream.str()); } }
 // Print a text at the bottom line, holding it until the function scope ends; this requires creation of the scope.
 // Nested calls in separate functions append to the held line.
 // The text for obvious reasons shouldn't have newlines and carriage returns; for efficiency purposes this is not checked.
-#define ARIADNE_LOG_SCOPE_PRINTHOLD(text) { if (!Logger::is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::hold(logscopemanager.scope(),logger_stream.str()); } }
+#define ARIADNE_LOG_SCOPE_PRINTHOLD(text) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().hold(logscopemanager.scope(),logger_stream.str()); } }
 
 namespace Ariadne {
 
@@ -353,53 +353,63 @@ class Logger {
     friend class BlockingLoggerScheduler;
     friend class NonblockingLoggerScheduler;
   public:
-    static void use_immediate_scheduler();
-    static void use_blocking_scheduler();
-    static void use_nonblocking_scheduler();
 
-    static void register_thread(LoggableSmartThread const& thread);
-    static void unregister_thread(LoggableSmartThread const& thread);
+    Logger();
+    Logger(Logger const&) = delete;
+    void operator=(Logger const&) = delete;
 
-    static void println(unsigned int level_increase, std::string text);
-    static void hold(std::string scope, std::string text);
-    static void release(std::string scope);
+    static Logger& instance() {
+        static Logger instance;
+        return instance;
+    }
 
-    static void increase_level(unsigned int i);
-    static void decrease_level(unsigned int i);
-    static void mute_increase_level();
-    static void mute_decrease_level();
+    void use_immediate_scheduler();
+    void use_blocking_scheduler();
+    void use_nonblocking_scheduler();
 
-    static bool is_muted_at(unsigned int i);
+    void register_thread(LoggableSmartThread const& thread);
+    void unregister_thread(LoggableSmartThread const& thread);
 
-    static unsigned int current_level();
-    static std::string current_thread_name();
-    static unsigned int cached_last_printed_level();
-    static std::string cached_last_printed_thread_name();
+    void println(unsigned int level_increase, std::string text);
+    void hold(std::string scope, std::string text);
+    void release(std::string scope);
 
-    static LoggerConfiguration& configuration();
+    void increase_level(unsigned int i);
+    void decrease_level(unsigned int i);
+    void mute_increase_level();
+    void mute_decrease_level();
+
+    bool is_muted_at(unsigned int i) const;
+
+    unsigned int current_level() const;
+    std::string current_thread_name() const;
+    unsigned int cached_last_printed_level() const;
+    std::string cached_last_printed_thread_name() const;
+
+    LoggerConfiguration& configuration();
 
   private:
-    static std::string _apply_theme(std::string const& text);
-    static std::string _apply_theme_for_keywords(std::string const& text);
-    static void _print_preamble_for_firstline(unsigned int level, std::string thread_name);
-    static void _print_preamble_for_extralines(unsigned int level, std::string thread_name);
-    static std::string _discard_newlines_and_indentation(std::string const& text);
-    static void _cover_held_columns_with_whitespaces(unsigned int printed_columns);
-    static void _print_held_line();
-    static void _println(LogRawMessage const& msg);
-    static void _hold(LogRawMessage const& msg);
-    static void _release(LogRawMessage const& msg);
-    static unsigned int _get_window_columns();
-    static bool _is_holding();
-    static bool _can_print_thread_name();
+    std::string _apply_theme(std::string const& text) const;
+    std::string _apply_theme_for_keywords(std::string const& text) const;
+    void _print_preamble_for_firstline(unsigned int level, std::string thread_name);
+    void _print_preamble_for_extralines(unsigned int level, std::string thread_name);
+    std::string _discard_newlines_and_indentation(std::string const& text);
+    void _cover_held_columns_with_whitespaces(unsigned int printed_columns);
+    void _print_held_line();
+    void _println(LogRawMessage const& msg);
+    void _hold(LogRawMessage const& msg);
+    void _release(LogRawMessage const& msg);
+    unsigned int _get_window_columns() const;
+    bool _is_holding() const;
+    bool _can_print_thread_name() const;
   private:
-    const static unsigned int _MUTE_LEVEL_OFFSET = 1024;
-    inline static std::vector<LogRawMessage> _current_held_stack;
-    inline static unsigned int _cached_num_held_columns = 0;
-    inline static unsigned int _cached_last_printed_level = 0;
-    inline static std::string _cached_last_printed_thread_name = std::string();
-    inline static SharedPointer<LoggerSchedulerInterface> _scheduler = SharedPointer<LoggerSchedulerInterface>(new NonblockingLoggerScheduler());
-    inline static LoggerConfiguration _configuration;
+    static const unsigned int _MUTE_LEVEL_OFFSET = 1024;
+    std::vector<LogRawMessage> _current_held_stack;
+    unsigned int _cached_num_held_columns;
+    unsigned int _cached_last_printed_level;
+    std::string _cached_last_printed_thread_name;
+    SharedPointer<LoggerSchedulerInterface> _scheduler;
+    LoggerConfiguration _configuration;
 };
 
 // Global log output file

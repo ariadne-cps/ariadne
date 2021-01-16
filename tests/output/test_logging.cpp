@@ -53,8 +53,8 @@ class TestLogging {
   public:
 
     TestLogging() {
-        Logger::use_immediate_scheduler();
-        Logger::configuration().set_prints_level_on_change_only(false);
+        Logger::instance().use_immediate_scheduler();
+        Logger::instance().configuration().set_prints_level_on_change_only(false);
     }
 
     Int test() {
@@ -69,53 +69,53 @@ class TestLogging {
     }
 
     Void test_shown_single_print() {
-        Logger::configuration().set_verbosity(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
     }
 
     Void test_hidden_single_print() {
-        Logger::configuration().set_verbosity(0);
+        Logger::instance().configuration().set_verbosity(0);
         ARIADNE_LOG_PRINTLN("This is a hidden call on level 1");
     }
 
     Void test_shown_call_function_with_entrance_and_exit() {
-        Logger::configuration().set_verbosity(2);
-        Logger::configuration().set_prints_scope_entrance(true);
-        Logger::configuration().set_prints_scope_exit(true);
+        Logger::instance().configuration().set_verbosity(2);
+        Logger::instance().configuration().set_prints_scope_entrance(true);
+        Logger::instance().configuration().set_prints_scope_exit(true);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(0,sample_function());
         ARIADNE_LOG_PRINTLN("This is again a call on level 1");
     }
 
     Void test_hide_call_function_with_entrance_and_exit() {
-        Logger::configuration().set_verbosity(2);
-        Logger::configuration().set_prints_scope_entrance(true);
-        Logger::configuration().set_prints_scope_exit(true);
+        Logger::instance().configuration().set_verbosity(2);
+        Logger::instance().configuration().set_prints_scope_entrance(true);
+        Logger::instance().configuration().set_prints_scope_exit(true);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(1,sample_function());
         ARIADNE_LOG_PRINTLN("This is again a call on level 1");
     }
 
     Void test_dark_theme() {
-        Logger::configuration().set_verbosity(2);
-        Logger::configuration().set_theme(TT_THEME_DARK);
+        Logger::instance().configuration().set_verbosity(2);
+        Logger::instance().configuration().set_theme(TT_THEME_DARK);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(0,sample_function());
         ARIADNE_LOG_PRINTLN("This is again a call on level 1");
     }
 
     Void test_light_theme() {
-        Logger::configuration().set_verbosity(2);
-        Logger::configuration().set_theme(TT_THEME_LIGHT);
+        Logger::instance().configuration().set_verbosity(2);
+        Logger::instance().configuration().set_theme(TT_THEME_LIGHT);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(0,sample_function());
         ARIADNE_LOG_PRINTLN("This is again a call on level 1");
     }
 
     Void test_multiple_threads() {
-        Logger::use_nonblocking_scheduler();
-        Logger::configuration().set_verbosity(3);
-        Logger::configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
+        Logger::instance().use_nonblocking_scheduler();
+        Logger::instance().configuration().set_verbosity(3);
+        Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         LoggableSmartThread thread1("thread1",[]() { print_something1(); }),

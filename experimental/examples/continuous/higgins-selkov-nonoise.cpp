@@ -30,7 +30,7 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[])
 {
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    Logger::instance().configuration().set_verbosity(get_verbosity(argc,argv));
 
     RealVariable v0("v0"), k1("k1"), k2("k2");
     RealVariable S("S"), P("P");

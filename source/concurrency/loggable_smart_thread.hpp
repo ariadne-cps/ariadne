@@ -63,7 +63,7 @@ class LoggableSmartThread {
     void activate()  {
         if (!_active) {
             _active = true;
-            Logger::register_thread(*this);
+            Logger::instance().register_thread(*this);
             _activate_promise.set_value();
         }
     }
@@ -71,7 +71,7 @@ class LoggableSmartThread {
     ~LoggableSmartThread() {
         if(!_active) _activate_promise.set_value();
         _thread.join();
-        Logger::unregister_thread(*this);
+        Logger::instance().unregister_thread(*this);
     }
 
   private:

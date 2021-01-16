@@ -280,7 +280,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    Logger::instance().configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Create the composed automaton
     CompositeHybridAutomaton watertank_system=get_system();

@@ -43,6 +43,8 @@
 #include "utility/pointer.hpp"
 #include "utility/writable.hpp"
 
+// Set the verbosity, i.e., the maximum level to be shown from println calls
+#define ARIADNE_LOG_SET_VERBOSITY(level) Logger::instance().configuration().set_verbosity(level);
 // Automatic level increase/decrease in a scope; meant to be used once within a function, at top scope; necessary for print holding.
 #define ARIADNE_LOG_SCOPE_CREATE auto logscopemanager = LogScopeManager(ARIADNE_PRETTY_FUNCTION);
 // Managed level increase/decrease around the function fn; if the function throws, manual decrease of the proper level is required.

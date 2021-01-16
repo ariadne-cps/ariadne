@@ -28,7 +28,7 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[])
 {
-    Logger::instance().configuration().set_verbosity(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
 

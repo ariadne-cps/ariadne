@@ -69,17 +69,17 @@ class TestLogging {
     }
 
     Void test_shown_single_print() {
-        Logger::instance().configuration().set_verbosity(1);
+        ARIADNE_LOG_SET_VERBOSITY(1);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
     }
 
     Void test_hidden_single_print() {
-        Logger::instance().configuration().set_verbosity(0);
+        ARIADNE_LOG_SET_VERBOSITY(0);
         ARIADNE_LOG_PRINTLN("This is a hidden call on level 1");
     }
 
     Void test_shown_call_function_with_entrance_and_exit() {
-        Logger::instance().configuration().set_verbosity(2);
+        ARIADNE_LOG_SET_VERBOSITY(2);
         Logger::instance().configuration().set_prints_scope_entrance(true);
         Logger::instance().configuration().set_prints_scope_exit(true);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -88,7 +88,7 @@ class TestLogging {
     }
 
     Void test_hide_call_function_with_entrance_and_exit() {
-        Logger::instance().configuration().set_verbosity(2);
+        ARIADNE_LOG_SET_VERBOSITY(2);
         Logger::instance().configuration().set_prints_scope_entrance(true);
         Logger::instance().configuration().set_prints_scope_exit(true);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -97,7 +97,7 @@ class TestLogging {
     }
 
     Void test_dark_theme() {
-        Logger::instance().configuration().set_verbosity(2);
+        ARIADNE_LOG_SET_VERBOSITY(2);
         Logger::instance().configuration().set_theme(TT_THEME_DARK);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(0,sample_function());
@@ -105,7 +105,7 @@ class TestLogging {
     }
 
     Void test_light_theme() {
-        Logger::instance().configuration().set_verbosity(2);
+        ARIADNE_LOG_SET_VERBOSITY(2);
         Logger::instance().configuration().set_theme(TT_THEME_LIGHT);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(0,sample_function());
@@ -114,7 +114,7 @@ class TestLogging {
 
     Void test_multiple_threads() {
         Logger::instance().use_nonblocking_scheduler();
-        Logger::instance().configuration().set_verbosity(3);
+        ARIADNE_LOG_SET_VERBOSITY(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

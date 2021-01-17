@@ -44,7 +44,17 @@ unsigned int ConcurrencyManager::concurrency() const {
 
 void ConcurrencyManager::set_concurrency(unsigned int value) {
     ARIADNE_PRECONDITION(value <= _maximum_concurrency and value > 0);
+    std::lock_guard<std::mutex> lock(_data_mutex);
     _concurrency = value;
+}
+
+List<TaskSearchPoint> ConcurrencyManager::last_search_best_points() const {
+    return _last_search_best_points;
+}
+
+void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPoint> const& points) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    _last_search_best_points = points;
 }
 
 }

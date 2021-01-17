@@ -52,6 +52,7 @@ class SequentialRunner final : public TaskRunnerBase<T> {
     typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
 
     Void activate() override final;
+    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
@@ -75,6 +76,7 @@ class DetachedRunner final : public TaskRunnerBase<T> {
     virtual ~DetachedRunner();
 
     Void activate() override final;
+    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
@@ -113,6 +115,7 @@ class ParameterSearchRunner final : public TaskRunnerBase<T> {
     virtual ~ParameterSearchRunner();
 
     Void activate() override final;
+    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 

@@ -38,8 +38,9 @@ namespace Ariadne {
 
 //! \brief Manages threads and sets runners based on concurrency availability.
 class ConcurrencyManager {
-  public:
+  private:
     ConcurrencyManager();
+  public:
     ConcurrencyManager(ConcurrencyManager const&) = delete;
     void operator=(ConcurrencyManager const&) = delete;
 
@@ -62,9 +63,16 @@ class ConcurrencyManager {
 
     void set_concurrency(unsigned int value);
 
+    List<TaskSearchPoint> last_search_best_points() const;
+    void set_last_search_best_points(List<TaskSearchPoint> const& points);
+
   private:
     const unsigned int _maximum_concurrency;
     unsigned int _concurrency;
+
+    std::mutex _data_mutex;
+
+    List<TaskSearchPoint> _last_search_best_points;
 };
 
 } // namespace Ariadne

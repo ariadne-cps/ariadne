@@ -48,6 +48,9 @@ class TaskRunnerInterface {
     //! to the use. Multiple activations are possible due to multiple calls of the runner, though they will not have any effect,
     //! since a thread can be activated only once, with no exception thrown.
     virtual void activate() = 0;
+
+    //! \brief Transfer running statistics onto the ConcurrencyManager
+    virtual void dump_statistics() = 0;
     //! \brief Push input to the runner
     virtual void push(InputType const& input) = 0;
     //! \brief Pull output from the runner

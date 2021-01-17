@@ -60,7 +60,7 @@ int main(int argc, const char* argv[])
     Real eps_y0 = 5/100_q;
 
     EnclosureConfiguration enclosure_config(evolver.function_factory());
-    enclosure_config.set_reconditioning_num_blocks(4);
+    enclosure_config.set_reconditioning_num_blocks(3);
     auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0},enclosure_config);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,initial_set);
 
@@ -71,6 +71,8 @@ int main(int argc, const char* argv[])
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     auto end = std::chrono::high_resolution_clock::now();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
+
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,ConcurrencyManager::instance().last_search_best_points());
 
     ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});

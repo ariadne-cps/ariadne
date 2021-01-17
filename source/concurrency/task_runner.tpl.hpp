@@ -28,6 +28,7 @@
 
 #include "../concurrency/task_runner.hpp"
 #include "../concurrency/task_interface.hpp"
+#include "../concurrency/concurrency_manager.hpp"
 
 namespace Ariadne {
 
@@ -50,6 +51,12 @@ SequentialRunner<T>::activate()
 {
     ARIADNE_LOG_SCOPE_CREATE;
 }
+
+template<class T>
+Void
+SequentialRunner<T>::dump_statistics()
+{ }
+
 
 template<class T>
 Void
@@ -95,6 +102,11 @@ Void
 DetachedRunner<T>::activate()
 {
     _thread.activate();
+}
+
+template<class T>
+Void
+DetachedRunner<T>::dump_statistics() {
 }
 
 template<class T>
@@ -177,7 +189,6 @@ ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
 
 template<class T>
 ParameterSearchRunner<T>::~ParameterSearchRunner() {
-    ARIADNE_LOG_PRINTLN_VAR(_best_points);
     _terminate = true;
     _input_availability.notify_all();
 }
@@ -187,6 +198,13 @@ Void
 ParameterSearchRunner<T>::activate() {
     for (auto thread : _threads)
         thread->activate();
+}
+
+template<class T>
+Void
+ParameterSearchRunner<T>::dump_statistics() {
+    ConcurrencyManager::instance().set_last_search_best_points(_best_points);
+    _best_points.clear();
 }
 
 template<class T>

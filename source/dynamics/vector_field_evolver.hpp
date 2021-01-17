@@ -63,7 +63,8 @@ class VectorFieldEvolver
       public TaskRunnableInterface<VectorFieldFlowStepTask>
 {
   public:
-    typedef TaskRunnerInterface<VectorFieldFlowStepTask> RunnerType;
+    typedef VectorFieldFlowStepTask TaskType;
+    typedef TaskRunnerInterface<TaskType> RunnerType;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;
@@ -134,9 +135,11 @@ class VectorFieldEvolver
         return reachable; }
     //!@}
 
-  protected:
+protected:
 
     void set_runner(SharedPointer<RunnerType> runner) override { this->_runner = runner; }
+    RunnerType& runner() override { return *_runner; }
+    RunnerType const& runner() const override {  return *_runner; }
 
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,

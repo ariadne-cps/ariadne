@@ -49,6 +49,10 @@ class TaskRunnerInterface {
     //! since a thread can be activated only once, with no exception thrown.
     virtual void activate() = 0;
 
+    //! \brief Return the task
+    virtual T& task() = 0;
+    virtual T const& task() const = 0;
+
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;
     //! \brief Push input to the runner
@@ -61,11 +65,15 @@ class TaskRunnerInterface {
 template<class T>
 class TaskRunnableInterface {
     friend class ConcurrencyManager;
+    friend class VerificationManager;
   public:
     typedef T TaskType;
 
     //! \brief Set a new runner, useful to override the default runner
     virtual void set_runner(SharedPointer<TaskRunnerInterface<TaskType>> runner) = 0;
+    //! \brief Get the runner
+    virtual TaskRunnerInterface<TaskType>& runner() = 0;
+    virtual TaskRunnerInterface<TaskType> const& runner() const = 0;
 };
 
 } // namespace Ariadne

@@ -90,9 +90,9 @@ class VectorFieldFlowStepTask final: public ParameterSearchTaskBase<VectorFieldF
         TaskAppraisalSpace<I,O>({
             execution_time_appraisal_parameter<I,O>,
             ScalarAppraisalParameter<I,O>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); },2),
-            VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+            /*VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
                                       [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
-                                      [](I const& i){ return i.current_set_bounds.dimension(); })
+                                      [](I const& i){ return i.current_set_bounds.dimension(); })*/
         })) { }
   public:
 

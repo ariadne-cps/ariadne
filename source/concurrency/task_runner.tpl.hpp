@@ -40,9 +40,13 @@ public:
     typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
 
     TaskRunnerBase() : _task(new T()) { }
+
+    T& task() override { return *_task; };
+    T const& task() const override { return *_task; };
+
     virtual ~TaskRunnerBase() = default;
 protected:
-    SharedPointer<TaskInterface<InputType,OutputType,ConfigurationType>> const _task;
+    SharedPointer<T> const _task;
 };
 
 template<class T>

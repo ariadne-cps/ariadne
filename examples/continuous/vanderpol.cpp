@@ -54,10 +54,16 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
 
+    typedef VectorFieldEvolver::RunnerType::InputType I;
+    typedef VectorFieldEvolver::RunnerType::OutputType O;
+    auto verification_parameter = ScalarAppraisalParameter<I,O>("y<=2.75",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
+        return o.evolve.bounding_box()[y].upper_bound().get_d(); });
+    VerificationManager::instance().verify_runnable(evolver, {verification_parameter});
+
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
-    Real eps_x0 = 15/100_q;
-    Real eps_y0 = 5/100_q;
+    Real eps_x0 = 0.15_dec;
+    Real eps_y0 = 0.05_dec;
 
     EnclosureConfiguration enclosure_config(evolver.function_factory());
     enclosure_config.set_reconditioning_num_blocks(3);

@@ -195,6 +195,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:ariadne-verification>
 )
 
 target_link_libraries(ariadne dl)

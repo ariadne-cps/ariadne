@@ -78,4 +78,6 @@ namespace Ariadne {
 #include "output/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
+#include "verification/verification_manager.hpp"
+
 #endif

@@ -23,7 +23,7 @@
  */
 
 /*! \file concurrency/concurrency_manager.hpp
- *  \brief Static class for managing concurrency across the library
+ *  \brief Singleton class for managing concurrency across the library
  */
 
 #ifndef ARIADNE_CONCURRENCY_MANAGER_HPP

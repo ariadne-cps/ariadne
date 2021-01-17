@@ -34,6 +34,7 @@
 #include "../concurrency/buffer.hpp"
 #include "../concurrency/task_search_point.hpp"
 #include "../concurrency/task_search_space.hpp"
+#include "../concurrency/task_appraisal.hpp"
 
 namespace Ariadne {
 
@@ -126,7 +127,7 @@ private:
     std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
     Buffer<InputType> _last_used_input;
     std::queue<TaskSearchPoint> _points;
-    List<TaskSearchPoint> _best_points;
+    List<TaskSearchPointAppraisal> _best_points;
     // Synchronization
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;

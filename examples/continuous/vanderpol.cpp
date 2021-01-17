@@ -58,7 +58,8 @@ int main(int argc, const char* argv[])
     typedef VectorFieldEvolver::RunnerType::OutputType O;
     auto verification_parameter = ScalarAppraisalParameter<I,O>("y<=2.75",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return o.evolve.bounding_box()[y].upper_bound().get_d(); });
-    VerificationManager::instance().verify_runnable(evolver, {verification_parameter});
+    auto verification_constraint = TaskAppraisalConstraint<I,O>(verification_parameter,2.75,AppraisalConstraintSeverity::HIGH);
+    VerificationManager::instance().verify_runnable(evolver, {verification_constraint});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

@@ -48,11 +48,11 @@ void ConcurrencyManager::set_concurrency(unsigned int value) {
     _concurrency = value;
 }
 
-List<TaskSearchPoint> ConcurrencyManager::last_search_best_points() const {
+List<TaskSearchPointAppraisal> ConcurrencyManager::last_search_best_points() const {
     return _last_search_best_points;
 }
 
-void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPoint> const& points) {
+void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPointAppraisal> const& points) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _last_search_best_points = points;
 }

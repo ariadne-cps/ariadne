@@ -25,6 +25,7 @@
 #include "symbolic/expression_set.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
+#include "concurrency/task_appraisal.hpp"
 
 #include "../test.hpp"
 
@@ -243,14 +244,19 @@ class TestTaskSearchParameter {
         TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
         TaskSearchPoint point2 = space.make_point({{b, 1}, {m, 6}, {e, 2}});
         TaskSearchPoint point3 = space.make_point({{b, 1}, {m, 7}, {e, 2}});
-        TaskSearchPointAppraisal a1(point1,3,0);
-        TaskSearchPointAppraisal a2(point2,2,1);
-        TaskSearchPointAppraisal a3(point3,4,0);
-        Set<TaskSearchPointAppraisal> as = {a1, a2, a3};
+        TaskSearchPoint point4 = space.make_point({{b, 0}, {m, 7}, {e, 2}});
+        TaskSearchPointAppraisal a1(point1,3,0,0);
+        TaskSearchPointAppraisal a2(point2,2,1,0);
+        TaskSearchPointAppraisal a3(point3,4,0,0);
+        TaskSearchPointAppraisal a4(point4,4,0,1);
+        Set<TaskSearchPointAppraisal> as = {a1, a2, a3, a4};
+
         ARIADNE_TEST_PRINT(as);
         ARIADNE_TEST_ASSERT(a1 < a2);
         ARIADNE_TEST_ASSERT(a1 < a3);
         ARIADNE_TEST_ASSERT(a3 < a2);
+        ARIADNE_TEST_ASSERT(a2 < a4);
+        ARIADNE_TEST_ASSERT(a3 < a4);
     }
 
     Void test() {

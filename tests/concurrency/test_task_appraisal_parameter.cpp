@@ -65,18 +65,6 @@ class TestTaskAppraisalParameter {
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MINIMISE);
     }
 
-    Void test_task_appraisal_weight() {
-        typedef ScalarAppraisalParameter<int,int> AppraisalParameter;
-        AppraisalParameter p1("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-                                            [](int const& input, int const& output, DurationType const& duration) { return output + duration.count() + input; },1.5);
-        ARIADNE_TEST_PRINT(p1);
-        ARIADNE_TEST_EQUALS(p1.weight(),1.5);
-
-
-        ARIADNE_TEST_FAIL(AppraisalParameter("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-                                             [](int const& input, int const& output, DurationType const& duration) { return output + duration.count() + input; },-1.0));
-    }
-
     Void test_task_appraisal_set() {
         TaskAppraisalParameter<Array<int>,int> p1 = ScalarAppraisalParameter<Array<int>,int>("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
             [](Array<int> const& input, int const& output, DurationType const& duration) { return output + duration.count() + input[0]; });
@@ -93,7 +81,6 @@ class TestTaskAppraisalParameter {
     Void test() {
         ARIADNE_TEST_CALL(test_scalar_appraisal_creation());
         ARIADNE_TEST_CALL(test_vector_appraisal_creation());
-        ARIADNE_TEST_CALL(test_task_appraisal_weight());
         ARIADNE_TEST_CALL(test_task_appraisal_set());
     }
 };

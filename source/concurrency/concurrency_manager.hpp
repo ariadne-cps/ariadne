@@ -33,6 +33,7 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_runner.hpp"
+#include "../concurrency/task_appraisal.hpp"
 
 namespace Ariadne {
 
@@ -63,8 +64,8 @@ class ConcurrencyManager {
 
     void set_concurrency(unsigned int value);
 
-    List<TaskSearchPoint> last_search_best_points() const;
-    void set_last_search_best_points(List<TaskSearchPoint> const& points);
+    List<TaskSearchPointAppraisal> last_search_best_points() const;
+    void set_last_search_best_points(List<TaskSearchPointAppraisal> const& points);
 
   private:
     const unsigned int _maximum_concurrency;
@@ -72,7 +73,7 @@ class ConcurrencyManager {
 
     std::mutex _data_mutex;
 
-    List<TaskSearchPoint> _last_search_best_points;
+    List<TaskSearchPointAppraisal> _last_search_best_points;
 };
 
 } // namespace Ariadne

@@ -93,24 +93,6 @@ class TaskSearchPoint : public WritableInterface {
 //! skipping to the next if the generated point is not new
 Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, Nat size);
 
-typedef double CostType;
-
-class TaskSearchPointAppraisal : public WritableInterface {
-  public:
-    TaskSearchPointAppraisal(TaskSearchPoint const& p, CostType const& s, Nat const& threshold_failures);
-    TaskSearchPoint const& point() const;
-    CostType const& cost() const;
-    Nat const& threshold_failures() const;
-    //! \brief Ordering is based on number of failures, followed by cost
-    Bool operator<(TaskSearchPointAppraisal const& s) const;
-
-    virtual OutputStream& _write(OutputStream& os) const;
-private:
-    TaskSearchPoint const _point;
-    CostType const _cost;
-    Nat const _threshold_failures;
-};
-
 } // namespace Ariadne
 
 #endif // ARIADNE_SEARCH_POINT_HPP

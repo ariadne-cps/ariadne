@@ -33,7 +33,8 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_runner.hpp"
-#include "../concurrency/task_appraisal_parameter.hpp"
+#include "../concurrency/task_appraisal.hpp"
+#include "../concurrency/task_appraisal_space.hpp"
 
 namespace Ariadne {
 
@@ -49,10 +50,21 @@ class VerificationManager {
         return instance;
     }
 
-    template<class T> void verify_runnable(TaskRunnableInterface<T>& runnable, Set<TaskAppraisalParameter<typename T::InputType,typename T::OutputType>> const& specification) const {
-        auto appraisal_parameters = runnable.runner().task().appraisal_space().parameters();
-        appraisal_parameters.adjoin(specification);
-        runnable.runner().task().set_appraisal_space(TaskAppraisalSpace<typename T::InputType,typename T::OutputType>(appraisal_parameters));
+    template<class T> void verify_runnable(TaskRunnableInterface<T>& runnable, Set<TaskAppraisalConstraint<typename T::InputType,typename T::OutputType>> const& specification) const {
+        typedef typename T::InputType I;
+        typedef typename T::OutputType O;
+        auto appraisal_space = runnable.runner().task().appraisal_space();
+        auto original_constraints = appraisal_space.constraints();
+        auto original_weights = appraisal_space.parameters_weights();
+        TaskAppraisalSpaceBuilder<I,O> builder;
+        for (auto constr : appraisal_space.constraints()) {
+            builder.add(constr,original_weights.get(constr.parameter()));
+        }
+        for (auto constr : specification) {
+            builder.add(constr,0.0);
+        }
+        runnable.runner().task().set_appraisal_space(builder.build());
+        ARIADNE_LOG_PRINTLN("new_appraisal_space = " << runnable.runner().task().appraisal_space());
     }
 };
 

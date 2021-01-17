@@ -252,7 +252,7 @@ ParameterSearchRunner<  T>::pull() {
     ARIADNE_LOG_PRINTLN_VAR(new_points);
 
     auto best = appraisals.begin()->point();
-    _best_points.push_back(best);
+    _best_points.push_back(*appraisals.begin());
     return outputs.get(best).first;
 }
 

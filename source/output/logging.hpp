@@ -199,83 +199,6 @@ struct LogRawMessage : public LogThinRawMessage {
 
 class LoggerData;
 
-class LoggerSchedulerInterface {
-  public:
-    virtual void println(unsigned int level_increase, std::string text) = 0;
-    virtual void hold(std::string scope, std::string text) = 0;
-    virtual void release(std::string scope) = 0;
-    virtual unsigned int current_level() const = 0;
-    virtual std::string current_thread_name() const = 0;
-    virtual SizeType largest_thread_name_size() const = 0;
-    virtual void increase_level(unsigned int i) = 0;
-    virtual void decrease_level(unsigned int i) = 0;
-    virtual ~LoggerSchedulerInterface() = default;
-};
-
-//! \brief A Logger scheduler that prints immediately. Not designed for concurrency, since
-//! the current level should be different for each thread that prints. Also the outputs can overlap arbitrarily.
-class ImmediateLoggerScheduler : public LoggerSchedulerInterface {
-public:
-    ImmediateLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
-private:
-    unsigned int _current_level;
-};
-
-//! \brief A Logger scheduler that enqueues messages and prints them sequentially.
-//! The order of printing respects the order of submission, thus blocking other submitters.
-class BlockingLoggerScheduler : public LoggerSchedulerInterface {
-public:
-    BlockingLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
-    void create_data_instance(LoggableSmartThread const& thread);
-    ~BlockingLoggerScheduler() = default;
-private:
-    std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
-    std::mutex _data_mutex;
-};
-
-//! \brief A Logger scheduler that enqueues messages and prints them in a dedicated thread.
-//! The order of printing is respected only within a given thread.
-class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
-  public:
-    NonblockingLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
-    void create_data_instance(LoggableSmartThread const& thread);
-    void kill_data_instance(LoggableSmartThread const& thread);
-    ~NonblockingLoggerScheduler();
-  private:
-    //! \brief Extracts one message from the largest queue, also removing dead data instances
-    SharedPointer<LogRawMessage> _dequeue_and_cleanup();
-    void _consume_msgs();
-  private:
-    std::map<std::thread::id,SharedPointer<LoggerData>> _data;
-    std::thread _dequeueing_thread;
-    std::atomic<bool> _terminate;
-    std::mutex _data_mutex;
-};
-
 //! \brief The policy for printing the thread id with respect to the log level: NEVER, BEFORE or AFTER
 enum class ThreadNamePrintingPolicy { NEVER, BEFORE, AFTER };
 
@@ -347,16 +270,19 @@ class LoggerConfiguration : public WritableInterface {
     std::map<std::string,TerminalTextStyle> _custom_keywords;
 };
 
+class LoggerSchedulerInterface;
+
 //! \brief A static class for log output handling.
 //! Configuration and final printing is done here, while scheduling is
 //! done in a separate class.
 class Logger {
+  private:
     friend class ImmediateLoggerScheduler;
     friend class BlockingLoggerScheduler;
     friend class NonblockingLoggerScheduler;
-  public:
 
     Logger();
+  public:
     Logger(Logger const&) = delete;
     void operator=(Logger const&) = delete;
 

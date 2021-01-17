@@ -265,14 +265,14 @@ class LoggerSchedulerInterface {
 class ImmediateLoggerScheduler : public LoggerSchedulerInterface {
   public:
     ImmediateLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
+    void println(unsigned int level_increase, std::string text) override;
+    void hold(std::string scope, std::string text) override;
+    void release(std::string scope) override;
+    unsigned int current_level() const override;
+    std::string current_thread_name() const override;
+    SizeType largest_thread_name_size() const override;
+    void increase_level(unsigned int i) override;
+    void decrease_level(unsigned int i) override;
  private:
     unsigned int _current_level;
 };
@@ -282,16 +282,16 @@ class ImmediateLoggerScheduler : public LoggerSchedulerInterface {
 class BlockingLoggerScheduler : public LoggerSchedulerInterface {
   public:
     BlockingLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
+    void println(unsigned int level_increase, std::string text) override;
+    void hold(std::string scope, std::string text) override;
+    void release(std::string scope) override;
+    unsigned int current_level() const override;
+    std::string current_thread_name() const override;
+    SizeType largest_thread_name_size() const override;
+    void increase_level(unsigned int i) override;
+    void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
-    ~BlockingLoggerScheduler() = default;
+    ~BlockingLoggerScheduler() override = default;
   private:
     std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
     std::mutex _data_mutex;
@@ -302,17 +302,17 @@ class BlockingLoggerScheduler : public LoggerSchedulerInterface {
 class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
   public:
     NonblockingLoggerScheduler();
-    virtual void println(unsigned int level_increase, std::string text) override;
-    virtual void hold(std::string scope, std::string text) override;
-    virtual void release(std::string scope) override;
-    virtual unsigned int current_level() const override;
-    virtual std::string current_thread_name() const override;
-    virtual SizeType largest_thread_name_size() const override;
-    virtual void increase_level(unsigned int i) override;
-    virtual void decrease_level(unsigned int i) override;
+    void println(unsigned int level_increase, std::string text) override;
+    void hold(std::string scope, std::string text) override;
+    void release(std::string scope) override;
+    unsigned int current_level() const override;
+    std::string current_thread_name() const override;
+    SizeType largest_thread_name_size() const override;
+    void increase_level(unsigned int i) override;
+    void decrease_level(unsigned int i) override;
     void create_data_instance(LoggableSmartThread const& thread);
     void kill_data_instance(LoggableSmartThread const& thread);
-    ~NonblockingLoggerScheduler();
+    ~NonblockingLoggerScheduler() override;
   private:
     //! \brief Extracts one message from the largest queue, also removing dead data instances
     SharedPointer<LogRawMessage> _dequeue_and_cleanup();
@@ -655,14 +655,14 @@ void Logger::use_nonblocking_scheduler() {
 }
 
 void Logger::register_thread(LoggableSmartThread const& thread) {
-    NonblockingLoggerScheduler* nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
-    BlockingLoggerScheduler* bls = dynamic_cast<BlockingLoggerScheduler*>(_scheduler.get());
+    auto nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
+    auto bls = dynamic_cast<BlockingLoggerScheduler*>(_scheduler.get());
     if (nbls != nullptr) nbls->create_data_instance(thread);
     else if (bls != nullptr) bls->create_data_instance(thread);
 }
 
 void Logger::unregister_thread(LoggableSmartThread const& thread) {
-    NonblockingLoggerScheduler* nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
+    auto nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
     if (nbls != nullptr) nbls->kill_data_instance(thread);
 }
 
@@ -719,7 +719,7 @@ bool Logger::_is_holding() const {
 }
 
 bool Logger::_can_print_thread_name() const {
-    ImmediateLoggerScheduler* sch = dynamic_cast<ImmediateLoggerScheduler*>(_scheduler.get());
+    auto sch = dynamic_cast<ImmediateLoggerScheduler*>(_scheduler.get());
     // Only if we don't use an immediate scheduler and we have the right printing policy
     if (sch == nullptr and _configuration.thread_name_printing_policy() != ThreadNamePrintingPolicy::NEVER)
         return true;

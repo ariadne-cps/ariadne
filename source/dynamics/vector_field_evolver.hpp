@@ -55,19 +55,19 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolver;
 template<> class Configuration<VectorFieldEvolver>;
-class VectorFieldEvolverConfiguration;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
     : public EvolverBase<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
+      public Configurable<VectorFieldEvolver>,
       public TaskRunnableInterface<VectorFieldFlowStepTask>
 {
   public:
     typedef VectorFieldFlowStepTask TaskType;
     typedef TaskRunnerInterface<TaskType> RunnerType;
-    typedef VectorFieldEvolverConfiguration ConfigurationType;
+    typedef Configuration<VectorFieldEvolver> ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
@@ -90,9 +90,6 @@ class VectorFieldEvolver
     //! \brief Get the internal system.
     virtual const SystemType& system() const override { return *_sys_ptr; }
 
-    //! \brief Get the internal integrator.
-    const IntegratorInterface* integrator() const { return _integrator.get(); }
-
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
     EnclosureType enclosure(RealBox const&, EnclosureConfiguration const&) const;
@@ -104,12 +101,6 @@ class VectorFieldEvolver
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
     EnclosureType enclosure(ExactBoxType const&, EnclosureConfiguration const&) const;
-
-    //!@{
-    //! \name Configuration for the class.
-    //! \brief A reference to the configuration controlling the evolution.
-    ConfigurationType& configuration() { return *this->_configuration; }
-    const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
@@ -156,23 +147,21 @@ protected:
 
   private:
     SharedPointer<SystemType> _sys_ptr;
-    SharedPointer<IntegratorInterface> _integrator;
-    SharedPointer<ConfigurationType> _configuration;
     SharedPointer<RunnerType> _runner;
 };
 
 
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
-class VectorFieldEvolverConfiguration : public ConfigurationInterface
+template<> class Configuration<VectorFieldEvolver> : public ConfigurationInterface
 {
   public:
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
 
     //! \brief Default constructor gives reasonable values.
-    VectorFieldEvolverConfiguration();
+    Configuration();
 
-    virtual ~VectorFieldEvolverConfiguration() = default;
+    virtual ~Configuration() = default;
 
   private:
 
@@ -191,6 +180,9 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Enable reconditioning of basic sets (false by default).
     Bool _enable_reconditioning;
 
+    //! \brief The integrator to be used.
+    SharedPointer<IntegratorInterface> _integrator;
+
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
@@ -204,6 +196,9 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
+
+    const IntegratorInterface& integrator() const { return *_integrator; }
+    Void set_integrator(const IntegratorInterface& integrator) { _integrator.reset(integrator.clone()); }
 
   public:
 

@@ -113,9 +113,8 @@ const Bool ENABLE_PREMATURE_TERMINATION = false;
 
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _sys_ptr(system.clone())
-    , _integrator(i.clone())
-    , _configuration(new ConfigurationType())
 {
+    configuration().set_integrator(i);
     ConcurrencyManager::instance().set_runner(*this);
 }
 
@@ -144,7 +143,7 @@ typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const R
 }
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
-    return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
+    return dynamic_cast<const IntegratorBase&>(this->configuration().integrator()).function_factory();
 }
 
 
@@ -172,7 +171,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
                    const EnclosureType& current_set) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+    if (possibly(current_set.euclidean_set().bounding_box().radius() > configuration().maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("initial set too large, splitting");
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
@@ -229,14 +228,14 @@ _evolution(EnclosureListType& final_sets,
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
-                  && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+                  && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
             for(SizeType i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
             // Compute evolution
@@ -284,8 +283,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("radius = "<<current_set.euclidean_set().bounding_box().radius());
 
     // Test to see if set requires reconditioning
-    if(this->_configuration->enable_reconditioning() &&
-       possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+    if(configuration().enable_reconditioning() &&
+       possibly(norm(current_set.state_function().errors()) > configuration().maximum_spacial_error())) {
         ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set.state_function().errors());
         current_set.recondition();
     }
@@ -297,8 +296,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Push inputs
-    _runner->push(VectorFieldFlowStepIn(system().dynamic_function(), *_integrator, current_set, current_set_bounds,
-                                        current_time, previous_step_size, _configuration->maximum_step_size()));
+    _runner->push(VectorFieldFlowStepIn(system().dynamic_function(), configuration().integrator(), current_set, current_set_bounds,
+                                        current_time, previous_step_size, configuration().maximum_step_size()));
     // Pull outputs
     auto out = _runner->pull();
     // Save outputs
@@ -309,23 +308,25 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 }
 
 
-VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
+Configuration<VectorFieldEvolver>::Configuration()
 {
     set_maximum_step_size(1);
     set_maximum_enclosure_radius(100.0);
     set_enable_reconditioning(true);
     set_maximum_spacial_error(1e-2);
+    set_integrator(TaylorPicardIntegrator(1e-2));
 }
 
 
 OutputStream&
-VectorFieldEvolverConfiguration::_write(OutputStream& os) const
+Configuration<VectorFieldEvolver>::_write(OutputStream& os) const
 {
     os << "VectorFieldEvolverConfiguration("
        << "\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_reconditioning=" << enable_reconditioning()
        << ",\n  maximum_spacial_error=" << maximum_spacial_error()
+       << ",\n  integrator=" << integrator()
        << "\n)";
     return os;
 }

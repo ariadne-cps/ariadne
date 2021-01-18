@@ -50,7 +50,7 @@ class ConcurrencyManager {
         return instance;
     }
 
-    template<class T> void set_runner(TaskRunnableInterface<T>& runnable) const {
+    template<class T> void set_runner(TaskRunnable<T>& runnable) const {
         SharedPointer<TaskRunnerInterface<T>> runner;
         if (_concurrency > 1)
             runner.reset(new ParameterSearchRunner<T>(_concurrency));

@@ -209,7 +209,7 @@ _evolution(EnclosureListType& final_sets,
     ProgressIndicator time_indicator(maximum_time.get_d());
 
     // Activate the runner, determining the log level for the thread(s)
-    _runner->activate();
+    runner()->activate();
 
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
@@ -251,7 +251,7 @@ _evolution(EnclosureListType& final_sets,
         else ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << time_indicator.percentage() << "%");
     }
 
-    _runner->dump_statistics();
+    runner()->dump_statistics();
 
     ARIADNE_LOG_PRINTLN("Finished evolution");
 }
@@ -296,10 +296,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Push inputs
-    _runner->push(VectorFieldFlowStepIn(system().dynamic_function(), configuration().integrator(), current_set, current_set_bounds,
+    runner()->push(VectorFieldFlowStepIn(system().dynamic_function(), configuration().integrator(), current_set, current_set_bounds,
                                         current_time, previous_step_size, configuration().maximum_step_size()));
     // Pull outputs
-    auto out = _runner->pull();
+    auto out = runner()->pull();
     // Save outputs
     reach_sets.adjoin(out.reach);
     intermediate_sets.adjoin(out.evolve);

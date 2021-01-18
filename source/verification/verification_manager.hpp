@@ -50,10 +50,10 @@ class VerificationManager {
         return instance;
     }
 
-    template<class T> void verify_runnable(TaskRunnableInterface<T>& runnable, Set<TaskAppraisalConstraint<typename T::InputType,typename T::OutputType>> const& specification) const {
+    template<class T> void verify_runnable(TaskRunnable<T>& runnable, Set<TaskAppraisalConstraint<typename T::InputType,typename T::OutputType>> const& specification) const {
         typedef typename T::InputType I;
         typedef typename T::OutputType O;
-        auto appraisal_space = runnable.runner().task().appraisal_space();
+        auto appraisal_space = runnable.runner()->task().appraisal_space();
         auto original_constraints = appraisal_space.constraints();
         auto original_weights = appraisal_space.parameters_weights();
         TaskAppraisalSpaceBuilder<I,O> builder;
@@ -63,8 +63,8 @@ class VerificationManager {
         for (auto constr : specification) {
             builder.add(constr,0.0);
         }
-        runnable.runner().task().set_appraisal_space(builder.build());
-        ARIADNE_LOG_PRINTLN("new_appraisal_space = " << runnable.runner().task().appraisal_space());
+        runnable.runner()->task().set_appraisal_space(builder.build());
+        ARIADNE_LOG_PRINTLN("new_appraisal_space = " << runnable.runner()->task().appraisal_space());
     }
 };
 

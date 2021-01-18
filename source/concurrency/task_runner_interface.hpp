@@ -63,17 +63,19 @@ class TaskRunnerInterface {
 
 //! \brief Interface for a class that supports a runnable task.
 template<class T>
-class TaskRunnableInterface {
+class TaskRunnable {
     friend class ConcurrencyManager;
     friend class VerificationManager;
   public:
     typedef T TaskType;
-
+  protected:
     //! \brief Set a new runner, useful to override the default runner
-    virtual void set_runner(SharedPointer<TaskRunnerInterface<TaskType>> runner) = 0;
+    void set_runner(SharedPointer<TaskRunnerInterface<TaskType>> runner) { this->_runner = runner; }
     //! \brief Get the runner
-    virtual TaskRunnerInterface<TaskType>& runner() = 0;
-    virtual TaskRunnerInterface<TaskType> const& runner() const = 0;
+    SharedPointer<TaskRunnerInterface<TaskType>>& runner() { return _runner; }
+    SharedPointer<TaskRunnerInterface<TaskType>> const& runner() const { return _runner; }
+  private:
+    SharedPointer<TaskRunnerInterface<TaskType>> _runner;
 };
 
 } // namespace Ariadne

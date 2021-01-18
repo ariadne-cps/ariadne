@@ -62,12 +62,9 @@ template<> class Configuration<VectorFieldEvolver>;
 class VectorFieldEvolver
     : public EvolverBase<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
       public Configurable<VectorFieldEvolver>,
-      public TaskRunnableInterface<VectorFieldFlowStepTask>
+      public TaskRunnable<VectorFieldFlowStepTask>
 {
   public:
-    typedef VectorFieldFlowStepTask TaskType;
-    typedef TaskRunnerInterface<TaskType> RunnerType;
-    typedef Configuration<VectorFieldEvolver> ConfigurationType;
     typedef VectorField SystemType;
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
@@ -130,10 +127,6 @@ class VectorFieldEvolver
 
 protected:
 
-    void set_runner(SharedPointer<RunnerType> runner) override { this->_runner = runner; }
-    RunnerType& runner() override { return *_runner; }
-    RunnerType const& runner() const override {  return *_runner; }
-
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, Bool reach) const override;
@@ -147,7 +140,6 @@ protected:
 
   private:
     SharedPointer<SystemType> _sys_ptr;
-    SharedPointer<RunnerType> _runner;
 };
 
 

@@ -113,15 +113,20 @@ class ConfigurationInterface : public WritableInterface {
     friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
+//! \brief Base template class to be specialised while deriving from ConfigurationInterface
+//! \details The configuration must have a default constructor, i.e. it must define defaults for all properties
 template<class C> class Configuration { };
 
+//! \brief Is-a component that provides a configuration
 template<class C>
 class Configurable {
-public:
+    friend class Configuration<C>;
+  public:
+    Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
     Configuration<C>& configuration() { return *_configuration; }
     Configuration<C> const& configuration() const { return *_configuration; }
-private:
-    SharedPointer<Configuration<C>> _configuration = SharedPointer<Configuration<C>>(new Configuration<C>());
+  private:
+    SharedPointer<Configuration<C>> _configuration;
 };
 
 

@@ -112,7 +112,7 @@ const Bool ENABLE_SUBDIVISIONS = false;
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
-    : _sys_ptr(system.clone())
+    : Configurable<VectorFieldEvolver>(Configuration<VectorFieldEvolver>()), _sys_ptr(system.clone())
 {
     configuration().set_integrator(i);
     ConcurrencyManager::instance().set_runner(*this);

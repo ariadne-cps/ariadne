@@ -43,8 +43,8 @@
 #include "../solvers/integrator_interface.hpp"
 #include "../solvers/integrator.hpp"
 #include "../dynamics/evolver_base.hpp"
-
-#include "../dynamics/vector_field_evolver_task.hpp"
+#include "../concurrency/task_runner.tpl.hpp"
+#include "../concurrency/task_appraisal_space.hpp"
 
 #include "../output/logging.hpp"
 
@@ -55,6 +55,7 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolver;
 template<> class Configuration<VectorFieldEvolver>;
+class VectorFieldFlowStepTask;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
@@ -195,6 +196,81 @@ template<> class Configuration<VectorFieldEvolver> : public ConfigurationInterfa
   public:
 
     virtual OutputStream& _write(OutputStream& os) const;
+};
+
+struct VectorFieldFlowStepIn {
+    VectorFieldFlowStepIn(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
+                          FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_) :
+            dynamic(dynamic_), current_set(current_set_), current_set_bounds(current_set_bounds_),
+            current_time(current_time_), previous_step_size(previous_step_size_) { }
+    EffectiveVectorMultivariateFunction const& dynamic;
+    LabelledEnclosure const& current_set;
+    FloatDPExactBox const& current_set_bounds;
+    Dyadic const& current_time;
+    Dyadic const& previous_step_size;
+};
+
+struct VectorFieldFlowStepOut {
+    VectorFieldFlowStepOut(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
+            evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
+    LabelledEnclosure const evolve;
+    LabelledEnclosure const reach;
+    Dyadic const time;
+    Dyadic const step_size_used;
+};
+
+class VectorFieldFlowStepTask final: public ParameterSearchTaskBase<VectorFieldFlowStepIn,VectorFieldFlowStepOut,VectorFieldEvolver> {
+    typedef VectorFieldFlowStepIn I;
+    typedef VectorFieldFlowStepOut O;
+    typedef VectorFieldEvolver C;
+public:
+    VectorFieldFlowStepTask() : ParameterSearchTaskBase<I,O,C>(
+            "stp",
+            TaskSearchSpace({
+                                    MetricSearchParameter("starting_step_size_num_refinements", 2, 5),
+                                    MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12),
+                                    MetricSearchParameter("maximum_temporal_order", 9, 15)
+                            }),
+            TaskAppraisalSpaceBuilder<I,O>()
+                    .add(execution_time_appraisal_parameter<I,O>)
+                    .add(ScalarAppraisalParameter<I,O>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
+                    .add(VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+                                                       [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
+                                                       [](I const& i){ return i.current_set_bounds.dimension(); }))
+                    .build()) { }
+public:
+
+    SharedPointer<Configuration<C>> to_configuration(I const& in, Configuration<C> const& cfg, TaskSearchPoint const& p) const override {
+        auto result = SharedPointer<Configuration<C>>(new Configuration<C>(cfg));
+        TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(result->integrator());
+        result->set_integrator(TaylorPicardIntegrator(
+                MaximumError(old_integrator.maximum_error()),
+                ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
+                LipschitzConstant(old_integrator.lipschitz_tolerance()),
+                StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
+                StepMaximumError(old_integrator.step_maximum_error()),
+                MinimumTemporalOrder(old_integrator.minimum_temporal_order()),
+                MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
+        ));
+        return result;
+    }
+
+    O run_task(I const& in, Configuration<C> const& cfg) const override {
+        LabelledEnclosure next_set = in.current_set;
+        LabelledEnclosure reach_set = in.current_set;
+        Dyadic next_time = in.current_time;
+        Dyadic chosen_step_size = cfg.maximum_step_size();
+        FlowStepModelType flow_model = cfg.integrator().flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
+        next_time += chosen_step_size;
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);
+        reach_set.apply_full_reach_step(flow_model);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
+        next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
+        return O(next_set, reach_set, next_time, chosen_step_size);
+    }
 };
 
 } // namespace Ariadne

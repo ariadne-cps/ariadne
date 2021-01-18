@@ -46,7 +46,7 @@ class TaskInterface {
   public:
     typedef I InputType;
     typedef O OutputType;
-    typedef C ConfigurationType;
+    typedef Configuration<C> ConfigurationType;
 
     //! \brief The name of the task, to be used for thread naming
     virtual String name() const = 0;
@@ -57,10 +57,10 @@ class TaskInterface {
     //! \brief Set the appraisal space for the task
     virtual Void set_appraisal_space(TaskAppraisalSpace<I,O> const& space) = 0;
 
-    //! \brief Convert a task parameter point into a configuration of values for the task, possibly using \a in for values
-    virtual C to_configuration(I const& in, TaskSearchPoint const& p) const = 0;
+    //! \brief Convert a configuration \a cfg into another configuration according to the point \a p, possibly using \a in for values
+    virtual SharedPointer<Configuration<C>> to_configuration(I const& in, Configuration<C> const& cfg, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
-    virtual O run_task(I const& in, C const& cfg) const = 0;
+    virtual O run_task(I const& in, Configuration<C> const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
     virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& in) const = 0;
 };

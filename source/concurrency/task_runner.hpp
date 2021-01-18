@@ -54,7 +54,7 @@ class SequentialRunner final : public TaskRunnerBase<T> {
 
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input) override final;
+    Void push(InputType const& input, ConfigurationType const& cfg) override final;
     OutputType pull() override final;
 
 private:
@@ -71,14 +71,14 @@ class DetachedRunner final : public TaskRunnerBase<T> {
     typedef typename TaskRunnerBase<T>::InputType InputType;
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
     typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
-    typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
+    typedef Buffer<Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
     virtual ~DetachedRunner();
 
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input) override final;
+    Void push(InputType const& input, ConfigurationType const& cfg) override final;
     OutputType pull() override final;
 
 private:
@@ -108,7 +108,7 @@ class ParameterSearchRunner final : public TaskRunnerBase<T> {
     typedef typename TaskRunnerBase<T>::InputType InputType;
     typedef typename TaskRunnerBase<T>::OutputType OutputType;
     typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
-    typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
+    typedef Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>> InputBufferContentType;
     typedef ParameterSearchOutputBufferData<OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
@@ -117,7 +117,7 @@ class ParameterSearchRunner final : public TaskRunnerBase<T> {
 
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input) override final;
+    Void push(InputType const& input, ConfigurationType const& cfg) override final;
     OutputType pull() override final;
 
 private:

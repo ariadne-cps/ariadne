@@ -114,7 +114,6 @@ class ConfigurationInterface : public WritableInterface {
 };
 
 //! \brief Base template class to be specialised while deriving from ConfigurationInterface
-//! \details The configuration must have a default constructor, i.e. it must define defaults for all properties
 template<class C> class Configuration { };
 
 //! \brief Is-a component that provides a configuration

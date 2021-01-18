@@ -55,8 +55,8 @@ class TaskRunnerInterface {
 
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;
-    //! \brief Push input to the runner
-    virtual void push(InputType const& input) = 0;
+    //! \brief Push input and current configuration to the runner
+    virtual void push(InputType const& input, ConfigurationType const& cfg) = 0;
     //! \brief Pull output from the runner
     virtual OutputType pull() = 0;
 };

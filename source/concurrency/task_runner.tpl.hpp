@@ -64,9 +64,9 @@ SequentialRunner<T>::dump_statistics()
 
 template<class T>
 Void
-SequentialRunner<T>::push(InputType const& input)
+SequentialRunner<T>::push(InputType const& input, ConfigurationType const& cfg)
 {
-    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->to_configuration(input,this->_task->search_space().initial_point()))));
+    _last_output.reset(new OutputType(this->_task->run_task(input,*this->_task->to_configuration(input,cfg,this->_task->search_space().initial_point()))));
 }
 
 template<class T>
@@ -84,7 +84,7 @@ DetachedRunner<T>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->to_configuration(pkg.first,pkg.second)));
+        _output_buffer.push(this->_task->run_task(pkg.first,*this->_task->to_configuration(pkg.first,pkg.second.first,pkg.second.second)));
         _output_availability.notify_all();
     }
 }
@@ -115,9 +115,9 @@ DetachedRunner<T>::dump_statistics() {
 
 template<class T>
 Void
-DetachedRunner<T>::push(InputType const& input)
+DetachedRunner<T>::push(InputType const& input, ConfigurationType const& cfg)
 {
-    _input_buffer.push({input,this->_task->search_space().initial_point()});
+    _input_buffer.push({input,{cfg,this->_task->search_space().initial_point()}});
     _input_availability.notify_all();
 }
 
@@ -158,14 +158,14 @@ ParameterSearchRunner<T>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = this->_task->to_configuration(pkg.first,pkg.second);
+        auto cfg = this->_task->to_configuration(pkg.first,pkg.second.first,pkg.second.second);
         auto start = std::chrono::high_resolution_clock::now();
         try {
-            auto result = this->_task->run_task(pkg.first,cfg);
+            auto result = this->_task->run_task(pkg.first,*cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");
-            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second));
+            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second.second));
         } catch (std::exception& e) {
             ++_failures;
             ARIADNE_LOG_PRINTLN("task failed: " << e.what());
@@ -213,9 +213,9 @@ ParameterSearchRunner<T>::dump_statistics() {
 
 template<class T>
 Void
-ParameterSearchRunner<T>::push(InputType const& input) {
+ParameterSearchRunner<T>::push(InputType const& input, ConfigurationType const& cfg) {
     for (SizeType i=0; i<_concurrency; ++i) {
-        _input_buffer.push({input,_points.front()});
+        _input_buffer.push({input,{cfg,_points.front()}});
         _points.pop();
     }
     _last_used_input.push(input);

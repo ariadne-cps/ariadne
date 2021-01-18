@@ -47,7 +47,7 @@ private:
 
 class A : public Configurable<A>, public WritableInterface {
   public:
-
+    A() : Configurable<A>(Configuration<A>()) { }
     OutputStream& _write(OutputStream& os) const override { os << "(A's configuration:" << configuration() << ")"; return os; }
 };
 

@@ -5,6 +5,7 @@ set(UNIT_TESTS
     test_linear_programming
     test_nonlinear_programming
     test_solvers
+    test_configuration
 )
 
 foreach(TEST ${UNIT_TESTS})

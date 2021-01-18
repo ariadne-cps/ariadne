@@ -53,6 +53,8 @@ namespace Ariadne {
 class VectorField;
 template<class ES> class Orbit;
 
+class VectorFieldEvolver;
+template<> class Configuration<VectorFieldEvolver>;
 class VectorFieldEvolverConfiguration;
 
 //! \brief A class for computing the evolution of a vector_field system.

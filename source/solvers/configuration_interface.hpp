@@ -113,6 +113,17 @@ class ConfigurationInterface : public WritableInterface {
     friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
+template<class C> class Configuration { };
+
+template<class C>
+class Configurable {
+public:
+    Configuration<C>& configuration() { return *_configuration; }
+    Configuration<C> const& configuration() const { return *_configuration; }
+private:
+    SharedPointer<Configuration<C>> _configuration = SharedPointer<Configuration<C>>(new Configuration<C>());
+};
+
 
 } // namespace Ariadne
 

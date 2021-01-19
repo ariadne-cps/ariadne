@@ -31,6 +31,8 @@ using namespace Ariadne;
 
 class TestRunnable : public TaskRunnable<TestRunnable> { };
 typedef TestRunnable R;
+
+namespace Ariadne {
 template<> struct TaskInput<R> {
     TaskInput(int i1_, Array<int> i2_) : i1(i1_), i2(i2_) { }
     int i1;
@@ -40,6 +42,7 @@ template<> struct TaskOutput<R> {
     TaskOutput(int o_) : o(o_) { }
     int o;
 };
+}
 
 typedef TaskInput<R> I;
 typedef TaskOutput<R> O;

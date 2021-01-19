@@ -30,6 +30,7 @@
 #define ARIADNE_TASK_APPRAISAL_PARAMETER_HPP
 
 #include <functional>
+#include <chrono>
 #include "utility/typedefs.hpp"
 #include "utility/container.hpp"
 #include "utility/string.hpp"

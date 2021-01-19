@@ -133,6 +133,7 @@ template<class O>
 class ParameterSearchOutputBufferData {
   public:
     ParameterSearchOutputBufferData(O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _output(output), _execution_time(execution_time), _point(point) { }
+    ParameterSearchOutputBufferData(ParameterSearchOutputBufferData<O> const& p) : _output(p._output), _execution_time(p._execution_time), _point(p._point) { }
     ParameterSearchOutputBufferData& operator=(ParameterSearchOutputBufferData<O> const& p) {
         _output = p._output;
         _execution_time = p._execution_time;

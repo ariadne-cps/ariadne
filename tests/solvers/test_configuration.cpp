@@ -29,6 +29,8 @@ using namespace Ariadne;
 
 class A;
 
+namespace Ariadne {
+
 template<> class Configuration<A> : public ConfigurationInterface {
 public:
     Configuration() : _int_parameter(0), _bool_parameter(false) { }
@@ -44,6 +46,8 @@ private:
     int _int_parameter;
     bool _bool_parameter;
 };
+
+}
 
 class A : public Configurable<A>, public WritableInterface {
   public:

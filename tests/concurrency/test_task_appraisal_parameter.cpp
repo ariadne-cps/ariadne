@@ -23,10 +23,26 @@
  */
 
 #include "concurrency/task_appraisal_parameter.hpp"
+#include "concurrency/task_runner_interface.hpp"
 #include "utility/array.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
+
+class TestRunnable : public TaskRunnable<TestRunnable> { };
+typedef TestRunnable R;
+template<> struct TaskInput<R> {
+    TaskInput(int i1_, Array<int> i2_) : i1(i1_), i2(i2_) { }
+    int i1;
+    Array<int> i2;
+};
+template<> struct TaskOutput<R> {
+    TaskOutput(int o_) : o(o_) { }
+    int o;
+};
+
+typedef TaskInput<R> I;
+typedef TaskOutput<R> O;
 
 class TestTaskAppraisalParameter {
   private:
@@ -39,41 +55,43 @@ class TestTaskAppraisalParameter {
     }
 
     Void test_scalar_appraisal_creation() {
-        ScalarAppraisalParameter<int,int> p("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-        [](int const& input, int const& output, DurationType const& duration) { return output + duration.count() + input; });
-        auto cost = p.appraise(2,5,_duration);
+        ScalarAppraisalParameter<R> p("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
+        [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
+        auto input = I(2,{1,2});
+        auto output = O(7);
+        auto cost = p.appraise(input,output,_duration);
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_scalar());
-        ARIADNE_TEST_EQUALS(cost,7);
-        ARIADNE_TEST_EQUALS(p.dimension(2),1);
+        ARIADNE_TEST_EQUALS(cost,9);
+        ARIADNE_TEST_EQUALS(p.dimension(input),1);
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MAXIMISE);
     }
 
     Void test_vector_appraisal_creation() {
-        VectorAppraisalParameter<Array<int>,int> p("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
-                                            [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) {
-                                                return output + duration.count() + input[idx]; },
-                                            [](Array<int> const& input) { return input.size(); });
-        Array<int> input = {1,-3};
-        int output = 5;
+        VectorAppraisalParameter<R> p("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
+                                            [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
+                                                return output.o + duration.count() + input.i2[idx]; },
+                                            [](I const& input) { return input.i2.size(); });
+        auto input = I(2,{1,2});
+        auto output = O(7);
 
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(not p.is_scalar());
-        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,0),6);
-        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,1),2);
+        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,0),8);
+        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,1),9);
         ARIADNE_TEST_EQUALS(p.dimension(input),2);
         ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MINIMISE);
     }
 
     Void test_task_appraisal_set() {
-        TaskAppraisalParameter<Array<int>,int> p1 = ScalarAppraisalParameter<Array<int>,int>("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-            [](Array<int> const& input, int const& output, DurationType const& duration) { return output + duration.count() + input[0]; });
+        ScalarAppraisalParameter<R> p1("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
+                                      [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
+        VectorAppraisalParameter<R> p2("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
+                                      [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
+                                          return output.o + duration.count() + input.i2[idx]; },
+                                      [](I const& input) { return input.i2.size(); });
 
-        TaskAppraisalParameter<Array<int>,int> p2 = VectorAppraisalParameter<Array<int>,int>("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
-            [](Array<int> const& input, int const& output, DurationType const& duration,SizeType const& idx) { return output + duration.count() + input[idx]; },
-            [](Array<int> const& input) { return input.size(); });
-
-        Set<TaskAppraisalParameter<Array<int>,int>> ps = {p1,p2};
+        Set<TaskAppraisalParameter<R>> ps = {p1,p2};
 
         ARIADNE_TEST_PRINT(ps);
     }

@@ -50,7 +50,7 @@ class VerificationManager {
         return instance;
     }
 
-    template<class R> void verify_runnable(TaskRunnable<R>& runnable, Set<TaskAppraisalConstraint<R>> const& specification) const {
+    template<class R> void add_safety_specification(TaskRunnable<R>& runnable, Set<TaskAppraisalConstraint<R>> const& specification) const {
         auto appraisal_space = runnable.runner()->task().appraisal_space();
         auto original_constraints = appraisal_space.constraints();
         auto original_weights = appraisal_space.parameters_weights();

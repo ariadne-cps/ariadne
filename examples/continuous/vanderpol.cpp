@@ -53,10 +53,10 @@ int main(int argc, const char* argv[])
 
     typedef TaskInput<VectorFieldEvolver> I;
     typedef TaskOutput<VectorFieldEvolver> O;
-    auto verification_parameter = ScalarAppraisalParameter<VectorFieldEvolver>("y<=2.75",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
+    auto verification_parameter = ScalarAppraisalParameter<VectorFieldEvolver>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return o.evolve.bounding_box()[y].upper_bound().get_d(); });
-    auto verification_constraint = TaskAppraisalConstraint<VectorFieldEvolver>(verification_parameter,2.75,AppraisalConstraintSeverity::HIGH);
-    VerificationManager::instance().verify_runnable(evolver, {verification_constraint});
+    auto verification_constraint = TaskAppraisalConstraint<VectorFieldEvolver>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
+    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -72,15 +72,19 @@ int main(int argc, const char* argv[])
 
     auto start = std::chrono::high_resolution_clock::now();
     ARIADNE_LOG_PRINTLN("Computing orbit... ");
-    auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    auto end = std::chrono::high_resolution_clock::now();
-    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
+    try {
+        auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+        auto end = std::chrono::high_resolution_clock::now();
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
 
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,ConcurrencyManager::instance().last_search_best_points());
+        ARIADNE_LOG_PRINTLN_VAR_AT(1,ConcurrencyManager::instance().last_search_best_points());
 
-    ARIADNE_LOG_PRINTLN("Plotting...");
-    LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
-    fig << fill_colour(1.0,0.75,0.5);
-    fig.draw(orbit.reach());
-    fig.write("vanderpol");
+        ARIADNE_LOG_PRINTLN("Plotting...");
+        LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
+        fig << fill_colour(1.0,0.75,0.5);
+        fig.draw(orbit.reach());
+        fig.write("vanderpol");
+    } catch (CriticalAppraisalFailureException& ex) {
+        ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
+    }
 }

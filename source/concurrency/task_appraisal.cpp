@@ -28,9 +28,9 @@ namespace Ariadne {
 
 TaskSearchPointAppraisal::TaskSearchPointAppraisal(TaskSearchPoint const& p,
                                                    CostType const& s,
-                                                   SizeType const& low_failures,
-                                                   SizeType const& high_failures)
-           : _point(p), _cost(s), _low_failures(low_failures), _high_failures(high_failures) { }
+                                                   SizeType const& permissive_failures,
+                                                   SizeType const& critical_failures)
+           : _point(p), _cost(s), _permissive_failures(permissive_failures), _critical_failures(critical_failures) { }
 
 TaskSearchPoint const&
 TaskSearchPointAppraisal::point() const {
@@ -43,25 +43,25 @@ TaskSearchPointAppraisal::cost() const {
 }
 
 SizeType const&
-TaskSearchPointAppraisal::low_failures() const {
-    return _low_failures;
+TaskSearchPointAppraisal::permissive_failures() const {
+    return _permissive_failures;
 }
 
 SizeType const&
-TaskSearchPointAppraisal::high_failures() const {
-    return _high_failures;
+TaskSearchPointAppraisal::critical_failures() const {
+    return _critical_failures;
 }
 
 Bool TaskSearchPointAppraisal::operator<(TaskSearchPointAppraisal const& s) const {
-    if (this->_high_failures > s._high_failures) return false;
-    else if (this->_high_failures < s._high_failures) return true;
-    else if (this->_low_failures > s._low_failures) return false;
-    else if (this->_low_failures < s._low_failures) return true;
+    if (this->_critical_failures > s._critical_failures) return false;
+    else if (this->_critical_failures < s._critical_failures) return true;
+    else if (this->_permissive_failures > s._permissive_failures) return false;
+    else if (this->_permissive_failures < s._permissive_failures) return true;
     else return this->_cost < s._cost;
 }
 
 OutputStream& TaskSearchPointAppraisal::_write(OutputStream& os) const {
-    return os << "{" << _point << ":" << _cost << (_low_failures > 0 ? (",L:"+to_string(_low_failures)) : "")
-            << (_high_failures > 0 ? (",H:"+to_string(_high_failures)) : "") << "}";
+    return os << "{" << _point << ":" << _cost << (_permissive_failures > 0 ? (",P:" + to_string(_permissive_failures)) : "")
+              << (_critical_failures > 0 ? (",C:" + to_string(_critical_failures)) : "") << "}";
 }
 } // namespace Ariadne

@@ -36,16 +36,23 @@ namespace Ariadne {
 
 typedef double CostType;
 
+class TaskSearchPointAppraisal;
+
+class CriticalAppraisalFailureException : public std::runtime_error {
+public:
+    CriticalAppraisalFailureException(Set<TaskSearchPointAppraisal> const& appraisals) : std::runtime_error("All appraised points have critical failures: " + to_string(appraisals)) { }
+};
+
 //! \brief Enumeration for the severity of the constraint
 //! \details NONE: there actually is no constraint
-//!          LOW: satisfying the constraint is only desired
-//!          HIGH: satisfying the constraint is mandatory
-enum class AppraisalConstraintSeverity { NONE, LOW, HIGH };
+//!          PERMISSIVE: satisfying the constraint is only desired
+//!          CRITICAL: satisfying the constraint is mandatory
+enum class AppraisalConstraintSeverity { NONE, PERMISSIVE, CRITICAL };
 inline std::ostream& operator<<(std::ostream& os, const AppraisalConstraintSeverity severity) {
     switch (severity) {
         case AppraisalConstraintSeverity::NONE: os << "NONE"; break;
-        case AppraisalConstraintSeverity::LOW: os << "LOW"; break;
-        case AppraisalConstraintSeverity::HIGH: os << "HIGH"; break;
+        case AppraisalConstraintSeverity::PERMISSIVE: os << "PERMISSIVE"; break;
+        case AppraisalConstraintSeverity::CRITICAL: os << "CRITICAL"; break;
         default: ARIADNE_FAIL_MSG("Unhandled AppraisalConstraintSeverity value.");
     }
     return os;
@@ -87,11 +94,11 @@ class TaskAppraisalConstraint : public WritableInterface {
 
 class TaskSearchPointAppraisal : public WritableInterface {
 public:
-    TaskSearchPointAppraisal(TaskSearchPoint const& p, CostType const& s, SizeType const& low_failures, SizeType const& high_failures);
+    TaskSearchPointAppraisal(TaskSearchPoint const& p, CostType const& s, SizeType const& permissive_failures, SizeType const& critical_failures);
     TaskSearchPoint const& point() const;
     CostType const& cost() const;
-    SizeType const& low_failures() const;
-    SizeType const& high_failures() const;
+    SizeType const& permissive_failures() const;
+    SizeType const& critical_failures() const;
     //! \brief Ordering is based on number of failures, followed by cost
     Bool operator<(TaskSearchPointAppraisal const& s) const;
 
@@ -99,8 +106,8 @@ public:
 private:
     TaskSearchPoint _point;
     CostType _cost;
-    SizeType _low_failures;
-    SizeType _high_failures;
+    SizeType _permissive_failures;
+    SizeType _critical_failures;
 };
 
 } // namespace Ariadne

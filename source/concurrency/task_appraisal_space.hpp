@@ -146,8 +146,8 @@ class TaskAppraisalSpace : public WritableInterface {
                     auto threshold = ac.threshold();
                     if ((p.optimisation() == TaskAppraisalParameterOptimisation::MINIMISE and appr > threshold) or
                         (p.optimisation() == TaskAppraisalParameterOptimisation::MAXIMISE and appr < threshold)) {
-                        if (ac.severity() == AppraisalConstraintSeverity::LOW) ++low_errors;
-                        else if (ac.severity() == AppraisalConstraintSeverity::HIGH) ++high_errors;
+                        if (ac.severity() == AppraisalConstraintSeverity::PERMISSIVE) ++low_errors;
+                        else if (ac.severity() == AppraisalConstraintSeverity::CRITICAL) ++high_errors;
                     }
                     if (max_min_diff > 0) val = (appr - scalar_min_max[p].first)/max_min_diff;
                 } else {

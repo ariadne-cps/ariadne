@@ -54,11 +54,11 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
 
-    typedef VectorFieldFlowStepIn I;
-    typedef VectorFieldFlowStepOut O;
-    auto verification_parameter = ScalarAppraisalParameter<I,O>("y<=2.75",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
+    typedef TaskInput<VectorFieldEvolver> I;
+    typedef TaskOutput<VectorFieldEvolver> O;
+    auto verification_parameter = ScalarAppraisalParameter<VectorFieldEvolver>("y<=2.75",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return o.evolve.bounding_box()[y].upper_bound().get_d(); });
-    auto verification_constraint = TaskAppraisalConstraint<I,O>(verification_parameter,2.75,AppraisalConstraintSeverity::HIGH);
+    auto verification_constraint = TaskAppraisalConstraint<VectorFieldEvolver>(verification_parameter,2.75,AppraisalConstraintSeverity::HIGH);
     VerificationManager::instance().verify_runnable(evolver, {verification_constraint});
 
     Real x0 = 1.4_dec;

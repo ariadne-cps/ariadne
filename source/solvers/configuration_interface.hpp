@@ -114,7 +114,7 @@ class ConfigurationInterface : public WritableInterface {
 };
 
 //! \brief Base template class to be specialised while deriving from ConfigurationInterface
-template<class C> class Configuration { };
+template<class C> class Configuration;
 
 //! \brief Is-a component that provides a configuration
 template<class C>

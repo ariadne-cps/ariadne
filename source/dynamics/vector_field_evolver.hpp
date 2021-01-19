@@ -63,7 +63,7 @@ class VectorFieldFlowStepTask;
 class VectorFieldEvolver
     : public EvolverBase<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
       public Configurable<VectorFieldEvolver>,
-      public TaskRunnable<VectorFieldFlowStepTask>
+      public TaskRunnable<VectorFieldEvolver>
 {
   public:
     typedef VectorField SystemType;
@@ -198,8 +198,8 @@ template<> class Configuration<VectorFieldEvolver> : public ConfigurationInterfa
     virtual OutputStream& _write(OutputStream& os) const;
 };
 
-struct VectorFieldFlowStepIn {
-    VectorFieldFlowStepIn(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
+template<> struct TaskInput<VectorFieldEvolver> {
+    TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
                           FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_) :
             dynamic(dynamic_), current_set(current_set_), current_set_bounds(current_set_bounds_),
             current_time(current_time_), previous_step_size(previous_step_size_) { }
@@ -210,8 +210,8 @@ struct VectorFieldFlowStepIn {
     Dyadic const& previous_step_size;
 };
 
-struct VectorFieldFlowStepOut {
-    VectorFieldFlowStepOut(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
+template<> struct TaskOutput<VectorFieldEvolver> {
+    TaskOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_, Dyadic const& step_size_used_) :
             evolve(evolve_), reach(reach_), time(time_), step_size_used(step_size_used_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
@@ -219,29 +219,30 @@ struct VectorFieldFlowStepOut {
     Dyadic const step_size_used;
 };
 
-class VectorFieldFlowStepTask final: public ParameterSearchTaskBase<VectorFieldFlowStepIn,VectorFieldFlowStepOut,VectorFieldEvolver> {
-    typedef VectorFieldFlowStepIn I;
-    typedef VectorFieldFlowStepOut O;
-    typedef VectorFieldEvolver C;
+template<> class Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<VectorFieldEvolver> {
+    typedef VectorFieldEvolver R;
+    typedef TaskInput<R> I;
+    typedef TaskOutput<R> O;
+    typedef Configuration<R> C;
 public:
-    VectorFieldFlowStepTask() : ParameterSearchTaskBase<I,O,C>(
+    Task() : ParameterSearchTaskBase<R>(
             "stp",
             TaskSearchSpace({
                                     MetricSearchParameter("starting_step_size_num_refinements", 2, 5),
                                     MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12),
                                     MetricSearchParameter("maximum_temporal_order", 9, 15)
                             }),
-            TaskAppraisalSpaceBuilder<I,O>()
-                    .add(execution_time_appraisal_parameter<I,O>)
-                    .add(ScalarAppraisalParameter<I,O>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
-                    .add(VectorAppraisalParameter<I,O>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+            TaskAppraisalSpaceBuilder<R>()
+                    .add(execution_time_appraisal_parameter<R>)
+                    .add(ScalarAppraisalParameter<R>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
+                    .add(VectorAppraisalParameter<R>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
                                                        [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
                                                        [](I const& i){ return i.current_set_bounds.dimension(); }))
                     .build()) { }
 public:
 
-    SharedPointer<Configuration<C>> to_configuration(I const& in, Configuration<C> const& cfg, TaskSearchPoint const& p) const override {
-        auto result = SharedPointer<Configuration<C>>(new Configuration<C>(cfg));
+    SharedPointer<C> to_configuration(I const& in, C const& cfg, TaskSearchPoint const& p) const override {
+        auto result = SharedPointer<C>(new C(cfg));
         TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(result->integrator());
         result->set_integrator(TaylorPicardIntegrator(
                 MaximumError(old_integrator.maximum_error()),
@@ -255,7 +256,7 @@ public:
         return result;
     }
 
-    O run_task(I const& in, Configuration<C> const& cfg) const override {
+    O run_task(I const& in, C const& cfg) const override {
         LabelledEnclosure next_set = in.current_set;
         LabelledEnclosure reach_set = in.current_set;
         Dyadic next_time = in.current_time;

@@ -38,6 +38,9 @@
 
 namespace Ariadne {
 
+template<class R> struct TaskInput;
+template<class R> struct TaskOutput;
+
 enum class TaskAppraisalParameterOptimisation { MINIMISE, MAXIMISE };
 inline std::ostream& operator<<(std::ostream& os, const TaskAppraisalParameterOptimisation opt) {
     switch (opt) {
@@ -51,11 +54,11 @@ inline std::ostream& operator<<(std::ostream& os, const TaskAppraisalParameterOp
 typedef double CostType;
 typedef std::chrono::microseconds DurationType;
 
-template<class I, class O>
+template<class R>
 class TaskAppraisalParameterInterface : public WritableInterface {
 public:
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
 
     virtual String const& name() const = 0;
     virtual TaskAppraisalParameterOptimisation optimisation() const = 0;
@@ -67,11 +70,11 @@ public:
     virtual ~TaskAppraisalParameterInterface() = default;
 };
 
-template<class I, class O>
-class TaskAppraisalParameterBase : public TaskAppraisalParameterInterface<I,O> {
+template<class R>
+class TaskAppraisalParameterBase : public TaskAppraisalParameterInterface<R> {
 public:
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
     TaskAppraisalParameterBase(String const& name, TaskAppraisalParameterOptimisation const& opt)
             : _name(name), _optimisation(opt) { }
 
@@ -86,13 +89,13 @@ private:
     TaskAppraisalParameterOptimisation const _optimisation;
 };
 
-template<class I, class O>
-class ScalarAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
+template<class R>
+class ScalarAppraisalParameter : public TaskAppraisalParameterBase<R> {
   public:
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
     ScalarAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const afunc)
-        : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc) { }
+        : TaskAppraisalParameterBase<R>(name,opt), _afunc(afunc) { }
 
     Bool is_scalar() const override { return true; };
     SizeType dimension(InputType const& input) const override { return 1; }
@@ -103,13 +106,13 @@ class ScalarAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
     std::function<CostType(InputType const&,OutputType const&,DurationType const&)> const _afunc;
 };
 
-template<class I, class O>
-class VectorAppraisalParameter : public TaskAppraisalParameterBase<I,O> {
+template<class R>
+class VectorAppraisalParameter : public TaskAppraisalParameterBase<R> {
 public:
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
     VectorAppraisalParameter(String const& name, TaskAppraisalParameterOptimisation const& opt, std::function<CostType(InputType const&,OutputType const&,DurationType const&,SizeType const&)> const afunc, std::function<SizeType(InputType const&)> const dfunc)
-            : TaskAppraisalParameterBase<I,O>(name,opt), _afunc(afunc), _dfunc(dfunc) { }
+            : TaskAppraisalParameterBase<R>(name,opt), _afunc(afunc), _dfunc(dfunc) { }
 
     Bool is_scalar() const override { return false; };
 
@@ -122,15 +125,15 @@ private:
     std::function<SizeType(InputType const&)> const _dfunc;
 };
 
-template<class I, class O>
+template<class R>
 class TaskAppraisalParameter : public WritableInterface {
 public:
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
 private:
-    SharedPointer<TaskAppraisalParameterInterface<InputType,OutputType>> _impl;
+    SharedPointer<TaskAppraisalParameterInterface<R>> _impl;
 public:
-    TaskAppraisalParameter(TaskAppraisalParameterInterface<InputType,OutputType> const& other) : _impl(other.clone()) { }
+    TaskAppraisalParameter(TaskAppraisalParameterInterface<R> const& other) : _impl(other.clone()) { }
     TaskAppraisalParameter(TaskAppraisalParameter const& other) : _impl(other._impl) { }
 
     Bool operator<(TaskAppraisalParameter const& p) const { return _impl->name() < p.name(); }
@@ -145,7 +148,7 @@ public:
 };
 
 //! \brief Template instance of the commonly-used execution time parameter for appraisal
-template<class I, class O> ScalarAppraisalParameter<I,O> execution_time_appraisal_parameter("execution_time",TaskAppraisalParameterOptimisation::MINIMISE,[](I const& i,O const& o,DurationType const& d) { return d.count(); });
+template<class R> ScalarAppraisalParameter<R> execution_time_appraisal_parameter("execution_time",TaskAppraisalParameterOptimisation::MINIMISE,[](TaskInput<R> const& i,TaskOutput<R> const& o,DurationType const& d) { return d.count(); });
 
 } // namespace Ariadne
 

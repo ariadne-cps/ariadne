@@ -37,55 +37,55 @@ namespace Ariadne {
 
 using std::min, std::max;
 
-template<class I, class O> class TaskAppraisalSpace;
+template<class R> class TaskAppraisalSpace;
 
-template<class I, class O>
+template<class R>
 class TaskAppraisalSpaceBuilder {
     typedef CostType WeightType;
 public:
     TaskAppraisalSpaceBuilder() = default;
 
-    TaskAppraisalSpaceBuilder& add(TaskAppraisalParameter<I,O> const& parameter, WeightType const& weight = WeightType(1.0)) {
-        return add(TaskAppraisalConstraint<I,O>(parameter),weight);
+    TaskAppraisalSpaceBuilder& add(TaskAppraisalParameter<R> const& parameter, WeightType const& weight = WeightType(1.0)) {
+        return add(TaskAppraisalConstraint<R>(parameter),weight);
     }
 
-    TaskAppraisalSpaceBuilder& add(TaskAppraisalConstraint<I,O> const& constraint, WeightType const& weight = WeightType(1.0)) {
+    TaskAppraisalSpaceBuilder& add(TaskAppraisalConstraint<R> const& constraint, WeightType const& weight = WeightType(1.0)) {
         ARIADNE_PRECONDITION(weight >= 0);
         _appraisal_constraints.insert(constraint);
-        _parameters_weights.insert(Pair<TaskAppraisalParameter<I,O>,WeightType>(constraint.parameter(),weight));
+        _parameters_weights.insert(Pair<TaskAppraisalParameter<R>,WeightType>(constraint.parameter(),weight));
         return *this;
     }
 
-    TaskAppraisalSpace<I,O> build() const;
+    TaskAppraisalSpace<R> build() const;
 
   private:
-    Set<TaskAppraisalConstraint<I,O>> _appraisal_constraints;
-    Map<TaskAppraisalParameter<I,O>,WeightType> _parameters_weights;
+    Set<TaskAppraisalConstraint<R>> _appraisal_constraints;
+    Map<TaskAppraisalParameter<R>,WeightType> _parameters_weights;
 };
 
-template<class I, class O>
+template<class R>
 class TaskAppraisalSpace : public WritableInterface {
-    friend class TaskAppraisalSpaceBuilder<I,O>;
+    friend class TaskAppraisalSpaceBuilder<R>;
   public:
     typedef CostType WeightType;
-    typedef I InputType;
-    typedef O OutputType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
 
   protected:
-    TaskAppraisalSpace(Set<TaskAppraisalConstraint<I,O>> const& appraisal_constraints,
-                       Map<TaskAppraisalParameter<I,O>,WeightType> const& parameters_weights)
+    TaskAppraisalSpace(Set<TaskAppraisalConstraint<R>> const& appraisal_constraints,
+                       Map<TaskAppraisalParameter<R>,WeightType> const& parameters_weights)
         : _appraisal_constraints(appraisal_constraints), _parameters_weights(parameters_weights) { }
   public:
-    Set<TaskAppraisalConstraint<I,O>> const& constraints() const { return _appraisal_constraints; }
-    Map<TaskAppraisalParameter<I,O>,WeightType> const& parameters_weights() const { return _parameters_weights; }
+    Set<TaskAppraisalConstraint<R>> const& constraints() const { return _appraisal_constraints; }
+    Map<TaskAppraisalParameter<R>,WeightType> const& parameters_weights() const { return _parameters_weights; }
 
     TaskAppraisalSpace* clone() const { return new TaskAppraisalSpace(*this); }
 
     virtual OutputStream& _write(OutputStream& os) const { os << _parameters_weights; return os; }
 
     Set<TaskSearchPointAppraisal>
-    appraise(Map<TaskSearchPoint,Pair<O,DurationType>> const& data, I const& input) const {
-        typedef TaskAppraisalParameter<I,O> ParamType;
+    appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
+        typedef TaskAppraisalParameter<R> ParamType;
         Set<TaskSearchPointAppraisal> result;
 
         // Compute the dimensions and initialise the min/max entries
@@ -170,12 +170,12 @@ class TaskAppraisalSpace : public WritableInterface {
     }
 
   private:
-    Set<TaskAppraisalConstraint<I,O>> const _appraisal_constraints;
-    Map<TaskAppraisalParameter<I,O>,WeightType> const _parameters_weights;
+    Set<TaskAppraisalConstraint<R>> const _appraisal_constraints;
+    Map<TaskAppraisalParameter<R>,WeightType> const _parameters_weights;
 };
 
-template<class I, class O>
-TaskAppraisalSpace<I,O> TaskAppraisalSpaceBuilder<I,O>::build() const {
+template<class R>
+TaskAppraisalSpace<R> TaskAppraisalSpaceBuilder<R>::build() const {
     ARIADNE_PRECONDITION(not _appraisal_constraints.empty());
     return TaskAppraisalSpace(_appraisal_constraints,_parameters_weights);
 }

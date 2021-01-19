@@ -54,16 +54,16 @@ inline std::ostream& operator<<(std::ostream& os, const AppraisalConstraintSever
 //! \brief Threshold for task appraisal
 //! \details The predicate depends on the MINIMISE/MAXIMISE character of the appraisal parameter:
 //! if MINIMISE, then the appraisal value must be lower than the threshold, if MAXIMISE it must be higher
-template<class I, class O>
+template<class R>
 class TaskAppraisalConstraint : public WritableInterface {
   public:
-    TaskAppraisalConstraint(TaskAppraisalParameter<I,O> const& parameter) : _parameter(parameter), _threshold(CostType(0)), _severity(AppraisalConstraintSeverity::NONE) { }
-    TaskAppraisalConstraint(TaskAppraisalParameter<I,O> const& parameter, CostType threshold, AppraisalConstraintSeverity severity) : _parameter(parameter), _threshold(threshold), _severity(severity) {
+    TaskAppraisalConstraint(TaskAppraisalParameter<R> const& parameter) : _parameter(parameter), _threshold(CostType(0)), _severity(AppraisalConstraintSeverity::NONE) { }
+    TaskAppraisalConstraint(TaskAppraisalParameter<R> const& parameter, CostType threshold, AppraisalConstraintSeverity severity) : _parameter(parameter), _threshold(threshold), _severity(severity) {
         ARIADNE_PRECONDITION(parameter.is_scalar() or severity == AppraisalConstraintSeverity::NONE); // Vector parameters do not support constraints
     }
 
     TaskAppraisalConstraint* clone() const { return new TaskAppraisalConstraint(*this); }
-    TaskAppraisalParameter<I,O> parameter() const { return _parameter; }
+    TaskAppraisalParameter<R> parameter() const { return _parameter; }
     CostType threshold() const { return _threshold; }
     AppraisalConstraintSeverity severity() const { return _severity; }
 
@@ -80,7 +80,7 @@ class TaskAppraisalConstraint : public WritableInterface {
     }
 
   private:
-    const TaskAppraisalParameter<I,O> _parameter;
+    const TaskAppraisalParameter<R> _parameter;
     const CostType _threshold;
     const AppraisalConstraintSeverity _severity;
 };

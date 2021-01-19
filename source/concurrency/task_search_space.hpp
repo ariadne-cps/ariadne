@@ -29,10 +29,15 @@
 #ifndef ARIADNE_TASK_SEARCH_SPACE_HPP
 #define ARIADNE_TASK_SEARCH_SPACE_HPP
 
+#include "../utility/writable.hpp"
+#include "../concurrency/task_search_parameter.hpp"
+
 namespace Ariadne {
 
-class TaskSearchParameter;
 class TaskSearchPoint;
+class Real;
+template<class R> class Variable;
+typedef Variable<Real> RealVariable;
 
 using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
 

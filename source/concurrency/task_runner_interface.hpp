@@ -31,17 +31,20 @@
 
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
+#include "../concurrency/task_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
 
 namespace Ariadne {
 
 //! \brief Interface for the runner of a task.
-//! \details This will usually be first implemented into an abstract base class.
-template<class T>
+//! \details Takes the runnable class as template argument.
+template<class R>
 class TaskRunnerInterface {
   public:
-    typedef typename T::InputType InputType;
-    typedef typename T::OutputType OutputType;
-    typedef typename T::ConfigurationType ConfigurationType;
+    typedef Task<R> TaskType;
+    typedef TaskInput<R> InputType;
+    typedef TaskOutput<R>  OutputType;
+    typedef Configuration<R> ConfigurationType;
 
     //! \brief Activates the runner, activating the threads and consequently properly setting the verbosity level
     //! \details This is necessary since the object may need to be visible at a higher level of abstraction compared
@@ -50,8 +53,8 @@ class TaskRunnerInterface {
     virtual void activate() = 0;
 
     //! \brief Return the task
-    virtual T& task() = 0;
-    virtual T const& task() const = 0;
+    virtual TaskType& task() = 0;
+    virtual TaskType const& task() const = 0;
 
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;
@@ -62,20 +65,18 @@ class TaskRunnerInterface {
 };
 
 //! \brief Interface for a class that supports a runnable task.
-template<class T>
+template<class R>
 class TaskRunnable {
     friend class ConcurrencyManager;
     friend class VerificationManager;
-  public:
-    typedef T TaskType;
   protected:
     //! \brief Set a new runner, useful to override the default runner
-    void set_runner(SharedPointer<TaskRunnerInterface<TaskType>> runner) { this->_runner = runner; }
+    void set_runner(SharedPointer<TaskRunnerInterface<R>> runner) { this->_runner = runner; }
     //! \brief Get the runner
-    SharedPointer<TaskRunnerInterface<TaskType>>& runner() { return _runner; }
-    SharedPointer<TaskRunnerInterface<TaskType>> const& runner() const { return _runner; }
+    SharedPointer<TaskRunnerInterface<R>>& runner() { return _runner; }
+    SharedPointer<TaskRunnerInterface<R>> const& runner() const { return _runner; }
   private:
-    SharedPointer<TaskRunnerInterface<TaskType>> _runner;
+    SharedPointer<TaskRunnerInterface<R>> _runner;
 };
 
 } // namespace Ariadne

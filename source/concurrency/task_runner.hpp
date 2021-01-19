@@ -38,19 +38,19 @@
 
 namespace Ariadne {
 
-template<class T> class TaskRunnerBase;
+template<class R> class TaskRunnerBase;
 
 //! \brief Run a task sequentially.
 //! \details Used to provide a sequential alternative to any thread-based implementation.
-template<class T>
-class SequentialRunner final : public TaskRunnerBase<T> {
+template<class R>
+class SequentialRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
   protected:
     SequentialRunner() = default;
   public:
-    typedef typename TaskRunnerBase<T>::InputType InputType;
-    typedef typename TaskRunnerBase<T>::OutputType OutputType;
-    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerBase<R>::InputType InputType;
+    typedef typename TaskRunnerBase<R>::OutputType OutputType;
+    typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
 
     Void activate() override final;
     void dump_statistics() override final;
@@ -62,15 +62,15 @@ private:
 };
 
 //! \brief Run a task in a detached thread, allowing other processing between pushing and pulling.
-template<class T>
-class DetachedRunner final : public TaskRunnerBase<T> {
+template<class R>
+class DetachedRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
   protected:
     DetachedRunner();
   public:
-    typedef typename TaskRunnerBase<T>::InputType InputType;
-    typedef typename TaskRunnerBase<T>::OutputType OutputType;
-    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerBase<R>::InputType InputType;
+    typedef typename TaskRunnerBase<R>::OutputType OutputType;
+    typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
     typedef Buffer<Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
 
@@ -99,15 +99,15 @@ typedef std::chrono::microseconds DurationType;
 template<class O> class ParameterSearchOutputBufferData;
 
 //! \brief Run a task by detached concurrent search into the parameter space.
-template<class T>
-class ParameterSearchRunner final : public TaskRunnerBase<T> {
+template<class R>
+class ParameterSearchRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
   protected:
     ParameterSearchRunner(Nat concurrency);
   public:
-    typedef typename TaskRunnerBase<T>::InputType InputType;
-    typedef typename TaskRunnerBase<T>::OutputType OutputType;
-    typedef typename TaskRunnerBase<T>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerBase<R>::InputType InputType;
+    typedef typename TaskRunnerBase<R>::OutputType OutputType;
+    typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
     typedef Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>> InputBufferContentType;
     typedef ParameterSearchOutputBufferData<OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;

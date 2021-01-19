@@ -32,52 +32,52 @@
 
 namespace Ariadne {
 
-template<class T>
-class TaskRunnerBase : public TaskRunnerInterface<T> {
-public:
-    typedef typename TaskRunnerInterface<T>::InputType InputType;
-    typedef typename TaskRunnerInterface<T>::OutputType OutputType;
-    typedef typename TaskRunnerInterface<T>::ConfigurationType ConfigurationType;
+template<class C>
+class TaskRunnerBase : public TaskRunnerInterface<C> {
+  public:
+    typedef typename TaskRunnerInterface<C>::TaskType TaskType;
+    typedef typename TaskRunnerInterface<C>::InputType InputType;
+    typedef typename TaskRunnerInterface<C>::OutputType OutputType;
+    typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
 
-    TaskRunnerBase() : _task(new T()) { }
+    TaskRunnerBase() : _task(new TaskType()) { }
 
-    T& task() override { return *_task; };
-    T const& task() const override { return *_task; };
+    TaskType& task() override { return *_task; };
+    TaskType const& task() const override { return *_task; };
 
     virtual ~TaskRunnerBase() = default;
-protected:
-    SharedPointer<T> const _task;
+  protected:
+    SharedPointer<TaskType> const _task;
 };
 
-template<class T>
+template<class C>
 Void
-SequentialRunner<T>::activate()
+SequentialRunner<C>::activate()
 {
     ARIADNE_LOG_SCOPE_CREATE;
 }
 
-template<class T>
+template<class C>
 Void
-SequentialRunner<T>::dump_statistics()
+SequentialRunner<C>::dump_statistics()
 { }
 
-
-template<class T>
+template<class C>
 Void
-SequentialRunner<T>::push(InputType const& input, ConfigurationType const& cfg)
+SequentialRunner<C>::push(InputType const& input, ConfigurationType const& cfg)
 {
     _last_output.reset(new OutputType(this->_task->run_task(input,*this->_task->to_configuration(input,cfg,this->_task->search_space().initial_point()))));
 }
 
-template<class T>
-typename SequentialRunner<T>::OutputType
-SequentialRunner<T>::pull() {
+template<class C>
+typename SequentialRunner<C>::OutputType
+SequentialRunner<C>::pull() {
     return *_last_output;
 }
 
-template<class T>
+template<class R>
 Void
-DetachedRunner<T>::_loop() {
+DetachedRunner<R>::_loop() {
     ARIADNE_LOG_SCOPE_CREATE;
     while(true) {
         std::unique_lock<std::mutex> locker(_input_mutex);

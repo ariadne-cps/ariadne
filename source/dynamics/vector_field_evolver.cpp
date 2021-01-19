@@ -296,7 +296,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
     // Push inputs
-    runner()->push(VectorFieldFlowStepIn(system().dynamic_function(), current_set, current_set_bounds,
+    runner()->push(TaskInput<VectorFieldEvolver>(system().dynamic_function(), current_set, current_set_bounds,
                                         current_time, previous_step_size),configuration());
     // Pull outputs
     auto out = runner()->pull();

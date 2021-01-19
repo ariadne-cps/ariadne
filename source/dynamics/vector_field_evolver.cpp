@@ -310,10 +310,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 Configuration<VectorFieldEvolver>::Configuration()
 {
-    set_maximum_step_size(1);
-    set_maximum_enclosure_radius(100.0);
-    set_enable_reconditioning(true);
-    set_maximum_spacial_error(1e-2);
+    set_maximum_step_size(std::numeric_limits<double>::infinity());
+    set_maximum_enclosure_radius(std::numeric_limits<double>::infinity());
+    set_enable_reconditioning(false);
+    set_maximum_spacial_error(std::numeric_limits<double>::infinity());
     set_integrator(TaylorPicardIntegrator(1e-2));
 }
 

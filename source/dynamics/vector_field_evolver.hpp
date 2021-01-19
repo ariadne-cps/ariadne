@@ -228,9 +228,9 @@ public:
     Task() : ParameterSearchTaskBase<R>(
             "stp",
             TaskSearchSpace({
-                                    MetricSearchParameter("starting_step_size_num_refinements", 2, 5),
-                                    MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12),
-                                    MetricSearchParameter("maximum_temporal_order", 9, 15)
+                                    MetricSearchParameter("starting_step_size_num_refinements", 2, 5,2),
+                                    MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12,9),
+                                    MetricSearchParameter("maximum_temporal_order", 9, 15,12)
                             }),
             TaskAppraisalSpaceBuilder<R>()
                     .add(execution_time_appraisal_parameter<R>)

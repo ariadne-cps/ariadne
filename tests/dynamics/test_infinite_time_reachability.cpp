@@ -99,6 +99,8 @@ class TestReachabilityAnalyser
         TaylorPicardIntegrator integrator(MaximumError(1e-2_pr));
 
         EvolverType evolver(system,integrator);
+        evolver.configuration().set_enable_reconditioning(true);
+        evolver.configuration().set_maximum_spacial_error(1e-2);
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

@@ -49,9 +49,6 @@ int main(int argc, const char* argv[])
                                       num_ref);
 
     VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(1e20);
-    evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
 
     typedef TaskInput<VectorFieldEvolver> I;

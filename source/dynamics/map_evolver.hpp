@@ -39,7 +39,7 @@
 
 #include "../dynamics/map.hpp"
 #include "../function/function_interface.hpp"
-#include "../solvers/configuration_interface.hpp"
+#include "../solvers/configuration.hpp"
 #include "../dynamics/evolver_base.hpp"
 
 #include "../output/logging.hpp"

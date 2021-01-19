@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solvers/configuration_interface.hpp
+ *            solvers/configuration.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,15 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solvers/configuration_interface.hpp
- *  \brief A simple interface for configuration classes, mainly provided to specify the involved semantics.
+/*! \file solvers/configuration.hpp
+ *  \brief Classes for configuration and related helpers.
  */
 
-#ifndef ARIADNE_CONFIGURATION_INTERFACE_HPP
-#define ARIADNE_CONFIGURATION_INTERFACE_HPP
+#ifndef ARIADNE_CONFIGURATION_HPP
+#define ARIADNE_CONFIGURATION_HPP
 
 #include <ostream>
 #include "utility/writable.hpp"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/pointer.hpp"
+#include "geometry/interval.hpp"
 
 namespace Ariadne {
 
@@ -128,7 +132,127 @@ class Configurable {
     SharedPointer<Configuration<C>> _configuration;
 };
 
+class ConfigurationPropertyInterface {
+  public:
+    virtual Bool is_single() const = 0;
+    virtual Bool is_specified() const = 0;
+    virtual ~ConfigurationPropertyInterface() = default;
+};
+
+template<class T>
+class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
+  protected:
+    ConfigurationPropertyBase(Bool is_specified) : _is_specified(is_specified) { }
+    void set_specified() { _is_specified = true; }
+  public:
+    Bool is_specified() const override { return _is_specified; };
+    virtual T const& get() const = 0;
+    virtual void set(T const& value) = 0;
+  private:
+    Bool _is_specified;
+};
+
+class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
+  public:
+    BooleanConfigurationProperty() : ConfigurationPropertyBase(false), _is_single(false) { }
+    BooleanConfigurationProperty(Bool const& value) : ConfigurationPropertyBase(true), _is_single(true), _value(value) { }
+    Bool const& get() const override {
+        ARIADNE_PRECONDITION(this->is_specified());
+        ARIADNE_PRECONDITION(this->is_single());
+        return _value;
+    }
+    Bool is_single() const override { return _is_single; };
+
+    //! \brief Set to both true and false
+    void set() { set_specified(); _is_single = false; }
+    //! \brief Set to value
+    void set(Bool const& value) override { set_specified(); _is_single = true; _value=value; }
+  private:
+    Bool _is_single;
+    Bool _value;
+};
+
+template<class T>
+class IntervalConfigurationProperty : public ConfigurationPropertyBase<T> {
+public:
+    IntervalConfigurationProperty() : ConfigurationPropertyBase<T>(false), _value(Interval<T>::empty_interval()) { }
+    IntervalConfigurationProperty(T const& lower, T const& upper) : ConfigurationPropertyBase<T>(true), _value(lower,upper) {
+        ARIADNE_PRECONDITION(not possibly(_value.is_empty()));
+        ARIADNE_PRECONDITION(definitely(_value.is_bounded())); }
+    IntervalConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true), _value(value) { }
+    T const& get() const override {
+        ARIADNE_PRECONDITION(this->is_specified());
+        ARIADNE_PRECONDITION(this->is_single());
+        return _value.upper_bound();
+    }
+    Bool is_single() const override { return possibly(_value.is_singleton()); };
+
+    void set(T const& lower, T const& upper) { set(Interval<T>(lower,upper)); }
+    void set(Interval<T> const& value) {
+        ARIADNE_PRECONDITION(not possibly(value.is_empty()));
+        ARIADNE_PRECONDITION(definitely(value.is_bounded()));
+        this->set_specified();
+        _value = value;
+    }
+    //! \brief Set a single value
+    //! \details An unbounded single value is accepted
+    void set(T const& value) override { this->set_specified(); _value = Interval<T>(value); }
+
+private:
+    Interval<T> _value;
+};
+
+//! \brief A property that specifies values from an enum \a T
+template<class T>
+class EnumConfigurationProperty : public ConfigurationPropertyBase<T> {
+public:
+    EnumConfigurationProperty() : ConfigurationPropertyBase<T>(false) { }
+    EnumConfigurationProperty(Set<T> const& values) : ConfigurationPropertyBase<T>(true), _values(values) {
+        ARIADNE_PRECONDITION(values.size()>0);
+    }
+    EnumConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) { _values.insert(value); }
+
+    Bool is_single() const override { return (_values.size() == 1); };
+
+    T const& get() const override {
+        ARIADNE_PRECONDITION(this->is_specified());
+        ARIADNE_PRECONDITION(this->is_single());
+        return *_values.begin();
+    }
+
+    void set(T const& value) override { this->set_specified(); _values.clear(); _values.insert(value); }
+    void set(Set<T> const& values) { ARIADNE_PRECONDITION(not values.empty()); this->set_specified(); _values = values; }
+private:
+    Set<T> _values;
+};
+
+//! \brief A property that specifies a list of objects following an interface \a T
+//! \details The interface must define the clone() method
+template<class T>
+class ListConfigurationProperty : public ConfigurationPropertyBase<T> {
+public:
+    ListConfigurationProperty() : ConfigurationPropertyBase<T>(false) { }
+    ListConfigurationProperty(List<SharedPointer<T>> const& list) : ConfigurationPropertyBase<T>(true), _values(list) {
+        ARIADNE_PRECONDITION(list.size()>0);
+    }
+    ListConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) { _values.push_back(SharedPointer<T>(value.clone())); }
+
+    Bool is_single() const override { return (_values.size() == 1); };
+
+    T const& get() const override {
+        ARIADNE_PRECONDITION(this->is_specified());
+        ARIADNE_PRECONDITION(this->is_single());
+        return *_values.back();
+    }
+
+    void set(T const& value) override { this->set_specified(); _values.clear(); _values.push_back(SharedPointer<T>(value.clone())); }
+    void set(SharedPointer<T> const& value) { ARIADNE_PRECONDITION(value != nullptr); this->set_specified(); _values.clear(); _values.push_back(value); }
+    void set(List<SharedPointer<T>> const& values) { ARIADNE_PRECONDITION(values.size()>0); this->set_specified(); _values = values; }
+private:
+    List<SharedPointer<T>> _values;
+};
+
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONFIGURATION_INTERFACE_HPP
+#endif // ARIADNE_CONFIGURATION_HPP

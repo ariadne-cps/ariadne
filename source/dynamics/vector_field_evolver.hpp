@@ -143,59 +143,53 @@ protected:
     SharedPointer<SystemType> _sys_ptr;
 };
 
+template class RangeConfigurationProperty<ExactDouble>;
+template class ListConfigurationProperty<IntegratorInterface>;
 
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
-template<> class Configuration<VectorFieldEvolver> : public ConfigurationInterface
+template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration
 {
   public:
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+    typedef ListConfigurationProperty<IntegratorInterface> IntegratorProperty;
 
     //! \brief Default constructor gives reasonable values.
-    Configuration();
+    Configuration() {
+        add_property("enable_reconditioning",BooleanConfigurationProperty(false));
+        add_property("integrator",ListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(1e-2)));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
+    }
 
-    virtual ~Configuration() = default;
-
-  private:
+    //! \brief Enable reconditioning of basic sets
+    Bool const& enable_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_reconditioning")).get(); }
+    void set_enable_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(); }
+    void set_enable_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(value); }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    RealType _maximum_step_size;
+    RealType const& maximum_step_size() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_step_size")).get(); }
+    void set_maximum_step_size(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_step_size")).set(cast_exact(value)); }
+    void set_maximum_step_size(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_step_size")).set(cast_exact(lower),cast_exact(upper)); }
+
+    //! \brief The maximum allowable approximation error for reconditioning
+    RealType const& maximum_spacial_error() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_spacial_error")).get(); }
+    void set_maximum_spacial_error(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_spacial_error")).set(cast_exact(value)); }
+    void set_maximum_spacial_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_spacial_error")).set(cast_exact(lower),cast_exact(upper)); }
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
-    RealType _maximum_enclosure_radius;
-
-    //! \brief The maximum allowable approximation error in the parameter-to-space mapping of an enclosure set.
-    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
-    RealType _maximum_spacial_error;
-
-    //! \brief Enable reconditioning of basic sets (false by default).
-    Bool _enable_reconditioning;
+    RealType const& maximum_enclosure_radius() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_enclosure_radius")).get(); }
+    void set_maximum_enclosure_radius(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_enclosure_radius")).set(cast_exact(value)); }
+    void set_maximum_enclosure_radius(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_enclosure_radius")).set(cast_exact(lower),cast_exact(upper)); }
 
     //! \brief The integrator to be used.
-    SharedPointer<IntegratorInterface> _integrator;
-
-  public:
-
-    const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
-
-    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
-
-    const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
-
-    const Bool& enable_reconditioning() const { return _enable_reconditioning; }
-    Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
-
-    const IntegratorInterface& integrator() const { return *_integrator; }
-    Void set_integrator(const IntegratorInterface& integrator) { _integrator.reset(integrator.clone()); }
-
-  public:
-
-    virtual OutputStream& _write(OutputStream& os) const;
+    IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorProperty const&>(*properties().get("integrator")).get(); }
+    void set_integrator(IntegratorInterface const& integrator) { dynamic_cast<IntegratorProperty&>(*properties().get("integrator")).set(integrator); }
+    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { dynamic_cast<IntegratorProperty&>(*properties().get("integrator")).set(integrator); }
 };
 
 template<> struct TaskInput<VectorFieldEvolver> {
@@ -240,10 +234,10 @@ public:
                                                        [](I const& i){ return i.current_set_bounds.dimension(); }))*/
                     .build()) { }
 
-    SharedPointer<C> to_configuration(I const& in, C const& cfg, TaskSearchPoint const& p) const override {
-        auto result = SharedPointer<C>(new C(cfg));
-        TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(result->integrator());
-        result->set_integrator(TaylorPicardIntegrator(
+    C singleton_configuration(C const& cfg, TaskSearchPoint const& p) const override {
+        auto result = cfg;
+        TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(cfg.integrator());
+        result.set_integrator(TaylorPicardIntegrator(
                 MaximumError(old_integrator.maximum_error()),
                 ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
                 LipschitzConstant(old_integrator.lipschitz_tolerance()),

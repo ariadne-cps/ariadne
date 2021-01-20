@@ -43,11 +43,8 @@ std::ostream& operator<<(std::ostream& os, const LevelOptions level) {
     }
 }
 
-template class IntervalConfigurationProperty<Real>;
-template class EnumConfigurationProperty<LevelOptions>;
-template class ListConfigurationProperty<IntegratorInterface>;
-
-using RealConfigurationProperty = IntervalConfigurationProperty<Real>;
+using RealConfigurationProperty = RangeConfigurationProperty<Real>;
+using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
 using Log10Converter = Log10SearchSpaceConverter<Real>;
@@ -58,6 +55,7 @@ template<> class Configuration<A> : public SearchableConfiguration {
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));
         add_property("maximum_step_size",RealConfigurationProperty(infinity,Log2Converter()));
+        add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<ExactDouble>()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
     }
@@ -68,8 +66,11 @@ template<> class Configuration<A> : public SearchableConfiguration {
 
     Real const& maximum_step_size() const { return dynamic_cast<RealConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
     void set_maximum_step_size(Real const& value) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
-    void set_maximum_step_size(Interval<Real> const& value) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
     void set_maximum_step_size(Real const& lower, Real const& upper) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(lower,upper); }
+
+    ExactDouble const& sweep_threshold() const { return dynamic_cast<ExactDoubleConfigurationProperty const&>(*properties().get("sweep_threshold")).get(); }
+    void set_sweep_threshold(ExactDouble const& value) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("sweep_threshold")).set(value); }
+    void set_sweep_threshold(ExactDouble const& lower, ExactDouble const& upper) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("sweep_threshold")).set(lower,upper); }
 
     LevelOptions const& level() const { return dynamic_cast<LevelOptionsConfigurationProperty const&>(*properties().get("level")).get(); }
     void set_level(LevelOptions const& level) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(level); }
@@ -91,7 +92,7 @@ class A : public Configurable<A>, public WritableInterface {
 class TestConfiguration {
   public:
 
-    void test_real_converters() {
+    void test_converters() {
         Log10SearchSpaceConverter<Real> log10_real;
         ARIADNE_TEST_EQUALS(log10_real.to_int(Real(0.001_dec)),-3);
         ARIADNE_TEST_PRINT(log10_real.to_value(-3).get_d());
@@ -142,7 +143,7 @@ class TestConfiguration {
 
     }
 
-    void test_interval_configuration_property_construction() {
+    void test_range_configuration_property_construction() {
         Log10Converter converter;
         RealConfigurationProperty p1(converter);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
@@ -160,7 +161,7 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(RealConfigurationProperty(1e-8_dec,1e-9_dec,converter));
     }
 
-    void test_interval_configuration_property_modification() {
+    void test_range_configuration_property_modification() {
         Log10Converter converter;
         RealConfigurationProperty p(converter);
         ARIADNE_TEST_EQUALS(p.cardinality(),0);
@@ -168,16 +169,11 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),1);
-        p.set(1e-9_dec,1e-8_dec);
-        ARIADNE_TEST_ASSERT(p.is_specified());
-        ARIADNE_TEST_ASSERT(not p.is_single());
-        ARIADNE_TEST_EQUALS(p.cardinality(),2);
-        p.set(Interval(1e-10_dec,1e-8_dec));
+        p.set(1e-10_dec,1e-8_dec);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),3);
         ARIADNE_TEST_FAIL(p.set(1e-8_dec,1e-9_dec));
-        ARIADNE_TEST_FAIL(p.set(Interval(1e-8_dec,1e-9_dec)));
     }
 
     void test_enum_configuration_property_construction() {
@@ -257,11 +253,11 @@ class TestConfiguration {
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_real_converters());
+        ARIADNE_TEST_CALL(test_converters());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_construction());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_modification());
-        ARIADNE_TEST_CALL(test_interval_configuration_property_construction());
-        ARIADNE_TEST_CALL(test_interval_configuration_property_modification());
+        ARIADNE_TEST_CALL(test_range_configuration_property_construction());
+        ARIADNE_TEST_CALL(test_range_configuration_property_modification());
         ARIADNE_TEST_CALL(test_enum_configuration_property_construction());
         ARIADNE_TEST_CALL(test_enum_configuration_property_modification());
         ARIADNE_TEST_CALL(test_list_configuration_property_construction());

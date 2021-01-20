@@ -308,29 +308,5 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 }
 
 
-Configuration<VectorFieldEvolver>::Configuration()
-{
-    set_maximum_step_size(std::numeric_limits<double>::infinity());
-    set_maximum_enclosure_radius(std::numeric_limits<double>::infinity());
-    set_enable_reconditioning(false);
-    set_maximum_spacial_error(std::numeric_limits<double>::infinity());
-    set_integrator(TaylorPicardIntegrator(1e-2));
-}
-
-
-OutputStream&
-Configuration<VectorFieldEvolver>::_write(OutputStream& os) const
-{
-    os << "VectorFieldEvolverConfiguration("
-       << "\n  maximum_step_size=" << maximum_step_size()
-       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
-       << ",\n  enable_reconditioning=" << enable_reconditioning()
-       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
-       << ",\n  integrator=" << integrator()
-       << "\n)";
-    return os;
-}
-
-
 }  // namespace Ariadne
 

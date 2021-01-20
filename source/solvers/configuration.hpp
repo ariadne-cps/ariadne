@@ -35,8 +35,9 @@
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "geometry/interval.hpp"
 #include "symbolic/identifier.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/real.hpp"
 
 namespace Ariadne {
 
@@ -151,16 +152,34 @@ template<class T> struct Log10SearchSpaceConverter;
 template<class T> struct Log2SearchSpaceConverter;
 template<class T> struct LinearSearchSpaceConverter;
 
+template<> struct Log10SearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+    int to_int(ExactDouble const& value) const override { return std::round(log(value.get_d())/log(10.0)); }
+    ExactDouble to_value(int i) const override { return ExactDouble(exp(log(10.0)*i)); }
+    SearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
+};
+
 template<> struct Log10SearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
     int to_int(Real const& value) const override { return round(log(value)/log(Real(10))).get<int>(); }
     Real to_value(int i) const override { return exp(Real(i) * log(Real(10))); }
     SearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
 };
 
+template<> struct Log2SearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+    int to_int(ExactDouble const& value) const override { return std::round(log(value.get_d())/log(2.0)); }
+    ExactDouble to_value(int i) const override { return ExactDouble(exp(log(2.0)*i)); }
+    SearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
+};
+
 template<> struct Log2SearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
     int to_int(Real const& value) const override { return round(log(value)/log(Real(2))).get<int>(); }
     Real to_value(int i) const override { return exp(Real(i) * log(Real(2))); }
     SearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
+};
+
+template<> struct LinearSearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+    int to_int(ExactDouble const& value) const override { return round(value).get<int>(); }
+    ExactDouble to_value(int i) const override { return ExactDouble(i); }
+    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
 template<> struct LinearSearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
@@ -200,7 +219,7 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
     Bool is_specified() const override { return _is_specified; };
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
-    //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if an interval
+    //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if a range
     virtual List<SharedPointer<T>> values() const = 0;
     OutputStream& _write(OutputStream& os) const override {
         auto vals = values();
@@ -255,62 +274,61 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
 };
 
 template<class T>
-class IntervalConfigurationProperty : public ConfigurationPropertyBase<T> {
-public:
-    IntervalConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
-        ConfigurationPropertyBase<T>(false), _value(Interval<T>::empty_interval()), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
-    IntervalConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
-        ConfigurationPropertyBase<T>(true), _value(lower,upper), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) {
-        ARIADNE_PRECONDITION(not possibly(_value.is_empty()));
-        ARIADNE_PRECONDITION(definitely(_value.is_bounded())); }
-    IntervalConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
-        ConfigurationPropertyBase<T>(true), _value(value), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
+  public:
+    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) {
+        ARIADNE_PRECONDITION(not possibly(upper < lower)); }
+    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(true), _lower(value), _upper(value), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
-        return _value.upper_bound();
+        return _upper;
     }
-    Bool is_single() const override { return possibly(_value.is_singleton()); };
+    Bool is_single() const override { if (not this->is_specified()) return false; else return possibly(_lower == _upper); }
     SizeType cardinality() const override {
         if (is_single()) return 1;
         else if (not this->is_specified()) return 0;
-        else return 1+(SizeType)(_converter->to_int(_value.upper_bound()) - _converter->to_int(_value.lower_bound()));
+        else return 1+(SizeType)(_converter->to_int(_upper) - _converter->to_int(_lower));
     }
 
     List<int> integer_values() const override {
         List<int> result;
         if (this->is_specified()) {
-            int min_value = _converter->to_int(_value.lower_bound());
-            int max_value = _converter->to_int(_value.upper_bound());
+            int min_value = _converter->to_int(_lower);
+            int max_value = _converter->to_int(_upper);
             for (int i=min_value; i<=max_value; ++i) result.push_back(i);
         }
         return result;
     };
 
-    ConfigurationPropertyInterface* clone() const override { return new IntervalConfigurationProperty(*this); };
+    ConfigurationPropertyInterface* clone() const override { return new RangeConfigurationProperty(*this); };
 
-    void set(T const& lower, T const& upper) { set(Interval<T>(lower,upper)); }
-    void set(Interval<T> const& value) {
-        ARIADNE_PRECONDITION(not possibly(value.is_empty()));
-        ARIADNE_PRECONDITION(definitely(value.is_bounded()));
+    void set(T const& lower, T const& upper) {
+        ARIADNE_PRECONDITION(not possibly(upper < lower));
         this->set_specified();
-        _value = value;
+        _lower = lower;
+        _upper = upper;
     }
     //! \brief Set a single value
     //! \details An unbounded single value is accepted
-    void set(T const& value) override { this->set_specified(); _value = Interval<T>(value); }
+    void set(T const& value) override { this->set_specified(); _lower = value; _upper = value; }
 
     List<SharedPointer<T>> values() const override {
         List<SharedPointer<T>> result;
         if (this->is_specified()) {
-            result.append(SharedPointer<T>(new T(_value.lower_bound())));
-            if (not is_single()) result.append(SharedPointer<T>(new T(_value.upper_bound())));
+            result.append(SharedPointer<T>(new T(_lower)));
+            if (not is_single()) result.append(SharedPointer<T>(new T(_upper)));
         }
         return result;
     }
 
 private:
-    Interval<T> _value;
+    T _lower;
+    T _upper;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
 };
 

@@ -66,7 +66,7 @@ template<class C>
 Void
 SequentialRunner<C>::push(InputType const& input, ConfigurationType const& cfg)
 {
-    _last_output.reset(new OutputType(this->_task->run_task(input,*this->_task->to_configuration(input,cfg,this->_task->search_space().initial_point()))));
+    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->singleton_configuration(cfg,this->_task->search_space().initial_point()))));
 }
 
 template<class C>
@@ -84,7 +84,7 @@ DetachedRunner<R>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(this->_task->run_task(pkg.first,*this->_task->to_configuration(pkg.first,pkg.second.first,pkg.second.second)));
+        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->singleton_configuration(pkg.second.first,pkg.second.second)));
         _output_availability.notify_all();
     }
 }
@@ -159,10 +159,10 @@ ParameterSearchRunner<T>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = this->_task->to_configuration(pkg.first,pkg.second.first,pkg.second.second);
+        auto cfg = this->_task->singleton_configuration(pkg.second.first,pkg.second.second);
         auto start = std::chrono::high_resolution_clock::now();
         try {
-            auto result = this->_task->run_task(pkg.first,*cfg);
+            auto result = this->_task->run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");

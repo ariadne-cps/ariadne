@@ -134,7 +134,6 @@ class Configurable {
 
 class ConfigurationPropertyInterface : public WritableInterface {
   public:
-    virtual String const& name() const = 0;
     virtual Bool is_single() const = 0;
     virtual Bool is_specified() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;
@@ -143,19 +142,15 @@ class ConfigurationPropertyInterface : public WritableInterface {
 template<class T>
 class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
   protected:
-    ConfigurationPropertyBase(String const& name, Bool const& is_specified) : _name(name), _is_specified(is_specified) {
-        ARIADNE_PRECONDITION(not name.empty());
-    }
+    ConfigurationPropertyBase(Bool const& is_specified) : _is_specified(is_specified) { }
     void set_specified() { _is_specified = true; }
   public:
-    String const& name() const override { return _name; }
     Bool is_specified() const override { return _is_specified; };
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
     //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if an interval
     virtual List<SharedPointer<T>> values() const = 0;
     OutputStream& _write(OutputStream& os) const override {
-        os << _name << " = ";
         auto vals = values();
         if (vals.empty()) { os << "N/A"; }
         else if (vals.size() == 1) { os << *vals[0]; }
@@ -166,14 +161,13 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
         }
         return os; }
   private:
-    String const _name;
     Bool _is_specified;
 };
 
 class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
   public:
-    BooleanConfigurationProperty(String const& name) : ConfigurationPropertyBase(name,false), _is_single(false) { }
-    BooleanConfigurationProperty(String const& name, Bool const& value) : ConfigurationPropertyBase(name,true), _is_single(true), _value(value) { }
+    BooleanConfigurationProperty() : ConfigurationPropertyBase(false), _is_single(false) { }
+    BooleanConfigurationProperty(Bool const& value) : ConfigurationPropertyBase(true), _is_single(true), _value(value) { }
     Bool const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
@@ -202,11 +196,11 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
 template<class T>
 class IntervalConfigurationProperty : public ConfigurationPropertyBase<T> {
 public:
-    IntervalConfigurationProperty(String const& name) : ConfigurationPropertyBase<T>(name,false), _value(Interval<T>::empty_interval()) { }
-    IntervalConfigurationProperty(String const& name, T const& lower, T const& upper) : ConfigurationPropertyBase<T>(name,true), _value(lower,upper) {
+    IntervalConfigurationProperty() : ConfigurationPropertyBase<T>(false), _value(Interval<T>::empty_interval()) { }
+    IntervalConfigurationProperty(T const& lower, T const& upper) : ConfigurationPropertyBase<T>(true), _value(lower,upper) {
         ARIADNE_PRECONDITION(not possibly(_value.is_empty()));
         ARIADNE_PRECONDITION(definitely(_value.is_bounded())); }
-    IntervalConfigurationProperty(String const& name, T const& value) : ConfigurationPropertyBase<T>(name,true), _value(value) { }
+    IntervalConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true), _value(value) { }
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
@@ -242,12 +236,12 @@ private:
 template<class T>
 class EnumConfigurationProperty : public ConfigurationPropertyBase<T> {
 public:
-    EnumConfigurationProperty(String const& name) : ConfigurationPropertyBase<T>(name,false) { ARIADNE_PRECONDITION(std::is_enum<T>::value); }
-    EnumConfigurationProperty(String const& name, Set<T> const& values) : ConfigurationPropertyBase<T>(name,true), _values(values) {
+    EnumConfigurationProperty() : ConfigurationPropertyBase<T>(false) { ARIADNE_PRECONDITION(std::is_enum<T>::value); }
+    EnumConfigurationProperty(Set<T> const& values) : ConfigurationPropertyBase<T>(true), _values(values) {
         ARIADNE_PRECONDITION(std::is_enum<T>::value);
         ARIADNE_PRECONDITION(values.size()>0);
     }
-    EnumConfigurationProperty(String const& name, T const& value) : ConfigurationPropertyBase<T>(name,true) {
+    EnumConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) {
         ARIADNE_PRECONDITION(std::is_enum<T>::value);
         _values.insert(value); }
 
@@ -277,11 +271,11 @@ private:
 template<class T>
 class ListConfigurationProperty : public ConfigurationPropertyBase<T> {
 public:
-    ListConfigurationProperty(String const& name) : ConfigurationPropertyBase<T>(name,false) { }
-    ListConfigurationProperty(String const& name, List<SharedPointer<T>> const& list) : ConfigurationPropertyBase<T>(name,true), _values(list) {
+    ListConfigurationProperty() : ConfigurationPropertyBase<T>(false) { }
+    ListConfigurationProperty(List<SharedPointer<T>> const& list) : ConfigurationPropertyBase<T>(true), _values(list) {
         ARIADNE_PRECONDITION(list.size()>0);
     }
-    ListConfigurationProperty(String const& name, T const& value) : ConfigurationPropertyBase<T>(name,true) { _values.push_back(SharedPointer<T>(value.clone())); }
+    ListConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) { _values.push_back(SharedPointer<T>(value.clone())); }
 
     Bool is_single() const override { return (_values.size() == 1); };
 

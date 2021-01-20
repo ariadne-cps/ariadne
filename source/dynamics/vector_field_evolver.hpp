@@ -39,12 +39,12 @@
 
 #include "../dynamics/vector_field.hpp"
 #include "../function/function_interface.hpp"
-#include "../solvers/configuration.hpp"
 #include "../solvers/integrator_interface.hpp"
 #include "../solvers/integrator.hpp"
 #include "../dynamics/evolver_base.hpp"
 #include "../concurrency/task_runner.tpl.hpp"
 #include "../concurrency/task_appraisal_space.hpp"
+#include "../concurrency/searchable_configuration.hpp"
 
 #include "../output/logging.hpp"
 

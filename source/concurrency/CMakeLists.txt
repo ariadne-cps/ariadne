@@ -6,6 +6,7 @@ add_library(${LIBRARY_NAME} OBJECT
         task_search_space.cpp
         task_search_point.cpp
         task_appraisal.cpp
+        searchable_configuration.cpp
         )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

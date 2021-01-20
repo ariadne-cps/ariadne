@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "solvers/configuration.hpp"
+#include "concurrency/searchable_configuration.hpp"
 #include "solvers/integrator.hpp"
 #include "numeric/decimal.hpp"
 #include "../test.hpp"
@@ -86,7 +86,7 @@ template<> class Configuration<A> : public SearchableConfiguration {
 class A : public Configurable<A>, public WritableInterface {
   public:
     A() : Configurable<A>(Configuration<A>()) { }
-    OutputStream& _write(OutputStream& os) const override { os << "(A's configuration:" << configuration() << ")"; return os; }
+    OutputStream& _write(OutputStream& os) const override { os << "configuration:" << configuration(); return os; }
 };
 
 class TestConfiguration {
@@ -252,6 +252,12 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(a.use_reconditioning());
     }
 
+    void test_configuration_search_space_generation() {
+        Configuration<A> a;
+        a.set_use_reconditioning();
+
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_converters());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_construction());
@@ -263,6 +269,7 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_list_configuration_property_construction());
         ARIADNE_TEST_CALL(test_list_configuration_property_modification());
         ARIADNE_TEST_CALL(test_configuration_construction());
+        ARIADNE_TEST_CALL(test_configuration_search_space_generation());
     }
 };
 

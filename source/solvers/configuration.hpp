@@ -35,6 +35,7 @@
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
 #include "geometry/interval.hpp"
+#include "symbolic/identifier.hpp"
 
 namespace Ariadne {
 
@@ -108,7 +109,6 @@ namespace Ariadne {
  *
  */
 class ConfigurationInterface : public WritableInterface {
-
   private:
     const ConfigurationInterface& operator=(const ConfigurationInterface& other) = delete;
   public:
@@ -117,7 +117,7 @@ class ConfigurationInterface : public WritableInterface {
     friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
-//! \brief Base template class to be specialised while deriving from ConfigurationInterface
+//! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
 template<class C> class Configuration;
 
 //! \brief Is-a component that provides a configuration
@@ -136,6 +136,7 @@ class ConfigurationPropertyInterface : public WritableInterface {
   public:
     virtual Bool is_single() const = 0;
     virtual Bool is_specified() const = 0;
+    virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;
 };
 
@@ -175,6 +176,8 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
     }
     Bool is_single() const override { return _is_single; };
 
+    ConfigurationPropertyInterface* clone() const override { return new BooleanConfigurationProperty(*this); };
+
     //! \brief Set to both true and false
     void set() { set_specified(); _is_single = false; }
     //! \brief Set to value
@@ -207,6 +210,8 @@ public:
         return _value.upper_bound();
     }
     Bool is_single() const override { return possibly(_value.is_singleton()); };
+
+    ConfigurationPropertyInterface* clone() const override { return new IntervalConfigurationProperty(*this); };
 
     void set(T const& lower, T const& upper) { set(Interval<T>(lower,upper)); }
     void set(Interval<T> const& value) {
@@ -247,6 +252,8 @@ public:
 
     Bool is_single() const override { return (_values.size() == 1); };
 
+    ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); };
+
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
@@ -279,6 +286,8 @@ public:
 
     Bool is_single() const override { return (_values.size() == 1); };
 
+    ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); };
+
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
@@ -294,6 +303,29 @@ private:
     List<SharedPointer<T>> _values;
 };
 
+//! \brief Extension of ConfigurationInterface to deal with search in the properties space
+class SearchableConfiguration : public ConfigurationInterface {
+  public:
+    virtual ~SearchableConfiguration() = default;
+  protected:
+    Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties() { return _properties; }
+    Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const { return _properties; }
+    //! \brief Add a property to the configuration
+    void add_property(Identifier const& name, ConfigurationPropertyInterface const& property) {
+        _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({name,SharedPointer<ConfigurationPropertyInterface>(property.clone())}));
+    }
+    OutputStream& _write(OutputStream& os) const override {
+        os << "(\n";
+        auto iter = _properties.begin(); SizeType i=0;
+        while (i<_properties.size()-1) {
+            os << "  " << iter->first << " = " << *iter->second << ",\n";
+            ++iter; ++i;
+        }
+        os << "  " << iter->first << " = " << *iter->second << ")"; return os;
+    }
+  private:
+    Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> _properties;
+};
 
 } // namespace Ariadne
 

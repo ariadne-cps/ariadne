@@ -51,55 +51,31 @@ using RealConfigurationProperty = IntervalConfigurationProperty<Real>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
 
-template<> class Configuration<A> : public ConfigurationInterface {
+template<> class Configuration<A> : public SearchableConfiguration {
   public:
-    Configuration() :
-        _use_reconditioning(new BooleanConfigurationProperty(false)),
-        _maximum_step_size(new RealConfigurationProperty(infinity)),
-        _level(new LevelOptionsConfigurationProperty(LevelOptions::LOW)),
-        _integrator(new IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2))) {
-        _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({"use_reconditioning",_use_reconditioning}));
-        _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({"maximum_step_size",_maximum_step_size}));
-        _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({"level",_level}));
-        _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({"integrator",_integrator}));
+    Configuration() {
+        add_property("use_reconditioning",BooleanConfigurationProperty(false));
+        add_property("maximum_step_size",RealConfigurationProperty(infinity));
+        add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
+        add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
     }
 
-    OutputStream& _write(OutputStream& os) const override {
-        os << "(\n";
-        auto iter = _properties.begin();
-        SizeType i=0;
-        while (i<_properties.size()-1) {
-            os << "  " << iter->first << " = " << *iter->second << ",\n";
-            ++iter; ++i;
-        }
-        os << "  " << iter->first << " = " << *iter->second << ")";
-        return os;
-    }
+    Bool const& use_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_reconditioning")).get(); }
+    void set_use_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(); }
+    void set_use_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(value); }
 
-    Bool const& use_reconditioning() const { return _use_reconditioning->get(); }
-    void set_use_reconditioning() { return _use_reconditioning->set(); }
-    void set_use_reconditioning(Bool const& value) { return _use_reconditioning->set(value); }
+    Real const& maximum_step_size() const { return dynamic_cast<RealConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
+    void set_maximum_step_size(Real const& value) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
+    void set_maximum_step_size(Interval<Real> const& value) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
+    void set_maximum_step_size(Real const& lower, Real const& upper) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(lower,upper); }
 
-    Real const& maximum_step_size() const { return _maximum_step_size->get(); }
-    void set_maximum_step_size(Real const& value) { _maximum_step_size->set(value); }
-    void set_maximum_step_size(Interval<Real> const& value) { _maximum_step_size->set(value); }
-    void set_maximum_step_size(Real const& lower, Real const& upper) { _maximum_step_size->set(lower,upper); }
+    LevelOptions const& level() const { return dynamic_cast<LevelOptionsConfigurationProperty const&>(*properties().get("level")).get(); }
+    void set_level(LevelOptions const& level) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(level); }
+    void set_level(Set<LevelOptions> const& levels) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(levels); }
 
-    LevelOptions const& level() const { return _level->get(); }
-    void set_level(LevelOptions const& level) { _level->set(level); }
-    void set_level(Set<LevelOptions> const& levels) { _level->set(levels); }
-
-    IntegratorInterface const& integrator() const { return _integrator->get(); }
-    void set_integrator(IntegratorInterface const& integrator) { _integrator->set(integrator); }
-    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { _integrator->set(integrator); }
-
-  private:
-    SharedPointer<BooleanConfigurationProperty> _use_reconditioning;
-    SharedPointer<RealConfigurationProperty> _maximum_step_size;
-    SharedPointer<LevelOptionsConfigurationProperty> _level;
-    SharedPointer<IntegratorConfigurationProperty> _integrator;
-
-    Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> _properties;
+    IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorConfigurationProperty const&>(*properties().get("integrator")).get(); }
+    void set_integrator(IntegratorInterface const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
+    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
 };
 
 }

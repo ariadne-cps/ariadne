@@ -239,7 +239,6 @@ public:
                                                        [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
                                                        [](I const& i){ return i.current_set_bounds.dimension(); }))*/
                     .build()) { }
-public:
 
     SharedPointer<C> to_configuration(I const& in, C const& cfg, TaskSearchPoint const& p) const override {
         auto result = SharedPointer<C>(new C(cfg));

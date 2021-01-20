@@ -30,6 +30,7 @@
 #define ARIADNE_CONFIGURATION_HPP
 
 #include <ostream>
+#include <type_traits>
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
@@ -117,6 +118,11 @@ class ConfigurationInterface : public WritableInterface {
     friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
+template <typename E>
+constexpr auto to_underlying(E e) noexcept {
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
 template<class C> class Configuration;
 
@@ -132,10 +138,55 @@ class Configurable {
     SharedPointer<Configuration<C>> _configuration;
 };
 
+template<class T>
+struct SearchSpaceConverterInterface {
+    virtual int to_int(T const& value) const = 0;
+    virtual T to_value(int i) const = 0;
+
+    virtual SearchSpaceConverterInterface* clone() const = 0;
+    virtual ~SearchSpaceConverterInterface() = default;
+};
+
+template<class T> struct Log10SearchSpaceConverter;
+template<class T> struct Log2SearchSpaceConverter;
+template<class T> struct LinearSearchSpaceConverter;
+
+template<> struct Log10SearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
+    int to_int(Real const& value) const override { return round(log(value)/log(Real(10))).get<int>(); }
+    Real to_value(int i) const override { return exp(Real(i) * log(Real(10))); }
+    SearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
+};
+
+template<> struct Log2SearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
+    int to_int(Real const& value) const override { return round(log(value)/log(Real(2))).get<int>(); }
+    Real to_value(int i) const override { return exp(Real(i) * log(Real(2))); }
+    SearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
+};
+
+template<> struct LinearSearchSpaceConverter<Real> : SearchSpaceConverterInterface<Real> {
+    int to_int(Real const& value) const override { return round(value).get<int>(); }
+    Real to_value(int i) const override { return Real(i); }
+    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+};
+
+template<> struct LinearSearchSpaceConverter<int> : SearchSpaceConverterInterface<int> {
+    int to_int(int const& value) const override { return value; }
+    int to_value(int i) const override { return i; }
+    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+};
+
 class ConfigurationPropertyInterface : public WritableInterface {
   public:
+    //! \brief If only one value is specified
     virtual Bool is_single() const = 0;
+    //! \brief If values are specified at all
     virtual Bool is_specified() const = 0;
+    //! \brief The number of values that result from the discretisation in the integer space
+    //! \details Returns 1 if single, 0 if not specified.
+    virtual SizeType cardinality() const = 0;
+    //! \brief The integer values identified by this property value(s)
+    virtual List<int> integer_values() const = 0;
+
     virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;
 };
@@ -175,6 +226,13 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
         return _value;
     }
     Bool is_single() const override { return _is_single; };
+    SizeType cardinality() const override { if (_is_single) return 1; else if (this->is_specified()) return 2; else return 0; }
+    List<int> integer_values() const override {
+        List<int> result;
+        if (_is_single) result.push_back(_value);
+        else { result.push_back(0); result.push_back(1); }
+        return result;
+    };
 
     ConfigurationPropertyInterface* clone() const override { return new BooleanConfigurationProperty(*this); };
 
@@ -199,17 +257,35 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
 template<class T>
 class IntervalConfigurationProperty : public ConfigurationPropertyBase<T> {
 public:
-    IntervalConfigurationProperty() : ConfigurationPropertyBase<T>(false), _value(Interval<T>::empty_interval()) { }
-    IntervalConfigurationProperty(T const& lower, T const& upper) : ConfigurationPropertyBase<T>(true), _value(lower,upper) {
+    IntervalConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(false), _value(Interval<T>::empty_interval()), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+    IntervalConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(true), _value(lower,upper), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) {
         ARIADNE_PRECONDITION(not possibly(_value.is_empty()));
         ARIADNE_PRECONDITION(definitely(_value.is_bounded())); }
-    IntervalConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true), _value(value) { }
+    IntervalConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
+        ConfigurationPropertyBase<T>(true), _value(value), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
         ARIADNE_PRECONDITION(this->is_single());
         return _value.upper_bound();
     }
     Bool is_single() const override { return possibly(_value.is_singleton()); };
+    SizeType cardinality() const override {
+        if (is_single()) return 1;
+        else if (not this->is_specified()) return 0;
+        else return 1+(SizeType)(_converter->to_int(_value.upper_bound()) - _converter->to_int(_value.lower_bound()));
+    }
+
+    List<int> integer_values() const override {
+        List<int> result;
+        if (this->is_specified()) {
+            int min_value = _converter->to_int(_value.lower_bound());
+            int max_value = _converter->to_int(_value.upper_bound());
+            for (int i=min_value; i<=max_value; ++i) result.push_back(i);
+        }
+        return result;
+    };
 
     ConfigurationPropertyInterface* clone() const override { return new IntervalConfigurationProperty(*this); };
 
@@ -235,6 +311,7 @@ public:
 
 private:
     Interval<T> _value;
+    SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
 };
 
 //! \brief A property that specifies values from an enum \a T
@@ -251,6 +328,12 @@ public:
         _values.insert(value); }
 
     Bool is_single() const override { return (_values.size() == 1); };
+    SizeType cardinality() const override { return _values.size(); }
+    List<int> integer_values() const override {
+        List<int> result;
+        for (auto e : _values) result.push_back(to_underlying(e));
+        return result;
+    };
 
     ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); };
 
@@ -285,6 +368,12 @@ public:
     ListConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) { _values.push_back(SharedPointer<T>(value.clone())); }
 
     Bool is_single() const override { return (_values.size() == 1); };
+    SizeType cardinality() const override { return _values.size(); }
+    List<int> integer_values() const override {
+        List<int> result;
+        for (SizeType i=0; i<_values.size(); ++i) result.push_back(i);
+        return result;
+    };
 
     ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); };
 
@@ -306,6 +395,12 @@ private:
 //! \brief Extension of ConfigurationInterface to deal with search in the properties space
 class SearchableConfiguration : public ConfigurationInterface {
   public:
+    SearchableConfiguration() = default;
+    SearchableConfiguration(SearchableConfiguration const& c) {
+        for (auto p : c.properties()) {
+            _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>(p.first,SharedPointer<ConfigurationPropertyInterface>(p.second->clone())));
+        }
+    }
     virtual ~SearchableConfiguration() = default;
   protected:
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties() { return _properties; }

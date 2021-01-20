@@ -50,12 +50,14 @@ template class ListConfigurationProperty<IntegratorInterface>;
 using RealConfigurationProperty = IntervalConfigurationProperty<Real>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
+using Log10Converter = Log10SearchSpaceConverter<Real>;
+using Log2Converter = Log2SearchSpaceConverter<Real>;
 
 template<> class Configuration<A> : public SearchableConfiguration {
   public:
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));
-        add_property("maximum_step_size",RealConfigurationProperty(infinity));
+        add_property("maximum_step_size",RealConfigurationProperty(infinity,Log2Converter()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
     }
@@ -89,15 +91,33 @@ class A : public Configurable<A>, public WritableInterface {
 class TestConfiguration {
   public:
 
+    void test_real_converters() {
+        Log10SearchSpaceConverter<Real> log10_real;
+        ARIADNE_TEST_EQUALS(log10_real.to_int(Real(0.001_dec)),-3);
+        ARIADNE_TEST_PRINT(log10_real.to_value(-3).get_d());
+        Log2SearchSpaceConverter<Real> log2_real;
+        ARIADNE_TEST_EQUALS(log2_real.to_int(Real(Dyadic(1,5u))),-5);
+        ARIADNE_TEST_PRINT(log2_real.to_value(-5).get_d());
+        LinearSearchSpaceConverter<Real> lin_real;
+        ARIADNE_TEST_EQUALS(lin_real.to_int(Real(3.49_dec)),3);
+        ARIADNE_TEST_EQUALS(lin_real.to_int(Real(3.5_dec)),4);
+        ARIADNE_TEST_EQUALS(lin_real.to_value(4).get_d(),4);
+        LinearSearchSpaceConverter<int> lin_int;
+        ARIADNE_TEST_EQUALS(lin_int.to_int(-2),-2);
+        ARIADNE_TEST_EQUALS(lin_int.to_value(4),4);
+    }
+
     void test_boolean_configuration_property_construction() {
         BooleanConfigurationProperty p1;
         ARIADNE_TEST_PRINT(p1);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
+        ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         BooleanConfigurationProperty p2(true);
         ARIADNE_TEST_PRINT(p2);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
+        ARIADNE_TEST_EQUALS(p2.cardinality(),1);
         ARIADNE_TEST_PRINT(p2.get());
     }
 
@@ -109,41 +129,53 @@ class TestConfiguration {
         ARIADNE_TEST_EQUALS(p.get(),false);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         p.set(true);
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_EQUALS(p.get(),true);
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         p.set();
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),2);
 
     }
 
     void test_interval_configuration_property_construction() {
-        RealConfigurationProperty p1;
+        Log10Converter converter;
+        RealConfigurationProperty p1(converter);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
-        RealConfigurationProperty p2(1e-2_dec);
+        ARIADNE_TEST_EQUALS(p1.cardinality(),0);
+        RealConfigurationProperty p2(1e-2_dec,converter);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
-        RealConfigurationProperty p3(1e-9_dec,1e-8_dec);
+        ARIADNE_TEST_EQUALS(p2.cardinality(),1);
+        RealConfigurationProperty p3(1e-10_dec,1e-8_dec,converter);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
-        ARIADNE_TEST_FAIL(RealConfigurationProperty(1e-8_dec,1e-9_dec));
+        ARIADNE_TEST_EQUALS(p3.cardinality(),3);
+        ARIADNE_TEST_FAIL(RealConfigurationProperty(1e-8_dec,1e-9_dec,converter));
     }
 
     void test_interval_configuration_property_modification() {
-        RealConfigurationProperty p;
+        Log10Converter converter;
+        RealConfigurationProperty p(converter);
+        ARIADNE_TEST_EQUALS(p.cardinality(),0);
         p.set(1e-2_dec);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         p.set(1e-9_dec,1e-8_dec);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
-        p.set(Interval(1e-9_dec,1e-8_dec));
+        ARIADNE_TEST_EQUALS(p.cardinality(),2);
+        p.set(Interval(1e-10_dec,1e-8_dec));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),3);
         ARIADNE_TEST_FAIL(p.set(1e-8_dec,1e-9_dec));
         ARIADNE_TEST_FAIL(p.set(Interval(1e-8_dec,1e-9_dec)));
     }
@@ -152,31 +184,39 @@ class TestConfiguration {
         LevelOptionsConfigurationProperty p1;
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
+        ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         LevelOptionsConfigurationProperty p2(LevelOptions::LOW);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
+        ARIADNE_TEST_EQUALS(p2.cardinality(),1);
         LevelOptionsConfigurationProperty p3({LevelOptions::LOW,LevelOptions::HIGH});
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
+        ARIADNE_TEST_EQUALS(p3.cardinality(),2);
     }
 
     void test_enum_configuration_property_modification() {
         LevelOptionsConfigurationProperty p;
+        ARIADNE_TEST_EQUALS(p.cardinality(),0);
         p.set(LevelOptions::MEDIUM);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         p.set({LevelOptions::MEDIUM,LevelOptions::HIGH});
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),2);
         ARIADNE_TEST_FAIL(p.set(Set<LevelOptions>()));
     }
 
     void test_list_configuration_property_construction() {
         IntegratorConfigurationProperty p1;
+        ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         IntegratorConfigurationProperty p2({TaylorPicardIntegrator(1e-2)});
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
+        ARIADNE_TEST_EQUALS(p2.cardinality(),1);
         ARIADNE_TEST_PRINT(p2.get());
         List<SharedPointer<IntegratorInterface>> integrators;
         ARIADNE_TEST_FAIL(new IntegratorConfigurationProperty(integrators));
@@ -185,16 +225,20 @@ class TestConfiguration {
         IntegratorConfigurationProperty p3(integrators);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
+        ARIADNE_TEST_EQUALS(p3.cardinality(),2);
     }
 
     void test_list_configuration_property_modification() {
         IntegratorConfigurationProperty p;
+        ARIADNE_TEST_EQUALS(p.cardinality(),0);
         p.set(TaylorPicardIntegrator(1e-2));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         p.set(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
         List<SharedPointer<IntegratorInterface>> integrators;
         ARIADNE_TEST_FAIL(p.set(integrators));
         integrators.append(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
@@ -202,9 +246,10 @@ class TestConfiguration {
         p.set(integrators);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),2);
     }
 
-    void test_simple_configuration() {
+    void test_configuration_construction() {
         Configuration<A> a;
         ARIADNE_TEST_PRINT(a);
         a.set_use_reconditioning(true);
@@ -212,6 +257,7 @@ class TestConfiguration {
     }
 
     void test() {
+        ARIADNE_TEST_CALL(test_real_converters());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_construction());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_modification());
         ARIADNE_TEST_CALL(test_interval_configuration_property_construction());
@@ -220,7 +266,7 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_enum_configuration_property_modification());
         ARIADNE_TEST_CALL(test_list_configuration_property_construction());
         ARIADNE_TEST_CALL(test_list_configuration_property_modification());
-        ARIADNE_TEST_CALL(test_simple_configuration());
+        ARIADNE_TEST_CALL(test_configuration_construction());
     }
 };
 

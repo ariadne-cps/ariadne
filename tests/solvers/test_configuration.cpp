@@ -110,29 +110,29 @@ class TestConfiguration {
 
     void test_boolean_configuration_property_construction() {
         BooleanConfigurationProperty p1("p1");
+        ARIADNE_TEST_PRINT(p1);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
         BooleanConfigurationProperty p2("p2",true);
+        ARIADNE_TEST_PRINT(p2);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
-        p2.set();
-        ARIADNE_TEST_ASSERT(p2.is_specified());
-        ARIADNE_TEST_ASSERT(not p2.is_single());
-        p2.set(false);
-        ARIADNE_TEST_ASSERT(p2.is_specified());
-        ARIADNE_TEST_ASSERT(p2.is_single());
     }
 
     void test_boolean_configuration_property_modification() {
         BooleanConfigurationProperty p("p");
+        ARIADNE_TEST_PRINT(p);
         p.set(false);
+        ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_EQUALS(p.get(),false);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
         p.set(true);
+        ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_EQUALS(p.get(),true);
         p.set();
+        ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
 

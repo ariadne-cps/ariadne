@@ -152,7 +152,19 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
     Bool is_specified() const override { return _is_specified; };
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
-    OutputStream& _write(OutputStream& os) const override { os << _name << " = " << get(); return os; }
+    //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if an interval
+    virtual List<SharedPointer<T>> values() const = 0;
+    OutputStream& _write(OutputStream& os) const override {
+        os << _name << " = ";
+        auto vals = values();
+        if (vals.empty()) { os << "N/A"; }
+        else if (vals.size() == 1) { os << *vals[0]; }
+        else {
+            os << "{";
+            for (SizeType i=0; i<vals.size()-1; ++i) os << *vals[i] << ",";
+            os << *vals[vals.size()-1] << "}";
+        }
+        return os; }
   private:
     String const _name;
     Bool _is_specified;
@@ -173,6 +185,15 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
     void set() { set_specified(); _is_single = false; }
     //! \brief Set to value
     void set(Bool const& value) override { set_specified(); _is_single = true; _value=value; }
+
+    List<SharedPointer<Bool>> values() const override {
+        List<SharedPointer<Bool>> result;
+        if (is_specified()) {
+            if (_is_single) result.append(SharedPointer<Bool>(new Bool(_value)));
+            else { result.append(SharedPointer<Bool>(new Bool(true))); result.append(SharedPointer<Bool>(new Bool(false))); }
+        }
+        return result;
+    }
   private:
     Bool _is_single;
     Bool _value;
@@ -204,6 +225,15 @@ public:
     //! \details An unbounded single value is accepted
     void set(T const& value) override { this->set_specified(); _value = Interval<T>(value); }
 
+    List<SharedPointer<T>> values() const override {
+        List<SharedPointer<T>> result;
+        if (this->is_specified()) {
+            result.append(SharedPointer<T>(new T(_value.lower_bound())));
+            if (not is_single()) result.append(SharedPointer<T>(new T(_value.upper_bound())));
+        }
+        return result;
+    }
+
 private:
     Interval<T> _value;
 };
@@ -231,6 +261,13 @@ public:
 
     void set(T const& value) override { this->set_specified(); _values.clear(); _values.insert(value); }
     void set(Set<T> const& values) { ARIADNE_PRECONDITION(not values.empty()); this->set_specified(); _values = values; }
+
+    List<SharedPointer<T>> values() const override {
+        List<SharedPointer<T>> result;
+        for (auto v : _values) {
+            result.push_back(SharedPointer<T>(new T(v)));
+        }
+        return result; }
 private:
     Set<T> _values;
 };
@@ -257,6 +294,8 @@ public:
     void set(T const& value) override { this->set_specified(); _values.clear(); _values.push_back(SharedPointer<T>(value.clone())); }
     void set(SharedPointer<T> const& value) { ARIADNE_PRECONDITION(value != nullptr); this->set_specified(); _values.clear(); _values.push_back(value); }
     void set(List<SharedPointer<T>> const& values) { ARIADNE_PRECONDITION(values.size()>0); this->set_specified(); _values = values; }
+
+    List<SharedPointer<T>> values() const override { return _values; }
 private:
     List<SharedPointer<T>> _values;
 };

@@ -51,14 +51,13 @@ using RealConfigurationProperty = IntervalConfigurationProperty<Real>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
 
-
 template<> class Configuration<A> : public ConfigurationInterface {
   public:
     Configuration() :
-        _use_reconditioning(new BooleanConfigurationProperty(false)),
-        _maximum_step_size(new RealConfigurationProperty(infinity)),
-        _level(new LevelOptionsConfigurationProperty(LevelOptions::LOW)),
-        _integrator(new IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2))) {
+        _use_reconditioning(new BooleanConfigurationProperty("use_reconditioning",false)),
+        _maximum_step_size(new RealConfigurationProperty("maximum_step_size",infinity)),
+        _level(new LevelOptionsConfigurationProperty("level",LevelOptions::LOW)),
+        _integrator(new IntegratorConfigurationProperty("integrator",TaylorPicardIntegrator(1e-2))) {
         _properties.push_back(_use_reconditioning);
         _properties.push_back(_maximum_step_size);
         _properties.push_back(_level);
@@ -66,11 +65,11 @@ template<> class Configuration<A> : public ConfigurationInterface {
     }
 
     OutputStream& _write(OutputStream& os) const override {
-        os << "use_reconditioning = " << use_reconditioning()
-           << ", maximum_step_size = " << maximum_step_size()
-           << ", level = " << level()
-           << ", integrator = " << integrator()
-           ; return os; }
+        os << "(\n";
+        for (SizeType i=0; i<_properties.size()-1; ++i) os << "  " << *_properties[i] << ",\n";
+        os << *_properties[_properties.size()-1] << ")";
+        return os;
+    }
 
     Bool const& use_reconditioning() const { return _use_reconditioning->get(); }
     void set_use_reconditioning() { return _use_reconditioning->set(); }
@@ -110,10 +109,10 @@ class TestConfiguration {
   public:
 
     void test_boolean_configuration_property_construction() {
-        BooleanConfigurationProperty p1;
+        BooleanConfigurationProperty p1("p1");
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
-        BooleanConfigurationProperty p2(true);
+        BooleanConfigurationProperty p2("p2",true);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
@@ -126,7 +125,7 @@ class TestConfiguration {
     }
 
     void test_boolean_configuration_property_modification() {
-        BooleanConfigurationProperty p;
+        BooleanConfigurationProperty p("p");
         p.set(false);
         ARIADNE_TEST_EQUALS(p.get(),false);
         ARIADNE_TEST_ASSERT(p.is_specified());
@@ -140,21 +139,21 @@ class TestConfiguration {
     }
 
     void test_interval_configuration_property_construction() {
-        RealConfigurationProperty p1;
+        RealConfigurationProperty p1("p1");
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
-        RealConfigurationProperty p2(1e-2_dec);
+        RealConfigurationProperty p2("p2",1e-2_dec);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
-        RealConfigurationProperty p3(1e-9_dec,1e-8_dec);
+        RealConfigurationProperty p3("p3",1e-9_dec,1e-8_dec);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
-        ARIADNE_TEST_FAIL(RealConfigurationProperty(1e-8_dec,1e-9_dec));
+        ARIADNE_TEST_FAIL(RealConfigurationProperty("p4",1e-8_dec,1e-9_dec));
     }
 
     void test_interval_configuration_property_modification() {
-        RealConfigurationProperty p;
+        RealConfigurationProperty p("p");
         p.set(1e-2_dec);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
@@ -169,19 +168,19 @@ class TestConfiguration {
     }
 
     void test_enum_configuration_property_construction() {
-        LevelOptionsConfigurationProperty p1;
+        LevelOptionsConfigurationProperty p1("p1");
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
-        LevelOptionsConfigurationProperty p2(LevelOptions::LOW);
+        LevelOptionsConfigurationProperty p2("p2",LevelOptions::LOW);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
-        LevelOptionsConfigurationProperty p3({LevelOptions::LOW,LevelOptions::HIGH});
+        LevelOptionsConfigurationProperty p3("p3",{LevelOptions::LOW,LevelOptions::HIGH});
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
     }
 
     void test_enum_configuration_property_modification() {
-        LevelOptionsConfigurationProperty p;
+        LevelOptionsConfigurationProperty p("p");
         p.set(LevelOptions::MEDIUM);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
@@ -192,23 +191,23 @@ class TestConfiguration {
     }
 
     void test_list_configuration_property_construction() {
-        IntegratorConfigurationProperty p1;
+        IntegratorConfigurationProperty p1("p1");
         ARIADNE_TEST_ASSERT(not p1.is_specified());
-        IntegratorConfigurationProperty p2({TaylorPicardIntegrator(1e-2)});
+        IntegratorConfigurationProperty p2("p2",{TaylorPicardIntegrator(1e-2)});
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
         List<SharedPointer<IntegratorInterface>> integrators;
-        ARIADNE_TEST_FAIL(new IntegratorConfigurationProperty(integrators));
+        ARIADNE_TEST_FAIL(new IntegratorConfigurationProperty("p3",integrators));
         integrators.append(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
         integrators.append(SharedPointer<IntegratorInterface>(new TaylorSeriesIntegrator(1e-2,Order(5))));
-        IntegratorConfigurationProperty p3(integrators);
+        IntegratorConfigurationProperty p3("p3",integrators);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
     }
 
     void test_list_configuration_property_modification() {
-        IntegratorConfigurationProperty p;
+        IntegratorConfigurationProperty p("p");
         p.set(TaylorPicardIntegrator(1e-2));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());

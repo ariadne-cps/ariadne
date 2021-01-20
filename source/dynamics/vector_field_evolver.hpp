@@ -65,6 +65,7 @@ class VectorFieldEvolver
 {
   public:
     typedef VectorField SystemType;
+    typedef Configuration<VectorFieldEvolver> ConfigurationType;
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
@@ -76,9 +77,7 @@ class VectorFieldEvolver
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
-    VectorFieldEvolver(
-    		const SystemType& system,
-            const IntegratorInterface& integrator);
+    VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration);
 
     //! \brief Make a dynamically-allocated copy.
     VectorFieldEvolver* clone() const override { return new VectorFieldEvolver(*this); }

@@ -65,6 +65,6 @@ Void evolution_submodule(pybind11::module& module)
 {
     export_orbit< Orbit<HybridEnclosure> >(module, "HybridOrbit");
     export_evolver<MapEvolver, IteratedMap>(module,"MapEvolver");
-    export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
+    export_evolver<VectorFieldEvolver, VectorField const&, Configuration<VectorFieldEvolver> const&>(module,"VectorFieldEvolver");
     export_evolver<GeneralHybridEvolver, GeneralHybridEvolver::SystemType const&>(module,"GeneralHybridEvolver");
 }

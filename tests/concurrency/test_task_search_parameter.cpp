@@ -58,15 +58,14 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_EQUALS(space.index(mp),0);
         ARIADNE_TEST_EQUALS(space.total_points(),6);
     }
-/*
+
     Void test_parameter_point_creation() {
-        TaskSearchSpace space({BooleanSearchParameter("use_subdivisions", false),
-                               MetricSearchParameter("sweep_threshold", 5, 10, 8),
-                               EnumerationSearchParameter<TestInterfaceBase>("integrator", {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5}));
+        TaskSearchSpace space({bp, mp});
         ARIADNE_TEST_PRINT(space.initial_point());
-        Map<RealVariable,Nat> bindings = {{RealVariable("use_subdivisions"),1},
-                                          {RealVariable("sweep_threshold"),5},
-                                          {RealVariable("integrator"),2}};
+        Map<Identifier,int> bindings = {{"use_subdivisions",1},
+                                          {"sweep_threshold",5}};
         ARIADNE_TEST_PRINT(bindings);
         TaskSearchPoint point = space.make_point(bindings);
         ARIADNE_TEST_PRINT(point);
@@ -74,50 +73,37 @@ class TestTaskSearchParameter {
     }
 
     Void test_parameter_point_equality() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 1, 10, 8),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
-        TaskSearchPoint point2 = space.make_point({{b, 1}, {e, 2}, {m, 5}});
-        TaskSearchPoint point3 = space.make_point({{b, 1}, {e, 3}, {m, 5}});
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point2 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point3 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 3}});
         ARIADNE_TEST_EQUAL(point1,point2);
         ARIADNE_TEST_NOT_EQUAL(point1,point3);
     }
 
     Void test_parameter_point_distance() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 3, 10, 8),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point = space.make_point({{b, 1}, {m, 5}, {e, 2}});
-        ARIADNE_TEST_PRINT(point);
-        TaskSearchPoint point2 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
-        ARIADNE_TEST_PRINT(point2);
-        ARIADNE_TEST_EQUALS(point.distance(point2),0);
-        TaskSearchPoint point3 = space.make_point({{b, 0}, {m, 5}, {e, 2}});
-        ARIADNE_TEST_PRINT(point3);
-        ARIADNE_TEST_EQUALS(point.distance(point3),1);
-        TaskSearchPoint point4 = space.make_point({{b, 1}, {m, 5}, {e, 0}});
-        ARIADNE_TEST_PRINT(point4);
-        ARIADNE_TEST_EQUALS(point.distance(point4),1);
-        TaskSearchPoint point5 = space.make_point({{b, 1}, {m, 8}, {e, 2}});
-        ARIADNE_TEST_PRINT(point5);
-        ARIADNE_TEST_EQUALS(point.distance(point5),3);
-        TaskSearchPoint point6 = space.make_point({{b, 0}, {m, 4}, {e, 0}});
-        ARIADNE_TEST_PRINT(point6);
-        ARIADNE_TEST_EQUALS(point.distance(point6),3);
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point2 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point3 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 3}});
+        TaskSearchPoint point4 = space.make_point({{"use_subdivisions", 0}, {"sweep_threshold", 5}});
+        ARIADNE_TEST_EQUALS(point1.distance(point2),0);
+        ARIADNE_TEST_EQUALS(point1.distance(point3),1);
+        ARIADNE_TEST_EQUALS(point3.distance(point4),3);
     }
 
     Void test_parameter_point_adjacent_shift() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 5, 10, 8),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
         auto points = point1.make_adjacent_shifted(1);
         auto point2 = *points.begin();
         ARIADNE_TEST_EQUALS(points.size(),1);
@@ -135,44 +121,40 @@ class TestTaskSearchParameter {
     }
 
     Void test_parameter_point_random_shift() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m.name(), 5, 10, 8),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
-        auto points = point1.make_random_shifted(5);
-        ARIADNE_TEST_EQUALS(points.size(),5);
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
+        auto points = point1.make_random_shifted(3);
+        ARIADNE_TEST_EQUALS(points.size(),3);
         for (auto point : points) {
             ARIADNE_TEST_PRINT(point);
         }
     }
 
     Void test_parameter_point_adjacent_set_shift() {
-        RealVariable b("use_subdivisions"), m1("sweep_threshold"), m2("maximum_step_size"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name(), false),
-                               MetricSearchParameter(m1.name(), 3, 10, 8),
-                               MetricSearchParameter(m2.name(), 1, 6, 2),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()}, B())});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint starting_point = space.make_point({{b, 1}, {m1, 5}, {m2, 2}, {e, 2}});
-        Set<TaskSearchPoint> points = starting_point.make_random_shifted(8);
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
+        Set<TaskSearchPoint> points = point1.make_random_shifted(3);
         ARIADNE_TEST_PRINT(points);
-        auto all_points = make_extended_set_by_shifting(points, 13);
-        ARIADNE_TEST_EQUALS(all_points.size(),13);
+        auto all_points = make_extended_set_by_shifting(points, 5);
+        ARIADNE_TEST_EQUALS(all_points.size(),5);
         ARIADNE_TEST_PRINT(all_points);
     }
 
     Void test_parameter_point_appraisal() {
-        RealVariable b("use_subdivisions"), m("sweep_threshold"), e("integrator");
-        TaskSearchSpace space({BooleanSearchParameter(b.name()),
-                               MetricSearchParameter(m.name(), 5, 10),
-                               EnumerationSearchParameter<TestInterfaceBase>(e.name(), {A(), B(), C(), D()})});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7}));
+        TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{b, 1}, {m, 5}, {e, 2}});
-        TaskSearchPoint point2 = space.make_point({{b, 1}, {m, 6}, {e, 2}});
-        TaskSearchPoint point3 = space.make_point({{b, 1}, {m, 7}, {e, 2}});
-        TaskSearchPoint point4 = space.make_point({{b, 0}, {m, 7}, {e, 2}});
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point2 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 2}});
+        TaskSearchPoint point3 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 3}});
+        TaskSearchPoint point4 = space.make_point({{"use_subdivisions", 0}, {"sweep_threshold", 4}});
         TaskSearchPointAppraisal a1(point1,3,0,0);
         TaskSearchPointAppraisal a2(point2,2,1,0);
         TaskSearchPointAppraisal a3(point3,4,0,0);
@@ -186,17 +168,17 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_ASSERT(a2 < a4);
         ARIADNE_TEST_ASSERT(a3 < a4);
     }
-*/
+
     Void test() {
         ARIADNE_TEST_CALL(test_metric_task_parameter_shift());
         ARIADNE_TEST_CALL(test_parameter_space());
-        /*ARIADNE_TEST_CALL(test_parameter_point_creation());
+        ARIADNE_TEST_CALL(test_parameter_point_creation());
         ARIADNE_TEST_CALL(test_parameter_point_equality());
         ARIADNE_TEST_CALL(test_parameter_point_distance());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_shift());
         ARIADNE_TEST_CALL(test_parameter_point_random_shift());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_set_shift());
-        ARIADNE_TEST_CALL(test_parameter_point_appraisal());*/
+        ARIADNE_TEST_CALL(test_parameter_point_appraisal());
     }
 };
 

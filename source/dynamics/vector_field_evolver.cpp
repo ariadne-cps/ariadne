@@ -111,10 +111,9 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i) :
-    TaskRunnable(Configuration<VectorFieldEvolver>()), _sys_ptr(system.clone())
+VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const ConfigurationType& configuration) :
+    TaskRunnable(configuration), _sys_ptr(system.clone())
 {
-    this->configuration().set_integrator(i);
     ConcurrencyManager::instance().set_runner(*this);
 }
 

@@ -68,7 +68,10 @@ Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
 }
 
 OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
-    return os << "{'" << name() << "', is_metric=" << _is_metric << ", values=" << _values << "}";
+    os << "{'" << name() << "', is_metric=" << _is_metric << ", values=";
+    if (_is_metric) os << "[" << _values[0] << ":" << _values[_values.size()-1] << "]";
+    else os << _values;
+    return os << "}";
 }
 
 } // namespace Ariadne

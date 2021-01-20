@@ -96,9 +96,11 @@ class TestReachabilityAnalyser
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        TaylorPicardIntegrator integrator(MaximumError(1e-2_pr));
-
-        EvolverType evolver(system,integrator);
+        Configuration<EvolverType> configuration;
+        configuration.set_integrator(TaylorPicardIntegrator(MaximumError(1e-2_pr)));
+        configuration.set_enable_reconditioning(true);
+        configuration.set_maximum_spacial_error(1e-2);
+        EvolverType evolver(system,configuration);
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

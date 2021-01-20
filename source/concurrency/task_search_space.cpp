@@ -38,12 +38,12 @@ TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings
     return TaskSearchPoint(*this, bindings);
 }
 
-TaskSearchPoint TaskSearchSpace::make_point(Map<Identifier,Nat> const& bindings) const {
+TaskSearchPoint TaskSearchSpace::make_point(Map<Identifier,int> const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        Nat v = bindings.find(p.name())->second;
-        pb.insert(Pair<TaskSearchParameter,Nat>(p, v));
+        int v = bindings.find(p.name())->second;
+        pb.insert(Pair<TaskSearchParameter,int>(p, v));
     }
     return TaskSearchPoint(*this, pb);
 }

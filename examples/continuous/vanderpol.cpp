@@ -31,7 +31,6 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    Logger::instance().use_blocking_scheduler();
     ConcurrencyManager::instance().set_concurrency(4);
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -39,7 +38,7 @@ int main(int argc, const char* argv[])
     RealConstant mu("mu",1);
     RealVariable x("x"), y("y");
 
-    VectorField dynamics({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
+    VectorField system({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
 
     MaximumError max_err=1e-6;
     StartingStepSizeNumRefinements num_ref=2;
@@ -48,10 +47,11 @@ int main(int argc, const char* argv[])
                                       LipschitzConstant(0.5),
                                       num_ref);
 
-    VectorFieldEvolver evolver(dynamics,integrator);
+    Configuration<VectorFieldEvolver> configuration;
+    configuration.set_maximum_step_size(0.0001,0.1);
+    configuration.set_integrator(integrator);
+    VectorFieldEvolver evolver(system,configuration);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
-    auto search_space = evolver.configuration().search_space();
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,search_space);
 
     typedef TaskInput<VectorFieldEvolver> I;
     typedef TaskOutput<VectorFieldEvolver> O;

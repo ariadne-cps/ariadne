@@ -53,12 +53,15 @@ class TaskSearchSpace;
 template<class C> class Configuration;
 
 //! \brief Is-a component that provides a configuration
+//! \details Since the configuration returned is const, a Configurable object should be constructed from
+//! a pre-set configuration. If the configuration must specify certain properties or if some properties
+//! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
+//! approach should be used for creation of the configuration, which should become an immutable object.
 template<class C>
 class Configurable {
     friend class Configuration<C>;
   public:
     Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
-    Configuration<C>& configuration() { return *_configuration; }
     Configuration<C> const& configuration() const { return *_configuration; }
   private:
     SharedPointer<Configuration<C>> _configuration;

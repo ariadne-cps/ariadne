@@ -44,7 +44,7 @@ class TaskSearchSpace : public WritableInterface {
   public:
     TaskSearchSpace(Set<TaskSearchParameter> const& parameters);
 
-    TaskSearchPoint make_point(Map<Identifier,Nat> const& bindings) const;
+    TaskSearchPoint make_point(Map<Identifier,int> const& bindings) const;
     TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
     TaskSearchPoint initial_point() const;
 

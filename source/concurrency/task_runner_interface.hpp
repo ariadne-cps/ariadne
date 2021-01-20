@@ -32,7 +32,7 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_interface.hpp"
-#include "../solvers/configuration.hpp"
+#include "../concurrency/searchable_configuration.hpp"
 
 namespace Ariadne {
 
@@ -56,20 +56,27 @@ class TaskRunnerInterface {
     virtual TaskType& task() = 0;
     virtual TaskType const& task() const = 0;
 
+    //! \brief Return the configuration
+    virtual ConfigurationType const& configuration() const = 0;
+    //! \brief Return the cached search space (derived from the configuration)
+    virtual TaskSearchSpace const& search_space() const = 0;
+
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;
-    //! \brief Push input and current configuration to the runner
-    virtual void push(InputType const& input, ConfigurationType const& cfg) = 0;
+    //! \brief Push input
+    virtual void push(InputType const& input) = 0;
     //! \brief Pull output from the runner
     virtual OutputType pull() = 0;
 };
 
 //! \brief Interface for a class that supports a runnable task.
 template<class R>
-class TaskRunnable {
+class TaskRunnable : public Configurable<R> {
     friend class ConcurrencyManager;
     friend class VerificationManager;
+    typedef Configuration<R> ConfigurationType;
   protected:
+    TaskRunnable(ConfigurationType const& configuration) : Configurable<R>(configuration) { }
     //! \brief Set a new runner, useful to override the default runner
     void set_runner(SharedPointer<TaskRunnerInterface<R>> runner) { this->_runner = runner; }
     //! \brief Get the runner

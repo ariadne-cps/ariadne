@@ -55,14 +55,12 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolver;
 template<> class Configuration<VectorFieldEvolver>;
-class VectorFieldFlowStepTask;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
     : public EvolverBase<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
-      public Configurable<VectorFieldEvolver>,
       public TaskRunnable<VectorFieldEvolver>
 {
   public:
@@ -221,11 +219,6 @@ template<> class Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<
 public:
     Task() : ParameterSearchTaskBase<R>(
             "stp",
-            TaskSearchSpace({
-                                    MetricSearchParameter("starting_step_size_num_refinements", 2, 5,2),
-                                    MetricSearchParameter("sweep_threshold", exp(-RealVariable("sweep_threshold") * log(RealConstant(10))), 8, 12,9),
-                                    MetricSearchParameter("maximum_temporal_order", 9, 15,12)
-                            }),
             TaskAppraisalSpaceBuilder<R>()
                     .add(execution_time_appraisal_parameter<R>)
                     .add(ScalarAppraisalParameter<R>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,[](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
@@ -239,12 +232,12 @@ public:
         TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(cfg.integrator());
         result.set_integrator(TaylorPicardIntegrator(
                 MaximumError(old_integrator.maximum_error()),
-                ThresholdSweeper<FloatDP>(DoublePrecision(),p.value("sweep_threshold")),
+                ThresholdSweeper<FloatDP>(DoublePrecision(), 1e-9/*"sweep_threshold"*/),
                 LipschitzConstant(old_integrator.lipschitz_tolerance()),
-                StartingStepSizeNumRefinements(p.value("starting_step_size_num_refinements").get_d()),
+                StartingStepSizeNumRefinements( 2/*"starting_step_size_num_refinements"*/),
                 StepMaximumError(old_integrator.step_maximum_error()),
                 MinimumTemporalOrder(old_integrator.minimum_temporal_order()),
-                MaximumTemporalOrder(p.value("maximum_temporal_order").get_d())
+                MaximumTemporalOrder(12/*"maximum_temporal_order"*/)
         ));
         return result;
     }

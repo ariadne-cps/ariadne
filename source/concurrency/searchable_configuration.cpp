@@ -23,6 +23,7 @@
  */
 
 #include "concurrency/searchable_configuration.hpp"
+#include "concurrency/task_search_space.hpp"
 
 namespace Ariadne {
 
@@ -56,6 +57,12 @@ OutputStream& SearchableConfiguration::_write(OutputStream& os) const {
         ++iter; ++i;
     }
     os << "  " << iter->first << " = " << *iter->second << ")"; return os;
+}
+
+TaskSearchSpace SearchableConfiguration::search_space() const {
+    Set<TaskSearchParameter> result;
+    for (auto p : _properties) result.insert(TaskSearchParameter(p.first,p.second->is_metric(),p.second->integer_values()));
+    return result;
 }
 
 } // namespace Ariadne

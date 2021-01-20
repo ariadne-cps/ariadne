@@ -34,7 +34,7 @@
 namespace Ariadne {
 
 class TaskSearchSpace;
-using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
+using ParameterBindingsMap = Map<TaskSearchParameter,int>;
 
 class TaskSearchPoint : public WritableInterface {
     friend class TaskSearchSpace;
@@ -48,11 +48,7 @@ class TaskSearchPoint : public WritableInterface {
     TaskSearchSpace const& space() const { return *_space; }
 
     //! \brief The coordinates in the natural space, according to the space ordering
-    List<Nat> coordinates() const { return _bindings.values(); }
-    //! \brief The values in the real space, possibly using some \a external_values
-    Map<TaskSearchParameter,Real> values(Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
-    //! \brief The value for a given parameter, possibly using some \a external values
-    Real value(Identifier const& var, Map<RealVariable,Real> const& external_values = Map<RealVariable,Real>()) const;
+    List<int> coordinates() const { return _bindings.values(); }
 
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
@@ -63,7 +59,7 @@ class TaskSearchPoint : public WritableInterface {
     Set<TaskSearchPoint> make_random_shifted(Nat amount) const;
 
     ParameterBindingsMap const& bindings() const { return _bindings; }
-    Nat const& operator[](TaskSearchParameter const& p) const { return _bindings.at(p); }
+    int const& operator[](TaskSearchParameter const& p) const { return _bindings.at(p); }
 
     TaskSearchPoint& operator=(TaskSearchPoint const& p);
     //! \brief Equality check is performed under the assumption that we always work with the same parameters,

@@ -22,49 +22,45 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_search_parameter.hpp"
+#include "concurrency/task_search_parameter.hpp"
 
 namespace Ariadne {
 
-std::ostream& operator<<(std::ostream& os, const TaskSearchParameterKind kind) {
-    switch(kind) {
-    case TaskSearchParameterKind::BOOLEAN:
-        os << "Boolean";
-        break;
-    case TaskSearchParameterKind::ENUMERATION:
-        os << "Enumeration";
-        break;
-    case TaskSearchParameterKind::METRIC:
-        os << "Metric";
-        break;
-    default:
-        ARIADNE_FAIL_MSG("Unhandled value " << kind << " in TaskSearchParameterKind for printing.");
+TaskSearchParameter::TaskSearchParameter(Identifier const& name, Bool is_metric, List<int> const& values) :
+    _name(name), _is_metric(is_metric), _values(values) { }
+
+Identifier const& TaskSearchParameter::name() const {
+    return _name;
+}
+
+List<int> const& TaskSearchParameter::values() const {
+    return _values;
+}
+
+Bool TaskSearchParameter::is_metric() const {
+    return _is_metric;
+}
+
+int TaskSearchParameter::random_value() const {
+    return _values[(SizeType)rand() % _values.size()];
+}
+
+int TaskSearchParameter::shifted_value_from(int value) const {
+    SizeType num_values = _values.size();
+    if (_is_metric) {
+        if (value == _values[0]) return value+1;
+        if (value == _values[num_values-1]) return value-1;
+        if ((SizeType)rand() % 2 == 0) return value+1;
+        else return value-1;
+    } else {
+        SizeType rand_value = (SizeType)rand() % (num_values-1);
+        if (_values[rand_value] == value) return _values[num_values-1];
+        else return _values[rand_value];
     }
-    return os;
-}
-
-Real TaskSearchParameterBase::value(Nat integer_value, Map<RealVariable,Real> const& constant_values) const {
-    Map<Identifier,Real> conversion_variables;
-    for (auto entry : constant_values) conversion_variables[entry.first.name()] = entry.second;
-    conversion_variables.insert(Pair<Identifier,Real>(_variable.name(),integer_value));
-
-    return evaluate(_value_expression, Valuation<Real,Real>(conversion_variables));
-}
-
-Nat MetricSearchParameter::shifted_value_from(Nat value) const {
-    if (value == lower_bound()) return value+1;
-    if (value == upper_bound()) return value-1;
-    if (rand() % 2 == 0) return value-1;
-    else return value+1;
-}
-
-Nat BooleanSearchParameter::shifted_value_from(Nat value) const {
-    return (value == 1 ? 0 : 1);
 }
 
 Bool TaskSearchParameter::operator==(TaskSearchParameter const& p) const {
-    // FIXME: enumeration tasks should be distinguished
-    return _impl->name() == p._impl->name() and _impl->kind() == p._impl->kind() and _impl->upper_bound() == p._impl->upper_bound();
+    return name() == p.name();
 }
 
 Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
@@ -72,7 +68,7 @@ Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
 }
 
 OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
-    return os << "{'" << name() << "', kind: " << kind() << ", [" << to_string(lower_bound()) << "," + to_string(upper_bound()) + "]->" << to_string(initial()) << "}";
+    return os << "{'" << name() << "', is_metric=" << _is_metric << ", values=" << _values << "}";
 }
 
 } // namespace Ariadne

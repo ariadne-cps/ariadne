@@ -23,7 +23,7 @@
  */
 
 /*! \file concurrency/task_search_space.hpp
- *  \brief Class for handling a search space of tool parameters for a task.
+ *  \brief Class for handling a search space of parameters for a task.
  */
 
 #ifndef ARIADNE_TASK_SEARCH_SPACE_HPP
@@ -37,24 +37,27 @@ namespace Ariadne {
 class TaskSearchPoint;
 class Real;
 template<class R> class Variable;
-typedef Variable<Real> RealVariable;
 
-using ParameterBindingsMap = Map<TaskSearchParameter,Nat>;
+using ParameterBindingsMap = Map<TaskSearchParameter,int>;
 
 class TaskSearchSpace : public WritableInterface {
   public:
     TaskSearchSpace(Set<TaskSearchParameter> const& parameters);
 
-    TaskSearchPoint make_point(Map<RealVariable,Nat> const& bindings) const;
+    TaskSearchPoint make_point(Map<Identifier,Nat> const& bindings) const;
     TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
     TaskSearchPoint initial_point() const;
 
-    List<TaskSearchParameter> const& parameters() const { return _parameters; }
+    List<TaskSearchParameter> const& parameters() const;
 
-    Nat dimension() const { return _parameters.size(); }
-    Nat index(TaskSearchParameter const& p) const;
+    //! \brief The total number of points identified by the space
+    SizeType total_points() const;
+    //! \brief The number of parameters in the space
+    SizeType dimension() const;
+    //! \brief The index of the given parameter in the ordered space
+    SizeType index(TaskSearchParameter const& p) const;
 
-    TaskSearchSpace* clone() const { return new TaskSearchSpace(*this); }
+    TaskSearchSpace* clone() const;
 
     virtual OutputStream& _write(OutputStream& os) const;
 

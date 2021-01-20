@@ -44,7 +44,7 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
     for (Nat num_points=1; num_points<=amount; ++num_points) {
         List<Nat> breadths = current_point.shift_breadths();
         Nat total_breadth = 0;
-        for (Nat b : breadths) total_breadth += b;
+        for (auto b : breadths) total_breadth += b;
         auto space = this->space();
 
         while(true) {
@@ -54,7 +54,7 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
             Bool shifted = false;
             for (auto binding : current_point.bindings()) {
                 auto const& param = binding.first;
-                Nat value = binding.second;
+                int value = binding.second;
                 current_breadth += breadths.at(space.index(param));
                 if (not shifted and current_breadth > offset) {
                     value = param.shifted_value_from(binding.second);
@@ -78,7 +78,7 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
 Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
     List<Nat> breadths = this->shift_breadths();
     Nat total_breadth = 0;
-    for (Nat b : breadths) total_breadth += b;
+    for (auto b : breadths) total_breadth += b;
     ARIADNE_PRECONDITION(total_breadth >= amount);
     Set<TaskSearchPoint> result;
     auto space = this->space();
@@ -93,37 +93,19 @@ Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
             Bool shifted = false;
             for (auto binding : _bindings) {
                 auto const& param = binding.first;
-                Nat value = binding.second;
+                int value = binding.second;
                 current_breadth += breadths.at(space.index(param));
                 if (not shifted and current_breadth > offset) {
                     value = param.shifted_value_from(binding.second);
                     shifted = true;
                 }
-                shifted_bindings.insert(std::pair<TaskSearchParameter,Nat>(param, value));
+                shifted_bindings.insert(std::pair<TaskSearchParameter,int>(param, value));
             }
             result.insert(space.make_point(shifted_bindings));
         } while (result.size() < num_points);
         ++num_points;
     }
     return result;
-}
-
-Map<TaskSearchParameter,Real> TaskSearchPoint::values(Map<RealVariable,Real> const & external_values) const {
-    Map<TaskSearchParameter,Real> result;
-    for (auto binding : _bindings) {
-        result.insert(Pair<TaskSearchParameter,Real>(binding.first, binding.first.value(binding.second, external_values)));
-    }
-    return result;
-}
-
-Real TaskSearchPoint::value(Identifier const& var, Map<RealVariable,Real> const& external_values) const {
-    auto iter = _bindings.begin();
-    for (;iter!=_bindings.end();++iter) {
-        if (iter->first.name() == var) break;
-    }
-    if (iter == _bindings.end())
-        ARIADNE_FAIL_MSG("Variable '" << var << "' could not be found in the space.");
-    return iter->first.value(iter->second,external_values);
 }
 
 TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
@@ -143,10 +125,9 @@ Bool TaskSearchPoint::operator==(TaskSearchPoint const& p) const {
 }
 
 Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
-    // ASSUMPTION: they have the same space
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
-        Nat const this_value = iter->second;
-        Nat const other_value = p._bindings.at(iter->first);
+        auto const this_value = iter->second;
+        auto const other_value = p._bindings.at(iter->first);
         if (this_value < other_value) return true;
         else if (this_value > other_value) return false;
     }
@@ -154,18 +135,15 @@ Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
 }
 
 Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
-    // ASSUMPTION: they have the same space
     Nat result = 0;
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
-        Nat const v1 = iter->second;
-        Nat const v2 = p._bindings.at(iter->first);
-        if (iter->first.kind() == TaskSearchParameterKind::METRIC) result += (v1 > v2 ? v1 - v2 : v2 - v1);
+        auto const v1 = iter->second;
+        auto const v2 = p._bindings.at(iter->first);
+        if (iter->first.is_metric()) result += (v1 > v2 ? (Nat)(v1 - v2) : (Nat)(v2 - v1));
         else result += (v1 == v2 ? 0 : 1);
     }
     return result;
-
 }
-
 
 OutputStream& TaskSearchPoint::_write(OutputStream& os) const {
     return os << _bindings.values();
@@ -173,10 +151,12 @@ OutputStream& TaskSearchPoint::_write(OutputStream& os) const {
 
 List<Nat> TaskSearchPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
-        for (auto iter = _bindings.begin(); iter != _bindings.end(); ++iter) {
-            if (iter->first.kind() != TaskSearchParameterKind::METRIC) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
-            else if (iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
-            else if (iter->second == iter->first.lower_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
+        for (auto b : _bindings) {
+            auto const& values = b.first.values();
+            auto size = values.size();
+            if (not b.first.is_metric()) _CACHED_SHIFT_BREADTHS.append(size-1); // all except the current
+            else if (b.second == values[size-1]) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
+            else if (b.second == values[0]) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down
         }
     }

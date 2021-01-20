@@ -22,8 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_search_point.hpp"
-#include "task_search_space.hpp"
+#include "symbolic/identifier.hpp"
+#include "concurrency/task_search_point.hpp"
+#include "concurrency/task_search_space.hpp"
 
 namespace Ariadne {
 
@@ -37,11 +38,11 @@ TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings
     return TaskSearchPoint(*this, bindings);
 }
 
-TaskSearchPoint TaskSearchSpace::make_point(Map<RealVariable,Nat> const& bindings) const {
+TaskSearchPoint TaskSearchSpace::make_point(Map<Identifier,Nat> const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        Nat v = bindings.find(p.variable())->second;
+        Nat v = bindings.find(p.name())->second;
         pb.insert(Pair<TaskSearchParameter,Nat>(p, v));
     }
     return TaskSearchPoint(*this, pb);
@@ -50,14 +51,32 @@ TaskSearchPoint TaskSearchSpace::make_point(Map<RealVariable,Nat> const& binding
 TaskSearchPoint TaskSearchSpace::initial_point() const {
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        pb.insert(Pair<TaskSearchParameter,Nat>(p, p.initial()));
+        pb.insert(Pair<TaskSearchParameter,Nat>(p, p.random_value()));
     }
     return TaskSearchPoint(*this, pb);
 }
 
-Nat TaskSearchSpace::index(TaskSearchParameter const& p) const {
+SizeType TaskSearchSpace::index(TaskSearchParameter const& p) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i) == p) return i;
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");
+}
+
+List<TaskSearchParameter> const& TaskSearchSpace::parameters() const {
+    return _parameters;
+}
+
+SizeType TaskSearchSpace::total_points() const {
+    SizeType result = 1;
+    for (auto p : _parameters) result *= p.values().size();
+    return result;
+}
+
+SizeType TaskSearchSpace::dimension() const {
+    return _parameters.size();
+}
+
+TaskSearchSpace* TaskSearchSpace::clone() const {
+    return new TaskSearchSpace(*this);
 }
 
 OutputStream& TaskSearchSpace::_write(OutputStream& os) const {

@@ -40,15 +40,22 @@ class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
 
-    TaskRunnerBase() : _task(new TaskType()) { }
+    TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration), _search_space(configuration.search_space().clone()) { }
 
     TaskType& task() override { return *_task; };
     TaskType const& task() const override { return *_task; };
+    ConfigurationType const& configuration() const override { return _configuration; }
+    TaskSearchSpace const& search_space() const override { return *_search_space; }
 
     virtual ~TaskRunnerBase() = default;
   protected:
     SharedPointer<TaskType> const _task;
+    ConfigurationType const _configuration;
+    SharedPointer<TaskSearchSpace> const _search_space;
 };
+
+template<class C>
+SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
 
 template<class C>
 Void
@@ -64,9 +71,9 @@ SequentialRunner<C>::dump_statistics()
 
 template<class C>
 Void
-SequentialRunner<C>::push(InputType const& input, ConfigurationType const& cfg)
+SequentialRunner<C>::push(InputType const& input)
 {
-    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->singleton_configuration(cfg,this->_task->search_space().initial_point()))));
+    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->singleton_configuration(this->configuration(),this->search_space().initial_point()))));
 }
 
 template<class C>
@@ -84,16 +91,17 @@ DetachedRunner<R>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->singleton_configuration(pkg.second.first,pkg.second.second)));
+        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->singleton_configuration(this->configuration(),pkg.second)));
         _output_availability.notify_all();
     }
 }
 
 template<class T>
-DetachedRunner<T>::DetachedRunner()
-        :  _thread(this->_task->name(), [this]() { _loop(); }),
-           _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
-           _terminate(false) { }
+DetachedRunner<T>::DetachedRunner(ConfigurationType const& configuration)
+        : TaskRunnerBase<T>(configuration),
+          _thread(this->_task->name(), [this]() { _loop(); }),
+          _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
+          _terminate(false) { }
 
 template<class T>
 DetachedRunner<T>::~DetachedRunner() {
@@ -115,9 +123,9 @@ DetachedRunner<T>::dump_statistics() {
 
 template<class T>
 Void
-DetachedRunner<T>::push(InputType const& input, ConfigurationType const& cfg)
+DetachedRunner<T>::push(InputType const& input)
 {
-    _input_buffer.push({input,{cfg,this->_task->search_space().initial_point()}});
+    _input_buffer.push({input,this->search_space().initial_point()});
     _input_availability.notify_all();
 }
 
@@ -159,14 +167,14 @@ ParameterSearchRunner<T>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = this->_task->singleton_configuration(pkg.second.first,pkg.second.second);
+        auto cfg = this->_task->singleton_configuration(this->configuration(),pkg.second);
         auto start = std::chrono::high_resolution_clock::now();
         try {
             auto result = this->_task->run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");
-            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second.second));
+            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second));
         } catch (std::exception& e) {
             ++_failures;
             ARIADNE_LOG_PRINTLN("task failed: " << e.what());
@@ -176,14 +184,15 @@ ParameterSearchRunner<T>::_loop() {
 }
 
 template<class T>
-ParameterSearchRunner<T>::ParameterSearchRunner(Nat concurrency)
-        :  _concurrency(concurrency), _failures(0), _last_used_input(1),
-           _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
-           _terminate(false) {
+ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configuration, Nat concurrency)
+        : TaskRunnerBase<T>(configuration), _concurrency(concurrency),
+          _failures(0), _last_used_input(1),
+          _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
+          _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
 
-    auto initial = this->_task->search_space().initial_point();
+    auto initial = this->search_space().initial_point();
     _points.push(initial);
     if (_concurrency>1) {
         auto shifted = initial.make_random_shifted(_concurrency-1);
@@ -214,9 +223,9 @@ ParameterSearchRunner<T>::dump_statistics() {
 
 template<class T>
 Void
-ParameterSearchRunner<T>::push(InputType const& input, ConfigurationType const& cfg) {
+ParameterSearchRunner<T>::push(InputType const& input) {
     for (SizeType i=0; i<_concurrency; ++i) {
-        _input_buffer.push({input,{cfg,_points.front()}});
+        _input_buffer.push({input,_points.front()});
         _points.pop();
     }
     _last_used_input.push(input);

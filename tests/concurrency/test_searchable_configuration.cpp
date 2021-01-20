@@ -111,6 +111,7 @@ class TestConfiguration {
     void test_boolean_configuration_property_construction() {
         BooleanConfigurationProperty p1;
         ARIADNE_TEST_PRINT(p1);
+        ARIADNE_TEST_ASSERT(not p1.is_metric());
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
@@ -146,6 +147,7 @@ class TestConfiguration {
     void test_range_configuration_property_construction() {
         Log10Converter converter;
         RealConfigurationProperty p1(converter);
+        ARIADNE_TEST_ASSERT(p1.is_metric());
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
@@ -178,6 +180,7 @@ class TestConfiguration {
 
     void test_enum_configuration_property_construction() {
         LevelOptionsConfigurationProperty p1;
+        ARIADNE_TEST_ASSERT(not p1.is_metric());
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
@@ -207,6 +210,7 @@ class TestConfiguration {
 
     void test_list_configuration_property_construction() {
         IntegratorConfigurationProperty p1;
+        ARIADNE_TEST_ASSERT(not p1.is_metric());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         IntegratorConfigurationProperty p2({TaylorPicardIntegrator(1e-2)});

@@ -45,16 +45,15 @@ template<class R> class TaskRunnerBase;
 template<class R>
 class SequentialRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
-  protected:
-    SequentialRunner() = default;
-  public:
     typedef typename TaskRunnerBase<R>::InputType InputType;
     typedef typename TaskRunnerBase<R>::OutputType OutputType;
     typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
-
+  protected:
+    SequentialRunner(ConfigurationType const& configuration);
+  public:
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input, ConfigurationType const& cfg) override final;
+    Void push(InputType const& input) override final;
     OutputType pull() override final;
 
 private:
@@ -65,20 +64,19 @@ private:
 template<class R>
 class DetachedRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
-  protected:
-    DetachedRunner();
-  public:
     typedef typename TaskRunnerBase<R>::InputType InputType;
     typedef typename TaskRunnerBase<R>::OutputType OutputType;
     typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
-    typedef Buffer<Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>>> InputBufferType;
+    typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
-
+  protected:
+    DetachedRunner(ConfigurationType const& configuration);
+  public:
     virtual ~DetachedRunner();
 
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input, ConfigurationType const& cfg) override final;
+    Void push(InputType const& input) override final;
     OutputType pull() override final;
 
 private:
@@ -102,22 +100,21 @@ template<class O> class ParameterSearchOutputBufferData;
 template<class R>
 class ParameterSearchRunner final : public TaskRunnerBase<R> {
     friend class ConcurrencyManager;
-  protected:
-    ParameterSearchRunner(Nat concurrency);
-  public:
     typedef typename TaskRunnerBase<R>::InputType InputType;
     typedef typename TaskRunnerBase<R>::OutputType OutputType;
     typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
-    typedef Pair<InputType,Pair<ConfigurationType,TaskSearchPoint>> InputBufferContentType;
+    typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
     typedef ParameterSearchOutputBufferData<OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
-
+  protected:
+    ParameterSearchRunner(ConfigurationType const& configuration, Nat concurrency);
+  public:
     virtual ~ParameterSearchRunner();
 
     Void activate() override final;
     void dump_statistics() override final;
-    Void push(InputType const& input, ConfigurationType const& cfg) override final;
+    Void push(InputType const& input) override final;
     OutputType pull() override final;
 
 private:

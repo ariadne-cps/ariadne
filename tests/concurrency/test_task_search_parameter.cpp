@@ -31,106 +31,34 @@
 
 using namespace Ariadne;
 
-struct TestInterfaceBase {
-    TestInterfaceBase(Nat val) : _val(val) { }
-    bool operator==(TestInterfaceBase const& o) const { return _val==o._val; }
-  private:
-    Nat _val;
-};
-struct A : public TestInterfaceBase { A() : TestInterfaceBase(0) { }};
-struct B : public TestInterfaceBase { B() : TestInterfaceBase(1) { }};
-struct C : public TestInterfaceBase { C() : TestInterfaceBase(2) { }};
-struct D : public TestInterfaceBase { D() : TestInterfaceBase(3) { }};
-struct E : public TestInterfaceBase { E() : TestInterfaceBase(4) { }};
-
 class TestTaskSearchParameter {
   public:
 
-    Void test_boolean_task_parameter() {
-        TaskSearchParameter p = BooleanSearchParameter("use_subdivisions", false);
+    Void test_task_parameter_creation() {
+        TaskSearchParameter p("use_subdivisions", false, List<int>({0,2}));
         ARIADNE_TEST_PRINT(p);
-    }
-
-    Void test_boolean_task_parameter_shift() {
-        BooleanSearchParameter b("use_subdivisions", false);
-        ARIADNE_TEST_EQUALS(b.shifted_value_from(0),1);
-        ARIADNE_TEST_EQUALS(b.shifted_value_from(1),0);
-    }
-
-    Void test_metric_task_parameter() {
-        TaskSearchParameter metric = MetricSearchParameter("sweep_threshold",
-                                                           RealVariable("sweep_threshold"), 5, 10, 8);
-        ARIADNE_TEST_PRINT(metric);
-    }
-
-    Void test_metric_task_parameter_invalid_bounds() {
-        ARIADNE_TEST_FAIL(MetricSearchParameter("sweep_threshold", RealVariable("sweep_threshold"), 8, 5));
-    }
-
-    Void test_metric_task_parameter_invalid_initial() {
-        ARIADNE_TEST_FAIL(MetricSearchParameter("sweep_threshold", RealVariable("sweep_threshold"), 5, 10, 11));
-        ARIADNE_TEST_FAIL(MetricSearchParameter("sweep_threshold", RealVariable("sweep_threshold"), 5, 10, 4));
     }
 
     Void test_metric_task_parameter_shift() {
-        MetricSearchParameter metric("sweep_threshold", 0, 10, 8);
-        ARIADNE_TEST_EQUALS(metric.shifted_value_from(0),1);
-        auto from_1 = metric.shifted_value_from(1);
-        ARIADNE_TEST_ASSERT(from_1 == 0 or from_1 == 2);
-
-        ARIADNE_TEST_EQUALS(metric.shifted_value_from(0),1);
-        auto from_ub = metric.shifted_value_from(metric.upper_bound());
-        ARIADNE_TEST_EQUALS(from_ub,metric.upper_bound()-1);
-    }
-
-    Void test_enumeration_task_parameter() {
-        TaskSearchParameter p = EnumerationSearchParameter<TestInterfaceBase>("integrator", {A(), B(), C(), D()}, B());
-        auto etp_ptr = dynamic_cast<EnumerationSearchParameter<TestInterfaceBase>*>(p.ptr());
-        ARIADNE_TEST_EQUALS(etp_ptr->elements().size(),4);
-        ARIADNE_TEST_PRINT(p);
-        ARIADNE_TEST_EQUALS(p.upper_bound(),3);
-    }
-
-    Void test_enumeration_task_parameter_invalid_initial() {
-        ARIADNE_TEST_FAIL(EnumerationSearchParameter<TestInterfaceBase>("integrator", {A(), B(), C(), D()}, E()));
-    }
-
-    Void test_enumeration_task_parameter_shift() {
-        EnumerationSearchParameter<TestInterfaceBase> e("integrator", {A(), B(), C(), D()}, B());
-        auto shifted_0 = e.shifted_value_from(0);
-        ARIADNE_TEST_ASSERT(shifted_0 == 1 or shifted_0 == 2 or shifted_0 == 3);
-        auto shifted_1 = e.shifted_value_from(1);
-        ARIADNE_TEST_ASSERT(shifted_1 == 0 or shifted_1 == 2 or shifted_1 == 3);
-        auto shifted_2 = e.shifted_value_from(2);
-        ARIADNE_TEST_ASSERT(shifted_2 == 0 or shifted_2 == 1 or shifted_2 == 3);
-        auto shifted_3 = e.shifted_value_from(3);
-        ARIADNE_TEST_ASSERT(shifted_3 == 0 or shifted_3 == 1 or shifted_3 == 2);
-    }
-
-    Void test_parameter_without_initial_value() {
-        MetricSearchParameter m("sweep_threshold", 0, 10);
-        BooleanSearchParameter b("use_subdivisions");
-        EnumerationSearchParameter<TestInterfaceBase> e("integrator", {A(), B(), C(), D()});
-
-        auto m_initial = m.initial();
-        ARIADNE_TEST_ASSERT(m_initial <= m.upper_bound() and m_initial >= m.lower_bound());
-        ARIADNE_TEST_ASSERT(b.initial() <= m.upper_bound());
-        ARIADNE_TEST_ASSERT(e.initial() <= e.upper_bound());
+        TaskSearchParameter metric("sweep_threshold", true, List<int>({8,9,10,11}));
+        ARIADNE_TEST_EQUALS(metric.shifted_value_from(8),9);
+        ARIADNE_TEST_EQUALS(metric.shifted_value_from(11),10);
+        auto from_1 = metric.shifted_value_from(10);
+        ARIADNE_TEST_ASSERT(from_1 == 9 or from_1 == 11);
     }
 
     Void test_parameter_space() {
-        BooleanSearchParameter bp("use_subdivisions", false);
-        MetricSearchParameter mp("sweep_threshold", 5, 10, 8);
-        EnumerationSearchParameter<TestInterfaceBase> ep("integrator", {A(), B(), C(), D()}, B());
-        TaskSearchSpace space({bp, mp, ep});
+        TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5}));
+        TaskSearchSpace space({bp, mp});
         ARIADNE_TEST_PRINT(space);
         ARIADNE_TEST_PRINT(space.parameters());
-        ARIADNE_TEST_EQUALS(space.dimension(),3);
-        ARIADNE_TEST_EQUALS(space.index(bp),2);
-        ARIADNE_TEST_EQUALS(space.index(ep),0);
-        ARIADNE_TEST_EQUALS(space.index(mp),1);
+        ARIADNE_TEST_EQUALS(space.dimension(),2);
+        ARIADNE_TEST_EQUALS(space.index(bp),1);
+        ARIADNE_TEST_EQUALS(space.index(mp),0);
+        ARIADNE_TEST_EQUALS(space.total_points(),6);
     }
-
+/*
     Void test_parameter_point_creation() {
         TaskSearchSpace space({BooleanSearchParameter("use_subdivisions", false),
                                MetricSearchParameter("sweep_threshold", 5, 10, 8),
@@ -258,26 +186,17 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_ASSERT(a2 < a4);
         ARIADNE_TEST_ASSERT(a3 < a4);
     }
-
+*/
     Void test() {
-        ARIADNE_TEST_CALL(test_boolean_task_parameter());
-        ARIADNE_TEST_CALL(test_boolean_task_parameter_shift());
-        ARIADNE_TEST_CALL(test_metric_task_parameter());
-        ARIADNE_TEST_CALL(test_metric_task_parameter_invalid_bounds());
-        ARIADNE_TEST_CALL(test_metric_task_parameter_invalid_initial());
         ARIADNE_TEST_CALL(test_metric_task_parameter_shift());
-        ARIADNE_TEST_CALL(test_enumeration_task_parameter());
-        ARIADNE_TEST_CALL(test_enumeration_task_parameter_invalid_initial());
-        ARIADNE_TEST_CALL(test_enumeration_task_parameter_shift());
-        ARIADNE_TEST_CALL(test_parameter_without_initial_value());
         ARIADNE_TEST_CALL(test_parameter_space());
-        ARIADNE_TEST_CALL(test_parameter_point_creation());
+        /*ARIADNE_TEST_CALL(test_parameter_point_creation());
         ARIADNE_TEST_CALL(test_parameter_point_equality());
         ARIADNE_TEST_CALL(test_parameter_point_distance());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_shift());
         ARIADNE_TEST_CALL(test_parameter_point_random_shift());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_set_shift());
-        ARIADNE_TEST_CALL(test_parameter_point_appraisal());
+        ARIADNE_TEST_CALL(test_parameter_point_appraisal());*/
     }
 };
 

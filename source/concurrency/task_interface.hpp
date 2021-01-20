@@ -57,8 +57,6 @@ class TaskInterface {
 
     //! \brief The name of the task, to be used for thread naming
     virtual String name() const = 0;
-    //! \brief Return the parameter space for the task
-    virtual TaskSearchSpace const& search_space() const = 0;
     //! \brief Return the appraisal space for the task
     virtual TaskAppraisalSpace<R> const& appraisal_space() const = 0;
     //! \brief Set the appraisal space for the task
@@ -80,17 +78,15 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
   protected:
-    ParameterSearchTaskBase(String const& name, TaskSearchSpace const& search_space, TaskAppraisalSpace<R> const& appraisal_space)
-        : _name(name), _search_space(search_space), _appraisal_space(appraisal_space.clone()) {}
+    ParameterSearchTaskBase(String const& name, TaskAppraisalSpace<R> const& appraisal_space)
+        : _name(name), _appraisal_space(appraisal_space.clone()) {}
   public:
     String name() const override { return _name; }
-    TaskSearchSpace const& search_space() const override { return _search_space; }
     TaskAppraisalSpace<R> const& appraisal_space() const override { return *_appraisal_space; }
     Void set_appraisal_space(TaskAppraisalSpace<R> const& space) override { _appraisal_space.reset(space.clone()); };
     Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _appraisal_space->appraise(data,input); }
   private:
     String const _name;
-    TaskSearchSpace const _search_space;
     SharedPointer<TaskAppraisalSpace<R>> _appraisal_space;
 };
 

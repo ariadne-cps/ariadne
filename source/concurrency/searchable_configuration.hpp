@@ -47,6 +47,8 @@ constexpr auto to_underlying(E e) noexcept {
     return static_cast<std::underlying_type_t<E>>(e);
 }
 
+class TaskSearchSpace;
+
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
 template<class C> class Configuration;
 
@@ -124,6 +126,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     virtual Bool is_single() const = 0;
     //! \brief If values are specified at all
     virtual Bool is_specified() const = 0;
+    //! \brief If the property class is metric
+    virtual Bool is_metric() const = 0;
     //! \brief The number of values that result from the discretisation in the integer space
     //! \details Returns 1 if single, 0 if not specified.
     virtual SizeType cardinality() const = 0;
@@ -169,6 +173,7 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
         return _value;
     }
     Bool is_single() const override { return _is_single; };
+    Bool is_metric() const override { return false; };
     SizeType cardinality() const override { if (_is_single) return 1; else if (this->is_specified()) return 2; else return 0; }
     List<int> integer_values() const override {
         List<int> result;
@@ -213,6 +218,7 @@ class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
         return _upper;
     }
     Bool is_single() const override { if (not this->is_specified()) return false; else return possibly(_lower == _upper); }
+    Bool is_metric() const override { return true; }
     SizeType cardinality() const override {
         if (is_single()) return 1;
         else if (not this->is_specified()) return 0;
@@ -229,7 +235,7 @@ class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
         return result;
     };
 
-    ConfigurationPropertyInterface* clone() const override { return new RangeConfigurationProperty(*this); };
+    ConfigurationPropertyInterface* clone() const override { return new RangeConfigurationProperty(*this); }
 
     void set(T const& lower, T const& upper) {
         ARIADNE_PRECONDITION(not possibly(upper < lower));
@@ -269,7 +275,8 @@ public:
         ARIADNE_PRECONDITION(std::is_enum<T>::value);
         _values.insert(value); }
 
-    Bool is_single() const override { return (_values.size() == 1); };
+    Bool is_single() const override { return (_values.size() == 1); }
+    Bool is_metric() const override { return false; }
     SizeType cardinality() const override { return _values.size(); }
     List<int> integer_values() const override {
         List<int> result;
@@ -277,7 +284,7 @@ public:
         return result;
     };
 
-    ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); };
+    ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); }
 
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
@@ -309,7 +316,8 @@ public:
     }
     ListConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) { _values.push_back(SharedPointer<T>(value.clone())); }
 
-    Bool is_single() const override { return (_values.size() == 1); };
+    Bool is_single() const override { return (_values.size() == 1); }
+    Bool is_metric() const override { return false; }
     SizeType cardinality() const override { return _values.size(); }
     List<int> integer_values() const override {
         List<int> result;
@@ -317,7 +325,7 @@ public:
         return result;
     };
 
-    ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); };
+    ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); }
 
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
@@ -341,6 +349,9 @@ class SearchableConfiguration : public ConfigurationInterface {
     SearchableConfiguration(SearchableConfiguration const& c);
     SearchableConfiguration& operator=(SearchableConfiguration const& c);
     virtual ~SearchableConfiguration() = default;
+
+    //! \brief Construct a search space from the current configuration
+    TaskSearchSpace search_space() const;
 
   protected:
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties();

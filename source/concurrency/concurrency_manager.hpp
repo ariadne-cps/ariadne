@@ -30,6 +30,7 @@
 #define ARIADNE_CONCURRENCY_MANAGER_HPP
 
 #include <thread>
+#include <algorithm>
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_runner.hpp"
@@ -51,28 +52,27 @@ class ConcurrencyManager {
     }
 
     template<class T> void set_runner(TaskRunnable<T>& runnable) const {
+        auto const& cfg = runnable.configuration();
         SharedPointer<TaskRunnerInterface<T>> runner;
-        if (_concurrency > 1 and not runnable.configuration().is_singleton())
-            runner.reset(new ParameterSearchRunner<T>(runnable.configuration(),_concurrency));
+        if (_concurrency > 1 and not cfg.is_singleton())
+            runner.reset(new ParameterSearchRunner<T>(cfg,std::min(_concurrency,cfg.search_space().total_points())));
         else
-            runner.reset(new SequentialRunner<T>(runnable.configuration()));
+            runner.reset(new SequentialRunner<T>(cfg));
         runnable.set_runner(runner);
     }
 
-    unsigned int maximum_concurrency() const;
-    unsigned int concurrency() const;
+    SizeType maximum_concurrency() const;
+    SizeType concurrency() const;
 
-    void set_concurrency(unsigned int value);
+    void set_concurrency(SizeType value);
 
     List<TaskSearchPointAppraisal> last_search_best_points() const;
     void set_last_search_best_points(List<TaskSearchPointAppraisal> const& points);
 
   private:
-    const unsigned int _maximum_concurrency;
-    unsigned int _concurrency;
-
+    const SizeType _maximum_concurrency;
+    SizeType _concurrency;
     std::mutex _data_mutex;
-
     List<TaskSearchPointAppraisal> _last_search_best_points;
 };
 

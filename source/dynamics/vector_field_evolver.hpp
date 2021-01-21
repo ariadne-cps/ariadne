@@ -154,17 +154,27 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
 
     //! \brief Default constructor gives reasonable values.
     Configuration() {
+        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
         add_property("enable_reconditioning",BooleanConfigurationProperty(false));
+        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
         add_property("integrator",ListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(1e-2)));
-        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
     }
+
+    //! \brief Enable premature termination of lower evolution
+    Bool const& enable_premature_termination() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_premature_termination")).get(); }
+    void set_enable_premature_termination(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_premature_termination")).set(value); }
 
     //! \brief Enable reconditioning of basic sets
     Bool const& enable_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_reconditioning")).get(); }
     void set_enable_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(value); }
     void set_both_enable_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set_both(); }
+
+    //! \brief Enable subdivisions for upper evolution
+    Bool const& enable_subdivisions() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_subdivisions")).get(); }
+    void set_enable_subdivisions(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_subdivisions")).set(value); }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.

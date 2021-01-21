@@ -106,11 +106,6 @@ OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
     return os;
 }
 
-// Allow subdivisions in upper evolution
-const Bool ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution
-const Bool ENABLE_PREMATURE_TERMINATION = false;
-
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const ConfigurationType& configuration) :
     TaskRunnable(configuration), _sys_ptr(system.clone())
 { }
@@ -224,7 +219,7 @@ _evolution(EnclosureListType& final_sets,
 
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && configuration().enable_subdivisions()
                   && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
@@ -232,7 +227,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && configuration().enable_premature_termination() && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
             // Compute evolution

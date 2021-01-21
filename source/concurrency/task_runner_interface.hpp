@@ -46,12 +46,6 @@ class TaskRunnerInterface {
     typedef TaskOutput<R>  OutputType;
     typedef Configuration<R> ConfigurationType;
 
-    //! \brief Activates the runner, activating the threads and consequently properly setting the verbosity level
-    //! \details This is necessary since the object may need to be visible at a higher level of abstraction compared
-    //! to the use. Multiple activations are possible due to multiple calls of the runner, though they will not have any effect,
-    //! since a thread can be activated only once, with no exception thrown.
-    virtual void activate() = 0;
-
     //! \brief Return the task
     virtual TaskType& task() = 0;
     virtual TaskType const& task() const = 0;

@@ -51,7 +51,6 @@ class SequentialRunner final : public TaskRunnerBase<R> {
   protected:
     SequentialRunner(ConfigurationType const& configuration);
   public:
-    Void activate() override final;
     void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
@@ -74,7 +73,6 @@ class DetachedRunner final : public TaskRunnerBase<R> {
   public:
     virtual ~DetachedRunner();
 
-    Void activate() override final;
     void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
@@ -85,6 +83,7 @@ private:
     LoggableSmartThread _thread;
     InputBufferType _input_buffer;
     OutputBufferType _output_buffer;
+    std::atomic<bool> _active;
     std::atomic<bool> _terminate;
     std::mutex _input_mutex;
     std::condition_variable _input_availability;
@@ -112,7 +111,6 @@ class ParameterSearchRunner final : public TaskRunnerBase<R> {
   public:
     virtual ~ParameterSearchRunner();
 
-    Void activate() override final;
     void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
@@ -129,6 +127,7 @@ private:
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;
     OutputBufferType _output_buffer;
+    std::atomic<bool> _active;
     std::atomic<bool> _terminate;
     std::mutex _input_mutex;
     std::condition_variable _input_availability;

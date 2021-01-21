@@ -52,8 +52,6 @@ template<class C>
 class TaskRunnerBase : public TaskRunnerInterface<C> {
   public:
     typedef typename TaskRunnerInterface<C>::TaskType TaskType;
-    typedef typename TaskRunnerInterface<C>::InputType InputType;
-    typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
 
     TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
@@ -70,12 +68,6 @@ class TaskRunnerBase : public TaskRunnerInterface<C> {
 
 template<class C>
 SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
-
-template<class C>
-Void
-SequentialRunner<C>::activate() {
-    ARIADNE_LOG_SCOPE_CREATE;
-}
 
 template<class C>
 Void
@@ -96,7 +88,6 @@ SequentialRunner<C>::pull() {
 template<class R>
 Void
 DetachedRunner<R>::_loop() {
-    ARIADNE_LOG_SCOPE_CREATE;
     while(true) {
         std::unique_lock<std::mutex> locker(_input_mutex);
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
@@ -112,7 +103,7 @@ DetachedRunner<T>::DetachedRunner(ConfigurationType const& configuration)
         : TaskRunnerBase<T>(configuration),
           _thread(this->_task->name(), [this]() { _loop(); }),
           _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
-          _terminate(false) { }
+          _active(false), _terminate(false) { }
 
 template<class T>
 DetachedRunner<T>::~DetachedRunner() {
@@ -122,17 +113,15 @@ DetachedRunner<T>::~DetachedRunner() {
 
 template<class T>
 Void
-DetachedRunner<T>::activate() {
-    _thread.activate();
-}
-
-template<class T>
-Void
 DetachedRunner<T>::dump_statistics() { }
 
 template<class T>
 Void
 DetachedRunner<T>::push(InputType const& input) {
+    if (not _active) {
+        _active = true;
+        _thread.activate();
+    }
     _input_buffer.push(input);
     _input_availability.notify_all();
 }
@@ -168,7 +157,6 @@ class ParameterSearchOutputBufferData {
 template<class T>
 Void
 ParameterSearchRunner<T>::_loop() {
-    ARIADNE_LOG_SCOPE_CREATE;
     while(true) {
         std::unique_lock<std::mutex> locker(_input_mutex);
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
@@ -176,8 +164,8 @@ ParameterSearchRunner<T>::_loop() {
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
         auto cfg = make_singleton(this->configuration(),pkg.second);
-        auto start = std::chrono::high_resolution_clock::now();
         try {
+            auto start = std::chrono::high_resolution_clock::now();
             auto result = this->_task->run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
@@ -196,7 +184,7 @@ ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configu
         : TaskRunnerBase<T>(configuration), _concurrency(concurrency),
           _failures(0), _last_used_input(1),
           _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
-          _terminate(false) {
+          _active(false), _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
     auto shifted = configuration.search_space().initial_point().make_random_shifted(_concurrency);
@@ -211,13 +199,6 @@ ParameterSearchRunner<T>::~ParameterSearchRunner() {
 
 template<class T>
 Void
-ParameterSearchRunner<T>::activate() {
-    for (auto thread : _threads)
-        thread->activate();
-}
-
-template<class T>
-Void
 ParameterSearchRunner<T>::dump_statistics() {
     ConcurrencyManager::instance().set_last_search_best_points(_best_points);
     _best_points.clear();
@@ -226,6 +207,10 @@ ParameterSearchRunner<T>::dump_statistics() {
 template<class T>
 Void
 ParameterSearchRunner<T>::push(InputType const& input) {
+    if (not _active) {
+        _active = true;
+        for (auto thread : _threads) thread->activate();
+    }
     for (SizeType i=0; i<_concurrency; ++i) {
         _input_buffer.push({input,_points.front()});
         _points.pop();

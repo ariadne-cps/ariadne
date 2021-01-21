@@ -200,9 +200,6 @@ _evolution(EnclosureListType& final_sets,
     ProgressIndicator initials_indicator(working_sets.size());
     ProgressIndicator time_indicator(maximum_time.get_d());
 
-    // Activate the runner, determining the log level for the thread(s)
-    runner()->activate();
-
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();

@@ -62,8 +62,6 @@ class TaskInterface {
     //! \brief Set the appraisal space for the task
     virtual Void set_appraisal_space(TaskAppraisalSpace<R> const& space) = 0;
 
-    //! \brief Convert a configuration \a cfg with multiple values into a configuration with all single values according to the point \a p
-    virtual ConfigurationType singleton_configuration(ConfigurationType const& cfg, TaskSearchPoint const& p) const = 0;
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in

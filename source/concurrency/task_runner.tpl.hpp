@@ -175,7 +175,7 @@ ParameterSearchRunner<T>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = this->_task->singleton_configuration(this->configuration(),pkg.second);
+        auto cfg = make_singleton(this->configuration(),pkg.second);
         auto start = std::chrono::high_resolution_clock::now();
         try {
             auto result = this->_task->run_task(pkg.first,cfg);

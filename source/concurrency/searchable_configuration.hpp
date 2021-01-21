@@ -143,12 +143,13 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
   protected:
     ConfigurationPropertyBase(Bool const& is_specified) : _is_specified(is_specified) { }
     void set_specified() { _is_specified = true; }
+  protected:
+    virtual List<SharedPointer<T>> values() const = 0;
   public:
     Bool is_specified() const override { return _is_specified; };
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
     //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if a range
-    virtual List<SharedPointer<T>> values() const = 0;
     OutputStream& _write(OutputStream& os) const override {
         auto vals = values();
         if (vals.empty()) { os << "<unspecified>"; }
@@ -163,7 +164,7 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
     Bool _is_specified;
 };
 
-class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
+class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool> {
   public:
     BooleanConfigurationProperty() : ConfigurationPropertyBase(false), _is_single(false) { }
     BooleanConfigurationProperty(Bool const& value) : ConfigurationPropertyBase(true), _is_single(true), _value(value) { }
@@ -196,6 +197,7 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
     //! \brief Set to value
     void set(Bool const& value) override { set_specified(); _is_single = true; _value=value; }
 
+  protected:
     List<SharedPointer<Bool>> values() const override {
         List<SharedPointer<Bool>> result;
         if (is_specified()) {
@@ -210,7 +212,7 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
 };
 
 template<class T>
-class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
+class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
     RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
@@ -264,6 +266,7 @@ class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
     //! \details An unbounded single value is accepted
     void set(T const& value) override { this->set_specified(); _lower = value; _upper = value; }
 
+  protected:
     List<SharedPointer<T>> values() const override {
         List<SharedPointer<T>> result;
         if (this->is_specified()) {
@@ -273,7 +276,7 @@ class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
         return result;
     }
 
-private:
+  private:
     T _lower;
     T _upper;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
@@ -281,7 +284,7 @@ private:
 
 //! \brief A property that specifies values from an enum \a T
 template<class T>
-class EnumConfigurationProperty : public ConfigurationPropertyBase<T> {
+class EnumConfigurationProperty final : public ConfigurationPropertyBase<T> {
 public:
     EnumConfigurationProperty() : ConfigurationPropertyBase<T>(false) { ARIADNE_PRECONDITION(std::is_enum<T>::value); }
     EnumConfigurationProperty(Set<T> const& values) : ConfigurationPropertyBase<T>(true), _values(values) {
@@ -322,21 +325,22 @@ public:
     void set(T const& value) override { this->set_specified(); _values.clear(); _values.insert(value); }
     void set(Set<T> const& values) { ARIADNE_PRECONDITION(not values.empty()); this->set_specified(); _values = values; }
 
+  protected:
     List<SharedPointer<T>> values() const override {
         List<SharedPointer<T>> result;
         for (auto v : _values) {
             result.push_back(SharedPointer<T>(new T(v)));
         }
         return result; }
-private:
+  private:
     Set<T> _values;
 };
 
 //! \brief A property that specifies a list of objects
 //! \details Typically \a T is an interface, must distinct T values are also accepted. T must define the clone() method to support interfaces.
 template<class T>
-class ListConfigurationProperty : public ConfigurationPropertyBase<T> {
-public:
+class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
+  public:
     ListConfigurationProperty() : ConfigurationPropertyBase<T>(false) { }
     ListConfigurationProperty(List<SharedPointer<T>> const& list) : ConfigurationPropertyBase<T>(true), _values(list) {
         ARIADNE_PRECONDITION(list.size()>0);
@@ -371,9 +375,9 @@ public:
     void set(T const& value) override { this->set_specified(); _values.clear(); _values.push_back(SharedPointer<T>(value.clone())); }
     void set(SharedPointer<T> const& value) { ARIADNE_PRECONDITION(value != nullptr); this->set_specified(); _values.clear(); _values.push_back(value); }
     void set(List<SharedPointer<T>> const& values) { ARIADNE_PRECONDITION(values.size()>0); this->set_specified(); _values = values; }
-
+  protected:
     List<SharedPointer<T>> values() const override { return _values; }
-private:
+  private:
     List<SharedPointer<T>> _values;
 };
 

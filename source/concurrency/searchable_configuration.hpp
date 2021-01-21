@@ -266,17 +266,16 @@ class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
 };
 
-//! \brief A property that specifies values from an enum \a T
+//! \brief A property that specifies a set of distinct values from class \a T
+//! \details This can be used either for an enum or for distinct objects of a class
 template<class T>
-class EnumConfigurationProperty final : public ConfigurationPropertyBase<T> {
+class SetConfigurationProperty final : public ConfigurationPropertyBase<T> {
 public:
-    EnumConfigurationProperty() : ConfigurationPropertyBase<T>(false) { ARIADNE_PRECONDITION(std::is_enum<T>::value); }
-    EnumConfigurationProperty(Set<T> const& values) : ConfigurationPropertyBase<T>(true), _values(values) {
-        ARIADNE_PRECONDITION(std::is_enum<T>::value);
+    SetConfigurationProperty() : ConfigurationPropertyBase<T>(false) { }
+    SetConfigurationProperty(Set<T> const& values) : ConfigurationPropertyBase<T>(true), _values(values) {
         ARIADNE_PRECONDITION(values.size()>0);
     }
-    EnumConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) {
-        ARIADNE_PRECONDITION(std::is_enum<T>::value);
+    SetConfigurationProperty(T const& value) : ConfigurationPropertyBase<T>(true) {
         _values.insert(value); }
 
     Bool is_single() const override { return (_values.size() == 1); }
@@ -298,7 +297,7 @@ public:
         _values.insert(value);
     };
 
-    ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); }
+    ConfigurationPropertyInterface* clone() const override { return new SetConfigurationProperty(*this); }
 
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
@@ -320,8 +319,8 @@ public:
     Set<T> _values;
 };
 
-//! \brief A property that specifies a list of objects
-//! \details Typically \a T is an interface, must distinct T values are also accepted. T must define the clone() method to support interfaces.
+//! \brief A property that specifies a list of objects deriving from an interface \a T
+//! \details T must define the clone() method to support interfaces.
 template<class T>
 class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
@@ -393,17 +392,23 @@ class SearchableConfiguration : public ConfigurationInterface {
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
 template<class C> class Configuration : public SearchableConfiguration { };
 
+class ConfigurableInterface {
+  public:
+    virtual SearchableConfiguration const& searchable_configuration() const = 0;
+};
+
 //! \brief Is-a component that provides a configuration
 //! \details Since the configuration returned is const, a Configurable object should be constructed from
 //! a pre-set configuration. If the configuration must specify certain properties or if some properties
 //! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
 //! approach should be used for creation of the configuration, which should become an immutable object.
 template<class C>
-class Configurable {
+class Configurable : public ConfigurableInterface {
     friend class Configuration<C>;
 public:
     Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
     Configuration<C> const& configuration() const { return *_configuration; }
+    SearchableConfiguration const& searchable_configuration() const override { return dynamic_cast<SearchableConfiguration const&>(*_configuration); }
 private:
     SharedPointer<Configuration<C>> _configuration;
 };

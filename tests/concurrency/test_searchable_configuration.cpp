@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& os, const LevelOptions level) {
 
 using RealConfigurationProperty = RangeConfigurationProperty<Real>;
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
-using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
+using LevelOptionsConfigurationProperty = SetConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
 using Log10Converter = Log10SearchSpaceConverter<Real>;
 using Log2Converter = Log2SearchSpaceConverter<Real>;
@@ -215,7 +215,7 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(p.set_single(0));
     }
 
-    void test_enum_configuration_property_construction() {
+    void test_set_configuration_property_construction() {
         LevelOptionsConfigurationProperty p1;
         ARIADNE_TEST_PRINT(p1);
         ARIADNE_TEST_ASSERT(not p1.is_metric());
@@ -234,7 +234,7 @@ class TestConfiguration {
         ARIADNE_TEST_EQUALS(p3.cardinality(),2);
     }
 
-    void test_enum_configuration_property_modification() {
+    void test_set_configuration_property_modification() {
         LevelOptionsConfigurationProperty p;
         ARIADNE_TEST_EQUALS(p.cardinality(),0);
         p.set(LevelOptions::MEDIUM);
@@ -248,7 +248,7 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(p.set(Set<LevelOptions>()));
     }
 
-    void test_enum_configuration_property_set_single() {
+    void test_set_configuration_property_set_single() {
         LevelOptionsConfigurationProperty p({LevelOptions::MEDIUM,LevelOptions::HIGH});
         p.set_single(0);
         ARIADNE_TEST_ASSERT(p.is_single());
@@ -384,15 +384,16 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_range_configuration_property_construction());
         ARIADNE_TEST_CALL(test_range_configuration_property_modification());
         ARIADNE_TEST_CALL(test_range_configuration_property_set_single());
-        ARIADNE_TEST_CALL(test_enum_configuration_property_construction());
-        ARIADNE_TEST_CALL(test_enum_configuration_property_modification());
-        ARIADNE_TEST_CALL(test_enum_configuration_property_set_single());
+        ARIADNE_TEST_CALL(test_set_configuration_property_construction());
+        ARIADNE_TEST_CALL(test_set_configuration_property_modification());
+        ARIADNE_TEST_CALL(test_set_configuration_property_set_single());
         ARIADNE_TEST_CALL(test_list_configuration_property_construction());
         ARIADNE_TEST_CALL(test_list_configuration_property_modification());
         ARIADNE_TEST_CALL(test_list_configuration_property_set_single());
         ARIADNE_TEST_CALL(test_configuration_construction());
         ARIADNE_TEST_CALL(test_configuration_search_space_generation());
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
+        //ARIADNE_TEST_CALL(test_configuration_hierarchic());
     }
 };
 

@@ -279,22 +279,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG_PRINTLN("box = "<<current_set.bounding_box());
     ARIADNE_LOG_PRINTLN("radius = "<<current_set.euclidean_set().bounding_box().radius());
 
-    // Test to see if set requires reconditioning
-    if(configuration().enable_reconditioning() &&
-       possibly(norm(current_set.state_function().errors()) > configuration().maximum_spacial_error())) {
-        ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set.state_function().errors());
-        current_set.recondition();
-    }
-
     /////////////// Main Evolution ////////////////////////////////
 
-    // Get bounding boxes for time and space bounding_box
-    auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
-    ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
-
     // Push inputs
-    runner()->push(TaskInput<VectorFieldEvolver>(system().dynamic_function(), current_set, current_set_bounds,
-                                        current_time, previous_step_size));
+    runner()->push(TaskInput<VectorFieldEvolver>(system().dynamic_function(), current_set, current_time, previous_step_size));
     // Pull outputs
     auto out = runner()->pull();
     // Save outputs

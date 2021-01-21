@@ -191,12 +191,10 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
 
 template<> struct TaskInput<VectorFieldEvolver> {
     TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
-                          FloatDPExactBox const& current_set_bounds_, Dyadic const& current_time_, Dyadic const& previous_step_size_) :
-            dynamic(dynamic_), current_set(current_set_), current_set_bounds(current_set_bounds_),
-            current_time(current_time_), previous_step_size(previous_step_size_) { }
+              Dyadic const& current_time_, Dyadic const& previous_step_size_) :
+            dynamic(dynamic_), current_set(current_set_), current_time(current_time_), previous_step_size(previous_step_size_) { }
     EffectiveVectorMultivariateFunction const& dynamic;
     LabelledEnclosure const& current_set;
-    FloatDPExactBox const& current_set_bounds;
     Dyadic const& current_time;
     Dyadic const& previous_step_size;
 };
@@ -226,27 +224,22 @@ public:
                                                        [](I const& i){ return i.current_set_bounds.dimension(); }))*/
                     .build()) { }
 
-    C singleton_configuration(C const& cfg, TaskSearchPoint const& p) const override {
-        auto result = cfg;
-        TaylorPicardIntegrator const& old_integrator = static_cast<TaylorPicardIntegrator const&>(cfg.integrator());
-        result.set_integrator(TaylorPicardIntegrator(
-                MaximumError(old_integrator.maximum_error()),
-                ThresholdSweeper<FloatDP>(DoublePrecision(), 1e-9/*"sweep_threshold"*/),
-                LipschitzConstant(old_integrator.lipschitz_tolerance()),
-                StartingStepSizeNumRefinements( 2/*"starting_step_size_num_refinements"*/),
-                StepMaximumError(old_integrator.step_maximum_error()),
-                MinimumTemporalOrder(old_integrator.minimum_temporal_order()),
-                MaximumTemporalOrder(12/*"maximum_temporal_order"*/)
-        ));
-        return result;
-    }
-
     O run_task(I const& in, C const& cfg) const override {
         LabelledEnclosure next_set = in.current_set;
         LabelledEnclosure reach_set = in.current_set;
         Dyadic next_time = in.current_time;
         Dyadic chosen_step_size = cfg.maximum_step_size();
-        FlowStepModelType flow_model = cfg.integrator().flow_step(in.dynamic, in.current_set_bounds, in.previous_step_size,chosen_step_size);
+
+        if(cfg.enable_reconditioning() && possibly(norm(next_set.state_function().errors()) > cfg.maximum_spacial_error())) {
+            ARIADNE_LOG_PRINTLN_AT(1,"reconditioning from errors "<<next_set.state_function().errors());
+            next_set.recondition();
+        }
+
+        auto set_bounds=cast_exact_box(next_set.euclidean_set().bounding_box());
+        ARIADNE_LOG_PRINTLN_VAR_AT(1, set_bounds);
+
+        FlowStepModelType flow_model = cfg.integrator().flow_step(in.dynamic, set_bounds, in.previous_step_size,chosen_step_size);
+
         ARIADNE_LOG_PRINTLN_VAR_AT(1, chosen_step_size);
         ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
         next_time += chosen_step_size;

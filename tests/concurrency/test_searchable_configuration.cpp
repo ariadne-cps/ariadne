@@ -62,7 +62,7 @@ template<> class Configuration<A> : public SearchableConfiguration {
     }
 
     Bool const& use_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_reconditioning")).get(); }
-    void set_use_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(); }
+    void set_both_use_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set_both(); }
     void set_use_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(value); }
 
     Real const& maximum_step_size() const { return dynamic_cast<RealConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
@@ -137,7 +137,7 @@ class TestConfiguration {
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_EQUALS(p.get(),true);
         ARIADNE_TEST_EQUALS(p.cardinality(),1);
-        p.set();
+        p.set_both();
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
@@ -147,16 +147,16 @@ class TestConfiguration {
 
     void test_boolean_configuration_property_set_single() {
         BooleanConfigurationProperty p;
-        p.set();
+        p.set_both();
         p.set_single(0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),false);
-        p.set();
+        p.set_both();
         p.set_single(1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),true);
         ARIADNE_TEST_FAIL(p.set_single(0));
-        p.set();
+        p.set_both();
         ARIADNE_TEST_FAIL(p.set_single(2));
         ARIADNE_TEST_FAIL(p.set_single(-1));
     }
@@ -334,14 +334,14 @@ class TestConfiguration {
     void test_configuration_search_space_generation() {
         Configuration<A> a;
         ARIADNE_TEST_FAIL(a.search_space());
-        a.set_use_reconditioning();
+        a.set_both_use_reconditioning();
         auto search_space = a.search_space();
         ARIADNE_TEST_EQUALS(search_space.dimension(),1);
     }
 
     void test_configuration_make_singleton() {
         Configuration<A> a;
-        a.set_use_reconditioning();
+        a.set_both_use_reconditioning();
         auto search_space = a.search_space();
         ARIADNE_TEST_PRINT(search_space);
         auto point = search_space.initial_point();
@@ -371,7 +371,7 @@ class TestConfiguration {
         a.set_use_reconditioning(false);
         TaskSearchSpace search_space4({p1,p2});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space4.initial_point()));
-        a.set_use_reconditioning();
+        a.set_both_use_reconditioning();
         TaskSearchSpace search_space5({p1});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space5.initial_point()))
     }

@@ -163,8 +163,8 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
 
     //! \brief Enable reconditioning of basic sets
     Bool const& enable_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_reconditioning")).get(); }
-    void set_enable_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(); }
     void set_enable_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(value); }
+    void set_both_enable_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set_both(); }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
@@ -181,7 +181,6 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType const& maximum_enclosure_radius() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_enclosure_radius")).get(); }
     void set_maximum_enclosure_radius(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_enclosure_radius")).set(cast_exact(value)); }
-    void set_maximum_enclosure_radius(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_enclosure_radius")).set(cast_exact(lower),cast_exact(upper)); }
 
     //! \brief The integrator to be used.
     IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorProperty const&>(*properties().get("integrator")).get(); }

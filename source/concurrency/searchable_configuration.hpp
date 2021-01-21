@@ -177,7 +177,7 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     ConfigurationPropertyInterface* clone() const override { return new BooleanConfigurationProperty(*this); };
 
     //! \brief Set to both true and false
-    void set() { set_specified(); _is_single = false; }
+    void set_both() { set_specified(); _is_single = false; }
     //! \brief Set to value
     void set(Bool const& value) override { set_specified(); _is_single = true; _value=value; }
 

@@ -53,14 +53,14 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
             ParameterBindingsMap shifted_bindings;
             Bool shifted = false;
             for (auto binding : current_point.bindings()) {
-                auto const& param = binding.first;
+                auto const& param = parameter(binding.first);
                 int value = binding.second;
                 current_breadth += breadths.at(space.index(param));
                 if (not shifted and current_breadth > offset) {
-                    value = param.shifted_value_from(binding.second);
+                    value = param.shifted_value_from(value);
                     shifted = true;
                 }
-                shifted_bindings.insert(std::pair<TaskSearchParameter,Nat>(param, value));
+                shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
             }
             result.insert(space.make_point(shifted_bindings));
 
@@ -92,20 +92,44 @@ Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
             ParameterBindingsMap shifted_bindings;
             Bool shifted = false;
             for (auto binding : _bindings) {
-                auto const& param = binding.first;
+                auto const& param = parameter(binding.first);
                 int value = binding.second;
                 current_breadth += breadths.at(space.index(param));
                 if (not shifted and current_breadth > offset) {
-                    value = param.shifted_value_from(binding.second);
+                    value = param.shifted_value_from(value);
                     shifted = true;
                 }
-                shifted_bindings.insert(std::pair<TaskSearchParameter,int>(param, value));
+                shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
             }
             result.insert(space.make_point(shifted_bindings));
         } while (result.size() < num_points);
         ++num_points;
     }
     return result;
+}
+
+TaskSearchSpace const& TaskSearchPoint::space() const {
+    return *_space;
+}
+
+List<int> TaskSearchPoint::coordinates() const {
+    return _bindings.values();
+}
+
+ParameterBindingsMap const& TaskSearchPoint::bindings() const {
+    return _bindings;
+}
+
+int TaskSearchPoint::value(Identifier const& name) const {
+    return _bindings.at(name);
+}
+
+SizeType TaskSearchPoint::index(Identifier const& name) const {
+    return _space->index(name);
+}
+
+TaskSearchParameter const& TaskSearchPoint::parameter(Identifier const& name) const {
+    return _space->parameter(name);
 }
 
 TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
@@ -125,9 +149,9 @@ Bool TaskSearchPoint::operator==(TaskSearchPoint const& p) const {
 }
 
 Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
-    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
-        auto const this_value = iter->second;
-        auto const other_value = p._bindings.at(iter->first);
+    for (auto b : _bindings) {
+        auto const this_value = b.second;
+        auto const other_value = p._bindings.at(b.first);
         if (this_value < other_value) return true;
         else if (this_value > other_value) return false;
     }
@@ -136,25 +160,27 @@ Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
 
 Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
     Nat result = 0;
-    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
-        auto const v1 = iter->second;
-        auto const v2 = p._bindings.at(iter->first);
-        if (iter->first.is_metric()) result += (v1 > v2 ? (Nat)(v1 - v2) : (Nat)(v2 - v1));
+    for (auto b : _bindings) {
+        auto const& param = parameter(b.first);
+        auto const v1 = b.second;
+        auto const v2 = p._bindings.at(param.name());
+        if (param.is_metric()) result += (v1 > v2 ? (Nat)(v1 - v2) : (Nat)(v2 - v1));
         else result += (v1 == v2 ? 0 : 1);
     }
     return result;
 }
 
 OutputStream& TaskSearchPoint::_write(OutputStream& os) const {
-    return os << _bindings.values();
+    return os << _bindings.keys() << ":" << _bindings.values();
 }
 
 List<Nat> TaskSearchPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
         for (auto b : _bindings) {
-            auto const& values = b.first.values();
+            auto const& param = parameter(b.first);
+            auto const& values = param.values();
             auto size = values.size();
-            if (not b.first.is_metric()) _CACHED_SHIFT_BREADTHS.append(size-1); // all except the current
+            if (not param.is_metric()) _CACHED_SHIFT_BREADTHS.append(size-1); // all except the current
             else if (b.second == values[size-1]) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
             else if (b.second == values[0]) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down

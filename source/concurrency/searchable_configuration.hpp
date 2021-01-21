@@ -39,28 +39,12 @@
 #include "numeric/builtin.hpp"
 #include "numeric/real.hpp"
 #include "solvers/configuration.hpp"
+#include "concurrency/task_search_point.hpp"
+#include "concurrency/task_search_space.hpp"
 
 namespace Ariadne {
 
 class TaskSearchSpace;
-
-//! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
-template<class C> class Configuration;
-
-//! \brief Is-a component that provides a configuration
-//! \details Since the configuration returned is const, a Configurable object should be constructed from
-//! a pre-set configuration. If the configuration must specify certain properties or if some properties
-//! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
-//! approach should be used for creation of the configuration, which should become an immutable object.
-template<class C>
-class Configurable {
-    friend class Configuration<C>;
-  public:
-    Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
-    Configuration<C> const& configuration() const { return *_configuration; }
-  private:
-    SharedPointer<Configuration<C>> _configuration;
-};
 
 //! \brief Interface for conversion from/into the integer search space
 template<class T>
@@ -395,9 +379,9 @@ class SearchableConfiguration : public ConfigurationInterface {
     //! \brief If the configuration is made of single values
     Bool is_singleton() const;
 
-  protected:
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties();
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
+
     //! \brief Add a property to the configuration
     void add_property(Identifier const& name, ConfigurationPropertyInterface const& property);
 
@@ -405,6 +389,37 @@ class SearchableConfiguration : public ConfigurationInterface {
   private:
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> _properties;
 };
+
+//! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
+template<class C> class Configuration : public SearchableConfiguration { };
+
+//! \brief Is-a component that provides a configuration
+//! \details Since the configuration returned is const, a Configurable object should be constructed from
+//! a pre-set configuration. If the configuration must specify certain properties or if some properties
+//! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
+//! approach should be used for creation of the configuration, which should become an immutable object.
+template<class C>
+class Configurable {
+    friend class Configuration<C>;
+public:
+    Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
+    Configuration<C> const& configuration() const { return *_configuration; }
+private:
+    SharedPointer<Configuration<C>> _configuration;
+};
+
+//! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
+template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, TaskSearchPoint const& p) {
+    auto result = cfg;
+    for (auto param : p.space().parameters()) {
+        auto prop_ptr = result.properties().find(param.name());
+        ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The TaskSearchPoint parameter '" << param.name() << "' is not in the configuration.");
+        ARIADNE_ASSERT_MSG(not prop_ptr->second->is_single(), "The ConfigurationProperty '" << prop_ptr->first << "' is already single thus cannot be made single.");
+        prop_ptr->second->set_single(p.value(prop_ptr->first));
+    }
+    ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, configuration could not be made singleton.");
+    return result;
+}
 
 } // namespace Ariadne
 

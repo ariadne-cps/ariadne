@@ -23,6 +23,7 @@
  */
 
 #include "concurrency/searchable_configuration.hpp"
+#include "concurrency/task_search_space.hpp"
 #include "solvers/integrator.hpp"
 #include "numeric/decimal.hpp"
 #include "../test.hpp"
@@ -326,11 +327,53 @@ class TestConfiguration {
         ARIADNE_TEST_PRINT(a);
         a.set_use_reconditioning(true);
         ARIADNE_TEST_ASSERT(a.use_reconditioning());
+        a.set_use_reconditioning(false);
+        ARIADNE_TEST_ASSERT(not a.use_reconditioning());
     }
 
     void test_configuration_search_space_generation() {
         Configuration<A> a;
+        ARIADNE_TEST_FAIL(a.search_space());
         a.set_use_reconditioning();
+        auto search_space = a.search_space();
+        ARIADNE_TEST_EQUALS(search_space.dimension(),1);
+    }
+
+    void test_configuration_make_singleton() {
+        Configuration<A> a;
+        a.set_use_reconditioning();
+        auto search_space = a.search_space();
+        ARIADNE_TEST_PRINT(search_space);
+        auto point = search_space.initial_point();
+        ARIADNE_TEST_PRINT(point);
+        Bool use_reconditioning = (point.coordinates()[0] == 1 ? true : false);
+        ARIADNE_TEST_PRINT(use_reconditioning);
+        auto b = make_singleton(a,point);
+        ARIADNE_TEST_ASSERT(not a.is_singleton());
+        ARIADNE_TEST_ASSERT(b.is_singleton());
+        ARIADNE_TEST_EQUALS(b.use_reconditioning(),use_reconditioning);
+
+        a.set_maximum_step_size(1e-3_dec,1e-1_dec);
+        auto search_space2 = a.search_space();
+        ARIADNE_TEST_PRINT(search_space2);
+        point = search_space2.initial_point();
+        ARIADNE_TEST_PRINT(point);
+        b = make_singleton(a,point);
+        ARIADNE_TEST_ASSERT(not a.is_singleton());
+        ARIADNE_TEST_ASSERT(b.is_singleton());
+        ARIADNE_TEST_PRINT(b);
+
+        TaskSearchParameter p1("use_reconditioning",false,List<int>({0,1}));
+        TaskSearchParameter p2("maximum_step_size",true,List<int>({-3,-1}));
+        TaskSearchParameter p3("sweep_threshold",true,List<int>({-10,-8}));
+        TaskSearchSpace search_space3({p1,p2,p3});
+        ARIADNE_TEST_FAIL(make_singleton(a,search_space3.initial_point()));
+        a.set_use_reconditioning(false);
+        TaskSearchSpace search_space4({p1,p2});
+        ARIADNE_TEST_FAIL(make_singleton(a,search_space4.initial_point()));
+        a.set_use_reconditioning();
+        TaskSearchSpace search_space5({p1});
+        ARIADNE_TEST_FAIL(make_singleton(a,search_space5.initial_point()))
     }
 
     void test() {
@@ -349,6 +392,7 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_list_configuration_property_set_single());
         ARIADNE_TEST_CALL(test_configuration_construction());
         ARIADNE_TEST_CALL(test_configuration_search_space_generation());
+        ARIADNE_TEST_CALL(test_configuration_make_singleton());
     }
 };
 

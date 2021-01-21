@@ -27,7 +27,9 @@
 namespace Ariadne {
 
 TaskSearchParameter::TaskSearchParameter(Identifier const& name, Bool is_metric, List<int> const& values) :
-    _name(name), _is_metric(is_metric), _values(values) { }
+    _name(name), _is_metric(is_metric), _values(values) {
+    ARIADNE_PRECONDITION(values.size()>1);
+}
 
 Identifier const& TaskSearchParameter::name() const {
     return _name;

@@ -35,15 +35,10 @@ TaskSearchSpace::TaskSearchSpace(Set<TaskSearchParameter> const& parameters)
 
 TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
-    return TaskSearchPoint(*this, bindings);
-}
-
-TaskSearchPoint TaskSearchSpace::make_point(Map<Identifier,int> const& bindings) const {
-    ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
         int v = bindings.find(p.name())->second;
-        pb.insert(Pair<TaskSearchParameter,int>(p, v));
+        pb.insert(Pair<Identifier,int>(p.name(), v));
     }
     return TaskSearchPoint(*this, pb);
 }
@@ -51,7 +46,7 @@ TaskSearchPoint TaskSearchSpace::make_point(Map<Identifier,int> const& bindings)
 TaskSearchPoint TaskSearchSpace::initial_point() const {
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        pb.insert(Pair<TaskSearchParameter,Nat>(p, p.random_value()));
+        pb.insert(Pair<Identifier,int>(p.name(), p.random_value()));
     }
     return TaskSearchPoint(*this, pb);
 }
@@ -59,6 +54,16 @@ TaskSearchPoint TaskSearchSpace::initial_point() const {
 SizeType TaskSearchSpace::index(TaskSearchParameter const& p) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i) == p) return i;
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");
+}
+
+SizeType TaskSearchSpace::index(Identifier const& name) const {
+    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).name() == name) return i;
+    ARIADNE_FAIL_MSG("Task parameter named '" << name << "' not found in the space.");
+}
+
+TaskSearchParameter const& TaskSearchSpace::parameter(Identifier const& name) const {
+    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).name() == name) return _parameters.at(i);
+    ARIADNE_FAIL_MSG("Task parameter named '" << name << "' not found in the space.");
 }
 
 List<TaskSearchParameter> const& TaskSearchSpace::parameters() const {

@@ -34,7 +34,7 @@
 namespace Ariadne {
 
 class TaskSearchSpace;
-using ParameterBindingsMap = Map<TaskSearchParameter,int>;
+using ParameterBindingsMap = Map<Identifier,int>;
 
 class TaskSearchPoint : public WritableInterface {
     friend class TaskSearchSpace;
@@ -45,10 +45,10 @@ class TaskSearchPoint : public WritableInterface {
     ~TaskSearchPoint() = default;
 
     //! \brief The parameter space
-    TaskSearchSpace const& space() const { return *_space; }
+    TaskSearchSpace const& space() const;
 
     //! \brief The coordinates in the natural space, according to the space ordering
-    List<int> coordinates() const { return _bindings.values(); }
+    List<int> coordinates() const;
 
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
@@ -58,8 +58,14 @@ class TaskSearchPoint : public WritableInterface {
     //! \details Guarantees that all points are different
     Set<TaskSearchPoint> make_random_shifted(Nat amount) const;
 
-    ParameterBindingsMap const& bindings() const { return _bindings; }
-    int const& operator[](TaskSearchParameter const& p) const { return _bindings.at(p); }
+    ParameterBindingsMap const& bindings() const;
+
+    //! \brief The value of the point for the given parameter identifier \a name
+    int value(Identifier const& name) const;
+    //! \brief The index in the space for the parameter identifier \a name
+    SizeType index(Identifier const& name) const;
+    //! \brief The parameter corresponding to the identifier \a name
+    TaskSearchParameter const& parameter(Identifier const& name) const;
 
     TaskSearchPoint& operator=(TaskSearchPoint const& p);
     //! \brief Equality check is performed under the assumption that we always work with the same parameters,

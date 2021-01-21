@@ -38,13 +38,12 @@ class TaskSearchPoint;
 class Real;
 template<class R> class Variable;
 
-using ParameterBindingsMap = Map<TaskSearchParameter,int>;
+using ParameterBindingsMap = Map<Identifier,int>;
 
 class TaskSearchSpace : public WritableInterface {
   public:
     TaskSearchSpace(Set<TaskSearchParameter> const& parameters);
 
-    TaskSearchPoint make_point(Map<Identifier,int> const& bindings) const;
     TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
     TaskSearchPoint initial_point() const;
 
@@ -56,6 +55,10 @@ class TaskSearchSpace : public WritableInterface {
     SizeType dimension() const;
     //! \brief The index of the given parameter in the ordered space
     SizeType index(TaskSearchParameter const& p) const;
+    //! \brief The index of the given parameter identifier in the ordered space
+    SizeType index(Identifier const& name) const;
+    //! \brief The parameter corresponding to the identifier \a name
+    TaskSearchParameter const& parameter(Identifier const& name) const;
 
     TaskSearchSpace* clone() const;
 

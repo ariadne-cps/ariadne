@@ -58,8 +58,6 @@ class TaskRunnerInterface {
 
     //! \brief Return the configuration
     virtual ConfigurationType const& configuration() const = 0;
-    //! \brief Return the cached search space (derived from the configuration)
-    virtual TaskSearchSpace const& search_space() const = 0;
 
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;

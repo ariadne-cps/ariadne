@@ -40,18 +40,16 @@ class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
 
-    TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration), _search_space(configuration.search_space().clone()) { }
+    TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
 
     TaskType& task() override { return *_task; };
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
-    TaskSearchSpace const& search_space() const override { return *_search_space; }
 
     virtual ~TaskRunnerBase() = default;
   protected:
     SharedPointer<TaskType> const _task;
     ConfigurationType const _configuration;
-    SharedPointer<TaskSearchSpace> const _search_space;
 };
 
 template<class C>
@@ -73,7 +71,7 @@ template<class C>
 Void
 SequentialRunner<C>::push(InputType const& input)
 {
-    _last_output.reset(new OutputType(this->_task->run_task(input,this->_task->singleton_configuration(this->configuration(),this->search_space().initial_point()))));
+    _last_output.reset(new OutputType(this->_task->run_task(input,this->configuration())));
 }
 
 template<class C>
@@ -91,7 +89,7 @@ DetachedRunner<R>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(this->_task->run_task(pkg.first,this->_task->singleton_configuration(this->configuration(),pkg.second)));
+        _output_buffer.push(this->_task->run_task(pkg,this->configuration()));
         _output_availability.notify_all();
     }
 }
@@ -111,21 +109,18 @@ DetachedRunner<T>::~DetachedRunner() {
 
 template<class T>
 Void
-DetachedRunner<T>::activate()
-{
+DetachedRunner<T>::activate() {
     _thread.activate();
 }
 
 template<class T>
 Void
-DetachedRunner<T>::dump_statistics() {
-}
+DetachedRunner<T>::dump_statistics() { }
 
 template<class T>
 Void
-DetachedRunner<T>::push(InputType const& input)
-{
-    _input_buffer.push({input,this->search_space().initial_point()});
+DetachedRunner<T>::push(InputType const& input) {
+    _input_buffer.push(input);
     _input_availability.notify_all();
 }
 
@@ -192,7 +187,7 @@ ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configu
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
 
-    auto initial = this->search_space().initial_point();
+    auto initial = configuration.search_space().initial_point();
     _points.push(initial);
     if (_concurrency>1) {
         auto shifted = initial.make_random_shifted(_concurrency-1);

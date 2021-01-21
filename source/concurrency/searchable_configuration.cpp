@@ -61,7 +61,10 @@ OutputStream& SearchableConfiguration::_write(OutputStream& os) const {
 
 TaskSearchSpace SearchableConfiguration::search_space() const {
     Set<TaskSearchParameter> result;
-    for (auto p : _properties) result.insert(TaskSearchParameter(p.first,p.second->is_metric(),p.second->integer_values()));
+    for (auto p : _properties) {
+        if (not p.second->is_single())
+            result.insert(TaskSearchParameter(p.first,p.second->is_metric(),p.second->integer_values()));
+    }
     return result;
 }
 

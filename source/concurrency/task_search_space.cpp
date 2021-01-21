@@ -75,6 +75,10 @@ SizeType TaskSearchSpace::dimension() const {
     return _parameters.size();
 }
 
+Bool TaskSearchSpace::is_empty() const {
+    return dimension() == 0;
+}
+
 TaskSearchSpace* TaskSearchSpace::clone() const {
     return new TaskSearchSpace(*this);
 }

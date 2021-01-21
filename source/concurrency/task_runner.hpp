@@ -67,7 +67,7 @@ class DetachedRunner final : public TaskRunnerBase<R> {
     typedef typename TaskRunnerBase<R>::InputType InputType;
     typedef typename TaskRunnerBase<R>::OutputType OutputType;
     typedef typename TaskRunnerBase<R>::ConfigurationType ConfigurationType;
-    typedef Buffer<Pair<InputType,TaskSearchPoint>> InputBufferType;
+    typedef Buffer<InputType> InputBufferType;
     typedef Buffer<OutputType> OutputBufferType;
   protected:
     DetachedRunner(ConfigurationType const& configuration);

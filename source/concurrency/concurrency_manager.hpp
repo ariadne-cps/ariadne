@@ -52,7 +52,7 @@ class ConcurrencyManager {
 
     template<class T> void set_runner(TaskRunnable<T>& runnable) const {
         SharedPointer<TaskRunnerInterface<T>> runner;
-        if (_concurrency > 1 and runnable.configuration().search_space().total_points() > 1)
+        if (_concurrency > 1 and not runnable.configuration().search_space().is_empty())
             runner.reset(new ParameterSearchRunner<T>(runnable.configuration(),_concurrency));
         else
             runner.reset(new SequentialRunner<T>(runnable.configuration()));

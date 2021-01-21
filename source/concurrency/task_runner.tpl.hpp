@@ -32,6 +32,22 @@
 
 namespace Ariadne {
 
+template<class R> TaskRunnable<R>::TaskRunnable(ConfigurationType const& configuration) : Configurable<R>(configuration) {
+    ConcurrencyManager::instance().set_runner(*this);
+}
+
+template<class R> void TaskRunnable<R>::set_runner(SharedPointer<TaskRunnerInterface<R>> runner) {
+    this->_runner = runner;
+}
+
+template<class R> SharedPointer<TaskRunnerInterface<R>>& TaskRunnable<R>::runner() {
+    return _runner;
+}
+
+template<class R> SharedPointer<TaskRunnerInterface<R>> const& TaskRunnable<R>::runner() const {
+    return _runner;
+}
+
 template<class C>
 class TaskRunnerBase : public TaskRunnerInterface<C> {
   public:
@@ -57,20 +73,17 @@ SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : 
 
 template<class C>
 Void
-SequentialRunner<C>::activate()
-{
+SequentialRunner<C>::activate() {
     ARIADNE_LOG_SCOPE_CREATE;
 }
 
 template<class C>
 Void
-SequentialRunner<C>::dump_statistics()
-{ }
+SequentialRunner<C>::dump_statistics() { }
 
 template<class C>
 Void
-SequentialRunner<C>::push(InputType const& input)
-{
+SequentialRunner<C>::push(InputType const& input) {
     _last_output.reset(new OutputType(this->_task->run_task(input,this->configuration())));
 }
 

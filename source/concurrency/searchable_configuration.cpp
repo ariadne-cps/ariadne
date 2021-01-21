@@ -59,7 +59,13 @@ OutputStream& SearchableConfiguration::_write(OutputStream& os) const {
     os << "  " << iter->first << " = " << *iter->second << ")"; return os;
 }
 
+Bool SearchableConfiguration::is_singleton() const {
+    for (auto p : _properties) if (not p.second->is_single()) return false;
+    return true;
+}
+
 TaskSearchSpace SearchableConfiguration::search_space() const {
+    ARIADNE_PRECONDITION(not is_singleton());
     Set<TaskSearchParameter> result;
     for (auto p : _properties) {
         if (not p.second->is_single())

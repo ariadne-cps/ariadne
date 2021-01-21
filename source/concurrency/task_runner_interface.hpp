@@ -74,12 +74,12 @@ class TaskRunnable : public Configurable<R> {
     friend class VerificationManager;
     typedef Configuration<R> ConfigurationType;
   protected:
-    TaskRunnable(ConfigurationType const& configuration) : Configurable<R>(configuration) { }
+    TaskRunnable(ConfigurationType const& configuration);
     //! \brief Set a new runner, useful to override the default runner
-    void set_runner(SharedPointer<TaskRunnerInterface<R>> runner) { this->_runner = runner; }
+    void set_runner(SharedPointer<TaskRunnerInterface<R>> runner);
     //! \brief Get the runner
-    SharedPointer<TaskRunnerInterface<R>>& runner() { return _runner; }
-    SharedPointer<TaskRunnerInterface<R>> const& runner() const { return _runner; }
+    SharedPointer<TaskRunnerInterface<R>>& runner();
+    SharedPointer<TaskRunnerInterface<R>> const& runner() const;
   private:
     SharedPointer<TaskRunnerInterface<R>> _runner;
 };

@@ -54,8 +54,6 @@ class TaskSearchSpace : public WritableInterface {
     SizeType total_points() const;
     //! \brief The number of parameters in the space
     SizeType dimension() const;
-    //! \brief If there are no parameters in the space
-    Bool is_empty() const;
     //! \brief The index of the given parameter in the ordered space
     SizeType index(TaskSearchParameter const& p) const;
 

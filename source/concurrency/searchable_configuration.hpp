@@ -392,6 +392,9 @@ class SearchableConfiguration : public ConfigurationInterface {
     //! \brief Construct a search space from the current configuration
     TaskSearchSpace search_space() const;
 
+    //! \brief If the configuration is made of single values
+    Bool is_singleton() const;
+
   protected:
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties();
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;

@@ -113,9 +113,7 @@ const Bool ENABLE_PREMATURE_TERMINATION = false;
 
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const ConfigurationType& configuration) :
     TaskRunnable(configuration), _sys_ptr(system.clone())
-{
-    ConcurrencyManager::instance().set_runner(*this);
-}
+{ }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));

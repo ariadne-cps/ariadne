@@ -112,23 +112,10 @@ class TestTaskSearchParameter {
         TaskSearchSpace space({bp, mp});
 
         TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
-        auto points = point1.make_adjacent_shifted(1);
-        auto point2 = *points.begin();
-        ARIADNE_TEST_EQUALS(points.size(),1);
         ARIADNE_TEST_PRINT(point1);
+        auto point2 = point1.make_adjacent_shifted();
         ARIADNE_TEST_PRINT(point2);
         ARIADNE_TEST_NOT_EQUAL(point1,point2);
-
-        ARIADNE_PRINT_TEST_COMMENT("Checking multiple shifted points");
-        points = point2.make_adjacent_shifted(2);
-        ARIADNE_TEST_EQUALS(points.size(),2);
-        for (auto point : points) {
-            ARIADNE_TEST_PRINT(point);
-            ARIADNE_TEST_NOT_EQUAL(point2,point);
-        }
-
-        ARIADNE_PRINT_TEST_COMMENT("Checking border point unable to produce more than 2 shifts");
-        ARIADNE_TEST_FAIL(point1.make_adjacent_shifted(3));
     }
 
     Void test_parameter_point_random_shift() {
@@ -136,12 +123,13 @@ class TestTaskSearchParameter {
         TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7}));
         TaskSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
-        auto points = point1.make_random_shifted(3);
+        TaskSearchPoint point = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
+        auto points = point.make_random_shifted(1);
+        ARIADNE_TEST_EQUALS(points.size(),1);
+        points = point.make_random_shifted(3);
         ARIADNE_TEST_EQUALS(points.size(),3);
-        for (auto point : points) {
-            ARIADNE_TEST_PRINT(point);
-        }
+        points = point.make_random_shifted(space.total_points());
+        ARIADNE_TEST_EQUALS(points.size(),space.total_points());
     }
 
     Void test_parameter_point_adjacent_set_shift() {

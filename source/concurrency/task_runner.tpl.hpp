@@ -199,14 +199,8 @@ ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configu
           _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
-
-    auto initial = configuration.search_space().initial_point();
-    _points.push(initial);
-    if (_concurrency>1) {
-        auto shifted = initial.make_random_shifted(_concurrency-1);
-        for (auto point : shifted)
-            _points.push(point);
-    }
+    auto shifted = configuration.search_space().initial_point().make_random_shifted(_concurrency);
+    for (auto point : shifted) _points.push(point);
 }
 
 template<class T>

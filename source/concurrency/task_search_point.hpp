@@ -50,12 +50,12 @@ class TaskSearchPoint : public WritableInterface {
     //! \brief The coordinates in the natural space, according to the space ordering
     List<int> coordinates() const;
 
-    //! \brief Generate an \a amount of new points by shifting one parameter each
-    //! \details Guarantees that all points are different and with distance equal to 1
-    Set<TaskSearchPoint> make_adjacent_shifted(Nat amount) const;
-    //! \brief Generate an \a amount of new points by shifting one parameter each from the current point,
+    //! \brief Generate a point adjacent to this one by shifting one parameter
+    TaskSearchPoint make_adjacent_shifted() const;
+    //! \brief Generate an \a amount of points by shifting one parameter each from the current point,
     //! then the next point to shift from is a random one from those already generated
-    //! \details Guarantees that all points are different
+    //! \details Guarantees that all points are different. Includes the original point.
+    //! If \a amount is 1, no new point is generated.
     Set<TaskSearchPoint> make_random_shifted(Nat amount) const;
 
     ParameterBindingsMap const& bindings() const;

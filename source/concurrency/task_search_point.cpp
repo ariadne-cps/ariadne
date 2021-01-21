@@ -41,71 +41,59 @@ TaskSearchPoint::TaskSearchPoint(TaskSearchPoint const& p) {
 Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
     Set<TaskSearchPoint> result;
     TaskSearchPoint current_point = *this;
-    for (Nat num_points=1; num_points<=amount; ++num_points) {
+    result.insert(current_point);
+    while (result.size() < amount) {
         List<Nat> breadths = current_point.shift_breadths();
-        Nat total_breadth = 0;
-        for (auto b : breadths) total_breadth += b;
+        Nat total_breadth = 0; for (auto b : breadths) total_breadth += b;
         auto space = this->space();
 
-        while(true) {
-            Nat offset = (Nat)rand() % total_breadth;
-            Nat current_breadth = 0;
-            ParameterBindingsMap shifted_bindings;
-            Bool shifted = false;
-            for (auto binding : current_point.bindings()) {
-                auto const& param = parameter(binding.first);
-                int value = binding.second;
-                current_breadth += breadths.at(space.index(param));
-                if (not shifted and current_breadth > offset) {
-                    value = param.shifted_value_from(value);
-                    shifted = true;
-                }
-                shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
+        Nat offset = (Nat)rand() % total_breadth;
+        Nat current_breadth = 0;
+        ParameterBindingsMap shifted_bindings;
+        Bool shifted = false;
+        for (auto binding : current_point.bindings()) {
+            auto const& param = current_point.parameter(binding.first);
+            int value = binding.second;
+            current_breadth += breadths.at(space.index(param));
+            if (not shifted and current_breadth > offset) {
+                value = param.shifted_value_from(value);
+                shifted = true;
             }
-            result.insert(space.make_point(shifted_bindings));
-
-            Nat new_choice = (Nat)rand() % result.size();
-            auto iter = result.begin();
-            for (Nat i=1; i<new_choice; ++i) ++iter;
-            current_point = *iter;
-
-            if (result.size() == num_points) break;
+            shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
         }
+        result.insert(space.make_point(shifted_bindings));
+
+        Nat new_choice = (Nat)rand() % result.size();
+        auto iter = result.begin();
+        for (Nat i=0; i<new_choice; ++i) ++iter;
+        current_point = *iter;
     }
     return result;
 }
 
-Set<TaskSearchPoint> TaskSearchPoint::make_adjacent_shifted(Nat amount) const {
+TaskSearchPoint TaskSearchPoint::make_adjacent_shifted() const {
     List<Nat> breadths = this->shift_breadths();
     Nat total_breadth = 0;
     for (auto b : breadths) total_breadth += b;
-    ARIADNE_PRECONDITION(total_breadth >= amount);
+    ARIADNE_PRECONDITION(total_breadth != 0);
     Set<TaskSearchPoint> result;
     auto space = this->space();
-    Set<Nat> offsets;
-    do offsets.insert((Nat)rand() % total_breadth); while (offsets.size() < amount);
+    Nat offset = (Nat)rand() % total_breadth;
 
-    Nat num_points = 1;
-    for (Nat offset : offsets) {
-        do {
-            Nat current_breadth = 0;
-            ParameterBindingsMap shifted_bindings;
-            Bool shifted = false;
-            for (auto binding : _bindings) {
-                auto const& param = parameter(binding.first);
-                int value = binding.second;
-                current_breadth += breadths.at(space.index(param));
-                if (not shifted and current_breadth > offset) {
-                    value = param.shifted_value_from(value);
-                    shifted = true;
-                }
-                shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
-            }
-            result.insert(space.make_point(shifted_bindings));
-        } while (result.size() < num_points);
-        ++num_points;
+    Nat current_breadth = 0;
+    ParameterBindingsMap shifted_bindings;
+    Bool shifted = false;
+    for (auto binding : _bindings) {
+        auto const &param = parameter(binding.first);
+        int value = binding.second;
+        current_breadth += breadths.at(space.index(param));
+        if (not shifted and current_breadth > offset) {
+            value = param.shifted_value_from(value);
+            shifted = true;
+        }
+        shifted_bindings.insert(std::pair<Identifier, int>(param.name(), value));
     }
-    return result;
+    return space.make_point(shifted_bindings);
 }
 
 TaskSearchSpace const& TaskSearchPoint::space() const {
@@ -199,7 +187,7 @@ Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& s
         auto source_it = expanded_sources.begin();
         SizeType previous_size = result.size();
         while (result.size() < size) {
-            result.adjoin(source_it->make_adjacent_shifted(1));
+            result.insert(source_it->make_adjacent_shifted());
             ++source_it; // Will move to next source even if no shift has been found
             if (source_it == expanded_sources.end()) break;
         }

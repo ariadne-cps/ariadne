@@ -42,11 +42,6 @@
 
 namespace Ariadne {
 
-template <typename E>
-constexpr auto to_underlying(E e) noexcept {
-    return static_cast<std::underlying_type_t<E>>(e);
-}
-
 class TaskSearchSpace;
 
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
@@ -136,6 +131,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     virtual SizeType cardinality() const = 0;
     //! \brief The integer values identified by this property value(s)
     virtual List<int> integer_values() const = 0;
+    //! \brief Set the property to the single value corresponding to the search space \a integer_value
+    virtual void set_single(int integer_value) = 0;
 
     virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;
@@ -154,7 +151,7 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
     virtual List<SharedPointer<T>> values() const = 0;
     OutputStream& _write(OutputStream& os) const override {
         auto vals = values();
-        if (vals.empty()) { os << "N/A"; }
+        if (vals.empty()) { os << "<unspecified>"; }
         else if (vals.size() == 1) { os << *vals[0]; }
         else {
             os << "{";
@@ -183,6 +180,13 @@ class BooleanConfigurationProperty : public ConfigurationPropertyBase<Bool> {
         if (_is_single) result.push_back(_value);
         else { result.push_back(0); result.push_back(1); }
         return result;
+    };
+
+    void set_single(int integer_value) override {
+        ARIADNE_PRECONDITION(not _is_single);
+        ARIADNE_PRECONDITION(integer_value == 0 or integer_value == 1);
+        _is_single = true;
+        if (integer_value == 1) _value = true; else _value = false;
     };
 
     ConfigurationPropertyInterface* clone() const override { return new BooleanConfigurationProperty(*this); };
@@ -238,6 +242,16 @@ class RangeConfigurationProperty : public ConfigurationPropertyBase<T> {
         return result;
     };
 
+    void set_single(int integer_value) override {
+        int min_value = _converter->to_int(_lower);
+        int max_value = _converter->to_int(_upper);
+        ARIADNE_PRECONDITION(not is_single());
+        ARIADNE_PRECONDITION(integer_value >= min_value and integer_value <= max_value);
+        if (integer_value == min_value) _upper = _lower; // Avoids rounding error
+        else if (integer_value == max_value) _lower = _upper; // Avoids rounding error
+        else { _lower = _upper = _converter->to_value(integer_value); }
+    };
+
     ConfigurationPropertyInterface* clone() const override { return new RangeConfigurationProperty(*this); }
 
     void set(T const& lower, T const& upper) {
@@ -283,8 +297,18 @@ public:
     SizeType cardinality() const override { return _values.size(); }
     List<int> integer_values() const override {
         List<int> result;
-        for (auto e : _values) result.push_back(to_underlying(e));
+        for (SizeType i=0; i<_values.size(); ++i) result.push_back(i);
         return result;
+    };
+
+    void set_single(int integer_value) override {
+        ARIADNE_PRECONDITION(not is_single());
+        ARIADNE_PRECONDITION(integer_value >= 0 and integer_value < (int)cardinality());
+        auto iter = _values.begin();
+        for (SizeType i=0;i<(SizeType)integer_value;++i) ++iter;
+        T value = *iter;
+        _values.clear();
+        _values.insert(value);
     };
 
     ConfigurationPropertyInterface* clone() const override { return new EnumConfigurationProperty(*this); }
@@ -326,6 +350,14 @@ public:
         List<int> result;
         for (SizeType i=0; i<_values.size(); ++i) result.push_back(i);
         return result;
+    };
+
+    void set_single(int integer_value) override {
+        ARIADNE_PRECONDITION(not is_single());
+        ARIADNE_PRECONDITION(integer_value >= 0 and integer_value < (int)cardinality());
+        SharedPointer<T> value = _values[(SizeType)integer_value];
+        _values.clear();
+        _values.push_back(value);
     };
 
     ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); }

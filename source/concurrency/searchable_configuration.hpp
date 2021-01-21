@@ -154,7 +154,7 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     BooleanConfigurationProperty(Bool const& value) : ConfigurationPropertyBase(true), _is_single(true), _value(value) { }
     Bool const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
-        ARIADNE_PRECONDITION(this->is_single());
+        ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
         return _value;
     }
     Bool is_single() const override { return _is_single; };
@@ -207,7 +207,7 @@ class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
         ConfigurationPropertyBase<T>(true), _lower(value), _upper(value), _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
-        ARIADNE_PRECONDITION(this->is_single());
+        ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
         return _upper;
     }
     Bool is_single() const override { if (not this->is_specified()) return false; else return possibly(_lower == _upper); }
@@ -302,7 +302,7 @@ public:
 
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
-        ARIADNE_PRECONDITION(this->is_single());
+        ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
         return *_values.begin();
     }
 
@@ -352,7 +352,7 @@ class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
 
     T const& get() const override {
         ARIADNE_PRECONDITION(this->is_specified());
-        ARIADNE_PRECONDITION(this->is_single());
+        ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
         return *_values.back();
     }
 

@@ -35,8 +35,16 @@ class TestTaskSearchParameter {
   public:
 
     Void test_task_parameter_creation() {
-        TaskSearchParameter p("use_subdivisions", false, List<int>({0,2}));
+        TaskSearchParameter p("use_subdivisions", false, List<int>({0,1}));
         ARIADNE_TEST_PRINT(p);
+    }
+
+    Void test_task_parameter_randomise() {
+        TaskSearchParameter p("use_subdivisions", false, List<int>({0,1}));
+        ARIADNE_TEST_PRINT(p);
+        List<int> values;
+        for (Nat i=0; i<16; ++i) values.push_back(p.random_value());
+        ARIADNE_TEST_PRINT(values);
     }
 
     Void test_metric_task_parameter_shift() {
@@ -170,6 +178,8 @@ class TestTaskSearchParameter {
     }
 
     Void test() {
+        ARIADNE_TEST_CALL(test_task_parameter_creation());
+        ARIADNE_TEST_CALL(test_task_parameter_randomise());
         ARIADNE_TEST_CALL(test_metric_task_parameter_shift());
         ARIADNE_TEST_CALL(test_parameter_space());
         ARIADNE_TEST_CALL(test_parameter_point_creation());

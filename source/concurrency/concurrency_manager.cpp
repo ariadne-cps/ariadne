@@ -30,9 +30,7 @@
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(1) {
-    srand(time(NULL));
-}
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(1) { }
 
 unsigned int ConcurrencyManager::maximum_concurrency() const {
     return _maximum_concurrency;
@@ -58,3 +56,10 @@ void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPointApprais
 }
 
 }
+
+inline bool _init_randomiser() {
+    srand(time(nullptr));
+    return true;
+}
+
+static const bool init_randomiser = _init_randomiser();

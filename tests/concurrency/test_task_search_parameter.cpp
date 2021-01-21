@@ -120,12 +120,15 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_NOT_EQUAL(point1,point2);
 
         ARIADNE_PRINT_TEST_COMMENT("Checking multiple shifted points");
-        points = point2.make_adjacent_shifted(3);
-        ARIADNE_TEST_EQUALS(points.size(),3);
+        points = point2.make_adjacent_shifted(2);
+        ARIADNE_TEST_EQUALS(points.size(),2);
         for (auto point : points) {
             ARIADNE_TEST_PRINT(point);
             ARIADNE_TEST_NOT_EQUAL(point2,point);
         }
+
+        ARIADNE_PRINT_TEST_COMMENT("Checking border point unable to produce more than 2 shifts");
+        ARIADNE_TEST_FAIL(point1.make_adjacent_shifted(3));
     }
 
     Void test_parameter_point_random_shift() {
@@ -143,15 +146,32 @@ class TestTaskSearchParameter {
 
     Void test_parameter_point_adjacent_set_shift() {
         TaskSearchParameter bp("use_subdivisions", false,List<int>({0,1}));
-        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7}));
+        TaskSearchParameter mp("sweep_threshold", true, List<int>({3,4,5,6,7,8}));
         TaskSearchSpace space({bp, mp});
+        ARIADNE_TEST_PRINT(space.total_points());
 
-        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
-        Set<TaskSearchPoint> points = point1.make_random_shifted(3);
+        TaskSearchPoint point = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 5}});
+        Set<TaskSearchPoint> points = point.make_random_shifted(3);
         ARIADNE_TEST_PRINT(points);
         auto all_points = make_extended_set_by_shifting(points, 5);
         ARIADNE_TEST_EQUALS(all_points.size(),5);
         ARIADNE_TEST_PRINT(all_points);
+
+        TaskSearchPoint point1 = space.make_point({{"use_subdivisions", 1}, {"sweep_threshold", 8}});
+        TaskSearchPoint point2 = space.make_point({{"use_subdivisions", 0}, {"sweep_threshold", 3}});
+        Set<TaskSearchPoint> border_points = {point1, point2};
+        ARIADNE_TEST_PRINT(border_points);
+        ARIADNE_PRINT_TEST_COMMENT("Checking maximum number of single shift points including the original border points");
+        auto six_points = make_extended_set_by_shifting(border_points, 6);
+        ARIADNE_TEST_PRINT(six_points);
+        ARIADNE_PRINT_TEST_COMMENT("Checking 1 point over the number of possible adjacent shiftings");
+        auto seven_points = make_extended_set_by_shifting(border_points, 7);
+        ARIADNE_TEST_PRINT(seven_points);
+        ARIADNE_PRINT_TEST_COMMENT("Checking up to the maximum number");
+        auto twelve_points = make_extended_set_by_shifting(border_points, 12);
+        ARIADNE_TEST_PRINT(twelve_points);
+        ARIADNE_PRINT_TEST_COMMENT("Checking 1 point over the maximum number");
+        ARIADNE_TEST_FAIL(make_extended_set_by_shifting(points, point.space().total_points()+1));
     }
 
     Void test_parameter_point_appraisal() {

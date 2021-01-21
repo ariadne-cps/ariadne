@@ -89,11 +89,13 @@ class TaskSearchPoint : public WritableInterface {
     mutable List<Nat> _CACHED_SHIFT_BREADTHS;
 };
 
-//! \brief Generate an \a amount of new points from \a sources, by shifting one parameter each
+//! \brief Generate an \a amount of new points from \a sources, by shifting one parameter each (ideally, see details)
 //! \return The original points plus the shifted ones
-//! \details \a size must be greater or equal than \a sources size, shifting points are chosen by rotation,
-//! skipping to the next if the generated point is not new
-Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, Nat size);
+//! \details \a size must be greater or equal than \a sources size but still lower than the maximum number of points
+//! for the space. Shifting points are chosen by rotation, skipping to the next if the generated point is not new-
+//! An effort is made to shift only by 1 with respect to the sources, but if not possible then the generated
+//! points are added to the points used for shifting.
+Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, SizeType size);
 
 } // namespace Ariadne
 

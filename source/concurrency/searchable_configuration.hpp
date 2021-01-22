@@ -41,6 +41,7 @@
 #include "solvers/configuration.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
+#include "concurrency/configuration_property_path.hpp"
 
 namespace Ariadne {
 
@@ -117,6 +118,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     virtual List<int> integer_values() const = 0;
     //! \brief Set the property to the single value corresponding to the search space \a integer_value
     virtual void set_single(int integer_value) = 0;
+    virtual void set_single(ConfigurationPropertyPath const& path, int integer_value) = 0;
+    virtual Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const = 0;
 
     virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;
@@ -133,6 +136,13 @@ class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
     Bool is_specified() const override { return _is_specified; };
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
+
+    Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const override {
+        Map<ConfigurationPropertyPath,List<int>> result;
+        result.insert(Pair<ConfigurationPropertyPath,List<int>>(ConfigurationPropertyPath(),integer_values()));
+        return result;
+    }
+
     //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if a range
     OutputStream& _write(OutputStream& os) const override {
         auto vals = values();
@@ -166,6 +176,11 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
         else { result.push_back(0); result.push_back(1); }
         return result;
     };
+
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override {
+        ARIADNE_PRECONDITION(path.is_root());
+        set_single(integer_value);
+    }
 
     void set_single(int integer_value) override {
         ARIADNE_PRECONDITION(not _is_single);
@@ -226,7 +241,12 @@ class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
             for (int i=min_value; i<=max_value; ++i) result.push_back(i);
         }
         return result;
-    };
+    }
+
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override {
+        ARIADNE_PRECONDITION(path.is_root());
+        set_single(integer_value);
+    }
 
     void set_single(int integer_value) override {
         int min_value = _converter->to_int(_lower);
@@ -287,6 +307,11 @@ public:
         return result;
     };
 
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override {
+        ARIADNE_PRECONDITION(path.is_root());
+        set_single(integer_value);
+    }
+
     void set_single(int integer_value) override {
         ARIADNE_PRECONDITION(not is_single());
         ARIADNE_PRECONDITION(integer_value >= 0 and integer_value < (int)cardinality());
@@ -346,6 +371,30 @@ class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
         _values.clear();
         _values.push_back(value);
     };
+
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override {
+        if (path.is_root()) {
+            set_single(integer_value);
+        } else {
+
+        }
+    }
+
+    Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const override {
+        Map<ConfigurationPropertyPath,List<int>> result;
+        if (not is_single())
+            result.insert(Pair<ConfigurationPropertyPath,List<int>>(ConfigurationPropertyPath(),integer_values()));
+        else { // NOTE: we could extend to multiple values by using indexes
+            // Get the value
+            // Check if ConfigurableInterface
+            // Extract the configuration
+            // Extract the properties
+            // For each
+            //     extract the nested_integer_values
+            //     prefix with the name of the property
+        }
+        return result;
+    }
 
     ConfigurationPropertyInterface* clone() const override { return new ListConfigurationProperty(*this); }
 

@@ -44,10 +44,32 @@ std::ostream& operator<<(std::ostream& os, const LevelOptions level) {
     }
 }
 
+class TestConfigurable;
+
+template<> class Configuration<TestConfigurable> : public SearchableConfiguration {
+  public:
+    Configuration() { add_property("use_something",BooleanConfigurationProperty(true)); }
+    Bool const& use_use_something() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_something")).get(); }
+    void set_both_use_something() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_something")).set_both(); }
+    void set_use_something(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_something")).set(value); }
+};
+class TestConfigurableInterface : public WritableInterface {
+public:
+    virtual TestConfigurableInterface* clone() const = 0;
+    virtual ~TestConfigurableInterface() = default;
+};
+class TestConfigurable : public TestConfigurableInterface, public Configurable<TestConfigurable> {
+public:
+    TestConfigurable() : Configurable<TestConfigurable>(Configuration<TestConfigurable>()) { }
+    OutputStream& _write(OutputStream& os) const override { os << "TestConfigurable: " << configuration(); return os; }
+    TestConfigurableInterface* clone() const override { return new TestConfigurable(*this); }
+};
+
 using RealConfigurationProperty = RangeConfigurationProperty<Real>;
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
 using LevelOptionsConfigurationProperty = SetConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
+using TestConfigurableConfigurationProperty = ListConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<Real>;
 using Log2Converter = Log2SearchSpaceConverter<Real>;
 
@@ -59,6 +81,7 @@ template<> class Configuration<A> : public SearchableConfiguration {
         add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<ExactDouble>()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
+        add_property("test_configurable",TestConfigurableConfigurationProperty(TestConfigurable()));
     }
 
     Bool const& use_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_reconditioning")).get(); }
@@ -80,6 +103,10 @@ template<> class Configuration<A> : public SearchableConfiguration {
     IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorConfigurationProperty const&>(*properties().get("integrator")).get(); }
     void set_integrator(IntegratorInterface const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
     void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
+
+    TestConfigurableInterface const& test_configurable() const { return dynamic_cast<TestConfigurableConfigurationProperty const&>(*properties().get("test_configurable")).get(); }
+    void set_test_configurable(TestConfigurableInterface const& test_configurable) { dynamic_cast<TestConfigurableConfigurationProperty&>(*properties().get("test_configurable")).set(test_configurable); }
+    void set_test_configurable(SharedPointer<TestConfigurableInterface> const& test_configurable) { dynamic_cast<TestConfigurableConfigurationProperty&>(*properties().get("test_configurable")).set(test_configurable); }
 };
 
 }
@@ -376,6 +403,19 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(make_singleton(a,search_space5.initial_point()))
     }
 
+    template<class C> Configurable<C>* get_configurable_ptr(ConfigurationPropertyInterface* property) {
+        ARIADNE_PRECONDITION(property->is_single());
+        auto list_property_ptr = dynamic_cast<ListConfigurationProperty<C>*>(property);
+        ARIADNE_ASSERT_MSG(list_property_ptr != nullptr, "The property to find the configurable is not a ListConfigurationProperty.");
+        auto configurable_ptr = dynamic_cast<Configurable<C>*>(list_property_ptr->get());
+        return configurable_ptr;
+    }
+
+    void test_configuration_hierarchic() {
+        Configuration<A> a;
+        //ConfigurationPropertyInterface* property = a.properties()["test_configurable"].get();
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_converters());
         ARIADNE_TEST_CALL(test_boolean_configuration_property_construction());
@@ -393,7 +433,7 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_configuration_construction());
         ARIADNE_TEST_CALL(test_configuration_search_space_generation());
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
-        //ARIADNE_TEST_CALL(test_configuration_hierarchic());
+        ARIADNE_TEST_CALL(test_configuration_hierarchic());
     }
 };
 

@@ -4,6 +4,7 @@ set(UNIT_TESTS
     test_buffer
     test_concurrency_manager
     test_searchable_configuration
+    test_configuration_property_path
 )
 
 foreach(TEST ${UNIT_TESTS})

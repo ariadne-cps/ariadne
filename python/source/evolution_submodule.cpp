@@ -30,9 +30,7 @@
 #include "dynamics/vector_field_evolver.hpp"
 
 #include "hybrid/hybrid_evolver.hpp"
-#include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
-#include "hybrid/hybrid_time.hpp"
 
 using namespace Ariadne;
 

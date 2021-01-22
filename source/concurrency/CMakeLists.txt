@@ -8,6 +8,7 @@ add_library(${LIBRARY_NAME} OBJECT
         task_appraisal.cpp
         searchable_configuration.cpp
         configuration_property_path.cpp
+        configuration_property.cpp
         )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

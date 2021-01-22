@@ -42,6 +42,8 @@
 #include "../output/progress_indicator.hpp"
 
 #include "../concurrency/concurrency_manager.hpp"
+#include "../concurrency/search_space_converter.hpp"
+#include "../concurrency/configuration_property.tpl.hpp"
 
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
@@ -282,6 +284,16 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     intermediate_sets.adjoin(out.evolve);
     working_sets.push_back(make_pair(out.time,out.evolve));
     previous_step_size = out.step_size_used;
+}
+
+Configuration<VectorFieldEvolver>::Configuration() {
+    add_property("enable_premature_termination",BooleanConfigurationProperty(false));
+    add_property("enable_reconditioning",BooleanConfigurationProperty(false));
+    add_property("enable_subdivisions",BooleanConfigurationProperty(false));
+    add_property("integrator",ListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(1e-2)));
+    add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+    add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+    add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
 }
 
 

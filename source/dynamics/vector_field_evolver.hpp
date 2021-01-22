@@ -45,6 +45,7 @@
 #include "../concurrency/task_runner.tpl.hpp"
 #include "../concurrency/task_appraisal_space.hpp"
 #include "../concurrency/searchable_configuration.hpp"
+#include "../concurrency/configuration_property.hpp"
 
 #include "../output/logging.hpp"
 
@@ -144,24 +145,14 @@ template class RangeConfigurationProperty<ExactDouble>;
 template class ListConfigurationProperty<IntegratorInterface>;
 
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
-template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration
-{
+template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
   public:
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef ListConfigurationProperty<IntegratorInterface> IntegratorProperty;
 
-    //! \brief Default constructor gives reasonable values.
-    Configuration() {
-        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
-        add_property("enable_reconditioning",BooleanConfigurationProperty(false));
-        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
-        add_property("integrator",ListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(1e-2)));
-        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
-    }
+    Configuration();
 
     //! \brief Enable premature termination of lower evolution
     Bool const& enable_premature_termination() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_premature_termination")).get(); }

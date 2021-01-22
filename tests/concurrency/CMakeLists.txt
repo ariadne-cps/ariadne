@@ -3,6 +3,7 @@ set(UNIT_TESTS
     test_task_appraisal_parameter
     test_buffer
     test_concurrency_manager
+    test_configuration_property
     test_searchable_configuration
     test_configuration_property_path
 )

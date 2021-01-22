@@ -26,6 +26,9 @@
  *  \brief Implementation code for runner classes.
  */
 
+#ifndef ARIADNE_TASK_RUNNER_TPL_HPP
+#define ARIADNE_TASK_RUNNER_TPL_HPP
+
 #include "../concurrency/task_runner.hpp"
 #include "../concurrency/task_interface.hpp"
 #include "../concurrency/concurrency_manager.hpp"
@@ -33,24 +36,23 @@
 
 namespace Ariadne {
 
-template<class R> TaskRunnable<R>::TaskRunnable(ConfigurationType const& configuration) : Configurable<R>(configuration) {
+template<class C> TaskRunnable<C>::TaskRunnable(ConfigurationType const& configuration) : Configurable<C>(configuration) {
     ConcurrencyManager::instance().set_runner(*this);
 }
 
-template<class R> void TaskRunnable<R>::set_runner(SharedPointer<TaskRunnerInterface<R>> runner) {
+template<class C> void TaskRunnable<C>::set_runner(SharedPointer<TaskRunnerInterface<C>> runner) {
     this->_runner = runner;
 }
 
-template<class R> SharedPointer<TaskRunnerInterface<R>>& TaskRunnable<R>::runner() {
+template<class C> SharedPointer<TaskRunnerInterface<C>>& TaskRunnable<C>::runner() {
     return _runner;
 }
 
-template<class R> SharedPointer<TaskRunnerInterface<R>> const& TaskRunnable<R>::runner() const {
+template<class C> SharedPointer<TaskRunnerInterface<C>> const& TaskRunnable<C>::runner() const {
     return _runner;
 }
 
-template<class C>
-class TaskRunnerBase : public TaskRunnerInterface<C> {
+template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
   public:
     typedef typename TaskRunnerInterface<C>::TaskType TaskType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
@@ -67,28 +69,19 @@ class TaskRunnerBase : public TaskRunnerInterface<C> {
     ConfigurationType const _configuration;
 };
 
-template<class C>
-SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
+template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
 
-template<class C>
-Void
-SequentialRunner<C>::dump_statistics() { }
+template<class C> void SequentialRunner<C>::dump_statistics() { }
 
-template<class C>
-Void
-SequentialRunner<C>::push(InputType const& input) {
+template<class C> void SequentialRunner<C>::push(InputType const& input) {
     _last_output.reset(new OutputType(this->_task->run_task(input,this->configuration())));
 }
 
-template<class C>
-typename SequentialRunner<C>::OutputType
-SequentialRunner<C>::pull() {
+template<class C> auto SequentialRunner<C>::pull() -> OutputType {
     return *_last_output;
 }
 
-template<class R>
-Void
-DetachedRunner<R>::_loop() {
+template<class C> void DetachedRunner<C>::_loop() {
     while(true) {
         std::unique_lock<std::mutex> locker(_input_mutex);
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
@@ -99,26 +92,20 @@ DetachedRunner<R>::_loop() {
     }
 }
 
-template<class T>
-DetachedRunner<T>::DetachedRunner(ConfigurationType const& configuration)
-        : TaskRunnerBase<T>(configuration),
+template<class C> DetachedRunner<C>::DetachedRunner(ConfigurationType const& configuration)
+        : TaskRunnerBase<C>(configuration),
           _thread(this->_task->name(), [this]() { _loop(); }),
           _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
           _active(false), _terminate(false) { }
 
-template<class T>
-DetachedRunner<T>::~DetachedRunner() {
+template<class C> DetachedRunner<C>::~DetachedRunner() {
     _terminate = true;
     _input_availability.notify_all();
 }
 
-template<class T>
-Void
-DetachedRunner<T>::dump_statistics() { }
+template<class C> void DetachedRunner<C>::dump_statistics() { }
 
-template<class T>
-Void
-DetachedRunner<T>::push(InputType const& input) {
+template<class C> void DetachedRunner<C>::push(InputType const& input) {
     if (not _active) {
         _active = true;
         _thread.activate();
@@ -127,16 +114,13 @@ DetachedRunner<T>::push(InputType const& input) {
     _input_availability.notify_all();
 }
 
-template<class T>
-typename DetachedRunner<T>::OutputType
-DetachedRunner<T>::pull() {
+template<class C> auto DetachedRunner<C>::pull() -> OutputType {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
     return _output_buffer.pop();
 }
 
-template<class O>
-class ParameterSearchOutputBufferData {
+template<class O> class ParameterSearchOutputBufferData {
   public:
     ParameterSearchOutputBufferData(O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _output(output), _execution_time(execution_time), _point(point) { }
     ParameterSearchOutputBufferData(ParameterSearchOutputBufferData<O> const& p) : _output(p._output), _execution_time(p._execution_time), _point(p._point) { }
@@ -155,9 +139,7 @@ class ParameterSearchOutputBufferData {
     TaskSearchPoint _point;
 };
 
-template<class T>
-Void
-ParameterSearchRunner<T>::_loop() {
+template<class C> void ParameterSearchRunner<C>::_loop() {
     while(true) {
         std::unique_lock<std::mutex> locker(_input_mutex);
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
@@ -180,9 +162,8 @@ ParameterSearchRunner<T>::_loop() {
     }
 }
 
-template<class T>
-ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configuration, Nat concurrency)
-        : TaskRunnerBase<T>(configuration), _concurrency(concurrency),
+template<class C> ParameterSearchRunner<C>::ParameterSearchRunner(ConfigurationType const& configuration, Nat concurrency)
+        : TaskRunnerBase<C>(configuration), _concurrency(concurrency),
           _failures(0), _last_used_input(1),
           _input_buffer(InputBufferType(concurrency)),_output_buffer(OutputBufferType(concurrency)),
           _active(false), _terminate(false) {
@@ -192,22 +173,17 @@ ParameterSearchRunner<T>::ParameterSearchRunner(ConfigurationType const& configu
     for (auto point : shifted) _points.push(point);
 }
 
-template<class T>
-ParameterSearchRunner<T>::~ParameterSearchRunner() {
+template<class C> ParameterSearchRunner<C>::~ParameterSearchRunner() {
     _terminate = true;
     _input_availability.notify_all();
 }
 
-template<class T>
-Void
-ParameterSearchRunner<T>::dump_statistics() {
+template<class C> Void ParameterSearchRunner<C>::dump_statistics() {
     ConcurrencyManager::instance().set_last_search_best_points(_best_points);
     _best_points.clear();
 }
 
-template<class T>
-Void
-ParameterSearchRunner<T>::push(InputType const& input) {
+template<class C> void ParameterSearchRunner<C>::push(InputType const& input) {
     if (not _active) {
         _active = true;
         for (auto thread : _threads) thread->activate();
@@ -220,9 +196,7 @@ ParameterSearchRunner<T>::push(InputType const& input) {
     _input_availability.notify_all();
 }
 
-template<class T>
-typename ParameterSearchRunner<T>::OutputType
-ParameterSearchRunner<  T>::pull() {
+template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>=_concurrency-_failures; });
     ARIADNE_LOG_PRINTLN("received " << _concurrency-_failures << " completed tasks");
@@ -257,3 +231,5 @@ ParameterSearchRunner<  T>::pull() {
 }
 
 } // namespace Ariadne
+
+#endif // ARIADNE_TASK_RUNNER_TPL_HPP

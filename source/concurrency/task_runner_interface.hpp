@@ -38,13 +38,13 @@ namespace Ariadne {
 
 //! \brief Interface for the runner of a task.
 //! \details Takes the runnable class as template argument.
-template<class R>
+template<class C>
 class TaskRunnerInterface {
   public:
-    typedef Task<R> TaskType;
-    typedef TaskInput<R> InputType;
-    typedef TaskOutput<R>  OutputType;
-    typedef Configuration<R> ConfigurationType;
+    typedef Task<C> TaskType;
+    typedef TaskInput<C> InputType;
+    typedef TaskOutput<C>  OutputType;
+    typedef Configuration<C> ConfigurationType;
 
     //! \brief Return the task
     virtual TaskType& task() = 0;
@@ -62,20 +62,20 @@ class TaskRunnerInterface {
 };
 
 //! \brief Interface for a class that supports a runnable task.
-template<class R>
-class TaskRunnable : public Configurable<R> {
+template<class C>
+class TaskRunnable : public Configurable<C> {
     friend class ConcurrencyManager;
     friend class VerificationManager;
-    typedef Configuration<R> ConfigurationType;
+    typedef Configuration<C> ConfigurationType;
   protected:
     TaskRunnable(ConfigurationType const& configuration);
     //! \brief Set a new runner, useful to override the default runner
-    void set_runner(SharedPointer<TaskRunnerInterface<R>> runner);
+    void set_runner(SharedPointer<TaskRunnerInterface<C>> runner);
     //! \brief Get the runner
-    SharedPointer<TaskRunnerInterface<R>>& runner();
-    SharedPointer<TaskRunnerInterface<R>> const& runner() const;
+    SharedPointer<TaskRunnerInterface<C>>& runner();
+    SharedPointer<TaskRunnerInterface<C>> const& runner() const;
   private:
-    SharedPointer<TaskRunnerInterface<R>> _runner;
+    SharedPointer<TaskRunnerInterface<C>> _runner;
 };
 
 } // namespace Ariadne

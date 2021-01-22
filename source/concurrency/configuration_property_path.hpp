@@ -31,18 +31,19 @@
 
 #include <utility>
 #include <deque>
+#include "../symbolic/identifier.hpp"
 #include "../utility/typedefs.hpp"
 #include "../utility/writable.hpp"
 
 namespace Ariadne {
 
-class Identifier;
-
 class ConfigurationPropertyPath : public WritableInterface {
   public:
     ConfigurationPropertyPath() = default;
+    ConfigurationPropertyPath(Identifier const& first);
     ConfigurationPropertyPath(ConfigurationPropertyPath const& path);
     ConfigurationPropertyPath& operator=(ConfigurationPropertyPath const& path);
+    Bool operator==(ConfigurationPropertyPath const& path) const;
     Bool operator<(ConfigurationPropertyPath const& path) const;
 
     Identifier repr() const;
@@ -50,6 +51,9 @@ class ConfigurationPropertyPath : public WritableInterface {
     Bool is_root() const;
     void append(Identifier const& node);
     void prepend(Identifier const& node);
+    //! \brief Return the first level of the path
+    Identifier first() const;
+    //! \brief Return everything but the first level of the path
     ConfigurationPropertyPath subpath() const;
 
     OutputStream& _write(OutputStream& os) const override;

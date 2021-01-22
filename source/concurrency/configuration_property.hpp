@@ -44,18 +44,19 @@
 
 namespace Ariadne {
 
-template<class T>
-class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
+template<class T> class ConfigurationPropertyBase : public ConfigurationPropertyInterface {
   protected:
     ConfigurationPropertyBase(Bool const& is_specified);
     void set_specified();
     virtual List<SharedPointer<T>> values() const = 0;
+    virtual void local_set_single(int integer_value) = 0;
+    virtual List<int> local_integer_values() const = 0;
   public:
     virtual T const& get() const = 0;
     virtual void set(T const& value) = 0;
 
     Bool is_specified() const override;
-    Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const override;
+    Map<ConfigurationPropertyPath,List<int>> integer_values() const override;
 
     //! \brief Supplies the values from the property, empty if not specified, the lower/upper bounds if a range
     OutputStream& _write(OutputStream& os) const override;
@@ -70,26 +71,25 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 
     Bool is_single() const override;
     Bool is_metric() const override;
+    Bool is_configurable() const override;
     SizeType cardinality() const override;
 
     ConfigurationPropertyInterface* clone() const override;
 
     Bool const& get() const override;
-    List<int> integer_values() const override;
     void set(Bool const& value) override;
     void set_both(); //! \brief Set to both true and false
-    void nested_set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void set_single(int integer_value) override;
-
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
+    void local_set_single(int integer_value) override;
   protected:
+    List<int> local_integer_values() const override;
     List<SharedPointer<Bool>> values() const override;
   private:
     Bool _is_single;
     Bool _value;
 };
 
-template<class T>
-class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
     RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter);
     RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter);
@@ -97,20 +97,21 @@ class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
 
     Bool is_single() const override;
     Bool is_metric() const override;
+    Bool is_configurable() const override;
     SizeType cardinality() const override;
 
     ConfigurationPropertyInterface* clone() const override;
 
     T const& get() const override;
-    List<int> integer_values() const override;
     void set(T const& lower, T const& upper);
     //! \brief Set a single value
     //! \details An unbounded single value is accepted
     void set(T const& value) override;
-    void nested_set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void set_single(int integer_value) override;
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
+    void local_set_single(int integer_value) override;
 
   protected:
+    List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
     T _lower;
@@ -120,8 +121,7 @@ class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
 
 //! \brief A property that specifies a set of distinct values from class \a T
 //! \details This can be used either for an enum or for distinct objects of a class
-template<class T>
-class SetConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class SetConfigurationProperty final : public ConfigurationPropertyBase<T> {
 public:
     SetConfigurationProperty();
     SetConfigurationProperty(Set<T> const& values);
@@ -129,18 +129,19 @@ public:
 
     Bool is_single() const override;
     Bool is_metric() const override;
+    Bool is_configurable() const override;
     SizeType cardinality() const override;
-    List<int> integer_values() const override;
 
     ConfigurationPropertyInterface* clone() const override;
 
     T const& get() const override;
     void set(T const& value) override;
     void set(Set<T> const& values);
-    void nested_set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void set_single(int integer_value) override;
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
+    void local_set_single(int integer_value) override;
 
   protected:
+    List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
     Set<T> _values;
@@ -148,8 +149,7 @@ public:
 
 //! \brief A property that specifies a list of objects deriving from an interface \a T
 //! \details T must define the clone() method to support interfaces.
-template<class T>
-class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
     ListConfigurationProperty();
     ListConfigurationProperty(List<SharedPointer<T>> const& list);
@@ -157,19 +157,20 @@ class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
 
     Bool is_single() const override;
     Bool is_metric() const override;
+    Bool is_configurable() const override;
     SizeType cardinality() const override;
 
     ConfigurationPropertyInterface* clone() const override;
 
     T const& get() const override;
-    List<int> integer_values() const override;
-    Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const override;
+    Map<ConfigurationPropertyPath,List<int>> integer_values() const override;
     void set(T const& value) override;
     void set(SharedPointer<T> const& value);
     void set(List<SharedPointer<T>> const& values);
-    void set_single(int integer_value) override;
-    void nested_set_single(ConfigurationPropertyPath const& path, int integer_value) override;
+    void local_set_single(int integer_value) override;
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
   protected:
+    List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
     List<SharedPointer<T>> _values;

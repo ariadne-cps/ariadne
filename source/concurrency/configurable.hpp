@@ -29,42 +29,32 @@
 #ifndef ARIADNE_CONFIGURABLE_HPP
 #define ARIADNE_CONFIGURABLE_HPP
 
-#include <ostream>
-#include <type_traits>
-#include "utility/writable.hpp"
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "symbolic/identifier.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/real.hpp"
-#include "solvers/configuration.hpp"
 
 namespace Ariadne {
 
 class SearchableConfiguration;
 
 class ConfigurableInterface {
-public:
+  public:
     virtual SearchableConfiguration const& searchable_configuration() const = 0;
 };
 
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
-template<class C> class Configuration;// : public SearchableConfiguration { };
+template<class C> class Configuration;
 
 //! \brief Is-a component that provides a configuration
 //! \details Since the configuration returned is const, a Configurable object should be constructed from
 //! a pre-set configuration. If the configuration must specify certain properties or if some properties
 //! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
 //! approach should be used for creation of the configuration, which should become an immutable object.
-template<class C>
-class Configurable : public ConfigurableInterface {
+template<class C> class Configurable : public ConfigurableInterface {
     friend class Configuration<C>;
-public:
+  public:
     Configurable(Configuration<C> const& config);
     Configuration<C> const& configuration() const;
     SearchableConfiguration const& searchable_configuration() const override;
-private:
+  private:
     SharedPointer<Configuration<C>> _configuration;
 };
 

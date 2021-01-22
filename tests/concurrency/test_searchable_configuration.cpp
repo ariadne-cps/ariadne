@@ -25,10 +25,8 @@
 #include "concurrency/searchable_configuration.hpp"
 #include "concurrency/configuration_property.tpl.hpp"
 #include "concurrency/task_search_space.hpp"
-#include "concurrency/task_search_point.hpp"
 #include "concurrency/configurable.tpl.hpp"
 #include "solvers/integrator.hpp"
-#include "numeric/decimal.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -64,23 +62,22 @@ public:
 class TestConfigurable : public TestConfigurableInterface, public Configurable<TestConfigurable> {
 public:
     TestConfigurable(Configuration<TestConfigurable> const& configuration) : Configurable<TestConfigurable>(configuration) { }
-    OutputStream& _write(OutputStream& os) const override { os << "TestConfigurable: " << configuration(); return os; }
+    OutputStream& _write(OutputStream& os) const override { os << "TestConfigurable" << configuration(); return os; }
     TestConfigurableInterface* clone() const override { return new TestConfigurable(*this); }
 };
 
-using RealConfigurationProperty = RangeConfigurationProperty<Real>;
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
 using LevelOptionsConfigurationProperty = SetConfigurationProperty<LevelOptions>;
 using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
 using TestConfigurableConfigurationProperty = ListConfigurationProperty<TestConfigurableInterface>;
-using Log10Converter = Log10SearchSpaceConverter<Real>;
-using Log2Converter = Log2SearchSpaceConverter<Real>;
+using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
+using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 
 template<> class Configuration<A> : public SearchableConfiguration {
   public:
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));
-        add_property("maximum_step_size",RealConfigurationProperty(infinity,Log2Converter()));
+        add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter()));
         add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<ExactDouble>()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
@@ -91,9 +88,9 @@ template<> class Configuration<A> : public SearchableConfiguration {
     void set_both_use_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set_both(); }
     void set_use_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(value); }
 
-    Real const& maximum_step_size() const { return dynamic_cast<RealConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
-    void set_maximum_step_size(Real const& value) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
-    void set_maximum_step_size(Real const& lower, Real const& upper) { dynamic_cast<RealConfigurationProperty&>(*properties().get("maximum_step_size")).set(lower,upper); }
+    ExactDouble const& maximum_step_size() const { return dynamic_cast<ExactDoubleConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
+    void set_maximum_step_size(ExactDouble const& value) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
+    void set_maximum_step_size(ExactDouble const& lower, ExactDouble const& upper) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("maximum_step_size")).set(lower,upper); }
 
     ExactDouble const& sweep_threshold() const { return dynamic_cast<ExactDoubleConfigurationProperty const&>(*properties().get("sweep_threshold")).get(); }
     void set_sweep_threshold(ExactDouble const& value) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("sweep_threshold")).set(value); }
@@ -132,7 +129,7 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(not a.use_reconditioning());
     }
 
-    void test_configuration_search_space_generation() {
+    void test_configuration_search_space() {
         Configuration<A> a;
         ARIADNE_TEST_FAIL(a.search_space());
         a.set_both_use_reconditioning();
@@ -154,7 +151,7 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(b.is_singleton());
         ARIADNE_TEST_EQUALS(b.use_reconditioning(),use_reconditioning);
 
-        a.set_maximum_step_size(1e-3_dec,1e-1_dec);
+        a.set_maximum_step_size(1e-3_x,1e-1_x);
         auto search_space2 = a.search_space();
         ARIADNE_TEST_PRINT(search_space2);
         point = search_space2.initial_point();
@@ -164,9 +161,9 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(b.is_singleton());
         ARIADNE_TEST_PRINT(b);
 
-        TaskSearchParameter p1("use_reconditioning",false,List<int>({0,1}));
-        TaskSearchParameter p2("maximum_step_size",true,List<int>({-3,-1}));
-        TaskSearchParameter p3("sweep_threshold",true,List<int>({-10,-8}));
+        TaskSearchParameter p1(ConfigurationPropertyPath("use_reconditioning"),false,List<int>({0,1}));
+        TaskSearchParameter p2(ConfigurationPropertyPath("maximum_step_size"),true,List<int>({-3,-1}));
+        TaskSearchParameter p3(ConfigurationPropertyPath("sweep_threshold"),true,List<int>({-10,-8}));
         TaskSearchSpace search_space3({p1,p2,p3});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space3.initial_point()));
         a.set_use_reconditioning(false);
@@ -177,30 +174,41 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(make_singleton(a,search_space5.initial_point()))
     }
 
-    template<class C> Configurable<C>* get_configurable_ptr(ConfigurationPropertyInterface* property) {
-        ARIADNE_PRECONDITION(property->is_single());
-        auto list_property_ptr = dynamic_cast<ListConfigurationProperty<C>*>(property);
-        ARIADNE_ASSERT_MSG(list_property_ptr != nullptr, "The property to find the configurable is not a ListConfigurationProperty.");
-        auto configurable_ptr = dynamic_cast<Configurable<C>*>(list_property_ptr->get());
-        return configurable_ptr;
-    }
-
-    void test_configuration_hierarchic() {
+    void test_configuration_hierarchic_search_space() {
         Configuration<A> ca;
         Configuration<TestConfigurable> ctc;
         ctc.set_both_use_something();
         TestConfigurable tc(ctc);
         ca.set_test_configurable(tc);
-        ConfigurationPropertyInterface* property = ca.properties()["test_configurable"].get();
-        auto values = property->nested_integer_values();
-        ARIADNE_TEST_PRINT(values);
+        ca.set_both_use_reconditioning();
+        auto search_space = ca.search_space();
+        ARIADNE_TEST_PRINT(ca);
+        ARIADNE_TEST_PRINT(search_space);
+        ARIADNE_TEST_EQUALS(search_space.dimension(),2);
+    }
+
+    void test_configuration_hierarchic_make_singleton() {
+        Configuration<A> ca;
+        Configuration<TestConfigurable> ctc;
+        ctc.set_both_use_something();
+        TestConfigurable tc(ctc);
+        ca.set_test_configurable(tc);
+        ca.set_both_use_reconditioning();
+        ARIADNE_TEST_PRINT(ca);
+        auto search_space = ca.search_space();
+        ARIADNE_TEST_PRINT(search_space);
+        auto point = search_space.initial_point();
+        ARIADNE_TEST_PRINT(point);
+        auto singleton = make_singleton(ca,point);
+        ARIADNE_TEST_PRINT(singleton);
     }
 
     void test() {
         ARIADNE_TEST_CALL(test_configuration_construction());
-        ARIADNE_TEST_CALL(test_configuration_search_space_generation());
+        ARIADNE_TEST_CALL(test_configuration_search_space());
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
-        ARIADNE_TEST_CALL(test_configuration_hierarchic());
+        ARIADNE_TEST_CALL(test_configuration_hierarchic_search_space());
+        ARIADNE_TEST_CALL(test_configuration_hierarchic_make_singleton());
     }
 };
 

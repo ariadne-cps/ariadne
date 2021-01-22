@@ -60,17 +60,26 @@ OutputStream& SearchableConfiguration::_write(OutputStream& os) const {
 }
 
 Bool SearchableConfiguration::is_singleton() const {
-    for (auto p : _properties) if (not p.second->is_single()) return false;
+    for (auto p : _properties) {
+        auto int_values = p.second->integer_values();
+        for (auto p_int : int_values) if (p_int.second.size() > 1) return false;
+    }
     return true;
 }
 
 TaskSearchSpace SearchableConfiguration::search_space() const {
-    ARIADNE_PRECONDITION(not is_singleton());
     Set<TaskSearchParameter> result;
     for (auto p : _properties) {
-        if (not p.second->is_single())
-            result.insert(TaskSearchParameter(p.first,p.second->is_metric(),p.second->integer_values()));
+        auto integer_values = p.second->integer_values();
+        for (auto p_int : integer_values) {
+            if (p_int.second.size() > 1) {
+                ConfigurationPropertyPath path(p_int.first);
+                path.prepend(p.first);
+                result.insert(TaskSearchParameter(path, p.second->is_metric(), p_int.second));
+            }
+        }
     }
+    ARIADNE_ASSERT_MSG(not result.empty(),"The search space is empty.");
     return result;
 }
 

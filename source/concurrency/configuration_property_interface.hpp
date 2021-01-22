@@ -29,12 +29,8 @@
 #ifndef ARIADNE_CONFIGURATION_PROPERTY_INTERFACE_HPP
 #define ARIADNE_CONFIGURATION_PROPERTY_INTERFACE_HPP
 
-#include <ostream>
-#include <type_traits>
 #include "utility/writable.hpp"
-#include "utility/macros.hpp"
 #include "utility/container.hpp"
-#include "utility/pointer.hpp"
 
 namespace Ariadne {
 
@@ -48,15 +44,17 @@ class ConfigurationPropertyInterface : public WritableInterface {
     virtual Bool is_specified() const = 0;
     //! \brief If the property class is metric
     virtual Bool is_metric() const = 0;
-    //! \brief The number of values that result from the discretisation in the integer space
+    //! \brief If the property object is a configurable itself
+    virtual Bool is_configurable() const = 0;
+    //! \brief The number of values stored for the property
     //! \details Returns 1 if single, 0 if not specified.
     virtual SizeType cardinality() const = 0;
-    //! \brief The integer values identified by this property value(s)
-    virtual List<int> integer_values() const = 0;
-    //! \brief Set the property to the single value corresponding to the search space \a integer_value
-    virtual void set_single(int integer_value) = 0;
-    virtual void nested_set_single(ConfigurationPropertyPath const& path, int integer_value) = 0;
-    virtual Map<ConfigurationPropertyPath,List<int>> nested_integer_values() const = 0;
+    //! \brief Set to a single value a given path, starting from this property
+    //! \details Supports the storage of objects that are Configurable themselves
+    virtual void set_single(ConfigurationPropertyPath const& path, int integer_value) = 0;
+    //! \brief The integer values for each property including the current one
+    //! \details Supports the storage of objects that are Configurable themselves
+    virtual Map<ConfigurationPropertyPath,List<int>> integer_values() const = 0;
 
     virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;

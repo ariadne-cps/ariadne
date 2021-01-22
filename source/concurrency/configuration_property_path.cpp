@@ -23,10 +23,13 @@
  */
 
 #include "../utility/macros.hpp"
-#include "../symbolic/identifier.hpp"
 #include "../concurrency/configuration_property_path.hpp"
 
 namespace Ariadne {
+
+ConfigurationPropertyPath::ConfigurationPropertyPath(Identifier const& first) {
+    _path.push_back(first);
+}
 
 ConfigurationPropertyPath::ConfigurationPropertyPath(ConfigurationPropertyPath const& path) {
     _path = path._path;
@@ -38,9 +41,11 @@ ConfigurationPropertyPath& ConfigurationPropertyPath::operator=(ConfigurationPro
 }
 
 Bool ConfigurationPropertyPath::operator<(ConfigurationPropertyPath const& path) const {
-    if (_path.size() < path._path.size()) return true;
-    else if (_path.size() > path._path.size()) return false;
-    else return (repr() < path.repr());
+    return this->repr() < path.repr();
+}
+
+Bool ConfigurationPropertyPath::operator==(ConfigurationPropertyPath const& path) const {
+    return this->repr() == path.repr();
 }
 
 Identifier ConfigurationPropertyPath::repr() const {
@@ -61,6 +66,10 @@ void ConfigurationPropertyPath::append(Identifier const& node) {
 void ConfigurationPropertyPath::prepend(Identifier const& node) {
     ARIADNE_PRECONDITION(not node.empty());
     _path.push_front(node);
+}
+
+Identifier ConfigurationPropertyPath::first() const {
+    return _path.front();
 }
 
 ConfigurationPropertyPath ConfigurationPropertyPath::subpath() const {

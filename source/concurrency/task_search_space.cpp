@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "symbolic/identifier.hpp"
+#include "concurrency/configuration_property_path.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
 
@@ -37,8 +37,8 @@ TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        int v = bindings.find(p.name())->second;
-        pb.insert(Pair<Identifier,int>(p.name(), v));
+        int v = bindings.find(p.path())->second;
+        pb.insert(Pair<ConfigurationPropertyPath,int>(p.path(), v));
     }
     return TaskSearchPoint(*this, pb);
 }
@@ -46,7 +46,7 @@ TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings
 TaskSearchPoint TaskSearchSpace::initial_point() const {
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
-        pb.insert(Pair<Identifier,int>(p.name(), p.random_value()));
+        pb.insert(Pair<ConfigurationPropertyPath,int>(p.path(), p.random_value()));
     }
     return TaskSearchPoint(*this, pb);
 }
@@ -56,14 +56,14 @@ SizeType TaskSearchSpace::index(TaskSearchParameter const& p) const {
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");
 }
 
-SizeType TaskSearchSpace::index(Identifier const& name) const {
-    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).name() == name) return i;
-    ARIADNE_FAIL_MSG("Task parameter named '" << name << "' not found in the space.");
+SizeType TaskSearchSpace::index(ConfigurationPropertyPath const& path) const {
+    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).path() == path) return i;
+    ARIADNE_FAIL_MSG("Task parameter with path '" << path << "' not found in the space.");
 }
 
-TaskSearchParameter const& TaskSearchSpace::parameter(Identifier const& name) const {
-    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).name() == name) return _parameters.at(i);
-    ARIADNE_FAIL_MSG("Task parameter named '" << name << "' not found in the space.");
+TaskSearchParameter const& TaskSearchSpace::parameter(ConfigurationPropertyPath const& path) const {
+    for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).path() == path) return _parameters.at(i);
+    ARIADNE_FAIL_MSG("Task parameter with path '" << path << "' not found in the space.");
 }
 
 List<TaskSearchParameter> const& TaskSearchSpace::parameters() const {

@@ -286,6 +286,43 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     previous_step_size = out.step_size_used;
 }
 
+Task<VectorFieldEvolver>::Task() : ParameterSearchTaskBase<C>("stp",
+  TaskAppraisalSpaceBuilder<C>()
+    .add(execution_time_appraisal_parameter<C>)
+    .add(ScalarAppraisalParameter<C>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,
+                                     [](TaskInput<C> const& i,TaskOutput<C> const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
+    /*.add(VectorAppraisalParameter<R>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+    [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
+    [](I const& i){ return i.current_set_bounds.dimension(); }))*/
+    .build()) { }
+
+auto Task<VectorFieldEvolver>::run_task(TaskInput<C> const& in, Configuration<C> const& cfg) const -> TaskOutput<C> {
+    LabelledEnclosure next_set = in.current_set;
+    LabelledEnclosure reach_set = in.current_set;
+    Dyadic next_time = in.current_time;
+    Dyadic chosen_step_size = cfg.maximum_step_size();
+
+    if(cfg.enable_reconditioning() && possibly(norm(next_set.state_function().errors()) > cfg.maximum_spacial_error())) {
+        ARIADNE_LOG_PRINTLN_AT(1,"reconditioning from errors "<<next_set.state_function().errors());
+        next_set.recondition();
+    }
+
+    auto set_bounds=cast_exact_box(next_set.euclidean_set().bounding_box());
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, set_bounds);
+
+    FlowStepModelType flow_model = cfg.integrator().flow_step(in.dynamic, set_bounds, in.previous_step_size,chosen_step_size);
+
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, chosen_step_size);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, flow_model);
+    next_time += chosen_step_size;
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_time);
+    reach_set.apply_full_reach_step(flow_model);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, reach_set);
+    next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
+    return TaskOutput<C>(next_set, reach_set, next_time, chosen_step_size);
+}
+
 Configuration<VectorFieldEvolver>::Configuration() {
     add_property("enable_premature_termination",BooleanConfigurationProperty(false));
     add_property("enable_reconditioning",BooleanConfigurationProperty(false));

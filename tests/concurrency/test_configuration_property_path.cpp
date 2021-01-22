@@ -34,8 +34,10 @@ class TestConfigurationPropertyPath {
     void test_construction() {
         ConfigurationPropertyPath p;
         ARIADNE_TEST_EQUALS(p.repr(),"./");
-        ConfigurationPropertyPath p2(p);
-        ARIADNE_TEST_EQUALS(p2.repr(),"./");
+        ConfigurationPropertyPath p2("child");
+        ARIADNE_TEST_EQUALS(p2.repr(),"./child/");
+        ConfigurationPropertyPath p3(p);
+        ARIADNE_TEST_EQUALS(p3.repr(),"./");
     }
 
     void test_append() {
@@ -54,12 +56,15 @@ class TestConfigurationPropertyPath {
         ARIADNE_TEST_EQUALS(p.repr(),"./child1/child2/");
     }
 
-    void test_subpath() {
+    void test_first_subpath() {
         ConfigurationPropertyPath p;
-        p.append("child");
-        ARIADNE_TEST_EQUALS(p.repr(),"./child/");
-        auto ps = p.subpath();
-        ARIADNE_TEST_EQUALS(ps.repr(),"./");
+        p.append("child1");
+        p.append("child2");
+        ARIADNE_TEST_EQUALS(p.repr(),"./child1/child2/");
+        auto sp = p.subpath();
+        ARIADNE_TEST_EQUALS(sp.repr(),"./child2/");
+        auto f = p.first();
+        ARIADNE_TEST_EQUALS(f,"child1");
     }
 
     void test_copy() {
@@ -71,11 +76,25 @@ class TestConfigurationPropertyPath {
         ARIADNE_TEST_EQUALS(p2.repr(),"./child1/child2/");
     }
 
+    void test_less_equal() {
+        ConfigurationPropertyPath p1;
+        p1.append("child1");
+        ConfigurationPropertyPath p2;
+        p2.append("child1");
+        ARIADNE_TEST_EQUAL(p1,p2);
+        p2.append("child2");
+        ARIADNE_TEST_ASSERT(p1<p2);
+        p2.prepend("child0");
+        ARIADNE_TEST_ASSERT(p2<p1);
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_construction());
         ARIADNE_TEST_CALL(test_append());
-        ARIADNE_TEST_CALL(test_subpath());
+        ARIADNE_TEST_CALL(test_prepend());
+        ARIADNE_TEST_CALL(test_first_subpath());
         ARIADNE_TEST_CALL(test_copy());
+        ARIADNE_TEST_CALL(test_less_equal());
     }
 };
 

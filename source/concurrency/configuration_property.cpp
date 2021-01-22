@@ -23,13 +23,10 @@
  */
 
 #include <ostream>
-#include <type_traits>
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "symbolic/identifier.hpp"
-#include "solvers/configuration.hpp"
 #include "concurrency/configuration_property.hpp"
 #include "concurrency/configuration_property.tpl.hpp"
 
@@ -57,25 +54,29 @@ Bool BooleanConfigurationProperty::is_metric() const {
     return false;
 }
 
+Bool BooleanConfigurationProperty::is_configurable() const {
+    return false;
+}
+
 SizeType BooleanConfigurationProperty::cardinality() const {
     if (_is_single) return 1;
     else if (this->is_specified()) return 2;
     else return 0;
 }
 
-List<int> BooleanConfigurationProperty::integer_values() const {
+List<int> BooleanConfigurationProperty::local_integer_values() const {
     List<int> result;
     if (_is_single) result.push_back(_value);
-    else { result.push_back(0); result.push_back(1); }
+    else if (is_specified()) { result.push_back(0); result.push_back(1); }
     return result;
 }
 
-void BooleanConfigurationProperty::nested_set_single(ConfigurationPropertyPath const& path, int integer_value) {
+void BooleanConfigurationProperty::set_single(ConfigurationPropertyPath const& path, int integer_value) {
     ARIADNE_PRECONDITION(path.is_root());
-    set_single(integer_value);
+    local_set_single(integer_value);
 }
 
-void BooleanConfigurationProperty::set_single(int integer_value) {
+void BooleanConfigurationProperty::local_set_single(int integer_value) {
     ARIADNE_PRECONDITION(not _is_single);
     ARIADNE_PRECONDITION(integer_value == 0 or integer_value == 1);
     _is_single = true;

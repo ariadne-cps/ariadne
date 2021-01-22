@@ -26,13 +26,13 @@
 
 namespace Ariadne {
 
-TaskSearchParameter::TaskSearchParameter(Identifier const& name, Bool is_metric, List<int> const& values) :
-    _name(name), _is_metric(is_metric), _values(values) {
+TaskSearchParameter::TaskSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values) :
+    _path(path), _is_metric(is_metric), _values(values) {
     ARIADNE_PRECONDITION(values.size()>1);
 }
 
-Identifier const& TaskSearchParameter::name() const {
-    return _name;
+ConfigurationPropertyPath const& TaskSearchParameter::path() const {
+    return _path;
 }
 
 List<int> const& TaskSearchParameter::values() const {
@@ -62,15 +62,15 @@ int TaskSearchParameter::shifted_value_from(int value) const {
 }
 
 Bool TaskSearchParameter::operator==(TaskSearchParameter const& p) const {
-    return name() == p.name();
+    return path() == p.path();
 }
 
 Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
-    return name() < p.name();
+    return path() < p.path();
 }
 
 OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
-    os << "{'" << name() << "', is_metric=" << _is_metric << ", values=";
+    os << "{'" << path() << "', is_metric=" << _is_metric << ", values=";
     if (_is_metric) os << "[" << _values[0] << ":" << _values[_values.size()-1] << "]";
     else os << _values;
     return os << "}";

@@ -25,29 +25,20 @@
 #ifndef ARIADNE_CONFIGURABLE_TPL_HPP
 #define ARIADNE_CONFIGURABLE_TPL_HPP
 
-#include <ostream>
-#include <type_traits>
-#include "utility/writable.hpp"
 #include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/pointer.hpp"
-#include "numeric/builtin.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
 #include "concurrency/configurable.hpp"
 
 namespace Ariadne {
 
-template<class C>
-Configurable<C>::Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
+template<class C> Configurable<C>::Configurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
 
-template<class C>
-Configuration<C> const& Configurable<C>::configuration() const {
+template<class C> Configuration<C> const& Configurable<C>::configuration() const {
     return *_configuration;
 }
 
-template<class C>
-SearchableConfiguration const& Configurable<C>::searchable_configuration() const {
+template<class C> SearchableConfiguration const& Configurable<C>::searchable_configuration() const {
     return dynamic_cast<SearchableConfiguration const &>(*_configuration);
 }
 
@@ -55,10 +46,9 @@ SearchableConfiguration const& Configurable<C>::searchable_configuration() const
 template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, TaskSearchPoint const& p) {
     auto result = cfg;
     for (auto param : p.space().parameters()) {
-        auto prop_ptr = result.properties().find(param.name());
-        ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The TaskSearchPoint parameter '" << param.name() << "' is not in the configuration.");
-        ARIADNE_ASSERT_MSG(not prop_ptr->second->is_single(), "The ConfigurationProperty '" << prop_ptr->first << "' is already single thus cannot be made single.");
-        prop_ptr->second->set_single(p.value(prop_ptr->first));
+        auto prop_ptr = result.properties().find(param.path().first());
+        ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The TaskSearchPoint parameter '" << param.path() << "' is not in the configuration.");
+        prop_ptr->second->set_single(param.path().subpath(),p.value(param.path()));
     }
     ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, configuration could not be made singleton.");
     return result;

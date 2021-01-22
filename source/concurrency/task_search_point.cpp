@@ -59,7 +59,7 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
                 value = param.shifted_value_from(value);
                 shifted = true;
             }
-            shifted_bindings.insert(std::pair<Identifier,int>(param.name(), value));
+            shifted_bindings.insert(std::pair<ConfigurationPropertyPath,int>(param.path(), value));
         }
         result.insert(space.make_point(shifted_bindings));
 
@@ -91,7 +91,7 @@ TaskSearchPoint TaskSearchPoint::make_adjacent_shifted() const {
             value = param.shifted_value_from(value);
             shifted = true;
         }
-        shifted_bindings.insert(std::pair<Identifier, int>(param.name(), value));
+        shifted_bindings.insert(std::pair<ConfigurationPropertyPath, int>(param.path(), value));
     }
     return space.make_point(shifted_bindings);
 }
@@ -108,16 +108,16 @@ ParameterBindingsMap const& TaskSearchPoint::bindings() const {
     return _bindings;
 }
 
-int TaskSearchPoint::value(Identifier const& name) const {
-    return _bindings.at(name);
+int TaskSearchPoint::value(ConfigurationPropertyPath const& path) const {
+    return _bindings.at(path);
 }
 
-SizeType TaskSearchPoint::index(Identifier const& name) const {
-    return _space->index(name);
+SizeType TaskSearchPoint::index(ConfigurationPropertyPath const& path) const {
+    return _space->index(path);
 }
 
-TaskSearchParameter const& TaskSearchPoint::parameter(Identifier const& name) const {
-    return _space->parameter(name);
+TaskSearchParameter const& TaskSearchPoint::parameter(ConfigurationPropertyPath const& path) const {
+    return _space->parameter(path);
 }
 
 TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
@@ -151,7 +151,7 @@ Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
     for (auto b : _bindings) {
         auto const& param = parameter(b.first);
         auto const v1 = b.second;
-        auto const v2 = p._bindings.at(param.name());
+        auto const v2 = p._bindings.at(param.path());
         if (param.is_metric()) result += (v1 > v2 ? (Nat)(v1 - v2) : (Nat)(v2 - v1));
         else result += (v1 == v2 ? 0 : 1);
     }

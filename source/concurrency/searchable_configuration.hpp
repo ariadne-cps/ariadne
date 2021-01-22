@@ -38,7 +38,6 @@
 #include "symbolic/identifier.hpp"
 #include "solvers/configuration.hpp"
 #include "concurrency/configuration_property_interface.hpp"
-#include "concurrency/configuration_property.tpl.hpp"
 
 namespace Ariadne {
 

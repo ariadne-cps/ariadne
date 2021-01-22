@@ -35,13 +35,14 @@
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "symbolic/identifier.hpp"
+#include "concurrency/configuration_property_path.hpp"
 
 namespace Ariadne {
 
 class TaskSearchParameter : public WritableInterface {
   public:
-    TaskSearchParameter(Identifier const& name, Bool is_metric, List<int> const& values);
-    Identifier const& name() const;
+    TaskSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values);
+    ConfigurationPropertyPath const& path() const;
     //! \brief Admissible values
     List<int> const& values() const;
     //! \brief Whether the parameter should shift to adjacent values instead of hopping between values
@@ -57,7 +58,7 @@ class TaskSearchParameter : public WritableInterface {
     OutputStream& _write(OutputStream& os) const override;
 
   private:
-    const Identifier _name;
+    const ConfigurationPropertyPath _path;
     const Bool _is_metric;
     const List<int> _values;
 };

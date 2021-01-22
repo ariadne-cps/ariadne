@@ -38,7 +38,7 @@ class TaskSearchPoint;
 class Real;
 template<class R> class Variable;
 
-using ParameterBindingsMap = Map<Identifier,int>;
+using ParameterBindingsMap = Map<ConfigurationPropertyPath,int>;
 
 class TaskSearchSpace : public WritableInterface {
   public:
@@ -56,9 +56,9 @@ class TaskSearchSpace : public WritableInterface {
     //! \brief The index of the given parameter in the ordered space
     SizeType index(TaskSearchParameter const& p) const;
     //! \brief The index of the given parameter identifier in the ordered space
-    SizeType index(Identifier const& name) const;
-    //! \brief The parameter corresponding to the identifier \a name
-    TaskSearchParameter const& parameter(Identifier const& name) const;
+    SizeType index(ConfigurationPropertyPath const& name) const;
+    //! \brief The parameter corresponding to the path \a path
+    TaskSearchParameter const& parameter(ConfigurationPropertyPath const& path) const;
 
     TaskSearchSpace* clone() const;
 

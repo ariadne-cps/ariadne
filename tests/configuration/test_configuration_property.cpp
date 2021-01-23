@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "concurrency/searchable_configuration.hpp"
-#include "concurrency/configuration_property.tpl.hpp"
+#include "configuration/searchable_configuration.hpp"
+#include "configuration/configuration_property.tpl.hpp"
 #include "solvers/integrator.hpp"
 #include "../test.hpp"
 

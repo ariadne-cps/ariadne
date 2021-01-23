@@ -35,7 +35,7 @@
 #include "../concurrency/task_search_point.hpp"
 #include "../concurrency/task_search_space.hpp"
 #include "../concurrency/task_appraisal.hpp"
-#include "../concurrency/configuration_property.tpl.hpp"
+#include "configuration/configuration_property.tpl.hpp"
 
 namespace Ariadne {
 

@@ -32,7 +32,7 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_interface.hpp"
-#include "../concurrency/configurable.hpp"
+#include "configuration/configurable.hpp"
 
 namespace Ariadne {
 

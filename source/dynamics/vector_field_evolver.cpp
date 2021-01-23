@@ -25,13 +25,6 @@
 #include "../function/functional.hpp"
 #include "../config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/container.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
 #include "../function/constraint.hpp"
 #include "../function/taylor_function.hpp"
 #include "../dynamics/enclosure.hpp"
@@ -42,8 +35,6 @@
 #include "../output/progress_indicator.hpp"
 
 #include "../concurrency/concurrency_manager.hpp"
-#include "../concurrency/search_space_converter.hpp"
-#include "../concurrency/configuration_property.tpl.hpp"
 
 #include "../dynamics/vector_field.hpp"
 #include "../dynamics/vector_field_evolver.hpp"

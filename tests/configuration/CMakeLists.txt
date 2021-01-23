@@ -1,8 +1,7 @@
 set(UNIT_TESTS
-    test_task_search_parameter
-    test_task_appraisal_parameter
-    test_buffer
-    test_concurrency_manager
+    test_configuration_property
+    test_searchable_configuration
+    test_configuration_property_path
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -12,7 +11,7 @@ foreach(TEST ${UNIT_TESTS})
     endif()    
     target_link_libraries(${TEST} ariadne)
     add_test(${TEST} ${TEST})    
-    set_property(TEST ${TEST} PROPERTY LABELS "concurrency;primary")
+    set_property(TEST ${TEST} PROPERTY LABELS "configuration;primary")
 endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})

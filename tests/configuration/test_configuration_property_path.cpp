@@ -23,7 +23,7 @@
  */
 
 #include "symbolic/identifier.hpp"
-#include "concurrency/configuration_property_path.hpp"
+#include "configuration/configuration_property_path.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;

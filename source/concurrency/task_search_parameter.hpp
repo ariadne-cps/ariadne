@@ -35,7 +35,7 @@
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "symbolic/identifier.hpp"
-#include "concurrency/configuration_property_path.hpp"
+#include "configuration/configuration_property_path.hpp"
 
 namespace Ariadne {
 

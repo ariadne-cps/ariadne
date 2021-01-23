@@ -28,7 +28,7 @@
 #include "utility/macros.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
-#include "concurrency/configurable.hpp"
+#include "configurable.hpp"
 
 namespace Ariadne {
 

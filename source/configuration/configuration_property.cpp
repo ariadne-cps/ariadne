@@ -27,8 +27,8 @@
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "concurrency/configuration_property.hpp"
-#include "concurrency/configuration_property.tpl.hpp"
+#include "configuration_property.hpp"
+#include "configuration_property.tpl.hpp"
 
 namespace Ariadne {
 

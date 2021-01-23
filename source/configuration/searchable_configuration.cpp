@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "concurrency/searchable_configuration.hpp"
+#include "searchable_configuration.hpp"
 #include "concurrency/task_search_space.hpp"
 
 namespace Ariadne {

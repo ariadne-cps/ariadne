@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/macros.hpp"
-#include "../concurrency/configuration_property_path.hpp"
+#include "utility/macros.hpp"
+#include "configuration_property_path.hpp"
 
 namespace Ariadne {
 

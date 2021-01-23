@@ -31,9 +31,9 @@
 
 #include <utility>
 #include <deque>
-#include "../symbolic/identifier.hpp"
-#include "../utility/typedefs.hpp"
-#include "../utility/writable.hpp"
+#include "symbolic/identifier.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 

@@ -30,7 +30,7 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 
 
-#include "../solvers/configuration.hpp"
+#include "configuration/configuration.hpp"
 #include "../dynamics/reachability_analyser.hpp"
 #include "../hybrid/hybrid_set.decl.hpp"
 #include "../hybrid/hybrid_set_interface.hpp"

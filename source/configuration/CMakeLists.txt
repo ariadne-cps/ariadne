@@ -1,11 +1,9 @@
-set(LIBRARY_NAME ariadne-concurrency)
+set(LIBRARY_NAME ariadne-configuration)
 
 add_library(${LIBRARY_NAME} OBJECT
-        concurrency_manager.cpp
-        task_search_parameter.cpp
-        task_search_space.cpp
-        task_search_point.cpp
-        task_appraisal.cpp
+        searchable_configuration.cpp
+        configuration_property_path.cpp
+        configuration_property.cpp
         )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

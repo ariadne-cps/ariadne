@@ -112,7 +112,11 @@ template<class T> List<int> RangeConfigurationProperty<T>::local_integer_values(
     if (this->is_specified()) {
         int min_value = _converter->to_int(_lower);
         int max_value = _converter->to_int(_upper);
-        for (int i=min_value; i<=max_value; ++i) result.push_back(i);
+        std::cout << "min_value = " << min_value << ", max_value = " << max_value << std::endl;
+        ARIADNE_ASSERT_MSG(not(max_value == std::numeric_limits<int>::max() and min_value < std::numeric_limits<int>::max()), "An upper bounded range is required.");
+        ARIADNE_ASSERT_MSG(not(min_value == std::numeric_limits<int>::min() and max_value > std::numeric_limits<int>::min()), "A lower bounded range is required.");
+        if (min_value == max_value) result.push_back(min_value); // Necessary to address the +inf case
+        else for (int i=min_value; i<=max_value; ++i) result.push_back(i);
     }
     return result;
 }

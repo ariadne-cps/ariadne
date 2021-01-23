@@ -256,7 +256,12 @@ Int main(Int argc, const char* argv[]) {
 
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-10);
 
-    TaylorPicardIntegrator taylor_picard_integrator(
+    Configuration<TaylorPicardIntegrator> config;
+    config.set_step_maximum_error(1e-6);
+    config.set_lipschitz_tolerance(0.5);
+    config.set_minimum_temporal_order(0);
+    config.set_maximum_temporal_order(16);
+    TaylorPicardIntegrator taylor_picard_integrator(config,
             maximum_error=1e-6,sweeper,lipschitz_constant=0.5,
             step_maximum_error=1e-8,minimum_temporal_order=0,maximum_temporal_order=16);
     TestIntegrator(taylor_picard_integrator).test();

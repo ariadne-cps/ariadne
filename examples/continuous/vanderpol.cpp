@@ -32,6 +32,7 @@ int main(int argc, const char* argv[])
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
     ConcurrencyManager::instance().set_concurrency(4);
+    Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
@@ -40,15 +41,15 @@ int main(int argc, const char* argv[])
 
     VectorField system({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
 
-    MaximumError max_err=1e-6;
-    StartingStepSizeNumRefinements num_ref=2;
-    TaylorPicardIntegrator integrator(max_err,
-                                      ThresholdSweeper<FloatDP>(DoublePrecision(),max_err.value()/1024),
-                                      LipschitzConstant(0.5),
-                                      num_ref);
+    double max_err = 1e-6;
+    Configuration<TaylorPicardIntegrator> integrator_config;
+    integrator_config.set_step_maximum_error(1e-6);
+    integrator_config.set_starting_step_size_num_refinements(2);
+    integrator_config.set_sweeper(ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1024));
+    TaylorPicardIntegrator integrator(integrator_config,max_err,ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1024),LipschitzConstant(0.5),StartingStepSizeNumRefinements(2));
 
-    Configuration<VectorFieldEvolver> configuration;
-    configuration.set_maximum_step_size(0.0001,0.1);
+    Configuration<VectorFieldEvolver> configuration(integrator);
+    configuration.set_maximum_step_size(0.1);
     configuration.set_integrator(integrator);
     VectorFieldEvolver evolver(system,configuration);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());

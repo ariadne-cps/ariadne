@@ -79,15 +79,15 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
-IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l, StartingStepSizeNumRefinements nr)
-    :  Configurable<IntegratorBase>(Configuration<IntegratorBase>()), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l)), _starting_step_size_num_refinements(nr), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
+IntegratorBase::IntegratorBase(SearchableConfiguration const& config, MaximumError e, LipschitzConstant l, StartingStepSizeNumRefinements nr)
+    :  Configurable<IntegratorBase>(config), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l)), _starting_step_size_num_refinements(nr), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(_maximum_error>0.0_x);
     ARIADNE_PRECONDITION(_lipschitz_tolerance>0.0_x)
 }
 
-IntegratorBase::IntegratorBase(MaximumError e, Sweeper<FloatDP> s, LipschitzConstant l, StartingStepSizeNumRefinements nr)
-    :  Configurable<IntegratorBase>(Configuration<IntegratorBase>()), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l))
+IntegratorBase::IntegratorBase(SearchableConfiguration const& config, MaximumError e, Sweeper<FloatDP> s, LipschitzConstant l, StartingStepSizeNumRefinements nr)
+    :  Configurable<IntegratorBase>(config), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l))
     , _starting_step_size_num_refinements(nr)
     , _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
 {
@@ -169,36 +169,28 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     }
 }
 
-Configuration<IntegratorBase>::Configuration() {
-    add_property("maximum_error",RealTypeProperty(inf,Log10SearchSpaceConverter<RealType>()));
-    add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,LinearSearchSpaceConverter<RealType>()));
-    add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>()));
-    add_property("function_factory",FunctionFactoryProperty(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-8))));
-    add_property("bounder",BounderProperty(EulerBounder()));
-}
-
 inline ExactDouble operator*(ExactDouble, TwoExp);
 inline ExactDouble operator/(ExactDouble, TwoExp);
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err)
-    : TaylorPicardIntegrator(err,ThresholdSweeper<FloatDP>(DP(),err.value()/1024),LipschitzConstant(0.5),StartingStepSizeNumRefinements(0),
+TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err)
+    : TaylorPicardIntegrator(config,err,ThresholdSweeper<FloatDP>(DP(),err.value()/1024),LipschitzConstant(0.5),StartingStepSizeNumRefinements(0),
                              StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip)
-    : TaylorPicardIntegrator(err,sweeper,lip,0,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip)
+    : TaylorPicardIntegrator(config,err,sweeper,lip,0,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr)
-    : TaylorPicardIntegrator(err,sweeper,lip,nr,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr)
+    : TaylorPicardIntegrator(config,err,sweeper,lip,nr,StepMaximumError(err.value()/128),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
                                                StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,sweeper,lip,0), _step_maximum_error(cast_exact(lerr.value())), _sweeper(sweeper)
-        , _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
+        : IntegratorBase(config,err,sweeper,lip,0), Configurable<TaylorPicardIntegrator>(config),
+        _step_maximum_error(cast_exact(lerr.value())), _sweeper(sweeper), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
-TaylorPicardIntegrator::TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,
+TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,
                                                StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
-    : IntegratorBase(err,sweeper,lip,nr), _step_maximum_error(cast_exact(lerr.value())), _sweeper(sweeper)
-    , _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
+    : IntegratorBase(config,err,sweeper,lip,nr), Configurable<TaylorPicardIntegrator>(config),
+    _step_maximum_error(cast_exact(lerr.value())), _sweeper(sweeper), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
 FlowStepModelType
 TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
@@ -275,15 +267,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
 
 Void TaylorPicardIntegrator::_write(OutputStream& os) const {
-    os << "TaylorPicardIntegrator"
-       << "(maximum_error = " << this->maximum_error()
-       << ", function_factory = " << this->function_factory()
-       << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
-       << ", step_maximum_error = " << this->step_maximum_error()
-       << ", sweeper = " << this->sweeper()
-       << ", minimum_temporal_order = " << this->minimum_temporal_order()
-       << ", maximum_temporal_order = " << this->maximum_temporal_order()
-       << " )";
+    os << "TaylorPicardIntegrator" << Configurable<TaylorPicardIntegrator>::configuration();
 }
 
 } // namespace Ariadne
@@ -307,7 +291,7 @@ static const LipschitzConstant DEFAULT_LIPSCHITZ_CONSTANT(0.5_x);
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(
         MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, Order ord)
-    : IntegratorBase(err,sweeper,lip,0), _sweeper(sweeper), _order(ord)
+    : IntegratorBase(/* FIXME */ Configuration<TaylorPicardIntegrator>(),err,sweeper,lip,0), _sweeper(sweeper), _order(ord)
 { }
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(
@@ -334,7 +318,7 @@ GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(
         MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StepMaximumError stperr,
         MinimumSpacialOrder minso, MinimumTemporalOrder minto,
         MaximumSpacialOrder maxso, MaximumTemporalOrder maxto)
-    : IntegratorBase(err,sweeper,lip,0), _step_maximum_error(cast_exact(stperr.value())), _sweeper(sweeper)
+    : IntegratorBase(/* FIXME */Configuration<TaylorPicardIntegrator>(),err,sweeper,lip,0), _step_maximum_error(cast_exact(stperr.value())), _sweeper(sweeper)
     , _minimum_spacial_order(minso), _minimum_temporal_order(minto), _maximum_spacial_order(maxso), _maximum_temporal_order(maxto)
 { }
 
@@ -890,10 +874,10 @@ template<class X> Void truncate(Vector< Differential<X> >& x, DegreeType spacial
 }
 
 AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, TemporalOrder temporal_order_)
-    : IntegratorBase(maximum_error_,lipschitz_constant=0.5,0), _spacial_order(1u), _temporal_order(temporal_order_) { }
+    : IntegratorBase(/* FIXME */Configuration<TaylorPicardIntegrator>(),maximum_error_,lipschitz_constant=0.5,0), _spacial_order(1u), _temporal_order(temporal_order_) { }
 
 AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, SpacialOrder spacial_order_, TemporalOrder temporal_order_)
-    : IntegratorBase(maximum_error_,lipschitz_constant=0.5,0), _spacial_order(spacial_order_), _temporal_order(temporal_order_) { }
+    : IntegratorBase(/* FIXME */Configuration<TaylorPicardIntegrator>(),maximum_error_,lipschitz_constant=0.5,0), _spacial_order(spacial_order_), _temporal_order(temporal_order_) { }
 
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& dom) const

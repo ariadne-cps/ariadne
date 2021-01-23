@@ -43,7 +43,7 @@
 namespace Ariadne {
 
 template class RangeConfigurationProperty<ExactDouble>;
-template class ListConfigurationProperty<IntegratorInterface>;
+template class InterfaceConfigurationProperty<IntegratorInterface>;
 
 namespace {
 
@@ -316,17 +316,6 @@ auto Task<VectorFieldEvolver>::run_task(TaskInput<C> const& in, Configuration<C>
     ARIADNE_LOG_PRINTLN_VAR_AT(1, next_set);
     return TaskOutput<C>(next_set, reach_set, next_time, chosen_step_size);
 }
-
-Configuration<VectorFieldEvolver>::Configuration() {
-    add_property("enable_premature_termination",BooleanConfigurationProperty(false));
-    add_property("enable_reconditioning",BooleanConfigurationProperty(false));
-    add_property("enable_subdivisions",BooleanConfigurationProperty(false));
-    add_property("integrator",ListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(1e-2)));
-    add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-    add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-    add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
-}
-
 
 }  // namespace Ariadne
 

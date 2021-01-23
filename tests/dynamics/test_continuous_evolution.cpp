@@ -101,8 +101,12 @@ Void TestContinuousEvolution::test() const
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8_pr);
 
     // Set up the evaluators
-    TaylorPicardIntegrator picard_integrator(maximum_error=1e-4_pr,sweeper,lipschitz_constant=0.5_x,
+
+    Configuration<TaylorPicardIntegrator> integrator_configuration;
+    integrator_configuration.set_step_maximum_error(1e-2);
+    TaylorPicardIntegrator picard_integrator(integrator_configuration,maximum_error=1e-4_pr,sweeper,lipschitz_constant=0.5_x,
                                              step_maximum_error=1e-6_pr,minimum_temporal_order=0,maximum_temporal_order=8);
+
     // Set up the evaluators
     GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4_pr,sweeper,lipschitz_constant=0.5_x,step_maximum_error=1e-6_pr,
                                              minimum_spacial_order=1,minimum_temporal_order=4,maximum_spacial_order=3,maximum_temporal_order=8);
@@ -125,7 +129,7 @@ Void TestContinuousEvolution::test() const
 //    initial_box[0]=ExactIntervalType(1.01,1.02);
 //    initial_box[1]=ExactIntervalType(0.51,0.52);
 
-    Configuration<VectorFieldEvolver> configuration;
+    Configuration<VectorFieldEvolver> configuration(integrator);
     configuration.set_integrator(integrator);
     configuration.set_enable_reconditioning(true);
     configuration.set_maximum_spacial_error(1e-2);
@@ -184,7 +188,9 @@ Void TestContinuousEvolution::failure_test() const
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8_pr);
 
     // Set up the evaluators
-    TaylorPicardIntegrator integrator(maximum_error=1e-6_pr,sweeper,lipschitz_constant=0.5_x,
+    Configuration<TaylorPicardIntegrator> integrator_configuration;
+    integrator_configuration.set_step_maximum_error(1e-6);
+    TaylorPicardIntegrator integrator(integrator_configuration,maximum_error=1e-6_pr,sweeper,lipschitz_constant=0.5_x,
                                       step_maximum_error=1e-8_pr,minimum_temporal_order=0,maximum_temporal_order=6);
 
     // Define the initial box
@@ -198,7 +204,7 @@ Void TestContinuousEvolution::failure_test() const
 
     VectorField failone_vf({dot(x)=1,dot(y)=-p*y+p});
 
-    Configuration<VectorFieldEvolver> configuration;
+    Configuration<VectorFieldEvolver> configuration(integrator);
     configuration.set_integrator(integrator);
     configuration.set_enable_reconditioning(true);
     configuration.set_maximum_spacial_error(1e-2);
@@ -249,8 +255,7 @@ Void TestContinuousEvolution::failure_test() const
     EffectiveVectorMultivariateFunction failtwo={o3,x1*x2/p,z3};
     VectorField failtwo_vf(failtwo);
 
-    Configuration<VectorFieldEvolver> configurationtwo;
-    configurationtwo.set_integrator(integrator);
+    Configuration<VectorFieldEvolver> configurationtwo(integrator);
     configurationtwo.set_enable_reconditioning(true);
     configurationtwo.set_maximum_spacial_error(1e-2);
     configurationtwo.set_maximum_enclosure_radius(enclosure_radius);

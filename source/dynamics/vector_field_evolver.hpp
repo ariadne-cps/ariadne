@@ -147,43 +147,51 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef ListConfigurationProperty<IntegratorInterface> IntegratorProperty;
+    typedef InterfaceConfigurationProperty<IntegratorInterface> IntegratorProperty;
 
-    Configuration();
+    Configuration(IntegratorInterface const& integrator) {
+        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
+        add_property("enable_reconditioning",BooleanConfigurationProperty(false));
+        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
+        add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(integrator));
+        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
+    }
 
     //! \brief Enable premature termination of lower evolution
-    Bool const& enable_premature_termination() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_premature_termination")).get(); }
-    void set_enable_premature_termination(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_premature_termination")).set(value); }
+    Bool const& enable_premature_termination() const { return at<BooleanConfigurationProperty>("enable_premature_termination").get(); }
+    void set_enable_premature_termination(Bool const& value) { at<BooleanConfigurationProperty>("enable_premature_termination").set(value); }
 
     //! \brief Enable reconditioning of basic sets
-    Bool const& enable_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_reconditioning")).get(); }
-    void set_enable_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set(value); }
-    void set_both_enable_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_reconditioning")).set_both(); }
+    Bool const& enable_reconditioning() const { return at<BooleanConfigurationProperty>("enable_reconditioning").get(); }
+    void set_enable_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("enable_reconditioning").set(value); }
+    void set_both_enable_reconditioning() { at<BooleanConfigurationProperty>("enable_reconditioning").set_both(); }
 
     //! \brief Enable subdivisions for upper evolution
-    Bool const& enable_subdivisions() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("enable_subdivisions")).get(); }
-    void set_enable_subdivisions(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("enable_subdivisions")).set(value); }
+    Bool const& enable_subdivisions() const { return at<BooleanConfigurationProperty>("enable_subdivisions").get(); }
+    void set_enable_subdivisions(Bool const& value) { at<BooleanConfigurationProperty>("enable_subdivisions").set(value); }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    RealType const& maximum_step_size() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_step_size")).get(); }
-    void set_maximum_step_size(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_step_size")).set(cast_exact(value)); }
-    void set_maximum_step_size(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_step_size")).set(cast_exact(lower),cast_exact(upper)); }
+    RealType const& maximum_step_size() const { return at<RealTypeProperty>("maximum_step_size").get(); }
+    void set_maximum_step_size(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(value)); }
+    void set_maximum_step_size(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(lower),cast_exact(upper)); }
 
     //! \brief The maximum allowable approximation error for reconditioning
-    RealType const& maximum_spacial_error() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_spacial_error")).get(); }
-    void set_maximum_spacial_error(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_spacial_error")).set(cast_exact(value)); }
-    void set_maximum_spacial_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_spacial_error")).set(cast_exact(lower),cast_exact(upper)); }
+    RealType const& maximum_spacial_error() const { return at<RealTypeProperty>("maximum_spacial_error").get(); }
+    void set_maximum_spacial_error(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(value)); }
+    void set_maximum_spacial_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(lower),cast_exact(upper)); }
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
-    RealType const& maximum_enclosure_radius() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_enclosure_radius")).get(); }
-    void set_maximum_enclosure_radius(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_enclosure_radius")).set(cast_exact(value)); }
+    RealType const& maximum_enclosure_radius() const { return at<RealTypeProperty>("maximum_enclosure_radius").get(); }
+    void set_maximum_enclosure_radius(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_enclosure_radius").set(cast_exact(value)); }
 
     //! \brief The integrator to be used.
-    IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorProperty const&>(*properties().get("integrator")).get(); }
-    void set_integrator(IntegratorInterface const& integrator) { dynamic_cast<IntegratorProperty&>(*properties().get("integrator")).set(integrator); }
-    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { dynamic_cast<IntegratorProperty&>(*properties().get("integrator")).set(integrator); }
+    IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
+    void set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); }
+    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); }
 };
 
 template<> struct TaskInput<VectorFieldEvolver> {

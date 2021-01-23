@@ -67,17 +67,24 @@ class TestInclusionIntegrator {
         SizeType period_of_parameter_reduction=12;
         ExactDouble ratio_of_parameters_to_keep=6.0_x;
         ExactDouble sw_threshold = 1e-8_pr;
-        ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
-
+        SweeperDP sweeper = ThresholdSweeperDP(DoublePrecision(),sw_threshold);
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
+        Configuration<TaylorPicardIntegrator> config;
+        config.set_step_maximum_error(1e-3);
+        config.set_sweeper(sweeper);
+        config.set_lipschitz_tolerance(0.5);
+        config.set_maximum_temporal_order(12);
+        config.set_minimum_temporal_order(4);
 
-        TaylorPicardIntegrator integrator(
+        TaylorPicardIntegrator integrator(config,
                 maximum_error=1e-3_pr,
                 sweeper,
                 lipschitz_constant=0.5_x,
                 step_maximum_error=1e-3_pr,
                 minimum_temporal_order=4,
                 maximum_temporal_order=12);
+
+        std::cout << "2" << std::endl;
 
         LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 

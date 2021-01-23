@@ -70,8 +70,9 @@ class TestHybridEvolution
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
-    //evolver->set_integrator(GradedTaylorSeriesIntegrator(1e-5));
-    evolver->set_integrator(TaylorPicardIntegrator(1e-5));
+    Configuration<TaylorPicardIntegrator> config;
+    config.set_step_maximum_error(1e-5);
+    evolver->set_integrator(TaylorPicardIntegrator(config,1e-5));
     evolver->configuration().set_maximum_step_size(0.25);
     evolver->configuration().set_maximum_enclosure_radius(0.125);
     evolver->configuration().set_maximum_enclosure_radius(0.5);

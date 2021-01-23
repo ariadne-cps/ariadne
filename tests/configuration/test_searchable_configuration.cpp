@@ -26,7 +26,6 @@
 #include "configuration/configuration_property.tpl.hpp"
 #include "concurrency/task_search_space.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "solvers/integrator.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -67,9 +66,8 @@ public:
 };
 
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
-using LevelOptionsConfigurationProperty = SetConfigurationProperty<LevelOptions>;
-using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
-using TestConfigurableConfigurationProperty = ListConfigurationProperty<TestConfigurableInterface>;
+using LevelOptionsConfigurationProperty = ListConfigurationProperty<LevelOptions>;
+using TestConfigurableConfigurationProperty = InterfaceConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 
@@ -80,7 +78,6 @@ template<> class Configuration<A> : public SearchableConfiguration {
         add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter()));
         add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<ExactDouble>()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
-        add_property("integrator",IntegratorConfigurationProperty(TaylorPicardIntegrator(1e-2)));
         add_property("test_configurable",TestConfigurableConfigurationProperty(TestConfigurable(Configuration<TestConfigurable>())));
     }
 
@@ -98,11 +95,7 @@ template<> class Configuration<A> : public SearchableConfiguration {
 
     LevelOptions const& level() const { return dynamic_cast<LevelOptionsConfigurationProperty const&>(*properties().get("level")).get(); }
     void set_level(LevelOptions const& level) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(level); }
-    void set_level(Set<LevelOptions> const& levels) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(levels); }
-
-    IntegratorInterface const& integrator() const { return dynamic_cast<IntegratorConfigurationProperty const&>(*properties().get("integrator")).get(); }
-    void set_integrator(IntegratorInterface const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
-    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { dynamic_cast<IntegratorConfigurationProperty&>(*properties().get("integrator")).set(integrator); }
+    void set_level(List<LevelOptions> const& levels) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(levels); }
 
     TestConfigurableInterface const& test_configurable() const { return dynamic_cast<TestConfigurableConfigurationProperty const&>(*properties().get("test_configurable")).get(); }
     void set_test_configurable(TestConfigurableInterface const& test_configurable) { dynamic_cast<TestConfigurableConfigurationProperty&>(*properties().get("test_configurable")).set(test_configurable); }

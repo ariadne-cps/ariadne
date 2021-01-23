@@ -134,14 +134,15 @@ Void export_integrators(pybind11::module& module)
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&, StepSizeType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
-
+/*
+ * TODO : restore
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
     taylor_picard_integrator_class.def(pybind11::init<ApproximateDouble>());
     taylor_picard_integrator_class.def("minimum_temporal_order",&TaylorPicardIntegrator::minimum_temporal_order);
     taylor_picard_integrator_class.def("maximum_temporal_order",&TaylorPicardIntegrator::maximum_temporal_order);
     taylor_picard_integrator_class.def("set_minimum_temporal_order",&TaylorPicardIntegrator::set_minimum_temporal_order);
     taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
-
+*/
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
     taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());
     taylor_series_integrator_class.def("order",&TaylorSeriesIntegrator::order);

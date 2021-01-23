@@ -39,9 +39,25 @@ std::ostream& operator<<(std::ostream& os, const LevelOptions level) {
     }
 }
 
+class TestInterface : public WritableInterface {
+  public:
+    virtual TestInterface* clone() const = 0;
+};
+class A : public TestInterface {
+  public:
+    OutputStream& _write(OutputStream& os) const override { return os << "A"; }
+    TestInterface* clone() const override { return new A(*this); }
+};
+class B : public TestInterface {
+public:
+    OutputStream& _write(OutputStream& os) const override { return os << "B"; }
+    TestInterface* clone() const override { return new B(*this); }
+};
+
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
-using LevelOptionsConfigurationProperty = SetConfigurationProperty<LevelOptions>;
-using IntegratorConfigurationProperty = ListConfigurationProperty<IntegratorInterface>;
+using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
+using SweeperConfigurationProperty = ListConfigurationProperty<Sweeper<FloatDP>>;
+using TestInterfaceConfigurationProperty = InterfaceConfigurationProperty<TestInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 
@@ -179,7 +195,7 @@ class TestConfiguration {
         ARIADNE_TEST_FAIL(p.local_set_single(0));
     }
 
-    void test_set_configuration_property_construction() {
+    void test_enum_configuration_property_construction() {
         LevelOptionsConfigurationProperty p1;
         ARIADNE_TEST_PRINT(p1);
         ARIADNE_TEST_ASSERT(not p1.is_metric());
@@ -196,9 +212,11 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
         ARIADNE_TEST_EQUALS(p3.cardinality(),2);
+        ARIADNE_TEST_FAIL(new EnumConfigurationProperty<int>());
+        ARIADNE_TEST_FAIL(new EnumConfigurationProperty<Integer>());
     }
 
-    void test_set_configuration_property_modification() {
+    void test_enum_configuration_property_modification() {
         LevelOptionsConfigurationProperty p;
         ARIADNE_TEST_EQUALS(p.cardinality(),0);
         auto iv = p.integer_values();
@@ -214,10 +232,10 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(not p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),2);
         ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),2);
-        ARIADNE_TEST_FAIL(p.set(Set<LevelOptions>()));
+        ARIADNE_TEST_FAIL(p.set(List<LevelOptions>()));
     }
 
-    void test_set_configuration_property_set_single() {
+    void test_enum_configuration_property_set_single() {
         LevelOptionsConfigurationProperty p({LevelOptions::MEDIUM,LevelOptions::HIGH});
         p.local_set_single(0);
         ARIADNE_TEST_ASSERT(p.is_single());
@@ -233,41 +251,42 @@ class TestConfiguration {
     }
 
     void test_list_configuration_property_construction() {
-        IntegratorConfigurationProperty p1;
+        SweeperConfigurationProperty p1;
         ARIADNE_TEST_ASSERT(not p1.is_metric());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
-        IntegratorConfigurationProperty p2({TaylorPicardIntegrator(1e-2)});
+        ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-6);
+        SweeperConfigurationProperty p2(sweeper);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_EQUALS(p2.cardinality(),1);
         ARIADNE_TEST_PRINT(p2.get());
-        List<SharedPointer<IntegratorInterface>> integrators;
-        ARIADNE_TEST_FAIL(new IntegratorConfigurationProperty(integrators));
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorSeriesIntegrator(1e-2,Order(5))));
-        IntegratorConfigurationProperty p3(integrators);
+        List<Sweeper<FloatDP>> sweepers;
+        ARIADNE_TEST_FAIL(new SweeperConfigurationProperty(sweepers));
+        sweepers.append(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6));
+        sweepers.append(GradedSweeper<FloatDP>(DoublePrecision(),Order(6)));
+        SweeperConfigurationProperty p3(sweepers);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
         ARIADNE_TEST_EQUALS(p3.cardinality(),2);
     }
 
     void test_list_configuration_property_modification() {
-        IntegratorConfigurationProperty p;
+        SweeperConfigurationProperty p;
         ARIADNE_TEST_EQUALS(p.cardinality(),0);
         auto iv = p.integer_values();
         ARIADNE_TEST_EQUALS(iv.size(),1);
         ARIADNE_TEST_EQUALS(iv.begin()->second.size(),0);
-        p.set(TaylorPicardIntegrator(1e-2));
+        p.set(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),1);
         ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),1);
-        List<SharedPointer<IntegratorInterface>> integrators;
-        ARIADNE_TEST_FAIL(p.set(integrators));
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorSeriesIntegrator(1e-2,Order(5))));
-        p.set(integrators);
+        List<Sweeper<FloatDP>> sweepers;
+        ARIADNE_TEST_FAIL(p.set(sweepers));
+        sweepers.append(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6));
+        sweepers.append(GradedSweeper<FloatDP>(DoublePrecision(),Order(6)));
+        p.set(sweepers);
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),2);
@@ -275,19 +294,80 @@ class TestConfiguration {
     }
 
     void test_list_configuration_property_set_single() {
-        List<SharedPointer<IntegratorInterface>> integrators;
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorPicardIntegrator(1e-2)));
-        integrators.append(SharedPointer<IntegratorInterface>(new TaylorSeriesIntegrator(1e-2,Order(5))));
-        IntegratorConfigurationProperty p(integrators);
+        List<Sweeper<FloatDP>> sweepers;
+        sweepers.append(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6));
+        sweepers.append(GradedSweeper<FloatDP>(DoublePrecision(),Order(6)));
+        SweeperConfigurationProperty p(sweepers);
         p.local_set_single(0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
-        p.set(integrators);
+        p.set(sweepers);
         p.local_set_single(1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_FAIL(p.local_set_single(0));
-        p.set(integrators);
+        p.set(sweepers);
+        ARIADNE_TEST_FAIL(p.local_set_single(2));
+        ARIADNE_TEST_FAIL(p.local_set_single(-1));
+    }
+
+    void test_interface_configuration_property_construction() {
+        TestInterfaceConfigurationProperty p1;
+        ARIADNE_TEST_ASSERT(not p1.is_metric());
+        ARIADNE_TEST_EQUALS(p1.cardinality(),0);
+        ARIADNE_TEST_ASSERT(not p1.is_specified());
+        A a;
+        TestInterfaceConfigurationProperty p2(a);
+        ARIADNE_TEST_ASSERT(p2.is_specified());
+        ARIADNE_TEST_ASSERT(p2.is_single());
+        ARIADNE_TEST_EQUALS(p2.cardinality(),1);
+        ARIADNE_TEST_PRINT(p2.get());
+        List<SharedPointer<TestInterface>> tests;
+        ARIADNE_TEST_FAIL(new TestInterfaceConfigurationProperty(tests));
+        tests.append(SharedPointer<TestInterface>(new A()));
+        tests.append(SharedPointer<TestInterface>(new B()));
+        TestInterfaceConfigurationProperty p3(tests);
+        ARIADNE_TEST_ASSERT(p3.is_specified());
+        ARIADNE_TEST_ASSERT(not p3.is_single());
+        ARIADNE_TEST_EQUALS(p3.cardinality(),2);
+    }
+
+    void test_interface_configuration_property_modification() {
+        TestInterfaceConfigurationProperty p;
+        ARIADNE_TEST_EQUALS(p.cardinality(),0);
+        auto iv = p.integer_values();
+        ARIADNE_TEST_EQUALS(iv.size(),1);
+        ARIADNE_TEST_EQUALS(iv.begin()->second.size(),0);
+        p.set(A());
+        ARIADNE_TEST_ASSERT(p.is_specified());
+        ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),1);
+        ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),1);
+        List<SharedPointer<TestInterface>> tests;
+        ARIADNE_TEST_FAIL(p.set(tests));
+        tests.append(SharedPointer<TestInterface>(new A()));
+        tests.append(SharedPointer<TestInterface>(new B()));
+        p.set(tests);
+        ARIADNE_TEST_ASSERT(p.is_specified());
+        ARIADNE_TEST_ASSERT(not p.is_single());
+        ARIADNE_TEST_EQUALS(p.cardinality(),2);
+        ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),2);
+    }
+
+    void test_interface_configuration_property_set_single() {
+        List<SharedPointer<TestInterface>> tests;
+        tests.append(SharedPointer<TestInterface>(new A()));
+        tests.append(SharedPointer<TestInterface>(new B()));
+        TestInterfaceConfigurationProperty p(tests);
+        p.local_set_single(0);
+        ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_PRINT(p);
+        p.set(tests);
+        p.local_set_single(1);
+        ARIADNE_TEST_ASSERT(p.is_single());
+        ARIADNE_TEST_PRINT(p);
+        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        p.set(tests);
         ARIADNE_TEST_FAIL(p.local_set_single(2));
         ARIADNE_TEST_FAIL(p.local_set_single(-1));
     }
@@ -300,12 +380,15 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_range_configuration_property_construction());
         ARIADNE_TEST_CALL(test_range_configuration_property_modification());
         ARIADNE_TEST_CALL(test_range_configuration_property_set_single());
-        ARIADNE_TEST_CALL(test_set_configuration_property_construction());
-        ARIADNE_TEST_CALL(test_set_configuration_property_modification());
-        ARIADNE_TEST_CALL(test_set_configuration_property_set_single());
+        ARIADNE_TEST_CALL(test_enum_configuration_property_construction());
+        ARIADNE_TEST_CALL(test_enum_configuration_property_modification());
+        ARIADNE_TEST_CALL(test_enum_configuration_property_set_single());
         ARIADNE_TEST_CALL(test_list_configuration_property_construction());
         ARIADNE_TEST_CALL(test_list_configuration_property_modification());
         ARIADNE_TEST_CALL(test_list_configuration_property_set_single());
+        ARIADNE_TEST_CALL(test_interface_configuration_property_construction());
+        ARIADNE_TEST_CALL(test_interface_configuration_property_modification());
+        ARIADNE_TEST_CALL(test_interface_configuration_property_set_single());
     }
 };
 

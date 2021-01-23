@@ -40,9 +40,9 @@ def test_integrators():
     d=BoxDomainType([{-1:+1},{-1:+1}])
     h=Dyadic(exact(0.25))
 
-    vf=EffectiveVectorMultivariateFunction([fo,fx])
-    integrator=TaylorPicardIntegrator(1e-8)
-    integrator.flow_step(vf,d,0,h)
+    #vf=EffectiveVectorMultivariateFunction([fo,fx])
+    #integrator=TaylorPicardIntegrator(1e-8)
+    #integrator.flow_step(vf,d,0,h)
 
     vf=ValidatedVectorMultivariateFunction([fo,fx])
     integrator=GradedTaylorSeriesIntegrator(1e-8)

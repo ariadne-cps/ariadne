@@ -60,8 +60,15 @@ class SearchableConfiguration : public ConfigurationInterface {
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& properties();
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
 
+    //! \brief Accessors for get and set of a property identified by \a identifier of type \a P
+    template<class P> P const& at(Identifier const& identifier) const { return static_cast<P const&>(*_properties.get(identifier)); }
+    template<class P> P& at(Identifier const& identifier) { return static_cast<P&>(*_properties.get(identifier)); }
+
     //! \brief Add a property to the configuration
     void add_property(Identifier const& name, ConfigurationPropertyInterface const& property);
+    //! \brief Add a property to the configuration from another configuration
+    //! \details This is used to copy a property from a user configuration onto the base class configuration
+    void add_shared_property(Identifier const& name, SearchableConfiguration const& c);
 
     OutputStream& _write(OutputStream& os) const override;
   private:

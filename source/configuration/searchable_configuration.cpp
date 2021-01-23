@@ -49,6 +49,12 @@ void SearchableConfiguration::add_property(Identifier const& name, Configuration
     _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>({name,SharedPointer<ConfigurationPropertyInterface>(property.clone())}));
 }
 
+void SearchableConfiguration::add_shared_property(Identifier const& name, SearchableConfiguration const& c) {
+    auto p = c.properties().find(name);
+    ARIADNE_ASSERT_MSG(p != c.properties().end(), "The supplied property '" << name <<"' does not exist in the source configuration.");
+    _properties.insert(*p);
+}
+
 OutputStream& SearchableConfiguration::_write(OutputStream& os) const {
     os << "(\n";
     auto iter = _properties.begin(); SizeType i=0;

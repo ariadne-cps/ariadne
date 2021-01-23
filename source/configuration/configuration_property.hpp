@@ -119,13 +119,12 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
 };
 
-//! \brief A property that specifies a set of distinct values from class \a T
-//! \details This can be used either for an enum or for distinct objects of a class
-template<class T> class SetConfigurationProperty final : public ConfigurationPropertyBase<T> {
+//! \brief A property that specifies distinct values from an enum
+template<class T> class EnumConfigurationProperty final : public ConfigurationPropertyBase<T> {
 public:
-    SetConfigurationProperty();
-    SetConfigurationProperty(Set<T> const& values);
-    SetConfigurationProperty(T const& value);
+    EnumConfigurationProperty();
+    EnumConfigurationProperty(Set<T> const& values);
+    EnumConfigurationProperty(T const& value);
 
     Bool is_single() const override;
     Bool is_metric() const override;
@@ -140,20 +139,48 @@ public:
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void local_set_single(int integer_value) override;
 
+protected:
+    List<int> local_integer_values() const override;
+    List<SharedPointer<T>> values() const override;
+private:
+    Set<T> _values;
+};
+
+//! \brief A property that specifies a set of distinct values from class \a T
+//! \details This can be used either for an enum or for distinct objects of a class or handle class
+template<class T> class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
+public:
+    ListConfigurationProperty();
+    ListConfigurationProperty(List<T> const& values);
+    ListConfigurationProperty(T const& value);
+
+    Bool is_single() const override;
+    Bool is_metric() const override;
+    Bool is_configurable() const override;
+    SizeType cardinality() const override;
+
+    ConfigurationPropertyInterface* clone() const override;
+
+    T const& get() const override;
+    void set(T const& value) override;
+    void set(List<T> const& values);
+    void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
+    void local_set_single(int integer_value) override;
+
   protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
-    Set<T> _values;
+    List<T> _values;
 };
 
 //! \brief A property that specifies a list of objects deriving from an interface \a T
 //! \details T must define the clone() method to support interfaces.
-template<class T> class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class InterfaceConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
-    ListConfigurationProperty();
-    ListConfigurationProperty(List<SharedPointer<T>> const& list);
-    ListConfigurationProperty(T const& value);
+    InterfaceConfigurationProperty();
+    InterfaceConfigurationProperty(List<SharedPointer<T>> const& list);
+    InterfaceConfigurationProperty(T const& value);
 
     Bool is_single() const override;
     Bool is_metric() const override;

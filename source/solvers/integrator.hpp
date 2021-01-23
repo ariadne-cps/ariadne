@@ -45,6 +45,12 @@
 #include "../function/affine.hpp"
 #include "../algebra/sweeper.hpp"
 
+#include "../configuration/searchable_configuration.hpp"
+#include "../configuration/configurable.hpp"
+#include "../configuration/configurable.tpl.hpp"
+#include "../configuration/configuration_property.hpp"
+#include "../configuration/configuration_property.tpl.hpp"
+
 namespace Ariadne {
 
 class Real;
@@ -96,8 +102,7 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
     friend OutputStream& operator<<(OutputStream& os, FlowModelType const& flwm);
 };
 
-class IntegratorBase
-    : public IntegratorInterface
+class IntegratorBase : public IntegratorInterface, public Configurable<IntegratorBase>
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
@@ -185,6 +190,45 @@ class IntegratorBase
     DegreeType _starting_step_size_num_refinements;
     FunctionFactoryPointer _function_factory_ptr;
     BounderPointer _bounder_ptr;
+};
+
+template<> class Configuration<IntegratorBase> : public SearchableConfiguration {
+  public:
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
+    typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+    typedef ListConfigurationProperty<ValidatedFunctionModelDPFactoryInterface> FunctionFactoryProperty;
+    typedef ListConfigurationProperty<BounderInterface> BounderProperty;
+
+    Configuration();
+
+    //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
+    DegreeType const& starting_step_size_num_refinements() const { return dynamic_cast<DegreeTypeProperty const&>(*properties().get("starting_step_size_num_refinements")).get(); }
+    void set_starting_step_size_num_refinements(DegreeType const& value) { dynamic_cast<DegreeTypeProperty&>(*properties().get("starting_step_size_num_refinements")).set(value); }
+    void set_starting_step_size_num_refinements(DegreeType const& lower, DegreeType const& upper) { dynamic_cast<DegreeTypeProperty&>(*properties().get("starting_step_size_num_refinements")).set(lower,upper); }
+
+    //! \brief The fraction L(f)*h used for a time step.
+    //! \details The convergence of the Picard iteration is approximately Lf*h.
+    RealType const& lipschitz_tolerance() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("lipschitz_tolerance")).get(); }
+    void set_lipschitz_tolerance(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("lipschitz_tolerance")).set(cast_exact(value)); }
+    void set_lipschitz_tolerance(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("lipschitz_tolerance")).set(cast_exact(lower),cast_exact(upper)); }
+
+    //! \brief A threshold for the error estimate of the approximation.
+    RealType const& maximum_error() const { return dynamic_cast<RealTypeProperty const&>(*properties().get("maximum_error")).get(); }
+    void set_maximum_error(ApproximateRealType const& value) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_error")).set(cast_exact(value)); }
+    void set_maximum_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { dynamic_cast<RealTypeProperty&>(*properties().get("maximum_error")).set(cast_exact(lower),cast_exact(upper)); }
+
+    //! \brief The function factory to be used.
+    ValidatedFunctionModelDPFactoryInterface const& function_factory() const { return dynamic_cast<FunctionFactoryProperty const&>(*properties().get("function_factory")).get(); }
+    void set_function_factory(ValidatedFunctionModelDPFactoryInterface const& function_factory) { dynamic_cast<FunctionFactoryProperty&>(*properties().get("function_factory")).set(function_factory); }
+    void set_function_factory(SharedPointer<ValidatedFunctionModelDPFactoryInterface> const& function_factory) { dynamic_cast<FunctionFactoryProperty&>(*properties().get("function_factory")).set(function_factory); }
+    void set_function_factory(List<SharedPointer<ValidatedFunctionModelDPFactoryInterface>> const& function_factories) { dynamic_cast<FunctionFactoryProperty&>(*properties().get("function_factory")).set(function_factories); }
+
+    //! \brief The bounder to be used.
+    BounderInterface const& bounder() const { return dynamic_cast<BounderProperty const&>(*properties().get("bounder")).get(); }
+    void set_bounder(BounderInterface const& bounder) { dynamic_cast<BounderProperty&>(*properties().get("bounder")).set(bounder); }
+    void set_bounder(SharedPointer<BounderInterface> const& bounder) { dynamic_cast<BounderProperty&>(*properties().get("bounder")).set(bounder); }
 };
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.

@@ -78,6 +78,12 @@ template<> struct LinearSearchSpaceConverter<int> : SearchSpaceConverterInterfac
     SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
+template<> struct LinearSearchSpaceConverter<DegreeType> : SearchSpaceConverterInterface<DegreeType> {
+    int to_int(DegreeType const& value) const override { return value; }
+    DegreeType to_value(int i) const override { return i; }
+    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+};
+
 } // namespace Ariadne
 
 #endif // ARIADNE_SEARCH_SPACE_CONVERTER_HPP

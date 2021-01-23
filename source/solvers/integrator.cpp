@@ -80,14 +80,14 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l, StartingStepSizeNumRefinements nr)
-    :  _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l)), _starting_step_size_num_refinements(nr), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
+    :  Configurable<IntegratorBase>(Configuration<IntegratorBase>()), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l)), _starting_step_size_num_refinements(nr), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(_maximum_error>0.0_x);
     ARIADNE_PRECONDITION(_lipschitz_tolerance>0.0_x)
 }
 
 IntegratorBase::IntegratorBase(MaximumError e, Sweeper<FloatDP> s, LipschitzConstant l, StartingStepSizeNumRefinements nr)
-    :  _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l))
+    :  Configurable<IntegratorBase>(Configuration<IntegratorBase>()), _maximum_error(cast_exact_double(e)), _lipschitz_tolerance(cast_exact_double(l))
     , _starting_step_size_num_refinements(nr)
     , _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
 {
@@ -167,6 +167,14 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
             h=hlf(h);
         }
     }
+}
+
+Configuration<IntegratorBase>::Configuration() {
+    add_property("maximum_error",RealTypeProperty(inf,Log10SearchSpaceConverter<RealType>()));
+    add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,LinearSearchSpaceConverter<RealType>()));
+    add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>()));
+    add_property("function_factory",FunctionFactoryProperty(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-8))));
+    add_property("bounder",BounderProperty(EulerBounder()));
 }
 
 inline ExactDouble operator*(ExactDouble, TwoExp);

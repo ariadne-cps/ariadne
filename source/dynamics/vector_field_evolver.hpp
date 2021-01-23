@@ -44,8 +44,8 @@
 #include "../dynamics/evolver_base.hpp"
 #include "../concurrency/task_runner.tpl.hpp"
 #include "../concurrency/task_appraisal_space.hpp"
-#include "configuration/searchable_configuration.hpp"
-#include "configuration/configuration_property.hpp"
+#include "../configuration/searchable_configuration.hpp"
+#include "../configuration/configuration_property.hpp"
 
 #include "../output/logging.hpp"
 

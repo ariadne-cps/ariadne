@@ -141,9 +141,6 @@ protected:
     SharedPointer<SystemType> _sys_ptr;
 };
 
-template class RangeConfigurationProperty<ExactDouble>;
-template class ListConfigurationProperty<IntegratorInterface>;
-
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
 template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
   public:

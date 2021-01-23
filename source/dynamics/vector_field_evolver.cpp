@@ -42,6 +42,9 @@
 
 namespace Ariadne {
 
+template class RangeConfigurationProperty<ExactDouble>;
+template class ListConfigurationProperty<IntegratorInterface>;
+
 namespace {
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {

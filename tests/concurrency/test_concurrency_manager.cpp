@@ -36,10 +36,11 @@ class TestConcurrencyManager {
     }
 
     void test_set_concurrency() {
-        ConcurrencyManager::instance().set_concurrency(5);
-        ARIADNE_TEST_EQUALS(ConcurrencyManager::instance().concurrency(),5);
+        auto max_concurrency = ConcurrencyManager::instance().maximum_concurrency();
+        ConcurrencyManager::instance().set_concurrency(max_concurrency);
+        ARIADNE_TEST_EQUALS(ConcurrencyManager::instance().concurrency(),max_concurrency);
         ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(0));
-        ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+ConcurrencyManager::instance().maximum_concurrency()));
+        ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+max_concurrency));
     }
 
     void test() {

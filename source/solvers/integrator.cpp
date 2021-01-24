@@ -80,7 +80,7 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
 IntegratorBase::IntegratorBase(SearchableConfiguration const& config)
-    :  Configurable<IntegratorBase>(config) { }
+    :  ConfigurableBase<IntegratorBase>(config) { }
 
 StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
@@ -138,6 +138,11 @@ inline ExactDouble operator/(ExactDouble, TwoExp);
 
 TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config)
     : IntegratorBase(config), Configurable<TaylorPicardIntegrator>(config) { }
+
+TaylorPicardIntegrator* TaylorPicardIntegrator::clone() const {
+    auto cfg = configuration();
+    return new TaylorPicardIntegrator(cfg);
+}
 
 FlowStepModelType
 TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const

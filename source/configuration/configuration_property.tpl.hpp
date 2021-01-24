@@ -161,83 +161,6 @@ template<class T> List<SharedPointer<T>> RangeConfigurationProperty<T>::values()
     return result;
 }
 
-template<class T> ListConfigurationProperty<T>::ListConfigurationProperty()
-    : ConfigurationPropertyBase<T>(false)
-{ }
-
-template<class T> ListConfigurationProperty<T>::ListConfigurationProperty(List<T> const& values)
-    : ConfigurationPropertyBase<T>(true), _values(values) {
-        ARIADNE_PRECONDITION(values.size()>0);
-}
-
-template<class T> ListConfigurationProperty<T>::ListConfigurationProperty(T const& value)
-    : ConfigurationPropertyBase<T>(true) {
-        _values.push_back(value);
-}
-
-template<class T> Bool ListConfigurationProperty<T>::is_single() const {
-    return (_values.size() == 1);
-}
-
-template<class T> Bool ListConfigurationProperty<T>::is_metric() const {
-    return false;
-}
-
-template<class T> Bool ListConfigurationProperty<T>::is_configurable() const {
-    return false;
-}
-
-template<class T> SizeType ListConfigurationProperty<T>::cardinality() const {
-    return _values.size();
-}
-
-template<class T> List<int> ListConfigurationProperty<T>::local_integer_values() const {
-    List<int> result;
-    for (SizeType i=0; i<_values.size(); ++i) result.push_back(i);
-    return result;
-}
-
-template<class T> void ListConfigurationProperty<T>::set_single(ConfigurationPropertyPath const& path, int integer_value) {
-    ARIADNE_PRECONDITION(path.is_root());
-    local_set_single(integer_value);
-}
-
-template<class T> void ListConfigurationProperty<T>::local_set_single(int integer_value) {
-    ARIADNE_PRECONDITION(not is_single());
-    ARIADNE_PRECONDITION(integer_value >= 0 and integer_value < (int)cardinality());
-    T value = _values[(SizeType)integer_value];
-    _values.clear();
-    _values.push_back(value);
-}
-
-template<class T> ConfigurationPropertyInterface* ListConfigurationProperty<T>::clone() const {
-    return new ListConfigurationProperty(*this);
-}
-
-template<class T> T const& ListConfigurationProperty<T>::get() const {
-    ARIADNE_PRECONDITION(this->is_specified());
-    ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
-    return _values.back();
-}
-
-template<class T> void ListConfigurationProperty<T>::set(T const& value) {
-    this->set_specified();
-    _values.clear();
-    _values.push_back(value);
-}
-
-template<class T> void ListConfigurationProperty<T>::set(List<T> const& values) {
-    ARIADNE_PRECONDITION(not values.empty());
-    this->set_specified();
-    _values = values;
-}
-
-template<class T> List<SharedPointer<T>> ListConfigurationProperty<T>::values() const {
-    List<SharedPointer<T>> result;
-    for (auto v : _values) result.push_back(SharedPointer<T>(new T(v)));
-    return result;
-}
-
 template<class T> EnumConfigurationProperty<T>::EnumConfigurationProperty()
         : ConfigurationPropertyBase<T>(false) {
     ARIADNE_PRECONDITION(std::is_enum<T>::value);
@@ -315,6 +238,83 @@ template<class T> void EnumConfigurationProperty<T>::set(Set<T> const& values) {
 }
 
 template<class T> List<SharedPointer<T>> EnumConfigurationProperty<T>::values() const {
+    List<SharedPointer<T>> result;
+    for (auto v : _values) result.push_back(SharedPointer<T>(new T(v)));
+    return result;
+}
+
+template<class T> ListConfigurationProperty<T>::ListConfigurationProperty()
+    : ConfigurationPropertyBase<T>(false)
+{ }
+
+template<class T> ListConfigurationProperty<T>::ListConfigurationProperty(List<T> const& values)
+    : ConfigurationPropertyBase<T>(true), _values(values) {
+        ARIADNE_PRECONDITION(values.size()>0);
+}
+
+template<class T> ListConfigurationProperty<T>::ListConfigurationProperty(T const& value)
+    : ConfigurationPropertyBase<T>(true) {
+        _values.push_back(value);
+}
+
+template<class T> Bool ListConfigurationProperty<T>::is_single() const {
+    return (_values.size() == 1);
+}
+
+template<class T> Bool ListConfigurationProperty<T>::is_metric() const {
+    return false;
+}
+
+template<class T> Bool ListConfigurationProperty<T>::is_configurable() const {
+    return false;
+}
+
+template<class T> SizeType ListConfigurationProperty<T>::cardinality() const {
+    return _values.size();
+}
+
+template<class T> List<int> ListConfigurationProperty<T>::local_integer_values() const {
+    List<int> result;
+    for (SizeType i=0; i<_values.size(); ++i) result.push_back(i);
+    return result;
+}
+
+template<class T> void ListConfigurationProperty<T>::set_single(ConfigurationPropertyPath const& path, int integer_value) {
+    ARIADNE_PRECONDITION(path.is_root());
+    local_set_single(integer_value);
+}
+
+template<class T> void ListConfigurationProperty<T>::local_set_single(int integer_value) {
+    ARIADNE_PRECONDITION(not is_single());
+    ARIADNE_PRECONDITION(integer_value >= 0 and integer_value < (int)cardinality());
+    T value = _values[(SizeType)integer_value];
+    _values.clear();
+    _values.push_back(value);
+}
+
+template<class T> ConfigurationPropertyInterface* ListConfigurationProperty<T>::clone() const {
+    return new ListConfigurationProperty(*this);
+}
+
+template<class T> T const& ListConfigurationProperty<T>::get() const {
+    ARIADNE_PRECONDITION(this->is_specified());
+    ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
+    return _values.back();
+}
+
+template<class T> void ListConfigurationProperty<T>::set(T const& value) {
+    this->set_specified();
+    _values.clear();
+    _values.push_back(value);
+}
+
+template<class T> void ListConfigurationProperty<T>::set(List<T> const& values) {
+    ARIADNE_PRECONDITION(not values.empty());
+    this->set_specified();
+    _values = values;
+}
+
+template<class T> List<SharedPointer<T>> ListConfigurationProperty<T>::values() const {
     List<SharedPointer<T>> result;
     for (auto v : _values) result.push_back(SharedPointer<T>(new T(v)));
     return result;
@@ -400,7 +400,9 @@ template<class T> Map<ConfigurationPropertyPath,List<int>> InterfaceConfiguratio
 }
 
 template<class T> ConfigurationPropertyInterface* InterfaceConfigurationProperty<T>::clone() const {
-    return new InterfaceConfigurationProperty(*this);
+    List<SharedPointer<T>> values;
+    for (auto ptr : _values) values.push_back(SharedPointer<T>(ptr->clone()));
+    return new InterfaceConfigurationProperty(values);
 }
 
 template<class T> T const& InterfaceConfigurationProperty<T>::get() const {

@@ -103,7 +103,7 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
     friend OutputStream& operator<<(OutputStream& os, FlowModelType const& flwm);
 };
 
-class IntegratorBase : public IntegratorInterface, public Configurable<IntegratorBase>
+class IntegratorBase : public IntegratorInterface, public ConfigurableBase<IntegratorBase>
 {
   protected:
     IntegratorBase(SearchableConfiguration const& config);
@@ -191,7 +191,7 @@ class TaylorPicardIntegrator : public IntegratorBase, public Configurable<Taylor
   public:
     TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config);
 
-    virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
+    virtual TaylorPicardIntegrator* clone() const;
     virtual Void _write(OutputStream& os) const;
 
     virtual FlowStepModelType
@@ -246,6 +246,7 @@ template<> class Configuration<TaylorPicardIntegrator> : public SearchableConfig
     //! \brief The sweeper to be used when creating a flow function.
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The maximum error produced on a single step of integration.
     RealType const& step_maximum_error() const { return at<RealTypeProperty>("step_maximum_error").get(); }

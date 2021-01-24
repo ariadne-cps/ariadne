@@ -42,15 +42,22 @@ template<class C> SearchableConfiguration const& Configurable<C>::searchable_con
     return dynamic_cast<SearchableConfiguration const &>(*_configuration);
 }
 
+template<class C> ConfigurableBase<C>::ConfigurableBase(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
+
+template<class C> Configuration<C> const& ConfigurableBase<C>::configuration() const {
+    return *_configuration;
+}
+
 //! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
 template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, TaskSearchPoint const& p) {
+    ARIADNE_PRECONDITION(not cfg.is_singleton());
     auto result = cfg;
     for (auto param : p.space().parameters()) {
         auto prop_ptr = result.properties().find(param.path().first());
         ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The TaskSearchPoint parameter '" << param.path() << "' is not in the configuration.");
         prop_ptr->second->set_single(param.path().subpath(),p.value(param.path()));
     }
-    ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, configuration could not be made singleton.");
+    ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, since the configuration could not be made singleton.");
     return result;
 }
 

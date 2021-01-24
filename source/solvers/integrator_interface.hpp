@@ -67,11 +67,6 @@ class IntegratorInterface
     //! \brief Write to an output stream.
     virtual Void _write(OutputStream& os) const = 0;
 
-    //! \brief Get the maximum allowable error in the flow.
-    virtual ExactDouble maximum_error() const = 0;
-    //! \brief Set the maximum allowable error in the flow.
-    virtual Void set_maximum_error(ApproximateDouble) = 0;
-
     //! \brief Compute the starting time step to be used for flow_bounds, calculating the Lipschitz time step as a bound.
     //! <br>
     //! Arguments: \f$f\f$ is the \a differential_equation, \f$D\f$ is the \a state_domain, \f$t\f$ is the \a starting_time,

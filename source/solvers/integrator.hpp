@@ -106,31 +106,8 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
 class IntegratorBase : public IntegratorInterface, public Configurable<IntegratorBase>
 {
   protected:
-    //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(SearchableConfiguration const& config, MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l, StartingStepSizeNumRefinements nr);
-    IntegratorBase(SearchableConfiguration const& config, MaximumError e, LipschitzConstant l, StartingStepSizeNumRefinements nr);
+    IntegratorBase(SearchableConfiguration const& config);
   public:
-    //! \brief A threshold for the error estimate of the approximation.
-    virtual Void set_maximum_error(ApproximateDouble e) { assert(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
-    virtual ExactDouble maximum_error() const  { return this->_maximum_error; }
-    //! \brief The fraction L(f)*h used for a time step.
-    //! The convergence of the Picard iteration is approximately Lf*h.
-    Void set_lipschitz_tolerance(ApproximateDouble lt) { _lipschitz_tolerance = cast_exact(lt); }
-    ExactDouble lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
-
-    //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
-    Void set_starting_step_size_num_refinements(StartingStepSizeNumRefinements nr) { _starting_step_size_num_refinements = nr; }
-    DegreeType starting_step_size_num_refinements() const { return _starting_step_size_num_refinements; }
-
-    //! \brief The class which constructs functions for representing the flow.
-    const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
-    //! \brief Set the class which constructs functions for representing the flow.
-    Void set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory);
-
-    //! \brief The class that computes bounds.
-    const BounderInterface& bounder() const;
-    //! \brief Set the class that computes bounds.
-    Void set_bounder(const BounderInterface& bounder);
 
     virtual StepSizeType
     starting_time_step_size(const ValidatedVectorMultivariateFunction& vector_field,
@@ -184,13 +161,6 @@ class IntegratorBase : public IntegratorInterface, public Configurable<Integrato
               const Interval<StepSizeType>& time_domain,
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const = 0;
-
-  public:
-    ExactDouble _maximum_error;
-    ExactDouble _lipschitz_tolerance;
-    DegreeType _starting_step_size_num_refinements;
-    FunctionFactoryPointer _function_factory_ptr;
-    BounderPointer _bounder_ptr;
 };
 
 template<> class Configuration<IntegratorBase> : public SearchableConfiguration {
@@ -216,42 +186,10 @@ template<> class Configuration<IntegratorBase> : public SearchableConfiguration 
 };
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
-class TaylorPicardIntegrator
-    : public IntegratorBase, public Configurable<TaylorPicardIntegrator>
+class TaylorPicardIntegrator : public IntegratorBase, public Configurable<TaylorPicardIntegrator>
 {
-    ExactDouble _step_maximum_error;
-    Sweeper<FloatDP> _sweeper;
-    DegreeType _minimum_temporal_order;
-    DegreeType _maximum_temporal_order;
   public:
-    //! \brief Default constructor.
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err);
-
-    //! \brief Constructor.
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
-
-    //! \brief Constructor.
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr);
-
-    //! \brief Constructor.
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                                                   StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
-
-    //! \brief Constructor.
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config, MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, StartingStepSizeNumRefinements nr,
-                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
-
-    //! \brief The order of the method in time.
-    DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
-    Void set_minimum_temporal_order(Nat m) { this->_minimum_temporal_order=m; }
-    DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
-    //! \brief  Set the sweep threshold of the Taylor model.
-    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
-    //! \brief  Set the maximum error of a single step.
-    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
-    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
+    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config);
 
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
@@ -270,8 +208,10 @@ class TaylorPicardIntegrator
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
+    using Configurable<TaylorPicardIntegrator>::configuration;
 
   private:
+
     FlowStepModelType
     _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
                const ExactBoxType& state_domain,

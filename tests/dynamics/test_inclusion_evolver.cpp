@@ -69,20 +69,14 @@ class TestInclusionIntegrator {
         ExactDouble sw_threshold = 1e-8_pr;
         SweeperDP sweeper = ThresholdSweeperDP(DoublePrecision(),sw_threshold);
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
-        Configuration<TaylorPicardIntegrator> config;
-        config.set_step_maximum_error(1e-3);
-        config.set_sweeper(sweeper);
-        config.set_lipschitz_tolerance(0.5);
-        config.set_maximum_temporal_order(12);
-        config.set_minimum_temporal_order(4);
 
-        TaylorPicardIntegrator integrator(config,
-                maximum_error=1e-3_pr,
-                sweeper,
-                lipschitz_constant=0.5_x,
-                step_maximum_error=1e-3_pr,
-                minimum_temporal_order=4,
-                maximum_temporal_order=12);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+            .set_step_maximum_error(1e-3)
+            .set_sweeper(sweeper)
+            .set_lipschitz_tolerance(0.5)
+            .set_maximum_temporal_order(12)
+            .set_minimum_temporal_order(4)
+        );
 
         std::cout << "2" << std::endl;
 

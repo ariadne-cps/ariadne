@@ -1628,7 +1628,7 @@ HybridEvolverBaseConfiguration::set_flow_accuracy(const ApproximateRealType valu
 {
     Configuration<TaylorPicardIntegrator> config;
     config.set_step_maximum_error(value);
-    _evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(config,value));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(config));
     _flow_accuracy = cast_exact(value);
 }
 

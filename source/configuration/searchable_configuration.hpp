@@ -61,8 +61,15 @@ class SearchableConfiguration : public ConfigurationInterface {
     Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
 
     //! \brief Accessors for get and set of a property identified by \a identifier of type \a P
-    template<class P> P const& at(Identifier const& identifier) const { return static_cast<P const&>(*_properties.get(identifier)); }
-    template<class P> P& at(Identifier const& identifier) { return static_cast<P&>(*_properties.get(identifier)); }
+    template<class P> P const& at(Identifier const& identifier) const {
+        auto prop_ptr = _properties.find(identifier);
+        ARIADNE_ASSERT_MSG(prop_ptr != _properties.end(),"The property '" << identifier << "' was not found in the configuration.");
+        return static_cast<P const&>(*prop_ptr->second); }
+    template<class P> P& at(Identifier const& identifier) {
+        auto prop_ptr = _properties.find(identifier);
+        ARIADNE_ASSERT_MSG(prop_ptr != _properties.end(),"The property '" << identifier << "' was not found in the configuration.");
+        return static_cast<P&>(*prop_ptr->second);
+    }
 
     //! \brief Add a property to the configuration
     void add_property(Identifier const& name, ConfigurationPropertyInterface const& property);

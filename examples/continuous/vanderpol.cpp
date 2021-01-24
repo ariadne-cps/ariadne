@@ -41,17 +41,16 @@ int main(int argc, const char* argv[])
 
     VectorField system({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
 
-    double max_err = 1e-6;
-    Configuration<TaylorPicardIntegrator> integrator_config;
-    integrator_config.set_step_maximum_error(1e-6);
-    integrator_config.set_starting_step_size_num_refinements(2);
-    integrator_config.set_sweeper(ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1024));
-    TaylorPicardIntegrator integrator(integrator_config,max_err,ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1024),LipschitzConstant(0.5),StartingStepSizeNumRefinements(2));
+    double max_err = 1e-8;
+    auto sweeper = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
+    TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+        .set_step_maximum_error(max_err)
+        .set_maximum_temporal_order(12)
+        .set_starting_step_size_num_refinements(2)
+        .set_sweeper(sweeper)
+    );
 
-    Configuration<VectorFieldEvolver> configuration(integrator);
-    configuration.set_maximum_step_size(0.1);
-    configuration.set_integrator(integrator);
-    VectorFieldEvolver evolver(system,configuration);
+    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.01,0.1));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
 
     typedef TaskInput<VectorFieldEvolver> I;
@@ -66,7 +65,8 @@ int main(int argc, const char* argv[])
     Real eps_x0 = 0.15_dec;
     Real eps_y0 = 0.05_dec;
 
-    EnclosureConfiguration enclosure_config(evolver.function_factory());
+    auto function_factory = TaylorFunctionFactory(sweeper);
+    EnclosureConfiguration enclosure_config(function_factory);
     enclosure_config.set_reconditioning_num_blocks(3);
     auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0},enclosure_config);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,initial_set);

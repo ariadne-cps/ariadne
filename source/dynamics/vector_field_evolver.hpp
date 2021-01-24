@@ -84,7 +84,7 @@ class VectorFieldEvolver
     VectorFieldEvolver* clone() const override { return new VectorFieldEvolver(*this); }
 
     //! \brief Get the internal system.
-    virtual const SystemType& system() const override { return *_sys_ptr; }
+    SystemType const& system() const override { return *_sys_ptr; }
 
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
@@ -97,9 +97,6 @@ class VectorFieldEvolver
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
     EnclosureType enclosure(ExactBoxType const&, EnclosureConfiguration const&) const;
-
-    //! \brief The class which constructs functions for the enclosures.
-    const FunctionFactoryType& function_factory() const;
 
     //!@}
 

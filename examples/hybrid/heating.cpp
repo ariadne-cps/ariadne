@@ -118,7 +118,7 @@ Int main(Int argc, const char* argv[])
     GradedTaylorSeriesIntegrator series_integrator(1e-3);
     series_integrator.set_maximum_spacial_order(6);
     series_integrator.set_maximum_temporal_order(12);
-    TaylorPicardIntegrator picard_integrator(1e-5);
+    TaylorPicardIntegrator picard_integrator(Configuration<TaylorPicardIntegrator>().set_step_maximum_error(1e-5));
     IntervalNewtonSolver solver(1e-12,8);
 
     // Create a GeneralHybridEvolver object

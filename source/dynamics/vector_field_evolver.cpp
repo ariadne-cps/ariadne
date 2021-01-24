@@ -107,7 +107,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Configura
 { }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(Sweeper<FloatDP>())));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
@@ -115,7 +115,7 @@ typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const E
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(Sweeper<FloatDP>())));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
@@ -123,15 +123,11 @@ typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const R
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(Sweeper<FloatDP>())));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
     return EnclosureType(box,this->system().state_space(),config);
-}
-
-typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
-    return dynamic_cast<const IntegratorBase&>(this->configuration().integrator()).function_factory();
 }
 
 

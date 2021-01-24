@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(4);
+    ConcurrencyManager::instance().set_concurrency(2);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -42,16 +42,18 @@ int main(int argc, const char* argv[])
     VectorField system({dot(x)=y, dot(y)=mu*y*(1-sqr(x))-x});
 
     double max_err = 1e-8;
-    auto sweeper = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
+    auto sweeper1 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
+    auto sweeper2 = GradedSweeper<FloatDP>(DoublePrecision(),Order(5));
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
         .set_step_maximum_error(max_err)
         .set_maximum_temporal_order(12)
-        .set_starting_step_size_num_refinements(2)
-        .set_sweeper(sweeper)
+        .set_starting_step_size_num_refinements(0,3)
+        .set_sweeper({sweeper1,sweeper2})
     );
 
-    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.01,0.1));
+    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.1));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
     typedef TaskInput<VectorFieldEvolver> I;
     typedef TaskOutput<VectorFieldEvolver> O;
@@ -65,7 +67,7 @@ int main(int argc, const char* argv[])
     Real eps_x0 = 0.15_dec;
     Real eps_y0 = 0.05_dec;
 
-    auto function_factory = TaylorFunctionFactory(sweeper);
+    auto function_factory = TaylorFunctionFactory(sweeper1);
     EnclosureConfiguration enclosure_config(function_factory);
     enclosure_config.set_reconditioning_num_blocks(3);
     auto initial_set = evolver.enclosure({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0},enclosure_config);

@@ -47,7 +47,7 @@ class TaskSearchSpace;
 class SearchableConfiguration : public ConfigurationInterface {
   public:
     SearchableConfiguration() = default;
-    SearchableConfiguration(SearchableConfiguration const& c);
+    SearchableConfiguration(SearchableConfiguration const& c) = default;
     SearchableConfiguration& operator=(SearchableConfiguration const& c);
     virtual ~SearchableConfiguration() = default;
 

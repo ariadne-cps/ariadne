@@ -51,7 +51,8 @@ template<class C> Configuration<C> const& ConfigurableBase<C>::configuration() c
 //! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
 template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, TaskSearchPoint const& p) {
     ARIADNE_PRECONDITION(not cfg.is_singleton());
-    auto result = cfg;
+    Configuration<C> result;
+    result = cfg;
     for (auto param : p.space().parameters()) {
         auto prop_ptr = result.properties().find(param.path().first());
         ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The TaskSearchPoint parameter '" << param.path() << "' is not in the configuration.");

@@ -56,13 +56,18 @@ template<> class Configuration<TestConfigurable> : public SearchableConfiguratio
 class TestConfigurableInterface : public WritableInterface {
 public:
     virtual TestConfigurableInterface* clone() const = 0;
+    virtual void set_value(String value) = 0;
     virtual ~TestConfigurableInterface() = default;
 };
 class TestConfigurable : public TestConfigurableInterface, public Configurable<TestConfigurable> {
 public:
+    TestConfigurable(String value, Configuration<TestConfigurable> const& configuration) : TestConfigurable(configuration) { _value = value; }
     TestConfigurable(Configuration<TestConfigurable> const& configuration) : Configurable<TestConfigurable>(configuration) { }
-    OutputStream& _write(OutputStream& os) const override { os << "TestConfigurable" << configuration(); return os; }
-    TestConfigurableInterface* clone() const override { return new TestConfigurable(*this); }
+    void set_value(String value) override { _value = value; }
+    OutputStream& _write(OutputStream& os) const override { os << "TestConfigurable(value="<<_value<<",configuration=" << configuration() <<")"; return os; }
+    TestConfigurableInterface* clone() const override { auto cfg = configuration(); return new TestConfigurable(_value,cfg); }
+private:
+    String _value;
 };
 
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;

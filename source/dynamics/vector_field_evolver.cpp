@@ -106,6 +106,12 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Configura
     TaskRunnable(configuration), _sys_ptr(system.clone())
 { }
 
+VectorFieldEvolver* VectorFieldEvolver::clone() const {
+    ConfigurationType new_cfg;
+    new_cfg = configuration();
+    return new VectorFieldEvolver(system(),new_cfg);
+}
+
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(Sweeper<FloatDP>())));
 }

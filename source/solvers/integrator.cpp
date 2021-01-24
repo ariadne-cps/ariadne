@@ -84,7 +84,6 @@ IntegratorBase::IntegratorBase(SearchableConfiguration const& config)
 
 StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
-
     FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step)))))).upper();
     auto lipschitz_step = static_cast<StepSizeType>(cast_exact(configuration().lipschitz_tolerance()/lipschitz));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,lipschitz_step);
@@ -140,7 +139,8 @@ TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegra
     : IntegratorBase(config), Configurable<TaylorPicardIntegrator>(config) { }
 
 TaylorPicardIntegrator* TaylorPicardIntegrator::clone() const {
-    auto cfg = configuration();
+    Configuration<TaylorPicardIntegrator> cfg;
+    cfg = configuration();
     return new TaylorPicardIntegrator(cfg);
 }
 

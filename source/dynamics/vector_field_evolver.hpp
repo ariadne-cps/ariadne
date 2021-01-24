@@ -81,7 +81,7 @@ class VectorFieldEvolver
     VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration);
 
     //! \brief Make a dynamically-allocated copy.
-    VectorFieldEvolver* clone() const override { return new VectorFieldEvolver(*this); }
+    VectorFieldEvolver* clone() const override;
 
     //! \brief Get the internal system.
     SystemType const& system() const override { return *_sys_ptr; }
@@ -146,6 +146,16 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef InterfaceConfigurationProperty<IntegratorInterface> IntegratorProperty;
+
+    Configuration() {
+        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
+        add_property("enable_reconditioning",BooleanConfigurationProperty(false));
+        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
+        add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
+    }
 
     Configuration(IntegratorInterface const& integrator) {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));

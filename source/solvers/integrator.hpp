@@ -196,29 +196,21 @@ class IntegratorBase : public IntegratorInterface, public Configurable<Integrato
 template<> class Configuration<IntegratorBase> : public SearchableConfiguration {
   public:
     typedef ExactDouble RealType;
-    typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceConfigurationProperty<ValidatedFunctionModelDPFactoryInterface> FunctionFactoryProperty;
     typedef InterfaceConfigurationProperty<BounderInterface> BounderProperty;
 
     Configuration(SearchableConfiguration const& configuration) {
         add_shared_property("lipschitz_tolerance",configuration);
         add_shared_property("starting_step_size_num_refinements",configuration);
-        add_shared_property("function_factory",configuration);
         add_shared_property("bounder",configuration);
     }
 
     //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
     DegreeType const& starting_step_size_num_refinements() const { return at<DegreeTypeProperty>("starting_step_size_num_refinements").get(); }
-
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
     RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-
-    //! \brief The function factory to be used.
-    ValidatedFunctionModelDPFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
-
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
 };
@@ -290,6 +282,7 @@ class TaylorPicardIntegrator
 
 template<> class Configuration<TaylorPicardIntegrator> : public SearchableConfiguration {
   public:
+    typedef Configuration<TaylorPicardIntegrator> C;
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
@@ -307,52 +300,45 @@ template<> class Configuration<TaylorPicardIntegrator> : public SearchableConfig
         // Base properties
         add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,LinearSearchSpaceConverter<RealType>()));
         add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>()));
-        add_property("function_factory",FunctionFactoryProperty(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-8))));
         add_property("bounder",BounderProperty(EulerBounder()));
     }
 
     //! \brief The sweeper to be used when creating a flow function.
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
-    void set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
 
     //! \brief The maximum error produced on a single step of integration.
     RealType const& step_maximum_error() const { return at<RealTypeProperty>("step_maximum_error").get(); }
-    void set_step_maximum_error(ApproximateRealType const& value) { at<RealTypeProperty>("step_maximum_error").set(cast_exact(value)); }
-    void set_step_maximum_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("step_maximum_error").set(cast_exact(lower),cast_exact(upper)); }
+    C& set_step_maximum_error(ApproximateRealType const& value) { at<RealTypeProperty>("step_maximum_error").set(cast_exact(value)); return *this; }
+    C& set_step_maximum_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("step_maximum_error").set(cast_exact(lower),cast_exact(upper)); return *this; }
 
     //! \brief The minimum temporal order to be used for the flow function.
     DegreeType const& minimum_temporal_order() const { return at<DegreeTypeProperty>("minimum_temporal_order").get(); }
-    void set_minimum_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("minimum_temporal_order").set(value); }
-    void set_minimum_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("minimum_temporal_order").set(lower,upper); }
+    C& set_minimum_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("minimum_temporal_order").set(value); return *this; }
+    C& set_minimum_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("minimum_temporal_order").set(lower,upper); return *this; }
 
     //! \brief The maximum temporal order to be used for the flow function.
     DegreeType const& maximum_temporal_order() const { return at<DegreeTypeProperty>("maximum_temporal_order").get(); }
-    void set_maximum_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("maximum_temporal_order").set(value); }
-    void set_maximum_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("maximum_temporal_order").set(lower,upper); }
+    C& set_maximum_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("maximum_temporal_order").set(value); return *this; }
+    C& set_maximum_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("maximum_temporal_order").set(lower,upper); return *this; }
 
     //! Base properties
 
     //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
     DegreeType const& starting_step_size_num_refinements() const { return at<DegreeTypeProperty>("starting_step_size_num_refinements").get(); }
-    void set_starting_step_size_num_refinements(DegreeType const& value) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(value); }
-    void set_starting_step_size_num_refinements(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(lower,upper); }
+    C& set_starting_step_size_num_refinements(DegreeType const& value) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(value); return *this; }
+    C& set_starting_step_size_num_refinements(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(lower,upper); return *this; }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
     RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    void set_lipschitz_tolerance(ApproximateRealType const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(cast_exact(value)); }
-    void set_lipschitz_tolerance(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(cast_exact(lower),cast_exact(upper)); }
-
-    //! \brief The function factory to be used.
-    ValidatedFunctionModelDPFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
-    void set_function_factory(ValidatedFunctionModelDPFactoryInterface const& function_factory) { at<FunctionFactoryProperty>("function_factory").set(function_factory); }
-    void set_function_factory(SharedPointer<ValidatedFunctionModelDPFactoryInterface> const& function_factory) { at<FunctionFactoryProperty>("function_factory").set(function_factory); }
-    void set_function_factory(List<SharedPointer<ValidatedFunctionModelDPFactoryInterface>> const& function_factories) { at<FunctionFactoryProperty>("function_factory").set(function_factories); }
+    C& set_lipschitz_tolerance(ApproximateRealType const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(cast_exact(value)); return *this; }
+    C& set_lipschitz_tolerance(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(cast_exact(lower),cast_exact(upper)); return *this; }
 
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
-    void set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); }
-    void set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); }
+    C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
+    C& set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
 };
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.

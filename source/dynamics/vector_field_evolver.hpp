@@ -144,6 +144,7 @@ protected:
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
 template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
   public:
+    typedef Configuration<VectorFieldEvolver> C;
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
@@ -161,37 +162,37 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
 
     //! \brief Enable premature termination of lower evolution
     Bool const& enable_premature_termination() const { return at<BooleanConfigurationProperty>("enable_premature_termination").get(); }
-    void set_enable_premature_termination(Bool const& value) { at<BooleanConfigurationProperty>("enable_premature_termination").set(value); }
+    C& set_enable_premature_termination(Bool const& value) { at<BooleanConfigurationProperty>("enable_premature_termination").set(value); return *this; }
 
     //! \brief Enable reconditioning of basic sets
     Bool const& enable_reconditioning() const { return at<BooleanConfigurationProperty>("enable_reconditioning").get(); }
-    void set_enable_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("enable_reconditioning").set(value); }
-    void set_both_enable_reconditioning() { at<BooleanConfigurationProperty>("enable_reconditioning").set_both(); }
+    C& set_enable_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("enable_reconditioning").set(value); return *this; }
+    C& set_both_enable_reconditioning() { at<BooleanConfigurationProperty>("enable_reconditioning").set_both(); return *this; }
 
     //! \brief Enable subdivisions for upper evolution
     Bool const& enable_subdivisions() const { return at<BooleanConfigurationProperty>("enable_subdivisions").get(); }
-    void set_enable_subdivisions(Bool const& value) { at<BooleanConfigurationProperty>("enable_subdivisions").set(value); }
+    C& set_enable_subdivisions(Bool const& value) { at<BooleanConfigurationProperty>("enable_subdivisions").set(value); return *this; }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
     RealType const& maximum_step_size() const { return at<RealTypeProperty>("maximum_step_size").get(); }
-    void set_maximum_step_size(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(value)); }
-    void set_maximum_step_size(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(lower),cast_exact(upper)); }
+    C& set_maximum_step_size(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(value)); return *this; }
+    C& set_maximum_step_size(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_step_size").set(cast_exact(lower),cast_exact(upper)); return *this; }
 
     //! \brief The maximum allowable approximation error for reconditioning
     RealType const& maximum_spacial_error() const { return at<RealTypeProperty>("maximum_spacial_error").get(); }
-    void set_maximum_spacial_error(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(value)); }
-    void set_maximum_spacial_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(lower),cast_exact(upper)); }
+    C& set_maximum_spacial_error(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(value)); return *this; }
+    C& set_maximum_spacial_error(ApproximateRealType const& lower, ApproximateRealType const& upper) { at<RealTypeProperty>("maximum_spacial_error").set(cast_exact(lower),cast_exact(upper)); return *this; }
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType const& maximum_enclosure_radius() const { return at<RealTypeProperty>("maximum_enclosure_radius").get(); }
-    void set_maximum_enclosure_radius(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_enclosure_radius").set(cast_exact(value)); }
+    C& set_maximum_enclosure_radius(ApproximateRealType const& value) { at<RealTypeProperty>("maximum_enclosure_radius").set(cast_exact(value)); return *this; }
 
     //! \brief The integrator to be used.
     IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
-    void set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); }
-    void set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); }
+    C& set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+    C& set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
 };
 
 template<> struct TaskInput<VectorFieldEvolver> {

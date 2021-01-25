@@ -43,15 +43,15 @@ int main(int argc, const char* argv[])
 
     double max_err = 1e-8;
     auto sweeper1 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
-    auto sweeper2 = GradedSweeper<FloatDP>(DoublePrecision(),Order(5));
+    auto sweeper2 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/100);
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
-        .set_step_maximum_error(max_err)
-        .set_maximum_temporal_order(12)
-        .set_starting_step_size_num_refinements(0,3)
+        .set_step_maximum_error(max_err,1e-6)
+        .set_maximum_temporal_order(10,15)
+        .set_starting_step_size_num_refinements(2)
         .set_sweeper({sweeper1,sweeper2})
     );
 
-    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.1));
+    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.01,0.1));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 

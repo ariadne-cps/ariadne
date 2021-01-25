@@ -103,7 +103,7 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
     friend OutputStream& operator<<(OutputStream& os, FlowModelType const& flwm);
 };
 
-class IntegratorBase : public IntegratorInterface, public ConfigurableBase<IntegratorBase>
+class IntegratorBase : public IntegratorInterface, public SharedConfigurable<IntegratorBase>
 {
   protected:
     IntegratorBase(SearchableConfiguration const& config);
@@ -163,7 +163,7 @@ class IntegratorBase : public IntegratorInterface, public ConfigurableBase<Integ
               const UpperBoxType& bounding_box) const = 0;
 };
 
-template<> class Configuration<IntegratorBase> : public SearchableConfiguration {
+template<> class Configuration<IntegratorBase> : public SharedSearchableConfiguration {
   public:
     typedef ExactDouble RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
@@ -171,9 +171,9 @@ template<> class Configuration<IntegratorBase> : public SearchableConfiguration 
     typedef InterfaceConfigurationProperty<BounderInterface> BounderProperty;
 
     Configuration(SearchableConfiguration const& configuration) {
-        add_shared_property("lipschitz_tolerance",configuration);
-        add_shared_property("starting_step_size_num_refinements",configuration);
-        add_shared_property("bounder",configuration);
+        add_property_from("lipschitz_tolerance",configuration);
+        add_property_from("starting_step_size_num_refinements",configuration);
+        add_property_from("bounder",configuration);
     }
 
     //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two

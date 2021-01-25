@@ -80,7 +80,7 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
 IntegratorBase::IntegratorBase(SearchableConfiguration const& config)
-    :  ConfigurableBase<IntegratorBase>(config) { }
+    : SharedConfigurable<IntegratorBase>(config) { }
 
 StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
@@ -163,64 +163,64 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 }
 
 FlowStepModelType
-TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
-{
+TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const {
     ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("f="<<f);
-    ARIADNE_LOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
+    ARIADNE_LOG_PRINTLN("f=" << f);
+    ARIADNE_LOG_PRINTLN("D=" << D << " T=" << T << ", A=" << A << ", B=" << B);
 
-    const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
+    const bool is_autonomous = (f.argument_size() == D.dimension() + A.dimension());
 
-    const SizeType nx=D.size();
-    const SizeType na=A.size();
+    const SizeType nx = D.size();
+    const SizeType na = A.size();
 
-    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na);
+    Range tarng = is_autonomous ? Range(nx + 1u, nx + 1u + na) : Range(nx, nx + 1u + na);
 
-    StepSizeType t=static_cast<StepSizeType>(T.lower_bound());
-    StepSizeType h=static_cast<StepSizeType>(T.upper_bound())-t;
+    StepSizeType t = static_cast<StepSizeType>(T.lower_bound());
+    StepSizeType h = static_cast<StepSizeType>(T.upper_bound()) - t;
 
     // Time interval centred on initial time, which will make the antiderivative more efficient
-    ExactIntervalType wT(t-h,t+h);
-    ARIADNE_ASSERT(t==med(wT));
+    ExactIntervalType wT(t - h, t + h);
+    ARIADNE_ASSERT(t == med(wT));
 
-    ExactBoxType dom=join(D,T,A);
-    ExactBoxType wdom=join(D,wT,A);
-    UpperBoxType const& bx=B;
-    ARIADNE_LOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
+    ExactBoxType dom = join(D, T, A);
+    ExactBoxType wdom = join(D, wT, A);
+    UpperBoxType const &bx = B;
+    ARIADNE_LOG_PRINTLN_AT(2, "dom=" << dom << ", wdom=" << wdom);
 
     auto function_factory = make_taylor_function_factory(configuration().sweeper());
 
-    FlowStepModelType phi0=function_factory->create_projection(wdom,range(0,nx));
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,phi0);
-    FlowStepModelType phi=function_factory->create_constants(wdom,cast_singleton(bx));
-    FlowStepModelType ta=function_factory->create_projection(wdom,tarng);
+    FlowStepModelType phi0 = function_factory->create_projection(wdom, range(0, nx));
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, phi0);
+    FlowStepModelType phi = function_factory->create_constants(wdom, cast_singleton(bx));
+    FlowStepModelType ta = function_factory->create_projection(wdom, tarng);
 
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,phi);
-    for(DegreeType k=0; k!=configuration().maximum_temporal_order(); ++k) {
-        Bool below_maximum_error=(phi.error().raw()<configuration().step_maximum_error());
-        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        ARIADNE_LOG_PRINTLN_VAR_AT(2,fphi);
+    ARIADNE_LOG_PRINTLN_VAR_AT(1, phi);
+    for (DegreeType k = 0; k != configuration().maximum_temporal_order(); ++k) {
+        Bool below_maximum_error = (phi.error().raw() < configuration().step_maximum_error());
+        FlowStepModelType fphi = compose(f, join(std::move(phi), ta));
+        ARIADNE_LOG_PRINTLN_VAR_AT(2, fphi);
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
-        phi=antiderivative(fphi,nx)+phi0;
-        ARIADNE_LOG_PRINTLN_VAR_AT(2,phi);
-        if(below_maximum_error && k>=configuration().minimum_temporal_order()) { break; }
+        phi = antiderivative(fphi, nx) + phi0;
+        ARIADNE_LOG_PRINTLN_VAR_AT(2, phi);
+        if (below_maximum_error && k >= configuration().minimum_temporal_order()) { break; }
     }
-    if(phi.error().raw()>configuration().step_maximum_error()) {
-        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step",
-                      "Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h
-                      <<" has error "<<phi.error()<<" after "<<configuration().maximum_temporal_order()<<
-                      " iterations, which exceeds step maximum error "<<configuration().step_maximum_error());
+    if (phi.error().raw() > configuration().step_maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException, "TaylorPicardIntegrator::flow_step",
+                      "Integration of " << f << " starting in " << D << " over time interval " << T << " of length "
+                                        << h
+                                        << " has error " << phi.error() << " after "
+                                        << configuration().maximum_temporal_order() <<
+                                        " iterations, which exceeds step maximum error "
+                                        << configuration().step_maximum_error());
     }
 
-    FlowStepModelType result=restriction(phi,dom);
+    FlowStepModelType result = restriction(phi, dom);
 
     ARIADNE_LOG_PRINTLN_VAR(result);
     return result;
-
 }
-
 
 
 Void TaylorPicardIntegrator::_write(OutputStream& os) const {

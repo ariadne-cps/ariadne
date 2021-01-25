@@ -61,10 +61,10 @@ template<class C> class Configurable : public ConfigurableInterface {
 //! \brief Is-a component that provides a configuration
 //! \details In order to avoid ambiguity when casting to ConfigurableInterface, base classes need
 //! to use this in place of Configurable
-template<class C> class ConfigurableBase {
+template<class C> class SharedConfigurable {
     friend class Configuration<C>;
 public:
-    ConfigurableBase(Configuration<C> const& config);
+    SharedConfigurable(Configuration<C> const& config);
     Configuration<C> const& base_configuration() const;
 private:
     SharedPointer<Configuration<C>> _base_configuration;

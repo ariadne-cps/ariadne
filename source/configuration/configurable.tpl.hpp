@@ -42,9 +42,9 @@ template<class C> SearchableConfiguration const& Configurable<C>::searchable_con
     return dynamic_cast<SearchableConfiguration const &>(*_configuration);
 }
 
-template<class C> ConfigurableBase<C>::ConfigurableBase(Configuration<C> const& config) : _base_configuration(new Configuration<C>(config)) { }
+template<class C> SharedConfigurable<C>::SharedConfigurable(Configuration<C> const& config) : _base_configuration(new Configuration<C>(config)) { }
 
-template<class C> Configuration<C> const& ConfigurableBase<C>::base_configuration() const {
+template<class C> Configuration<C> const& SharedConfigurable<C>::base_configuration() const {
     return *_base_configuration;
 }
 

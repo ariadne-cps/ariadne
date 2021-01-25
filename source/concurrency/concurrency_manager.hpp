@@ -56,7 +56,11 @@ class ConcurrencyManager {
         SharedPointer<TaskRunnerInterface<T>> runner;
         if (_concurrency > 1 and not cfg.is_singleton())
             runner.reset(new ParameterSearchRunner<T>(cfg,std::min(_concurrency,cfg.search_space().total_points())));
-        else
+        else if (_concurrency == 1 and not cfg.is_singleton()) {
+            auto point = cfg.search_space().initial_point();
+            ARIADNE_LOG_PRINTLN_AT(1,"The configuration is not singleton: using point " << point << " for sequential running.");
+            runner.reset(new SequentialRunner<T>(make_singleton(cfg,point)));
+        } else
             runner.reset(new SequentialRunner<T>(cfg));
         runnable.set_runner(runner);
     }

@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(2);
+    ConcurrencyManager::instance().set_concurrency(4);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -44,23 +44,32 @@ int main(int argc, const char* argv[])
     double max_err = 1e-8;
     auto sweeper1 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
     auto sweeper2 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/100);
-    TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
-        .set_step_maximum_error(max_err,1e-6)
-        .set_maximum_temporal_order(10,15)
-        .set_starting_step_size_num_refinements(2)
-        .set_sweeper({sweeper1,sweeper2})
-    );
+    auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err);
+    auto integrator_configuration = Configuration<TaylorPicardIntegrator>()
+            .set_step_maximum_error(max_err,1e-5)
+            .set_maximum_temporal_order(8,15)
+            .set_starting_step_size_num_refinements(0,5)
+            .set_sweeper({sweeper1,sweeper2,sweeper3});
+    TaylorPicardIntegrator integrator(integrator_configuration);
 
-    VectorFieldEvolver evolver(system,Configuration<VectorFieldEvolver>(integrator).set_maximum_step_size(0.01,0.1));
+    typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef Configuration<E> C;
+
+    E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.001,1.0));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
-    typedef TaskInput<VectorFieldEvolver> I;
-    typedef TaskOutput<VectorFieldEvolver> O;
-    auto verification_parameter = ScalarAppraisalParameter<VectorFieldEvolver>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
+    auto verification_parameter = ScalarAppraisalParameter<E>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return o.evolve.bounding_box()[y].upper_bound().get_d(); });
-    auto verification_constraint = TaskAppraisalConstraint<VectorFieldEvolver>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
-    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint});
+    auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
+    auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, C& c){
+        auto time_diff = 6.5 - i.current_time.get_d();
+        auto radius_diff = (2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d();
+        if (time_diff > 0 and radius_diff > 0) {
+            //integrator_configuration.set_step_maximum_error(ApproximateDouble(radius_diff/time_diff));
+            //c.set_integrator(TaylorPicardIntegrator(integrator_configuration));
+        }
+    });
+    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint},{refinement_rule});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

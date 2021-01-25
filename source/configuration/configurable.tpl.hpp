@@ -29,6 +29,7 @@
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
 #include "configurable.hpp"
+#include "configuration_refinement_rule.hpp"
 
 namespace Ariadne {
 
@@ -59,6 +60,14 @@ template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, T
         prop_ptr->second->set_single(param.path().subpath(),p.value(param.path()));
     }
     ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, since the configuration could not be made singleton.");
+    return result;
+}
+
+//! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
+template<class C> Configuration<C> make_refined(TaskInput<C> const& input, Configuration<C> const& cfg, List<ConfigurationRefinementRule<C>> const& rules) {
+    Configuration<C> result;
+    result = cfg;
+    for (auto rule : rules) rule(input,result);
     return result;
 }
 

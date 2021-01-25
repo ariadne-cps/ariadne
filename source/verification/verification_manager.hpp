@@ -50,15 +50,18 @@ class VerificationManager {
         return instance;
     }
 
-    template<class R> void add_safety_specification(TaskRunnable<R>& runnable, Set<TaskAppraisalConstraint<R>> const& specification) const {
+    template<class R> void add_safety_specification(
+            TaskRunnable<R>& runnable,
+            Set<TaskAppraisalConstraint<R>> const& safety_constraints,
+            List<ConfigurationRefinementRule<R>> const& refinement_rules = List<ConfigurationRefinementRule<R>>()) const {
         auto appraisal_space = runnable.runner()->task().appraisal_space();
         auto original_constraints = appraisal_space.constraints();
         auto original_weights = appraisal_space.parameters_weights();
         TaskAppraisalSpaceBuilder<R> builder;
         for (auto constr : appraisal_space.constraints()) builder.add(constr,original_weights.get(constr.parameter()));
-        for (auto constr : specification) builder.add(constr); // Use default weight 1.0
-
+        for (auto constr : safety_constraints) builder.add(constr); // Use default weight 1.0
         runnable.runner()->task().set_appraisal_space(builder.build());
+        runnable.runner()->task().set_configuration_refinement_rules(refinement_rules);
     }
 };
 

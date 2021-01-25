@@ -47,6 +47,7 @@ template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 template<class R> class Task;
 template<class R> class Configuration;
+template<class R> class ConfigurationRefinementRule;
 
 template<class R>
 class TaskInterface {
@@ -61,6 +62,10 @@ class TaskInterface {
     virtual TaskAppraisalSpace<R> const& appraisal_space() const = 0;
     //! \brief Set the appraisal space for the task
     virtual Void set_appraisal_space(TaskAppraisalSpace<R> const& space) = 0;
+    //! \brief Return the configuration refinement rules
+    virtual Set<ConfigurationRefinementRule<R>> const& configuration_refinement_rules() const = 0;
+    //! \brief Set the configuration refinement rules for the task
+    virtual Void set_configuration_refinement_rules(Set<ConfigurationRefinementRule<R>> const& rules) = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
@@ -81,11 +86,17 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
   public:
     String name() const override { return _name; }
     TaskAppraisalSpace<R> const& appraisal_space() const override { return *_appraisal_space; }
-    Void set_appraisal_space(TaskAppraisalSpace<R> const& space) override { _appraisal_space.reset(space.clone()); };
+    Void set_appraisal_space(TaskAppraisalSpace<R> const& space) override { _appraisal_space.reset(space.clone()); }
+
+    Set<ConfigurationRefinementRule<R>> const& configuration_refinement_rules() const override { return _configuration_refinement_rules; }
+    Void set_configuration_refinement_rules(Set<ConfigurationRefinementRule<R>> const& rules) override {
+        _configuration_refinement_rules.clear(); _configuration_refinement_rules.adjoin(rules); }
+
     Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _appraisal_space->appraise(data,input); }
   private:
     String const _name;
     SharedPointer<TaskAppraisalSpace<R>> _appraisal_space;
+    Set<ConfigurationRefinementRule<R>> _configuration_refinement_rules;
 };
 
 } // namespace Ariadne

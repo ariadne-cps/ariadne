@@ -201,12 +201,20 @@ class TestConfiguration {
         ARIADNE_TEST_PRINT(singleton);
     }
 
+    void test_configuration_restrict() {
+        Configuration<A> ca;
+        ca.set_maximum_step_size(0.01_x,0.1_x);
+        ARIADNE_TEST_PRINT(ca);
+
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_configuration_construction());
         ARIADNE_TEST_CALL(test_configuration_search_space());
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_search_space());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_make_singleton());
+        ARIADNE_TEST_CALL(test_configuration_restrict());
     }
 };
 

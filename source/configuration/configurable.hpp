@@ -65,9 +65,9 @@ template<class C> class ConfigurableBase {
     friend class Configuration<C>;
 public:
     ConfigurableBase(Configuration<C> const& config);
-    Configuration<C> const& configuration() const;
+    Configuration<C> const& base_configuration() const;
 private:
-    SharedPointer<Configuration<C>> _configuration;
+    SharedPointer<Configuration<C>> _base_configuration;
 };
 
 } // namespace Ariadne

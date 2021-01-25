@@ -208,7 +208,6 @@ class TaylorPicardIntegrator : public IntegratorBase, public Configurable<Taylor
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
-    using Configurable<TaylorPicardIntegrator>::configuration;
 
   private:
 

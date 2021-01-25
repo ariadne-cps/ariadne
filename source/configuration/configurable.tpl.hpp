@@ -64,7 +64,7 @@ template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, T
 }
 
 //! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
-template<class C> Configuration<C> make_refined(TaskInput<C> const& input, Configuration<C> const& cfg, List<ConfigurationRefinementRule<C>> const& rules) {
+template<class C> Configuration<C> make_refined(TaskInput<C> const& input, Configuration<C> const& cfg, Set<ConfigurationRefinementRule<C>> const& rules) {
     Configuration<C> result;
     result = cfg;
     for (auto rule : rules) rule(input,result);

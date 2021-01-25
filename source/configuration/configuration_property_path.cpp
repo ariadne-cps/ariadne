@@ -58,14 +58,16 @@ Bool ConfigurationPropertyPath::is_root() const {
     return _path.empty();
 }
 
-void ConfigurationPropertyPath::append(Identifier const& node) {
+ConfigurationPropertyPath& ConfigurationPropertyPath::append(Identifier const& node) {
     ARIADNE_PRECONDITION(not node.empty());
     _path.push_back(node);
+    return *this;
 }
 
-void ConfigurationPropertyPath::prepend(Identifier const& node) {
+ConfigurationPropertyPath& ConfigurationPropertyPath::prepend(Identifier const& node) {
     ARIADNE_PRECONDITION(not node.empty());
     _path.push_front(node);
+    return *this;
 }
 
 Identifier ConfigurationPropertyPath::first() const {

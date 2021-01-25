@@ -55,6 +55,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     //! \brief The integer values for each property including the current one
     //! \details Supports the storage of objects that are Configurable themselves
     virtual Map<ConfigurationPropertyPath,List<int>> integer_values() const = 0;
+    //! \brief Retrieve the property at the given \a path
+    virtual ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) = 0;
 
     virtual ConfigurationPropertyInterface* clone() const = 0;
     virtual ~ConfigurationPropertyInterface() = default;

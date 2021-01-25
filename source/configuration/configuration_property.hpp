@@ -76,6 +76,8 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 
     ConfigurationPropertyInterface* clone() const override;
 
+    ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
+
     Bool const& get() const override;
     void set(Bool const& value) override;
     void set_both(); //! \brief Set to both true and false
@@ -101,6 +103,8 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     SizeType cardinality() const override;
 
     ConfigurationPropertyInterface* clone() const override;
+
+    ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
 
     T const& get() const override;
     void set(T const& lower, T const& upper);
@@ -133,6 +137,8 @@ public:
 
     ConfigurationPropertyInterface* clone() const override;
 
+    ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
+
     T const& get() const override;
     void set(T const& value) override;
     void set(Set<T> const& values);
@@ -161,6 +167,8 @@ public:
 
     ConfigurationPropertyInterface* clone() const override;
 
+    ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
+
     T const& get() const override;
     void set(T const& value) override;
     void set(List<T> const& values);
@@ -188,6 +196,8 @@ template<class T> class InterfaceConfigurationProperty final : public Configurat
     SizeType cardinality() const override;
 
     ConfigurationPropertyInterface* clone() const override;
+
+    ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
 
     T const& get() const override;
     Map<ConfigurationPropertyPath,List<int>> integer_values() const override;

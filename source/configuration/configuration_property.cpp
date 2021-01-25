@@ -40,6 +40,11 @@ BooleanConfigurationProperty::BooleanConfigurationProperty(Bool const& value)
     : ConfigurationPropertyBase(true), _is_single(true), _value(value)
 { }
 
+ConfigurationPropertyInterface* BooleanConfigurationProperty::at(ConfigurationPropertyPath const& path) {
+    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " is not a root but a boolean property can't have configurable objects below.");
+    return this;
+}
+
 Bool const& BooleanConfigurationProperty::get() const {
     ARIADNE_PRECONDITION(this->is_specified());
     ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");

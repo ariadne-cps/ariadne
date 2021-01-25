@@ -74,7 +74,8 @@ template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const&
 template<class C> void SequentialRunner<C>::dump_statistics() { }
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
-    _last_output.reset(new OutputType(this->_task->run_task(input,this->configuration())));
+    auto cfg = make_refined(input,this->configuration(),this->_task->configuration_refinement_rules());
+    _last_output.reset(new OutputType(this->_task->run_task(input,cfg)));
 }
 
 template<class C> auto SequentialRunner<C>::pull() -> OutputType {
@@ -87,7 +88,8 @@ template<class C> void DetachedRunner<C>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        _output_buffer.push(this->_task->run_task(pkg,this->configuration()));
+        auto cfg = make_refined(pkg.first,this->configuration(),this->_task->configuration_refinement_rules());
+        _output_buffer.push(this->_task->run_task(pkg,cfg));
         _output_availability.notify_all();
     }
 }
@@ -146,7 +148,8 @@ template<class C> void ParameterSearchRunner<C>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto cfg = make_singleton(this->configuration(),pkg.second);
+        auto refined_cfg = make_refined(pkg.first,this->configuration(),this->_task->configuration_refinement_rules());
+        auto cfg = make_singleton(refined_cfg,pkg.second);
         try {
             auto start = std::chrono::high_resolution_clock::now();
             auto result = this->_task->run_task(pkg.first,cfg);

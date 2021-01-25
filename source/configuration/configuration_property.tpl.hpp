@@ -139,6 +139,11 @@ template<class T> ConfigurationPropertyInterface* RangeConfigurationProperty<T>:
     return new RangeConfigurationProperty(*this);
 }
 
+template<class T> ConfigurationPropertyInterface* RangeConfigurationProperty<T>::at(ConfigurationPropertyPath const& path) {
+    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " is not a root but a range property can't have configurable objects below.");
+    return this;
+}
+
 template<class T> void RangeConfigurationProperty<T>::set(T const& lower, T const& upper) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
     this->set_specified();
@@ -219,6 +224,11 @@ template<class T> ConfigurationPropertyInterface* EnumConfigurationProperty<T>::
     return new EnumConfigurationProperty(*this);
 }
 
+template<class T> ConfigurationPropertyInterface* EnumConfigurationProperty<T>::at(ConfigurationPropertyPath const& path) {
+    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " is not a root but an enum property can't have configurable objects below.");
+    return this;
+}
+
 template<class T> T const& EnumConfigurationProperty<T>::get() const {
     ARIADNE_PRECONDITION(this->is_specified());
     ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
@@ -294,6 +304,11 @@ template<class T> void ListConfigurationProperty<T>::local_set_single(int intege
 
 template<class T> ConfigurationPropertyInterface* ListConfigurationProperty<T>::clone() const {
     return new ListConfigurationProperty(*this);
+}
+
+template<class T> ConfigurationPropertyInterface* ListConfigurationProperty<T>::at(ConfigurationPropertyPath const& path) {
+    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " is not a root but a list property can't have configurable objects below.");
+    return this;
 }
 
 template<class T> T const& ListConfigurationProperty<T>::get() const {
@@ -403,6 +418,19 @@ template<class T> ConfigurationPropertyInterface* InterfaceConfigurationProperty
     List<SharedPointer<T>> values;
     for (auto ptr : _values) values.push_back(SharedPointer<T>(ptr->clone()));
     return new InterfaceConfigurationProperty(values);
+}
+
+template<class T> ConfigurationPropertyInterface* InterfaceConfigurationProperty<T>::at(ConfigurationPropertyPath const& path) {
+    if (path.is_root()) return this;
+    else {
+        ARIADNE_ASSERT_MSG(is_configurable(),"The object held is not configurable, path error.");
+        ARIADNE_ASSERT_MSG(is_single(),"Cannot retrieve properties if the list has multiple objects.");
+        auto configurable_ptr = dynamic_cast<ConfigurableInterface*>(_values.back().get());
+        auto properties = configurable_ptr->searchable_configuration().properties();
+        auto prop_ptr = properties.find(path.first());
+        ARIADNE_ASSERT_MSG(prop_ptr != properties.end(),"The property '" << path.first() << "' was not found in the configuration.");
+        return prop_ptr->second->at(path.subpath());
+    }
 }
 
 template<class T> T const& InterfaceConfigurationProperty<T>::get() const {

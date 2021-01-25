@@ -49,8 +49,8 @@ class ConfigurationPropertyPath : public WritableInterface {
     Identifier repr() const;
 
     Bool is_root() const;
-    void append(Identifier const& node);
-    void prepend(Identifier const& node);
+    ConfigurationPropertyPath& append(Identifier const& node);
+    ConfigurationPropertyPath& prepend(Identifier const& node);
     //! \brief Return the first level of the path
     Identifier first() const;
     //! \brief Return everything but the first level of the path

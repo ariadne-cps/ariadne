@@ -71,7 +71,7 @@ private:
 };
 
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
-using LevelOptionsConfigurationProperty = ListConfigurationProperty<LevelOptions>;
+using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
 using TestConfigurableConfigurationProperty = InterfaceConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
@@ -86,25 +86,30 @@ template<> class Configuration<A> : public SearchableConfiguration {
         add_property("test_configurable",TestConfigurableConfigurationProperty(TestConfigurable(Configuration<TestConfigurable>())));
     }
 
-    Bool const& use_reconditioning() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_reconditioning")).get(); }
-    void set_both_use_reconditioning() { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set_both(); }
-    void set_use_reconditioning(Bool const& value) { dynamic_cast<BooleanConfigurationProperty&>(*properties().get("use_reconditioning")).set(value); }
+    Bool const& use_reconditioning() const { return at<BooleanConfigurationProperty>("use_reconditioning").get(); }
+    void set_both_use_reconditioning() { at<BooleanConfigurationProperty>("use_reconditioning").set_both(); }
+    void set_use_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("use_reconditioning").set(value); }
 
-    ExactDouble const& maximum_step_size() const { return dynamic_cast<ExactDoubleConfigurationProperty const&>(*properties().get("maximum_step_size")).get(); }
-    void set_maximum_step_size(ExactDouble const& value) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("maximum_step_size")).set(value); }
-    void set_maximum_step_size(ExactDouble const& lower, ExactDouble const& upper) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("maximum_step_size")).set(lower,upper); }
+    ExactDouble const& maximum_step_size() const { return at<ExactDoubleConfigurationProperty>("maximum_step_size").get(); }
+    void set_maximum_step_size(ExactDouble const& value) { at<ExactDoubleConfigurationProperty>("maximum_step_size").set(value); }
+    void set_maximum_step_size(ExactDouble const& lower, ExactDouble const& upper) { at<ExactDoubleConfigurationProperty>("maximum_step_size").set(lower,upper); }
 
-    ExactDouble const& sweep_threshold() const { return dynamic_cast<ExactDoubleConfigurationProperty const&>(*properties().get("sweep_threshold")).get(); }
-    void set_sweep_threshold(ExactDouble const& value) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("sweep_threshold")).set(value); }
-    void set_sweep_threshold(ExactDouble const& lower, ExactDouble const& upper) { dynamic_cast<ExactDoubleConfigurationProperty&>(*properties().get("sweep_threshold")).set(lower,upper); }
+    ExactDouble const& sweep_threshold() const { return at<ExactDoubleConfigurationProperty>("sweep_threshold").get(); }
+    void set_sweep_threshold(ExactDouble const& value) { at<ExactDoubleConfigurationProperty>("sweep_threshold").set(value); }
+    void set_sweep_threshold(ExactDouble const& lower, ExactDouble const& upper) { at<ExactDoubleConfigurationProperty>("sweep_threshold").set(lower,upper); }
 
-    LevelOptions const& level() const { return dynamic_cast<LevelOptionsConfigurationProperty const&>(*properties().get("level")).get(); }
-    void set_level(LevelOptions const& level) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(level); }
-    void set_level(List<LevelOptions> const& levels) { dynamic_cast<LevelOptionsConfigurationProperty&>(*properties().get("level")).set(levels); }
+    LevelOptions const& level() const { return at<LevelOptionsConfigurationProperty>("level").get(); }
+    void set_level(LevelOptions const& level) { at<LevelOptionsConfigurationProperty>("level").set(level); }
+    void set_level(List<LevelOptions> const& levels) { at<LevelOptionsConfigurationProperty>("level").set(levels); }
 
-    TestConfigurableInterface const& test_configurable() const { return dynamic_cast<TestConfigurableConfigurationProperty const&>(*properties().get("test_configurable")).get(); }
-    void set_test_configurable(TestConfigurableInterface const& test_configurable) { dynamic_cast<TestConfigurableConfigurationProperty&>(*properties().get("test_configurable")).set(test_configurable); }
-    void set_test_configurable(SharedPointer<TestConfigurableInterface> const& test_configurable) { dynamic_cast<TestConfigurableConfigurationProperty&>(*properties().get("test_configurable")).set(test_configurable); }
+    TestConfigurableInterface const& test_configurable() const { return at<TestConfigurableConfigurationProperty>("test_configurable").get(); }
+    void set_test_configurable(TestConfigurableInterface const& test_configurable) { at<TestConfigurableConfigurationProperty>("test_configurable").set(test_configurable); }
+    void set_test_configurable(SharedPointer<TestConfigurableInterface> const& test_configurable) { at<TestConfigurableConfigurationProperty>("test_configurable").set(test_configurable); }
+};
+
+template<> struct TaskInput<A> {
+    TaskInput(Bool valid_) : valid(valid_) { }
+    Bool valid;
 };
 
 }
@@ -201,11 +206,35 @@ class TestConfiguration {
         ARIADNE_TEST_PRINT(singleton);
     }
 
-    void test_configuration_restrict() {
+    void test_configuration_at() {
         Configuration<A> ca;
-        ca.set_maximum_step_size(0.01_x,0.1_x);
-        ARIADNE_TEST_PRINT(ca);
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::LOW);
+        ca.set_level(LevelOptions::MEDIUM);
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::MEDIUM);
+        ARIADNE_TEST_FAIL(ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("inexistent")));
+        auto level_prop = ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("level"));
+        ARIADNE_TEST_EQUALS(level_prop.get(),LevelOptions::MEDIUM);
+        ca.at<LevelOptionsConfigurationProperty>(ConfigurationPropertyPath("level")).set(LevelOptions::HIGH);
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::HIGH);
+        auto use_something_prop = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
+        ARIADNE_TEST_EQUALS(use_something_prop.get(),true);
+        ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something")).set(false);
+        auto use_something_prop_again = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
+        ARIADNE_TEST_EQUALS(use_something_prop_again.get(),false);
+    }
 
+    void test_configuration_refine() {
+        Configuration<A> ca;
+        auto property = ConfigurationPropertyPath("test_configurable").append("use_something");
+
+        TaskInput<A> input(false);
+        ConfigurationRefinementRule<A> rule([property](TaskInput<A> const& input,Configuration<A>& ca){
+            ca.at<BooleanConfigurationProperty>(property).set(input.valid); });
+        auto rca = make_refined(input,ca,{rule});
+        ARIADNE_TEST_EQUALS(rca.at<BooleanConfigurationProperty>(property).get(),false);
+        input.valid = true;
+        rca = make_refined(input,ca,{rule});
+        ARIADNE_TEST_EQUALS(rca.at<BooleanConfigurationProperty>(property).get(),true);
     }
 
     void test() {
@@ -214,7 +243,8 @@ class TestConfiguration {
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_search_space());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_make_singleton());
-        ARIADNE_TEST_CALL(test_configuration_restrict());
+        ARIADNE_TEST_CALL(test_configuration_at());
+        ARIADNE_TEST_CALL(test_configuration_refine());
     }
 };
 

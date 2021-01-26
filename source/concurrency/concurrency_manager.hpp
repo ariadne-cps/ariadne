@@ -79,6 +79,9 @@ class ConcurrencyManager {
     //! \brief Print the last_search_best_points in a .m file for plotting
     void print_last_search_best_points() const;
 
+    //! \brief Return the optimal point (i.e., the most common value for all dimensions) from the last search
+    List<int> last_optimal_point() const;
+
     //! \brief The refinement values for each property from the last run
     PropertyRefinementsMap last_property_refinement_values() const;
     void set_last_property_refinement_values(PropertyRefinementsMap const& refinements);

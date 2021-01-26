@@ -64,6 +64,41 @@ void ConcurrencyManager::set_last_property_refinement_values(PropertyRefinements
     _last_property_refinement_values.adjoin(refinements);
 }
 
+List<int> ConcurrencyManager::last_optimal_point() const {
+    List<int> result;
+    if (not _last_search_best_points.empty()) {
+        auto space = _last_search_best_points.front().point().space();
+        auto dimension = space.dimension();
+
+        List<Map<int,SizeType>> frequencies;
+        for (SizeType i=0; i<dimension; ++i) frequencies.push_back(Map<int,SizeType>());
+        for (auto appraisal : _last_search_best_points) {
+            auto coordinates = appraisal.point().coordinates();
+            for (SizeType i=0; i<dimension; ++i) {
+                auto iter = frequencies[i].find(coordinates[i]);
+                if (iter == frequencies[i].end()) frequencies[i].insert(make_pair(coordinates[i],1));
+                else frequencies[i].at(coordinates[i])++;
+            }
+        }
+
+        for (SizeType i=0; i<dimension; ++i) {
+            auto freq_it = frequencies[i].begin();
+            int best_value = freq_it->first;
+            SizeType best_frequency = freq_it->second;
+            ++freq_it;
+            while(freq_it != frequencies[i].end()) {
+                if (freq_it->second >best_frequency) {
+                    best_value = freq_it->first;
+                    best_frequency = freq_it->second;
+                }
+                ++freq_it;
+            }
+            result.push_back(best_value);
+        }
+    }
+    return result;
+}
+
 void ConcurrencyManager::print_last_search_best_points() const {
     if (not _last_search_best_points.empty()) {
         std::ofstream file;

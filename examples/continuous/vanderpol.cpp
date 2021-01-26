@@ -107,6 +107,8 @@ int main(int argc, const char* argv[])
         ConcurrencyManager::instance().print_last_search_best_points();
         ConcurrencyManager::instance().print_last_property_refinement_values();
 
+        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().last_optimal_point());
+
         ARIADNE_LOG_PRINTLN("Plotting...");
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
         fig << fill_colour(1.0,0.75,0.5);

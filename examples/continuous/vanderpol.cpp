@@ -59,13 +59,25 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
     auto verification_parameter = ScalarAppraisalParameter<E>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
-        return o.evolve.bounding_box()[y].upper_bound().get_d(); });
+        return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
     auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, O const& o, C& c){
-        const auto step_maximum_error = ConfigurationPropertyPath("integrator").append("step_maximum_error");
-        auto time_d = 6.5 - i.current_time.get_d();
-        auto radius_d = (2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d();
-        if (time_d > 0 and radius_d > 0) c.at<RangeConfigurationProperty<ExactDouble>>(step_maximum_error).set(ExactDouble(radius_d/time_d));
+        ExactDouble min_value = 1e-6_x;
+        ExactDouble max_value = 1e-4_x;
+        const auto property_name = ConfigurationPropertyPath("integrator").append("step_maximum_error");
+        auto previous_value = c.at<RangeConfigurationProperty<ExactDouble>>(property_name).get();
+        ARIADNE_LOG_PRINTLN("Previous value for step_maximum_error: " << previous_value);
+        auto current_rho = ((o.evolve.bounding_box()[y].radius() - i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d();
+        ARIADNE_LOG_PRINTLN("current rho: " << current_rho);
+        auto time_d = 6.5 - o.time.get_d();
+        auto target_rho = ((2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d())/time_d;
+        ARIADNE_LOG_PRINTLN("target rho: " << target_rho);
+        double K = 1e-2;
+        auto new_value = ExactDouble(previous_value.get_d()*(1.0-K*(current_rho-target_rho)/abs(target_rho)));
+        ARIADNE_LOG_PRINTLN("New value for step_maximum_error: " << new_value);
+        auto final_value = max(min_value,min(max_value,new_value));
+        if (final_value != new_value) ARIADNE_LOG_PRINTLN("Overridden to: " << final_value);
+        c.at<RangeConfigurationProperty<ExactDouble>>(property_name).set(final_value);
     });
     VerificationManager::instance().add_safety_specification(evolver, {verification_constraint},{refinement_rule});
 

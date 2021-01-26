@@ -70,8 +70,10 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto rule : task().configuration_refinement_rules()) {
-            auto refinement = rule.apply(input,output,_configuration);
-            _property_refinement_values.insert(refinement);
+            auto ref = rule.apply(input,output,_configuration);
+            auto iter = _property_refinement_values.find(ref.first);
+            if (iter != _property_refinement_values.end()) _property_refinement_values.at(ref.first).push_back(ref.second);
+            else _property_refinement_values.insert(ref);
         }
     }
 
@@ -85,7 +87,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
 
 template<class C> void SequentialRunner<C>::dump_statistics() {
-    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
     this->_property_refinement_values.clear();
 }
 
@@ -124,7 +126,7 @@ template<class C> DetachedRunner<C>::~DetachedRunner() {
 }
 
 template<class C> void DetachedRunner<C>::dump_statistics() {
-    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
     this->_property_refinement_values.clear();
 }
 
@@ -204,7 +206,7 @@ template<class C> ParameterSearchRunner<C>::~ParameterSearchRunner() {
 template<class C> Void ParameterSearchRunner<C>::dump_statistics() {
     ConcurrencyManager::instance().set_last_search_best_points(_best_points);
     _best_points.clear();
-    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
     this->_property_refinement_values.clear();
 }
 

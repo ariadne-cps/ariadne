@@ -56,8 +56,10 @@ class TestConfigurationPropertyPath {
         ARIADNE_TEST_EQUALS(p.repr(),"./child1/child2/");
     }
 
-    void test_first_subpath() {
+    void test_first_last_subpath() {
         ConfigurationPropertyPath p;
+        ARIADNE_TEST_FAIL(p.first());
+        ARIADNE_TEST_FAIL(p.last())
         p.append("child1");
         p.append("child2");
         ARIADNE_TEST_EQUALS(p.repr(),"./child1/child2/");
@@ -65,6 +67,8 @@ class TestConfigurationPropertyPath {
         ARIADNE_TEST_EQUALS(sp.repr(),"./child2/");
         auto f = p.first();
         ARIADNE_TEST_EQUALS(f,"child1");
+        auto l = p.last();
+        ARIADNE_TEST_EQUALS(l,"child2");
     }
 
     void test_copy() {
@@ -92,7 +96,7 @@ class TestConfigurationPropertyPath {
         ARIADNE_TEST_CALL(test_construction());
         ARIADNE_TEST_CALL(test_append());
         ARIADNE_TEST_CALL(test_prepend());
-        ARIADNE_TEST_CALL(test_first_subpath());
+        ARIADNE_TEST_CALL(test_first_last_subpath());
         ARIADNE_TEST_CALL(test_copy());
         ARIADNE_TEST_CALL(test_less_equal());
     }

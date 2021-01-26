@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(1);
+    ConcurrencyManager::instance().set_concurrency(4);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -54,7 +54,8 @@ int main(int argc, const char* argv[])
 
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef Configuration<E> C;
 
-    E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.001,1.0));
+    E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.01,1.0));
+    //E evolver(system,Configuration<E>(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
@@ -73,7 +74,7 @@ int main(int argc, const char* argv[])
         auto time_d = 6.5 - o.time.get_d();
         auto target_rho = ((2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d())/time_d;
         ARIADNE_LOG_PRINTLN("target rho: " << target_rho);
-        double K = 1e-2;
+        double K = 1e-3;
         auto new_value = ExactDouble(previous_value.get_d()*(1.0-K*(current_rho-target_rho)/abs(target_rho)));
         ARIADNE_LOG_PRINTLN("New value for step_maximum_error: " << new_value);
         auto final_value = max(min_value,min(max_value,new_value));
@@ -103,7 +104,8 @@ int main(int argc, const char* argv[])
         auto end = std::chrono::high_resolution_clock::now();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
 
-        ARIADNE_LOG_PRINTLN_VAR_AT(1,ConcurrencyManager::instance().last_search_best_points());
+        ConcurrencyManager::instance().print_last_search_best_points();
+        ConcurrencyManager::instance().print_last_property_refinement_values();
 
         ARIADNE_LOG_PRINTLN("Plotting...");
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});

@@ -76,16 +76,22 @@ class ConcurrencyManager {
     List<TaskSearchPointAppraisal> last_search_best_points() const;
     void set_last_search_best_points(List<TaskSearchPointAppraisal> const& points);
 
+    //! \brief Print the last_search_best_points in a .m file for plotting
+    void print_last_search_best_points() const;
+
     //! \brief The refinement values for each property from the last run
-    PropertyRefinementsMap property_refinement_values() const;
-    void set_property_refinement_values(PropertyRefinementsMap const& refinements);
+    PropertyRefinementsMap last_property_refinement_values() const;
+    void set_last_property_refinement_values(PropertyRefinementsMap const& refinements);
+
+    //! \brief Print the last_property_refinement_values in a .m file for plotting
+    void print_last_property_refinement_values() const;
 
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
     std::mutex _data_mutex;
     List<TaskSearchPointAppraisal> _last_search_best_points;
-    PropertyRefinementsMap _property_refinement_values;
+    PropertyRefinementsMap _last_property_refinement_values;
 };
 
 } // namespace Ariadne

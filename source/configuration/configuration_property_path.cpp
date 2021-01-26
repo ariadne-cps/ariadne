@@ -71,7 +71,13 @@ ConfigurationPropertyPath& ConfigurationPropertyPath::prepend(Identifier const& 
 }
 
 Identifier ConfigurationPropertyPath::first() const {
+    ARIADNE_PRECONDITION(not is_root());
     return _path.front();
+}
+
+Identifier ConfigurationPropertyPath::last() const {
+    ARIADNE_PRECONDITION(not is_root());
+    return _path.back();
 }
 
 ConfigurationPropertyPath ConfigurationPropertyPath::subpath() const {

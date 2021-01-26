@@ -53,6 +53,8 @@ class ConfigurationPropertyPath : public WritableInterface {
     ConfigurationPropertyPath& prepend(Identifier const& node);
     //! \brief Return the first level of the path
     Identifier first() const;
+    //! \brief Return the last level of the path
+    Identifier last() const;
     //! \brief Return everything but the first level of the path
     ConfigurationPropertyPath subpath() const;
 

@@ -43,7 +43,7 @@ class TaskRunnerInterface {
   public:
     typedef Task<C> TaskType;
     typedef TaskInput<C> InputType;
-    typedef TaskOutput<C>  OutputType;
+    typedef TaskOutput<C> OutputType;
     typedef Configuration<C> ConfigurationType;
 
     //! \brief Return the task
@@ -52,6 +52,9 @@ class TaskRunnerInterface {
 
     //! \brief Return the configuration
     virtual ConfigurationType const& configuration() const = 0;
+
+    //! \brief Refine the current configuration from a completed task data, i.e., the input/output pair \a in and \a out
+    virtual void refine_configuration(InputType const& in, OutputType const& out) = 0;
 
     //! \brief Transfer running statistics onto the ConcurrencyManager
     virtual void dump_statistics() = 0;

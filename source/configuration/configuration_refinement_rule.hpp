@@ -23,7 +23,7 @@
  */
 
 /*! \file configuration/configuration_refinement_rule.hpp
- *  \brief A rule for refining a configuration based on input.
+ *  \brief A rule for refining a configuration based on a task result.
  */
 
 #ifndef ARIADNE_CONFIGURATION_REFINEMENT_RULE_HPP
@@ -32,19 +32,22 @@
 #include <functional>
 #include "configurable.hpp"
 #include "utility/pointer.hpp"
-#include "concurrency/task_interface.hpp"
 
 namespace Ariadne {
+
+template<class R> struct TaskInput;
+template<class R> struct TaskOutput;
 
 template<class R>
 class ConfigurationRefinementRule {
   public:
     typedef TaskInput<R> InputType;
+    typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
-    typedef std::function<void(InputType const&, ConfigurationType&)> FunctionType;
+    typedef std::function<void(InputType const&, OutputType const&, ConfigurationType&)> FunctionType;
 
     ConfigurationRefinementRule(FunctionType const& function) : _function(function) { }
-    void operator()(InputType const& i, ConfigurationType& c) { _function(i,c); }
+    void operator()(InputType const& i, OutputType const& o, ConfigurationType& c) { _function(i,o,c); }
     Bool operator<(ConfigurationRefinementRule<R> const& r) const { return &_function < &r._function; }
   private:
     FunctionType const _function;

@@ -61,8 +61,8 @@ int main(int argc, const char* argv[])
     auto verification_parameter = ScalarAppraisalParameter<E>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return o.evolve.bounding_box()[y].upper_bound().get_d(); });
     auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
-    auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, C& c){
-        static const auto step_maximum_error = ConfigurationPropertyPath("integrator").append("step_maximum_error");
+    auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, O const& o, C& c){
+        const auto step_maximum_error = ConfigurationPropertyPath("integrator").append("step_maximum_error");
         auto time_d = 6.5 - i.current_time.get_d();
         auto radius_d = (2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d();
         if (time_d > 0 and radius_d > 0) c.at<RangeConfigurationProperty<ExactDouble>>(step_maximum_error).set(ExactDouble(radius_d/time_d));

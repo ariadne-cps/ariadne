@@ -132,6 +132,23 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(not a.use_reconditioning());
     }
 
+    void test_configuration_at() {
+        Configuration<A> ca;
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::LOW);
+        ca.set_level(LevelOptions::MEDIUM);
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::MEDIUM);
+        ARIADNE_TEST_FAIL(ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("inexistent")));
+        auto level_prop = ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("level"));
+        ARIADNE_TEST_EQUALS(level_prop.get(),LevelOptions::MEDIUM);
+        ca.at<LevelOptionsConfigurationProperty>(ConfigurationPropertyPath("level")).set(LevelOptions::HIGH);
+        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::HIGH);
+        auto use_something_prop = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
+        ARIADNE_TEST_EQUALS(use_something_prop.get(),true);
+        ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something")).set(false);
+        auto use_something_prop_again = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
+        ARIADNE_TEST_EQUALS(use_something_prop_again.get(),false);
+    }
+
     void test_configuration_search_space() {
         Configuration<A> a;
         ARIADNE_TEST_FAIL(a.search_space());
@@ -206,45 +223,13 @@ class TestConfiguration {
         ARIADNE_TEST_PRINT(singleton);
     }
 
-    void test_configuration_at() {
-        Configuration<A> ca;
-        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::LOW);
-        ca.set_level(LevelOptions::MEDIUM);
-        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::MEDIUM);
-        ARIADNE_TEST_FAIL(ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("inexistent")));
-        auto level_prop = ca.at<EnumConfigurationProperty<LevelOptions>>(ConfigurationPropertyPath("level"));
-        ARIADNE_TEST_EQUALS(level_prop.get(),LevelOptions::MEDIUM);
-        ca.at<LevelOptionsConfigurationProperty>(ConfigurationPropertyPath("level")).set(LevelOptions::HIGH);
-        ARIADNE_TEST_EQUALS(ca.level(),LevelOptions::HIGH);
-        auto use_something_prop = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
-        ARIADNE_TEST_EQUALS(use_something_prop.get(),true);
-        ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something")).set(false);
-        auto use_something_prop_again = ca.at<BooleanConfigurationProperty>(ConfigurationPropertyPath("test_configurable").append("use_something"));
-        ARIADNE_TEST_EQUALS(use_something_prop_again.get(),false);
-    }
-
-    void test_configuration_refine() {
-        Configuration<A> ca;
-        auto property = ConfigurationPropertyPath("test_configurable").append("use_something");
-
-        TaskInput<A> input(false);
-        ConfigurationRefinementRule<A> rule([property](TaskInput<A> const& input,Configuration<A>& ca){
-            ca.at<BooleanConfigurationProperty>(property).set(input.valid); });
-        auto rca = make_refined(input,ca,{rule});
-        ARIADNE_TEST_EQUALS(rca.at<BooleanConfigurationProperty>(property).get(),false);
-        input.valid = true;
-        rca = make_refined(input,ca,{rule});
-        ARIADNE_TEST_EQUALS(rca.at<BooleanConfigurationProperty>(property).get(),true);
-    }
-
     void test() {
         ARIADNE_TEST_CALL(test_configuration_construction());
+        ARIADNE_TEST_CALL(test_configuration_at());
         ARIADNE_TEST_CALL(test_configuration_search_space());
         ARIADNE_TEST_CALL(test_configuration_make_singleton());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_search_space());
         ARIADNE_TEST_CALL(test_configuration_hierarchic_make_singleton());
-        ARIADNE_TEST_CALL(test_configuration_at());
-        ARIADNE_TEST_CALL(test_configuration_refine());
     }
 };
 

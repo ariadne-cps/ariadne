@@ -32,7 +32,6 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/string.hpp"
-#include "../concurrency/task_search_space.hpp"
 
 namespace Ariadne {
 
@@ -71,32 +70,6 @@ class TaskInterface {
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
     virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
-};
-
-//! \brief The base for parameter search tasks
-//! \details Useful to streamline task construction
-template<class R>
-class ParameterSearchTaskBase : public TaskInterface<R> {
-  public:
-    typedef TaskInput<R> InputType;
-    typedef TaskOutput<R> OutputType;
-  protected:
-    ParameterSearchTaskBase(String const& name, TaskAppraisalSpace<R> const& appraisal_space)
-        : _name(name), _appraisal_space(appraisal_space.clone()) {}
-  public:
-    String name() const override { return _name; }
-    TaskAppraisalSpace<R> const& appraisal_space() const override { return *_appraisal_space; }
-    Void set_appraisal_space(TaskAppraisalSpace<R> const& space) override { _appraisal_space.reset(space.clone()); }
-
-    Set<ConfigurationRefinementRule<R>> const& configuration_refinement_rules() const override { return _configuration_refinement_rules; }
-    Void set_configuration_refinement_rules(Set<ConfigurationRefinementRule<R>> const& rules) override {
-        _configuration_refinement_rules.clear(); _configuration_refinement_rules.adjoin(rules); }
-
-    Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _appraisal_space->appraise(data,input); }
-  private:
-    String const _name;
-    SharedPointer<TaskAppraisalSpace<R>> _appraisal_space;
-    Set<ConfigurationRefinementRule<R>> _configuration_refinement_rules;
 };
 
 } // namespace Ariadne

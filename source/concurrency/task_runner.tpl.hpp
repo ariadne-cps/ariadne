@@ -29,10 +29,12 @@
 #ifndef ARIADNE_TASK_RUNNER_TPL_HPP
 #define ARIADNE_TASK_RUNNER_TPL_HPP
 
-#include "../concurrency/task_runner.hpp"
-#include "../concurrency/task_interface.hpp"
-#include "../concurrency/concurrency_manager.hpp"
+#include "task.tpl.hpp"
+#include "task_runner.hpp"
+#include "task_interface.hpp"
+#include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
+#include "configuration/configuration_refinement_rule.hpp"
 
 namespace Ariadne {
 
@@ -55,6 +57,8 @@ template<class C> SharedPointer<TaskRunnerInterface<C>> const& TaskRunnable<C>::
 template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
   public:
     typedef typename TaskRunnerInterface<C>::TaskType TaskType;
+    typedef typename TaskRunnerInterface<C>::InputType InputType;
+    typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
 
     TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
@@ -63,10 +67,14 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
 
+    void refine_configuration(InputType const& input, OutputType const& output) override {
+        for (auto rule : task().configuration_refinement_rules()) rule(input,output,_configuration);
+    }
+
     virtual ~TaskRunnerBase() = default;
   protected:
     SharedPointer<TaskType> const _task;
-    ConfigurationType const _configuration;
+    ConfigurationType _configuration;
 };
 
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
@@ -74,8 +82,9 @@ template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const&
 template<class C> void SequentialRunner<C>::dump_statistics() { }
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
-    auto cfg = make_refined(input,this->configuration(),this->_task->configuration_refinement_rules());
-    _last_output.reset(new OutputType(this->_task->run_task(input,cfg)));
+    OutputType result = this->_task->run_task(input,this->configuration());
+    this->refine_configuration(input,result);
+    _last_output.reset(new OutputType(result));
 }
 
 template<class C> auto SequentialRunner<C>::pull() -> OutputType {
@@ -87,9 +96,10 @@ template<class C> void DetachedRunner<C>::_loop() {
         std::unique_lock<std::mutex> locker(_input_mutex);
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
-        auto pkg = _input_buffer.pop();
-        auto cfg = make_refined(pkg.first,this->configuration(),this->_task->configuration_refinement_rules());
-        _output_buffer.push(this->_task->run_task(pkg,cfg));
+        auto input = _input_buffer.pop();
+        OutputType output = this->_task->run_task(input,this->configuration());
+        this->refine_configuration(input,output);
+        _output_buffer.push(output);
         _output_availability.notify_all();
     }
 }
@@ -148,15 +158,14 @@ template<class C> void ParameterSearchRunner<C>::_loop() {
         locker.unlock();
         if (_terminate) break;
         auto pkg = _input_buffer.pop();
-        auto refined_cfg = make_refined(pkg.first,this->configuration(),this->_task->configuration_refinement_rules());
-        auto cfg = make_singleton(refined_cfg,pkg.second);
+        auto cfg = make_singleton(this->configuration(),pkg.second);
         try {
             auto start = std::chrono::high_resolution_clock::now();
-            auto result = this->_task->run_task(pkg.first,cfg);
+            auto output = this->_task->run_task(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");
-            _output_buffer.push(OutputBufferContentType(result,execution_time,pkg.second));
+            _output_buffer.push(OutputBufferContentType(output,execution_time,pkg.second));
         } catch (std::exception& e) {
             ++_failures;
             ARIADNE_LOG_PRINTLN("task failed: " << e.what());
@@ -230,7 +239,11 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     if (appraisals.begin()->critical_failures() > 0)
         throw CriticalAppraisalFailureException(appraisals);
     _best_points.push_back(*appraisals.begin());
-    return outputs.get(best).first;
+    auto best_output = outputs.get(best).first;
+
+    this->refine_configuration(input,best_output);
+
+    return best_output;
 }
 
 } // namespace Ariadne

@@ -29,12 +29,12 @@
 #ifndef ARIADNE_TASK_RUNNER_HPP
 #define ARIADNE_TASK_RUNNER_HPP
 
-#include "../concurrency/task_runner_interface.hpp"
-#include "../concurrency/loggable_smart_thread.hpp"
-#include "../concurrency/buffer.hpp"
-#include "../concurrency/task_search_point.hpp"
-#include "../concurrency/task_search_space.hpp"
-#include "../concurrency/task_appraisal.hpp"
+#include "loggable_smart_thread.hpp"
+#include "buffer.hpp"
+#include "task_runner_interface.hpp"
+#include "task_search_point.hpp"
+#include "task_search_space.hpp"
+#include "task_appraisal.hpp"
 #include "configuration/configuration_property.tpl.hpp"
 
 namespace Ariadne {

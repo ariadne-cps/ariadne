@@ -35,11 +35,13 @@
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_runner.hpp"
 #include "../concurrency/task_appraisal.hpp"
+#include "../configuration/configuration_property_interface.hpp"
 
 namespace Ariadne {
 
 //! \brief Manages threads and sets runners based on concurrency availability.
 class ConcurrencyManager {
+    typedef Map<ConfigurationPropertyPath,List<SharedPointer<ConfigurationPropertyInterface>>> PropertyRefinementsMap;
   private:
     ConcurrencyManager();
   public:
@@ -70,14 +72,20 @@ class ConcurrencyManager {
 
     void set_concurrency(SizeType value);
 
+    //! \brief The best points resulting from the last search
     List<TaskSearchPointAppraisal> last_search_best_points() const;
     void set_last_search_best_points(List<TaskSearchPointAppraisal> const& points);
+
+    //! \brief The refinement values for each property from the last run
+    PropertyRefinementsMap property_refinement_values() const;
+    void set_property_refinement_values(PropertyRefinementsMap const& refinements);
 
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
     std::mutex _data_mutex;
     List<TaskSearchPointAppraisal> _last_search_best_points;
+    PropertyRefinementsMap _property_refinement_values;
 };
 
 } // namespace Ariadne

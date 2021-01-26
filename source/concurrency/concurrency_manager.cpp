@@ -30,7 +30,7 @@
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(1) { }
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(1) {}
 
 SizeType ConcurrencyManager::maximum_concurrency() const {
     return _maximum_concurrency;
@@ -50,9 +50,18 @@ List<TaskSearchPointAppraisal> ConcurrencyManager::last_search_best_points() con
     return _last_search_best_points;
 }
 
-void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPointAppraisal> const& points) {
+void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPointAppraisal> const &points) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _last_search_best_points = points;
+}
+
+auto ConcurrencyManager::property_refinement_values() const -> PropertyRefinementsMap {
+    return _property_refinement_values;
+}
+
+void ConcurrencyManager::set_property_refinement_values(PropertyRefinementsMap const &refinements) {
+    _property_refinement_values.clear();
+    _property_refinement_values.adjoin(refinements);
 }
 
 }

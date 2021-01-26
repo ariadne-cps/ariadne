@@ -60,6 +60,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::InputType InputType;
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
+    typedef Map<ConfigurationPropertyPath,List<SharedPointer<ConfigurationPropertyInterface>>> PropertyRefinementsMap;
 
     TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
 
@@ -68,18 +69,25 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     ConfigurationType const& configuration() const override { return _configuration; }
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
-        for (auto rule : task().configuration_refinement_rules()) rule(input,output,_configuration);
+        for (auto rule : task().configuration_refinement_rules()) {
+            auto refinement = rule.apply(input,output,_configuration);
+            _property_refinement_values.insert(refinement);
+        }
     }
 
     virtual ~TaskRunnerBase() = default;
   protected:
     SharedPointer<TaskType> const _task;
     ConfigurationType _configuration;
+    PropertyRefinementsMap _property_refinement_values;
 };
 
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
 
-template<class C> void SequentialRunner<C>::dump_statistics() { }
+template<class C> void SequentialRunner<C>::dump_statistics() {
+    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    this->_property_refinement_values.clear();
+}
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
     OutputType result = this->_task->run_task(input,this->configuration());
@@ -115,7 +123,10 @@ template<class C> DetachedRunner<C>::~DetachedRunner() {
     _input_availability.notify_all();
 }
 
-template<class C> void DetachedRunner<C>::dump_statistics() { }
+template<class C> void DetachedRunner<C>::dump_statistics() {
+    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    this->_property_refinement_values.clear();
+}
 
 template<class C> void DetachedRunner<C>::push(InputType const& input) {
     if (not _active) {
@@ -193,6 +204,8 @@ template<class C> ParameterSearchRunner<C>::~ParameterSearchRunner() {
 template<class C> Void ParameterSearchRunner<C>::dump_statistics() {
     ConcurrencyManager::instance().set_last_search_best_points(_best_points);
     _best_points.clear();
+    ConcurrencyManager::instance().set_property_refinement_values(this->_property_refinement_values);
+    this->_property_refinement_values.clear();
 }
 
 template<class C> void ParameterSearchRunner<C>::push(InputType const& input) {

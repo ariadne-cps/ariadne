@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(4);
+    ConcurrencyManager::instance().set_concurrency(1);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -61,11 +61,12 @@ int main(int argc, const char* argv[])
     auto verification_parameter = ScalarAppraisalParameter<E>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
-    auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, O const& o, C& c){
+    auto refinement_rule = ConfigurationRefinementRule<E>([y](I const& i, O const& o, C& c)->ConfigurationRefinementRule<E>::ResultType {
         ExactDouble min_value = 1e-6_x;
         ExactDouble max_value = 1e-4_x;
         const auto property_name = ConfigurationPropertyPath("integrator").append("step_maximum_error");
-        auto previous_value = c.at<RangeConfigurationProperty<ExactDouble>>(property_name).get();
+        const auto property = c.at<RangeConfigurationProperty<ExactDouble>>(property_name);
+        auto previous_value = property.get();
         ARIADNE_LOG_PRINTLN("Previous value for step_maximum_error: " << previous_value);
         auto current_rho = ((o.evolve.bounding_box()[y].radius() - i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d();
         ARIADNE_LOG_PRINTLN("current rho: " << current_rho);
@@ -78,6 +79,7 @@ int main(int argc, const char* argv[])
         auto final_value = max(min_value,min(max_value,new_value));
         if (final_value != new_value) ARIADNE_LOG_PRINTLN("Overridden to: " << final_value);
         c.at<RangeConfigurationProperty<ExactDouble>>(property_name).set(final_value);
+        return make_pair(property_name,SharedPointer<ConfigurationPropertyInterface>(property.clone()));
     });
     VerificationManager::instance().add_safety_specification(evolver, {verification_constraint},{refinement_rule});
 

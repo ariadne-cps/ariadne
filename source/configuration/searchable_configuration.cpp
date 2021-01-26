@@ -72,7 +72,7 @@ TaskSearchSpace SearchableConfiguration::search_space() const {
             if (p_int.second.size() > 1) {
                 ConfigurationPropertyPath path(p_int.first);
                 path.prepend(p.first);
-                result.insert(TaskSearchParameter(path, p.second->is_metric(), p_int.second));
+                result.insert(TaskSearchParameter(path, p.second->is_metric(p_int.first), p_int.second));
             }
         }
     }

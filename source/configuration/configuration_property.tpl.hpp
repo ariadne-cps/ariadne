@@ -93,7 +93,8 @@ template<class T> Bool RangeConfigurationProperty<T>::is_single() const {
     else return possibly(_lower == _upper);
 }
 
-template<class T> Bool RangeConfigurationProperty<T>::is_metric() const {
+template<class T> Bool RangeConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
+    ARIADNE_PRECONDITION(path.is_root());
     return true;
 }
 
@@ -187,7 +188,8 @@ template<class T> Bool EnumConfigurationProperty<T>::is_single() const {
     return (_values.size() == 1);
 }
 
-template<class T> Bool EnumConfigurationProperty<T>::is_metric() const {
+template<class T> Bool EnumConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
+    ARIADNE_PRECONDITION(path.is_root());
     return false;
 }
 
@@ -271,7 +273,8 @@ template<class T> Bool ListConfigurationProperty<T>::is_single() const {
     return (_values.size() == 1);
 }
 
-template<class T> Bool ListConfigurationProperty<T>::is_metric() const {
+template<class T> Bool ListConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
+    ARIADNE_PRECONDITION(path.is_root());
     return false;
 }
 
@@ -349,8 +352,20 @@ template<class T> Bool InterfaceConfigurationProperty<T>::is_single() const {
     return (_values.size() == 1);
 }
 
-template<class T> Bool InterfaceConfigurationProperty<T>::is_metric() const {
-    return false;
+template<class T> Bool InterfaceConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
+    if (not is_configurable()) {
+        ARIADNE_PRECONDITION(path.is_root());
+        return false;
+    } else {
+        ARIADNE_PRECONDITION(is_single());
+        auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
+        auto p_ptr = properties.find(path.first());
+        if (p_ptr != properties.end()) {
+            return p_ptr->second->is_metric(path.subpath());
+        } else {
+            ARIADNE_FAIL_MSG("A property for " << path << " has not been found.");
+        }
+    }
 }
 
 template<class T> Bool InterfaceConfigurationProperty<T>::is_configurable() const {

@@ -42,8 +42,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     virtual Bool is_single() const = 0;
     //! \brief If values are specified at all
     virtual Bool is_specified() const = 0;
-    //! \brief If the property class is metric
-    virtual Bool is_metric() const = 0;
+    //! \brief If the property class at the \a path is metric
+    virtual Bool is_metric(ConfigurationPropertyPath const& path) const = 0;
     //! \brief If the property object is a configurable itself
     virtual Bool is_configurable() const = 0;
     //! \brief The number of values stored for the property

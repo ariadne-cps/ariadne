@@ -50,6 +50,7 @@ int main(int argc, const char* argv[])
             .set_maximum_temporal_order(8,15)
             .set_starting_step_size_num_refinements(0,5)
             .set_sweeper({sweeper1,sweeper2,sweeper3});
+    ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
     TaylorPicardIntegrator integrator(integrator_configuration);
 
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef Configuration<E> C;

@@ -55,7 +55,8 @@ Bool BooleanConfigurationProperty::is_single() const {
     return _is_single;
 }
 
-Bool BooleanConfigurationProperty::is_metric() const {
+Bool BooleanConfigurationProperty::is_metric(ConfigurationPropertyPath const& path) const {
+    ARIADNE_PRECONDITION(path.is_root());
     return false;
 }
 

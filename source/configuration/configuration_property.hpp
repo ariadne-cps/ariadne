@@ -70,7 +70,7 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     BooleanConfigurationProperty(Bool const& value);
 
     Bool is_single() const override;
-    Bool is_metric() const override;
+    Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 
@@ -98,7 +98,7 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter);
 
     Bool is_single() const override;
-    Bool is_metric() const override;
+    Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 
@@ -131,7 +131,7 @@ public:
     EnumConfigurationProperty(T const& value);
 
     Bool is_single() const override;
-    Bool is_metric() const override;
+        Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 
@@ -161,7 +161,7 @@ public:
     ListConfigurationProperty(T const& value);
 
     Bool is_single() const override;
-    Bool is_metric() const override;
+    Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 
@@ -191,7 +191,7 @@ template<class T> class InterfaceConfigurationProperty final : public Configurat
     InterfaceConfigurationProperty(T const& value);
 
     Bool is_single() const override;
-    Bool is_metric() const override;
+    Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 

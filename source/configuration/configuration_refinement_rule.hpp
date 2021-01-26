@@ -46,14 +46,16 @@ class ConfigurationRefinementRule {
     typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
     typedef Pair<ConfigurationPropertyPath,SharedPointer<ConfigurationPropertyInterface>> ResultType;
-    typedef std::function<ResultType(InputType const&, OutputType const&, ConfigurationType&)> FunctionType;
+    typedef std::function<ConfigurationPropertyInterface*(InputType const&, OutputType const&, ConfigurationType&, ConfigurationPropertyPath const&)> FunctionType;
 
-    ConfigurationRefinementRule(FunctionType const& function) : _function(function) { }
+    ConfigurationRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _function(function) { }
     //! \brief Apply the rule and return the refined result
-    ResultType apply(InputType const& i, OutputType const& o, ConfigurationType& c) { return _function(i,o,c); }
+    ResultType apply(InputType const& i, OutputType const& o, ConfigurationType& c) { return make_pair(_path,SharedPointer<ConfigurationPropertyInterface>(_function(i,o,c,_path))); }
     Bool operator<(ConfigurationRefinementRule<R> const& r) const { return &_function < &r._function; }
   private:
+    ConfigurationPropertyPath const _path;
     FunctionType const _function;
+
 };
 
 

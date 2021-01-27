@@ -41,7 +41,7 @@ namespace Ariadne {
 
 //! \brief Manages threads and sets runners based on concurrency availability.
 class ConcurrencyManager {
-    typedef Map<ConfigurationPropertyPath,List<SharedPointer<ConfigurationPropertyInterface>>> PropertyRefinementsMap;
+    typedef Map<ConfigurationPropertyPath,List<ExactDouble>> PropertyRefinementsMap;
   private:
     ConcurrencyManager();
   public:

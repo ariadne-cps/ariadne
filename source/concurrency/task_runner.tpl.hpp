@@ -60,7 +60,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::InputType InputType;
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
-    typedef Map<ConfigurationPropertyPath,List<SharedPointer<ConfigurationPropertyInterface>>> PropertyRefinementsMap;
+    typedef Map<ConfigurationPropertyPath,List<ExactDouble>> PropertyRefinementsMap;
 
     TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
 
@@ -70,10 +70,12 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto rule : task().configuration_refinement_rules()) {
-            auto ref = rule.apply(input,output,_configuration);
-            auto iter = _property_refinement_values.find(ref.first);
-            if (iter != _property_refinement_values.end()) _property_refinement_values.at(ref.first).push_back(ref.second);
-            else _property_refinement_values.insert(ref);
+            auto prop_ratio = rule.get_ratio(input,output);
+            _configuration.properties().get(prop_ratio.first.first())->refine_value(prop_ratio.first.subpath(),prop_ratio.second);
+            auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(prop_ratio.first).get();
+            auto iter = _property_refinement_values.find(prop_ratio.first);
+            if (iter != _property_refinement_values.end()) _property_refinement_values.at(prop_ratio.first).push_back(value);
+            else _property_refinement_values.insert(make_pair(prop_ratio.first,value));
         }
     }
 

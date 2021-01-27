@@ -143,6 +143,7 @@ template<class T> void RangeConfigurationProperty<T>::refine_value(Configuration
         _refined = Randomiser<T>::get(_lower,_upper);
         _is_refined = true;
     } else _refined = max(_lower,min(_upper,_refiner->get(_upper,ratio)));
+    ARIADNE_LOG_PRINTLN("Refined value: " << _refined);
 }
 
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {

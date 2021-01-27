@@ -39,22 +39,25 @@ namespace Ariadne {
 template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 
-template<class R>
-class ConfigurationPropertyRefinementRule {
+//! \brief A rule for refinement of a property.
+template<class R> class ConfigurationPropertyRefinementRule {
   public:
+    typedef double RatioType;
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
-    typedef Pair<ConfigurationPropertyPath,SharedPointer<ConfigurationPropertyInterface>> ResultType;
-    typedef std::function<ConfigurationPropertyInterface*(InputType const&, OutputType const&, ConfigurationType&, ConfigurationPropertyPath const&)> FunctionType;
+    typedef Pair<ConfigurationPropertyPath,RatioType> ResultType;
+    typedef std::function<RatioType(InputType const&, OutputType const&)> FunctionType;
 
-    ConfigurationPropertyRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _function(function) { }
-    //! \brief Apply the rule and return the refined result
-    ResultType apply(InputType const& i, OutputType const& o, ConfigurationType& c) { return make_pair(_path,SharedPointer<ConfigurationPropertyInterface>(_function(i,o,c,_path))); }
-    Bool operator<(ConfigurationPropertyRefinementRule<R> const& r) const { return &_function < &r._function; }
+    ConfigurationPropertyRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _ratio_function(function) { }
+    //! \brief Find the ratio for refinement
+    ResultType get_ratio(InputType const& i, OutputType const& o) { return make_pair(_path,_ratio_function(i,o)); }
+    //! \brief Comparison for set appending
+    //! \details Only one rule for a specific property is expected to be used.
+    Bool operator<(ConfigurationPropertyRefinementRule<R> const& r) const { return _path < r._path; }
   private:
     ConfigurationPropertyPath const _path;
-    FunctionType const _function;
+    FunctionType const _ratio_function;
 
 };
 

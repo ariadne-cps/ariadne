@@ -129,10 +129,8 @@ void ConcurrencyManager::print_last_property_refinement_values() const {
         for (auto prop : _last_property_refinement_values) {
             std::ofstream file;
             file.open("refinements.m");
-            List<ExactDouble> values;
-            for (auto p : prop.second) {
-                values.push_back(dynamic_cast<RangeConfigurationProperty<ExactDouble>*>(p.get())->get());
-            }
+            List<double> values;
+            for (auto p : prop.second) values.push_back(p.get_d());
             file << "y = " << values << ";\n";
             file << "x = [1:" << values.size() << "];\n";
             file << "semilogy(x,y)";

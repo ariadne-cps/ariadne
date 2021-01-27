@@ -46,14 +46,14 @@ int main(int argc, const char* argv[])
     auto sweeper2 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/100);
     auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err);
     auto integrator_configuration = Configuration<TaylorPicardIntegrator>()
-            .set_step_maximum_error(1e-5)
+            .set_step_maximum_error(1e-6,1e-4)
             .set_maximum_temporal_order(8,15)
             .set_starting_step_size_num_refinements(0,5)
             .set_sweeper({sweeper1,sweeper2,sweeper3});
     ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
     TaylorPicardIntegrator integrator(integrator_configuration);
 
-    typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef Configuration<E> C;
+    typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O;
 
     E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.01,1.0));
     //E evolver(system,Configuration<E>(integrator));
@@ -64,24 +64,13 @@ int main(int argc, const char* argv[])
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
     auto refinement_rule = ConfigurationPropertyRefinementRule<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
-                                                                  [y](I const& i, O const& o, C& c, ConfigurationPropertyPath const& path) {
-        ExactDouble min_value = 1e-6_x;
-        ExactDouble max_value = 1e-4_x;
-        const auto property = c.at<RangeConfigurationProperty<ExactDouble>>(path);
-        auto previous_value = property.get();
-        ARIADNE_LOG_PRINTLN("Previous value for step_maximum_error: " << previous_value);
+                                                                  [y](I const& i, O const& o) {
         auto current_rho = ((o.evolve.bounding_box()[y].radius() - i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d();
         ARIADNE_LOG_PRINTLN("current rho: " << current_rho);
         auto time_d = 6.5 - o.time.get_d();
         auto target_rho = ((2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d())/time_d;
         ARIADNE_LOG_PRINTLN("target rho: " << target_rho);
-        double K = 1e-3;
-        auto new_value = ExactDouble(previous_value.get_d()*(1.0-K*(current_rho-target_rho)/abs(target_rho)));
-        ARIADNE_LOG_PRINTLN("New value for step_maximum_error: " << new_value);
-        auto final_value = max(min_value,min(max_value,new_value));
-        if (final_value != new_value) ARIADNE_LOG_PRINTLN("Overridden to: " << final_value);
-        c.at<RangeConfigurationProperty<ExactDouble>>(path).set(final_value);
-        return property.clone();
+        return (current_rho-target_rho)/abs(target_rho);
     });
     VerificationManager::instance().add_safety_specification(evolver, {verification_constraint},{refinement_rule});
 

@@ -65,6 +65,7 @@ template<class T> class ConfigurationPropertyBase : public ConfigurationProperty
     Bool _is_specified;
 };
 
+//! \brief A property for a boolean value.
 class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool> {
   public:
     BooleanConfigurationProperty();
@@ -93,6 +94,9 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     Bool _value;
 };
 
+//! \brief A range configuration property offers a range of values with a distance metric
+//! \details This property needs a converter to decide how to distribute the integer values in the search space.
+//! Also, this property when not set to a single value can be refined by using a refiner.
 template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
     RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
@@ -103,6 +107,9 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     Bool is_metric(ConfigurationPropertyPath const& path) const override;
     Bool is_configurable() const override;
     SizeType cardinality() const override;
+
+    //! \brief If the range value is currently under refinement
+    Bool is_refined() const;
 
     ConfigurationPropertyInterface* clone() const override;
 
@@ -122,6 +129,8 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
   private:
     T _lower;
     T _upper;
+    T _refined;
+    Bool _is_refined;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
     SharedPointer<ConfigurationPropertyRefinerInterface<T>> const _refiner;
 };

@@ -22,9 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-#include <time.h>
-
 #include "../utility/macros.hpp"
 #include "../concurrency/concurrency_manager.hpp"
 
@@ -145,10 +142,3 @@ void ConcurrencyManager::print_last_property_refinement_values() const {
 }
 
 }
-
-inline bool _init_randomiser() {
-    srand(time(nullptr));
-    return true;
-}
-
-static const bool init_randomiser = _init_randomiser();

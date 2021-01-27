@@ -31,6 +31,7 @@
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
+#include "utility/randomiser.hpp"
 #include "symbolic/identifier.hpp"
 #include "configuration.hpp"
 #include "configuration_property.hpp"
@@ -39,6 +40,8 @@
 #include "configurable.hpp"
 
 namespace Ariadne {
+
+using std::min, std::max;
 
 template<class T> ConfigurationPropertyBase<T>::ConfigurationPropertyBase(Bool const& is_specified) : _is_specified(is_specified) { }
 
@@ -69,13 +72,13 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
 }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
-        ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()),
+        ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
         _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) { }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper,
         SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
-        ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper),
+        ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
         _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
@@ -83,19 +86,21 @@ template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T co
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value,
         SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
-        ConfigurationPropertyBase<T>(true), _lower(value), _upper(value),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) { }
+                RangeConfigurationProperty(value,value,converter,refiner) { }
 
 template<class T> T const& RangeConfigurationProperty<T>::get() const {
     ARIADNE_PRECONDITION(this->is_specified());
-    ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
-    return _upper;
+    ARIADNE_ASSERT_MSG(this->is_single() or is_refined(),"The property should have a single value or be under refinement when actually used. Are you accessing it outside the related task?");
+    return (is_refined() ? _refined : _upper);
 }
 
 template<class T> Bool RangeConfigurationProperty<T>::is_single() const {
     if (not this->is_specified()) return false;
     else return possibly(_lower == _upper);
+}
+
+template<class T> Bool RangeConfigurationProperty<T>::is_refined() const {
+    return _is_refined;
 }
 
 template<class T> Bool RangeConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
@@ -133,8 +138,11 @@ template<class T> void RangeConfigurationProperty<T>::set_single(ConfigurationPr
 
 template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
     ARIADNE_PRECONDITION(path.is_root());
-    ARIADNE_PRECONDITION(is_single())
-    _lower = _upper = _refiner->get(_upper,ratio);
+    ARIADNE_ASSERT_MSG(not is_single(),"The property value must be in an interval in order to be refined.");
+    if (not is_refined()) {
+        _refined = Randomiser<T>::get(_lower,_upper);
+        _is_refined = true;
+    } else _refined = max(_lower,min(_upper,_refiner->get(_upper,ratio)));
 }
 
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {
@@ -158,12 +166,14 @@ template<class T> ConfigurationPropertyInterface* RangeConfigurationProperty<T>:
 
 template<class T> void RangeConfigurationProperty<T>::set(T const& lower, T const& upper) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
+    ARIADNE_ASSERT_MSG(not is_refined(),"The value is under refinement, setting it is not allowed.");
     this->set_specified();
     _lower = lower;
     _upper = upper;
 }
 
 template<class T> void RangeConfigurationProperty<T>::set(T const& value) {
+    ARIADNE_ASSERT_MSG(not is_refined(),"The value is under refinement, setting it is not allowed.");
     this->set_specified();
     _lower = value;
     _upper = value;

@@ -202,12 +202,18 @@ class TestConfiguration {
     void test_range_configuration_property_refine() {
         Log10Converter converter;
         Proportional refiner(0.125);
-        ExactDoubleConfigurationProperty p1(1.0_x,converter,refiner);
+        ExactDoubleConfigurationProperty p1(1.0_x,2.0_x,converter,refiner);
         p1.refine_value(ConfigurationPropertyPath(),1.0);
-        auto val = p1.get().get_d();
-        ARIADNE_TEST_EQUALS(val,0.875);
+        auto val1 = p1.get().get_d();
+        ARIADNE_TEST_ASSERT(val1 < 2.0 and val1 >= 1.0);
+        p1.refine_value(ConfigurationPropertyPath(),-1.0);
+        auto val2 = p1.get().get_d();
+        ARIADNE_TEST_ASSERT(val2 > val1);
+        p1.refine_value(ConfigurationPropertyPath(),0.5);
+        auto val3 = p1.get().get_d();
+        ARIADNE_TEST_ASSERT(val3 < val2);
         ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath("something"),1.0));
-        ExactDoubleConfigurationProperty p2(0.01_x,1.0_x,converter,refiner);
+        ExactDoubleConfigurationProperty p2(1.0_x,converter,refiner);
         ARIADNE_TEST_FAIL(p2.refine_value(ConfigurationPropertyPath(),1.0));
     }
 

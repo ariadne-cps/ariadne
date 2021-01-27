@@ -53,7 +53,7 @@ class VerificationManager {
     template<class R> void add_safety_specification(
             TaskRunnable<R>& runnable,
             Set<TaskAppraisalConstraint<R>> const& safety_constraints,
-            List<ConfigurationRefinementRule<R>> const& refinement_rules = List<ConfigurationRefinementRule<R>>()) const {
+            List<ConfigurationPropertyRefinementRule<R>> const& refinement_rules = List<ConfigurationPropertyRefinementRule<R>>()) const {
         auto appraisal_space = runnable.runner()->task().appraisal_space();
         auto original_constraints = appraisal_space.constraints();
         auto original_weights = appraisal_space.parameters_weights();

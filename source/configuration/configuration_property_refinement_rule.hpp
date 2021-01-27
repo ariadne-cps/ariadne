@@ -1,5 +1,5 @@
 /***************************************************************************
- *            configuration/configuration_refinement_rule.hpp
+ *            configuration/configuration_property_refinement_rule.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -26,8 +26,8 @@
  *  \brief A rule for refining a configuration based on a task result.
  */
 
-#ifndef ARIADNE_CONFIGURATION_REFINEMENT_RULE_HPP
-#define ARIADNE_CONFIGURATION_REFINEMENT_RULE_HPP
+#ifndef ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_RULE_HPP
+#define ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_RULE_HPP
 
 #include <functional>
 #include "utility/pointer.hpp"
@@ -40,7 +40,7 @@ template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 
 template<class R>
-class ConfigurationRefinementRule {
+class ConfigurationPropertyRefinementRule {
   public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
@@ -48,10 +48,10 @@ class ConfigurationRefinementRule {
     typedef Pair<ConfigurationPropertyPath,SharedPointer<ConfigurationPropertyInterface>> ResultType;
     typedef std::function<ConfigurationPropertyInterface*(InputType const&, OutputType const&, ConfigurationType&, ConfigurationPropertyPath const&)> FunctionType;
 
-    ConfigurationRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _function(function) { }
+    ConfigurationPropertyRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _function(function) { }
     //! \brief Apply the rule and return the refined result
     ResultType apply(InputType const& i, OutputType const& o, ConfigurationType& c) { return make_pair(_path,SharedPointer<ConfigurationPropertyInterface>(_function(i,o,c,_path))); }
-    Bool operator<(ConfigurationRefinementRule<R> const& r) const { return &_function < &r._function; }
+    Bool operator<(ConfigurationPropertyRefinementRule<R> const& r) const { return &_function < &r._function; }
   private:
     ConfigurationPropertyPath const _path;
     FunctionType const _function;
@@ -61,4 +61,4 @@ class ConfigurationRefinementRule {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONFIGURATION_REFINEMENT_RULE_HPP
+#endif // ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_RULE_HPP

@@ -232,13 +232,13 @@ template<> class Configuration<TaylorPicardIntegrator> : public SearchableConfig
 
     Configuration() {
         add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6)));
-        add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>()));
-        add_property("minimum_temporal_order",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>()));
-        add_property("maximum_temporal_order",DegreeTypeProperty(15u,LinearSearchSpaceConverter<DegreeType>()));
+        add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("minimum_temporal_order",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>(),ProportionalRefiner<DegreeType>(1e-3)));
+        add_property("maximum_temporal_order",DegreeTypeProperty(15u,LinearSearchSpaceConverter<DegreeType>(),ProportionalRefiner<DegreeType>(1e-3)));
 
         // Base properties
-        add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,LinearSearchSpaceConverter<RealType>()));
-        add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>()));
+        add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,LinearSearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>(),ProportionalRefiner<DegreeType>(1e-3)));
         add_property("bounder",BounderProperty(EulerBounder()));
     }
 

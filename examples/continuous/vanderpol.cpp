@@ -63,8 +63,8 @@ int main(int argc, const char* argv[])
     auto verification_parameter = ScalarAppraisalParameter<E>("y",TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
-    auto refinement_rule = ConfigurationRefinementRule<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
-    [y](I const& i, O const& o, C& c, ConfigurationPropertyPath const& path) {
+    auto refinement_rule = ConfigurationPropertyRefinementRule<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
+                                                                  [y](I const& i, O const& o, C& c, ConfigurationPropertyPath const& path) {
         ExactDouble min_value = 1e-6_x;
         ExactDouble max_value = 1e-4_x;
         const auto property = c.at<RangeConfigurationProperty<ExactDouble>>(path);

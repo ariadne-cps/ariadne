@@ -75,13 +75,14 @@ using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions
 using TestConfigurableConfigurationProperty = InterfaceConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
+using Proportional = ProportionalRefiner<ExactDouble>;
 
 template<> class Configuration<A> : public SearchableConfiguration {
   public:
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));
-        add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter()));
-        add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<ExactDouble>()));
+        add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter(),Proportional(1e-3)));
+        add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2Converter(),Proportional(1e-3)));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("test_configurable",TestConfigurableConfigurationProperty(TestConfigurable(Configuration<TestConfigurable>())));
     }
@@ -105,11 +106,6 @@ template<> class Configuration<A> : public SearchableConfiguration {
     TestConfigurableInterface const& test_configurable() const { return at<TestConfigurableConfigurationProperty>("test_configurable").get(); }
     void set_test_configurable(TestConfigurableInterface const& test_configurable) { at<TestConfigurableConfigurationProperty>("test_configurable").set(test_configurable); }
     void set_test_configurable(SharedPointer<TestConfigurableInterface> const& test_configurable) { at<TestConfigurableConfigurationProperty>("test_configurable").set(test_configurable); }
-};
-
-template<> struct TaskInput<A> {
-    TaskInput(Bool valid_) : valid(valid_) { }
-    Bool valid;
 };
 
 }

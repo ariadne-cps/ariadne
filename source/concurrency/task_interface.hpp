@@ -46,7 +46,7 @@ template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 template<class R> class Task;
 template<class R> class Configuration;
-template<class R> class ConfigurationRefinementRule;
+template<class R> class ConfigurationPropertyRefinementRule;
 
 template<class R>
 class TaskInterface {
@@ -62,9 +62,9 @@ class TaskInterface {
     //! \brief Set the appraisal space for the task
     virtual Void set_appraisal_space(TaskAppraisalSpace<R> const& space) = 0;
     //! \brief Return the configuration refinement rules
-    virtual Set<ConfigurationRefinementRule<R>> const& configuration_refinement_rules() const = 0;
+    virtual Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const = 0;
     //! \brief Set the configuration refinement rules for the task
-    virtual Void set_configuration_refinement_rules(Set<ConfigurationRefinementRule<R>> const& rules) = 0;
+    virtual Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;

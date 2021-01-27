@@ -40,6 +40,7 @@
 #include "numeric/real.hpp"
 #include "configuration.hpp"
 #include "configuration_property_interface.hpp"
+#include "configuration_property_refiner.hpp"
 #include "concurrency/search_space_converter.hpp"
 
 namespace Ariadne {
@@ -83,6 +84,7 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     void set_both(); //! \brief Set to both true and false
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void local_set_single(int integer_value) override;
+    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<Bool>> values() const override;
@@ -93,9 +95,9 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 
 template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
-    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter);
-    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter);
-    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter);
+    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
+    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
+    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
 
     Bool is_single() const override;
     Bool is_metric(ConfigurationPropertyPath const& path) const override;
@@ -113,7 +115,7 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     void set(T const& value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void local_set_single(int integer_value) override;
-
+    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
@@ -121,6 +123,7 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     T _lower;
     T _upper;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
+    SharedPointer<ConfigurationPropertyRefinerInterface<T>> const _refiner;
 };
 
 //! \brief A property that specifies distinct values from an enum
@@ -144,7 +147,7 @@ public:
     void set(Set<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void local_set_single(int integer_value) override;
-
+    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
 protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
@@ -174,7 +177,7 @@ public:
     void set(List<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void local_set_single(int integer_value) override;
-
+    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
@@ -204,9 +207,10 @@ template<class T> class InterfaceConfigurationProperty final : public Configurat
     void set(T const& value) override;
     void set(SharedPointer<T> const& value);
     void set(List<SharedPointer<T>> const& values);
-    void local_set_single(int integer_value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-  protected:
+    void local_set_single(int integer_value) override;
+    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
+    protected:
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:

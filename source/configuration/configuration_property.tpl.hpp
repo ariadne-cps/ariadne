@@ -68,19 +68,24 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
     return os;
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) { }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper,
+        SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
         ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) {
+        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value,
+        SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
         ConfigurationPropertyBase<T>(true), _lower(value), _upper(value),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) { }
 
 template<class T> T const& RangeConfigurationProperty<T>::get() const {
     ARIADNE_PRECONDITION(this->is_specified());
@@ -124,6 +129,12 @@ template<class T> List<int> RangeConfigurationProperty<T>::local_integer_values(
 template<class T> void RangeConfigurationProperty<T>::set_single(ConfigurationPropertyPath const& path, int integer_value) {
     ARIADNE_PRECONDITION(path.is_root());
     local_set_single(integer_value);
+}
+
+template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+    ARIADNE_PRECONDITION(path.is_root());
+    ARIADNE_PRECONDITION(is_single())
+    _lower = _upper = _refiner->get(_upper,ratio);
 }
 
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {
@@ -207,6 +218,7 @@ template<class T> List<int> EnumConfigurationProperty<T>::local_integer_values()
     return result;
 }
 
+
 template<class T> void EnumConfigurationProperty<T>::set_single(ConfigurationPropertyPath const& path, int integer_value) {
     ARIADNE_PRECONDITION(path.is_root());
     local_set_single(integer_value);
@@ -220,6 +232,11 @@ template<class T> void EnumConfigurationProperty<T>::local_set_single(int intege
     T value = *iter;
     _values.clear();
     _values.insert(value);
+}
+
+template<class T> void EnumConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+    ARIADNE_PRECONDITION(path.is_root());
+    ARIADNE_ERROR("The value of an enum property cannot be refined.");
 }
 
 template<class T> ConfigurationPropertyInterface* EnumConfigurationProperty<T>::clone() const {
@@ -305,6 +322,11 @@ template<class T> void ListConfigurationProperty<T>::local_set_single(int intege
     _values.push_back(value);
 }
 
+template<class T> void ListConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+    ARIADNE_PRECONDITION(path.is_root());
+    ARIADNE_ERROR("The value of a list property cannot be refined.");
+}
+
 template<class T> ConfigurationPropertyInterface* ListConfigurationProperty<T>::clone() const {
     return new ListConfigurationProperty(*this);
 }
@@ -353,10 +375,8 @@ template<class T> Bool InterfaceConfigurationProperty<T>::is_single() const {
 }
 
 template<class T> Bool InterfaceConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
-    if (not is_configurable()) {
-        ARIADNE_PRECONDITION(path.is_root());
-        return false;
-    } else {
+    if (path.is_root()) return false;
+    if (is_configurable()) {
         ARIADNE_PRECONDITION(is_single());
         auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
         auto p_ptr = properties.find(path.first());
@@ -365,6 +385,8 @@ template<class T> Bool InterfaceConfigurationProperty<T>::is_metric(Configuratio
         } else {
             ARIADNE_FAIL_MSG("A property for " << path << " has not been found.");
         }
+    } else {
+        ARIADNE_FAIL_MSG("The object is not configurable, a property for " << path << " could not been found.");
     }
 }
 
@@ -409,6 +431,16 @@ template<class T> void InterfaceConfigurationProperty<T>::set_single(Configurati
         }
         ARIADNE_ASSERT_MSG(been_set,"A property for " << path << " has not been found.");
     }
+}
+
+template<class T> void InterfaceConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+    ARIADNE_ASSERT_MSG(not path.is_root(),"The value of an interface configuration property can not be refined.");
+    ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the interface configuration property is not configurable.");
+    ARIADNE_ASSERT_MSG(is_single(),"Multiple values are allowed only if not configurable");
+    auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
+    auto p_ptr = properties.find(path.first());
+    if (p_ptr != properties.end()) p_ptr->second->refine_value(path.subpath(),ratio);
+    else { ARIADNE_ERROR("The path " << path << " has not been found."); }
 }
 
 template<class T> Map<ConfigurationPropertyPath,List<int>> InterfaceConfigurationProperty<T>::integer_values() const {

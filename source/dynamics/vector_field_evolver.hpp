@@ -152,9 +152,9 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
         add_property("enable_reconditioning",BooleanConfigurationProperty(false));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
         add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
-        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
+        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
     }
 
     Configuration(IntegratorInterface const& integrator) {
@@ -162,9 +162,9 @@ template<> class Configuration<VectorFieldEvolver> final : public SearchableConf
         add_property("enable_reconditioning",BooleanConfigurationProperty(false));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
         add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(integrator));
-        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
+        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
+        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
     }
 
     //! \brief Enable premature termination of lower evolution

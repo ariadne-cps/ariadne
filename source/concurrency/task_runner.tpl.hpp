@@ -34,7 +34,7 @@
 #include "task_interface.hpp"
 #include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "configuration/configuration_refinement_rule.hpp"
+#include "configuration/configuration_property_refinement_rule.hpp"
 
 namespace Ariadne {
 

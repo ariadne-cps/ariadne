@@ -79,11 +79,11 @@ TaskSearchSpace SearchableConfiguration::search_space() const {
     ARIADNE_ASSERT_MSG(not result.empty(),"The search space is empty.");
     return result;
 }
-
+/*
 Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& SharedSearchableConfiguration::properties() const {
     return _properties;
 }
-
+*/
 void SharedSearchableConfiguration::add_property_from(Identifier const& name, SearchableConfiguration const& c) {
     auto p = c.properties().find(name);
     ARIADNE_ASSERT_MSG(p != c.properties().end(), "The supplied property '" << name <<"' does not exist in the source configuration.");

@@ -34,18 +34,20 @@ namespace Ariadne {
 //! \brief Interface for conversion from/into the integer search space
 template<class T>
 struct ConfigurationPropertyRefinerInterface {
-    virtual T get(T const& current, double coefficient) const = 0;
+    //! \brief Apply the amount to the current value using the refinement rule chosen
+    virtual T apply(double amount,T const& current) const = 0;
 
     virtual ConfigurationPropertyRefinerInterface* clone() const = 0;
     virtual ~ConfigurationPropertyRefinerInterface() = default;
 };
 
+//! \brief Proportional control refiner: next = current*(1-G*amount) with G a gain constant
 template<class T> struct ProportionalRefiner;
 
 template<> struct ProportionalRefiner<ExactDouble> : public ConfigurationPropertyRefinerInterface<ExactDouble> {
     ProportionalRefiner(double gain) : _gain(gain) { }
-    ExactDouble get(ExactDouble const& current, double coefficient) const override {
-        return ExactDouble(current.get_d()*(1.0 - _gain*coefficient));
+    ExactDouble apply(double amount, ExactDouble const& current) const override {
+        return ExactDouble(current.get_d()*(1.0 - _gain*amount));
     }
     ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
   private:
@@ -54,8 +56,8 @@ template<> struct ProportionalRefiner<ExactDouble> : public ConfigurationPropert
 
 template<> struct ProportionalRefiner<DegreeType> : public ConfigurationPropertyRefinerInterface<DegreeType> {
     ProportionalRefiner(double gain) : _gain(gain) { }
-    DegreeType get(DegreeType const& current, double coefficient) const override {
-        return DegreeType(current*(1.0 - _gain*coefficient));
+    DegreeType apply(double amount, DegreeType const& current) const override {
+        return DegreeType(current*(1.0 - _gain*amount));
     }
     ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
 private:

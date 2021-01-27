@@ -98,7 +98,7 @@ class SharedSearchableConfiguration : public ConfigurationInterface {
 public:
     virtual ~SharedSearchableConfiguration() = default;
 
-    Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
+    //Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
 
     //! \brief Accessors for get and set of a property identified by \a identifier of type \a P
     template<class P> P const& at(Identifier const& identifier) const {

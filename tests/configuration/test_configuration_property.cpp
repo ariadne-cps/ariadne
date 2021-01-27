@@ -124,17 +124,17 @@ class TestConfiguration {
     void test_boolean_configuration_property_set_single() {
         BooleanConfigurationProperty p;
         p.set_both();
-        p.local_set_single(0);
+        p.set_single(ConfigurationPropertyPath(),0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),false);
         p.set_both();
-        p.local_set_single(1);
+        p.set_single(ConfigurationPropertyPath(),1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),true);
-        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
         p.set_both();
-        ARIADNE_TEST_FAIL(p.local_set_single(2));
-        ARIADNE_TEST_FAIL(p.local_set_single(-1));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),2));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));
     }
 
     void test_range_configuration_property_construction() {
@@ -182,27 +182,29 @@ class TestConfiguration {
         Log10Converter converter;
         Proportional refiner(1e-3);
         ExactDoubleConfigurationProperty p(0.001_x,0.1_x,converter,refiner);
-        p.local_set_single(-3);
+        p.set_single(ConfigurationPropertyPath(),-3);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
         p.set(0.001_x,0.1_x);
-        p.local_set_single(-1);
+        p.set_single(ConfigurationPropertyPath(),-1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
         p.set(0.001_x,0.1_x);
-        p.local_set_single(-2);
+        p.set_single(ConfigurationPropertyPath(),-2);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p.get().get_d());
-        ARIADNE_TEST_FAIL(p.local_set_single(-1));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));
         p.set(0.001_x,0.1_x);
-        ARIADNE_TEST_FAIL(p.local_set_single(-4));
-        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-4));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
     }
 
     void test_range_configuration_property_refine() {
         Log10Converter converter;
         Proportional refiner(0.125);
         ExactDoubleConfigurationProperty p1(1.0_x,2.0_x,converter,refiner);
+        ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath(),1.0));
+        p1.refine_init(ConfigurationPropertyPath());
         p1.refine_value(ConfigurationPropertyPath(),1.0);
         auto val1 = p1.get().get_d();
         ARIADNE_TEST_ASSERT(val1 < 2.0 and val1 >= 1.0);
@@ -259,17 +261,17 @@ class TestConfiguration {
 
     void test_enum_configuration_property_set_single() {
         LevelOptionsConfigurationProperty p({LevelOptions::MEDIUM,LevelOptions::HIGH});
-        p.local_set_single(0);
+        p.set_single(ConfigurationPropertyPath(),0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),LevelOptions::MEDIUM);
         p.set({LevelOptions::MEDIUM,LevelOptions::HIGH});
-        p.local_set_single(1);
+        p.set_single(ConfigurationPropertyPath(),1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.get(),LevelOptions::HIGH);
-        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
         p.set({LevelOptions::MEDIUM,LevelOptions::HIGH});
-        ARIADNE_TEST_FAIL(p.local_set_single(2));
-        ARIADNE_TEST_FAIL(p.local_set_single(-1));;
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),2));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));;
     }
 
     void test_list_configuration_property_construction() {
@@ -320,17 +322,17 @@ class TestConfiguration {
         sweepers.append(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6));
         sweepers.append(GradedSweeper<FloatDP>(DoublePrecision(),Order(6)));
         SweeperConfigurationProperty p(sweepers);
-        p.local_set_single(0);
+        p.set_single(ConfigurationPropertyPath(),0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
         p.set(sweepers);
-        p.local_set_single(1);
+        p.set_single(ConfigurationPropertyPath(),1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
-        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
         p.set(sweepers);
-        ARIADNE_TEST_FAIL(p.local_set_single(2));
-        ARIADNE_TEST_FAIL(p.local_set_single(-1));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),2));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));
     }
 
     void test_interface_configuration_property_construction() {
@@ -381,17 +383,17 @@ class TestConfiguration {
         tests.append(SharedPointer<TestInterface>(new A()));
         tests.append(SharedPointer<TestInterface>(new B()));
         TestInterfaceConfigurationProperty p(tests);
-        p.local_set_single(0);
+        p.set_single(ConfigurationPropertyPath(),0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
         p.set(tests);
-        p.local_set_single(1);
+        p.set_single(ConfigurationPropertyPath(),1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
-        ARIADNE_TEST_FAIL(p.local_set_single(0));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
         p.set(tests);
-        ARIADNE_TEST_FAIL(p.local_set_single(2));
-        ARIADNE_TEST_FAIL(p.local_set_single(-1));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),2));
+        ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));
     }
 
     void test() {

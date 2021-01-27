@@ -50,6 +50,7 @@ template<class R> class ConfigurationPropertyRefinementRule {
     typedef std::function<RatioType(InputType const&, OutputType const&)> FunctionType;
 
     ConfigurationPropertyRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _ratio_function(function) { }
+    ConfigurationPropertyPath const& path() const { return _path; }
     //! \brief Find the ratio for refinement
     ResultType get_ratio(InputType const& i, OutputType const& o) { return make_pair(_path,_ratio_function(i,o)); }
     //! \brief Comparison for set appending

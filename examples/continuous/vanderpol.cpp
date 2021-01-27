@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
     ConcurrencyManager::instance().set_concurrency(4);
-    //Logger::instance().use_blocking_scheduler();
+    Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
@@ -56,7 +56,6 @@ int main(int argc, const char* argv[])
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O;
 
     E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.01,1.0));
-    //E evolver(system,Configuration<E>(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 

@@ -52,6 +52,8 @@ class ConfigurationPropertyInterface : public WritableInterface {
     //! \brief Set to a single value a given path, starting from this property
     //! \details Supports the storage of objects that are Configurable themselves
     virtual void set_single(ConfigurationPropertyPath const& path, int integer_value) = 0;
+    //! \details Set a random initial value for refinement of a metric property
+    virtual void refine_init(ConfigurationPropertyPath const& path) = 0;
     //! \brief Refine the value at a \a path with the given \a ratio using the hardcoded proportional refinement strategy
     virtual void refine_value(ConfigurationPropertyPath const& path, double ratio) = 0;
     //! \brief The integer values for each property including the current one

@@ -84,9 +84,10 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     void set(Bool const& value) override;
     void set_both(); //! \brief Set to both true and false
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void local_set_single(int integer_value) override;
+    void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
+    void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<Bool>> values() const override;
   private:
@@ -121,9 +122,10 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     //! \details An unbounded single value is accepted
     void set(T const& value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void local_set_single(int integer_value) override;
+    void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
+    void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
@@ -155,9 +157,10 @@ public:
     void set(T const& value) override;
     void set(Set<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void local_set_single(int integer_value) override;
+    void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
 protected:
+    void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
 private:
@@ -185,9 +188,10 @@ public:
     void set(T const& value) override;
     void set(List<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void local_set_single(int integer_value) override;
+    void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
   protected:
+    void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
@@ -217,9 +221,10 @@ template<class T> class InterfaceConfigurationProperty final : public Configurat
     void set(SharedPointer<T> const& value);
     void set(List<SharedPointer<T>> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void local_set_single(int integer_value) override;
+    void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
     protected:
+    void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:

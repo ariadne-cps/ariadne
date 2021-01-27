@@ -68,6 +68,11 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
 
+    void refine_configuration_init() override {
+        for (auto rule : task().configuration_refinement_rules())
+            _configuration.properties().get(rule.path().first())->refine_init(rule.path().subpath());
+    }
+
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto rule : task().configuration_refinement_rules()) {
             auto prop_ratio = rule.get_ratio(input,output);
@@ -80,6 +85,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     }
 
     virtual ~TaskRunnerBase() = default;
+
   protected:
     SharedPointer<TaskType> const _task;
     ConfigurationType _configuration;
@@ -196,8 +202,6 @@ template<class C> ParameterSearchRunner<C>::ParameterSearchRunner(ConfigurationT
           _active(false), _terminate(false) {
     for (Nat i=0; i<concurrency; ++i)
         _threads.append(SharedPointer<LoggableSmartThread>(new LoggableSmartThread(this->_task->name() + (concurrency>=10 and i<10 ? "0" : "") + to_string(i), [this]() { _loop(); })));
-    auto shifted = configuration.search_space().initial_point().make_random_shifted(_concurrency);
-    for (auto point : shifted) _points.push(point);
 }
 
 template<class C> ParameterSearchRunner<C>::~ParameterSearchRunner() {
@@ -215,6 +219,8 @@ template<class C> Void ParameterSearchRunner<C>::dump_statistics() {
 template<class C> void ParameterSearchRunner<C>::push(InputType const& input) {
     if (not _active) {
         _active = true;
+        auto shifted = this->_configuration.search_space().initial_point().make_random_shifted(_concurrency);
+        for (auto point : shifted) _points.push(point);
         for (auto thread : _threads) thread->activate();
     }
     for (SizeType i=0; i<_concurrency; ++i) {

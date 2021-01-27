@@ -62,6 +62,7 @@ class VerificationManager {
         for (auto constr : safety_constraints) builder.add(constr); // Use default weight 1.0
         runnable.runner()->task().set_appraisal_space(builder.build());
         runnable.runner()->task().set_configuration_refinement_rules(refinement_rules);
+        runnable.runner()->refine_configuration_init();
     }
 };
 

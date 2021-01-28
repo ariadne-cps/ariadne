@@ -144,8 +144,8 @@ class TaskRankingSpace : public WritableInterface {
                     auto max_min_diff = scalar_min_max[p].second - scalar_min_max[p].first;
                     auto rank = p.rank(input, entry.second.first, entry.second.second);
                     auto threshold = rc.threshold();
-                    if ((p.optimisation() == RankingParameterOptimisation::MINIMISE and rank > threshold) or
-                        (p.optimisation() == RankingParameterOptimisation::MAXIMISE and rank < threshold)) {
+                    if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
+                        (p.optimisation() == OptimisationCriterion::MAXIMISE and rank < threshold)) {
                         if (rc.severity() == RankingConstraintSeverity::PERMISSIVE) ++low_errors;
                         else if (rc.severity() == RankingConstraintSeverity::CRITICAL) ++high_errors;
                     }
@@ -161,7 +161,7 @@ class TaskRankingSpace : public WritableInterface {
                     }
                 }
 
-                if (p.optimisation() == RankingParameterOptimisation::MAXIMISE) c += weight * score;
+                if (p.optimisation() == OptimisationCriterion::MAXIMISE) c += weight * score;
                 else c -= weight*score;
             }
             result.insert(TaskExecutionRanking(entry.first, c, low_errors, high_errors));

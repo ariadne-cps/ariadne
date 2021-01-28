@@ -44,9 +44,11 @@ typedef std::chrono::microseconds DurationType;
 
 template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
-template<class R> class Task;
-template<class R> class Configuration;
-template<class R> class ConfigurationPropertyRefinementRule;
+template<class R> struct TaskObjective;
+template<class R> class TaskObjectiveMeasurer;
+template<class R> struct Task;
+template<class R> struct Configuration;
+template<class R> class ConfigurationPropertyRefinementTarget;
 
 template<class R>
 class TaskInterface {
@@ -54,7 +56,6 @@ class TaskInterface {
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
-    typedef typename R::ConfigurationRefinementObjectiveType ConfigurationRefinementObjectiveType;
 
     //! \brief The name of the task, to be used for thread naming
     virtual String name() const = 0;
@@ -63,13 +64,9 @@ class TaskInterface {
     //! \brief Set the ranking space for the task
     virtual Void set_ranking_space(TaskRankingSpace<R> const& space) = 0;
     //! \brief Return the configuration refinement rules
-    virtual Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const = 0;
-    //! \brief Set the configuration refinement rules for the task
-    virtual Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) = 0;
-    //! \brief Return the configuration refinement objectives
-    virtual Void set_configuration_refinement_objectives(Set<ConfigurationRefinementObjectiveType> const& objectives) = 0;
-    //! \brief Set the configuration refinement objectives for the task
-    virtual Set<ConfigurationRefinementObjectiveType> const& configuration_refinement_objectives() const = 0;
+    virtual Set<ConfigurationPropertyRefinementTarget<R>> const& configuration_refinement_targets() const = 0;
+    //! \brief Set the configuration refinement targets for the task
+    virtual Void set_configuration_refinement_targets(Set<ConfigurationPropertyRefinementTarget<R>> const& rules) = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;

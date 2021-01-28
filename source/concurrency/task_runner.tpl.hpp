@@ -32,9 +32,10 @@
 #include "task.tpl.hpp"
 #include "task_runner.hpp"
 #include "task_interface.hpp"
+#include "task_objective_measurer.hpp"
 #include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "verification/configuration_property_refinement_rule.hpp"
+#include "configuration/configuration_property_refinement_target.hpp"
 
 namespace Ariadne {
 
@@ -60,29 +61,29 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::InputType InputType;
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
+    typedef typename TaskRunnerInterface<C>::ObjectiveMeasurerType ObjectiveMeasurerType;
     typedef Map<ConfigurationPropertyPath,List<ExactDouble>> PropertyRefinementsMap;
 
-    TaskRunnerBase(ConfigurationType const& configuration) : _task(new TaskType()), _configuration(configuration) { }
+    TaskRunnerBase(ConfigurationType const& configuration)
+        : _task(new TaskType()), _objective_measurer(new ObjectiveMeasurerType()), _configuration(configuration) { }
 
     TaskType& task() override { return *_task; };
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
 
     void refine_configuration_init() override {
-        for (auto rule : task().configuration_refinement_rules())
+        for (auto rule : task().configuration_refinement_targets())
             _configuration.properties().get(rule.path().first())->refine_init(rule.path().subpath());
     }
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
-        for (auto rule : task().configuration_refinement_rules()) {
-            for (auto obj : task().configuration_refinement_objectives()) {
-                auto prop_ratio = rule.get_ratio(input,output,obj);
-                _configuration.properties().get(prop_ratio.first.first())->refine_value(prop_ratio.first.subpath(),prop_ratio.second);
-                auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(prop_ratio.first).get();
-                auto iter = _property_refinement_values.find(prop_ratio.first);
-                if (iter != _property_refinement_values.end()) _property_refinement_values.at(prop_ratio.first).push_back(value);
-                else _property_refinement_values.insert(make_pair(prop_ratio.first,value));
-            }
+        for (auto target : task().configuration_refinement_targets()) {
+            auto amount = _objective_measurer->get(input,output,target.objectives());
+            _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),amount);
+            auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(target.path()).get();
+            auto iter = _property_refinement_values.find(target.path());
+            if (iter != _property_refinement_values.end()) _property_refinement_values.at(target.path()).push_back(value);
+            else _property_refinement_values.insert(make_pair(target.path(),value));
         }
     }
 
@@ -90,6 +91,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 
   protected:
     SharedPointer<TaskType> const _task;
+    SharedPointer<ObjectiveMeasurerType> const _objective_measurer;
     ConfigurationType _configuration;
     PropertyRefinementsMap _property_refinement_values;
 };

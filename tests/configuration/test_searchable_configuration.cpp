@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& os, const LevelOptions level) {
 
 class TestConfigurable;
 
-template<> class Configuration<TestConfigurable> : public SearchableConfiguration {
+template<> struct Configuration<TestConfigurable> : public SearchableConfiguration {
   public:
     Configuration() { add_property("use_something",BooleanConfigurationProperty(true)); }
     Bool const& use_use_something() const { return dynamic_cast<BooleanConfigurationProperty const&>(*properties().get("use_something")).get(); }
@@ -77,7 +77,7 @@ using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 using Proportional = ProportionalRefiner<ExactDouble>;
 
-template<> class Configuration<A> : public SearchableConfiguration {
+template<> struct Configuration<A> : public SearchableConfiguration {
   public:
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));

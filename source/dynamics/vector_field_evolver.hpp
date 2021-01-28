@@ -46,7 +46,7 @@
 #include "../concurrency/task_ranking_space.hpp"
 #include "../configuration/searchable_configuration.hpp"
 #include "../configuration/configuration_property.hpp"
-#include "../verification/safety_objective_measure.decl.hpp"
+#include "../concurrency/task_objective_measurer.hpp"
 
 namespace Ariadne {
 
@@ -54,7 +54,7 @@ class VectorField;
 template<class ES> class Orbit;
 
 class VectorFieldEvolver;
-template<> class Configuration<VectorFieldEvolver>;
+template<> struct Configuration<VectorFieldEvolver>;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!
@@ -73,7 +73,6 @@ class VectorFieldEvolver
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef TimedRadiusObjective ConfigurationRefinementObjectiveType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -138,8 +137,7 @@ protected:
 };
 
 //! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
-template<> class Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
-  public:
+template<> struct Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
     typedef Configuration<VectorFieldEvolver> C;
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
@@ -220,9 +218,32 @@ template<> struct TaskOutput<VectorFieldEvolver> {
     Dyadic const step_size_used;
 };
 
-template<> class Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<VectorFieldEvolver> {
+template<> struct TaskObjective<VectorFieldEvolver> {
+    TaskObjective(RealVariable const& v, PositiveFloatDPUpperBound const& r, Dyadic const& t) : variable(v), radius(r), time(t) { }
+    RealVariable variable;
+    PositiveFloatDPUpperBound const radius;
+    Dyadic const time;
+};
+
+template<> class TaskObjectiveMeasurer<VectorFieldEvolver> : public TaskObjectiveMeasurerBase<VectorFieldEvolver> {
+    typedef typename TaskObjectiveMeasurerInterface::ScoreType ScoreType;
+    typedef typename TaskObjectiveMeasurerInterface::InputType InputType;
+    typedef typename TaskObjectiveMeasurerInterface::OutputType OutputType;
+    typedef typename TaskObjectiveMeasurerInterface::ObjectiveType ObjectiveType;
+  protected:
+    ScoreType current(InputType const& i, OutputType const& o, ObjectiveType const& obj) const override {
+        return ((o.evolve.bounding_box()[obj.variable].radius() - i.current_set.bounding_box()[obj.variable].radius())/(o.time-i.current_time)).get_d();
+    }
+    ScoreType reference(InputType const& i, ObjectiveType const& obj) const override {
+        return ((obj.radius - i.current_set.bounding_box()[obj.variable].radius())/(obj.time-i.current_time)).get_d();
+    }
+    Bool discard(InputType const& i, ObjectiveType const& obj) const override {
+        return i.current_time > obj.time;
+    }
+};
+
+template<> struct Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<VectorFieldEvolver> {
     typedef VectorFieldEvolver C;
-public:
     Task();
     TaskOutput<C> run_task(TaskInput<C> const& in, Configuration<C> const& cfg) const override;
 };

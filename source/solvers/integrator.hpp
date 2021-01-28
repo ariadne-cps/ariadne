@@ -163,7 +163,7 @@ class IntegratorBase : public IntegratorInterface, public SharedConfigurable<Int
               const UpperBoxType& bounding_box) const = 0;
 };
 
-template<> class Configuration<IntegratorBase> : public SharedSearchableConfiguration {
+template<> struct Configuration<IntegratorBase> : public SharedSearchableConfiguration {
   public:
     typedef ExactDouble RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
@@ -219,8 +219,7 @@ class TaylorPicardIntegrator : public IntegratorBase, public Configurable<Taylor
                const UpperBoxType& bounding_box) const;
 };
 
-template<> class Configuration<TaylorPicardIntegrator> : public SearchableConfiguration {
-  public:
+template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfiguration {
     typedef Configuration<TaylorPicardIntegrator> C;
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;

@@ -53,7 +53,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
     TaylorPicardIntegrator integrator(integrator_configuration);
 
-    typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef typename E::ConfigurationRefinementObjectiveType OBJ;
+    typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef TaskObjective<E> OBJ;
 
     E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.01,1.0));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
@@ -61,19 +61,11 @@ int main(int argc, const char* argv[])
 
 
     OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.079_x,DoublePrecision())),Dyadic(6.5_x));
-    auto verification_parameter = ScalarRankingParameter<E>(y.name(), RankingParameterOptimisation::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
+    auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 2.75, RankingConstraintSeverity::CRITICAL);
-    auto refinement_rule = ConfigurationPropertyRefinementRule<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
-                                                                  [y](I const& i, O const& o, OBJ const& obj) {
-        auto current_rho = ((o.evolve.bounding_box()[y].radius() - i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d();
-        ARIADNE_LOG_PRINTLN("current rho: " << current_rho);
-        auto time_d = 6.5 - o.time.get_d();
-        auto target_rho = ((2.75 - 2.671) - i.current_set.bounding_box()[y].radius().get_d())/time_d;
-        ARIADNE_LOG_PRINTLN("target rho: " << target_rho);
-        return (current_rho-target_rho)/abs(target_rho);
-    });
-    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement_rule}, {y_65});
+    auto refinement_target = ConfigurationPropertyRefinementTarget<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65});
+    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement_target});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

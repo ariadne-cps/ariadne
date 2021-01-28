@@ -34,7 +34,7 @@
 #include "../concurrency/task_runner.hpp"
 #include "../concurrency/task_execution_ranking.hpp"
 #include "../concurrency/task_ranking_space.hpp"
-#include "configuration_property_refinement_rule.hpp"
+#include "configuration/configuration_property_refinement_target.hpp"
 
 namespace Ariadne {
 
@@ -50,11 +50,10 @@ class VerificationManager {
         return instance;
     }
 
-    template<class R> void add_safety_specification(
-            TaskRunnable<R>& runnable,
-            Set<TaskRankingConstraint<R>> const& safety_constraints,
-            List<ConfigurationPropertyRefinementRule<R>> const& refinement_rules,
-            Set<TimedRadiusObjective> const& objectives) const {
+    template<class R> void add_safety_specification(TaskRunnable<R>& runnable,
+                                      Set<TaskRankingConstraint<R>> const& safety_constraints,
+                                      List<ConfigurationPropertyRefinementTarget<R>> const& refinement_targets) const
+    {
         auto appraisal_space = runnable.runner()->task().ranking_space();
         auto original_constraints = appraisal_space.constraints();
         auto original_weights = appraisal_space.parameters_weights();
@@ -62,8 +61,7 @@ class VerificationManager {
         for (auto constr : appraisal_space.constraints()) builder.add(constr,original_weights.get(constr.parameter()));
         for (auto constr : safety_constraints) builder.add(constr); // Use default weight 1.0
         runnable.runner()->task().set_ranking_space(builder.build());
-        runnable.runner()->task().set_configuration_refinement_rules(refinement_rules);
-        runnable.runner()->task().set_configuration_refinement_objectives(objectives);
+        runnable.runner()->task().set_configuration_refinement_targets(refinement_targets);
         runnable.runner()->refine_configuration_init();
     }
 };

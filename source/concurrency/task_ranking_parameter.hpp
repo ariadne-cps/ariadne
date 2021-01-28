@@ -42,12 +42,12 @@ namespace Ariadne {
 template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 
-enum class RankingParameterOptimisation { MINIMISE, MAXIMISE };
-inline std::ostream& operator<<(std::ostream& os, const RankingParameterOptimisation opt) {
+enum class OptimisationCriterion { MINIMISE, MAXIMISE };
+inline std::ostream& operator<<(std::ostream& os, const OptimisationCriterion opt) {
     switch (opt) {
-        case RankingParameterOptimisation::MAXIMISE: os << "MAXIMISE"; break;
-        case RankingParameterOptimisation::MINIMISE: os << "MINIMISE"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled RankingParameterOptimisation value.");
+        case OptimisationCriterion::MAXIMISE: os << "MAXIMISE"; break;
+        case OptimisationCriterion::MINIMISE: os << "MINIMISE"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled OptimisationCriterion value.");
     }
     return os;
 }
@@ -62,7 +62,7 @@ public:
     typedef TaskOutput<R> OutputType;
 
     virtual String const& name() const = 0;
-    virtual RankingParameterOptimisation optimisation() const = 0;
+    virtual OptimisationCriterion optimisation() const = 0;
     virtual Bool is_scalar() const = 0;
     virtual ScoreType rank(InputType const& input, OutputType const& output, DurationType const& duration, SizeType const& idx = 0) const = 0;
     virtual SizeType dimension(InputType const& input) const = 0;
@@ -76,18 +76,18 @@ class TaskRankingParameterBase : public TaskRankingParameterInterface<R> {
 public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-    TaskRankingParameterBase(String const& name, RankingParameterOptimisation const& opt)
+    TaskRankingParameterBase(String const& name, OptimisationCriterion const& opt)
             : _name(name), _optimisation(opt) { }
 
     String const& name() const override { return _name; }
-    RankingParameterOptimisation optimisation() const override { return _optimisation; }
+    OptimisationCriterion optimisation() const override { return _optimisation; }
 
     OutputStream& _write(OutputStream& os) const override {
         os << "{'" << name() << "'," << optimisation() << "," << (this->is_scalar() ? "SCALAR":"VECTOR") << "}"; return os; }
 
 private:
     String const _name;
-    RankingParameterOptimisation const _optimisation;
+    OptimisationCriterion const _optimisation;
 };
 
 template<class R>
@@ -95,7 +95,7 @@ class ScalarRankingParameter : public TaskRankingParameterBase<R> {
   public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-    ScalarRankingParameter(String const& name, RankingParameterOptimisation const& opt, std::function<ScoreType(InputType const&, OutputType const&, DurationType const&)> const afunc)
+    ScalarRankingParameter(String const& name, OptimisationCriterion const& opt, std::function<ScoreType(InputType const&, OutputType const&, DurationType const&)> const afunc)
         : TaskRankingParameterBase<R>(name, opt), _afunc(afunc) { }
 
     Bool is_scalar() const override { return true; };
@@ -112,7 +112,7 @@ class VectorRankingParameter : public TaskRankingParameterBase<R> {
 public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-    VectorRankingParameter(String const& name, RankingParameterOptimisation const& opt, std::function<ScoreType(InputType const&, OutputType const&, DurationType const&, SizeType const&)> const afunc, std::function<SizeType(InputType const&)> const dfunc)
+    VectorRankingParameter(String const& name, OptimisationCriterion const& opt, std::function<ScoreType(InputType const&, OutputType const&, DurationType const&, SizeType const&)> const afunc, std::function<SizeType(InputType const&)> const dfunc)
             : TaskRankingParameterBase<R>(name, opt), _afunc(afunc), _dfunc(dfunc) { }
 
     Bool is_scalar() const override { return false; };
@@ -140,7 +140,7 @@ public:
     Bool operator<(TaskRankingParameter const& p) const { return _impl->name() < p.name(); }
 
     String const& name() const { return _impl->name(); }
-    RankingParameterOptimisation optimisation() const { return _impl->optimisation(); };
+    OptimisationCriterion optimisation() const { return _impl->optimisation(); };
     Bool is_scalar() const { return _impl->is_scalar(); };
     ScoreType rank(InputType const& input, OutputType const& output, DurationType const& duration, SizeType const& idx = 0) const {
         return _impl->rank(input, output, duration, idx); }
@@ -150,7 +150,7 @@ public:
 };
 
 //! \brief Template instance of the commonly-used execution time parameter for appraisal
-template<class R> ScalarRankingParameter<R> execution_time_ranking("execution_time", RankingParameterOptimisation::MINIMISE, [](TaskInput<R> const& i, TaskOutput<R> const& o, DurationType const& d) { return d.count(); });
+template<class R> ScalarRankingParameter<R> execution_time_ranking("execution_time", OptimisationCriterion::MINIMISE, [](TaskInput<R> const& i, TaskOutput<R> const& o, DurationType const& d) { return d.count(); });
 
 } // namespace Ariadne
 

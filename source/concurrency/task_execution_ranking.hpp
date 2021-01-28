@@ -79,7 +79,7 @@ class TaskRankingConstraint : public WritableInterface {
     virtual OutputStream& _write(OutputStream& os) const {
         os << "{" << _parameter.name();
         if (_severity != RankingConstraintSeverity::NONE) {
-            if (_parameter.optimisation() == RankingParameterOptimisation::MINIMISE) os << "<=";
+            if (_parameter.optimisation() == OptimisationCriterion::MINIMISE) os << "<=";
             else os << ">=";
             os << _threshold << "(" << _severity << ")";
         }

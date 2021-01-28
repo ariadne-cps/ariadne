@@ -41,7 +41,7 @@ class ConfigurableInterface {
 };
 
 //! \brief Base template class to be specialised while deriving from SearchableConfigurationInterface
-template<class C> class Configuration;
+template<class C> struct Configuration;
 
 //! \brief Is-a component that provides a configuration
 //! \details Since the configuration returned is const, a Configurable object should be constructed from
@@ -49,7 +49,7 @@ template<class C> class Configuration;
 //! must be coherent with the Configurable (e.g., the system used by a Configurable evolver), then a Builder
 //! approach should be used for creation of the configuration, which should become an immutable object.
 template<class C> class Configurable : public ConfigurableInterface {
-    friend class Configuration<C>;
+    friend struct Configuration<C>;
   public:
     Configurable(Configuration<C> const& config);
     Configuration<C> const& configuration() const;
@@ -62,7 +62,7 @@ template<class C> class Configurable : public ConfigurableInterface {
 //! \details In order to avoid ambiguity when casting to ConfigurableInterface, base classes need
 //! to use this in place of Configurable
 template<class C> class SharedConfigurable {
-    friend class Configuration<C>;
+    friend struct Configuration<C>;
 public:
     SharedConfigurable(Configuration<C> const& config);
     Configuration<C> const& base_configuration() const;

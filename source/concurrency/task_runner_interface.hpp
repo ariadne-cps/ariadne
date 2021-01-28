@@ -45,6 +45,8 @@ class TaskRunnerInterface {
     typedef TaskInput<C> InputType;
     typedef TaskOutput<C> OutputType;
     typedef Configuration<C> ConfigurationType;
+    typedef TaskObjective<C> ObjectiveType;
+    typedef TaskObjectiveMeasurer<C> ObjectiveMeasurerType;
 
     //! \brief Return the task
     virtual TaskType& task() = 0;

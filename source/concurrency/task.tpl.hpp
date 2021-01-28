@@ -34,7 +34,7 @@
 #include "../utility/string.hpp"
 #include "task_interface.hpp"
 #include "task_search_space.hpp"
-#include "verification/configuration_property_refinement_rule.hpp"
+#include "configuration/configuration_property_refinement_target.hpp"
 
 namespace Ariadne {
 
@@ -50,7 +50,7 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
   public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-    typedef typename R::ConfigurationRefinementObjectiveType ConfigurationRefinementObjectiveType;
+    typedef TaskObjective<R> ObjectiveType;
   protected:
     ParameterSearchTaskBase(String const& name, TaskRankingSpace<R> const& ranking_space)
         : _name(name), _ranking_space(ranking_space.clone()) {}
@@ -59,21 +59,16 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     TaskRankingSpace<R> const& ranking_space() const override { return *_ranking_space; }
     Void set_ranking_space(TaskRankingSpace<R> const& space) override { _ranking_space.reset(space.clone()); }
 
-    Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const override { return _configuration_refinement_rules; }
-    Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) override {
-        _configuration_refinement_rules.clear(); _configuration_refinement_rules.adjoin(rules); }
-
-    Set<ConfigurationRefinementObjectiveType> const& configuration_refinement_objectives() const override { return _configuration_refinement_objectives; }
-    Void set_configuration_refinement_objectives(Set<ConfigurationRefinementObjectiveType> const& objectives) override {
-        _configuration_refinement_objectives.clear(); _configuration_refinement_objectives.adjoin(objectives); }
+    Set<ConfigurationPropertyRefinementTarget<R>> const& configuration_refinement_targets() const override { return _configuration_refinement_targets; }
+    Void set_configuration_refinement_targets(Set<ConfigurationPropertyRefinementTarget<R>> const& rules) override {
+        _configuration_refinement_targets.clear(); _configuration_refinement_targets.adjoin(rules); }
 
     Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _ranking_space->rank(data, input); }
 
   private:
     String const _name;
     SharedPointer<TaskRankingSpace<R>> _ranking_space;
-    Set<ConfigurationPropertyRefinementRule<R>> _configuration_refinement_rules;
-    Set<ConfigurationRefinementObjectiveType> _configuration_refinement_objectives;
+    Set<ConfigurationPropertyRefinementTarget<R>> _configuration_refinement_targets;
 };
 
 } // namespace Ariadne

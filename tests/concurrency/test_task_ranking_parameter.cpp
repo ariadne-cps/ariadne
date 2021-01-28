@@ -58,7 +58,7 @@ class TestTaskRankingParameter {
     }
 
     Void test_scalar_ranking_parameter_creation() {
-        ScalarRankingParameter<R> p("chosen_step_size", RankingParameterOptimisation::MAXIMISE,
+        ScalarRankingParameter<R> p("chosen_step_size", OptimisationCriterion::MAXIMISE,
                                     [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
         auto input = I(2,{1,2});
         auto output = O(7);
@@ -67,11 +67,11 @@ class TestTaskRankingParameter {
         ARIADNE_TEST_ASSERT(p.is_scalar());
         ARIADNE_TEST_EQUALS(cost,9);
         ARIADNE_TEST_EQUALS(p.dimension(input),1);
-        ARIADNE_TEST_EQUALS(p.optimisation(), RankingParameterOptimisation::MAXIMISE);
+        ARIADNE_TEST_EQUALS(p.optimisation(), OptimisationCriterion::MAXIMISE);
     }
 
     Void test_vector_ranking_parameter_creation() {
-        VectorRankingParameter<R> p("enclosure_widths", RankingParameterOptimisation::MINIMISE,
+        VectorRankingParameter<R> p("enclosure_widths", OptimisationCriterion::MINIMISE,
                                     [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
                                                 return output.o + duration.count() + input.i2[idx]; },
                                     [](I const& input) { return input.i2.size(); });
@@ -83,13 +83,13 @@ class TestTaskRankingParameter {
         ARIADNE_TEST_EQUALS(p.rank(input, output, _duration, 0), 8);
         ARIADNE_TEST_EQUALS(p.rank(input, output, _duration, 1), 9);
         ARIADNE_TEST_EQUALS(p.dimension(input),2);
-        ARIADNE_TEST_EQUALS(p.optimisation(), RankingParameterOptimisation::MINIMISE);
+        ARIADNE_TEST_EQUALS(p.optimisation(), OptimisationCriterion::MINIMISE);
     }
 
     Void test_task_ranking_parameter_set() {
-        ScalarRankingParameter<R> p1("chosen_step_size", RankingParameterOptimisation::MAXIMISE,
+        ScalarRankingParameter<R> p1("chosen_step_size", OptimisationCriterion::MAXIMISE,
                                      [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
-        VectorRankingParameter<R> p2("enclosure_widths", RankingParameterOptimisation::MINIMISE,
+        VectorRankingParameter<R> p2("enclosure_widths", OptimisationCriterion::MINIMISE,
                                      [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
                                           return output.o + duration.count() + input.i2[idx]; },
                                      [](I const& input) { return input.i2.size(); });

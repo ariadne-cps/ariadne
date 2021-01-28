@@ -34,7 +34,7 @@
 #include "task_runner_interface.hpp"
 #include "task_search_point.hpp"
 #include "task_search_space.hpp"
-#include "task_appraisal.hpp"
+#include "task_execution_ranking.hpp"
 #include "configuration/configuration_property.tpl.hpp"
 
 namespace Ariadne {
@@ -122,7 +122,7 @@ private:
     std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
     Buffer<InputType> _last_used_input;
     std::queue<TaskSearchPoint> _points;
-    List<TaskSearchPointAppraisal> _best_points;
+    List<TaskExecutionRanking> _best_points;
     // Synchronization
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;

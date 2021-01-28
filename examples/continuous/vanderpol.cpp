@@ -61,9 +61,9 @@ int main(int argc, const char* argv[])
 
 
     OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.079_x,DoublePrecision())),Dyadic(6.5_x));
-    auto verification_parameter = ScalarAppraisalParameter<E>(y.name(),TaskAppraisalParameterOptimisation::MINIMISE,[y](I const& i,O const& o,DurationType const& d) {
+    auto verification_parameter = ScalarRankingParameter<E>(y.name(), RankingParameterOptimisation::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
-    auto verification_constraint = TaskAppraisalConstraint<E>(verification_parameter,2.75,AppraisalConstraintSeverity::CRITICAL);
+    auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 2.75, RankingConstraintSeverity::CRITICAL);
     auto refinement_rule = ConfigurationPropertyRefinementRule<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
                                                                   [y](I const& i, O const& o, OBJ const& obj) {
         auto current_rho = ((o.evolve.bounding_box()[y].radius() - i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d();
@@ -105,7 +105,7 @@ int main(int argc, const char* argv[])
         fig << fill_colour(1.0,0.75,0.5);
         fig.draw(orbit.reach());
         fig.write("vanderpol");
-    } catch (CriticalAppraisalFailureException& ex) {
+    } catch (CriticalRankingFailureException& ex) {
         ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
     }
 }

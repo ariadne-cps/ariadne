@@ -43,7 +43,7 @@
 #include "../solvers/integrator.hpp"
 #include "../dynamics/evolver_base.hpp"
 #include "../concurrency/task_runner.tpl.hpp"
-#include "../concurrency/task_appraisal_space.hpp"
+#include "../concurrency/task_ranking_space.hpp"
 #include "../configuration/searchable_configuration.hpp"
 #include "../configuration/configuration_property.hpp"
 #include "../verification/safety_objective_measure.decl.hpp"

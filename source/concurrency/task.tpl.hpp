@@ -39,9 +39,9 @@
 namespace Ariadne {
 
 class TaskSearchPoint;
-class TaskSearchPointAppraisal;
+class TaskExecutionRanking;
 class TaskSearchSpace;
-template<class R> class TaskAppraisalSpace;
+template<class R> class TaskRankingSpace;
 
 //! \brief The base for parameter search tasks
 //! \details Useful to streamline task construction
@@ -52,12 +52,12 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     typedef TaskOutput<R> OutputType;
     typedef typename R::ConfigurationRefinementObjectiveType ConfigurationRefinementObjectiveType;
   protected:
-    ParameterSearchTaskBase(String const& name, TaskAppraisalSpace<R> const& appraisal_space)
-        : _name(name), _appraisal_space(appraisal_space.clone()) {}
+    ParameterSearchTaskBase(String const& name, TaskRankingSpace<R> const& ranking_space)
+        : _name(name), _ranking_space(ranking_space.clone()) {}
   public:
     String name() const override { return _name; }
-    TaskAppraisalSpace<R> const& appraisal_space() const override { return *_appraisal_space; }
-    Void set_appraisal_space(TaskAppraisalSpace<R> const& space) override { _appraisal_space.reset(space.clone()); }
+    TaskRankingSpace<R> const& ranking_space() const override { return *_ranking_space; }
+    Void set_ranking_space(TaskRankingSpace<R> const& space) override { _ranking_space.reset(space.clone()); }
 
     Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const override { return _configuration_refinement_rules; }
     Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) override {
@@ -67,11 +67,11 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     Void set_configuration_refinement_objectives(Set<ConfigurationRefinementObjectiveType> const& objectives) override {
         _configuration_refinement_objectives.clear(); _configuration_refinement_objectives.adjoin(objectives); }
 
-    Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _appraisal_space->appraise(data,input); }
+    Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _ranking_space->rank(data, input); }
 
   private:
     String const _name;
-    SharedPointer<TaskAppraisalSpace<R>> _appraisal_space;
+    SharedPointer<TaskRankingSpace<R>> _ranking_space;
     Set<ConfigurationPropertyRefinementRule<R>> _configuration_refinement_rules;
     Set<ConfigurationRefinementObjectiveType> _configuration_refinement_objectives;
 };

@@ -43,11 +43,11 @@ void ConcurrencyManager::set_concurrency(SizeType value) {
     _concurrency = value;
 }
 
-List<TaskSearchPointAppraisal> ConcurrencyManager::last_search_best_points() const {
+List<TaskExecutionRanking> ConcurrencyManager::last_search_best_points() const {
     return _last_search_best_points;
 }
 
-void ConcurrencyManager::set_last_search_best_points(List<TaskSearchPointAppraisal> const &points) {
+void ConcurrencyManager::set_last_search_best_points(List<TaskExecutionRanking> const &points) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _last_search_best_points = points;
 }
@@ -69,8 +69,8 @@ List<int> ConcurrencyManager::last_optimal_point() const {
 
         List<Map<int,SizeType>> frequencies;
         for (SizeType i=0; i<dimension; ++i) frequencies.push_back(Map<int,SizeType>());
-        for (auto appraisal : _last_search_best_points) {
-            auto coordinates = appraisal.point().coordinates();
+        for (auto ranking : _last_search_best_points) {
+            auto coordinates = ranking.point().coordinates();
             for (SizeType i=0; i<dimension; ++i) {
                 auto iter = frequencies[i].find(coordinates[i]);
                 if (iter == frequencies[i].end()) frequencies[i].insert(make_pair(coordinates[i],1));
@@ -106,8 +106,8 @@ void ConcurrencyManager::print_last_search_best_points() const {
         file << "x = [1:" << size << "];\n";
         Map<SizeType,List<int>> values;
         for (SizeType i=0; i<dimension; ++i) values.insert(make_pair(i,List<int>()));
-        for (auto appraisal : _last_search_best_points) {
-            auto point = appraisal.point();
+        for (auto ranking : _last_search_best_points) {
+            auto point = ranking.point();
             for (SizeType i=0; i<dimension; ++i) values.at(i).push_back(point.coordinates()[i]);
         }
         file << "figure(1);\n";

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_appraisal.cpp
+ *            concurrency/task_execution_ranking.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,37 +22,37 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../concurrency/task_appraisal.hpp"
+#include "../concurrency/task_execution_ranking.hpp"
 
 namespace Ariadne {
 
-TaskSearchPointAppraisal::TaskSearchPointAppraisal(TaskSearchPoint const& p,
-                                                   CostType const& s,
-                                                   SizeType const& permissive_failures,
-                                                   SizeType const& critical_failures)
+TaskExecutionRanking::TaskExecutionRanking(TaskSearchPoint const& p,
+                                           ScoreType const& s,
+                                           SizeType const& permissive_failures,
+                                           SizeType const& critical_failures)
            : _point(p), _cost(s), _permissive_failures(permissive_failures), _critical_failures(critical_failures) { }
 
 TaskSearchPoint const&
-TaskSearchPointAppraisal::point() const {
+TaskExecutionRanking::point() const {
     return _point;
 }
 
-CostType const&
-TaskSearchPointAppraisal::cost() const {
+ScoreType const&
+TaskExecutionRanking::score() const {
     return _cost;
 }
 
 SizeType const&
-TaskSearchPointAppraisal::permissive_failures() const {
+TaskExecutionRanking::permissive_failures() const {
     return _permissive_failures;
 }
 
 SizeType const&
-TaskSearchPointAppraisal::critical_failures() const {
+TaskExecutionRanking::critical_failures() const {
     return _critical_failures;
 }
 
-Bool TaskSearchPointAppraisal::operator<(TaskSearchPointAppraisal const& s) const {
+Bool TaskExecutionRanking::operator<(TaskExecutionRanking const& s) const {
     if (this->_critical_failures > s._critical_failures) return false;
     else if (this->_critical_failures < s._critical_failures) return true;
     else if (this->_permissive_failures > s._permissive_failures) return false;
@@ -60,7 +60,7 @@ Bool TaskSearchPointAppraisal::operator<(TaskSearchPointAppraisal const& s) cons
     else return this->_cost < s._cost;
 }
 
-OutputStream& TaskSearchPointAppraisal::_write(OutputStream& os) const {
+OutputStream& TaskExecutionRanking::_write(OutputStream& os) const {
     return os << "{" << _point << ":" << _cost << (_permissive_failures > 0 ? (",P:" + to_string(_permissive_failures)) : "")
               << (_critical_failures > 0 ? (",C:" + to_string(_critical_failures)) : "") << "}";
 }

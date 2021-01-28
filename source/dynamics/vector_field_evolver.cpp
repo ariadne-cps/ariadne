@@ -283,11 +283,11 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 }
 
 Task<VectorFieldEvolver>::Task() : ParameterSearchTaskBase<C>("stp",
-  TaskAppraisalSpaceBuilder<C>()
-    .add(execution_time_appraisal_parameter<C>)
-    .add(ScalarAppraisalParameter<C>("step_size_used",TaskAppraisalParameterOptimisation::MAXIMISE,
-                                     [](TaskInput<C> const& i,TaskOutput<C> const& o,DurationType const& d) { return o.step_size_used.get_d(); }),2)
-    /*.add(VectorAppraisalParameter<R>("final_set_width_increases",TaskAppraisalParameterOptimisation::MINIMISE,
+                                                              TaskRankingSpaceBuilder<C>()
+    .add(execution_time_ranking<C>)
+    .add(ScalarRankingParameter<C>("step_size_used", RankingParameterOptimisation::MAXIMISE,
+                                   [](TaskInput<C> const& i,TaskOutput<C> const& o,DurationType const& d) { return o.step_size_used.get_d(); }), 2)
+    /*.add(VectorRankingParameter<R>("final_set_width_increases",RankingParameterOptimisation::MINIMISE,
     [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
     [](I const& i){ return i.current_set_bounds.dimension(); }))*/
     .build()) { }

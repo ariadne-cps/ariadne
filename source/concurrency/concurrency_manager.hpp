@@ -34,7 +34,7 @@
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../concurrency/task_runner.hpp"
-#include "../concurrency/task_appraisal.hpp"
+#include "../concurrency/task_execution_ranking.hpp"
 #include "../configuration/configuration_property_interface.hpp"
 
 namespace Ariadne {
@@ -73,8 +73,8 @@ class ConcurrencyManager {
     void set_concurrency(SizeType value);
 
     //! \brief The best points resulting from the last search
-    List<TaskSearchPointAppraisal> last_search_best_points() const;
-    void set_last_search_best_points(List<TaskSearchPointAppraisal> const& points);
+    List<TaskExecutionRanking> last_search_best_points() const;
+    void set_last_search_best_points(List<TaskExecutionRanking> const& points);
 
     //! \brief Print the last_search_best_points in a .m file for plotting
     void print_last_search_best_points() const;
@@ -93,7 +93,7 @@ class ConcurrencyManager {
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
     std::mutex _data_mutex;
-    List<TaskSearchPointAppraisal> _last_search_best_points;
+    List<TaskExecutionRanking> _last_search_best_points;
     PropertyRefinementsMap _last_property_refinement_values;
 };
 

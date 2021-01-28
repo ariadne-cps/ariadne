@@ -36,9 +36,9 @@
 namespace Ariadne {
 
 class TaskSearchPoint;
-class TaskSearchPointAppraisal;
+class TaskExecutionRanking;
 class TaskSearchSpace;
-template<class R> class TaskAppraisalSpace;
+template<class R> class TaskRankingSpace;
 
 typedef std::chrono::microseconds DurationType;
 
@@ -58,10 +58,10 @@ class TaskInterface {
 
     //! \brief The name of the task, to be used for thread naming
     virtual String name() const = 0;
-    //! \brief Return the appraisal space for the task
-    virtual TaskAppraisalSpace<R> const& appraisal_space() const = 0;
-    //! \brief Set the appraisal space for the task
-    virtual Void set_appraisal_space(TaskAppraisalSpace<R> const& space) = 0;
+    //! \brief Return the ranking space for the task
+    virtual TaskRankingSpace<R> const& ranking_space() const = 0;
+    //! \brief Set the ranking space for the task
+    virtual Void set_ranking_space(TaskRankingSpace<R> const& space) = 0;
     //! \brief Return the configuration refinement rules
     virtual Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const = 0;
     //! \brief Set the configuration refinement rules for the task
@@ -74,7 +74,7 @@ class TaskInterface {
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
-    virtual Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
+    virtual Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
 };
 
 } // namespace Ariadne

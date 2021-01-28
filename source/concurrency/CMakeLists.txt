@@ -5,7 +5,7 @@ add_library(${LIBRARY_NAME} OBJECT
         task_search_parameter.cpp
         task_search_space.cpp
         task_search_point.cpp
-        task_appraisal.cpp
+        task_execution_ranking.cpp
         )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

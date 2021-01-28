@@ -25,7 +25,7 @@
 #include "symbolic/expression_set.hpp"
 #include "concurrency/task_search_point.hpp"
 #include "concurrency/task_search_space.hpp"
-#include "concurrency/task_appraisal.hpp"
+#include "concurrency/task_execution_ranking.hpp"
 
 #include "../test.hpp"
 
@@ -186,11 +186,11 @@ class TestTaskSearchParameter {
         TaskSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
         TaskSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
         TaskSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 4}});
-        TaskSearchPointAppraisal a1(point1,3,0,0);
-        TaskSearchPointAppraisal a2(point2,2,1,0);
-        TaskSearchPointAppraisal a3(point3,4,0,0);
-        TaskSearchPointAppraisal a4(point4,4,0,1);
-        Set<TaskSearchPointAppraisal> as = {a1, a2, a3, a4};
+        TaskExecutionRanking a1(point1, 3, 0, 0);
+        TaskExecutionRanking a2(point2, 2, 1, 0);
+        TaskExecutionRanking a3(point3, 4, 0, 0);
+        TaskExecutionRanking a4(point4, 4, 0, 1);
+        Set<TaskExecutionRanking> as = {a1, a2, a3, a4};
 
         ARIADNE_TEST_PRINT(as);
         ARIADNE_TEST_ASSERT(a1 < a2);

@@ -246,13 +246,13 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
         outputs.insert(Pair<TaskSearchPoint,Pair<OutputType,DurationType>>(
                 io_data.point(),{io_data.output(),io_data.execution_time()}));
     }
-    auto appraisals = this->_task->appraise(outputs,input);
-    ARIADNE_LOG_PRINTLN_VAR(appraisals);
+    auto rankings = this->_task->rank(outputs,input);
+    ARIADNE_LOG_PRINTLN_VAR(rankings);
 
     Set<TaskSearchPoint> new_points;
     SizeType cnt = 0;
-    for (auto a : appraisals) {
-        new_points.insert(a.point());
+    for (auto it = rankings.rbegin(); it != rankings.rend(); ++it) {
+        new_points.insert(it->point());
         ++cnt;
         if (cnt >= _concurrency/2) break;
     }
@@ -260,10 +260,10 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     for (auto p : new_points) _points.push(p);
     ARIADNE_LOG_PRINTLN_VAR(new_points);
 
-    auto best = appraisals.begin()->point();
-    if (appraisals.begin()->critical_failures() > 0)
-        throw CriticalAppraisalFailureException(appraisals);
-    _best_points.push_back(*appraisals.begin());
+    auto best = rankings.rbegin()->point();
+    if (rankings.rbegin()->critical_failures() > 0)
+        throw CriticalRankingFailureException(rankings);
+    _best_points.push_back(*rankings.rbegin());
     auto best_output = outputs.get(best).first;
 
     this->refine_configuration(input,best_output);

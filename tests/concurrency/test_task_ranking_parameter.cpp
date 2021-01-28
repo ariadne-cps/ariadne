@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_task_appraisal_parameter.cpp
+ *            test_task_ranking_parameter.cpp
  *
  *  Copyright  2008-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "concurrency/task_appraisal_parameter.hpp"
+#include "concurrency/task_ranking_parameter.hpp"
 #include "concurrency/task_runner_interface.hpp"
 #include "utility/array.hpp"
 #include "../test.hpp"
@@ -47,66 +47,66 @@ template<> struct TaskOutput<R> {
 typedef TaskInput<R> I;
 typedef TaskOutput<R> O;
 
-class TestTaskAppraisalParameter {
+class TestTaskRankingParameter {
   private:
     DurationType _duration;
   public:
 
-    TestTaskAppraisalParameter() {
+    TestTaskRankingParameter() {
         auto now = std::chrono::high_resolution_clock::now();
         _duration = std::chrono::duration_cast<DurationType>(now-now);
     }
 
-    Void test_scalar_appraisal_creation() {
-        ScalarAppraisalParameter<R> p("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-        [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
+    Void test_scalar_ranking_parameter_creation() {
+        ScalarRankingParameter<R> p("chosen_step_size", RankingParameterOptimisation::MAXIMISE,
+                                    [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
         auto input = I(2,{1,2});
         auto output = O(7);
-        auto cost = p.appraise(input,output,_duration);
+        auto cost = p.rank(input, output, _duration);
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(p.is_scalar());
         ARIADNE_TEST_EQUALS(cost,9);
         ARIADNE_TEST_EQUALS(p.dimension(input),1);
-        ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MAXIMISE);
+        ARIADNE_TEST_EQUALS(p.optimisation(), RankingParameterOptimisation::MAXIMISE);
     }
 
-    Void test_vector_appraisal_creation() {
-        VectorAppraisalParameter<R> p("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
-                                            [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
+    Void test_vector_ranking_parameter_creation() {
+        VectorRankingParameter<R> p("enclosure_widths", RankingParameterOptimisation::MINIMISE,
+                                    [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
                                                 return output.o + duration.count() + input.i2[idx]; },
-                                            [](I const& input) { return input.i2.size(); });
+                                    [](I const& input) { return input.i2.size(); });
         auto input = I(2,{1,2});
         auto output = O(7);
 
         ARIADNE_TEST_PRINT(p);
         ARIADNE_TEST_ASSERT(not p.is_scalar());
-        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,0),8);
-        ARIADNE_TEST_EQUALS(p.appraise(input,output,_duration,1),9);
+        ARIADNE_TEST_EQUALS(p.rank(input, output, _duration, 0), 8);
+        ARIADNE_TEST_EQUALS(p.rank(input, output, _duration, 1), 9);
         ARIADNE_TEST_EQUALS(p.dimension(input),2);
-        ARIADNE_TEST_EQUALS(p.optimisation(),TaskAppraisalParameterOptimisation::MINIMISE);
+        ARIADNE_TEST_EQUALS(p.optimisation(), RankingParameterOptimisation::MINIMISE);
     }
 
-    Void test_task_appraisal_set() {
-        ScalarAppraisalParameter<R> p1("chosen_step_size",TaskAppraisalParameterOptimisation::MAXIMISE,
-                                      [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
-        VectorAppraisalParameter<R> p2("enclosure_widths",TaskAppraisalParameterOptimisation::MINIMISE,
-                                      [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
+    Void test_task_ranking_parameter_set() {
+        ScalarRankingParameter<R> p1("chosen_step_size", RankingParameterOptimisation::MAXIMISE,
+                                     [](I const& input, O const& output, DurationType const& duration) { return output.o + duration.count() + input.i1; });
+        VectorRankingParameter<R> p2("enclosure_widths", RankingParameterOptimisation::MINIMISE,
+                                     [](I const& input, O const& output, DurationType const& duration, SizeType const& idx) {
                                           return output.o + duration.count() + input.i2[idx]; },
-                                      [](I const& input) { return input.i2.size(); });
+                                     [](I const& input) { return input.i2.size(); });
 
-        Set<TaskAppraisalParameter<R>> ps = {p1,p2};
+        Set<TaskRankingParameter<R>> ps = {p1, p2};
 
         ARIADNE_TEST_PRINT(ps);
     }
 
     Void test() {
-        ARIADNE_TEST_CALL(test_scalar_appraisal_creation());
-        ARIADNE_TEST_CALL(test_vector_appraisal_creation());
-        ARIADNE_TEST_CALL(test_task_appraisal_set());
+        ARIADNE_TEST_CALL(test_scalar_ranking_parameter_creation());
+        ARIADNE_TEST_CALL(test_vector_ranking_parameter_creation());
+        ARIADNE_TEST_CALL(test_task_ranking_parameter_set());
     }
 };
 
 int main() {
-    TestTaskAppraisalParameter().test();
+    TestTaskRankingParameter().test();
     return ARIADNE_TEST_FAILURES;
 }

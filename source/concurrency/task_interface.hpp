@@ -54,6 +54,7 @@ class TaskInterface {
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
+    typedef typename R::ConfigurationRefinementObjectiveType ConfigurationRefinementObjectiveType;
 
     //! \brief The name of the task, to be used for thread naming
     virtual String name() const = 0;
@@ -65,6 +66,10 @@ class TaskInterface {
     virtual Set<ConfigurationPropertyRefinementRule<R>> const& configuration_refinement_rules() const = 0;
     //! \brief Set the configuration refinement rules for the task
     virtual Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) = 0;
+    //! \brief Return the configuration refinement objectives
+    virtual Void set_configuration_refinement_objectives(Set<ConfigurationRefinementObjectiveType> const& objectives) = 0;
+    //! \brief Set the configuration refinement objectives for the task
+    virtual Set<ConfigurationRefinementObjectiveType> const& configuration_refinement_objectives() const = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            configuration/configuration_property_refinement_rule.hpp
+ *            verification/configuration_property_refinement_rule.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -30,9 +30,9 @@
 #define ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_RULE_HPP
 
 #include <functional>
-#include "utility/pointer.hpp"
-#include "configurable.hpp"
-#include "configuration_property_interface.hpp"
+#include "configuration/configurable.hpp"
+#include "configuration/configuration_property_interface.hpp"
+#include "verification/safety_objective_measure.decl.hpp"
 
 namespace Ariadne {
 
@@ -46,13 +46,14 @@ template<class R> class ConfigurationPropertyRefinementRule {
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
     typedef Configuration<R> ConfigurationType;
+    typedef typename R::ConfigurationRefinementObjectiveType ObjectiveType;
     typedef Pair<ConfigurationPropertyPath,RatioType> ResultType;
-    typedef std::function<RatioType(InputType const&, OutputType const&)> FunctionType;
+    typedef std::function<RatioType(InputType const&, OutputType const&, ObjectiveType const&)> FunctionType;
 
     ConfigurationPropertyRefinementRule(ConfigurationPropertyPath const& path, FunctionType const& function) : _path(path), _ratio_function(function) { }
     ConfigurationPropertyPath const& path() const { return _path; }
     //! \brief Find the ratio for refinement
-    ResultType get_ratio(InputType const& i, OutputType const& o) { return make_pair(_path,_ratio_function(i,o)); }
+    ResultType get_ratio(InputType const& i, OutputType const& o, ObjectiveType const& obj) { return make_pair(_path,_ratio_function(i,o,obj)); }
     //! \brief Comparison for set appending
     //! \details Only one rule for a specific property is expected to be used.
     Bool operator<(ConfigurationPropertyRefinementRule<R> const& r) const { return _path < r._path; }

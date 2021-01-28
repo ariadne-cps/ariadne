@@ -34,7 +34,7 @@
 #include "task_interface.hpp"
 #include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "configuration/configuration_property_refinement_rule.hpp"
+#include "verification/configuration_property_refinement_rule.hpp"
 
 namespace Ariadne {
 
@@ -75,12 +75,14 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto rule : task().configuration_refinement_rules()) {
-            auto prop_ratio = rule.get_ratio(input,output);
-            _configuration.properties().get(prop_ratio.first.first())->refine_value(prop_ratio.first.subpath(),prop_ratio.second);
-            auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(prop_ratio.first).get();
-            auto iter = _property_refinement_values.find(prop_ratio.first);
-            if (iter != _property_refinement_values.end()) _property_refinement_values.at(prop_ratio.first).push_back(value);
-            else _property_refinement_values.insert(make_pair(prop_ratio.first,value));
+            for (auto obj : task().configuration_refinement_objectives()) {
+                auto prop_ratio = rule.get_ratio(input,output,obj);
+                _configuration.properties().get(prop_ratio.first.first())->refine_value(prop_ratio.first.subpath(),prop_ratio.second);
+                auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(prop_ratio.first).get();
+                auto iter = _property_refinement_values.find(prop_ratio.first);
+                if (iter != _property_refinement_values.end()) _property_refinement_values.at(prop_ratio.first).push_back(value);
+                else _property_refinement_values.insert(make_pair(prop_ratio.first,value));
+            }
         }
     }
 

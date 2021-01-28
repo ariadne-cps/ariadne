@@ -46,8 +46,7 @@
 #include "../concurrency/task_appraisal_space.hpp"
 #include "../configuration/searchable_configuration.hpp"
 #include "../configuration/configuration_property.hpp"
-
-#include "../output/logging.hpp"
+#include "../verification/safety_objective_measure.decl.hpp"
 
 namespace Ariadne {
 
@@ -74,7 +73,7 @@ class VectorFieldEvolver
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
+    typedef TimedRadiusObjective ConfigurationRefinementObjectiveType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.

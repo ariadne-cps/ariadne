@@ -34,7 +34,7 @@
 #include "../utility/string.hpp"
 #include "task_interface.hpp"
 #include "task_search_space.hpp"
-#include "configuration/configuration_property_refinement_rule.hpp"
+#include "verification/configuration_property_refinement_rule.hpp"
 
 namespace Ariadne {
 
@@ -50,6 +50,7 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
   public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
+    typedef typename R::ConfigurationRefinementObjectiveType ConfigurationRefinementObjectiveType;
   protected:
     ParameterSearchTaskBase(String const& name, TaskAppraisalSpace<R> const& appraisal_space)
         : _name(name), _appraisal_space(appraisal_space.clone()) {}
@@ -62,12 +63,17 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     Void set_configuration_refinement_rules(Set<ConfigurationPropertyRefinementRule<R>> const& rules) override {
         _configuration_refinement_rules.clear(); _configuration_refinement_rules.adjoin(rules); }
 
+    Set<ConfigurationRefinementObjectiveType> const& configuration_refinement_objectives() const override { return _configuration_refinement_objectives; }
+    Void set_configuration_refinement_objectives(Set<ConfigurationRefinementObjectiveType> const& objectives) override {
+        _configuration_refinement_objectives.clear(); _configuration_refinement_objectives.adjoin(objectives); }
+
     Set<TaskSearchPointAppraisal> appraise(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _appraisal_space->appraise(data,input); }
 
   private:
     String const _name;
     SharedPointer<TaskAppraisalSpace<R>> _appraisal_space;
     Set<ConfigurationPropertyRefinementRule<R>> _configuration_refinement_rules;
+    Set<ConfigurationRefinementObjectiveType> _configuration_refinement_objectives;
 };
 
 } // namespace Ariadne

@@ -40,7 +40,7 @@
 namespace Ariadne {
 
 template<class C> TaskRunnable<C>::TaskRunnable(ConfigurationType const& configuration) : Configurable<C>(configuration) {
-    ConcurrencyManager::instance().set_runner(*this);
+    ConcurrencyManager::instance().choose_runner_for(*this, configuration);
 }
 
 template<class C> void TaskRunnable<C>::set_runner(SharedPointer<TaskRunnerInterface<C>> runner) {
@@ -70,11 +70,6 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     TaskType& task() override { return *_task; };
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
-
-    void refine_configuration_init() override {
-        for (auto rule : task().configuration_refinement_targets())
-            _configuration.properties().get(rule.path().first())->refine_init(rule.path().subpath());
-    }
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto target : task().configuration_refinement_targets()) {

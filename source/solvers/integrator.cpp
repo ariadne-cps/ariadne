@@ -197,6 +197,8 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG_PRINTLN_VAR_AT(1, phi);
     for (DegreeType k = 0; k != configuration().maximum_temporal_order(); ++k) {
         Bool below_maximum_error = (phi.error().raw() < configuration().step_maximum_error());
+
+
         FlowStepModelType fphi = compose(f, join(std::move(phi), ta));
         ARIADNE_LOG_PRINTLN_VAR_AT(2, fphi);
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,

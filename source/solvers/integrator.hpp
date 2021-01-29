@@ -231,7 +231,7 @@ template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfi
 
     Configuration() {
         add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6)));
-        add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-4)));
+        add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>(),ProportionalRefiner<RealType>(1e-3)));
         add_property("minimum_temporal_order",DegreeTypeProperty(0u,LinearSearchSpaceConverter<DegreeType>(),ProportionalRefiner<DegreeType>(1e-3)));
         add_property("maximum_temporal_order",DegreeTypeProperty(15u,LinearSearchSpaceConverter<DegreeType>(),ProportionalRefiner<DegreeType>(1e-3)));
 

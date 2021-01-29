@@ -55,8 +55,6 @@ class TaskRunnerInterface {
     //! \brief Return the configuration
     virtual ConfigurationType const& configuration() const = 0;
 
-    //! \brief Initialise the refinement of the configuration
-    virtual void refine_configuration_init() = 0;
     //! \brief Refine the current configuration from a completed task data, i.e., the input/output pair \a in and \a out
     virtual void refine_configuration(InputType const& in, OutputType const& out) = 0;
 

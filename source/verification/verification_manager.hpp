@@ -29,11 +29,12 @@
 #ifndef ARIADNE_VERIFICATION_MANAGER_HPP
 #define ARIADNE_VERIFICATION_MANAGER_HPP
 
-#include "../utility/container.hpp"
-#include "../utility/pointer.hpp"
-#include "../concurrency/task_runner.hpp"
-#include "../concurrency/task_execution_ranking.hpp"
-#include "../concurrency/task_ranking_space.hpp"
+#include "utility/container.hpp"
+#include "utility/pointer.hpp"
+#include "concurrency/task_runner.hpp"
+#include "concurrency/task_execution_ranking.hpp"
+#include "concurrency/task_ranking_space.hpp"
+#include "concurrency/concurrency_manager.hpp"
 #include "configuration/configuration_property_refinement_target.hpp"
 
 namespace Ariadne {
@@ -52,7 +53,7 @@ class VerificationManager {
 
     template<class R> void add_safety_specification(TaskRunnable<R>& runnable,
                                       Set<TaskRankingConstraint<R>> const& safety_constraints,
-                                      List<ConfigurationPropertyRefinementTarget<R>> const& refinement_targets) const
+                                      Set<ConfigurationPropertyRefinementTarget<R>> const& refinement_targets) const
     {
         auto appraisal_space = runnable.runner()->task().ranking_space();
         auto original_constraints = appraisal_space.constraints();
@@ -60,9 +61,17 @@ class VerificationManager {
         TaskRankingSpaceBuilder<R> builder;
         for (auto constr : appraisal_space.constraints()) builder.add(constr,original_weights.get(constr.parameter()));
         for (auto constr : safety_constraints) builder.add(constr); // Use default weight 1.0
+        auto search_space_dimension = runnable.searchable_configuration().search_space().dimension();
+        auto num_refinements = refinement_targets.size();
+        ARIADNE_ASSERT_MSG(num_refinements <= search_space_dimension, "The number of properties to refine is greater than the number of non-single properties.");
+        Configuration<R> cfg = runnable.configuration();
+        auto new_cfg = cfg;
+        for (auto target : refinement_targets)
+            new_cfg.properties().get(target.path().first())->refine_init(target.path().subpath());
+
+        ConcurrencyManager::instance().choose_runner_for(runnable, new_cfg); // Re-chooses the runner
         runnable.runner()->task().set_ranking_space(builder.build());
         runnable.runner()->task().set_configuration_refinement_targets(refinement_targets);
-        runnable.runner()->refine_configuration_init();
     }
 };
 

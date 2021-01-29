@@ -24,6 +24,7 @@
 
 /*! \file utility/randomiser.hpp
  *  \brief Generators of random numbers for a type.
+ *  \details The values are generated uniformly in the provided interval.
  */
 
 #ifndef ARIADNE_RANDOMISER_HPP
@@ -50,7 +51,7 @@ template<> struct Randomiser<ExactDouble> {
 template<> struct Randomiser<DegreeType> {
     //! \get Return a value between 0 and \a value
     static DegreeType get(DegreeType const& min, DegreeType const& max) {
-        return DegreeType(min+rand()/RAND_MAX*(max-min));
+        return DegreeType(min + rand() % (max-min+1));
     }
 };
 

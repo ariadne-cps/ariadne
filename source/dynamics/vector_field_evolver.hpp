@@ -226,16 +226,20 @@ template<> struct TaskObjective<VectorFieldEvolver> {
 };
 
 template<> class TaskObjectiveMeasurer<VectorFieldEvolver> : public TaskObjectiveMeasurerBase<VectorFieldEvolver> {
-    typedef typename TaskObjectiveMeasurerInterface::ScoreType ScoreType;
+    typedef typename TaskObjectiveMeasurerInterface::ErrorType ErrorType;
+    typedef typename TaskObjectiveMeasurerInterface::ProgressType ProgressType;
     typedef typename TaskObjectiveMeasurerInterface::InputType InputType;
     typedef typename TaskObjectiveMeasurerInterface::OutputType OutputType;
     typedef typename TaskObjectiveMeasurerInterface::ObjectiveType ObjectiveType;
   protected:
-    ScoreType current(InputType const& i, OutputType const& o, ObjectiveType const& obj) const override {
+    ErrorType current_measure(InputType const& i, OutputType const& o, ObjectiveType const& obj) const override {
         return ((o.evolve.bounding_box()[obj.variable].radius() - i.current_set.bounding_box()[obj.variable].radius())/(o.time-i.current_time)).get_d();
     }
-    ScoreType reference(InputType const& i, ObjectiveType const& obj) const override {
+    ErrorType reference_measure(InputType const& i, ObjectiveType const& obj) const override {
         return ((obj.radius - i.current_set.bounding_box()[obj.variable].radius())/(obj.time-i.current_time)).get_d();
+    }
+    ProgressType get_progress(InputType const& i, OutputType const& o) const override {
+        return o.step_size_used.get_d();
     }
     Bool discard(InputType const& i, ObjectiveType const& obj) const override {
         return i.current_time > obj.time;

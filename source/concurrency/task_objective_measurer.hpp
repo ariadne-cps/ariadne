@@ -32,23 +32,28 @@
 namespace Ariadne {
 
 //! \brief A measurer for a set of task objectives related to the refinement of a property
-template<class R>
-class TaskObjectiveMeasurerInterface {
+//! \details The measurer is generic and is designed to return two measures: an error and a progress
+template<class R> class TaskObjectiveMeasurerInterface {
   public:
     typedef TaskObjective<R> ObjectiveType;
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-    typedef double ScoreType;
-    //! \brief Get the amount to be used for refinement
-    //! \details The amount is chosen as the maximum among the objectives, each calculated as (current-reference)/reference
-    virtual ScoreType get(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const = 0;
+    typedef double ErrorType;
+    typedef double ProgressType;
+
+    virtual Pair<ErrorType,ProgressType> get(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const = 0;
   protected:
+    //! \brief Get the error with respect to the objectives
+    //! \details The error is chosen as the maximum among the objectives, each calculated as (current-reference)/reference
+    virtual ErrorType get_error(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const = 0;
     //! \brief Whether to discard an objective at the current input
     virtual Bool discard(InputType const& i, ObjectiveType const& obj) const = 0;
-    //! \brief Get the current measure from input/output, where the objective may also be required to select proper data
-    virtual ScoreType current(InputType const& i, OutputType const& o, ObjectiveType const& obj) const = 0;
-    //! \brief Get the reference measure from input and objective
-    virtual ScoreType reference(InputType const& i, ObjectiveType const& obj) const = 0;
+    //! \brief Get the current measure for error from input/output, where the objective may also be required to select proper data
+    virtual ErrorType current_measure(InputType const& i, OutputType const& o, ObjectiveType const& obj) const = 0;
+    //! \brief Get the reference measure for error from input and objective
+    virtual ErrorType reference_measure(InputType const& i, ObjectiveType const& obj) const = 0;
+    //! \brief Get the progress in the task with respect to the input and output
+    virtual ProgressType get_progress(InputType const& i, OutputType const& o) const = 0;
 
     virtual ~TaskObjectiveMeasurerInterface() = default;
 };
@@ -60,13 +65,19 @@ template<class R> class TaskObjectiveMeasurerBase : public TaskObjectiveMeasurer
     typedef TaskObjective<R> ObjectiveType;
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
+    typedef typename TaskObjectiveMeasurerInterface<R>::ErrorType ErrorType;
+    typedef typename TaskObjectiveMeasurerInterface<R>::ProgressType ProgressType;
   public:
-    ScoreType get(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const override final {
+    Pair<ErrorType,ProgressType> get(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const final {
+        return make_pair(get_error(i,o,objectives),this->get_progress(i,o));
+    }
+
+    ScoreType get_error(InputType const& i, OutputType const& o, List<ObjectiveType> const& objectives) const override final {
         auto result = std::numeric_limits<double>::lowest();
         for (auto obj : objectives) {
             if (not this->discard(i,obj)) {
-                auto ref = this->reference(i,obj);
-                auto amount = (this->current(i,o,obj) - ref)/ref;
+                auto ref = this->reference_measure(i, obj);
+                auto amount = (this->current_measure(i, o, obj) - ref) / ref;
                 if (amount > result) result = amount;
             }
         }

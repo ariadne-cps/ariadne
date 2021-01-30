@@ -34,8 +34,9 @@ namespace Ariadne {
 //! \brief Interface for refining a value in the search space (cast to double)
 class ConfigurationPropertyRefinerInterface {
   public:
-    //! \brief Apply the amount to the current value using the refinement rule chosen
-    virtual double apply(double amount, double current) const = 0;
+    //! \brief Apply the \a error with a given \a progress measure to the \a current value using the refinement chosen
+    //! \details It may change the internal state of the object.
+    virtual double apply(double error, double progress, double current) = 0;
 
     virtual ConfigurationPropertyRefinerInterface* clone() const = 0;
     virtual ~ConfigurationPropertyRefinerInterface() = default;
@@ -45,25 +46,31 @@ class ConfigurationPropertyRefinerInterface {
 class ProportionalRefiner : public ConfigurationPropertyRefinerInterface {
   public:
     ProportionalRefiner(double Kp) : _Kp(Kp) { }
-    double apply(double amount, double current) const override { return current + _Kp*amount; }
+    double apply(double error, double step, double current) override { return current + _Kp*error; }
     ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
   private:
     double _Kp;
 };
 
-/*
-template<> struct PIDRefiner<ExactDouble> : public ConfigurationPropertyRefinerInterface<ExactDouble> {
-    PIDRefiner(double Kp, double Ki, double Kd) : _gain(gain) { }
-    ExactDouble apply(double amount, ExactDouble const& current) const override {
-        return ExactDouble(current.get_d()*(1.0 - _gain*amount));
+class PIDRefiner : public ConfigurationPropertyRefinerInterface {
+  public:
+    PIDRefiner(double Kp, double Ki, double Kd) : _Kp(Kp), _Ki(Ki), _Kd(Kd), _error_k_2(0), _error_k_1(0), _step_k_1(1e-20) { }
+    double apply(double error_k, double step_k, double current) override {
+        auto result = current + (_Kp+_Ki*step_k+_Kd/step_k)*error_k - (_Kp+_Kd*(step_k+_step_k_1)/(step_k*_step_k_1))*_error_k_1 + _Kd/_step_k_1*_error_k_2;
+        _error_k_2 = _error_k_1;
+        _error_k_1 = error_k;
+        _step_k_1 = step_k;
+        return result;
     }
-    ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
-private:
-    double _Kp;
-    double _Ki;
-    double _Kd;
+    ConfigurationPropertyRefinerInterface* clone() const override { return new PIDRefiner(*this); }
+  private:
+    const double _Kp;
+    const double _Ki;
+    const double _Kd;
+    double _error_k_2;
+    double _error_k_1;
+    double _step_k_1;
 };
-*/
 
 } // namespace Ariadne
 

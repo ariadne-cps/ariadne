@@ -73,8 +73,8 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
         for (auto target : task().configuration_refinement_targets()) {
-            auto amount = _objective_measurer->get(input,output,target.objectives());
-            _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),amount);
+            auto error_progress = _objective_measurer->get(input,output,target.objectives());
+            _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),error_progress.first,error_progress.second);
             auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(target.path()).get();
             auto iter = _property_refinement_values.find(target.path());
             if (iter != _property_refinement_values.end()) _property_refinement_values.at(target.path()).push_back(value);

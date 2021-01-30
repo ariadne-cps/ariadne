@@ -74,12 +74,12 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new ProportionalRefiner(-1e-2))) { }
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new PIDRefiner(-1e-2,1e-2,1e-4))) { }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new ProportionalRefiner(-1e-2))) {
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new PIDRefiner(-1e-2,1e-2,1e-4))) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
 
@@ -149,15 +149,15 @@ template<class T> void RangeConfigurationProperty<T>::refine_init(ConfigurationP
     _is_refined = true;
 }
 
-template<class T> T RangeConfigurationProperty<T>::_refine_value(double amount) {
-    return _converter->from_double(_refiner->apply(amount,_converter->to_double(_refined)));
+template<class T> T RangeConfigurationProperty<T>::_refine_value(double error, double progress) {
+    return _converter->from_double(_refiner->apply(error,progress,_converter->to_double(_refined)));
 }
 
-template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double error, double progress) {
     ARIADNE_PRECONDITION(path.is_root());
     ARIADNE_PRECONDITION(is_refined());
     ARIADNE_ASSERT_MSG(not is_single(),"The property value must be in an interval in order to be refined.");
-    _refined = max(_lower,min(_upper, _refine_value(ratio)));
+    _refined = max(_lower,min(_upper, _refine_value(error,progress)));
 }
 
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {
@@ -269,7 +269,7 @@ template<class T> void EnumConfigurationProperty<T>::refine_init(ConfigurationPr
     ARIADNE_ERROR("The value of an enum property cannot be refined.");
 }
 
-template<class T> void EnumConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+template<class T> void EnumConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double error, double progress) {
     ARIADNE_PRECONDITION(path.is_root());
     ARIADNE_ERROR("The value of an enum property cannot be refined.");
 }
@@ -362,7 +362,7 @@ template<class T> void ListConfigurationProperty<T>::refine_init(ConfigurationPr
     ARIADNE_ERROR("The value of a list property cannot be refined.");
 }
 
-template<class T> void ListConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+template<class T> void ListConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double error, double progress) {
     ARIADNE_PRECONDITION(path.is_root());
     ARIADNE_ERROR("The value of a list property cannot be refined.");
 }
@@ -483,13 +483,13 @@ template<class T> void InterfaceConfigurationProperty<T>::refine_init(Configurat
     else { ARIADNE_ERROR("The path " << path << " has not been found."); }
 }
 
-template<class T> void InterfaceConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
+template<class T> void InterfaceConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double error, double progress) {
     ARIADNE_ASSERT_MSG(not path.is_root(),"The value of an interface configuration property can not be refined.");
     ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the interface configuration property is not configurable.");
     ARIADNE_ASSERT_MSG(is_single(),"Can't reach the path since there are multiple values and multiple configurable objects are not allowed");
     auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
     auto p_ptr = properties.find(path.first());
-    if (p_ptr != properties.end()) p_ptr->second->refine_value(path.subpath(),ratio);
+    if (p_ptr != properties.end()) p_ptr->second->refine_value(path.subpath(),error,progress);
     else { ARIADNE_ERROR("The path " << path << " has not been found."); }
 }
 

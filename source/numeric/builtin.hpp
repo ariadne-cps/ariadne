@@ -38,6 +38,7 @@
 #include "../utility/metaprogramming.hpp"
 #include "../numeric/number.decl.hpp"
 
+#include "logical.hpp"
 #include "twoexp.hpp"
 
 namespace Ariadne {
@@ -92,12 +93,12 @@ class ApproximateDouble {
     friend ApproximateDouble& operator/=(ApproximateDouble& x1, ApproximateDouble x2) { x1._d/=x2._d; return x1; }
 
     friend Bool same(ApproximateDouble x1, ApproximateDouble x2) { return x1._d==x2._d; }
-    friend Bool operator==(ApproximateDouble x1, ApproximateDouble x2) { return x1._d==x2._d; }
-    friend Bool operator!=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d!=x2._d; }
-    friend Bool operator> (ApproximateDouble x1, ApproximateDouble x2) { return x1._d> x2._d; }
-    friend Bool operator< (ApproximateDouble x1, ApproximateDouble x2) { return x1._d< x2._d; }
-    friend Bool operator>=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d>=x2._d; }
-    friend Bool operator<=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d<=x2._d; }
+    friend ApproximateKleenean operator==(ApproximateDouble x1, ApproximateDouble x2) { return x1._d==x2._d; }
+    friend ApproximateKleenean operator!=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d!=x2._d; }
+    friend ApproximateKleenean operator> (ApproximateDouble x1, ApproximateDouble x2) { return x1._d> x2._d; }
+    friend ApproximateKleenean operator< (ApproximateDouble x1, ApproximateDouble x2) { return x1._d< x2._d; }
+    friend ApproximateKleenean operator>=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d>=x2._d; }
+    friend ApproximateKleenean operator<=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d<=x2._d; }
 };
 inline ApproximateDouble operator"" _a (long double lx);
 
@@ -118,17 +119,20 @@ class ExactDouble {
     friend ExactDouble abs(ExactDouble x) { return ExactDouble(std::abs(x._d)); }
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }
     friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._d); }
-//    friend ApproximateDouble operator-(ApproximateDouble x1, ApproximateDouble x2);
+    friend ApproximateDouble operator+(ApproximateDouble x1, ApproximateDouble x2);
+    friend ApproximateDouble operator-(ApproximateDouble x1, ApproximateDouble x2);
+    friend ApproximateDouble operator*(ApproximateDouble x1, ApproximateDouble x2);
+    friend ApproximateDouble operator/(ApproximateDouble x1, ApproximateDouble x2);
     friend ExactDouble operator*(ExactDouble x, TwoExp p) { return ExactDouble(x.get_d()*p.get_d()); }
     friend ExactDouble operator/(ExactDouble x, TwoExp p) { return ExactDouble(x.get_d()/p.get_d()); }
     friend Comparison cmp(ExactDouble const& x1, ExactDouble const& x2) {
         return Comparison( (x1._d==x2._d) ? 0 : (x1._d<x2._d) ? -1 : +1 ); }
-    friend Bool operator==(ExactDouble const& x1, ExactDouble const& x2) { return x1._d==x2._d; }
-    friend Bool operator!=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d!=x2._d; }
-    friend Bool operator>=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d>=x2._d; }
-    friend Bool operator<=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d<=x2._d; }
-    friend Bool operator> (ExactDouble const& x1, ExactDouble const& x2) { return x1._d> x2._d; }
-    friend Bool operator< (ExactDouble const& x1, ExactDouble const& x2) { return x1._d< x2._d; }
+    friend Boolean operator==(ExactDouble const& x1, ExactDouble const& x2) { return x1._d==x2._d; }
+    friend Boolean operator!=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d!=x2._d; }
+    friend Boolean operator>=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d>=x2._d; }
+    friend Boolean operator<=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d<=x2._d; }
+    friend Boolean operator> (ExactDouble const& x1, ExactDouble const& x2) { return x1._d> x2._d; }
+    friend Boolean operator< (ExactDouble const& x1, ExactDouble const& x2) { return x1._d< x2._d; }
     friend ExactDouble operator"" _x (long double lx) { double x=lx; if (x!=lx) { std::cerr<<"lx="<<lx; assert(x==lx); } return ExactDouble(x); }
     friend ExactDouble operator"" _pr (long double lx) { double x=lx; return ExactDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }

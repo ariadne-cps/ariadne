@@ -145,7 +145,7 @@ template<class T> void RangeConfigurationProperty<T>::refine_init(ConfigurationP
     ARIADNE_ASSERT_MSG(not(max_value == std::numeric_limits<int>::max() and min_value < std::numeric_limits<int>::max()),"An upper bounded range is required.");
     ARIADNE_ASSERT_MSG(not(min_value == std::numeric_limits<int>::min() and max_value > std::numeric_limits<int>::min()),"A lower bounded range is required.");
     int rnd_value = min_value + rand() % (max_value - min_value + 1);
-    _refined = _converter->to_value(rnd_value);
+    _refined = _converter->from_int(rnd_value);
     _is_refined = true;
 }
 
@@ -164,7 +164,7 @@ template<class T> void RangeConfigurationProperty<T>::local_set_single(int integ
     ARIADNE_PRECONDITION(integer_value >= min_value and integer_value <= max_value);
     if (integer_value == min_value) _upper = _lower; // Avoids rounding error
     else if (integer_value == max_value) _lower = _upper; // Avoids rounding error
-    else { _lower = _upper = _converter->to_value(integer_value); }
+    else { _lower = _upper = _converter->from_int(integer_value); }
 }
 
 template<class T> ConfigurationPropertyInterface* RangeConfigurationProperty<T>::clone() const {

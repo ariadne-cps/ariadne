@@ -32,55 +32,76 @@
 namespace Ariadne {
 
 //! \brief Interface for conversion from/into the integer search space
-template<class T>
-struct SearchSpaceConverterInterface {
+template<class T> struct SearchSpaceConverterInterface {
+    //! \brief Convert the \a value into an integer value
     virtual int to_int(T const& value) const = 0;
-    virtual T to_value(int i) const = 0;
+    //! \brief Convert the \a value into a double value
+    virtual double to_double(T const& value) const = 0;
+    //! \brief Convert from an integer value \a i into the original value
+    virtual T from_int(int i) const = 0;
+    //! \brief Convert from a double into the original value
+    virtual T from_double(double value) const = 0;
 
     virtual SearchSpaceConverterInterface* clone() const = 0;
     virtual ~SearchSpaceConverterInterface() = default;
+};
+
+template<class T> struct SearchSpaceConverterBase : public SearchSpaceConverterInterface<T> {
+  public:
+    T from_int(int i) const override final { return this->from_double(i); }
 };
 
 template<class T> struct Log10SearchSpaceConverter;
 template<class T> struct Log2SearchSpaceConverter;
 template<class T> struct LinearSearchSpaceConverter;
 
-template<> struct Log10SearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+template<> struct Log10SearchSpaceConverter<ExactDouble> : SearchSpaceConverterBase<ExactDouble> {
     int to_int(ExactDouble const& value) const override {
         if (value == inf) return std::numeric_limits<int>::max();
         else if (value == -inf) return std::numeric_limits<int>::min();
         else return std::round(log(value.get_d())/log(10.0)); }
-    ExactDouble to_value(int i) const override { return ExactDouble(exp(log(10.0)*i)); }
+    double to_double(ExactDouble const& value) const override {
+        if (value == inf) return std::numeric_limits<double>::max();
+        else if (value == -inf) return std::numeric_limits<double>::min();
+        else return log(value.get_d())/log(10.0); }
+    ExactDouble from_double(double value) const override { return ExactDouble(exp(log(10.0)*value)); }
     SearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
 };
 
-template<> struct Log2SearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+template<> struct Log2SearchSpaceConverter<ExactDouble> : SearchSpaceConverterBase<ExactDouble> {
     int to_int(ExactDouble const& value) const override {
         if (value == inf) return std::numeric_limits<int>::max();
         else if (value == -inf) return std::numeric_limits<int>::min();
         return std::round(log(value.get_d())/log(2.0)); }
-    ExactDouble to_value(int i) const override { return ExactDouble(exp(log(2.0)*i)); }
+    double to_double(ExactDouble const& value) const override {
+        if (value == inf) return std::numeric_limits<double>::max();
+        else if (value == -inf) return std::numeric_limits<double>::min();
+        return log(value.get_d())/log(2.0); }
+    ExactDouble from_double(double value) const override { return ExactDouble(exp(log(2.0)*value)); }
     SearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
 };
 
-template<> struct LinearSearchSpaceConverter<ExactDouble> : SearchSpaceConverterInterface<ExactDouble> {
+template<> struct LinearSearchSpaceConverter<ExactDouble> : SearchSpaceConverterBase<ExactDouble> {
     int to_int(ExactDouble const& value) const override {
         if (value == inf) return std::numeric_limits<int>::max();
         else if (value == -inf) return std::numeric_limits<int>::min();
         return round(value).get<int>(); }
-    ExactDouble to_value(int i) const override { return ExactDouble(i); }
+    double to_double(ExactDouble const& value) const override { return value.get_d(); }
+    ExactDouble from_double(double value) const override { return ExactDouble(value); }
     SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
-template<> struct LinearSearchSpaceConverter<int> : SearchSpaceConverterInterface<int> {
+template<> struct LinearSearchSpaceConverter<int> : SearchSpaceConverterBase<int> {
     int to_int(int const& value) const override { return value; }
-    int to_value(int i) const override { return i; }
+    double to_double(int const& value) const override { return value; }
+    int from_double(double i) const override { return std::round(i); }
     SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
-template<> struct LinearSearchSpaceConverter<DegreeType> : SearchSpaceConverterInterface<DegreeType> {
+template<> struct LinearSearchSpaceConverter<DegreeType> : SearchSpaceConverterBase<DegreeType> {
     int to_int(DegreeType const& value) const override { return value; }
-    DegreeType to_value(int i) const override { return i; }
+    double to_double(DegreeType const& value) const override { return value; }
+    DegreeType from_double(double i) const override { return DegreeType(i); }
     SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 

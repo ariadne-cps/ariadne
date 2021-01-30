@@ -68,17 +68,17 @@ class TestConfiguration {
     void test_converters() {
         Log10SearchSpaceConverter<ExactDouble> log10_x;
         ARIADNE_TEST_EQUALS(log10_x.to_int(0.001_x),-3);
-        ARIADNE_TEST_PRINT(log10_x.to_value(-3).get_d());
+        ARIADNE_TEST_PRINT(log10_x.from_int(-3).get_d());
         Log2SearchSpaceConverter<ExactDouble> log2_x;
         ARIADNE_TEST_EQUALS(log2_x.to_int(0.03125_x),-5);
-        ARIADNE_TEST_PRINT(log2_x.to_value(-5).get_d());
+        ARIADNE_TEST_PRINT(log2_x.from_int(-5).get_d());
         LinearSearchSpaceConverter<ExactDouble> lin_x;
         ARIADNE_TEST_EQUALS(lin_x.to_int(3.49_x),3);
         ARIADNE_TEST_EQUALS(lin_x.to_int(3.5_x),4);
-        ARIADNE_TEST_EQUALS(lin_x.to_value(4).get_d(),4);
+        ARIADNE_TEST_EQUALS(lin_x.from_int(4).get_d(),4);
         LinearSearchSpaceConverter<int> lin_int;
         ARIADNE_TEST_EQUALS(lin_int.to_int(-2),-2);
-        ARIADNE_TEST_EQUALS(lin_int.to_value(4),4);
+        ARIADNE_TEST_EQUALS(lin_int.from_int(4),4);
     }
 
     void test_boolean_configuration_property_construction() {

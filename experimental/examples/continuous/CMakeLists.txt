@@ -1,4 +1,5 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
+    circle
     laub-loomis-nonoise
 	lotka-volterra-nonoise
 	higgins-selkov-nonoise

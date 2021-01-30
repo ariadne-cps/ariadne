@@ -75,14 +75,13 @@ using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions
 using TestConfigurableConfigurationProperty = InterfaceConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
-using Proportional = ProportionalRefiner<ExactDouble>;
 
 template<> struct Configuration<A> : public SearchableConfiguration {
   public:
     Configuration() {
         add_property("use_reconditioning",BooleanConfigurationProperty(false));
-        add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter(),Proportional(1e-3)));
-        add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2Converter(),Proportional(1e-3)));
+        add_property("maximum_step_size",ExactDoubleConfigurationProperty(inf,Log2Converter()));
+        add_property("sweep_threshold",ExactDoubleConfigurationProperty(ExactDouble::infinity(),Log2Converter()));
         add_property("level",LevelOptionsConfigurationProperty(LevelOptions::LOW));
         add_property("test_configurable",TestConfigurableConfigurationProperty(TestConfigurable(Configuration<TestConfigurable>())));
     }

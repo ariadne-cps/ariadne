@@ -100,9 +100,9 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 //! Also, this property when not set to a single value can be refined by using a refiner.
 template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
-    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
-    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
-    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner);
+    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
+    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
+    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
 
     Bool is_single() const override;
     Bool is_metric(ConfigurationPropertyPath const& path) const override;
@@ -134,7 +134,7 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     T _refined;
     Bool _is_refined;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
-    SharedPointer<ConfigurationPropertyRefinerInterface<T>> const _refiner;
+    SharedPointer<ConfigurationPropertyRefinerInterface<T>> _refiner;
 };
 
 //! \brief A property that specifies distinct values from an enum

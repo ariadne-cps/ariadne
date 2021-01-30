@@ -43,26 +43,41 @@ struct ConfigurationPropertyRefinerInterface {
 
 //! \brief Proportional control refiner: next = current*(1-G*amount) with G a gain constant
 template<class T> struct ProportionalRefiner;
+template<class T> struct PIDRefiner;
 
 template<> struct ProportionalRefiner<ExactDouble> : public ConfigurationPropertyRefinerInterface<ExactDouble> {
-    ProportionalRefiner(double gain) : _gain(gain) { }
+    ProportionalRefiner(double Kp) : _Kp(Kp) { }
+    ExactDouble apply(double amount, ExactDouble const& current) const override {
+        return ExactDouble(current.get_d() + _Kp*amount);
+    }
+    ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
+  private:
+    double _Kp;
+};
+
+template<> struct ProportionalRefiner<DegreeType> : public ConfigurationPropertyRefinerInterface<DegreeType> {
+    ProportionalRefiner(double Kp) : _Kp(Kp) { }
+    DegreeType apply(double amount, DegreeType const& current) const override {
+        return DegreeType(current + _Kp*amount);
+    }
+    ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
+private:
+    double _Kp;
+};
+
+/*
+template<> struct PIDRefiner<ExactDouble> : public ConfigurationPropertyRefinerInterface<ExactDouble> {
+    PIDRefiner(double Kp, double Ki, double Kd) : _gain(gain) { }
     ExactDouble apply(double amount, ExactDouble const& current) const override {
         return ExactDouble(current.get_d()*(1.0 - _gain*amount));
     }
     ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
-  private:
-    double _gain;
-};
-
-template<> struct ProportionalRefiner<DegreeType> : public ConfigurationPropertyRefinerInterface<DegreeType> {
-    ProportionalRefiner(double gain) : _gain(gain) { }
-    DegreeType apply(double amount, DegreeType const& current) const override {
-        return DegreeType(current*(1.0 - _gain*amount));
-    }
-    ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
 private:
-    double _gain;
+    double _Kp;
+    double _Ki;
+    double _Kd;
 };
+*/
 
 } // namespace Ariadne
 

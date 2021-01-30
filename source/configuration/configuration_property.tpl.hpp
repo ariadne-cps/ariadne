@@ -71,22 +71,20 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
     return os;
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) { }
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(new ProportionalRefiner<T>(-1e-7))) { }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper,
-        SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(refiner.clone())) {
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(new ProportionalRefiner<T>(-1e-7))) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value,
-        SearchSpaceConverterInterface<T> const& converter, ConfigurationPropertyRefinerInterface<T> const& refiner) :
-                RangeConfigurationProperty(value,value,converter,refiner) { }
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
+                RangeConfigurationProperty(value,value,converter) { }
 
 template<class T> T const& RangeConfigurationProperty<T>::get() const {
     ARIADNE_PRECONDITION(this->is_specified());

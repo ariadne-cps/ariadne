@@ -123,18 +123,20 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     void set(T const& value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double ratio) override;
+    void refine_value(ConfigurationPropertyPath const& path, double amount) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
+  private:
+    T _refine_value(double amount);
   private:
     T _lower;
     T _upper;
     T _refined;
     Bool _is_refined;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
-    SharedPointer<ConfigurationPropertyRefinerInterface<T>> _refiner;
+    SharedPointer<ConfigurationPropertyRefinerInterface> _refiner;
 };
 
 //! \brief A property that specifies distinct values from an enum

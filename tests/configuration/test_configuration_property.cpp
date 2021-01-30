@@ -60,7 +60,6 @@ using SweeperConfigurationProperty = ListConfigurationProperty<Sweeper<FloatDP>>
 using TestInterfaceConfigurationProperty = InterfaceConfigurationProperty<TestInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
-using Proportional = ProportionalRefiner<ExactDouble>;
 
 class TestConfiguration {
   public:

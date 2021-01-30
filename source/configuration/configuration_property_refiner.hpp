@@ -31,37 +31,23 @@
 
 namespace Ariadne {
 
-//! \brief Interface for conversion from/into the integer search space
-template<class T>
-struct ConfigurationPropertyRefinerInterface {
+//! \brief Interface for refining a value in the search space (cast to double)
+class ConfigurationPropertyRefinerInterface {
+  public:
     //! \brief Apply the amount to the current value using the refinement rule chosen
-    virtual T apply(double amount,T const& current) const = 0;
+    virtual double apply(double amount, double current) const = 0;
 
     virtual ConfigurationPropertyRefinerInterface* clone() const = 0;
     virtual ~ConfigurationPropertyRefinerInterface() = default;
 };
 
 //! \brief Proportional control refiner: next = current*(1-G*amount) with G a gain constant
-template<class T> struct ProportionalRefiner;
-template<class T> struct PIDRefiner;
-
-template<> struct ProportionalRefiner<ExactDouble> : public ConfigurationPropertyRefinerInterface<ExactDouble> {
+class ProportionalRefiner : public ConfigurationPropertyRefinerInterface {
+  public:
     ProportionalRefiner(double Kp) : _Kp(Kp) { }
-    ExactDouble apply(double amount, ExactDouble const& current) const override {
-        return ExactDouble(current.get_d() + _Kp*amount);
-    }
+    double apply(double amount, double current) const override { return current + _Kp*amount; }
     ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
   private:
-    double _Kp;
-};
-
-template<> struct ProportionalRefiner<DegreeType> : public ConfigurationPropertyRefinerInterface<DegreeType> {
-    ProportionalRefiner(double Kp) : _Kp(Kp) { }
-    DegreeType apply(double amount, DegreeType const& current) const override {
-        return DegreeType(current + _Kp*amount);
-    }
-    ConfigurationPropertyRefinerInterface* clone() const override { return new ProportionalRefiner(*this); }
-private:
     double _Kp;
 };
 

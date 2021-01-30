@@ -74,12 +74,12 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(new ProportionalRefiner<T>(-1e-7))) { }
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new ProportionalRefiner(-1e-2))) { }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
         _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())),
-        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface<T>>(new ProportionalRefiner<T>(-1e-7))) {
+        _refiner(SharedPointer<ConfigurationPropertyRefinerInterface>(new ProportionalRefiner(-1e-2))) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
 
@@ -149,11 +149,15 @@ template<class T> void RangeConfigurationProperty<T>::refine_init(ConfigurationP
     _is_refined = true;
 }
 
+template<class T> T RangeConfigurationProperty<T>::_refine_value(double amount) {
+    return _converter->from_double(_refiner->apply(amount,_converter->to_double(_refined)));
+}
+
 template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, double ratio) {
     ARIADNE_PRECONDITION(path.is_root());
     ARIADNE_PRECONDITION(is_refined());
     ARIADNE_ASSERT_MSG(not is_single(),"The property value must be in an interval in order to be refined.");
-    _refined = max(_lower,min(_upper,_refiner->apply(ratio,_refined)));
+    _refined = max(_lower,min(_upper, _refine_value(ratio)));
 }
 
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {

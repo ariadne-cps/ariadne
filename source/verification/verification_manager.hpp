@@ -35,7 +35,7 @@
 #include "concurrency/task_execution_ranking.hpp"
 #include "concurrency/task_ranking_space.hpp"
 #include "concurrency/concurrency_manager.hpp"
-#include "configuration/configuration_property_refinement_target.hpp"
+#include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
@@ -53,7 +53,7 @@ class VerificationManager {
 
     template<class R> void add_safety_specification(TaskRunnable<R>& runnable,
                                       Set<TaskRankingConstraint<R>> const& safety_constraints,
-                                      Set<ConfigurationPropertyRefinementTarget<R>> const& refinement_targets) const
+                                      Set<ConfigurationPropertyRefinement<R>> const& refinement_targets) const
     {
         auto appraisal_space = runnable.runner()->task().ranking_space();
         auto original_constraints = appraisal_space.constraints();
@@ -71,7 +71,7 @@ class VerificationManager {
 
         ConcurrencyManager::instance().choose_runner_for(runnable, new_cfg); // Re-chooses the runner
         runnable.runner()->task().set_ranking_space(builder.build());
-        runnable.runner()->task().set_configuration_refinement_targets(refinement_targets);
+        runnable.runner()->task().set_configuration_refinements(refinement_targets);
     }
 };
 

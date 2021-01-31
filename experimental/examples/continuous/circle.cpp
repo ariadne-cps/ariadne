@@ -60,13 +60,13 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
 
-    OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.5_x,DoublePrecision())),Dyadic(2));
+    OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.25_x,DoublePrecision())),Dyadic(2));
     auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
-    auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 1.5, RankingConstraintSeverity::CRITICAL);
-    auto refinement_target = ConfigurationPropertyRefinementTarget<E>(
-            ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65},ProportionalRefiner(-1e-2));
-    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement_target});
+    auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 1.25, RankingConstraintSeverity::CRITICAL);
+    auto refinement = ConfigurationPropertyRefinement<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
+                                                         {y_65},ProportionalRefiner(-1e-1));
+    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement});
 
     Real x0 = 0;
     Real y0 = 1;

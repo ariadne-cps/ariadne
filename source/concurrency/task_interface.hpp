@@ -48,7 +48,7 @@ template<class R> struct TaskObjective;
 template<class R> class TaskObjectiveMeasurer;
 template<class R> struct Task;
 template<class R> struct Configuration;
-template<class R> class ConfigurationPropertyRefinementTarget;
+template<class R> class ConfigurationPropertyRefinement;
 
 template<class R>
 class TaskInterface {
@@ -63,10 +63,10 @@ class TaskInterface {
     virtual TaskRankingSpace<R> const& ranking_space() const = 0;
     //! \brief Set the ranking space for the task
     virtual Void set_ranking_space(TaskRankingSpace<R> const& space) = 0;
-    //! \brief Return the configuration refinement rules
-    virtual Set<ConfigurationPropertyRefinementTarget<R>> const& configuration_refinement_targets() const = 0;
-    //! \brief Set the configuration refinement targets for the task
-    virtual Void set_configuration_refinement_targets(Set<ConfigurationPropertyRefinementTarget<R>> const& rules) = 0;
+    //! \brief Return the configuration refinements
+    virtual Set<ConfigurationPropertyRefinement<R>> const& configuration_refinements() const = 0;
+    //! \brief Set the configuration refinements for the task
+    virtual Void set_configuration_refinements(Set<ConfigurationPropertyRefinement<R>> const& refinements) = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;

@@ -35,7 +35,7 @@
 #include "task_objective_measurer.hpp"
 #include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "configuration/configuration_property_refinement_target.hpp"
+#include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
@@ -72,7 +72,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     ConfigurationType const& configuration() const override { return _configuration; }
 
     void refine_configuration(InputType const& input, OutputType const& output) override {
-        for (auto target : task().configuration_refinement_targets()) {
+        for (auto target : task().configuration_refinements()) {
             auto error_progress = _objective_measurer->get(input,output,target.objectives());
             _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),target.refiner(),error_progress.first,error_progress.second);
             auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(target.path()).get();

@@ -42,7 +42,7 @@ class ConfigurationPropertyRefinerInterface {
     virtual ~ConfigurationPropertyRefinerInterface() = default;
 };
 
-//! \brief Proportional control refiner: next = current*(1-G*amount) with G a gain constant
+//! \brief Proportional control refiner
 class ProportionalRefiner : public ConfigurationPropertyRefinerInterface {
   public:
     ProportionalRefiner(double Kp) : _Kp(Kp) { }
@@ -52,10 +52,12 @@ class ProportionalRefiner : public ConfigurationPropertyRefinerInterface {
     double _Kp;
 };
 
+//! \brief Proportional-Integrative-Derivative control refiner
 class PIDRefiner : public ConfigurationPropertyRefinerInterface {
   public:
     PIDRefiner(double Kp, double Ki, double Kd) : _Kp(Kp), _Ki(Ki), _Kd(Kd), _error_k_2(0), _error_k_1(0), _step_k_1(1e-20) { }
     double apply(double error_k, double step_k, double current) override {
+        if (error_k == std::numeric_limits<double>::min()) return std::numeric_limits<double>::max();
         auto result = current + (_Kp+_Ki*step_k+_Kd/step_k)*error_k - (_Kp+_Kd*(step_k+_step_k_1)/(step_k*_step_k_1))*_error_k_1 + _Kd/_step_k_1*_error_k_2;
         _error_k_2 = _error_k_1;
         _error_k_1 = error_k;

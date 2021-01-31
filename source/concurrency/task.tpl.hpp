@@ -34,7 +34,7 @@
 #include "../utility/string.hpp"
 #include "task_interface.hpp"
 #include "task_search_space.hpp"
-#include "configuration/configuration_property_refinement_target.hpp"
+#include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
@@ -59,16 +59,16 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     TaskRankingSpace<R> const& ranking_space() const override { return *_ranking_space; }
     Void set_ranking_space(TaskRankingSpace<R> const& space) override { _ranking_space.reset(space.clone()); }
 
-    Set<ConfigurationPropertyRefinementTarget<R>> const& configuration_refinement_targets() const override { return _configuration_refinement_targets; }
-    Void set_configuration_refinement_targets(Set<ConfigurationPropertyRefinementTarget<R>> const& rules) override {
-        _configuration_refinement_targets.clear(); _configuration_refinement_targets.adjoin(rules); }
+    Set<ConfigurationPropertyRefinement<R>> const& configuration_refinements() const override { return _configuration_refinements; }
+    Void set_configuration_refinements(Set<ConfigurationPropertyRefinement<R>> const& rules) override {
+        _configuration_refinements.clear(); _configuration_refinements.adjoin(rules); }
 
     Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _ranking_space->rank(data, input); }
 
   private:
     String const _name;
     SharedPointer<TaskRankingSpace<R>> _ranking_space;
-    Set<ConfigurationPropertyRefinementTarget<R>> _configuration_refinement_targets;
+    Set<ConfigurationPropertyRefinement<R>> _configuration_refinements;
 };
 
 } // namespace Ariadne

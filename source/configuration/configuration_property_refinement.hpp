@@ -1,5 +1,5 @@
 /***************************************************************************
- *            configuration/configuration_property_refinement_target.hpp
+ *            configuration/configuration_property_refinement.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file configuration/configuration_property_refinement_target.hpp
- *  \brief A set of objectives for refining a configuration based on a task result.
+/*! \file configuration/configuration_property_refinement.hpp
+ *  \brief The information for refining a configuration based on a task result.
  */
 
-#ifndef ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_TARGET_HPP
-#define ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_TARGET_HPP
+#ifndef ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_HPP
+#define ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_HPP
 
 #include <functional>
 #include "configurable.hpp"
@@ -40,15 +40,15 @@ template<class R> struct TaskOutput;
 
 enum class OptimisationCriterion;
 
-//! \brief A set of objectives for refinement of a property.
+//! \brief The information for refinement of a property.
 //! \details
-template<class R> class ConfigurationPropertyRefinementTarget {
+template<class R> class ConfigurationPropertyRefinement {
   public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
     typedef TaskObjective<R> ObjectiveType;
 
-    ConfigurationPropertyRefinementTarget(ConfigurationPropertyPath const& path, List<ObjectiveType> const& objectives, ConfigurationPropertyRefinerInterface const& refiner)
+    ConfigurationPropertyRefinement(ConfigurationPropertyPath const& path, List<ObjectiveType> const& objectives, ConfigurationPropertyRefinerInterface const& refiner)
         : _path(path), _objectives(objectives), _refiner(refiner.clone()) { }
     ConfigurationPropertyPath const& path() const { return _path; }
     List<ObjectiveType> const& objectives() const { return _objectives; }
@@ -57,7 +57,7 @@ template<class R> class ConfigurationPropertyRefinementTarget {
 
     //! \brief Comparison for set appending
     //! \details Only one rule for a specific property is expected to be used.
-    Bool operator<(ConfigurationPropertyRefinementTarget<R> const& r) const { return _path < r._path; }
+    Bool operator<(ConfigurationPropertyRefinement<R> const& r) const { return _path < r._path; }
   private:
     ConfigurationPropertyPath const _path;
     List<ObjectiveType> const _objectives;
@@ -67,4 +67,4 @@ template<class R> class ConfigurationPropertyRefinementTarget {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_TARGET_HPP
+#endif // ARIADNE_CONFIGURATION_PROPERTY_REFINEMENT_HPP

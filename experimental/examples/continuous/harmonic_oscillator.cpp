@@ -1,5 +1,5 @@
 /***************************************************************************
- *            circle.cpp
+ *            harmonic_oscillator.cpp
  *
  *  Copyright  2017-20  Luca Geretti
  *
@@ -34,7 +34,7 @@ int main(int argc, const char* argv[])
     ConcurrencyManager::instance().set_concurrency(4);
     Logger::instance().use_blocking_scheduler();
 
-    ARIADNE_LOG_PRINTLN("Circular behavior");
+    ARIADNE_LOG_PRINTLN("Harmonic Oscillator");
 
     RealConstant f("f",1);
     RealVariable x("x"), y("y");
@@ -97,16 +97,16 @@ int main(int argc, const char* argv[])
         LabelledFigure fig({-2.0<=x<=2.0,-2<=y<=2});
         fig << fill_colour(1.0,0.75,0.5);
         fig.draw(orbit.reach());
-        fig.write("circle-xy");
+        fig.write("harmonic-xy");
         LabelledFigure fig2({0<=TimeVariable()<=2.5_dec,-2.0<=y<=2.0});
         fig2 << fill_colour(1.0,0.75,0.5);
         fig2.draw(orbit.reach());
-        fig2.write("circle-ty");
+        fig2.write("harmonic-ty");
         LabelledFigure fig3({0<=TimeVariable()<=2.5_dec,-2.0<=x<=2.0});
         fig3 << fill_colour(1.0,0.75,0.5);
         fig3.draw(orbit.reach());
-        fig3.write("circle-tx");
-    } catch (CriticalRankingFailureException& ex) {
+        fig3.write("harmonic-tx");
+    } catch (CriticalRankingFailureException<E>& ex) {
         ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
     }
 }

@@ -36,11 +36,12 @@ namespace Ariadne {
 
 typedef double ScoreType;
 
+template<class R> class TaskRankingConstraint;
 class TaskExecutionRanking;
 
-class CriticalRankingFailureException : public std::runtime_error {
+template<class R> class CriticalRankingFailureException : public std::runtime_error {
 public:
-    CriticalRankingFailureException(Set<TaskExecutionRanking> const& rankings) : std::runtime_error("All ranked points have critical failures: " + to_string(rankings)) { }
+    CriticalRankingFailureException(Set<TaskRankingConstraint<R>> const& constraints) : std::runtime_error("The execution has critical failures for these constraints: " + to_string(constraints)) { }
 };
 
 //! \brief Enumeration for the severity of the constraint
@@ -61,8 +62,7 @@ inline std::ostream& operator<<(std::ostream& os, const RankingConstraintSeverit
 //! \brief Constraint for task ranking
 //! \details The predicate depends on the MINIMISE/MAXIMISE character of the ranking parameter:
 //! if MINIMISE, then the cost value must be lower than the threshold, if MAXIMISE it must be higher
-template<class R>
-class TaskRankingConstraint : public WritableInterface {
+template<class R> class TaskRankingConstraint : public WritableInterface {
   public:
     TaskRankingConstraint(TaskRankingParameter<R> const& parameter) : _parameter(parameter), _threshold(ScoreType(0)), _severity(RankingConstraintSeverity::NONE) { }
     TaskRankingConstraint(TaskRankingParameter<R> const& parameter, ScoreType threshold, RankingConstraintSeverity severity) : _parameter(parameter), _threshold(threshold), _severity(severity) {

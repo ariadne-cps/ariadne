@@ -98,7 +98,7 @@ int main(int argc, const char* argv[])
         fig << fill_colour(1.0,0.75,0.5);
         fig.draw(orbit.reach());
         fig.write("vanderpol");
-    } catch (CriticalRankingFailureException& ex) {
+    } catch (CriticalRankingFailureException<VectorFieldEvolver>& ex) {
         ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
     }
 }

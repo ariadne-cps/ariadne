@@ -1,5 +1,5 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
-    circle
+    harmonic_oscillator
     laub-loomis-nonoise
 	lotka-volterra-nonoise
 	higgins-selkov-nonoise

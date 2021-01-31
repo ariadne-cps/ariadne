@@ -100,6 +100,8 @@ template<class C> void SequentialRunner<C>::dump_statistics() {
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
     OutputType result = this->_task->run_task(input,this->configuration());
+    auto failed_constraints = this->_task->ranking_space().failed_critical_constraints(input,result);
+    if (not failed_constraints.empty()) throw CriticalRankingFailureException<C>(failed_constraints);
     this->refine_configuration(input,result);
     _last_output.reset(new OutputType(result));
 }
@@ -125,7 +127,7 @@ template<class C> DetachedRunner<C>::DetachedRunner(ConfigurationType const& con
         : TaskRunnerBase<C>(configuration),
           _thread(this->_task->name(), [this]() { _loop(); }),
           _input_buffer(InputBufferType(1)),_output_buffer(OutputBufferType(1)),
-          _active(false), _terminate(false) { }
+          _last_used_input(1), _active(false), _terminate(false) { }
 
 template<class C> DetachedRunner<C>::~DetachedRunner() {
     _terminate = true;
@@ -143,13 +145,17 @@ template<class C> void DetachedRunner<C>::push(InputType const& input) {
         _thread.activate();
     }
     _input_buffer.push(input);
+    _last_used_input.push(input);
     _input_availability.notify_all();
 }
 
 template<class C> auto DetachedRunner<C>::pull() -> OutputType {
     std::unique_lock<std::mutex> locker(_output_mutex);
     _output_availability.wait(locker, [this]() { return _output_buffer.size()>0; });
-    return _output_buffer.pop();
+    auto result = _output_buffer.pop();
+    auto failed_constraints = this->_task->ranking_space().failed_critical_constraints(_last_used_input.pop(),result);
+    if (not failed_constraints.empty()) throw CriticalRankingFailureException<C>(failed_constraints);
+    return result;
 }
 
 template<class O> class ParameterSearchOutputBufferData {
@@ -259,7 +265,7 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
 
     auto best = rankings.rbegin()->point();
     if (rankings.rbegin()->critical_failures() > 0)
-        throw CriticalRankingFailureException(rankings);
+        throw CriticalRankingFailureException<C>(this->_task->ranking_space().failed_critical_constraints(input,outputs.get(best).first));
     _best_points.push_back(*rankings.rbegin());
     auto best_output = outputs.get(best).first;
 

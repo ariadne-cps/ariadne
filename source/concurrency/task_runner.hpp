@@ -84,6 +84,7 @@ private:
     LoggableSmartThread _thread;
     InputBufferType _input_buffer;
     OutputBufferType _output_buffer;
+    Buffer<InputType> _last_used_input;
     std::atomic<bool> _active;
     std::atomic<bool> _terminate;
     std::mutex _input_mutex;

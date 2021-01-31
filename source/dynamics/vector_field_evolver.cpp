@@ -208,15 +208,14 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<std::left<<working_sets.size()+1
                                  <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
                                  <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
-                                 <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
-                                 <<" r="<<std::setw(7)<<current_set_model.radius()
-                                 <<" w="<<std::setw(7)<<current_set_model.bounding_box().euclidean_set().widths()
+                                 <<" p="<<std::setw(3)<<std::left<<current_set_model.number_of_parameters()
+                                 <<" r="<<std::setw(6)<<current_set_model.radius()
+                                 <<" ri="<<current_set_model.bounding_box().euclidean_set().radii()
                                  <<" c="<<current_set_model.centre());
 
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(semantics == Semantics::UPPER && configuration().enable_subdivisions()
-                  && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::UPPER && configuration().enable_subdivisions() && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
             for(SizeType i=0; i!=subdivisions.size(); ++i) {
@@ -226,11 +225,7 @@ _evolution(EnclosureListType& final_sets,
         } else if(semantics == Semantics::LOWER && configuration().enable_premature_termination() && decide(current_set_radius>configuration().maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
-            // Compute evolution
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  current_timed_set,previous_step_size,maximum_time,
-                                  semantics,reach);
+            this->_evolution_step(working_sets,final_sets,reach_sets,intermediate_sets, current_timed_set,previous_step_size,maximum_time, semantics,reach);
         }
 
         initials_indicator.update_current(final_sets.size());

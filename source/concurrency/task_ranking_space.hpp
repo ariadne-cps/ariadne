@@ -83,8 +83,28 @@ class TaskRankingSpace : public WritableInterface {
 
     virtual OutputStream& _write(OutputStream& os) const { os << _parameters_weights; return os; }
 
-    Set<TaskExecutionRanking>
-    rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
+    Bool has_critical_constraints() const {
+        for (auto c : _constraints) if (c.severity() == RankingConstraintSeverity::CRITICAL) return true;
+        return false;
+    }
+
+    Set<TaskRankingConstraint<R>> failed_critical_constraints(InputType const& input, OutputType const& output) const {
+        Set<TaskRankingConstraint<R>> result;
+        for (auto c : _constraints) {
+            if (c.severity() == RankingConstraintSeverity::CRITICAL) {
+                auto const& p = c.parameter();
+                auto rank = p.rank(input,output,DurationType(0));
+                auto threshold = c.threshold();
+                if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
+                    (p.optimisation() == OptimisationCriterion::MAXIMISE and rank < threshold)) {
+                    result.insert(c);
+                }
+            }
+        }
+        return result;
+    }
+
+    Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
         typedef TaskRankingParameter<R> ParamType;
         Set<TaskExecutionRanking> result;
 

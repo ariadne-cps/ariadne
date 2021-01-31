@@ -210,6 +210,7 @@ _evolution(EnclosureListType& final_sets,
                                  <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                                  <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
                                  <<" r="<<std::setw(7)<<current_set_model.radius()
+                                 <<" w="<<std::setw(7)<<current_set_model.bounding_box().euclidean_set().widths()
                                  <<" c="<<current_set_model.centre());
 
         if(definitely(current_time>=maximum_time)) {

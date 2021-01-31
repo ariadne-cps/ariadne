@@ -154,16 +154,6 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
         add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
     }
 
-    Configuration(IntegratorInterface const& integrator) {
-        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
-        add_property("enable_reconditioning",BooleanConfigurationProperty(false));
-        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
-        add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(integrator));
-        add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
-        add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));
-    }
-
     //! \brief Enable premature termination of lower evolution
     Bool const& enable_premature_termination() const { return at<BooleanConfigurationProperty>("enable_premature_termination").get(); }
     C& set_enable_premature_termination(Bool const& value) { at<BooleanConfigurationProperty>("enable_premature_termination").set(value); return *this; }
@@ -225,7 +215,7 @@ template<> struct TaskObjective<VectorFieldEvolver> {
     Dyadic const time;
 };
 
-template<> class TaskObjectiveMeasurer<VectorFieldEvolver> : public TaskObjectiveMeasurerBase<VectorFieldEvolver> {
+template<> class TaskObjectiveMeasurer<VectorFieldEvolver> final : public TaskObjectiveMeasurerBase<VectorFieldEvolver> {
     typedef typename TaskObjectiveMeasurerInterface::ErrorType ErrorType;
     typedef typename TaskObjectiveMeasurerInterface::ProgressType ProgressType;
     typedef typename TaskObjectiveMeasurerInterface::InputType InputType;

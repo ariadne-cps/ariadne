@@ -55,7 +55,7 @@ int main(int argc, const char* argv[])
 
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef TaskObjective<E> OBJ;
 
-    E evolver(system,Configuration<E>(integrator));
+    E evolver(system,Configuration<E>().set_integrator(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 

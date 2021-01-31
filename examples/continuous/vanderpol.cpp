@@ -45,20 +45,18 @@ int main(int argc, const char* argv[])
     auto sweeper1 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
     auto sweeper2 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/100);
     auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err);
-    auto integrator_configuration = Configuration<TaylorPicardIntegrator>()
-            .set_step_maximum_error(1e-6,1e-4)
-            .set_maximum_temporal_order(8,15)
-            .set_starting_step_size_num_refinements(0,5)
-            .set_sweeper({sweeper1,sweeper2,sweeper3});
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
-    TaylorPicardIntegrator integrator(integrator_configuration);
+
+    TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                          .set_step_maximum_error(1e-6,1e-4)
+                                          .set_maximum_temporal_order(8,15)
+                                          .set_starting_step_size_num_refinements(0,5)
+                                          .set_sweeper({sweeper1,sweeper2,sweeper3})
+                                          );
 
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef TaskObjective<E> OBJ;
 
-    E evolver(system,Configuration<E>(integrator).set_maximum_step_size(0.01,1.0));
+    E evolver(system,Configuration<E>().set_integrator(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
-    ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
-
 
     OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.079_x,DoublePrecision())),Dyadic(6.5_x));
     auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {

@@ -35,13 +35,12 @@
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "symbolic/identifier.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/real.hpp"
-#include "configuration.hpp"
+#include "configuration_interface.hpp"
 #include "configuration_property_interface.hpp"
 #include "configuration_property_refiner.hpp"
-#include "concurrency/search_space_converter.hpp"
+#include "configuration_search_space_converter.hpp"
 
 namespace Ariadne {
 
@@ -100,9 +99,9 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 //! Also, this property when not set to a single value can be refined by using a refiner.
 template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
-    RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
-    RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
-    RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
+    RangeConfigurationProperty(ConfigurationSearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
+    RangeConfigurationProperty(T const& lower, T const& upper, ConfigurationSearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
+    RangeConfigurationProperty(T const& value, ConfigurationSearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
 
     Bool is_single() const override;
     Bool is_metric(ConfigurationPropertyPath const& path) const override;
@@ -135,7 +134,7 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     T _upper;
     T _refined;
     Bool _is_refined;
-    SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
+    SharedPointer<ConfigurationSearchSpaceConverterInterface<T>> const _converter;
 };
 
 //! \brief A property that specifies distinct values from an enum

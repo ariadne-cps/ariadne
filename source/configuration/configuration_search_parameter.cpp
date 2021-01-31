@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter.cpp
+ *            configuration/configuration_search_parameter.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,32 +22,32 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "concurrency/task_search_parameter.hpp"
+#include "configuration_search_parameter.hpp"
 
 namespace Ariadne {
 
-TaskSearchParameter::TaskSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values) :
+ConfigurationSearchParameter::ConfigurationSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values) :
     _path(path), _is_metric(is_metric), _values(values) {
     ARIADNE_PRECONDITION(values.size()>1);
 }
 
-ConfigurationPropertyPath const& TaskSearchParameter::path() const {
+ConfigurationPropertyPath const& ConfigurationSearchParameter::path() const {
     return _path;
 }
 
-List<int> const& TaskSearchParameter::values() const {
+List<int> const& ConfigurationSearchParameter::values() const {
     return _values;
 }
 
-Bool TaskSearchParameter::is_metric() const {
+Bool ConfigurationSearchParameter::is_metric() const {
     return _is_metric;
 }
 
-int TaskSearchParameter::random_value() const {
+int ConfigurationSearchParameter::random_value() const {
     return _values[(SizeType)rand() % _values.size()];
 }
 
-int TaskSearchParameter::shifted_value_from(int value) const {
+int ConfigurationSearchParameter::shifted_value_from(int value) const {
     SizeType num_values = _values.size();
     if (_is_metric) {
         if (value == _values[0]) return value+1;
@@ -61,15 +61,15 @@ int TaskSearchParameter::shifted_value_from(int value) const {
     }
 }
 
-Bool TaskSearchParameter::operator==(TaskSearchParameter const& p) const {
+Bool ConfigurationSearchParameter::operator==(ConfigurationSearchParameter const& p) const {
     return path() == p.path();
 }
 
-Bool TaskSearchParameter::operator<(TaskSearchParameter const& p) const {
+Bool ConfigurationSearchParameter::operator<(ConfigurationSearchParameter const& p) const {
     return path() < p.path();
 }
 
-OutputStream& TaskSearchParameter::_write(OutputStream& os) const {
+OutputStream& ConfigurationSearchParameter::_write(OutputStream& os) const {
     os << "{'" << path() << "', is_metric=" << _is_metric << ", values=";
     if (_is_metric) os << "[" << _values[0] << ":" << _values[_values.size()-1] << "]";
     else os << _values;

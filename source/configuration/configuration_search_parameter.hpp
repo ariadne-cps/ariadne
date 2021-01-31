@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_search_parameter.hpp
+ *            configuration/configuration_search_parameter.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,26 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_search_parameter.hpp
- *  \brief Classes for handling tool search parameters for a task.
+/*! \file configuration/configuration_search_parameter.hpp
+ *  \brief Classes for handling configuration search parameters.
  */
 
-#ifndef ARIADNE_TASK_SEARCH_PARAMETER_HPP
-#define ARIADNE_TASK_SEARCH_PARAMETER_HPP
+#ifndef ARIADNE_CONFIGURATION_SEARCH_PARAMETER_HPP
+#define ARIADNE_CONFIGURATION_SEARCH_PARAMETER_HPP
 
 #include "utility/typedefs.hpp"
 #include "utility/container.hpp"
 #include "utility/string.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
-#include "symbolic/identifier.hpp"
+#include "utility/identifier.hpp"
 #include "configuration/configuration_property_path.hpp"
 
 namespace Ariadne {
 
-class TaskSearchParameter : public WritableInterface {
+class ConfigurationSearchParameter : public WritableInterface {
   public:
-    TaskSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values);
+    ConfigurationSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values);
     ConfigurationPropertyPath const& path() const;
     //! \brief Admissible values
     List<int> const& values() const;
@@ -52,8 +52,8 @@ class TaskSearchParameter : public WritableInterface {
     //! \brief Randomly get the result from shifting the given \a value
     int shifted_value_from(int value) const;
 
-    Bool operator==(TaskSearchParameter const& p) const;
-    Bool operator<(TaskSearchParameter const& p) const;
+    Bool operator==(ConfigurationSearchParameter const& p) const;
+    Bool operator<(ConfigurationSearchParameter const& p) const;
 
     OutputStream& _write(OutputStream& os) const override;
 
@@ -65,4 +65,4 @@ class TaskSearchParameter : public WritableInterface {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TASK_SEARCH_PARAMETER_HPP
+#endif // ARIADNE_CONFIGURATION_SEARCH_PARAMETER_HPP

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_parameter_space.cpp
+ *            configuration/configuration_search_space.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -23,68 +23,68 @@
  */
 
 #include "configuration/configuration_property_path.hpp"
-#include "concurrency/task_search_point.hpp"
-#include "concurrency/task_search_space.hpp"
+#include "configuration_search_point.hpp"
+#include "configuration_search_space.hpp"
 
 namespace Ariadne {
 
-TaskSearchSpace::TaskSearchSpace(Set<TaskSearchParameter> const& parameters)
+ConfigurationSearchSpace::ConfigurationSearchSpace(Set<ConfigurationSearchParameter> const& parameters)
         : _parameters(parameters) {
     ARIADNE_PRECONDITION(not _parameters.empty());
 }
 
-TaskSearchPoint TaskSearchSpace::make_point(ParameterBindingsMap const& bindings) const {
+ConfigurationSearchPoint ConfigurationSearchSpace::make_point(ParameterBindingsMap const& bindings) const {
     ARIADNE_PRECONDITION(bindings.size() == this->dimension())
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
         int v = bindings.find(p.path())->second;
         pb.insert(Pair<ConfigurationPropertyPath,int>(p.path(), v));
     }
-    return TaskSearchPoint(*this, pb);
+    return ConfigurationSearchPoint(*this, pb);
 }
 
-TaskSearchPoint TaskSearchSpace::initial_point() const {
+ConfigurationSearchPoint ConfigurationSearchSpace::initial_point() const {
     ParameterBindingsMap pb;
     for (auto p : _parameters) {
         pb.insert(Pair<ConfigurationPropertyPath,int>(p.path(), p.random_value()));
     }
-    return TaskSearchPoint(*this, pb);
+    return ConfigurationSearchPoint(*this, pb);
 }
 
-SizeType TaskSearchSpace::index(TaskSearchParameter const& p) const {
+SizeType ConfigurationSearchSpace::index(ConfigurationSearchParameter const& p) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i) == p) return i;
     ARIADNE_FAIL_MSG("Task parameter '" << p << "' not found in the space.");
 }
 
-SizeType TaskSearchSpace::index(ConfigurationPropertyPath const& path) const {
+SizeType ConfigurationSearchSpace::index(ConfigurationPropertyPath const& path) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).path() == path) return i;
     ARIADNE_FAIL_MSG("Task parameter with path '" << path << "' not found in the space.");
 }
 
-TaskSearchParameter const& TaskSearchSpace::parameter(ConfigurationPropertyPath const& path) const {
+ConfigurationSearchParameter const& ConfigurationSearchSpace::parameter(ConfigurationPropertyPath const& path) const {
     for (SizeType i=0; i<_parameters.size(); ++i) if (_parameters.at(i).path() == path) return _parameters.at(i);
     ARIADNE_FAIL_MSG("Task parameter with path '" << path << "' not found in the space.");
 }
 
-List<TaskSearchParameter> const& TaskSearchSpace::parameters() const {
+List<ConfigurationSearchParameter> const& ConfigurationSearchSpace::parameters() const {
     return _parameters;
 }
 
-SizeType TaskSearchSpace::total_points() const {
+SizeType ConfigurationSearchSpace::total_points() const {
     SizeType result = 1;
     for (auto p : _parameters) result *= p.values().size();
     return result;
 }
 
-SizeType TaskSearchSpace::dimension() const {
+SizeType ConfigurationSearchSpace::dimension() const {
     return _parameters.size();
 }
 
-TaskSearchSpace* TaskSearchSpace::clone() const {
-    return new TaskSearchSpace(*this);
+ConfigurationSearchSpace* ConfigurationSearchSpace::clone() const {
+    return new ConfigurationSearchSpace(*this);
 }
 
-OutputStream& TaskSearchSpace::_write(OutputStream& os) const {
+OutputStream& ConfigurationSearchSpace::_write(OutputStream& os) const {
     return os << _parameters;
 }
 

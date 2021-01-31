@@ -29,7 +29,7 @@
 #ifndef ARIADNE_TASK_EXECUTION_RANKING_HPP
 #define ARIADNE_TASK_EXECUTION_RANKING_HPP
 
-#include "../concurrency/task_search_point.hpp"
+#include "configuration/configuration_search_point.hpp"
 #include "../concurrency/task_ranking_parameter.hpp"
 
 namespace Ariadne {
@@ -94,8 +94,8 @@ template<class R> class TaskRankingConstraint : public WritableInterface {
 
 class TaskExecutionRanking : public WritableInterface {
 public:
-    TaskExecutionRanking(TaskSearchPoint const& p, ScoreType const& s, SizeType const& permissive_failures, SizeType const& critical_failures);
-    TaskSearchPoint const& point() const;
+    TaskExecutionRanking(ConfigurationSearchPoint const& p, ScoreType const& s, SizeType const& permissive_failures, SizeType const& critical_failures);
+    ConfigurationSearchPoint const& point() const;
     ScoreType const& score() const;
     SizeType const& permissive_failures() const;
     SizeType const& critical_failures() const;
@@ -104,7 +104,7 @@ public:
 
     virtual OutputStream& _write(OutputStream& os) const;
 private:
-    TaskSearchPoint _point;
+    ConfigurationSearchPoint _point;
     ScoreType _cost;
     SizeType _permissive_failures;
     SizeType _critical_failures;

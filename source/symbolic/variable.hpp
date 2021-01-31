@@ -42,7 +42,7 @@
 #include "../numeric/logical.decl.hpp"
 #include "../numeric/number.decl.hpp"
 #include "../symbolic/expression.decl.hpp"
-#include "../symbolic/identifier.hpp"
+#include "utility/identifier.hpp"
 #include "../symbolic/operations.hpp"
 
 namespace Ariadne {

@@ -167,6 +167,7 @@ endif()
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-configuration>
     $<TARGET_OBJECTS:ariadne-algebra>
     source/geometry/interval.cpp
 )
@@ -174,10 +175,10 @@ add_library(ariadne-core SHARED
 add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-configuration>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-configuration>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>
@@ -187,10 +188,10 @@ add_library(ariadne-kernel SHARED
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-configuration>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-configuration>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>

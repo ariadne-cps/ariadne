@@ -104,7 +104,7 @@ class TaskRankingSpace : public WritableInterface {
         return result;
     }
 
-    Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
+    Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
         typedef TaskRankingParameter<R> ParamType;
         Set<TaskExecutionRanking> result;
 

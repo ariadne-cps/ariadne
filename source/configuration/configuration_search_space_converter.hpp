@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/search_space_converter.hpp
+ *            configuration/search_space_converter.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,17 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/search_space_converter.hpp
- *  \brief Classes for converting data from/to the interger search space.
+/*! \file configuration/configuration_search_space_converter.hpp
+ *  \brief Classes for converting configuration property data from/to the integer search space.
  */
 
-#ifndef ARIADNE_SEARCH_SPACE_CONVERTER_HPP
-#define ARIADNE_SEARCH_SPACE_CONVERTER_HPP
+#ifndef ARIADNE_CONFIGURATION_SEARCH_SPACE_CONVERTER_HPP
+#define ARIADNE_CONFIGURATION_SEARCH_SPACE_CONVERTER_HPP
 
 namespace Ariadne {
 
 //! \brief Interface for conversion from/into the integer search space
-template<class T> struct SearchSpaceConverterInterface {
+template<class T> struct ConfigurationSearchSpaceConverterInterface {
     //! \brief Convert the \a value into an integer value
     virtual int to_int(T const& value) const = 0;
     //! \brief Convert the \a value into a double value
@@ -42,11 +42,11 @@ template<class T> struct SearchSpaceConverterInterface {
     //! \brief Convert from a double into the original value
     virtual T from_double(double value) const = 0;
 
-    virtual SearchSpaceConverterInterface* clone() const = 0;
-    virtual ~SearchSpaceConverterInterface() = default;
+    virtual ConfigurationSearchSpaceConverterInterface* clone() const = 0;
+    virtual ~ConfigurationSearchSpaceConverterInterface() = default;
 };
 
-template<class T> struct SearchSpaceConverterBase : public SearchSpaceConverterInterface<T> {
+template<class T> struct SearchSpaceConverterBase : public ConfigurationSearchSpaceConverterInterface<T> {
   public:
     T from_int(int i) const override final { return this->from_double(i); }
 };
@@ -65,7 +65,7 @@ template<> struct Log10SearchSpaceConverter<ExactDouble> : SearchSpaceConverterB
         else if (value == -inf) return std::numeric_limits<double>::min();
         else return log(value.get_d())/log(10.0); }
     ExactDouble from_double(double value) const override { return ExactDouble(exp(log(10.0)*value)); }
-    SearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
 };
 
 template<> struct Log2SearchSpaceConverter<ExactDouble> : SearchSpaceConverterBase<ExactDouble> {
@@ -78,7 +78,7 @@ template<> struct Log2SearchSpaceConverter<ExactDouble> : SearchSpaceConverterBa
         else if (value == -inf) return std::numeric_limits<double>::min();
         return log(value.get_d())/log(2.0); }
     ExactDouble from_double(double value) const override { return ExactDouble(exp(log(2.0)*value)); }
-    SearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new Log2SearchSpaceConverter(*this); }
 };
 
 template<> struct LinearSearchSpaceConverter<ExactDouble> : SearchSpaceConverterBase<ExactDouble> {
@@ -88,23 +88,23 @@ template<> struct LinearSearchSpaceConverter<ExactDouble> : SearchSpaceConverter
         return round(value).get<int>(); }
     double to_double(ExactDouble const& value) const override { return value.get_d(); }
     ExactDouble from_double(double value) const override { return ExactDouble(value); }
-    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
 template<> struct LinearSearchSpaceConverter<int> : SearchSpaceConverterBase<int> {
     int to_int(int const& value) const override { return value; }
     double to_double(int const& value) const override { return value; }
     int from_double(double i) const override { return std::round(i); }
-    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
 template<> struct LinearSearchSpaceConverter<DegreeType> : SearchSpaceConverterBase<DegreeType> {
     int to_int(DegreeType const& value) const override { return value; }
     double to_double(DegreeType const& value) const override { return value; }
     DegreeType from_double(double i) const override { return DegreeType(i); }
-    SearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new LinearSearchSpaceConverter(*this); }
 };
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SEARCH_SPACE_CONVERTER_HPP
+#endif // ARIADNE_CONFIGURATION_SEARCH_SPACE_CONVERTER_HPP

@@ -32,8 +32,8 @@
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
 #include "utility/randomiser.hpp"
-#include "symbolic/identifier.hpp"
-#include "configuration.hpp"
+#include "utility/identifier.hpp"
+#include "configuration_interface.hpp"
 #include "configuration_property.hpp"
 #include "configuration_property_path.hpp"
 #include "searchable_configuration.hpp"
@@ -71,17 +71,17 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
     return os;
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(ConfigurationSearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) { }
+        _converter(SharedPointer<ConfigurationSearchSpaceConverterInterface<T>>(converter.clone())) { }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, ConfigurationSearchSpaceConverterInterface<T> const& converter) :
         ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
-        _converter(SharedPointer<SearchSpaceConverterInterface<T>>(converter.clone())) {
+        _converter(SharedPointer<ConfigurationSearchSpaceConverterInterface<T>>(converter.clone())) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
 
-template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value, SearchSpaceConverterInterface<T> const& converter) :
+template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& value, ConfigurationSearchSpaceConverterInterface<T> const& converter) :
                 RangeConfigurationProperty(value,value,converter) { }
 
 template<class T> T const& RangeConfigurationProperty<T>::get() const {

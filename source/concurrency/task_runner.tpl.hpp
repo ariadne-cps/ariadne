@@ -147,7 +147,7 @@ template<class C> auto DetachedRunner<C>::pull() -> OutputType {
 
 template<class O> class ParameterSearchOutputBufferData {
   public:
-    ParameterSearchOutputBufferData(O const& output, DurationType const& execution_time, TaskSearchPoint const& point) : _output(output), _execution_time(execution_time), _point(point) { }
+    ParameterSearchOutputBufferData(O const& output, DurationType const& execution_time, ConfigurationSearchPoint const& point) : _output(output), _execution_time(execution_time), _point(point) { }
     ParameterSearchOutputBufferData(ParameterSearchOutputBufferData<O> const& p) : _output(p._output), _execution_time(p._execution_time), _point(p._point) { }
     ParameterSearchOutputBufferData& operator=(ParameterSearchOutputBufferData<O> const& p) {
         _output = p._output;
@@ -157,11 +157,11 @@ template<class O> class ParameterSearchOutputBufferData {
     };
     O const& output() const { return _output; }
     DurationType const& execution_time() const { return _execution_time; }
-    TaskSearchPoint const& point() const { return _point; }
+    ConfigurationSearchPoint const& point() const { return _point; }
   private:
     O _output;
     DurationType _execution_time;
-    TaskSearchPoint _point;
+    ConfigurationSearchPoint _point;
 };
 
 template<class C> void ParameterSearchRunner<C>::_loop() {
@@ -223,16 +223,16 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     _failures=0;
 
     InputType input = _last_used_input.pop();
-    Map<TaskSearchPoint,Pair<OutputType,DurationType>> outputs;
+    Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> outputs;
     while (_output_buffer.size() > 0) {
         auto io_data = _output_buffer.pop();
-        outputs.insert(Pair<TaskSearchPoint,Pair<OutputType,DurationType>>(
+        outputs.insert(Pair<ConfigurationSearchPoint,Pair<OutputType,DurationType>>(
                 io_data.point(),{io_data.output(),io_data.execution_time()}));
     }
     auto rankings = this->_task->rank(outputs,input);
     ARIADNE_LOG_PRINTLN_VAR(rankings);
 
-    Set<TaskSearchPoint> new_points;
+    Set<ConfigurationSearchPoint> new_points;
     SizeType cnt = 0;
     for (auto it = rankings.rbegin(); it != rankings.rend(); ++it) {
         new_points.insert(it->point());

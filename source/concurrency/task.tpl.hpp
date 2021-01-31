@@ -33,14 +33,14 @@
 #include "../utility/pointer.hpp"
 #include "../utility/string.hpp"
 #include "task_interface.hpp"
-#include "task_search_space.hpp"
+#include "configuration/configuration_search_space.hpp"
 #include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
-class TaskSearchPoint;
+class ConfigurationSearchPoint;
 class TaskExecutionRanking;
-class TaskSearchSpace;
+class ConfigurationSearchSpace;
 template<class R> class TaskRankingSpace;
 
 //! \brief The base for parameter search tasks
@@ -63,7 +63,7 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     Void set_configuration_refinements(Set<ConfigurationPropertyRefinement<R>> const& rules) override {
         _configuration_refinements.clear(); _configuration_refinements.adjoin(rules); }
 
-    Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _ranking_space->rank(data, input); }
+    Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const override { return _ranking_space->rank(data, input); }
 
   private:
     String const _name;

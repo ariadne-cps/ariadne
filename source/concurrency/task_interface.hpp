@@ -35,9 +35,9 @@
 
 namespace Ariadne {
 
-class TaskSearchPoint;
+class ConfigurationSearchPoint;
 class TaskExecutionRanking;
-class TaskSearchSpace;
+class ConfigurationSearchSpace;
 template<class R> class TaskRankingSpace;
 
 typedef std::chrono::microseconds DurationType;
@@ -71,7 +71,7 @@ class TaskInterface {
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
     virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
-    virtual Set<TaskExecutionRanking> rank(Map<TaskSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
+    virtual Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
 };
 
 } // namespace Ariadne

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_search_space.hpp
+ *            configuration/configuration_search_space.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,52 +22,52 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_search_space.hpp
- *  \brief Class for handling a search space of parameters for a task.
+/*! \file configuration/configuration_search_space.hpp
+ *  \brief Class for handling a search space of configuration properties.
  */
 
-#ifndef ARIADNE_TASK_SEARCH_SPACE_HPP
-#define ARIADNE_TASK_SEARCH_SPACE_HPP
+#ifndef ARIADNE_CONFIGURATION_SEARCH_SPACE_HPP
+#define ARIADNE_CONFIGURATION_SEARCH_SPACE_HPP
 
-#include "../utility/writable.hpp"
-#include "../concurrency/task_search_parameter.hpp"
+#include "utility/writable.hpp"
+#include "configuration_search_parameter.hpp"
 
 namespace Ariadne {
 
-class TaskSearchPoint;
+class ConfigurationSearchPoint;
 class Real;
 template<class R> class Variable;
 
 using ParameterBindingsMap = Map<ConfigurationPropertyPath,int>;
 
-class TaskSearchSpace : public WritableInterface {
+class ConfigurationSearchSpace : public WritableInterface {
   public:
-    TaskSearchSpace(Set<TaskSearchParameter> const& parameters);
+    ConfigurationSearchSpace(Set<ConfigurationSearchParameter> const& parameters);
 
-    TaskSearchPoint make_point(ParameterBindingsMap const& bindings) const;
-    TaskSearchPoint initial_point() const;
+    ConfigurationSearchPoint make_point(ParameterBindingsMap const& bindings) const;
+    ConfigurationSearchPoint initial_point() const;
 
-    List<TaskSearchParameter> const& parameters() const;
+    List<ConfigurationSearchParameter> const& parameters() const;
 
     //! \brief The total number of points identified by the space
     SizeType total_points() const;
     //! \brief The number of parameters in the space
     SizeType dimension() const;
     //! \brief The index of the given parameter in the ordered space
-    SizeType index(TaskSearchParameter const& p) const;
+    SizeType index(ConfigurationSearchParameter const& p) const;
     //! \brief The index of the given parameter identifier in the ordered space
     SizeType index(ConfigurationPropertyPath const& name) const;
     //! \brief The parameter corresponding to the path \a path
-    TaskSearchParameter const& parameter(ConfigurationPropertyPath const& path) const;
+    ConfigurationSearchParameter const& parameter(ConfigurationPropertyPath const& path) const;
 
-    TaskSearchSpace* clone() const;
+    ConfigurationSearchSpace* clone() const;
 
     virtual OutputStream& _write(OutputStream& os) const;
 
   private:
-    const List<TaskSearchParameter> _parameters;
+    const List<ConfigurationSearchParameter> _parameters;
 };
 
 } // namespace Ariadne
 
-#endif // ARIADNE_TASK_SEARCH_SPACE_HPP
+#endif // ARIADNE_CONFIGURATION_SEARCH_SPACE_HPP

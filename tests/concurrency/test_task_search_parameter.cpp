@@ -23,8 +23,8 @@
  */
 
 #include "symbolic/expression_set.hpp"
-#include "concurrency/task_search_point.hpp"
-#include "concurrency/task_search_space.hpp"
+#include "configuration/configuration_search_point.hpp"
+#include "configuration/configuration_search_space.hpp"
 #include "concurrency/task_execution_ranking.hpp"
 
 #include "../test.hpp"
@@ -35,12 +35,12 @@ class TestTaskSearchParameter {
   public:
 
     Void test_task_parameter_creation() {
-        TaskSearchParameter p(ConfigurationPropertyPath("use_subdivisions"), false, List<int>({0,1}));
+        ConfigurationSearchParameter p(ConfigurationPropertyPath("use_subdivisions"), false, List<int>({0, 1}));
         ARIADNE_TEST_PRINT(p);
     }
 
     Void test_task_parameter_randomise() {
-        TaskSearchParameter p(ConfigurationPropertyPath("use_subdivisions"), false, List<int>({0,1}));
+        ConfigurationSearchParameter p(ConfigurationPropertyPath("use_subdivisions"), false, List<int>({0, 1}));
         ARIADNE_TEST_PRINT(p);
         List<int> values;
         for (Nat i=0; i<16; ++i) values.push_back(p.random_value());
@@ -48,7 +48,7 @@ class TestTaskSearchParameter {
     }
 
     Void test_metric_task_parameter_shift() {
-        TaskSearchParameter metric(ConfigurationPropertyPath("sweep_threshold"), true, List<int>({8,9,10,11}));
+        ConfigurationSearchParameter metric(ConfigurationPropertyPath("sweep_threshold"), true, List<int>({8, 9, 10, 11}));
         ARIADNE_TEST_EQUALS(metric.shifted_value_from(8),9);
         ARIADNE_TEST_EQUALS(metric.shifted_value_from(11),10);
         auto from_1 = metric.shifted_value_from(10);
@@ -58,9 +58,9 @@ class TestTaskSearchParameter {
     Void test_parameter_space() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5}));
+        ConfigurationSearchSpace space({bp, mp});
         ARIADNE_TEST_PRINT(space);
         ARIADNE_TEST_PRINT(space.parameters());
         ARIADNE_TEST_EQUALS(space.dimension(),2);
@@ -72,13 +72,13 @@ class TestTaskSearchParameter {
     Void test_parameter_point_creation() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5}));
+        ConfigurationSearchSpace space({bp, mp});
         ARIADNE_TEST_PRINT(space.initial_point());
         Map<ConfigurationPropertyPath,int> bindings = {{use_subdivisions,1},{sweep_threshold,5}};
         ARIADNE_TEST_PRINT(bindings);
-        TaskSearchPoint point = space.make_point(bindings);
+        ConfigurationSearchPoint point = space.make_point(bindings);
         ARIADNE_TEST_PRINT(point);
         ARIADNE_TEST_PRINT(point.space());
     }
@@ -86,13 +86,13 @@ class TestTaskSearchParameter {
     Void test_parameter_point_equality() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5}));
+        ConfigurationSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{use_subdivisions, 1},{sweep_threshold, 2}});
-        TaskSearchPoint point2 = space.make_point({{use_subdivisions, 1},{sweep_threshold, 2}});
-        TaskSearchPoint point3 = space.make_point({{use_subdivisions, 1},{sweep_threshold, 3}});
+        ConfigurationSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
         ARIADNE_TEST_EQUAL(point1,point2);
         ARIADNE_TEST_NOT_EQUAL(point1,point3);
     }
@@ -100,14 +100,14 @@ class TestTaskSearchParameter {
     Void test_parameter_point_distance() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5}));
+        ConfigurationSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
-        TaskSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
-        TaskSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
-        TaskSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 5}});
+        ConfigurationSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
+        ConfigurationSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 5}});
         ARIADNE_TEST_EQUALS(point1.distance(point2),0);
         ARIADNE_TEST_EQUALS(point1.distance(point3),1);
         ARIADNE_TEST_EQUALS(point3.distance(point4),3);
@@ -116,11 +116,11 @@ class TestTaskSearchParameter {
     Void test_parameter_point_adjacent_shift() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5}));
+        ConfigurationSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
+        ConfigurationSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
         ARIADNE_TEST_PRINT(point1);
         auto point2 = point1.make_adjacent_shifted();
         ARIADNE_TEST_PRINT(point2);
@@ -130,11 +130,11 @@ class TestTaskSearchParameter {
     Void test_parameter_point_random_shift() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5,6,7}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5, 6, 7}));
+        ConfigurationSearchSpace space({bp, mp});
 
-        TaskSearchPoint point = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
+        ConfigurationSearchPoint point = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
         auto points = point.make_random_shifted(1);
         ARIADNE_TEST_EQUALS(points.size(),1);
         points = point.make_random_shifted(3);
@@ -146,21 +146,21 @@ class TestTaskSearchParameter {
     Void test_parameter_point_adjacent_set_shift() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5,6,7,8}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5, 6, 7, 8}));
+        ConfigurationSearchSpace space({bp, mp});
         ARIADNE_TEST_PRINT(space.total_points());
 
-        TaskSearchPoint point = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
-        Set<TaskSearchPoint> points = point.make_random_shifted(3);
+        ConfigurationSearchPoint point = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 5}});
+        Set<ConfigurationSearchPoint> points = point.make_random_shifted(3);
         ARIADNE_TEST_PRINT(points);
         auto all_points = make_extended_set_by_shifting(points, 5);
         ARIADNE_TEST_EQUALS(all_points.size(),5);
         ARIADNE_TEST_PRINT(all_points);
 
-        TaskSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 8}});
-        TaskSearchPoint point2 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 3}});
-        Set<TaskSearchPoint> border_points = {point1, point2};
+        ConfigurationSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 8}});
+        ConfigurationSearchPoint point2 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 3}});
+        Set<ConfigurationSearchPoint> border_points = {point1, point2};
         ARIADNE_TEST_PRINT(border_points);
         ARIADNE_PRINT_TEST_COMMENT("Checking maximum number of single shift points including the original border points");
         auto six_points = make_extended_set_by_shifting(border_points, 6);
@@ -178,14 +178,14 @@ class TestTaskSearchParameter {
     Void test_parameter_point_appraisal() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
-        TaskSearchParameter bp(use_subdivisions, false,List<int>({0,1}));
-        TaskSearchParameter mp(sweep_threshold, true, List<int>({3,4,5,6,7}));
-        TaskSearchSpace space({bp, mp});
+        ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
+        ConfigurationSearchParameter mp(sweep_threshold, true, List<int>({3, 4, 5, 6, 7}));
+        ConfigurationSearchSpace space({bp, mp});
 
-        TaskSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
-        TaskSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
-        TaskSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
-        TaskSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 4}});
+        ConfigurationSearchPoint point1 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
+        ConfigurationSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
+        ConfigurationSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 4}});
         TaskExecutionRanking a1(point1, 3, 0, 0);
         TaskExecutionRanking a2(point2, 2, 1, 0);
         TaskExecutionRanking a3(point3, 4, 0, 0);

@@ -32,8 +32,8 @@
 #include "loggable_smart_thread.hpp"
 #include "buffer.hpp"
 #include "task_runner_interface.hpp"
-#include "task_search_point.hpp"
-#include "task_search_space.hpp"
+#include "configuration/configuration_search_point.hpp"
+#include "configuration/configuration_search_space.hpp"
 #include "task_execution_ranking.hpp"
 #include "configuration/configuration_property.tpl.hpp"
 
@@ -101,7 +101,7 @@ template<class C> class ParameterSearchRunner final : public TaskRunnerBase<C> {
     typedef typename TaskRunnerBase<C>::InputType InputType;
     typedef typename TaskRunnerBase<C>::OutputType OutputType;
     typedef typename TaskRunnerBase<C>::ConfigurationType ConfigurationType;
-    typedef Pair<InputType,TaskSearchPoint> InputBufferContentType;
+    typedef Pair<InputType,ConfigurationSearchPoint> InputBufferContentType;
     typedef ParameterSearchOutputBufferData<OutputType> OutputBufferContentType;
     typedef Buffer<InputBufferContentType> InputBufferType;
     typedef Buffer<OutputBufferContentType> OutputBufferType;
@@ -119,7 +119,7 @@ private:
     Nat const _concurrency; // Number of threads to be used
     std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
     Buffer<InputType> _last_used_input;
-    std::queue<TaskSearchPoint> _points;
+    std::queue<ConfigurationSearchPoint> _points;
     // Synchronization
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;

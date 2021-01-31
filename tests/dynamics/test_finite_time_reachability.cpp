@@ -100,7 +100,8 @@ class TestReachabilityAnalyser
         integrator_configuration.set_step_maximum_error(1e-2);
         TaylorPicardIntegrator integrator(integrator_configuration);
 
-        EvolverType evolver(system,Configuration<EvolverType>(integrator)
+        EvolverType evolver(system,Configuration<EvolverType>()
+            .set_integrator(integrator)
             .set_enable_reconditioning(true)
             .set_maximum_spacial_error(1e-2)
         );

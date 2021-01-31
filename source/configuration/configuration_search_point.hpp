@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_search_point.hpp
+ *            configuration/configuration_search_point.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,41 +22,42 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/task_search_point.hpp
- *  \brief Class for handling search points of tool parameters for a task.
+/*! \file configuration/configuration_search_point.hpp
+ *  \brief Class for handling search points of configuration properties.
  */
 
-#ifndef ARIADNE_SEARCH_POINT_HPP
-#define ARIADNE_SEARCH_POINT_HPP
+#ifndef ARIADNE_CONFIGURATION_SEARCH_POINT_HPP
+#define ARIADNE_CONFIGURATION_SEARCH_POINT_HPP
 
-#include "task_search_parameter.hpp"
+#include "configuration_search_parameter.hpp"
+#include "configuration_search_space.hpp"
+#include "configurable.hpp"
 
 namespace Ariadne {
 
-class TaskSearchSpace;
 using ParameterBindingsMap = Map<ConfigurationPropertyPath,int>;
 
-class TaskSearchPoint : public WritableInterface {
-    friend class TaskSearchSpace;
+class ConfigurationSearchPoint : public WritableInterface {
+    friend class ConfigurationSearchSpace;
   protected:
-    TaskSearchPoint(TaskSearchSpace const& space, ParameterBindingsMap const& bindings);
+    ConfigurationSearchPoint(ConfigurationSearchSpace const& space, ParameterBindingsMap const& bindings);
   public:
-    TaskSearchPoint(TaskSearchPoint const& p);
-    ~TaskSearchPoint() = default;
+    ConfigurationSearchPoint(ConfigurationSearchPoint const& p);
+    ~ConfigurationSearchPoint() = default;
 
     //! \brief The parameter space
-    TaskSearchSpace const& space() const;
+    ConfigurationSearchSpace const& space() const;
 
     //! \brief The coordinates in the natural space, according to the space ordering
     List<int> coordinates() const;
 
     //! \brief Generate a point adjacent to this one by shifting one parameter
-    TaskSearchPoint make_adjacent_shifted() const;
+    ConfigurationSearchPoint make_adjacent_shifted() const;
     //! \brief Generate an \a amount of points by shifting one parameter each from the current point,
     //! then the next point to shift from is a random one from those already generated
     //! \details Guarantees that all points are different. Includes the original point.
     //! If \a amount is 1, no new point is generated.
-    Set<TaskSearchPoint> make_random_shifted(Nat amount) const;
+    Set<ConfigurationSearchPoint> make_random_shifted(Nat amount) const;
 
     ParameterBindingsMap const& bindings() const;
 
@@ -65,17 +66,17 @@ class TaskSearchPoint : public WritableInterface {
     //! \brief The index in the space for the parameter identifier \a path
     SizeType index(ConfigurationPropertyPath const& path) const;
     //! \brief The parameter corresponding to the identifier \a path
-    TaskSearchParameter const& parameter(ConfigurationPropertyPath const& path) const;
+    ConfigurationSearchParameter const& parameter(ConfigurationPropertyPath const& path) const;
 
-    TaskSearchPoint& operator=(TaskSearchPoint const& p);
+    ConfigurationSearchPoint& operator=(ConfigurationSearchPoint const& p);
     //! \brief Equality check is performed under the assumption that we always work with the same parameters,
     //! hence no space check is performed.
-    Bool operator==(TaskSearchPoint const& p) const;
+    Bool operator==(ConfigurationSearchPoint const& p) const;
     //! \brief Ordering is based on point value
-    Bool operator<(TaskSearchPoint const& p) const;
+    Bool operator<(ConfigurationSearchPoint const& p) const;
     //! \brief The distance with respect to another point
     //! \details Distance between values for non-metric parameters is either 1 or 0
-    Nat distance(TaskSearchPoint const& p) const;
+    Nat distance(ConfigurationSearchPoint const& p) const;
 
     //! \brief Compute the breadth of possible shifts of the point for each parameter
     List<Nat> shift_breadths() const;
@@ -83,7 +84,7 @@ class TaskSearchPoint : public WritableInterface {
     virtual OutputStream& _write(OutputStream& os) const;
   private:
 
-    SharedPointer<TaskSearchSpace> _space;
+    SharedPointer<ConfigurationSearchSpace> _space;
     ParameterBindingsMap _bindings;
 
     mutable List<Nat> _CACHED_SHIFT_BREADTHS;
@@ -95,8 +96,22 @@ class TaskSearchPoint : public WritableInterface {
 //! for the space. Shifting points are chosen by rotation, skipping to the next if the generated point is not new-
 //! An effort is made to shift only by 1 with respect to the sources, but if not possible then the generated
 //! points are added to the points used for shifting.
-Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, SizeType size);
+Set<ConfigurationSearchPoint> make_extended_set_by_shifting(Set<ConfigurationSearchPoint> const& sources, SizeType size);
+
+//! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
+template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, ConfigurationSearchPoint const& p) {
+    ARIADNE_PRECONDITION(not cfg.is_singleton());
+    Configuration<C> result;
+    result = cfg;
+    for (auto param : p.space().parameters()) {
+        auto prop_ptr = result.properties().find(param.path().first());
+        ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The ConfigurationSearchPoint parameter '" << param.path() << "' is not in the configuration.");
+        prop_ptr->second->set_single(param.path().subpath(),p.value(param.path()));
+    }
+    ARIADNE_ASSERT_MSG(result.is_singleton(),"There are missing parameters in the search point, since the configuration could not be made singleton.");
+    return result;
+}
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SEARCH_POINT_HPP
+#endif // ARIADNE_CONFIGURATION_SEARCH_POINT_HPP

@@ -24,8 +24,9 @@
 
 #include "configuration/searchable_configuration.hpp"
 #include "configuration/configuration_property.tpl.hpp"
-#include "concurrency/task_search_space.hpp"
+#include "configuration/configuration_search_space.hpp"
 #include "configuration/configurable.tpl.hpp"
+#include "configuration/configuration_search_point.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -176,16 +177,16 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(b.is_singleton());
         ARIADNE_TEST_PRINT(b);
 
-        TaskSearchParameter p1(ConfigurationPropertyPath("use_reconditioning"),false,List<int>({0,1}));
-        TaskSearchParameter p2(ConfigurationPropertyPath("maximum_step_size"),true,List<int>({-3,-1}));
-        TaskSearchParameter p3(ConfigurationPropertyPath("sweep_threshold"),true,List<int>({-10,-8}));
-        TaskSearchSpace search_space3({p1,p2,p3});
+        ConfigurationSearchParameter p1(ConfigurationPropertyPath("use_reconditioning"), false, List<int>({0, 1}));
+        ConfigurationSearchParameter p2(ConfigurationPropertyPath("maximum_step_size"), true, List<int>({-3, -1}));
+        ConfigurationSearchParameter p3(ConfigurationPropertyPath("sweep_threshold"), true, List<int>({-10, -8}));
+        ConfigurationSearchSpace search_space3({p1, p2, p3});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space3.initial_point()));
         a.set_use_reconditioning(false);
-        TaskSearchSpace search_space4({p1,p2});
+        ConfigurationSearchSpace search_space4({p1, p2});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space4.initial_point()));
         a.set_both_use_reconditioning();
-        TaskSearchSpace search_space5({p1});
+        ConfigurationSearchSpace search_space5({p1});
         ARIADNE_TEST_FAIL(make_singleton(a,search_space5.initial_point()))
     }
 

@@ -35,14 +35,14 @@
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "symbolic/identifier.hpp"
-#include "configuration.hpp"
+#include "utility/identifier.hpp"
+#include "configuration_interface.hpp"
 #include "configuration_property_interface.hpp"
 #include "configuration_property_path.hpp"
 
 namespace Ariadne {
 
-class TaskSearchSpace;
+class ConfigurationSearchSpace;
 
 //! \brief Extension of ConfigurationInterface to deal with search in the properties space
 class SearchableConfiguration : public ConfigurationInterface {
@@ -53,7 +53,7 @@ class SearchableConfiguration : public ConfigurationInterface {
     virtual ~SearchableConfiguration() = default;
 
     //! \brief Construct a search space from the current configuration
-    TaskSearchSpace search_space() const;
+    ConfigurationSearchSpace search_space() const;
 
     //! \brief If the configuration is made of single values
     Bool is_singleton() const;

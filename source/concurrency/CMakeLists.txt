@@ -2,9 +2,6 @@ set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
         concurrency_manager.cpp
-        task_search_parameter.cpp
-        task_search_space.cpp
-        task_search_point.cpp
         task_execution_ranking.cpp
         )
 

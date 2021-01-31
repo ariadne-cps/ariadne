@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "symbolic/identifier.hpp"
+#include "utility/identifier.hpp"
 #include "configuration/configuration_property_path.hpp"
 #include "../test.hpp"
 

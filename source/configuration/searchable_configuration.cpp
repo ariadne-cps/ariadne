@@ -23,7 +23,7 @@
  */
 
 #include "searchable_configuration.hpp"
-#include "concurrency/task_search_space.hpp"
+#include "configuration_search_space.hpp"
 
 namespace Ariadne {
 
@@ -32,7 +32,6 @@ SearchableConfiguration& SearchableConfiguration::operator=(SearchableConfigurat
     for (auto p : c.properties()) _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>(p.first,SharedPointer<ConfigurationPropertyInterface>(p.second->clone())));
     return *this;
 }
-
 
 Map<Identifier,SharedPointer<ConfigurationPropertyInterface>>& SearchableConfiguration::properties() {
     return _properties;
@@ -64,26 +63,22 @@ Bool SearchableConfiguration::is_singleton() const {
     return true;
 }
 
-TaskSearchSpace SearchableConfiguration::search_space() const {
-    Set<TaskSearchParameter> result;
+ConfigurationSearchSpace SearchableConfiguration::search_space() const {
+    Set<ConfigurationSearchParameter> result;
     for (auto p : _properties) {
         auto integer_values = p.second->integer_values();
         for (auto p_int : integer_values) {
             if (p_int.second.size() > 1) {
                 ConfigurationPropertyPath path(p_int.first);
                 path.prepend(p.first);
-                result.insert(TaskSearchParameter(path, p.second->is_metric(p_int.first), p_int.second));
+                result.insert(ConfigurationSearchParameter(path, p.second->is_metric(p_int.first), p_int.second));
             }
         }
     }
     ARIADNE_ASSERT_MSG(not result.empty(),"The search space is empty.");
     return result;
 }
-/*
-Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& SharedSearchableConfiguration::properties() const {
-    return _properties;
-}
-*/
+
 void SharedSearchableConfiguration::add_property_from(Identifier const& name, SearchableConfiguration const& c) {
     auto p = c.properties().find(name);
     ARIADNE_ASSERT_MSG(p != c.properties().end(), "The supplied property '" << name <<"' does not exist in the source configuration.");

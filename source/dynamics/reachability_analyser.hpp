@@ -29,7 +29,7 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_HPP
 
-#include "configuration/configuration.hpp"
+#include "configuration/configuration_interface.hpp"
 #include "../geometry/set.hpp"
 #include "../geometry/grid_paving.hpp"
 #include "../geometry/function_set.hpp"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solvers/configuration.hpp
+ *            configuration/configuration_interface.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solvers/configuration.hpp
- *  \brief Classes for configuration and related helpers.
+/*! \file configuration/configuration_interface.hpp
+ *  \brief Interface for basic configurations.
  */
 
 #ifndef ARIADNE_CONFIGURATION_HPP
@@ -32,12 +32,6 @@
 #include <ostream>
 #include <type_traits>
 #include "utility/writable.hpp"
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/pointer.hpp"
-#include "symbolic/identifier.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/real.hpp"
 
 namespace Ariadne {
 

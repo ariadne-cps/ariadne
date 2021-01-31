@@ -34,7 +34,7 @@
 #include "../numeric/numeric.hpp"
 #include "../algebra/vector.hpp"
 #include "../geometry/set_interface.hpp"
-#include "../symbolic/identifier.hpp"
+#include "utility/identifier.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../output/drawer_interface.hpp"
 

@@ -26,13 +26,13 @@
 
 namespace Ariadne {
 
-TaskExecutionRanking::TaskExecutionRanking(TaskSearchPoint const& p,
+TaskExecutionRanking::TaskExecutionRanking(ConfigurationSearchPoint const& p,
                                            ScoreType const& s,
                                            SizeType const& permissive_failures,
                                            SizeType const& critical_failures)
            : _point(p), _cost(s), _permissive_failures(permissive_failures), _critical_failures(critical_failures) { }
 
-TaskSearchPoint const&
+ConfigurationSearchPoint const&
 TaskExecutionRanking::point() const {
     return _point;
 }

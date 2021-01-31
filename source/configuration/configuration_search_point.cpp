@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/task_search_point.cpp
+ *            configuration/configuration_search_point.cpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,25 +22,24 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "task_search_point.hpp"
-#include "task_search_space.hpp"
-#include "../output/logging.hpp"
+#include "configuration_search_point.hpp"
+#include "configuration_search_space.hpp"
 
 namespace Ariadne {
 
-TaskSearchPoint::TaskSearchPoint(TaskSearchSpace const& space, ParameterBindingsMap const& bindings)
+ConfigurationSearchPoint::ConfigurationSearchPoint(ConfigurationSearchSpace const& space, ParameterBindingsMap const& bindings)
     : _space(space.clone()), _bindings(bindings) { }
 
-TaskSearchPoint::TaskSearchPoint(TaskSearchPoint const& p) {
+ConfigurationSearchPoint::ConfigurationSearchPoint(ConfigurationSearchPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);
     this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
     this->_space.reset(p.space().clone());
 }
 
-Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
-    Set<TaskSearchPoint> result;
-    TaskSearchPoint current_point = *this;
+Set<ConfigurationSearchPoint> ConfigurationSearchPoint::make_random_shifted(Nat amount) const {
+    Set<ConfigurationSearchPoint> result;
+    ConfigurationSearchPoint current_point = *this;
     result.insert(current_point);
     while (result.size() < amount) {
         List<Nat> breadths = current_point.shift_breadths();
@@ -71,12 +70,12 @@ Set<TaskSearchPoint> TaskSearchPoint::make_random_shifted(Nat amount) const {
     return result;
 }
 
-TaskSearchPoint TaskSearchPoint::make_adjacent_shifted() const {
+ConfigurationSearchPoint ConfigurationSearchPoint::make_adjacent_shifted() const {
     List<Nat> breadths = this->shift_breadths();
     Nat total_breadth = 0;
     for (auto b : breadths) total_breadth += b;
     ARIADNE_PRECONDITION(total_breadth != 0);
-    Set<TaskSearchPoint> result;
+    Set<ConfigurationSearchPoint> result;
     auto space = this->space();
     Nat offset = (Nat)rand() % total_breadth;
 
@@ -96,31 +95,31 @@ TaskSearchPoint TaskSearchPoint::make_adjacent_shifted() const {
     return space.make_point(shifted_bindings);
 }
 
-TaskSearchSpace const& TaskSearchPoint::space() const {
+ConfigurationSearchSpace const& ConfigurationSearchPoint::space() const {
     return *_space;
 }
 
-List<int> TaskSearchPoint::coordinates() const {
+List<int> ConfigurationSearchPoint::coordinates() const {
     return _bindings.values();
 }
 
-ParameterBindingsMap const& TaskSearchPoint::bindings() const {
+ParameterBindingsMap const& ConfigurationSearchPoint::bindings() const {
     return _bindings;
 }
 
-int TaskSearchPoint::value(ConfigurationPropertyPath const& path) const {
+int ConfigurationSearchPoint::value(ConfigurationPropertyPath const& path) const {
     return _bindings.at(path);
 }
 
-SizeType TaskSearchPoint::index(ConfigurationPropertyPath const& path) const {
+SizeType ConfigurationSearchPoint::index(ConfigurationPropertyPath const& path) const {
     return _space->index(path);
 }
 
-TaskSearchParameter const& TaskSearchPoint::parameter(ConfigurationPropertyPath const& path) const {
+ConfigurationSearchParameter const& ConfigurationSearchPoint::parameter(ConfigurationPropertyPath const& path) const {
     return _space->parameter(path);
 }
 
-TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
+ConfigurationSearchPoint& ConfigurationSearchPoint::operator=(ConfigurationSearchPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);
     this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
@@ -128,7 +127,7 @@ TaskSearchPoint& TaskSearchPoint::operator=(TaskSearchPoint const& p) {
     return *this;
 }
 
-Bool TaskSearchPoint::operator==(TaskSearchPoint const& p) const {
+Bool ConfigurationSearchPoint::operator==(ConfigurationSearchPoint const& p) const {
     for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
         if (p._bindings.at(iter->first) != iter->second)
             return false;
@@ -136,7 +135,7 @@ Bool TaskSearchPoint::operator==(TaskSearchPoint const& p) const {
     return true;
 }
 
-Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
+Bool ConfigurationSearchPoint::operator<(ConfigurationSearchPoint const& p) const {
     for (auto b : _bindings) {
         auto const this_value = b.second;
         auto const other_value = p._bindings.at(b.first);
@@ -146,7 +145,7 @@ Bool TaskSearchPoint::operator<(TaskSearchPoint const& p) const {
     return false; // They are equal
 }
 
-Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
+Nat ConfigurationSearchPoint::distance(ConfigurationSearchPoint const& p) const {
     Nat result = 0;
     for (auto b : _bindings) {
         auto const& param = parameter(b.first);
@@ -158,11 +157,11 @@ Nat TaskSearchPoint::distance(TaskSearchPoint const& p) const {
     return result;
 }
 
-OutputStream& TaskSearchPoint::_write(OutputStream& os) const {
+OutputStream& ConfigurationSearchPoint::_write(OutputStream& os) const {
     return os << _bindings.values();
 }
 
-List<Nat> TaskSearchPoint::shift_breadths() const {
+List<Nat> ConfigurationSearchPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
         for (auto b : _bindings) {
             auto const& param = parameter(b.first);
@@ -177,7 +176,7 @@ List<Nat> TaskSearchPoint::shift_breadths() const {
     return _CACHED_SHIFT_BREADTHS;
 }
 
-Set<TaskSearchPoint> make_extended_set_by_shifting(Set<TaskSearchPoint> const& sources, SizeType size) {
+Set<ConfigurationSearchPoint> make_extended_set_by_shifting(Set<ConfigurationSearchPoint> const& sources, SizeType size) {
     ARIADNE_PRECONDITION(size>=sources.size());
     ARIADNE_PRECONDITION(sources.begin()->space().total_points() >= size);
     auto expanded_sources = sources; // To be be expanded if the previous sources are incapable of getting the required size

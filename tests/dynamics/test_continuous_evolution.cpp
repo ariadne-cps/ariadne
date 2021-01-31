@@ -132,7 +132,7 @@ Void TestContinuousEvolution::test() const
 //    initial_box[0]=ExactIntervalType(1.01,1.02);
 //    initial_box[1]=ExactIntervalType(0.51,0.52);
 
-    VectorFieldEvolver evolver(vanderpol,Configuration<VectorFieldEvolver>(integrator)
+    VectorFieldEvolver evolver(vanderpol,Configuration<VectorFieldEvolver>()
         .set_integrator(integrator)
         .set_enable_reconditioning(true)
         .set_maximum_spacial_error(1e-2)
@@ -209,7 +209,8 @@ Void TestContinuousEvolution::failure_test() const
     RealVariable x("x"), y("y");
 
     VectorField failone_vf({dot(x)=1,dot(y)=-p*y+p});
-    VectorFieldEvolver evolverone(failone_vf,Configuration<VectorFieldEvolver>(integrator)
+    VectorFieldEvolver evolverone(failone_vf,Configuration<VectorFieldEvolver>()
+        .set_integrator(integrator)
         .set_enable_reconditioning(true)
         .set_maximum_spacial_error(1e-6)
         .set_maximum_enclosure_radius(enclosure_radius)
@@ -258,7 +259,8 @@ Void TestContinuousEvolution::failure_test() const
     EffectiveScalarMultivariateFunction x2=EffectiveScalarMultivariateFunction::coordinate(3,1);
     EffectiveVectorMultivariateFunction failtwo={o3,x1*x2/p,z3};
     VectorField failtwo_vf(failtwo);
-    VectorFieldEvolver evolvertwo(failtwo_vf,Configuration<VectorFieldEvolver>(integrator)
+    VectorFieldEvolver evolvertwo(failtwo_vf,Configuration<VectorFieldEvolver>()
+        .set_integrator(integrator)
         .set_enable_reconditioning(true)
         .set_maximum_spacial_error(1e-2)
         .set_maximum_enclosure_radius(enclosure_radius)

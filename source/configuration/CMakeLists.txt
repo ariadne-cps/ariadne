@@ -2,7 +2,10 @@ set(LIBRARY_NAME ariadne-configuration)
 
 add_library(${LIBRARY_NAME} OBJECT
         searchable_configuration.cpp
+        configuration_search_space.cpp
         configuration_property_path.cpp
+        configuration_search_parameter.cpp
+        configuration_search_point.cpp
         configuration_property.cpp
         )
 

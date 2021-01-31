@@ -48,10 +48,12 @@ template<class R> class ConfigurationPropertyRefinementTarget {
     typedef TaskOutput<R> OutputType;
     typedef TaskObjective<R> ObjectiveType;
 
-    ConfigurationPropertyRefinementTarget(ConfigurationPropertyPath const& path, List<ObjectiveType> const& objectives)
-        : _path(path), _objectives(objectives) { }
+    ConfigurationPropertyRefinementTarget(ConfigurationPropertyPath const& path, List<ObjectiveType> const& objectives, ConfigurationPropertyRefinerInterface const& refiner)
+        : _path(path), _objectives(objectives), _refiner(refiner.clone()) { }
     ConfigurationPropertyPath const& path() const { return _path; }
     List<ObjectiveType> const& objectives() const { return _objectives; }
+    ConfigurationPropertyRefinerInterface& refiner() { return *_refiner; }
+    ConfigurationPropertyRefinerInterface const& refiner() const { return *_refiner; }
 
     //! \brief Comparison for set appending
     //! \details Only one rule for a specific property is expected to be used.
@@ -59,6 +61,7 @@ template<class R> class ConfigurationPropertyRefinementTarget {
   private:
     ConfigurationPropertyPath const _path;
     List<ObjectiveType> const _objectives;
+    SharedPointer<ConfigurationPropertyRefinerInterface> _refiner;
 };
 
 

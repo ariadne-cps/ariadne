@@ -95,7 +95,7 @@ void BooleanConfigurationProperty::refine_init(ConfigurationPropertyPath const& 
     ARIADNE_ERROR("The value of a boolean property cannot be refined.");
 }
 
-void BooleanConfigurationProperty::refine_value(ConfigurationPropertyPath const& path, double error, double progress) {
+void BooleanConfigurationProperty::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
     ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " does not exist.");
     ARIADNE_ERROR("The value of a boolean property cannot be refined.");
 }

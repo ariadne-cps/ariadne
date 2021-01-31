@@ -64,7 +64,8 @@ int main(int argc, const char* argv[])
     auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 2.75, RankingConstraintSeverity::CRITICAL);
-    auto refinement_target = ConfigurationPropertyRefinementTarget<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65});
+    auto refinement_target = ConfigurationPropertyRefinementTarget<E>(
+            ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65},ProportionalRefiner(-1e-4));
     VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement_target});
 
     Real x0 = 1.4_dec;

@@ -85,7 +85,7 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     void set_both(); //! \brief Set to both true and false
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double error, double progress) override;
+    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -123,20 +123,19 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     void set(T const& value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double error, double progress) override;
+    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
-    T _refine_value(double error, double progress);
+    T _refine_value(ConfigurationPropertyRefinerInterface& refiner, double error, double progress);
   private:
     T _lower;
     T _upper;
     T _refined;
     Bool _is_refined;
     SharedPointer<SearchSpaceConverterInterface<T>> const _converter;
-    SharedPointer<ConfigurationPropertyRefinerInterface> _refiner;
 };
 
 //! \brief A property that specifies distinct values from an enum
@@ -160,7 +159,7 @@ public:
     void set(Set<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double error, double progress) override;
+    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
 protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -191,7 +190,7 @@ public:
     void set(List<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double error, double progress) override;
+    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -224,7 +223,7 @@ template<class T> class InterfaceConfigurationProperty final : public Configurat
     void set(List<SharedPointer<T>> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, double error, double progress) override;
+    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
     protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;

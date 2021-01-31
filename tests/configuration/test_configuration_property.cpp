@@ -197,24 +197,25 @@ class TestConfiguration {
 
     void test_range_configuration_property_refine() {
         Log10Converter converter;
+        ProportionalRefiner refiner(-1e-3);
         ExactDoubleConfigurationProperty p1(1.0_x,2.0_x,converter);
-        ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath(),1.0,1.0));
+        ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath(),refiner,1.0,1.0));
         p1.refine_init(ConfigurationPropertyPath());
-        p1.refine_value(ConfigurationPropertyPath(),1.0,1.0);
+        p1.refine_value(ConfigurationPropertyPath(),refiner,1.0,1.0);
         auto val1 = p1.get().get_d();
         ARIADNE_TEST_PRINT(val1);
         ARIADNE_TEST_ASSERT(val1 < 2.0 and val1 >= 1.0);
-        p1.refine_value(ConfigurationPropertyPath(),-1.0,1.0);
+        p1.refine_value(ConfigurationPropertyPath(),refiner,-1.0,1.0);
         auto val2 = p1.get().get_d();
         ARIADNE_TEST_PRINT(val2);
         ARIADNE_TEST_ASSERT(val2 > val1);
-        p1.refine_value(ConfigurationPropertyPath(),0.5,1.0);
+        p1.refine_value(ConfigurationPropertyPath(),refiner,0.5,1.0);
         auto val3 = p1.get().get_d();
         ARIADNE_TEST_PRINT(val3);
         ARIADNE_TEST_ASSERT(val3 < val2);
-        ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath("something"),1.0,1.0));
+        ARIADNE_TEST_FAIL(p1.refine_value(ConfigurationPropertyPath("something"),refiner,1.0,1.0));
         ExactDoubleConfigurationProperty p2(1.0_x,converter);
-        ARIADNE_TEST_FAIL(p2.refine_value(ConfigurationPropertyPath(),1.0,1.0));
+        ARIADNE_TEST_FAIL(p2.refine_value(ConfigurationPropertyPath(),refiner,1.0,1.0));
     }
 
     void test_enum_configuration_property_construction() {

@@ -72,7 +72,7 @@ private:
 
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
-using TestConfigurableConfigurationProperty = InterfaceConfigurationProperty<TestConfigurableInterface>;
+using TestConfigurableConfigurationProperty = InterfaceListConfigurationProperty<TestConfigurableInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 

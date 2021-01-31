@@ -168,7 +168,7 @@ template<> struct Configuration<IntegratorBase> : public SharedSearchableConfigu
     typedef ExactDouble RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceConfigurationProperty<BounderInterface> BounderProperty;
+    typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
 
     Configuration(SearchableConfiguration const& configuration) {
         add_property_from("lipschitz_tolerance",configuration);
@@ -222,9 +222,9 @@ template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfi
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceConfigurationProperty<ValidatedFunctionModelDPFactoryInterface> FunctionFactoryProperty;
-    typedef InterfaceConfigurationProperty<BounderInterface> BounderProperty;
-    typedef ListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
+    typedef InterfaceListConfigurationProperty<ValidatedFunctionModelDPFactoryInterface> FunctionFactoryProperty;
+    typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
+    typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
         add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6)));

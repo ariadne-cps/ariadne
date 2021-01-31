@@ -43,7 +43,7 @@
 namespace Ariadne {
 
 template class RangeConfigurationProperty<ExactDouble>;
-template class InterfaceConfigurationProperty<IntegratorInterface>;
+template class InterfaceListConfigurationProperty<IntegratorInterface>;
 
 namespace {
 

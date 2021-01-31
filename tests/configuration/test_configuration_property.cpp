@@ -56,8 +56,8 @@ public:
 
 using ExactDoubleConfigurationProperty = RangeConfigurationProperty<ExactDouble>;
 using LevelOptionsConfigurationProperty = EnumConfigurationProperty<LevelOptions>;
-using SweeperConfigurationProperty = ListConfigurationProperty<Sweeper<FloatDP>>;
-using TestInterfaceConfigurationProperty = InterfaceConfigurationProperty<TestInterface>;
+using SweeperConfigurationProperty = HandleListConfigurationProperty<Sweeper<FloatDP>>;
+using TestInterfaceListConfigurationProperty = InterfaceListConfigurationProperty<TestInterface>;
 using Log10Converter = Log10SearchSpaceConverter<ExactDouble>;
 using Log2Converter = Log2SearchSpaceConverter<ExactDouble>;
 
@@ -335,28 +335,28 @@ class TestConfiguration {
     }
 
     void test_interface_configuration_property_construction() {
-        TestInterfaceConfigurationProperty p1;
+        TestInterfaceListConfigurationProperty p1;
         ARIADNE_TEST_ASSERT(not p1.is_metric(ConfigurationPropertyPath()));
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         A a;
-        TestInterfaceConfigurationProperty p2(a);
+        TestInterfaceListConfigurationProperty p2(a);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_EQUALS(p2.cardinality(),1);
         ARIADNE_TEST_PRINT(p2.get());
         List<SharedPointer<TestInterface>> tests;
-        ARIADNE_TEST_FAIL(new TestInterfaceConfigurationProperty(tests));
+        ARIADNE_TEST_FAIL(new TestInterfaceListConfigurationProperty(tests));
         tests.append(SharedPointer<TestInterface>(new A()));
         tests.append(SharedPointer<TestInterface>(new B()));
-        TestInterfaceConfigurationProperty p3(tests);
+        TestInterfaceListConfigurationProperty p3(tests);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
         ARIADNE_TEST_EQUALS(p3.cardinality(),2);
     }
 
     void test_interface_configuration_property_modification() {
-        TestInterfaceConfigurationProperty p;
+        TestInterfaceListConfigurationProperty p;
         ARIADNE_TEST_EQUALS(p.cardinality(),0);
         auto iv = p.integer_values();
         ARIADNE_TEST_EQUALS(iv.size(),1);
@@ -381,7 +381,7 @@ class TestConfiguration {
         List<SharedPointer<TestInterface>> tests;
         tests.append(SharedPointer<TestInterface>(new A()));
         tests.append(SharedPointer<TestInterface>(new B()));
-        TestInterfaceConfigurationProperty p(tests);
+        TestInterfaceListConfigurationProperty p(tests);
         p.set_single(ConfigurationPropertyPath(),0);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);

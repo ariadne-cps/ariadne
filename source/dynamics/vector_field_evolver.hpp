@@ -142,13 +142,13 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceConfigurationProperty<IntegratorInterface> IntegratorProperty;
+    typedef InterfaceListConfigurationProperty<IntegratorInterface> IntegratorProperty;
 
     Configuration() {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));
         add_property("enable_reconditioning",BooleanConfigurationProperty(false));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
-        add_property("integrator", InterfaceConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
         add_property("maximum_enclosure_radius",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_spacial_error",RealTypeProperty(ExactDouble::infinity(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_step_size",RealTypeProperty(ExactDouble::infinity(),Log2SearchSpaceConverter<RealType>()));

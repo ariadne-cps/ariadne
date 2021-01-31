@@ -168,13 +168,13 @@ private:
     Set<T> _values;
 };
 
-//! \brief A property that specifies a set of distinct values from class \a T
+//! \brief A property that specifies a set of distinct values from handle class \a T
 //! \details This can be used either for an enum or for distinct objects of a class or handle class
-template<class T> class ListConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class HandleListConfigurationProperty final : public ConfigurationPropertyBase<T> {
 public:
-    ListConfigurationProperty();
-    ListConfigurationProperty(List<T> const& values);
-    ListConfigurationProperty(T const& value);
+    HandleListConfigurationProperty();
+    HandleListConfigurationProperty(List<T> const& values);
+    HandleListConfigurationProperty(T const& value);
 
     Bool is_single() const override;
     Bool is_metric(ConfigurationPropertyPath const& path) const override;
@@ -191,6 +191,7 @@ public:
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
     void refine_init(ConfigurationPropertyPath const& path) override;
     void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
+    Map<ConfigurationPropertyPath,List<int>> integer_values() const override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -201,11 +202,11 @@ public:
 
 //! \brief A property that specifies a list of objects deriving from an interface \a T
 //! \details T must define the clone() method to support interfaces.
-template<class T> class InterfaceConfigurationProperty final : public ConfigurationPropertyBase<T> {
+template<class T> class InterfaceListConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
-    InterfaceConfigurationProperty();
-    InterfaceConfigurationProperty(List<SharedPointer<T>> const& list);
-    InterfaceConfigurationProperty(T const& value);
+    InterfaceListConfigurationProperty();
+    InterfaceListConfigurationProperty(List<SharedPointer<T>> const& list);
+    InterfaceListConfigurationProperty(T const& value);
 
     Bool is_single() const override;
     Bool is_metric(ConfigurationPropertyPath const& path) const override;

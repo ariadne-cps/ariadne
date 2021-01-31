@@ -36,6 +36,7 @@
 #include "utility/string.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
+#include "utility/handle.hpp"
 
 namespace Ariadne {
 
@@ -127,26 +128,22 @@ private:
 };
 
 template<class R>
-class TaskRankingParameter : public WritableInterface {
+class TaskRankingParameter : public Handle<TaskRankingParameterInterface<R>> {
 public:
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
-private:
-    SharedPointer<TaskRankingParameterInterface<R>> _impl;
+    using Handle<TaskRankingParameterInterface<R>>::Handle;
 public:
-    TaskRankingParameter(TaskRankingParameterInterface<R> const& other) : _impl(other.clone()) { }
-    TaskRankingParameter(TaskRankingParameter const& other) : _impl(other._impl) { }
+    
+    Bool operator<(TaskRankingParameter const& p) const { return this->_ptr->name() < p.name(); }
 
-    Bool operator<(TaskRankingParameter const& p) const { return _impl->name() < p.name(); }
-
-    String const& name() const { return _impl->name(); }
-    OptimisationCriterion optimisation() const { return _impl->optimisation(); };
-    Bool is_scalar() const { return _impl->is_scalar(); };
+    String const& name() const { return this->_ptr->name(); }
+    OptimisationCriterion optimisation() const { return this->_ptr->optimisation(); };
+    Bool is_scalar() const { return this->_ptr->is_scalar(); };
     ScoreType rank(InputType const& input, OutputType const& output, DurationType const& duration, SizeType const& idx = 0) const {
-        return _impl->rank(input, output, duration, idx); }
-    SizeType dimension(InputType const& input) const { return _impl->dimension(input); }
-
-    OutputStream& _write(OutputStream& os) const override { return _impl->_write(os); }
+        return this->_ptr->rank(input, output, duration, idx); }
+    SizeType dimension(InputType const& input) const { return this->_ptr->dimension(input); }
+    friend OutputStream& operator<<(OutputStream& os, const TaskRankingParameter<R>& p) { return os << *p._ptr; }
 };
 
 //! \brief Template instance of the commonly-used execution time parameter for appraisal

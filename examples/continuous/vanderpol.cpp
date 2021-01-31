@@ -88,10 +88,7 @@ int main(int argc, const char* argv[])
         auto end = std::chrono::high_resolution_clock::now();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
 
-        ConcurrencyManager::instance().print_last_search_best_points();
-        ConcurrencyManager::instance().print_last_property_refinement_values();
-
-        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().last_optimal_point());
+        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().optimal_point());
 
         ARIADNE_LOG_PRINTLN("Plotting...");
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
@@ -101,4 +98,7 @@ int main(int argc, const char* argv[])
     } catch (CriticalRankingFailureException<VectorFieldEvolver>& ex) {
         ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
     }
+
+    ConcurrencyManager::instance().print_best_rankings();
+    ConcurrencyManager::instance().print_refinement_values();
 }

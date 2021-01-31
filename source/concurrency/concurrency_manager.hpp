@@ -72,29 +72,31 @@ class ConcurrencyManager {
 
     void set_concurrency(SizeType value);
 
-    //! \brief The best points resulting from the last search
-    List<TaskExecutionRanking> last_search_best_points() const;
-    void set_last_search_best_points(List<TaskExecutionRanking> const& points);
+    //! \brief The best points saved
+    List<TaskExecutionRanking> best_rankings() const;
+    void append_best_ranking(TaskExecutionRanking const& point);
+    void clear_best_rankings();
 
-    //! \brief Print the last_search_best_points in a .m file for plotting
-    void print_last_search_best_points() const;
+    //! \brief Print best rankings in a .m file for plotting
+    void print_best_rankings() const;
 
-    //! \brief Return the optimal point (i.e., the most common value for all dimensions) from the last search
-    List<int> last_optimal_point() const;
+    //! \brief Return the optimal point (i.e., the most common value for all dimensions)
+    List<int> optimal_point() const;
 
-    //! \brief The refinement values for each property from the last run
-    PropertyRefinementsMap last_property_refinement_values() const;
-    void set_last_property_refinement_values(PropertyRefinementsMap const& refinements);
+    //! \brief The refinement values saved for each property
+    PropertyRefinementsMap refinement_values() const;
+    void append_refinement_value(ConfigurationPropertyPath const& path, ExactDouble const& value);
+    void clear_refinement_values();
 
-    //! \brief Print the last_property_refinement_values in a .m file for plotting
-    void print_last_property_refinement_values() const;
+    //! \brief Print refinement values in a .m file for plotting
+    void print_refinement_values() const;
 
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
     std::mutex _data_mutex;
-    List<TaskExecutionRanking> _last_search_best_points;
-    PropertyRefinementsMap _last_property_refinement_values;
+    List<TaskExecutionRanking> _best_rankings;
+    PropertyRefinementsMap _refinement_values;
 };
 
 } // namespace Ariadne

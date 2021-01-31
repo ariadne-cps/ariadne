@@ -76,9 +76,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
             auto error_progress = _objective_measurer->get(input,output,target.objectives());
             _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),target.refiner(),error_progress.first,error_progress.second);
             auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(target.path()).get();
-            auto iter = _property_refinement_values.find(target.path());
-            if (iter != _property_refinement_values.end()) _property_refinement_values.at(target.path()).push_back(value);
-            else _property_refinement_values.insert(make_pair(target.path(),value));
+            ConcurrencyManager::instance().append_refinement_value(target.path(),value);
         }
     }
 
@@ -88,15 +86,9 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     SharedPointer<TaskType> const _task;
     SharedPointer<ObjectiveMeasurerType> const _objective_measurer;
     ConfigurationType _configuration;
-    PropertyRefinementsMap _property_refinement_values;
 };
 
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
-
-template<class C> void SequentialRunner<C>::dump_statistics() {
-    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
-    this->_property_refinement_values.clear();
-}
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
     OutputType result = this->_task->run_task(input,this->configuration());
@@ -132,11 +124,6 @@ template<class C> DetachedRunner<C>::DetachedRunner(ConfigurationType const& con
 template<class C> DetachedRunner<C>::~DetachedRunner() {
     _terminate = true;
     _input_availability.notify_all();
-}
-
-template<class C> void DetachedRunner<C>::dump_statistics() {
-    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
-    this->_property_refinement_values.clear();
 }
 
 template<class C> void DetachedRunner<C>::push(InputType const& input) {
@@ -214,13 +201,6 @@ template<class C> ParameterSearchRunner<C>::~ParameterSearchRunner() {
     _input_availability.notify_all();
 }
 
-template<class C> Void ParameterSearchRunner<C>::dump_statistics() {
-    ConcurrencyManager::instance().set_last_search_best_points(_best_points);
-    _best_points.clear();
-    ConcurrencyManager::instance().set_last_property_refinement_values(this->_property_refinement_values);
-    this->_property_refinement_values.clear();
-}
-
 template<class C> void ParameterSearchRunner<C>::push(InputType const& input) {
     if (not _active) {
         _active = true;
@@ -266,7 +246,7 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     auto best = rankings.rbegin()->point();
     if (rankings.rbegin()->critical_failures() > 0)
         throw CriticalRankingFailureException<C>(this->_task->ranking_space().failed_critical_constraints(input,outputs.get(best).first));
-    _best_points.push_back(*rankings.rbegin());
+    ConcurrencyManager::instance().append_best_ranking(*rankings.rbegin());
     auto best_output = outputs.get(best).first;
 
     this->refine_configuration(input,best_output);

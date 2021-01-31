@@ -43,33 +43,43 @@ void ConcurrencyManager::set_concurrency(SizeType value) {
     _concurrency = value;
 }
 
-List<TaskExecutionRanking> ConcurrencyManager::last_search_best_points() const {
-    return _last_search_best_points;
+List<TaskExecutionRanking> ConcurrencyManager::best_rankings() const {
+    return _best_rankings;
 }
 
-void ConcurrencyManager::set_last_search_best_points(List<TaskExecutionRanking> const &points) {
+void ConcurrencyManager::append_best_ranking(TaskExecutionRanking const& ranking) {
     std::lock_guard<std::mutex> lock(_data_mutex);
-    _last_search_best_points = points;
+    _best_rankings.push_back(ranking);
 }
 
-auto ConcurrencyManager::last_property_refinement_values() const -> PropertyRefinementsMap {
-    return _last_property_refinement_values;
+void ConcurrencyManager::clear_best_rankings() {
+    _best_rankings.clear();
 }
 
-void ConcurrencyManager::set_last_property_refinement_values(PropertyRefinementsMap const &refinements) {
-    _last_property_refinement_values.clear();
-    _last_property_refinement_values.adjoin(refinements);
+auto ConcurrencyManager::refinement_values() const -> PropertyRefinementsMap {
+    return _refinement_values;
 }
 
-List<int> ConcurrencyManager::last_optimal_point() const {
+void ConcurrencyManager::append_refinement_value(ConfigurationPropertyPath const& path, ExactDouble const& value) {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    auto iter = _refinement_values.find(path);
+    if (iter == _refinement_values.end()) _refinement_values.insert(make_pair(path,List<ExactDouble>(value)));
+    else iter->second.push_back(value);
+}
+
+void ConcurrencyManager::clear_refinement_values() {
+    _refinement_values.clear();
+}
+
+List<int> ConcurrencyManager::optimal_point() const {
     List<int> result;
-    if (not _last_search_best_points.empty()) {
-        auto space = _last_search_best_points.front().point().space();
+    if (not _best_rankings.empty()) {
+        auto space = _best_rankings.front().point().space();
         auto dimension = space.dimension();
 
         List<Map<int,SizeType>> frequencies;
         for (SizeType i=0; i<dimension; ++i) frequencies.push_back(Map<int,SizeType>());
-        for (auto ranking : _last_search_best_points) {
+        for (auto ranking : _best_rankings) {
             auto coordinates = ranking.point().coordinates();
             for (SizeType i=0; i<dimension; ++i) {
                 auto iter = frequencies[i].find(coordinates[i]);
@@ -96,17 +106,17 @@ List<int> ConcurrencyManager::last_optimal_point() const {
     return result;
 }
 
-void ConcurrencyManager::print_last_search_best_points() const {
-    if (not _last_search_best_points.empty()) {
+void ConcurrencyManager::print_best_rankings() const {
+    if (not _best_rankings.empty()) {
         std::ofstream file;
         file.open("points.m");
-        auto space = _last_search_best_points.front().point().space();
+        auto space = _best_rankings.front().point().space();
         auto dimension = space.dimension();
-        auto size = _last_search_best_points.size();
+        auto size = _best_rankings.size();
         file << "x = [1:" << size << "];\n";
         Map<SizeType,List<int>> values;
         for (SizeType i=0; i<dimension; ++i) values.insert(make_pair(i,List<int>()));
-        for (auto ranking : _last_search_best_points) {
+        for (auto ranking : _best_rankings) {
             auto point = ranking.point();
             for (SizeType i=0; i<dimension; ++i) values.at(i).push_back(point.coordinates()[i]);
         }
@@ -124,9 +134,9 @@ void ConcurrencyManager::print_last_search_best_points() const {
     }
 }
 
-void ConcurrencyManager::print_last_property_refinement_values() const {
-    if (not _last_property_refinement_values.empty()) {
-        for (auto prop : _last_property_refinement_values) {
+void ConcurrencyManager::print_refinement_values() const {
+    if (not _refinement_values.empty()) {
+        for (auto prop : _refinement_values) {
             std::ofstream file;
             file.open("refinements.m");
             List<double> values;

@@ -47,25 +47,24 @@ int main(int argc, const char* argv[])
     auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err);
     auto integrator_configuration = Configuration<TaylorPicardIntegrator>()
             .set_step_maximum_error(1e-7,1e-4)
-            .set_maximum_temporal_order(15)
-            .set_starting_step_size_num_refinements(0)
+            .set_maximum_temporal_order(9,15)
+            .set_starting_step_size_num_refinements(0,5)
             .set_sweeper(sweeper2);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
     TaylorPicardIntegrator integrator(integrator_configuration);
 
     typedef VectorFieldEvolver E; typedef TaskInput<E> I; typedef TaskOutput<E> O; typedef TaskObjective<E> OBJ;
 
-    E evolver(system,Configuration<E>(integrator).set_maximum_step_size(1.0));
+    E evolver(system,Configuration<E>(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
-
 
     OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.25_x,DoublePrecision())),Dyadic(2));
     auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
         return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
     auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 1.25, RankingConstraintSeverity::CRITICAL);
     auto refinement = ConfigurationPropertyRefinement<E>(ConfigurationPropertyPath("integrator").append("step_maximum_error"),
-                                                         {y_65},ProportionalRefiner(-1e-1));
+                                                         {y_65},ProportionalRefiner(-1e-2));
     VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement});
 
     Real x0 = 0;
@@ -88,10 +87,7 @@ int main(int argc, const char* argv[])
         auto end = std::chrono::high_resolution_clock::now();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
 
-        ConcurrencyManager::instance().print_last_search_best_points();
-        ConcurrencyManager::instance().print_last_property_refinement_values();
-
-        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().last_optimal_point());
+        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().optimal_point());
 
         ARIADNE_LOG_PRINTLN("Plotting...");
         LabelledFigure fig({-2.0<=x<=2.0,-2<=y<=2});
@@ -109,4 +105,7 @@ int main(int argc, const char* argv[])
     } catch (CriticalRankingFailureException<E>& ex) {
         ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
     }
+
+    ConcurrencyManager::instance().print_best_rankings();
+    ConcurrencyManager::instance().print_refinement_values();
 }

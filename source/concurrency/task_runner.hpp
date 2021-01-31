@@ -52,7 +52,6 @@ class SequentialRunner final : public TaskRunnerBase<C> {
   protected:
     SequentialRunner(ConfigurationType const& configuration);
   public:
-    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
@@ -74,7 +73,6 @@ class DetachedRunner final : public TaskRunnerBase<C> {
   public:
     virtual ~DetachedRunner();
 
-    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
@@ -112,7 +110,6 @@ template<class C> class ParameterSearchRunner final : public TaskRunnerBase<C> {
   public:
     virtual ~ParameterSearchRunner();
 
-    void dump_statistics() override final;
     Void push(InputType const& input) override final;
     OutputType pull() override final;
 
@@ -123,7 +120,6 @@ private:
     std::atomic<Nat> _failures; // Number of failures after a given push, reset during pulling
     Buffer<InputType> _last_used_input;
     std::queue<TaskSearchPoint> _points;
-    List<TaskExecutionRanking> _best_points;
     // Synchronization
     List<SharedPointer<LoggableSmartThread>> _threads;
     InputBufferType _input_buffer;

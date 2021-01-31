@@ -58,8 +58,6 @@ class TaskRunnerInterface {
     //! \brief Refine the current configuration from a completed task data, i.e., the input/output pair \a in and \a out
     virtual void refine_configuration(InputType const& in, OutputType const& out) = 0;
 
-    //! \brief Transfer running statistics onto the ConcurrencyManager
-    virtual void dump_statistics() = 0;
     //! \brief Push input
     virtual void push(InputType const& input) = 0;
     //! \brief Pull output from the runner

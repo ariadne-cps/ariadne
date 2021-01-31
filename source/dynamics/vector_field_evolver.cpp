@@ -234,8 +234,6 @@ _evolution(EnclosureListType& final_sets,
         else ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << time_indicator.percentage() << "%");
     }
 
-    runner()->dump_statistics();
-
     ARIADNE_LOG_PRINTLN("Finished evolution");
 }
 

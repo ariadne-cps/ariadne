@@ -49,7 +49,7 @@ int main(int argc, const char* argv[])
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
                                           .set_step_maximum_error(1e-6,1e-4)
                                           .set_maximum_temporal_order(8,15)
-                                          .set_starting_step_size_num_refinements(0,5)
+                                          .set_lipschitz_tolerance(1e-2,0.5)
                                           .set_sweeper({sweeper1,sweeper2,sweeper3})
                                           );
 

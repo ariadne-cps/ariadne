@@ -87,8 +87,6 @@ IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction cons
     FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step)))))).upper();
     auto lipschitz_step = static_cast<StepSizeType>(cast_exact(base_configuration().lipschitz_tolerance()/lipschitz));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,lipschitz_step);
-    for (SizeType i=0; i<base_configuration().starting_step_size_num_refinements(); ++i)
-        lipschitz_step = hlf(lipschitz_step);
     return min(lipschitz_step, maximum_time_step);
 }
 

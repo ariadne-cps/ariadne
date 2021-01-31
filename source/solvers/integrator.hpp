@@ -172,12 +172,9 @@ template<> struct Configuration<IntegratorBase> : public SharedSearchableConfigu
 
     Configuration(SearchableConfiguration const& configuration) {
         add_property_from("lipschitz_tolerance",configuration);
-        add_property_from("starting_step_size_num_refinements",configuration);
         add_property_from("bounder",configuration);
     }
 
-    //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
-    DegreeType const& starting_step_size_num_refinements() const { return at<DegreeTypeProperty>("starting_step_size_num_refinements").get(); }
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
     RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
@@ -237,7 +234,6 @@ template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfi
 
         // Base properties
         add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,Log2SearchSpaceConverter<RealType>()));
-        add_property("starting_step_size_num_refinements",DegreeTypeProperty(0u));
         add_property("bounder",BounderProperty(EulerBounder()));
     }
 
@@ -262,11 +258,6 @@ template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfi
     C& set_maximum_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("maximum_temporal_order").set(lower,upper); return *this; }
 
     //! Base properties
-
-    //! \brief The number of times the starting step size obtained from the Lipschitz step is divided by two
-    DegreeType const& starting_step_size_num_refinements() const { return at<DegreeTypeProperty>("starting_step_size_num_refinements").get(); }
-    C& set_starting_step_size_num_refinements(DegreeType const& value) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(value); return *this; }
-    C& set_starting_step_size_num_refinements(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("starting_step_size_num_refinements").set(lower,upper); return *this; }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.

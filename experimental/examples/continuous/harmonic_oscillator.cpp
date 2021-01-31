@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
     auto integrator_configuration = Configuration<TaylorPicardIntegrator>()
             .set_step_maximum_error(1e-7,1e-4)
             .set_maximum_temporal_order(9,15)
-            .set_starting_step_size_num_refinements(0,5)
+            .set_lipschitz_tolerance(0.5)
             .set_sweeper(sweeper2);
     ARIADNE_LOG_PRINTLN_VAR_AT(1,integrator_configuration.search_space());
     TaylorPicardIntegrator integrator(integrator_configuration);

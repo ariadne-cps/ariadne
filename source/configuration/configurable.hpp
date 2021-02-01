@@ -58,18 +58,6 @@ template<class C> class Configurable : public ConfigurableInterface {
     SharedPointer<Configuration<C>> _configuration;
 };
 
-//! \brief Is-a component that provides a configuration
-//! \details In order to avoid ambiguity when casting to ConfigurableInterface, base classes need
-//! to use this in place of Configurable
-template<class C> class BaseConfigurable {
-    friend struct Configuration<C>;
-public:
-    BaseConfigurable(Configuration<C> const& config);
-    Configuration<C> const& configuration() const;
-private:
-    SharedPointer<Configuration<C>> _configuration;
-};
-
 } // namespace Ariadne
 
 #endif // ARIADNE_CONFIGURATION_HPP

@@ -58,11 +58,10 @@ int main(int argc, const char* argv[])
     E evolver(system,Configuration<E>().set_integrator(integrator));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
-    ARIADNE_LOG_PRINTLN_AT(1,"Done.");
 
     OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.079_x,DoublePrecision())),Dyadic(6.5_x));
     auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
-        return ((o.evolve.bounding_box()[y].radius()-i.current_set.bounding_box()[y].radius())/o.step_size_used).get_d(); });
+        return o.evolve.bounding_box()[y].upper_bound().get_d(); });
     auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 2.75, RankingConstraintSeverity::CRITICAL);
     auto refinement_target = ConfigurationPropertyRefinement<E>(
             ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65},ProportionalRefiner(-1e-4));

@@ -101,8 +101,7 @@ Set<ConfigurationSearchPoint> make_extended_set_by_shifting(Set<ConfigurationSea
 //! \brief Make a configuration from another configuration \a cfg and a point \a p in the search space
 template<class C> Configuration<C> make_singleton(Configuration<C> const& cfg, ConfigurationSearchPoint const& p) {
     ARIADNE_PRECONDITION(not cfg.is_singleton());
-    Configuration<C> result;
-    result = cfg;
+    Configuration<C> result = cfg;
     for (auto param : p.space().parameters()) {
         auto prop_ptr = result.properties().find(param.path().first());
         ARIADNE_ASSERT_MSG(prop_ptr != cfg.properties().end(), "The ConfigurationSearchPoint parameter '" << param.path() << "' is not in the configuration.");

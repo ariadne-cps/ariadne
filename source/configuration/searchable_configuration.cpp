@@ -27,6 +27,10 @@
 
 namespace Ariadne {
 
+SearchableConfiguration::SearchableConfiguration(SearchableConfiguration const& c) {
+    for (auto p : c.properties()) _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>(p.first,SharedPointer<ConfigurationPropertyInterface>(p.second->clone())));
+}
+
 SearchableConfiguration& SearchableConfiguration::operator=(SearchableConfiguration const& c) {
     _properties.clear();
     for (auto p : c.properties()) _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>(p.first,SharedPointer<ConfigurationPropertyInterface>(p.second->clone())));
@@ -77,22 +81,6 @@ ConfigurationSearchSpace SearchableConfiguration::search_space() const {
     }
     ARIADNE_ASSERT_MSG(not result.empty(),"The search space is empty.");
     return result;
-}
-
-void SharedSearchableConfiguration::add_property_from(Identifier const& name, SearchableConfiguration const& c) {
-    auto p = c.properties().find(name);
-    ARIADNE_ASSERT_MSG(p != c.properties().end(), "The supplied property '" << name <<"' does not exist in the source configuration.");
-    _properties.insert(Pair<Identifier,SharedPointer<ConfigurationPropertyInterface>>(p->first,p->second));
-}
-
-OutputStream& SharedSearchableConfiguration::_write(OutputStream& os) const {
-    os << "(\n";
-    auto iter = _properties.begin(); SizeType i=0;
-    while (i<_properties.size()-1) {
-        os << iter->first << " = " << *iter->second << ",\n";
-        ++iter; ++i;
-    }
-    os << iter->first << " = " << *iter->second << ")"; return os;
 }
 
 } // namespace Ariadne

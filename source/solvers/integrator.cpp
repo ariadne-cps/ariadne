@@ -80,7 +80,7 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
 IntegratorBase::IntegratorBase(Configuration<IntegratorBase> const& config)
-    : BaseConfigurable<IntegratorBase>(config) { }
+    : Configurable<IntegratorBase>(config) { }
 
 StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
@@ -134,12 +134,10 @@ inline ExactDouble operator*(ExactDouble, TwoExp);
 inline ExactDouble operator/(ExactDouble, TwoExp);
 
 TaylorPicardIntegrator::TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config)
-    : IntegratorBase(config), Configurable<TaylorPicardIntegrator>(config) { }
+    : IntegratorBase(config) { }
 
 TaylorPicardIntegrator* TaylorPicardIntegrator::clone() const {
-    Configuration<TaylorPicardIntegrator> cfg;
-    cfg = configuration();
-    return new TaylorPicardIntegrator(cfg);
+    return new TaylorPicardIntegrator(this->configuration());
 }
 
 FlowStepModelType
@@ -223,7 +221,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
 
 Void TaylorPicardIntegrator::_write(OutputStream& os) const {
-    os << "TaylorPicardIntegrator" << Configurable<TaylorPicardIntegrator>::configuration();
+    os << "TaylorPicardIntegrator" << configuration();
 }
 
 } // namespace Ariadne

@@ -103,7 +103,7 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
     friend OutputStream& operator<<(OutputStream& os, FlowModelType const& flwm);
 };
 
-class IntegratorBase : public IntegratorInterface, public BaseConfigurable<IntegratorBase>
+class IntegratorBase : public IntegratorInterface, public Configurable<IntegratorBase>
 {
   protected:
     IntegratorBase(Configuration<IntegratorBase> const& config);
@@ -183,40 +183,7 @@ template<> struct Configuration<IntegratorBase> : public SearchableConfiguration
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
 };
 
-//! \brief An integrator which uses a validated Picard iteration on Taylor models.
-class TaylorPicardIntegrator : public IntegratorBase, public Configurable<TaylorPicardIntegrator>
-{
-  public:
-    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config);
-
-    virtual TaylorPicardIntegrator* clone() const;
-    virtual Void _write(OutputStream& os) const;
-
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
-              const ExactBoxType& state_domain,
-              const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
-
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
-              const ExactBoxType& state_domain,
-              const Interval<StepSizeType>& time_domain,
-              const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
-
-    using IntegratorBase::flow_step;
-    using Configurable<TaylorPicardIntegrator>::configuration;
-
-  private:
-
-    FlowStepModelType
-    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
-               const ExactBoxType& state_domain,
-               const ExactIntervalType& time_domain,
-               const ExactBoxType& parameter_domain,
-               const UpperBoxType& bounding_box) const;
-};
+class TaylorPicardIntegrator;
 
 template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<IntegratorBase> {
     typedef Configuration<TaylorPicardIntegrator> C;
@@ -266,6 +233,41 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<I
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
     C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
     C& set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
+};
+
+//! \brief An integrator which uses a validated Picard iteration on Taylor models.
+class TaylorPicardIntegrator : public IntegratorBase
+{
+  public:
+    TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator> const& config);
+
+    virtual TaylorPicardIntegrator* clone() const;
+    virtual Void _write(OutputStream& os) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
+    using IntegratorBase::flow_step;
+    Configuration<TaylorPicardIntegrator> const& configuration() const { return static_cast<Configuration<TaylorPicardIntegrator> const&>(IntegratorBase::configuration()); }
+
+  private:
+
+    FlowStepModelType
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
 };
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.

@@ -107,9 +107,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Configura
 { }
 
 VectorFieldEvolver* VectorFieldEvolver::clone() const {
-    ConfigurationType new_cfg;
-    new_cfg = configuration();
-    return new VectorFieldEvolver(system(),new_cfg);
+    return new VectorFieldEvolver(system(),configuration());
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {

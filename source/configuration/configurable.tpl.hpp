@@ -40,12 +40,6 @@ template<class C> SearchableConfiguration const& Configurable<C>::searchable_con
     return dynamic_cast<SearchableConfiguration const &>(*_configuration);
 }
 
-template<class C> BaseConfigurable<C>::BaseConfigurable(Configuration<C> const& config) : _configuration(new Configuration<C>(config)) { }
-
-template<class C> Configuration<C> const& BaseConfigurable<C>::configuration() const {
-    return *_configuration;
-}
-
 } // namespace Ariadne
 
 #endif // ARIADNE_CONFIGURABLE_TPL_HPP

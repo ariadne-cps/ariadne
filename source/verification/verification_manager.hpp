@@ -65,11 +65,10 @@ class VerificationManager {
         auto num_refinements = refinement_targets.size();
         ARIADNE_ASSERT_MSG(num_refinements <= search_space_dimension, "The number of properties to refine is greater than the number of non-single properties.");
         Configuration<R> cfg = runnable.configuration();
-        auto new_cfg = cfg;
         for (auto target : refinement_targets)
-            new_cfg.properties().get(target.path().first())->refine_init(target.path().subpath());
+            cfg.properties().get(target.path().first())->refine_init(target.path().subpath());
 
-        ConcurrencyManager::instance().choose_runner_for(runnable, new_cfg); // Re-chooses the runner
+        ConcurrencyManager::instance().choose_runner_for(runnable, cfg); // Re-chooses the runner
         runnable.runner()->task().set_ranking_space(builder.build());
         runnable.runner()->task().set_configuration_refinements(refinement_targets);
     }

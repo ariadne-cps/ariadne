@@ -84,8 +84,8 @@ ConfigurationSearchSpace* ConfigurationSearchSpace::clone() const {
     return new ConfigurationSearchSpace(*this);
 }
 
-OutputStream& ConfigurationSearchSpace::_write(OutputStream& os) const {
-    return os << _parameters;
+OutputStream& operator<<(OutputStream& os, ConfigurationSearchSpace const& space) {
+    return os << space._parameters;
 }
 
 } // namespace Ariadne

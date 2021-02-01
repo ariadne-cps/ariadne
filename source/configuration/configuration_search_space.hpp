@@ -29,7 +29,6 @@
 #ifndef ARIADNE_CONFIGURATION_SEARCH_SPACE_HPP
 #define ARIADNE_CONFIGURATION_SEARCH_SPACE_HPP
 
-#include "utility/writable.hpp"
 #include "configuration_search_parameter.hpp"
 
 namespace Ariadne {
@@ -40,7 +39,7 @@ template<class R> class Variable;
 
 using ParameterBindingsMap = Map<ConfigurationPropertyPath,int>;
 
-class ConfigurationSearchSpace : public WritableInterface {
+class ConfigurationSearchSpace {
   public:
     ConfigurationSearchSpace(Set<ConfigurationSearchParameter> const& parameters);
 
@@ -62,7 +61,7 @@ class ConfigurationSearchSpace : public WritableInterface {
 
     ConfigurationSearchSpace* clone() const;
 
-    virtual OutputStream& _write(OutputStream& os) const;
+    friend OutputStream& operator<<(OutputStream& os, ConfigurationSearchSpace const& space);
 
   private:
     const List<ConfigurationSearchParameter> _parameters;

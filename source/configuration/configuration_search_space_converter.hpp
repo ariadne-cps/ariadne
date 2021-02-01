@@ -29,6 +29,9 @@
 #ifndef ARIADNE_CONFIGURATION_SEARCH_SPACE_CONVERTER_HPP
 #define ARIADNE_CONFIGURATION_SEARCH_SPACE_CONVERTER_HPP
 
+#include "numeric/builtin.hpp"
+#include "numeric/real.hpp"
+
 namespace Ariadne {
 
 //! \brief Interface for conversion from/into the integer search space

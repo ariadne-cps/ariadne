@@ -157,8 +157,8 @@ Nat ConfigurationSearchPoint::distance(ConfigurationSearchPoint const& p) const 
     return result;
 }
 
-OutputStream& ConfigurationSearchPoint::_write(OutputStream& os) const {
-    return os << _bindings.values();
+OutputStream& operator<<(OutputStream& os, ConfigurationSearchPoint const& point) {
+    return os << point._bindings.values();
 }
 
 List<Nat> ConfigurationSearchPoint::shift_breadths() const {

@@ -86,9 +86,9 @@ ConfigurationPropertyPath ConfigurationPropertyPath::subpath() const {
     return result;
 }
 
-OutputStream& ConfigurationPropertyPath::_write(OutputStream& os) const {
-    auto size = _path.size();
-    auto iter = _path.begin();
+OutputStream& operator<<(OutputStream& os, ConfigurationPropertyPath const& p) {
+    auto size = p._path.size();
+    auto iter = p._path.begin();
     os << "./";
     for (SizeType i=0; i<size; ++i) {
         os << *iter << "/";

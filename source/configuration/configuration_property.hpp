@@ -31,12 +31,9 @@
 
 #include <ostream>
 #include <type_traits>
-#include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/real.hpp"
 #include "configuration_interface.hpp"
 #include "configuration_property_interface.hpp"
 #include "configuration_property_refiner.hpp"

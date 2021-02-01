@@ -37,7 +37,7 @@ namespace Ariadne {
 
 using ParameterBindingsMap = Map<ConfigurationPropertyPath,int>;
 
-class ConfigurationSearchPoint : public WritableInterface {
+class ConfigurationSearchPoint {
     friend class ConfigurationSearchSpace;
   protected:
     ConfigurationSearchPoint(ConfigurationSearchSpace const& space, ParameterBindingsMap const& bindings);
@@ -81,7 +81,7 @@ class ConfigurationSearchPoint : public WritableInterface {
     //! \brief Compute the breadth of possible shifts of the point for each parameter
     List<Nat> shift_breadths() const;
 
-    virtual OutputStream& _write(OutputStream& os) const;
+    friend OutputStream& operator<<(OutputStream& os, ConfigurationSearchPoint const& point);
   private:
 
     SharedPointer<ConfigurationSearchSpace> _space;

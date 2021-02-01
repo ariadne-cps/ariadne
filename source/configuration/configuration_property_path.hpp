@@ -33,11 +33,10 @@
 #include <deque>
 #include "utility/identifier.hpp"
 #include "utility/typedefs.hpp"
-#include "utility/writable.hpp"
 
 namespace Ariadne {
 
-class ConfigurationPropertyPath : public WritableInterface {
+class ConfigurationPropertyPath {
   public:
     ConfigurationPropertyPath() = default;
     ConfigurationPropertyPath(Identifier const& first);
@@ -58,7 +57,7 @@ class ConfigurationPropertyPath : public WritableInterface {
     //! \brief Return everything but the first level of the path
     ConfigurationPropertyPath subpath() const;
 
-    OutputStream& _write(OutputStream& os) const override;
+    friend OutputStream& operator<<(OutputStream& os, ConfigurationPropertyPath const& path);
   private:
     std::deque<Identifier> _path;
 };

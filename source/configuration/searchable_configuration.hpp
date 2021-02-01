@@ -31,7 +31,6 @@
 
 #include <ostream>
 #include <type_traits>
-#include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"

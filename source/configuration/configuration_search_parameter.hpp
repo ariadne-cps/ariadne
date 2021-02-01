@@ -32,14 +32,13 @@
 #include "utility/typedefs.hpp"
 #include "utility/container.hpp"
 #include "utility/string.hpp"
-#include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "utility/identifier.hpp"
-#include "configuration/configuration_property_path.hpp"
+#include "configuration_property_path.hpp"
 
 namespace Ariadne {
 
-class ConfigurationSearchParameter : public WritableInterface {
+class ConfigurationSearchParameter {
   public:
     ConfigurationSearchParameter(ConfigurationPropertyPath const& path, Bool is_metric, List<int> const& values);
     ConfigurationPropertyPath const& path() const;
@@ -55,7 +54,7 @@ class ConfigurationSearchParameter : public WritableInterface {
     Bool operator==(ConfigurationSearchParameter const& p) const;
     Bool operator<(ConfigurationSearchParameter const& p) const;
 
-    OutputStream& _write(OutputStream& os) const override;
+    friend OutputStream& operator<<(OutputStream& os, ConfigurationSearchParameter const& parameter);
 
   private:
     const ConfigurationPropertyPath _path;

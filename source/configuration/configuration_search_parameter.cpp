@@ -69,10 +69,10 @@ Bool ConfigurationSearchParameter::operator<(ConfigurationSearchParameter const&
     return path() < p.path();
 }
 
-OutputStream& ConfigurationSearchParameter::_write(OutputStream& os) const {
-    os << "{'" << path() << "', is_metric=" << _is_metric << ", values=";
-    if (_is_metric) os << "[" << _values[0] << ":" << _values[_values.size()-1] << "]";
-    else os << _values;
+OutputStream& operator<<(OutputStream& os, ConfigurationSearchParameter const& p) {
+    os << "{'" << p._path << "', is_metric=" << p._is_metric << ", values=";
+    if (p._is_metric) os << "[" << p._values[0] << ":" << p._values[p._values.size()-1] << "]";
+    else os << p._values;
     return os << "}";
 }
 

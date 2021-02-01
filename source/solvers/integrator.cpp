@@ -79,13 +79,13 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
-IntegratorBase::IntegratorBase(SearchableConfiguration const& config)
-    : SharedConfigurable<IntegratorBase>(config) { }
+IntegratorBase::IntegratorBase(Configuration<IntegratorBase> const& config)
+    : BaseConfigurable<IntegratorBase>(config) { }
 
 StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
     FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step)))))).upper();
-    auto lipschitz_step = static_cast<StepSizeType>(cast_exact(base_configuration().lipschitz_tolerance()/lipschitz));
+    auto lipschitz_step = static_cast<StepSizeType>(cast_exact(configuration().lipschitz_tolerance()/lipschitz));
     ARIADNE_LOG_PRINTLN_VAR_AT(1,lipschitz_step);
     return min(lipschitz_step, maximum_time_step);
 }
@@ -94,22 +94,22 @@ StepSizeType
 IntegratorBase::starting_time_step_size(ValidatedVectorMultivariateFunction const& vector_field, BoxDomainType const& state_domain, BoxDomainType const& parameter_domain, StepSizeType const& evaluation_time_step, StepSizeType const& maximum_time_step) const {
 
     FloatDPUpperBound lipschitz = norm(vector_field.jacobian(Vector<FloatDPBounds>(cast_singleton(product(state_domain, to_time_bounds(0, evaluation_time_step), parameter_domain))))).upper();
-    return min(static_cast<StepSizeType>(cast_exact(base_configuration().lipschitz_tolerance()/lipschitz)), maximum_time_step);
+    return min(static_cast<StepSizeType>(cast_exact(configuration().lipschitz_tolerance()/lipschitz)), maximum_time_step);
 }
 
 Pair<StepSizeType,UpperBoxType>
 IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
-    return base_configuration().bounder().compute(vf,D,hsug);
+    return configuration().bounder().compute(vf,D,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
 IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
-    return base_configuration().bounder().compute(vf,D,A,hsug);
+    return configuration().bounder().compute(vf,D,A,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
 IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
-    return base_configuration().bounder().compute(vf,D,t,A,hsug);
+    return configuration().bounder().compute(vf,D,t,A,hsug);
 }
 
 
@@ -737,11 +737,11 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 Pair<StepSizeType,UpperBoxType>
 TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
 {
-    return base_configuration().bounder().compute(vf,dx,hmax);
+    return configuration().bounder().compute(vf,dx,hmax);
 }
 
 Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
-    os << "TaylorSeriesIntegrator" << base_configuration();
+    os << "TaylorSeriesIntegrator" << configuration();
 }
 
 
@@ -784,11 +784,11 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
 Pair<StepSizeType,UpperBoxType>
 GradedTaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
 {
-    return base_configuration().bounder().compute(vf,dx,hmax);
+    return configuration().bounder().compute(vf,dx,hmax);
 }
 
 Void GradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
-    os << "GradedTaylorSeriesIntegrator" << base_configuration();
+    os << "GradedTaylorSeriesIntegrator" << configuration();
 }
 
 
@@ -892,7 +892,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 }
 
 Void AffineIntegrator::_write(OutputStream& os) const {
-    os << "AffineIntegrator" << base_configuration();
+    os << "AffineIntegrator" << configuration();
 }
 
 

@@ -103,10 +103,10 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
     friend OutputStream& operator<<(OutputStream& os, FlowModelType const& flwm);
 };
 
-class IntegratorBase : public IntegratorInterface, public SharedConfigurable<IntegratorBase>
+class IntegratorBase : public IntegratorInterface, public BaseConfigurable<IntegratorBase>
 {
   protected:
-    IntegratorBase(SearchableConfiguration const& config);
+    IntegratorBase(Configuration<IntegratorBase> const& config);
   public:
 
     virtual StepSizeType
@@ -163,21 +163,22 @@ class IntegratorBase : public IntegratorInterface, public SharedConfigurable<Int
               const UpperBoxType& bounding_box) const = 0;
 };
 
-template<> struct Configuration<IntegratorBase> : public SharedSearchableConfiguration {
+template<> struct Configuration<IntegratorBase> : public SearchableConfiguration {
   public:
     typedef ExactDouble RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
 
-    Configuration(SearchableConfiguration const& configuration) {
-        add_property_from("lipschitz_tolerance",configuration);
-        add_property_from("bounder",configuration);
+    Configuration() {
+        add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,Log2SearchSpaceConverter<RealType>()));
+        add_property("bounder",BounderProperty(EulerBounder()));
     }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
     RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
+
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
 };
@@ -205,6 +206,7 @@ class TaylorPicardIntegrator : public IntegratorBase, public Configurable<Taylor
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
+    using Configurable<TaylorPicardIntegrator>::configuration;
 
   private:
 
@@ -216,13 +218,12 @@ class TaylorPicardIntegrator : public IntegratorBase, public Configurable<Taylor
                const UpperBoxType& bounding_box) const;
 };
 
-template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfiguration {
+template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<IntegratorBase> {
     typedef Configuration<TaylorPicardIntegrator> C;
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionModelDPFactoryInterface> FunctionFactoryProperty;
     typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
@@ -231,10 +232,6 @@ template<> struct Configuration<TaylorPicardIntegrator> : public SearchableConfi
         add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>()));
         add_property("minimum_temporal_order",DegreeTypeProperty(0u));
         add_property("maximum_temporal_order",DegreeTypeProperty(15u));
-
-        // Base properties
-        add_property("lipschitz_tolerance",RealTypeProperty(0.5_x,Log2SearchSpaceConverter<RealType>()));
-        add_property("bounder",BounderProperty(EulerBounder()));
     }
 
     //! \brief The sweeper to be used when creating a flow function.

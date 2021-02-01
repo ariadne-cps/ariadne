@@ -100,11 +100,12 @@ public:
 
     //Map<Identifier,SharedPointer<ConfigurationPropertyInterface>> const& properties() const;
 
-    //! \brief Accessors for get and set of a property identified by \a identifier of type \a P
+    //! \brief Accessors for const get of a property identified by \a identifier of type \a P
     template<class P> P const& at(Identifier const& identifier) const {
         auto prop_ptr = _properties.find(identifier);
         ARIADNE_ASSERT_MSG(prop_ptr != _properties.end(),"The property '" << identifier << "' was not found in the configuration.");
-        return static_cast<P const&>(*prop_ptr->second); }
+        return static_cast<P const&>(*prop_ptr->second);
+    }
 
     //! \brief Add a property to the configuration from another configuration
     //! \details This is used to copy a property from a user configuration onto the base class configuration

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/configurable.hpp
+ *            configuration/configurable.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/configurable.hpp
+/*! \file configuration/configurable.hpp
  *  \brief Classes for configurable tasks.
  */
 

@@ -77,8 +77,9 @@ template<class R> class TaskObjectiveMeasurerBase : public TaskObjectiveMeasurer
         for (auto obj : objectives) {
             if (not this->discard(i,obj)) {
                 auto ref = this->reference_measure(i, obj);
-                auto amount = (this->current_measure(i, o, obj) - ref) / ref;
-                if (amount > result) result = amount;
+                auto cur = this->current_measure(i, o, obj);
+                ScoreType error = (cur - ref)/abs(ref);
+                if (error > result) result = error;
             }
         }
         return result;

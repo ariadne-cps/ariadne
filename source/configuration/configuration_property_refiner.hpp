@@ -52,12 +52,33 @@ class ProportionalRefiner : public ConfigurationPropertyRefinerInterface {
     double _Kp;
 };
 
+//! \brief Proportional control refiner that considers the error infinite if positive
+class SaturateIfPositiveProportionalRefiner : public ConfigurationPropertyRefinerInterface {
+public:
+    SaturateIfPositiveProportionalRefiner(double Kp) : _Kp(Kp) { }
+    double apply(double error, double step, double current) override { if (error > 0) error = std::numeric_limits<double>::max(); return current+_Kp*error; }
+    ConfigurationPropertyRefinerInterface* clone() const override { return new SaturateIfPositiveProportionalRefiner(*this); }
+private:
+    double _Kp;
+};
+
+//! \brief Proportional control refiner with exponential rather than constant gain
+class ExpProportionalRefiner : public ConfigurationPropertyRefinerInterface {
+public:
+    ExpProportionalRefiner(double Kp, double exp_base) : _Kp(Kp), _exp_base(exp_base) { }
+    double apply(double error, double step, double current) override { return current + _Kp*pow(_exp_base,error)*error; }
+    ConfigurationPropertyRefinerInterface* clone() const override { return new ExpProportionalRefiner(*this); }
+private:
+    double _Kp;
+    double _exp_base;
+};
+
 //! \brief Proportional-Integrative-Derivative control refiner
 class PIDRefiner : public ConfigurationPropertyRefinerInterface {
   public:
     PIDRefiner(double Kp, double Ki, double Kd) : _Kp(Kp), _Ki(Ki), _Kd(Kd), _error_k_2(0), _error_k_1(0), _step_k_1(1e-20) { }
     double apply(double error_k, double step_k, double current) override {
-        if (error_k == std::numeric_limits<double>::min()) return std::numeric_limits<double>::max();
+        if (error_k == std::numeric_limits<double>::min()) return _Kp * std::numeric_limits<double>::max();
         auto result = current + (_Kp+_Ki*step_k+_Kd/step_k)*error_k - (_Kp+_Kd*(step_k+_step_k_1)/(step_k*_step_k_1))*_error_k_1 + _Kd/_step_k_1*_error_k_2;
         _error_k_2 = _error_k_1;
         _error_k_1 = error_k;
@@ -66,6 +87,34 @@ class PIDRefiner : public ConfigurationPropertyRefinerInterface {
     }
     ConfigurationPropertyRefinerInterface* clone() const override { return new PIDRefiner(*this); }
   private:
+    const double _Kp;
+    const double _Ki;
+    const double _Kd;
+    double _error_k_2;
+    double _error_k_1;
+    double _step_k_1;
+};
+
+//! \brief Proportional-Integrative-Derivative control refiner, saturating and resetting if a positive error occurs
+class SaturateIfPositivePIDRefiner : public ConfigurationPropertyRefinerInterface {
+public:
+    SaturateIfPositivePIDRefiner(double Kp, double Ki, double Kd) : _Kp(Kp), _Ki(Ki), _Kd(Kd), _error_k_2(0), _error_k_1(0), _step_k_1(1.0) { }
+    double apply(double error_k, double step_k, double current) override {
+        if (error_k == std::numeric_limits<double>::min()) return _Kp * std::numeric_limits<double>::max();
+        else if (error_k > 0) {
+            error_k = std::numeric_limits<double>::max();
+            _error_k_2 = 0;
+            _error_k_1 = 0;
+            _step_k_1 = 1.0;
+        }
+        auto result = current + (_Kp+_Ki*step_k+_Kd/step_k)*error_k - (_Kp+_Kd*(step_k+_step_k_1)/(step_k*_step_k_1))*_error_k_1 + _Kd/_step_k_1*_error_k_2;
+        _error_k_2 = _error_k_1;
+        _error_k_1 = error_k;
+        _step_k_1 = step_k;
+        return result;
+    }
+    ConfigurationPropertyRefinerInterface* clone() const override { return new SaturateIfPositivePIDRefiner(*this); }
+private:
     const double _Kp;
     const double _Ki;
     const double _Kd;

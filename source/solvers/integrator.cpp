@@ -140,6 +140,10 @@ TaylorPicardIntegrator* TaylorPicardIntegrator::clone() const {
     return new TaylorPicardIntegrator(this->configuration());
 }
 
+Configuration<TaylorPicardIntegrator> const& TaylorPicardIntegrator::configuration() const {
+    return static_cast<Configuration<TaylorPicardIntegrator> const&>(IntegratorBase::configuration());
+}
+
 FlowStepModelType
 TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
 {

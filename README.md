@@ -12,7 +12,7 @@ The installation instructions are presented for Ubuntu 20.04 and macOS 10.15 onl
 
 For the Ubuntu installation, we will refer to packages available on Aptitude. The macOS installation instead will assume you are using the Brew package manager.
 
-The build system is CMake. The library is tested for compilation using gcc and clang.
+The build system is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0 or AppleClang 12).
 
 #### Dependencies
 
@@ -25,7 +25,7 @@ Please note that adding new dependencies after preparing the build environment r
 Specific instructions for Ubuntu and macOS follow.
 
 ##### Ubuntu
-Aptitude packages: `cmake pkg-config git libgmp-dev libmpfr-dev libcairo2-dev`
+Aptitude packages: `cmake pkg-config git libgmp-dev libmpfr-dev libcairo2-dev` and either `clang-11` or `g++-10` for the compiler toolchain.
 
 Additional package required for the Python interface: `python3-dev` or `python-dev`.
 
@@ -34,7 +34,7 @@ Additional packages required for documentation: `doxygen doxygen-latex`
 ##### macOS
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
 
-2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake git mpfr gmp cairo`
+2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake git mpfr gmp cairo` and `gcc@10` if using GCC.
 
 For Cairo support, you may need to set up a permanent variable for the path of pkgconfig by adding the following line in your `~\.bash_profile`:
 

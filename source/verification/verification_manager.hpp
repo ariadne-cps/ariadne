@@ -60,7 +60,7 @@ class VerificationManager {
         auto original_weights = appraisal_space.parameters_weights();
         TaskRankingSpaceBuilder<R> builder;
         for (auto constr : appraisal_space.constraints()) builder.add(constr,original_weights.get(constr.parameter()));
-        for (auto constr : safety_constraints) builder.add(constr); // Use default weight 1.0
+        for (auto constr : safety_constraints) builder.add(constr,1.0/safety_constraints.size()); // Use a total weight of 1.5 distributed along safety constraints
         auto search_space_dimension = runnable.searchable_configuration().search_space().dimension();
         auto num_refinements = refinement_targets.size();
         ARIADNE_ASSERT_MSG(num_refinements <= search_space_dimension, "The number of properties to refine is greater than the number of non-single properties.");

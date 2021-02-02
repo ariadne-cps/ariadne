@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/searchable_configuration.hpp
+ *            configuration/searchable_configuration.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/searchable_configuration.hpp
+/*! \file configuration/searchable_configuration.hpp
  *  \brief Classes for configuration and related helpers.
  */
 

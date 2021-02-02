@@ -24,6 +24,15 @@
 
 /*! \file configuration/configurable.hpp
  *  \brief Classes for configurable tasks.
+ *  \details If a class C needs a configuration, then it:
+ *  1) must derive from Configurable<C>
+ *  2) a Configuration<C> must be specified, which derives from SearchableConfiguration
+ *  3) C constructors must take a Configuration<C> object
+ *  For a base class B and one of its derivations D, D derives from B as usual, while the configuration design is a bit more complicated:
+ *  1) B follows the design for a configurable class as described above
+ *  2) Configuration<D> derives from Configuration<B>, with get/set accessors for Configuration<B> also, since Configuration<B> can't be passed
+ *     (you could make Configuration<B> constructors protected, if you prefer)
+ *  3) D needs its own configuration() override, which static casts B::configuration() onto Configuration<D>
  */
 
 #ifndef ARIADNE_CONFIGURABLE_HPP

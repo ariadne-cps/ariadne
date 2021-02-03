@@ -66,13 +66,13 @@ class TestConfiguration {
 
     void test_converters() {
         Log10SearchSpaceConverter<ExactDouble> log10_x;
-        ARIADNE_TEST_EQUALS(log10_x.to_int(0.001_x),-3);
+        ARIADNE_TEST_EQUALS(log10_x.to_int(cast_exact(0.001)),-3);
         ARIADNE_TEST_PRINT(log10_x.from_int(-3).get_d());
         Log2SearchSpaceConverter<ExactDouble> log2_x;
         ARIADNE_TEST_EQUALS(log2_x.to_int(0.03125_x),-5);
         ARIADNE_TEST_PRINT(log2_x.from_int(-5).get_d());
         LinearSearchSpaceConverter<ExactDouble> lin_x;
-        ARIADNE_TEST_EQUALS(lin_x.to_int(3.49_x),3);
+        ARIADNE_TEST_EQUALS(lin_x.to_int(cast_exact(3.49)),3);
         ARIADNE_TEST_EQUALS(lin_x.to_int(3.5_x),4);
         ARIADNE_TEST_EQUALS(lin_x.from_int(4).get_d(),4);
         LinearSearchSpaceConverter<int> lin_int;
@@ -143,16 +143,16 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(not p1.is_specified());
         ARIADNE_TEST_ASSERT(not p1.is_single());
         ARIADNE_TEST_EQUALS(p1.cardinality(),0);
-        ExactDoubleConfigurationProperty p2(1e-2_x,converter);
+        ExactDoubleConfigurationProperty p2(cast_exact(1e-2),converter);
         ARIADNE_TEST_ASSERT(p2.is_specified());
         ARIADNE_TEST_ASSERT(p2.is_single());
         ARIADNE_TEST_PRINT(p2.get());
         ARIADNE_TEST_EQUALS(p2.cardinality(),1);
-        ExactDoubleConfigurationProperty p3(1e-10_x,1e-8_x,converter);
+        ExactDoubleConfigurationProperty p3(cast_exact(1e-10),cast_exact(1e-8),converter);
         ARIADNE_TEST_ASSERT(p3.is_specified());
         ARIADNE_TEST_ASSERT(not p3.is_single());
         ARIADNE_TEST_EQUALS(p3.cardinality(),3);
-        ARIADNE_TEST_FAIL(ExactDoubleConfigurationProperty(1e-8_x,1e-9_x,converter));
+        ARIADNE_TEST_FAIL(ExactDoubleConfigurationProperty(cast_exact(1e-8),cast_exact(1e-9),converter));
     }
 
     void test_range_configuration_property_modification() {
@@ -162,35 +162,35 @@ class TestConfiguration {
         auto iv = p.integer_values();
         ARIADNE_TEST_EQUALS(iv.size(),1);
         ARIADNE_TEST_EQUALS(iv.begin()->second.size(),0);
-        p.set(1e-2_x);
+        p.set(cast_exact(1e-2));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),1);
         ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),1);
-        p.set(1e-10_x,1e-8_x);
+        p.set(cast_exact(1e-10),cast_exact(1e-8));
         ARIADNE_TEST_ASSERT(p.is_specified());
         ARIADNE_TEST_ASSERT(not p.is_single());
         ARIADNE_TEST_EQUALS(p.cardinality(),3);
         ARIADNE_TEST_EQUALS(p.integer_values().begin()->second.size(),3);
-        ARIADNE_TEST_FAIL(p.set(1e-8_x,1e-9_x));
+        ARIADNE_TEST_FAIL(p.set(cast_exact(1e-8),cast_exact(1e-9)));
     }
 
     void test_range_configuration_property_set_single() {
         Log10Converter converter;
-        ExactDoubleConfigurationProperty p(0.001_x,0.1_x,converter);
+        ExactDoubleConfigurationProperty p(cast_exact(0.001),cast_exact(0.1),converter);
         p.set_single(ConfigurationPropertyPath(),-3);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
-        p.set(0.001_x,0.1_x);
+        p.set(cast_exact(0.001),cast_exact(0.1));
         p.set_single(ConfigurationPropertyPath(),-1);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p);
-        p.set(0.001_x,0.1_x);
+        p.set(cast_exact(0.001),cast_exact(0.1));
         p.set_single(ConfigurationPropertyPath(),-2);
         ARIADNE_TEST_ASSERT(p.is_single());
         ARIADNE_TEST_PRINT(p.get().get_d());
         ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-1));
-        p.set(0.001_x,0.1_x);
+        p.set(cast_exact(0.001),cast_exact(0.1));
         ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),-4));
         ARIADNE_TEST_FAIL(p.set_single(ConfigurationPropertyPath(),0));
     }

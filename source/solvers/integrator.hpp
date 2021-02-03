@@ -229,7 +229,7 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<I
 
     Configuration() {
         add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-6)));
-        add_property("step_maximum_error",RealTypeProperty(1e-6_x,Log10SearchSpaceConverter<RealType>()));
+        add_property("step_maximum_error",RealTypeProperty(cast_exact(1e-6),Log10SearchSpaceConverter<RealType>()));
         add_property("minimum_temporal_order",DegreeTypeProperty(0u));
         add_property("maximum_temporal_order",DegreeTypeProperty(15u));
     }

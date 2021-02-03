@@ -167,7 +167,7 @@ class TestConfiguration {
         ARIADNE_TEST_ASSERT(b.is_singleton());
         ARIADNE_TEST_EQUALS(b.use_reconditioning(),use_reconditioning);
 
-        a.set_maximum_step_size(1e-3_x,1e-1_x);
+        a.set_maximum_step_size(cast_exact(1e-3),cast_exact(1e-1));
         auto search_space2 = a.search_space();
         ARIADNE_TEST_PRINT(search_space2);
         point = search_space2.initial_point();

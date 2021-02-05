@@ -37,11 +37,8 @@
 #include <queue>
 #include <map>
 #include <sstream>
-#include <thread>
-#include <future>
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
-#include "utility/writable.hpp"
 
 // Set the verbosity, i.e., the maximum level to be shown from println calls
 #define ARIADNE_LOG_SET_VERBOSITY(level) Logger::instance().configuration().set_verbosity(level);
@@ -114,7 +111,7 @@ static TerminalTextStyle TT_STYLE_DARKGREY(244,0,false,false);
 static TerminalTextStyle TT_STYLE_LIGHTGREY(251,0,false,false);
 
 //! \brief A set of text styles for different elements of the logging interface
-struct TerminalTextTheme : public WritableInterface {
+struct TerminalTextTheme {
     TerminalTextTheme();
     TerminalTextTheme(TerminalTextStyle level_number, TerminalTextStyle level_shown_separator, TerminalTextStyle level_hidden_separator,
                       TerminalTextStyle multiline_separator, TerminalTextStyle assignment_comparison, TerminalTextStyle miscellaneous_operator,
@@ -142,7 +139,7 @@ struct TerminalTextTheme : public WritableInterface {
 
     bool has_style() const; // Whether at least one style is set
 
-    virtual OutputStream& _write(OutputStream& os) const override;
+    friend OutputStream& operator<<(OutputStream& os, TerminalTextTheme const& theme);
 };
 
 //! \brief Empty theme, for not forcing any theme
@@ -205,7 +202,7 @@ enum class ThreadNamePrintingPolicy { NEVER, BEFORE, AFTER };
 OutputStream& operator<<(OutputStream& os, const ThreadNamePrintingPolicy& p);
 
 //! \brief Configuration of visualisation settings for a Logger
-class LoggerConfiguration : public WritableInterface {
+class LoggerConfiguration {
   public:
 
     LoggerConfiguration();
@@ -254,7 +251,7 @@ class LoggerConfiguration : public WritableInterface {
     //! \brief Get the map of keywords (a TerminalTextStyle equal to TT_STYLE_NONE implies no custom style forced)
     std::map<std::string,TerminalTextStyle> const& custom_keywords() const;
 
-    virtual OutputStream& _write(OutputStream& os) const override;
+    friend OutputStream& operator<<(OutputStream& os, LoggerConfiguration const& configuration);
 
   private:
     unsigned int _verbosity;

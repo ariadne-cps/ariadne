@@ -27,10 +27,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include "../config.hpp"
 #include "../output/logging.hpp"
-#include "../utility/writable.hpp"
-#include "../utility/macros.hpp"
 #include "../concurrency/loggable_smart_thread.hpp"
 
 namespace Ariadne {
@@ -44,18 +41,6 @@ void redirect_log(const char* filename)
     }
     log_file_stream.open(filename);
     std::clog.rdbuf( log_file_stream.rdbuf() );
-}
-
-OutputStream& operator<<(OutputStream& os, const WritableInterface& w);
-
-void write_error(OutputStream& os, const char* i, const char* c, const char* t) {
-    os << "Error in dynamic_handle_cast: cannot convert object of static type " << c << " and dynamic type " << i << " to type " << t << "\n";
-}
-
-void write_error(OutputStream& os, const WritableInterface* w, const char* i, const char* c, const char* t) {
-    os << "Error in dynamic_handle_cast:" << std::flush;
-    os << " cannot convert "; assert(w); w->_write(os); os << std::flush;
-    os << " of static type " << c << " and dynamic type " << i << " to type " << t << std::endl;
 }
 
 std::string very_pretty_function(std::string msg) {
@@ -110,22 +95,22 @@ bool TerminalTextTheme::has_style() const {
             colon.is_styled() or comma.is_styled() or number.is_styled() or at.is_styled() or keyword.is_styled());
 }
 
-OutputStream& TerminalTextTheme::_write(OutputStream& os) const {
+OutputStream& operator<<(OutputStream& os, TerminalTextTheme const& theme) {
     // This should not be used by ARIADNE_LOG_PRINTLN, otherwise it will be parsed further, breaking level separator styling
     os << "TerminalTextTheme("
-       << "\n  level_number= " << level_number() << "1 2 3 4 5 6 7 8 9" << TerminalTextStyle::RESET
-            << ",\n  level_shown_separator= " << level_shown_separator() << "|" << TerminalTextStyle::RESET
-            << ",\n  level_hidden_separator= " << level_hidden_separator() << "|" << TerminalTextStyle::RESET
-            << ",\n  multiline_separator= " << multiline_separator() << "·" << TerminalTextStyle::RESET
-            << ",\n  assignment_comparison= " << assignment_comparison() << "= > < !" << TerminalTextStyle::RESET
-            << ",\n  miscellaneous_operator= " << miscellaneous_operator() << "+ - * / \\ ^ | & %" << TerminalTextStyle::RESET
-            << ",\n  round_parentheses= " << round_parentheses() << "( )" << TerminalTextStyle::RESET
-            << ",\n  square_parentheses= " << square_parentheses() << "[ ]" << TerminalTextStyle::RESET
-            << ",\n  curly_parentheses= " << curly_parentheses() << "{ }" << TerminalTextStyle::RESET
-            << ",\n  comma= " << comma() << ":" << TerminalTextStyle::RESET
-            << ",\n  number= " << number() << "1.2" << TerminalTextStyle::RESET
-            << ",\n  at= " << at() << ":" << TerminalTextStyle::RESET
-            << ",\n  keyword= " << keyword() << "virtual const true false inf" << TerminalTextStyle::RESET
+       << "\n  level_number= " << theme.level_number() << "1 2 3 4 5 6 7 8 9" << TerminalTextStyle::RESET
+            << ",\n  level_shown_separator= " << theme.level_shown_separator() << "|" << TerminalTextStyle::RESET
+            << ",\n  level_hidden_separator= " << theme.level_hidden_separator() << "|" << TerminalTextStyle::RESET
+            << ",\n  multiline_separator= " << theme.multiline_separator() << "·" << TerminalTextStyle::RESET
+            << ",\n  assignment_comparison= " << theme.assignment_comparison() << "= > < !" << TerminalTextStyle::RESET
+            << ",\n  miscellaneous_operator= " << theme.miscellaneous_operator() << "+ - * / \\ ^ | & %" << TerminalTextStyle::RESET
+            << ",\n  round_parentheses= " << theme.round_parentheses() << "( )" << TerminalTextStyle::RESET
+            << ",\n  square_parentheses= " << theme.square_parentheses() << "[ ]" << TerminalTextStyle::RESET
+            << ",\n  curly_parentheses= " << theme.curly_parentheses() << "{ }" << TerminalTextStyle::RESET
+            << ",\n  comma= " << theme.comma() << ":" << TerminalTextStyle::RESET
+            << ",\n  number= " << theme.number() << "1.2" << TerminalTextStyle::RESET
+            << ",\n  at= " << theme.at() << ":" << TerminalTextStyle::RESET
+            << ",\n  keyword= " << theme.keyword() << "virtual const true false inf" << TerminalTextStyle::RESET
        << "\n)";
     return os;
 }
@@ -623,16 +608,16 @@ std::map<std::string,TerminalTextStyle> const& LoggerConfiguration::custom_keywo
     return _custom_keywords;
 }
 
-OutputStream& LoggerConfiguration::_write(OutputStream& os) const {
+OutputStream& operator<<(OutputStream& os, LoggerConfiguration const& c) {
     os << "LoggerConfiguration("
-       << "\n  verbosity=" << _verbosity
-       << ",\n  indents_based_on_level=" << _indents_based_on_level
-       << ",\n  prints_level_on_change_only=" << _prints_level_on_change_only
-       << ",\n  prints_scope_entrance=" << _prints_scope_entrance
-       << ",\n  prints_scope_exit=" << _prints_scope_exit
-       << ",\n  handles_multiline_output=" << _handles_multiline_output
-       << ",\n  discards_newlines_and_indentation=" << _discards_newlines_and_indentation
-       << ",\n  thread_name_printing_policy=" << _thread_name_printing_policy
+       << "\n  verbosity=" << c._verbosity
+       << ",\n  indents_based_on_level=" << c._indents_based_on_level
+       << ",\n  prints_level_on_change_only=" << c._prints_level_on_change_only
+       << ",\n  prints_scope_entrance=" << c._prints_scope_entrance
+       << ",\n  prints_scope_exit=" << c._prints_scope_exit
+       << ",\n  handles_multiline_output=" << c._handles_multiline_output
+       << ",\n  discards_newlines_and_indentation=" << c._discards_newlines_and_indentation
+       << ",\n  thread_name_printing_policy=" << c._thread_name_printing_policy
        << ",\n  theme=(not shown)" // To show theme colors appropriately, print the theme object directly on standard output
        << "\n)";
     return os;

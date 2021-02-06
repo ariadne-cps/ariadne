@@ -74,7 +74,11 @@ template<class R> class TaskRankingConstraint : public WritableInterface {
     ScoreType threshold() const { return _threshold; }
     RankingConstraintSeverity severity() const { return _severity; }
 
-    Bool operator<(TaskRankingConstraint const& c) const { return _parameter < c._parameter; }
+    Bool operator<(TaskRankingConstraint const& c) const {
+        if (_parameter.name() != c._parameter.name())
+            return _parameter < c._parameter;
+        else return _threshold < c.threshold();
+    }
 
     virtual OutputStream& _write(OutputStream& os) const {
         os << "{" << _parameter.name();

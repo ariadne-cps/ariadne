@@ -44,10 +44,10 @@ int main(int argc, const char* argv[])
     double max_err = 1e-8;
     auto sweeper1 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/10);
     auto sweeper2 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/100);
-    auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err);
+    auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1000);
 
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
-                                          .set_step_maximum_error(1e-7,1e-5)
+                                          .set_step_maximum_error(1e-8,1e-5)
                                           .set_maximum_temporal_order(8,15)
                                           .set_lipschitz_tolerance(1e-2,0.5)
                                           .set_sweeper({sweeper1,sweeper2,sweeper3})
@@ -59,13 +59,20 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
-    OBJ y_65(y,PositiveFloatDPUpperBound(FloatDP(0.078_x,DoublePrecision())),Dyadic(6.5_x));
-    auto verification_parameter = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
-        return o.evolve.bounding_box()[y].upper_bound().get_d(); });
-    auto verification_constraint = TaskRankingConstraint<E>(verification_parameter, 2.75, RankingConstraintSeverity::CRITICAL);
+    double factor = 0.1;
+    OBJ y_p275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.07*factor),DoublePrecision())),Dyadic(6.48_x));
+    OBJ y_m275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.075*factor),DoublePrecision())),Dyadic(3.15_x));
+    auto verification_parameter_p275 = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
+        return o.reach.bounding_box()[y].upper_bound().get_d(); });
+    auto verification_parameter_m271 = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MAXIMISE, [y](I const& i, O const& o, DurationType const& d) {
+        return o.reach.bounding_box()[y].lower_bound().get_d(); });
+    auto verification_constraint_p275 = TaskRankingConstraint<E>(verification_parameter_p275, 2.75, RankingConstraintSeverity::CRITICAL);
+    auto verification_constraint_m271 = TaskRankingConstraint<E>(verification_parameter_m271, -2.75, RankingConstraintSeverity::CRITICAL);
     auto refinement_target = ConfigurationPropertyRefinement<E>(
-            ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_65},SaturateIfPositiveProportionalRefiner(-1e-1));
-    VerificationManager::instance().add_safety_specification(evolver, {verification_constraint}, {refinement_target});
+            ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_p275,y_m275},SaturateIfPositiveProportionalRefiner(-1e-3));
+    VerificationManager::instance().add_safety_specification(evolver,
+                                                             {verification_constraint_m271,verification_constraint_p275},
+                                                             {refinement_target});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

@@ -76,7 +76,7 @@ template<class R> class TaskRankingConstraint : public WritableInterface {
 
     Bool operator<(TaskRankingConstraint const& c) const {
         if (_parameter.name() != c._parameter.name())
-            return _parameter < c._parameter;
+            return _parameter.name() < c._parameter.name();
         else return _threshold < c.threshold();
     }
 

@@ -94,7 +94,7 @@ class TestTaskRankingParameter {
                                           return output.o + duration.count() + input.i2[idx]; },
                                      [](I const& input) { return input.i2.size(); });
 
-        Set<TaskRankingParameter<R>> ps = {p1, p2};
+        List<TaskRankingParameter<R>> ps = {p1, p2};
 
         ARIADNE_TEST_PRINT(ps);
     }

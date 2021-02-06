@@ -135,12 +135,6 @@ public:
     using Handle<TaskRankingParameterInterface<R>>::Handle;
 public:
 
-    // TODO: remove, can't make into a set
-    Bool operator<(TaskRankingParameter const& p) const {
-        if (name() != p.name()) return name() < p.name();
-        else return optimisation() < p.optimisation();
-    }
-
     String const& name() const { return this->_ptr->name(); }
     OptimisationCriterion optimisation() const { return this->_ptr->optimisation(); };
     Bool is_scalar() const { return this->_ptr->is_scalar(); };

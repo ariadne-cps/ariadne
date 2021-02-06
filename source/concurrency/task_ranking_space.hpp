@@ -101,44 +101,46 @@ class TaskRankingSpace : public WritableInterface {
     }
 
     Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
-        typedef TaskRankingParameter<R> ParamType;
+        typedef TaskRankingConstraint<R> ConstraintType;
         Set<TaskExecutionRanking> result;
 
         // Compute the dimensions and initialise the min/max entries
-        Map<ParamType,SizeType> dimensions;
-        Map<ParamType,Pair<ScoreType,ScoreType>> scalar_min_max;
-        Map<ParamType,Vector<Pair<ScoreType,ScoreType>>> vector_min_max;
+        Map<ConstraintType,SizeType> dimensions;
+        Map<ConstraintType,Pair<ScoreType,ScoreType>> scalar_min_max;
+        Map<ConstraintType,Vector<Pair<ScoreType,ScoreType>>> vector_min_max;
         auto data_iter = data.cbegin();
-        for (auto c : _constraint_weights.keys()) {
+        for (auto cw : _constraint_weights) {
+            auto c = cw.first;
             auto p = c.parameter();
             auto dim = p.dimension(input);
-            dimensions.insert(Pair<ParamType,SizeType>{p,dim});
+            dimensions.insert(Pair<ConstraintType,SizeType>{c,dim});
             if (dim == 1) {
                 auto val = p.rank(input, data_iter->second.first, data_iter->second.second);
-                scalar_min_max.insert(Pair<ParamType,Pair<ScoreType,ScoreType>>{p, {val, val}});
+                scalar_min_max.insert(Pair<ConstraintType,Pair<ScoreType,ScoreType>>{c, {val, val}});
             } else {
                 Vector<Pair<ScoreType,ScoreType>> vals(dim);
                 for (SizeType i=0; i<dim; ++i) {
                     auto val = p.rank(input, data_iter->second.first, data_iter->second.second, i);
                     vals[i] = {val,val};
                 }
-                vector_min_max.insert(Pair<ParamType,Vector<Pair<ScoreType,ScoreType>>>{p, vals});
+                vector_min_max.insert(Pair<ConstraintType,Vector<Pair<ScoreType,ScoreType>>>{c, vals});
             }
         }
 
         // Update the min/max on the remaining data entries
         ++data_iter;
         while (data_iter != data.cend()) {
-            for (auto c : _constraint_weights.keys()) {
+            for (auto cw : _constraint_weights) {
+                auto c = cw.first;
                 auto p = c.parameter();
-                auto dim = dimensions.get(p);
+                auto dim = dimensions.get(c);
                 if (dim == 1) {
                     auto val = p.rank(input, data_iter->second.first, data_iter->second.second);
-                    scalar_min_max[p] = {min(scalar_min_max[p].first,val), max(scalar_min_max[p].second,val)};
+                    scalar_min_max[c] = {min(scalar_min_max[c].first,val), max(scalar_min_max[c].second,val)};
                 } else {
                     for (SizeType i=0; i<dim; ++i) {
                         auto val = p.rank(input, data_iter->second.first, data_iter->second.second, i);
-                        vector_min_max[p][i] = {min(vector_min_max[p][i].first,val),max(vector_min_max[p][i].second,val)};
+                        vector_min_max[c][i] = {min(vector_min_max[c][i].first,val),max(vector_min_max[c][i].second,val)};
                     }
                 }
             }
@@ -155,10 +157,10 @@ class TaskRankingSpace : public WritableInterface {
                 auto const& c = cw.first;
                 auto p = c.parameter();
                 auto weight = cw.second;
-                auto dim = dimensions.get(p);
+                auto dim = dimensions.get(c);
                 ScoreType local_score(0);
                 if (dim == 1) {
-                    auto max_min_diff = scalar_min_max[p].second - scalar_min_max[p].first;
+                    auto max_min_diff = scalar_min_max[c].second - scalar_min_max[c].first;
                     auto rank = p.rank(input, entry.second.first, entry.second.second);
                     auto threshold = c.threshold();
                     if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
@@ -166,13 +168,13 @@ class TaskRankingSpace : public WritableInterface {
                         if (c.severity() == RankingConstraintSeverity::PERMISSIVE) ++low_errors;
                         else if (c.severity() == RankingConstraintSeverity::CRITICAL) ++high_errors;
                     }
-                    if (max_min_diff > 0) local_score = (rank-scalar_min_max[p].first)/max_min_diff;
+                    if (max_min_diff > 0) local_score = (rank-scalar_min_max[c].first)/max_min_diff;
                 } else {
                     SizeType effective_dim = dim;
                     for (SizeType i=0; i<dim; ++i) {
-                        auto max_min_diff = vector_min_max[p][i].second - vector_min_max[p][i].first;
+                        auto max_min_diff = vector_min_max[c][i].second - vector_min_max[c][i].first;
                         auto rank = p.rank(input, entry.second.first, entry.second.second, i);
-                        if (max_min_diff > 0) local_score = (rank - vector_min_max[p][i].first)/max_min_diff;
+                        if (max_min_diff > 0) local_score = (rank - vector_min_max[c][i].first)/max_min_diff;
                         else --effective_dim;
                         if (effective_dim > 0) local_score/=effective_dim;
                     }
@@ -183,6 +185,7 @@ class TaskRankingSpace : public WritableInterface {
             }
             result.insert(TaskExecutionRanking(entry.first, score, low_errors, high_errors));
         }
+
         return result;
     }
 

@@ -23,6 +23,7 @@
  */
 
 #include "ariadne.hpp"
+#include "output/progress_indicator.hpp"
 
 using namespace Ariadne;
 
@@ -31,7 +32,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(8);
+    ConcurrencyManager::instance().set_concurrency(1);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -47,9 +48,9 @@ int main(int argc, const char* argv[])
     auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1000);
 
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
-                                          .set_step_maximum_error(1e-8,1e-6)
-                                          .set_maximum_temporal_order(12)
-                                          .set_lipschitz_tolerance(1e-2,0.5)
+                                          .set_step_maximum_error(1e-8,1e-5)
+                                          .set_maximum_temporal_order(9,12)
+                                          .set_lipschitz_tolerance(0.05,0.5)
                                           .set_sweeper({sweeper1,sweeper2,sweeper3})
                                           );
 
@@ -97,23 +98,60 @@ int main(int argc, const char* argv[])
 
     Real evolution_time = 7;
 
-    auto start = std::chrono::high_resolution_clock::now();
-    ARIADNE_LOG_PRINTLN("Computing orbit... ");
-    try {
-        auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-        auto end = std::chrono::high_resolution_clock::now();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count())/1000 << " seconds.");
+    SizeType num_tries = 10;
+    List<SizeType> success_times;
+    List<SizeType> success_num_reachables;
+    ProgressIndicator indicator(num_tries);
+    auto start_all = std::chrono::high_resolution_clock::now();
+    ARIADNE_LOG_SCOPE_CREATE;
+    for (SizeType i=0; i<num_tries; ++i) {
+        ARIADNE_LOG_PRINTLN_AT(1,"Test n." << i);
+        auto start = std::chrono::high_resolution_clock::now();
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit... ");
+        try {
+            auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+            auto end = std::chrono::high_resolution_clock::now();
+            SizeType time_millis = (SizeType)std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+            success_times.push_back(time_millis);
+            success_num_reachables.push_back(orbit.reach().size());
+            ARIADNE_LOG_PRINTLN_AT(1,"Done in " << ((double)time_millis)/1000 << " seconds.");
+            /*
+            ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().optimal_point());
 
-        ARIADNE_LOG_PRINTLN_AT(1,"Optimal point: " << ConcurrencyManager::instance().optimal_point());
-
-        ARIADNE_LOG_PRINTLN("Plotting...");
-        LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
-        fig << fill_colour(1.0,0.75,0.5);
-        fig.draw(orbit.reach());
-        fig.write("vanderpol");
-    } catch (CriticalRankingFailureException<VectorFieldEvolver>& ex) {
-        ARIADNE_LOG_PRINTLN("Safety verification failure: " << ex.what());
+            ARIADNE_LOG_PRINTLN("Plotting...");
+            LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
+            fig << fill_colour(1.0,0.75,0.5);
+            fig.draw(orbit.reach());
+            fig.write("vanderpol");
+            */
+        } catch (CriticalRankingFailureException<VectorFieldEvolver>& ex) {
+            ARIADNE_LOG_PRINTLN_AT(1,"Safety verification failure: " << ex.what());
+        }
+        ConcurrencyManager::instance().choose_runner_for(evolver,evolver.configuration());
+        VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
+        indicator.update_current(i+1);
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of tries, currently " << 1+i-success_times.size() << " failures.");
     }
+    double avg_time = 0; double stddev_time = 0;
+    double avg_num_reachable = 0; double stddev_num_reachable = 0;
+    for (SizeType i=0; i<success_times.size(); ++i) {
+        auto time = success_times.at(i);
+        auto num_reachable = success_num_reachables.at(i);
+        avg_time += time; stddev_time += time*time;
+        avg_num_reachable += num_reachable; stddev_num_reachable += num_reachable*num_reachable;
+    }
+    avg_time = avg_time/success_times.size()/1e3;
+    stddev_time = sqrt(stddev_time/1e6/success_times.size() - avg_time*avg_time);
+    avg_num_reachable = avg_num_reachable/success_num_reachables.size();
+    stddev_num_reachable = sqrt(stddev_num_reachable/success_num_reachables.size() - avg_num_reachable*avg_num_reachable);
 
-    ConcurrencyManager::instance().print_best_rankings();
+    ARIADNE_LOG_PRINTLN("Got " << round(((double)num_tries-success_times.size())/num_tries*100) <<
+        "% of errors, with average execution time of " << round(avg_time*100)/100 << " s (±" << round(stddev_time*100)/100 << ")" <<
+        " and average number of reachable sets " << round(avg_num_reachable) << " (±" << round(stddev_num_reachable) << ")");
+
+    auto end_all = std::chrono::high_resolution_clock::now();
+    SizeType time_millis = (SizeType)std::chrono::duration_cast<std::chrono::milliseconds>(end_all-start_all).count();
+    ARIADNE_LOG_PRINTLN("Took a total of " << ((double)time_millis)/1000 << " seconds.");
+
+    //ConcurrencyManager::instance().print_best_rankings();
 }

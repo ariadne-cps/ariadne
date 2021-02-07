@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(1);
+    ConcurrencyManager::instance().set_concurrency(16);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -83,7 +83,8 @@ int main(int argc, const char* argv[])
                                       [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
     );
 
-    VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
+    List<Pair<TaskRankingParameter<E>,double>> specification = {{verification_p275,2},{verification_m275,2},{constrain_p275,1},{constrain_m275,1}};
+    VerificationManager::instance().add_safety_specification(evolver,specification);
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -98,7 +99,7 @@ int main(int argc, const char* argv[])
 
     Real evolution_time = 7;
 
-    SizeType num_tries = 10;
+    SizeType num_tries = 100;
     List<SizeType> success_times;
     List<SizeType> success_num_reachables;
     ProgressIndicator indicator(num_tries);
@@ -128,7 +129,7 @@ int main(int argc, const char* argv[])
             ARIADNE_LOG_PRINTLN_AT(1,"Safety verification failure: " << ex.what());
         }
         ConcurrencyManager::instance().choose_runner_for(evolver,evolver.configuration());
-        VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
+        VerificationManager::instance().add_safety_specification(evolver,specification);
         indicator.update_current(i+1);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of tries, currently " << 1+i-success_times.size() << " failures.");
     }

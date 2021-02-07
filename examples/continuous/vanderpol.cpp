@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     Logger::instance().configuration().set_theme(TT_THEME_DARK);
     Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
-    ConcurrencyManager::instance().set_concurrency(4);
+    ConcurrencyManager::instance().set_concurrency(8);
     Logger::instance().use_blocking_scheduler();
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
@@ -47,8 +47,8 @@ int main(int argc, const char* argv[])
     auto sweeper3 = ThresholdSweeper<FloatDP>(DoublePrecision(),max_err/1000);
 
     TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
-                                          .set_step_maximum_error(1e-8,1e-5)
-                                          .set_maximum_temporal_order(8,15)
+                                          .set_step_maximum_error(1e-8,1e-6)
+                                          .set_maximum_temporal_order(12)
                                           .set_lipschitz_tolerance(1e-2,0.5)
                                           .set_sweeper({sweeper1,sweeper2,sweeper3})
                                           );
@@ -59,9 +59,8 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration());
     ARIADNE_LOG_PRINTLN_VAR_AT(1,evolver.configuration().search_space());
 
-    double factor = 0.1;
-    OBJ y_p275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.07*factor),DoublePrecision())),Dyadic(6.48_x));
-    OBJ y_m275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.075*factor),DoublePrecision())),Dyadic(3.15_x));
+    OBJ y_p275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.07),DoublePrecision())),Dyadic(cast_exact(6.48)));
+    OBJ y_m275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.075),DoublePrecision())),Dyadic(cast_exact(3.15)));
     auto verification_p275 = ScalarObjectiveRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, RankingConstraintSeverity::CRITICAL, y_p275,
                                       [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return o.reach.bounding_box()[obj.variable].upper_bound().get_d(); },
                                       [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return 2.75; },
@@ -83,8 +82,7 @@ int main(int argc, const char* argv[])
                                       [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
     );
 
-    //VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
-    VerificationManager::instance().add_safety_specification(evolver,{constrain_p275,constrain_m275});
+    VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;

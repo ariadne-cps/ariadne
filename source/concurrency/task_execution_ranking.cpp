@@ -30,7 +30,7 @@ TaskExecutionRanking::TaskExecutionRanking(ConfigurationSearchPoint const& p,
                                            ScoreType const& s,
                                            SizeType const& permissive_failures,
                                            SizeType const& critical_failures)
-           : _point(p), _cost(s), _permissive_failures(permissive_failures), _critical_failures(critical_failures) { }
+           : _point(p), _score(s), _permissive_failures(permissive_failures), _critical_failures(critical_failures) { }
 
 ConfigurationSearchPoint const&
 TaskExecutionRanking::point() const {
@@ -39,7 +39,7 @@ TaskExecutionRanking::point() const {
 
 ScoreType const&
 TaskExecutionRanking::score() const {
-    return _cost;
+    return _score;
 }
 
 SizeType const&
@@ -53,15 +53,15 @@ TaskExecutionRanking::critical_failures() const {
 }
 
 Bool TaskExecutionRanking::operator<(TaskExecutionRanking const& s) const {
-    if (this->_critical_failures > s._critical_failures) return false;
-    else if (this->_critical_failures < s._critical_failures) return true;
-    else if (this->_permissive_failures > s._permissive_failures) return false;
-    else if (this->_permissive_failures < s._permissive_failures) return true;
-    else return this->_cost < s._cost;
+    if (this->_critical_failures > s._critical_failures) return true;
+    else if (this->_critical_failures < s._critical_failures) return false;
+    else if (this->_permissive_failures > s._permissive_failures) return true;
+    else if (this->_permissive_failures < s._permissive_failures) return false;
+    else return this->_score < s._score;
 }
 
 OutputStream& TaskExecutionRanking::_write(OutputStream& os) const {
-    return os << "{" << _point << ":" << _cost << (_permissive_failures > 0 ? (",P:" + to_string(_permissive_failures)) : "")
+    return os << "{" << _point << ":" << _score << (_permissive_failures > 0 ? (",P:" + to_string(_permissive_failures)) : "")
               << (_critical_failures > 0 ? (",C:" + to_string(_critical_failures)) : "") << "}";
 }
 } // namespace Ariadne

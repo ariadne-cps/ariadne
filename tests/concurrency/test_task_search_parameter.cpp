@@ -175,7 +175,7 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_FAIL(make_extended_set_by_shifting(points, point.space().total_points()+1));
     }
 
-    Void test_parameter_point_appraisal() {
+    Void test_parameter_point_ranking() {
         ConfigurationPropertyPath use_subdivisions("use_subdivisions");
         ConfigurationPropertyPath sweep_threshold("sweep_threshold");
         ConfigurationSearchParameter bp(use_subdivisions, false, List<int>({0, 1}));
@@ -186,18 +186,18 @@ class TestTaskSearchParameter {
         ConfigurationSearchPoint point2 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 2}});
         ConfigurationSearchPoint point3 = space.make_point({{use_subdivisions, 1}, {sweep_threshold, 3}});
         ConfigurationSearchPoint point4 = space.make_point({{use_subdivisions, 0}, {sweep_threshold, 4}});
-        TaskExecutionRanking a1(point1, 3, 0, 0);
-        TaskExecutionRanking a2(point2, 2, 1, 0);
+        TaskExecutionRanking a1(point1, 2, 0, 0);
+        TaskExecutionRanking a2(point2, 4, 1, 0);
         TaskExecutionRanking a3(point3, 4, 0, 0);
         TaskExecutionRanking a4(point4, 4, 0, 1);
         Set<TaskExecutionRanking> as = {a1, a2, a3, a4};
 
         ARIADNE_TEST_PRINT(as);
-        ARIADNE_TEST_ASSERT(a1 < a2);
+        ARIADNE_TEST_ASSERT(a2 < a1);
         ARIADNE_TEST_ASSERT(a1 < a3);
-        ARIADNE_TEST_ASSERT(a3 < a2);
-        ARIADNE_TEST_ASSERT(a2 < a4);
-        ARIADNE_TEST_ASSERT(a3 < a4);
+        ARIADNE_TEST_ASSERT(a2 < a3);
+        ARIADNE_TEST_ASSERT(a4 < a2);
+        ARIADNE_TEST_ASSERT(a4 < a3);
     }
 
     Void test() {
@@ -211,7 +211,7 @@ class TestTaskSearchParameter {
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_shift());
         ARIADNE_TEST_CALL(test_parameter_point_random_shift());
         ARIADNE_TEST_CALL(test_parameter_point_adjacent_set_shift());
-        ARIADNE_TEST_CALL(test_parameter_point_appraisal());
+        ARIADNE_TEST_CALL(test_parameter_point_ranking());
     }
 };
 

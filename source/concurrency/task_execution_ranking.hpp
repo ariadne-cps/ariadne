@@ -56,7 +56,7 @@ public:
     virtual OutputStream& _write(OutputStream& os) const;
 private:
     ConfigurationSearchPoint _point;
-    ScoreType _cost;
+    ScoreType _score;
     SizeType _permissive_failures;
     SizeType _critical_failures;
 };

@@ -77,7 +77,7 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
 
 template<class C> void SequentialRunner<C>::push(InputType const& input) {
-    OutputType result = this->_task->run_task(input,this->configuration());
+    OutputType result = this->_task->run(input,this->configuration());
     auto failed_constraints = this->_task->ranking_space().failed_critical_constraints(input,result);
     if (not failed_constraints.empty()) throw CriticalRankingFailureException<C>(failed_constraints);
     _last_output.reset(new OutputType(result));
@@ -93,7 +93,7 @@ template<class C> void DetachedRunner<C>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         if (_terminate) break;
         auto input = _input_buffer.pop();
-        OutputType output = this->_task->run_task(input,this->configuration());
+        OutputType output = this->_task->run(input,this->configuration());
         _output_buffer.push(output);
         _output_availability.notify_all();
     }
@@ -158,7 +158,7 @@ template<class C> void ParameterSearchRunner<C>::_loop() {
         auto cfg = make_singleton(this->configuration(),pkg.second);
         try {
             auto start = std::chrono::high_resolution_clock::now();
-            auto output = this->_task->run_task(pkg.first,cfg);
+            auto output = this->_task->run(pkg.first,cfg);
             auto end = std::chrono::high_resolution_clock::now();
             auto execution_time = std::chrono::duration_cast<DurationType>(end-start);
             ARIADNE_LOG_PRINTLN("task for " << pkg.second << " completed in " << execution_time.count() << " us");

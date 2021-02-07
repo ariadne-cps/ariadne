@@ -83,7 +83,7 @@ int main(int argc, const char* argv[])
                                       [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
     );
 
-    List<Pair<TaskRankingParameter<E>,double>> specification = {{verification_p275,2},{verification_m275,2},{constrain_p275,1},{constrain_m275,1}};
+    List<Pair<TaskRankingParameter<E>,double>> specification = {{verification_p275,2},{verification_m275,2},{constrain_p275,2},{constrain_m275,2}};
     VerificationManager::instance().add_safety_specification(evolver,specification);
 
     Real x0 = 1.4_dec;

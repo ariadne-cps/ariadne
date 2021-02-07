@@ -284,7 +284,7 @@ Task<VectorFieldEvolver>::Task() : ParameterSearchTaskBase<C>("stp",
     [](I const& i){ return i.current_set_bounds.dimension(); }))*/
     .build()) { }
 
-auto Task<VectorFieldEvolver>::run_task(TaskInput<C> const& in, Configuration<C> const& cfg) const -> TaskOutput<C> {
+auto Task<VectorFieldEvolver>::run(TaskInput<C> const& in, Configuration<C> const& cfg) const -> TaskOutput<C> {
     LabelledEnclosure next_set = in.current_set;
     LabelledEnclosure reach_set = in.current_set;
     Dyadic next_time = in.current_time;

@@ -217,7 +217,7 @@ template<> struct TaskObjective<VectorFieldEvolver> {
 template<> struct Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<VectorFieldEvolver> {
     typedef VectorFieldEvolver C;
     Task();
-    TaskOutput<C> run_task(TaskInput<C> const& in, Configuration<C> const& cfg) const override;
+    TaskOutput<C> run(TaskInput<C> const& in, Configuration<C> const& cfg) const override;
 };
 
 } // namespace Ariadne

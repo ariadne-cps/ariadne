@@ -65,7 +65,7 @@ class TaskInterface {
     virtual Void set_ranking_space(TaskRankingSpace<R> const& space) = 0;
 
     //! \brief The task to be performed, taking \a in as input and \a cfg as a configuration of the parameters
-    virtual OutputType run_task(InputType const& in, ConfigurationType const& cfg) const = 0;
+    virtual OutputType run(InputType const& in, ConfigurationType const& cfg) const = 0;
     //! \brief Evaluate the costs of points from output and execution time, possibly using the input \a in
     virtual Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& in) const = 0;
 };

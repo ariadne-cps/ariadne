@@ -154,6 +154,7 @@ template<class C> void ParameterSearchRunner<C>::_loop() {
         _input_availability.wait(locker, [this]() { return _input_buffer.size()>0 || _terminate; });
         locker.unlock();
         if (_terminate) break;
+        if (_input_buffer.size() == 0) std::cout << "Input buffer is empty." << std::endl;
         auto pkg = _input_buffer.pop();
         auto cfg = make_singleton(this->configuration(),pkg.second);
         try {
@@ -228,8 +229,9 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
     ARIADNE_LOG_PRINTLN_VAR(new_points);
 
     auto best = rankings.rbegin()->point();
-    if (rankings.rbegin()->critical_failures() > 0)
-        throw CriticalRankingFailureException<C>(this->_task->ranking_space().failed_critical_constraints(input,outputs.get(best).first));
+    if (rankings.rbegin()->critical_failures() > 0) {
+        throw CriticalRankingFailureException<C>(this->_task->ranking_space().failed_critical_constraints(input, outputs.get(best).first));
+    }
     ConcurrencyManager::instance().append_best_ranking(*rankings.rbegin());
     auto best_output = outputs.get(best).first;
 

@@ -128,7 +128,7 @@ int main(int argc, const char* argv[])
         } catch (CriticalRankingFailureException<VectorFieldEvolver>& ex) {
             ARIADNE_LOG_PRINTLN_AT(1,"Safety verification failure: " << ex.what());
         }
-        ConcurrencyManager::instance().choose_runner_for(evolver,evolver.configuration());
+        ConcurrencyManager::instance().choose_runner_for(evolver);
         VerificationManager::instance().add_safety_specification(evolver,specification);
         indicator.update_current(i+1);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of tries, currently " << 1+i-success_times.size() << " failures.");

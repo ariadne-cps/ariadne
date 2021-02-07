@@ -53,9 +53,10 @@ class ConcurrencyManager {
         return instance;
     }
 
-    //! \brief Choose the proper runner for \a runnable using \a cfg
-    template<class T> void choose_runner_for(TaskRunnable<T>& runnable, Configuration<T> const& cfg) const {
+    //! \brief Choose the proper runner for \a runnable
+    template<class T> void choose_runner_for(TaskRunnable<T>& runnable) const {
         SharedPointer<TaskRunnerInterface<T>> runner;
+        auto const& cfg = runnable.configuration();
         if (_concurrency > 1 and not cfg.is_singleton())
             runner.reset(new ParameterSearchRunner<T>(cfg,std::min(_concurrency,cfg.search_space().total_points())));
         else if (_concurrency == 1 and not cfg.is_singleton()) {

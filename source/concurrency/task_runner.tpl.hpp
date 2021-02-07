@@ -38,10 +38,10 @@
 namespace Ariadne {
 
 template<class C> TaskRunnable<C>::TaskRunnable(ConfigurationType const& configuration) : Configurable<C>(configuration) {
-    ConcurrencyManager::instance().choose_runner_for(*this, configuration);
+    ConcurrencyManager::instance().choose_runner_for(*this);
 }
 
-template<class C> void TaskRunnable<C>::set_runner(SharedPointer<TaskRunnerInterface<C>> runner) {
+template<class C> void TaskRunnable<C>::set_runner(SharedPointer<TaskRunnerInterface<C>> const& runner) {
     this->_runner = runner;
 }
 

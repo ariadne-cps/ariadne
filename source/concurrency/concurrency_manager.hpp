@@ -83,11 +83,6 @@ class ConcurrencyManager {
     //! \brief Return the optimal point (i.e., the most common value for all dimensions)
     List<int> optimal_point() const;
 
-    //! \brief The refinement values saved for each property
-    PropertyRefinementsMap refinement_values() const;
-    void append_refinement_value(ConfigurationPropertyPath const& path, ExactDouble const& value);
-    void clear_refinement_values();
-
     //! \brief Print refinement values in a .m file for plotting
     void print_refinement_values() const;
 
@@ -96,7 +91,6 @@ class ConcurrencyManager {
     SizeType _concurrency;
     std::mutex _data_mutex;
     List<TaskExecutionRanking> _best_rankings;
-    PropertyRefinementsMap _refinement_values;
 };
 
 } // namespace Ariadne

@@ -56,21 +56,6 @@ void ConcurrencyManager::clear_best_rankings() {
     _best_rankings.clear();
 }
 
-auto ConcurrencyManager::refinement_values() const -> PropertyRefinementsMap {
-    return _refinement_values;
-}
-
-void ConcurrencyManager::append_refinement_value(ConfigurationPropertyPath const& path, ExactDouble const& value) {
-    std::lock_guard<std::mutex> lock(_data_mutex);
-    auto iter = _refinement_values.find(path);
-    if (iter == _refinement_values.end()) _refinement_values.insert(make_pair(path,List<ExactDouble>(value)));
-    else iter->second.push_back(value);
-}
-
-void ConcurrencyManager::clear_refinement_values() {
-    _refinement_values.clear();
-}
-
 List<int> ConcurrencyManager::optimal_point() const {
     List<int> result;
     if (not _best_rankings.empty()) {
@@ -115,10 +100,12 @@ void ConcurrencyManager::print_best_rankings() const {
         auto size = _best_rankings.size();
         file << "x = [1:" << size << "];\n";
         Map<SizeType,List<int>> values;
+        List<int> soft_failures;
         for (SizeType i=0; i<dimension; ++i) values.insert(make_pair(i,List<int>()));
         for (auto ranking : _best_rankings) {
             auto point = ranking.point();
             for (SizeType i=0; i<dimension; ++i) values.at(i).push_back(point.coordinates()[i]);
+            soft_failures.push_back(ranking.permissive_failures());
         }
         file << "figure(1);\n";
         file << "hold on;\n";
@@ -128,24 +115,12 @@ void ConcurrencyManager::print_best_rankings() const {
             std::replace(name.begin(), name.end(), '_', ' ');
             file << "plot(x,y" << i << ",'DisplayName','" << name << "');\n";
         }
+        file << "yf = " << soft_failures << ";\n";
+        file << "plot(x,yf,'DisplayName','(soft failures)');\n";
+
         file << "legend;\n";
         file << "hold off;\n";
         file.close();
-    }
-}
-
-void ConcurrencyManager::print_refinement_values() const {
-    if (not _refinement_values.empty()) {
-        for (auto prop : _refinement_values) {
-            std::ofstream file;
-            file.open("refinements.m");
-            List<double> values;
-            for (auto p : prop.second) values.push_back(p.get_d());
-            file << "y = " << values << ";\n";
-            file << "x = [1:" << values.size() << "];\n";
-            file << "semilogy(x,y)";
-            file.close();
-        }
     }
 }
 

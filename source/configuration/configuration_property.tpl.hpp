@@ -72,11 +72,11 @@ template<class T> OutputStream& ConfigurationPropertyBase<T>::_write(OutputStrea
 }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(ConfigurationSearchSpaceConverterInterface<T> const& converter) :
-        ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()), _refined(T()), _is_refined(false),
+        ConfigurationPropertyBase<T>(false), _lower(T()), _upper(T()),
         _converter(SharedPointer<ConfigurationSearchSpaceConverterInterface<T>>(converter.clone())) { }
 
 template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T const& lower, T const& upper, ConfigurationSearchSpaceConverterInterface<T> const& converter) :
-        ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper), _refined(T()), _is_refined(false),
+        ConfigurationPropertyBase<T>(true), _lower(lower), _upper(upper),
         _converter(SharedPointer<ConfigurationSearchSpaceConverterInterface<T>>(converter.clone())) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
 }
@@ -86,17 +86,13 @@ template<class T> RangeConfigurationProperty<T>::RangeConfigurationProperty(T co
 
 template<class T> T const& RangeConfigurationProperty<T>::get() const {
     ARIADNE_PRECONDITION(this->is_specified());
-    ARIADNE_ASSERT_MSG(this->is_single() or is_refined(),"The property should have a single value or be under refinement when actually used. Are you accessing it outside the related task?");
-    return (is_refined() ? _refined : _upper);
+    ARIADNE_ASSERT_MSG(this->is_single(),"The property should have a single value when actually used. Are you accessing it outside the related task?");
+    return _upper;
 }
 
 template<class T> Bool RangeConfigurationProperty<T>::is_single() const {
     if (not this->is_specified()) return false;
     else return possibly(_lower == _upper);
-}
-
-template<class T> Bool RangeConfigurationProperty<T>::is_refined() const {
-    return _is_refined;
 }
 
 template<class T> Bool RangeConfigurationProperty<T>::is_metric(ConfigurationPropertyPath const& path) const {
@@ -117,14 +113,12 @@ template<class T> SizeType RangeConfigurationProperty<T>::cardinality() const {
 template<class T> List<int> RangeConfigurationProperty<T>::local_integer_values() const {
     List<int> result;
     if (this->is_specified()) {
-        if (not this->is_refined()) {
-            int min_value = _converter->to_int(_lower);
-            int max_value = _converter->to_int(_upper);
-            ARIADNE_ASSERT_MSG(not(max_value == std::numeric_limits<int>::max() and min_value < std::numeric_limits<int>::max()),"An upper bounded range is required.");
-            ARIADNE_ASSERT_MSG(not(min_value == std::numeric_limits<int>::min() and max_value > std::numeric_limits<int>::min()),"A lower bounded range is required.");
-            if (min_value == max_value) result.push_back(min_value); // Necessary to address the +inf case
-            else for (int i = min_value; i <= max_value; ++i) result.push_back(i);
-        } else result.push_back(0);
+        int min_value = _converter->to_int(_lower);
+        int max_value = _converter->to_int(_upper);
+        ARIADNE_ASSERT_MSG(not(max_value == std::numeric_limits<int>::max() and min_value < std::numeric_limits<int>::max()),"An upper bounded range is required.");
+        ARIADNE_ASSERT_MSG(not(min_value == std::numeric_limits<int>::min() and max_value > std::numeric_limits<int>::min()),"A lower bounded range is required.");
+        if (min_value == max_value) result.push_back(min_value); // Necessary to address the +inf case
+        else for (int i = min_value; i <= max_value; ++i) result.push_back(i);
     }
     return result;
 }
@@ -134,32 +128,7 @@ template<class T> void RangeConfigurationProperty<T>::set_single(ConfigurationPr
     local_set_single(integer_value);
 }
 
-template<class T> void RangeConfigurationProperty<T>::refine_init(ConfigurationPropertyPath const& path) {
-    ARIADNE_PRECONDITION(path.is_root());
-    ARIADNE_ASSERT_MSG(not is_single(),"The property value must be in an interval in order to be refined.");
-    ARIADNE_ASSERT_MSG(not is_refined(),"The property has already been initialised for refinement.");
-    int min_value = _converter->to_int(_lower);
-    int max_value = _converter->to_int(_upper);
-    ARIADNE_ASSERT_MSG(not(max_value == std::numeric_limits<int>::max() and min_value < std::numeric_limits<int>::max()),"An upper bounded range is required.");
-    ARIADNE_ASSERT_MSG(not(min_value == std::numeric_limits<int>::min() and max_value > std::numeric_limits<int>::min()),"A lower bounded range is required.");
-    int rnd_value = min_value + rand() % (max_value - min_value + 1);
-    _refined = _converter->from_int(rnd_value);
-    _is_refined = true;
-}
-
-template<class T> T RangeConfigurationProperty<T>::_refine_value(ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    return _converter->from_double(refiner.apply(error,progress,_converter->to_double(_refined)));
-}
-
-template<class T> void RangeConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    ARIADNE_PRECONDITION(path.is_root());
-    ARIADNE_PRECONDITION(is_refined());
-    ARIADNE_ASSERT_MSG(not is_single(),"The property value must be in an interval in order to be refined.");
-    _refined = max(_lower,min(_upper, _refine_value(refiner,error,progress)));
-}
-
 template<class T> void RangeConfigurationProperty<T>::local_set_single(int integer_value) {
-    ARIADNE_PRECONDITION(not is_refined());
     int min_value = _converter->to_int(_lower);
     int max_value = _converter->to_int(_upper);
     ARIADNE_PRECONDITION(not is_single());
@@ -180,14 +149,12 @@ template<class T> ConfigurationPropertyInterface* RangeConfigurationProperty<T>:
 
 template<class T> void RangeConfigurationProperty<T>::set(T const& lower, T const& upper) {
     ARIADNE_PRECONDITION(not possibly(upper < lower));
-    ARIADNE_ASSERT_MSG(not is_refined(),"The value is under refinement, setting it is not allowed.");
     this->set_specified();
     _lower = lower;
     _upper = upper;
 }
 
 template<class T> void RangeConfigurationProperty<T>::set(T const& value) {
-    ARIADNE_ASSERT_MSG(not is_refined(),"The value is under refinement, setting it is not allowed.");
     this->set_specified();
     _lower = value;
     _upper = value;
@@ -196,12 +163,8 @@ template<class T> void RangeConfigurationProperty<T>::set(T const& value) {
 template<class T> List<SharedPointer<T>> RangeConfigurationProperty<T>::values() const {
     List<SharedPointer<T>> result;
     if (this->is_specified()) {
-        if (this->is_refined()) {
-            result.append(std::make_shared<T>(_refined));
-        } else {
-            result.append(std::make_shared<T>(_lower));
-            if (not is_single()) result.append(std::make_shared<T>(_upper));
-        }
+        result.append(std::make_shared<T>(_lower));
+        if (not is_single()) result.append(std::make_shared<T>(_upper));
     }
     return result;
 }
@@ -260,16 +223,6 @@ template<class T> void EnumConfigurationProperty<T>::local_set_single(int intege
     T value = *iter;
     _values.clear();
     _values.insert(value);
-}
-
-template<class T> void EnumConfigurationProperty<T>::refine_init(ConfigurationPropertyPath const& path) {
-    ARIADNE_PRECONDITION(path.is_root());
-    ARIADNE_ERROR("The value of an enum property cannot be refined.");
-}
-
-template<class T> void EnumConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    ARIADNE_PRECONDITION(path.is_root());
-    ARIADNE_ERROR("The value of an enum property cannot be refined.");
 }
 
 template<class T> ConfigurationPropertyInterface* EnumConfigurationProperty<T>::clone() const {
@@ -380,26 +333,6 @@ template<class T> void HandleListConfigurationProperty<T>::set_single(Configurat
         }
         ARIADNE_ASSERT_MSG(been_set,"A property for " << path << " has not been found.");
     }
-}
-
-template<class T> void HandleListConfigurationProperty<T>::refine_init(ConfigurationPropertyPath const& path) {
-    ARIADNE_ASSERT_MSG(not path.is_root(),"The value of a list configuration property can not be refined.");
-    ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the list configuration property is not configurable.");
-    ARIADNE_ASSERT_MSG(is_single(),"Can't reach the path since there are multiple values and multiple configurable objects are not allowed");
-    auto properties = dynamic_cast<ConfigurableInterface*>(_values.at(0).pointer())->searchable_configuration().properties();
-    auto p_ptr = properties.find(path.first());
-    if (p_ptr != properties.end()) p_ptr->second->refine_init(path.subpath());
-    else { ARIADNE_ERROR("The path " << path << " has not been found."); }
-}
-
-template<class T> void HandleListConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    ARIADNE_ASSERT_MSG(not path.is_root(),"The value of a list configuration property can not be refined.");
-    ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the list configuration property is not configurable.");
-    ARIADNE_ASSERT_MSG(is_single(),"Can't reach the path since there are multiple values and multiple configurable objects are not allowed");
-    auto properties = dynamic_cast<ConfigurableInterface*>(_values.at(0).pointer())->searchable_configuration().properties();
-    auto p_ptr = properties.find(path.first());
-    if (p_ptr != properties.end()) p_ptr->second->refine_value(path.subpath(),refiner,error,progress);
-    else { ARIADNE_ERROR("The path " << path << " has not been found."); }
 }
 
 template<class T> Map<ConfigurationPropertyPath,List<int>> HandleListConfigurationProperty<T>::integer_values() const {
@@ -533,26 +466,6 @@ template<class T> void InterfaceListConfigurationProperty<T>::set_single(Configu
         }
         ARIADNE_ASSERT_MSG(been_set,"A property for " << path << " has not been found.");
     }
-}
-
-template<class T> void InterfaceListConfigurationProperty<T>::refine_init(ConfigurationPropertyPath const& path) {
-    ARIADNE_ASSERT_MSG(not path.is_root(),"The value of an interface configuration property can not be refined.");
-    ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the interface configuration property is not configurable.");
-    ARIADNE_ASSERT_MSG(is_single(),"Can't reach the path since there are multiple values and multiple configurable objects are not allowed");
-    auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
-    auto p_ptr = properties.find(path.first());
-    if (p_ptr != properties.end()) p_ptr->second->refine_init(path.subpath());
-    else { ARIADNE_ERROR("The path " << path << " has not been found."); }
-}
-
-template<class T> void InterfaceListConfigurationProperty<T>::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    ARIADNE_ASSERT_MSG(not path.is_root(),"The value of an interface configuration property can not be refined.");
-    ARIADNE_ASSERT_MSG(is_configurable(),"The path is incorrect since the object in the interface configuration property is not configurable.");
-    ARIADNE_ASSERT_MSG(is_single(),"Can't reach the path since there are multiple values and multiple configurable objects are not allowed");
-    auto properties = dynamic_cast<ConfigurableInterface*>(_values.back().get())->searchable_configuration().properties();
-    auto p_ptr = properties.find(path.first());
-    if (p_ptr != properties.end()) p_ptr->second->refine_value(path.subpath(),refiner,error,progress);
-    else { ARIADNE_ERROR("The path " << path << " has not been found."); }
 }
 
 template<class T> Map<ConfigurationPropertyPath,List<int>> InterfaceListConfigurationProperty<T>::integer_values() const {

@@ -38,27 +38,24 @@ namespace Ariadne {
 using std::min, std::max;
 
 template<class R> class TaskRankingSpace;
+typedef ScoreType WeightType;
+template<class R> using ParameterWeightsList = List<Pair<TaskRankingParameter<R>,WeightType>>;
 
 template<class R>
 class TaskRankingSpaceBuilder {
-    typedef ScoreType WeightType;
 public:
     TaskRankingSpaceBuilder() = default;
 
     TaskRankingSpaceBuilder& add(TaskRankingParameter<R> const& parameter, WeightType const& weight = WeightType(1.0)) {
-        return add(TaskRankingConstraint<R>(parameter), weight);
-    }
-
-    TaskRankingSpaceBuilder& add(TaskRankingConstraint<R> const& constraint, WeightType const& weight = WeightType(1.0)) {
         ARIADNE_PRECONDITION(weight >= 0);
-        _constraint_weights.insert(Pair<TaskRankingConstraint<R>,WeightType>(constraint, weight));
+        _parameter_weights.push_back(Pair<TaskRankingParameter<R>,WeightType>(parameter, weight));
         return *this;
     }
 
     TaskRankingSpace<R> build() const;
 
   private:
-    Map<TaskRankingConstraint<R>,WeightType> _constraint_weights;
+    ParameterWeightsList<R> _parameter_weights;
 };
 
 template<class R>
@@ -70,77 +67,77 @@ class TaskRankingSpace : public WritableInterface {
     typedef TaskOutput<R> OutputType;
 
   protected:
-    TaskRankingSpace(Map<TaskRankingConstraint<R>,WeightType> const& constraint_weights)
-        : _constraint_weights(constraint_weights) { }
+    TaskRankingSpace(List<Pair<TaskRankingParameter<R>,WeightType>> const& parameter_weights)
+        : _parameter_weights(parameter_weights) { }
   public:
-    Map<TaskRankingConstraint<R>,WeightType> const& constraint_weights() const { return _constraint_weights; }
+    ParameterWeightsList<R> const& parameter_weights() const { return _parameter_weights; }
 
     TaskRankingSpace* clone() const { return new TaskRankingSpace(*this); }
 
-    virtual OutputStream& _write(OutputStream& os) const { os << _constraint_weights; return os; }
+    virtual OutputStream& _write(OutputStream& os) const { os << _parameter_weights; return os; }
 
     Bool has_critical_constraints() const {
-        for (auto c : _constraint_weights.keys()) if (c.severity() == RankingConstraintSeverity::CRITICAL) return true;
+        for (auto pw : _parameter_weights) if (pw.first.severity() == RankingConstraintSeverity::CRITICAL) return true;
         return false;
     }
 
-    Set<TaskRankingConstraint<R>> failed_critical_constraints(InputType const& input, OutputType const& output) const {
-        Set<TaskRankingConstraint<R>> result;
-        for (auto c : _constraint_weights.keys()) {
-            if (c.severity() == RankingConstraintSeverity::CRITICAL) {
-                auto const& p = c.parameter();
+    List<TaskRankingParameter<R>> failed_critical_constraints(InputType const& input, OutputType const& output) const {
+        List<TaskRankingParameter<R>> result;
+        for (auto pw : _parameter_weights) {
+            if (pw.first.severity() == RankingConstraintSeverity::CRITICAL) {
+                auto const& p = pw.first;
                 auto rank = p.rank(input,output,DurationType(0));
-                auto threshold = c.threshold();
+                auto threshold = p.threshold(input,output,DurationType(0));
                 if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
                     (p.optimisation() == OptimisationCriterion::MAXIMISE and rank < threshold)) {
-                    result.insert(c);
+                    result.push_back(p);
                 }
             }
         }
         return result;
     }
 
-    Set<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
-        typedef TaskRankingConstraint<R> ConstraintType;
-        Set<TaskExecutionRanking> result;
+    List<TaskExecutionRanking> rank(Map<ConfigurationSearchPoint,Pair<OutputType,DurationType>> const& data, InputType const& input) const {
+        List<TaskExecutionRanking> result;
+
+        ParameterWeightsList<R> kept_parameter_weights;
+        for (auto pw : _parameter_weights) if (not pw.first.discard(input)) kept_parameter_weights.push_back(pw);
 
         // Compute the dimensions and initialise the min/max entries
-        Map<ConstraintType,SizeType> dimensions;
-        Map<ConstraintType,Pair<ScoreType,ScoreType>> scalar_min_max;
-        Map<ConstraintType,Vector<Pair<ScoreType,ScoreType>>> vector_min_max;
+        List<SizeType> dimensions;
+        List<Pair<ScoreType,ScoreType>> scalar_min_max;
+        List<Vector<Pair<ScoreType,ScoreType>>> vector_min_max;
         auto data_iter = data.cbegin();
-        for (auto cw : _constraint_weights) {
-            auto c = cw.first;
-            auto p = c.parameter();
+        for (auto pw : kept_parameter_weights) {
+            auto p = pw.first;
             auto dim = p.dimension(input);
-            dimensions.insert(Pair<ConstraintType,SizeType>{c,dim});
+            dimensions.push_back(dim);
             if (dim == 1) {
                 auto val = p.rank(input, data_iter->second.first, data_iter->second.second);
-                scalar_min_max.insert(Pair<ConstraintType,Pair<ScoreType,ScoreType>>{c, {val, val}});
+                scalar_min_max.push_back(Pair<ScoreType,ScoreType>{val, val});
             } else {
                 Vector<Pair<ScoreType,ScoreType>> vals(dim);
                 for (SizeType i=0; i<dim; ++i) {
                     auto val = p.rank(input, data_iter->second.first, data_iter->second.second, i);
                     vals[i] = {val,val};
                 }
-                vector_min_max.insert(Pair<ConstraintType,Vector<Pair<ScoreType,ScoreType>>>{c, vals});
+                vector_min_max.push_back(vals);
             }
         }
 
         // Update the min/max on the remaining data entries
         ++data_iter;
         while (data_iter != data.cend()) {
-            for (auto cw : _constraint_weights) {
-                auto c = cw.first;
-                auto p = c.parameter();
-                auto dim = dimensions.get(c);
+            for (SizeType pw_idx=0; pw_idx < kept_parameter_weights.size(); ++pw_idx) {
+                auto p = kept_parameter_weights[pw_idx].first;
+                auto dim = dimensions[pw_idx];
                 if (dim == 1) {
                     auto val = p.rank(input, data_iter->second.first, data_iter->second.second);
-                    scalar_min_max[c] = {min(scalar_min_max[c].first,val), max(scalar_min_max[c].second,val)};
+                    scalar_min_max[pw_idx] = {min(scalar_min_max[pw_idx].first,val), max(scalar_min_max[pw_idx].second,val)};
                 } else {
                     for (SizeType i=0; i<dim; ++i) {
                         auto val = p.rank(input, data_iter->second.first, data_iter->second.second, i);
-                        vector_min_max[c][i] = {min(vector_min_max[c][i].first,val),max(vector_min_max[c][i].second,val)};
+                        vector_min_max[pw_idx][i] = {min(vector_min_max[pw_idx][i].first,val),max(vector_min_max[pw_idx][i].second,val)};
                     }
                 }
             }
@@ -153,28 +150,29 @@ class TaskRankingSpace : public WritableInterface {
             // sum/subtract each weighted cost based on the minimise/maximise objective
             ScoreType score(0);
             SizeType low_errors(0), high_errors(0);
-            for (auto cw : _constraint_weights) {
-                auto const& c = cw.first;
-                auto p = c.parameter();
-                auto weight = cw.second;
-                auto dim = dimensions.get(c);
+            for (SizeType pw_idx=0; pw_idx < kept_parameter_weights.size(); ++pw_idx) {
+                auto p = kept_parameter_weights[pw_idx].first;
+                auto weight = kept_parameter_weights[pw_idx].second;
+                auto dim = dimensions[pw_idx];
                 ScoreType local_score(0);
                 if (dim == 1) {
-                    auto max_min_diff = scalar_min_max[c].second - scalar_min_max[c].first;
+                    auto max_min_diff = scalar_min_max[pw_idx].second - scalar_min_max[pw_idx].first;
                     auto rank = p.rank(input, entry.second.first, entry.second.second);
-                    auto threshold = c.threshold();
-                    if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
-                        (p.optimisation() == OptimisationCriterion::MAXIMISE and rank < threshold)) {
-                        if (c.severity() == RankingConstraintSeverity::PERMISSIVE) ++low_errors;
-                        else if (c.severity() == RankingConstraintSeverity::CRITICAL) ++high_errors;
+                    if (p.uses_objective()) {
+                        auto threshold = p.threshold(input, entry.second.first, entry.second.second);
+                        if ((p.optimisation() == OptimisationCriterion::MINIMISE and rank > threshold) or
+                            (p.optimisation() == OptimisationCriterion::MAXIMISE and rank < threshold)) {
+                            if (p.severity() == RankingConstraintSeverity::PERMISSIVE) ++low_errors;
+                            else if (p.severity() == RankingConstraintSeverity::CRITICAL) ++high_errors;
+                        }
                     }
-                    if (max_min_diff > 0) local_score = (rank-scalar_min_max[c].first)/max_min_diff;
+                    if (max_min_diff > 0) local_score = (rank-scalar_min_max[pw_idx].first)/max_min_diff;
                 } else {
                     SizeType effective_dim = dim;
                     for (SizeType i=0; i<dim; ++i) {
-                        auto max_min_diff = vector_min_max[c][i].second - vector_min_max[c][i].first;
+                        auto max_min_diff = vector_min_max[pw_idx][i].second - vector_min_max[pw_idx][i].first;
                         auto rank = p.rank(input, entry.second.first, entry.second.second, i);
-                        if (max_min_diff > 0) local_score = (rank - vector_min_max[c][i].first)/max_min_diff;
+                        if (max_min_diff > 0) local_score = (rank - vector_min_max[pw_idx][i].first)/max_min_diff;
                         else --effective_dim;
                         if (effective_dim > 0) local_score/=effective_dim;
                     }
@@ -183,20 +181,20 @@ class TaskRankingSpace : public WritableInterface {
                 if (p.optimisation() == OptimisationCriterion::MAXIMISE) score += weight * local_score;
                 else score -= weight*local_score;
             }
-            result.insert(TaskExecutionRanking(entry.first, score, low_errors, high_errors));
+            result.push_back(TaskExecutionRanking(entry.first, score, low_errors, high_errors));
         }
 
         return result;
     }
 
   private:
-    Map<TaskRankingConstraint<R>,WeightType> const _constraint_weights;
+    ParameterWeightsList<R> const _parameter_weights;
 };
 
 template<class R>
 TaskRankingSpace<R> TaskRankingSpaceBuilder<R>::build() const {
-    ARIADNE_PRECONDITION(not _constraint_weights.empty());
-    return TaskRankingSpace(_constraint_weights);
+    ARIADNE_PRECONDITION(not _parameter_weights.empty());
+    return TaskRankingSpace(_parameter_weights);
 }
 
 } // namespace Ariadne

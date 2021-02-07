@@ -46,7 +46,6 @@
 #include "../concurrency/task_ranking_space.hpp"
 #include "../configuration/searchable_configuration.hpp"
 #include "../configuration/configuration_property.hpp"
-#include "../concurrency/task_objective_measurer.hpp"
 
 namespace Ariadne {
 
@@ -213,27 +212,6 @@ template<> struct TaskObjective<VectorFieldEvolver> {
     RealVariable variable;
     PositiveFloatDPUpperBound const radius;
     Dyadic const time;
-};
-
-template<> class TaskObjectiveMeasurer<VectorFieldEvolver> final : public TaskObjectiveMeasurerBase<VectorFieldEvolver> {
-    typedef typename TaskObjectiveMeasurerInterface::ErrorType ErrorType;
-    typedef typename TaskObjectiveMeasurerInterface::ProgressType ProgressType;
-    typedef typename TaskObjectiveMeasurerInterface::InputType InputType;
-    typedef typename TaskObjectiveMeasurerInterface::OutputType OutputType;
-    typedef typename TaskObjectiveMeasurerInterface::ObjectiveType ObjectiveType;
-  protected:
-    ErrorType current_measure(InputType const& i, OutputType const& o, ObjectiveType const& obj) const override {
-        return ((o.evolve.bounding_box()[obj.variable].radius() - i.current_set.bounding_box()[obj.variable].radius())/(o.time-i.current_time)).get_d();
-    }
-    ErrorType reference_measure(InputType const& i, ObjectiveType const& obj) const override {
-        return ((obj.radius - i.current_set.bounding_box()[obj.variable].radius())/(obj.time-i.current_time)).get_d();
-    }
-    ProgressType get_progress(InputType const& i, OutputType const& o) const override {
-        return o.step_size_used.get_d();
-    }
-    Bool discard(InputType const& i, ObjectiveType const& obj) const override {
-        return i.current_time > obj.time;
-    }
 };
 
 template<> struct Task<VectorFieldEvolver> final: public ParameterSearchTaskBase<VectorFieldEvolver> {

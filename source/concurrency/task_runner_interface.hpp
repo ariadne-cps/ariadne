@@ -29,10 +29,10 @@
 #ifndef ARIADNE_TASK_RUNNER_INTERFACE_HPP
 #define ARIADNE_TASK_RUNNER_INTERFACE_HPP
 
-#include "../utility/container.hpp"
-#include "../utility/pointer.hpp"
-#include "../concurrency/task_interface.hpp"
+#include "utility/container.hpp"
+#include "utility/pointer.hpp"
 #include "configuration/configurable.hpp"
+#include "task_interface.hpp"
 
 namespace Ariadne {
 
@@ -45,8 +45,6 @@ class TaskRunnerInterface {
     typedef TaskInput<C> InputType;
     typedef TaskOutput<C> OutputType;
     typedef Configuration<C> ConfigurationType;
-    typedef TaskObjective<C> ObjectiveType;
-    typedef TaskObjectiveMeasurer<C> ObjectiveMeasurerType;
 
     //! \brief Return the task
     virtual TaskType& task() = 0;
@@ -54,9 +52,6 @@ class TaskRunnerInterface {
 
     //! \brief Return the configuration
     virtual ConfigurationType const& configuration() const = 0;
-
-    //! \brief Refine the current configuration from a completed task data, i.e., the input/output pair \a in and \a out
-    virtual void refine_configuration(InputType const& in, OutputType const& out) = 0;
 
     //! \brief Push input
     virtual void push(InputType const& input) = 0;

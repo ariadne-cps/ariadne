@@ -36,64 +36,11 @@ namespace Ariadne {
 
 typedef double ScoreType;
 
-template<class R> class TaskRankingConstraint;
 class TaskExecutionRanking;
 
 template<class R> class CriticalRankingFailureException : public std::runtime_error {
 public:
-    CriticalRankingFailureException(Set<TaskRankingConstraint<R>> const& constraints) : std::runtime_error("The execution has critical failures for these constraints: " + to_string(constraints)) { }
-};
-
-//! \brief Enumeration for the severity of the constraint
-//! \details NONE: there actually is no constraint
-//!          PERMISSIVE: satisfying the constraint is only desired
-//!          CRITICAL: satisfying the constraint is mandatory
-enum class RankingConstraintSeverity { NONE, PERMISSIVE, CRITICAL };
-inline std::ostream& operator<<(std::ostream& os, const RankingConstraintSeverity severity) {
-    switch (severity) {
-        case RankingConstraintSeverity::NONE: os << "NONE"; break;
-        case RankingConstraintSeverity::PERMISSIVE: os << "PERMISSIVE"; break;
-        case RankingConstraintSeverity::CRITICAL: os << "CRITICAL"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled RankingConstraintSeverity value.");
-    }
-    return os;
-}
-
-//! \brief Constraint for task ranking
-//! \details The predicate depends on the MINIMISE/MAXIMISE character of the ranking parameter:
-//! if MINIMISE, then the cost value must be lower than the threshold, if MAXIMISE it must be higher
-template<class R> class TaskRankingConstraint : public WritableInterface {
-  public:
-    TaskRankingConstraint(TaskRankingParameter<R> const& parameter) : _parameter(parameter), _threshold(ScoreType(0)), _severity(RankingConstraintSeverity::NONE) { }
-    TaskRankingConstraint(TaskRankingParameter<R> const& parameter, ScoreType threshold, RankingConstraintSeverity severity) : _parameter(parameter), _threshold(threshold), _severity(severity) {
-        ARIADNE_PRECONDITION(parameter.is_scalar() or severity == RankingConstraintSeverity::NONE); // Vector parameters do not support constraints
-    }
-
-    TaskRankingConstraint* clone() const { return new TaskRankingConstraint(*this); }
-    TaskRankingParameter<R> parameter() const { return _parameter; }
-    ScoreType threshold() const { return _threshold; }
-    RankingConstraintSeverity severity() const { return _severity; }
-
-    Bool operator<(TaskRankingConstraint const& c) const {
-        if (_parameter.name() != c._parameter.name())
-            return _parameter.name() < c._parameter.name();
-        else return _threshold < c.threshold();
-    }
-
-    virtual OutputStream& _write(OutputStream& os) const {
-        os << "{" << _parameter.name();
-        if (_severity != RankingConstraintSeverity::NONE) {
-            if (_parameter.optimisation() == OptimisationCriterion::MINIMISE) os << "<=";
-            else os << ">=";
-            os << _threshold << "(" << _severity << ")";
-        }
-        os << "}"; return os;
-    }
-
-  private:
-    const TaskRankingParameter<R> _parameter;
-    const ScoreType _threshold;
-    const RankingConstraintSeverity _severity;
+    CriticalRankingFailureException(List<TaskRankingParameter<R>> const& parameters) : std::runtime_error("The execution has critical failures for these parameters: " + to_string(parameters)) { }
 };
 
 class TaskExecutionRanking : public WritableInterface {

@@ -90,16 +90,6 @@ void BooleanConfigurationProperty::local_set_single(int integer_value) {
     else _value = false;
 }
 
-void BooleanConfigurationProperty::refine_init(ConfigurationPropertyPath const& path) {
-    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " does not exist.");
-    ARIADNE_ERROR("The value of a boolean property cannot be refined.");
-}
-
-void BooleanConfigurationProperty::refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) {
-    ARIADNE_ASSERT_MSG(path.is_root(),"The path " << path << " does not exist.");
-    ARIADNE_ERROR("The value of a boolean property cannot be refined.");
-}
-
 ConfigurationPropertyInterface* BooleanConfigurationProperty::clone() const {
     return new BooleanConfigurationProperty(*this);
 }

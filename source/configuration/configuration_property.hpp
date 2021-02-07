@@ -36,7 +36,6 @@
 #include "utility/pointer.hpp"
 #include "configuration_interface.hpp"
 #include "configuration_property_interface.hpp"
-#include "configuration_property_refiner.hpp"
 #include "configuration_search_space_converter.hpp"
 
 namespace Ariadne {
@@ -80,8 +79,6 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
     void set(Bool const& value) override;
     void set_both(); //! \brief Set to both true and false
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -93,7 +90,6 @@ class BooleanConfigurationProperty final : public ConfigurationPropertyBase<Bool
 
 //! \brief A range configuration property offers a range of values with a distance metric
 //! \details This property needs a converter to decide how to distribute the integer values in the search space.
-//! Also, this property when not set to a single value can be refined by using a refiner.
 template<class T> class RangeConfigurationProperty final : public ConfigurationPropertyBase<T> {
   public:
     RangeConfigurationProperty(ConfigurationSearchSpaceConverterInterface<T> const& converter = LinearSearchSpaceConverter<T>());
@@ -105,9 +101,6 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     Bool is_configurable() const override;
     SizeType cardinality() const override;
 
-    //! \brief If the range value is currently under refinement
-    Bool is_refined() const;
-
     ConfigurationPropertyInterface* clone() const override;
 
     ConfigurationPropertyInterface* at(ConfigurationPropertyPath const& path) override;
@@ -118,19 +111,13 @@ template<class T> class RangeConfigurationProperty final : public ConfigurationP
     //! \details An unbounded single value is accepted
     void set(T const& value) override;
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
   protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;
   private:
-    T _refine_value(ConfigurationPropertyRefinerInterface& refiner, double error, double progress);
-  private:
     T _lower;
     T _upper;
-    T _refined;
-    Bool _is_refined;
     SharedPointer<ConfigurationSearchSpaceConverterInterface<T>> const _converter;
 };
 
@@ -154,8 +141,6 @@ public:
     void set(T const& value) override;
     void set(Set<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
 protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
@@ -185,8 +170,6 @@ public:
     void set(T const& value) override;
     void set(List<T> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
     Map<ConfigurationPropertyPath,List<int>> integer_values() const override;
   protected:
     void local_set_single(int integer_value) override;
@@ -219,9 +202,7 @@ template<class T> class InterfaceListConfigurationProperty final : public Config
     void set(SharedPointer<T> const& value);
     void set(List<SharedPointer<T>> const& values);
     void set_single(ConfigurationPropertyPath const& path, int integer_value) override;
-    void refine_init(ConfigurationPropertyPath const& path) override;
-    void refine_value(ConfigurationPropertyPath const& path, ConfigurationPropertyRefinerInterface& refiner, double error, double progress) override;
-    protected:
+  protected:
     void local_set_single(int integer_value) override;
     List<int> local_integer_values() const override;
     List<SharedPointer<T>> values() const override;

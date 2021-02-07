@@ -35,7 +35,6 @@
 #include "concurrency/task_execution_ranking.hpp"
 #include "concurrency/task_ranking_space.hpp"
 #include "concurrency/concurrency_manager.hpp"
-#include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
@@ -51,24 +50,13 @@ class VerificationManager {
         return instance;
     }
 
-    template<class R> void add_safety_specification(TaskRunnable<R>& runnable,
-                                      Set<TaskRankingConstraint<R>> const& safety_constraints,
-                                      Set<ConfigurationPropertyRefinement<R>> const& refinement_targets) const
+    template<class R> void add_safety_specification(TaskRunnable<R>& runnable, List<TaskRankingParameter<R>> const& specification) const
     {
         auto appraisal_space = runnable.runner()->task().ranking_space();
         TaskRankingSpaceBuilder<R> builder;
-        for (auto constr_weight : appraisal_space.constraint_weights()) builder.add(constr_weight.first,constr_weight.second);
-        for (auto constr : safety_constraints) builder.add(constr,1.0/safety_constraints.size());
-        auto search_space_dimension = runnable.searchable_configuration().search_space().dimension();
-        auto num_refinements = refinement_targets.size();
-        ARIADNE_ASSERT_MSG(num_refinements <= search_space_dimension, "The number of properties to refine is greater than the number of non-single properties.");
-        Configuration<R> cfg = runnable.configuration();
-        for (auto target : refinement_targets)
-            cfg.properties().get(target.path().first())->refine_init(target.path().subpath());
-
-        ConcurrencyManager::instance().choose_runner_for(runnable, cfg); // Re-chooses the runner
+        for (auto pw : appraisal_space.parameter_weights()) builder.add(pw.first,pw.second);
+        for (auto s : specification) builder.add(s,1.0/specification.size());
         runnable.runner()->task().set_ranking_space(builder.build());
-        runnable.runner()->task().set_configuration_refinements(refinement_targets);
     }
 };
 

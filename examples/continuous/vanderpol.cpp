@@ -62,17 +62,29 @@ int main(int argc, const char* argv[])
     double factor = 0.1;
     OBJ y_p275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.07*factor),DoublePrecision())),Dyadic(6.48_x));
     OBJ y_m275(y,PositiveFloatDPUpperBound(FloatDP(cast_exact(0.075*factor),DoublePrecision())),Dyadic(3.15_x));
-    auto verification_parameter_p275 = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, [y](I const& i, O const& o, DurationType const& d) {
-        return o.reach.bounding_box()[y].upper_bound().get_d(); });
-    auto verification_parameter_m271 = ScalarRankingParameter<E>(y.name(), OptimisationCriterion::MAXIMISE, [y](I const& i, O const& o, DurationType const& d) {
-        return o.reach.bounding_box()[y].lower_bound().get_d(); });
-    auto verification_constraint_p275 = TaskRankingConstraint<E>(verification_parameter_p275, 2.75, RankingConstraintSeverity::CRITICAL);
-    auto verification_constraint_m271 = TaskRankingConstraint<E>(verification_parameter_m271, -2.75, RankingConstraintSeverity::CRITICAL);
-    auto refinement_target = ConfigurationPropertyRefinement<E>(
-            ConfigurationPropertyPath("integrator").append("step_maximum_error"),{y_p275,y_m275},SaturateIfPositiveProportionalRefiner(-1e-3));
-    VerificationManager::instance().add_safety_specification(evolver,
-                                                             {verification_constraint_m271,verification_constraint_p275},
-                                                             {refinement_target});
+    auto verification_p275 = ScalarObjectiveRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, RankingConstraintSeverity::CRITICAL, y_p275,
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return o.reach.bounding_box()[obj.variable].upper_bound().get_d(); },
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return 2.75; },
+                                      [](I const& i, OBJ const& obj) { return false; }
+                                      );
+    auto verification_m275 = ScalarObjectiveRankingParameter<E>(y.name(), OptimisationCriterion::MAXIMISE, RankingConstraintSeverity::CRITICAL, y_m275,
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return o.reach.bounding_box()[obj.variable].lower_bound().get_d(); },
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return -2.75; },
+                                      [](I const& i, OBJ const& obj) { return false; }
+    );
+    auto constrain_p275 = ScalarObjectiveRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, RankingConstraintSeverity::PERMISSIVE, y_p275,
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return ((o.evolve.bounding_box()[obj.variable].radius() - i.current_set.bounding_box()[obj.variable].radius())/(o.time-i.current_time)).get_d(); },
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return ((obj.radius - i.current_set.bounding_box()[obj.variable].radius())/(obj.time-i.current_time)).get_d(); },
+                                      [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
+    );
+    auto constrain_m275 = ScalarObjectiveRankingParameter<E>(y.name(), OptimisationCriterion::MINIMISE, RankingConstraintSeverity::PERMISSIVE, y_m275,
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return ((o.evolve.bounding_box()[obj.variable].radius() - i.current_set.bounding_box()[obj.variable].radius())/(o.time-i.current_time)).get_d(); },
+                                      [](I const& i, O const& o, DurationType const& d, OBJ const& obj) { return ((obj.radius - i.current_set.bounding_box()[obj.variable].radius())/(obj.time-i.current_time)).get_d(); },
+                                      [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
+    );
+
+    //VerificationManager::instance().add_safety_specification(evolver,{verification_p275,verification_m275,constrain_p275,constrain_m275});
+    VerificationManager::instance().add_safety_specification(evolver,{constrain_p275,constrain_m275});
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -106,5 +118,4 @@ int main(int argc, const char* argv[])
     }
 
     ConcurrencyManager::instance().print_best_rankings();
-    ConcurrencyManager::instance().print_refinement_values();
 }

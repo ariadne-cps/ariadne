@@ -32,10 +32,8 @@
 #include "task.tpl.hpp"
 #include "task_runner.hpp"
 #include "task_interface.hpp"
-#include "task_objective_measurer.hpp"
 #include "concurrency_manager.hpp"
 #include "configuration/configurable.tpl.hpp"
-#include "configuration/configuration_property_refinement.hpp"
 
 namespace Ariadne {
 
@@ -61,31 +59,19 @@ template<class C> class TaskRunnerBase : public TaskRunnerInterface<C> {
     typedef typename TaskRunnerInterface<C>::InputType InputType;
     typedef typename TaskRunnerInterface<C>::OutputType OutputType;
     typedef typename TaskRunnerInterface<C>::ConfigurationType ConfigurationType;
-    typedef typename TaskRunnerInterface<C>::ObjectiveMeasurerType ObjectiveMeasurerType;
-    typedef Map<ConfigurationPropertyPath,List<ExactDouble>> PropertyRefinementsMap;
 
     TaskRunnerBase(ConfigurationType const& configuration)
-        : _task(new TaskType()), _objective_measurer(new ObjectiveMeasurerType()), _configuration(configuration) { }
+        : _task(new TaskType()), _configuration(configuration) { }
 
     TaskType& task() override { return *_task; };
     TaskType const& task() const override { return *_task; };
     ConfigurationType const& configuration() const override { return _configuration; }
 
-    void refine_configuration(InputType const& input, OutputType const& output) override {
-        for (auto target : task().configuration_refinements()) {
-            auto error_progress = _objective_measurer->get(input,output,target.objectives());
-            _configuration.properties().get(target.path().first())->refine_value(target.path().subpath(),target.refiner(),error_progress.first,error_progress.second);
-            auto value = _configuration.template at<RangeConfigurationProperty<ExactDouble>>(target.path()).get();
-            ConcurrencyManager::instance().append_refinement_value(target.path(),value);
-        }
-    }
-
     virtual ~TaskRunnerBase() = default;
 
   protected:
     SharedPointer<TaskType> const _task;
-    SharedPointer<ObjectiveMeasurerType> const _objective_measurer;
-    ConfigurationType _configuration;
+    ConfigurationType const _configuration;
 };
 
 template<class C> SequentialRunner<C>::SequentialRunner(ConfigurationType const& configuration) : TaskRunnerBase<C>(configuration) { }
@@ -94,7 +80,6 @@ template<class C> void SequentialRunner<C>::push(InputType const& input) {
     OutputType result = this->_task->run_task(input,this->configuration());
     auto failed_constraints = this->_task->ranking_space().failed_critical_constraints(input,result);
     if (not failed_constraints.empty()) throw CriticalRankingFailureException<C>(failed_constraints);
-    this->refine_configuration(input,result);
     _last_output.reset(new OutputType(result));
 }
 
@@ -109,7 +94,6 @@ template<class C> void DetachedRunner<C>::_loop() {
         if (_terminate) break;
         auto input = _input_buffer.pop();
         OutputType output = this->_task->run_task(input,this->configuration());
-        this->refine_configuration(input,output);
         _output_buffer.push(output);
         _output_availability.notify_all();
     }
@@ -248,8 +232,6 @@ template<class C> auto ParameterSearchRunner<C>::pull() -> OutputType {
         throw CriticalRankingFailureException<C>(this->_task->ranking_space().failed_critical_constraints(input,outputs.get(best).first));
     ConcurrencyManager::instance().append_best_ranking(*rankings.rbegin());
     auto best_output = outputs.get(best).first;
-
-    this->refine_configuration(input,best_output);
 
     return best_output;
 }

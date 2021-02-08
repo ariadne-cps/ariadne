@@ -274,15 +274,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     previous_step_size = out.step_size_used;
 }
 
-Task<VectorFieldEvolver>::Task() : ParameterSearchTaskBase<C>("stp",
-                                                              TaskRankingSpaceBuilder<C>()
-    .add(execution_time_ranking<C>)
-    .add(ScalarRankingParameter<C>("step_size_used", OptimisationCriterion::MAXIMISE,
-                                   [](TaskInput<C> const& i,TaskOutput<C> const& o,DurationType const& d) { return o.step_size_used.get_d(); }), 2)
-    /*.add(VectorRankingParameter<R>("final_set_width_increases",OptimisationCriterion::MINIMISE,
-    [](I const& i,O const& o,DurationType const& d,SizeType const& idx) { return (o.evolve.euclidean_set().bounding_box()[idx].width() - i.current_set_bounds[idx].width()).get_d(); },
-    [](I const& i){ return i.current_set_bounds.dimension(); }))*/
-    .build()) { }
+Task<VectorFieldEvolver>::Task() : ParameterSearchTaskBase<C>("stp") { }
 
 auto Task<VectorFieldEvolver>::run(TaskInput<C> const& in, Configuration<C> const& cfg) const -> TaskOutput<C> {
     LabelledEnclosure next_set = in.current_set;

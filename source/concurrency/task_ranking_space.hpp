@@ -193,7 +193,6 @@ class TaskRankingSpace : public WritableInterface {
 
 template<class R>
 TaskRankingSpace<R> TaskRankingSpaceBuilder<R>::build() const {
-    ARIADNE_PRECONDITION(not _parameter_weights.empty());
     return TaskRankingSpace(_parameter_weights);
 }
 

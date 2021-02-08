@@ -83,8 +83,16 @@ int main(int argc, const char* argv[])
                                       [](I const& i, OBJ const& obj) { return i.current_time > obj.time; }
     );
 
-    List<Pair<TaskRankingParameter<E>,double>> specification = {{verification_p275,2},{verification_m275,2},{constrain_p275,2},{constrain_m275,2}};
-    VerificationManager::instance().add_safety_specification(evolver,specification);
+    auto step_size_used = ScalarRankingParameter<E>("step_size_used", OptimisationCriterion::MAXIMISE, [](I const& i,O const& o,DurationType const& d) { return o.step_size_used.get_d(); });
+
+    List<Pair<TaskRankingParameter<E>,double>> specification = {{verification_p275,2},
+                                                                {verification_m275,2},
+                                                                {constrain_p275,2},
+                                                                {constrain_m275,2},
+                                                                {execution_time_ranking<E>,1},
+                                                                {step_size_used,2}};
+
+    VerificationManager::instance().set_ranking_space(evolver,specification);
 
     Real x0 = 1.4_dec;
     Real y0 = 2.4_dec;
@@ -129,7 +137,7 @@ int main(int argc, const char* argv[])
             ARIADNE_LOG_PRINTLN_AT(1,"Safety verification failure: " << ex.what());
         }
         ConcurrencyManager::instance().choose_runner_for(evolver);
-        VerificationManager::instance().add_safety_specification(evolver,specification);
+        VerificationManager::instance().set_ranking_space(evolver,specification);
         indicator.update_current(i+1);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of tries, currently " << 1+i-success_times.size() << " failures.");
     }

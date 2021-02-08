@@ -33,6 +33,7 @@
 #include "../utility/pointer.hpp"
 #include "../utility/string.hpp"
 #include "task_interface.hpp"
+#include "task_ranking_space.hpp"
 #include "configuration/configuration_search_space.hpp"
 
 namespace Ariadne {
@@ -40,7 +41,6 @@ namespace Ariadne {
 class ConfigurationSearchPoint;
 class TaskExecutionRanking;
 class ConfigurationSearchSpace;
-template<class R> class TaskRankingSpace;
 
 //! \brief The base for parameter search tasks
 //! \details Useful to streamline task construction
@@ -50,8 +50,8 @@ class ParameterSearchTaskBase : public TaskInterface<R> {
     typedef TaskInput<R> InputType;
     typedef TaskOutput<R> OutputType;
   protected:
-    ParameterSearchTaskBase(String const& name, TaskRankingSpace<R> const& ranking_space)
-        : _name(name), _ranking_space(ranking_space.clone()) {}
+    ParameterSearchTaskBase(String const& name)
+        : _name(name), _ranking_space(SharedPointer<TaskRankingSpace<R>>(TaskRankingSpaceBuilder<R>().build().clone())) {}
   public:
     String name() const override { return _name; }
     TaskRankingSpace<R> const& ranking_space() const override { return *_ranking_space; }

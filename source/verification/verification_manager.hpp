@@ -50,11 +50,9 @@ class VerificationManager {
         return instance;
     }
 
-    template<class R> void add_safety_specification(TaskRunnable<R>& runnable, List<Pair<TaskRankingParameter<R>,double>> const& specification) const
+    template<class R> void set_ranking_space(TaskRunnable<R>& runnable, List<Pair<TaskRankingParameter<R>,double>> const& specification) const
     {
-        auto appraisal_space = runnable.runner()->task().ranking_space();
         TaskRankingSpaceBuilder<R> builder;
-        for (auto pw : appraisal_space.parameter_weights()) builder.add(pw.first,pw.second);
         for (auto s : specification) builder.add(s.first,s.second);
         runnable.runner()->task().set_ranking_space(builder.build());
     }

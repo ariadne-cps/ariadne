@@ -96,7 +96,10 @@ template<class T> struct IndexOf<T> { };
 // Returns N, if T is the Nth element of the class list TS...
 template<class T, class... TS> constexpr decltype(auto) index_of() { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
 
-template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
+template<class F, class... AS> using InvokeResult = typename std::invoke_result<F,AS...>::type;
+template<class SIG> struct ResultOfTrait;
+template<class F, class... AS> struct ResultOfTrait<F(AS...)> { typedef typename std::invoke_result<F,AS...>::type Type; };
+template<class SIG> using ResultOf = typename ResultOfTrait<SIG>::Type;
 
 template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<T2,T3>>;
 

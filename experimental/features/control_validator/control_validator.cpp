@@ -82,11 +82,11 @@ using ExactFloatVariablesBox = ExactFloatDPVariablesBox;
 template<class T> using remove_cv_t = typename std::remove_cv<T>::type;
 template<class T> using remove_reference_t = typename std::remove_reference<T>::type;
 template<class T> using remove_const_reference_t = typename std::remove_const<typename std::remove_reference<T>::type>::type;
-template<class S> using result_of_t = typename std::result_of<S>::type;
+template<class F, class... AS> using invoke_result_t = typename std::invoke_result<F,AS...>::type;
 template<class It> using dereference_t = decltype(*declval<It>);
 
 template<class InputIt, class UnaryPredicate> auto
-quasi_all_of(InputIt first, InputIt last, UnaryPredicate p) -> result_of_t<UnaryPredicate(dereference_t<InputIt>)> {
+quasi_all_of(InputIt first, InputIt last, UnaryPredicate p) -> invoke_result_t<UnaryPredicate,dereference_t<InputIt>> {
     decltype(p(*first)) r=true; while(first!=last) { r=r && p(*first); if(not possibly(r)) { return r; } ++first; }  return r; }
 template<class InputIt, class UnaryPredicate> auto quasi_any_of(InputIt first, InputIt last, UnaryPredicate p) -> decltype(p(*first)) {
     decltype(p(*first)) r=false; while(first!=last) { r=r || p(*first); if(definitely(r)) { return r; } ++first; }  return r; }

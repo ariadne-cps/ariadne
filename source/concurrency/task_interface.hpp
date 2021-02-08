@@ -29,6 +29,7 @@
 #ifndef ARIADNE_TASK_INTERFACE_HPP
 #define ARIADNE_TASK_INTERFACE_HPP
 
+#include <chrono>
 #include "../utility/container.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/string.hpp"
@@ -45,10 +46,8 @@ typedef std::chrono::microseconds DurationType;
 template<class R> struct TaskInput;
 template<class R> struct TaskOutput;
 template<class R> struct TaskObjective;
-template<class R> class TaskObjectiveMeasurer;
 template<class R> struct Task;
 template<class R> struct Configuration;
-template<class R> class ConfigurationPropertyRefinement;
 
 template<class R>
 class TaskInterface {

@@ -311,8 +311,6 @@ orbit(const HybridEnclosure& initial,
     return orbit;
 }
 
-HybridEvolverBase::FunctionFactoryType* make_taylor_function_factory();
-
 HybridEvolverBase::HybridEvolverBase(const SystemType& system)
 {
     this->_create(system,make_taylor_function_factory());

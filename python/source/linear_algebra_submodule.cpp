@@ -556,7 +556,7 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
         //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X>>, pybind11::is_operator());
         diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
 
-        module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+        module.def("inverse", &_inverse_<DiagonalMatrix<X>>);
     }
 }
 

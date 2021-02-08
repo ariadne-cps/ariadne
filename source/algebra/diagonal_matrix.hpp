@@ -83,6 +83,11 @@ struct DiagonalMatrixOperations {
         return A1;
     }
 
+    template<class X> friend DiagonalMatrix<X> inverse(DiagonalMatrix<X> A) {
+        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=rec(A.at(i,i)); }
+        return A;
+    }
+
     template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
@@ -170,6 +175,7 @@ template<class X> class DiagonalMatrix
     Vector<X> diagonal() const;
     operator Matrix<X>() const;
     operator SymmetricMatrix<X>() const;
+  private: public:
     OutputStream& _write(OutputStream&) const;
 };
 
@@ -241,7 +247,6 @@ template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {
 template<class X> OutputStream& DiagonalMatrix<X>::_write(OutputStream& os) const {
     return os << "diag(" << this->_ary << ")";
 }
-
 
 } // namespace Ariadne
 

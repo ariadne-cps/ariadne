@@ -189,6 +189,9 @@ template<class... AS> auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_
 template<class... AS> auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
 template<class... AS> auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
 
+template<class... AS> auto _inverse_(AS... as) -> decltype(inverse(as...)) { return inverse(as...); }
+template<class... AS> auto _solve_(AS... as) -> decltype(solve(as...)) { return solve(as...); }
+
 template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
 template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }

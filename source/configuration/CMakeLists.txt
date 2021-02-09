@@ -7,6 +7,7 @@ add_library(${LIBRARY_NAME} OBJECT
         configuration_search_parameter.cpp
         configuration_search_point.cpp
         configuration_property.cpp
+        configurable_integrator.cpp
         )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

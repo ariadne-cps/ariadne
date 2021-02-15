@@ -80,7 +80,7 @@ jobs:
 
     - name: Build Library, Tests and Examples
       working-directory: ${{runner.workspace}}/build
-      run: make -j $($NPROC)
+      run: cmake --build . --parallel $($NPROC)
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
@@ -98,14 +98,14 @@ jobs:
       working-directory: ${{runner.workspace}}/tutorials/rigorous_numerics
       run: |
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
-        make -j $($NPROC)
+        cmake --build . --parallel $($NPROC)
         ./rigorous_numerics_tutorial -v 0 > /dev/null
 
     - name: Check Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/hybrid_evolution
       run: |
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
-        make -j $($NPROC)
+        cmake --build . --parallel $($NPROC)
         ./hybrid_evolution_tutorial -v 0 > /dev/null
 
     - name: Check Python Tutorial

@@ -32,7 +32,7 @@ jobs:
 
     - name: Build Library and Tests
       working-directory: ${{runner.workspace}}/build
-      run: make -j $($NPROC) tests
+      run: cmake --build . --parallel $($NPROC) --target tests
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

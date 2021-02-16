@@ -1,3 +1,5 @@
+find_package(Kirk)
+
 if(${KIRK_FOUND})
     set(EXTERNAL_SRC ${EXTERNAL_SRC} kirk_real.cpp)
 endif()
@@ -17,3 +19,5 @@ endif()
 if(${KIRK_FOUND})
     target_link_libraries(ariadne-external kirk)
 endif()
+
+add_subdirectory(examples)

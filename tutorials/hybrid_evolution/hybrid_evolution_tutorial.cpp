@@ -159,12 +159,13 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
+    TimeVariable time;
 
     StringVariable valve("valve");
     StringVariable controller("controller");
 
-    StringConstant opened("opened");
-    StringConstant rising("rising");
+    String opened("opened");
+    String rising("rising");
 
     // Create a simulator object
     HybridSimulator simulator;
@@ -174,17 +175,18 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
     HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
 
     // Define the termination: continuous time and maximum number of transitions
-    HybridTerminationCriterion termination(30,5);
+    HybridTerminationCriterion termination(30.0_x,5);
 
     // Compute a simulation trajectory
     ARIADNE_LOG_PRINTLN("Computing simulation trajectory...");
     auto orbit = simulator.orbit(system,initial_point,termination);
 
     // Plot the simulation trajectory using all different projections
-    ARIADNE_LOG_PRINTLN("Plotting simulation trajectory..");
-    plot("simulation_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
-    plot("simulation_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
+    ARIADNE_LOG_PRINTLN("Plotting simulation trajectory...");
+    plot("simulation_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
+    plot("simulation_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
+    ARIADNE_LOG_PRINTLN("Done computing and plotting simulation trajectory!");
 }
 //! [simulate_evolution]
 
@@ -210,28 +212,30 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
+    TimeVariable time;
 
     StringVariable valve("valve");
     StringVariable controller("controller");
 
-    StringConstant opened("opened");
-    StringConstant rising("rising");
+    String opened("opened");
+    String rising("rising");
 
     // Define the initial set, by supplying the location as a list of locations for each composed automata, and
     // the continuous set as a list of variable assignments for each variable controlled on that location
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
     // Define the termination: continuous time and maximum number of transitions
-    HybridTerminationCriterion termination(30,5);
+    HybridTerminationCriterion termination(30.0_x,5);
     // Compute the orbit using upper semantics
-    ARIADNE_LOG_PRINTLN("Computing evolution...");
+    ARIADNE_LOG_PRINTLN("Computing evolution flow tube...");
     auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
 
-    // Plot the trajectory using two different projections
-    ARIADNE_LOG_PRINTLN("Plotting trajectory...");
-    plot("finite_evolution_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
-    plot("finite_evolution_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
+    // Plot the flow tube using two different projections
+    ARIADNE_LOG_PRINTLN("Plotting evolution flow tube...");
+    plot("finite_evolution_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
+    plot("finite_evolution_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
+    ARIADNE_LOG_PRINTLN("Done computing and plotting evolution flow tube!");
 }
 //! [compute_evolution]
 
@@ -246,6 +250,7 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
     analyser.configuration().set_lock_to_grid_time(5);
 
     ARIADNE_LOG_PRINTLN_AT(1,"Analyser configuration: " << analyser.configuration());
+    ARIADNE_LOG_PRINTLN_AT(1,"Analyser evolver: " << analyser.evolver());
 
     return analyser;
 }
@@ -261,18 +266,35 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     StringVariable valve("valve");
     StringVariable controller("controller");
 
-    StringConstant opened("opened");
-    StringConstant rising("rising");
+    String opened("opened");
+    String rising("rising");
 
-    // Define the initial set
-    HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+    // Define the initial set and final time
+    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+    ARIADNE_LOG_PRINTLN("initial_set: " << initial_set);
+    HybridTime final_time(3.0_x,5);
+    ARIADNE_LOG_PRINTLN("final_time: " << final_time);
 
-    // Compute over-approximation to finite-time reachable set using upper semantics.
+    // Compute over-approximation to infinite-time reachable set using lower semantics.
+    ARIADNE_LOG_PRINTLN("Computing lower reach set...");
+    auto lower_reach = analyser.lower_reach(initial_set,final_time);
+    ARIADNE_LOG_PRINTLN("Plotting lower reach set...");
+    plot("lower_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),lower_reach);
+    ARIADNE_LOG_PRINTLN("Done computing and plotting lower reach set!");
+
+    // Compute over-approximation to infinite-time reachable set using upper semantics.
+    ARIADNE_LOG_PRINTLN("Computing upper reach set...");
+    auto upper_reach = analyser.upper_reach(initial_set,final_time);
+    ARIADNE_LOG_PRINTLN("Plotting upper reach set...");
+    plot("upper_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),upper_reach);
+    ARIADNE_LOG_PRINTLN("Done computing and plotting upper reach set!");
+
+    // Compute over-approximation to infinite-time reachable set using upper semantics.
     ARIADNE_LOG_PRINTLN("Computing outer chain reach set...");
     auto outer_chain_reach = analyser.outer_chain_reach(initial_set);
-
-    ARIADNE_LOG_PRINTLN("Plotting trajectory...");
+    ARIADNE_LOG_PRINTLN("Plotting outer chain reach set...");
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
+    ARIADNE_LOG_PRINTLN("Done computing and plotting outer chain reach set!");
 }
 //! [compute_reachability]
 

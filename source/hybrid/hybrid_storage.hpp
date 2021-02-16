@@ -70,14 +70,14 @@ class HybridStorage
     : public HybridDrawableInterface
 {
     HybridGridTreePaving  _state_set;
-    HybridAutomatonInterface const* _system_ptr;
+    SharedPointer<HybridAutomatonInterface const> _system_ptr;
   public:
   public:
     typedef HybridGrid GridType;
     typedef HybridGridTreePaving PavingType;
 
-    HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(&sys) { }
-    HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(&sys) { }
+    HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(sys.clone()) { }
+    HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(sys.clone()) { }
 
     HybridAutomatonInterface const& system() const { return *this->_system_ptr; }
     HybridAutomatonInterface const& auxiliary_data() const { return *this->_system_ptr; }
@@ -131,7 +131,7 @@ class HybridStorage
     }
 
     friend OutputStream& operator<<(OutputStream& os, HybridStorage const& set) {
-        return os << "HybridStorage(" << set._state_set << ", " << set._system_ptr << "\n"; }
+        return os << "HybridStorage(" << set._state_set << ", system_ptr=" << set._system_ptr << ", system.name()=" << set._system_ptr->name() << ")"; }
 
     friend class HybridStorageElementReference;
 };

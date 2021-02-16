@@ -104,6 +104,7 @@ class HybridEvolverBase
 {
     friend class HybridEvolverBaseConfiguration;
   public:
+    typedef HybridEvolverInterface Interface;
     typedef HybridEvolverBaseConfiguration ConfigurationType;
     typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;

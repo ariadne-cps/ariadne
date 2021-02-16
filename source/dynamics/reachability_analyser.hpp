@@ -122,6 +122,9 @@ template<class SYS> class ReachabilityAnalyser
     ConfigurationType& configuration() { return *this->_configuration; }
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
+    //! \brief A reference to the analyser's evolver parameter.
+    const EvolverType& evolver() const { return *this->_evolver; }
+
     //! \brief Get the system associated with the analyser.
     virtual const SystemType& system() const override { return *this->_system; }
     //!@}
@@ -163,6 +166,7 @@ template<class SYS> class ReachabilityAnalyser
     virtual StorageType
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& time) const override;
+
 
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
     virtual StorageType

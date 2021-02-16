@@ -34,8 +34,6 @@
 
 namespace Ariadne {
 
-typedef Integer DiscreteTimeType;
-
 class DiscreteEvent;
 
 //! \ingroup AnalysisModule
@@ -125,7 +123,7 @@ class HybridTime
     }
 
     friend OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {
-        return os << "("<<ht._continuous_time<<","<<ht._discrete_time<<")";
+        return os << "(time="<<ht._continuous_time<<", steps="<<ht._discrete_time<<")";
     }
 };
 

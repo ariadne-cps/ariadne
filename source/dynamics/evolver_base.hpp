@@ -39,9 +39,8 @@ namespace Ariadne {
 template<class SYS, class ES, class TRM> class EvolverBase
     : public EvolverInterface<SYS,ES,TRM>
 {
-    typedef EvolverInterface<SYS,ES,TRM> Interface;
-
   public:
+    typedef EvolverInterface<SYS,ES,TRM> Interface;
     typedef typename EvolverInterface<SYS,ES,TRM>::SystemType SystemType;
     typedef typename EvolverInterface<SYS,ES,TRM>::TimeType TimeType;
     typedef typename EvolverInterface<SYS,ES,TRM>::TerminationType TerminationType;

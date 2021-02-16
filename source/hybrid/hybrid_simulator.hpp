@@ -47,6 +47,7 @@ class HybridSimulator
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
     typedef HybridApproximatePointType EnclosureType;
+    typedef Orbit<HybridApproximatePointType> OrbitType;
     typedef HybridTerminationCriterion TerminationType;
   private:
     FloatDPApproximation _step_size;

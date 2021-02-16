@@ -62,8 +62,6 @@ template<class E> class Orbit {
 };
 #endif
 
-typedef Real TimeType;
-
 template<class ES> class Orbit;
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 

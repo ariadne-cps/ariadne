@@ -1,3 +1,5 @@
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/experimental/features/kirk")
+
 find_package(Kirk)
 
 if(${KIRK_FOUND})

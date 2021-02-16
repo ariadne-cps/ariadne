@@ -1,2 +1,3 @@
 add_subdirectory(examples)
-add_subdirectory(features)
+# Disabled to streamline the configuration
+#add_subdirectory(features)

@@ -31,7 +31,7 @@
 #ifndef ARIADNE_INTEGER_HPP
 #define ARIADNE_INTEGER_HPP
 
-#include "../external/gmp.hpp"
+#include "../numeric/gmp.hpp"
 
 #include <cassert>
 

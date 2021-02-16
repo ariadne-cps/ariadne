@@ -29,7 +29,7 @@
 #ifndef ARIADNE_DYADIC_HPP
 #define ARIADNE_DYADIC_HPP
 
-#include "../external/gmp.hpp"
+#include "../numeric/gmp.hpp"
 
 #include <iostream> // For std::floor std::ceil etc
 #include <iomanip> // For std::setprecision

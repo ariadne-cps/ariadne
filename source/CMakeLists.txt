@@ -8,5 +8,3 @@ add_subdirectory(dynamics)
 add_subdirectory(symbolic)
 add_subdirectory(output)
 add_subdirectory(hybrid)
-
-add_subdirectory(external)

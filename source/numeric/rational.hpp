@@ -31,7 +31,7 @@
 #ifndef ARIADNE_RATIONAL_HPP
 #define ARIADNE_RATIONAL_HPP
 
-#include "../external/gmp.hpp"
+#include "../numeric/gmp.hpp"
 #include "../utility/typedefs.hpp"
 #include "../utility/metaprogramming.hpp"
 #include "../utility/string.hpp"

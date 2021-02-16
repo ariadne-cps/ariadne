@@ -122,8 +122,6 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
-find_package(Kirk)
-
 add_subdirectory(source)
 add_subdirectory(tests)
 add_subdirectory(examples)
@@ -190,13 +188,9 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-target_link_libraries(ariadne dl)
-target_link_libraries(ariadne-kernel dl)
-target_link_libraries(ariadne-core dl)
-
-target_link_libraries(ariadne ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 
 if(COVERAGE)
     target_link_libraries(ariadne coverage_config)

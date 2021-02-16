@@ -41,6 +41,9 @@ Void export_figure(pybind11::module& module)
     pybind11::class_<Projection2d> planar_projection_map_class(module,"Projection2d");
     planar_projection_map_class.def(pybind11::init<DimensionType,DimensionType,DimensionType>());
 
+    pybind11::class_<Axes2d> axes2d_class(module,"Axes2d");
+    axes2d_class.def(pybind11::init<double,RealVariable,double,double,RealVariable,double>());
+
     static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
 
     pybind11::class_<Figure> figure_class(module,"Figure");
@@ -63,8 +66,12 @@ Void export_figure(pybind11::module& module)
     figure_class.def("write",(Void(Figure::*)(const Char*,Nat,Nat)const)&Figure::write);
 }
 
+Void export_plot(pybind11::module& module)
+{
+}
 
 Void graphics_submodule(pybind11::module& module) {
     export_figure(module);
+    export_plot(module);
 }
 

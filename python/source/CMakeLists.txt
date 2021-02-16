@@ -22,7 +22,7 @@ add_library(pyariadne-algebra-module-obj OBJECT
     algebra_module.cpp
 )
 
-add_library(pyariadne-extra-submodule-obj OBJECT  
+add_library(pyariadne-extra-submodule-obj OBJECT
     symbolic_submodule.cpp
     optimization_submodule.cpp
     function_submodule.cpp
@@ -32,6 +32,7 @@ add_library(pyariadne-extra-submodule-obj OBJECT
     system_submodule.cpp
     evolution_submodule.cpp
     graphics_submodule.cpp
+    hybrid_submodule.cpp
 )
 
 add_library(pyariadne-module-obj OBJECT

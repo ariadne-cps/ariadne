@@ -37,8 +37,9 @@ void symbolic_submodule(pybind11::module& module);
 void system_submodule(pybind11::module& module);
 void evolution_submodule(pybind11::module& module);
 void graphics_submodule(pybind11::module& module);
+void hybrid_submodule(pybind11::module& module);
 
-PYBIND11_MODULE(ariadne, module) {  
+PYBIND11_MODULE(ariadne, module) {
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);
@@ -52,4 +53,5 @@ PYBIND11_MODULE(ariadne, module) {
     system_submodule(module);
     evolution_submodule(module);
     graphics_submodule(module);
+    hybrid_submodule(module);
 }

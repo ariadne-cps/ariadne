@@ -39,9 +39,6 @@
 #include "geometry/function_set.hpp"
 #include "geometry/affine_set.hpp"
 
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_set.hpp"
-
 namespace Ariadne {
 
 

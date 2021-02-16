@@ -74,7 +74,7 @@ template<class IVL> class HybridVariablesBox
     //! \brief The location in which the box is defined.
     VariablesBox<IVL> const& continuous_set() const { return this->Base::second; }
     //! \brief The active variables in the location \a loc.
-    virtual Set<RealVariable> variables() const { return this->Base::second.variables(); }
+    Set<RealVariable> variables() const { return this->Base::second.variables(); }
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
     Box<IVL> euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 };
@@ -128,7 +128,7 @@ template<class IVL> class HybridVariablesBoxes
         for(auto hbox : hboxes) { this->adjoin(hbox); } }
 
     HybridVariablesBoxes<IVL>& adjoin(HybridVariablesBox<IVL> const& hbox){
-        this->Base::insert(hbox.location(),hbox.continuous_set()); }
+        this->Base::insert(hbox.location(),hbox.continuous_set()); return *this; }
 
     //! \brief The location in which the box is defined.
     Set<DiscreteLocation> locations() const { return this->Base::keys(); }

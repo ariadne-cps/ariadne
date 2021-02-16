@@ -200,6 +200,38 @@ inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable
 inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
 inline VariableLowerInterval<Double> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<Double>(l,v); }
 
+
+//! \ingroup ExpressionSetSubModule
+//! \brief An point defining values for a collection of real variables.
+template<class X> class VariablesPoint {
+    Map<RealVariable,X> _vals;
+  public:
+    typedef X CoordinateType;
+    typedef Point<X> PointType;
+    typedef VariablesPoint<X> VariablesPointType;
+
+    VariablesPoint() : _vals() { }
+    VariablesPoint(const RealSpace& spc, const PointType& pt);
+    VariablesPoint(const Map<RealVariable,CoordinateType>& vals) : _vals(vals) { }
+    template<class XX, EnableIf<IsConvertible<XX,X>> = dummy> VariablesPoint(const LabelledSet<Point<XX>>& lpt);
+    template<class XX,EnableIf<IsConstructible<X,XX>> =dummy> VariablesPoint(VariablesPoint<XX> const& ept) : _vals(ept.values()) { }
+    Map<RealVariable,CoordinateType> values() const { return this->_vals; }
+    Set<RealVariable> variables() const { return this->_vals.keys(); }
+    const CoordinateType& operator[](const RealVariable& v) const { return this->_vals[v]; }
+    PointType euclidean_set(const RealSpace& spc) const {
+        return PointType(spc.dimension(),[this,&spc](SizeType i){return this->_vals[spc[i]];}); }
+    friend OutputStream& operator<<(OutputStream& os, const VariablesPointType& ept) {
+        return os << "VariablesPoint"<<class_name<X>()<<"( values=" << ept.values() << " )"; }
+    explicit operator LabelledSet<Point<X>> () const;
+};
+
+template<class X> VariablesPoint<X>::VariablesPoint(const RealSpace& spc, const Point<X>& pt) {
+    ARIADNE_PRECONDITION(spc.dimension()==pt.dimension());
+    for(SizeType i=0; i!=spc.dimension(); ++i) {
+        this->_vals.insert(spc.variable(i),pt[i]);
+    }
+}
+
 //! \ingroup ExpressionSetSubModule
 //! \brief An box defining ranges for a collection of real variables.
 template<class IVL> class VariablesBox {
@@ -215,6 +247,8 @@ template<class IVL> class VariablesBox {
     template<class I, EnableIf<IsConvertible<I,IVL>> = dummy> VariablesBox(const LabelledSet<Box<I>>& lbx);
     VariablesBox(const RealSpace& spc, const Box<IVL>& bx);
     VariablesBox(const Map<RealVariable,IntervalType>& bnds) : _bnds(bnds) { }
+    VariablesBox(const Set<VariableIntervalType>& bnds) : _bnds() {
+        for(auto bnd : bnds) { this->_bnds.insert(bnd.variable(),bnd.interval()); } }
     VariablesBox(const List<VariableIntervalType>& bnds) :  _bnds() {
         for(auto bnd : bnds) { this->_bnds.insert(bnd.variable(),bnd.interval()); } }
     VariablesBox(const InitializerList<VariableIntervalType>& lst) : VariablesBox(List<VariableIntervalType>(lst)) { }
@@ -223,7 +257,7 @@ template<class IVL> class VariablesBox {
     Set<RealVariable> variables() const { return this->_bnds.keys(); }
     const IntervalType& operator[](const RealVariable& v) const { return this->_bnds[v]; }
     BoxType euclidean_set(const RealSpace& spc) const {
-        BoxType res(spc.dimension()); for(SizeType i=0; i!=res.dimension(); ++i) { res[i]=this->_bnds[spc[i]]; } return res; }
+        return BoxType(spc.dimension(),[this,&spc](SizeType i){return this->_bnds[spc[i]];}); }
     decltype(auto) is_empty() const { return any(_bnds,[](auto e){return e.second.is_empty();}); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBoxType& ebx) {
         return os << "VariablesBox"<<class_name<IVL>()<<"( bounds=" << ebx.bounds() << " )"; }
@@ -330,6 +364,11 @@ template<class S> EqualsType<S> operator==(LabelledSet<S> const& eset1, Labelled
     if(eset1.variables()!=eset2.variables()) { return false; }
     ARIADNE_ASSERT(eset1.space()==eset2.space());
     return eset1.euclidean_set()==eset2.euclidean_set();
+}
+
+template<class X> VariablesPoint<X>::operator LabelledSet<Point<X>>() const {
+    RealSpace spc(List<RealVariable>(this->variables()));
+    return LabelledSet<Point<X>>(spc,this->euclidean_set(spc));
 }
 
 template<class IVL> VariablesBox<IVL>::operator LabelledSet<Box<IVL>>() const {

@@ -243,6 +243,12 @@ HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
     this->adjoin(loc,RealExpressionConstraintSet(cnstr));
 }
 
+HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
+                                         const RealExpressionConstraintSet& cs)
+{
+    this->adjoin(loc,cs);
+}
+
 HybridConstraintSet* HybridConstraintSet::clone() const {
     return new HybridConstraintSet(*this);
 }
@@ -357,6 +363,11 @@ Set<RealVariable> HybridBoundedConstraintSet::variables(DiscreteLocation loc) co
     return _sets[loc].variables();
 }
 
+RealExpressionBoundedConstraintSet const& HybridBoundedConstraintSet::continuous_set(DiscreteLocation loc) const {
+    ARIADNE_ASSERT(this->_sets.has_key(loc));
+    return this->_sets[loc];
+}
+
 BoundedConstraintSet const HybridBoundedConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     ARIADNE_ASSERT(this->_sets.has_key(loc));
     return BoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
@@ -412,13 +423,13 @@ Set<DiscreteLocation> HybridBoundedConstraintSet::locations() const {
     return this->_sets.keys();
 }
 
-HybridExactBoxes HybridBoundedConstraintSet::bounding_box() const {
-    HybridExactBoxes result;
+HybridUpperBoxes HybridBoundedConstraintSet::bounding_box() const {
+    HybridUpperBoxes result;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         RealSpace spc=make_list(iter->second.variables());
         RealVariablesBox bnds=iter->second.bounds();
         RealBox rbx=bnds.euclidean_set(spc);
-        ExactBoxType ebx=over_approximation(rbx);
+        UpperBoxType ebx=over_approximation(rbx);
         result.insert(iter->first,spc,ebx);
     }
     return result;
@@ -470,7 +481,12 @@ template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const Dis
     }
 }
 
-
+template<class EBS> Void HybridBasicSet<EBS>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
+{
+    for (auto loc : locations) {
+        draw_hybrid_basic_set(canvas,loc,axes,*this);
+    }
+}
 
 
 template<class IVL> Void HybridBox<IVL>::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& p) const {
@@ -523,6 +539,7 @@ template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
 template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
 template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }
+template<> String class_name<UpperBoxType>() { return "UpperFloatDPBox"; }
 
 template<> String class_name<GridCell>() { return "GridCell"; }
 
@@ -534,6 +551,10 @@ template class HybridPoint<Real>;
 template class HybridBasicSet<ExactBoxType>;
 template class HybridBox<ExactIntervalType>;
 template class HybridBoxes<ExactIntervalType>;
+
+template class HybridBasicSet<UpperBoxType>;
+template class HybridBox<UpperIntervalType>;
+template class HybridBoxes<UpperIntervalType>;
 
 template class HybridBox<RealInterval>;
 

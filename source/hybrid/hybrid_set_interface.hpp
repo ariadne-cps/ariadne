@@ -44,6 +44,8 @@
 
 namespace Ariadne {
 
+class HybridSetInterfaceBase;
+
 template<class P> class HybridBoundedSetInterface;
 template<class P> class HybridOpenSetInterface;
 template<class P> class HybridClosedSetInterface;
@@ -52,7 +54,6 @@ template<class P> class HybridCompactSetInterface;
 template<class P> class HybridRegularSetInterface;
 template<class P> class HybridLocatedSetInterface;
 template<class P> class HybridRegularLocatedSetInterface;
-template<class P> using HybridSetInterface = HybridRegularLocatedSetInterface<P>;
 
 using EffectiveHybridBoundedSetInterface = HybridBoundedSetInterface<EffectiveTag>;
 using EffectiveHybridOpenSetInterface = HybridOpenSetInterface<EffectiveTag>;
@@ -62,7 +63,6 @@ using EffectiveHybridCompactSetInterface = HybridCompactSetInterface<EffectiveTa
 using EffectiveHybridRegularSetInterface = HybridRegularSetInterface<EffectiveTag>;
 using EffectiveHybridLocatedSetInterface = HybridLocatedSetInterface<EffectiveTag>;
 using EffectiveHybridRegularLocatedSetInterface = HybridRegularLocatedSetInterface<EffectiveTag>;
-using EffectiveHybridSetInterface = HybridSetInterface<EffectiveTag>;
 
 using ValidatedHybridBoundedSetInterface = HybridBoundedSetInterface<ValidatedTag>;
 using ValidatedHybridOpenSetInterface = HybridOpenSetInterface<ValidatedTag>;
@@ -72,6 +72,9 @@ using ValidatedHybridCompactSetInterface = HybridCompactSetInterface<ValidatedTa
 using ValidatedHybridRegularSetInterface = HybridRegularSetInterface<ValidatedTag>;
 using ValidatedHybridLocatedSetInterface = HybridLocatedSetInterface<ValidatedTag>;
 using ValidatedHybridRegularLocatedSetInterface = HybridRegularLocatedSetInterface<ValidatedTag>;
+
+template<class P> using HybridSetInterface = HybridRegularLocatedSetInterface<P>;
+using EffectiveHybridSetInterface = HybridSetInterface<EffectiveTag>;
 using ValidatedHybridSetInterface = HybridSetInterface<ValidatedTag>;
 
 //! \ingroup HybridSetSubmodule

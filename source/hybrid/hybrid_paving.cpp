@@ -221,12 +221,12 @@ ValidatedLowerKleenean HybridGridTreePaving::inside(const HybridExactBoxes& hbx)
 }
 
 HybridUpperBoxes HybridGridTreePaving::bounding_box() const {
-    HybridExactBoxes result;
+    HybridUpperBoxes result;
     for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
         if( !_loc_iter->second.is_empty() ) {
             DiscreteLocation const& loc = _loc_iter->first;
             RealSpace const& spc=this->space(loc);
-            result.insert(loc,spc,cast_exact_box(_loc_iter->second.bounding_box()));
+            result.insert(loc,spc,_loc_iter->second.bounding_box());
         }
     }
     return result;

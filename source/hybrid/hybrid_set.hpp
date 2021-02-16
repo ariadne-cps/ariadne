@@ -167,7 +167,7 @@ class HybridDenotableSet
     bool has_location(DiscreteLocation const& loc) const { return this->_esets.has_key(loc); }
 
     friend OutputStream& operator<<(OutputStream& os, const HybridDenotableSet<EDS>& hds) {
-        return os << "Hybrid" << class_name<EDS>() << hds._sets;
+        return os << "Hybrid" << class_name<EDS>() << static_cast<Base const&>(hds);
     }
 };
 
@@ -179,8 +179,8 @@ template<class X> class HybridPoint
   public:
     HybridPoint<X>() : HybridBasicSet<Point<X>>() { }
     HybridPoint<X>(const DiscreteLocation& q, const RealSpace& spc, const Point<X>& pt) : HybridBasicSet<Point<X>>(q,spc,pt) { }
-
-    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,X>& val);
+    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,X>& val)
+        : HybridBasicSet<Point<X>>(q,LabelledSet<Point<X>>(VariablesPoint<X>(val))) { }
     HybridPoint<X>(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& val);
     HybridPoint<X>(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& val);
 
@@ -243,13 +243,16 @@ template<class IVL> class HybridBox
 //! \details Primarily used to represent bounds for a compact hybrid set.
 template<class IVL> class HybridBoxes
     : public virtual HybridDrawableInterface
-    , public Map<DiscreteLocation,LabelledSet<Box<IVL>>>
+    , public HybridDenotableSet<Box<IVL>>
 {
-    typedef Map<DiscreteLocation,LabelledSet<Box<IVL>>> Base;
+    typedef HybridDenotableSet<Box<IVL>> Base;
   public:
     //! \brief Set the continuous state set in location \a loc to \a vbx.
     Void insert(const HybridBox<IVL>& hbx) {
-        this->Map<DiscreteLocation,LabelledSet<Box<IVL>>>::insert(hbx.location(),LabelledSet<Box<IVL>>(hbx.space(),hbx.euclidean_set())); }
+        this->Base::insert(hbx.location(),LabelledSet<Box<IVL>>(hbx.space(),hbx.euclidean_set())); }
+    //! \brief Set the continuous state set in location \a loc to \a vbx.
+    Void insert(const DiscreteLocation& loc, const LabelledSet<Box<IVL>>& bx) {
+        this->Base::insert(loc,bx); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
     Void insert(const DiscreteLocation& loc, const RealSpace& spc, const Box<IVL>& bx) {
         this->Base::insert(loc,LabelledSet<Box<IVL>>(spc,bx)); }

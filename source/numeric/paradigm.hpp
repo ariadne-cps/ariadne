@@ -96,9 +96,11 @@ template<class P> using LessThan = P;
 template<class P1, class P2=P1> struct ParadigmTraits;
 
 
-template<> struct ParadigmTraits<ExactTag,EffectiveTag> {
-    using Weaker = EffectiveTag;
+
+template<> struct ParadigmTraits<ExactTag,ExactTag> {
+    using Weaker = ExactTag;
     using Stronger = ExactTag;
+    using NextWeaker = EffectiveTag;
 };
 
 template<> struct ParadigmTraits<EffectiveTag,EffectiveTag> {
@@ -122,8 +124,36 @@ template<> struct ParadigmTraits<ApproximateTag,ApproximateTag> {
     using NextWeaker = Void;
 };
 
+template<> struct ParadigmTraits<ExactTag,EffectiveTag> {
+    using Stronger = ExactTag; using Weaker = EffectiveTag; };
+template<> struct ParadigmTraits<ExactTag,ValidatedTag> {
+    using Stronger = ExactTag; using Weaker = ValidatedTag; };
+template<> struct ParadigmTraits<ExactTag,ApproximateTag> {
+    using Stronger = ExactTag; using Weaker = ApproximateTag; };
+template<> struct ParadigmTraits<EffectiveTag,ExactTag> {
+    using Stronger = ExactTag; using Weaker = EffectiveTag; };
+template<> struct ParadigmTraits<EffectiveTag,ValidatedTag> {
+    using Stronger = EffectiveTag; using Weaker = ValidatedTag; };
+template<> struct ParadigmTraits<EffectiveTag,ApproximateTag> {
+    using Stronger = EffectiveTag; using Weaker = ApproximateTag; };
+template<> struct ParadigmTraits<ValidatedTag,ExactTag> {
+    using Stronger = ExactTag; using Weaker = ValidatedTag; };
+template<> struct ParadigmTraits<ValidatedTag,EffectiveTag> {
+    using Stronger = EffectiveTag; using Weaker = ValidatedTag; };
+template<> struct ParadigmTraits<ValidatedTag,ApproximateTag> {
+    using Stronger = ValidatedTag; using Weaker = ApproximateTag; };
+template<> struct ParadigmTraits<ApproximateTag,ExactTag> {
+    using Stronger = ExactTag; using Weaker = ApproximateTag; };
+template<> struct ParadigmTraits<ApproximateTag,EffectiveTag> {
+    using Stronger = EffectiveTag; using Weaker = ApproximateTag; };
+template<> struct ParadigmTraits<ApproximateTag,ValidatedTag> {
+    using Stronger = ValidatedTag; using Weaker = ApproximateTag; };
+
 //! \brief A tag meaning that the object provides a positive upper bound for a quantity.
 struct ErrorTag { };
+
+//! \brief The weaker of \a P1 and \a P2.
+template<class P1, class P2> using Weaker = typename ParadigmTraits<P1,P2>::Weaker;
 
 
 //! \brief Inherits from \c TrueType if paradigm \a P1 is weaker than \a P2.

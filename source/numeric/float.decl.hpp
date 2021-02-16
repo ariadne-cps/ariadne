@@ -127,7 +127,7 @@ template<class PR> using FloatError = Error<RawFloatType<PR>>; //!< <p/> \ingrou
 //!@}
 
 template<class P, class PR, class PRE=PR> struct FloatTypedef;
-template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
+template<class PR> struct FloatTypedef<ApproximationTag,PR> { typedef FloatApproximation<PR> Type; };
 template<class PR> struct FloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
 template<class PR> struct FloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };
 template<class PR> struct FloatTypedef<OrderTag,PR> { typedef FloatBounds<PR> Type; };
@@ -135,7 +135,10 @@ template<class PR, class PRE> struct FloatTypedef<MetricTag,PR,PRE> { typedef Fl
 template<class PR> struct FloatTypedef<ExactTag,PR> { typedef FloatValue<PR> Type; };
 template<class PR> struct FloatTypedef<ErrorTag,PR> { typedef FloatError<PR> Type; };
 
+template<class PR> struct FloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
 template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
+template<class PR> struct FloatTypedef<EffectiveTag,PR> { typedef FloatBounds<PR> Type; };
+template<class PR, class PRE> struct FloatTypedef<ValidatedTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
 template<class P, class PR, class PRE=PR> using FloatType = typename FloatTypedef<P,PR,PRE>::Type;

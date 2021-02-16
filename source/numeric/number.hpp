@@ -68,6 +68,9 @@ struct DispatchException : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+template<class PR> struct IsPrecision : False { };
+template<> struct IsPrecision<DoublePrecision> : True { };
+template<> struct IsPrecision<MultiplePrecision> : True { };
 
 template<class P> Positive<Number<P>> cast_positive(Number<P> y);
 template<class P> Positive<UpperNumber<P>> cast_positive(UpperNumber<P> y);
@@ -135,6 +138,8 @@ template<class P> class Number
     template<class PP> friend class LowerNumber;
     template<class PP> friend class UpperNumber;
 
+    template<class PR> using ResultFloatType = FloatType<Weaker<P,ValidatedTag>,PR>;
+
     template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,ExactTag>>>;
   public:
     typedef NumberInterface Interface;
@@ -171,34 +176,13 @@ template<class P> class Number
         explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return this->ref()._get(WP(),prec); }
+    ResultFloatType<DoublePrecision> get(DoublePrecision const& prec) const { return this->ref()._get(P(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
-    FloatType<WP,MultiplePrecision> get(WP par, MultiplePrecision const& prec) const { return this->ref()._get(WP(),prec); }
-    //! \brief Get the value of the number as a double-precision floating-point type
-    template<class PR, EnableIf<IsSame<PR,DoublePrecision>> =dummy>
-    FloatType<P,PR> get(PR pr) const { return this->ref()._get(P(),pr); }
-    //! \brief Get the value of the number as a multiple-precision floating-point type
-    template<class PR, EnableIf<IsSame<PR,MultiplePrecision>> =dummy>
-    FloatType<P,PR> get(PR pr) const { return this->ref()._get(P(),pr); }
+    ResultFloatType<MultiplePrecision> get(MultiplePrecision const& prec) const { return this->ref()._get(P(),prec); }
 
-    //! \brief Get the value of the number as a multiple-precision floating-point ball.
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec, DoublePrecision const& errprec) const { return this->ref()._get(WP(),prec,errprec); }
-    //! \brief Get the value of the number as a multiple-precision floating-point ball, with double-precision error.
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,MultiplePrecision,DoublePrecision> get(WP par, MultiplePrecision const& prec, DoublePrecision const& errprec) const { return this->ref()._get(WP(),prec,errprec); }
-    //! \brief Get the value of the number as a multiple-precision floating-point ball.
-    template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,MultiplePrecision,MultiplePrecision> get(WP par, MultiplePrecision const& prec, MultiplePrecision const& errprec) const { return this->ref()._get(WP(),prec,errprec); }
-
-    //! \brief Get the value of the number as a double-precision floating-point type
-    FloatType<P,DoublePrecision> get() const { return this->ref()._get(P()); }
-    //! \brief Get the value of the number as a double-precision floating-point type
-    FloatType<P,DoublePrecision> get(DoublePrecision const& prec) const { return this->ref()._get(P(),prec); }
-    //! \brief Get the value of the number as a multiple-precision floating-point type
-    FloatType<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return this->ref()._get(P(),prec); }
+    //! \brief Get the value of the number as a floating-point ball with the given precision and error precision.
+    template<class PR, class PRE, EnableIf<And<IsPrecision<PR>,IsPrecision<PRE>,IsWeaker<ValidatedTag,P>>> =dummy>
+    FloatBall<PR,PRE> get(PR const& prec, PRE const& errprec) const { return this->ref()._get(P(),prec,errprec); }
 
     //! \brief Try to dynamic_cast the object to concrete type \a X.
     template<class X> X extract() const;
@@ -290,7 +274,6 @@ template<class P> class LowerNumber
     //! \brief Construct from a type convertible to a Number.
     template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy> LowerNumber(const X& x) : LowerNumber<P>(Number<P>(x).handle()) { }
 
-    template<class PR> FloatLowerBound<PR> get(LowerTag, PR pr) const { return this->ref()._get(LowerTag(),pr); }
     template<class PR> FloatLowerBound<PR> get(PR pr) const { return this->ref()._get(LowerTag(),pr); }
 
     template<class X> X extract() const;
@@ -355,7 +338,6 @@ template<class P> class UpperNumber
     //! \brief Construct from a type convertible to a Number.
     template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
 
-    template<class PR> FloatUpperBound<PR> get(UpperTag, PR pr) const { return this->ref()._get(UpperTag(),pr); }
     template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->ref()._get(UpperTag(),pr); }
 
     template<class X> X extract() const;

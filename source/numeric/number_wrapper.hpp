@@ -115,7 +115,6 @@ inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     return res;
 }
 
-
 template<class... YS> struct Aware;
 
 template<class DI> struct Managed;

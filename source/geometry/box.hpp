@@ -519,7 +519,7 @@ inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, FloatDPUpperBound eps) {
 }
 // TODO: Add widen for other generic values
 inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, ValidatedUpperNumber eps) {
-    return widen(bx,eps.get(UpperTag(),dp));
+    return widen(bx,eps.get(dp));
 }
 
 inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {

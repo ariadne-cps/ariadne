@@ -462,18 +462,18 @@ template<class P> void export_number(pybind11::module& module)
 //    number_class.def("get", (FloatMPApproximation(Number<P>::*)(ApproximateTag,MultiplePrecision)const) &Number<P>::get);
 }
 
-FloatDPBounds get(ExactNumber const& n, DoublePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatMPBounds get(ExactNumber const& n, MultiplePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatDPBounds get(EffectiveNumber const& n, DoublePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatMPBounds get(EffectiveNumber const& n, MultiplePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatDPBounds get(ValidatedNumber const& n, DoublePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatMPBounds get(ValidatedNumber const& n, MultiplePrecision const& pr) { return n.get(OrderTag(),pr); }
-FloatDPUpperBound get(ValidatedUpperNumber const& n, DoublePrecision const& pr) { return n.get(UpperTag(),pr); }
-FloatMPUpperBound get(ValidatedUpperNumber const& n, MultiplePrecision const& pr) { return n.get(UpperTag(),pr); }
-FloatDPLowerBound get(ValidatedLowerNumber const& n, DoublePrecision const& pr) { return n.get(LowerTag(),pr); }
-FloatMPLowerBound get(ValidatedLowerNumber const& n, MultiplePrecision const& pr) { return n.get(LowerTag(),pr); }
-FloatDPApproximation get(ApproximateNumber const& n, DoublePrecision const& pr) { return n.get(ApproximateTag(),pr); }
-FloatMPApproximation get(ApproximateNumber const& n, MultiplePrecision const& pr) { std::cerr<<"get(AN,MP)\n";return n.get(ApproximateTag(),pr); }
+FloatDPBounds get(ExactNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPBounds get(ExactNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
+FloatDPBounds get(EffectiveNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPBounds get(EffectiveNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
+FloatDPBounds get(ValidatedNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPBounds get(ValidatedNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
+FloatDPUpperBound get(ValidatedUpperNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPUpperBound get(ValidatedUpperNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
+FloatDPLowerBound get(ValidatedLowerNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPLowerBound get(ValidatedLowerNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
+FloatDPApproximation get(ApproximateNumber const& y, DoublePrecision const& pr) { return y.get(pr); }
+FloatMPApproximation get(ApproximateNumber const& y, MultiplePrecision const& pr) { return y.get(pr); }
 
 
 template<class X, class Y> void implicitly_convertible_to() {

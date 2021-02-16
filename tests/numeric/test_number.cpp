@@ -194,30 +194,25 @@ template<class Y> void test_number_get() {
     MultiplePrecision mp(192);
     MultiplePrecision mpe(128);
 
-    MetricTag metric;
+    ARIADNE_TEST_WITHIN(ApproximateNumber(y).get(dp),q,Dyadic(TwoExp(-52)));
+    ARIADNE_TEST_WITHIN(ApproximateNumber(y).get(mp),q,Dyadic(TwoExp(-128)));
 
-    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,Dyadic(TwoExp(-52)));
-    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,Dyadic(TwoExp(-128)));
+    ARIADNE_TEST_BINARY_PREDICATE(models,ValidatedLowerNumber(y).get(dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,ValidatedLowerNumber(y).get(mp),q);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(LowerTag(),dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(LowerTag(),mp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,ValidatedUpperNumber(y).get(dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,ValidatedUpperNumber(y).get(mp),q);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),mp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(mp),q);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(OrderTag(),dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(OrderTag(),mp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(dp,dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(mp,dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(mp,mpe),q);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),mp),q);
-
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,dp,dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,mp,dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(metric,mp,mpe),q);
-
-    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,dp,dp)),FloatDPBall);
-    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,mp,dp)),FloatMPDPBall);
-    ARIADNE_TEST_SAME_TYPE(decltype(y.get(metric,mp,mpe)),FloatMPBall);
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(dp,dp)),FloatDPBall);
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(mp,dp)),FloatMPDPBall);
+    ARIADNE_TEST_SAME_TYPE(decltype(y.get(mp,mpe)),FloatMPBall);
 }
 
 template<> void test_number_get<ExactNumber>() { }
@@ -226,19 +221,19 @@ template<> void test_number_get<ApproximateNumber>() {
     Rational q=3/5_q;
     ApproximateNumber y(q);
     MultiplePrecision mp(128);
-    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,3e-16);
-    ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,3e-16);
+    ARIADNE_TEST_WITHIN(y.get(dp),q,3e-16);
+    ARIADNE_TEST_WITHIN(y.get(mp),q,3e-16);
 
     // Regression tests for DP/MP conversion.
     Dbl d=-0.6;
     ARIADNE_TEST_ASSIGN(y,d);
-    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),dp));
-    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),mp));
+    ARIADNE_TEST_EXECUTE(y.get(dp));
+    ARIADNE_TEST_EXECUTE(y.get(mp));
 
     FloatDPApproximation x(-2.5,double_precision);
     ARIADNE_TEST_ASSIGN(y,x);
-    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),dp));
-    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),mp));
+    ARIADNE_TEST_EXECUTE(y.get(dp));
+    ARIADNE_TEST_EXECUTE(y.get(mp));
 
 }
 
@@ -353,10 +348,10 @@ TestDirectedNumber<Y>::test_operations() {
             FloatBounds<PR> x(q,pr);
             FloatLowerBound<PR> xl=x;
             FloatUpperBound<PR> xu=4*x;
-            
+
             ValidatedLowerNumber yl(xl);
             ValidatedUpperNumber yu(xu);
-            
+
             // Tests
             ARIADNE_TEST_ASSERT(not definitely (yl > q));
             ARIADNE_TEST_ASSERT(not definitely (-yl < -q));

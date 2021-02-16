@@ -89,6 +89,9 @@ class NumberInterface
     FloatDPBall _get(MetricTag p, DoublePrecision pr) const;
     FloatMPBall _get(MetricTag p, MultiplePrecision pr) const;
 
+    FloatDPBounds _get(ValidatedTag, DoublePrecision pr) const;
+    FloatMPBounds _get(ValidatedTag, MultiplePrecision pr) const;
+
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;
 

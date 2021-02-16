@@ -48,8 +48,8 @@ template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> co
 template<class F> Bounds<F>::Bounds(Real const& x, PR pr) : Bounds(x.get(pr)) {}
 template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, ValidatedUpperNumber const& upper) : Bounds<F>(lower,lower.create(upper)) { }
 template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, UpperBound<F> const& upper) : Bounds<F>(upper.create(lower),upper) { }
-template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr) : Bounds<F>(lower.get(LowerTag(),pr),upper.get(UpperTag(),pr)) { }
-template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr) : Bounds(y.get(BoundedTag(),pr)) {}
+template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr) : Bounds<F>(lower.get(pr),upper.get(pr)) { }
+template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr) : Bounds(y.get(pr)) {}
 template<class F> Bounds<F>::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Bounds<F>>(*this));}
 
 

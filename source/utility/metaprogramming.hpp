@@ -133,6 +133,10 @@ template<class T1, class T2, class... Tps> struct Second { typedef T2 Type; };
 template<class X> using RemoveConst = typename std::remove_const<X>::type;
 template<class X> using RemoveReference = typename std::remove_reference<X>::type;
 
+template<class L> using LogicalNegationType = decltype(!declval<L>());
+template<class L1, class L2=L1> using LogicalConjunctionType = decltype(declval<L1>() && declval<L2>());
+template<class L1, class L2=L1> using LogicalDisjunctionType = decltype(declval<L1>() || declval<L2>());
+
 template<class X> using NegationType = decltype(-declval<X>());
 template<class X1, class X2=X1> using SumType = decltype(declval<X1>()+declval<X2>());
 template<class X1, class X2=X1> using DifferenceType = decltype(declval<X1>()-declval<X2>());

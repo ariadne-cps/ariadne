@@ -78,6 +78,8 @@ template<class F> class LowerBound
         LowerBound<F>(const Decimal& d, PR pr) : _l(d,down,pr) { }
         LowerBound<F>(const Rational& q, PR pr) : _l(q,down,pr) { }
         LowerBound<F>(const Real& r, PR pr);
+        LowerBound<F>(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        LowerBound<F>(const Bounds<F>& x, PR pr);
     LowerBound<F>(const LowerBound<F>& x, PR pr);
     //! A lower bound of type \p F from a generic lower bound \a y.
     LowerBound<F>(const ValidatedLowerNumber& y, PR pr);

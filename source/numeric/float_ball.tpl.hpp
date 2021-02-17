@@ -83,9 +83,9 @@ template<class F, class FE> Ball<F,FE>::Ball(Dyadic const& w, PR pr, PRE pre) : 
 template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre) : _v(F(q,near,pr)), _e(abs(Rational(_v)-q),up,pre) {}
 
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr) : Ball(r.get(pr)) {}
-template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr) : Ball(y.get(MetricTag(),pr)) {}
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr) : Ball(y.get(pr,_error_precision<PRE>(pr))) {}
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre) : Ball(r.get(pr),pre) {}
-template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre) : Ball(y.get(MetricTag(),pr,pre)) {}
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre) : Ball(y.get(pr,pre)) {}
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this));}
 
 template<class F, class FE> LowerBound<F> const Ball<F,FE>::lower() const { return LowerBound<F>(sub(down,this->_v,this->_e)); }

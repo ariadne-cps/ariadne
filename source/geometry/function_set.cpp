@@ -194,7 +194,6 @@ Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMu
     return make_pair(jmax_in_row_imax,max_row_sum);
 }
 
-ApproximateNumber operator-(ValidatedUpperNumber const&, ValidatedUpperNumber const&);
 ApproximateNumber max(ValidatedLowerNumber const&, ValidatedUpperNumber const&);
 
 Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {

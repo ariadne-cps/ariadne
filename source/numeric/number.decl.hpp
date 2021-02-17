@@ -108,6 +108,8 @@ Integer ceil(Dyadic const&);
 template<class X> class Positive;
 
 template<class P=Void> class Number;
+template<class P> class LowerNumber;
+template<class P> class UpperNumber;
 
 template<> struct IsNumericType<Nat>;
 template<> struct IsNumericType<Int>;
@@ -125,6 +127,8 @@ template<> struct IsGenericNumericType<Rational> : True { };
 template<> struct IsGenericNumericType<Real> : True { };
 template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
+template<class P> struct IsGenericNumericType<UpperNumber<P>> : True { };
+template<class P> struct IsGenericNumericType<LowerNumber<P>> : True { };
 template<class Y> struct IsGenericNumericType<Positive<Y>> : IsGenericNumericType<Y> { };
 
 
@@ -133,34 +137,27 @@ template<class Y> struct IsGenericNumericType<Positive<Y>> : IsGenericNumericTyp
 //!@{
 using ExactNumber=Number<ExactTag>; //!< Alias for generic exact numbers.
 using EffectiveNumber=Number<EffectiveTag>; //!< Alias for generic effective numbers.
-using EffectiveUpperNumber=Number<EffectiveUpperTag>; //!< Alias for generic effective upper numbers.
-using EffectiveLowerNumber=Number<EffectiveLowerTag>; //!< Alias for generic effective lower numbers.
+using EffectiveUpperNumber=UpperNumber<EffectiveTag>; //!< Alias for generic effective upper numbers.
+using EffectiveLowerNumber=LowerNumber<EffectiveTag>; //!< Alias for generic effective lower numbers.
 using ValidatedNumber=Number<ValidatedTag>; //!< Alias for generic validated numbers.
-using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic validated upper numbers.
-using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers.
+using ValidatedUpperNumber=UpperNumber<ValidatedTag>; //!< Alias for generic validated upper numbers.
+using ValidatedLowerNumber=LowerNumber<ValidatedTag>; //!< Alias for generic validated lower numbers.
 using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers.
 
 template<class P> using PositiveNumber = Positive<Number<P>>; //!< Alias for positive numbers.
+template<class P> using PositiveUpperNumber = Positive<UpperNumber<P>>; //!< Alias for positive upper numbers.
+template<class P> using PositiveLowerNumber = Positive<LowerNumber<P>>; //!< Alias for positive lower numbers.
 using PositiveExactNumber=PositiveNumber<ExactTag>; //!< <p/>
 using PositiveEffectiveNumber=PositiveNumber<EffectiveTag>; //!< <p/>
-using PositiveEffectiveUpperNumber=PositiveNumber<EffectiveUpperTag>; //!< <p/>
-using PositiveEffectiveLowerNumber=PositiveNumber<EffectiveLowerTag>; //!< <p/>
+using PositiveEffectiveUpperNumber=PositiveUpperNumber<EffectiveTag>; //!< <p/>
+using PositiveEffectiveLowerNumber=PositiveLowerNumber<EffectiveTag>; //!< <p/>
 using PositiveValidatedNumber=PositiveNumber<ValidatedTag>; //!< <p/>
-using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< <p/>
-using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< <p/>
+using PositiveValidatedUpperNumber=PositiveUpperNumber<ValidatedTag>; //!< <p/>
+using PositiveValidatedLowerNumber=PositiveLowerNumber<ValidatedTag>; //!< <p/>
 using PositiveApproximateNumber=PositiveNumber<ApproximateTag>; //!< <p/>
 
 using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< Alias for validated error bounds.
 //@!}
-
-template<class P> using UpperNumber=Number<typename ParadigmTraits<P>::Upper>;
-template<class P> using LowerNumber=Number<typename ParadigmTraits<P>::Lower>;
-template<class P> using PositiveUpperNumber=Positive<UpperNumber<P>>;
-template<class P> using PositiveLowerNumber=Positive<LowerNumber<P>>;
-using EffectivePositiveUpperNumber = Positive<UpperNumber<EffectiveTag>>;
-using EffectivePositiveLowerNumber = Positive<LowerNumber<EffectiveTag>>;
-using ValidatedPositiveUpperNumber = Positive<UpperNumber<ValidatedTag>>;
-using ValidatedPositiveLowerNumber = Positive<LowerNumber<ValidatedTag>>;
 
 } // namespace Ariadne
 

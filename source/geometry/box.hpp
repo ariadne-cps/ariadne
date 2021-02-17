@@ -160,9 +160,9 @@ class Box
     //! The bounding box.
     Box<IntervalType> bounding_box() const;
 
-    //! \brief Test if the box is empty.
+    //! \brief Test if the box is empty. Returns the same type as IntervalType::is_empty().
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    //! \brief Test if the box is bounded.
+    //! \brief Test if the box is bounded.Returns the same type as IntervalType::is_bounded().
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
     //! Splits the box along coordinate \a k and takes the lower , middle, or upper part as given by \a lmu.
@@ -519,7 +519,7 @@ inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, FloatDPUpperBound eps) {
 }
 // TODO: Add widen for other generic values
 inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, ValidatedUpperNumber eps) {
-    return widen(bx,eps.get(UpperTag(),dp));
+    return widen(bx,eps.get(dp));
 }
 
 inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {

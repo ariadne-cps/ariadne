@@ -47,7 +47,7 @@ template<class F> Approximation<F>::Approximation(Value<F> const& x) : Approxima
 template<class F> Approximation<F>::Approximation(Error<F> const& x) : Approximation<F>(x.raw()) { }
 
 template<class F> Approximation<F>::Approximation(Real const& r, PR pr) : Approximation<F>(r.get(pr)) {}
-template<class F> Approximation<F>::Approximation(ApproximateNumber const& y, PR pr) : Approximation<F>(y.get(ApproximateTag(),pr)) {}
+template<class F> Approximation<F>::Approximation(ApproximateNumber const& y, PR pr) : Approximation<F>(y.get(pr)) {}
 template<class F> Approximation<F>::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<Approximation<F>>(*this));}
 
 

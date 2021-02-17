@@ -407,7 +407,7 @@ template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Multivariat
             s[j]=MultivariatePolynomial<NumericType>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->properties()));
-            s[j]=(MultivariatePolynomial<NumericType>::coordinate(this->argument_size(),j,zero)-domj.midpoint())/domj.radius();
+            s[j]=(MultivariatePolynomial<NumericType>::coordinate(this->argument_size(),j,zero)-domj.midpoint())/static_cast<NumericType>(domj.radius());
         }
     }
 

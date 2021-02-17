@@ -26,8 +26,6 @@
  *  \brief
  */
 
-
-
 #include "../utility/module.hpp"
 #include "../numeric/paradigm.hpp"
 
@@ -79,6 +77,9 @@ Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyad
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
+FloatDPBounds NumberInterface::_get(ValidatedTag, DoublePrecision pr) const { return this->_get(OrderTag(),pr); }
+FloatMPBounds NumberInterface::_get(ValidatedTag, MultiplePrecision pr) const { return this->_get(OrderTag(),pr); }
+
 FloatDPBall NumberInterface::_get(MetricTag p, DoublePrecision pr) const { return this->_get(p,pr,pr); }
 FloatMPBall NumberInterface::_get(MetricTag p, MultiplePrecision pr) const { return this->_get(p,pr,pr); }
 
@@ -120,10 +121,10 @@ template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new N
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 
-inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
-    return y1.get(dp).raw() <= y2.get(dp).raw(); }
+//inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
+//    return y1.get(dp).raw() <= y2.get(dp).raw(); }
 
-Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y) {
+PositiveValidatedUpperNumber mag(PositiveValidatedUpperNumber const& y) {
     return y; }
 
 

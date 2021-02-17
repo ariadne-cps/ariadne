@@ -78,6 +78,8 @@ template<class F> class UpperBound
         UpperBound<F>(const Decimal& d, PR pr) : _u(d,up,pr) { }
         UpperBound<F>(const Rational& q, PR pr) : _u(q,up,pr) { }
         UpperBound<F>(const Real& r, PR pr);
+        UpperBound<F>(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        UpperBound<F>(const Bounds<F>& x, PR pr);
     UpperBound<F>(const UpperBound<F>& x, PR pr);
     //! A upper bound of type \p F from a generic upper bound \a y.
     UpperBound<F>(const ValidatedUpperNumber& y, PR pr);

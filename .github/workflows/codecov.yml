@@ -20,7 +20,7 @@ jobs:
 
     - name: Set Up Dependencies
       run: |
-        sudo apt install -y cmake pkg-config lcov g++-10 libcairo2-dev libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config lcov g++-10 libcairo2-dev libmpfr-dev python3-pip python3-dev
         sudo pip3 install coverage pytest
 
     - name: Create Build Environment
@@ -28,7 +28,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -DCOVERAGE=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -G "Ninja" -DCOVERAGE=ON
 
     - name: Build Library and Tests
       working-directory: ${{runner.workspace}}/build

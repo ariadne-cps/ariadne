@@ -225,7 +225,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
     HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
     // Define the termination: continuous time and maximum number of transitions
-    HybridTerminationCriterion termination(30.0_x,5);
+    HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
     ARIADNE_LOG_PRINTLN("Computing evolution flow tube...");
     auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
@@ -272,15 +272,8 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     // Define the initial set and final time
     HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
     ARIADNE_LOG_PRINTLN("initial_set: " << initial_set);
-    HybridTime final_time(3.0_x,5);
+    HybridTime final_time(30.0_x,5);
     ARIADNE_LOG_PRINTLN("final_time: " << final_time);
-
-    // Compute over-approximation to infinite-time reachable set using lower semantics.
-    ARIADNE_LOG_PRINTLN("Computing lower reach set...");
-    auto lower_reach = analyser.lower_reach(initial_set,final_time);
-    ARIADNE_LOG_PRINTLN("Plotting lower reach set...");
-    plot("lower_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),lower_reach);
-    ARIADNE_LOG_PRINTLN("Done computing and plotting lower reach set!");
 
     // Compute over-approximation to infinite-time reachable set using upper semantics.
     ARIADNE_LOG_PRINTLN("Computing upper reach set...");
@@ -306,9 +299,6 @@ Int main(Int argc, const char* argv[])
 
     // Create the composed automaton
     CompositeHybridAutomaton watertank_system=get_system();
-
-    // Choose a compact output representation for systems
-    CompositeHybridAutomaton::set_default_writer(CompactCompositeHybridAutomatonWriter());
 
     // Print the system description on the command line
     ARIADNE_LOG_PRINTLN("System: " << watertank_system);

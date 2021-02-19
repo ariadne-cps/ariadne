@@ -213,7 +213,7 @@ def compute_evolution(evolver):
     # (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
     initial_set=HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)<=7])
     # Define the termination: continuous time and maximum number of transitions
-    termination=HybridTerminationCriterion(Real(exact(30.0)),5)
+    termination=HybridTerminationCriterion(Real(30),5)
 
     # Compute the evolution flow tube using upper semantics
     print("Computing evolution flow tube...")
@@ -258,15 +258,8 @@ def compute_reachability(analyser):
     # Define the initial set
     initial_set=HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
     print("Initial set:",initial_set)
-    final_time=HybridTime(Real(exact(3.0)),5)
+    final_time=HybridTime(Real(exact(30.0)),5)
     print("Final time:",final_time)
-
-    # Compute lower-approximation to finite-time reachable set using lower semantics.
-    print("Computing lower reach set...")
-    lower_reach = analyser.lower_reach(initial_set,final_time)
-    print("Plotting lower reach set...")
-    plot("lower_reach",Axes2d(5,height,9, -0.1,aperture,1.1),lower_reach)
-    print("Done computing and plotting lower reach set!\n")
 
     # Compute over-approximation to finite-time reachable set using upper semantics.
     print("Computing upper reach set...")
@@ -289,10 +282,6 @@ def compute_reachability(analyser):
 if __name__ == '__main__':
     # Create the composed automaton
     watertank_system=get_system()
-
-    # Choose a compact output representation for systems
-    #   NOT CURRENTLY SUPPORTED IN PYTHON INTERFACE
-    # CompositeHybridAutomaton.set_default_writer(CompactCompositeHybridAutomatonWriter())
 
     # Print the system description on the command line
     print("System: ",watertank_system)

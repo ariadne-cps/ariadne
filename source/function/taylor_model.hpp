@@ -613,7 +613,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vec
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> compose(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<TaylorModel<ValidatedTag,F>>& tg) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size());
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),tg.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
     return r;
 }

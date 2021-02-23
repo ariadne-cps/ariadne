@@ -1,7 +1,7 @@
 /***************************************************************************
  *            multifunction.hpp
  *
- *  Copyright 2008-12  Pieter Collins
+ *  Copyright 2008-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -78,31 +78,32 @@ template<class P> class ImageGenericPoint : public GenericPoint<P>::Interface {
 };
 
 
-template<class P, class SIG> class Multifunction;
+template<class P, class SIG, template<class,class>class SET=LocatedSet> class Multifunction;
+
 template<class P> using VectorMultivariateMultifunction = Multifunction<P,RealVector(RealVector)>;
 using ValidatedVectorMultivariateMultifunction = VectorMultivariateMultifunction<ValidatedTag>;
 
 
-template<class P, class SIG> class MultifunctionInterface;
+template<class P, class SIG, template<class,class>class SET=LocatedSet> class MultifunctionInterface;
 
-template<class P, class SIG> class MultifunctionInterface {
+template<class P, class SIG, template<class,class>class SET> class MultifunctionInterface {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    virtual ~MultifunctionInterface<P,SIG>() = default;
-    virtual LocatedSet<P,RES> _call(Argument<Number<P>> const& x) const = 0;
+    virtual ~MultifunctionInterface<P,SIG,SET>() = default;
+    virtual SET<P,RES> _call(Argument<Number<P>> const& x) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
-template<class F, class P, class SIG> struct IsMultifunction {
+template<class F, class P, class SIG, template<class,class>class SET> struct IsMultifunction {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
     using D=typename SignatureTraits<SIG>::DomainType;
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
 
-    template<class FF, class=decltype(declval<LocatedSet<P,RES>>()=declval<FF>()(declval<Argument<Number<P>>>()))>
+    template<class FF, class=decltype(declval<SET<P,RES>>()=declval<FF>()(declval<Argument<Number<P>>>()))>
         static std::true_type test(int);
     template<class FF>
         static std::false_type test(...);
@@ -111,30 +112,31 @@ template<class F, class P, class SIG> struct IsMultifunction {
 
 //! \ingroup Function
 //! \brief Functions \f$\X\mvto\Y\f$ returning a \ref LocatedSet at each point.
-template<class P, class SIG> class Multifunction
-    : public Handle<MultifunctionInterface<P,SIG>>
+template<class P, class SIG, template<class,class>class SET> class Multifunction
+    : public Handle<MultifunctionInterface<P,SIG,SET>>
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
     using D=typename SignatureTraits<SIG>::DomainType;
+    using ResultSetType = SET<P,RES>;
   public:
-    typedef MultifunctionInterface<P,SIG> Interface;
+    typedef MultifunctionInterface<P,SIG,SET> Interface;
     typedef D DomainType;
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
 
     using Handle<Interface>::Handle;
     //! \brief <p/>
-    template<class MF, EnableIf<IsMultifunction<MF,P,SIG>> =dummy> explicit Multifunction(MF const& mf);
+    template<class MF, EnableIf<IsMultifunction<MF,P,SIG,SET>> =dummy> explicit Multifunction(MF const& mf);
     //! \brief <p/>
-    LocatedSet<P,RES> operator() (Argument<Number<P>> const& x) const { return this->reference()._call(x); }
+    SET<P,RES> operator() (Argument<Number<P>> const& x) const { return this->reference()._call(x); }
     //! \brief <p/>
-    friend LocatedSet<P,RES> apply (Multifunction<P,SIG> const& f, LocatedSet<P,ARG> const& x);
+    friend SET<P,RES> apply (Multifunction<P,SIG,SET> const& f, SET<P,ARG> const& x);
     //! \brief <p/>
-    friend OutputStream& operator<<(OutputStream& os,Multifunction<P,SIG> const& mf) { return mf.reference()._write(os); }
+    friend OutputStream& operator<<(OutputStream& os,Multifunction<P,SIG,SET> const& mf) { return mf.reference()._write(os); }
 };
 
-template<class MF, class P, class SIG> class MultifunctionWrapper
-    : public virtual MultifunctionInterface<P,SIG>
+template<class MF, class P, class SIG, template<class,class>class SET> class MultifunctionWrapper
+    : public virtual MultifunctionInterface<P,SIG,SET>
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
@@ -144,23 +146,23 @@ template<class MF, class P, class SIG> class MultifunctionWrapper
 
     MultifunctionWrapper(MF mf) : _mf(mf) { }
     MF const& base() const { return this->_mf; }
-    virtual LocatedSet<P,RES> _call(Argument<Number<P>> const& x) const final override {
-        return static_cast<LocatedSet<P,RES>>(this->_mf(x)); }
+    virtual SET<P,RES> _call(Argument<Number<P>> const& x) const final override {
+        return static_cast<SET<P,RES>>(this->_mf(x)); }
     virtual OutputStream& _write(OutputStream& os) const  final override {
         return os << this->base(); }
   private:
     MF _mf;
 };
 
-template<class P, class SIG> template<class MF, EnableIf<IsMultifunction<MF,P,SIG>>>
-Multifunction<P,SIG>::Multifunction(MF const& mf)
-    : Multifunction<P,SIG>(std::make_shared<MultifunctionWrapper<MF,P,SIG>>(mf)) {
+template<class P, class SIG,template<class,class>class SET> template<class MF, EnableIf<IsMultifunction<MF,P,SIG,SET>>>
+Multifunction<P,SIG,SET>::Multifunction(MF const& mf)
+    : Multifunction<P,SIG,SET>(std::make_shared<MultifunctionWrapper<MF,P,SIG,SET>>(mf)) {
 }
 
 
 using ValidatedImageSet = ValidatedConstrainedImageSet;
 
-template<class P, class SIG> class MultifunctionPatch;
+template<class P, class SIG, template<class,class>class SET=LocatedSet> class MultifunctionPatch;
 template<class P> using VectorMultivariateMultifunctionPatch = MultifunctionPatch<P,RealVector(RealVector)>;
 using ValidatedVectorMultivariateMultifunctionPatch = VectorMultivariateMultifunctionPatch<ValidatedTag>;
 
@@ -189,7 +191,7 @@ MultifunctionPatch<P,RealVector(RealVector)>::operator() (Vector<ValidatedNumber
     return ValidatedImageSet(this->error_domain(),fim);
 }
 
-static_assert(IsMultifunction<MultifunctionPatch<ValidatedTag,RealVector(RealVector)>,ValidatedTag,RealVector(RealVector)>::value);
+static_assert(IsMultifunction<MultifunctionPatch<ValidatedTag,RealVector(RealVector)>,ValidatedTag,RealVector(RealVector),LocatedSet>::value);
 
 
 
@@ -227,7 +229,20 @@ MultifunctionModel<P,RealVector(RealVector),PR>::operator() (Vector<ValidatedNum
     return ValidatedImageSet(this->error_domain(),fim);
 }
 
-static_assert(IsMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>,ValidatedTag,RealVector(RealVector)>::value);
+static_assert(IsMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>,ValidatedTag,RealVector(RealVector),LocatedSet>::value);
+
+
+template<class P, class RES, class ARG> class Function<P,CompactSet<P,RES>(ARG)>
+    : public Multifunction<P,RES(ARG),CompactSet>
+{
+    using Multifunction<P,RES(ARG),CompactSet>::Multifunction;
+};
+template<class P, class RES, class ARG> class Function<P,LocatedSet<P,RES>(ARG)>
+    : public Multifunction<P,RES(ARG),LocatedSet>
+{
+    using Multifunction<P,RES(ARG),LocatedSet>::Multifunction;
+};
+
 
 } // namespace Ariadne
 

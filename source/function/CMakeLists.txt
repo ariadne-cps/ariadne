@@ -13,6 +13,7 @@ add_library(${LIBRARY_NAME} OBJECT
     affine_model.cpp
     taylor_model.cpp
     taylor_function.cpp
+    taylor_multifunction.cpp
 )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

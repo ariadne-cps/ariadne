@@ -1,4 +1,3 @@
-add_custom_target(tests)
 add_custom_target(tests-cpp)
 add_custom_target(tests-core)
 add_custom_target(tests-kernel)

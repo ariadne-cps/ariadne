@@ -122,10 +122,12 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
+add_custom_target(everything)
+
 add_subdirectory(source)
-add_subdirectory(tests)
-add_subdirectory(examples)
-add_subdirectory(tutorials)
+add_subdirectory(tests EXCLUDE_FROM_ALL)
+add_subdirectory(examples EXCLUDE_FROM_ALL)
+add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 find_package(PythonLibs)

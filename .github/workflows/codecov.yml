@@ -30,9 +30,9 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -G "Ninja" -DCOVERAGE=ON
 
-    - name: Build Library and Tests
+    - name: Build Library, Bindings and Tests
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --parallel $($NPROC) --target tests
+      run: cmake --build . --parallel $($NPROC) --target pyariadne tests
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

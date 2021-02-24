@@ -78,9 +78,17 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja" -DWERROR=ON
 
-    - name: Build Library, Tests and Examples
+    - name: Build Library and Bindings
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --parallel $($NPROC)
+
+    - name: Build Examples
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build . --parallel $($NPROC) --target examples
+
+    - name: Build Tests
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build . --parallel $($NPROC) --target tests
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

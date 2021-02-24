@@ -105,8 +105,6 @@ template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepres
     return os << class_name<FE>() << "Error("<<repr.reference().raw()<<")"; }
 
 
-inline Dyadic operator/(Dyadic x, Two w) { return Dyadic(x/(w^1)); }
-
 
 template<class L> Bool _decide_(L l) { return decide(l); }
 template<class L> Bool _definitely_(L l) { return definitely(l); }

@@ -38,6 +38,7 @@
 
 #include "../algebra/multi_index.hpp"
 #include "../algebra/expansion.hpp"
+#include "../algebra/expansion.inl.hpp"
 #include "../algebra/operations.hpp"
 #include "../algebra/differential.hpp"
 

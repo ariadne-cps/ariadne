@@ -31,7 +31,7 @@ def test_calculus():
 
     bx=BoxDomainType([{1:3},{-1:2},{-3:3}])
 
-    swp = ThresholdSweeper(dp,1e-8);
+    swp = ThresholdSweeperDP(dp,1e-8);
 
     tc=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(bx,cast_exact(1.5),swp)
     tx=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bx,0,swp)

@@ -36,11 +36,11 @@
 #include "algebra/expansion.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "algebra/multi_index.hpp"
-#include "function/taylor_model.hpp"
 #include "algebra/differential.hpp"
 #include "function/formula.hpp"
 #include "function/polynomial.hpp"
 #include "function/affine.hpp"
+#include "function/taylor_model.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
 #include "function/procedure.hpp"
@@ -134,6 +134,9 @@ template<class F> Void export_function_evaluation(pybind11::module module, pybin
     define_call<Differential<FloatDPApproximation>>(function_class);
     define_call<Differential<FloatMPApproximation>>(function_class);
 
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
+
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPApproximation>>);
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPApproximation>>);
     module.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
@@ -148,6 +151,9 @@ template<class F> Void export_function_evaluation(pybind11::module module, pybin
     define_call<FloatMPBounds>(function_class);
     define_call<Differential<FloatDPBounds>>(function_class);
     define_call<Differential<FloatMPBounds>>(function_class);
+
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
 
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPBounds>>);
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPBounds>>);
@@ -228,6 +234,18 @@ Void export_polynomials(pybind11::module& module)
     export_polynomial<FloatDPApproximation>(module);
 }
 
+Void export_domains(pybind11::module& module)
+{
+    pybind11::class_<RealDomain> real_domain_class(module,"RealDomain");
+    real_domain_class.def(pybind11::init<>());
+    //    real_domain_class.def(pybind11::init<SizeOne>());
+    real_domain_class.def("__repr__", &__cstr__<RealDomain>);
+
+    pybind11::class_<EuclideanDomain> euclidean_domain_class(module,"EuclideanDomain");
+    euclidean_domain_class.def(pybind11::init<SizeType>());
+    euclidean_domain_class.def("__repr__", &__cstr__<EuclideanDomain>);
+}
+
 template<class P> Void export_scalar_univariate_function(pybind11::module& module)
 {
     pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
@@ -249,7 +267,9 @@ template<class P> Void export_scalar_univariate_function(pybind11::module& modul
 
     function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(RealDomain,Number<P>)) &ScalarUnivariateFunction<P>::constant);
     function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::coordinate);
+    function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)(RealDomain)) &ScalarUnivariateFunction<P>::coordinate);
     function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::identity);
+    function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)(RealDomain)) &ScalarUnivariateFunction<P>::identity);
 
     define_elementary_algebra<ScalarUnivariateFunction<P>,Number<P>>(module,function_class);
 
@@ -333,16 +353,17 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
     }
 
-
-//FIXME
-//    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
-//    scalar_function_class.def("__le__", &__le__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
-//    scalar_function_class.def("__ge__", &__ge__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
+    if constexpr (IsSame<P,EffectiveTag>::value) {
+        scalar_function_class.def("__eq__", &__eq__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+        scalar_function_class.def("__le__", &__le__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+        scalar_function_class.def("__ge__", &__ge__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+    }
 
     scalar_function_class.def("__str__", &__cstr__<ScalarMultivariateFunction<P>>);
     scalar_function_class.def("__repr__", &__crepr__<ScalarMultivariateFunction<P>>);
 
     scalar_function_class.def_static("constant", (ScalarMultivariateFunction<P>(*)(SizeType,Number<P>)) &ScalarMultivariateFunction<P>::constant);
+    scalar_function_class.def_static("coordinate", (ScalarMultivariateFunction<P>(*)(EuclideanDomain,SizeType)) &ScalarMultivariateFunction<P>::coordinate);
     scalar_function_class.def_static("coordinate", (ScalarMultivariateFunction<P>(*)(SizeType,SizeType)) &ScalarMultivariateFunction<P>::coordinate);
 
     scalar_function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarMultivariateFunction<P>::gradient);
@@ -390,7 +411,10 @@ template<class P> Void export_vector_function(pybind11::module& module)
     vector_function_class.def("__str__", &__cstr__<VectorMultivariateFunction<P>>);
     vector_function_class.def("__repr__", &__crepr__<VectorMultivariateFunction<P>>);
 
+    vector_function_class.def_static("zeros", (VectorMultivariateFunction<P>(*)(SizeType,SizeType)) &VectorMultivariateFunction<P>::zeros);
+    vector_function_class.def_static("zeros", (VectorMultivariateFunction<P>(*)(SizeType,EuclideanDomain)) &VectorMultivariateFunction<P>::zeros);
     vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(SizeType)) &VectorMultivariateFunction<P>::identity);
+    vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(EuclideanDomain)) &VectorMultivariateFunction<P>::identity);
 
     module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
     module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
@@ -440,6 +464,8 @@ Void function_submodule(pybind11::module& module) {
     export_multi_index(module);
 
     export_polynomials(module);
+
+    export_domains(module);
 
     export_scalar_univariate_functions(module);
     export_vector_univariate_functions(module);

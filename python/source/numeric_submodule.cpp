@@ -688,6 +688,7 @@ template<> Void export_precision<DoublePrecision>(pymodule& module) {
     precision_class.def("__str__", &__cstr__<DoublePrecision>);
     precision_class.def("__repr__", &__cstr__<DoublePrecision>);
     module.attr("double_precision") = double_precision;
+    module.attr("dp") = dp;
 }
 
 template<> Void export_precision<MultiplePrecision>(pymodule& module) {

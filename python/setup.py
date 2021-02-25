@@ -53,10 +53,8 @@ class CMakeBuild(build_ext):
                 extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
@@ -76,7 +74,9 @@ setup(
     author='Luca Geretti',
     author_email='luca.geretti@gmail.com',
     description='C++ library for formal verification of cyber-physical systems',
+    url='https://github.com/ariadne-cps/ariadne',
     long_description='',
+    license='GPL-3.0',
     ext_modules=[CMakeExtension('ariadne')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

@@ -24,7 +24,7 @@ if(PYTHON_TESTS)
     foreach(TESTNAME ${TESTS_PYTHON})
         add_custom_target(test_python_${TESTNAME} COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test_${TESTNAME}.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
         add_test(NAME test_python_${TESTNAME} COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test_${TESTNAME}.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-        set_property(TEST test_python_${TESTNAME} PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+        set_property(TEST test_python_${TESTNAME} PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}")
         set_property(TEST test_python_${TESTNAME} PROPERTY LABELS "python;primary")
     endforeach()
 

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.9)
 project(HybridEvolutionTutorial VERSION 2.1)
 
 # Set to search the root source directory for the FindAriadne.cmake module
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 # Set the C++ standard to C++20, as used by Ariadne
 set(CMAKE_CXX_STANDARD 20)

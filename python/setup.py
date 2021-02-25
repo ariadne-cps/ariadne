@@ -69,15 +69,15 @@ class CMakeBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 setup(
-    name='ariadne',
-    version='2.1',
+    name='pyariadne',
+    version='2.1-rc4',
     author='Luca Geretti',
     author_email='luca.geretti@gmail.com',
     description='C++ library for formal verification of cyber-physical systems',
     url='https://github.com/ariadne-cps/ariadne',
     long_description='',
     license='GPL-3.0',
-    ext_modules=[CMakeExtension('ariadne')],
+    ext_modules=[CMakeExtension('pyariadne')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )

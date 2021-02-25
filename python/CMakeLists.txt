@@ -46,5 +46,5 @@ add_library(pyariadne MODULE
     $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
     $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
 )
-set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "pyariadne" SUFFIX ".so")
 target_link_libraries (pyariadne PUBLIC ${ARIADNE_LIBRARIES} PRIVATE pybind11::module)

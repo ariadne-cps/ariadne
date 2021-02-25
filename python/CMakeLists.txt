@@ -47,7 +47,3 @@ add_library(pyariadne MODULE
 )
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
 target_link_libraries (pyariadne PUBLIC ${ARIADNE_LIBRARIES} PRIVATE pybind11::module)
-
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m site --user-site OUTPUT_VARIABLE PYARIADNE_INSTALL_DIR)
-string(STRIP ${PYARIADNE_INSTALL_DIR} PYARIADNE_INSTALL_DIR)
-install(TARGETS pyariadne DESTINATION ${PYARIADNE_INSTALL_DIR})

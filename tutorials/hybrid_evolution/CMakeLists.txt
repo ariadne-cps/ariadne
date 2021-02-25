@@ -6,17 +6,16 @@ project(HybridEvolutionTutorial VERSION 2.1)
 # Set to search the root source directory for the FindAriadne.cmake module
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
 
-# Set to look for includes in usr/local directory, required for GMP
-include_directories(SYSTEM /usr/local/include)
-
 # Set the C++ standard to C++20, as used by Ariadne
 set(CMAKE_CXX_STANDARD 20)
 
-# Find Ariadne as a required dependency
+# Find Ariadne and other dynamic library dependencies
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
 find_package(Ariadne REQUIRED)
 
-# Add the Ariadne headers to the includes
-include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
+# Add the headers to the includes
+include_directories(SYSTEM ${GMP_INCLUDES} ${MPFR_INCLUDES} ${ARIADNE_INCLUDE_DIRS})
 
 # Set the executable along with the required source files
 add_executable(hybrid_evolution_tutorial hybrid_evolution_tutorial.cpp)

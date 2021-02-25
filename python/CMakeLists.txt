@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.9)
 
 project(PythonBindings VERSION 2.1)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
 find_package(Ariadne REQUIRED)
 
-include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
-# Set to look for includes in usr/local directory, required for GMP
-include_directories(SYSTEM /usr/local/include)
+include_directories(SYSTEM ${GMP_INCLUDES} ${MPFR_INCLUDES} ${ARIADNE_INCLUDE_DIRS})
 
 find_package(PythonLibs REQUIRED)
 

@@ -1,67 +1,53 @@
-find_package(PythonLibs)
+cmake_minimum_required(VERSION 3.9)
 
-if(PYTHONLIBS_FOUND)
-    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pybind11/CMakeLists.txt)
-        message(STATUS "pybind11 dependency not available.")
-        find_package(Git)
-        if(GIT_FOUND)
-            message(STATUS "Downloading pybind11 repository...")
-            if (NOT EXISTS ${PROJECT_SOURCE_DIR}/.git) # Manages the case when an archive is used
-                if (${PROJECT_SOURCE_DIR} EQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-                    set(SUBMODULE_SUBPATH "python/")
-                endif()
-                execute_process(COMMAND git init WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-                execute_process(COMMAND rm -Rf ${CMAKE_CURRENT_SOURCE_DIR}/pybind11 OUTPUT_QUIET ERROR_QUIET)
-                execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 ${SUBMODULE_SUBPATH}pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-                execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-            else() # When using a clone
-                execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-            endif()
-            if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pybind11/CMakeLists.txt)
-                message(ERROR "pybind11 download failure.")
-            else()
-                message(STATUS "Downloaded pybind11 dependency successfully.")
-            endif()
-        else()
-            message(ERROR "Git not found, pybind11 dependency could not be downloaded.")
+project(PythonBindings VERSION 2.1)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(Ariadne REQUIRED)
+
+include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
+# Set to look for includes in usr/local directory, required for GMP
+include_directories(SYSTEM /usr/local/include)
+
+find_package(PythonLibs REQUIRED)
+
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/pybind11/CMakeLists.txt)
+    message(STATUS "pybind11 dependency not available.")
+    find_package(Git)
+    if(GIT_FOUND)
+        message(STATUS "Downloading pybind11 repository...")
+        if (NOT EXISTS ${PROJECT_SOURCE_DIR}/.git) # Manages the case when an archive is used
+            execute_process(COMMAND git init WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+            execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/pybind11 OUTPUT_QUIET ERROR_QUIET)
+            execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+            execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        else() # When using a clone
+            execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         endif()
+        if(NOT EXISTS ${PROJECT_SOURCE_DIR}/pybind11/CMakeLists.txt)
+            message(ERROR "pybind11 download failure.")
+        else()
+            message(STATUS "Downloaded pybind11 dependency successfully.")
+        endif()
+    else()
+        message(ERROR "Git not found, pybind11 dependency could not be downloaded.")
     endif()
-
-    add_subdirectory(pybind11)
-    add_subdirectory(source)
-
-    add_library(pyariadne MODULE
-        $<TARGET_OBJECTS:pyariadne-module-obj>
-        $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-        $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
-        $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
-    )
-    set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
-    target_link_libraries (pyariadne PUBLIC ariadne ${GCOV_LIBRARIES} PRIVATE pybind11::module)
-
-    add_library(pyariadne-numeric MODULE
-        $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
-        $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-        $<TARGET_OBJECTS:ariadne-utility>
-        $<TARGET_OBJECTS:ariadne-numeric>
-    )
-    set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
-    target_link_libraries (pyariadne-numeric PUBLIC ${GCOV_LIBRARIES} ${MPFR_LIBRARIES} ${GMP_LIBRARIES} PRIVATE pybind11::module)
-
-    add_library(pyariadne-algebra MODULE
-        $<TARGET_OBJECTS:pyariadne-algebra-module-obj>
-        $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-        $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
-    )
-    set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
-    target_link_libraries (pyariadne-algebra PUBLIC ${GCOV_LIBRARIES} ariadne PRIVATE pybind11::module)
-
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -m site --user-site OUTPUT_VARIABLE PYARIADNE_INSTALL_DIR)
-    string(STRIP ${PYARIADNE_INSTALL_DIR} PYARIADNE_INSTALL_DIR)
-    install(TARGETS pyariadne DESTINATION ${PYARIADNE_INSTALL_DIR})
-
-    add_subdirectory(tests)
-
-else()
-    message(STATUS "PythonLibs not found: Python bindings will not be built.")
 endif()
+
+add_subdirectory(pybind11)
+add_subdirectory(source)
+
+add_library(pyariadne MODULE
+    $<TARGET_OBJECTS:pyariadne-module-obj>
+    $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
+    $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
+    $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
+)
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
+target_link_libraries (pyariadne PUBLIC ${ARIADNE_LIBRARIES} PRIVATE pybind11::module)
+
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m site --user-site OUTPUT_VARIABLE PYARIADNE_INSTALL_DIR)
+string(STRIP ${PYARIADNE_INSTALL_DIR} PYARIADNE_INSTALL_DIR)
+install(TARGETS pyariadne DESTINATION ${PYARIADNE_INSTALL_DIR})

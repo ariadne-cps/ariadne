@@ -7,7 +7,7 @@ project(RigorousNumericsTutorial VERSION 2.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
 
 # Set to look for includes in usr/local directory, required for GMP
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include")
+include_directories(SYSTEM /usr/local/include)
 
 # Set the C++ standard to C++20, as used by Ariadne
 set(CMAKE_CXX_STANDARD 20)

@@ -39,10 +39,6 @@ add_library(pyariadne-module-obj OBJECT
     ariadne_module.cpp
 )
 
-cotire(pyariadne-numeric-submodule-obj CONFIGURATIONS None)
-cotire(pyariadne-algebra-submodule-obj CONFIGURATIONS None)
-cotire(pyariadne-extra-submodule-obj CONFIGURATIONS None)
-
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
     target_compile_options(pyariadne-numeric-submodule-obj PUBLIC -W${WARN})
     target_compile_options(pyariadne-numeric-module-obj PUBLIC -W${WARN})

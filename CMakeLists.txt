@@ -126,12 +126,13 @@ add_custom_target(everything)
 add_custom_target(tests)
 
 add_subdirectory(source)
-add_subdirectory(python)
 
 add_subdirectory(tests EXCLUDE_FROM_ALL)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
+
+include(PythonBindings)
 
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>

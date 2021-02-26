@@ -1,7 +1,6 @@
 set(TUTORIALS
     rigorous_numerics
     hybrid_evolution
-    modules
 )
 
 add_custom_target(tutorials)
@@ -13,4 +12,6 @@ foreach(tutorial ${TUTORIALS})
     target_link_libraries(${tutorial}_tutorial ariadne)
     add_dependencies(tutorials ${tutorial}_tutorial)
 endforeach()
+
+add_subdirectory(demonstrations)
 

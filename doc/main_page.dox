@@ -52,7 +52,7 @@ An example of the use of %Ariadne for reachability analysis of a simple hybrid s
 
 An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the file  \link tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink.
 
-Examples of the use of %Ariadne via the Python interface can be found on the \ref python_modules_tutorial_page documentation page.
+Examples of the use of %Ariadne via the Python interface can be found on the \ref python_module_demonstrations_page documentation page.
 
 \section mainpage_advanced_usage Advanced Usage
 

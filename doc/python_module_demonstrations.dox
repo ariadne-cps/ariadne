@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python_modules_tutorial.dox
+ *            python_module_demonstrations.dox
  *
- *  Copyright  2009-20  Pieter Collins
+ *  Copyright  2009-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,32 +22,32 @@
  */
 
 /*!
- * \file python_modules_tutorial.dox
- * \brief Documentation for the tutorial on Ariadne's Python modules
+ * \file python_module_demonstrations.dox
+ * \brief Documentation for the demonstrations of Ariadne's Python modules
  */
 
 namespace Ariadne {
 
 /*!
 
-\page python_modules_tutorial_page Python Modules Tutorial
+\page python_module_demonstrations_page Python Module Demonstrations
 
-On this page, we explain how to use %Ariadne's internal function calculus via the Python interface. First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_modules_tutorial_numerical and \ref python_modules_tutorial_linear_algebra sections. A guide to the nonlinear functions available is given in \ref python_modules_tutorial_functional_calculus. Finally, a guide to the numerical Taylor calculus is given in \ref python_modules_tutorial_taylor_calculus.
+On this page, we explain how to use %Ariadne's internal function calculus via the Python interface. First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_numerical_demonstration and \ref python_linear_algebra_demonstration sections. A guide to the nonlinear functions available is given in \ref python_functional_calculus_demonstration. Finally, a guide to the numerical Taylor calculus is given in \ref python_taylor_calculus_demonstration.
 
-The full code of the tutorial is given in \ref python/tutorials/modules_tutorial.py
-
-\dontinclude python/tutorials/modules_tutorial.py
+The full code of the tutorial is given in \ref python/tutorials/module_demonstrations.py
 
 
 
-\section python_modules_tutorial_introspection The Ariadne module.
+\section python_introspection_demonstration The Ariadne module.
 
 First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
-\skipline import
+\code from ariadne import * \endcode
 To see all the classes and functions available in %Ariadne, type:
-\skipline dir
+\code print(dir(ariadne)) \endcode
 
-\section python_modules_tutorial_numerical Numerical Types
+\section python_numerical_demonstration Numerical Types
+
+\dontinclude python/tutorials/numeric_demonstration.py
 
 %Ariadne supports several basic numerical types, including core \ref Integer, \ref Dyadic, \ref Decimal, \ref Rational and \ref Real classes, which store numbers exactly. These number types are good for problem specification, but may be inefficient for actual numerical computations.
 
@@ -100,9 +100,13 @@ and the %Approximation classes support approximate arithmetic.
 \skipline =FloatMPApproximation
 \skipline =FloatMPApproximation
 
+\sa \ref NumericModule
 
 
-\section python_modules_tutorial_linear_algebra Linear Algebra
+
+\section python_linear_algebra_demonstration Linear Algebra
+
+\dontinclude python/tutorials/algebra_demonstration.py
 
 %Ariadne supports linear algebra operations based on Vector and Matrix classes. In the C++ library, these types are parameterised by the scalar type (e.g. %Rational, %FloatDPBounds).
 
@@ -114,29 +118,13 @@ and the %Approximation classes support approximate arithmetic.
 As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine for solving systems of linear equations:
 \skipline solve
 
-\subsection python_modules_tutorial_linear_algebra_slicing Slicing (Future addition)
-
-In the future, it will be possible to create \c VectorSlice and \c MatrixSlice objects using Python's slicing operatior. As in Matlab and other C++ libraries, and unlike Python sequences, these operations return a "view" into the structure, and not a copy, so can be used for in-place modification.
-
-The semantics of this operator have not been determined, since Python has different conventions from C++ libraries such as the STL \c valarray class, glas and uBlas \c vector classes and Matlab classes. For example, if \c v is the vector <c>[0,1,2,3,4,5,6,7,8,9]</c>, then different possibilities are
-
- - Python: <c> v[start:finish:stride] </c>  e.g. <c>v[1:6:2]</c> = <c>v[1:7:2]</c> = <c>[1,3,5]</c>;
-
- - C++ STL \c valarray : <c> v[slice(start,size,stride)]</c> e.g.  <c> v[slice(1,3,2)]</c>\c  = <c>[3,5,7]</c>;
-
- - C++ uBlas: \c <c> project(v,slice(start,stride,size)) </c>  e.g.  <c>project(v,slice(1,2,3))</c> = <c>[1,3,5]</c>;
-
- - C++ glas: \c <c> slice(start,finish,stride)) </c>  e.g.  <c>v[slice(1,6,2)])</c> = <c>v[slice(1,7,2)])</c> = <c>[1,3,5]</c>;
-
- - Matlab: <c> v(first:stride:last) </c> with one-based indexing; e.g. <c>v(2:2:6)</c> = <c>v(2:2;7)</c> = <c>[1,3,5]</c>;
-
-The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
-
-\sa  \ref LinearAlgebraModule, Vector, Matrix
+\sa \ref LinearAlgebraModule
 
 
 
-\section python_modules_tutorial_function Functions
+\section python_function_demonstration Functions
+
+\dontinclude python/tutorials/function_demonstration.py
 
 %Ariadne supports nonlinear functions by means of abstract classes, including \ref EffectiveScalarMultivariateFunction for scalar functions \f$f:\R^m\rightarrow\R\f$
 \skipline EffectiveScalarMultivariateFunction
@@ -160,9 +148,10 @@ A polynomial can be created by using the <tt>coordinate(n,j)</tt> static method,
 The standard arithmetical operations are available for polynomial expressions:
 \skipline q=
 
+\sa \ref FunctionModule
 
 
-\section python_modules_tutorial_taylor_functional_calculus Taylor Function Calculus
+\section python_taylor_functional_calculus_demonstration Taylor Function Calculus
 
 The generic function interfaces cannot generally be directly manipulated. Instead, they can be converted to numerical \ref ValidatedScalarMultivariateTaylorFunctionModelDP and \ref ValidatedVectorMultivariateTaylorFunctionModelDP types which can then be worked with.
 
@@ -233,24 +222,41 @@ Since Taylor function models provide a set of possibilities for the actual funct
 
 
 
-\section python_modules_tutorial_solvers Solvers
+\section python_geometry_demonstration Geometry
+
+\dontinclude python/tutorials/geometry_demonstration.py
+
+\sa \ref GeometryModule
+
+
+\section python_solvers_demonstration Solvers
+
+\dontinclude python/tutorials/solver_demonstration.py
 
 %Ariadne uses %Solver classes for complicated operations such as solving algebraic or differential equations.
 
-\subsection python_modules_tutorial_algebraic_solvers Solving Algebraic Equations
+\subsection python_algebraic_solvers_demonstration Solving Algebraic Equations
 
 We can solve parameterised algebraic equations using the operator \c implicit of a \a Solver class.
 If \f$f:D_1\times D_2\rightarrow \R^n\f$ with \f$D_2\subset\R^n\f$ then the operator \c implicit(f) attempts to compute a function \f$h:D_1\to\R^n\f$ such that \f$f(x,h(x))=0\f$ for \f$x\in D_m\f$. The function \f$h\f$ must satisfy \f$h(D_1)\subset D_2\f$.
 
-\snippet python/tutorials/modules_tutorial.py Algebraic Solver demonstration
+\skipline slv=
+\skipline f=
+\skipline slv.implicit
+\skipline g=
+\skipline slv.implicit
 
 
-\subsection python_modules_tutorial_differential_equation_solvers Solving Differential Equations
+\subsection python_differential_equation_solvers_demonstration Solving Differential Equations
 
 We can solve differential equations using the operator \c flow of the \a Integrator.
 If \f$:\R^n\to\R^n\f$, \f$D\subset\R^n\f$ and \f$h>0\f$, then the operator \c flow(f,D,h) computes a function \f$\phi:D\times[0,h]\to\R^n\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ and \f$\phi(x,0)=x\f$.
 
-\snippet python/tutorials/modules_tutorial.py Differential Solver demonstration
+\skipline integrator=
+\skipline f=
+\skipline integrator.flow
+
+\sa \ref SolverModule
 
 */
 

@@ -70,9 +70,19 @@ The \ref Rational class supports exact representation of rational numbers.
 \skipline Rational
 \skipline Rational
 
-The \ref Real number class supports arbitrary formulae.
+The \ref Real number class represents general real numbers
 \skipline Real
-\skipline Real
+and supports standard arithmetical operations,
+\skipline +r
+\skipline neg
+elementary functions (root, exponential, logarithm and trigonometric)
+\skipline sqrt
+lattice operations
+\skipline abs
+comparisons
+\skipline r<=
+and the distance function
+\skipline dist
 
 Computations in %Ariadne are usually most efficiently performed using floating-point number types. %Ariadne internally supports the \ref FloatDP and \ref FloatMP types, which are respectively based on builtin IEEE double-precision floating-point numbers, and multiple-precision floating-point numbers from the MPFR library.
 
@@ -228,6 +238,29 @@ Since Taylor function models provide a set of possibilities for the actual funct
 
 \sa \ref GeometryModule
 
+%Ariadne supports intervals with different types for the endpoints
+\skipline RationalInterval
+\skipline FloatDPUpperInterval
+A box is the Cartesian product of intervals, and can be created from a list of intervals
+\skipline RealBox
+
+Standard geometric predicates are supported
+\skipline subset
+\skipline disjoint
+
+Sets can also be defined based on constraints
+\skipline ConstraintSet
+
+The intersections of a box and a set based on constraints is guaranteed to be bounded
+\skipline intersection
+and we can compute its image under a continuous function
+\skipline image
+
+Sets can be discretised on a grid
+\skipline outer_approximation
+
+The projection onto a two-dimensional coordinate space can be plotted
+\skipline plot
 
 \section python_solvers_demonstration Solvers
 

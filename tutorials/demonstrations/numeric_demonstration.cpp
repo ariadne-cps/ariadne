@@ -60,9 +60,21 @@ void numeric_demonstration() {
 
     // Create a real number
     auto r=Real(q);
-    r=Real(sin(q));
     print("r:",r);
 
+    // Operations on real numbers
+    // Arithmetic operators
+    +r; -r; r+r; r-r; r*r; r/r;
+    // Arithmetic operations
+    neg(r); sqr(r); hlf(r); rec(r); pow(r,-3);
+    // Algebraic and transcendental operations
+    sqrt(r); exp(r); log(r); sin(r); cos(r); tan(r); atan(r);
+    // Lattice operations
+    abs(r); max(r,r); min(r,r);
+    // Comparison operators
+    auto k = r<=r;
+    // Metric
+    dist(r,r);
 
     // Store a double-precision floating-point number
     auto d=ExactDouble(1.375);

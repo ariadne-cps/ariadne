@@ -22,7 +22,7 @@
 # along with Ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 # Import all classes in the ariadne module
-from ariadne import *
+from pyariadne import *
 
 # Print a list of all available classes and functions
 print(dir())

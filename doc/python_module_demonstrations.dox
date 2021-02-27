@@ -41,7 +41,7 @@ The full code of the tutorial is given in \ref python/tutorials/module_demonstra
 \section python_introspection_demonstration The Ariadne module.
 
 First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
-\code from ariadne import * \endcode
+\code from pyariadne import * \endcode
 To see all the classes and functions available in %Ariadne, type:
 \code print(dir(ariadne)) \endcode
 

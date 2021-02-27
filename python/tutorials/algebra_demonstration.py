@@ -22,7 +22,7 @@
 # along with Ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 # Import all classes in the ariadne module
-from ariadne import *
+from pyariadne import *
 
 
 def linear_algebra_demonstration():

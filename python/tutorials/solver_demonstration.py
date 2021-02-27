@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################################
 #            solver_demonstration.py
@@ -22,7 +22,7 @@
 # along with Ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 # Import all classes in the ariadne module
-from ariadne import *
+from pyariadne import *
 
 
 def algebraic_solver_demonstration():

@@ -22,7 +22,7 @@
 ## and add the following to you .gdbinit file, replacing $TOP by the top-level directory
 #import sys
 #sys.path.insert(0, '$TOP/')
-#from ariadne/gdb_printers import register_ariadne_printers
+#from pyariadne/gdb_printers import register_ariadne_printers
 #register_ariadne_printers (None)
 #end
 

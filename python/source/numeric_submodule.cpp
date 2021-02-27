@@ -105,8 +105,6 @@ template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepres
     return os << class_name<FE>() << "Error("<<repr.reference().raw()<<")"; }
 
 
-inline Dyadic operator/(Dyadic x, Two w) { return Dyadic(x/(w^1)); }
-
 
 template<class L> Bool _decide_(L l) { return decide(l); }
 template<class L> Bool _definitely_(L l) { return definitely(l); }
@@ -408,6 +406,7 @@ void export_real(pymodule& module)
     pybind11::class_<Real> real_class(module,"Real");
     real_class.def(init<Int>());
     real_class.def(init<Integer>());
+    real_class.def(init<ExactDouble>());
     real_class.def(init<Dyadic>());
     real_class.def(init<Decimal>());
     real_class.def(init<Rational>());
@@ -424,6 +423,8 @@ void export_real(pymodule& module)
     define_lattice(module,real_class);
     define_comparisons(module,real_class);
 
+    module.def("dist", &_dist_<Real,Real>);
+
     module.def("when", [](UpperKleenean p1, Real r1, UpperKleenean p2, Real r2){return when({p1,r1},{p2,r2});});
     module.def("choose", [](LowerKleenean p1, Real r1, LowerKleenean p2, Real r2){return choose({p1,r1},{p2,r2});});
     //module.def("when", (Real(*)(Case<UpperKleenean,Real>,Case<UpperKleenean,Real>)) &when);
@@ -432,10 +433,13 @@ void export_real(pymodule& module)
 
     implicitly_convertible<Int,Real>();
     implicitly_convertible<Integer,Real>();
+    implicitly_convertible<ExactDouble,Real>();
     implicitly_convertible<Dyadic,Real>();
     implicitly_convertible<Decimal,Real>();
     implicitly_convertible<Rational,Real>();
 
+    pybind11::class_<PositiveReal,pybind11::bases<Real>> positive_real_class(module,"PositiveReal");
+    positive_real_class.def("__repr__", &__cstr__<PositiveReal>);
 
     pybind11::class_<ValidatedReal> validated_real_class(module,"ValidatedReal");
     validated_real_class.def(init<DyadicBounds>());
@@ -690,6 +694,7 @@ template<> Void export_precision<DoublePrecision>(pymodule& module) {
     precision_class.def("__str__", &__cstr__<DoublePrecision>);
     precision_class.def("__repr__", &__cstr__<DoublePrecision>);
     module.attr("double_precision") = double_precision;
+    module.attr("dp") = dp;
 }
 
 template<> Void export_precision<MultiplePrecision>(pymodule& module) {

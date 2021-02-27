@@ -1,7 +1,7 @@
 /***************************************************************************
  *            rigorous_numerics_tutorial.cpp
  *
- *  Copyright  20-17  Pieter Collins
+ *  Copyright  2009-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,7 +32,6 @@ extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatMP>::output_places;
 
 int main(int argc, const char* argv[]) {
-
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     //! [numeric_demonstration]
@@ -125,7 +124,7 @@ int main(int argc, const char* argv[]) {
         auto y=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),1);
         auto g = sqr(x)+4*sqr(y);
         auto h = EffectiveVectorMultivariateFunction{1+x+y*y,2+x-y};
-        EffectiveConstraint c=(g<=1);
+        auto c=(g<=1);
         ConstraintSet cs={c};
         RealBox bx={{-2,+2},{-2,+2}};
         ApproximateBoxType bbx={{-2,+4},{-2,+4}};
@@ -137,7 +136,7 @@ int main(int argc, const char* argv[]) {
         fig << fill_colour(0.0,0.5,0.5) << bbx; // Use stream insertion to control graphics
         fig.set_fill_colour(0,1,1).draw(cis); // Use chained methods to control graphics
         fig.write("rigorous_numerics_tutorial"); //
-        plot("rigorous_numerics_tutorial",Projection2d(2,0,1),bbx,Colour(1,0.5,0.5),bbx,Colour(0,1,1),cis); // Plot in one command
+        plot("rigorous_numerics_tutorial",Projection2d(2,0,1),bbx,{{Colour(0,1,1),cis}}); // Plot in one command
     }
     //! [geometry_demonstration]
 

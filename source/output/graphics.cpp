@@ -775,6 +775,13 @@ Void CairoCanvas::finalise()
 #endif
 
 
+Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
+    Figure fig; fig.set_projection_map(pr); fig.set_bounding_box(bbox);
+    for (auto cset : csets) {
+        fig.set_fill_colour(cset.first); fig << cset.second;
+    }
+    fig.write(filename);
+}
 
 } // namespace Ariadne
 

@@ -82,9 +82,9 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --parallel $($NPROC)
 
-    - name: Build Examples
+    - name: Build Examples and Demonstrations
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --parallel $($NPROC) --target examples
+      run: cmake --build . --parallel $($NPROC) --target examples demonstrations
 
     - name: Build Tests
       working-directory: ${{runner.workspace}}/build

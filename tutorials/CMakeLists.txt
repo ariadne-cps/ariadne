@@ -13,3 +13,5 @@ foreach(tutorial ${TUTORIALS})
     add_dependencies(tutorials ${tutorial}_tutorial)
 endforeach()
 
+add_subdirectory(demonstrations)
+

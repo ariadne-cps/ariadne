@@ -55,7 +55,12 @@ Void export_slackness(pybind11::module& module)
 Void export_constraint(pybind11::module& module)
 {
     pybind11::class_<EffectiveConstraint> effective_nonlinear_constraint_class(module,"EffectiveConstraint");
+    effective_nonlinear_constraint_class.def(pybind11::init<EffectiveConstraint>());
     effective_nonlinear_constraint_class.def(pybind11::init<EffectiveNumber,EffectiveScalarMultivariateFunction,EffectiveNumber>());
+    effective_nonlinear_constraint_class.def(pybind11::init([](EffectiveScalarMultivariateFunction const& f, EffectiveNumber const& u){return EffectiveConstraint(EffectiveNumber(-infty),f,u);}));
+    effective_nonlinear_constraint_class.def(pybind11::init([](EffectiveNumber const& l, EffectiveScalarMultivariateFunction const& f){return EffectiveConstraint(l,f,EffectiveNumber(infty));}));
+    effective_nonlinear_constraint_class.def(pybind11::init<EffectiveScalarMultivariateFunction,EffectiveNumber>());
+
     effective_nonlinear_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
 
     pybind11::class_<ValidatedConstraint> validated_nonlinear_constraint_class(module,"ValidatedConstraint");

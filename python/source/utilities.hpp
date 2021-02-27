@@ -179,6 +179,7 @@ template<class... AS> auto _mag_(AS const& ... as) -> decltype(mag(as...)) { ret
 template<class... AS> auto _mig_(AS const& ... as) -> decltype(mig(as...)) { return mig(as...); }
 template<class... AS> auto _arg_(AS const& ... as) -> decltype(arg(as...)) { return arg(as...); }
 template<class... AS> auto _conj_(AS const& ... as) -> decltype(conj(as...)) { return conj(as...); }
+template<class... AS> auto _dist_(AS const& ... as) -> decltype(dist(as...)) { return dist(as...); }
 
 template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 

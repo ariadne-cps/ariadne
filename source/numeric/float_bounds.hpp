@@ -110,6 +110,7 @@ template<class F> class Bounds
     template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr) : _l(dl,pr), _u(du,pr) { }
     Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr) : _l(wl,down,pr), _u(wu,up,pr) { }
+    Bounds<F>(Decimal const& dl, Decimal const& du, PrecisionType pr) : _l(dl,down,pr), _u(du,up,pr) { }
     Bounds<F>(Rational const& ql, Rational const& qu, PrecisionType pr) : _l(ql,down,pr), _u(qu,up,pr) { }
 
     template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>

@@ -46,8 +46,12 @@ Void export_figure(pybind11::module& module)
 
     static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
 
+    pybind11::class_<Colour> colour_class(module,"Colour");
+    colour_class.def(pybind11::init<double,double,double>());
+
     pybind11::class_<Figure> figure_class(module,"Figure");
     figure_class.def(pybind11::init<>());
+    figure_class.def(pybind11::init<GraphicsBoundingBoxType,Projection2d>());
     figure_class.def("set_projection_map",(Figure&(Figure::*)(const Projection2d&)) &Figure::set_projection_map, reference_internal);
     figure_class.def("set_projection",(Figure&(Figure::*)(DimensionType,DimensionType,DimensionType)) &Figure::set_projection, reference_internal);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box, reference_internal);
@@ -68,6 +72,7 @@ Void export_figure(pybind11::module& module)
 
 Void export_plot(pybind11::module& module)
 {
+    module.def("plot",(Void(*)(const char*,Projection2d const&,ApproximateBoxType const&,List<Pair<Colour,DrawableInterface const&>> const&)) &plot);
 }
 
 Void graphics_submodule(pybind11::module& module) {

@@ -126,6 +126,7 @@ Void export_integrators(pybind11::module& module)
     pybind11::class_<FlowStepModelType> flow_step_model_class(module,"FlowStepModelType");
     flow_step_model_class.def("__str__", &__cstr__<FlowStepModelType>);
     pybind11::class_<FlowModelType> flow_model_class(module,"FlowModelType");
+    flow_model_class.def("size",&FlowModelType::size);
     // Use a lambda here to prevent errors when using Clang/GCC
     flow_model_class.def("__len__",[](FlowModelType const& fm){return fm.size();});
     // NOTE: The export below gives 'ValueError: vector::reserve' at runtime when compiled using Clang

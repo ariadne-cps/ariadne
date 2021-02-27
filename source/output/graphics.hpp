@@ -289,6 +289,8 @@ template<class... CSETS> Void
 plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {
     plot(filename, Projection2d(2u,0,1), bbox, csets...); }
 
+Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets);
+
 } // namespace Ariadne
 
 #endif // ARIADNE_GRAPHICS_HPP

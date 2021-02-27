@@ -1,5 +1,6 @@
-from ariadne import *
-#from ariadne import tribool,Indeterminate,Interval, Box, split,disjoint,subset
+#!/usr/bin/python3
+
+from pyariadne import *
 
 Indeterminate=indeterminate()
 def unknown(tb):

@@ -233,6 +233,8 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(IsConstructible<Vector<X>,Vector<Y>,PR>::value) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
+        } else if (IsConstructible<Vector<X>,Vector<Dyadic>,PR>::value) {
+            vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Dyadic>(lst),pr);}));
         }
     }
 

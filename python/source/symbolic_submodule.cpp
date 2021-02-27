@@ -242,6 +242,21 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     return real_variable_class;
 }
 
+Void export_valuations(pybind11::module& module)
+{
+    pybind11::class_<RealValuation> real_valuation_class(module,"RealValuation");
+    real_valuation_class.def(pybind11::init<RealValuation>());
+    real_valuation_class.def(pybind11::init<std::map<RealVariable,Real>>());
+    real_valuation_class.def(pybind11::init<Array<Real>,Space<Real>>());
+    //Valuation(const List<Assignment<Variable<T>,X> >& la);
+    real_valuation_class.def("insert", &RealValuation::insert);
+    real_valuation_class.def("set", &RealValuation::set);
+    real_valuation_class.def("get", &RealValuation::get);
+    real_valuation_class.def("__getitem__", &RealValuation::get);
+    real_valuation_class.def("__setitem__", &RealValuation::set);
+    real_valuation_class.def("__repr__", &__cstr__<RealValuation>);
+}
+
 Void export_expressions(pybind11::module& module)
 {
     pybind11::class_<RealSpace> real_space_class(module,"RealSpace");
@@ -315,6 +330,8 @@ Void export_expressions(pybind11::module& module)
     module.def("max", &_max_<RealExpression,RealExpression>);
     module.def("min", &_min_<RealExpression,RealExpression>);
     module.def("abs", &_abs_<RealExpression>);
+
+    module.def("evaluate", (Real(*)(RealExpression const&, RealValuation const&)) &evaluate);
 
     module.def("substitute",(RealExpression(*)(RealExpression const&, const List<Assignment<RealVariable,RealExpression>>&)) &substitute);
     module.def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,RealExpression>&)) &substitute);
@@ -454,6 +471,7 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
 Void symbolic_submodule(pybind11::module& module) {
     export_constants(module);
     auto real_variable_class=export_variables(module);
+    export_valuations(module);
     export_expressions(module);
     export_sets(module,real_variable_class);
 }

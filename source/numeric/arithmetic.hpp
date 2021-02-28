@@ -29,7 +29,7 @@
 #ifndef ARIADNE_ARITHMETIC_HPP
 #define ARIADNE_ARITHMETIC_HPP
 
-#include "../utility/metaprogramming.hpp"
+#include "utility/metaprogramming.hpp"
 #include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "sign.hpp"

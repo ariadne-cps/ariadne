@@ -30,16 +30,16 @@
 #define ARIADNE_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "../utility/container.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/taylor_model.hpp"
+#include "utility/container.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/function_model.hpp"
-#include "../function/scaled_function_patch.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_model.hpp"
+#include "function/scaled_function_patch.hpp"
 
 namespace Ariadne {
 

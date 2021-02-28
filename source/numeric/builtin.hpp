@@ -35,8 +35,8 @@
 #include <iomanip>
 #include <limits>
 
-#include "../utility/metaprogramming.hpp"
-#include "../numeric/number.decl.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/number.decl.hpp"
 
 #include "logical.hpp"
 #include "twoexp.hpp"

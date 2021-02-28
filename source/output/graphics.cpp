@@ -22,23 +22,23 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
-#include "../config.hpp"
+#include "utility/standard.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/stlio.hpp"
-#include "../numeric/numeric.hpp"
-#include "../function/function.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
-#include "../symbolic/variable.hpp"
-#include "../symbolic/space.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../output/geometry2d.hpp"
-#include "../output/graphics.hpp"
-#include "../output/cairo.hpp"
-#include "../output/progress_indicator.hpp"
-#include "../output/logging.hpp"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/expression_set.hpp"
+#include "output/geometry2d.hpp"
+#include "output/graphics.hpp"
+#include "output/cairo.hpp"
+#include "output/progress_indicator.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 

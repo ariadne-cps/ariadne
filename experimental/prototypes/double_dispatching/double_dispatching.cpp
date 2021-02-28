@@ -3,7 +3,7 @@
 #include <tuple>
 #include <iostream>
 
-#include "../../../source/config.hpp"
+#include "../../source/config.hpp"
 
 #if defined HAVE_GMPXX_H
 

@@ -31,11 +31,11 @@
 
 #include <iostream>
 
-#include "../symbolic/space.hpp"
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_scalings.hpp"
+#include "symbolic/space.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_scalings.hpp"
 
-#include "../geometry/grid.hpp"
+#include "geometry/grid.hpp"
 
 namespace Ariadne {
 

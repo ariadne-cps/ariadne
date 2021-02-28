@@ -30,21 +30,21 @@
 #define ARIADNE_SCALED_FUNCTION_PATCH_HPP
 
 #include <iosfwd>
-#include "../utility/container.hpp"
-#include "../utility/exceptions.hpp"
-#include "../utility/declarations.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/taylor_model.hpp"
+#include "utility/container.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../algebra/operations.hpp"
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/function_model.hpp"
-#include "../function/function_model_mixin.hpp"
+#include "algebra/operations.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_model.hpp"
+#include "function/function_model_mixin.hpp"
 
 // FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
-#include "../function/formula.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

@@ -29,13 +29,13 @@
 #ifndef ARIADNE_MEASURABLE_SET_HPP
 #define ARIADNE_MEASURABLE_SET_HPP
 
-#include "../utility/handle.hpp"
-#include "../numeric/number.hpp"
+#include "utility/handle.hpp"
+#include "numeric/number.hpp"
 
-#include "../numeric/sequence.hpp"
-#include "../numeric/integer.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../numeric/twoexp.hpp"
+#include "numeric/sequence.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/twoexp.hpp"
 #include "interval.hpp"
 
 namespace Ariadne {

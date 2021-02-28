@@ -26,8 +26,8 @@
  *  \brief
  */
 
-#include "../utility/module.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/module.hpp"
+#include "numeric/paradigm.hpp"
 
 #include "casts.hpp"
 #include "number.hpp"

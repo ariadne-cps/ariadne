@@ -44,7 +44,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "numeric/floatmp.hpp"
 
 #include "../test.hpp"
-#include "../utility.hpp"
+#include "utility.hpp"
 #include "check_numeric.hpp"
 
 using namespace std;

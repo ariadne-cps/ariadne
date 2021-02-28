@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../algebra/vector.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 

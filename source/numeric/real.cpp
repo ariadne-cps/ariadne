@@ -26,9 +26,9 @@
  *  \brief
  */
 
-#include "../utility/module.hpp"
-#include "../numeric/operators.hpp"
-#include "../symbolic/templates.hpp"
+#include "utility/module.hpp"
+#include "numeric/operators.hpp"
+#include "symbolic/templates.hpp"
 
 #include "logical.hpp"
 #include "real.hpp"

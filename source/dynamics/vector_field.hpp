@@ -31,14 +31,14 @@
 
 #include <memory>
 
-#include "../function/function.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../geometry/grid.hpp"
-#include "../symbolic/expression.decl.hpp"
+#include "function/function.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/grid.hpp"
+#include "symbolic/expression.decl.hpp"
 
-#include "../symbolic/variable.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
 
 
 namespace Ariadne {

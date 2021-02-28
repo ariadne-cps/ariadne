@@ -36,26 +36,26 @@
 
 #include <memory>
 
-#include "../utility/tribool.hpp"
-#include "../utility/array.hpp"
-#include "../utility/iterator.hpp"
+#include "utility/tribool.hpp"
+#include "utility/array.hpp"
+#include "utility/iterator.hpp"
 
-#include "../utility/binary_word.hpp"
+#include "utility/binary_word.hpp"
 
-#include "../utility/exceptions.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/list_set.hpp"
+#include "utility/exceptions.hpp"
+#include "geometry/box.hpp"
+#include "geometry/point.hpp"
+#include "geometry/list_set.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../geometry/set_interface.hpp"
-#include "../geometry/paving_interface.hpp"
-#include "../algebra/vector.hpp"
-#include "../geometry/grid.hpp"
-#include "../geometry/grid_cell.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/paving_interface.hpp"
+#include "algebra/vector.hpp"
+#include "geometry/grid.hpp"
+#include "geometry/grid_cell.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

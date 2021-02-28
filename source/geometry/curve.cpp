@@ -22,22 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/formula.hpp"
+#include "function/functional.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #include <cassert>
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/algebra.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
-#include "../geometry/curve.hpp"
+#include "geometry/curve.hpp"
 
 
 namespace Ariadne {

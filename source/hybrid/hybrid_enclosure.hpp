@@ -34,18 +34,18 @@
 #include <list>
 #include <iostream>
 
-#include "../output/logging.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "output/logging.hpp"
+#include "utility/declarations.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
-#include "../geometry/box.hpp"
-#include "../dynamics/enclosure.hpp"
+#include "geometry/box.hpp"
+#include "dynamics/enclosure.hpp"
 
 namespace Ariadne {
 

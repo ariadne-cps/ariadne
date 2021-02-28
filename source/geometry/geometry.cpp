@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../config.hpp"
+#include "numeric/numeric.hpp"
+#include "config.hpp"
 
-#include "../geometry/geometry.hpp"
-#include "../utility/tuple.hpp"
+#include "geometry/geometry.hpp"
+#include "utility/tuple.hpp"
 
 namespace Ariadne {
 

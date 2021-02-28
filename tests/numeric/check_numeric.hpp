@@ -23,7 +23,7 @@
  */
 
 #include "../test.hpp"
-#include "../utility.hpp"
+#include "utility.hpp"
 #include "numeric/operators.hpp"
 
 using namespace Ariadne;

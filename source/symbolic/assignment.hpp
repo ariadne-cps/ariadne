@@ -34,17 +34,17 @@
 #include <string>
 
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/functional.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/string.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/functional.hpp"
+#include "utility/stlio.hpp"
+#include "utility/string.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../symbolic/variable.hpp"
-#include "../symbolic/expression.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/expression.hpp"
 
 namespace Ariadne {
 
@@ -151,7 +151,7 @@ EffectiveVectorMultivariateFunction make_function(const List<RealAssignment>& as
 
 } // namespace Ariadne
 
-#include "../symbolic/valuation.hpp"
+#include "symbolic/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

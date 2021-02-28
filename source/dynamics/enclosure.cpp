@@ -22,59 +22,59 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iomanip>
 
-#include "../function/constraint.hpp"
-#include "../function/formula.hpp"
-#include "../function/procedure.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/storage.hpp"
+#include "function/constraint.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/storage.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/polynomial.hpp"
-#include "../function/function.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
 
-#include "../function/function_model.hpp"
-#include "../function/taylor_function.hpp"
+#include "function/function_model.hpp"
+#include "function/taylor_function.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/grid.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid.hpp"
 
-#include "../geometry/function_set.hpp"
-#include "../geometry/affine_set.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "../geometry/paving_interface.hpp"
-#include "../geometry/paver.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "geometry/paving_interface.hpp"
+#include "geometry/paver.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../solvers/constraint_solver.hpp"
-#include "../solvers/nonlinear_programming.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "solvers/nonlinear_programming.hpp"
 
-#include "../output/graphics_interface.hpp"
-#include "../output/drawer.hpp"
-#include "../output/progress_indicator.hpp"
+#include "output/graphics_interface.hpp"
+#include "output/drawer.hpp"
+#include "output/progress_indicator.hpp"
 
-#include "../hybrid/discrete_event.hpp"
+#include "hybrid/discrete_event.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../symbolic/space.hpp"
-#include "../symbolic/expression_set.hpp"
+#include "numeric/operators.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/expression_set.hpp"
 
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/expansion.inl.hpp"
 
 
 namespace Ariadne {

@@ -658,7 +658,7 @@ If we additionally wish to flow forward a time \f$h\f$, then
 
 \section latex_documentation Additional Documentation
 
-For more information, see the documentation at <A HREF="../doc/evolution_step.pdf">evolution_step.pdf</A>.
+For more information, see the documentation at <A HREF="doc/evolution_step.pdf">evolution_step.pdf</A>.
 
 */
 

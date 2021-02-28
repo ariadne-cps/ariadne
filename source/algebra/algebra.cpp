@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../config.hpp"
+#include "numeric/numeric.hpp"
+#include "config.hpp"
 
 #include "algebra.hpp"
 #include "algebra_mixin.hpp"

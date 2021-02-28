@@ -33,17 +33,17 @@
 #include <stdexcept>
 #include <string>
 
-#include "../solvers/integrator_interface.hpp"
-#include "../solvers/bounder.hpp"
-#include "../function/function_interface.hpp"
+#include "solvers/integrator_interface.hpp"
+#include "solvers/bounder.hpp"
+#include "function/function_interface.hpp"
 
-#include "../utility/declarations.hpp"
-#include "../utility/attribute.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../output/logging.hpp"
-#include "../utility/pointer.hpp"
-#include "../function/affine.hpp"
-#include "../algebra/sweeper.hpp"
+#include "utility/declarations.hpp"
+#include "utility/attribute.hpp"
+#include "numeric/dyadic.hpp"
+#include "output/logging.hpp"
+#include "utility/pointer.hpp"
+#include "function/affine.hpp"
+#include "algebra/sweeper.hpp"
 
 namespace Ariadne {
 

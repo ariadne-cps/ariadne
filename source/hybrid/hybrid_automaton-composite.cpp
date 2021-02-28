@@ -22,21 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <map>
 
-#include "../utility/macros.hpp"
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/space.hpp"
-#include "../function/function.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_space.hpp"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
 
-#include "../hybrid/hybrid_automaton-composite.hpp"
+#include "hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 

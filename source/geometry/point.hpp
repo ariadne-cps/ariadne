@@ -29,10 +29,10 @@
 #ifndef ARIADNE_POINT_HPP
 #define ARIADNE_POINT_HPP
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

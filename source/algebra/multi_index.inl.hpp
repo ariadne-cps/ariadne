@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/iterator.hpp"
+#include "utility/iterator.hpp"
 
 namespace Ariadne {
 

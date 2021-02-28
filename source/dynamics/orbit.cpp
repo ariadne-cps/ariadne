@@ -22,19 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #include <utility>
 
-#include "../dynamics/orbit.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/curve.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
+#include "geometry/box.hpp"
+#include "geometry/point.hpp"
+#include "geometry/curve.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
 
 namespace Ariadne {
 

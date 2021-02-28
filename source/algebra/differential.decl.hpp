@@ -29,9 +29,9 @@
 #ifndef ARIADNE_DIFFERENTIAL_DECL_HPP
 #define ARIADNE_DIFFERENTIAL_DECL_HPP
 
-#include "../numeric/number.decl.hpp"
-#include "../numeric/float.decl.hpp"
-#include "../geometry/interval.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
+#include "geometry/interval.decl.hpp"
 
 namespace Ariadne {
 

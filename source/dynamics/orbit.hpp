@@ -35,12 +35,12 @@
 #include <map>
 #include <memory>
 
-#include "../numeric/numeric.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/storage.hpp"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/storage.hpp"
 
 
 namespace Ariadne {

@@ -33,9 +33,9 @@
 
 #include "multi_index.hpp"
 
-#include "../utility/typedefs.hpp"
-#include "../utility/iterator.hpp"
-#include "../utility/macros.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/iterator.hpp"
+#include "utility/macros.hpp"
 
 
 namespace Ariadne {

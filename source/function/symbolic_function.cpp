@@ -22,19 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/differential.hpp"
-#include "../numeric/operators.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/formula.hpp"
-#include "../function/formula.tpl.hpp"
-#include "../function/function.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/differential.hpp"
+#include "numeric/operators.hpp"
+#include "algebra/algebra.hpp"
+#include "function/formula.hpp"
+#include "function/formula.tpl.hpp"
+#include "function/function.hpp"
 
-#include "../function/symbolic_function.hpp"
+#include "function/symbolic_function.hpp"
 
 
 namespace Ariadne {

@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/taylor_function.hpp"
-#include "../solvers/integrator.hpp"
-#include "../solvers/bounder.hpp"
-#include "../algebra/expansion.inl.hpp"
-#include "../output/progress_indicator.hpp"
+#include "function/taylor_function.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/bounder.hpp"
+#include "algebra/expansion.inl.hpp"
+#include "output/progress_indicator.hpp"
 #include "inclusion_evolver.hpp"
 
 namespace Ariadne {

@@ -29,11 +29,11 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "../output/logging.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../numeric/numeric.hpp"
-#include "../utility/tuple.hpp"
+#include "output/logging.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/tuple.hpp"
 
 namespace Ariadne {
 

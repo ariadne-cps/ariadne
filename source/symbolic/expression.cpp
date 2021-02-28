@@ -22,22 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
-#include "../config.hpp"
+#include "utility/standard.hpp"
+#include "config.hpp"
 
 
-#include "../algebra/algebra.hpp"
-#include "../algebra/algebra_wrapper.hpp"
+#include "algebra/algebra.hpp"
+#include "algebra/algebra_wrapper.hpp"
 
-#include "../function/formula.hpp"
-#include "../function/formula.tpl.hpp"
+#include "function/formula.hpp"
+#include "function/formula.tpl.hpp"
 
-#include "../symbolic/constant.hpp"
-#include "../symbolic/variable.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
-#include "../symbolic/valuation.hpp"
+#include "symbolic/constant.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/valuation.hpp"
 
 
 #include "symbolic/templates.tpl.hpp"

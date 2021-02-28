@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
+#include "utility/standard.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -31,17 +31,17 @@
 
 
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../numeric/builtin.hpp"
-#include "../numeric/twoexp.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../numeric/decimal.hpp"
-#include "../numeric/rational.hpp"
-#include "../numeric/rounding.hpp"
-#include "../numeric/floatdp.hpp"
-#include "../numeric/floatmp.hpp"
+#include "utility/macros.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/twoexp.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/decimal.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/rounding.hpp"
+#include "numeric/floatdp.hpp"
+#include "numeric/floatmp.hpp"
 
 
 namespace Ariadne {

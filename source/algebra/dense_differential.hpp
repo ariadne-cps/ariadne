@@ -31,13 +31,13 @@
 #include <cmath>
 #include <limits>
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/series.hpp"
-#include "../algebra/multi_index.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/series.hpp"
+#include "algebra/multi_index.hpp"
 
 namespace Ariadne {
 

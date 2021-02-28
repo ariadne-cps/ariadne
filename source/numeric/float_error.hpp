@@ -29,8 +29,8 @@
 #ifndef ARIADNE_FLOAT_ERROR_HPP
 #define ARIADNE_FLOAT_ERROR_HPP
 
-#include "../utility/macros.hpp"
-#include "../utility/metaprogramming.hpp"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
 
 #include "logical.decl.hpp"
 #include "number.decl.hpp"

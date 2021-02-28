@@ -29,8 +29,8 @@
 #ifndef ARIADNE_ALGEBRA_OPERATIONS_HPP
 #define ARIADNE_ALGEBRA_OPERATIONS_HPP
 
-#include "../numeric/operators.hpp"
-#include "../numeric/arithmetic.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/arithmetic.hpp"
 
 namespace Ariadne {
 

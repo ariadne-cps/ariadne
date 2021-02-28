@@ -26,34 +26,34 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <limits>
 
-#include "../utility/macros.hpp"
-#include "../output/logging.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/tribool.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/linear_algebra.decl.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/diagonal_matrix.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/function.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/taylor_function.hpp"
-#include "../function/formula.hpp"
-#include "../function/procedure.hpp"
+#include "utility/macros.hpp"
+#include "output/logging.hpp"
+#include "utility/tuple.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/linear_algebra.decl.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/diagonal_matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
 
-#include "../solvers/nonlinear_programming.hpp"
-#include "../solvers/solver.hpp"
-#include "../algebra/multi_index-noaliasing.hpp"
-#include "../solvers/constraint_solver.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/solver.hpp"
+#include "algebra/multi_index-noaliasing.hpp"
+#include "solvers/constraint_solver.hpp"
 
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

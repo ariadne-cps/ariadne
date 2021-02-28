@@ -31,15 +31,15 @@
 
 #include <iosfwd>
 
-#include "../utility/declarations.hpp"
-#include "../utility/tribool.hpp"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "../geometry/set_interface.hpp"
+#include "geometry/set_interface.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

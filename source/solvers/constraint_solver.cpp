@@ -22,28 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/tribool.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/algebra.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../function/polynomial.hpp"
-#include "../function/function.hpp"
-#include "../function/formula.hpp"
-#include "../function/procedure.hpp"
-#include "../function/constraint.hpp"
-#include "../solvers/nonlinear_programming.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/taylor_function.hpp"
+#include "utility/macros.hpp"
+#include "utility/tuple.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_paving.hpp"
+#include "function/polynomial.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/procedure.hpp"
+#include "function/constraint.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "function/function_mixin.hpp"
+#include "function/taylor_function.hpp"
 
-#include "../solvers/constraint_solver.hpp"
-#include "../solvers/solver.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "solvers/solver.hpp"
 
 namespace Ariadne {
 

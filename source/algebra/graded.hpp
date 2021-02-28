@@ -29,7 +29,7 @@
 #ifndef ARIADNE_GRADED_HPP
 #define ARIADNE_GRADED_HPP
 
-#include "../function/procedure.hpp"
+#include "function/procedure.hpp"
 
 namespace Ariadne {
 

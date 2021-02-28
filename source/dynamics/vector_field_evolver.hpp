@@ -35,15 +35,15 @@
 #include <iostream>
 
 
-#include "../utility/tuple.hpp"
+#include "utility/tuple.hpp"
 
-#include "../dynamics/vector_field.hpp"
-#include "../function/function_interface.hpp"
-#include "../solvers/configuration_interface.hpp"
-#include "../solvers/integrator_interface.hpp"
-#include "../dynamics/evolver_base.hpp"
+#include "dynamics/vector_field.hpp"
+#include "function/function_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "solvers/integrator_interface.hpp"
+#include "dynamics/evolver_base.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 

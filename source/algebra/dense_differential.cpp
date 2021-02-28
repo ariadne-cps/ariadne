@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../algebra/dense_differential.hpp"
+#include "algebra/dense_differential.hpp"
 
 namespace Ariadne {
 template class DenseDifferential<FloatDP>;

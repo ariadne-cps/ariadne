@@ -32,18 +32,18 @@
 #include <cmath>
 #include <iostream>
 
-#include "../utility/metaprogramming.hpp"
-#include "../utility/typedefs.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
-#include "../numeric/sign.hpp"
-#include "../numeric/is_number.hpp"
+#include "numeric/sign.hpp"
+#include "numeric/is_number.hpp"
 
-#include "../numeric/logical.decl.hpp"
-#include "../numeric/float.decl.hpp"
-#include "../numeric/number.hpp"
-#include "../numeric/real.hpp"
-#include "../numeric/logical.hpp"
+#include "numeric/logical.decl.hpp"
+#include "numeric/float.decl.hpp"
+#include "numeric/number.hpp"
+#include "numeric/real.hpp"
+#include "numeric/logical.hpp"
 
 namespace Ariadne {
 

@@ -27,10 +27,10 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include "../config.hpp"
-#include "../output/logging.hpp"
-#include "../utility/writable.hpp"
-#include "../utility/macros.hpp"
+#include "config.hpp"
+#include "output/logging.hpp"
+#include "utility/writable.hpp"
+#include "utility/macros.hpp"
 
 namespace Ariadne {
 

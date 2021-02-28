@@ -29,14 +29,14 @@
 #ifndef ARIADNE_FUNCTION_EXPRESSION_HPP
 #define ARIADNE_FUNCTION_EXPRESSION_HPP
 
-#include "../symbolic/expression.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../symbolic/space.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/expression_set.hpp"
+#include "symbolic/space.hpp"
 
-#include "../function/function.hpp"
-#include "../function/formula.hpp"
-#include "../function/function_model.hpp"
-#include "../function/taylor_function.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/function_model.hpp"
+#include "function/taylor_function.hpp"
 
 namespace Ariadne {
 

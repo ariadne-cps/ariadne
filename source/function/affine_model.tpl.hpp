@@ -22,18 +22,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/affine_model.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/affine_model.hpp"
 
 #include "model_utilities.hpp"
 
-#include "../function/affine.hpp"
-#include "../function/taylor_function.hpp"
-#include "../algebra/vector.hpp"
+#include "function/affine.hpp"
+#include "function/taylor_function.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 

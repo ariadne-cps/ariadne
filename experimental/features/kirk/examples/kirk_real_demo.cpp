@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "../kirk_real.hpp"
+#include "kirk_real.hpp"
 #include "numeric/real.hpp"
 #include "numeric/floatmp.hpp"
 #include "numeric/float_bounds.hpp"

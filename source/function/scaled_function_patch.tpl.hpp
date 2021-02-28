@@ -25,24 +25,24 @@
 #ifndef FUNCTION_PATCH_TCC
 #define FUNCTION_PATCH_TCC
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../function/polynomial.hpp"
-#include "../algebra/differential.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/polynomial.hpp"
+#include "algebra/differential.hpp"
 
-#include "../function/function.hpp"
-#include "../function/function_mixin.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
 
-#include "../algebra/evaluate.hpp"
+#include "algebra/evaluate.hpp"
 
 #define VOLATILE ;
 

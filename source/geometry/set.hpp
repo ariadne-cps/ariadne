@@ -31,11 +31,11 @@
 
 #include <iosfwd>
 
-#include "../utility/tribool.hpp"
-#include "../geometry/box.hpp"
-#include "../utility/handle.hpp"
-#include "../geometry/set.decl.hpp"
-#include "../geometry/set_interface.hpp"
+#include "utility/tribool.hpp"
+#include "geometry/box.hpp"
+#include "utility/handle.hpp"
+#include "geometry/set.decl.hpp"
+#include "geometry/set_interface.hpp"
 
 namespace Ariadne {
 

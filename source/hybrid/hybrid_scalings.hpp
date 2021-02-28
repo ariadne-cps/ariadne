@@ -32,10 +32,10 @@
 #include <iostream>
 #include <map>
 
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "../symbolic/variable.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 

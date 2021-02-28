@@ -29,14 +29,14 @@
 #ifndef ARIADNE_MEASURABLE_FUNCTION_HPP
 #define ARIADNE_MEASURABLE_FUNCTION_HPP
 
-#include "../numeric/number.hpp"
+#include "numeric/number.hpp"
 
 #include "domain.hpp"
 #include "function_model.hpp"
 
-#include "../geometry/set.hpp"
-#include "../geometry/measurable_set.hpp"
-#include "../geometry/set_wrapper.hpp"
+#include "geometry/set.hpp"
+#include "geometry/measurable_set.hpp"
+#include "geometry/set_wrapper.hpp"
 
 namespace Ariadne {
 

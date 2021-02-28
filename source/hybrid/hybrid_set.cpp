@@ -22,29 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../hybrid/hybrid_expression_set.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 
-#include "../numeric/real.hpp"
-#include "../numeric/casts.hpp"
+#include "numeric/real.hpp"
+#include "numeric/casts.hpp"
 
-#include "../symbolic/expression_set.hpp"
-#include "../geometry/function_set.hpp"
+#include "symbolic/expression_set.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
-#include "../output/graphics.hpp"
-#include "../hybrid/hybrid_graphics.hpp"
-#include "../numeric/rounding.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "numeric/rounding.hpp"
+#include "symbolic/assignment.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
 
 namespace Ariadne {
 

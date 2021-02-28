@@ -27,13 +27,13 @@
  */
 
 
-#include "../utility/stdlib.hpp"
+#include "utility/stdlib.hpp"
 
 #include "integer.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/string.hpp"
-#include "../numeric/logical.hpp"
+#include "utility/macros.hpp"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
 
 #include <limits>
 

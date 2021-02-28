@@ -29,8 +29,8 @@
 #ifndef ARIADNE_EVOLVER_BASE_HPP
 #define ARIADNE_EVOLVER_BASE_HPP
 
-#include "../dynamics/evolver_interface.hpp"
-#include "../geometry/list_set.hpp"
+#include "dynamics/evolver_interface.hpp"
+#include "geometry/list_set.hpp"
 
 namespace Ariadne {
 

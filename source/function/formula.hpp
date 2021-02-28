@@ -35,19 +35,19 @@
 #include <string>
 
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/operations.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
 
-#include "../symbolic/templates.hpp"
-#include "../symbolic/constant.hpp"
+#include "symbolic/templates.hpp"
+#include "symbolic/constant.hpp"
 
 namespace Ariadne {
 

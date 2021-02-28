@@ -29,18 +29,18 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_HPP
 
-#include "../solvers/configuration_interface.hpp"
-#include "../geometry/set.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../geometry/function_set.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "geometry/set.hpp"
+#include "geometry/grid_paving.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/storage.hpp"
-#include "../dynamics/orbit.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
-#include "../dynamics/reachability_analyser_interface.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/storage.hpp"
+#include "dynamics/orbit.hpp"
+#include "dynamics/vector_field_evolver.hpp"
+#include "dynamics/reachability_analyser_interface.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 
 namespace Ariadne {

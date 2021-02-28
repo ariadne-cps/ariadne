@@ -26,8 +26,8 @@
  *  \brief
  */
 
-#include "../numeric/number.decl.hpp"
-#include "../numeric/float.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
 #ifndef ARIADNE_LINEAR_ALGEBRA_DECL_HPP
 #define ARIADNE_LINEAR_ALGEBRA_DECL_HPP

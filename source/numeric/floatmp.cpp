@@ -28,7 +28,7 @@
 
 
 
-#include "../utility/module.hpp"
+#include "utility/module.hpp"
 #include "logical.hpp"
 #include "builtin.hpp"
 #include "twoexp.hpp"

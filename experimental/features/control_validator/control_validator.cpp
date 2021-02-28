@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
 #include <type_traits>
 
-#include "../utility/declarations.hpp"
-#include "../symbolic/variable.hpp"
+#include "utility/declarations.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;
@@ -37,15 +37,15 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 };
 } // namespace Ariadne
 
-#include "../symbolic/expression.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../symbolic/function_expression.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/expression_set.hpp"
+#include "symbolic/function_expression.hpp"
 
 
-#include "../function/function.hpp"
-#include "../function/scaled_function_patch.hpp"
-#include "../function/taylor_function.hpp"
+#include "function/function.hpp"
+#include "function/scaled_function_patch.hpp"
+#include "function/taylor_function.hpp"
 
 
 #define ARIADNE_PRINT(expression) std::cout << #expression << "=" << (expression) << "\n"

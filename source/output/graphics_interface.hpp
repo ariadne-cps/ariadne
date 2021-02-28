@@ -29,7 +29,7 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_GRAPHICS_INTERFACE_HPP
 
-#include "../utility/declarations.hpp"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 

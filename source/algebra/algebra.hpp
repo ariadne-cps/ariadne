@@ -30,12 +30,12 @@
 
 #include <iosfwd>
 #include <iostream>
-#include "../numeric/numeric.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/operators.hpp"
-#include "../algebra/algebra_interface.hpp"
-#include "../algebra/operations.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/pointer.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/operators.hpp"
+#include "algebra/algebra_interface.hpp"
+#include "algebra/operations.hpp"
 
 namespace Ariadne {
 

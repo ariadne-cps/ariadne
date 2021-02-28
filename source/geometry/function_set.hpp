@@ -33,19 +33,19 @@
 
 #include <memory>
 
-#include "../utility/macros.hpp"
-#include "../utility/container.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../symbolic/templates.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../function/function.hpp"
-#include "../function/function_model.hpp"
-#include "../function/constraint.hpp"
-#include "../output/graphics_interface.hpp"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "symbolic/templates.hpp"
+#include "geometry/set_interface.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
+#include "function/constraint.hpp"
+#include "output/graphics_interface.hpp"
 
-#include "../geometry/box.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 

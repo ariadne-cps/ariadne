@@ -29,7 +29,7 @@
 #ifndef ARIADNE_RANGE_HPP
 #define ARIADNE_RANGE_HPP
 
-#include "../utility/typedefs.hpp"
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 

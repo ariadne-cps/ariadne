@@ -22,26 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/taylor_model.hpp"
+#include "numeric/operators.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/formula.hpp"
-#include "../function/formula.tpl.hpp"
+#include "function/formula.hpp"
+#include "function/formula.tpl.hpp"
 
-#include "../function/function.hpp"
+#include "function/function.hpp"
 
-#include "../function/function_mixin.hpp"
-#include "../function/function_mixin.tpl.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_mixin.tpl.hpp"
 
-#include "../function/function_model.hpp"
+#include "function/function_model.hpp"
 
-#include "../function/symbolic_function.hpp"
+#include "function/symbolic_function.hpp"
 
-#include "../symbolic/expression.hpp"
+#include "symbolic/expression.hpp"
 
 
 namespace Ariadne {

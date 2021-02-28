@@ -29,11 +29,11 @@
 #ifndef ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 #define ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 
-#include "../function/function.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../geometry/grid.hpp"
-#include "../symbolic/identifier.hpp"
-#include "../symbolic/expression.decl.hpp"
+#include "function/function.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/grid.hpp"
+#include "symbolic/identifier.hpp"
+#include "symbolic/expression.decl.hpp"
 
 namespace Ariadne {
 

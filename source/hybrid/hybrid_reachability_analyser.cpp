@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <string>
 #include <sstream>
@@ -35,38 +35,38 @@
 #include <valarray>
 
 
-#include "../utility/exceptions.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../solvers/integrator.hpp"
-#include "../solvers/solver.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
 
-#include "../dynamics/reachability_analyser.tpl.hpp"
+#include "dynamics/reachability_analyser.tpl.hpp"
 
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
-#include "../hybrid/hybrid_evolver.hpp"
-#include "../hybrid/hybrid_reachability_analyser.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
 
 
-#include "../output/logging.hpp"
-#include "../output/graphics.hpp"
-#include "../solvers/linear_programming.hpp"
+#include "output/logging.hpp"
+#include "output/graphics.hpp"
+#include "solvers/linear_programming.hpp"
 
-#include "../hybrid/hybrid_graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 

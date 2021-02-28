@@ -29,7 +29,7 @@
 #ifndef ARIADNE_EXCEPTIONS_HPP
 #define ARIADNE_EXCEPTIONS_HPP
 
-#include "../utility/string.hpp"
+#include "utility/string.hpp"
 
 #include <exception>
 #include <stdexcept>

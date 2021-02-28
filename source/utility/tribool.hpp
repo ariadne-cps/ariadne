@@ -26,7 +26,7 @@
  *  \brief Three-valued logic variable.
  */
 
-#include "../numeric/logical.hpp"
+#include "numeric/logical.hpp"
 
 /*
 #ifdef DOXYGEN

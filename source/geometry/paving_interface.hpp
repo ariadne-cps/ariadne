@@ -30,10 +30,10 @@
 #define ARIADNE_PAVING_INTERFACE_HPP
 
 #include <iosfwd>
-#include "../utility/declarations.hpp"
-#include "../geometry/grid_cell.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../output/graphics_interface.hpp"
+#include "utility/declarations.hpp"
+#include "geometry/grid_cell.hpp"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

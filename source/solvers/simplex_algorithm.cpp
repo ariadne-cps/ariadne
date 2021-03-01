@@ -22,20 +22,20 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../function/affine.hpp"
-#include "../solvers/linear_programming.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/affine.hpp"
+#include "solvers/linear_programming.hpp"
 
-#include "../utility/macros.hpp"
-#include "../output/logging.hpp"
+#include "utility/macros.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 

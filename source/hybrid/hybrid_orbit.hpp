@@ -35,13 +35,13 @@
 #include <map>
 #include <memory>
 
-#include "../numeric/numeric.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_enclosure.hpp"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
 
-#include "../dynamics/orbit.hpp"
+#include "dynamics/orbit.hpp"
 
 namespace Ariadne {
 

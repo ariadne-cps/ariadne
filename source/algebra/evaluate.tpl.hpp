@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../algebra/vector.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 

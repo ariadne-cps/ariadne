@@ -31,8 +31,8 @@
 #ifndef ARIADNE_NUMBER_INTERFACE
 #define ARIADNE_NUMBER_INTERFACE
 
-#include "../utility/clonable.hpp"
-#include "../utility/writable.hpp"
+#include "utility/clonable.hpp"
+#include "utility/writable.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"

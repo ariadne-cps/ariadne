@@ -30,7 +30,7 @@
 #define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "../geometry/set_interface.hpp"
+#include "geometry/set_interface.hpp"
 
 namespace Ariadne {
 

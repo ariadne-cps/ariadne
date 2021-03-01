@@ -29,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_OPERATIONS_HPP
 #define ARIADNE_FLOAT_OPERATIONS_HPP
 
-#include "../utility/macros.hpp"
+#include "utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"

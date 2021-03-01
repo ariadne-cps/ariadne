@@ -35,18 +35,18 @@
 #include <iostream>
 
 
-#include "../utility/tuple.hpp"
+#include "utility/tuple.hpp"
 
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "../solvers/configuration_interface.hpp"
-#include "../hybrid/hybrid_enclosure.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
-#include "../hybrid/hybrid_evolver_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 

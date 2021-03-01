@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../algebra/evaluate.tpl.hpp"
-#include "../algebra/expansion.inl.hpp"
-#include "../algebra/expansion.tpl.hpp"
+#include "algebra/evaluate.tpl.hpp"
+#include "algebra/expansion.inl.hpp"
+#include "algebra/expansion.tpl.hpp"
 
 namespace Ariadne {
 

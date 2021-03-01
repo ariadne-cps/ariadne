@@ -25,7 +25,7 @@
 #ifndef ARIADNE_BOX_DECL_HPP
 #define ARIADNE_BOX_DECL_HPP
 
-#include "../geometry/interval.decl.hpp"
+#include "geometry/interval.decl.hpp"
 
 namespace Ariadne {
 

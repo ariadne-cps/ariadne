@@ -22,28 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../geometry/interval.hpp"
-#include "../function/function_model.hpp"
+#include "geometry/interval.hpp"
+#include "function/function_model.hpp"
 
-#include "../solvers/solver.hpp"
+#include "solvers/solver.hpp"
 
-#include "../output/logging.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/formula.hpp"
-#include "../function/function.hpp"
-#include "../function/function_model.hpp"
+#include "output/logging.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
 
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/expansion.inl.hpp"
 
-#include "../algebra/evaluate.hpp"
-#include "../algebra/evaluate.tpl.hpp"
+#include "algebra/evaluate.hpp"
+#include "algebra/evaluate.tpl.hpp"
 
 namespace Ariadne {
 

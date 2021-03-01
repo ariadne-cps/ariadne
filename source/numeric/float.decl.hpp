@@ -26,8 +26,8 @@
  *  \brief
  */
 
-#include "../utility/typedefs.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
 #ifndef ARIADNE_FLOAT_DECL_HPP
 #define ARIADNE_FLOAT_DECL_HPP

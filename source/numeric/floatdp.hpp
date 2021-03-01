@@ -34,13 +34,13 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "../utility/declarations.hpp"
-#include "../numeric/operators.hpp"
-#include "../numeric/rounding.hpp"
-#include "../numeric/sign.hpp"
-#include "../numeric/builtin.hpp"
-#include "../numeric/number.decl.hpp"
-#include "../numeric/float.decl.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/rounding.hpp"
+#include "numeric/sign.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
 namespace Ariadne {
 

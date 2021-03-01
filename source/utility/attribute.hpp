@@ -30,7 +30,7 @@
 #define ARIADNE_ATTRIBUTE_HPP
 
 #include "typedefs.hpp"
-#include "../numeric/builtin.hpp"
+#include "numeric/builtin.hpp"
 
 namespace Ariadne {
 

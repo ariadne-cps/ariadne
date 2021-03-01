@@ -29,8 +29,8 @@
 #ifndef ARIADNE_SCALING_HPP
 #define ARIADNE_SCALING_HPP
 
-#include "../numeric/dyadic.hpp"
-#include "../function/domain.hpp"
+#include "numeric/dyadic.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 

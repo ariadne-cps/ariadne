@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../symbolic/templates.tpl.hpp"
+#include "symbolic/templates.tpl.hpp"
 
 namespace Ariadne {
 

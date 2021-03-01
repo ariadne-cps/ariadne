@@ -29,7 +29,7 @@
 #ifndef ARIADNE_IDENTIFIER_HPP
 #define ARIADNE_IDENTIFIER_HPP
 
-#include "../utility/string.hpp"
+#include "utility/string.hpp"
 
 namespace Ariadne {
 

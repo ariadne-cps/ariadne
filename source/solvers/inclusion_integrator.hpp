@@ -29,17 +29,17 @@
 #ifndef ARIADNE_INCLUSION_INTEGRATOR_HPP
 #define ARIADNE_INCLUSION_INTEGRATOR_HPP
 
-#include "../utility/typedefs.hpp"
-#include "../utility/attribute.hpp"
-#include "../algebra/sweeper.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/domain.hpp"
-#include "../function/function_model.hpp"
-#include "../function/formula.hpp"
-#include "../function/symbolic_function.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../output/logging.hpp"
-#include "../solvers/integrator_interface.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/attribute.hpp"
+#include "algebra/sweeper.hpp"
+#include "algebra/algebra.hpp"
+#include "function/domain.hpp"
+#include "function/function_model.hpp"
+#include "function/formula.hpp"
+#include "function/symbolic_function.hpp"
+#include "symbolic/expression_set.hpp"
+#include "output/logging.hpp"
+#include "solvers/integrator_interface.hpp"
 
 namespace Ariadne {
 

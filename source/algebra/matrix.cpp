@@ -22,19 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/module.hpp"
+#include "numeric/module.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #include "matrix.hpp"
 #include "symmetric_matrix.hpp"
 
-#include "../utility/exceptions.hpp"
-#include "../numeric/float.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../numeric/rational.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/float.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/rational.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
 
 #include "matrix.tpl.hpp"
 
@@ -920,7 +920,7 @@ template class SymmetricMatrix<FloatDPApproximation>;
 
 } // namespace Ariadne
 
-#include "../geometry/interval.hpp"
+#include "geometry/interval.hpp"
 
 namespace Ariadne {
 template class Matrix<FloatDPUpperInterval>;

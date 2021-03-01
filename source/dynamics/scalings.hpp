@@ -32,13 +32,13 @@
 #include <iostream>
 #include <map>
 
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "../numeric/floatdp.hpp"
-#include "../numeric/float_value.hpp"
-#include "../geometry/grid.hpp"
-#include "../symbolic/variable.hpp"
+#include "numeric/floatdp.hpp"
+#include "numeric/float_value.hpp"
+#include "geometry/grid.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 

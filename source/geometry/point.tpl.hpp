@@ -27,9 +27,9 @@
 #include <string>
 #include <vector>
 
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
-#include "../utility/stlio.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "utility/stlio.hpp"
 
 namespace Ariadne {
 

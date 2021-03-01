@@ -31,7 +31,7 @@
 #ifndef ARIADNE_LOGICAL_DECL_HPP
 #define ARIADNE_LOGICAL_DECL_HPP
 
-#include "../numeric/paradigm.hpp"
+#include "numeric/paradigm.hpp"
 
 namespace Ariadne {
 

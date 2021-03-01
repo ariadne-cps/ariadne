@@ -31,8 +31,8 @@
 
 #include <iosfwd>
 
-#include "../utility/declarations.hpp"
-#include "../function/function.decl.hpp"
+#include "utility/declarations.hpp"
+#include "function/function.decl.hpp"
 
 namespace Ariadne {
 

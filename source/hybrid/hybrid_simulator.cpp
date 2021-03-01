@@ -22,34 +22,34 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../hybrid/hybrid_simulator.hpp"
+#include "hybrid/hybrid_simulator.hpp"
 
-#include "../utility/array.hpp"
-#include "../utility/container.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/valuation.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/valuation.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
 
-#include "../function/function.hpp"
-#include "../function/formula.hpp"
-#include "../function/taylor_model.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../solvers/runge_kutta_integrator.hpp"
+#include "solvers/runge_kutta_integrator.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 
 namespace Ariadne {

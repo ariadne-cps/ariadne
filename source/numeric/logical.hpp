@@ -28,9 +28,9 @@
 #ifndef ARIADNE_LOGICAL_HPP
 #define ARIADNE_LOGICAL_HPP
 
-#include "../utility/stdlib.hpp"
-#include "../utility/typedefs.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/stdlib.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
 #include "logical.decl.hpp"
 

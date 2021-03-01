@@ -22,13 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../geometry/interval.hpp"
+#include "numeric/numeric.hpp"
+#include "geometry/interval.hpp"
 
-#include "../algebra/differential.hpp"
-#include "../algebra/univariate_differential.hpp"
-#include "../algebra/fixed_differential.hpp"
-#include "../algebra/fixed_univariate_differential.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/univariate_differential.hpp"
+#include "algebra/fixed_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 
 #include "operations.hpp"
 

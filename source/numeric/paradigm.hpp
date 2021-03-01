@@ -30,7 +30,7 @@
 #define ARIADNE_PARADIGM_HPP
 
 #include <cstdint>
-#include "../utility/metaprogramming.hpp"
+#include "utility/metaprogramming.hpp"
 
 namespace Ariadne {
 

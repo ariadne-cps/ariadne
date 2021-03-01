@@ -31,10 +31,10 @@
 
 #include <iosfwd>
 
-#include "../utility/declarations.hpp"
-#include "../utility/tribool.hpp"
-#include "../utility/writable.hpp"
-#include "../numeric/numeric.hpp"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
+#include "utility/writable.hpp"
+#include "numeric/numeric.hpp"
 
 #include "set.decl.hpp"
 #include "box.decl.hpp"

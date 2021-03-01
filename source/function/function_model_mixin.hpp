@@ -33,21 +33,21 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../function/function_model_interface.hpp"
-#include "../function/function_model.hpp"
+#include "function/function_model_interface.hpp"
+#include "function/function_model.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/operations.hpp"
-#include "../algebra/algebra_mixin.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/algebra_mixin.hpp"
 
-#include "../function/domain.hpp"
+#include "function/domain.hpp"
 
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/function.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 

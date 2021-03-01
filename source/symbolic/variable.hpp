@@ -33,17 +33,17 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/tribool.hpp"
-#include "../utility/string.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/tribool.hpp"
+#include "utility/string.hpp"
 
-#include "../numeric/logical.decl.hpp"
-#include "../numeric/number.decl.hpp"
-#include "../symbolic/expression.decl.hpp"
-#include "../symbolic/identifier.hpp"
-#include "../symbolic/operations.hpp"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "symbolic/expression.decl.hpp"
+#include "symbolic/identifier.hpp"
+#include "symbolic/operations.hpp"
 
 namespace Ariadne {
 

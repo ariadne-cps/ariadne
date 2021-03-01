@@ -28,9 +28,9 @@
 
 
 
-#include "../utility/stdlib.hpp"
-#include "../utility/macros.hpp"
-#include "../utility/typedefs.hpp"
+#include "utility/stdlib.hpp"
+#include "utility/macros.hpp"
+#include "utility/typedefs.hpp"
 
 #include "rational.hpp"
 #include "logical.hpp"

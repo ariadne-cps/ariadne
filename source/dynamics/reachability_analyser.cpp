@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <string>
 #include <sstream>
@@ -35,33 +35,33 @@
 #include <valarray>
 
 
-#include "../utility/exceptions.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../solvers/integrator.hpp"
-#include "../solvers/solver.hpp"
-#include "../geometry/function_set.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../dynamics/vector_field.hpp"
+#include "dynamics/vector_field.hpp"
 
-#include "../dynamics/orbit.hpp"
-#include "../dynamics/map_evolver.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
-#include "../dynamics/reachability_analyser.hpp"
+#include "dynamics/orbit.hpp"
+#include "dynamics/map_evolver.hpp"
+#include "dynamics/vector_field_evolver.hpp"
+#include "dynamics/reachability_analyser.hpp"
 
-#include "../output/logging.hpp"
-#include "../output/graphics.hpp"
-#include "../solvers/linear_programming.hpp"
+#include "output/logging.hpp"
+#include "output/graphics.hpp"
+#include "solvers/linear_programming.hpp"
 
-#include "../dynamics/reachability_analyser.tpl.hpp"
+#include "dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
 

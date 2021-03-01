@@ -30,10 +30,10 @@
 #ifndef ARIADNE_TAYLOR_SERIES_HPP
 #define ARIADNE_TAYLOR_SERIES_HPP
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/series.hpp"
-#include "../function/domain.hpp"
-#include "../utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/series.hpp"
+#include "function/domain.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 

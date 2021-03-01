@@ -22,30 +22,30 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/container.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/constraint.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/orbit.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "../solvers/integrator.hpp"
+#include "solvers/integrator.hpp"
 
-#include "../output/logging.hpp"
-#include "../output/progress_indicator.hpp"
+#include "output/logging.hpp"
+#include "output/progress_indicator.hpp"
 
-#include "../dynamics/vector_field.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
+#include "dynamics/vector_field.hpp"
+#include "dynamics/vector_field_evolver.hpp"
 
-#include "../symbolic/space.hpp"
-#include "../symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/assignment.hpp"
 
 namespace Ariadne {
 

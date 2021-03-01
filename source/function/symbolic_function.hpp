@@ -33,20 +33,20 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../function/function_interface.hpp"
+#include "function/function_interface.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/metaprogramming.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/metaprogramming.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../numeric/operators.tpl.hpp"
-#include "../algebra/vector.hpp"
+#include "numeric/numeric.hpp"
+#include "numeric/operators.tpl.hpp"
+#include "algebra/vector.hpp"
 
-#include "../function/function_mixin.hpp"
-#include "../function/projection.hpp"
-#include "../function/formula.hpp"
+#include "function/function_mixin.hpp"
+#include "function/projection.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 

@@ -32,7 +32,7 @@
 #include <string>
 #include <iosfwd>
 
-#include "../utility/declarations.hpp"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 

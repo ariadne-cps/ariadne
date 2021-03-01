@@ -29,7 +29,7 @@
 #ifndef ARIADNE_DYADIC_HPP
 #define ARIADNE_DYADIC_HPP
 
-#include "../numeric/gmp.hpp"
+#include "numeric/gmp.hpp"
 
 #include <iostream> // For std::floor std::ceil etc
 #include <iomanip> // For std::setprecision
@@ -37,13 +37,13 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "../utility/handle.hpp"
-#include "../utility/writable.hpp"
+#include "utility/handle.hpp"
+#include "utility/writable.hpp"
 
-#include "../numeric/logical.hpp"
-#include "../numeric/integer.hpp"
-#include "../numeric/twoexp.hpp"
-#include "../numeric/arithmetic.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/twoexp.hpp"
+#include "numeric/arithmetic.hpp"
 
 namespace Ariadne {
 

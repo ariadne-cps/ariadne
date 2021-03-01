@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/exceptions.hpp"
-#include "../algebra/operations.hpp"
+#include "utility/exceptions.hpp"
+#include "algebra/operations.hpp"
 
-#include "../algebra/series.hpp"
-#include "../function/taylor_series.hpp"
+#include "algebra/series.hpp"
+#include "function/taylor_series.hpp"
 
 namespace Ariadne {
 

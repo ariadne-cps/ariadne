@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../geometry/point.tpl.hpp"
+#include "geometry/point.tpl.hpp"
 
 namespace Ariadne {
 

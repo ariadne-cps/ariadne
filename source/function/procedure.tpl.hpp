@@ -24,20 +24,20 @@
 
 #include <iostream>
 
-#include "../utility/container.hpp"
-#include "../algebra/vector.hpp"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../function/formula.hpp"
-#include "../algebra/expansion.hpp"
-#include "../geometry/box.hpp"
+#include "numeric/operators.hpp"
+#include "function/formula.hpp"
+#include "algebra/expansion.hpp"
+#include "geometry/box.hpp"
 
-#include "../algebra/evaluate.tpl.hpp"
-#include "../function/formula.tpl.hpp"
+#include "algebra/evaluate.tpl.hpp"
+#include "function/formula.tpl.hpp"
 
 // FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
-#include "../function/taylor_model.hpp"
-#include "../algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -397,7 +397,7 @@ template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X>
 
 } // namespace Ariadne
 
-#include "../algebra/fixed_univariate_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 
 namespace Ariadne {
 

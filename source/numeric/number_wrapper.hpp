@@ -33,8 +33,8 @@
 
 #include <cassert>
 
-#include "../utility/module.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/module.hpp"
+#include "numeric/paradigm.hpp"
 
 #include "number_interface.hpp"
 
@@ -52,8 +52,8 @@
 #include "float_approximation.hpp"
 #include "float_error.hpp"
 
-#include "../symbolic/templates.hpp"
-#include "../numeric/operators.hpp"
+#include "symbolic/templates.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 

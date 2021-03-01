@@ -22,17 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../output/drawer.hpp"
+#include "output/drawer.hpp"
 
-#include "../utility/macros.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/affine_set.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "utility/macros.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 

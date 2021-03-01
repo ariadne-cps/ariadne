@@ -33,15 +33,15 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/declarations.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/declarations.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/operations.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
 
 namespace Ariadne {
 

@@ -27,12 +27,12 @@
 
 #include <iostream>
 
-#include "../utility/container.hpp"
-#include "../utility/declarations.hpp"
-#include "../solvers/integrator.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "solvers/integrator.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 

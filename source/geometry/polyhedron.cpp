@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <string>
@@ -34,20 +34,20 @@
 #include <vector>
 #include <valarray>
 
-#include "../geometry/polyhedron.hpp"
+#include "geometry/polyhedron.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "../function/function.hpp"
+#include "function/function.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/polytope.hpp"
+#include "geometry/box.hpp"
+#include "geometry/polytope.hpp"
 
 
 

@@ -22,32 +22,32 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
 #include <iomanip>
 #include <limits>
 
-#include "../numeric/rounding.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/series.hpp"
-#include "../algebra/differential.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/taylor_series.hpp"
-#include "../function/function.hpp"
-#include "../utility/exceptions.hpp"
+#include "numeric/rounding.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/series.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
+#include "function/taylor_series.hpp"
+#include "function/function.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../algebra/expansion.inl.hpp"
-#include "../algebra/evaluate.tpl.hpp"
-#include "../algebra/algebra_operations.tpl.hpp"
+#include "algebra/expansion.inl.hpp"
+#include "algebra/evaluate.tpl.hpp"
+#include "algebra/algebra_operations.tpl.hpp"
 
 #define VOLATILE ;
-#include "../algebra/multi_index-noaliasing.hpp"
-#include "../function/function_mixin.hpp"
-#include "../algebra/vector.hpp"
+#include "algebra/multi_index-noaliasing.hpp"
+#include "function/function_mixin.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 

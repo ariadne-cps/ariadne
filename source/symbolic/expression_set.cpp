@@ -22,15 +22,15 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
-#include "../config.hpp"
+#include "utility/standard.hpp"
+#include "config.hpp"
 
-#include "../symbolic/expression_set.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/space.hpp"
-#include "../function/constraint.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/function_set.hpp"
+#include "symbolic/expression_set.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
+#include "function/constraint.hpp"
+#include "geometry/box.hpp"
+#include "geometry/function_set.hpp"
 
 
 

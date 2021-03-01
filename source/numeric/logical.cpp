@@ -26,11 +26,11 @@
  *  \brief
  */
 
-#include "../utility/stdlib.hpp"
-#include "../utility/string.hpp"
-#include "../utility/macros.hpp"
-#include "../numeric/sequence.hpp"
-#include "../symbolic/templates.hpp"
+#include "utility/stdlib.hpp"
+#include "utility/string.hpp"
+#include "utility/macros.hpp"
+#include "numeric/sequence.hpp"
+#include "symbolic/templates.hpp"
 
 #include "logical.hpp"
 #include "integer.hpp"
@@ -220,7 +220,7 @@ template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenea
 
 } // namespace Ariadne
 
-#include "../utility/array.hpp"
+#include "utility/array.hpp"
 
 namespace Ariadne {
 

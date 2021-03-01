@@ -31,11 +31,11 @@
 
 #define SIMPLE_VECTOR_OPERATORS
 
-#include "../utility/macros.hpp"
-#include "../utility/metaprogramming.hpp"
-#include "../utility/container.hpp"
-#include "../utility/declarations.hpp"
-#include "../numeric/builtin.hpp"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/builtin.hpp"
 
 #include "range.hpp"
 #include "slice.hpp"
@@ -781,7 +781,7 @@ Vector<X>::Vector(InitializerList<Dbl> const& lst, PRS... prs)
 
 } // namespace Ariadne
 
-#include "../numeric/float.decl.hpp"
+#include "numeric/float.decl.hpp"
 namespace Ariadne {
 inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }

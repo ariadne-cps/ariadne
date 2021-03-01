@@ -22,26 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../geometry/zonotope.hpp"
+#include "geometry/zonotope.hpp"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../solvers/linear_programming.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/list_set.hpp"
-#include "../function/function.hpp"
-#include "../geometry/polytope.hpp"
-#include "../output/geometry2d.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "solvers/linear_programming.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "function/function.hpp"
+#include "geometry/polytope.hpp"
+#include "output/geometry2d.hpp"
 
 
 namespace Ariadne {

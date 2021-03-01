@@ -27,16 +27,16 @@
  */
 
 
-#include "../numeric/module.hpp"
-#include "../function/function.hpp"
-#include "../function/taylor_model.hpp"
+#include "numeric/module.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
 
 #include "box.hpp"
 #include "box.tpl.hpp"
 
-#include "../function/formula.hpp"
+#include "function/formula.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
 namespace Ariadne {
 

@@ -26,11 +26,11 @@
  *  \brief
  */
 
-#include "../utility/module.hpp"
+#include "utility/module.hpp"
 
 // FIXME: Online needed for the zero_element() method
-#include "../numeric/floatdp.hpp"
-#include "../numeric/floatmp.hpp"
+#include "numeric/floatdp.hpp"
+#include "numeric/floatmp.hpp"
 
 #include "vector.hpp"
 

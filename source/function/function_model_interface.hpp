@@ -29,13 +29,13 @@
 #ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 #define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
-#include "../algebra/algebra_interface.hpp"
+#include "algebra/algebra_interface.hpp"
 
-#include "../function/function.decl.hpp"
-#include "../function/function_interface.hpp"
+#include "function/function.decl.hpp"
+#include "function/function_interface.hpp"
 
-#include "../algebra/range.hpp"
-#include "../numeric/operators.hpp"
+#include "algebra/range.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 

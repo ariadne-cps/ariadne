@@ -22,24 +22,24 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/constraint.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/orbit.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "symbolic/assignment.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
-#include "../dynamics/map.hpp"
-#include "../dynamics/map_evolver.hpp"
+#include "dynamics/map.hpp"
+#include "dynamics/map_evolver.hpp"
 
 namespace Ariadne {
 

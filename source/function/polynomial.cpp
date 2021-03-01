@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../config.hpp"
+#include "numeric/numeric.hpp"
+#include "config.hpp"
 
-#include "../geometry/interval.hpp"
-#include "../function/polynomial.hpp"
-#include "../function/polynomial.tpl.hpp"
+#include "geometry/interval.hpp"
+#include "function/polynomial.hpp"
+#include "function/polynomial.tpl.hpp"
 
 namespace Ariadne {
 

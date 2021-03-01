@@ -31,8 +31,8 @@
 #ifndef ARIADNE_VECTOR_HPP
 #define ARIADNE_VECTOR_HPP
 
-#include "../utility/module.hpp"
-#include "../utility/container.hpp"
+#include "utility/module.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 

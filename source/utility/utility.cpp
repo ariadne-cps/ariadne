@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../config.hpp"
+#include "config.hpp"
 #include "stack_trace.hpp"
 
 #ifdef ARIADNE_ENABLE_STACK_TRACE

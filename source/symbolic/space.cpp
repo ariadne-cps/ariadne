@@ -32,11 +32,11 @@
 
 #include "space.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../symbolic/variable.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 

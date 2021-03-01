@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../output/graphics.hpp"
+#include "output/graphics.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>

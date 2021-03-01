@@ -24,10 +24,10 @@
 
 #include "formula.hpp"
 
-#include "../symbolic/templates.tpl.hpp"
+#include "symbolic/templates.tpl.hpp"
 #include "formula.tpl.hpp"
 
-#include "../numeric/operators.tpl.hpp"
+#include "numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 

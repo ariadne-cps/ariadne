@@ -22,33 +22,33 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iomanip>
 
-#include "../solvers/integrator.hpp"
-#include "../solvers/bounder.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/bounder.hpp"
 
-#include "../output/logging.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/sweeper.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/function.hpp"
-#include "../function/function_model.hpp"
-#include "../function/formula.hpp"
-#include "../function/scaling.hpp"
-#include "../function/taylor_function.hpp"
-#include "../function/taylor_model.hpp"
+#include "output/logging.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/sweeper.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
+#include "function/formula.hpp"
+#include "function/scaling.hpp"
+#include "function/taylor_function.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/polynomial.hpp"
-#include "../geometry/interval.hpp"
+#include "function/polynomial.hpp"
+#include "geometry/interval.hpp"
 
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -322,8 +322,8 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
 } // namespace Ariadne
 
 
-#include "../algebra/graded.hpp"
-#include "../function/procedure.hpp"
+#include "algebra/graded.hpp"
+#include "function/procedure.hpp"
 namespace Ariadne {
 
 class FormulaFunction;

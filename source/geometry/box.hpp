@@ -29,13 +29,13 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "../utility/container.hpp"
+#include "utility/container.hpp"
 
-#include "../numeric/logical.hpp"
-#include "../numeric/floatdp.hpp"
-#include "../geometry/interval.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/set_interface.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/floatdp.hpp"
+#include "geometry/interval.hpp"
+#include "geometry/point.hpp"
+#include "geometry/set_interface.hpp"
 
 #include "box.decl.hpp"
 

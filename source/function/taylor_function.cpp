@@ -22,29 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/algebra.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../function/polynomial.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/evaluate.hpp"
-#include "../function/taylor_model.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/polynomial.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/function.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/scaled_function_patch.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "function/scaled_function_patch.hpp"
 
-#include "../function/taylor_function.hpp"
+#include "function/taylor_function.hpp"
 
 #include "taylor_model.tpl.hpp"
 #include "scaled_function_patch.tpl.hpp"

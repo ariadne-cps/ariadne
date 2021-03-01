@@ -29,7 +29,7 @@
 #ifndef ARIADNE_SET_WRAPPER_HPP
 #define ARIADNE_SET_WRAPPER_HPP
 
-#include "../utility/handle.hpp"
+#include "utility/handle.hpp"
 #include "set.hpp"
 
 namespace Ariadne {

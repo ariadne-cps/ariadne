@@ -31,20 +31,20 @@
 
 #include <map>
 
-#include "../utility/macros.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/array.hpp"
-#include "../utility/pointer.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/sweeper.hpp"
-#include "../algebra/operations.hpp"
-#include "../algebra/evaluate.hpp"
-#include "../function/domain.hpp"
-#include "../function/scaling.hpp"
-#include "../function/polynomial.hpp"
+#include "utility/macros.hpp"
+#include "utility/declarations.hpp"
+#include "utility/array.hpp"
+#include "utility/pointer.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/sweeper.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/domain.hpp"
+#include "function/scaling.hpp"
+#include "function/polynomial.hpp"
 
 namespace Ariadne {
 

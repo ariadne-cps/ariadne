@@ -29,9 +29,9 @@
 #ifndef ARIADNE_CONSTRAINT_HPP
 #define ARIADNE_CONSTRAINT_HPP
 
-#include "../numeric/numeric.hpp"
-#include "../function/function.hpp"
-#include "../utility/metaprogramming.hpp"
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
+#include "utility/metaprogramming.hpp"
 
 namespace Ariadne {
 

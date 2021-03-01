@@ -29,12 +29,12 @@
 #ifndef ARIADNE_BOUNDER_HPP
 #define ARIADNE_BOUNDER_HPP
 
-#include "../utility/typedefs.hpp"
-#include "../utility/attribute.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/domain.hpp"
-#include "../function/function_model.hpp"
-#include "../output/logging.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/attribute.hpp"
+#include "algebra/algebra.hpp"
+#include "function/domain.hpp"
+#include "function/function_model.hpp"
+#include "output/logging.hpp"
 #include "integrator_interface.hpp"
 
 namespace Ariadne {

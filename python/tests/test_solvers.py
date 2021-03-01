@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_solvers.py
 #
-#  Copyright 2012-20  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
+#  Copyright  2012-20  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify

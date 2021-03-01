@@ -3,7 +3,7 @@
 ##############################################################################
 #            solve_polynomial.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright  2009  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify

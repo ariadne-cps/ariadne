@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_import.py
 #
-#  Copyright 2006-20  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
+#  Copyright  2006-20  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify

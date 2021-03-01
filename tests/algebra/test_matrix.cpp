@@ -2,7 +2,7 @@
  *            test_matrix.cpp
  *
  *  Copyright  2006-20  Pieter Collins, Alberto Casagrande
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *
  ****************************************************************************/
 
 /*

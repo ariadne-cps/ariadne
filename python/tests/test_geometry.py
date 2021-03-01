@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_geometry.py
 #
-#  Copyright 2020  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
+#  Copyright  2020  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify

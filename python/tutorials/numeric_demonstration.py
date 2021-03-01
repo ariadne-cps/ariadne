@@ -3,7 +3,7 @@
 ##############################################################################
 #            numeric_demonstration.py
 #
-#  Copyright 2009-21  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
+#  Copyright  2009-21  Pieter Collins
 ##############################################################################
 
 # This file is part of Ariadne.

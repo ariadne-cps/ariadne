@@ -264,7 +264,7 @@ auto SolverBase::fixed_point(const ValidatedVectorMultivariateFunction& f, const
 auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                           const ExactBoxType& ip,
                           const ExactBoxType& ix) const
-    -> ValidatedVectorMultivariateFunctionModelType
+    -> ValidatedVectorMultivariateFunctionPatch
 {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
@@ -334,14 +334,14 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","Could not prove existence of a solution in "<<ix<<".");
 }
 
-ValidatedScalarMultivariateFunctionModelDP
+ValidatedScalarMultivariateFunctionPatch
 SolverBase::implicit(const ValidatedScalarMultivariateFunction& f,
                      const ExactBoxType& ip,
                      const ExactIntervalType& ix) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
-    ValidatedVectorMultivariateFunctionModelDP res=this->implicit(ValidatedVectorMultivariateFunction(List<ValidatedScalarMultivariateFunction>(1u,f)),ip,ExactBoxType(1u,ix));
+    ValidatedVectorMultivariateFunctionPatch res=this->implicit(ValidatedVectorMultivariateFunction(List<ValidatedScalarMultivariateFunction>(1u,f)),ip,ExactBoxType(1u,ix));
     return res[0];
 }
 
@@ -431,24 +431,30 @@ auto FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG_PRINTLN_AT(1,"nx="<<nx);
     Vector<ValidatedNumericType> nr(nx);
     ARIADNE_LOG_PRINTLN_AT(1,"nr="<<nr);
-    return nr;
+#warning
+    //    return nr;
 }
 
 
-ValidatedVectorMultivariateFunctionModelDP
+#warning
+ValidatedVectorMultivariateFunctionPatch join(ValidatedVectorMultivariateFunctionPatch const&, ValidatedVectorMultivariateFunctionPatch const&);
+
+ValidatedVectorMultivariateFunctionPatch
 IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
-                                    const ValidatedVectorMultivariateFunctionModelDP& id,
-                                    const ValidatedVectorMultivariateFunctionModelDP& h) const
+                                    const ValidatedVectorMultivariateFunctionPatch& id,
+                                    const ValidatedVectorMultivariateFunctionPatch& h) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    const SizeType m=id.size();
-    const SizeType n=h.size();
+    const SizeType m=id.result_size();
+    const SizeType n=h.result_size();
     DP pr;
 
     ARIADNE_LOG_PRINTLN("f="<<f);
     ARIADNE_LOG_PRINTLN("h="<<h);
 
-    ValidatedVectorMultivariateFunctionModelDP mh=h; mh.clobber();
+    ValidatedVectorMultivariateFunctionPatch mh=h;
+#warning
+    //    mh.clobber();
     ARIADNE_LOG_PRINTLN("midpoint(h)="<<mh);
 
     ValidatedScalarMultivariateFunction zero_function(f.domain());

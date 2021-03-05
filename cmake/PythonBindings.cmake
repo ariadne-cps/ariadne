@@ -53,9 +53,8 @@ if(PYTHONLIBS_FOUND)
     set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
     target_link_libraries (pyariadne-algebra PUBLIC ${GCOV_LIBRARIES} ariadne PRIVATE pybind11::module)
 
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -m site --user-site OUTPUT_VARIABLE PYARIADNE_INSTALL_DIR)
-    string(STRIP ${PYARIADNE_INSTALL_DIR} PYARIADNE_INSTALL_DIR)
-    install(TARGETS pyariadne DESTINATION ${PYARIADNE_INSTALL_DIR})
+    find_package(Python)
+    install(TARGETS pyariadne DESTINATION ${Python_SITEARCH})
 
     add_subdirectory(python/tests)
 

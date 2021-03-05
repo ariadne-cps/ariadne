@@ -182,3 +182,8 @@ endif()
 
 install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Luca Geretti")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcairo2-dev, libmpfr-dev, python3-dev")
+set(CPack)

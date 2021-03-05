@@ -145,7 +145,8 @@ HybridAutomaton get_controller()
 //! [get_controller]
 
 //! [get_system]
-CompositeHybridAutomaton get_system() {
+CompositeHybridAutomaton get_system()
+{
     CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
     return watertank_system;
 }
@@ -207,7 +208,8 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
 //! End of [create_evolver]
 
 //! [compute_evolution]
-Void compute_evolution(const GeneralHybridEvolver& evolver) {
+Void compute_evolution(const GeneralHybridEvolver& evolver)
+{
     ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
@@ -242,6 +244,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
 //! [create_analyser]
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 {
+    ARIADNE_LOG_SCOPE_CREATE
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 
@@ -249,15 +252,16 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
     analyser.configuration().set_maximum_grid_fineness(6);
     analyser.configuration().set_lock_to_grid_time(5);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"Analyser configuration: " << analyser.configuration());
-    ARIADNE_LOG_PRINTLN_AT(1,"Analyser evolver: " << analyser.evolver());
+    ARIADNE_LOG_PRINTLN("Analyser configuration: " << analyser.configuration());
+    ARIADNE_LOG_PRINTLN("Analyser evolver: " << analyser.evolver());
 
     return analyser;
 }
 //! [create_analyser]
 
 //! [compute_reachability]
-Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
+Void compute_reachability(const HybridReachabilityAnalyser& analyser)
+{
     ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");

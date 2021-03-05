@@ -26,18 +26,18 @@ from pyariadne import *
 #! [get_tank]
 def get_tank():
     # Declare the system constants
-    alpha=RealConstant("alpha",dec(0.02))
-    beta=RealConstant("beta",dec(0.3))
+    alpha = RealConstant("alpha",dec(0.02))
+    beta = RealConstant("beta",dec(0.3))
 
     # Declare the variables for the dynamics
-    aperture=RealVariable("aperture")
-    height=RealVariable("height")
+    aperture = RealVariable("aperture")
+    height = RealVariable("height")
 
     # Create the tank automaton
-    automaton=HybridAutomaton("tank")
+    automaton = HybridAutomaton("tank")
 
     # Declare a trivial discrete location (we use an empty label since there is only one location).
-    flow=DiscreteLocation()
+    flow = DiscreteLocation()
 
     # The water level is always given by the same dynamic.
     # The inflow is controlled by the valve aperture, the outflow depends on the
@@ -51,28 +51,28 @@ def get_tank():
 #! [get_valve]
 def get_valve():
     # Declare some constants. Note that system parameters should be given as variables.
-    T=RealConstant("T",4)
+    T = RealConstant("T",4)
 
     # Declare the shared system variables
-    aperture=RealVariable("aperture")
+    aperture = RealVariable("aperture")
 
     # Declare the events we use
-    stop_opening=DiscreteEvent("stop_opening")
-    stop_closing=DiscreteEvent("stop_closing")
-    can_open=DiscreteEvent("can_open")
-    can_close=DiscreteEvent("can_close")
+    stop_opening = DiscreteEvent("stop_opening")
+    stop_closing = DiscreteEvent("stop_closing")
+    can_open = DiscreteEvent("can_open")
+    can_close = DiscreteEvent("can_close")
 
     # Declare the variable for the automaton name
-    valve=StringVariable("valve")
+    valve = StringVariable("valve")
 
     # Create the valve automaton
-    automaton=HybridAutomaton(valve.name())
+    automaton = HybridAutomaton(valve.name())
 
     # Declare the values the valve variable can have
-    opening=DiscreteLocation({valve:"opening"})
-    closed=DiscreteLocation({valve:"closed"})
-    opened=DiscreteLocation({valve:"opened"})
-    closing=DiscreteLocation({valve:"closing"})
+    opening = DiscreteLocation({valve:"opening"})
+    closed = DiscreteLocation({valve:"closed"})
+    opened = DiscreteLocation({valve:"opened"})
+    closing = DiscreteLocation({valve:"closing"})
 
     # Define the algebraic equations for the opened/closed locations.
     automaton.new_mode(opened,[let(aperture)<<1])
@@ -97,28 +97,28 @@ def get_valve():
 #! [get_controller]
 def get_controller():
     # Declare some constants
-    hmin=RealConstant("hmin",dec(5.75))
-    hmax=RealConstant("hmax",dec(7.75))
-    delta=RealConstant("delta",dec(0.02))
+    hmin = RealConstant("hmin",dec(5.75))
+    hmax = RealConstant("hmax",dec(7.75))
+    delta = RealConstant("delta",dec(0.02))
 
     # Declare the shared system variables
-    height=RealVariable("height")
+    height = RealVariable("height")
 
     # Declare the events we use
-    can_open=DiscreteEvent("can_open")
-    can_close=DiscreteEvent("can_close")
-    must_open=DiscreteEvent("must_open")
-    must_close=DiscreteEvent("must_close")
+    can_open = DiscreteEvent("can_open")
+    can_close = DiscreteEvent("can_close")
+    must_open = DiscreteEvent("must_open")
+    must_close = DiscreteEvent("must_close")
 
     # Declare the variable for the automaton name
-    controller=StringVariable("controller")
+    controller = StringVariable("controller")
 
     # Create the controller automaton
-    automaton=HybridAutomaton(controller.name())
+    automaton = HybridAutomaton(controller.name())
 
     # Declare the locations for the controller
-    rising=DiscreteLocation({controller:"rising"})
-    falling=DiscreteLocation({controller:"falling"})
+    rising = DiscreteLocation({controller:"rising"})
+    falling = DiscreteLocation({controller:"falling"})
 
     # Instantiate modes for each location with no dynamics
     automaton.new_mode(rising)
@@ -141,7 +141,7 @@ def get_controller():
 
 #! [get_system]
 def get_system():
-    watertank_system=CompositeHybridAutomaton("watertank",[get_tank(),get_valve(),get_controller()])
+    watertank_system = CompositeHybridAutomaton("watertank",[get_tank(),get_valve(),get_controller()])
     return watertank_system
 
 #! [get_system]
@@ -150,24 +150,24 @@ def get_system():
 #! [simulate_evolution]
 def simulate_evolution(system):
     # Re-introduce the shared system variables required for the initial set
-    aperture=RealVariable("aperture")
-    height=RealVariable("height")
+    aperture = RealVariable("aperture")
+    height = RealVariable("height")
 
-    valve=StringVariable("valve")
-    controller=StringVariable("controller")
+    valve = StringVariable("valve")
+    controller = StringVariable("controller")
 
-    opened=String("opened")
-    rising=String("rising")
+    opened = String("opened")
+    rising = String("rising")
 
     # Create a simulator object
-    simulator=HybridSimulator()
+    simulator = HybridSimulator()
     simulator.set_step_size(0.01)
 
     # Set an initial point for the simulation
-    initial_point=HybridRealPoint(DiscreteLocation({valve:opened,controller:rising}),{height:Real(7)})
+    initial_point = HybridRealPoint(DiscreteLocation({valve:opened,controller:rising}),{height:Real(7)})
 
     # Define the termination: continuous time and maximum number of transitions
-    termination=HybridTerminationCriterion(Real(exact(30.0)),5)
+    termination = HybridTerminationCriterion(Real(exact(30.0)),5)
 
     # Compute a simulation trajectory
     print("Computing simulation trajectory...")
@@ -185,7 +185,7 @@ def simulate_evolution(system):
 #! [create_evolver]
 def create_evolver(system):
     # Create a GeneralHybridEvolver object
-    evolver=GeneralHybridEvolver(system)
+    evolver = GeneralHybridEvolver(system)
 
     # Set the evolver configuration
     evolver.configuration().set_maximum_enclosure_radius(3.0)
@@ -200,22 +200,22 @@ def create_evolver(system):
 #! [compute_evolution]
 def compute_evolution(evolver):
     # Re-introduce the shared system variables required for the initial set
-    aperture=RealVariable("aperture")
-    height=RealVariable("height")
-    time=TimeVariable()
+    aperture = RealVariable("aperture")
+    height = RealVariable("height")
+    time = TimeVariable()
 
-    valve=StringVariable("valve")
-    controller=StringVariable("controller")
+    valve = StringVariable("valve")
+    controller = StringVariable("controller")
 
-    opened=String("opened")
-    rising=String("rising")
+    opened = String("opened")
+    rising = String("rising")
 
     # Define the initial set, by supplying the location as a list of locations for each composed automata, and
     # the continuous set as a list of variable assignments for each variable controlled on that location
-    # (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    initial_set=HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)<=7])
+    # (the assignment can be either a singleton value using the = symbol or an interval using the <= symbols)
+    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)<=7])
     # Define the termination: continuous time and maximum number of transitions
-    termination=HybridTerminationCriterion(Real(30),5)
+    termination = HybridTerminationCriterion(Real(30),5)
 
     # Compute the evolution flow tube using upper semantics
     print("Computing evolution flow tube...")
@@ -233,7 +233,7 @@ def compute_evolution(evolver):
 #! [create_analyser]
 def create_analyser(evolver):
     # Create a ReachabilityAnalyser object
-    analyser=HybridReachabilityAnalyser(evolver)
+    analyser = HybridReachabilityAnalyser(evolver)
 
     #  Set the analyser configuration
     analyser.configuration().set_maximum_grid_fineness(6)
@@ -248,19 +248,19 @@ def create_analyser(evolver):
 #! [compute_reachability]
 def compute_reachability(analyser):
     # Re-introduce the shared system variables required for the initial set
-    aperture=RealVariable("aperture")
-    height=RealVariable("height")
+    aperture = RealVariable("aperture")
+    height = RealVariable("height")
 
-    valve=StringVariable("valve")
-    controller=StringVariable("controller")
+    valve = StringVariable("valve")
+    controller = StringVariable("controller")
 
-    opened=String("opened")
-    rising=String("rising")
+    opened = String("opened")
+    rising = String("rising")
 
     # Define the initial set
-    initial_set=HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
+    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
     print("Initial set:",initial_set)
-    final_time=HybridTime(Real(exact(30.0)),5)
+    final_time = HybridTime(Real(exact(30.0)),5)
     print("Final time:",final_time)
 
     # Compute over-approximation to finite-time reachable set using upper semantics.
@@ -283,7 +283,7 @@ def compute_reachability(analyser):
 #! [main]
 if __name__ == '__main__':
     # Create the composed automaton
-    watertank_system=get_system()
+    watertank_system = get_system()
 
     # Print the system description on the command line
     print("System: ",watertank_system)

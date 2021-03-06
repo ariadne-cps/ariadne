@@ -48,8 +48,11 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_hidden_single_print());
         ARIADNE_TEST_CALL(test_shown_call_function_with_entrance_and_exit());
         ARIADNE_TEST_CALL(test_hide_call_function_with_entrance_and_exit());
+        ARIADNE_TEST_CALL(test_indents_based_on_level());
         ARIADNE_TEST_CALL(test_dark_theme());
         ARIADNE_TEST_CALL(test_light_theme());
+        ARIADNE_TEST_CALL(test_handles_multiline_output());
+        ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
         return 0;
     }
 
@@ -79,6 +82,32 @@ class TestLogging {
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
         ARIADNE_LOG_RUN_AT(1,sample_function());
         ARIADNE_LOG_PRINTLN("This is again a call on level 1");
+    }
+
+    Void test_indents_based_on_level() {
+        Logger::configuration().set_verbosity(2);
+        Logger::configuration().set_indents_based_on_level(true);
+        ARIADNE_LOG_PRINTLN("Call at level 1");
+        ARIADNE_LOG_PRINTLN_AT(1,"Call at level 2");
+        Logger::configuration().set_indents_based_on_level(false);
+        ARIADNE_LOG_PRINTLN("Call at level 1");
+        ARIADNE_LOG_PRINTLN_AT(1,"Call at level 2");
+    }
+
+    Void test_handles_multiline_output() {
+        Logger::configuration().set_verbosity(2);
+        Logger::configuration().set_handles_multiline_output(true);
+        ARIADNE_LOG_PRINTLN("This is a very long string for this test that will most definitely be longer than just one line, at least if the number of columns in the terminal is not excessively large, but this should suffice I believe. Just to be sure, let's add some more characters to the line and the result should get into a second line.");
+        Logger::configuration().set_handles_multiline_output(false);
+        ARIADNE_LOG_PRINTLN("This is a very long string for this test that will most definitely be longer than just one line, at least if the number of columns in the terminal is not excessively large, but this should suffice I believe. Just to be sure, let's add some more characters to the line and the result should get into a second line.");
+    }
+
+    Void test_discards_newlines_and_indentation() {
+        Logger::configuration().set_verbosity(2);
+        Logger::configuration().set_discards_newlines_and_indentation(true);
+        ARIADNE_LOG_PRINTLN("This text should just be in a single line \n       with no extra whitespaces.");
+        Logger::configuration().set_discards_newlines_and_indentation(false);
+        ARIADNE_LOG_PRINTLN("This text should be in two lines\n          where the second one starts several whitespaces in.");
     }
 
     Void test_dark_theme() {

@@ -11,8 +11,6 @@ add_library(${LIBRARY_NAME} OBJECT
     reachability_analyser.cpp
 )
 
-cotire(${LIBRARY_NAME} CONFIGURATIONS None)
-
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
     target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
 endforeach()

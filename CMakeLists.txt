@@ -70,8 +70,6 @@ endif()
 enable_testing()
 include(CTest)
 
-include(cotire)
-
 include(UseDoxygen OPTIONAL)
 
 include(CheckTypeSize)

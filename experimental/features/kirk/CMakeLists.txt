@@ -8,7 +8,6 @@ endif()
 
 if (${EXTERNAL_SRC})
     add_library(ariadne-external SHARED ${EXTERNAL_SRC})
-    cotire(ariadne-external CONFIGURATIONS None)
     foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
         target_compile_options(ariadne-external PUBLIC -W${WARN})
     endforeach()

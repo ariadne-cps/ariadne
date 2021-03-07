@@ -59,7 +59,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr gmp cairo
+        brew install ninja gcc@10 python3 mpfr cairo
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
         sudo easy_install pip
         sudo pip3 install --upgrade pip

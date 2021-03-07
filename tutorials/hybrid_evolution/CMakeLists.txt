@@ -10,12 +10,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 20)
 
 # Find Ariadne and other dynamic library dependencies
-find_package(GMP REQUIRED)
 find_package(MPFR REQUIRED)
 find_package(Ariadne REQUIRED)
 
 # Add the headers to the includes
-include_directories(SYSTEM ${GMP_INCLUDES} ${MPFR_INCLUDES} ${ARIADNE_INCLUDE_DIRS})
+include_directories(SYSTEM ${MPFR_INCLUDES} ${ARIADNE_INCLUDE_DIRS})
 
 # Set the executable along with the required source files
 add_executable(hybrid_evolution_tutorial hybrid_evolution_tutorial.cpp)

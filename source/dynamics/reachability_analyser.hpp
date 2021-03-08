@@ -90,6 +90,7 @@ template<class SYS> class ReachabilityAnalyser
     using typename Interface::RegularSetInterfaceType;
     using typename Interface::RegularLocatedSetInterfaceType;
     using typename Interface::SetApproximationType;
+    using typename Interface::TerminationType;
     using typename Interface::SafetyCertificateType;
 
     typedef typename Interface::EnclosureType EnclosureType;
@@ -136,17 +137,17 @@ template<class SYS> class ReachabilityAnalyser
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
     virtual StorageType
     lower_evolve(const OvertSetInterfaceType& initial_set,
-                 const TimeType& steps) const override;
+                 const TerminationType& termination) const override;
 
     //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
     virtual Pair<StorageType,StorageType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
-                       const TimeType& time) const override;
+                       const TerminationType& termination) const override;
 
     //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
     virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set,
-                const TimeType& time) const override;
+                const TerminationType& termination) const override;
 
     //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
     virtual StorageType
@@ -155,17 +156,17 @@ template<class SYS> class ReachabilityAnalyser
     //! \brief Compute an upper-approximation to the set obtained by evolving the system starting in \a initial_set up to \a time.
     virtual StorageType
     upper_evolve(const CompactSetInterfaceType& initial_set,
-                 const TimeType& time) const override;
+                 const TerminationType& termination) const override;
 
     //! \brief Compute upper-approximations to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
     virtual Pair<StorageType,StorageType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
-                       const TimeType& time) const override;
+                       const TerminationType& termination) const override;
 
     //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set up to \a time.
     virtual StorageType
     upper_reach(const CompactSetInterfaceType& initial_set,
-                const TimeType& time) const override;
+                const TerminationType& termination) const override;
 
 
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
@@ -181,14 +182,14 @@ template<class SYS> class ReachabilityAnalyser
   protected:
     // Helper functions for operators on lists of sets.
     Pair<StorageType,StorageType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
-            const TimeType& time, const Nat accuracy, ListSet<EnclosureType>& evolve_enclosures,
+            const TerminationType& termination, const Nat accuracy, ListSet<EnclosureType>& evolve_enclosures,
             Semantics semantics, const EvolverType& evolver) const;
-    StorageType _upper_reach(const StorageType& set, const TimeType& time,
+    StorageType _upper_reach(const StorageType& set, const TerminationType& termination,
             const Nat accuracy, const EvolverType& evolver) const;
-    StorageType _upper_evolve(const StorageType& set, const TimeType& time,
+    StorageType _upper_evolve(const StorageType& set, const TerminationType& termination,
             const Nat accuracy, const EvolverType& evolver) const;
     Void _adjoin_upper_reach_evolve(StorageType& reach_set, StorageType& final_set,
-                                    const StorageType& set, const TimeType& time,
+                                    const StorageType& set, const TerminationType& termination,
                                     const Nat accuracy, const EvolverType& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
     Void _checked_restriction(StorageType& set, const StorageType& bounding) const;

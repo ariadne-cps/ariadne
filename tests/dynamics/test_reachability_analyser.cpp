@@ -40,6 +40,11 @@
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_automaton.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
+
 #include "../test.hpp"
 
 using namespace std;
@@ -245,7 +250,7 @@ class TestReachabilityAnalyser
     }
 
     Void test() {
-
+        test_hybrid(); return;
         ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
         ARIADNE_TEST_CALL(test_lower_reach_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
@@ -256,6 +261,24 @@ class TestReachabilityAnalyser
         ARIADNE_TEST_CALL(test_verify_safety());
     }
 
+    Void test_hybrid() {
+        HybridAutomaton system;
+        DiscreteLocation location;
+        RealVariable x("x");
+        system.new_mode(location,{dot(x)=-x});
+
+        GeneralHybridEvolver evolver(system);
+        HybridReachabilityAnalyser reachability_analyser(evolver);
+
+        HybridSet initial_set(location,{x.in(1.0_dy,2.0_dy)},{});
+
+        HybridTime termination(5.0_x,3);
+//        reachability_analyser.configuration().set_lock_to_grid_time(HybridTime(1.0_x,1));
+        reachability_analyser.configuration().set_lock_to_grid_time(1.0);
+        reachability_analyser.configuration().set_lock_to_grid_steps(0);
+        reachability_analyser.upper_evolve(initial_set,termination);
+        //        analyser.upper_evolve(initial_set,termination);
+    }
 };
 
 

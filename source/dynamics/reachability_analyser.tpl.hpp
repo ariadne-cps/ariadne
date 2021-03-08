@@ -86,7 +86,7 @@ clone() const
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
-                     const TimeType& time,
+                     const TerminationType& termination,
                      const Nat accuracy,
                      ListSet<EnclosureType>& evolve_enclosures,
                      Semantics semantics,
@@ -102,7 +102,7 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
         ListSet<EnclosureType> current_reach_enclosures;
         ListSet<EnclosureType> current_evolve_enclosures;
 
-        make_lpair(current_reach_enclosures,current_evolve_enclosures) = evolver.reach_evolve(initial_enclosure,time,semantics);
+        make_lpair(current_reach_enclosures,current_evolve_enclosures) = evolver.reach_evolve(initial_enclosure,termination,semantics);
 
         for(auto enclosure : current_reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
@@ -127,7 +127,7 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_reach(const StorageType& set,
-             const TimeType& time,
+             const TerminationType& termination,
              const Nat accuracy,
              const EvolverType& evolver) const
     -> StorageType
@@ -138,7 +138,7 @@ _upper_reach(const StorageType& set,
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,Semantics::UPPER);
+        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,termination,Semantics::UPPER);
         for(auto enclosure : reach) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -150,7 +150,7 @@ _upper_reach(const StorageType& set,
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_evolve(const StorageType& set,
-              const TimeType& time,
+              const TerminationType& termination,
               const Nat accuracy,
               const EvolverType& evolver) const
     -> StorageType
@@ -161,7 +161,7 @@ _upper_evolve(const StorageType& set,
     for(auto cell : cells) {
         ARIADNE_LOG_PRINTLN_AT(1,"Evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,Semantics::UPPER);
+        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,termination,Semantics::UPPER);
         for(auto enclosure : final) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -176,7 +176,7 @@ ReachabilityAnalyser<SYS>::
 _adjoin_upper_reach_evolve(StorageType& reach_cells,
                            StorageType& evolve_cells,
                            const StorageType& set,
-                           const TimeType& time,
+                           const TerminationType& termination,
                            const Nat accuracy,
                            const EvolverType& evolver) const
 {
@@ -192,7 +192,7 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,Semantics::UPPER);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
         ARIADNE_LOG_PRINTLN_AT(1,"computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.");
 
         for(auto enclosure : reach_enclosures) {
@@ -212,7 +212,7 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 lower_evolve(const OvertSetInterfaceType& initial_set,
-             const TimeType& time) const
+             const TerminationType& termination) const
     -> StorageType
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -229,7 +229,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,Semantics::LOWER);
+        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,termination,Semantics::LOWER);
         for(auto enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(final_cells,grid_fineness);
         }
@@ -242,7 +242,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 lower_reach(const OvertSetInterfaceType& initial_set,
-            const TimeType& time) const
+            const TerminationType& termination) const
     -> StorageType
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -260,7 +260,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,Semantics::LOWER);
+        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,termination,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,grid_fineness);
         }
@@ -272,7 +272,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 lower_reach_evolve(const OvertSetInterfaceType& initial_set,
-                   const TimeType& time) const
+                   const TerminationType& termination) const
     -> Pair<StorageType,StorageType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -295,7 +295,7 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,Semantics::LOWER);
+        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,termination,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach,grid_fineness);
         }
@@ -395,11 +395,10 @@ inline Natural compute_time_steps(Real time, Real lock_to_grid_time) {
     return cast_positive(round(time/lock_to_grid_time));
 }
 
-
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 upper_evolve(const CompactSetInterfaceType& initial_set,
-             const TimeType& time) const
+             const TerminationType& termination) const
     -> StorageType
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -429,11 +428,11 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
 }
 
 
-
+/*
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 upper_reach(const CompactSetInterfaceType& initial_set,
-            const TimeType& time) const
+            const TerminationType& termination) const
     -> StorageType
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -481,13 +480,14 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG_PRINTLN("final_reach size = "<<reach_cells.size());
     return reach_cells;
 }
+*/
 
 
-
+/*
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 upper_reach_evolve(const CompactSetInterfaceType& initial_set,
-                   const TimeType& time) const
+                   const TerminationType& termination) const
     -> Pair<StorageType,StorageType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -529,6 +529,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG_PRINTLN("evolve="<<evolve_cells);
     return std::make_pair(reach_cells,evolve_cells);
 }
+*/
 
 
 template<class SYS> auto

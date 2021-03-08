@@ -29,7 +29,7 @@
 #ifndef ARIADNE_STANDARD_HPP
 #define ARIADNE_STANDARD_HPP
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -42,7 +42,7 @@
 
 #include <stdint.h>
 
-#include "../utility/macros.hpp"
-#include "../utility/metaprogramming.hpp"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
 
 #endif

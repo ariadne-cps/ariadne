@@ -1,4 +1,6 @@
-add_library(ariadne-dynamics OBJECT
+set(LIBRARY_NAME ariadne-dynamics)
+
+add_library(${LIBRARY_NAME} OBJECT
     enclosure.cpp
     orbit.cpp
     inclusion_vector_field.cpp
@@ -9,8 +11,10 @@ add_library(ariadne-dynamics OBJECT
     reachability_analyser.cpp
 )
 
-cotire(ariadne-dynamics CONFIGURATIONS None)
+foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
+    target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
+endforeach()
 
 if(COVERAGE)
-    target_link_libraries(ariadne-dynamics PUBLIC coverage_config)
+    target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)
 endif()

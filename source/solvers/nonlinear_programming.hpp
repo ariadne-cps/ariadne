@@ -29,11 +29,11 @@
 #ifndef ARIADNE_NONLINEAR_PROGRAMMING_HPP
 #define ARIADNE_NONLINEAR_PROGRAMMING_HPP
 
-#include "../utility/declarations.hpp"
+#include "utility/declarations.hpp"
 
-#include "../output/logging.hpp"
-#include "../numeric/numeric.hpp"
-#include "../utility/tuple.hpp"
+#include "output/logging.hpp"
+#include "numeric/numeric.hpp"
+#include "utility/tuple.hpp"
 
 
 namespace Ariadne {
@@ -106,7 +106,6 @@ class OptimiserInterface {
 //! Common routines for nonlinear minimisation
 class OptimiserBase
     : public OptimiserInterface
-    , public Loggable
 {
   protected:
     static const FloatDPValue zero;

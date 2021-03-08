@@ -22,21 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <map>
 
-#include "../utility/macros.hpp"
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/space.hpp"
-#include "../function/function.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_space.hpp"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
 
-#include "../hybrid/hybrid_automaton-composite.hpp"
+#include "hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 
@@ -101,7 +101,6 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 } // namespace
 
 // Declare functions from hybrid_automaton.cpp
-List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()
@@ -139,7 +138,7 @@ typedef Map<DiscreteLocation,DiscreteMode>::ConstIterator ModesConstIterator;
 Bool
 CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
     DiscreteLocation automaton_location;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         if(!this->_components[i].has_partial_mode(location)) {
             return false;
         }
@@ -151,7 +150,7 @@ CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
 
 Bool
 CompositeHybridAutomaton::has_partial_mode(DiscreteLocation location) const {
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         if(!this->_components[i].has_partial_mode(location)) {
             return false;
         }
@@ -162,7 +161,7 @@ CompositeHybridAutomaton::has_partial_mode(DiscreteLocation location) const {
 Bool
 CompositeHybridAutomaton::has_invariant(DiscreteLocation location, DiscreteEvent event) const
 {
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_invariant(location,event)) {
             return true;
         }
@@ -173,7 +172,7 @@ CompositeHybridAutomaton::has_invariant(DiscreteLocation location, DiscreteEvent
 Bool
 CompositeHybridAutomaton::has_guard(DiscreteLocation location, DiscreteEvent event) const
 {
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_guard(location,event)) {
             return true;
         }
@@ -183,7 +182,7 @@ CompositeHybridAutomaton::has_guard(DiscreteLocation location, DiscreteEvent eve
 
 Bool
 CompositeHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const {
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         if(this->_components[i].has_transition(source,event)) {
             return true;
         }
@@ -295,7 +294,7 @@ CompositeHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent ev
 DiscreteLocation
 CompositeHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         DiscreteMode const& component_mode = this->_components[i].mode(source);
         if(component_mode._targets.has_key(event)) {
             result.adjoin(component_mode._targets[event]);
@@ -345,7 +344,7 @@ CompositeHybridAutomaton::variables(DiscreteLocation location) const {
 List<RealVariable>
 CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         ARIADNE_ASSERT(this->_components[i].has_partial_mode(location));
         // Append state space in mode i; note that this automatically checks whether a variable is already present
         result.append(this->_components[i].state_variables(location));
@@ -356,7 +355,7 @@ CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
 List<RealVariable>
 CompositeHybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     List<RealVariable> result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         // Append state space in mode i; note that this automatically checks whether a variable is already present
         result.append(this->_components[i].auxiliary_variables(location));
     }
@@ -367,7 +366,7 @@ CompositeHybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
 List<RealAssignment>
 CompositeHybridAutomaton::auxiliary_assignments(DiscreteLocation location) const {
     List<RealAssignment> result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].auxiliary_assignments(location));
     }
     return result;
@@ -382,7 +381,7 @@ CompositeHybridAutomaton::sorted_auxiliary_assignments(DiscreteLocation location
 List<DottedRealAssignment>
 CompositeHybridAutomaton::dynamic_assignments(DiscreteLocation location) const {
     List<DottedRealAssignment> result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].dynamic_assignments(location));
     }
     // No need to sort result since dotted variables cannot appear in the right-hand side (currently)
@@ -393,7 +392,7 @@ CompositeHybridAutomaton::dynamic_assignments(DiscreteLocation location) const {
 List<PrimedRealAssignment>
 CompositeHybridAutomaton::reset_assignments(DiscreteLocation location, DiscreteEvent event) const {
     List<PrimedRealAssignment> result;
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         result.append(this->_components[i].reset_assignments(location,event));
     }
     return result;
@@ -403,7 +402,7 @@ CompositeHybridAutomaton::reset_assignments(DiscreteLocation location, DiscreteE
 ContinuousPredicate
 CompositeHybridAutomaton::invariant_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].invariant_predicate(location,event);
         if(is_constant(result,true) || is_constant(guard,false)) { result=guard; }
         else if(is_constant(guard,true) || is_constant(result,false)) { }
@@ -416,7 +415,7 @@ CompositeHybridAutomaton::invariant_predicate(DiscreteLocation location, Discret
 ContinuousPredicate
 CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEvent event) const {
     ContinuousPredicate result(true);
-    for(Nat i=0; i!=this->_components.size(); ++i) {
+    for(SizeType i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].guard_predicate(location,event);
         if(is_constant(result,true) || is_constant(guard,false)) { result=guard; }
         else if(is_constant(guard,true) || is_constant(result,false)) { }
@@ -486,7 +485,7 @@ CompositeHybridAutomaton::_write(OutputStream& os) const {
 OutputStream&
 VerboseCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << "CompositeHybridAutomaton(\n";
-    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+    for(SizeType i = 0; i < ha.number_of_components(); ++i) {
         os << ha.component(i);
     }
     return os << "\n)\n";
@@ -496,8 +495,8 @@ OutputStream&
 CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << ha.name() << " {\n";
     Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
-    HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());
-    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+    HybridAutomaton::set_default_writer(CompactHybridAutomatonWriter());
+    for(SizeType i = 0; i < ha.number_of_components(); ++i) {
         os << ha.component(i);
     }
     HybridAutomaton::set_default_writer(previous_writer);
@@ -755,6 +754,7 @@ CompositeHybridAutomaton::discrete_reachability(DiscreteLocation initial_locatio
 Set<DiscreteLocation>
 CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& initial_locations) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
     const CompositeHybridAutomaton& automaton=*this;
 
     Set<DiscreteLocation> reached=initial_locations;
@@ -771,34 +771,25 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
     while(!working.empty()) {
         ++step;
         for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
-            ARIADNE_LOG(5,"new_mode\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"new_mode");
             DiscreteLocation location=*source_iter;
-            ARIADNE_LOG(5,"  mode: "<<location<<":\n");
-            ARIADNE_LOG(7,"      auxiliary="<<automaton.auxiliary_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.auxiliary_function(location)<<"\n");
-            ARIADNE_LOG(7,"      dynamic="<<automaton.dynamic_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.dynamic_function(location)<<"\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"mode: "<<location<<":");
+            ARIADNE_LOG_PRINTLN_AT(2,"auxiliary="<<automaton.auxiliary_assignments(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"function="<<automaton.auxiliary_function(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"dynamic="<<automaton.dynamic_assignments(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"function="<<automaton.dynamic_function(location));
 
-/*
-            Map<DiscreteEvent,ContinuousPredicate> invariants=automaton.invariant_predicates(location);
-            for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator invariant_iter=invariants.begin();
-                    invariant_iter!=invariants.end(); ++invariant_iter) {
-                ARIADNE_LOG(7,"    invariant: "<<invariant_iter->second<<"\n");
-                ARIADNE_LOG(7,"      function: "<<automaton.invariant_function(location,invariant_iter->first)<<"\n");
-                ARIADNE_LOG(7,"        action: "<<invariant_iter->first<<"\n");
-            }
-*/
             Set<DiscreteEvent> events=automaton.events(location);
-            ARIADNE_LOG(5,"  events: "<<events<<"\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"events: "<<events);
             for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
-                ARIADNE_LOG(7,"    event:"<<event<<"\n");
+                ARIADNE_LOG_PRINTLN_AT(2,"event:"<<event);
                 DiscreteLocation target=automaton.target(location,event);
-                ARIADNE_LOG(7,"    transition: "<<event<<" -> "<<target<<"\n");
-                ARIADNE_LOG(7,"        reset="<<automaton.reset_assignments(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.reset_function(location,event)<<"\n");
-                ARIADNE_LOG(7,"        guard="<<automaton.guard_predicate(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.guard_function(location,event)<<"\n");
+                ARIADNE_LOG_PRINTLN_AT(3,"transition: "<<event<<" -> "<<target);
+                ARIADNE_LOG_PRINTLN_AT(3,"reset="<<automaton.reset_assignments(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"function="<<automaton.reset_function(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"guard="<<automaton.guard_predicate(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"function="<<automaton.guard_function(location,event));
                 if(!reached.contains(target)) {
                     found.insert(target);
                     reached.insert(target);
@@ -807,7 +798,7 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
            }
 
         }
-        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"step "<<step<<" found: "<<found);
         working.clear();
         working.swap(found);
     }

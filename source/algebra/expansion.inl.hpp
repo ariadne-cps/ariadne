@@ -28,9 +28,9 @@
 #include "multi_index.hpp"
 #include "expansion.hpp"
 
-#include "../utility/typedefs.hpp"
-#include "../utility/iterator.hpp"
-#include "../utility/macros.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/iterator.hpp"
+#include "utility/macros.hpp"
 
 namespace Ariadne {
 
@@ -244,6 +244,7 @@ template<class I, class X> class ExpansionValueReference {
     operator const X& () const { return _e.get(_a); }
     //operator X& () { return _e.at(_a); }
     ExpansionValueReference<I,X>& operator=(const X& x) { _e.at(_a)=x; return *this; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> ExpansionValueReference<I,X>& operator=(const Y& y) { _e.at(_a)=y; return *this; }
     ExpansionValueReference<I,X>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
     ExpansionValueReference<I,X>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
     ExpansionValueReference<I,X>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
@@ -256,7 +257,7 @@ Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
     : Expansion(other.argument_size(),X(other.zero_coefficient(),prs...))
 {
     MultiIndex a(other.argument_size());
-    X x;
+    X x=_zero_coefficient;
     for(auto iter=other.begin();
         iter!=other.end(); ++iter)
     {

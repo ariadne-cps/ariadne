@@ -1,7 +1,7 @@
-include_directories(${PYTHON_INCLUDE_DIRS})
+include_directories(${Python3_INCLUDE_DIRS})
 include_directories(SYSTEM ${PYBIND11_INCLUDE_DIR})
 
-message(STATUS "You will have to use the Python ${PYTHON_VERSION_MAJOR} interpreter to import Ariadne correctly.")
+message(STATUS "Please note that you need to use the Python 3 interpreter to import pyariadne correctly.")
 
 add_library(pyariadne-numeric-submodule-obj OBJECT
     numeric_submodule.cpp
@@ -22,7 +22,7 @@ add_library(pyariadne-algebra-module-obj OBJECT
     algebra_module.cpp
 )
 
-add_library(pyariadne-extra-submodule-obj OBJECT  
+add_library(pyariadne-extra-submodule-obj OBJECT
     symbolic_submodule.cpp
     optimization_submodule.cpp
     function_submodule.cpp
@@ -32,15 +32,21 @@ add_library(pyariadne-extra-submodule-obj OBJECT
     system_submodule.cpp
     evolution_submodule.cpp
     graphics_submodule.cpp
+    hybrid_submodule.cpp
 )
 
 add_library(pyariadne-module-obj OBJECT
     ariadne_module.cpp
 )
 
-cotire(pyariadne-numeric-submodule-obj CONFIGURATIONS None)
-cotire(pyariadne-algebra-submodule-obj CONFIGURATIONS None)
-cotire(pyariadne-extra-submodule-obj CONFIGURATIONS None)
+foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
+    target_compile_options(pyariadne-numeric-submodule-obj PUBLIC -W${WARN})
+    target_compile_options(pyariadne-numeric-module-obj PUBLIC -W${WARN})
+    target_compile_options(pyariadne-algebra-submodule-obj PUBLIC -W${WARN})
+    target_compile_options(pyariadne-algebra-module-obj PUBLIC -W${WARN})
+    target_compile_options(pyariadne-extra-submodule-obj PUBLIC -W${WARN})
+    target_compile_options(pyariadne-module-obj PUBLIC -W${WARN})
+endforeach()
 
 if(COVERAGE)
     target_link_libraries(pyariadne-numeric-submodule-obj PUBLIC coverage_config)

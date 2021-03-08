@@ -35,13 +35,13 @@
 #include <map>
 #include <memory>
 
-#include "../numeric/numeric.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_enclosure.hpp"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
 
-#include "../dynamics/orbit.hpp"
+#include "dynamics/orbit.hpp"
 
 namespace Ariadne {
 
@@ -76,7 +76,7 @@ class Orbit<HybridApproximatePoint>
     Orbit(const HybridApproximatePoint& hpt);
     Orbit(List<HybridInterpolatedCurve> crvs);
     Void insert(HybridTime ht, const HybridApproximatePoint& hpt);
-    Nat size() const;
+    SizeType size() const;
     const InterpolatedCurve& curve(Nat m) const;
     const List<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;

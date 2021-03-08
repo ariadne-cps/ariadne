@@ -1,7 +1,7 @@
 /***************************************************************************
  *            riccati.hpp
  *
- *  Copyright 2013-14  Pieter Collins
+ *  Copyright  2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -25,9 +25,9 @@
  *  \brief Solution of algebraic Riccati equations.
  */
 
-#include "../numeric/float-user.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/symmetric_matrix.hpp"
+#include "numeric/float-user.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/symmetric_matrix.hpp"
 
 namespace Ariadne {
 

@@ -27,17 +27,17 @@
  */
 
 
-#include "../utility/stdlib.hpp"
+#include "utility/stdlib.hpp"
 
 #include "dyadic.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/string.hpp"
-#include "../numeric/logical.hpp"
-#include "../numeric/twoexp.hpp"
-#include "../numeric/builtin.hpp"
-#include "../numeric/rational.hpp"
-#include "../numeric/extended.hpp"
+#include "utility/macros.hpp"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/twoexp.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/extended.hpp"
 
 #include <limits>
 
@@ -225,15 +225,31 @@ Dyadic operator-(TwoExp y) {
     return -Dyadic(y);
 }
 
-Dyadic operator*(Dyadic x, TwoExp w) {
-    const int q=w.exponent();
+Dyadic operator*(Dyadic x, TwoExp y) {
+    const int q=y.exponent();
     if(q>=0) { mpf_mul_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(q)); }
     else { mpf_div_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(-q)); }
     return x;
 }
 
-Dyadic operator/(Dyadic x, TwoExp w) {
-    return x*rec(w);
+Dyadic operator/(Dyadic x, TwoExp y) {
+    return x*rec(y);
+}
+
+Dyadic operator/(Int n, Two) {
+    return Dyadic(n,1u);
+}
+
+Dyadic operator/(Integer z, Two) {
+    return Dyadic(z,1u);
+}
+
+Dyadic operator/(ExactDouble d, Two) {
+    return Dyadic(d)/two;
+}
+
+Dyadic operator/(Dyadic x, Two) {
+    return x*(two^(-1));
 }
 
 OutputStream& operator<<(OutputStream& os, TwoExp w) {
@@ -436,6 +452,5 @@ inline RoundExact opposite(RoundExact) { return RoundExact(); }
 template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
 
 template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
-
 
 } // namespace Ariadne

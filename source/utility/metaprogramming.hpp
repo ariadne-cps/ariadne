@@ -70,6 +70,7 @@ template<class T, class U> using IsConvertible = std::is_convertible<T,U>;
 template<class T, class... U> using IsConstructible = std::is_constructible<T,U...>;
 template<class T, class U> using IsStrictlyConstructible = And<IsConstructible<T,U>,Not<IsConvertible<U,T>>>;
 template<class T> using IsDefaultConstructible = std::is_default_constructible<T>;
+template<class T> using IsCopyConstructible = std::is_copy_constructible<T>;
 template<class T, class U> using IsAssignable = std::is_assignable<T,U>;
 template<class T, class U> using IsBaseOf = std::is_base_of<T,U>;
 //template<class F, class... AS> using IsInvocable = std::is_invokable<F,AS...>;
@@ -95,7 +96,10 @@ template<class T> struct IndexOf<T> { };
 // Returns N, if T is the Nth element of the class list TS...
 template<class T, class... TS> constexpr decltype(auto) index_of() { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
 
-template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
+template<class F, class... AS> using InvokeResult = typename std::invoke_result<F,AS...>::type;
+template<class SIG> struct ResultOfTrait;
+template<class F, class... AS> struct ResultOfTrait<F(AS...)> { typedef typename std::invoke_result<F,AS...>::type Type; };
+template<class SIG> using ResultOf = typename ResultOfTrait<SIG>::Type;
 
 template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<T2,T3>>;
 
@@ -128,6 +132,10 @@ template<class T1, class T2, class... Tps> struct Second { typedef T2 Type; };
 
 template<class X> using RemoveConst = typename std::remove_const<X>::type;
 template<class X> using RemoveReference = typename std::remove_reference<X>::type;
+
+template<class L> using LogicalNegationType = decltype(!declval<L>());
+template<class L1, class L2=L1> using LogicalConjunctionType = decltype(declval<L1>() && declval<L2>());
+template<class L1, class L2=L1> using LogicalDisjunctionType = decltype(declval<L1>() || declval<L2>());
 
 template<class X> using NegationType = decltype(-declval<X>());
 template<class X1, class X2=X1> using SumType = decltype(declval<X1>()+declval<X2>());
@@ -179,6 +187,8 @@ template<class A1, class A2> struct CanDivide {
     static const bool value = decltype(test<A1,A2>(1))::value;
 };
 
+template<class F, class... AS> using InvokeResult = typename std::invoke_result<F,AS...>::type;
+//template<class F, class... AS> using IsInvocable = std::is_invokable<F,AS...>;
 //template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class F, class... AS> struct IsInvocable;
 template<class R, class F, class... AS> struct IsInvocableReturning;

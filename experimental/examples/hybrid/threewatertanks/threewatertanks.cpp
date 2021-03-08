@@ -38,7 +38,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Declare the shared system variables
     RealVariable aperture1("aperture1");
@@ -76,11 +76,10 @@ Int main(Int argc, const char* argv[])
                                                      valve1_automaton,valve2_automaton,valve3_automaton,
                                                      controller1_automaton,controller2_automaton,controller3_automaton});
 
-    cout << threewatertanks_system << endl;
+    ARIADNE_LOG_PRINTLN(threewatertanks_system);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(threewatertanks_system);
-    evolver.verbosity = evolver_verbosity;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05);
@@ -89,20 +88,19 @@ Int main(Int argc, const char* argv[])
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    std::cout << "Computing evolution... " << std::flush;
+    ARIADNE_LOG_PRINTLN("Computing evolution... ");
     HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},
                           {height1==7,height2==7,height3==7});
-    HybridTime evolution_time(35.0,15);
+    HybridTime evolution_time(35.0_x,15);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
 
-    std::cout << "Plotting trajectory... "<<std::flush;
+    ARIADNE_LOG_PRINTLN("Plotting trajectory... ");
     Axes2d time_height1_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height1<=9.1);
     plot("watertank-t-height1",time_height1_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d time_height2_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height2<=9.1);
     plot("watertank-t-height2",time_height2_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d time_height3_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height3<=12.1);
-    plot("watertank-t-height3",time_height3_axes, Colour(0.0,0.5,1.0), orbit);    
+    plot("watertank-t-height3",time_height3_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height1_aperture1_axes(-0.1,height1,9.1, -0.1,aperture1,1.1);
     plot("watertank-height1-aperture1",height1_aperture1_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height2_aperture2_axes(-0.1,height2,9.1, -0.1,aperture2,1.1);
@@ -111,5 +109,4 @@ Int main(Int argc, const char* argv[])
     plot("watertank-height1-height2",height1_height2_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d aperture1_aperture2_axes(-0.1,aperture1,1.1, -0.1,aperture2,1.1);
     plot("watertank-aperture1-aperture2",aperture1_aperture2_axes, Colour(0.0,0.5,1.0), orbit);
-    std::cout << "done." << std::endl;
 }

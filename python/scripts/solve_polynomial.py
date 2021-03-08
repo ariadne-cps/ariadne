@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################################
 #            solve_polynomial.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright  2009  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ for y in s: print y,p(y)                # prints the solutions and evaluates p a
 
 """
 
-from ariadne import Box,Polynomial,PolynomialFunction,TaylorFunction,KrawczykSolver,variables
+from pyariadne import Box,Polynomial,PolynomialFunction,TaylorFunction,KrawczykSolver,variables
 from sys import exit
 import __builtin__
 

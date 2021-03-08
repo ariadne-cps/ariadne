@@ -34,27 +34,27 @@
 
 #include <memory>
 
-#include "../utility/macros.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/container.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../geometry/curve.hpp"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "utility/declarations.hpp"
+#include "utility/container.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
+#include "geometry/curve.hpp"
 
-#include "../symbolic/expression_set.hpp"
+#include "symbolic/expression_set.hpp"
 
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/hybrid_set_interface.hpp"
-#include "../hybrid/hybrid_expression_set.hpp"
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_grid.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_grid.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
-#include "../hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -124,9 +124,9 @@ class HybridGridTreePaving
     Void restrict(const HybridGridTreePaving& hgts);
     Void restrict_to_extent(Nat extent);
     Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
-    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat fineness);
-    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
-    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness);
+    Void adjoin_inner_approximation(const EffectiveHybridSetInterface& hs, const Nat fineness);
+    Void adjoin_lower_approximation(const EffectiveHybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
+    Void adjoin_outer_approximation(const EffectiveHybridCompactSetInterface& hs, const Nat fineness);
     Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
     template<class S> Void adjoin_outer_approximation(DiscreteLocation q, const S& s);
 
@@ -141,7 +141,7 @@ class HybridGridTreePaving
     friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
     friend Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
   public:
-    //@{ \name HybridSetInterface methods
+    //!@{ \name HybridSetInterface methods
     HybridGridTreePaving* clone() const { return new HybridGridTreePaving(*this); }
     HybridSpace space() const { return this->grid().space(); }
     ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
@@ -151,7 +151,7 @@ class HybridGridTreePaving
     HybridUpperBoxes bounding_box() const;
     OutputStream& _write(OutputStream& os) const;
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
-    //@}
+    //!@}
   public:
     friend OutputStream& operator<<(OutputStream& os, const HybridGridTreePaving& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }
@@ -162,7 +162,7 @@ class HybridGridTreePaving
 template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
     this->_provide_location(q).adjoin_outer_approximation(s); }
 
-inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
+inline HybridGridTreePaving inner_approximation(const EffectiveHybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
     HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
 
 

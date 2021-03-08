@@ -33,6 +33,7 @@
 
 #include "paradigm.hpp"
 #include "number.hpp"
+#include "bits.hpp"
 #include "rounding.hpp"
 #include "sign.hpp"
 #include <mpfr.h>
@@ -41,42 +42,50 @@ namespace Ariadne {
 
 /************ FloatMP ********************************************************/
 
-struct NoInit { };
+struct NoInit;
 struct RawPtr { };
+struct DefaultTag;
 
 struct RoundUpward; struct RoundDownward;
 
 typedef mpfr_rnd_t RoundingModeMP;
+
+typedef std::make_unsigned<mpfr_prec_t>::type unsigned_mpfr_prec_t;
 
 //! \ingroup NumericModule
 //! \brief The precision of a FloatMP object.
 //! \relates FloatMP
 class MultiplePrecision {
     mpfr_prec_t prec;
-    typedef std::make_unsigned<mpfr_prec_t>::type unsigned_mpfr_prec_t;
   public:
     typedef unsigned_mpfr_prec_t Type;
     //! \brief
+//    explicit MultiplePrecision(DefaultTag const&);
+    //! \brief
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
+    //! \brief
+    explicit MultiplePrecision(Bits pr) : prec(static_cast<mpfr_prec_t>(pr)) { }
     //! \brief
     explicit MultiplePrecision(DoublePrecision const& pr) : prec(53u) { }
     //! \brief The number of binary digits of precision requested.
     unsigned_mpfr_prec_t bits() const { return static_cast<unsigned_mpfr_prec_t>(prec); }
     operator mpfr_prec_t () const { return prec; }
-    //! \brief .
+    //! \brief <p/>
     friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::max(mp1.bits(),mp2.bits()))); }
-    //! \brief .
+    //! \brief <p/>
     friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::min(mp1.bits(),mp2.bits()))); }
-    //! \brief .
+    //! \brief <p/>
     friend Bool operator==(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()==mp2.bits(); }
-    //! \brief .
+    //! \brief <p/>
     friend Bool operator<=(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()<=mp2.bits(); }
-    //! \brief .
+    //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
 using MP = MultiplePrecision;
 inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision multiple_precision(Bits pr) { return MultiplePrecision(pr); }
 inline MultiplePrecision precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision precision(Bits pr) { return MultiplePrecision(pr); }
 inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 
 //! \ingroup FltMPSubModule
@@ -120,15 +129,17 @@ class FloatMP {
     static FloatMP min(PrecisionType);
   public:
     ~FloatMP();
-    explicit FloatMP(NoInit);
-    explicit FloatMP(PrecisionType, NoInit);
-    explicit FloatMP(const mpfr_t, RawPtr);
+    explicit FloatMP(NoInit const&);
+    explicit FloatMP(PrecisionType, NoInit const&);
+    explicit FloatMP(const mpfr_t, RawPtr const&);
 
+  private:
     FloatMP();
-    FloatMP(double);
-
+    explicit FloatMP(double);
+  public:
     explicit FloatMP(PrecisionType);
-    explicit FloatMP(double, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatMP(N n, PrecisionType pr)
+        : FloatMP(ExactDouble(n),pr) { }
     explicit FloatMP(FloatDP const&, PrecisionType);
     explicit FloatMP(ExactDouble const& x, PrecisionType);
     explicit FloatMP(TwoExp const& x, PrecisionType);
@@ -137,10 +148,15 @@ class FloatMP {
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);
 
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP& operator=(N n) {
+        return this->operator=(ExactDouble(n)); }
+    FloatMP& operator=(const ExactDouble& x);
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(double, RoundingModeType, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP(N n, RoundingModeType rnd, PrecisionType pr)
+        : FloatMP(ExactDouble(n),rnd,pr) { }
+    FloatMP(ExactDouble, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
 
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
@@ -248,8 +264,43 @@ class FloatMP {
     friend FloatMP mul(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
     friend FloatMP div(RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2);
 
-    friend FloatMP add(RoundUpward rnd, FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, FloatDP const& x2);
+    // Correctly rounded arithmetic
+    friend FloatMP sqr(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP rec(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP add(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP fma(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend FloatMP pow(CurrentRoundingMode, FloatMP const& x, Int n);
+    friend FloatMP sqrt(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP exp(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP log(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP sin(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP cos(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP tan(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP asin(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP acos(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP atan(CurrentRoundingMode, FloatMP const& x);
+    static FloatMP pi(CurrentRoundingMode, MultiplePrecision pr);
+
+    friend FloatMP add(CurrentRoundingMode rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP div(CurrentRoundingMode rnd, FloatMP const& x1, FloatDP const& x2);
+    friend FloatMP add(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
+    friend FloatMP div(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
+
+    friend FloatMP add(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP div(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
+    friend FloatMP add(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP div(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
 
     // Correctly rounded arithmetic
     friend FloatMP sqr(FloatMP const& x);
@@ -271,34 +322,6 @@ class FloatMP {
     friend FloatMP atan(FloatMP const& x);
     static FloatMP pi(MultiplePrecision pr);
 
-    // Correctly rounded operators
-    friend FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
-
-    // Correctly rounded  mixed operators
-    friend FloatMP operator+(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator-(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator*(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator/(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator+(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator-(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator*(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator/(Dbl x1, FloatMP const& x2);
-
-    friend FloatMP operator+(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator-(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator*(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator/(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator+(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator-(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator*(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator/(FloatDP const& x1, FloatMP const& x2);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
     friend Bool operator==(FloatMP const& x1, FloatMP const& x2);
@@ -393,6 +416,8 @@ class FloatMP {
 template<class R, class A> R integer_cast(const A& a);
 template<> inline Int integer_cast(const FloatMP& x) { return static_cast<Int>(x.get_d()); }
 template<> inline Nat integer_cast(const FloatMP& x) { return static_cast<Nat>(x.get_d()); }
+
+//inline MultiplePrecision::MultiplePrecision(DefaultTag const&) : MultiplePrecision(FloatMP::get_default_precision()) { }
 
 
 } // namespace Ariadne

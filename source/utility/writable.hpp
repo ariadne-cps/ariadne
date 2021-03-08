@@ -59,7 +59,8 @@ template<class T> EnableIf<IsWritable<T>,OutputStream&> operator<<(OutputStream&
 }
 
 template<class T> class Writer;
-template<class T> class WritableTemporary;
+template<class T> class WriterInterface;
+template<class T, class W=WriterInterface<T>> class WritableTemporary;
 
 template<class T> class WriterInterface {
   public:
@@ -79,13 +80,13 @@ template<class T> class Writer : public Handle<WriterInterface<T>> {
 };
 
 
-template<class T> class WritableTemporary {
+template<class T, class W> class WritableTemporary {
   private:
-    WriterInterface<T> const& _w; T const& _t;
-    WritableTemporary(WriterInterface<T> const& w, T const& t) : _w(w), _t(t) { }
-    friend class WriterInterface<T>; friend class Writer<T>;
+    W const& _w; T const& _t;
+    WritableTemporary(W const& w, T const& t) : _w(w), _t(t) { }
+    friend W; friend class Writer<T>;
   public:
-    friend OutputStream& operator<<(OutputStream& os, WritableTemporary<T> const& wt) { return wt._w._write(os,wt._t); }
+    friend OutputStream& operator<<(OutputStream& os, WritableTemporary<T,W> const& wt) { return wt._w._write(os,wt._t); }
 };
 
 template<class T> WritableTemporary<T> WriterInterface<T>::operator() (T const& t) const {

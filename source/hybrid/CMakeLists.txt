@@ -1,4 +1,6 @@
-add_library(ariadne-hybrid OBJECT
+set(LIBRARY_NAME ariadne-hybrid)
+
+add_library(${LIBRARY_NAME} OBJECT
     discrete_location.cpp
     hybrid_set.cpp
     hybrid_paving.cpp
@@ -12,8 +14,10 @@ add_library(ariadne-hybrid OBJECT
     hybrid_graphics.cpp
 )
 
-cotire(ariadne-hybrid CONFIGURATIONS None)
+foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
+    target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
+endforeach()
 
 if(COVERAGE)
-    target_link_libraries(ariadne-hybrid PUBLIC coverage_config)
+    target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)
 endif()

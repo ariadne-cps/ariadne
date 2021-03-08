@@ -119,10 +119,10 @@ Void TestPaving::test_branch() const {
     BinaryWord word3("1100");
     BinaryWord word4("1110");
 
-    ExactBoxType box1{{0.0,0.25},{0.25,0.5}};
-    ExactBoxType box2{{0.25,0.5},{0.0,0.25}};
-    ExactBoxType box3{{0.5,0.75},{0.5,0.75}};
-    ExactBoxType box4{{0.75,1.0},{0.5,0.75}};
+    ExactBoxType box1{{0.0_x,0.25_x},{0.25_x,0.5_x}};
+    ExactBoxType box2{{0.25_x,0.5_x},{0.0_x,0.25_x}};
+    ExactBoxType box3{{0.5_x,0.75_x},{0.5_x,0.75_x}};
+    ExactBoxType box4{{0.75_x,1.0_x},{0.5_x,0.75_x}};
 
     paving.adjoin(GridCell(grid,height,word1));
     paving.adjoin(GridCell(grid,height,word2));
@@ -205,7 +205,7 @@ Void TestPaving::test_geometry() const {
     ARIADNE_TEST_EQUAL(intersection(paving_handle1,paving_handle2),paving_handle1);
     ARIADNE_TEST_EQUAL(difference(paving_handle2,paving_handle1),paving_handle4);
 
-    ARIADNE_TEST_SAME(geometric_union(paving_handle1,paving_handle3).bounding_box(),UpperBoxType({{0.25,1.0},{0.0,0.75}}));
+    ARIADNE_TEST_SAME(geometric_union(paving_handle1,paving_handle3).bounding_box(),UpperBoxType({{0.25_x,1.0_x},{0.0_x,0.75_x}}));
 
 
 }
@@ -216,7 +216,7 @@ Void TestPaving::test_approximation() const {
     PavingInterface& paving = grid_set;
 
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
-    EffectiveConstrainedImageSet set(RealBox({{-1.0,1.0},{-1.0,1.0}}));
+    EffectiveConstrainedImageSet set(RealBox({{-1.0_x,1.0_x},{-1.0_x,1.0_x}}));
     set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
     Nat depth = 2;
     paving.adjoin_outer_approximation(set,depth);

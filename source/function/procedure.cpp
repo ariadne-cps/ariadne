@@ -25,10 +25,10 @@
 #include "procedure.hpp"
 #include "procedure.tpl.hpp"
 
-#include "../algebra/differential.hpp"
-#include "../algebra/fixed_univariate_differential.hpp"
-#include "../algebra/graded.hpp"
-#include "../function/function.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
+#include "algebra/graded.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 
@@ -58,8 +58,8 @@ template FloatDPBounds hessian(Procedure<ValidatedNumber> const& f, Vector<Float
 
 inline
 Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {
-    r.set_lower(max(r.lower(),x.lower()));
-    r.set_upper(min(r.upper(),x.upper()));
+    r.set_lower_bound(max(r.lower_bound(),x.lower_bound()));
+    r.set_upper_bound(min(r.upper_bound(),x.upper_bound()));
 }
 
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactIntervalType codom)

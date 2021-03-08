@@ -22,13 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../config.hpp"
+#include "numeric/numeric.hpp"
+#include "config.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/affine.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/affine.hpp"
 
 namespace Ariadne {
 

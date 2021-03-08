@@ -24,10 +24,10 @@
 
 #include "formula.hpp"
 
-#include "../symbolic/templates.tpl.hpp"
+#include "symbolic/templates.tpl.hpp"
 #include "formula.tpl.hpp"
 
-#include "../numeric/operators.tpl.hpp"
+#include "numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 
@@ -132,7 +132,7 @@ template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
                 case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
                 case OperatorKind::COMPARISON: return os << "(" << f.arg1() << symbol(f.op()) << f.arg2() << ")";
                 case OperatorKind::SCALAR: return os << "(" << f.cnst() << symbol(f.op()) << f.arg() << ")";
-                default: ARIADNE_FAIL_MSG("Cannot output formula with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
+                default: ARIADNE_FAIL_MSG("Cannot output formula with operator "<<f.op()<<" of kind "<<f.kind());
             }
     }
 */
@@ -143,7 +143,6 @@ template class Formula<ValidatedNumber>;
 template class Formula<EffectiveNumber>;
 template class Formula<ExactNumber>;
 
-template class Formula<FloatDPApproximation>;
 template class Formula<Real>;
 
 template Formula<EffectiveNumber> simplify(Formula<EffectiveNumber> const&);

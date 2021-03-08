@@ -34,17 +34,18 @@
 #include <list>
 #include <iostream>
 
-#include "../utility/declarations.hpp"
-#include "../output/logging.hpp"
-#include "../utility/container.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../function/affine.hpp"
-#include "../function/affine_model.hpp"
-#include "../function/constraint.hpp"
+#include "utility/declarations.hpp"
+#include "output/logging.hpp"
+#include "utility/container.hpp"
+#include "output/graphics_interface.hpp"
+#include "function/affine.hpp"
+#include "function/affine_model.hpp"
+#include "function/constraint.hpp"
 
 namespace Ariadne {
 
-template<class X> struct LinearProgram;
+template<class X> struct RigorousNumericsTraits;
+template<class X, class XX=typename RigorousNumericsTraits<X>::Type> struct LinearProgram;
 
 class Grid;
 class PavingInterface;
@@ -95,9 +96,8 @@ template<class F> ValidatedAffineModelConstraint<F> operator==(const ValidatedAf
 //! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
 //! \sa ValidatedConstrainedImageSet
 class ValidatedAffineConstrainedImageSet
-    : public virtual ValidatedCompactSetInterface
+    : public virtual ValidatedEuclideanCompactSetInterface
 	, public virtual DrawableInterface
-	, public Loggable
 {
     ExactBoxType  _domain;
     Vector<ValidatedAffineModelDP> _space_models;
@@ -147,16 +147,16 @@ class ValidatedAffineConstrainedImageSet
     GridTreePaving outer_approximation(const Grid& g, Nat fineness) const;
     Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
-    List<Point2d> boundary(Nat xc, Nat yc) const;
+    List<Point2d> boundary(SizeType xc, SizeType yc) const;
 
     virtual Void draw(CanvasInterface&, const Projection2d& p) const;
     virtual OutputStream& _write(OutputStream& os) const;
 
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
-    Void construct_linear_program(LinearProgram<FloatDP>& lp) const;
-    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness);
-    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness);
+    Void construct_linear_program(LinearProgram<FloatDPValue,FloatDPBounds>& lp) const;
+    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDPValue,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
+    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDPValue,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {

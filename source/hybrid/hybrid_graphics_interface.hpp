@@ -29,7 +29,7 @@
 #ifndef ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -49,6 +49,8 @@ Projection2d projection(const RealSpace& spc, const Variables2d& variables);
 //! \brief Base interface for drawable objects
 class HybridDrawableInterface {
   public:
+    //! brief The type of data needed to project to a 2d image.
+    typedef Variables2d ProjectionType;
     //! brief Virtual destructor.
     virtual ~HybridDrawableInterface() = default;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.

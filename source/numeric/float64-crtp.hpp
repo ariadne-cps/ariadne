@@ -31,10 +31,10 @@
 #ifndef ARIADNE_FLOAT64_HPP
 #define ARIADNE_FLOAT64_HPP
 
-#include "../utility/module.hpp"
-#include "../utility/metaprogramming.hpp"
-#include "../numeric/paradigm.hpp"
-#include "../numeric/sign.hpp"
+#include "utility/module.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/paradigm.hpp"
+#include "numeric/sign.hpp"
 
 namespace Ariadne {
 

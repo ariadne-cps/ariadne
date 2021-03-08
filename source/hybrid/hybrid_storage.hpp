@@ -34,27 +34,35 @@
 #include <list>
 #include <iostream>
 
-#include "../output/logging.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "output/logging.hpp"
+#include "utility/declarations.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../hybrid/hybrid_graphics_interface.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
-#include "../geometry/box.hpp"
-#include "../dynamics/storage.hpp"
+#include "geometry/box.hpp"
+#include "dynamics/storage.hpp"
 
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> struct LinearProgram;
 
 class Storage;
 class GridTreePaving;
+
+// FIXME: This class should not be necessary, as indexing HybridStorage should give a reference to a Euclidean/Labelled storage
+class HybridStorageElementReference {
+    HybridStorage* _hstorage; DiscreteLocation const& _loc;
+  public:
+    HybridStorageElementReference(HybridStorage* hstorage, DiscreteLocation const& loc) : _hstorage(hstorage), _loc(loc) { }
+    inline operator const LabelledStorage () const;
+    inline Void clear();
+};
 
 //! \ingroup HybridSetSubModule
 //! \brief A class representing global reach or evolve set for a hybrid system.
@@ -62,17 +70,19 @@ class HybridStorage
     : public HybridDrawableInterface
 {
     HybridGridTreePaving  _state_set;
-    HybridAutomatonInterface const* _system_ptr;
+    SharedPointer<HybridAutomatonInterface const> _system_ptr;
+  public:
   public:
     typedef HybridGrid GridType;
+    typedef HybridGridTreePaving PavingType;
 
-    HybridStorage(HybridGrid const& hg) : _state_set(hg), _system_ptr(nullptr) { }
-    HybridStorage(HybridGridTreePaving const& hgtp) : _state_set(hgtp), _system_ptr(nullptr) { }
+    HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(sys.clone()) { }
+    HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(sys.clone()) { }
 
-    Void set_system(HybridAutomatonInterface const& system) { _system_ptr=&system; }
-    HybridAutomatonInterface const* auxiliary() const { return this->_system_ptr; }
-    EffectiveVectorMultivariateFunction auxiliary(DiscreteLocation const& loc) const {
-        return this->_system_ptr->auxiliary_function(loc); }
+    HybridAutomatonInterface const& system() const { return *this->_system_ptr; }
+    HybridAutomatonInterface const& auxiliary_data() const { return *this->_system_ptr; }
+    LabelledMapping auxiliary_mapping(DiscreteLocation const& loc) const {
+        return LabelledMapping(this->_system_ptr->continuous_state_space(loc),this->_system_ptr->auxiliary_function(loc),this->_system_ptr->continuous_auxiliary_space(loc)); }
 
     HybridGrid grid() const { return this->_state_set.grid(); }
     HybridGridTreePaving& state_set() {
@@ -97,9 +107,9 @@ class HybridStorage
     friend Bool intersect(HybridStorage const& set1, HybridStorage const& set2) {
         return intersect(set1._state_set,set2._state_set); }
 
-    Void adjoin_lower_approximation(HybridOvertSetInterface const& set, Nat extent, Nat fineness) {
+    Void adjoin_lower_approximation(EffectiveHybridOvertSetInterface const& set, Nat extent, Nat fineness) {
         this->_state_set.adjoin_lower_approximation(set,extent,fineness); }
-    Void adjoin_outer_approximation(HybridCompactSetInterface const& set, Nat fineness) {
+    Void adjoin_outer_approximation(EffectiveHybridCompactSetInterface const& set, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(set,fineness); }
     Void adjoin_outer_approximation(HybridExactBoxes const& bx, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(bx,fineness); }
@@ -108,8 +118,9 @@ class HybridStorage
     Void mince(Nat fineness) { this->_state_set.mince(fineness); }
     Void recombine() { this->_state_set.recombine(); }
 
-    Storage operator[] (DiscreteLocation const& loc) const {
-        return Storage(this->_state_set[loc],this->auxiliary(loc)); }
+    const LabelledStorage operator[] (DiscreteLocation const& loc) const;
+    HybridStorageElementReference operator[] (DiscreteLocation const& loc) {
+        return HybridStorageElementReference{this,loc}; }
 
     virtual Void draw(CanvasInterface& cnv, const Set<DiscreteLocation>& locs, const Variables2d& vars) const override {
         if (this->_system_ptr!=nullptr) {
@@ -120,9 +131,15 @@ class HybridStorage
     }
 
     friend OutputStream& operator<<(OutputStream& os, HybridStorage const& set) {
-        return os << "HybridStorage(" << set._state_set << ", " << set._system_ptr << "\n"; }
+        return os << "HybridStorage(" << set._state_set << ", system_ptr=" << set._system_ptr << ", system.name()=" << set._system_ptr->name() << ")"; }
+
+    friend class HybridStorageElementReference;
 };
 
+//HybridStorageElementReference::operator const Storage () const { return (*_hstorage)[_loc]; }
+HybridStorageElementReference::operator const LabelledStorage () const {
+    return LabelledStorage(_hstorage->_state_set[_loc],_hstorage->auxiliary_mapping(_loc)); }
+Void HybridStorageElementReference::clear() { return _hstorage->state_set()[_loc].clear(); }
 
 } // namespace Ariadne
 

@@ -31,7 +31,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Declare the shared system variables
     RealVariable aperture1("aperture1");
@@ -54,7 +54,6 @@ Int main(Int argc, const char* argv[])
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(twowatertanks_system);
-    evolver.verbosity = evolver_verbosity;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05);
@@ -65,7 +64,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution... " << std::flush;
     HybridSet initial_set({valve|fully1},{height1==2,height2==4});
-    HybridTime evolution_time(200.0,16);
+    HybridTime evolution_time(200.0_x,16);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 

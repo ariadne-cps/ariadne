@@ -90,7 +90,7 @@ template<class X> void TestComplex<X>::test_concept() {
 
 template<class X> void TestComplex<X>::test_conversions() {
 //    auto one_dp=one.get(dp);
-//    auto pi_mp=pi(MultiplePrecision(2));
+//    auto pi_mp=pi(MultiplePrecision(2_bits));
 //    ARIADNE_TEST_PRINT(one_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
 
@@ -158,7 +158,8 @@ template<class X> void TestComplex<X>::test_transcendental() {
 template<class X> void TestComplex<X>::test_polar() {
     Dyadic eps{FloatDP::eps(dp)};
     Dyadic tol=16*eps;
-    Complex<X> i=Complex<X>(0,1);
+    X zero=nul(_one);
+    Complex<X> i=Complex<X>(zero,_one);
     ARIADNE_TEST_WITHIN(arg(exp(-3*i)),-3,tol);
     ARIADNE_TEST_WITHIN(arg(exp(-2*i)),-2,tol);
     ARIADNE_TEST_WITHIN(arg(exp(-1*i)),-1,tol);
@@ -191,7 +192,7 @@ void test_fourier() {
     auto pr=dp;
 
     SizeType N=32;
-    Array<X> cs(N,[&](SizeType i){if (i==0) return X(1); return X(1)/(i*i);});
+    Array<X> cs(N,[&](SizeType i){if (i==0) return X(1,pr); return X(1,pr)/(i*i);});
 
     using Constants::i;
 

@@ -34,23 +34,22 @@
 #include <list>
 #include <iostream>
 
-#include "../output/logging.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "output/logging.hpp"
+#include "utility/declarations.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
-#include "../geometry/box.hpp"
-#include "../dynamics/enclosure.hpp"
+#include "geometry/box.hpp"
+#include "dynamics/enclosure.hpp"
 
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> struct LinearProgram;
 
 class Enclosure;
 class Grid;
@@ -64,14 +63,13 @@ template<class L, class R> class Assignment;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
 template<class X> class Space;
 typedef Space<Real> RealSpace;
+typedef VariablesBox<UpperIntervalType> VariablesUpperBoxType;
 template<class ES> class ListSet;
 template<class ES> class HybridListSet;
 
 class HybridEnclosure;
 class HybridStorage;
 template<> class ListSet<HybridEnclosure>;
-
-enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
 //! \ingroup HybridSetSubModule
 //! \brief A class representing an enclosure for a hybrid evolution.
@@ -112,7 +110,6 @@ enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, 
 //! replace it with the constraint \f$g_e(x_i)\leq 0\f$.
 class HybridEnclosure
     : public HybridDrawableInterface
-    , public Loggable
 {
     friend class SimpleHybridEvolver;
     friend class ConstraintHybridEvolver;
@@ -121,29 +118,30 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
-    List<RealVariable> _state_space;
-    List<RealVariable> _auxiliary_space;
-    Enclosure _set;
-    List<EnclosureVariableType> _variables;
+    LabelledEnclosure _set;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
+    //! \brief An empty enclosure.
+    HybridEnclosure(EnclosureConfiguration const& config);
     //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
-    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelDPFactoryInterface& fac);
+    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelDPFactory& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelDPFactoryInterface& factory);
+    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelDPFactory& factory);
 
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModelDPFactory& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModelDPFactory& fac);
 
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelDPFactory& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelDPFactoryInterface& fac);
-    //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelDPFactory& fac);
+    //! \brief An enclosure constructed from a location \a q, and a (timed, labelled) enclosure \a es.
     explicit HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
+    //! \brief An enclosure constructed from a location \a q, and a (timed, labelled) enclosure \a es.
+    explicit HybridEnclosure(const DiscreteLocation& q, const LabelledEnclosure& es);
 
     //! \brief Destructor.
     ~HybridEnclosure();
@@ -163,7 +161,7 @@ class HybridEnclosure
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
     //! \brief The factory used to create functions.
-    const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
+    const ValidatedFunctionModelDPFactory& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -215,7 +213,9 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
+    Void apply_reset(DiscreteEvent e, DiscreteLocation q,
+                     RealSpace s, const ValidatedVectorMultivariateFunction& r,
+                     RealSpace v, const EffectiveVectorMultivariateFunction& a);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon)\f$ and \f$\tau'(s)=\tau(s)+\epsilon\f$
     Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$
@@ -256,9 +256,9 @@ class HybridEnclosure
     Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    Void new_parameter(ExactIntervalType ivl, EnclosureVariableType);
+    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    Void new_variable(ExactIntervalType ivl, EnclosureVariableType);
+    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
@@ -288,6 +288,8 @@ class HybridEnclosure
     ValidatedLowerKleenean is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
     ValidatedKleenean satisfies(EffectiveConstraint c) const;
+    //! \brief A list of the kind of quantity each parameter represents.
+    List<EnclosureVariableKind> const& variable_kinds() const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridUpperBoxType bounding_box() const;
@@ -304,7 +306,7 @@ class HybridEnclosure
     Void adjoin_outer_approximation_to(HybridStorage& paving, Nat fineness) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
-    Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
+    Pair<HybridEnclosure,HybridEnclosure> split(SizeType dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
 
@@ -369,8 +371,9 @@ class ListSet<HybridEnclosure>
             this->adjoin(*iter); } }
     Void append(const HybridEnclosure& hes) { this->_list.append(hes); }
     SizeType size() const { return _list.size(); }
-    const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
+    const HybridEnclosure& operator[](SizeType i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
+    VariablesUpperBoxType bounding_box() const;
     Void reduce() { for(auto& set : _list ) { set.reduce(); } }
     Void clear() { this->_list.clear(); }
     HybridEnclosure& front() { return this->_list.front(); }
@@ -382,18 +385,18 @@ class ListSet<HybridEnclosure>
     ConstIterator begin() const { return _list.begin(); }
     ConstIterator end() const { return _list.end(); }
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-        for(Nat i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
+        for(SizeType i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
     friend ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
         ValidatedLowerKleenean result=true; for(auto iter=set.begin(); iter!=set.end(); ++iter) { result = result && inside(*iter,bx); } return result; }
     friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
         return os << hls._list; };
-    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
+    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int dpth);
   private:
     List<HybridEnclosure> _list;
 };
 
-HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
+HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat dpth);
 
 
 } // namespace Ariadne

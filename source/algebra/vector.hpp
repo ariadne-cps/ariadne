@@ -31,11 +31,11 @@
 
 #define SIMPLE_VECTOR_OPERATORS
 
-#include "../utility/macros.hpp"
-#include "../utility/metaprogramming.hpp"
-#include "../utility/container.hpp"
-#include "../utility/declarations.hpp"
-#include "../numeric/builtin.hpp"
+#include "utility/macros.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/container.hpp"
+#include "utility/declarations.hpp"
+#include "numeric/builtin.hpp"
 
 #include "range.hpp"
 #include "slice.hpp"
@@ -43,7 +43,7 @@
 namespace Ariadne {
 
 //! \ingroup LinearAlgebraModule
-//! A scalar of type \a X; defined as an alias of \a X.
+//! \brief A scalar of type \a X; defined as an synonym (typedef) of \a X.
 template<class X> using Scalar = X;
 
 /************ Vector *********************************************************/
@@ -89,6 +89,21 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
+template<class PR> PR make_default_precision();
+
+template<class X> X make_zero() {
+    if constexpr (IsDefaultConstructible<X>::value) { return X(); }
+    else if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        if constexpr (IsConstructible<X,PR>::value) {
+            PR pr=make_default_precision<PR>(); return X(pr);
+        } else {
+            abort();
+        }
+    }
+    else { abort(); }
+}
+
 template<class X> class VectorRange;
 
 #ifdef SIMPLE_VECTOR_OPERATORS
@@ -123,6 +138,8 @@ struct DeclareVectorOperations { };
 template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
+struct DefaultTag { };
+
 //! \ingroup LinearAlgebraModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
@@ -134,7 +151,7 @@ class Vector
 {
     Array<X> _ary;
   public:
-    //@{
+    //!@{
     //! \name Type definitions
 
     //! \brief The type used to index the elements.
@@ -144,15 +161,13 @@ class Vector
     typedef X ScalarType;
     typedef X ValueType;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Default constructor constructs a vector with no elements.
     Vector() : _ary() { }
-    //! \brief Construct a vector of size \a n, with elements initialised to the default value.
-    explicit Vector(SizeType n) : _ary(n,X()) { static_assert(IsDefaultConstructible<X>::value,""); }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
     //! Construct a vector from parameters of \a X.
@@ -166,9 +181,15 @@ class Vector
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
     //! \brief Convert from an initializer list of generic type and a precision parameter.
-    template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy> Vector(InitializerList<double> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy> Vector(InitializerList<Real> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
+    template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy>
+        Vector(InitializerList<Real> const& lst, PR pr);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy, DisableIf<IsConstructible<X,Real,PRS...>> =dummy>
+        Vector(InitializerList<ExactDouble> const& lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        Vector(InitializerList<Dbl> const& lst, PRS... prs);
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy>
+        Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr);
+
     //! \brief Convert from an array of generic type and a precision parameter.
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
     //! \brief Convert from an vector of generic type and a precision parameter.
@@ -194,29 +215,34 @@ class Vector
     Vector(Vector<X>&& v) = default;
     //! \brief Copy assignment.
     Vector<X>& operator=(const Vector<X>& v) = default;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Static constructors
 
     //! \brief The zero vector of size \a n.
-    static Vector<X> zero(SizeType n) { return Vector<X>(n,static_cast<X>(0)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> zero(SizeType n, PRS... prs) { return Vector<X>(n,X(0u,prs...)); }
     //! \brief The vector of size \a n with all entries equal to one.
-    static Vector<X> one(SizeType n) { return Vector<X>(n,static_cast<X>(1)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> one(SizeType n, PRS... prs) { return Vector<X>(n,X(1u,prs...)); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Vector<X> unit(SizeType n,SizeType i) {
-        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0)); result[i]=static_cast<X>(1); return result; }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> unit(SizeType n, SizeType i, PRS... prs) {
+        ARIADNE_ASSERT(i<n); Vector<X> result(n,X(0u,prs...)); result[i]=X(1u,prs...); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Array< Vector<X> > basis(SizeType n) {
-        Array< Vector<X> > result(n); for(Nat i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
-    //@}
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Array< Vector<X> > basis(SizeType n, PRS... prs) {
+        Array<Vector<X>> result(n,Vector<X>(n,prs...));
+        for(SizeType i=0; i!=n; ++i) { result[i]=unit(n,i,prs...); } return result; }
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
 
     //! \brief Resize to hold \a n elements.
     //! The previous values need not be preserved, and the new values need not be initialised.
-    Void resize(SizeType n) { this->_ary.resize(n); }
+    Void resize(SizeType n) { this->_ary.resize(n,this->zero_element()); }
     //! \brief The number of elements of the vector.
     SizeType size() const { return this->_ary.size(); }
     //! \brief A reference to the value stored in the \a i<sup>th</sup> element.
@@ -236,10 +262,12 @@ class Vector
     //! \brief Constant range subscripting operator.
     VectorRange<const Vector<X>> operator[](Range rng) const;
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
-    const X zero_element() const { if(this->size()!=0) { return create_zero((*this)[0]); } else { return X(); } }
+    const X zero_element() const {
+        if(this->size()!=0) { return create_zero((*this)[0]); }
+        else { return make_zero<X>(); } }
     //! \brief The raw data array.
     Array<X> const& array() const { return _ary; }
-    //@}
+    //!@}
 
 #ifdef DOXYGEN
     //! \brief Equality operator.
@@ -386,7 +414,7 @@ struct ProvideVectorOperations {
     }
 
     template<class X> friend decltype(mag(declval<X>())) sup_norm(const Vector<X>& v) {
-        decltype(mag(declval<X>())) r=abs(v.zero_element());
+        decltype(mag(declval<X>())) r=mag(v.zero_element());
         for(SizeType i=0; i!=v.size(); ++i) {
             r=max(r,mag(v[i]));
         }
@@ -723,9 +751,9 @@ template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
     return r;
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>>>
-Vector<X>::Vector(InitializerList<double> const& lst, PR pr)
-    : _ary(Array<ExactDouble>(Array<double>(lst)),pr)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>, DisableIf<IsConstructible<X,Real,PRS...>>>
+Vector<X>::Vector(InitializerList<ExactDouble> const& lst, PRS... prs)
+    : _ary(Array<ExactDouble>(lst),prs...)
 {
 }
 
@@ -735,18 +763,25 @@ Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
 {
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
+template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>>
+Vector<X>::Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr)
     : _ary(lst.size(),X(pr))
 {
     SizeType i=0;
     for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
-        _ary[i]=X(ExactDouble(iter->first),ExactDouble(iter->second),pr); ++i;
+        _ary[i]=X(iter->first,iter->second,pr); ++i;
     }
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Vector<X>::Vector(InitializerList<Dbl> const& lst, PRS... prs)
+    : _ary(Array<Dbl>(lst),prs...)
+{
 }
 
 } // namespace Ariadne
 
-#include "../numeric/float.decl.hpp"
+#include "numeric/float.decl.hpp"
 namespace Ariadne {
 inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }

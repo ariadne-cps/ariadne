@@ -81,8 +81,8 @@ Void TestProcedure::test()
 
 Void TestProcedure::test_construct_from_formula()
 {
-    ApproximateNumber c(2.0);
-    ApproximateFormula o(ApproximateFormula::constant(1.0));
+    ApproximateNumber c(2.0_x);
+    ApproximateFormula o(ApproximateFormula::constant(1.0_x));
     ApproximateFormula x(ApproximateFormula::coordinate(0));
     ApproximateFormula y(ApproximateFormula::coordinate(1));
 
@@ -107,24 +107,24 @@ Void TestProcedure::test_construct_from_formula()
 Void TestProcedure::test_construct_from_expansion()
 {
     {
-        Expansion<MultiIndex,FloatDPApproximation> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} },pr);
+        Expansion<MultiIndex,FloatDPApproximation> e({ {{0,0},1.0_x}, {{1,0},2.0_x}, {{0,2},3.0_x}, {{1,4},4.0_x} },pr);
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
         Procedure<ApproximateNumber> p(e);
         ARIADNE_TEST_PRINT(p);
-        Vector<FloatDPApproximation> x({2.0,3.0},pr);
+        Vector<FloatDPApproximation> x({2.0_x,3.0_x},pr);
         ARIADNE_TEST_PRINT(simple_evaluate(e,x));
         ARIADNE_TEST_PRINT(evaluate(p,x));
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
     {
-        Expansion<MultiIndex,FloatDPApproximation> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} },pr);
+        Expansion<MultiIndex,FloatDPApproximation> e({ {{0,0},1.0_x}, {{1,0},2.0_x}, {{0,1},3.0_x}, {{2,0},4.0_x}, {{1,1},5.0_x}, {{0,2},6.0_x} },pr);
         e.reverse_lexicographic_sort();
         Procedure<ApproximateNumber> p(e);
         ARIADNE_TEST_PRINT(p);
-        Vector<FloatDPApproximation> x({2.0,3.0},pr);
+        Vector<FloatDPApproximation> x({2.0_x,3.0_x},pr);
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 }
@@ -138,15 +138,15 @@ Void TestProcedure::test_evaluate()
     p.new_instruction(Pow(),0ul,2);
     p.new_instruction(Sqr(),1ul);
     p.new_instruction(Add(),2ul,3ul);
-    p.new_constant(9.0);
+    p.new_constant(9.0_x);
     p.new_instruction_scalar(Mul(),0ul,4ul);
     p.new_instruction(Sqrt(),5ul);
     ARIADNE_TEST_PRINT(p);
 
-    Vector<FloatDPApproximation> x({3.0,4.0},pr);
+    Vector<FloatDPApproximation> x({3.0_x,4.0_x},pr);
     ARIADNE_TEST_PRINT(x);
 
-    ARIADNE_TEST_EQUALS(evaluate(p,x),15.0);
+    ARIADNE_TEST_EQUALS(evaluate(p,x),15.0_x);
 }
 
 Void TestProcedure::test_propagate()
@@ -163,7 +163,7 @@ Void TestProcedure::test_propagate()
         p.new_instruction(Sqrt(),5u);
         ARIADNE_TEST_PRINT(p);
 
-        UpperBoxType x=ExactBoxType{ {0.25,2.0}, {0.5,3.0} };
+        UpperBoxType x=ExactBoxType{ {0.25_x,2.0_x}, {0.5_x,3.0_x} };
         ARIADNE_TEST_PRINT(x);
 
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
@@ -179,8 +179,8 @@ Void TestProcedure::test_propagate()
     ARIADNE_TEST_PRINT(ff);
     Vector<ValidatedProcedure> pp(argument_size=2,ff);
     ARIADNE_TEST_PRINT(pp);
-    UpperBoxType xx=ExactBoxType{ {0.125,2.0}, {0.25,3.0} };
-    ExactBoxType cc=ExactBoxType{ {1.0,1.0}, {1.0,1.0} };
+    UpperBoxType xx=ExactBoxType{ {0.125_x,2.0_x}, {0.25_x,3.0_x} };
+    ExactBoxType cc=ExactBoxType{ {1.0_x,1.0_x}, {1.0_x,1.0_x} };
     ARIADNE_TEST_PRINT(xx);
     ARIADNE_TEST_PRINT(evaluate(pp,cast_vector(xx)));
     simple_hull_reduce(xx,pp,cc);

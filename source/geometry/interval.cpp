@@ -23,7 +23,7 @@
  */
 
 #include "interval.hpp"
-#include "../numeric/dyadic.hpp"
+#include "numeric/dyadic.hpp"
 
 namespace Ariadne {
 
@@ -32,7 +32,7 @@ static const uint GEOMETRY_OUTPUT_PLACES = 4;
 template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl) {
     auto places = FloatDPValue::output_places;
     FloatDPValue::output_places=GEOMETRY_OUTPUT_PLACES;
-    os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
+    os << "{" << ivl.lower_bound() << ":" << ivl.upper_bound() << "}";
     FloatDPValue::output_places=places;
     return os;
 }
@@ -41,16 +41,16 @@ Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(upward);
     volatile float min=std::numeric_limits<float>::min();
-    volatile double neg_l=(-ivl.lower()).get_d();
+    volatile double neg_l=(-ivl.lower_bound()).get_d();
     volatile double l=-neg_l;
-    volatile double u=ivl.upper().get_d();
+    volatile double u=ivl.upper_bound().get_d();
     volatile float neg_rl=neg_l;
     volatile float ru=u;
-    if(l==u) { neg_rl+=min; ru+=min; }
-    if(neg_rl<neg_l) { neg_rl+=min; }
-    if(ru<u) { ru+=min; }
+    if(l==u) { neg_rl=neg_rl+min; ru=ru+min; }
+    if(neg_rl<neg_l) { neg_rl=neg_rl+min; }
+    if(ru<u) { ru=ru+min; }
     volatile float rl=-neg_l;
-    Interval<FloatDPValue> res(rl,ru);
+    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
@@ -59,12 +59,12 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(to_nearest);
     volatile float eps=std::numeric_limits<float>::epsilon();
-    volatile double l=ivl.lower().get_d();
-    volatile double u=ivl.upper().get_d();
+    volatile double l=ivl.lower_bound().get_d();
+    volatile double u=ivl.upper_bound().get_d();
     volatile float rl=l;
     volatile float ru=u;
-    if(rl==ru) { rl-=(rl*eps); ru+=(ru*eps); }
-    Interval<FloatDPValue> res(rl,ru);
+    if(rl==ru) { rl=rl-(rl*eps); ru=ru+(ru*eps); }
+    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
@@ -72,14 +72,14 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
 InputStream&
 operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
 {
-    FloatDP l,u;
+    FloatDP l(dp),u(dp);
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(not is.fail());
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    ivl.set(FloatDPValue(l),FloatDPValue(u));
+    ivl.set_bounds(FloatDPValue(l),FloatDPValue(u));
     return is;
 }
 
@@ -88,7 +88,7 @@ template<> FloatDPUpperInterval UpperIntervalFactory<FloatDP>::create(ValidatedN
     return FloatDPUpperInterval(FloatDPBounds(y,this->_precision)); }
 
 FloatDPBounds cast_singleton(FloatDPUpperInterval const& ivl) {
-    return FloatDPBounds(ivl.lower(),ivl.upper()); }
+    return FloatDPBounds(ivl.lower_bound(),ivl.upper_bound()); }
 FloatDPUpperInterval make_interval(FloatDPBounds const& x) {
     return FloatDPUpperInterval(x.lower(),x.upper()); }
 
@@ -130,13 +130,13 @@ FloatDPUpperInterval pow(FloatDPUpperInterval const& ivl, Int n) {
 
 FloatDPUpperInterval sqrt(FloatDPUpperInterval const& ivl) {
     // Defining sqrt(I)=hull{x:x^2 in I}, if I=[a,b] with b>=0, then sqrt(I)=[-sqrt(b),+sqrt(b)]
-    if(ivl.upper().raw()<0) { return FloatDPUpperInterval::empty_interval(); }
-    else { FloatDP u=sqrt(up,ivl.upper().raw()); return FloatDPUpperInterval(-u,+u); } }
+    if(ivl.upper_bound().raw()<0) { return FloatDPUpperInterval::empty_interval(); }
+    else { FloatDP u=sqrt(up,ivl.upper_bound().raw()); return FloatDPUpperInterval(-u,+u); } }
 FloatDPUpperInterval exp(FloatDPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 FloatDPUpperInterval log(FloatDPUpperInterval const& ivl) {
-    if(ivl.upper().raw()<=0) { return FloatDPUpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return FloatDPUpperInterval(-inf,log(up,ivl.upper().raw())); }
+    if(ivl.upper_bound().raw()<=0) { return FloatDPUpperInterval::empty_interval(); }
+    else if(ivl.lower_bound().raw()<=0) { return FloatDPUpperInterval(FloatDP(-inf,dp),log(up,ivl.upper_bound().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
 FloatDPUpperInterval sin(FloatDPUpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }
@@ -159,9 +159,18 @@ ValidatedKleenean eq(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval cons
 ValidatedKleenean lt(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
+template<> Interval<FloatMPUpperBound>::Interval() : Interval(EmptyInterval()) { }
+template<> Interval<FloatMPUpperBound>::Interval(EmptyInterval const&)
+    : Interval(FloatMP::inf(Sign::POSITIVE,FloatMP::get_default_precision()),
+               FloatMP::inf(Sign::NEGATIVE,FloatMP::get_default_precision())) { }
+template<> Interval<FloatMPUpperBound>::Interval(UnitInterval const&)
+    : Interval(FloatMP(-1,FloatMP::get_default_precision()),FloatMP(+1,FloatMP::get_default_precision())) { }
+template<> Interval<FloatMPUpperBound>::Interval(EntireInterval const&)
+    : Interval(FloatMP(-inf,FloatMP::get_default_precision()),FloatMP(+inf,FloatMP::get_default_precision())) { }
+
 
 FloatMPBounds cast_singleton(FloatMPUpperInterval const& ivl) {
-    return FloatMPBounds(ivl.lower(),ivl.upper()); }
+    return FloatMPBounds(ivl.lower_bound(),ivl.upper_bound()); }
 FloatMPUpperInterval make_interval(FloatMPBounds const& x) {
     return FloatMPUpperInterval(x.lower(),x.upper()); }
 
@@ -206,14 +215,15 @@ FloatMPUpperInterval pow(FloatMPUpperInterval const& ivl, Int n) {
 
 FloatMPUpperInterval sqrt(FloatMPUpperInterval const& ivl) {
     // Defining sqrt(I)=hull{x:x^2 in I}, if I=[a,b] with b>=0, then sqrt(I)=[-sqrt(b),+sqrt(b)]
-    if(ivl.upper().raw()<0) { return FloatMPUpperInterval::empty_interval(); }
-    else { FloatMP u=sqrt(up,ivl.upper().raw()); return FloatMPUpperInterval(-u,+u); } }
+    auto pr=ivl.upper_bound().precision(); auto inf_=FloatMP::inf(pr);
+    if(ivl.upper_bound().raw()<0) { return FloatMPUpperInterval(+inf_,-inf_); }
+    else { FloatMP u=sqrt(up,ivl.upper_bound().raw()); return FloatMPUpperInterval(-u,+u); } }
 FloatMPUpperInterval exp(FloatMPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 FloatMPUpperInterval log(FloatMPUpperInterval const& ivl) {
-    auto pr=ivl.upper().precision();
-    if(ivl.upper().raw()<=0) { return FloatMPUpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return FloatMPUpperInterval(FloatMP::inf(Sign::NEGATIVE,pr),log(up,ivl.upper().raw())); }
+    auto pr=ivl.upper_bound().precision(); auto inf_=FloatMP::inf(pr);
+    if(ivl.upper_bound().raw()<=0) { return FloatMPUpperInterval(+inf_,-inf_); }
+    else if(ivl.lower_bound().raw()<=0) { return FloatMPUpperInterval(-inf_,log(up,ivl.upper_bound().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
 FloatMPUpperInterval sin(FloatMPUpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }
@@ -238,9 +248,9 @@ ValidatedKleenean lt(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval cons
 
 
 ApproximateKleenean eq(FloatDPApproximateInterval const& ivl1, FloatDPApproximateInterval const& ivl2) {
-    return ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper(); }
+    return ivl1.lower_bound()==ivl2.lower_bound() && ivl1.upper_bound()==ivl2.upper_bound(); }
 ApproximateKleenean eq(FloatMPApproximateInterval const& ivl1, FloatMPApproximateInterval const& ivl2) {
-    return ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper(); }
+    return ivl1.lower_bound()==ivl2.lower_bound() && ivl1.upper_bound()==ivl2.upper_bound(); }
 
 template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }

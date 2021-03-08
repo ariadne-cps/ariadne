@@ -22,22 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <map>
 
-#include "../utility/macros.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/tuple.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
-#include "../function/function.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_space.hpp"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "utility/tuple.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+#include "function/function.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
 
-#include "../hybrid/hybrid_automaton-restrictive.hpp"
+#include "hybrid/hybrid_automaton-restrictive.hpp"
 
 namespace Ariadne {
 
@@ -488,7 +488,7 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 
 inline Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     Map<RealVariable,RealInterval> res;
-    for(Nat i=0; i!=b.size(); ++i) {
+    for(SizeType i=0; i!=b.size(); ++i) {
         res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
     }
     return res;
@@ -813,7 +813,7 @@ CompositionalHybridAutomaton::_compute_target(DiscreteLocation source, DiscreteE
     for(SizeType i=0; i!=this->_discrete_updates.size(); ++i) {
         if(get_second(this->_discrete_updates[i]) == event && get_first(this->_discrete_updates[i]) == source) {
             DiscreteUpdate const& update = get_third(_discrete_updates[i]);
-            for(Nat j=0; j!=update.size(); ++j) {
+            for(SizeType j=0; j!=update.size(); ++j) {
                 result.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -830,7 +830,7 @@ CompositionalHybridAutomaton::_compute_targets(DiscreteLocation source) const {
             DiscreteEvent const& event = get_second(_discrete_updates[i]);
             DiscreteUpdate const& update = get_third(_discrete_updates[i]);
             DiscreteLocation& target = result[event];
-            for(Nat j=0; j!=update.size(); ++j) {
+            for(SizeType j=0; j!=update.size(); ++j) {
                 target.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -1238,10 +1238,10 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
         ++step;
         for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
             DiscreteLocation location=*source_iter;
-            ARIADNE_LOG(5,"  mode: "<<location<<":\n");
+            ARIADNE_LOG(5,"  mode: "<<location<<":");
 
             Set<DiscreteEvent> events=automaton.guard_events(location);
-            ARIADNE_LOG(5,"    events: "<<events<<"\n");
+            ARIADNE_LOG(5,"    events: "<<events);
             for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
                 ARIADNE_LOG(5,"      transition: "<<event<<" -> ");
@@ -1254,7 +1254,7 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
            }
 
         }
-        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
+        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n");
         working.clear();
         working.swap(found);
     }
@@ -1283,7 +1283,7 @@ CompositionalHybridAutomaton compose(const List<CompositionalHybridAutomaton>& c
 
     // Introduce nonjumping constraints for discrete variables
     for(SizeType i=0; i!=components.size(); ++i) {
-        for(Nat j=0; j!=component[i]._dotted_assignments.size(); ++j) {
+        for(SizeType j=0; j!=component[i]._dotted_assignments.size(); ++j) {
             Tuple<DiscretePredicate,DottedRealAssignment> dynamic = _components[i]._dotted_assignments[j];
             this->_nonjumping[i]._append(dynamic.first,dynamic.second.left_hand_side());
         }

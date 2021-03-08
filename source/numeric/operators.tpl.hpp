@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
+#include "utility/standard.hpp"
 
-#include "../numeric/operators.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 

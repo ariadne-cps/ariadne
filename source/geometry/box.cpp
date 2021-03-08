@@ -27,16 +27,16 @@
  */
 
 
-#include "../numeric/module.hpp"
-#include "../function/function.hpp"
-#include "../function/taylor_model.hpp"
+#include "numeric/module.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
 
 #include "box.hpp"
 #include "box.tpl.hpp"
 
-#include "../function/formula.hpp"
+#include "function/formula.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -64,16 +64,17 @@ UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction c
 template class Box<Interval<Real>>;
 template class Box<Interval<FloatDPValue>>;
 template class Box<Interval<FloatDPUpperBound>>;
+template class Box<Interval<FloatDPLowerBound>>;
 template class Box<Interval<FloatDPApproximation>>;
 
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
-    Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
+    SizeType ix=p.x_coordinate(); SizeType iy=p.y_coordinate();
     ApproximateIntervalType x=bx[ix]; ApproximateIntervalType y=bx[iy];
-    c.move_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
-    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.lower()));
-    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.upper()));
-    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.upper()));
-    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
+    c.move_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
+    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.lower_bound()));
+    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.upper_bound()));
+    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.upper_bound()));
+    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
     c.fill();
 }
 
@@ -101,7 +102,7 @@ ExactBoxType make_box(const String& str)
     }
 
     ExactBoxType bx(vec.size());
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         bx[i]=vec[i];
     }
     return bx;
@@ -115,14 +116,14 @@ template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n,
 template<class BX> void make_vertices_up(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         v.push_back(pt);
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         v.push_back(pt);
     } else {        // recursive case: we are still scanning dimensions
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         make_vertices_up(bx, i+1, n, pt, v);
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         make_vertices_down(bx, i+1, n, pt, v);
     }
 }
@@ -130,14 +131,14 @@ template<class BX> void make_vertices_up(const BX& bx, SizeType i, SizeType n, V
 template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         v.push_back(pt);
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         v.push_back(pt);
     } else {        // recursive case: we are still scanning dimensions
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         make_vertices_up(bx, i+1, n, pt, v);
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         make_vertices_down(bx, i+1, n, pt, v);
     }
 }
@@ -146,7 +147,7 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
     std::vector<VertexType> v;
     SizeType n = this->dimension();
     if(n > 0) {
-        VertexType pt(n);
+        VertexType pt=this->lower_bounds();
         make_vertices_up(*this, 0, n-1, pt, v);
     }
     return v;

@@ -35,12 +35,12 @@
 #include <map>
 #include <memory>
 
-#include "../numeric/numeric.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/storage.hpp"
+#include "numeric/numeric.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/storage.hpp"
 
 
 namespace Ariadne {
@@ -61,8 +61,6 @@ template<class E> class Orbit {
     EnclosureListType const& final() const;
 };
 #endif
-
-typedef Real TimeType;
 
 template<class ES> class Orbit;
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
@@ -112,6 +110,35 @@ class Orbit<Enclosure>
   public:
     typedef ES EnclosureType;
     typedef ListSet<ES> EnclosureListType;
+
+    Orbit(const ES& set) : _initial(set) { }
+    Void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }
+    Void adjoin_intermediate(const EnclosureType& set) { this->_intermediate.adjoin(set); }
+    Void adjoin_final(const EnclosureType& set) { this->_final.adjoin(set); }
+
+    Void adjoin_reach(const EnclosureListType& set) { this->_reach.adjoin(set); }
+    Void adjoin_intermediate(const EnclosureListType& set) { this->_intermediate.adjoin(set); }
+    Void adjoin_final(const EnclosureListType& set) { this->_final.adjoin(set); }
+
+    EnclosureType const& initial() const { return this->_initial; }
+    EnclosureListType const& reach() const { return this->_reach; }
+    EnclosureListType const& intermediate() const { return this->_intermediate; }
+    EnclosureListType const& final() const { return this->_final; }
+  private:
+    ES _initial;
+    ESL _reach;
+    ESL _intermediate;
+    ESL _final;
+};
+
+template<>
+class Orbit<LabelledEnclosure>
+{
+    typedef LabelledEnclosure ES;
+    typedef LabelledSet<ListSet<Enclosure>> ESL;
+  public:
+    typedef ES EnclosureType;
+    typedef ESL EnclosureListType;
 
     Orbit(const ES& set) : _initial(set) { }
     Void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }

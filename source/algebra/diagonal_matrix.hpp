@@ -52,6 +52,11 @@ struct DiagonalMatrixOperations {
         return A._write(os);
     }
 
+    template<class X> friend DiagonalMatrix<NegationType<X>> operator-(DiagonalMatrix<X> A) {
+        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=-A.at(i,i); }
+        return A;
+    }
+
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }
@@ -76,6 +81,11 @@ struct DiagonalMatrixOperations {
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
         return A1;
+    }
+
+    template<class X> friend DiagonalMatrix<X> inverse(DiagonalMatrix<X> A) {
+        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=rec(A.at(i,i)); }
+        return A;
     }
 
     template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
@@ -106,7 +116,7 @@ struct DiagonalMatrixOperations {
 
     template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Transpose<Matrix<X>> const& A) {
         ARIADNE_PRECONDITION(D.size()==A.row_size())
-        Matrix<X> R(A.row_size(),A.column_size());
+        Matrix<X> R(A.row_size(),A.column_size(),(A.zero_element()*D.zero_element()*A.zero_element()));
         for(SizeType i=0; i!=A.row_size(); ++i) {
             for(SizeType j=0; j!=A.column_size(); ++j) {
                 R.at(i,j)=D.at(i,i)*A.at(i,j);
@@ -149,7 +159,7 @@ template<class X> class DiagonalMatrix
     X _zero;
     Array<X> _ary;
   public:
-    explicit DiagonalMatrix(SizeType n);
+    template<class... PRS, EnableIf<IsConstructible<X,Int,PRS...>> =dummy> explicit DiagonalMatrix(SizeType n, PRS...);
     explicit DiagonalMatrix(Array<X>);
     explicit DiagonalMatrix(Vector<X>);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
@@ -165,11 +175,13 @@ template<class X> class DiagonalMatrix
     Vector<X> diagonal() const;
     operator Matrix<X>() const;
     operator SymmetricMatrix<X>() const;
+  private: public:
     OutputStream& _write(OutputStream&) const;
 };
 
-template<class X> DiagonalMatrix<X>::DiagonalMatrix(SizeType n)
-    : _zero(0), _ary(n,_zero)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Int,PRS...>>>
+DiagonalMatrix<X>::DiagonalMatrix(SizeType n, PRS... prs)
+    : _zero(0,prs...), _ary(n,_zero)
 { }
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
@@ -182,7 +194,7 @@ template<class X> DiagonalMatrix<X>::DiagonalMatrix(Vector<X> vec)
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
 DiagonalMatrix<X>::DiagonalMatrix(DiagonalMatrix<Y> const& D, PRS... prs)
-    : _ary(D.diagonal().array(),prs...)
+    : _zero(D.zero_element(),prs...), _ary(D.diagonal().array(),prs...)
 { }
 
 template<class X> SizeType DiagonalMatrix<X>::size() const {
@@ -235,7 +247,6 @@ template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {
 template<class X> OutputStream& DiagonalMatrix<X>::_write(OutputStream& os) const {
     return os << "diag(" << this->_ary << ")";
 }
-
 
 } // namespace Ariadne
 

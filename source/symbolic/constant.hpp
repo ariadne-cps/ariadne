@@ -29,13 +29,16 @@
 #ifndef ARIADNE_CONSTANT_HPP
 #define ARIADNE_CONSTANT_HPP
 
-#include "../utility/string.hpp"
-#include "../symbolic/identifier.hpp"
+#include "utility/string.hpp"
+#include "symbolic/identifier.hpp"
 
 namespace Ariadne {
 
 //! \ingroup SymbolicModule
-//! A named constant of type \a T.
+//! \brief A named constant of type \a T.
+//! \details
+//! \par \b Example
+//! \snippet tutorials/symbolic_usage.cpp Constant_usage
 //! \see Variable, Expression
 template<class T> class Constant
     : public T
@@ -66,13 +69,6 @@ template<> class Constant<String>
     const String& value() const { return *this; }
     const String& val() const { return *this; }
 };
-
-//@{
-//! \related Constant \name Type synonyms.
-using StringConstant = Constant<String>; //!< .
-using IntegerConstant = Constant<Integer>; //!< \brief .
-using RealConstant = Constant<Real>; //!< .
-//@}
 
 } // namespace Ariadne
 

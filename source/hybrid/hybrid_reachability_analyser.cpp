@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <string>
 #include <sstream>
@@ -35,38 +35,38 @@
 #include <valarray>
 
 
-#include "../utility/exceptions.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
 
-#include "../geometry/box.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../solvers/integrator.hpp"
-#include "../solvers/solver.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/solver.hpp"
 
-#include "../dynamics/reachability_analyser.tpl.hpp"
+#include "dynamics/reachability_analyser.tpl.hpp"
 
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
-#include "../hybrid/hybrid_evolver.hpp"
-#include "../hybrid/hybrid_reachability_analyser.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_evolver.hpp"
+#include "hybrid/hybrid_reachability_analyser.hpp"
 
 
-#include "../output/logging.hpp"
-#include "../output/graphics.hpp"
-#include "../solvers/linear_programming.hpp"
+#include "output/logging.hpp"
+#include "output/graphics.hpp"
+#include "solvers/linear_programming.hpp"
 
-#include "../hybrid/hybrid_graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 
@@ -76,7 +76,7 @@ inline Real operator-(Real const& r1, Rational const& q2) {
 
 inline FloatDPBounds operator*(Integer n1,  const FloatDPValue& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
-    FloatDPValue x1((Int)n1.get_si());
+    FloatDPValue x1((Int)n1.get_si(),dp);
     return x1*x2;
 }
 
@@ -123,33 +123,32 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridStorage& reach_cell
                                                        const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
-    ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
+    ARIADNE_LOG_SCOPE_CREATE;
     HybridGrid grid=set.grid();
     HybridGridTreePaving cells=set.state_set();
     cells.mince(accuracy);
 
-    ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");
+    ProgressIndicator indicator(cells.size());
+    ARIADNE_LOG_PRINTLN("Evolving "<<cells.size()<<" cells");
     for(HybridGridCell const& cell : cells) {
-        ARIADNE_LOG(7,"Evolving cell = "<<cell<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"Evolving cell = "<<cell);
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
-        ARIADNE_LOG(7,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
-        ARIADNE_LOG(7,"  adjoining reach enclosures to grid... ");
+        ARIADNE_LOG_PRINTLN_AT(1,"Computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
-        ARIADNE_LOG(7,"done\n");
-        ARIADNE_LOG(7,"  adjoining final enclosures to grid... ");
+        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining final enclosures to grid... ");
         for(HybridEnclosure const& enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
-        ARIADNE_LOG(7,"done.\n");
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
-    ARIADNE_LOG(6,"  final reach size = "<<reach_cells.size()<<"\n");
-    ARIADNE_LOG(6,"  final evolve size = "<<evolve_cells.size()<<"\n");
-    ARIADNE_LOG(6,"Done.\n");
+    ARIADNE_LOG_PRINTLN("Final reach size = "<<reach_cells.size());
+    ARIADNE_LOG_PRINTLN("Final evolve size = "<<evolve_cells.size());
 }
 
 

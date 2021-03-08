@@ -22,29 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/algebra.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../function/polynomial.hpp"
-#include "../algebra/differential.hpp"
-#include "../algebra/evaluate.hpp"
-#include "../function/taylor_model.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "algebra/multi_index.hpp"
+#include "function/polynomial.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/evaluate.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/function.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/scaled_function_patch.hpp"
+#include "function/function.hpp"
+#include "function/function_mixin.hpp"
+#include "function/scaled_function_patch.hpp"
 
-#include "../function/taylor_function.hpp"
+#include "function/taylor_function.hpp"
 
 #include "taylor_model.tpl.hpp"
 #include "scaled_function_patch.tpl.hpp"
@@ -55,17 +55,17 @@
 namespace Ariadne {
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
-template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,BoxDomainType>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,RealVector>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelDP>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,IntervalDomainType>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,IntervalDomainType>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealScalar(RealVector)>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealScalar(RealVector)>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelDP>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,BoxDomainType>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,BoxDomainType>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealVector(RealVector)>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealVector(RealVector)>;
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
-template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,BoxDomainType>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,RealVector>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;

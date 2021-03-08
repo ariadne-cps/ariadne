@@ -42,7 +42,7 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-
+template<class PR> String numeric_class_tag();
 
 //ValidatedNumericType evaluate(const ValidatedScalarMultivariateFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 //Vector<ValidatedNumericType> evaluate(const ValidatedVectorMultivariateFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
@@ -63,8 +63,8 @@ namespace Ariadne {
 //ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedScalarMultivariateFunctionModelDP&);
 //ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
 
-template<class P, class D, class C, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< FunctionModel<P,D,C,PR,PRE> >& frepr) {
-    static_cast<const FunctionInterface<P,D,C>&>(frepr.reference()).repr(os); return os;
+template<class P, class SIG, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< FunctionModel<P,SIG,PR,PRE> >& frepr) {
+    static_cast<const FunctionModelInterface<P,SIG,PR,PRE>&>(frepr.reference()).repr(os); return os;
 }
 
 ValidatedVectorMultivariateTaylorFunctionModelDP __getslice__(const ValidatedVectorMultivariateTaylorFunctionModelDP& tf, Int start, Int stop) {
@@ -180,8 +180,10 @@ ValidatedVectorMultivariateFunction unrestrict(const ValidatedVectorMultivariate
 
 static constexpr auto self = pybind11::detail::self;
 
-Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) { return new ThresholdSweeper<FloatDP>(pr,x); }
-Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) { return new GradedSweeper<FloatDP>(pr,n); }
+Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) {
+    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,x)); }
+Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) {
+    return Sweeper<FloatDP>(std::make_shared<GradedSweeper<FloatDP>>(pr,n)); }
 
 
 
@@ -194,25 +196,32 @@ Void export_expansion(pybind11::module& module)
 }
 
 
-Void export_sweeper(pybind11::module& module)
+template<class FLT> Void export_sweeper(pybind11::module& module)
 {
-    pybind11::class_<Sweeper<FloatDP>> sweeper_class(module,"Sweeper");
-    sweeper_class.def(pybind11::init<Sweeper<FloatDP>>());
-    sweeper_class.def("__str__", &__cstr__<Sweeper<FloatDP>>);
+    using PR=PrecisionType<FLT>;
+    String pr_name=numeric_class_tag<PR>();
+    String flt_name=class_name<FLT>();
+    pybind11::class_<Sweeper<FLT>> sweeper_class(module,("Sweeper"+pr_name).c_str());
+    sweeper_class.def(pybind11::init<Sweeper<FLT>>());
+    sweeper_class.def("__str__", &__cstr__<Sweeper<FLT>>);
 
-    pybind11::class_<ThresholdSweeper<FloatDP>> threshold_sweeper_class(module,"ThresholdSweeper");
-    threshold_sweeper_class.def(pybind11::init<DP,double>());
-    threshold_sweeper_class.def("__str__", &__cstr__<ThresholdSweeper<FloatDP>>);
-    sweeper_class.def(pybind11::init<ThresholdSweeper<FloatDP>>());
-    pybind11::implicitly_convertible<ThresholdSweeper<FloatDP>,Sweeper<FloatDP>>();
+    pybind11::class_<ThresholdSweeper<FLT>> threshold_sweeper_class(module,("ThresholdSweeper"+pr_name).c_str());
+    threshold_sweeper_class.def(pybind11::init<PR,double>());
+    threshold_sweeper_class.def("__str__", &__cstr__<ThresholdSweeper<FLT>>);
+    sweeper_class.def(pybind11::init<ThresholdSweeper<FLT>>());
+    pybind11::implicitly_convertible<ThresholdSweeper<FLT>,Sweeper<FLT>>();
 
-    pybind11::class_<GradedSweeper<FloatDP>> graded_sweeper_class(module,"GradedSweeper");
-    graded_sweeper_class.def(pybind11::init<DP,int>());
-    graded_sweeper_class.def("__str__", &__cstr__<GradedSweeper<FloatDP>>);
-    sweeper_class.def(pybind11::init<GradedSweeper<FloatDP>>());
-    pybind11::implicitly_convertible<GradedSweeper<FloatDP>,Sweeper<FloatDP>>();
+    pybind11::class_<GradedSweeper<FLT>> graded_sweeper_class(module,("GradedSweeper"+pr_name).c_str());
+    graded_sweeper_class.def(pybind11::init<PR,int>());
+    graded_sweeper_class.def("__str__", &__cstr__<GradedSweeper<FLT>>);
+    sweeper_class.def(pybind11::init<GradedSweeper<FLT>>());
+    pybind11::implicitly_convertible<GradedSweeper<FLT>,Sweeper<FLT>>();
 }
 
+Void export_sweepers(pybind11::module& module) {
+    export_sweeper<FloatDP>(module);
+    export_sweeper<FloatMP>(module);
+}
 
 Expansion<MultiIndex,FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
 Expansion<MultiIndex,FloatDPApproximation>const& get_expansion(ApproximateTaylorModelDP const& tm) { return tm.expansion(); }
@@ -306,6 +315,7 @@ Void export_approximate_taylor_model(pybind11::module& module)
 Void export_scalar_function_model(pybind11::module& module)
 {
     typedef ValidatedScalarMultivariateFunctionModelDP::NumericType NumericType;
+    typename NumericType::PrecisionType pr;
 
     pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModelDP");
     scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateFunctionModelDP>());
@@ -321,14 +331,14 @@ Void export_scalar_function_model(pybind11::module& module)
     scalar_function_model_class.def(self-self);
     scalar_function_model_class.def(self*self);
     scalar_function_model_class.def(self/self);
-    scalar_function_model_class.def(self+NumericType());
-    scalar_function_model_class.def(self-NumericType());
-    scalar_function_model_class.def(self*NumericType());
-    scalar_function_model_class.def(self/NumericType());
-    scalar_function_model_class.def(NumericType()+self);
-    scalar_function_model_class.def(NumericType()-self);
-    scalar_function_model_class.def(NumericType()*self);
-    scalar_function_model_class.def(NumericType()/self);
+    scalar_function_model_class.def(self+NumericType(pr));
+    scalar_function_model_class.def(self-NumericType(pr));
+    scalar_function_model_class.def(self*NumericType(pr));
+    scalar_function_model_class.def(self/NumericType(pr));
+    scalar_function_model_class.def(NumericType(pr)+self);
+    scalar_function_model_class.def(NumericType(pr)-self);
+    scalar_function_model_class.def(NumericType(pr)*self);
+    scalar_function_model_class.def(NumericType(pr)/self);
     scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarMultivariateFunctionModelDP>);
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarMultivariateFunctionModelDP>);
 
@@ -551,10 +561,14 @@ Void export_vector_taylor_function(pybind11::module& module)
     module.def("refinement", &_refinement_<VF,VF>);
     module.def("refines", &_refines_<VF,VF>);
 
+    module.def("join", &_join_<SF,SF>);
+    module.def("join", &_join_<SF,VF>);
     module.def("join", &_join_<VF,SF>);
-        module.def("join", &_join_<SF,SF>);
+    module.def("join", &_join_<VF,VF>);
+    module.def("combine", &_combine_<SF,SF>);
+    module.def("combine", &_combine_<SF,VF>);
     module.def("combine", &_combine_<VF,SF>);
-        module.def("combine", &_combine_<SF,SF>);
+    module.def("combine", &_combine_<VF,VF>);
     module.def("embed", &_embed_<VF,D>);
         module.def("embed", &_embed_<D,VF,D>);
 
@@ -583,7 +597,7 @@ Void export_vector_taylor_function(pybind11::module& module)
 Void calculus_submodule(pybind11::module& module)
 {
     export_expansion(module);
-    export_sweeper(module);
+    export_sweepers(module);
 /*
     export_approximate_taylor_model(module);
     export_validated_taylor_model(module);

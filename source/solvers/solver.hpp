@@ -33,20 +33,20 @@
 #include <stdexcept>
 #include <string>
 
-#include "../solvers/solver_interface.hpp"
-#include "../function/function_interface.hpp"
+#include "solvers/solver_interface.hpp"
+#include "function/function_interface.hpp"
 
-#include "../output/logging.hpp"
-#include "../utility/attribute.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
+#include "output/logging.hpp"
+#include "utility/attribute.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
 template<class X> class Vector;
 
-/*! \ingroup \ingroup Solvers
+/*! \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.
  */
 class SolverBase
@@ -54,12 +54,12 @@ class SolverBase
 {
   public:
     /*! \brief Constructor. */
-    SolverBase(double max_error, Nat max_steps);
+    SolverBase(ApproximateDouble max_error, Nat max_steps);
 
     /*! \brief The maximum permissible error of the solution. */
-    FloatDPValue maximum_error() const { return this->_max_error; }
+    ExactDouble maximum_error() const { return this->_max_error; }
     /*! \brief Set the maximum error. */
-    Void set_maximum_error(RawFloatDP max_error) { this->_max_error=cast_exact(max_error); };
+    Void set_maximum_error(ApproximateDouble max_error) { this->_max_error=cast_exact(max_error); };
 
     /*! \brief The maximum number of steps allowed before the method must quit. */
     Nat maximum_number_of_steps() const { return this->_max_steps; }
@@ -95,7 +95,7 @@ class SolverBase
     /*! \brief Perform one iterative step of the contractor. */
     virtual ValidatedVectorMultivariateFunctionModelDP implicit_step(const ValidatedVectorMultivariateFunction& f,const ValidatedVectorMultivariateFunctionModelDP& p,const ValidatedVectorMultivariateFunctionModelDP& x) const = 0;
   private:
-    FloatDPValue _max_error;
+    ExactDouble _max_error;
     Nat _max_steps;
     std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> > _function_factory_ptr;
 };
@@ -109,7 +109,7 @@ class IntervalNewtonSolver
 {
   public:
     /*! \brief Constructor. */
-    IntervalNewtonSolver(double max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
+    IntervalNewtonSolver(ApproximateDouble max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
     IntervalNewtonSolver(MaximumError max_error, MaximumNumericTypeOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
@@ -133,7 +133,7 @@ class KrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    KrawczykSolver(double max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
+    KrawczykSolver(ApproximateDouble max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
     KrawczykSolver(MaximumError max_error, MaximumNumericTypeOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
@@ -160,7 +160,7 @@ class FactoredKrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    FactoredKrawczykSolver(double max_error, Nat max_steps) : KrawczykSolver(max_error,max_steps) { }
+    FactoredKrawczykSolver(ApproximateDouble max_error, Nat max_steps) : KrawczykSolver(max_error,max_steps) { }
     FactoredKrawczykSolver(MaximumError max_error, MaximumNumericTypeOfSteps max_steps) : KrawczykSolver(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }

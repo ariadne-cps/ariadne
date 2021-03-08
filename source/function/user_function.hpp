@@ -32,19 +32,19 @@
 #include <cstdarg>
 #include <iosfwd>
 
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../function/taylor_model.hpp"
-#include "../algebra/differential.hpp"
-#include "../function/formula.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
+#include "function/formula.hpp"
 
 #include "function_mixin.hpp"
 
@@ -170,7 +170,7 @@ template<class F> class VectorUserFunction
         virtual Matrix<FloatDPBounds> jacobian(const Vector<FloatDPBounds>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<FloatDPBounds>::variables(1u,x))); }
 
-        virtual EffectiveScalarMultivariateFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction::Interface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a

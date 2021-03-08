@@ -22,32 +22,32 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
 #include <iomanip>
 #include <limits>
 
-#include "../numeric/rounding.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/series.hpp"
-#include "../algebra/differential.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/taylor_series.hpp"
-#include "../function/function.hpp"
-#include "../utility/exceptions.hpp"
+#include "numeric/rounding.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/series.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
+#include "function/taylor_series.hpp"
+#include "function/function.hpp"
+#include "utility/exceptions.hpp"
 
-#include "../algebra/expansion.inl.hpp"
-#include "../algebra/evaluate.tpl.hpp"
-#include "../algebra/algebra_operations.tpl.hpp"
+#include "algebra/expansion.inl.hpp"
+#include "algebra/evaluate.tpl.hpp"
+#include "algebra/algebra_operations.tpl.hpp"
 
 #define VOLATILE ;
-#include "../algebra/multi_index-noaliasing.hpp"
-#include "../function/function_mixin.hpp"
-#include "../algebra/vector.hpp"
+#include "algebra/multi_index-noaliasing.hpp"
+#include "function/function_mixin.hpp"
+#include "algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -56,30 +56,28 @@ typedef IntegralConstant<Int,1> One;
 static const Zero zero = Zero();
 static const One one = One();
 
-FloatDP operator+(FloatDP x1, FloatDP x2);
-FloatDP operator-(FloatDP x1, FloatDP x2);
-FloatDP operator*(FloatDP x1, FloatDP x2);
-FloatDP operator/(FloatDP x1, FloatDP x2);
-FloatDP& operator+=(FloatDP& x1, FloatDP x2);
-FloatDP& operator-=(FloatDP& x1, FloatDP x2);
-FloatDP& operator*=(FloatDP& x1, FloatDP x2);
-FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+namespace {
+FloatDP operator+(FloatDP x1, FloatDP x2) { return add(rounded,x1,x2); }
+FloatDP operator-(FloatDP x1, FloatDP x2) { return sub(rounded,x1,x2); }
+FloatDP operator*(FloatDP x1, FloatDP x2) { return mul(rounded,x1,x2); }
+FloatDP operator/(FloatDP x1, FloatDP x2) { return div(rounded,x1,x2); }
+FloatDP operator/(FloatDP x1, Int n2) { return div(rounded,x1,FloatDP(n2,x1.precision())); }
+FloatDP& operator+=(FloatDP& x1, FloatDP x2) { return x1=add(rounded,x1,x2); }
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2) { return add(rounded,x1,x2); }
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2) { return sub(rounded,x1,x2); }
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2) { return mul(rounded,x1,x2); }
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2) { return div(rounded,x1,x2); }
+FloatMP operator/(FloatMP const& x1, Int const& n2) { return div(rounded,x1,FloatMP(n2,x1.precision())); }
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2) { return iadd(FloatMP::get_rounding_mode(),x1,x2); }
+} // namespace
 
 template<class F> F UnknownError<F>::raw() const {
     return F(0u,this->precision()); }
 template<class F> typename F::PrecisionType UnknownError<F>::precision() const {
-    if constexpr (IsSame<F,FloatMP>::value) { return MultiplePrecision(64); }
+    if constexpr (IsSame<F,FloatMP>::value) { return MultiplePrecision(64_bits); }
     else { return typename F::PrecisionType(); } }
 template<class F> UnknownError<F>::operator PositiveApproximation<F> () const {
-    return PositiveApproximation<F>(0,this->precision()); }
+    return PositiveApproximation<F>(0u,this->precision()); }
 
 template<class F> UnknownError<F> nul(UnknownError<F>) { return UnknownError<F>(); }
 template<class F> UnknownError<F> mag(UnknownError<F>) { return UnknownError<F>(); }
@@ -92,6 +90,7 @@ template<class F> UnknownError<F> operator+(UnknownError<F>, PositiveApproximati
 template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
 template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
 template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const& e) { return os << "???"; }
+template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, ExactDouble const&) { return e; }
 
 
 template<class F> ZeroError<F> const& nul(ZeroError<F> const& e) { return e; }
@@ -120,40 +119,40 @@ template<class X> X const& cast_singleton(X const& x) { return x; }
 template<class F> Bounds<F> const& cast_singleton(Interval<UpperBound<F>> const& ivl) { return reinterpret_cast<Bounds<F>const&>(ivl); }
 
 template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()+x2.lower(),x1.upper()+x2.upper()); }
+    return ApproximateInterval<F>(x1.lower_bound()+x2.lower_bound(),x1.upper_bound()+x2.upper_bound()); }
 template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()-x2.upper(),x1.upper()-x2.lower()); }
+    return ApproximateInterval<F>(x1.lower_bound()-x2.upper_bound(),x1.upper_bound()-x2.lower_bound()); }
 template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
     return make_interval(reinterpret_cast<Bounds<F>const&>(x1)*reinterpret_cast<Bounds<F>const&>(x2)); }
 
 template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> x1, Approximation<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+    return ApproximateInterval<F>(x1.lower_bound()+x2,x1.upper_bound()+x2); }
 template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> x1, Approximation<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+    return ApproximateInterval<F>(x1.lower_bound()-x2,x1.upper_bound()-x2); }
 template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> x1, Approximation<F> const& x2) {
-    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
-    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); }
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower_bound()*x2,x1.upper_bound()*x2); }
+    else { return ApproximateInterval<F>(x1.upper_bound()*x2,x1.lower_bound()*x2); }
 }
 template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, ApproximateInterval<F> x2) {
-    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+    return ApproximateInterval<F>(x1+x2.lower_bound(),x1+x2.upper_bound()); }
 template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, ApproximateInterval<F> x2) {
-    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+    return ApproximateInterval<F>(x1-x2.upper_bound(),x1-x2.lower_bound()); }
 template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, ApproximateInterval<F> x2) {
     return x2*x1; }
 /*
 template<class F> ApproximateInterval<F> operator+(UpperInterval<F> x1, Approximation<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+    return ApproximateInterval<F>(x1.lower_bound()+x2,x1.upper_bound()+x2); }
 template<class F> ApproximateInterval<F> operator-(UpperInterval<F> x1, Approximation<F> const& x2) {
-    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+    return ApproximateInterval<F>(x1.lower_bound()-x2,x1.upper_bound()-x2); }
 */
 template<class F> ApproximateInterval<F> operator*(UpperInterval<F> const& x1, Approximation<F> const& x2) {
-    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
-    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); } }
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower_bound()*x2,x1.upper_bound()*x2); }
+    else { return ApproximateInterval<F>(x1.upper_bound()*x2,x1.lower_bound()*x2); } }
 /*
 template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, UpperInterval<F> x2) {
-    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+    return ApproximateInterval<F>(x1+x2.lower_bound(),x1+x2.upper_bound()); }
 template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, UpperInterval<F> x2) {
-    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+    return ApproximateInterval<F>(x1-x2.upper_bound(),x1-x2.lower_bound()); }
 */
 template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, UpperInterval<F> const& x2) {
     return x2*x1; }
@@ -168,10 +167,10 @@ template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const&
 
 
 template<class F> PositiveUpperBound<F> mag(Interval<UpperBound<F>> const& ivl) {
-    return cast_positive(max(-ivl.lower(),ivl.upper()));
+    return cast_positive(max(-ivl.lower_bound(),ivl.upper_bound()));
 }
 template<class F> PositiveApproximation<F> mag(Interval<Approximation<F>> const& ivl) {
-    return cast_positive(max(-ivl.lower(),ivl.upper()));
+    return cast_positive(max(-ivl.lower_bound(),ivl.upper_bound()));
 }
 
 
@@ -194,7 +193,7 @@ struct SumMultiIndex {
 
 namespace {
 
-static const double MACHINE_EPSILON = 2.2204460492503131e-16;
+static const ExactDouble MACHINE_EPSILON(2.2204460492503131e-16);
 
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
@@ -203,22 +202,22 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 inline Interval<FloatDPValue> convert_interval(Interval<FloatDPValue> const& ivl, DoublePrecision pr) {
     return ivl; }
 inline Interval<FloatMPValue> convert_interval(Interval<FloatDPValue> const& ivl, MultiplePrecision pr) {
-    return Interval<FloatMPValue>(FloatMP(ivl.lower().raw(),pr),FloatMP(ivl.upper().raw(),pr)); }
+    return Interval<FloatMPValue>(FloatMP(ivl.lower_bound().raw(),pr),FloatMP(ivl.upper_bound().raw(),pr)); }
 
 inline Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) {
     return ivl; }
 inline Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
-    return Interval<FloatDPUpperBound>(FloatDP(ivl.lower().raw(),down,pr),FloatDP(ivl.upper().raw(),up,pr)); }
+    return Interval<FloatDPUpperBound>(FloatDP(ivl.lower_bound().raw(),down,pr),FloatDP(ivl.upper_bound().raw(),up,pr)); }
 
 inline Interval<FloatDPApproximation> const& convert_interval(Interval<FloatDPApproximation> const& ivl, DoublePrecision) {
     return ivl; }
 inline Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproximation> const& ivl, DoublePrecision pr) {
-    return Interval<FloatDPApproximation>(FloatDP(ivl.lower().raw(),near,pr),FloatDP(ivl.upper().raw(),near,pr)); }
+    return Interval<FloatDPApproximation>(FloatDP(ivl.lower_bound().raw(),near,pr),FloatDP(ivl.upper_bound().raw(),near,pr)); }
 
 template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
 template<class FLT> Bool is_same_as_zero(Bounds<FLT> const& xb) { return xb.lower_raw()==0 && xb.upper_raw()==0; }
 template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv.raw()==0; }
-template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower().raw()==0 && xv.upper().raw()==0; }
+template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower_bound().raw()==0 && xv.upper_bound().raw()==0; }
 
 } // namespace
 
@@ -445,13 +444,22 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+template<class F> F create_default() {
+    if constexpr (IsSame<F,FloatDP>::value) { return FloatDP(dp); }
+    else if constexpr (IsSame<F,FloatDPValue>::value) { return FloatDPValue(dp); }
+    else if constexpr (IsSame<F,FloatDPError>::value) { return FloatDPError(dp); }
+    else if constexpr (IsSame<F,FloatMP>::value) { return FloatMP(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPValue>::value) { return FloatMPValue(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPError>::value) { return FloatMPError(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,Interval<FloatDPUpperBound>>::value) { return FloatDPUpperInterval(0,0); }
+    else { abort(); }
+}
 
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel()
-    : _expansion(0), _error(), _sweeper()
+    : _expansion(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
 {
 }
-
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
     : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
@@ -470,7 +478,7 @@ template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIn
 {
 }
 
-template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,ExactDouble>& f, const ExactDouble& e, SweeperType swp)
     : TaylorModel(Expansion<MultiIndex,CoefficientType>(Expansion<MultiIndex,Dyadic>(f),swp.precision()),ErrorType(Dyadic(e),swp.precision()),swp)
 {
 }
@@ -578,14 +586,14 @@ template<class F> struct ValidatedApproximation {
     Bounds<F> _v; Approximation<F> _a;
     ValidatedApproximation(Bounds<F>const& x) : _v(x), _a(x) { }
     operator Bounds<F> const& () const { return _v; }
-    LowerBound<F> lower() const { return _v.lower(); }
+    LowerBound<F> lower_bound() const { return _v.lower_bound(); }
     Approximation<F> middle() const { return _a; }
-    UpperBound<F> upper() const { return _v.upper(); }
+    UpperBound<F> upper_bound() const { return _v.upper_bound(); }
     F const& lower_raw() const { return _v.lower_raw(); }
     F const& middle_raw() const { return _a.raw(); }
     F const& upper_raw() const { return _v.upper_raw(); }
     friend OutputStream& operator<<(OutputStream& os, ValidatedApproximation<F> const& x) {
-        return os << "{"<<x._v.lower()<<":"<<x._a<<":"<<x._v.upper()<<"}"; }
+        return os << "{"<<x._v.lower_bound()<<":"<<x._a<<":"<<x._v.upper_bound()<<"}"; }
 };
 template<class F> Approximation<F> const& make_validated_approximation(Approximation<F> const& x) { return x; }
 template<class F> ValidatedApproximation<F> make_validated_approximation(Bounds<F> const& x) { return ValidatedApproximation<F>(x); }
@@ -720,17 +728,17 @@ template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> 
     F::set_rounding_to_nearest();
     F rv=xv*cm;
     F::set_rounding_upward();
-    F u,ml;
     if(xv>=0) {
         F mcl=-cl;
-        u=xv*cu;
-        ml=xv*mcl;
+        F u=xv*cu;
+        F ml=xv*mcl;
+        re+=hlf(u+ml);
     } else {
         F mcu=-cu;
-        u=xv*cl;
-        ml=xv*mcu;
+        F u=xv*cl;
+        F ml=xv*mcu;
+        re+=hlf(u+ml);
     }
-    re+=(u+ml)/2;
     return Value<F>(rv);
 }
 
@@ -968,7 +976,7 @@ template<class P, class F, class C> Void _scal(TaylorModel<P,F>& r, const C& c) 
 
 /*
 template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c) {
-    ARIADNE_ASSERT_MSG(is_finite(c.lower().raw()) && is_finite(c.upper().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
+    ARIADNE_ASSERT_MSG(is_finite(c.lower_bound().raw()) && is_finite(c.upper_bound().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
     ValidatedApproximation<F> clmu=c;
     r.error()*=mag(c);
     _sparse_apply(SMulErr{clmu},r);
@@ -1042,7 +1050,7 @@ template<class P, class F> inline Void _sma(TaylorModel<P,F>& r, const TaylorMod
     using namespace std::placeholders;
 
     if constexpr (IsSame<decltype(c),FloatBounds<PR>>::value) {
-        ARIADNE_DEBUG_ASSERT_MSG(c.lower().raw()<=c.upper().raw(),c);
+        ARIADNE_DEBUG_ASSERT_MSG(c.lower_bound().raw()<=c.upper_bound().raw(),c);
         ARIADNE_DEBUG_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
         ARIADNE_DEBUG_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
     }
@@ -1197,9 +1205,9 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Nul, ModelType const& x) -> ModelType {
     return ModelType(x.argument_size(),x.sweeper()); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Pos, ModelType x) -> ModelType {
-    return std::move(x); }
+    return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Neg, ModelType x) -> ModelType {
-    _neg(x); return std::move(x); }
+    _neg(x); return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType const& x, ModelType const& y) -> ModelType {
     return _add(x,y); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Sub, ModelType const& x, ModelType const& y) -> ModelType {
@@ -1207,9 +1215,9 @@ template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Sub, 
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType const& x, ModelType const& y) -> ModelType {
     return _mul(x,y); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType x, NumericType const& c) -> ModelType {
-    _acc(x,c); return std::move(x); }
+    _acc(x,c); return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType x, NumericType const& c) -> ModelType {
-    _scal(x,c); return std::move(x); }
+    _scal(x,c); return x; }
 
 // TODO: Should be able to automatically generate these operations
 /*
@@ -1297,7 +1305,7 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::clobber() {
 template<class P, class F> auto TaylorModel<P,F>::tolerance() const -> RawFloatType {
     typedef RawFloatType FLT;
     const ThresholdSweeper<FLT>* ptr=dynamic_cast<const ThresholdSweeper<FLT>*>(&static_cast<const SweeperInterface<FLT>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : FLT(std::numeric_limits<double>::epsilon(),this->precision());
+    return (ptr) ? ptr->sweep_threshold() : FLT(cast_exact(std::numeric_limits<double>::epsilon()),this->precision());
 }
 
 
@@ -1380,9 +1388,9 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
     typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
     RangeType yr=y.range();
-    if(definitely(xr.lower()>=yr.upper())) {
+    if(definitely(xr.lower_bound()>=yr.upper_bound())) {
         return x;
-    } else if(definitely(yr.lower()>=xr.upper())) {
+    } else if(definitely(yr.lower_bound()>=xr.upper_bound())) {
         return y;
     } else {
         return hlf((x+y)+abs(x-y));;
@@ -1394,9 +1402,9 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
     typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
     RangeType yr=y.range();
-    if(definitely(xr.upper()<=yr.lower())) {
+    if(definitely(xr.upper_bound()<=yr.lower_bound())) {
         return x;
-    } else if(definitely(yr.upper()<=xr.lower())) {
+    } else if(definitely(yr.upper_bound()<=xr.lower_bound())) {
         return y;
     } else {
         return hlf((x+y)-abs(x-y));
@@ -1404,31 +1412,30 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
 }
 
 template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Abs, const TaylorModel<P,F>& x) {
-    typedef typename F::PrecisionType PR;
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
-    if(definitely(xr.lower()>=0)) {
+    if(definitely(xr.lower_bound()>=0)) {
         return x;
-    } else if(definitely(xr.upper()<=0)) {
+    } else if(definitely(xr.upper_bound()<=0)) {
         return -x;
     } else {
         // Use power series expansion $abs(x)=\sum_{i=0}^{7} p_i x^{2i} \pm e$ for $x\in[-1,+1]$ with
         // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
         // TODO: Find more accurate and stable formula
         static const Nat n=7u;
-        static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
-        static const Dbl err=0.035;
+        static const ExactDouble p[n]={0.0112167620474_pr, 5.6963263292747541_pr, -31.744583789655049_pr, 100.43002481377681_pr, -162.01366698662306_pr, 127.45243493284417_pr, -38.829743345344667_pr};
+        static const ExactDouble err=0.035_pr;
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
         CoefficientType xmag=static_cast<CoefficientType>(cast_exact(mag(xr)));
         TaylorModel<P,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<CoefficientType>(p[n-1u]);
+        r=p[n-1u];
         for(Nat i=0; i!=(n-1u); ++i) {
             Nat j=(n-2)-i;
-            r=s*r+static_cast<CoefficientType>(p[j]);
+            r=s*r+p[j];
         }
-        r+=FloatBounds<PR>(-err,+err);
+        r.error()+=err;
         return r*xmag;
     }
 }
@@ -1504,10 +1511,10 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
     static const DegreeType MAX_DEGREE=20;
-    static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    static const ExactDouble MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface<F> const& sweeper=tm.sweeper();
 
-    F max_truncation_error=MAX_TRUNCATION_ERROR;
+    F max_truncation_error(MAX_TRUNCATION_ERROR,sweeper.precision());
     ThresholdSweeper<F> const* threshold_sweeper_ptr = dynamic_cast<ThresholdSweeper<F> const*>(&sweeper);
     if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->sweep_threshold(); }
 
@@ -1517,7 +1524,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
 
     //std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
-    Nat d=max_degree;
+    DegreeType d=max_degree;
     CoefficientType c=tm.value();
     FloatDPBounds r=cast_singleton(tm.range());
     Series<FloatDPBounds> centre_series=fn.series(c);
@@ -1535,13 +1542,13 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     //std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<max_truncation_error);
     }
 
     TaylorModel<P,F> x=tm-c;
     TaylorModel<P,F> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         res=centre_series[d-i-1u]+x*res;
         // Don't sweep here...
     }
@@ -1579,7 +1586,7 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_embed_error(const
             for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
             rtm._append(ra,xv);
         }
-        return std::move(rtm);
+        return rtm;
     }
 }
 
@@ -1764,9 +1771,9 @@ template<class P, class F> Void TaylorModel<P,F>::unscale(IntervalDomainType con
     // resulting interval should be independent of the unneeded component
     TaylorModel<P,F>& tm=*this;
     auto ivl=convert_interval(codom,this->precision());
-    ARIADNE_ASSERT_MSG(decide(ivl.lower()<=ivl.upper()),"Cannot unscale TaylorModel<P,F> "<<tm<<" from empty interval "<<ivl);
+    ARIADNE_ASSERT_MSG(decide(ivl.lower_bound()<=ivl.upper_bound()),"Cannot unscale TaylorModel<P,F> "<<tm<<" from empty interval "<<ivl);
 
-    if(codom.lower()==codom.upper()) {
+    if(codom.lower_bound()==codom.upper_bound()) {
         tm=0;
         // Uncomment out line below to make unscaling to a singleton interval undefined
         //tm.clear(); tm.set_error(+inf);
@@ -1940,7 +1947,11 @@ template<class P, class F> Bool TaylorModel<P,F>::_refines(const TaylorModel<P,F
 template<class P, class F> Bool TaylorModel<P,F>::_consistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::norm(tm1-tm2).raw() <= (tm1.error()+tm2.error()).raw()*2u);
+    if constexpr(IsSame<P,ValidatedTag>::value) {
+        return (Ariadne::norm(tm1-tm2).raw() <= (2u*(tm1.error()+tm2.error())).raw());
+    } else {
+        return true;
+    }
 }
 
 template<class P, class F> Bool TaylorModel<P,F>::_inconsistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
@@ -1957,13 +1968,14 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const 
     if constexpr (IsSame<P,ValidatedTag>::value) {
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
 
+        PrecisionType pr=r.precision();
         ErrorType max_error=nul(r.error());
 
         const ErrorType& xe=x.error();
         const ErrorType& ye=y.error();
 
-        CoefficientType rv,xv,yv;
-        FloatDP xu,yu,mxl,myl,u,ml;
+        CoefficientType rv(pr),xv(pr),yv(pr);
+        F xu(pr),yu(pr),mxl(pr),myl(pr),u(pr),ml(pr);
         MultiIndex a;
 
         typename TaylorModel<P,F>::ConstIterator xiter=x.begin();

@@ -29,7 +29,7 @@
 #ifndef ARIADNE_VECTOR_INTERFACE_HPP
 #define ARIADNE_VECTOR_INTERFACE_HPP
 
-#include "../utility/writable.hpp"
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 

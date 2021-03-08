@@ -28,9 +28,9 @@
 
 
 
-#include "../utility/stdlib.hpp"
-#include "../utility/macros.hpp"
-#include "../utility/typedefs.hpp"
+#include "utility/stdlib.hpp"
+#include "utility/macros.hpp"
+#include "utility/typedefs.hpp"
 
 #include "rational.hpp"
 #include "logical.hpp"
@@ -515,6 +515,7 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
 
 struct RoundExact { };
 inline RoundExact opposite(RoundExact) { return RoundExact(); }
+template<class Y> inline decltype(auto) sqr(RoundExact, Y const& y) { return sqr(y); }
 template<class Y> inline decltype(auto) rec(RoundExact, Y const& y) { return rec(y); }
 template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
 template<class Y1, class Y2> inline decltype(auto) div(RoundExact, Y1 const& y1, Y2 const& y2) { return y1/y2; }
@@ -587,9 +588,21 @@ template<class RNDUP, class Y> inline auto _div(RNDUP up, Bounds<Y> const& y1, B
     }
 }
 
+template<class RNDUP, class Y> Bounds<Y> _sqr(RNDUP up, Bounds<Y> const& y) {
+    auto down=opposite(up);
+    const Y& yl=y.lower_raw(); const Y& yu=y.upper_raw();
+    if(yl>0) {
+        return Bounds<Y>(sqr(down,yl),sqr(up,yu));
+    } else if(yu<0) {
+        return Bounds<Y>(sqr(down,yu),sqr(up,yl));
+    } else {
+        return Bounds<Y>(nul(yl),max(sqr(up,yl),sqr(up,yu)));
+    }
+}
+
 template<class RNDUP, class Y> Bounds<Y> _rec(RNDUP up, Bounds<Y> const& y) {
     auto down=opposite(up);
-   const Y& yl=y.lower_raw(); const Y& yu=y.upper_raw();
+    const Y& yl=y.lower_raw(); const Y& yu=y.upper_raw();
     if(yl>0 || yu<0) {
         return Bounds<Y>(rec(down,yu),rec(up,yl));
     } else {
@@ -606,6 +619,8 @@ Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2) {
     return _mul(RoundExact(),q1,q2); }
 Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2) {
     return _div(RoundExact(),q1,q2); }
+Bounds<Rational> sqr(RationalBounds const& q) {
+    return _sqr(RoundExact(),q); }
 Bounds<Rational> rec(RationalBounds const& q) {
     return _rec(RoundExact(),q); }
 

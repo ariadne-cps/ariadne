@@ -29,7 +29,7 @@ using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
@@ -66,7 +66,6 @@ Int main(Int argc, const char* argv[])
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolverType evolver(ball);
-    evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(2.0);
@@ -76,9 +75,9 @@ Int main(Int argc, const char* argv[])
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
-    Real e(1.0/16);
+    Real e(0.0625_x);
     HybridSet initial_set(freefall,{2-e<=x<=2+e,-e<=v<=e});
-    HybridTime evolution_time(1.5,4);
+    HybridTime evolution_time(1.5_x,4);
 
     std::cout << "Computing evolution... " << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::LOWER);

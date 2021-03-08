@@ -29,8 +29,8 @@
 #ifndef ARIADNE_EVOLVER_BASE_HPP
 #define ARIADNE_EVOLVER_BASE_HPP
 
-#include "../dynamics/evolver_interface.hpp"
-#include "../geometry/list_set.hpp"
+#include "dynamics/evolver_interface.hpp"
+#include "geometry/list_set.hpp"
 
 namespace Ariadne {
 
@@ -39,9 +39,8 @@ namespace Ariadne {
 template<class SYS, class ES, class TRM> class EvolverBase
     : public EvolverInterface<SYS,ES,TRM>
 {
-    typedef EvolverInterface<SYS,ES,TRM> Interface;
-
   public:
+    typedef EvolverInterface<SYS,ES,TRM> Interface;
     typedef typename EvolverInterface<SYS,ES,TRM>::SystemType SystemType;
     typedef typename EvolverInterface<SYS,ES,TRM>::TimeType TimeType;
     typedef typename EvolverInterface<SYS,ES,TRM>::TerminationType TerminationType;
@@ -54,7 +53,7 @@ template<class SYS, class ES, class TRM> class EvolverBase
         return os << "Evolver( ... )"; }
 
   public:
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const = 0;
@@ -71,7 +70,7 @@ template<class SYS, class ES, class TRM> class EvolverBase
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return std::make_pair(reachable,final); }
 
-    //@}
+    //!@}
 
   protected:
     //! \brief Main routine for computing the evolution.

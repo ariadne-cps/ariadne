@@ -33,9 +33,9 @@
 
 #include "multi_index.hpp"
 
-#include "../utility/typedefs.hpp"
-#include "../utility/iterator.hpp"
-#include "../utility/macros.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/iterator.hpp"
+#include "utility/macros.hpp"
 
 
 namespace Ariadne {
@@ -98,6 +98,7 @@ template<class I, class X> using ArgumentOfType = typename IndexTraits<I>::templ
 
 template<class I, class X> class Expansion;
 
+//! \brief A sparse list of index-value pairs.
 template<class I, class X> class Expansion {
     using S=typename IndexTraits<I>::SizeOfType;
     using V=typename IndexTraits<I>::IndexIntoType;
@@ -130,13 +131,14 @@ template<class I, class X> class Expansion {
     typedef typename UniformList<X>::ConstReference CoefficientConstReference;
 
     ~Expansion();
-    explicit Expansion(ArgumentSizeType as); // DEPRECATED
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        explicit Expansion(ArgumentSizeType as, PRS... prs) : Expansion(as,X(0u,prs...)) { } // DEPRECATED
     explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
-    template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
+    template<class PR, EnableIf<IsConstructible<X,Nat,PR>> =dummy>
         explicit Expansion(ArgumentSizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
-    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
-        Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
         explicit Expansion(Expansion<I,Y> const&, PRS... prs);
     Expansion(const Expansion<I,X>&);
@@ -178,6 +180,9 @@ template<class I, class X> class Expansion {
     Void prepend(const IndexType& a, const CoefficientType& x);
     Void append(const IndexType& a, const CoefficientType& x);
     Void append_sum(const IndexType& a1, const IndexType& a2, const CoefficientType& x);
+
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void append(const IndexType& a, const Y& y) {
+        X x=this->_zero_coefficient; x=y; this->append(a,x); }
 
     Iterator find(const IndexType& a);
     ConstIterator find(const IndexType& a) const;
@@ -236,21 +241,21 @@ public:
 };
 
 
-template<class I, class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
+template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Nat,PR>>>
 Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
-    : Expansion(as,X(0,pr),cap)
+    : Expansion(as,X(0u,pr),cap)
 {
 }
 
-
-template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr) : Expansion(0)
+template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs)
+    : Expansion(ArgumentSizeType(),X(0.0_x,prs...))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
-    _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
-    _coefficients = UniformList<X>(0,X(pr));
-    _zero_coefficient = X(0,pr);
+    _indices = UniformList<I>(0u,I(lst.begin()->first)*0);
+    _coefficients = UniformList<X>(0,X(prs...));
+    _zero_coefficient = X(0,prs...);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);
@@ -259,8 +264,8 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, P
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
-        MultiIndex a=iter->first;
-        X x(iter->second,pr);
+        I a=iter->first;
+        X x(iter->second,prs...);
         if(decide(x!=0)) { this->append(a,x); }
     }
 }

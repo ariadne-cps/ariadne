@@ -30,11 +30,11 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "../hybrid/hybrid_set_interface.hpp"
-#include "../dynamics/evolver_interface.hpp"
-#include "../dynamics/reachability_analyser_interface.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "dynamics/evolver_interface.hpp"
+#include "dynamics/reachability_analyser_interface.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 
@@ -46,27 +46,26 @@ class HybridGridTreePaving;
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyserInterface
     : public virtual ReachabilityAnalyserInterface<HybridAutomatonInterface>
-    , public Loggable
 {
   public:
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef SystemType::TimeType TimeType;
-    typedef HybridOvertSetInterface OvertSetInterfaceType;
-    typedef HybridCompactSetInterface CompactSetInterfaceType;
-    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
-    typedef HybridRegularSetInterface RegularSetInterfaceType;
+    typedef EffectiveHybridOvertSetInterface OvertSetInterfaceType;
+    typedef EffectiveHybridCompactSetInterface CompactSetInterfaceType;
+    typedef EffectiveHybridLocatedSetInterface LocatedSetInterfaceType;
+    typedef EffectiveHybridRegularSetInterface RegularSetInterfaceType;
     typedef HybridGridTreePaving SetApproximationType;
 
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor */
     virtual ~HybridReachabilityAnalyserInterface() = default;
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyserInterface* clone() const = 0;
-    //@}
+    //!@}
 
 };
 

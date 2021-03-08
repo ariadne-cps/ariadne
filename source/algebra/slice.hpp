@@ -29,7 +29,7 @@
 #ifndef ARIADNE_SLICE_HPP
 #define ARIADNE_SLICE_HPP
 
-#include "../utility/typedefs.hpp"
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 

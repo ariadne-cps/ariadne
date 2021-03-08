@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/exceptions.hpp"
-#include "../algebra/operations.hpp"
+#include "utility/exceptions.hpp"
+#include "algebra/operations.hpp"
 
-#include "../algebra/series.hpp"
-#include "../function/taylor_series.hpp"
+#include "algebra/series.hpp"
+#include "function/taylor_series.hpp"
 
 namespace Ariadne {
 
@@ -104,7 +104,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
     FloatDPUpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
-                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm-c;
@@ -126,7 +126,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
 template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=20;
-    static const FloatDP TRUNCATION_ERROR=1e-8;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
     FloatDPValue c=tm.value();
     FloatDPBounds r=tm.range();
@@ -140,7 +140,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn,
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm-c;
@@ -169,7 +169,7 @@ template<class F> Error<F> error_bound(Bounds<F> const& b, Bounds<F> const& c) {
 template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn, const A& tm, FloatDP eps)
 {
     static const Nat DEGREE=20;
-    static const FloatDP TRUNCATION_ERROR=1e-8;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
     FloatDPValue c=tm.value();
     FloatDPBounds r=tm.range();
@@ -188,7 +188,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn,
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm;
@@ -229,15 +229,16 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     auto tol=cast_exact(x.tolerance());
     auto avg=cast_exact(x.average());
     auto rad=cast_exact(x.radius());
+    auto pr=avg.precision();
 
     if(avg<=rad) {
-        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
     }
 
     auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
-    Series<X> sqrt_series=Series<X>(Sqrt(),X(1));
+    Series<X> sqrt_series=Series<X>(Sqrt(),X(1,pr));
     Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
@@ -263,7 +264,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
     auto rad=cast_exact(x.radius());
 
     if(decide(rad>=abs(avg))) {
-        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad<<"\n");
+        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad);
     }
 
     auto eps=mag(rad/avg);
@@ -292,9 +293,10 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
     auto tol=cast_exact(x.tolerance());
     auto avg=cast_exact(x.average());
     auto rad=cast_exact(x.radius());
+    auto pr=avg.precision();
 
     if(avg<=rad) {
-        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
     }
 
     auto eps=mag(rad/avg);
@@ -303,11 +305,11 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
     Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)/d;
 
-    A y=x/avg-X(1);
+    A y=x/avg-1;
     A z=x.create();
-    z+=X(d%2?-1:+1)/d;
+    z+=X(d%2?-1:+1,pr)/d;
     for(Nat i=1; i!=d; ++i) {
-        z=X((d-i)%2?+1:-1)/(d-i) + z * y;
+        z=X((d-i)%2?+1:-1,pr)/(d-i) + z * y;
     }
     z=z*y;
 
@@ -387,7 +389,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     A z=x.create_constant(1);
     for(DegreeType i=0; i!=deg; ++i) {
-        z/=X(-Int(2*(deg-i)*(2*(deg-i)+1)));
+        z/=(-Int(2*(deg-i)*(2*(deg-i)+1)));
         z*=s;
         z+=1;
     }
@@ -426,7 +428,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Cos, const A& x)
     // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
     A z=x.create_constant(c);
     for(DegreeType i=0; i!=deg; ++i) {
-        z/=X(-Int(2*(deg-i)*(2*(deg-i)-1)));
+        z/=(-Int(2*(deg-i)*(2*(deg-i)-1)));
         z*=s;
         z+=c;
     }

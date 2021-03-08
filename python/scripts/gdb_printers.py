@@ -1,8 +1,10 @@
-# Pretty-printers for Ariadne
-#  Copyright (C) 2010 Pieter Collins
-
-# Some of these are based on pretty-printers for libstc++.
-#  Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
+##############################################################################
+#            solve_polynomial.py
+#
+#  Copyright  2010  Pieter Collins
+#    Some of these are based on pretty-printers for libstc++.
+#    Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
+##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-## To use these printers, put this file in a directory $TOP/ariadne_gdb_printers.py
-## and add the following to you .gdbinit file, replacing $TOP by the top-level directory
+# Pretty-printers for Ariadne
+# To use these printers, put this file in a directory $TOP/ariadne_gdb_printers.py
+# and add the following to you .gdbinit file, replacing $TOP by the top-level directory
 #import sys
 #sys.path.insert(0, '$TOP/')
-#from ariadne/gdb_printers import register_ariadne_printers
+#from pyariadne/gdb_printers import register_ariadne_printers
 #register_ariadne_printers (None)
 #end
 

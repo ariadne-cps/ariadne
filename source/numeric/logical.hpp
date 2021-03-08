@@ -28,9 +28,9 @@
 #ifndef ARIADNE_LOGICAL_HPP
 #define ARIADNE_LOGICAL_HPP
 
-#include "../utility/stdlib.hpp"
-#include "../utility/typedefs.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/stdlib.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/paradigm.hpp"
 
 #include "logical.decl.hpp"
 
@@ -224,6 +224,7 @@ class Indeterminate {
     operator ValidatedKleenean() const;
     friend Bool decide(Indeterminate const& l, Effort e);
     friend Bool decide(Indeterminate const& l);
+    friend OutputStream& operator<<(OutputStream& os, ValidatedKleenean const&);
 };
 
 //! \ingroup LogicalModule
@@ -265,6 +266,7 @@ class Boolean : public Logical<Boolean,LogicalValue> {
 class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> {
     typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
+    explicit Sierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
     explicit Sierpinskian(LogicalPointer l) : Base(l) { }
     explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     Sierpinskian(Indeterminate) : Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
@@ -294,6 +296,7 @@ class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinski
 class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> {
     typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
+    explicit NegatedSierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
     explicit NegatedSierpinskian(LogicalPointer l) : Base(l) { }
     explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
@@ -573,6 +576,11 @@ class NondeterministicBoolean {
 inline NondeterministicBoolean choose(LowerKleenean pt, LowerKleenean pf) {
     return NondeterministicBoolean(pt,pf);
 }
+
+//! \relates LowerKleenean
+//! Returns an index \a i such that \c p[i] is definitely \c true, if one exists.
+//! Loops infinitely if no \c p[i] can be shown to be definitely \c true.
+SizeType nondeterministic_choose_index(Array<LowerKleenean> const& p);
 
 template<class P, class T> class Case {
     P _p; T _t;

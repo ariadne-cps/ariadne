@@ -33,19 +33,19 @@
 
 #include <memory>
 
-#include "../utility/macros.hpp"
-#include "../utility/container.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../symbolic/templates.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../function/function.hpp"
-#include "../function/function_model.hpp"
-#include "../function/constraint.hpp"
-#include "../output/graphics_interface.hpp"
+#include "utility/macros.hpp"
+#include "utility/container.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "symbolic/templates.hpp"
+#include "geometry/set_interface.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
+#include "function/constraint.hpp"
+#include "output/graphics_interface.hpp"
 
-#include "../geometry/box.hpp"
+#include "geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -79,9 +79,9 @@ class ImageSet { };
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class ConstraintSet
-    : public virtual RegularSetInterface
+    : public virtual EffectiveEuclideanRegularSetInterface
 {
-    Nat _dimension;
+    SizeType _dimension;
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
@@ -95,11 +95,11 @@ class ConstraintSet
     //! \brief The bounds of the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
     List<EffectiveConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
@@ -121,7 +121,7 @@ class ConstraintSet
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class BoundedConstraintSet
-    : public virtual RegularLocatedSetInterface
+    : public virtual EffectiveEuclideanRegularLocatedSetInterface
     , public virtual DrawableInterface
 {
     RealBox _domain;
@@ -142,11 +142,11 @@ class BoundedConstraintSet
     //! \brief The bounds for the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
     List<EffectiveConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
@@ -176,7 +176,8 @@ class BoundedConstraintSet
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 //! \see ValidatedConstrainedImageSet
 class ConstrainedImageSet
-    : public virtual LocatedSetInterface, public virtual DrawableInterface
+    : public virtual EffectiveEuclideanLocatedSetInterface
+    , public virtual DrawableInterface
 {
     RealBox _domain;
     EffectiveVectorMultivariateFunction _function;
@@ -205,11 +206,11 @@ class ConstrainedImageSet
     //! \brief The function used to define the set.
     const List<EffectiveConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    Nat number_of_parameters() const { return this->_domain.size(); };
+    SizeType number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     Void apply(const EffectiveVectorMultivariateFunction& h) {
@@ -238,7 +239,7 @@ class ConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<ConstrainedImageSet,ConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
+    Pair<ConstrainedImageSet,ConstrainedImageSet> split(SizeType j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
     LowerKleenean inside(const ExactBoxType& bx) const;
@@ -272,7 +273,8 @@ class ConstrainedImageSet
 //! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 class ValidatedConstrainedImageSet
-    : public virtual ValidatedLocatedSetInterface, public virtual DrawableInterface
+    : public virtual ValidatedEuclideanLocatedSetInterface
+    , public virtual DrawableInterface
 {
     ExactBoxType _domain;
     ExactBoxType _reduced_domain;
@@ -302,11 +304,11 @@ class ValidatedConstrainedImageSet
     //! \brief The constraints used to define the set.
     const List<ValidatedConstraint> constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    ValidatedConstraint const constraint(Nat i) const { return this->_constraints[i]; };
+    ValidatedConstraint const constraint(SizeType i) const { return this->_constraints[i]; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    Nat number_of_parameters() const { return this->_domain.size(); };
+    SizeType number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     Void apply(const ValidatedVectorMultivariateFunction& h) {
@@ -342,7 +344,7 @@ class ValidatedConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
+    Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(SizeType j) const;
     //! \brief Restrict the parameter domain to \a parameter_subdomain.
     ValidatedConstrainedImageSet restriction(ExactBoxType const& new_domain) const;
 

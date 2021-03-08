@@ -29,7 +29,7 @@ using namespace Ariadne;
 
 inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> DC()
 {
-    Real k0(0.002987);
+    Real k0(0.002987_dec);
     Real fp0 = (-11+k0)/600;
     Real fp1 = (k0-1)/15_q;
     Real fq0 = (1-k0)/14;

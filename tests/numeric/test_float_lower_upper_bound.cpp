@@ -198,7 +198,7 @@ TestDirectedFloats<PR>::test_comparison() {
     }
 
     {
-        PositiveFloatLowerBoundType one(1u);
+        PositiveFloatLowerBoundType one(1u,pr);
         PositiveFloatLowerBoundType two_thirds=one*2u/3u;
         ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds < 2u));
         ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds <= 2u));
@@ -215,7 +215,7 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestDirectedFloats<DoublePrecision>(dp).test();
-    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128)).test();
+    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

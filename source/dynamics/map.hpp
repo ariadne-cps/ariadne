@@ -31,19 +31,27 @@
 
 #include <memory>
 
-#include "../function/function.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../geometry/grid.hpp"
+#include "function/function.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/grid.hpp"
+
+#include "symbolic/variable.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+
 
 namespace Ariadne {
 
-class MapEvolver;
 class Enclosure;
+class LabelledEnclosure;
 class Storage;
+class LabelledStorage;
 
-/*! \brief An iterated function system in Euclidean space.
- */
+class MapEvolver;
+
+//! \brief An iterated function system in Euclidean space.
 class IteratedMap
+//    : public ExtendedSystemMixin
 {
   public:
     //! \brief The type used to represent time.
@@ -54,24 +62,34 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
     //! \brief The type used to evolve the system
     typedef MapEvolver EvolverType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef Storage StorageType;
+    typedef LabelledStorage StorageType;
   public:
-    IteratedMap(const EffectiveVectorMultivariateFunction& f) : _function(f) {
-        ARIADNE_PRECONDITION(f.result_size()==f.argument_size()); }
-    virtual IteratedMap* clone() const { return new IteratedMap(*this); }
-    virtual ~IteratedMap() = default;
-    DimensionType dimension() const { return this->_function.result_size(); }
-    const EffectiveVectorMultivariateFunction& function() const { return _function; }
-    Grid grid() const { return Grid(_function.argument_size()); }
-  private:
-    EffectiveVectorMultivariateFunction _function;
-};
+    IteratedMap(const EffectiveVectorMultivariateFunction& f);
+    IteratedMap(const List<PrimedRealAssignment>&);
+    IteratedMap(const List<PrimedRealAssignment>&, List<RealAssignment> const&);
 
-inline OutputStream& operator<<(OutputStream& os, const IteratedMap& vf) {
-    return os << "IteratedMap( " << vf.function() << " )";
-}
+    const EffectiveVectorMultivariateFunction& update_function() const { return this->_update_function; }
+    const EffectiveVectorMultivariateFunction& auxiliary_function() const { return this->_auxiliary_function; }
+    const EffectiveVectorMultivariateFunction& auxiliary_mapping() const { return this->_auxiliary_function; }
+
+    RealSpace state_space() const;
+    RealSpace auxiliary_space() const;
+    RealSpace state_auxiliary_space() const;
+
+    IteratedMap* clone() const { return new IteratedMap(*this); }
+    ~IteratedMap() = default;
+    DimensionType dimension() const { return this->_update_function.result_size(); }
+    const EffectiveVectorMultivariateFunction& function() const { return _update_function; }
+
+    friend OutputStream& operator<<(OutputStream& os, IteratedMap const& map);
+  private:
+    List<PrimedRealAssignment> _updates;
+    List<RealAssignment> _auxiliary;
+    EffectiveVectorMultivariateFunction _update_function;
+    EffectiveVectorMultivariateFunction _auxiliary_function;
+};
 
 
 } // namespace Ariadne

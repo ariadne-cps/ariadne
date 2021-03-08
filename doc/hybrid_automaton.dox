@@ -49,7 +49,7 @@ Building a hybrid automaton in %Ariadne involves two main steps. We first define
 
 \subsection hybrid_automaton_numeric Numerical Types
 
-%Ariadne supporst \ref Float and \ref Interval types, representing an exact floating-point value, and an approximation to a real value given by an interval \f$[l,u]\f$.
+%Ariadne supports \ref FloatApproximation and \ref FloatBounds types, representing an approximate floating-point value, and an approximation to a real value given by an interval \f$[l,u]\f$.
 
 Additionally, %Ariadne supports \ref Integer and \ref Rational types if the Gnu Multiple-Precision library (GMP) is available. However, these types are typically not used for defining systems.
 
@@ -73,8 +73,8 @@ Matrix<Float> A(m,n, a[0][0],a[0][1],..,a[0][n-1],
 
 \section hybrid_automaton_functions Ariadne Functions
 
-An %Ariadne \ref MonolithicHybridAutomaton object is built out of vector-valued functions on Euclidean space \f$f:\R^m\rightarrow\R^n\f$.
-Since %Ariadne internally needs to be able to evaluate the function on different data types, all functions used in an %Ariadne \ref MonolithicHybridAutomaton must inherit from the \ref ScalarFunctionInterface or \ref VectorFunctionInterface class.
+An %Ariadne \ref HybridAutomaton object is built out of vector-valued functions on Euclidean space \f$f:\R^m\rightarrow\R^n\f$.
+Since %Ariadne internally needs to be able to evaluate the function on different data types, all functions used in an %Ariadne \ref HybridAutomaton must inherit from the \ref ScalarFunctionInterface or \ref VectorFunctionInterface class.
 The \ref ScalarFunction and \ref VectorFunction classes can be used to build general-purpose functions.
 A number of builtin function types are provided, including \ref IdentityFunction, \ref ScalarConstantFunction, \ref ScalarAffineFunction and \ref ScalarPolynomialFunction.
 Additionally, a \link ScalarUserFunction ScalarUserFunction<T> \endlink template is provided to facilitate the creation of more complicated nonlinear functions.
@@ -149,9 +149,9 @@ struct RadiusFunction : ScalarUserFunction<RadiusFunction>, ScalarFunctionData<1
 
 \section hybrid_automaton_building Building a Hybrid Automaton
 
-First, construct a \ref MonolithicHybridAutomaton object with no modes and no transitions:
+First, construct a \ref HybridAutomaton object with no modes and no transitions:
 \code
-MonolithicHybridAutomaton automaton;
+HybridAutomaton automaton;
 \endcode
 
 Then declare the discrete states and discrete events. The \ref DiscreteLocation and \ref DiscreteEvent classes are just integer labels and can be created as follows:
@@ -163,9 +163,9 @@ DiscreteEvent event12(3);
 
 
 Finally, build up the system using the methods:
- - \ref MonolithicHybridAutomaton::new_mode "HybridAutomaton::new_mode(DiscreteState location, FunctionInterface dynamic)"
- - \ref MonolithicHybridAutomaton::new_invariant "MonolithicHybridAutomaton::new_invariant(DiscreteState location, FunctionInterface predicate)"
- - \ref MonolithicHybridAutomaton::new_transition "MonolithicHybridAutomaton::new_transition(DiscreteEvent event, DiscreteState source, DiscreteState target, FunctionInterface reset, FunctionInterface guard, bool urgency)"
+ - \ref HybridAutomaton::new_mode "HybridAutomaton::new_mode(DiscreteState location, FunctionInterface dynamic)"
+ - \ref HybridAutomaton::new_invariant "HybridAutomaton::new_invariant(DiscreteState location, FunctionInterface predicate)"
+ - \ref HybridAutomaton::new_transition "HybridAutomaton::new_transition(DiscreteEvent event, DiscreteState source, DiscreteState target, FunctionInterface reset, FunctionInterface guard, bool urgency)"
 
 bearing in mind:
  - Every mode must correspond to different discrete state.

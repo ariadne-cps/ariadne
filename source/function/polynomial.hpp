@@ -36,10 +36,11 @@
 #include <map>
 #include <algorithm>
 
-#include "../algebra/multi_index.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/operations.hpp"
-#include "../algebra/differential.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
+#include "algebra/operations.hpp"
+#include "algebra/differential.hpp"
 
 
 namespace Ariadne {
@@ -78,11 +79,13 @@ template<class X> class PolynomialConstructors<UniIndex,X> {
     typedef UniIndex I;
   public:
     static Polynomial<I,X> constant(X const& c) { return Polynomial<I,X>::_constant(SizeOne(),c); }
-    static Polynomial<I,X> coordinate() { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero()); }
-    static Polynomial<I,X> variable() { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero()); }
+    static Polynomial<I,X> coordinate(X const& z) { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero(),z); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Polynomial<I,X> coordinate(PRS... prs) { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero(),X(0u,prs...)); }
+//    static Polynomial<I,X> variable() { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero()); }
     static Polynomial<I,X> constant(SizeOne as, X const& c) { return Polynomial<I,X>::_constant(as,c); }
-    static Polynomial<I,X> coordinate(SizeOne as, IndexZero j) { return Polynomial<I,X>::_coordinate(as,j); }
-    static Polynomial<I,X> variable(SizeOne as, IndexZero j) { return Polynomial<I,X>::_coordinate(as,j); }
+    static Polynomial<I,X> coordinate(SizeOne as, IndexZero j, X const& z) { return Polynomial<I,X>::_coordinate(as,j,z); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Polynomial<I,X> coordinate(SizeOne as, IndexZero j, PRS... prs) { return Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
+//    static Polynomial<I,X> variable(SizeOne as, IndexZero j) { return Polynomial<I,X>::_coordinate(as,j); }
 };
 
 template<class X> class PolynomialConstructors<MultiIndex,X> {
@@ -91,8 +94,11 @@ template<class X> class PolynomialConstructors<MultiIndex,X> {
     //! \brief Create a constant polynomial in \a as variables with value \a c.
     static Polynomial<I,X> constant(SizeType as, X const& c) { return Polynomial<I,X>::_constant(as,c); }
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
-    static Polynomial<I,X> coordinate(SizeType as, SizeType j) { return Polynomial<I,X>::_coordinate(as,j); }
-    static Polynomial<I,X> variable(SizeType as, SizeType j) { return Polynomial<I,X>::_coordinate(as,j); }
+    static Polynomial<I,X> coordinate(SizeType as, SizeType j, X const& z) { return
+        Polynomial<I,X>::_coordinate(as,j,z); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Polynomial<I,X> coordinate(SizeType as, SizeType j, PRS... prs) { return
+        Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
+    template<class... PRS> static Polynomial<I,X> variable(SizeType as, SizeType j, PRS... prs) { return Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
 };
 
 
@@ -131,20 +137,24 @@ class Polynomial
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef ReverseLexicographicLess IndexComparisonType;
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
-    //! \brief The zero polynomial in the default number of variables.
-    explicit Polynomial();
+    //! \brief The zero polynomial in \a as variables, with zero taking properties from \a z.
+    explicit Polynomial(ArgumentSizeType as, X const& z);
     //! \brief The zero polynomial in \a as variables.
-    explicit Polynomial(ArgumentSizeType as);
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        explicit Polynomial(ArgumentSizeType as, PRS... prs);
     //! \brief Copy/conversion constructor.
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy> Polynomial(const Polynomial<I,XX>& p);
     //! \brief Copy/conversion constructor.
     template<class XX> explicit Polynomial(const Expansion<I,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst);
-    //@}
+    //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        explicit Polynomial(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
+    //!@}
 
     //! \brief Create the null polynomial in the same number of variables.
     Polynomial<I,X> create_zero() const;
@@ -154,21 +164,23 @@ class Polynomial
 
     //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
-    static Argument<Polynomial<I,X>> coordinates(ArgumentSizeType as);
-    static Argument<Polynomial<I,X>> variables(ArgumentSizeType as);
+    static Argument<Polynomial<I,X>> coordinates(ArgumentSizeType as, X const& z);
+    static Argument<Polynomial<I,X>> variables(ArgumentSizeType as, X const& z);
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static coordinates(ArgumentSizeType as, PRS... prs) { return coordinates(as,X(0u,prs...)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static variables(ArgumentSizeType as, PRS... prs) { return variables(as,X(0u,prs...)); }
 
-    //! \brief Set equal to a constant.
+    //! \brief %Set equal to a constant.
     Polynomial<I,X>& operator=(const X& x);
-    //@{
+    //!@{
     //! \name Comparisons
 
     //! \brief Equality operator.
     template<class XX> EqualityType<X,XX> operator==(const Polynomial<I,XX>& p) const;
     //! \brief Inequality operator.
     template<class XX> InequalityType<X,XX> operator!=(const Polynomial<I,XX>& p) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
 
     //! \brief The number of variables in the argument of the polynomial.
@@ -187,9 +199,11 @@ class Polynomial
     const Expansion<I,X>& expansion() const;
     //! \brief A reference to the raw data expansion.
     Expansion<I,X>& expansion();
-    //@}
+    //! \brief A zero value usable as a coefficient.
+    X const& zero_coefficient() const;
+    //!@}
 
-    //@{
+    //!@{
     //! \name Iterators
 
     //! \brief An Iterator to the beginning of the list of terms.
@@ -204,10 +218,10 @@ class Polynomial
     ConstIterator end() const;
     //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
     ConstIterator find(const I& a) const;
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Modifying operations
 
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
@@ -216,20 +230,20 @@ class Polynomial
     Void reserve(SizeType n);
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
     Void erase(Iterator iter);
-    //! \brief Set the polynomial to zero.
+    //! \brief %Set the polynomial to zero.
     Void clear();
     //! \brief Remove all zero terms from the expansion, and order the expansion reverse lexicographically by term.
     Void cleanup();
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Evaluation
 
     //! Evaluate on a vector of algebra elements.
     template<class A> A operator() (Vector<A> const&) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Modifying operators
 
     //! \brief Truncate to degree \a d.
@@ -238,9 +252,9 @@ class Polynomial
     Polynomial<I,X>& differentiate(VariableIndexType j);
     //! \brief Antidifferentiate (integrate) with respect to the \a j<sup>th</sup> variable.
     Polynomial<I,X>& antidifferentiate(VariableIndexType j);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Related operations
     friend Polynomial<I,X>& operator*=(Polynomial<I,X>& p, const Monomial<I,X>& m) { return Polynomial<I,X>::_imul(p,m); }
 
@@ -251,11 +265,11 @@ class Polynomial
     template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
     template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
     template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
-    //@}
+    //!@}
 
     Void check() const;
     static Polynomial<I,X> _constant(ArgumentSizeType as, const X& c);
-    static Polynomial<I,X> _coordinate(ArgumentSizeType as, VariableIndexType j);
+    static Polynomial<I,X> _coordinate(ArgumentSizeType as, VariableIndexType j, X const& z);
     static Polynomial<UniIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<UniIndex,X>>& q);
     static Polynomial<MultiIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<MultiIndex,X>>& q);
     static X _evaluate(const Polynomial<I,X>& p, const ArgumentOf<I,X>& vx);
@@ -311,6 +325,13 @@ template<class I, class X> template<class XX, EnableIf<IsConvertible<XX,X>>> Pol
 
 template<class I, class X> template<class XX> Polynomial<I,X>::Polynomial(const Expansion<I,XX>& e)
     : _expansion(e) { this->cleanup(); }
+
+template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>>
+Polynomial<I,X>::Polynomial(ArgumentSizeType as, PRS... prs) : Polynomial(as,X(0u,prs...)) { }
+
+template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs)
+    : _expansion(lst,prs...) { this->cleanup(); }
 
 template<class I, class X> template<class XX> EqualityType<X,XX> Polynomial<I,X>::operator==(const Polynomial<I,XX>& p) const {
     const_cast<Polynomial<I,X>*>(this)->cleanup();
@@ -378,31 +399,31 @@ template<class I, class X> inline MultivariatePolynomial<MidpointType<X>> midpoi
 // Vectorised operations
 template<class I, class X, class A> Vector<A> evaluate(const Vector<Polynomial<I,X>>& p, const Vector<A>& v) {
     Vector<A> r(p.size(),v.zero_element());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=evaluate(p[i],v); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=evaluate(p[i],v); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> derivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> antiderivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> truncate(const Vector<Polynomial<I,X>>& p, DegreeType d) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;
 }
 
 template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<Polynomial<I,X>>& p) {
     Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
     return r;
 }
 

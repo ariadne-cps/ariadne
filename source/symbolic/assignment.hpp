@@ -34,17 +34,17 @@
 #include <string>
 
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/functional.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/string.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/functional.hpp"
+#include "utility/stlio.hpp"
+#include "utility/string.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../symbolic/variables.hpp"
-#include "../symbolic/expression.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/expression.hpp"
 
 namespace Ariadne {
 
@@ -140,9 +140,18 @@ template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> Dotte
 }
 
 
+//! \relates Assignment
+//! \brief Sort a list of assignments so that an assigned-to variable is only used after it is assigned.
+List<RealAssignment> algebraic_sort(const List<RealAssignment>& assignments);
+
+//! \relates Assignment
+//! \brief Make a function on a Euclidean domain given an ordered list of assignments,
+//! so that assigned variables can be used in the definition of other variables.
+EffectiveVectorMultivariateFunction make_function(const List<RealAssignment>& assignments, const RealSpace& arguments);
+
 } // namespace Ariadne
 
-#include "../symbolic/valuation.hpp"
+#include "symbolic/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

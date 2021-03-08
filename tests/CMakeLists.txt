@@ -1,7 +1,8 @@
-add_custom_target(tests)
 add_custom_target(tests-cpp)
 add_custom_target(tests-core)
 add_custom_target(tests-kernel)
+
+add_dependencies(everything tests)
 
 add_subdirectory(numeric)
 add_subdirectory(algebra)

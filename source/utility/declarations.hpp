@@ -31,21 +31,21 @@
 
 #include <iosfwd>
 
-#include "../utility/metaprogramming.hpp"
-#include "../utility/typedefs.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/typedefs.hpp"
 
-#include "../numeric/paradigm.hpp"
-#include "../numeric/logical.decl.hpp"
-#include "../numeric/number.decl.hpp"
-#include "../numeric/float.decl.hpp"
+#include "numeric/paradigm.hpp"
+#include "numeric/logical.decl.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
-#include "../algebra/linear_algebra.decl.hpp"
-#include "../algebra/differential.decl.hpp"
+#include "algebra/linear_algebra.decl.hpp"
+#include "algebra/differential.decl.hpp"
 
-#include "../function/function.decl.hpp"
+#include "function/function.decl.hpp"
 
-#include "../geometry/interval.decl.hpp"
-#include "../geometry/box.decl.hpp"
+#include "geometry/interval.decl.hpp"
+#include "geometry/box.decl.hpp"
 
 namespace Ariadne {
 

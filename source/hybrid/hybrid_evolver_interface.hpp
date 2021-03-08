@@ -29,15 +29,15 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "../dynamics/evolver_interface.hpp"
+#include "dynamics/evolver_interface.hpp"
 
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_orbit.hpp"
 
-#include "../hybrid/discrete_event.hpp"
+#include "hybrid/discrete_event.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 
@@ -50,13 +50,12 @@ class HybridEnclosure;
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
     : public EvolverInterface<HybridAutomatonInterface,HybridEnclosure,HybridTerminationCriterion>
-    , public Loggable
 {
   public:
     //! \brief Make a dynamically-allocated copy.
     virtual HybridEvolverInterface* clone() const = 0;
 
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
@@ -72,9 +71,9 @@ class HybridEvolverInterface
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const = 0;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
@@ -82,7 +81,7 @@ class HybridEvolverInterface
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridBoundedConstraintSet& initial_set) const = 0;
 
-    //@}
+    //!@}
 
 };
 

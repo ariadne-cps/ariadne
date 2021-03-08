@@ -40,7 +40,7 @@ namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for real numbers.
-//! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatLowerBound.
+//! \sa UpperReal, FloatDP, FloatMP, Bounds, LowerBound.
 template<class F> class UpperBound
     : public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
     , public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
@@ -52,15 +52,22 @@ template<class F> class UpperBound
   protected:
     typedef UpperTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
+    //! <p/>
     typedef UpperTag Paradigm;
+    //! <p/>
     typedef UpperBound<F> NumericType;
+    //! <p/>
     typedef ValidatedUpperNumber GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
-    UpperBound<F>() : _u(0.0) { }
-    explicit UpperBound<F>(PrecisionType pr) : _u(0.0,pr) { }
+    //! A upper bound of zero with precision \a pr.
+    explicit UpperBound<F>(PrecisionType pr) : _u(0.0_x,pr) { }
+    //! A upper bound with value \a u.
     explicit UpperBound<F>(RawType const& u) : _u(u) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> UpperBound<F>(N n, PR pr) : UpperBound<F>(ExactDouble(n),pr) { }
@@ -71,30 +78,47 @@ template<class F> class UpperBound
         UpperBound<F>(const Decimal& d, PR pr) : _u(d,up,pr) { }
         UpperBound<F>(const Rational& q, PR pr) : _u(q,up,pr) { }
         UpperBound<F>(const Real& r, PR pr);
+        UpperBound<F>(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        UpperBound<F>(const Bounds<F>& x, PR pr);
     UpperBound<F>(const UpperBound<F>& x, PR pr);
+    //! A upper bound of type \p F from a generic upper bound \a y.
     UpperBound<F>(const ValidatedUpperNumber& y, PR pr);
     template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
         UpperBound<F>(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
 
+    //! Convert from upper \em and lower bounds on a number.
     UpperBound<F>(Bounds<F> const& x);
     template<class FE> UpperBound<F>(Ball<F,FE> const& x);
     UpperBound<F>(Value<F> const& x);
     UpperBound<F>(Error<F> const& x); // FIXME: Remove
 
         UpperBound<F>& operator=(const Value<F>& x) { return *this=UpperBound<F>(x); }
+    //! Assign from the upper bound \a y, keeping the same precision.
     UpperBound<F>& operator=(const ValidatedUpperNumber& y) { return *this=UpperBound<F>(y,this->precision()); }
+    //! Create a upper bound from the generic upper bound \a y with the same precision as \a this.
     UpperBound<F> create(const ValidatedUpperNumber& y) const { return UpperBound<F>(y,this->precision()); }
+    //! Create a lower bound from the generic lower bound \a y with the same precision as \a this.
     LowerBound<F> create(const ValidatedLowerNumber& y) const { return LowerBound<F>(y,this->precision()); }
 
+    //! Downcast to a generic upper bound.
     operator ValidatedUpperNumber () const;
 
+    //! The precision of the floating-point type used.
     PrecisionType precision() const { return _u.precision(); }
+    //! The compuational properties needed to create the upper bound; equivalent to the precision.
     PropertiesType properties() const { return _u.precision(); }
+    //! Downcast to a generic upper bound.
     GenericType generic() const { return this->operator GenericType(); }
+    //! The raw data used to represent the upper bound.
     RawType const& raw() const { return _u; }
+    //! A mutable reference to the raw data used to represent the upper bound.
     RawType& raw() { return _u; }
+    //! Over-approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return _u.get_d(); }
   public:
+    friend Bool is_nan(UpperBound<F> const& x) {
+        return is_nan(x._u); }
+
     friend UpperBound<F> max(UpperBound<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(max(x1._u,x2._u)); }
     friend UpperBound<F> min(UpperBound<F> const& x1, UpperBound<F> const& x2) {
@@ -146,9 +170,6 @@ template<class F> class UpperBound
   public:
     friend LowerBound<F> neg(UpperBound<F> const& x);
     friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2);
-  public:
-    friend Approximation<F> rec(UpperBound<F> const& x);
-    friend Approximation<F> rec(LowerBound<F> const& x);
   public:
     friend UpperBound<F> operator*(PositiveBounds<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(mul(up,x2.raw()>=0?x1.upper().raw():x1.lower().raw(),x2.raw())); }
@@ -243,7 +264,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
         return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveLowerBound<F> const& x2) {
-        return div(x1,x2); }
+        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator*=(PositiveUpperBound<F>& x1, PositiveUpperBound<F> const& x2) {
         return x1=x1*x2; }
   public:
@@ -263,7 +284,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     friend PositiveUpperBound<F> operator/(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2) {
         return PositiveUpperBound<F>(div(down,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, Nat m2) {
-        return PositiveUpperBound<F>(div(up,x1.raw(),m2)); }
+        return PositiveUpperBound<F>(div(up,x1.raw(),F(m2,x1.precision()))); }
     friend PositiveLowerBound<F> operator/(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2);
 };
 

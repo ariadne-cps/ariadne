@@ -22,34 +22,34 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../hybrid/hybrid_simulator.hpp"
+#include "hybrid/hybrid_simulator.hpp"
 
-#include "../utility/array.hpp"
-#include "../utility/container.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/valuation.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/valuation.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
 
-#include "../function/function.hpp"
-#include "../function/formula.hpp"
-#include "../function/taylor_model.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../solvers/runge_kutta_integrator.hpp"
+#include "solvers/runge_kutta_integrator.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 
 namespace Ariadne {
@@ -59,9 +59,8 @@ template<class T> class Orbit;
 class DegenerateCrossingException { };
 
 HybridSimulator::HybridSimulator()
-    : _step_size(0.125)
+    : _step_size(0.125_x,dp)
 {
-    this->charcode="s";
 }
 
 Void HybridSimulator::set_step_size(double h)
@@ -98,19 +97,16 @@ Bool satisfies_invariants(const HybridAutomatonInterface& system, const Discrete
 
 template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace& sspc) {
     if(hpt.space()==sspc) { return hpt.point(); }
-    Map<RealVariable,X> values=hpt.values();
-    Point<X> pt(sspc.dimension());
-    for(Nat i=0; i!=pt.size(); ++i) {
-        pt[i]=values[sspc.variable(i)];
-    }
+    Map<RealVariable,X> const values=hpt.values();
+    Point<X> pt(sspc.dimension(),[&](SizeType i){return values[sspc.variable(i)];});
     return pt;
 }
 
 template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const DiscreteLocation& location, const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
-    Point<X> sapt(saspc.dimension());
+    Point<X> sapt(saspc.dimension(),spt.zero_element());
     Point<X> apt = evaluate(auxiliary_function,spt);
-    for(Nat i=0; i!=sapt.size(); ++i) {
+    for(SizeType i=0; i!=sapt.size(); ++i) {
         RealVariable var = saspc.variable(i);
         sapt[i]= sspc.contains(var) ? spt[sspc[var]] : apt[aspc[var]];
     }
@@ -133,8 +129,9 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
-    DoublePrecision pr;
-    HybridTime t(0.0,0);
+    ARIADNE_LOG_SCOPE_CREATE;
+
+    HybridTime t(0.0_x,0);
     Dyadic h(ExactDouble(this->_step_size.get_d()));
     HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
 
@@ -157,16 +154,16 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG(1, (verbosity == 1 ? "\r" : "")
-                << "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
+        ARIADNE_LOG_PRINTLN_AT(1,
+                "t=" << std::setw(4) << std::left << t.continuous_time().lower().compute(Effort(0u))
                 << " #e=" << std::left << t.discrete_time()
                 << " p=" << point
                 << " l=" << std::left << location
                 << " e=" << std::left << event_trace
-                << " \n" << std::setprecision(old_precision));
+                << std::setprecision(old_precision));
 
         if (not satisfies_invariants(system, location, point)) {
-            ARIADNE_LOG(2,"invariant/progress condition not satisfied, stopping evolution.\n");
+            ARIADNE_LOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
             break;
         }
 
@@ -191,7 +188,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             next_point=reset(point);
             event_trace.push_back(event);
 
-            ARIADNE_LOG(2,"event " << event << " enabled: next point " << next_point << ", on location " << target << "\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
 
             dynamic=system.dynamic_function(location);
             guards=guard_functions(system,location);

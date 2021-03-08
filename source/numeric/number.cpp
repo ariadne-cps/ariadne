@@ -26,10 +26,8 @@
  *  \brief
  */
 
-
-
-#include "../utility/module.hpp"
-#include "../numeric/paradigm.hpp"
+#include "utility/module.hpp"
+#include "numeric/paradigm.hpp"
 
 #include "casts.hpp"
 #include "number.hpp"
@@ -44,57 +42,51 @@
 #include "number_interface.hpp"
 #include "number_wrapper.hpp"
 
+#include "float_value.hpp"
+#include "float_ball.hpp"
+#include "float_bounds.hpp"
+#include "float_upper_bound.hpp"
+#include "float_lower_bound.hpp"
+#include "float_approximation.hpp"
+
 /************ Number *********************************************************/
 
 namespace Ariadne {
 
 using NumberHandle = Handle<NumberInterface>;
 
-// Declare operations for Integer and Rational numbers
-Real sqrt(Real const&);
-Real exp(Real const&);
-Real log(Real const&);
-Real sin(Real const&);
-Real cos(Real const&);
-Real tan(Real const&);
-Real asin(Real const&);
-Real acos(Real const&);
-Real atan(Real const&);
 
-template<> struct DispatchingTraits<Integer> { typedef Aware<Integer> AwareOfTypes; };
+// Define declared Approximation operations
+Approximation<FloatDP> pow(Approximation<FloatDP> const& x, Integer const& n) {
+    return Approximation<FloatDP>(pow(approx,x._a,n.get_si())); }
+Approximation<FloatMP> pow(Approximation<FloatMP> const& x, Integer const& n) {
+    return Approximation<FloatMP>(pow(approx,x._a,n.get_si())); }
+
+
+
+
+
 template class NumberWrapper<Integer>;
-template<> struct DispatchingTraits<Dyadic> { typedef Aware<Dyadic,Integer> AwareOfTypes; };
 template class NumberWrapper<Dyadic>;
-template<> struct DispatchingTraits<Rational> { typedef Aware<Rational,Dyadic,Integer> AwareOfTypes; };
 template class NumberWrapper<Rational>;
-
-template<> struct DispatchingTraits<Real> { typedef Aware<Real> AwareOfTypes; };
 template class NumberWrapper<Real>;
 
 ExactDouble::operator ExactNumber() const { return Dyadic(*this).operator ExactNumber(); }
-//ExactDouble::operator ExactNumber() const { if(std::isfinite(this->get_d()) { return Dyadic(*this).operator ExactNumber(); } else { return ExactNumber(new NumberWrapper<ExactDouble>(*this)); } }
 Integer::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Integer>(*this)); }
 Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyadic>(*this)); }
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
+FloatDPBounds NumberInterface::_get(ValidatedTag, DoublePrecision pr) const { return this->_get(OrderTag(),pr); }
+FloatMPBounds NumberInterface::_get(ValidatedTag, MultiplePrecision pr) const { return this->_get(OrderTag(),pr); }
+
 FloatDPBall NumberInterface::_get(MetricTag p, DoublePrecision pr) const { return this->_get(p,pr,pr); }
 FloatMPBall NumberInterface::_get(MetricTag p, MultiplePrecision pr) const { return this->_get(p,pr,pr); }
 
-//template<class X> struct DispatchingTraits<Value<X>> { typedef Aware<Value<X>,Integer,Dyadic> AwareOfTypes; };
-template<class F> struct DispatchingTraits<Value<F>> {
-    typedef Aware<Dyadic,Integer> AwareOfTypes; };
-template<class F> struct DispatchingTraits<Bounds<F>> {
-    typedef Aware<Value<F>,Bounds<F>,Integer,Dyadic,Rational> AwareOfTypes; };
-template<class F> struct DispatchingTraits<Approximation<F>> {
-    typedef Aware<Value<F>,Bounds<F>,Approximation<F>,Integer,Dyadic,Rational> AwareOfTypes; };
-
-template<class F, class FE> struct DispatchingTraits<Ball<F,FE>> {
-    typedef Aware<Ball<F,FE>,Value<F>,Bounds<F>,Approximation<F>,Integer,Dyadic,Rational> AwareOfTypes; };
 
 template class NumberWrapper<FloatDPApproximation>;
-//template class NumberWrapper<FloatDPLowerBound>;
-//template class NumberWrapper<FloatDPUpperBound>;
+template class NumberWrapper<FloatDPLowerBound>;
+template class NumberWrapper<FloatDPUpperBound>;
 template class NumberWrapper<FloatDPBounds>;
 template class NumberWrapper<FloatDPBall>;
 template class NumberWrapper<FloatDPValue>;
@@ -114,8 +106,8 @@ template<> FloatDPError::operator ValidatedErrorNumber() const { return Validate
 template<> FloatMPError::operator ValidatedErrorNumber() const { return ValidatedErrorNumber(new NumberWrapper<FloatMPValue>(cast_exact(*this))); }
 
 template class NumberWrapper<FloatMPApproximation>;
-//template class NumberWrapper<FloatMPLowerBound>;
-//template class NumberWrapper<FloatMPUpperBound>;
+template class NumberWrapper<FloatMPLowerBound>;
+template class NumberWrapper<FloatMPUpperBound>;
 template class NumberWrapper<FloatMPBounds>;
 template class NumberWrapper<FloatMPBall>;
 template class NumberWrapper<FloatMPValue>;
@@ -129,10 +121,10 @@ template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new N
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 
-inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
-    return y1.get(dp).raw() <= y2.get(dp).raw(); }
+//inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
+//    return y1.get(dp).raw() <= y2.get(dp).raw(); }
 
-Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y) {
+PositiveValidatedUpperNumber mag(PositiveValidatedUpperNumber const& y) {
     return y; }
 
 

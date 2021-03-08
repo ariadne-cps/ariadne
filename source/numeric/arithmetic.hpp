@@ -29,7 +29,7 @@
 #ifndef ARIADNE_ARITHMETIC_HPP
 #define ARIADNE_ARITHMETIC_HPP
 
-#include "../utility/metaprogramming.hpp"
+#include "utility/metaprogramming.hpp"
 #include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "sign.hpp"
@@ -277,7 +277,7 @@ template<class X, class R=X> struct DeclareInplaceFieldOperators : DeclareInplac
 template<class X, class NX, class R=X, class NR=NX> struct DeclareDirectedGroupOperations
     : DeclareInplaceDirectedGroupOperators<X,NX,R>
 {
-    //@{
+    //!@{
     //! \name Named operations.
 
     //! \brief Zero \a 0. Preserves accuracy parameters.
@@ -293,10 +293,10 @@ template<class X, class NX, class R=X, class NR=NX> struct DeclareDirectedGroupO
     //! \brief Difference \a x1-x2. May be implemented in terms of add() and neg() as <code>add(x1,neg(x2))</code>.
     friend R sub(X const& x1, NX const& x2);
     friend NR sub(NX const& x1, X const& x2);
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name  Standard overloadable operators.
 
     //! \brief Positive \a +x. Usually dispatches to <code>pos(x)</code>
@@ -309,7 +309,7 @@ template<class X, class NX, class R=X, class NR=NX> struct DeclareDirectedGroupO
     //! \brief Difference \a x1-x2. Usually dispatches to <code>sub(x1,x2)</code>
     friend R operator-(X const& x1, NX const& x2);
     friend NR operator-(NX const& x1, X const& x2);
-    //@}
+    //!@}
 };
 
 //! \ingroup NumericAlgebraSubModule
@@ -324,7 +324,7 @@ template<class X, class R=X> struct DeclareGroupOperations
 template<class X, class R=X, class PR=R> struct DeclareRingOperations
     : DeclareGroupOperations<X,R>
 {
-    //@{
+    //!@{
     //! \name Named operations.
 
     //! \brief Square \a x^2.
@@ -333,16 +333,16 @@ template<class X, class R=X, class PR=R> struct DeclareRingOperations
     friend R mul(X const& x1, X const& x2);
     //! \brief Power \a x<sup>m</sup>. May be implemented in terms of mul() and/or sqr().
     friend R pow(X const& x, Nat m);
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name  Standard overloadable operators.
 
     //! \brief Product \a x1*x2. Usually dispatches to <code>mul(x1,x2)</code>
     friend R operator*(X const& x1, X const& x2);
 
-    //@}
+    //!@}
 };
 
 //! \ingroup NumericAlgebraSubModule

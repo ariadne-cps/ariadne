@@ -30,10 +30,10 @@
 #define ARIADNE_PAVING_INTERFACE_HPP
 
 #include <iosfwd>
-#include "../utility/declarations.hpp"
-#include "../geometry/grid_cell.hpp"
-#include "../geometry/set_interface.hpp"
-#include "../output/graphics_interface.hpp"
+#include "utility/declarations.hpp"
+#include "geometry/grid_cell.hpp"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -126,7 +126,7 @@ class SubPavingInterface;
 //! NOTE: Since operations modifying a sub-paving modify the original paving, we need to be careful with constantness, in particular when making copies.
 //! This may be an issue in the branch method or when implementing Handle classes.
 class SubPavingInterface
-    : public virtual ValidatedLocatedSetInterface
+    : public virtual LocatedSetInterface<ValidatedTag,RealVector>
     , public virtual DrawableInterface
 {
     friend class SubPavingHandle;
@@ -240,10 +240,10 @@ class PavingInterface
     virtual PavingInterface* clone() const = 0;
     virtual GridCell smallest_enclosing_primary_cell(const UpperBoxType& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
     virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat fineness) { ARIADNE_ABSTRACT_METHOD; }
-    virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat fineness) = 0;
+    virtual Void adjoin_outer_approximation(const EffectiveEuclideanCompactSetInterface& set, const Nat fineness) = 0;
     virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat fineness) = 0;
-    virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat extent, const Nat fineness) = 0;
-    virtual Void adjoin_inner_approximation(const SetInterface& set, const Nat fineness) = 0;
+    virtual Void adjoin_inner_approximation(const EffectiveEuclideanOpenSetInterface& set, const Nat extent, const Nat fineness) = 0;
+    virtual Void adjoin_inner_approximation(const EffectiveEuclideanSetInterface& set, const Nat fineness) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
     virtual Void restrict(const SubPavingInterface& paving) = 0;
     virtual Void remove(const SubPavingInterface& paving) = 0;
@@ -284,9 +284,9 @@ class PavingHandle
 
     //GridCell smallest_enclosing_primary_cell(const ExactBoxType& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
     Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat fineness) { return this->_ptr->adjoin_cells(predicate,fineness); }
-    Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat fineness) { return this->_ptr->adjoin_outer_approximation(set,fineness); }
-    Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat extent, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,extent,fineness); }
-    Void adjoin_inner_approximation(const SetInterface& set, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,fineness); }
+    Void adjoin_outer_approximation(const EffectiveEuclideanCompactSetInterface& set, const Nat fineness) { return this->_ptr->adjoin_outer_approximation(set,fineness); }
+    Void adjoin_inner_approximation(const EffectiveEuclideanOpenSetInterface& set, const Nat extent, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,extent,fineness); }
+    Void adjoin_inner_approximation(const EffectiveEuclideanSetInterface& set, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,fineness); }
     Void adjoin(const SubPavingInterface& paving) { return this->_ptr->adjoin(paving); }
     Void restrict(const SubPavingInterface& paving) { return this->_ptr->restrict(paving); }
     Void remove(const SubPavingInterface& paving) { return this->_ptr->remove(paving); }

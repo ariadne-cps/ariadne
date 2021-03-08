@@ -30,9 +30,9 @@
 #ifndef ARIADNE_EXPRESSION_TEMPLATES_HPP
 #define ARIADNE_EXPRESSION_TEMPLATES_HPP
 
-#include "../numeric/operators.hpp"
-#include "../numeric/integer.hpp"
-#include "../numeric/sequence.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/sequence.hpp"
 
 namespace Ariadne {
 

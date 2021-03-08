@@ -99,6 +99,11 @@ template<class T> inline List<T> catenate(const List<T>& l1, const T& t2) {
     r.append(t2);
     return r;
 }
+template<class T, class F, EnableIf<IsInvocable<F,T>> =dummy> inline
+List<InvokeResult<F,T>> apply(F&& f, List<T> const& lst) {
+    typedef InvokeResult<F,T> R; List<R> res; res.reserve(lst.size());
+    for (auto itm : lst) { res.append(f(itm)); } return res;
+}
 
 template<class T> OutputStream& operator<<(OutputStream& os, const std::vector<T>& v) {
     bool first=true;
@@ -179,6 +184,9 @@ template<class T> class Set : public std::set<T> {
             this->std::set<T>::erase(static_cast<const T&>(*iter)); }
         return *this; }
 };
+template<class T, class F, EnableIf<IsInvocable<F,T>> =dummy> inline
+Set<InvokeResult<F,T>> apply(F&& f, Set<T> const& set) {
+    typedef InvokeResult<F,T> R; Set<R> res; for (auto itm : set) { res.adjoin(f(itm)); } return res; }
 template<class T> inline Set<T> join(Set<T> s1, Set<T> const& s2) {
     s1.adjoin(s2); return s1; }
 template<class T> inline bool contains(const std::set<T>& s, const T& t) {
@@ -223,6 +231,8 @@ template<class K, class T> class Map : public std::map<K,T> {
   public:
     typedef typename std::map<K,T>::iterator Iterator;
     typedef typename std::map<K,T>::const_iterator ConstIterator;
+    template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
+        Map(const std::map<K,TT>& m) : std::map<K,T>(m.begin(),m.end()) { }
     using std::map<K,T>::map;
     using std::map<K,T>::insert;
     T& operator[](K k) { return this->std::map<K,T>::operator[](k); }

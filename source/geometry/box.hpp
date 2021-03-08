@@ -29,13 +29,13 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "../utility/container.hpp"
+#include "utility/container.hpp"
 
-#include "../numeric/logical.hpp"
-#include "../numeric/floatdp.hpp"
-#include "../geometry/interval.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/set_interface.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/floatdp.hpp"
+#include "geometry/interval.hpp"
+#include "geometry/point.hpp"
+#include "geometry/set_interface.hpp"
 
 #include "box.decl.hpp"
 
@@ -65,8 +65,11 @@ class Box
     typedef typename I::WidthType W;
     typedef decltype(max(declval<L>(),declval<U>())) V;
   public:
+    //! \brief The type used for drawing ListSet of Box. FIXME: Should not be present
+    typedef DrawableInterface DrawableInterfaceType;
+
     //! \brief The type returned by the dimension() method.
-    typedef SizeType DimensionType;
+    typedef Ariadne::DimensionType DimensionType;
     //! The type used for a component interval.
     typedef I IntervalType;
     //! The type used for the lower bound of a component interval.
@@ -157,14 +160,14 @@ class Box
     //! The bounding box.
     Box<IntervalType> bounding_box() const;
 
-    //! \brief Test if the box is empty.
+    //! \brief Test if the box is empty. Returns the same type as IntervalType::is_empty().
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    //! \brief Test if the box is bounded.
+    //! \brief Test if the box is bounded.Returns the same type as IntervalType::is_bounded().
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
-    //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
+    //! Splits the box along coordinate \a k and takes the lower , middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SizeType k, SplitPart lmu) const;
-    //! Splits the box along the longest direction \a k and takes the lower, middle, or upper part as given by \a lmu.
+    //! Splits the box along the longest direction \a k and takes the lower , middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SplitPart lmu) const;
     //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split(SizeType k) const;
@@ -468,15 +471,13 @@ template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
 }
 
 template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {
-    Vector<decltype(cast_singleton(declval<I>()))> v(bx.dimension());
-    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i]); }
-    return v;
+    typedef decltype(cast_singleton(declval<I>())) X;
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i]);});
 }
 
 template<class I, class PR> inline auto cast_singleton(Box<I> const& bx, PR pr) -> Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> {
-    Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> v(bx.dimension(),pr);
-    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i],pr); }
-    return v;
+    typedef decltype(cast_singleton(declval<I>(),declval<PR>())) X;
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i],pr);});
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
@@ -504,7 +505,7 @@ inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPAppro
     FloatDPApproximation eps(e);
     FloatDPApproximateBox r(bx.dimension());
     for(DimensionType i=0; i!=bx.dimension(); ++i) {
-        r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
+        r[i]=ApproximateIntervalType(bx[i].lower_bound()-eps,bx[i].upper_bound()+eps);
     }
     return r;
 }
@@ -518,7 +519,7 @@ inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, FloatDPUpperBound eps) {
 }
 // TODO: Add widen for other generic values
 inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, ValidatedUpperNumber eps) {
-    return widen(bx,eps.get(UpperTag(),dp));
+    return widen(bx,eps.get(dp));
 }
 
 inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {
@@ -561,12 +562,13 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
 template<class IVL> class BoxSet;
 
 template<> class BoxSet<ExactIntervalType>
-    : public virtual RegularLocatedSetInterface,
-      public virtual DrawableInterface,
-      public Box<ExactIntervalType>
+    : public virtual EffectiveEuclideanRegularLocatedSetInterface
+    ,  public virtual DrawableInterface
+    ,  public Box<ExactIntervalType>
 {
 
   public:
+    typedef typename EuclideanSetTraits::DimensionType DimensionType;
     using Box<ExactIntervalType>::Box;
     BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
@@ -602,12 +604,14 @@ template<> class BoxSet<ApproximateIntervalType>
 
 
 template<> class BoxSet<RealInterval>
-    : public virtual RegularLocatedSetInterface
+    : public virtual RegularLocatedSetInterface<EffectiveTag,RealVector>
     , public virtual DrawableInterface
     , public Box<RealInterval>
 {
     using BoxType = Box<RealInterval>;
   public:
+    typedef typename EuclideanSetTraits::DimensionType DimensionType;
+
     using Box<RealInterval>::Box;
     BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 

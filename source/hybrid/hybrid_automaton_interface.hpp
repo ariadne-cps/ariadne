@@ -30,9 +30,9 @@
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
 
 #include <cassert>
-#include "../function/function.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../hybrid/discrete_location.hpp"
+#include "function/function.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 
@@ -57,7 +57,7 @@ class HybridStorage;
 //! \defgroup SystemSpecificationErrors System specification errors
 //! \ingroup HybridAutomataSubModule
 //! \brief  Exception classes reporting system specification errors
-///@{
+///!@{
 
 //! \ingroup SystemModule
 //! \brief Base class for an error in system specification.
@@ -163,13 +163,15 @@ class IndistinguishableLocationsError : public StateSpecificationError {
     IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
 };
 
-//! .
+//! \brief A discrete location defines more variables than are needed to specify the discrete mode.
+//! \details Only relevant for a complete hybrid automaton,
+//! since a component automaton need not recognise all discrete variables.
 class OverspecifiedLocationException : public IndistinguishableLocationsError {
   public:
     OverspecifiedLocationException(const StringType& what) : IndistinguishableLocationsError(what) { }
 };
 
-///@}
+///!@}
 
 
 //! \ingroup SystemModule
@@ -193,13 +195,13 @@ class HybridAutomatonInterface {
     //! \brief Cloning operator.
     virtual HybridAutomatonInterface* clone() const = 0;
 
-    //@{
+    //!@{
     //! \name Data access and queries.
 
     //! \brief The name of the automaton.
     virtual const Identifier& name() const = 0;
 
-    //@{
+    //!@{
     //! \name Methods for testing and extracting the discrete dynamics.
 
     //! \brief Test if the hybrid automaton has a valid discrete mode \a location.
@@ -223,9 +225,9 @@ class HybridAutomatonInterface {
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const = 0;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods for extracting the continuous dynamics.
 
     //! \brief The dimension of the state space in the given \a location.
@@ -262,14 +264,14 @@ class HybridAutomatonInterface {
     virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); return List<RealExpression>(); }
 
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output methods
 
     //! \brief Write to an output stream.
     virtual OutputStream& _write(OutputStream& os) const = 0;
-    //@}
+    //!@}
 
 };
 
@@ -285,7 +287,7 @@ inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
         case EventKind::PERMISSIVE: os<<"permissive"; break;
         case EventKind::URGENT: os<<"urgent"; break;
         case EventKind::IMPACT: os<<"impact"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled EventKind for output streaming.\n");
+        default: ARIADNE_FAIL_MSG("Unhandled EventKind for output streaming.");
     } return os;
 }
 

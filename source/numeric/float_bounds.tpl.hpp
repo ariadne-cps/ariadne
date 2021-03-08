@@ -48,8 +48,8 @@ template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> co
 template<class F> Bounds<F>::Bounds(Real const& x, PR pr) : Bounds(x.get(pr)) {}
 template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, ValidatedUpperNumber const& upper) : Bounds<F>(lower,lower.create(upper)) { }
 template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, UpperBound<F> const& upper) : Bounds<F>(upper.create(lower),upper) { }
-template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr) : Bounds<F>(lower.get(LowerTag(),pr),upper.get(UpperTag(),pr)) { }
-template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr) : Bounds(y.get(BoundedTag(),pr)) {}
+template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr) : Bounds<F>(lower.get(pr),upper.get(pr)) { }
+template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr) : Bounds(y.get(pr)) {}
 template<class F> Bounds<F>::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Bounds<F>>(*this));}
 
 
@@ -90,7 +90,7 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
     ARIADNE_ASSERT(y.lower_raw()<=pi_val.upper_raw());
     ARIADNE_ASSERT(y.upper_raw()>=-pi_val.upper_raw());
 
-    F rl,ru;
+    F rl(prec),ru(prec);
     if(y.lower_raw()<=-pi_val.lower_raw()) {
         if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
         else { rl=-one; ru=+one; }
@@ -117,16 +117,16 @@ template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x) -> Boun
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
-    if(tu<xu) { F::set_rounding_upward(); tu+=fm; }
+    if(tu<xu) { F::set_rounding_upward(); tu=tu+fm; }
     volatile float tl=xl;
-    if(tl>xl) { F::set_rounding_downward(); tl-=fm; }
+    if(tl>xl) { F::set_rounding_downward(); tl=tl-fm; }
     F::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
-    return Bounds<F>(double(tl),double(tu));
+    return Bounds<F>(ExactDouble(tl),ExactDouble(tu),x.precision());
 }
 
 template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x, Nat n) -> Bounds<F> {
-    Bounds<F> _e=Bounds<F>(std::pow(2.0,52-(Int)n));
+    Bounds<F> _e=Bounds<F>(ExactDouble(std::pow(2.0,52-(Int)n)),x.precision());
     Bounds<F> y=x+_e; return y-_e;
 }
 
@@ -155,7 +155,7 @@ template<class F> auto Operations<Bounds<F>>::_cast_integer(Bounds<F> const& x) 
 
 template<class F> auto Operations<Bounds<F>>::_read(InputStream& is, Bounds<F>& x) -> InputStream& {
     char cl,cm,cr;
-    F _l,_u;
+    F _l(x.precision()),_u(x.precision());
     auto rnd=F::get_rounding_mode();
     is >> cl;
     F::set_rounding_downward();

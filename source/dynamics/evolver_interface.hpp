@@ -77,7 +77,7 @@ class EvolverInterface
     virtual OutputStream& _write(OutputStream& os) const = 0;
 
   public:
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
@@ -108,7 +108,7 @@ class EvolverInterface
                  const TerminationType& time,
                  Semantics semantics) const = 0;
 
-    //@}
+    //!@}
 
 };
 

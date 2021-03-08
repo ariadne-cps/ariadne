@@ -186,7 +186,7 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestFloatApproximation<DoublePrecision>(dp).test();
-    TestFloatApproximation<MultiplePrecision>(MultiplePrecision(128)).test();
+    TestFloatApproximation<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

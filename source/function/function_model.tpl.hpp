@@ -26,18 +26,18 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../function/function_model.hpp"
+#include "function/function_model.hpp"
 
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/function.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/operations.hpp"
-#include "../function/domain.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
+#include "function/domain.hpp"
 
 namespace Ariadne {
 

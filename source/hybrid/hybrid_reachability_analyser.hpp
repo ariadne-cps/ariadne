@@ -30,20 +30,20 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 
 
-#include "../solvers/configuration_interface.hpp"
-#include "../dynamics/reachability_analyser.hpp"
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/hybrid_set_interface.hpp"
-#include "../hybrid/hybrid_evolver_interface.hpp"
-#include "../hybrid/hybrid_reachability_analyser_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "dynamics/reachability_analyser.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "hybrid/hybrid_evolver_interface.hpp"
+#include "hybrid/hybrid_reachability_analyser_interface.hpp"
 
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_grid.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
-#include "../hybrid/hybrid_storage.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_grid.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_storage.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 
 namespace Ariadne {
@@ -84,7 +84,7 @@ class HybridReachabilityAnalyser
   public:
     typedef HybridReachabilityAnalyserConfiguration ConfigurationType;
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Construct from an evolver.
@@ -92,7 +92,7 @@ class HybridReachabilityAnalyser
 
     //! \brief Make a dynamically-allocated copy.
     virtual HybridReachabilityAnalyser* clone() const;
-    //@}
+    //!@}
 
   protected:
     Void _adjoin_upper_reach_evolve(HybridStorage& reach_cells,
@@ -262,8 +262,8 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! \brief Check the consistency in respect to the system space, then set the grid.
     Void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
-    Void set_scaling(const RealVariable& v, RawFloatDP s) {
-        dynamic_cast<SimpleHybridScalings&>(static_cast<HybridScalingsInterface&>(this->grid().scalings())) .set_scaling(v,FloatDPValue(s)); }
+    Void set_scaling(const RealVariable& v, ApproximateDouble s) {
+        dynamic_cast<SimpleHybridScalings&>(static_cast<HybridScalingsInterface&>(this->grid().scalings())) .set_scaling(v,s); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

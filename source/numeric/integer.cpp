@@ -27,13 +27,13 @@
  */
 
 
-#include "../utility/stdlib.hpp"
+#include "utility/stdlib.hpp"
 
 #include "integer.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/string.hpp"
-#include "../numeric/logical.hpp"
+#include "utility/macros.hpp"
+#include "utility/string.hpp"
+#include "numeric/logical.hpp"
 
 #include <limits>
 
@@ -58,7 +58,7 @@ bin(uint8_t n, uint8_t k)
 {
     ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
@@ -86,7 +86,7 @@ bin(uint16_t n, uint16_t k)
 {
     ARIADNE_ASSERT(n<16);  // Maximum computable bin(n,n/2) using 16 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint16_t r=1;
@@ -114,7 +114,7 @@ bin(uint32_t n, uint32_t k)
 {
     ARIADNE_ASSERT(n<31);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
@@ -144,7 +144,7 @@ bin(uint64_t n, uint64_t k)
 {
     ARIADNE_ASSERT(n<63);  // Maximum computable bin(n,n/2) using 64 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint64_t r=1;
@@ -387,10 +387,11 @@ Boolean lt(Integer const& z1, Integer const& z2) {
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
 OutputStream& operator<<(OutputStream& os, Integer const& z) {
-    char str[511];
-    str[510]='\0';
+    static const int OUTPUT_BUFFER_SIZE=4096;
+    char str[OUTPUT_BUFFER_SIZE];
+    str[OUTPUT_BUFFER_SIZE-1]='\0';
     mpz_get_str (str, 10, z._mpz);
-    assert(str[510]=='\0');
+    assert(str[OUTPUT_BUFFER_SIZE-1]=='\0');
     return os << str;
 }
 

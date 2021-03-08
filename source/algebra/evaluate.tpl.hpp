@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../algebra/vector.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/expansion.inl.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -73,13 +73,13 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<M
         // Omit zero terms where possible
         t=c;
         for(SizeType i=0; i!=std::min(j,k); ++i) {
-            for(Nat ii=0; ii!=a[i]; ++ii) {
+            for(DegreeType ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];
             }
         }
         for(SizeType i=std::min(j,k); i!=k; ++i) {
             t=t+r[i];
-            for(Nat ii=0; ii!=a[i]; ++ii) {
+            for(DegreeType ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];
             }
             r[i]=z;
@@ -87,7 +87,7 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<M
         if(j<=k) {
             t=t+r[k];
         }
-        for(SizeType ii=na[k]; ii!=a[k]; ++ii) {
+        for(DegreeType ii=na[k]; ii!=a[k]; ++ii) {
             t=t*x[k];
         }
         r[k]=t;
@@ -100,13 +100,13 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<M
     // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
     t=c;
     for(SizeType i=0; i!=j; ++i) {
-        for(SizeType ii=0; ii!=a[i]; ++ii) {
+        for(DegreeType ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];
         }
     }
     for(SizeType i=j; i!=n; ++i) {
         t=t+r[i];
-        for(SizeType ii=0; ii!=a[i]; ++ii) {
+        for(DegreeType ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];
         }
     }
@@ -163,8 +163,8 @@ ArithmeticType<X,Y> power_evaluate(const Expansion<MultiIndex,X>& e, const Vecto
         UniformConstReference<MultiIndex> j=iter->index();
         UniformConstReference<X> c=iter->coefficient();
         t=one;
-        for(Nat k=0; k!=e.argument_size(); ++k) {
-            for(Nat l=0; l!=j[k]; ++l) {
+        for(SizeType k=0; k!=e.argument_size(); ++k) {
+            for(DegreeType l=0; l!=j[k]; ++l) {
                 t=t*y[k];
             }
         }

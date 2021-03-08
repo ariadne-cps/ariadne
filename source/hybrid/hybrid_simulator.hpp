@@ -29,8 +29,8 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_HPP
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
-#include "../output/logging.hpp"
-#include "../hybrid/hybrid_set.decl.hpp"
+#include "output/logging.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {
 
@@ -42,12 +42,12 @@ template<class T> class Orbit;
 /*! \brief A class for computing the evolution of a hybrid system.
  */
 class HybridSimulator
-    : public Loggable
 {
   public:
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
     typedef HybridApproximatePointType EnclosureType;
+    typedef Orbit<HybridApproximatePointType> OrbitType;
     typedef HybridTerminationCriterion TerminationType;
   private:
     FloatDPApproximation _step_size;
@@ -57,7 +57,7 @@ class HybridSimulator
     HybridSimulator();
     Void set_step_size(double h);
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const TerminationType& termination) const;

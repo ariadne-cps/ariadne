@@ -33,10 +33,10 @@
 #include <initializer_list>
 #include <iostream>
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
 
 namespace Ariadne {
 

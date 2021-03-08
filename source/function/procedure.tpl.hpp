@@ -24,20 +24,20 @@
 
 #include <iostream>
 
-#include "../utility/container.hpp"
-#include "../algebra/vector.hpp"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../function/formula.hpp"
-#include "../algebra/expansion.hpp"
-#include "../geometry/box.hpp"
+#include "numeric/operators.hpp"
+#include "function/formula.hpp"
+#include "algebra/expansion.hpp"
+#include "geometry/box.hpp"
 
-#include "../algebra/evaluate.tpl.hpp"
-#include "../function/formula.tpl.hpp"
+#include "algebra/evaluate.tpl.hpp"
+#include "function/formula.tpl.hpp"
 
 // FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
-#include "../function/taylor_model.hpp"
-#include "../algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -167,7 +167,7 @@ Vector<Procedure<Y>>::Vector(SizeType as, const Vector<Formula<Y>>& f)
         _convert(this->_instructions,this->_constants,f[i], ind);
     }
 
-    for(Nat i=0; i!=f.size(); ++i) {
+    for(SizeType i=0; i!=f.size(); ++i) {
         this->_results[i]=ind[f[i].node_ptr()];
     }
 
@@ -281,7 +281,7 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }
 template<class X> Void backpropagate(X const& r, Leq, X& a1, X& a2) {
-    FloatDPValue inf_(inf); restrict(a1,X(-inf_,a2.upper())); restrict(a1,X(a2.lower(),+inf_)); }
+    restrict(a1,X(-inf,a2.upper())); restrict(a1,X(a2.lower(),+inf)); }
 
 template<class X> Void backpropagate(X const& r, UnaryElementaryOperator eop, X& a) {
     return eop.accept([&r,&a](auto op){backpropagate(r,op,a);}); }
@@ -312,7 +312,6 @@ template<class X, class Y> Void _backpropagate(SizeType r, Vector<X>& x, List<X>
 
 template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const List<ProcedureInstruction>& p, const List<Y>& c)
 {
-    FloatDPValue inf_(inf);
     ARIADNE_ASSERT(v.size()==p.size());
     SizeType r=p.size();
     while(r!=0u) {
@@ -398,7 +397,7 @@ template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X>
 
 } // namespace Ariadne
 
-#include "../algebra/fixed_univariate_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 
 namespace Ariadne {
 

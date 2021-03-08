@@ -105,7 +105,7 @@ class DefineComplexOperations {
     template<class X1, class X2> friend decltype(auto) operator/(Complex<X1> const& z1, X2 const& x2) { return div(z1,x2); }
     template<class X1, class X2> friend decltype(auto) operator/(X1 const& x1, Complex<X2> const& z2) { return div(x1,z2); }
 
-    //@{
+    //!@{
     //! \name Comparison operations and operators.
     template<class X1, class X2> friend EqualityType<X1,X2> operator==(Complex<X1> const& z1, Complex<X2> const& z2) {
         return (z1._re==z2._re) && (z1._im == z2._im); } //!< Equality.
@@ -122,7 +122,7 @@ class DefineComplexOperations {
     template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend InequalityType<X1,X2> operator!=(X1 const& x1, Complex<X2> const& z2) {
         return (x1!=z2._re) || (0!=z2._im); } //!< Equality.
 
-    //@}
+    //!@}
 
     template<class X> friend Complex<X> pos(Complex<X> const& z) {
         return Complex<X> (pos(z._re),pos(z._im)); } //!< Identity \a +z.
@@ -155,9 +155,10 @@ template<class X> class Complex
     typedef typename X::Paradigm Paradigm;
     typedef X RealType;
   public:
-    //@{
+    //!@{
     //! \name Constructors
-    Complex() : _re(), _im() { } //!< Default constructor yields the number 0.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    Complex(PRS... prs) : _re(0u,prs...), _im(0u,prs...) { } //!< Default constructor yields the number 0.
     Complex(X const& x) : _re(x), _im(nul(x)) { } //!< Construct the number \a x + <i>i</i> \a y.
     Complex(X const& x, X const& y) : _re(x), _im(y) { } //!< Construct the number \a x + <i>i</i> \a y.
 
@@ -175,9 +176,9 @@ template<class X> class Complex
         Complex(Y const& x, Y const& y, PRS... prs) : _re(x,prs...), _im(y,prs...) { }
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> = dummy>
         Complex(Complex<Y> const& z, PRS... prs) : _re(z.real_part(),prs...), _im(z.imaginary_part(),prs...) { }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Extract in Cartesian and polar coordinates
     X const& real_part() const { return _re; } //!< The real part \a x of \a x+iy
     X const& imaginary_part() const { return _im; } //!< The imaginary part \a y of \a x+iy
@@ -187,9 +188,9 @@ template<class X> class Complex
 
     template<class... PRS> decltype(auto) get(PRS... prs) {
         typedef decltype(this->_re.get(prs...)) R; return Complex<R>(this->_re.get(prs...),this->_im.get(prs...)); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Standard arithmetic operators
     friend Complex<X> operator+(Complex<X> const& z) { return pos(z); } //!< Unary plus.
     friend Complex<X> operator-(Complex<X> const& z) { return neg(z); } //!< Unary minus.
@@ -201,14 +202,14 @@ template<class X> class Complex
     friend Complex<X>& operator-=(Complex<X>& z1, Complex<X> const& z2) { z1._re-=z2._re; z1._im-=z2._im; return z1; } //!< Inplace minus.
     friend Complex<X>& operator*=(Complex<X>& z1, Complex<X> const& z2) { return z1=mul(z1,z2); } //!< Inplace times.
     friend Complex<X>& operator/=(Complex<X>& z1, Complex<X> const& z2) { return z1=div(z1,z2); } //!< Inplace divides.
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Named arithmetical functions
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Algebraic and transcendental functions
     friend Complex<X> add(Complex<X> const& z1, Complex<X> const& z2) {
         return Complex<X> (z1._re+z2._re,z1._im+z2._im); } //!< \brief Sum \a z1+z2.
@@ -226,34 +227,34 @@ template<class X> class Complex
     friend Complex<X> log(Complex<X> const& z) {
         auto rs=sqr(z._re)+sqr(z._im); auto th=arg(z); return Complex<X>(log(rs)/2,th); }
         //!< The natural logarithm of \a z. Currently requires \a Re(z) ≥ 0.
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Special complex number functions
     friend ModulusType<X> abs(Complex<X> const& z) { return z.modulus(); }
     friend decltype(auto) mag(Complex<X> const& z) { return cast_positive(sqrt(add(sqr(mag(z._re)),sqr(mag(z._im))))); } //!< Absolute value \a |r|.
     friend ArgumentType<X> arg(Complex<X> const& z) { return z.argument(); }
     friend Complex<X> conj(Complex<X> const& z) { return Complex<X>(z._re,-z._im); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! Operations based on the metric structure.
     friend Positive<X> dist(Complex<X> const& z1, Complex<X> const& z2) { return abs(sub(z1,z2)); }
         //< The distance |\a r <sub>1</sub>-\a r <sub>2</sub>| between \a r<sub>1</sub> and \a r<sub>2</sub>.
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Operations on the representation.
     friend Bool same(Complex<X> const&, Complex<X> const&); //!< Test equivalence of representation.
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, Complex<X> const& r) {
         return os << r._re << "+i*" << r._im; } //< Write to an output stream.
-    //@}
+    //!@}
 
   private:
     static X _arg(Complex<X> const& z);

@@ -118,11 +118,11 @@ void TestDyadic::test_literal() {
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
     ARIADNE_TEST_PRINT(q);
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
-    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<q);
     ARIADNE_TEST_EXECUTE(std::cout<<decimal_write(q));
-    ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q)<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q));
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(decimal_write));
-    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<q);
 
     RepresentationWriter<Dyadic> representation_write;
     ARIADNE_TEST_EXECUTE(std::cout<<representation_write(q));
@@ -253,6 +253,18 @@ void TestDyadic::test_infinity() {
     ARIADNE_TEST_EQUALS(max(Dyadic::inf(Sign(-1)),Dyadic(-2)),Dyadic(-2));
     ARIADNE_TEST_EQUALS(max(Dyadic(-2),Dyadic::inf(Sign(+1))),Dyadic::inf(Sign(+1)));
 
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)<=3);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)>=1);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)< 4);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)> 0);
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)<=2));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)>=2));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)< 3));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)> 1));
+    ARIADNE_TEST_ASSERT(!(DyadicBounds(1,3)<=0));
+    ARIADNE_TEST_ASSERT(!(DyadicBounds(1,3)>=4));
+    ARIADNE_TEST_ASSERT(not(DyadicBounds(1,3)< 1));
+    ARIADNE_TEST_ASSERT(not(DyadicBounds(1,3)> 3));
 }
 
 

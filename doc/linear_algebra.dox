@@ -17,12 +17,12 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
+ *  along with this program; if not, write to the Free
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 
-/*! 
+/*!
 
 \file linear_algebra.dox
 \brief Documentation on linear algebra
@@ -30,6 +30,15 @@
 
 
 \page linear_algebra_page Linear Algebra
+
+This page describes the basic data structures and mathematical algorithms of computational linear algebra.
+For details on how this is implemented in %Ariadne, see the \ref LinearAlgebraModule documentation.
+
+\b References
+- David C. Lay, <em>Linear Algebra and its Applicatons</em>, Addison-Wesley, 2002. ISBN 0-20170-970-8
+- Gene H. Golub and Charles F. Van Loan, <em>Matrix Computations</em>, Johns Hopkins University Press, 1996. ISBN 0-80185-414-8
+
+
 
 \section pivoting Pivoting and Permutations
 
@@ -47,7 +56,7 @@ For example, the permutation
 can be writing in pivot form
 \f[ p=(0\;1)\ (1\;3)\ (2\;4)\ (3\;4)\ (4\;4) . \f]
 The inverses are
-\f[ \pi^{-1}=\left(\begin{array}{ccccc}0&1&2&3&4\\4&0&3&1&2\end{array}\right); \qquad 
+\f[ \pi^{-1}=\left(\begin{array}{ccccc}0&1&2&3&4\\4&0&3&1&2\end{array}\right); \qquad
      p^{-1}=(4\;4)\ (3\;4)\ (2\;4)\ (1\;3)\ (0\;1) \f]
 
 Applying the permuation to the vector \f$v=(v_0,v_1,v_2,v_3,v_4)^T\f$ yields the vector \f$\pi v=(v_1,v_3,v_4,v_2,v_0)^T\f$.
@@ -71,7 +80,7 @@ We now store both \f$B=(j_0,j_1,\ldots,j_{m-1})\f$ giving the columns of the bas
 
 \section matrix_inverse Inverting Matrices
 
-\subsection schulz_matrix_inverse Schulz's method 
+\subsection schulz_matrix_inverse Schulz's method
 Schulz's method is an iterative method for computing matrix inverses:
 \f[ B_{k+1} = B_k \sum_{i=0}^{n} (I-AB_k)^i .  \f]
 The interval version is given by:
@@ -79,7 +88,7 @@ The interval version is given by:
 
 \section matrix_inverse_derivative Derivative of Matrix Inverse
 
-If \f$B=A^{-1}\f$, then 
+If \f$B=A^{-1}\f$, then
 \f[ \fbox{$ \dot{B} = B\dot{A}B $} \f]
 
 
@@ -88,6 +97,6 @@ If \f$B=A^{-1}\f$, then
 Gauss-Seidel iteration is a method for solving linear equations \f$Ax=b\f$, which can also be used to compute inverses using \f$AB=I\f$. The scheme is
 \f[   x^{(k+1)} = \left( {D + L} \right)^{ - 1} \left( {b-U x^{(k)} } \right) \f]
 where \f$A=L+D+U\f$; the matrices \f$D\f$, \f$L\f$ and \f$U\f$ represent the diagonal, negative strictly lower triangular, and negative strictly upper triangular parts of \f$A\f$. When implementing Gauss Seidel, an explicit entry-by-entry approach is commonly used:
-\f[  x^{(k+1)}_i = \frac{1}{a_{ii}} \left(b_i - \sum_{j<i}a_{ij}x^{(k+1)}_j-\sum_{j>i}a_{ij}x^{(k)}_j\right),\, i=1,2,\ldots,n. \f] 
+\f[  x^{(k+1)}_i = \frac{1}{a_{ii}} \left(b_i - \sum_{j<i}a_{ij}x^{(k+1)}_j-\sum_{j>i}a_{ij}x^{(k)}_j\right),\, i=1,2,\ldots,n. \f]
 
 */

@@ -35,14 +35,14 @@
 #include <set>
 #include <map>
 
-#include "../function/function.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/expression.hpp"
-#include "../output/logging.hpp"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/expression.hpp"
+#include "output/logging.hpp"
 
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -230,7 +230,6 @@ inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 //! \sa \ref DiscreteMode, \ref DiscreteTransition, \ref CompositeHybridAutomaton
 class HybridAutomaton
     : public HybridAutomatonInterface
-    , public Loggable
 {
     friend class CompositeHybridAutomaton;
     static Writer<HybridAutomaton> _default_writer;
@@ -244,8 +243,6 @@ public:
     typedef double RealType ;
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
-
-    friend List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
   protected:
 
@@ -280,7 +277,7 @@ public:
                      List<PrimedRealAssignment> const& reset);
 
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Default constructor with "system" name.
@@ -299,9 +296,9 @@ public:
 
     //! \brief Destructor.
     virtual ~HybridAutomaton() = default;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
@@ -509,9 +506,9 @@ public:
         this->new_transition(DiscreteLocation(),event,DiscreteLocation(),reset,guard,kind);
     }
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access and queries.
 
     //! \brief The name of the automaton
@@ -534,9 +531,9 @@ public:
     //! \brief Checks validity of the mode for the given \a location.
     //! Only checks for underspecified dynamics; overspecification is determined at build-time.
     Void check_mode(DiscreteLocation location) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Access for compositional hybrid automata.
 
     //! \brief The state (dotted) variables in the given location.
@@ -549,9 +546,11 @@ public:
     DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The algebraic equations valid in the location.
     List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
+/*
     //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
     //! occurs before any equation using that variable.
     List<RealAssignment> sorted_auxiliary_assignments(DiscreteLocation location) const;
+*/
     //! \brief The differential equations valid in the given location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
     //! \brief The invariant predicates valid in the given location.
@@ -560,9 +559,9 @@ public:
     ContinuousPredicate guard_predicate(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The differential equations valid in the given location.
     List<PrimedRealAssignment> reset_assignments(DiscreteLocation source, DiscreteEvent event) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
     //! \brief The continuous state space for each location.
@@ -606,7 +605,7 @@ public:
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
     virtual EffectiveVectorMultivariateFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
-    //@}
+    //!@}
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

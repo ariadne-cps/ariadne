@@ -30,41 +30,43 @@
 #define ARIADNE_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "../utility/container.hpp"
-#include "../utility/exceptions.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/taylor_model.hpp"
+#include "utility/container.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../function/function_interface.hpp"
-#include "../function/function_mixin.hpp"
-#include "../function/function_model.hpp"
-#include "../function/scaled_function_patch.hpp"
+#include "function/function_interface.hpp"
+#include "function/function_mixin.hpp"
+#include "function/function_model.hpp"
+#include "function/scaled_function_patch.hpp"
 
 namespace Ariadne {
 
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-//@{
+//! \ingroup FunctionModelSubModule
 //! \name Template shorthands and type synonyms for Taylor function models
-template<class P, class F> using ScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<TaylorModel<P,F>>; //!< . \ingroup FunctionModelSubModule
-template<class P, class F> using VectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<TaylorModel<P,F>>; //!< . \ingroup FunctionModelSubModule
-template<class F> using ValidatedScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<ValidatedTaylorModel<F>>; //!< . \ingroup FunctionModelSubModule
-template<class F> using ValidatedVectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<ValidatedTaylorModel<F>>; //!< . \ingroup FunctionModelSubModule
-template<class F> using ApproximateScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<ApproximateTaylorModel<F>>; //!< . \ingroup FunctionModelSubModule
-template<class F> using ApproximateVectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<ApproximateTaylorModel<F>>; //!< . \ingroup FunctionModelSubModule
+//!@{
+//! \ingroup FunctionModelSubModule
+template<class P, class F> using ScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<TaylorModel<P,F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class P, class F> using VectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<TaylorModel<P,F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ValidatedScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<ValidatedTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ValidatedVectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<ValidatedTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ApproximateScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<ApproximateTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ApproximateVectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<ApproximateTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
 
-using ValidatedScalarMultivariateTaylorFunctionModelDP = ScalarScaledFunctionPatch<ValidatedTaylorModelDP>; //!< . \ingroup FunctionModelSubModule
-using ValidatedVectorMultivariateTaylorFunctionModelDP = VectorScaledFunctionPatch<ValidatedTaylorModelDP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateScalarMultivariateTaylorFunctionModelDP = ScalarScaledFunctionPatch<ApproximateTaylorModelDP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateVectorMultivariateTaylorFunctionModelDP = VectorScaledFunctionPatch<ApproximateTaylorModelDP>; //!< . \ingroup FunctionModelSubModule
+using ValidatedScalarMultivariateTaylorFunctionModelDP = ScalarScaledFunctionPatch<ValidatedTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
+using ValidatedVectorMultivariateTaylorFunctionModelDP = VectorScaledFunctionPatch<ValidatedTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
+using ApproximateScalarMultivariateTaylorFunctionModelDP = ScalarScaledFunctionPatch<ApproximateTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
+using ApproximateVectorMultivariateTaylorFunctionModelDP = VectorScaledFunctionPatch<ApproximateTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
 
-using ValidatedScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPatch<ValidatedTaylorModelMP>; //!< . \ingroup FunctionModelSubModule
-using ValidatedVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ValidatedTaylorModelMP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPatch<ApproximateTaylorModelMP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ApproximateTaylorModelMP>; //!< . \ingroup FunctionModelSubModule
-//@}
+using ValidatedScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPatch<ValidatedTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
+using ValidatedVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ValidatedTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
+using ApproximateScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPatch<ApproximateTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
+using ApproximateVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ApproximateTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
+//!@}
 
 class TaylorFunctionFactory
     : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>

@@ -29,13 +29,13 @@
 #ifndef ARIADNE_CALCULUS_BASE_HPP
 #define ARIADNE_CALCULUS_BASE_HPP
 
-#include "../utility/tribool.hpp"
-#include "../output/logging.hpp"
-#include "../function/function_interface.hpp"
+#include "utility/tribool.hpp"
+#include "output/logging.hpp"
+#include "function/function_interface.hpp"
 #include "calculus_interface.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
@@ -53,7 +53,6 @@ class BoxDomainType;
 template<class Var>
 class CalculusBase
     : public CalculusInterface<Var>
-    , public Loggable
 {
     typedef FloatDP R;
     typedef FloatDP A;
@@ -86,7 +85,7 @@ class CalculusBase
     ValidatedKleenean _tribool(const IntervalType& ivl) const {
         if(ivl.lower()>0) { return true; } else if(ivl.upper()<0) { return false; } else { return indeterminate; } }
   public:
-    //@{ \name Dynamical operations
+    //!@{ \name Dynamical operations
 
     //! \brief Computes the image of the set defined by \a set_model under the approximation of the map
     //! given by \a map_model.
@@ -211,9 +210,9 @@ class CalculusBase
         return this->flow_bounds(vf,d,maximum_step_size,maximum_bound_diameter);
     }
 
-    //@}
+    //!@}
 
-    //@{ \name Constructing models for functions
+    //!@{ \name Constructing models for functions
     //! \brief A model for the map \a f over the domain \a d.
     virtual MapModelType map_model(const VectorMultivariateFunctionType& f, const BoxType& d) const = 0;
 
@@ -227,9 +226,9 @@ class CalculusBase
 
     //! \brief A model for the constant time \a t over the box \a d.
     virtual TimeModelType time_model(const FloatDP& t, const BoxType& d) const = 0;
-    //@}
+    //!@}
 
-    //@{ \name Set-based operations
+    //!@{ \name Set-based operations
     //! \brief Compute a model for the given box \a bx.
     virtual SetModelType set_model(const BoxType& bx) const = 0;
     //! \brief Compute an enclosure for the set model \a s.
@@ -242,7 +241,7 @@ class CalculusBase
     virtual Array<SetModelType> subdivide(const SetModelType& s) const = 0;
     //! \brief An over-approximation to the set \a s with a simplified description.
     virtual SetModelType simplify(const SetModelType& s) const = 0;
-    //@}
+    //!@}
 
   public:
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points

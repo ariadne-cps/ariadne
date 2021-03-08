@@ -22,27 +22,27 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/function_model.hpp"
-#include "../function/function_model.tpl.hpp"
-#include "../function/taylor_model.hpp"
+#include "function/function_model.hpp"
+#include "function/function_model.tpl.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
-#include "../function/formula.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 
 template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
 template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
 
-template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,MultiplePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealScalar),DoublePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealScalar),MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealVector(RealScalar),DoublePrecision>;
+template class FunctionModel<ValidatedTag,RealVector(RealScalar),MultiplePrecision>;
 
-template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,MultiplePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealVector),DoublePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealVector),MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>;
+template class FunctionModel<ValidatedTag,RealVector(RealVector),MultiplePrecision>;
 
 } // namespace Ariadne

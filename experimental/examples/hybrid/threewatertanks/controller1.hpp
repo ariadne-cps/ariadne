@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valve-permissive.hpp
+ *            controller.hpp
  *
  *  Copyright  2017 Luca Geretti
  *
@@ -25,7 +25,7 @@
 
 using namespace Ariadne;
 
-inline AtomicHybridAutomaton getController1()
+inline HybridAutomaton getController1()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.
@@ -42,14 +42,16 @@ inline AtomicHybridAutomaton getController1()
     DiscreteEvent e_must_open("must_open1");
     DiscreteEvent e_must_close("must_close1");
 
-    AtomicHybridAutomaton controller("controller1");
+    StringVariable controller1("controller1");
 
-    // Declare the values the valve can variable can have
-    AtomicDiscreteLocation rising("rising1");
-    AtomicDiscreteLocation falling("falling1");
+    HybridAutomaton controller(controller1.name());
 
-    controller.new_mode(rising,List<RealAssignment>());
-    controller.new_mode(falling,List<RealAssignment>());
+    // Declare the values the valve can have
+    DiscreteLocation rising(controller1|"rising1");
+    DiscreteLocation falling(controller1|"falling1");
+
+    controller.new_mode(rising);
+    controller.new_mode(falling);
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to

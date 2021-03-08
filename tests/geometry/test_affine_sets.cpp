@@ -43,12 +43,20 @@ static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
 inline decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { return af <= FloatDPValue(w,dp); }
-inline FloatDPValue operator"" _ex (long double x) { return FloatDPValue((double)x); }
-inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1)/x2; }
+inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1,dp)/x2; }
+template<class X> AffineConstraint<X> operator<=(const Dyadic& l, const Affine<X>& a) {
+    return AffineConstraint<X>({l,a.value().precision()},a,+infty); }
+template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const Dyadic& u) {
+    return AffineConstraint<X>(-infty,a,u); }
+template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const Dyadic& u) {
+    ARIADNE_ASSERT(decide(ac.upper_bound()==infty));
+    return AffineConstraint<X>(ac.lower_bound(),ac.function(),{u,ac.lower_bound().precision()}); }
+template<class X> AffineConstraint<X> operator==(const Affine<X>& a, const Dyadic& u) {
+    return AffineConstraint<X>(u,a,u); }
 }
 
 struct FloatDPValueVector2d : FloatDPValueVector, Vector2d {
-    FloatDPValueVector2d(double vx, double vy) : FloatDPValueVector{FloatDPValue(vx),FloatDPValue(vy)}, Vector2d(vx,vy) { }
+    FloatDPValueVector2d(double vx, double vy) : FloatDPValueVector({ExactDouble(vx),ExactDouble(vy)},dp), Vector2d(vx,vy) { }
 };
 
 class TestAffineSet
@@ -59,24 +67,24 @@ class TestAffineSet
     Vector< Affine<FloatDPBounds> > x;
     ValidatedAffineConstrainedImageSet set;
   public:
-    TestAffineSet() : set(Matrix<FloatDPValue>(2,2),Vector<FloatDPValue>(2)) { }
+    TestAffineSet() : set(Matrix<FloatDPValue>(2,2,dp),Vector<FloatDPValue>(2,dp)) { }
 
     Void test_pure_constraint() {
         figure.clear();
 
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
+        x = Affine<FloatDPBounds>::variables(2,dp);
 
         set=ValidatedAffineConstrainedImageSet(D, {x[0]+2,x[0]+x[1]} );
 
-        set.new_parameter_constraint(x[0]+0.5_ex*x[1]+0.75_ex <= 0.0_ex);
-        set.new_parameter_constraint(-0.5_ex*x[0]+1.5_ex*x[1]+0.5_ex <= 0.0_ex);
+        set.new_parameter_constraint(x[0]+0.5_x*x[1]+0.75_x <= 0.0_x);
+        set.new_parameter_constraint(-0.5_x*x[0]+1.5_x*x[1]+0.5_x <= 0.0_x);
 
         ARIADNE_TEST_PRINT(set);
         figure.draw(set);
 
         set=ValidatedAffineConstrainedImageSet(D, {x[0]+x[1]+2,x[0]+x[1]+2});
-        set.new_parameter_constraint(-0.5_ex*x[0]-1.5_ex*x[1]+0.5_ex <= 0.0_ex);
+        set.new_parameter_constraint(-0.5_x*x[0]-1.5_x*x[1]+0.5_x <= 0.0_x);
 
         ARIADNE_TEST_PRINT(set);
         figure.draw(set);
@@ -84,18 +92,18 @@ class TestAffineSet
 
     Void test_constrained_image() {
         D = ExactBoxType::unit_box(3);
-        x = Affine<FloatDPBounds>::variables(3);
+        x = Affine<FloatDPBounds>::variables(3,dp);
 
         set=ValidatedAffineConstrainedImageSet(D, {2*x[0]+3*x[1]+x[2],x[0]+x[1]-2} );
 
-        set.new_parameter_constraint(1.0_ex*x[0]+0.5_ex*x[1]+0.25_ex*x[2]<=0.75_ex);
-        set.new_parameter_constraint(-2.0_ex*x[0]-3.0_ex*x[1]-1.0_ex*x[2]<=3.00_ex);
+        set.new_parameter_constraint(1.0_x*x[0]+0.5_x*x[1]+0.25_x*x[2]<=0.75_x);
+        set.new_parameter_constraint(-2.0_x*x[0]-3.0_x*x[1]-1.0_x*x[2]<=3.00_x);
 
         ARIADNE_TEST_PRINT(set);
         Polytope2d expected_set({{-3.0,-3.0}, {-3.0,-3.66667}, {2.0,-2.0}, {4.0,-1.0},
                                      {3.0,-0.5}, {1.0,-1.0}, {-2.0,-2.0}, {-3.0,-2.5}});
 
-        figure.clear(); figure.set_bounding_box(ExactBoxType{{-7.,+7.},{-5.,+1.}}); figure.set_fill_opacity(0.5);
+        figure.clear(); figure.set_bounding_box(ExactBoxType{{-7.0_x,+7.0_x},{-5.0_x,+1.0_x}}); figure.set_fill_opacity(0.05);
         figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         figure.write("test_affine_set-constrained_image");
     }
@@ -103,16 +111,16 @@ class TestAffineSet
 
     Void test_separated() {
         D=ExactBoxType::unit_box(3);
-        x=Affine<FloatDPBounds>::variables(3);
-        set=ValidatedAffineConstrainedImageSet(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
-        set.new_parameter_constraint(-1.1875_ex+0.0625_ex*x[0]+x[1]<=0.0_ex);
+        x=Affine<FloatDPBounds>::variables(3,dp);
+        set=ValidatedAffineConstrainedImageSet(D, {-0.9375_x+0.0625_x*x[0]+0.5_x*x[1],0.87890625_x-0.1171875_x*x[0]+x[1]+0.00390625_x*x[2]});
+        set.new_parameter_constraint(-1.1875_x+0.0625_x*x[0]+x[1]<=0.0_x);
         ARIADNE_TEST_PRINT(set);
-        ExactBoxType cell1({{-1.0,-0.9375},{0.8125, 0.875}}); // subset
-        ExactBoxType cell2({{-0.5625,-0.50},{1.4375,1.5}}); // overlaps
-        ExactBoxType cell3({{-0.875,-0.75},{0.625,0.7578125}}); // touches at (-0.875,0.7578125);
-        ExactBoxType cell4({{-1.1850,-1.125},{0.0625,0.125}}); // almost touches
-        ExactBoxType cell5({{-0.9375,-0.875},{0.4375,0.5}}); // disjoint
-        ExactBoxType cell6({{-1.5,-1.375},{0.5,0.625}}); // disjoint; regression test
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell1,({{-1.0_x,-0.9375_x},{0.8125_x, 0.875_x}})); // subset
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell2,({{-0.5625_x,-0.50_x},{1.4375_x,1.5_x}})); // overlaps
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell3,({{-0.875_x,-0.75_x},{0.625_x,0.7578125_x}})); // touches at (-0.875_x,0.7578125_x);
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell4,({{-1.1875_x,-1.125_x},{0.0625_x,0.125_x}})); // almost touches
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell5,({{-0.9375_x,-0.875_x},{0.4375_x,0.5_x}})); // disjoint
+        ARIADNE_TEST_CONSTRUCT(ExactBoxType,cell6,({{-1.5_x,-1.375_x},{0.5_x,0.625_x}})); // disjoint; regression test
 
         ARIADNE_TEST_ASSERT(!definitely(set.separated(cell1)));
         ARIADNE_TEST_ASSERT(!definitely(set.separated(cell2)));
@@ -133,16 +141,15 @@ class TestAffineSet
                << fill_colour(1,0,0) << cell6
                ;
         figure.write("test_affine_set-separated");
-
     }
 
     Void test_outer_approximation() {
 
         {
             D=ExactBoxType::unit_box(2);
-            x=Affine<FloatDPBounds>::variables(2);
+            x=Affine<FloatDPBounds>::variables(2,dp);
             set=ValidatedAffineConstrainedImageSet(D,{x[0],x[1]});
-            set.new_parameter_constraint(x[0]+x[1]<=-0.5_ex);
+            set.new_parameter_constraint(x[0]+x[1]<=-0.5_x);
             ARIADNE_TEST_PRINT(set);
 
             GridTreePaving paving = set.outer_approximation(Grid(2),4);
@@ -163,12 +170,12 @@ class TestAffineSet
         {
             // The following set has difficulties
             set=ValidatedAffineConstrainedImageSet(D,{x[0],x[1]});
-            set.new_parameter_constraint(2.0_ex*x[0]+1.0_ex*x[1]<=0.5_ex);
-            set.new_parameter_constraint(-0.5_ex*x[0]+1.0_ex*x[1]<=0.75_ex);
-            set.new_parameter_constraint(-0.5_ex*x[0]-1.0_ex*x[1]<=0.875_ex);
+            set.new_parameter_constraint(2.0_x*x[0]+1.0_x*x[1]<=0.5_x);
+            set.new_parameter_constraint(-0.5_x*x[0]+1.0_x*x[1]<=0.75_x);
+            set.new_parameter_constraint(-0.5_x*x[0]-1.0_x*x[1]<=0.875_x);
 
             figure.clear();
-            figure.set_bounding_box(widen(ExactBoxType{{-1.0,+1.0},{-1.0,+1.0}},+0.125_x));
+            figure.set_bounding_box(widen(ExactBoxType{{-1.0_x,+1.0_x},{-1.0_x,+1.0_x}},+0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(set.outer_approximation(Grid(2),3));
@@ -181,13 +188,13 @@ class TestAffineSet
 
         {
             D=ExactBoxType::unit_box(3);
-            x=Affine<FloatDPBounds>::variables(3);
+            x=Affine<FloatDPBounds>::variables(3,dp);
 
-            set=ValidatedAffineConstrainedImageSet( D, {2.0_ex*x[0]+3.0_ex*x[1]+1.0_ex*x[2]+0.05_ex, x[0]+x[1]+2.051_ex} );
+            set=ValidatedAffineConstrainedImageSet( D, {2.0_pr*x[0]+3.0_pr*x[1]+1.0_pr*x[2]+0.05_pr, x[0]+x[1]+2.051_pr} );
 
-            set.new_parameter_constraint(+1.01_ex*x[0]+0.51_ex*x[1]+0.251_ex*x[2]<=0.751_ex);
-            set.new_parameter_constraint(-0.51_ex*x[0]+1.51_ex*x[1]+0.01_ex*x[2]<=0.51_ex);
-            set.new_parameter_constraint(-2.01_ex*x[0]-3.01_ex*x[1]-1.02_ex*x[2]<=3.01_ex);
+            set.new_parameter_constraint(+1.01_pr*x[0]+0.51_pr*x[1]+0.251_pr*x[2]<=0.751_pr);
+            set.new_parameter_constraint(-0.51_pr*x[0]+1.51_pr*x[1]+0.01_pr*x[2]<=0.51_pr);
+            set.new_parameter_constraint(-2.01_pr*x[0]-3.01_pr*x[1]-1.02_pr*x[2]<=3.01_pr);
 
             Grid grid(2);
             GridTreePaving paving(grid);
@@ -195,7 +202,7 @@ class TestAffineSet
             paving.recombine();
 
             figure.clear();
-            figure.set_bounding_box(ExactBoxType{{-7.0,+7.0},{-1.0,+5.0}});
+            figure.set_bounding_box(ExactBoxType{{-7.0_x,+7.0_x},{-1.0_x,+5.0_x}});
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.set_fill_opacity(0.5);
             figure.draw(paving);
@@ -206,8 +213,8 @@ class TestAffineSet
         }
 
         {
-            set=ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(3),{-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
-            set.new_parameter_constraint(0.0625_ex*x[0]+x[1]<=1.1875_ex);
+            set=ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(3),{-0.9375_x+0.0625_x*x[0]+0.5_x*x[1],0.87890625_x-0.1171875_x*x[0]+x[1]+0.00390625_x*x[2]});
+            set.new_parameter_constraint(0.0625_x*x[0]+x[1]<=1.1875_x);
             ARIADNE_TEST_PRINT(set);
 
             GridTreePaving paving = set.outer_approximation(Grid(2),4);
@@ -230,10 +237,10 @@ class TestAffineSet
 
     Void test_empty() {
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
+        x = Affine<FloatDPBounds>::variables(2,dp);
 
-        set=ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex} );
-        set.new_parameter_constraint(-1.0_ex*x[1] <= -2.0_ex);
+        set=ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x} );
+        set.new_parameter_constraint(-1.0_x*x[1] <= -2.0_x);
 
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_ASSERT(set.is_empty());
@@ -246,29 +253,29 @@ class TestAffineSet
     Void test_invalid() {
         {
             D = ExactBoxType::unit_box(1);
-            x = Affine<FloatDPBounds>::variables(2);
-            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex} ));
+            x = Affine<FloatDPBounds>::variables(2,dp);
+            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x} ));
         }
         {
             D = ExactBoxType::unit_box(2);
-            x = Affine<FloatDPBounds>::variables(2);
-            auto a = Affine<FloatDPBounds>::variables(1);
-            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex}, {a[0]<=-0.25_ex} ));
+            x = Affine<FloatDPBounds>::variables(2,dp);
+            auto a = Affine<FloatDPBounds>::variables(1,dp);
+            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x}, {a[0]<=-0.25_x} ));
         }
     }
 
     Void test_uniform_error() {
-        FloatDPValue e=0.25_ex;
+        FloatDPValue e(0.25_x,dp);
         FloatDPBounds E = FloatDPBounds(-e,+e);
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
-        ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+E/2, 0.25_ex*x[0]-0.25_ex*x[1]+E} );
+        x = Affine<FloatDPBounds>::variables(2,dp);
+        ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+E/2, 0.25_x*x[0]-0.25_x*x[1]+E} );
         D = ExactBoxType::unit_box(4);
-        x = Affine<FloatDPBounds>::variables(4);
-        ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+e*x[2]/2, 0.25_ex*x[0]-0.25_ex*x[1]+e*x[3]} );
+        x = Affine<FloatDPBounds>::variables(4,dp);
+        ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+e*x[2]/2, 0.25_x*x[0]-0.25_x*x[1]+e*x[3]} );
 
         figure.clear();
-        figure.set_bounding_box(ExactBoxType{{-1.0,+1.0},{-1.0,+1.0}});
+        figure.set_bounding_box(ExactBoxType{{-1.0_x,+1.0_x},{-1.0_x,+1.0_x}});
         figure.set_fill_opacity(0.5);
         figure.set_fill_colour(0,1,0);
         figure.draw(set2);
@@ -299,7 +306,7 @@ class TestAffineSet
         Vector< Affine<FloatDPBounds> > a;
         ExactBoxType dom;
         figure.clear();
-        figure.set_bounding_box(ExactBoxType{{-1.0,+15.0},{-1.0,+15.0}});
+        figure.set_bounding_box(ExactBoxType{{-1.0_x,+15.0_x},{-1.0_x,+15.0_x}});
         figure.set_fill_colour(0.5,1.0,1.0);
         figure.set_fill_opacity(0.5);
 
@@ -311,142 +318,142 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate two-dimensional image set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{1.0,13.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[1]});
             expected_set=Polytope2d({{-0.5,-0.25}, {+0.5,-0.25}, {+0.5,+0.25},{-0.5,+0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of nondegenerate two-dimensional constrained image set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d(4.0,13.0);
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]},{a[0]+a[1]<=0.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[1]},{a[0]+a[1]<=0.5_x});
             expected_set=Polytope2d({{-0.5,-0.25}, {+0.5,-0.25}, {+0.5,-0.125}, {-0.25,+0.25},{-0.5,+0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of two-dimensional image set with errors
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,13.0};
-            FloatDPBounds e=FloatDPBounds(-1.0,+1.0);
+            FloatDPBounds e=FloatDPBounds(-1.0_x,+1.0_x,dp);
 
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.25_ex*a[0]+0.25_ex*a[1]+0.5_ex*e,o[1]+0.5_ex*a[0]-0.5_ex*a[1]});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.25_x*a[0]+0.25_x*a[1]+0.5_x*e,o[1]+0.5_x*a[0]-0.5_x*a[1]});
             expected_set=Polytope2d({{-1.0,0.0}, {-0.5,-1.0}, {+0.5,-1.0}, {+1.0,0.0}, {+0.5,+1.0}, {-0.5,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of nondegenerate one-dimensional image set
-            a=Affine<FloatDPBounds>::variables(1);
+            a=Affine<FloatDPBounds>::variables(1,dp);
             dom=ExactBoxType::unit_box(1);
             offsets=FloatDPValueVector2d{1.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0.0_ex*a[0]<=1.0_ex,a[0]==0.75_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[0]},{0.0_x*a[0]<=1.0_x,a[0]==0.75_x});
             expected_set=Polytope2d({{0.375, 0.1875}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of one-dimensional image set
-            a=Affine<FloatDPBounds>::variables(1);
+            a=Affine<FloatDPBounds>::variables(1,dp);
             dom=ExactBoxType::unit_box(1);
             offsets=FloatDPValueVector2d{4.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[0]});
             expected_set=Polytope2d({{-0.5,-0.25}, {0.5,0.25}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of one-dimensional constraint set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.0_ex*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.0_x*a[0]<=1.0_x,a[0]+a[1]==0.5_x});
             expected_set=Polytope2d({{-0.5,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of one-dimensional constraint set with one proper constraint on boundary
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{10.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_ex<=a[0], a[1]<=0.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_x<=a[0], a[1]<=0.5_x});
             expected_set=Polytope2d({{+1.0,-1.0}, {+1.0,+0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of set with constraint a<=0 and a>=0
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{13.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_ex*a[1]<=0.75_ex,0.75_ex<=a[0]+0.5_ex*a[1]});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_x*a[1]<=0.75_x,0.75_x<=a[0]+0.5_x*a[1]});
             expected_set=Polytope2d({{+0.25,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of set with constraint 0<=a<=0
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{13.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_ex<=a[0]+0.5_ex*a[1]<=0.75_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_x<=a[0]+0.5_x*a[1]<=0.75_x});
             expected_set=Polytope2d({{+0.25,+1.0}, {+1.0,-0.5}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of set with degenerate constraints at corner of box
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{1.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_ex*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_x*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
             expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of set with degenerate constraints near corner of box
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{4.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_ex*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_x*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
             expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,0.0}, {+0.667,+0.667}, {0.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of set repeated constraints
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]<=2.0_ex,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_x*a[1]<=2.0_x,a[0]/3.0_x+a[1]*2.0_x/3.0_x<=0.333333333333333333_pr});
             expected_set=Polytope2d({{-1.0,-1.0}, {+1.0,-1.0}, {+1.0,0.5}, {0.0,+1.0}, {-1.0,+1.0}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of projection of three-dimensional box with single equality constraint
-            a=Affine<FloatDPBounds>::variables(3);
+            a=Affine<FloatDPBounds>::variables(3,dp);
             dom=ExactBoxType::unit_box(3);
             offsets=FloatDPValueVector2d{10.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]+a[2]==1.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_x*a[1]+a[2]==1.5_x});
             expected_set=Polytope2d({{+1.0,-0.25}, {+1.0,+0.75}, {+0.5,+1.0}, {-1.0,+1.0}, {-1.0,+0.75}}) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
-            a=Affine<FloatDPBounds>::variables(3);
+            a=Affine<FloatDPBounds>::variables(3,dp);
             dom=ExactBoxType::unit_box(3);
             offsets=FloatDPValueVector2d{1.0,7.0};
-            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_ex*a[0]+0.20_ex*a[1]+0.05_ex*a[2],o[1]-0.10_ex*a[0]+0.1_ex*a[1]+0.05_ex*a[2]},{a[1]-a[2]<=-0.25_ex,a[0]+a[1]+a[2]==0.5_ex});
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_pr*a[0]+0.20_pr*a[1]+0.05_pr*a[2],o[1]-0.10_pr*a[0]+0.1_pr*a[1]+0.05_pr*a[2]},{a[1]-a[2]<=-0.25_x,a[0]+a[1]+a[2]==0.5_x});
             expected_set=Polytope2d({{+0.0,0.0}}) + offsets; // Unknown
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -455,7 +462,7 @@ class TestAffineSet
     }
 
     Void test() {
-        figure.set_bounding_box(ExactBoxType{{-4.0_ex,+4.0_ex},{-4.0_ex,+4.0_ex}});
+        figure.set_bounding_box(ExactBoxType{{-4.0_x,+4.0_x},{-4.0_x,+4.0_x}});
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_invalid());
         ARIADNE_TEST_CALL(test_pure_constraint());

@@ -33,11 +33,11 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
 
-#include "../symbolic/variables.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 
@@ -53,8 +53,21 @@ typedef Space<Real> RealSpace;
 
 //! \ingroup SymbolicModule
 //! \brief A space defined as a list of named variables of type \a T.
-//!   Allows conversion between the space \a T<sup>n</sup> and a space defined by named variables.
-//! \details \see Variable
+//! Allows conversion between the indexed space \a T<sup>n</sup> and the space \a T<sup>V</sup> defined by named variables \a V.
+//!
+//! \details %Ariadne's main computational functionality is based around Euclidean space \f$\R^n\f$.
+//! However, it is more convenient to define sets and functions symbolically in terms of named variables.
+//! A Space<Real> provides an ordering of variables which allows conversion between the two kinds of representation.
+//!
+//! The main conversion allowed is between \ref Valuation of type \a T<sup>V</sup> for a set of \a n variables \a V,
+//! and a \ref Vector or type \a T<sup>n</sup>.
+//! It also allows conversion between sets defined in terms of named variables and those defined in terms of numbered indices,
+//! such as \ref VariablesBox and \ref Box.
+//! In general, the conversion operations are provided by the symbolic class.
+//!
+//! \b Example
+//! \snippet tutorials/symbolic_usage.cpp Space_usage
+//! \see Variable
 template<class T> class Space
 {
   public:
@@ -69,11 +82,13 @@ template<class T> class Space
     Bool operator==(const Space<T>& other) const;
     Bool operator!=(const Space<T>& other) const;
 
+    //! \brief The dimension of the space.
     SizeType size() const;
     //! \brief The dimension of the space.
     SizeType dimension() const;
     //! \brief The \a i<sup>th</sup> named variable.
     const VariableType operator[](SizeType i) const;
+    //! \brief The \a i<sup>th</sup> named variable.
     const VariableType variable(SizeType i) const;
 
     //! \brief A list giving ordered variables.

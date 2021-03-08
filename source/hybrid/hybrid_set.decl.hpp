@@ -32,6 +32,18 @@
 
 namespace Ariadne {
 
+class HybridSetBase;
+
+template<class P> class HybridBoundedSet;
+template<class P> class HybridOpenSet;
+template<class P> class HybridClosedSet;
+template<class P> class HybridOvertSet;
+template<class P> class HybridCompactSet;
+template<class P> class HybridRegularSet;
+template<class P> class HybridLocatedSet;
+template<class P> class HybridRegularLocatedSet;
+
+
 template<class UB> class VariableInterval;
 using FloatVariableInterval = VariableInterval<FloatDP>;
 
@@ -53,16 +65,14 @@ using HybridApproximatePoint = HybridPoint<FloatDPApproximation>;
 template<class IVL> class HybridBox;
 using HybridRealBox = HybridBox<RealInterval>;
 using HybridExactBox = HybridBox<ExactIntervalType>;
-using HybridUpperBox = HybridBox<ExactIntervalType>;
-//using HybridUpperBox = HybridBox<UpperIntervalType>;
+using HybridUpperBox = HybridBox<UpperIntervalType>;
 
 using HybridExactBoxType = HybridExactBox;
 using HybridUpperBoxType = HybridUpperBox;
 
 template<class IVL> class HybridBoxes;
-//using HybridUpperBoxes = HybridBoxes<UpperIntervalType>;
 using HybridExactBoxes = HybridBoxes<ExactIntervalType>;
-using HybridUpperBoxes = HybridBoxes<ExactIntervalType>;
+using HybridUpperBoxes = HybridBoxes<UpperIntervalType>;
 
 using HybridExactBoxesType = HybridExactBoxes;
 using HybridUpperBoxesType = HybridUpperBoxes;

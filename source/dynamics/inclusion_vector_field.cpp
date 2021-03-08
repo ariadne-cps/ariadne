@@ -23,14 +23,14 @@
  */
 
 #include "inclusion_vector_field.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../function/symbolic_function.hpp"
+#include "symbolic/expression_set.hpp"
+#include "function/symbolic_function.hpp"
 
 namespace Ariadne {
 
 List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
     List<Nat> result;
-    for (Nat i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
+    for (SizeType i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
     return result;
 }
 
@@ -39,14 +39,14 @@ BoxDomainType input_bounds_to_domain(RealVariablesBox const& inputs) {
 
     auto vars = inputs.variables();
     for (auto v : vars) {
-        result.push_back(cast_exact(IntervalDomainType(inputs[v].lower().get_d(),inputs[v].upper().get_d())));
+        result.push_back(IntervalDomainType(cast_exact(inputs[v].lower_bound().get(dp)),cast_exact(inputs[v].upper_bound().get(dp))));
     }
     return Vector<IntervalDomainType>(result);
 }
 
 Pair<CoordinateFormulaPair,ExactIntervalType> centered_coordinate_transformation(Nat const& i, ExactIntervalType const& bounds) {
-    if (same(bounds.lower(),-bounds.upper())) return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)},bounds);
-    else return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)+EffectiveFormula::constant(EffectiveNumber(bounds.midpoint()))},ExactIntervalType(cast_exact(bounds.lower()-bounds.midpoint()),cast_exact(bounds.upper()-bounds.midpoint())));
+    if (same(bounds.lower_bound(),-bounds.upper_bound())) return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)},bounds);
+    else return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)+EffectiveFormula::constant(EffectiveNumber(bounds.midpoint()))},ExactIntervalType(cast_exact(bounds.lower_bound()-bounds.midpoint()),cast_exact(bounds.upper_bound()-bounds.midpoint())));
 }
 
 
@@ -86,7 +86,7 @@ Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunc
 
     Vector<EffectiveFormula> transformed_formulae = substitute(ff._formulae,centering_substitution);
 
-    List<Nat> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
+    List<SizeType> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
     if (is_additive_in(transformed_formulae,input_indices)) {
         incorporate_additive_inputs_coefficients(transformed_formulae,transformed_inputs);
     }

@@ -29,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_BALL_HPP
 #define ARIADNE_FLOAT_BALL_HPP
 
-#include "../utility/macros.hpp"
+#include "utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -46,6 +46,7 @@ template<class PRE, class PR, DisableIf<IsDefaultConstructible<PRE>> = dummy, En
 
 //! \ingroup NumericModule
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
+//! \sa Real, FloatDP, FloatMP, Error, Value, Bounds, Approximation.
 template<class F, class FE> class Ball
     : public DefineConcreteGenericOperators<Ball<F,FE>>
     , public DefineFieldOperators<Ball<F,FE>>
@@ -56,23 +57,37 @@ template<class F, class FE> class Ball
     typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
     static_assert(IsConstructible<PR,PRE>::value or IsDefaultConstructible<PRE>::value,"");
   public:
+    //! <p/>
     typedef P Paradigm;
+    //! <p/>
     typedef Ball<F,FE> NumericType;
+    //! <p/>
     typedef Number<P> GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef FE RawErrorType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PRE ErrorPrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
-    Ball<F,FE>() : _v(0.0), _e(0.0) { }
-    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0,pr), _e(0.0,_error_precision<PRE>(pr)) { }
-    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0,pr), _e(0.0,pre) { }
-    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0,_error_precision<PRE>(v.precision())) { }
-    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
+    //! Construct a ball of radius \f$0\f$ about zero, using precision \a pr for the centre (value),
+    //! and using either value \a pr for the precision of the radius (error), or the default value.
+    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0_x,pr), _e(0.0_x,_error_precision<PRE>(pr)) { }
+    //! Construct a ball of radius \f$0\f$ about zero,
+    //! using precision \a pr for the centre (value), and \a pre for the radius (error).
+    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
+    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
+    //! Construct a ball of radius \a e about \a v.
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
+    //! Construct a ball of radius \a error about \a value.
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
     Ball<F,FE>(Value<F> const& x, PRE pre);
+    //! Construct a ball containing the bounds \a x, with error bound of precision \a pre.
     Ball<F,FE>(Bounds<F> const& x, PRE pre);
     Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
@@ -87,23 +102,35 @@ template<class F, class FE> class Ball
     Ball<F,FE>(const ValidatedNumber& y, PR pr);
 
     // FIXME: Constructors for other types
+        Ball<F,FE>(const Integer& z, PR pr, PRE pre);
         Ball<F,FE>(const Dyadic& w, PR pr, PRE pre);
         Ball<F,FE>(const Rational& q, PR pr, PRE pre);
         Ball<F,FE>(const Real& q, PR pr, PRE pre);
+    //! Construct a ball guaranteed to contain the generic validated number \a y,
+    //! using precision \a pr for the centre (value), and \a pre for the radius (error).
     Ball<F,FE>(const ValidatedNumber& y, PR pr, PRE pre);
 
+    //! Construct a ball containing the bounds \a x.
+    //! The precision of the error is either that of \a F, or the default value.
     explicit Ball<F,FE>(Bounds<F> const& x);
     Ball<F,FE>(Value<F> const& x);
 
+    //! Assign from generic validated bounds \a y, keeping the same properties.
     Ball<F,FE>& operator=(const ValidatedNumber& y) { return *this=Ball<F,FE>(y,this->precision(),this->error_precision()); }
 
+    //! Downcast to a generic validated value.
     operator ValidatedNumber () const;
 
+    //! Create a ball from the generic validated number \a y with the same properties as \a this.
     Ball<F,FE> create(const ValidatedNumber& y) const { return Ball<F,FE>(y,this->precision(),this->error_precision()); }
 
+    //! A lower bound.
     LowerBound<F> const lower() const;
+    //! An upper bound.
     UpperBound<F> const upper() const;
+    //! The centre value of the ball.
     Value<F> const value() const;
+    //! The radius of the ball, giving a bound on the error of \ref value().
     Error<FE> const error() const;
 
     friend Value<F> value(Ball<F,FE> const& x) { return x.value(); }
@@ -113,15 +140,24 @@ template<class F, class FE> class Ball
     RawType const upper_raw() const { return add(up,_v,_e); }
     RawType const& value_raw() const { return _v; }
     RawErrorType const& error_raw() const { return _e; }
+    //! Approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return _v.get_d(); }
 
+    //! The precision of the floating-point type used for the centre value.
     PrecisionType precision() const { return _v.precision(); }
+    //! The precision of the floating-point type used for the error bound.
     ErrorPrecisionType error_precision() const { return _e.precision(); }
+    //! The compuational properties needed to create the ball; equivalent to the precision and error-precision.
     PropertiesType properties() const { return _v.precision(); }
+    //! Downcast to a generic validated ball.
     GenericType generic() const { return this->operator GenericType(); }
+    //! Add \a e to error bound.
     Ball<F,FE> pm(Error<FE> const& e) const;
     friend Approximation<F> round(Approximation<F> const& x);
   public:
+    friend Bool is_nan(Ball<F,FE> const& x) {
+        return is_nan(x._v) || is_nan(x._e); }
+
     friend Ball<F,FE> max(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_max(x1,x2); }
     friend Ball<F,FE> min(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
@@ -182,10 +218,10 @@ template<class F, class FE> class Ball
     friend Ball<F,FE> atan(Ball<F,FE> const& x) {
         return Ball<F,FE>(atan(Bounds<F>(x)),x.error_precision()); }
 
-    //! \related Ball<F,FE> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_eq(x1,x2); }
-    //! \related Ball<F,FE> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_lt(x1,x2); }
 
@@ -208,23 +244,31 @@ template<class F, class FE> class Ball
     friend auto is_positive(Ball<F,FE> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>=0.0) { return true; } else if(x.upper_raw()<0.0) { return false; } else { return indeterminate; } }
 
+    //! <p/>
     friend Bool same(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._v==x2._v && x1._e==x2._e; }
+    //! <p/>
     friend Bool models(Ball<F,FE> const& x1, Value<F> const& x2) {
         return x1._l<=x2._v && x1._u >= x2._v; }
+    //! <p/>
     friend Bool consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l<=x2._u && x1._u >= x2._l; }
+    //! <p/>
     friend Bool inconsistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l>x2._u || x1._u < x2._l; }
+    //! <p/>
     friend Bool refines(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l>=x2._l && x1._u <= x2._u; }
+    //! <p/>
     friend Ball<F,FE> refinement(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Ball<F,FE>(refinement(Bounds<F>(x1),Bounds<F>(x2)),x1.error_precision()); }
 
     friend Integer cast_integer(Ball<F,FE> const& x) {
         return Operations<Ball<F,FE>>::_cast_integer(x); }
 
+    //! <p/>
     friend OutputStream& operator<<(OutputStream& os, Ball<F,FE> const& x) { return Operations<Ball<F,FE>>::_write(os,x); }
+    //! <p/>
     friend InputStream& operator>>(InputStream& is, Ball<F,FE>& x) { return Operations<Ball<F,FE>>::_read(is,x); }
   private: public:
     F _v; FE _e;
@@ -234,9 +278,18 @@ template<class PR> Ball(ValidatedNumber, PR) -> Ball<RawFloatType<PR>>;
 template<class PR, class PRE> Ball(ValidatedNumber, PR, PRE) -> Ball<RawFloatType<PR>,RawFloatType<PRE>>;
 template<class F, class FE> Ball(F,FE) -> Ball<F,FE>;
 
-template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F,FE> const& flt) {
-    return FloatFactory<PrecisionType<F>>(flt.precision());
-}
+template<class F, class FE> inline FloatBallFactory<PrecisionType<F>,PrecisionType<FE>> factory(Ball<F,FE> const& flt) {
+    return FloatBallFactory<PrecisionType<F>,PrecisionType<FE>>(flt.precision(),flt.error_precision()); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<ValidatedTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<EffectiveTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<ExactTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Real const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Rational const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Dyadic const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Integer const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+
+template<class PR, class PRE> inline PositiveFloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(PositiveValidatedNumber const& y) { return PositiveFloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+
 
 template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
     using PR = typename Ball<F,FE>::PrecisionType;
@@ -434,7 +487,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     }
 
     static PositiveLowerBound<F> _mig(Ball<F,FE> const& x) {
-        return PositiveLowerBound<F>(max(0,sub(down,abs(x._v),x._e)));
+        return PositiveLowerBound<F>(max(F(0,x._v.precision()),sub(down,abs(x._v),x._e)));
     }
 
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.

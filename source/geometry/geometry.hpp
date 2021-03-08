@@ -30,8 +30,8 @@
 
 #include <vector>
 
-#include "../geometry/box.hpp"
-#include "../function/function_interface.hpp"
+#include "geometry/box.hpp"
+#include "function/function_interface.hpp"
 
 namespace Ariadne {
 
@@ -40,9 +40,9 @@ enum class SplitPart : char;
 
 inline
 SizeType irmax(const ExactBoxType& bx) {
-    FloatDP dmax=0.0;
-    Nat imax=0;
-    for(Nat i=0; i!=bx.size(); ++i) {
+    FloatDP dmax(0.0_x,dp);
+    SizeType imax=0;
+    for(SizeType i=0; i!=bx.size(); ++i) {
         FloatDP d=bx[i].width().upper().raw();
         if(d>dmax) {
             imax=i;
@@ -60,14 +60,14 @@ inline
 ExactBoxType split(const ExactBoxType& bx, SizeType i, SplitPart lr) {
     ExactBoxType result(bx);
     ExactIntervalType& ivl=result[i];
-    const FloatDPValue& l=ivl.lower();
-    const FloatDPValue& u=ivl.upper();
+    const FloatDPValue& l=ivl.lower_bound();
+    const FloatDPValue& u=ivl.upper_bound();
     FloatDPValue c=mid(l,u);
     if(lr==SplitPart::MIDDLE) {
-        ivl.set(mid(l,c),mid(c,u));
+        ivl.set_bounds(mid(l,c),mid(c,u));
     } else {
-        if(lr==SplitPart::LOWER) { ivl.set_upper(c); }
-        else { ivl.set_lower(c); }
+        if(lr==SplitPart::LOWER) { ivl.set_upper_bound(c); }
+        else { ivl.set_lower_bound(c); }
     }
     return result;
 }
@@ -76,9 +76,9 @@ inline
 Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx, SizeType i)
 {
     Pair<ExactBoxType,ExactBoxType> result(bx,bx);
-    FloatDPValue c=mid(bx[i].lower(),bx[i].upper());
-    result.first[i].set_upper(c);
-    result.second[i].set_lower(c);
+    FloatDPValue c=mid(bx[i].lower_bound(),bx[i].upper_bound());
+    result.first[i].set_upper_bound(c);
+    result.second[i].set_lower_bound(c);
     return result;
 }
 
@@ -114,7 +114,7 @@ image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const 
         //cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        Nat i=irmax(d);
+        SizeType i=irmax(d);
         //cout << "splitting\n";
         return separated(split(d,i,SplitPart::LOWER),f,b,eps) && separated(split(d,i,SplitPart::UPPER),f,b,eps);
     }
@@ -140,7 +140,7 @@ image_inside(const ExactBoxType& d, const F& f, const ExactBoxType& b, const Raw
         //cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        Nat i=irmax(d);
+        SizeType i=irmax(d);
         //cout << "splitting\n";
         return inside(split(d,i,SplitPart::LOWER),f,b,eps) && inside(split(d,i,SplitPart::UPPER),f,b,eps);
     }
@@ -150,8 +150,8 @@ template<class DS>
 DS remove_subsets(const DS& ls)
 {
     DS result;
-    for(Nat i=0; i!=ls.size(); ++i) {
-        for(Nat j=0; j!=ls.size(); ++j) {
+    for(SizeType i=0; i!=ls.size(); ++i) {
+        for(SizeType j=0; j!=ls.size(); ++j) {
             if(inside(ls[i],ls[j])) {
                 break;
             }
@@ -164,8 +164,8 @@ template<class DS>
 DS remove_supersets(const DS& ls)
 {
     DS result;
-    for(Nat i=0; i!=ls.size(); ++i) {
-        for(Nat j=0; j!=ls.size(); ++j) {
+    for(SizeType i=0; i!=ls.size(); ++i) {
+        for(SizeType j=0; j!=ls.size(); ++j) {
             if(inside(ls[j],ls[i])) {
                 break;
             }
@@ -176,45 +176,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-ValidatedLowerKleenean overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-ValidatedLowerKleenean inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean inside(const CompactSetInterface<EffectiveTag,T>& cps, const OpenSetInterface<EffectiveTag,T>& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-ValidatedLowerKleenean separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean separated(const CompactSetInterface<EffectiveTag,T>& cps, const ClosedSetInterface<EffectiveTag,T>& cls, const FloatDP& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-ValidatedKleenean overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedKleenean separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-ValidatedLowerKleenean intersection_overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean intersection_overlap(const OvertSetInterface<EffectiveTag,T>& ls, const OpenSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedSierpinskian intersection_inside(const ClosedSetInterface<EffectiveTag,T>& ls, const OpenSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-ValidatedSierpinskian intersection_separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedSierpinskian intersection_separated(const ClosedSetInterface<EffectiveTag,T>& ls, const ClosedSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 } // namespace Ariadne

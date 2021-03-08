@@ -29,18 +29,18 @@
 #ifndef ARIADNE_REACHABILITY_ANALYSER_HPP
 #define ARIADNE_REACHABILITY_ANALYSER_HPP
 
-#include "../solvers/configuration_interface.hpp"
-#include "../geometry/set.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../geometry/function_set.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "geometry/set.hpp"
+#include "geometry/grid_paving.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/storage.hpp"
-#include "../dynamics/orbit.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
-#include "../dynamics/reachability_analyser_interface.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/storage.hpp"
+#include "dynamics/orbit.hpp"
+#include "dynamics/vector_field_evolver.hpp"
+#include "dynamics/reachability_analyser_interface.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 
 namespace Ariadne {
@@ -74,7 +74,6 @@ template<> struct SafetyCertificate<EuclideanSpace> {
 //! \brief A class for performing reachability analysis on a hybrid system.
 template<class SYS> class ReachabilityAnalyser
     : public ReachabilityAnalyserInterface<SYS>
-    , public Loggable
 {
     typedef ReachabilityAnalyserInterface<SYS> Interface;
   public:
@@ -96,14 +95,14 @@ template<class SYS> class ReachabilityAnalyser
     typedef typename Interface::EnclosureType EnclosureType;
     typedef typename Interface::StorageType StorageType;
     using GridType = typename StorageType::GridType;
-    using PavingType = StorageType;
+    using PavingType = typename StorageType::PavingType;
   private:
   protected:
     SharedPointer<SystemType> _system;
     SharedPointer<EvolverType> _evolver;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Virtual destructor
@@ -114,22 +113,25 @@ template<class SYS> class ReachabilityAnalyser
 
     //! \brief Make a dynamically-allocated copy.
     virtual ReachabilityAnalyser* clone() const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods to set and get the configuration properties of the class.
 
     //! \brief A reference to the analyser's configuration parameters.
     ConfigurationType& configuration() { return *this->_configuration; }
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
+    //! \brief A reference to the analyser's evolver parameter.
+    const EvolverType& evolver() const { return *this->_evolver; }
+
     //! \brief Get the system associated with the analyser.
     virtual const SystemType& system() const override { return *this->_system; }
-    //@}
+    //!@}
 
 
 
-    //@{
+    //!@{
     //! \name Evaluation of systems on abstract sets
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
     virtual StorageType
@@ -165,6 +167,7 @@ template<class SYS> class ReachabilityAnalyser
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& time) const override;
 
+
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
     virtual StorageType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const override;
@@ -173,7 +176,7 @@ template<class SYS> class ReachabilityAnalyser
     virtual SafetyCertificateType
     verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const override;
 
-    //@}
+    //!@}
 
   protected:
     // Helper functions for operators on lists of sets.

@@ -12,7 +12,6 @@
 
 #cmakedefine ARIADNE_ENABLE_STACK_TRACE
 
-#cmakedefine HAVE_GMPXX_H
 #cmakedefine HAVE_CAIRO_H
 
 #endif /* ARIADNE_CONFIG_HPP */

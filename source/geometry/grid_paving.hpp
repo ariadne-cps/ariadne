@@ -3,7 +3,6 @@
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
- *
  ****************************************************************************/
 
 /*
@@ -36,26 +35,26 @@
 
 #include <memory>
 
-#include "../utility/tribool.hpp"
-#include "../utility/array.hpp"
-#include "../utility/iterator.hpp"
+#include "utility/tribool.hpp"
+#include "utility/array.hpp"
+#include "utility/iterator.hpp"
 
-#include "../utility/binary_word.hpp"
+#include "utility/binary_word.hpp"
 
-#include "../utility/exceptions.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/list_set.hpp"
+#include "utility/exceptions.hpp"
+#include "geometry/box.hpp"
+#include "geometry/point.hpp"
+#include "geometry/list_set.hpp"
 
-#include "../numeric/numeric.hpp"
+#include "numeric/numeric.hpp"
 
-#include "../geometry/set_interface.hpp"
-#include "../geometry/paving_interface.hpp"
-#include "../algebra/vector.hpp"
-#include "../geometry/grid.hpp"
-#include "../geometry/grid_cell.hpp"
+#include "geometry/set_interface.hpp"
+#include "geometry/paving_interface.hpp"
+#include "algebra/vector.hpp"
+#include "geometry/grid.hpp"
+#include "geometry/grid_cell.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -112,8 +111,8 @@ class GridTreeSubpaving
 
     friend class GridTreeCursor;
 
-    friend GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-    friend GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+    friend GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+    friend GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
     //! \brief The pointer to the root node of the subpaving tree.
     //! Note that, this is not necessarily the root node of the corresponding paving tree.
@@ -179,7 +178,7 @@ class GridTreeSubpaving
     //! \brief A short name for the constant Iterator
     typedef GridTreeConstIterator ConstIterator;
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief The new root node can only be constructed from the existing tree node.
@@ -197,13 +196,13 @@ class GridTreeSubpaving
     //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for DrawableInterface.
     GridTreeSubpaving* clone() const;
 
-    //@}
+    //!@}
 
     //! Virtual destructor. The destructor needs to be virtual since GridTreeSet is a subclass
     //! with different memory management.
     virtual ~GridTreeSubpaving();
 
-    //@{
+    //!@{
     //! \name Properties
 
     //! \brief True if the set is empty.
@@ -243,17 +242,17 @@ class GridTreeSubpaving
     //! the two GridTreeSubset represent equal sets.
     Bool operator==(const GridTreeSubpaving& anotherGridTreeSubset) const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Modifying operations
 
     //! \brief Sets the ROOT NODE of this \a GridTreeSubset to either enabled (true) or disabled (false).
     Void set_root_cell(Bool enabled_or_disabled);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Subdivisions
 
     //! \brief Subdivides the tree in such a way that it's total depth becomes ( extent + numSubdivInDim ) * D
@@ -276,15 +275,15 @@ class GridTreeSubpaving
     //! \brief Subdivide the paving until the smallest depth such that the leaf
     //! cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
     //! not subdivided.
-    Void subdivide( FloatDP theMaxCellWidth );
+    Void subdivide( ApproximateDouble theMaxCellWidth );
 
     //! \brief Recombines the subdivisions, for instance if all subcells of a cell are
     //! enabled/disabled then they are put together.
     Void recombine();
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Predicates
 
     //! \brief Tests if a cell is a subset of a set.
@@ -346,9 +345,9 @@ class GridTreeSubpaving
     //! \brief Tests if a grid set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps( const ExactBoxType& theBoxType ) const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Iterators
 
     //! \brief A constant Iterator through the enabled leaf nodes of the subpaving.
@@ -357,9 +356,9 @@ class GridTreeSubpaving
     //! \brief A constant Iterator to the end of the enabled leaf nodes of the subpaving.
     ConstIterator end() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Conversions
 
     //! \brief An assignment operator that only copies the pointer to the root of the binary tree and the cell
@@ -368,9 +367,9 @@ class GridTreeSubpaving
     //! \brief Convert to a list of ordinary boxes, unrelated to the grid.
     operator ListSet<ExactBoxType>() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/Output
 
     //! \brief Draw on a two-dimensional canvas.
@@ -380,7 +379,7 @@ class GridTreeSubpaving
     OutputStream& _write(OutputStream& os) const;
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
-    //@}
+    //!@}
 
   private:
     virtual GridTreeSubpaving* _branch(Bool left_or_right) const;
@@ -449,9 +448,9 @@ class GridTreePaving
     //! This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
     static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                             const Nat max_mince_tree_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+                                             const Nat max_mince_tree_depth, const EffectiveEuclideanCompactSetInterface& theSet, BinaryWord * pPath );
     static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                             const Nat max_mince_tree_depth, const ValidatedCompactSetInterface& theSet, BinaryWord * pPath );
+                                             const Nat max_mince_tree_depth, const ValidatedEuclideanCompactSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
     //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_extent and represented
@@ -461,7 +460,7 @@ class GridTreePaving
     //! This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
     static Void _adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                             const Nat max_mince_tree_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+                                             const Nat max_mince_tree_depth, const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
     //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_hight and represented
@@ -473,13 +472,13 @@ class GridTreePaving
     //! The approximation method does not recombine cells, as knowing that both children intersect a set is more
     //! information than knowing that the parent does.
     static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                             const Nat max_mince_tree_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
+                                             const Nat max_mince_tree_depth, const EffectiveEuclideanOvertSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
     //! It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
     //! a cell, then we know it overlaps the cell and all its children.
     static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                             const Nat max_mince_tree_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+                                             const Nat max_mince_tree_depth, const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method is uset to do restriction of this set to the set given by
     //! \a theOtherSubPaving Note that, here we require that the extent of the primary
@@ -497,7 +496,7 @@ class GridTreePaving
     Void up_to_primary_cell( const Nat toPCellExtent );
 
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Create a %GridTreeSet based on zero dimensions.
@@ -544,9 +543,9 @@ class GridTreePaving
     //! extent of the primary cell which is assumed to correspond to the root node of \a theTree.
     explicit GridTreePaving( const Grid& theGrid, Nat theExtent, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Cloning/Copying/Assignment
 
     //! \brief The copy assignment operator, which copies all the data
@@ -557,7 +556,7 @@ class GridTreePaving
     //! In this case, all the data is copied.
     GridTreePaving* clone() const;
 
-    //@}
+    //!@}
 
     //! \brief Destructor, removes all the dynamically allocated data, any
     //! GridTreeSubset referencing this %GridTreeSet becomes invalid.
@@ -565,7 +564,7 @@ class GridTreePaving
 
 
 
-    //@{
+    //!@{
     //! \name Geometric Operations
 
     // PIETER: You may prefer to make inplace operations may return
@@ -604,9 +603,9 @@ class GridTreePaving
     //! smallest primary cell on the Grid, such that it contains \a theBoxType (after it's
     //! mapping on \a theGrid )
     GridCell smallest_enclosing_primary_cell(const UpperBoxType& theBoxType) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Operations
 
     //! \brief Join (make union of) two grid paving sets.
@@ -629,9 +628,9 @@ class GridTreePaving
     friend GridTreePaving outer_skew_product(GridTreePaving const& theSet1, Grid const& theGrid2,
                                              ValidatedVectorMultivariateFunction const& theFunction);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Approximation
 
     //! \brief Adjoin an over approximation to box, computing to the given resolution:
@@ -649,68 +648,68 @@ class GridTreePaving
     //!   3. Minces the paving to the level: depth + \<the primary cell extent\>
     //!   4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
     //!   5. Disables the cells that are disjoint with the \a theSet
-    Void adjoin_outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
-    Void adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
+    Void adjoin_outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim );
+    Void adjoin_outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim );
     Void adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim );
 
     //! \brief Adjoin a lower approximation to a given set, computing to the given extent and resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! A lower approximation comprises all cells intersecting a given set.
-    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
+    Void adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
 
     //! \brief Adjoin a lower approximation to a given set restricted to the given bounding box,
     //! computing to the given resolution: \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. A lower approximation comprises all cells intersecting a given set.
-    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+    Void adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
     //! \brief Adjoin a lower approximation to a given set, computing to the given resolution
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! A lower approximation comprises all cells intersecting a given set.
-    Void adjoin_lower_approximation( const LocatedSetInterface& theSet, const Nat numSubdivInDim );
+    Void adjoin_lower_approximation( const EffectiveEuclideanLocatedSetInterface& theSet, const Nat numSubdivInDim );
 
     //! \brief Adjoin an inner approximation to a given set, computing to the given extent and resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! An inner approximation comprises all cells that are sub-cells of the given set.
-    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
 
     //! \brief Adjoin an inner approximation to a given set restricted to the given bounding box,
     //! computing to the given resolution: \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
     //! the given set.
-    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
     //! \brief Adjoin an inner approximation to the given set, computing to the given resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
     //! the given set.
-    Void adjoin_inner_approximation( const SetInterface& theSet, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Nat numSubdivInDim );
 
     Void adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim );
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output routines.
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreePaving& theGridTreeSet);
-    //@}
+    //!@}
 
 };
 
 GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat fineness);
 GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat fineness);
-GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
-GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
-GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim );
-GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
-GridTreePaving inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
 template<class BS> GridTreePaving outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim);
 
@@ -787,7 +786,7 @@ class GridTreeCursor {
     //! \brief Returns true if the current node is the right child of the parent node
     Bool is_right_child() const;
 
-    //@{
+    //!@{
     //! \name Leaf Operations
 
     //! \brief Markes the leaf node as enabled, otherwise they through \a NotALeafNodeEsception
@@ -796,7 +795,7 @@ class GridTreeCursor {
     //! \brief Markes the leaf node as disabled, otherwise they through \a NotALeafNodeEsception
     Void set_disabled() const;
 
-    //@}
+    //!@}
 
     //! \brief Move to the parent node. Throws an NotAllowedMoveException if the current node is the root.
     //! Returns a reference to itself.
@@ -845,7 +844,7 @@ class GridTreeConstIterator
 
     friend class IteratorCoreAccess;
 
-    //@{
+    //!@{
     //! \name Iterator Specific
 
     virtual Void increment();
@@ -858,9 +857,9 @@ class GridTreeConstIterator
 
     virtual GridCell const& dereference() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Local
 
     //! \brief Allows to navigate to the first (\a firstLast==true ),
@@ -873,10 +872,10 @@ class GridTreeConstIterator
     //! The search is performed from left to right. (Is used for forward iteration)
     Void find_next_enabled_leaf();
 
-    //@}
+    //!@}
 
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Default constructor constructs an invalid Iterator.
@@ -894,7 +893,7 @@ class GridTreeConstIterator
     //! underlying GridTreeCursor. The latter is copied by it's copy constructor.
     GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) = default;
 
-    //@}
+    //!@}
 
     //! \brief An assignment operator that copies the current state by copying the
     //! underlying GridTreeCursor. The latter is copied by it's assignment operator.
@@ -905,13 +904,13 @@ class GridTreeConstIterator
     //! latter one does not deallocate the enclosed sub paving.
     ~GridTreeConstIterator() = default;
 
-    //@{
+    //!@{
     //! \name Get the cursor of the Iterator
 
     // This cursor is only needed to get access to enable/disable node functionality
     GridTreeCursor const& cursor() const;
 
-    //@}
+    //!@}
   private:
     // Return a dynamically-allocated copy.
     virtual GridTreeConstIterator* clone() const;
@@ -957,7 +956,7 @@ GridTreePaving outer_approximation(const ListSet<BS>& theSet, const Grid& theGri
 
 Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridCell& theGridCell);
 Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridTreePaving& theGridTreeSet);
-Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const CompactSetInterface& theSet);
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const EffectiveEuclideanCompactSetInterface& theSet);
 
 } // namespace Ariadne
 

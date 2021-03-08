@@ -1,3 +1,26 @@
+/***************************************************************************
+ *            dirichlet.cpp
+ *
+ *  Copyright  2018-20  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 #include "ariadne.hpp"
 
 #include "function/taylor_function.hpp"
@@ -58,8 +81,8 @@ template<class F> Void gnuplot(String filename, ValidatedScalarTaylorFunctionMod
     auto pr=tf.properties().precision();
     IntervalDomainType dom=tf.domain()[0];
     Nat m=100;
-    Value<F> ax(Dyadic(dom.lower()),pr);
-    Value<F> bx(Dyadic(dom.upper()),pr);
+    Value<F> ax(Dyadic(dom.lower_bound()),pr);
+    Value<F> bx(Dyadic(dom.upper_bound()),pr);
     Vector<Bounds<F>> x(1u,pr);
     for(SizeType i=0; i<=m; ++i) {
         x[0] = ((m-i)*ax+i*bx)/m;
@@ -102,8 +125,8 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     ThresholdSweeper<F> swp(pr,eps);
 
     // Define left and right endpoints of interval, and representative test point
-    Vector<Value<F>> a({0},pr);
-    Vector<Value<F>> b({1},pr);
+    Vector<Value<F>> a({0.0_x},pr);
+    Vector<Value<F>> b({1.0_x},pr);
     auto xv=(a+2*b)/3;
 
     // Define domain of problem, and zero and coordinate functions.
@@ -119,7 +142,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
 
     // Set the number of terms to use for the Fourier series
     SizeType n=10;
-    Array<FloatDPBounds> sums(n);
+    Array<FloatDPBounds> sums(n,FloatDPBounds(pr));
 
     // Compute the Fourier coefficients of f
     List<Bounds<F>> as=fourier_coefficients(tf,n);
@@ -141,7 +164,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     PRINTLN;
 
     // Compute the Fourier coefficients of the particular solution
-    List<FloatDPBounds> cs(n);
+    List<FloatDPBounds> cs(n,FloatDPBounds(dp));
     for(SizeType i=0; i!=n; ++i) {
         cs[i] = as[i]/(1-sqr(i*pi));
     }

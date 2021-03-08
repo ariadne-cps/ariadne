@@ -30,12 +30,12 @@
 #include <iostream>
 #include <iomanip>
 
-#include "../function/functional.hpp"
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/binary_word.hpp"
-#include "../geometry/list_set.hpp"
+#include "function/functional.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/stlio.hpp"
+#include "utility/binary_word.hpp"
+#include "geometry/list_set.hpp"
 
 
 namespace Ariadne {
@@ -97,7 +97,7 @@ class BinaryTreeNode {
     Void init( ValidatedKleenean isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
 
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Construct a tree node.
@@ -122,11 +122,11 @@ class BinaryTreeNode {
     //! of the tree. Their order is the same as in \a theTree, e.g. here it is: 3,4,5
     explicit BinaryTreeNode( const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
-    //@}
+    //!@}
 
     ~BinaryTreeNode();
 
-    //@{
+    //!@{
     //! \name Properties
 
     //! \brief Returns true if the node is marked as enabled, otherwise false
@@ -170,9 +170,9 @@ class BinaryTreeNode {
 
     static Bool is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode );
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Leaf Operations
 
     //! \brief This method makes the node to become a leaf node with the enabled value : \a is_enabled
@@ -200,9 +200,9 @@ class BinaryTreeNode {
     //! If the initial tree depth is greater than \a depth then nothing is done.
     Void mince(const Nat depth);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name
 
     //! \brief Allows to assign one binary tree node to the other, this is done by copying
@@ -282,7 +282,7 @@ class BinaryTreeNode {
     //! covered then we mean: is a subnode in the (virtual) tree and all it's subnodes in the (virtual) tree.
     static Bool subset( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
 
-    //@}
+    //!@}
 };
 
 //***************************************BinaryTreeNode**********************************************/

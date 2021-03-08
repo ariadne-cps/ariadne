@@ -29,9 +29,9 @@
 #ifndef ARIADNE_CONSTRAINT_HPP
 #define ARIADNE_CONSTRAINT_HPP
 
-#include "../numeric/numeric.hpp"
-#include "../function/function.hpp"
-#include "../utility/metaprogramming.hpp"
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
+#include "utility/metaprogramming.hpp"
 
 namespace Ariadne {
 
@@ -43,17 +43,17 @@ namespace Ariadne {
 template<class F, class R>
 class Constraint {
   public:
-    typedef F FunctionType; //!< .
-    typedef R BoundType; //!< .
-    typedef R UpperBoundType; //!< .
-    typedef NegationType<R> LowerBoundType; //!< .
+    typedef F FunctionType; //!< <p/>
+    typedef R BoundType; //!< <p/>
+    typedef R UpperBoundType; //!< <p/>
+    typedef NegationType<R> LowerBoundType; //!< <p/>
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
-    //! .
+    //! <p/>
     Constraint(LowerBoundType const& l, FunctionType const& f, UpperBoundType const& u)
         : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT_MSG(decide(l<=u),"f="<<f<<"\nl="<<l<<", u="<<u); }
 
-    //! .
+    //! <p/>
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 
@@ -72,13 +72,13 @@ class Constraint {
 
     Void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
-    //! .
+    //! <p/>
     FunctionType const& function() const { return this->_function; }
-    //! .
+    //! <p/>
     SizeType argument_size() const { return this->_function.argument_size(); }
-    //! .
+    //! <p/>
     LowerBoundType const& lower_bound() const { return this->_lower_bound; }
-    //! .
+    //! <p/>
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
 
     // FIXME: This function should not be used as it breaks type safety
@@ -89,15 +89,15 @@ class Constraint {
     R _upper_bound;
 };
 
-//@{
+//!@{
 //! \relates Constraint
 //! \name Type synonyms
-using RealConstraint = Constraint<RealScalarMultivariateFunction,Real>; //!< .
-using EffectiveConstraint = Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber>; //!< .
-using ValidatedConstraint = Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber>; //!< .
-using ApproximateConstraint = Constraint<ApproximateScalarMultivariateFunction,ApproximateNumber>; //!< .
-using ValidatedExactConstraint = Constraint<ValidatedScalarMultivariateFunction,ExactNumber>; //!< .
-//@}
+using RealConstraint = Constraint<RealScalarMultivariateFunction,Real>; //!< <p/>
+using EffectiveConstraint = Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber>; //!< <p/>
+using ValidatedConstraint = Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber>; //!< <p/>
+using ApproximateConstraint = Constraint<ApproximateScalarMultivariateFunction,ApproximateNumber>; //!< <p/>
+using ValidatedExactConstraint = Constraint<ValidatedScalarMultivariateFunction,ExactNumber>; //!< <p/>
+//!@}
 
 template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();

@@ -29,17 +29,17 @@
 #ifndef ARIADNE_INCLUSION_INTEGRATOR_HPP
 #define ARIADNE_INCLUSION_INTEGRATOR_HPP
 
-#include "../utility/typedefs.hpp"
-#include "../utility/attribute.hpp"
-#include "../algebra/sweeper.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/domain.hpp"
-#include "../function/function_model.hpp"
-#include "../function/formula.hpp"
-#include "../function/symbolic_function.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../output/logging.hpp"
-#include "../solvers/integrator_interface.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/attribute.hpp"
+#include "algebra/sweeper.hpp"
+#include "algebra/algebra.hpp"
+#include "function/domain.hpp"
+#include "function/function_model.hpp"
+#include "function/formula.hpp"
+#include "function/symbolic_function.hpp"
+#include "symbolic/expression_set.hpp"
+#include "output/logging.hpp"
+#include "solvers/integrator_interface.hpp"
 
 namespace Ariadne {
 
@@ -87,7 +87,7 @@ template<class F> PositiveLowerBound<F> dexp(LowerBound<F> const& x) {
 }
 
 template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
-    return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
+    return PositiveBounds<F>(dexp(x.lower_bound()),dexp(x.upper_bound()));
 }
 
 // Compute (x*e^x/2-e^x+x/2+1)/x^3, which is a positive monotone function.
@@ -118,6 +118,8 @@ template<class F> PositiveUpperBound<F> psi1(PositiveUpperBound<F> const& xu) {
 }
 
 struct ErrorConstants {
+    typedef decltype(declval<ErrorType>().precision()) PrecisionType;
+
     ErrorType K; // K
     Vector<ErrorType> Kj; // K[j]
     ErrorType pK; // K'
@@ -155,7 +157,8 @@ struct ErrorConstants {
             FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
-private:
+    PrecisionType precision() const { return PrecisionType(); }
+  private:
     SizeType _dimension;
 };
 
@@ -241,9 +244,11 @@ ErrorType vstar(BoxDomainType const& inputs);
 template<class A> ErrorType wstar_multiplier();
 
 template<class A> ErrorType wstar(BoxDomainType const& inputs) {
-    ErrorType result(0u);
+    typedef typename ErrorType::PrecisionType PR;
+    PR pr;
+    ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size()))
-        result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper()));
+        result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper_bound()));
     return result;
 }
 
@@ -258,7 +263,7 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind
         case InputsRelationKind::SINGULAR: os << "SINGULAR"; break;
         case InputsRelationKind::DUAL: os << "DUAL"; break;
         case InputsRelationKind::ADDITIVE: os << "ADDITIVE"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
+        default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming");
     }
     return os;
 }
@@ -282,7 +287,7 @@ public:
 };
 
 template<class A, class R>
-class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
+class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A> {
   public:
     ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs)
         : _f(f), _inputs(inputs) { }
@@ -302,11 +307,11 @@ class ApproximationErrorProcessorFactory {
     typedef ApproximationErrorProcessorInterface<A> Processor;
 public:
     SharedPointer<Processor> create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) const {
-        Nat n = f.result_size();
-        Nat m = inputs.size();
+        SizeType n = f.result_size();
+        SizeType m = inputs.size();
         ARIADNE_ASSERT_MSG(f.argument_size()-n == m, "ApproximationErrorProcessorFactory was given an incompatible f argument space in respect to the inputs box");
         Set<Nat> input_idx;
-        for (Nat i : range(n,n+m)) { input_idx.insert(i); }
+        for (SizeType i : range(n,n+m)) { input_idx.insert(i); }
         if (is_additive_in(f,input_idx)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(f,inputs));
         else if (m == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(f, inputs));
         else if (m == 2) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,DualInputs>(f, inputs));
@@ -330,7 +335,7 @@ class InclusionIntegratorInterface {
 
 
 template<class A>
-class InclusionIntegrator : public InclusionIntegratorInterface, Loggable {
+class InclusionIntegrator : public InclusionIntegratorInterface {
     friend class InclusionIntegratorFactory;
   protected:
     EffectiveVectorMultivariateFunction const& _f;
@@ -373,8 +378,10 @@ class InclusionIntegratorHandle {
     InclusionIntegratorHandle(InclusionIntegratorHandle const& other) : _impl(other._impl) { }
     InclusionIntegratorHandle& operator=(InclusionIntegratorHandle const& other) { _impl = other._impl; return *this; }
 
-    Bool operator==(const InclusionIntegratorInterface& rhs) const { return *_impl == rhs; }
-    Bool operator<(const InclusionIntegratorHandle& rhs) const { return *_impl < *rhs._impl; }
+    friend Bool operator==(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
+        return lhs._impl->operator==(*rhs._impl); }
+    friend Bool operator<(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
+        return lhs._impl->operator<(*rhs._impl); }
 
     template<class A> Bool handles(A const& a) const { return instance_of<A>(&*_impl); }
 

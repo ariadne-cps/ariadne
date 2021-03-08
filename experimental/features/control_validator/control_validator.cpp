@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
 #include <type_traits>
 
-#include "../utility/declarations.hpp"
-#include "../symbolic/variables.hpp"
+#include "utility/declarations.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;
@@ -37,15 +37,15 @@ template<> struct Vector<RealVariable> : List<RealVariable> {
 };
 } // namespace Ariadne
 
-#include "../symbolic/expression.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/expression_set.hpp"
-#include "../symbolic/function_expression.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/expression_set.hpp"
+#include "symbolic/function_expression.hpp"
 
 
-#include "../function/function.hpp"
-#include "../function/scaled_function_patch.hpp"
-#include "../function/taylor_function.hpp"
+#include "function/function.hpp"
+#include "function/scaled_function_patch.hpp"
+#include "function/taylor_function.hpp"
 
 
 #define ARIADNE_PRINT(expression) std::cout << #expression << "=" << (expression) << "\n"
@@ -82,11 +82,11 @@ using ExactFloatVariablesBox = ExactFloatDPVariablesBox;
 template<class T> using remove_cv_t = typename std::remove_cv<T>::type;
 template<class T> using remove_reference_t = typename std::remove_reference<T>::type;
 template<class T> using remove_const_reference_t = typename std::remove_const<typename std::remove_reference<T>::type>::type;
-template<class S> using result_of_t = typename std::result_of<S>::type;
+template<class F, class... AS> using invoke_result_t = typename std::invoke_result<F,AS...>::type;
 template<class It> using dereference_t = decltype(*declval<It>);
 
 template<class InputIt, class UnaryPredicate> auto
-quasi_all_of(InputIt first, InputIt last, UnaryPredicate p) -> result_of_t<UnaryPredicate(dereference_t<InputIt>)> {
+quasi_all_of(InputIt first, InputIt last, UnaryPredicate p) -> invoke_result_t<UnaryPredicate,dereference_t<InputIt>> {
     decltype(p(*first)) r=true; while(first!=last) { r=r && p(*first); if(not possibly(r)) { return r; } ++first; }  return r; }
 template<class InputIt, class UnaryPredicate> auto quasi_any_of(InputIt first, InputIt last, UnaryPredicate p) -> decltype(p(*first)) {
     decltype(p(*first)) r=false; while(first!=last) { r=r || p(*first); if(definitely(r)) { return r; } ++first; }  return r; }

@@ -35,16 +35,16 @@
 #include <set>
 #include <map>
 
-#include "../utility/tuple.hpp"
-#include "../function/function.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/valuation.hpp"
-#include "../output/logging.hpp"
+#include "utility/tuple.hpp"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/valuation.hpp"
+#include "output/logging.hpp"
 
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -136,8 +136,6 @@ Set<Identifier> names(const Set<RealVariable>& v);
 //! \details Trivially compositional by definition.
 class RestrictiveHybridAutomaton
 //    : public virtual HybridAutomatonInterface
-//    , public Loggable
-: public Loggable
 {
   public:
     //! \brief The type used to represent time.
@@ -177,7 +175,7 @@ class RestrictiveHybridAutomaton
 
     friend RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);
 
-    //@{
+    //!@{
     //! \name Methods for building the automaton.
 
     Void disable_events(DiscretePredicate q, EventSet e);
@@ -204,9 +202,9 @@ class RestrictiveHybridAutomaton
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, RealPredicate g);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access and queries.
 
     //! \brief The discrete mode with given discrete state.
@@ -235,9 +233,9 @@ class RestrictiveHybridAutomaton
 
 
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
 
@@ -252,10 +250,10 @@ class RestrictiveHybridAutomaton
     EffectiveScalarMultivariateFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
     EffectiveScalarMultivariateFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Methods for extracting the discrete dynamics of the automaton.
 
     //! \brief Test if the hybrid automaton has a valid discrete mode with the given \a location.
@@ -270,10 +268,10 @@ class RestrictiveHybridAutomaton
     //! \brief The target for \a event from location \a source. Returns \a source if \a event is not present.
     DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Methods for extracting the continuous dynamics of the automaton.
 
     //! \brief The continuous variables which are required in the location.
@@ -299,11 +297,11 @@ class RestrictiveHybridAutomaton
     ContinuousPredicate invariant_predicate(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard (activation predicate) corresponding to the given \a event.
     ContinuousPredicate guard_predicate( DiscreteLocation location, DiscreteEvent event) const;
-    //@}
+    //!@}
 
 
 /*
-     //@{
+     //!@{
     //! \name Methods for extracting the continuous dynamics of the automaton for conformance with HybridAutomatonInterface.
 
     //! \brief The dimension of the state spacec in the given \a location.
@@ -327,9 +325,9 @@ class RestrictiveHybridAutomaton
     virtual HybridSpace state_space() const;
     virtual RealSpace continuous_state_space(DiscreteLocation loc) const;
 
-   //@}
+   //!@}
 */
-    //@{
+    //!@{
     //! \name Methods for checking the validity of the automaton.
 
     //! \brief Checks whether the equations valid in the location are valid.
@@ -341,15 +339,15 @@ class RestrictiveHybridAutomaton
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial location(s).
     Void check_reachable_modes(const Set<DiscreteLocation>&) const;
     Void check_reachable_modes(DiscreteLocation) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Discrete reachability analysis.
 
     //! \brief Performs a discrete reachability analysis from the given initial location.
     Set<DiscreteLocation> reachable_locations(const Set<DiscreteLocation>&) const;
     Set<DiscreteLocation> reachable_locations(const DiscreteLocation&) const;
-    //@}
+    //!@}
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

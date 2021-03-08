@@ -3,7 +3,6 @@
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
- *
  ****************************************************************************/
 
 /*
@@ -23,22 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../utility/stlio.hpp"
-#include "../function/projection.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../geometry/binary_tree.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/stlio.hpp"
+#include "function/projection.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
+#include "geometry/binary_tree.hpp"
 
-#include "../geometry/set_interface.hpp"
+#include "geometry/set_interface.hpp"
 
 
 namespace Ariadne {
@@ -84,7 +83,7 @@ Nat GridAbstractCell::smallest_enclosing_primary_cell_extent( const LatticeBoxTy
 Nat GridAbstractCell::smallest_enclosing_primary_cell_extent( const UpperBoxType& theBoxType, const Grid& theGrid) {
     Vector<ExactIntervalType> theLatticeBoxType( theBoxType.size() );
     //Convert the box to theGrid coordinates
-    for( Nat i = 0; i != theBoxType.size(); ++i ) {
+    for( SizeType i = 0; i != theBoxType.size(); ++i ) {
         theLatticeBoxType[i] = cast_exact_interval( ( theBoxType[i] - cast_exact(theGrid.origin()[i])) / cast_exact(theGrid.lengths()[i]) );
     }
     //Compute and return the smallest primary cell, enclosing this box on the grid
@@ -98,15 +97,15 @@ ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLa
     Vector<FloatDP> theGridOrigin( theGrid.origin() );
     Vector<FloatDP> theGridLengths( theGrid.lengths() );
 
-    for(Nat current_dimension = 0; current_dimension < dimensions; current_dimension ++){
+    for(DimensionType current_dimension = 0; current_dimension < dimensions; current_dimension ++){
         const FloatDP theDimLength = theGridLengths[current_dimension];
         const FloatDP theDimOrigin = theGridOrigin[current_dimension];
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
-        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
-        theTmpBoxType[current_dimension].set(cast_exact(lower),cast_exact(upper));
+        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower_bound().raw() ) );
+        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper_bound().raw() ) );
+        theTmpBoxType[current_dimension].set_bounds(cast_exact(lower),cast_exact(upper));
     }
 
     return theTmpBoxType;
@@ -196,7 +195,7 @@ class BinaryCode {
     BinaryCode(Nat tree_height, BinaryWord word) : _height(tree_height), _word(word) { } //assert(word.size()>=height); }
     bool operator[](Int i) { return _word[static_cast<Nat>(i+static_cast<Int>(_height))]; }
     friend OutputStream& operator<<(OutputStream& os, BinaryCode const& bc) {
-        for (Nat i=0; i!=bc._word.size(); ++i) {
+        for (SizeType i=0; i!=bc._word.size(); ++i) {
             if (i==bc._height) { os << '.'; } os << (short)bc._word[i];
         }
         return os;
@@ -221,8 +220,8 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
     LatticeBoxType theResultLatticeBoxType( primary_cell_lattice_box( theExtent , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
-    Nat current_dimension = 0;
-    for(Nat i = 0; i < theWord.size(); i++){
+    SizeType current_dimension = 0;
+    for(SizeType i = 0; i < theWord.size(); i++){
         //We move through the dimensions in a linear fasshion
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
@@ -230,10 +229,10 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
         FloatDP middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
-            theResultLatticeBoxType[current_dimension].set_lower( cast_exact(middlePointInCurrDim) );
+            theResultLatticeBoxType[current_dimension].set_lower_bound( cast_exact(middlePointInCurrDim) );
         } else {
             //Choose the left half
-            theResultLatticeBoxType[current_dimension].set_upper( cast_exact(middlePointInCurrDim) );
+            theResultLatticeBoxType[current_dimension].set_upper_bound( cast_exact(middlePointInCurrDim) );
         }
     }
     return theResultLatticeBoxType;
@@ -243,7 +242,7 @@ GridCell raise_to_level(GridCell gc, Nat level) {
     assert(gc.root_extent()<=level);
     DimensionType n=gc.dimension();
     BinaryWord w;
-    for (Nat l=level; l!=gc.root_extent(); --l) {
+    for (SizeType l=level; l!=gc.root_extent(); --l) {
         for (DimensionType j=0; j!=n; ++j) {
             w.append(l%2);
         }
@@ -259,7 +258,7 @@ GridCell raise_to_level(GridCell gc, Nat level) {
 //the newly created word for the low-left cell of the open cell
 GridOpenCell GridCell::interior() const {
     BinaryWord theOpenCellWord = _theWord;
-    for( Nat i = 0; i < _theGrid.dimension(); i++) {
+    for( SizeType i = 0; i < _theGrid.dimension(); i++) {
         theOpenCellWord.push_back(false);
     }
     //The open cell will be defined by the given new word, i.e. the path to the
@@ -275,7 +274,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theExtent, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Box<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theExtent, theWord );
-    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
+    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper_bound().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -305,7 +304,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theExtent, co
     //   we go backwards and look for the smallest cell such that the upper border computed in 1.
     //   is less than the cell's box upper border (in the given dimension). This is indicated by incountering
     //   the first zero in the path to the base cell in dimension dim from the end of the path
-    Nat position = theBaseCellWord.size() - 1;
+    SizeType position = theBaseCellWord.size() - 1;
     while(true) {
         //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
         if( ( position % dimensions == dim ) && !theBaseCellWord[position] ) {
@@ -319,7 +318,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theExtent, co
     //5. When this entry in the word is found from that point on we have to inverse the path in such
     //   a way that every component in the dimension from this point till the end of the word is
     //   inverted. This will provide us with the path to the neighborind cell in the given dimension
-    for(Nat index = position; index < theBaseCellWord.size(); index++){
+    for(SizeType index = position; index < theBaseCellWord.size(); index++){
         if( index % dimensions == dim ) {
             //If this element of the path corresponds to the needed dimension then we need to invert it
             theBaseCellWord[index] = !theBaseCellWord[index];
@@ -414,11 +413,11 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theExtent,
     for( DimensionType dim = 0; dim < theGrid.dimension(); dim++){
         ExactIntervalType openCellBoxInLatticeDimIntervalType;
         ExactIntervalType baseCellBoxInLatticeDimIntervalType = baseCellBoxInLattice[dim];
-        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower().raw();
-        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
-                             sub( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
-                                        baseCellBoxInLatticeDimIntervalType.lower().raw() ) );
-        openCellBoxInLatticeDimIntervalType.set(cast_exact(lower),cast_exact(upper));
+        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower_bound().raw();
+        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
+                             sub( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
+                                        baseCellBoxInLatticeDimIntervalType.lower_bound().raw() ) );
+        openCellBoxInLatticeDimIntervalType.set_bounds(cast_exact(lower),cast_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimIntervalType;
     }
@@ -543,17 +542,17 @@ Void GridOpenCell::neighboring_cells( const Nat theExtent, const BinaryWord& the
 
 GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theExtent,
                                          const BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) {
-    const Nat num_dimensions = theGrid.dimension();
+    const SizeType num_dimensions = theGrid.dimension();
     //01. Allocate the Array of size _theGrid.dimensions() in which we will store
     //    the position in the path theBaseCellWord, for each dimension, from which on
     //    we need to inverse the path to get the proper neighboring cell.
-    Vector<Nat> invert_position(num_dimensions);
-    const Nat NO_INVERSE_POSITION = static_cast<Nat>(theBaseCellWord.size());
+    Vector<SizeType> invert_position(num_dimensions);
+    const SizeType NO_INVERSE_POSITION = static_cast<SizeType>(theBaseCellWord.size());
     //Initialize the Array with NO_INVERSE_POSITION to make sure that the inversion positions
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,
     //count the required number of iverse dimensions
-    Nat inverseDimensionsNumericType = 0;
-    for( Nat i = 0; i < num_dimensions; i++ ) {
+    SizeType inverseDimensionsNumericType = 0;
+    for( SizeType i = 0; i < num_dimensions; i++ ) {
         invert_position[i] = NO_INVERSE_POSITION;
         inverseDimensionsNumericType = inverseDimensionsNumericType + cellPosition[i];
     }
@@ -565,14 +564,14 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theExten
     //    we go backwards and, for each dimension in which we need to move from the base cell, look
     //    for the first zero in the path. This position, for each dimension, will indicate the path
     //    suffix which has to be inverted to get the neighboring cell defined by cellPosition
-    Nat firstInversePosition = NO_INVERSE_POSITION;
+    SizeType firstInversePosition = NO_INVERSE_POSITION;
     if( inverseDimensionsNumericType > 0 ) {
         //If there is a need to do inverses, i.e. we are not adding the base cell itself
-        Nat foundNumericTypeOfInverses = 0;
-        Nat position = theNeighborCellWord.size() - 1u;
+        SizeType foundNumericTypeOfInverses = 0;
+        SizeType position = theNeighborCellWord.size() - 1u;
         while(true) {
             //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
-            Nat dimension = position % num_dimensions;
+            SizeType dimension = position % num_dimensions;
             //If we need to inverse in this dimension and this is the first found position in
             //this dimension from which on we should inverse then save the position index.
             if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] &&
@@ -597,8 +596,8 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theExten
     //04. Since now all the inversion positions are found, we need to go through the path again and
     //    inverse it in the needed dimesnions starting from (corresponding) the found positions on.
     //    This will provide us with the path to the neighborind cell in the given dimension
-    for( Nat index = firstInversePosition; index < theNeighborCellWord.size(); index++ ) {
-        Nat dimension = index % num_dimensions;
+    for( SizeType index = firstInversePosition; index < theNeighborCellWord.size(); index++ ) {
+        SizeType dimension = index % num_dimensions;
         if( cellPosition[ dimension ] && ( index >= invert_position[ dimension ] ) ) {
             theNeighborCellWord[index] = !theNeighborCellWord[index];
         }
@@ -609,7 +608,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theExten
 
 Void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreePaving& theSet,
                                   BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
-    const Nat num_dimensions = theCell.grid().dimension();
+    const SizeType num_dimensions = theCell.grid().dimension();
     if( cellPosition.size() < num_dimensions ) {
         //Choose the left direction in the current dimension
         cellPosition.push_back( false );
@@ -631,7 +630,7 @@ Void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTr
             //Take the given word theCell.word() and then add the directions from the cellPosition
             //The latter start from the first axis till the last one, but the path in coverCellBaseWord
             //currently ends at some other axis so we need to align them when appending cellPosition
-            for( Nat i = 0; i < num_dimensions ; i++ ) {
+            for( SizeType i = 0; i < num_dimensions ; i++ ) {
                 coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
             }
             //Add the resulting cover cell
@@ -731,7 +730,7 @@ GridTreeCursor::~GridTreeCursor() {
 
 inline Void GridTreeCursor::push( BinaryTreeNode* pLatestNode ){
     //If we are out of free space, increase the Array's capacity
-    if( static_cast<Nat>(_currentStackIndex +1) == ( _theStack.size()  ) ){
+    if( static_cast<SizeType>(_currentStackIndex +1) == ( _theStack.size()  ) ){
         _theStack.resize( _theStack.size() + STACK_SIZE_INCREMENT );
     }
 
@@ -739,7 +738,7 @@ inline Void GridTreeCursor::push( BinaryTreeNode* pLatestNode ){
     _currentStackIndex += 1;
 
     //Put the tree node pointer into the stack
-    _theStack[static_cast<Nat>(_currentStackIndex)] = pLatestNode;
+    _theStack[static_cast<SizeType>(_currentStackIndex)] = pLatestNode;
 
 }
 
@@ -751,7 +750,7 @@ inline BinaryTreeNode* GridTreeCursor::pop( ){
         //Return the stack element at _currentStackIndex,
         //then decrement the current element's index (here inverted in order)
         _currentStackIndex--;
-        return _theStack[ static_cast<Nat>(_currentStackIndex+1) ];
+        return _theStack[ static_cast<SizeType>(_currentStackIndex+1) ];
     }
 
     return pLastNode;
@@ -764,15 +763,15 @@ Bool GridTreeCursor::is_at_the_root() const {
 }
 
 Bool GridTreeCursor::is_enabled() const {
-    return _theStack[ static_cast<Nat>(_currentStackIndex) ]->is_enabled();
+    return _theStack[ static_cast<SizeType>(_currentStackIndex) ]->is_enabled();
 }
 
 Bool GridTreeCursor::is_disabled() const {
-    return _theStack[ static_cast<Nat>(_currentStackIndex) ]->is_disabled();
+    return _theStack[ static_cast<SizeType>(_currentStackIndex) ]->is_disabled();
 }
 
 Bool GridTreeCursor::is_leaf() const {
-    return _theStack[ static_cast<Nat>(_currentStackIndex) ]->is_leaf();
+    return _theStack[ static_cast<SizeType>(_currentStackIndex) ]->is_leaf();
 }
 
 Bool GridTreeCursor::is_root() const {
@@ -780,21 +779,21 @@ Bool GridTreeCursor::is_root() const {
 }
 
 Void GridTreeCursor::set_enabled() const {
-    return _theStack[ static_cast<Nat>(_currentStackIndex) ]->set_enabled();
+    return _theStack[ static_cast<SizeType>(_currentStackIndex) ]->set_enabled();
 }
 
 Void GridTreeCursor::set_disabled() const {
-    return _theStack[ static_cast<Nat>(_currentStackIndex) ]->set_disabled();
+    return _theStack[ static_cast<SizeType>(_currentStackIndex) ]->set_disabled();
 }
 
 Bool GridTreeCursor::is_left_child() const{
     //If there is a parent node and the given node is it's left child
-    return ( _currentStackIndex > 0 ) && ( _theStack[ static_cast<Nat>(_currentStackIndex - 1) ]->left_node() == _theStack[ static_cast<Nat>(_currentStackIndex) ] );
+    return ( _currentStackIndex > 0 ) && ( _theStack[ static_cast<SizeType>(_currentStackIndex - 1) ]->left_node() == _theStack[ static_cast<SizeType>(_currentStackIndex) ] );
 }
 
 Bool GridTreeCursor::is_right_child() const{
     //If there is a parent node and the given node is it's right child
-    return ( _currentStackIndex > 0 ) && ( _theStack[ static_cast<Nat>(_currentStackIndex - 1) ]->right_node() == _theStack[ static_cast<Nat>(_currentStackIndex) ] );
+    return ( _currentStackIndex > 0 ) && ( _theStack[ static_cast<SizeType>(_currentStackIndex - 1) ]->right_node() == _theStack[ static_cast<SizeType>(_currentStackIndex) ] );
 }
 
 GridTreeCursor& GridTreeCursor::move_up() {
@@ -835,9 +834,9 @@ inline GridTreeCursor& GridTreeCursor::move(BinaryTreeDirection up_or_left_or_ri
         //If we are not in the leaf node then we can go down
         BinaryTreeNode* pNextNode;
         if( up_or_left_or_right == BinaryTreeDirection::RIGHT ) { //move to the right
-            pNextNode = _theStack[ static_cast<Nat>(_currentStackIndex) ]->right_node();
+            pNextNode = _theStack[ static_cast<SizeType>(_currentStackIndex) ]->right_node();
         } else { // move to the left
-            pNextNode = _theStack[ static_cast<Nat>(_currentStackIndex) ]->left_node();
+            pNextNode = _theStack[ static_cast<SizeType>(_currentStackIndex) ]->left_node();
         }
         //Put the node into the stack
         push(pNextNode);
@@ -852,7 +851,7 @@ inline GridTreeCursor& GridTreeCursor::move(BinaryTreeDirection up_or_left_or_ri
 Bool GridTreeCursor::operator==(const GridTreeCursor& anotherGridTreeCursor) const {
     Bool areEqual = false;
     if( (this->_currentStackIndex >=0) && (anotherGridTreeCursor._currentStackIndex >=0 ) ){
-        areEqual = (this->_theStack[static_cast<Nat>(this->_currentStackIndex)] == anotherGridTreeCursor._theStack[static_cast<Nat>(anotherGridTreeCursor._currentStackIndex)]);
+        areEqual = (this->_theStack[static_cast<SizeType>(this->_currentStackIndex)] == anotherGridTreeCursor._theStack[static_cast<SizeType>(anotherGridTreeCursor._currentStackIndex)]);
     }
     return areEqual;
 }
@@ -864,7 +863,7 @@ GridTreeSubpaving GridTreeCursor::operator*() {
     return GridTreeSubpaving( _theCurrentGridCell._theGrid,
                            _theCurrentGridCell._theExtent,
                            _theCurrentGridCell._theWord,
-                           _theStack[ static_cast<Nat>(_currentStackIndex) ] );
+                           _theStack[ static_cast<SizeType>(_currentStackIndex) ] );
 }
 
 const GridTreeSubpaving GridTreeCursor::operator*() const {
@@ -878,8 +877,8 @@ OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCurs
     os << "GridTreeCursor( " << theGridTreeCursor._pSubPaving <<
         ", Curr. stack index: " << curr_stack_idx  <<
         ", Stack data: [ ";
-    for(Nat i = 0; i <= static_cast<Nat>(curr_stack_idx); i++){
-        os << theGridTreeCursor._theStack[i]->node_to_string() << ( ( i < static_cast<Nat>(curr_stack_idx) ) ? "" : ", ");
+    for(SizeType i = 0; i <= static_cast<SizeType>(curr_stack_idx); i++){
+        os << theGridTreeCursor._theStack[i]->node_to_string() << ( ( i < static_cast<SizeType>(curr_stack_idx) ) ? "" : ", ");
     }
     return os<<" ], " << theGridTreeCursor._theCurrentGridCell << " )";
 }
@@ -1072,7 +1071,7 @@ inline Nat GridTreeSubpaving::compute_number_subdiv( FloatDP theWidth, const Flo
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div(approx, log(approx, div(approx, theWidth, theMaxWidth ) ) , log(approx, R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, FloatDP(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, FloatDP(2.0_x,dp) ) ) ) );
     }
     return result;
 }
@@ -1102,9 +1101,9 @@ UpperBoxType GridTreeSubpaving::bounding_box() const {
 
     for( ; iter!=this->end(); ++iter) {
         UpperBoxType cell = iter->box();
-        for(Nat i = 0; i < cell.dimension(); ++i) {
-            if(cell[i].lower().raw() < bbox[i].lower().raw()) bbox[i].set_lower(cell[i].lower());
-            if(cell[i].upper().raw() > bbox[i].upper().raw()) bbox[i].set_upper(cell[i].upper());
+        for(DimensionType i = 0; i < cell.dimension(); ++i) {
+            if(cell[i].lower_bound().raw() < bbox[i].lower_bound().raw()) bbox[i].set_lower_bound(cell[i].lower_bound());
+            if(cell[i].upper_bound().raw() > bbox[i].upper_bound().raw()) bbox[i].set_upper_bound(cell[i].upper_bound());
         }
     }
 
@@ -1197,7 +1196,7 @@ GridTreeSubpaving GridTreeSubpaving::branch(Bool left_or_right) const {
 }
 
 
-Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
+Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
     //1. Take the ExactBoxType of this GridTreeSubset's GridCell
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
@@ -1209,11 +1208,13 @@ Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
     const DimensionType dimensions = _theGridCell.dimension();
     Nat max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
 
-    for(Nat i = 0; i < dimensions; i++){
+    FloatDP theMaxCellWidth(cast_exact(theInputMaxCellWidth),dp);
+
+    for(DimensionType i = 0; i < dimensions; i++){
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
         //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper().raw(), theRootCellBoxType[i].lower().raw() ) , theMaxCellWidth );
+        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper_bound().raw(), theRootCellBoxType[i].lower_bound().raw() ) , theMaxCellWidth );
 
         //Compute the max number of subdivisions and the dimension where to do them
         if( num_subdiv >= max_num_subdiv_dim ){
@@ -1751,7 +1752,7 @@ Bool intersect( const GridCell& theCell, const GridTreeSubpaving& theSet ) {
             //Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
             //Here we try to find the node corresponding to theCell in the binary tree of theSet
             //in case we encounter a leaf node then we just stop, because it is enough information for us
-            for( Nat i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
+            for( SizeType i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
                 if( pCurrentNode->is_leaf() ) {
                     //We reached the leaf node and theCell is it's subset, so we stop now
                     break;
@@ -1817,7 +1818,7 @@ static Void common_primary_cell_path(const GridTreeSubpaving& theSet1, const Gri
 static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord& pathFromSuperToSub ){
     //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
     const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
-    for( Nat i = 0; i < pathFromSuperToSub.size(); i++ ) {
+    for( SizeType i = 0; i < pathFromSuperToSub.size(); i++ ) {
         if( pCurrentSuperTreeNode->is_leaf() ) {
             //We are in the leaf node and we have not yet reached the node
             //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
@@ -2107,7 +2108,7 @@ GridTreePaving::GridTreePaving( const GridCell& theGridCell  ) :
 }
 
 GridTreePaving::GridTreePaving( const Nat theDimension, const Bool enable ) :
-    GridTreeSubpaving( Grid( theDimension, FloatDP(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
+    GridTreeSubpaving( Grid( theDimension, FloatDP(1.0_x,dp) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
     //We want a [0,1]x...[0,1] cell in N dimensional space with no sxaling or shift of coordinates:
     //1. Create a new non scaling grid with no shift of the coordinates
     //2. The extent of the primary cell is zero, since is is [0,1]x...[0,1] itself
@@ -2222,11 +2223,11 @@ Void GridTreePaving::_adjoin_cell( const Nat theCellRootExtent, BinaryWord const
 
 
 Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanCompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
-    const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
+    const EffectiveEuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
 
     if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
@@ -2270,11 +2271,11 @@ Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTr
 }
 
 Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const ValidatedCompactSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const ValidatedEuclideanCompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
-    const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
+    const EffectiveEuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
 
     if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
@@ -2325,7 +2326,7 @@ Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTr
 // TODO:Think of another representation in terms of covers but not pavings, then this problem
 // can be cured in a different fashion.
 Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanOvertSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
@@ -2358,7 +2359,7 @@ Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTr
 }
 
 Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
@@ -2395,8 +2396,8 @@ Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTr
 
 Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, const Nat numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
-    for(SizeType i=0; i!=theBoxType.dimension(); ++i) {
-        if(theBoxType[i].lower()>=theBoxType[i].upper()) {
+    for(DimensionType i=0; i!=theBoxType.dimension(); ++i) {
+        if(theBoxType[i].lower_bound()>=theBoxType[i].upper_bound()) {
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(ExactBoxType,Nat)","ExactBoxType "<<theBoxType<<" has empty interior.");
         }
     }
@@ -2405,11 +2406,11 @@ Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, 
 
 Void GridTreePaving::adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim ) {
     ExactBoxSetType theBoxSet=cast_exact_box(theBoxType);
-    CompactSetInterface const& theSet=theBoxSet;
+    EffectiveEuclideanCompactSetInterface const& theSet=theBoxSet;
     this->adjoin_outer_approximation(theSet,numSubdivInDim);
 }
 
-Void GridTreePaving::adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2441,7 +2442,7 @@ Void GridTreePaving::adjoin_outer_approximation( const CompactSetInterface& theS
     }
 }
 
-Void GridTreePaving::adjoin_outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2475,11 +2476,11 @@ Void GridTreePaving::adjoin_outer_approximation( const ValidatedCompactSetInterf
 
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
-Void GridTreePaving::adjoin_lower_approximation( const LocatedSetInterface& theSet, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanLocatedSetInterface& theSet, const Nat numSubdivInDim ) {
     this->adjoin_lower_approximation( theSet, cast_exact_box(theSet.bounding_box()), numSubdivInDim );
 }
 
-Void GridTreePaving::adjoin_lower_approximation( const OvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2498,10 +2499,10 @@ Void GridTreePaving::adjoin_lower_approximation( const OvertSetInterface& theSet
 
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord();
-        //const RegularSetInterface* theRegularVersionOfSet = dynamic_cast<const RegularSetInterface*>(&theSet);
-        const OpenSetInterface* theOpenVersionOfSet = dynamic_cast<const OpenSetInterface*>(&theSet);
-        //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
-        const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
+        //const EffectiveEuclideanRegularSetInterface* theRegularVersionOfSet = dynamic_cast<const EffectiveEuclideanRegularSetInterface*>(&theSet);
+        const EffectiveEuclideanOpenSetInterface* theOpenVersionOfSet = dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(&theSet);
+        //const EffectiveEuclideanLocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const EffectiveEuclideanLocatedSetInterface*>(&theSet);
+        const EffectiveEuclideanOvertSetInterface* theOvertVersionOfSet = dynamic_cast<const EffectiveEuclideanOvertSetInterface*>(&theSet);
         if( theOpenVersionOfSet ) {
             _adjoin_lower_approximation( GridTreeSubpaving::_theGridCell.grid(), pBinaryTreeNode, heightInDim, max_mince_tree_depth, *theOpenVersionOfSet, pEmptyPath );
         } else {
@@ -2511,7 +2512,7 @@ Void GridTreePaving::adjoin_lower_approximation( const OvertSetInterface& theSet
     }
 }
 
-Void GridTreePaving::adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
     ARIADNE_ASSERT( theBoundingBoxType.dimension() == this->root_cell().dimension() );
@@ -2524,12 +2525,12 @@ Void GridTreePaving::adjoin_lower_approximation( const OvertSetInterface& theSet
 }
 
 Void GridTreePaving::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
+                                                  const Nat max_mince_tree_depth, const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath ) {
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
     // If the set if closed, then we can use the separated(Box) method to speed-up computation
-    const ClosedSetInterface* theClosedSet = dynamic_cast<const ClosedSetInterface*>(&theSet);
+    const EffectiveEuclideanClosedSetInterface* theClosedSet = dynamic_cast<const EffectiveEuclideanClosedSetInterface*>(&theSet);
 
     if( ! pBinaryTreeNode->is_enabled() ) {
         //If this it is not an enabled leaf node then we can add something to it.
@@ -2572,7 +2573,7 @@ Void GridTreePaving::_adjoin_inner_approximation( const Grid & theGrid, BinaryTr
     }
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const OpenSetInterface& theSet, const Nat extent, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Nat extent, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2596,7 +2597,7 @@ Void GridTreePaving::adjoin_inner_approximation( const OpenSetInterface& theSet,
     }
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
     ARIADNE_ASSERT( theBoundingBoxType.dimension() == this->root_cell().dimension() );
@@ -2613,8 +2614,8 @@ Void GridTreePaving::adjoin_inner_approximation( const OpenSetInterface& theSet,
     adjoin_inner_approximation( theSet, extent, numSubdivInDim );
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const SetInterface& theSet, const Nat numSubdivInDim ) {
-    OpenSetInterface const& theOpenSet = theSet;
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Nat numSubdivInDim ) {
+    EffectiveEuclideanOpenSetInterface const& theOpenSet = theSet;
     ExactBoxType theBoundingBox = cast_exact_box(theSet.bounding_box());
     this -> adjoin_inner_approximation(theOpenSet, theBoundingBox, numSubdivInDim);
 }
@@ -2831,14 +2832,14 @@ Void GridTreePaving::restrict_to_extent( const Nat theExtent ) {
     const Nat thisPavingPCellExtent = this->root_cell().root_extent();
 
     if( thisPavingPCellExtent > theExtent){
-        // ARIADNE_WARN("restricting GridTreeSet of extent " << this->root_cell().root_extent() << " to extent " << theExtent << ".\n");
+        // ARIADNE_WARN("restricting GridTreeSet of extent " << this->root_cell().root_extent() << " to extent " << theExtent << ".");
 
         BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellExtent, theExtent );
 
         //Go throught the tree and disable all the leaves that
         //are not rooted to the primary cell defined by this path
         BinaryTreeNode * pCurrentNode = _pRootTreeNode;
-        for( Nat i = 0; i < pathToPCell.size(); i++ ) {
+        for( SizeType i = 0; i < pathToPCell.size(); i++ ) {
             if( pCurrentNode->is_leaf() ){
                 if( pCurrentNode->is_enabled() ){
                     //If we are in an enabled leaf node then we split.
@@ -2869,7 +2870,7 @@ Void GridTreePaving::restrict_to_extent( const Nat theExtent ) {
 
 GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat numSubdivInDim) {
     ExactBoxSetType theBoxSet=theBoxType;
-    CompactSetInterface const& theSet=theBoxSet;
+    EffectiveEuclideanCompactSetInterface const& theSet=theBoxSet;
     return outer_approximation(theSet,theGrid,numSubdivInDim);
 }
 
@@ -2877,41 +2878,41 @@ GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat num
     return outer_approximation(theBoxType, Grid(theBoxType.dimension()), numSubdivInDim);
 }
 
-GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_outer_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( theSet.dimension() );
     return outer_approximation( theSet, theGrid, numSubdivInDim );
 }
 
-GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_outer_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const ValidatedEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( theSet.dimension() );
     return outer_approximation( theSet, theGrid, numSubdivInDim );
 }
 
-GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, extent, numSubdivInDim );
     return result;
 }
 
-GridTreePaving inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, bounding_box, numSubdivInDim );
     return result;
@@ -3003,14 +3004,14 @@ BinaryWord product_word(GridCell const& gc1, GridCell const& gc2) {
     Int level=-static_cast<Int>(extent);
     while (level < r1) {
         if (-level>h1) {
-            for(SizeType j=0; j!=n1; ++j) { word.append(level%2); }
+            for(DimensionType j=0; j!=n1; ++j) { word.append(level%2); }
         } else {
-            for(SizeType j=0; j!=n1; ++j) { word.append(w1[i1]); ++i1; }
+            for(DimensionType j=0; j!=n1; ++j) { word.append(w1[i1]); ++i1; }
         }
         if (-level>h2) {
-            for(SizeType j=0; j!=n2; ++j) { word.append(level%2); }
+            for(DimensionType j=0; j!=n2; ++j) { word.append(level%2); }
         } else {
-            for(SizeType j=0; j!=n2; ++j) { word.append(w2[i2]); ++i2; }
+            for(DimensionType j=0; j!=n2; ++j) { word.append(w2[i2]); ++i2; }
         }
         ++level;
     }
@@ -3059,7 +3060,7 @@ Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const 
     }
 }
 
-Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const CompactSetInterface& theSet) {
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const EffectiveEuclideanCompactSetInterface& theSet) {
     static const Int DRAWING_DEPTH=16;
     draw(theGraphic,theProjection,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
 }

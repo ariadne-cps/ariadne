@@ -35,15 +35,15 @@
 #include <set>
 #include <map>
 
-#include "../function/function.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/expression.hpp"
-#include "../output/logging.hpp"
+#include "function/function.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/expression.hpp"
+#include "output/logging.hpp"
 
-#include "../hybrid/hybrid_automaton.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_automaton.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -64,7 +64,6 @@ class CompositeHybridAutomaton;
 //! \sa \ref HybridAutomaton
 class CompositeHybridAutomaton
     : public HybridAutomatonInterface
-    , public Loggable
 {
     mutable DiscreteMode _cached_mode;
     Void _cache_mode(DiscreteLocation) const;
@@ -75,7 +74,7 @@ class CompositeHybridAutomaton
   public:
     typedef HybridTime TimeType;
   public:
-    //@{
+    //!@{
     //! \name Constructors.
 
     //! \brief Default constructor creates "system" named automaton.
@@ -97,9 +96,9 @@ class CompositeHybridAutomaton
     //! \brief Virtual destructor.
     virtual ~CompositeHybridAutomaton() = default;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods for querying the component automata.
 
     //! \brief The name of the automaton
@@ -109,9 +108,9 @@ class CompositeHybridAutomaton
     Nat number_of_components() const;
     //! \brief The \a i<sup>th</sup> component automaton.
     const HybridAutomaton& component(Nat i) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods for finding the modes, transitions and events of the composite automaton.
 
     //! The mode corresponding to the given location.
@@ -127,9 +126,9 @@ class CompositeHybridAutomaton
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
     Bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods fo rextracting the continuous dynamics of the automaton.
 
 
@@ -161,10 +160,10 @@ class CompositeHybridAutomaton
     ContinuousPredicate invariant_predicate(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard (activation predicate) corresponding to the given \a event.
     ContinuousPredicate guard_predicate( DiscreteLocation location, DiscreteEvent event) const;
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
     //! \brief The continuous state space for each location.
@@ -198,10 +197,10 @@ class CompositeHybridAutomaton
     //! \brief The type of the event (urgent, permissive, impact etc).
     EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Methods for checking the validity of the automaton.
 
     //! \brief Checks whether the equations valid in the location are valid.
@@ -213,16 +212,16 @@ class CompositeHybridAutomaton
     Void check_reachable_modes(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial locations.
     Void check_reachable_modes(const Set<DiscreteLocation>&) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Discrete reachability analysis.
 
     //! \brief Performs a discrete reachability analysis from the given initial location.
     Set<DiscreteLocation> discrete_reachability(DiscreteLocation) const;
     //! \brief Performs a discrete reachability analysis from the given initial locations.
     Set<DiscreteLocation> discrete_reachability(const Set<DiscreteLocation>&) const;
-    //@}
+    //!@}
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

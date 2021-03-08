@@ -3,7 +3,6 @@
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
- *
  ****************************************************************************/
 
 /*
@@ -23,24 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../utility/stlio.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/stlio.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid.hpp"
 
 
 namespace Ariadne {
 
 using ExactNumericType = Grid::ExactNumericType;
 using Double = double;
+
+namespace {
+FloatDP mul(RoundToNearest, FloatDP x1, double x2) { return FloatDP(cast_exact(x1.dbl*x2),dp); }
+} // namespace
 
 struct Grid::Data
 {
@@ -67,29 +70,39 @@ Grid& Grid::operator=(const Grid& gr)
     this->_data=gr._data; return *this;
 }
 
-Grid::Grid(Nat d)
+Grid::Grid(DimensionType d)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(d,FloatDP(0));
-    Vector<FloatDP> lengths(d,FloatDP(1));
+    Vector<FloatDP> origin(d,FloatDP(0,dp));
+    Vector<FloatDP> lengths(d,FloatDP(1,dp));
     this->_create(origin,lengths);
 }
 
-Grid::Grid(Nat d, FloatDP l)
+Grid::Grid(DimensionType d, FloatDP l)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(d,FloatDP(0));
+    Vector<FloatDP> origin(d,FloatDP(0,dp));
     Vector<FloatDP> lengths(d,l);
     this->_create(origin,lengths);
 }
 
+Grid::Grid(DimensionType d, ApproximateDouble l)
+    : Grid(d,FloatDP(cast_exact(l),dp))
+{
+}
+
+
 Grid::Grid(const Vector<FloatDP>& lengths)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(lengths.size(),FloatDP(0));
+    Vector<FloatDP> origin(lengths.size(),FloatDP(0,dp));
     this->_create(origin,lengths);
 }
 
+Grid::Grid(const Vector<ApproximateDouble>& lengths)
+    : Grid(Vector<ApproximateDouble>(lengths.size(),0.0),lengths)
+{
+}
 Grid::Grid(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
     : _data(new Data())
 {
@@ -98,6 +111,15 @@ Grid::Grid(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
     }
     this->_create(origin,lengths);
 }
+
+inline Vector<FloatDP> cast_raw_vector(Vector<ApproximateDouble> const& v, DoublePrecision pr) {
+    return Vector<FloatDP>(v.size(),[&v,pr](SizeType i){return FloatDP(cast_exact(v[i]),pr);}); }
+
+Grid::Grid(const Vector<ApproximateDouble>& origin, const Vector<ApproximateDouble>& lengths)
+    : Grid(cast_raw_vector(origin,dp),cast_raw_vector(lengths,dp))
+{
+}
+
 
 Void Grid::_create(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
 {
@@ -120,47 +142,47 @@ const Vector<FloatDP>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-ExactNumericType Grid::coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::coordinate(DimensionType d, DyadicType x) const
 {
-    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],x)));
+    return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],x)));
 }
 
-ExactNumericType Grid::subdivision_coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::subdivision_coordinate(DimensionType d, DyadicType x) const
 {
-    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],x)));
+    return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],x)));
 }
 
-ExactNumericType Grid::subdivision_coordinate(Nat d, IntegerType n) const
+ExactNumericType Grid::subdivision_coordinate(DimensionType d, IntegerType n) const
 {
-    return ExactNumericType(add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n)));
+    return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],n)));
 }
 
-Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
+Int Grid::subdivision_index(DimensionType d, const ExactNumericType& x) const
 {
-    FloatDP half=0.5;
-    Int n=integer_cast<Int>(floor(add(approx,div(approx,sub(approx,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
-    FloatDP sc=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],n));
+    FloatDP half(0.5_x,dp);
+    Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    FloatDP sc=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],n));
     if(sc == x.raw()) {
         return n;
     } else {
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(Nat d,ExactNumericType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(DimensionType d,ExactNumericType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
-Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
+Int Grid::subdivision_lower_index(DimensionType d, const LowerNumericType& x) const
 {
     Int n=integer_cast<Int>(floor(div(down,sub(down,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x.raw()>=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],(n+1)))) {
+    if(x.raw()>=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],(n+1)))) {
         return n+1;
     } else {
         return n;
     }
 }
 
-Int Grid::subdivision_upper_index(Nat d, const UpperNumericType& x) const
+Int Grid::subdivision_upper_index(DimensionType d, const UpperNumericType& x) const
 {
     Int n=integer_cast<Int>(ceil(div(up,sub(up,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x.raw()<=add(approx,this->_data->_origin[d],mul(approx,this->_data->_lengths[d],(n-1)))) {
+    if(x.raw()<=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],(n-1)))) {
         return n-1;
     } else {
         return n;
@@ -194,7 +216,7 @@ Array<Double> Grid::lower_index(const ExactBoxType& bx) const
 {
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=subdivision_lower_index(i,bx[i].lower());
+        res[i]=subdivision_lower_index(i,bx[i].lower_bound());
     }
     return res;
 }
@@ -203,14 +225,14 @@ Array<Double> Grid::upper_index(const ExactBoxType& bx) const
 {
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=subdivision_upper_index(i,bx[i].upper());
+        res[i]=subdivision_upper_index(i,bx[i].upper_bound());
     }
     return res;
 }
 
 ExactPointType Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<FloatDPValue> res(a.size());
+    Vector<FloatDPValue> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -219,7 +241,7 @@ ExactPointType Grid::point(const Array<IntegerType>& a) const
 
 ExactPointType Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<FloatDPValue> res(a.size());
+    Vector<FloatDPValue> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }

@@ -22,13 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../geometry/interval.hpp"
+#include "numeric/numeric.hpp"
+#include "geometry/interval.hpp"
 
-#include "../algebra/differential.hpp"
-#include "../algebra/univariate_differential.hpp"
-#include "../algebra/fixed_differential.hpp"
-#include "../algebra/fixed_univariate_differential.hpp"
+#include "algebra/differential.hpp"
+#include "algebra/univariate_differential.hpp"
+#include "algebra/fixed_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
 
 #include "operations.hpp"
 
@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-template class UnivariateDifferential<FloatDP>;
+template class UnivariateDifferential<RoundedFloatDP>;
 template class UnivariateDifferential<FloatDPApproximation>;
 template class UnivariateDifferential<FloatDPBounds>;
 template class UnivariateDifferential<FloatDPUpperInterval>;
@@ -45,22 +45,21 @@ template class UnivariateDifferential<FloatDPUpperInterval>;
 template class UnivariateDifferential<FloatMPApproximation>;
 template class UnivariateDifferential<FloatMPBounds>;
 
-
-template class Differential<FloatDP>;
+template class Differential<RoundedFloatDP>;
 template class Differential<FloatDPBounds>;
 template class Differential<FloatDPApproximation>;
 template class Differential<FloatDPUpperInterval>;
 
-template struct AlgebraOperations<Differential<FloatDP>>;
+template struct AlgebraOperations<Differential<RoundedFloatDP>>;
 template struct AlgebraOperations<Differential<FloatDPApproximation>>;
 template struct AlgebraOperations<Differential<FloatDPBounds>>;
 template struct AlgebraOperations<Differential<FloatDPUpperInterval>>;
-template class GradedAlgebraOperations<Differential<FloatDP>>;
+template class GradedAlgebraOperations<Differential<RoundedFloatDP>>;
 template class GradedAlgebraOperations<Differential<FloatDPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
 template class GradedAlgebraOperations<Differential<FloatDPUpperInterval>>;
 
-template class Vector<Differential<FloatDP>>;
+template class Vector<Differential<RoundedFloatDP>>;
 template class Vector<Differential<FloatDPBounds>>;
 template class Vector<Differential<FloatDPApproximation>>;
 template class Vector<Differential<FloatDPUpperInterval>>;

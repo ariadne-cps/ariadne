@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################################
 #            test_linear_algebra.py
 #
-#  Copyright 2007  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright  2007-20  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne import *
+from pyariadne import *
 
 print(dir(FloatDPBoundsVector))
-
-def exact(x): return Dyadic(ExactDouble(x))
 
 Precision=DoublePrecision
 ApproximateScalar=FloatDPApproximation
@@ -56,18 +54,18 @@ def test_vector():
 
     (+va,-va,va+va,va-va,xa*va,va*xa,va/xa)
     (+vb,-vb,vb+vb,vb-vb,xb*vb,vb*xb,vb/xb)
-    
+
     # Mixed vector operations
     # Disallowed mixed ValidatedVector - ApproximateScalar operations
     (va+vb,va-vb,va*xb,va/xb)
     (vb+va,vb-va)
-    
+
     # NOTE: No GenericScalar - ConcreteVector operations
 #    (va*n,va/n)
 #    (va*d,va/d)
 #    (vb*n,vb/n)
- 
- 
+
+
 def test_covector():
     ua=ApproximateCovector([1.125,xa],pr)
     ua=ApproximateCovector([1.125,2.125],pr)
@@ -79,7 +77,7 @@ def test_covector():
 
     (ua+ub,ua-ub,ua*xb,ua/xb)
     (ub+ua,ub-ua)
-    
+
 #    (ua*n,ua/n)
 #    (ua*d,ua/d)
 #    (ub*n,ub/n)

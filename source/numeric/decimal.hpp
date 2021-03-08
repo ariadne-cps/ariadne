@@ -31,9 +31,9 @@
 
 #include <string>
 #include <iostream>
-#include "../utility/typedefs.hpp"
-#include "../numeric/number.decl.hpp"
-#include "../numeric/integer.hpp"
+#include "utility/typedefs.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/integer.hpp"
 
 namespace Ariadne {
 

@@ -78,13 +78,14 @@ template<class F, class FE> Ball<F,FE>::Ball(Integer const& z, PR pr) : _v(z,nea
 template<class F, class FE> Ball<F,FE>::Ball(Dyadic const& w, PR pr) : _v(w,near,pr), _e(abs(Dyadic(_v)-w),up,_error_precision<PRE>(pr)) {}
 template<class F, class FE> Ball<F,FE>::Ball(Decimal const& d, PR pr) : Ball(Rational(d),pr) {}
 template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr) : _v(q,near,pr), _e(abs(Rational(_v)-q),up,_error_precision<PRE>(pr)) {}
+template<class F, class FE> Ball<F,FE>::Ball(Integer const& z, PR pr, PRE pre) : _v(F(z,near,pr)), _e(abs(Dyadic(_v)-z),up,pre) {}
 template<class F, class FE> Ball<F,FE>::Ball(Dyadic const& w, PR pr, PRE pre) : _v(F(w,near,pr)), _e(abs(Dyadic(_v)-w),up,pre) {}
 template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre) : _v(F(q,near,pr)), _e(abs(Rational(_v)-q),up,pre) {}
 
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr) : Ball(r.get(pr)) {}
-template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr) : Ball(y.get(MetricTag(),pr)) {}
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr) : Ball(y.get(pr,_error_precision<PRE>(pr))) {}
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre) : Ball(r.get(pr),pre) {}
-template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre) : Ball(y.get(MetricTag(),pr,pre)) {}
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre) : Ball(y.get(pr,pre)) {}
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this));}
 
 template<class F, class FE> LowerBound<F> const Ball<F,FE>::lower() const { return LowerBound<F>(sub(down,this->_v,this->_e)); }
@@ -108,7 +109,7 @@ template<class F, class FE> Integer Operations<Ball<F,FE>>::_cast_integer(Ball<F
 template<class F, class FE> InputStream& Operations<Ball<F,FE>>::_read(InputStream& is, Ball<F,FE>& x) {
     static const char pmstr[] = "\u00b1";
     char cpm[3];
-    F _v; FE _e;
+    F _v(x.precision()); FE _e(x.error_precision());
     auto rnd=F::get_rounding_mode();
     F::set_rounding_to_nearest();
     is >> _v;

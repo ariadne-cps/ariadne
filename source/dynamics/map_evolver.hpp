@@ -35,14 +35,14 @@
 #include <iostream>
 
 
-#include "../utility/tuple.hpp"
+#include "utility/tuple.hpp"
 
-#include "../dynamics/map.hpp"
-#include "../function/function_interface.hpp"
-#include "../solvers/configuration_interface.hpp"
-#include "../dynamics/evolver_base.hpp"
+#include "dynamics/map.hpp"
+#include "function/function_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "dynamics/evolver_base.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 
@@ -59,15 +59,14 @@ class EvolutionProfiler;
 /*! \brief A class for computing the evolution of an iterated map.
  */
 class MapEvolver
-    : public EvolverBase< IteratedMap, Enclosure, Integer>
-    , public Loggable
+    : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
 {
   public:
     typedef MapEvolverConfiguration ConfigurationType;
     typedef IteratedMap SystemType;
     typedef Integer TimeType;
     typedef Integer TerminationType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     typedef Pair<TerminationType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -85,11 +84,12 @@ class MapEvolver
 
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
+    EnclosureType enclosure(RealVariablesBox const&) const;
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
 
-    //@{
+    //!@{
     //! \name Configuration for the class.
 
     //! \brief A reference to the configuration.
@@ -99,10 +99,10 @@ class MapEvolver
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType function_factory() const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;

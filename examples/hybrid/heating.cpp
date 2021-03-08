@@ -61,7 +61,7 @@ Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, c
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Create the system
     // Set the system dynamic parameters
@@ -118,7 +118,6 @@ Int main(Int argc, const char* argv[])
     GradedTaylorSeriesIntegrator series_integrator(1e-3);
     series_integrator.set_maximum_spacial_order(6);
     series_integrator.set_maximum_temporal_order(12);
-    series_integrator.verbosity=0;
     TaylorPicardIntegrator picard_integrator(1e-5);
     IntervalNewtonSolver solver(1e-12,8);
 
@@ -129,7 +128,6 @@ Int main(Int argc, const char* argv[])
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
     evolver.configuration().set_maximum_step_size(7.0/16);
-    evolver.verbosity=evolver_verbosity;
     cout <<  evolver.configuration() << endl << endl;
 
     evolver.configuration().set_enable_reconditioning(true);
@@ -151,7 +149,7 @@ Int main(Int argc, const char* argv[])
     // Compute the system evolution
 
     // Set the initial set.
-    double r=1.0/1024; double Ti=16.25;
+    Dyadic r=exp2(-10); Dyadic Ti=16.25_dy;
     Real Tinitmin(Ti+r); Real Tinitmax(Ti+3*r); Real Cinitmin(0+r); Real Cinitmax(0+3*r); // Tinit=16.0;
     HybridSet initial_set(heating|off, {Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax} );
     cout << "initial_set=" << initial_set << endl;
@@ -159,7 +157,7 @@ Int main(Int argc, const char* argv[])
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
-    HybridTime evolution_time(2.75,127);
+    HybridTime evolution_time(2.75_x,127);
     cout << "evolution_time=" << evolution_time << endl;
 
     cout << "\nComputing orbit using series integrator... \n" << flush;
@@ -203,7 +201,6 @@ Int main(Int argc, const char* argv[])
     std::cerr<<"transient_time="<<analyser.configuration().transient_time()<<"\n";
     std::cerr<<"transient_steps="<<analyser.configuration().transient_steps()<<"\n";
     analyser.configuration().set_maximum_grid_fineness(5);
-    analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
     HybridStorage chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;

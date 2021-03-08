@@ -30,14 +30,14 @@
 #define ARIADNE_DRAWER_INTERFACE_HPP
 
 #include <iosfwd>
-#include "../utility/writable.hpp"
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 
 typedef Void Void;
 class CanvasInterface;
-struct PlanarProjectionMap;
-typedef PlanarProjectionMap Projection2d;
+struct Projection2d;
+typedef Projection2d Projection2d;
 class ValidatedConstrainedImageSet;
 
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
@@ -58,11 +58,10 @@ class DrawerInterface : public WritableInterface
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class Drawer
+    : public Handle<const DrawerInterface>
 {
-    SharedPointer<const DrawerInterface> _ptr;
   public:
-    Drawer(SharedPointer<const DrawerInterface> ptr) : _ptr(ptr) { }
-    Drawer(const DrawerInterface* ptr) : _ptr(ptr) { }
+    using Handle<const DrawerInterface>::Handle;
     inline Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const {
         return this->_ptr->draw(cnvs,proj,set); }
     friend inline OutputStream& operator<<(OutputStream& os, Drawer const& drw) {

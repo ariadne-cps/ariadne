@@ -33,7 +33,7 @@
 
 #include "expansion.hpp"
 #include "expansion.inl.hpp"
-#include "../numeric/logical.hpp"
+#include "numeric/logical.hpp"
 
 namespace Ariadne {
 
@@ -45,10 +45,6 @@ inline double abs(double d) { return std::fabs(d); }
 
 template<class I, class X> Expansion<I,X>::~Expansion()
 {
-}
-
-template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as)
-    : Expansion<I,X>(as,X()) {
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
@@ -73,11 +69,18 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 }
 */
 
-template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(ArgumentSizeType())
+namespace {
+template<class I, class X> X get_zero_coefficient(InitializerList<Pair<I,X>> const& lst) {
+    ARIADNE_PRECONDITION(lst.size()!=0);
+    return nul(lst.begin()->second);
+}
+} // namespace
+
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
+    : Expansion(ArgumentSizeType(),get_zero_coefficient(lst))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
-    _zero_coefficient = nul(lst.begin()->second);
     _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
     _coefficients = UniformList<X>(0,_zero_coefficient);
 
@@ -86,7 +89,7 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
     _coefficients.reserve(cap);
 
     I a(this->argument_size());
-    X x;
+    X x=_zero_coefficient;
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
@@ -183,7 +186,7 @@ template<class I, class X> Void Expansion<I,X>::reserve(SizeType new_capacity) {
 template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
     if(new_size<this->size()) {
         this->_indices.resize(new_size);
-        this->_coefficients.resize(new_size);
+        this->_coefficients.resize(new_size,this->_zero_coefficient);
     } else {
         if(this->capacity() < new_size) {
             this->reserve(new_size);
@@ -545,17 +548,17 @@ template<class I, class X, class CMP> SortedExpansion<I,X,CMP>::SortedExpansion(
 
 /*
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) -> Iterator {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     return  std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) const -> ConstIterator {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     return std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 */
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::get(const I& a) const -> CoefficientType const& {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
         return this->_zero_coefficient;
@@ -565,10 +568,10 @@ template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::get(const I
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::at(const I& a) -> CoefficientType& {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
-        iter=this->Expansion<I,X>::insert(iter,a,X(0));
+        iter=this->Expansion<I,X>::insert(iter,a,this->_zero_coefficient);
     }
     return iter->coefficient();
 }

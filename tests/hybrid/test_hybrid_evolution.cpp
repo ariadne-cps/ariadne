@@ -58,10 +58,7 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    unsigned int log_verbosity;
     mutable shared_ptr<HybridEvolverBase> evolver;
-  public:
-    TestHybridEvolution(const unsigned int verb);
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
@@ -70,17 +67,14 @@ class TestHybridEvolution
     Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const unsigned int verb) : log_verbosity(verb) { }
-
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
     //evolver->set_integrator(GradedTaylorSeriesIntegrator(1e-5));
     evolver->set_integrator(TaylorPicardIntegrator(1e-5));
-    evolver->verbosity=log_verbosity;
-    evolver->configuration().set_maximum_step_size(1./4);
-    evolver->configuration().set_maximum_enclosure_radius(1./8);
-    evolver->configuration().set_maximum_enclosure_radius(1./2);
+    evolver->configuration().set_maximum_step_size(0.25);
+    evolver->configuration().set_maximum_enclosure_radius(0.125);
+    evolver->configuration().set_maximum_enclosure_radius(0.5);
 }
 
 Void TestHybridEvolution::test() const {
@@ -97,13 +91,13 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     RealVariable v("v");
     TimeVariable t;
 
-    Real lambda(0.5);
+    Real lambda(0.5_x);
     bouncing_ball.new_mode(q,{dot(x)=v,dot(v)=-one});
     bouncing_ball.new_transition(q,e,q,{next(x)=x,next(v)=-lambda*v},x<=0,EventKind::IMPACT);
     ARIADNE_TEST_PRINT(bouncing_ball);
 
-    double height=2.0;
-    double radius=1.0/64;
+    Dyadic height=2;
+    Dyadic radius=1/pow(two,6);
     HybridExactBox initial(q,bouncing_ball.continuous_state_space(q),ExactBoxType{{height-radius,height+radius},{-radius,+radius}});
     Decimal tmax(4.5);
     Natural maxsteps=5u;
@@ -120,7 +114,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-    FloatDPValue exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
+    FloatDPValue exl(0.12_pr,dp), exu(+0.13_pr,dp), evl(-0.04_pr,dp), evu(+0.04_pr,dp); // Expected bounds
     HybridExactBox expected_orbit_final_bounding_box=HybridExactBox(q,{x.in(exl,exu),v.in(evl,evu)});
     ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final,expected_orbit_final_bounding_box);
 
@@ -190,7 +184,7 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridSet initial(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
 
     //HybridTime evolution_time(80.0,5);
-    HybridTime evolution_time(80.0,8);
+    HybridTime evolution_time(80.0_x,8);
 
     _set_evolver(watertank);
 
@@ -218,11 +212,12 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    auto log_verbosity = get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
-    DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 1u;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
+    DRAWING_ACCURACY = 1u;
 
-    TestHybridEvolution(log_verbosity).test();
+    TestHybridEvolution().test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

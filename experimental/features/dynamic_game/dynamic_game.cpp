@@ -1,7 +1,7 @@
 /***************************************************************************
  *            dynamic_game.cpp
  *
- *  Copyright 2015--17  Pieter Collins, Chun Wen
+ *  Copyright  2015-17  Pieter Collins, Chun Wen
  *
  ****************************************************************************/
 
@@ -32,12 +32,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "../numeric/rational.hpp"
-#include "../numeric/real.hpp"
-#include "../numeric/floatdp.hpp"
-#include "../symbolic/variables.hpp"
-#include "../symbolic/expression.hpp"
-#include "../symbolic/assignment.hpp"
+#include "numeric/rational.hpp"
+#include "numeric/real.hpp"
+#include "numeric/floatdp.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
 
 typedef std::ostream OutputStream;
 typedef std::string String;

@@ -31,20 +31,17 @@
 #ifndef ARIADNE_INTERVAL_HPP
 #define ARIADNE_INTERVAL_HPP
 
-#include "../utility/module.hpp"
+#include "utility/module.hpp"
 
-#include "../numeric/logical.hpp"
-#include "../numeric/number.hpp"
-#include "../numeric/float.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../numeric/arithmetic.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/number.hpp"
+#include "numeric/float.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
 
 namespace Ariadne {
-
-//! \defgroup GeometryModule Geometry Module
-//!  \brief Classes describing sets in Euclidean space.
 
 enum class SplitPart : char;
 
@@ -55,12 +52,14 @@ OutputStream& operator<<(OutputStream& os, const SplitPart& s);
 template<class U> struct CentreTrait { typedef decltype(declval<U>()-declval<U>()) Type; };
 template<class F> struct CentreTrait<UpperBound<F>> { typedef Approximation<F> Type; };
 template<class F> struct CentreTrait<LowerBound<F>> { typedef Approximation<F> Type; };
+template<class P> struct CentreTrait<UpperNumber<P>> { typedef ApproximateNumber Type; };
 
 template<class U> struct MidpointTrait { typedef decltype(max(-declval<U>(),declval<U>())) Type; };
 template<class F> struct MidpointTrait<UpperBound<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<LowerBound<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<Bounds<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<Ball<F>> { typedef Value<F> Type; };
+template<class P> struct MidpointTrait<UpperNumber<P>> { typedef ExactNumber Type; };
 
 template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
 template<class U> struct WidthTrait { using L=decltype(-declval<U>()); typedef decltype(cast_positive(declval<U>()-declval<L>())) Type; };
@@ -89,7 +88,7 @@ template<class F> class IntervalFactory<Approximation<F>> {
   public:
     IntervalFactory(PrecisionType precision) : _precision(precision) { }
     ApproximateInterval<F> create(ApproximateNumber const& y) const {
-        return ApproximateInterval<F>(y,this->_precision); }
+        return ApproximateInterval<F>(y,y,this->_precision); }
 };
 
 template<class F> using UpperIntervalFactory = IntervalFactory<UpperBound<F>>;
@@ -110,7 +109,7 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     friend Error<F> mag(UpperInterval<F> const&);
     friend UpperInterval<F> fma(UpperInterval<F> const& x1, UpperInterval<F> const& x2, UpperInterval<F> y);
     friend UpperIntervalFactory<F> factory(UpperInterval<F> const& ivl) {
-        return UpperIntervalFactory<F>(ivl.upper().precision()); }
+        return UpperIntervalFactory<F>(ivl.upper_bound().precision()); }
 
     PrecisionType precision() const;
 
@@ -147,16 +146,16 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 {
     typedef typename F::PrecisionType PR; typedef PR PrecisionType;
     friend ApproximateIntervalFactory<F> factory(ApproximateInterval<F> const& ivl) {
-        return ApproximateIntervalFactory<F>(ivl.upper().precision()); }
+        return ApproximateIntervalFactory<F>(ivl.upper_bound().precision()); }
     friend PositiveApproximation<F> mag(ApproximateInterval<F> const& ivl) {
-        return cast_positive(max(-ivl.lower(),ivl.upper())); }
+        return cast_positive(max(-ivl.lower_bound(),ivl.upper_bound())); }
     friend ApproximateInterval<F> add(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
-        return ApproximateInterval<F>(ivl1.lower()+ivl2.lower(),ivl1.upper()+ivl2.upper()); }
+        return ApproximateInterval<F>(ivl1.lower_bound()+ivl2.lower_bound(),ivl1.upper_bound()+ivl2.upper_bound()); }
     friend ApproximateInterval<F> sub(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
-        return ApproximateInterval<F>(ivl1.lower()-ivl2.upper(),ivl1.upper()-ivl2.lower()); }
+        return ApproximateInterval<F>(ivl1.lower_bound()-ivl2.upper_bound(),ivl1.upper_bound()-ivl2.lower_bound()); }
     friend ApproximateInterval<F> mul(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
-        auto rll=ivl1.lower()*ivl2.lower(); auto rlu=ivl1.lower()*ivl2.upper();
-        auto rul=ivl1.upper()*ivl2.lower(); auto ruu=ivl1.upper()*ivl2.upper();
+        auto rll=ivl1.lower_bound()*ivl2.lower_bound(); auto rlu=ivl1.lower_bound()*ivl2.upper_bound();
+        auto rul=ivl1.upper_bound()*ivl2.lower_bound(); auto ruu=ivl1.upper_bound()*ivl2.upper_bound();
         return ApproximateInterval<F>(min(min(rll,rlu),min(rul,ruu)),max(max(rll,rlu),max(rul,ruu))); }
     friend ApproximateInterval<F> fma(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2, ApproximateInterval<F> y);
 
@@ -167,7 +166,7 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
 template<class T, class U> struct IsConstructibleGivenDefaultPrecision {
-    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),declval<TT>().precision()))> static std::true_type test(int);
+    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),PrecisionType<TT>()))> static std::true_type test(int);
     template<class TT, class UU> static std::false_type test(...);
     static const bool value = decltype(test<T,U>(1))::value;
 };
@@ -234,6 +233,8 @@ template<class U> class Interval
     //! \brief Construct a singleton interval from a number.
     template<class V, EnableIf<And<IsConstructible<L,V>,IsConstructible<U,V>>> = dummy>
         explicit Interval(const V& v) : _l(v), _u(v) { }
+    template<class V, EnableIf<IsConstructibleGivenDefaultPrecision<U,V>> =dummy, DisableIf<IsConstructible<U,V>> =dummy>
+        explicit Interval(const V& v) : Interval(L(v,PrecisionType<U>()),U(v,PrecisionType<U>())) { }
     //! \brief Assign a singleton interval from a number.
     template<class V, EnableIf<And<IsAssignable<L,V>,IsAssignable<U,V>>> = dummy>
         Interval<U>& operator=(const V& v) { _l=v; _u=v; return *this; }
@@ -243,19 +244,22 @@ template<class U> class Interval
 
     //! \brief Convert from an interval of a different type.
     template<class UU, EnableIf<IsConvertible<UU,U>> = dummy>
-        Interval(Interval<UU> const& x) : _l(x.lower()), _u(x.upper()) { }
+        Interval(Interval<UU> const& x) : _l(x.lower_bound()), _u(x.upper_bound()) { }
     //! \brief Construct from an interval of a different type.
     template<class UU, EnableIf<And<IsConstructible<U,UU>,Not<IsConvertible<UU,U>>>> =dummy>
-        explicit Interval(Interval<UU> const& x) : _l(x.lower()), _u(x.upper()) { }
+        explicit Interval(Interval<UU> const& x) : _l(x.lower_bound()), _u(x.upper_bound()) { }
     //! \brief Construct from an interval of a different type using the given precision.
     template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
-        explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
+        explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower_bound(),pr), _u(x.upper_bound(),pr) { }
     //! \brief Construct from an interval of a different type using a default precision.
     template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
         explicit Interval(Interval<UU> const& x) : Interval(x,PrecisionType<U>()) { }
     //! \brief Construct from an interval of a different type using a default precision.
-    template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
-        explicit Interval(NegationType<UU> const& l, UU const& u) : Interval(L(l,PrecisionType<U>()),U(u,PrecisionType<U>())) { }
+    template<class LL, class UU,
+             EnableIf<IsConstructibleGivenDefaultPrecision<L,LL>> =dummy,
+             EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy,
+             DisableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>>> =dummy>
+        Interval(LL const& l, UU const& u) : Interval(L(l,PrecisionType<U>()),U(u,PrecisionType<U>())) { }
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.
@@ -267,14 +271,18 @@ template<class U> class Interval
     template<class LL, class UU, class PR, EnableIf<And<IsConstructible<L,LL,PR>,IsConstructible<U,UU,PR>>> =dummy>
         Interval(const LL& l, const UU& u, PR pr) : _l(l,pr), _u(u,pr) { }
 
+    //! \brief Assign from an interval of a different type.
+    template<class UU, EnableIf<IsAssignable<U,UU>> = dummy>
+        Interval<U>& operator=(const Interval<UU>& x) { _l=x._l; _u=x._u; return *this; }
+
   public:
     //! \brief The dimension of the set; statically returns size one.
     SizeOne dimension() const;
 
     //! \brief The lower bound of the interval.
-    LowerBoundType const& lower() const;
+    LowerBoundType const& lower_bound() const;
     //! \brief The upper bound of the interval.
-    UpperBoundType const& upper() const;
+    UpperBoundType const& upper_bound() const;
     //! \brief The midpoint of the interval. Need not be the exact midpoint. \sa radius()
     MidpointType midpoint() const;
     //! \brief The centre of the interval, computed with whatever rounding is appropriate.
@@ -284,9 +292,9 @@ template<class U> class Interval
     //! \brief The width of the interval.
     WidthType width() const;
 
-    void set_lower(LowerBoundType l);
-    void set_upper(UpperBoundType u);
-    void set(LowerBoundType l, UpperBoundType u);
+    void set_lower_bound(LowerBoundType l);
+    void set_upper_bound(UpperBoundType u);
+    void set_bounds(LowerBoundType l, UpperBoundType u);
 
     //! Test if the interval is empty.
     auto is_empty() const -> decltype(declval<L>() > declval<U>());
@@ -300,7 +308,7 @@ template<class U> class Interval
 
 template<class F> auto DeclareIntervalArithmeticOperations<UpperBound<F>>::precision() const -> PrecisionType {
     Interval<UpperBound<F>>const& ivl=static_cast<Interval<UpperBound<F>>const&>(*this);
-    return min(ivl.lower().precision(),ivl.upper().precision());
+    return min(ivl.lower_bound().precision(),ivl.upper_bound().precision());
 }
 
 //! \related Interval \brief Write to an output stream.
@@ -308,8 +316,8 @@ template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& 
 
 template<class L, class U> Interval(L,U) -> Interval<decltype(min(-declval<L>(),declval<U>()))>;
 
-template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower());
-template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper());
+template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower_bound());
+template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper_bound());
 template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre());
 template<class U> inline auto midpoint(Interval<U> const& ivl) -> decltype(ivl.midpoint());
 template<class U> inline auto radius(Interval<U> const& ivl) -> decltype(ivl.radius());
@@ -318,40 +326,40 @@ template<class U> inline auto width(Interval<U> const& ivl) -> decltype(ivl.widt
 //! \related Interval \brief Make an interval with the given lower and upper bounds.
 template<class L, class U> inline Interval<U> make_interval(L l, U u) { return Interval<U>(l,u); }
 
-template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
+template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower_bound()>ivl.upper_bound());
 //! \related Interval \brief Test if the interval is empty.
-template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower()>ivl.upper());
+template<class U> inline auto is_empty(Interval<U> const& ivl) -> decltype(ivl.lower_bound()>ivl.upper_bound());
 //! \related Interval \brief Test if the interval is a singleton.
-template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower()==ivl.upper());
+template<class U> inline auto is_singleton(Interval<U> const& ivl) -> decltype(ivl.lower_bound()==ivl.upper_bound());
 //! \related Interval \brief Test if the interval is bounded.
-template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper()<ivl.lower());
+template<class U> inline auto is_bounded(Interval<U> const& ivl) -> decltype(ivl.upper_bound()<ivl.lower_bound());
 
 //! \related Interval \brief Test if \a x1 is an element of the interval \a ivl2.
-template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower()<=x1 && ivl2.upper()>=x1);
+template<class U, class X> inline auto element(X const& x1, Interval<U> const& ivl2) -> decltype(ivl2.lower_bound()<=x1 && ivl2.upper_bound()>=x1);
 //! \related Interval \brief Test if the interval \a ivl1 contains \a x2.
-template<class U, class X> inline auto contains(Interval<U> const& ivl1, X const& x2) -> decltype(ivl1.lower()<=x2 && ivl1.upper()>=x2);
+template<class U, class X> inline auto contains(Interval<U> const& ivl1, X const& x2) -> decltype(ivl1.lower_bound()<=x2 && ivl1.upper_bound()>=x2);
 //! \related Interval \brief Test if the interval \a ivl1 is equal to \a ivl2.
-template<class U> inline auto equal(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper());
+template<class U> inline auto equal(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper_bound()==ivl2.upper_bound());
 //! \related Interval \brief Test if the interval \a ivl1 is a subset of \a ivl2.
-template<class U1, class U2> inline auto subset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<=ivl2.upper());
+template<class U1, class U2> inline auto subset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()<=ivl2.upper_bound());
 //! \related Interval \brief Test if the interval \a ivl1 is a superset of \a ivl2.
-template<class U1, class U2> inline auto superset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.upper());
+template<class U1, class U2> inline auto superset(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()>=ivl2.upper_bound());
 //! \related Interval \brief Test if the interval \a ivl1 is disjoint from \a ivl2. Returns \c false even if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto disjoint(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower());
+template<class U1, class U2> inline auto disjoint(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()<ivl2.lower_bound());
 //! \related Interval \brief Test if the interval \a ivl1 intersects \a ivl2. Returns \c true even if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto intersect(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>=ivl2.lower());
+template<class U1, class U2> inline auto intersect(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()>=ivl2.lower_bound());
 
 //! \related Interval \brief Test if the closed interval \a ivl1 is disjoint from the closed interval \a ivl2.
 //! Returns \c false if the two intervals only have an endpoint in common.
-template<class U1, class U2> inline auto separated(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.lower());
+template<class U1, class U2> inline auto separated(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()<ivl2.lower_bound());
 //! \related Interval \brief Test if the interval \a ivl1 overlaps \a ivl2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.
-template<class U1, class U2> inline auto overlap(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>ivl2.lower());
+template<class U1, class U2> inline auto overlap(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()>ivl2.lower_bound());
 //! \related Interval \brief Test if the (closed) interval \a ivl1 is a subset of the interior of \a ivl2.
-template<class U1, class U2> inline auto inside(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()<ivl2.upper());
+template<class U1, class U2> inline auto inside(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()<ivl2.upper_bound());
 //! \related Interval \brief Test if the interior of the interval \a ivl1 is a superset of the (closed) interval \a ivl2.
-template<class U1, class U2> inline auto covers(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper()>ivl2.upper());
+template<class U1, class U2> inline auto covers(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> decltype(ivl1.upper_bound()>ivl2.upper_bound());
 
 //! \related Interval \brief The intersection of two intervals.
 template<class U1, class U2> inline auto intersection(Interval<U1> const& ivl1, Interval<U2> const& ivl2) -> Interval<decltype(min(declval<U1>(),declval<U2>()))>;
@@ -367,12 +375,14 @@ template<class U, class X> inline auto hull(X x1, Interval<U> const& ivl2) -> In
 
 //! \related Interval \brief Split an interval into its lower, middle or upper half.
 template<class U> inline auto split(Interval<U> const& ivl1, SplitPart lmu) -> Interval<U>;
+//! \related Interval \brief Split an interval into its lower and upper half.
+template<class U> inline auto split(Interval<U> const& ivl) -> Pair<Interval<U>,Interval<U>>;
 
 
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects given information on endpoints.
-template<class U> inline auto operator==(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()==ivl2.upper());
+template<class U> inline auto operator==(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper_bound()==ivl2.upper_bound());
 //! \related Interval \brief Inequality operator.
-template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper()!=ivl2.upper());
+template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper_bound()!=ivl2.upper_bound());
 
 
 //! \related FloatDPApproximationInterval \related FloatDPExactInterval \brief Allows the over-approximating interval \a ivl to be treated as exact.
@@ -398,7 +408,7 @@ FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
 FloatMPUpperInterval make_interval(FloatMPBounds const& x);
 
 template<class UB, class PR> FloatBounds<PR> cast_singleton(Interval<UB> const& ivl, PR pr) {
-    return FloatBounds<PR>(ivl.lower(),ivl.upper(),pr); }
+    return FloatBounds<PR>(ivl.lower_bound(),ivl.upper_bound(),pr); }
 
 //! \related FloatDPUpperInterval \brief An interval containing the given interval in its interior.
 template<class F> Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl);
@@ -418,7 +428,7 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
 inline Interval<FloatDPValue> to_time_bounds(Dyadic const& tl, Dyadic const& tu) {
     return Interval<FloatDPValue>(FloatDPLowerBound(tl,DoublePrecision()).raw(),FloatDPLowerBound(tu,DoublePrecision()).raw()); }
 inline Interval<FloatDPValue> to_time_bounds(Interval<Dyadic> const& ivl) {
-    return to_time_bounds(ivl.lower(),ivl.upper()); }
+    return to_time_bounds(ivl.lower_bound(),ivl.upper_bound()); }
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);

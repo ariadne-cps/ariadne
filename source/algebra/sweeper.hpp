@@ -29,11 +29,11 @@
 #ifndef ARIADNE_SWEEPER_HPP
 #define ARIADNE_SWEEPER_HPP
 
-#include "../utility/macros.hpp"
-#include "../utility/attribute.hpp"
-#include "../numeric/float.decl.hpp"
-#include "../algebra/multi_index.hpp"
-#include "../algebra/expansion.hpp"
+#include "utility/macros.hpp"
+#include "utility/attribute.hpp"
+#include "numeric/float.decl.hpp"
+#include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
 
 namespace Ariadne {
 
@@ -64,6 +64,8 @@ template<class F> class SweeperInterface {
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
+  public:
+    inline SweeperInterface* _copy() const { return this->_clone(); }
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
 };
 
@@ -73,20 +75,20 @@ template<class F> class SweeperInterface {
  *  In particular, the concrete sweeper classes have an inline discard(...) method which is used in the sweep(...) method since the exact type is known.
  *  This is a major efficiency improvement.
  */
-template<class F> class Sweeper {
+template<class F> class Sweeper
+    : public Handle<SweeperInterface<F>>
+{
     typedef typename F::PrecisionType PR;
   public:
+    typedef SweeperInterface<F> Interface;
     typedef F RawFloatType;
     typedef PR PrecisionType;
     typedef MultiIndex IndexType;
   public:
+    using Handle<Interface>::Handle;
+
     Sweeper();
-    inline Sweeper(const SweeperInterface<F>& p) : _ptr(p._clone()) { }
-    inline Sweeper(std::shared_ptr<const SweeperInterface<F>> p) : _ptr(p) { }
-    inline Sweeper(const SweeperInterface<F>* p) : _ptr(p) { }
-    inline operator const SweeperInterface<F>& () const { return *_ptr; }
-    inline std::shared_ptr<const SweeperInterface<F>> operator& () { return _ptr; }
-  public:
+
     //! \brief The precision to which terms should be built.
     inline PrecisionType precision() const { return this->_ptr->_precision(); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
@@ -98,8 +100,6 @@ template<class F> class Sweeper {
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
     inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
-  private:
-    std::shared_ptr<const SweeperInterface<F>> _ptr;
 };
 
 template<class F> class SweeperBase
@@ -190,6 +190,8 @@ template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<
   public:
     ThresholdSweeper(PR precision, F sweep_threshold)
         : _coefficient_precision(precision), _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0); }
+    ThresholdSweeper(PR precision, ApproximateDouble sweep_threshold)
+        : _coefficient_precision(precision), _sweep_threshold(cast_exact(sweep_threshold),precision) { ARIADNE_ASSERT(cast_exact(sweep_threshold)>=0); }
     inline PR precision() const { return _coefficient_precision; }
     inline F sweep_threshold() const { return _sweep_threshold; }
     inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->_sweep_threshold; }
@@ -207,7 +209,7 @@ template<class F> class RelativeThresholdSweeper : public RelativeSweeperMixin<R
         : _coefficient_precision(precision), _relative_sweep_threshold(relative_sweep_threshold) { ARIADNE_ASSERT(relative_sweep_threshold>0); }
     inline PR precision() const { return _coefficient_precision; }
     inline F relative_sweep_threshold() const { return _relative_sweep_threshold; }
-    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < this->_relative_sweep_threshold*nrm; }
+    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < mul(approx,this->_relative_sweep_threshold,nrm); }
   private:
     virtual Void _write(OutputStream& os) const { os << "RelativeThresholdSweeper( relative_sweep_threshold="<<this->_relative_sweep_threshold<<" )"; };
 };
@@ -283,8 +285,10 @@ private:
     DegreeType _degree;
 };
 
-template<> inline Sweeper<FloatDP>::Sweeper() : _ptr(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
-template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatMP>(MultiplePrecision(64),std::numeric_limits<double>::epsilon())) { }
+template<> inline Sweeper<FloatDP>::Sweeper()
+    : Sweeper(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
+template<> inline Sweeper<FloatMP>::Sweeper()
+    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),std::numeric_limits<double>::epsilon())) { }
 
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;

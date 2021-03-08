@@ -31,16 +31,16 @@
 #ifndef ARIADNE_INTEGER_HPP
 #define ARIADNE_INTEGER_HPP
 
-#include "../external/gmp.hpp"
+#include "numeric/gmp.hpp"
 
 #include <cassert>
 
-#include "../utility/typedefs.hpp"
-#include "../utility/metaprogramming.hpp"
-#include "../numeric/sign.hpp"
-#include "../numeric/logical.hpp"
-#include "../numeric/arithmetic.hpp"
-#include "../numeric/number.decl.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/metaprogramming.hpp"
+#include "numeric/sign.hpp"
+#include "numeric/logical.hpp"
+#include "numeric/arithmetic.hpp"
+#include "numeric/number.decl.hpp"
 
 namespace Ariadne {
 
@@ -121,7 +121,7 @@ class Integer
     Integer(Integer&&);
     Integer& operator=(const Integer&);
     Integer& operator=(Integer&&);
-    operator Number<ExactTag> () const;
+    operator ExactNumber () const;
 
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);
@@ -185,7 +185,7 @@ template<> class Positive<Integer> : public Integer {
     Positive<Integer>() : Integer() { }
     template<class M, EnableIf<IsBuiltinUnsigned<M>> = dummy> Positive<Integer>(M m) : Integer(m) { }
     Positive<Integer>(int n) = delete;
-    Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
+    explicit Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
 };
 
 //! \brief A positive integer.

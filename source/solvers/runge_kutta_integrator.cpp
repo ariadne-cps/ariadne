@@ -22,26 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../utility/standard.hpp"
-#include "../config.hpp"
+#include "utility/standard.hpp"
+#include "config.hpp"
 
 #include <iostream>
 
-#include "../solvers/runge_kutta_integrator.hpp"
+#include "solvers/runge_kutta_integrator.hpp"
 
-#include "../utility/container.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/algebra.hpp"
-#include "../function/function.hpp"
-#include "../function/taylor_model.hpp"
-#include "../function/formula.hpp"
+#include "utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/formula.hpp"
 
 namespace Ariadne {
 
-inline auto operator*(double s, FloatDPApproximationVector v) -> decltype(FloatDPApproximation(s)*v) { return FloatDPApproximation(s)*v; }
+inline auto operator*(ApproximateDouble s, FloatDPApproximationVector v) -> FloatDPApproximationVector { return FloatDPApproximation(cast_exact(s),dp)*v; }
 
-RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
+RungeKutta4Integrator::RungeKutta4Integrator(ApproximateDouble step_size)
     : _step_size(step_size)
 {
 }

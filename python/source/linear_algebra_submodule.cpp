@@ -24,6 +24,7 @@
 
 #include "pybind11.hpp"
 #include "utilities.hpp"
+#include "numeric_submodule.hpp"
 
 #include "config.hpp"
 
@@ -157,7 +158,8 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
     pybind11::list const& row0=static_cast<pybind11::list const&>(row0_obj);
     SizeType rs=lst.size();
     SizeType cs=row0.size();
-    Matrix<X> r(rs,cs);
+    assert(rs!=0 && cs!=0);
+    Matrix<X> r(rs,cs,*row0[0].cast<X*>());
     for(SizeType i=0; i!=rs; ++i) {
         pybind11::object row_obj=lst[i];
         pybind11::list const& row=static_cast<pybind11::list const&>(row_obj);
@@ -173,13 +175,16 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPApproximation>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPValue>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDP>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatMP>& repr);
 
-template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
-    return os <<repr.reference(); }
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& x);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& x);
+
+//template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
+//    return os <<repr.reference(); }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Vector<X>>& repr) {
     Vector<X> const& v=repr.reference();
@@ -207,22 +212,29 @@ template<class X>
 Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
 {
     vector_class.def(pybind11::init<Vector<X>>());
-    if constexpr (IsDefaultConstructible<X>::value) {
-        vector_class.def(pybind11::init<Nat>()); }
+    if constexpr (IsConstructible<X,Nat>::value) {
+        vector_class.def(pybind11::init<Nat>());
+        vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType)) &Vector<X>::unit);
+        vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType)) &Vector<X>::basis);
+    }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
-        vector_class.def(pybind11::init<Nat,PR>());
+        if constexpr (IsConstructible<X,Nat,PR>::value) {
+            vector_class.def(pybind11::init<Nat,PR>());
+            vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType,PR)) &Vector<X>::unit);
+            vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType,PR)) &Vector<X>::basis);
+        }
     }
     vector_class.def(pybind11::init<Nat,X>());
-    vector_class.def_static("unit",&Vector<X>::unit);
-    vector_class.def_static("basis",&Vector<X>::basis);
     vector_class.def(pybind11::init([](pybind11::list const& lst){return Vector<X>(pybind11::cast<Array<X>>(lst));}));
 
     // Convert from a Python list and properties
-    if constexpr (HasGenericType<X>::value) {
+    if constexpr (HasGenericType<X>::value and HasPrecisionType<X>::value) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(IsConstructible<Vector<X>,Vector<Y>,PR>::value) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
+        } else if (IsConstructible<Vector<X>,Vector<Dyadic>,PR>::value) {
+            vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Dyadic>(lst),pr);}));
         }
     }
 
@@ -378,11 +390,14 @@ template<class X>
 Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
 {
     matrix_class.def(pybind11::init<Matrix<X>>());
-    if constexpr (IsDefaultConstructible<X>::value) {
-        matrix_class.def(pybind11::init<Nat,Nat>()); }
+    if constexpr (IsConstructible<X,Nat>::value) {
+        matrix_class.def(pybind11::init<Nat,Nat>());
+        matrix_class.def_static("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
+    }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
         matrix_class.def(pybind11::init<Nat,Nat,PR>());
+        matrix_class.def_static("identity",(Matrix<X>(*)(SizeType,PR)) &Matrix<X>::identity);
     }
     matrix_class.def(pybind11::init<Nat,Nat,X>());
     matrix_class.def("rows", &Matrix<X>::row_size);
@@ -394,7 +409,6 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def("__str__",&__cstr__<Matrix<X>>);
     matrix_class.def("__repr__",&__repr__<Matrix<X>>);
 
-    matrix_class.def_static("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
@@ -448,6 +462,12 @@ Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<
 
 
 
+Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Real>>& matrix_class)
+{
+    using X=Real;
+    define_matrix_class<X>(module,matrix_class);
+}
+
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Value<F>>>& matrix_class)
 {
     using X=Value<F>;
@@ -468,6 +488,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("gs_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &gs_solve);
     module.def("gs_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &gs_solve);
     module.def("lu_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &lu_solve);
+    module.def("lu_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &lu_solve);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
     module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
@@ -513,22 +534,32 @@ template<class X> Void export_matrix(pybind11::module& module)
 template<class X> Void export_diagonal_matrix(pybind11::module& module)
 {
     pybind11::class_<DiagonalMatrix<X>> diagonal_matrix_class(module,python_name<X>("DiagonalMatrix").c_str());
-    diagonal_matrix_class.def(pybind11::init<SizeType >());
+    if constexpr (IsConstructible<X,Nat>::value) {
+        diagonal_matrix_class.def(pybind11::init<SizeType>());
+    }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        diagonal_matrix_class.def(pybind11::init<SizeType,PR>());
+    }
     diagonal_matrix_class.def(pybind11::init<Vector<X>>());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
-    //diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
-    diagonal_matrix_class.def("__add__", &__add__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__sub__", &__sub__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X> , Return<Vector<X>> >, pybind11::is_operator());
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
-    //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
-    diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
 
-    //module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+    diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
+
+    if constexpr (IsSame<ArithmeticType<X>,X>::value) {
+        diagonal_matrix_class.def("__add__", &__add__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__sub__", &__sub__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X>>, pybind11::is_operator());
+        //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+        diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X>>, pybind11::is_operator());
+
+        module.def("inverse", &_inverse_<DiagonalMatrix<X>>);
+    }
 }
 
 Void export_pivot_matrix(pybind11::module& module)
@@ -567,9 +598,17 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_matrix<FloatMPValue>(module);
 
     export_pivot_matrix(module);
+
     export_diagonal_matrix<FloatDPApproximation>(module);
+    export_diagonal_matrix<FloatDPBounds>(module);
+    export_diagonal_matrix<FloatDPValue>(module);
+    export_diagonal_matrix<FloatMPApproximation>(module);
+    export_diagonal_matrix<FloatMPBounds>(module);
+//    export_diagonal_matrix<FloatMPValue>(module);
 
     export_vector<Real>(module);
+    export_covector<Real>(module);
+    export_matrix<Real>(module);
 
     export_vector<Rational>(module);
     export_covector<Rational>(module);

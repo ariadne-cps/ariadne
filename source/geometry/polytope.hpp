@@ -37,11 +37,11 @@
 #include <cassert>
 #include <cstring>
 
-#include "../utility/macros.hpp"
-#include "../geometry/point.hpp"
+#include "utility/macros.hpp"
+#include "geometry/point.hpp"
 
-#include "../geometry/set_interface.hpp"
-#include "../output/graphics_interface.hpp"
+#include "geometry/set_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -70,7 +70,7 @@ class Polytope
     //! \brief Default constructor constructs an empty polytope in zero dimensions.
     Polytope() { }
     //! \brief Construct an empty polytope in \a d dimensions.
-    Polytope(Nat d) { }
+    Polytope(DimensionType d) { }
     //! \brief Construct polytope with vertices in \a v.
     Polytope(const std::vector<ExactPoint>& v) : _vertices(v) { }
 

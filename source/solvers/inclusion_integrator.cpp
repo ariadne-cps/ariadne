@@ -22,26 +22,30 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/taylor_function.hpp"
-#include "../solvers/integrator.hpp"
-#include "../solvers/bounder.hpp"
-#include "../algebra/expansion.inl.hpp"
+#include "function/taylor_function.hpp"
+#include "solvers/integrator.hpp"
+#include "solvers/bounder.hpp"
+#include "algebra/expansion.inl.hpp"
 #include "inclusion_integrator.hpp"
 
 namespace Ariadne {
 
 template<class I> decltype(auto) inline norm(Box<I> const& bx) { return norm(cast_vector(bx)); }
 
-template<> ErrorType wstar_multiplier<ZeroApproximation>() { return ErrorType(0u); }
-template<> ErrorType wstar_multiplier<ConstantApproximation>() { return ErrorType(1u); }
-template<> ErrorType wstar_multiplier<AffineApproximation>() { return ErrorType(5.0/3u); }
-template<> ErrorType wstar_multiplier<SinusoidalApproximation>() { return ErrorType(1.3645_upper); }
-template<> ErrorType wstar_multiplier<PiecewiseApproximation>() { return ErrorType(5.0/4u); }
+namespace {
+static const typename ErrorType::PrecisionType pr=typename ErrorType::PrecisionType();
+} // namespace
+
+template<> ErrorType wstar_multiplier<ZeroApproximation>() { return ErrorType(0u,pr); }
+template<> ErrorType wstar_multiplier<ConstantApproximation>() { return ErrorType(1u,pr); }
+template<> ErrorType wstar_multiplier<AffineApproximation>() { return ErrorType(5u,pr)/3u; }
+template<> ErrorType wstar_multiplier<SinusoidalApproximation>() { return ErrorType(1.3645_dec,pr); }
+template<> ErrorType wstar_multiplier<PiecewiseApproximation>() { return ErrorType(1.25_x,pr); }
 
 ErrorType vstar(BoxDomainType const& inputs) {
-    ErrorType result(0u);
+    ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size())) {
-        result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper())));
+        result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper_bound())));
     }
     return result;
 }
@@ -88,10 +92,9 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 
     auto n = noise_independent_component.result_size();
     auto m = input_derivatives.size();
-    DoublePrecision pr;
     ErrorType ze(pr);
     ErrorType K=ze, pK=ze, pKv=ze, pKw=ze, L=ze, pL=ze, pLv=ze, pLw=ze, H=ze, pH=ze, pHv=ze, pHw=ze;
-    Vector<ErrorType> Kj(n), pKj(n), pKjv(n), pKjw(n), Lj(n), pLj(n), pLjv(n), pLjw(n), Hj(n), pHj(n), pHjv(n), pHjw(n);
+    Vector<ErrorType> Kj(n,pr), pKj(n,pr), pKjv(n,pr), pKjw(n,pr), Lj(n,pr), pLj(n,pr), pLjv(n,pr), pLjw(n,pr), Hj(n,pr), pHj(n,pr), pHjv(n,pr), pHjw(n,pr);
     FloatDPUpperBound Lambda=ze;
 
     auto Df=noise_independent_component.differential(cast_singleton(B),2);
@@ -118,7 +121,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
         Hj[j] = H_j;
     }
 
-    Matrix<ErrorType> pK_ij(m,n), pL_ij(m,n), pH_ij(m,n);
+    Matrix<ErrorType> pK_ij(m,n,pr), pL_ij(m,n,pr), pH_ij(m,n,pr);
 
     for (auto i : range(m)) {
         auto Diff_g_i=input_derivatives[i].differential(cast_singleton(B),2);
@@ -149,7 +152,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 
     for (auto j : range(n)) {
         for (auto i : range(m)) {
-            ErrorType Vi(abs(inputs[i]).upper());
+            ErrorType Vi(abs(inputs[i]).upper_bound());
             ErrorType Wi(Vi*wstar_multiplier<A>());
             pKjv[j] += Vi*pK_ij[i][j]; pLjv[j] += Vi*pL_ij[i][j]; pHjv[j] += Vi*pH_ij[i][j];
             pKjw[j] += Wi*pK_ij[i][j]; pLjw[j] += Wi*pL_ij[i][j]; pHjw[j] += Wi*pH_ij[i][j];
@@ -221,11 +224,11 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
     Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,_inputs,h));
 
-    Vector<ErrorType> result_componentwise(n.dimension());
+    Vector<ErrorType> result_componentwise(n.dimension(),n.precision());
     for (auto j: range(n.dimension()))
         result_componentwise[j] = component_error<A,R>(n,_inputs,h,j);
 
-    Vector<ErrorType> result(n.dimension());
+    Vector<ErrorType> result(n.dimension(),n.precision());
     for (auto j: range(n.dimension())) {
         result[j] = min(result_worstcase[j],result_componentwise[j]);
     }
@@ -234,11 +237,12 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    ARIADNE_LOG_SCOPE_CREATE;
     ErrorConstants norms = compute_constants<A>(Ariadne::noise_independent_component(_f, _inputs.size()),
                                              Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
-    ARIADNE_LOG(7,"norms: " << norms << "\n");
+    ARIADNE_LOG_PRINTLN("norms: " << norms);
     Set<Nat> input_idx;
-    for (Nat i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }
+    for (SizeType i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }
     if (is_additive_in(_f,input_idx))
         norms.pK=mag(norm(_inputs));
     return process(norms,h);
@@ -251,7 +255,7 @@ InclusionIntegratorFactory::create(EffectiveVectorMultivariateFunction const& f,
     if (approximation.handles(AffineApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<AffineApproximation>(f,inputs,_integrator)));
     if (approximation.handles(SinusoidalApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<SinusoidalApproximation>(f,inputs,_integrator)));
     if (approximation.handles(PiecewiseApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<PiecewiseApproximation>(f,inputs,_integrator)));
-    ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation << "\n");
+    ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation);
 }
 
 
@@ -267,19 +271,19 @@ InclusionIntegrator<A>::operator<(const InclusionIntegratorInterface& rhs) const
 
 template<class A> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
-
+    ARIADNE_LOG_SCOPE_CREATE;
     TimeStepType new_t = lower_bound(t+h);
 
     Interval<TimeStepType> domt(t,new_t);
 
     auto e=this->compute_errors(h,B);
-    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+    ARIADNE_LOG_PRINTLN("approximation errors:"<<e);
     auto doma = this->build_parameter_domain(_inputs);
 
     auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
-    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw:"<<Fw);
     auto phi = this->_integrator->flow_step(Fw,domx,domt,doma,B);
     add_errors(phi,e);
 
@@ -295,10 +299,10 @@ template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrato
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
@@ -401,7 +405,7 @@ template<class A> Pair<StepSizeType,UpperBoxType> InclusionIntegrator<A>::flow_b
 
 template<class A> BoxDomainType InclusionIntegrator<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
-    for (Nat i=0; i<this->_num_params_per_input; ++i)
+    for (SizeType i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;
 }
@@ -427,15 +431,15 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<AffineA
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto three = EffectiveScalarMultivariateFunction::constant(n+1+2*m,3_z);
     auto t = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
     }
     return result;
 }
@@ -447,15 +451,15 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Sinusoi
     auto pgamma = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
     auto gamma = EffectiveScalarMultivariateFunction::constant(n+1+2*m,4.162586_dec);
     auto t = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
     }
     return result;
 }
@@ -467,16 +471,17 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Piecewi
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
 
 template<> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+    ARIADNE_LOG_SCOPE_CREATE;
 
     List<ValidatedVectorMultivariateFunctionModelType> result;
 
@@ -491,12 +496,12 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto doma = this->build_parameter_domain(_inputs);
 
     auto e=this->compute_errors(h,B);
-    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+    ARIADNE_LOG_PRINTLN("approximation errors:"<<e);
 
     auto w_hlf = build_w_functions<PiecewiseApproximation>(domt_first,doma,n,m);
-    ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w_hlf:"<<w_hlf);
     auto Fw_hlf = substitute_v_with_w(_f, w_hlf);
-    ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw_hlf:" << Fw_hlf);
 
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
@@ -508,9 +513,9 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto domx_second = cast_exact_box(intermediate_evolve.range());
 
     auto w = this->build_secondhalf_piecewise_w_functions(domt_second,doma,n,m);
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
-    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw:"<<Fw);
     auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);
 

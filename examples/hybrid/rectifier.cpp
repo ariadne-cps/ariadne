@@ -1,6 +1,25 @@
 /***************************************************************************
- *            rectifier_automaton.cpp
+ *            rectifier.cpp
+ *
+ *  Copyright  2009-20  Luca Geretti
+ *
  ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 #include <cstdarg>
 #include "ariadne.hpp"
@@ -20,33 +39,33 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
     if (MAX_GRID_DEPTH >= 0)
     {
         // The rectangle to be drawn
-        ExactBoxType rect = ExactBoxType(numVariables);
+        ApproximateBoxType rect (numVariables);
         // Chooses the fill colour
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
         Nat numDivisions = static_cast<Nat>(MAX_GRID_DEPTH) / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        FloatDP step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        ApproximateDouble step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
-        FloatDP pos_x = bbox[0].lower().raw();
+        ApproximateDouble pos_x = bbox[0].lower_bound().get_d();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
-        while (pos_x < bbox[0].upper().raw())
+        while (pos_x.get_d() < bbox[0].upper_bound().get_d())
         {
-            rect[xaxis] = ExactIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+            rect[xaxis] = ApproximateIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
             fig << rect; // Appends the rectangle
         }
 
         // Repeats for the rectangles in the y direction
-        FloatDP step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        FloatDP pos_y = bbox[1].lower().raw();
+        ApproximateDouble step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        ApproximateDouble pos_y = bbox[1].lower_bound().get_d();
         rect[xaxis] = bbox[0];
-        while (pos_y < bbox[1].upper().raw())
+        while (pos_y.get_d() < bbox[1].upper_bound().get_d())
         {
-            rect[yaxis] = ExactIntervalType(pos_y,pos_y+step_y);
+            rect[yaxis] = ApproximateIntervalType(pos_y,pos_y+step_y);
             fig << rect;
             pos_y += step_y;
         }
@@ -59,13 +78,13 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
-    Real amplitude(4.0);
-    Real frequency(50.0);
-    Real Ron (10.0);
+    Real amplitude(4.0_dec);
+    Real frequency(50.0_dec);
+    Real Ron (10.0_dec);
     Real Cl = 0.0001_dec;
-    Real Rl (1000.0);
+    Real Rl (1000.0_dec);
 
     /// Introduces the dynamics parameters
     Vector<Real> parameters(5);
@@ -86,7 +105,6 @@ Int main(Int argc, const char* argv[])
     //float LOCK_TOGRID_TIME = 2.0/frequency;
     //double LOCK_TOGRID_TIME = 0.25/frequency;
     //Int MAX_GRID_DEPTH = 7;
-    //Int VERBOSITY=3;
     Bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
@@ -189,7 +207,6 @@ Int main(Int argc, const char* argv[])
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(rectifier_automaton);
-    evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(MAX_ENCL_RADIUS);
@@ -236,8 +253,6 @@ Int main(Int argc, const char* argv[])
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
     rectifier_automaton.set_grid(Grid(Vector<FloatDP>({3, 0.25/dp[1], 1.0, 0.5})));
     std::cout <<  analyser.parameters() << std::endl;
-
-    analyser.verbosity=VERBOSITY;
 
     HybridImageSet initial_set;
     initial_set[offoff]=initial_box;

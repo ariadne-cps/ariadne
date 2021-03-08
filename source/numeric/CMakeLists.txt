@@ -1,4 +1,6 @@
-add_library(ariadne-numeric OBJECT
+set(LIBRARY_NAME ariadne-numeric)
+
+add_library(${LIBRARY_NAME} OBJECT
     dyadic.cpp
     logical.cpp
     operators.cpp
@@ -20,8 +22,11 @@ add_library(ariadne-numeric OBJECT
     float_literals.cpp
 )
 
-cotire(ariadne-numeric CONFIGURATIONS None)
+foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
+     target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
+endforeach()
 
 if(COVERAGE)
-     target_link_libraries(ariadne-numeric PUBLIC coverage_config)
+     target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)
 endif()
+

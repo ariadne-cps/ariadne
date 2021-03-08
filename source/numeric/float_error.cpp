@@ -23,6 +23,7 @@
  */
 
 
+#include "builtin.hpp"
 #include "float_error.hpp"
 #include "float_error.tpl.hpp"
 

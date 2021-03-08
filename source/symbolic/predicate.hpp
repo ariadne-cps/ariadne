@@ -32,15 +32,15 @@
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
-#include "../function/function_interface.hpp"
+#include "function/function_interface.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
 
-#include "../algebra/vector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/differential.hpp"
-#include "../function/taylor_model.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/differential.hpp"
+#include "function/taylor_model.hpp"
 
 namespace Ariadne {
 
@@ -102,7 +102,7 @@ class DisjunctivePredicate
 
     DisjunctivePredicate& operator|=(ExpressionPredicate p) {
         if(_tautology) { return *this; }
-        for(Nat i=0; i!=_predicates.size(); ++i) {
+        for(SizeType i=0; i!=_predicates.size(); ++i) {
             if(p.same(_predicates[i])) { return *this; }
             if(p.opposite(_predicates[i])) { _predicates.clear(); _tautology=true; return *this; }
         }
@@ -111,7 +111,7 @@ class DisjunctivePredicate
     }
 
     DisjunctivePredicate& operator|=(const DisjunctivePredicate& p) {
-        for(Nat i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
+        for(SizeType i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual SizeType argument_size() const;
     virtual Kleenean evaluate(const Vector<FloatDP>& x) const;
@@ -136,7 +136,7 @@ class ConjunctiveNormalFormPredicate
     ConjunctiveNormalFormPredicate& operator&=(DisjunctivePredicate p) {
         _cnf.push_back(p); return *this; }
     ConjunctiveNormalFormPredicate& operator|=(DisjunctivePredicate p) {
-        for(Nat i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
+        for(SizeType i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual SizeType argument_size() const;
     virtual Kleenean evaluate(const Vector<FloatDP>& x) const;

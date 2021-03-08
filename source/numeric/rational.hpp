@@ -31,14 +31,14 @@
 #ifndef ARIADNE_RATIONAL_HPP
 #define ARIADNE_RATIONAL_HPP
 
-#include "../external/gmp.hpp"
-#include "../utility/typedefs.hpp"
-#include "../utility/metaprogramming.hpp"
-#include "../utility/string.hpp"
-#include "../numeric/integer.hpp"
-#include "../numeric/arithmetic.hpp"
-#include "../numeric/number.decl.hpp"
-#include "../numeric/float.decl.hpp"
+#include "numeric/gmp.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/metaprogramming.hpp"
+#include "utility/string.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/arithmetic.hpp"
+#include "numeric/number.decl.hpp"
+#include "numeric/float.decl.hpp"
 
 namespace Ariadne {
 
@@ -82,7 +82,7 @@ class Rational
     Rational(Rational&&);
     Rational& operator=(const Rational&);
     Rational& operator=(Rational&&);
-    operator Number<ExactTag> () const;
+    operator ExactNumber () const;
 
     static Rational inf(Sign sgn);
     static Rational inf();
@@ -157,6 +157,7 @@ template<> class Bounds<Rational> {
     friend Bounds<Rational> operator-(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l-q2._u,q1._u-q2._l); }
     friend Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2);
     friend Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2);
+    friend Bounds<Rational> sqr(RationalBounds const& q);
     friend Bounds<Rational> rec(RationalBounds const& q);
     friend RationalBounds abs(RationalBounds const& q) { return RationalBounds(max(min(q._l,-q._u),0),max(-q._l,q._u)); }
     friend Bounds<Rational> max(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(max(q1._l,q2._l),max(q1._u,q2._u)); }

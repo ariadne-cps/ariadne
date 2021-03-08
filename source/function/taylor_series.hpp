@@ -30,10 +30,10 @@
 #ifndef ARIADNE_TAYLOR_SERIES_HPP
 #define ARIADNE_TAYLOR_SERIES_HPP
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/series.hpp"
-#include "../function/domain.hpp"
-#include "../utility/container.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/series.hpp"
+#include "function/domain.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 
@@ -51,7 +51,7 @@ template<> class TaylorSeries<FloatDPBounds> {
     Array<FloatDPValue> _expansion;
     FloatDPError _error;
   public:
-    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u), _error(0u) { }
+    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u,FloatDPValue(dp)), _error(0u,dp) { }
 
     TaylorSeries(const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree,
                  AnalyticFunction const& function);
@@ -70,7 +70,7 @@ template<> class TaylorSeries<FloatDPBounds> {
 
 template<class OP> inline
 TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)
-    : _domain(domain), _expansion(degree+1u), _error(0u)
+    : _domain(domain), _expansion(degree+1u,FloatDPValue(dp)), _error(0u,dp)
 {
     Series<FloatDPBounds> centre_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(centre));
     Series<FloatDPBounds> range_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(cast_singleton(domain)));

@@ -30,7 +30,7 @@
 #define ARIADNE_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "../geometry/set_interface.hpp"
+#include "geometry/set_interface.hpp"
 
 namespace Ariadne {
 
@@ -81,7 +81,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \name Get the system associated with the analyser.
     virtual const SystemType& system() const = 0;
 
-    //@{
+    //!@{
     //! \name Evaluation of maps on abstract sets
 
     //! \brief Compute an approximation to the set obtained by iterating \a steps times the system starting in \a initial_set.
@@ -128,7 +128,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     virtual SafetyCertificateType
     verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const = 0;
 
-    //@}
+    //!@}
 
 };
 

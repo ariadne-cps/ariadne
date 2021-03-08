@@ -168,6 +168,8 @@ template<class... AS> auto _log_(AS const& ... as) -> decltype(log(as...)) { ret
 template<class... AS> auto _sin_(AS const& ... as) -> decltype(sin(as...)) { return sin(as...); }
 template<class... AS> auto _cos_(AS const& ... as) -> decltype(cos(as...)) { return cos(as...); }
 template<class... AS> auto _tan_(AS const& ... as) -> decltype(tan(as...)) { return tan(as...); }
+template<class... AS> auto _asin_(AS const& ... as) -> decltype(asin(as...)) { return asin(as...); }
+template<class... AS> auto _acos_(AS const& ... as) -> decltype(acos(as...)) { return acos(as...); }
 template<class... AS> auto _atan_(AS const& ... as) -> decltype(atan(as...)) { return atan(as...); }
 template<class... AS> auto _max_(AS const& ... as) -> decltype(max(as...)) { return max(as...); }
 template<class... AS> auto _min_(AS const& ... as) -> decltype(min(as...)) { return min(as...); }
@@ -177,6 +179,7 @@ template<class... AS> auto _mag_(AS const& ... as) -> decltype(mag(as...)) { ret
 template<class... AS> auto _mig_(AS const& ... as) -> decltype(mig(as...)) { return mig(as...); }
 template<class... AS> auto _arg_(AS const& ... as) -> decltype(arg(as...)) { return arg(as...); }
 template<class... AS> auto _conj_(AS const& ... as) -> decltype(conj(as...)) { return conj(as...); }
+template<class... AS> auto _dist_(AS const& ... as) -> decltype(dist(as...)) { return dist(as...); }
 
 template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 
@@ -186,6 +189,9 @@ template<class... AS> auto _partial_evaluate_(AS... as) -> decltype(partial_eval
 template<class... AS> auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
 template<class... AS> auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
 template<class... AS> auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
+
+template<class... AS> auto _inverse_(AS... as) -> decltype(inverse(as...)) { return inverse(as...); }
+template<class... AS> auto _solve_(AS... as) -> decltype(solve(as...)) { return solve(as...); }
 
 template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
@@ -251,7 +257,10 @@ void export_array(pybind11::module& module, const char* name)
 
     pybind11::class_<Array<T>> array_class(module,name);
     array_class.def(pybind11::init<Array<T>>());
-    array_class.def(pybind11::init<uint>());
+    if (IsDefaultConstructible<T>::value) {
+        array_class.def(pybind11::init<uint>());
+    }
+    array_class.def(pybind11::init<uint,T>());
     array_class.def("__len__", &Array<T>::size);
     array_class.def("__getitem__", &__getitem__<Array<T>,int,T>);
     array_class.def("__setitem__", &__setitem__<Array<T>,int,T>);
@@ -260,8 +269,10 @@ void export_array(pybind11::module& module, const char* name)
 
 
 namespace pybind11::detail {
+
+// The third template argument is 'true' if the array is resizable
 template <class T> struct type_caster<Ariadne::Array<T>>
-    : array_caster<Ariadne::Array<T>, T, true> { };
+    : array_caster<Ariadne::Array<T>, T, Ariadne::IsDefaultConstructible<T>::value> { };
 template <class T> struct type_caster<Ariadne::List<T>>
     : list_caster<Ariadne::List<T>, T> { };
 template <class T> struct type_caster<Ariadne::Set<T>>
@@ -382,6 +393,8 @@ template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& m
     module.def("sin", &_sin_<X>);
     module.def("cos", &_cos_<X>);
     module.def("tan", &_tan_<X>);
+    module.def("asin", &_asin_<X>);
+    module.def("acos", &_acos_<X>);
     module.def("atan", &_atan_<X>);
     return pyclass;
 }
@@ -564,7 +577,7 @@ pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std
 
     pybind11::class_<Vector<X>> vector_class(module, name.c_str());
     vector_class.def(pybind11::init<Vector<X>>());
-    vector_class.def(pybind11::init<Array<X>>());
+//    vector_class.def(pybind11::init<Array<X>>());
     if constexpr (IsDefaultConstructible<X>::value) {
         vector_class.def(pybind11::init<Nat>());
     }
@@ -589,8 +602,10 @@ pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std
     }
     vector_class.def("__str__",&__cstr__<Vector<X>>);
     //vector_class.def("__repr__",&__repr__<Vector<X>>);
-    vector_class.def_static("unit",&Vector<X>::unit);
-    vector_class.def_static("basis",&Vector<X>::basis);
+    if constexpr (IsDefaultConstructible<X>::value) {
+        vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType))&Vector<X>::unit);
+        vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType))&Vector<X>::basis);
+    }
 
     module.def("dot", &_dot_<Vector<X>,Vector<X>>);
 

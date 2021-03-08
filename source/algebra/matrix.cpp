@@ -22,19 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/module.hpp"
+#include "numeric/module.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
 #include "matrix.hpp"
 #include "symmetric_matrix.hpp"
 
-#include "../utility/exceptions.hpp"
-#include "../numeric/float.hpp"
-#include "../numeric/dyadic.hpp"
-#include "../numeric/rational.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
+#include "utility/exceptions.hpp"
+#include "numeric/float.hpp"
+#include "numeric/dyadic.hpp"
+#include "numeric/rational.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
 
 #include "matrix.tpl.hpp"
 
@@ -63,7 +63,7 @@ lu_inverse(const Matrix<X>& M)
     for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
         SizeType iamax=k;
-        X amax(0);
+        X amax(M.zero_element());
         for(SizeType i=k; i!=m; ++i) {
             if(decide(abs(A[i][k])>amax)) {
                 iamax=i;
@@ -242,15 +242,16 @@ template<class X> Matrix<Bounds<X>> gs_solve_bounds(const Matrix<Bounds<X>>& A, 
 }
 
 template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
-    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][0]=b[i]; }
+    X bz=b.zero_element();
+    Matrix<X> B(b.size(),1u,bz); for(SizeType i=0; i!=b.size(); ++i) { B[i][0]=b[i]; }
     Matrix<X> R=gs_solve(A,B);
-    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
+    Vector<X> r(R.row_size(),R.zero_element()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
     return r;
 }
 
 
 template<class X> Matrix<X> gs_inverse(const Matrix<X>& A) {
-    return gs_solve(A,Matrix<X>::identity(A.row_size()));
+    return gs_solve(A,Matrix<X>::identity(A.row_size(),A.zero_element()));
 }
 
 
@@ -354,7 +355,7 @@ row_norms(const Matrix<X>& A)
 {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    Vector<RowNormType<X>> r(m);
+    Vector<RowNormType<X>> r(m,A.zero_element());
 
     for(SizeType i=0; i!=m; ++i) {
         r[i]=A.zero_element();
@@ -380,9 +381,9 @@ normalise_rows(Matrix<X>& A)
 
     auto prev_rounding_mode=X::get_rounding_mode();
     X::set_rounding_upward();
-    Array<X> row_asums(m);
+    Array<X> row_asums(m,A.zero_element());
     for(SizeType i=0; i!=m; ++i) {
-        row_asums[i]=0.0;
+        row_asums[i]=0.0_x;
         for(SizeType j=0; j!=n; ++j) {
             row_asums[i]+=abs(A[i][j]);
         }
@@ -407,7 +408,7 @@ triangular_decomposition(const Matrix<X>& A)
 
     SizeType m=A.row_size();
     SizeType n=A.column_size();
-    Matrix<X> L=Matrix<X>::identity(m);
+    Matrix<X> L=Matrix<X>::identity(m,A.zero_element());
     Matrix<X> U=A;
 
     // Array of row pivots. The value P[i] gives the row
@@ -475,7 +476,7 @@ triangular_factor(const Matrix<X>& A)
     const SizeType n=A.column_size();
 
     Matrix<X> R=A;
-    PivotMatrix P(n); for(Nat i=0; i!=n; ++i) { P[i]=i; }
+    PivotMatrix P(n); for(SizeType i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
     Array<X> cns(n);
@@ -576,9 +577,9 @@ triangular_multiplier(const Matrix<X>& A)
     Matrix<X> R; PivotMatrix P;
     make_ltuple(R,P)=triangular_factor(A);
 
-    Matrix<X> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0; }
+    Matrix<X> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0_x; }
 
-    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
+    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0_x); }
 
     for(SizeType k=m-1; k!=SizeType(-1); --k) {
         X r=1/R[k][k];
@@ -607,7 +608,7 @@ triangular_multiplier(const Matrix<X>& A)
 template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
 {
     const SizeType n=pv.size();
-    Array<SizeType> perm(n); for(Nat i=0; i!=n; ++i) { perm[i]=i; }
+    Array<SizeType> perm(n); for(SizeType i=0; i!=n; ++i) { perm[i]=i; }
     for(SizeType i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
@@ -638,12 +639,12 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 
     SizeType m=A.row_size();
     SizeType n=A.column_size();
-    Matrix<X> Q(m,m);
+    Matrix<X> Q(m,m,zero);
     Matrix<X> R(A);
     PivotMatrix P(n);
 
-    Array<X> p(n);
-    Vector<X> u(m);
+    Array<X> p(n,zero);
+    Vector<X> u(m,zero);
 
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=m; ++j) {
@@ -706,7 +707,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 
         // Compute H=(1-2uu'/u'u)
         // Matrix<X> H(n,n); for(SizeType i=0; i!=n; ++i) {
-        // H[i][i]=1.0; for(SizeType j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
+        // H[i][i]=1.0_x; for(SizeType j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
 
         // For each column b of R, compute b-=2u(u.b)/u.u
         for(SizeType j=k; j!=n; ++j) {
@@ -755,7 +756,7 @@ orthogonal_decomposition(const Matrix<X>& A)
     Matrix<X> O(m,m,z);
     Matrix<X> R(A);
 
-    Array<X> p(n);
+    Array<X> p(n,z);
 
     for(SizeType c=0; c!=std::min(m,n); ++c) {
 
@@ -847,10 +848,10 @@ template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix
 }
 
 
-template class Matrix<FloatDP>;
-template Matrix<FloatDP> inverse(const Matrix<FloatDP>&);
-template Vector<FloatDP> solve(const Matrix<FloatDP>&, const Vector<FloatDP>&);
-template Void normalise_rows(Matrix<FloatDP>&);
+template class Matrix<RoundedFloatDP>;
+template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
+template Vector<RoundedFloatDP> solve(const Matrix<RoundedFloatDP>&, const Vector<RoundedFloatDP>&);
+template Void normalise_rows(Matrix<RoundedFloatDP>&);
 
 template class Matrix<FloatDPApproximation>;
 template Matrix<FloatDPApproximation> inverse(const Matrix<FloatDPApproximation>&);
@@ -894,6 +895,7 @@ template Vector<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Vector<
 template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_inverse(const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
+template Vector<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
@@ -918,7 +920,7 @@ template class SymmetricMatrix<FloatDPApproximation>;
 
 } // namespace Ariadne
 
-#include "../geometry/interval.hpp"
+#include "geometry/interval.hpp"
 
 namespace Ariadne {
 template class Matrix<FloatDPUpperInterval>;

@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################################
 #            test_calculus.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright  2009-20  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne import *
+from pyariadne import *
 
 def test_calculus():
 
@@ -29,9 +29,9 @@ def test_calculus():
     cy=ValidatedNumber(2)
     cx=FloatDPBounds(2,dp)
 
-    bx=ExactBoxType([{Dyadic(1):3},{-1:2},{-3:3}])
+    bx=BoxDomainType([{1:3},{-1:2},{-3:3}])
 
-    swp = ThresholdSweeper(dp,1e-8);
+    swp = ThresholdSweeperDP(dp,1e-8);
 
     tc=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(bx,cast_exact(1.5),swp)
     tx=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bx,0,swp)

@@ -32,30 +32,30 @@
 #include <map>
 #include <memory>
 
-#include "../utility/macros.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/declarations.hpp"
-#include "../utility/container.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../geometry/curve.hpp"
+#include "utility/macros.hpp"
+#include "utility/stlio.hpp"
+#include "utility/declarations.hpp"
+#include "utility/container.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/grid_paving.hpp"
+#include "geometry/curve.hpp"
 
-#include "../symbolic/expression_set.hpp"
+#include "symbolic/expression_set.hpp"
 
-#include "../hybrid/hybrid_set.decl.hpp"
-#include "../hybrid/hybrid_set_interface.hpp"
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_grid.hpp"
-#include "../geometry/point.hpp"
-#include "../geometry/box.hpp"
+#include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_grid.hpp"
+#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
-#include "../hybrid/hybrid_graphics_interface.hpp"
+#include "hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 
 
-//! \ingroup SymbolicModule
+//! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a box in a single location.
 //! \details Does not assume a canonical order of the real variables.
@@ -74,13 +74,13 @@ template<class IVL> class HybridVariablesBox
     //! \brief The location in which the box is defined.
     VariablesBox<IVL> const& continuous_set() const { return this->Base::second; }
     //! \brief The active variables in the location \a loc.
-    virtual Set<RealVariable> variables() const { return this->Base::second.variables(); }
+    Set<RealVariable> variables() const { return this->Base::second.variables(); }
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
     Box<IVL> euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 };
 
 class HybridBoxSet
-    : public virtual HybridSetInterface
+    : public virtual EffectiveHybridSetInterface
     , public virtual HybridDrawableInterface
     , public HybridVariablesBox<RealInterval>
 {
@@ -109,7 +109,7 @@ class HybridBoxSet
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   private:
     virtual HybridBoxSet* clone() const override;
-    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
+    virtual EffectiveEuclideanSetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -128,7 +128,7 @@ template<class IVL> class HybridVariablesBoxes
         for(auto hbox : hboxes) { this->adjoin(hbox); } }
 
     HybridVariablesBoxes<IVL>& adjoin(HybridVariablesBox<IVL> const& hbox){
-        this->Base::insert(hbox.location(),hbox.continuous_set()); }
+        this->Base::insert(hbox.location(),hbox.continuous_set()); return *this; }
 
     //! \brief The location in which the box is defined.
     Set<DiscreteLocation> locations() const { return this->Base::keys(); }
@@ -154,7 +154,7 @@ class HybridBoxesSet
 //! \brief A hybrid set defined by a constraint system in each location.
 //! NOTE: If a location is not specified, the set is considered empty. This may be changed in future to the set being considered unconstrained (entire).
 class HybridConstraintSet
-    : public virtual HybridRegularSetInterface
+    : public virtual EffectiveHybridRegularSetInterface
 {
     Map<DiscreteLocation, RealExpressionConstraintSet> _sets;
   public:
@@ -191,14 +191,14 @@ class HybridConstraintSet
 
     virtual OutputStream& _write(OutputStream& os) const override;
   protected:
-    virtual RegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    virtual EffectiveEuclideanRegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridBoundedConstraintSet
-    : public virtual HybridSetInterface
+    : public virtual EffectiveHybridSetInterface
     , public virtual HybridDrawableInterface
 {
     Map<DiscreteLocation, RealExpressionBoundedConstraintSet> _sets;

@@ -22,29 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../hybrid/hybrid_expression_set.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 
-#include "../numeric/real.hpp"
-#include "../numeric/casts.hpp"
+#include "numeric/real.hpp"
+#include "numeric/casts.hpp"
 
-#include "../symbolic/expression_set.hpp"
-#include "../geometry/function_set.hpp"
+#include "symbolic/expression_set.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
-#include "../output/graphics.hpp"
-#include "../hybrid/hybrid_graphics.hpp"
-#include "../numeric/rounding.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "numeric/rounding.hpp"
+#include "symbolic/assignment.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
 
 namespace Ariadne {
 
@@ -71,7 +71,7 @@ Orbit<HybridApproximatePoint>::Orbit(List<HybridInterpolatedCurve> hcrvs)
     : _curves_ptr(new List<HybridInterpolatedCurve>(std::move(hcrvs)))
 { }
 
-Nat
+SizeType
 Orbit<HybridApproximatePoint>::size() const
 {
     return this->_curves_ptr->size();
@@ -98,7 +98,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
 
 Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<HybridApproximatePoint>& orbit=*this;
-    for(Nat i=0; i!=orbit._curves_ptr->size(); ++i) {
+    for(SizeType i=0; i!=orbit._curves_ptr->size(); ++i) {
         HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
         if(locations.empty() || locations.contains(hcurve.location())) {
             RealSpace const& space=hcurve.space();
@@ -135,23 +135,16 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
     return os;
 }
 
-
+/*
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& x)
-    : HybridBasicSet<Point<X>>(q,make_list(x.keys()),Point<X>(x.size()))
+    : HybridPoint<X>(q,x.keys(),x.values())
 {
-    SizeType i=0;
-    for(auto iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=iter->second;
-    }
 }
+*/
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& x)
-    : HybridBasicSet<Point<X>>(q,left_hand_sides(x),Point<X>(x.size()))
+    : HybridBasicSet<Point<X>>(q,left_hand_sides(x),Point<X>(x.size(),[&x](SizeType i){return x[i].right_hand_side();}))
 {
-    SizeType i=0;
-    for(auto iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=numeric_cast<X>(iter->right_hand_side());
-    }
 }
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& x)
@@ -185,7 +178,7 @@ RealSpace HybridBoxSet::space(DiscreteLocation loc) const {
     ARIADNE_ASSERT(this->location()==loc);
     return RealSpace( make_list(this->HybridVariablesBox<RealInterval>::variables()) );
 }
-SetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+EffectiveEuclideanSetInterface* HybridBoxSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     ARIADNE_NOT_IMPLEMENTED; // FIXME: Box does not inherit from SetInterface...
 }
 
@@ -250,6 +243,12 @@ HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
     this->adjoin(loc,RealExpressionConstraintSet(cnstr));
 }
 
+HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
+                                         const RealExpressionConstraintSet& cs)
+{
+    this->adjoin(loc,cs);
+}
+
 HybridConstraintSet* HybridConstraintSet::clone() const {
     return new HybridConstraintSet(*this);
 }
@@ -285,7 +284,7 @@ ConstraintSet const HybridConstraintSet::euclidean_set(DiscreteLocation loc, Rea
     return ConstraintSet(this->_sets[loc].euclidean_set(spc));
 }
 
-RegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+EffectiveEuclideanRegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
@@ -364,6 +363,11 @@ Set<RealVariable> HybridBoundedConstraintSet::variables(DiscreteLocation loc) co
     return _sets[loc].variables();
 }
 
+RealExpressionBoundedConstraintSet const& HybridBoundedConstraintSet::continuous_set(DiscreteLocation loc) const {
+    ARIADNE_ASSERT(this->_sets.has_key(loc));
+    return this->_sets[loc];
+}
+
 BoundedConstraintSet const HybridBoundedConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     ARIADNE_ASSERT(this->_sets.has_key(loc));
     return BoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
@@ -419,13 +423,13 @@ Set<DiscreteLocation> HybridBoundedConstraintSet::locations() const {
     return this->_sets.keys();
 }
 
-HybridExactBoxes HybridBoundedConstraintSet::bounding_box() const {
-    HybridExactBoxes result;
+HybridUpperBoxes HybridBoundedConstraintSet::bounding_box() const {
+    HybridUpperBoxes result;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         RealSpace spc=make_list(iter->second.variables());
         RealVariablesBox bnds=iter->second.bounds();
         RealBox rbx=bnds.euclidean_set(spc);
-        ExactBoxType ebx=over_approximation(rbx);
+        UpperBoxType ebx=over_approximation(rbx);
         result.insert(iter->first,spc,ebx);
     }
     return result;
@@ -468,8 +472,6 @@ template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(Hybr
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
-
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {
@@ -479,7 +481,12 @@ template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const Dis
     }
 }
 
-
+template<class EBS> Void HybridBasicSet<EBS>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
+{
+    for (auto loc : locations) {
+        draw_hybrid_basic_set(canvas,loc,axes,*this);
+    }
+}
 
 
 template<class IVL> Void HybridBox<IVL>::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& p) const {
@@ -532,6 +539,7 @@ template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
 template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
 template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }
+template<> String class_name<UpperBoxType>() { return "UpperFloatDPBox"; }
 
 template<> String class_name<GridCell>() { return "GridCell"; }
 
@@ -543,6 +551,10 @@ template class HybridPoint<Real>;
 template class HybridBasicSet<ExactBoxType>;
 template class HybridBox<ExactIntervalType>;
 template class HybridBoxes<ExactIntervalType>;
+
+template class HybridBasicSet<UpperBoxType>;
+template class HybridBox<UpperIntervalType>;
+template class HybridBoxes<UpperIntervalType>;
 
 template class HybridBox<RealInterval>;
 

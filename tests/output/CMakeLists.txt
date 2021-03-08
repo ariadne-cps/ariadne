@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_graphics
+    test_logging
 )
 
 foreach(TEST ${UNIT_TESTS})

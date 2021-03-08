@@ -35,19 +35,19 @@
 #include <string>
 
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "../numeric/operators.hpp"
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/expansion.hpp"
-#include "../algebra/operations.hpp"
+#include "numeric/operators.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/operations.hpp"
 
-#include "../symbolic/templates.hpp"
-#include "../symbolic/constant.hpp"
+#include "symbolic/templates.hpp"
+#include "symbolic/constant.hpp"
 
 namespace Ariadne {
 
@@ -106,6 +106,7 @@ template<class Y> struct AlgebraOperations<Formula<Y>,Y> {
         return Formula<Y>::graded(op,f,n); }
 };
 
+//! \ingroup FunctionModule
 //! \brief A formula defining a real function.
 //!
 //! The Formula class is implemented as a directed acyclic graph, with

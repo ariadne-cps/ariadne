@@ -33,15 +33,15 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "../utility/macros.hpp"
-#include "../utility/pointer.hpp"
-#include "../utility/declarations.hpp"
+#include "utility/macros.hpp"
+#include "utility/pointer.hpp"
+#include "utility/declarations.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/covector.hpp"
-#include "../algebra/matrix.hpp"
-#include "../algebra/operations.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/operations.hpp"
 
 namespace Ariadne {
 
@@ -69,7 +69,6 @@ class AffineModel<ApproximateTag,F>
     typedef Approximation<F> CoefficientType;
     typedef Interval<FloatApproximation<PR>> RangeType;
 
-    explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)) { }
     explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)) { }
     explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g) : _c(c), _g(g) { }
@@ -108,7 +107,6 @@ class AffineModel<ApproximateTag,F>
 
     RangeType range() const;
 
-    Void resize(SizeType n) { this->_g.resize(n); }
     Void set_value(const CoefficientType& c) { _c=c; }
     Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
     Void set_gradient(SizeType j, const ApproximateNumber& g) { _g[j]=g; }
@@ -142,11 +140,10 @@ class AffineModel<ValidatedTag,F>
     typedef AffineModel<ValidatedTag,F> AffineModelType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
 
-    explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)), _e(0u,prec) { }
     explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)), _e(nul(c)) { }
     explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g, const ErrorType& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u) { }
+    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u,c.precision()) { }
 
     explicit AffineModel(const Affine<FloatBounds<PR>>& affine);
     explicit AffineModel(const Affine<ValidatedNumber>& affine, PrecisionType precision);
@@ -176,6 +173,8 @@ class AffineModel<ValidatedTag,F>
     const Covector<CoefficientType>& gradient() const { return this->_g; }
     const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
     const ErrorType& error() const { return this->_e; }
+    CoefficientType& value() { return this->_c; }
+    CoefficientType& gradient(SizeType i) { return this->_g[i]; }
     ErrorType& error() { return this->_e; }
     CoefficientType& operator[](SizeType i) { return this->_g[i]; }
     const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
@@ -187,8 +186,6 @@ class AffineModel<ValidatedTag,F>
     Void set_gradient(SizeType j, const Dyadic& g) { _g[j]=g; }
     Void set_error(const ErrorType& e) { _e=e; }
     Void set_error(Nat m) { _e=m; }
-
-    Void resize(SizeType n) { this->_g.resize(n); }
 
     template<class X> X evaluate(const Vector<X>& v) const;
     friend OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedTag,F>& f) { return f._write(os); }

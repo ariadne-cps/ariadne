@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../numeric/numeric.hpp"
-#include "../function/taylor_model.tpl.hpp"
+#include "numeric/numeric.hpp"
+#include "function/taylor_model.tpl.hpp"
 
 namespace Ariadne {
 

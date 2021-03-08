@@ -34,6 +34,7 @@
 namespace Ariadne {
 
 template<class PR> class FloatFactory {
+  protected:
     PR _pr; typedef RawFloatType<PR> F;
   public:
     typedef PR PrecisionType;
@@ -42,12 +43,12 @@ template<class PR> class FloatFactory {
     PR precision() const { return this->_pr; }
     PR properties() const { return this->_pr; }
   public:
-    FloatApproximation<PR> create(Number<ApproximateTag> const& y);
-    FloatLowerBound<PR> create(Number<ValidatedLowerTag> const& y);
-    FloatUpperBound<PR> create(Number<ValidatedUpperTag> const& y);
-    FloatBounds<PR> create(Number<ValidatedTag> const& y);
-    FloatBounds<PR> create(Number<EffectiveTag> const& y);
-    FloatBounds<PR> create(Number<ExactTag> const& y);
+    FloatApproximation<PR> create(ApproximateNumber const& y);
+    FloatLowerBound<PR> create(ValidatedLowerNumber const& y);
+    FloatUpperBound<PR> create(ValidatedUpperNumber const& y);
+    FloatBounds<PR> create(ValidatedNumber const& y);
+    FloatBounds<PR> create(EffectiveNumber const& y);
+    FloatBounds<PR> create(ExactNumber const& y);
     FloatBounds<PR> create(Real const& y);
     FloatBounds<PR> create(Rational const& y);
     FloatBounds<PR> create(Dyadic const& y);
@@ -58,10 +59,25 @@ template<class PR> class FloatFactory {
     template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y);
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y);
     template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y);
-    PositiveFloatApproximation<PR> create(PositiveNumber<ApproximateTag> const& y);
-    PositiveFloatLowerBound<PR> create(PositiveNumber<ValidatedLowerTag> const& y);
-    PositiveFloatUpperBound<PR> create(PositiveNumber<ValidatedUpperTag> const& y);
-    PositiveFloatBounds<PR> create(PositiveNumber<ValidatedTag> const& y);
+    PositiveFloatApproximation<PR> create(PositiveApproximateNumber const& y);
+    PositiveFloatLowerBound<PR> create(PositiveValidatedLowerNumber const& y);
+    PositiveFloatUpperBound<PR> create(PositiveValidatedUpperNumber const& y);
+    PositiveFloatBounds<PR> create(PositiveValidatedNumber const& y);
+};
+
+template<class PR, class PRE> class FloatBallFactory : public FloatFactory<PR> {
+    PRE _pre;
+  public:
+    FloatBallFactory(PR const& pr, PRE const& pre) : FloatFactory<PR>(pr), _pre(pre) { }
+    using FloatFactory<PR>::create;
+    FloatBall<PR,PRE> create(Number<ValidatedTag> const& y);
+    FloatBall<PR,PRE> create(Number<EffectiveTag> const& y);
+    FloatBall<PR,PRE> create(Number<ExactTag> const& y);
+    FloatBall<PR,PRE> create(Real const& y);
+    FloatBall<PR,PRE> create(Rational const& y);
+    FloatBall<PR,PRE> create(Dyadic const& y);
+    FloatBall<PR,PRE> create(Integer const& y);
+    PositiveFloatBall<PR,PRE> create(PositiveNumber<ValidatedTag> const& y);
 };
 
 template<class Y, class PR> using ConcreteType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
@@ -72,7 +88,7 @@ template<class F> inline FloatFactory<PrecisionType<F>> factory(Approximation<F>
 template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> const& flt);
 template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> const& flt);
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Bounds<F> const& flt);
-template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F,FE> const& flt);
+template<class F, class FE> inline FloatBallFactory<PrecisionType<F>,PrecisionType<FE>> factory(Ball<F,FE> const& flt);
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt);
 
 /*

@@ -22,33 +22,34 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../utility/container.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/constraint.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/orbit.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "utility/container.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "../solvers/integrator.hpp"
+#include "solvers/integrator.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
+#include "output/progress_indicator.hpp"
 
-#include "../dynamics/vector_field.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
+#include "dynamics/vector_field.hpp"
+#include "dynamics/vector_field_evolver.hpp"
 
-#include "../symbolic/space.hpp"
-#include "../symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/assignment.hpp"
+
+namespace Ariadne {
 
 namespace {
-
-using namespace Ariadne;
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {
     List<ES> result;
@@ -58,31 +59,51 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
     return result;
 }
 
+} // namespace
 
-}
+EffectiveVectorMultivariateFunction make_auxiliary_function(
+    Space<Real> const& state_space,
+    List<RealAssignment> const& algebraic);
 
+EffectiveVectorMultivariateFunction make_dynamic_function(
+    Space<Real> const& space,
+    List<RealAssignment> const& algebraic,
+    List<DottedRealAssignment> const& differential);
 
-
-namespace Ariadne {
 
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
-    : _variable_names(variable_names(left_hand_sides(dynamics)))
-    , _function(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))))
+    : VectorField(dynamics, List<RealAssignment>())
 {
 }
 
-VectorField::VectorField(EffectiveVectorMultivariateFunction const& function) {
-    List<Identifier> variable_names;
-    for (auto i : range(0,function.result_size()))
-        variable_names.append(Identifier("x"+std::to_string(i)));
-
-    _variable_names = variable_names;
-    _function = function;
+VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAssignment> const& auxiliary)
+    : _dynamics(dynamics), _auxiliary(auxiliary)
+    , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
+    , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
+{
 }
 
-RealSpace VectorField::state_space() const
+VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
+    : _dynamic_function(function), _auxiliary_function(0u,function.domain())
 {
-    return real_space(this->_variable_names);
+    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
+}
+
+RealSpace VectorField::state_space() const {
+    return RealSpace(left_hand_sides(this->_dynamics));
+}
+
+RealSpace VectorField::auxiliary_space() const {
+    return RealSpace(left_hand_sides(this->_auxiliary));
+}
+
+
+OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
+    os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "
+          "auxiliary_function = " << vf.auxiliary_function() << ", "
+          "dynamics = " << vf._dynamics << ", "
+          "auxiliary = " << vf._auxiliary << ")";
+    return os;
 }
 
 // Allow subdivisions in upper evolution
@@ -101,15 +122,18 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    this->charcode = "v";
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
+}
+
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
@@ -135,6 +159,26 @@ orbit(const EnclosureType& initial_set,
     return orbit;
 }
 
+Void VectorFieldEvolver::
+_append_initial_set(List<TimedEnclosureType>& working_sets,
+                   const TimeStepType& initial_time,
+                   const EnclosureType& current_set) const
+{
+    ARIADNE_LOG_SCOPE_CREATE;
+    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+        ARIADNE_LOG_PRINTLN("initial set too large, splitting");
+        Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
+        if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
+        if(!definitely(split_sets.second.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.second); }
+    } else {
+        working_sets.push_back(make_pair(initial_time,current_set));
+    }
+}
+
+Void test_print() {
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("test\r\n");
+}
 
 
 Void
@@ -147,40 +191,37 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            Bool reach) const
 {
-    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
 
     List< TimedEnclosureType > working_sets;
 
     {
-        // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
         TimeStepType initial_time = 0u;
-        ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
-        EnclosureType initial_set_model(initial_set);
-        ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        working_sets.push_back(make_pair(initial_time,initial_set_model));
+        // Append the initial set, possibly splitting it
+        _append_initial_set(working_sets,initial_time,initial_set);
     }
 
+    ProgressIndicator initials_indicator(working_sets.size());
+    ProgressIndicator time_indicator(maximum_time.get_d());
 
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();
         TimeStepType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        FloatDPUpperBound current_set_radius=current_set_model.bounding_box().radius();
+        FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
-            for(Nat i=0; i!=subdivisions.size(); ++i) {
+            for(SizeType i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
         } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
-            ARIADNE_WARN("Terminating lower evolution at time " << current_time
-                         << " and set " << current_set_model << " due to maximum radius being exceeded.");
+            ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
@@ -189,13 +230,17 @@ _evolution(EnclosureListType& final_sets,
                                   semantics,reach);
         }
 
-        ARIADNE_LOG(1,"#w="<<std::setw(4)<<working_sets.size()
-                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
-                        <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
-                        <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
-                        <<" r="<<std::setw(7)<<current_set_model.radius()
-                        <<" c="<<current_set_model.centre() << "\n");
+        ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
+                            <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                            <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
+                            <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
+                            <<" r="<<std::setw(7)<<current_set_model.radius()
+                            <<" c="<<current_set_model.centre());
 
+        initials_indicator.update_current(final_sets.size());
+        time_indicator.update_current(current_time.get_d());
+        if (initials_indicator.final_value() > 1) { ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << initials_indicator.percentage() << "% of sets, " << time_indicator.percentage() << "% of current set"); }
+        else ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << time_indicator.percentage() << "%");
     }
 }
 
@@ -214,27 +259,29 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Semantics semantics,
                 Bool reach) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     typedef EffectiveVectorMultivariateFunction FunctionType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;
-    ARIADNE_LOG(9,"working_timed_set_model = "<<working_timed_set_model<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"working_timed_set_model = "<<working_timed_set_model);
     make_lpair(current_time,current_set_model)=working_timed_set_model;
 
-    ARIADNE_LOG(4,"current_time = "<<current_time<<"");
-    ARIADNE_LOG(6,"current_set_model = "<<current_set_model<<"\n");
+    ARIADNE_LOG_PRINTLN("current_time = "<<current_time);
+    ARIADNE_LOG_PRINTLN("current_set_model = "<<current_set_model);
 
-    ARIADNE_LOG(2,"box = "<<current_set_model.bounding_box()<<" ");
-    ARIADNE_LOG(2,"radius = "<<current_set_model.bounding_box().radius()<<"\n\n");
-    //const Nat nd=initial_set_model.result_size();
-    //const Nat ng=initial_set_model.argument_size();
+    ARIADNE_LOG_PRINTLN("box = "<<current_set_model.bounding_box());
+    ARIADNE_LOG_PRINTLN("radius = "<<current_set_model.euclidean_set().bounding_box().radius());
+    //const SizeType nd=initial_set_model.result_size();
+    //const SizeType ng=initial_set_model.argument_size();
 
 
     // Test to see if set requires reconditioning
     if(this->_configuration->enable_reconditioning() &&
        possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
 
-        ARIADNE_LOG(4," reconditioning: errors "<<current_set_model.state_function().errors()<<"\n");
+        ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set_model.state_function().errors());
         current_set_model.recondition();
         working_sets.append(make_pair(current_time,current_set_model));
         return;
@@ -249,8 +296,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const FloatDP zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
-    ExactBoxType current_set_bounds=cast_exact_box(current_set_model.bounding_box());
-    ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
+    auto current_set_bounds=cast_exact_box(current_set_model.euclidean_set().bounding_box());
+    ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds);
 
 
     // Compute flow model
@@ -259,29 +306,26 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
-    ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
-    ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+    ARIADNE_LOG_PRINTLN("step_size = "<<step_size);
+    ARIADNE_LOG_PRINTLN_AT(1,"flow_model = "<<flow_model);
     FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
-    ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"flow_step_model = "<<flow_step_model);
 
     // Compute the integration time model
     TimeStepType next_time=current_time+TimeStepType(step_size);
-    ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"next_time = "<<next_time);
     // Compute the flow tube (reachable set) model and the final set
-    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0,step_size))<<"\n");
-    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0,step_size)));
-    ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-    EnclosureType next_set_model=apply(flow_step_model,current_set_model);
-    ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
-    ARIADNE_LOG(4,"Done computing evolution\n");
+    EnclosureType reach_set_model=current_set_model;
+    reach_set_model.apply_full_reach_step(flow_model);
+    ARIADNE_LOG_PRINTLN_AT(1,"reach_set_model = "<<reach_set_model);
+    EnclosureType next_set_model=current_set_model;
+    next_set_model.apply_fixed_evolve_step(flow_model,step_size);
+    ARIADNE_LOG_PRINTLN_AT(1,"next_set_model = "<<next_set_model);
 
     reach_sets.adjoin(reach_set_model);
 
     intermediate_sets.adjoin(EnclosureType(next_set_model));
     working_sets.push_back(make_pair(next_time,next_set_model));
-
-    ARIADNE_LOG(2,"Done evolution_step.\n\n");
-
 }
 
 
@@ -297,12 +341,12 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 OutputStream&
 VectorFieldEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "VectorFieldEvolverConfiguration"
-       << ",\n  maximum_step_size=" << maximum_step_size()
+    os << "VectorFieldEvolverConfiguration("
+       << "\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_reconditioning=" << enable_reconditioning()
        << ",\n  maximum_spacial_error=" << maximum_spacial_error()
-       << "\n)\n";
+       << "\n)";
     return os;
 }
 

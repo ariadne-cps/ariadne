@@ -32,13 +32,13 @@
 #include <iostream>
 #include <map>
 
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
 
-#include "../numeric/floatdp.hpp"
-#include "../numeric/float_value.hpp"
-#include "../geometry/grid.hpp"
-#include "../symbolic/variables.hpp"
+#include "numeric/floatdp.hpp"
+#include "numeric/float_value.hpp"
+#include "geometry/grid.hpp"
+#include "symbolic/variable.hpp"
 
 namespace Ariadne {
 
@@ -50,22 +50,22 @@ typedef Value<FloatDP> FloatDPValue;
 //! \ingroup DynamicsModule
 //! \brief A class which defines the state space grid to use given the continuous state variables \a spc.
 class Scalings {
-    FloatDPValue _default_scaling;
-    Map<Identifier,FloatDPValue> _scalings;
+    ExactDouble _default_scaling;
+    Map<Identifier,ExactDouble> _scalings;
   public:
-    Scalings(FloatDPValue default_scaling)
-        : _default_scaling(default_scaling), _scalings() { }
-    Scalings(FloatDPValue default_scaling, Map<RealVariable,FloatDPValue> const& scalings);
-    Void set_scaling(RealVariable const& var, FloatDPValue scal) {
-        ARIADNE_ASSERT(decide(scal>0)); _scalings[var.name()]=scal; }
-    FloatDPValue scaling(const RealVariable& var) const {
+    Scalings(ApproximateDouble default_scaling)
+        : _default_scaling(cast_exact(default_scaling)), _scalings() { }
+    Scalings(ExactDouble default_scaling, Map<RealVariable,ExactDouble> const& scalings);
+    Void set_scaling(RealVariable const& var, ApproximateDouble scal) {
+        ARIADNE_ASSERT(decide(scal>0)); _scalings[var.name()]=cast_exact(scal); }
+    ExactDouble scaling(const RealVariable& var) const {
         return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : this->_default_scaling; }
     Grid grid(RealSpace const& spc) const;
     friend OutputStream& operator<<(OutputStream& os, Scalings const& s) {
         return os << "Scalings( " << s._scalings << " )"; }
 };
 
-inline Scalings::Scalings(FloatDPValue default_scaling, Map<RealVariable,FloatDPValue> const& scalings)
+inline Scalings::Scalings(ExactDouble default_scaling, Map<RealVariable,ExactDouble> const& scalings)
     : _default_scaling(default_scaling), _scalings()
 {
     ARIADNE_ASSERT(default_scaling>0);
@@ -75,7 +75,7 @@ inline Scalings::Scalings(FloatDPValue default_scaling, Map<RealVariable,FloatDP
 }
 
 inline Grid Scalings::grid(RealSpace const& spc) const {
-    return Grid(Vector<FloatDP>(spc.dimension(),[this,&spc](SizeType i){return this->scaling(spc[i]).raw();}));
+    return Grid(Vector<ExactDouble>(spc.dimension(),[this,&spc](SizeType i){return this->scaling(spc[i]);}));
 }
 
 } // namespace Ariadne

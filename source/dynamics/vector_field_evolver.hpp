@@ -35,15 +35,15 @@
 #include <iostream>
 
 
-#include "../utility/tuple.hpp"
+#include "utility/tuple.hpp"
 
-#include "../dynamics/vector_field.hpp"
-#include "../function/function_interface.hpp"
-#include "../solvers/configuration_interface.hpp"
-#include "../solvers/integrator_interface.hpp"
-#include "../dynamics/evolver_base.hpp"
+#include "dynamics/vector_field.hpp"
+#include "function/function_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "solvers/integrator_interface.hpp"
+#include "dynamics/evolver_base.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 
@@ -53,7 +53,6 @@ class VectorField;
 template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
-class Enclosure;
 
 class EvolutionProfiler;
 
@@ -61,8 +60,7 @@ class EvolutionProfiler;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, Enclosure, typename VectorField::TimeType >
-    , public Loggable
+    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
 {
   public:
     typedef VectorFieldEvolverConfiguration ConfigurationType;
@@ -70,11 +68,11 @@ class VectorFieldEvolver
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -91,10 +89,13 @@ class VectorFieldEvolver
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
 
+    //! \brief Make an enclosure from a user set with variables.
+    EnclosureType enclosure(RealVariablesBox const&) const;
+
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
 
-    //@{
+    //!@{
     //! \name Configuration for the class.
     //! \brief A reference to the configuration controlling the evolution.
     ConfigurationType& configuration() { return *this->_configuration; }
@@ -103,9 +104,9 @@ class VectorFieldEvolver
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
@@ -124,7 +125,7 @@ class VectorFieldEvolver
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
         return reachable; }
-    //@}
+    //!@}
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -135,6 +136,8 @@ class VectorFieldEvolver
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, Bool reach) const;
+
+    virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 
   private:
     std::shared_ptr< SystemType > _sys_ptr;
@@ -147,8 +150,8 @@ class VectorFieldEvolver
 class VectorFieldEvolverConfiguration : public ConfigurationInterface
 {
   public:
-    typedef FloatDPValue RealType;
-    typedef double RawRealType;
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
 
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
@@ -159,7 +162,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    StepSizeType _maximum_step_size;
+    RealType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -174,15 +177,14 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
+    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }

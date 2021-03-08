@@ -36,24 +36,21 @@
 using namespace Ariadne;
 
 
-inline EffectiveScalarMultivariateFunction operator+(EffectiveScalarMultivariateFunction f, double c) { return f+Real(c); }
-inline EffectiveScalarMultivariateFunction operator*(double c, EffectiveScalarMultivariateFunction f) { return Real(c)*f; }
-
 
 Int main(Int argc, char **argv)
 {
 
-    ExactBoxType bx1(2); bx1[0]=ExactIntervalType(-0.2,0.2); bx1[1]=ExactIntervalType(-0.1,0.10);
-    ExactBoxType bx2(2); bx2[0]=ExactIntervalType(0.1,0.3); bx2[1]=ExactIntervalType(0.05,0.15);
-    ExactBoxType bx3(2); bx3[0]=ExactIntervalType(0.2,0.4); bx3[1]=ExactIntervalType(0.10,0.25);
-    ExactBoxType bx4(2); bx4[0]=ExactIntervalType(0.25,0.5); bx4[1]=ExactIntervalType(0.20,0.50);
-    ExactBoxType bx5(2); bx5[0]=ExactIntervalType(0.4,0.8); bx5[1]=ExactIntervalType(0.40,1.1);
+    ExactBoxType bx1(2); bx1[0]=ExactIntervalType(-0.2_pr,0.2_pr); bx1[1]=ExactIntervalType(-0.1_pr,0.10_pr);
+    ExactBoxType bx2(2); bx2[0]=ExactIntervalType(0.1_pr,0.3_pr); bx2[1]=ExactIntervalType(0.05_pr,0.15_pr);
+    ExactBoxType bx3(2); bx3[0]=ExactIntervalType(0.2_pr,0.4_pr); bx3[1]=ExactIntervalType(0.10_pr,0.25_pr);
+    ExactBoxType bx4(2); bx4[0]=ExactIntervalType(0.25_pr,0.5_pr); bx4[1]=ExactIntervalType(0.20_pr,0.50_pr);
+    ExactBoxType bx5(2); bx5[0]=ExactIntervalType(0.4_pr,0.8_pr); bx5[1]=ExactIntervalType(0.40_pr,1.1_pr);
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
-    Real p(0.5);
+    Real p(0.5_x);
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(3);
-    EffectiveVectorMultivariateFunction afn1={0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6};
+    EffectiveVectorMultivariateFunction afn1={0.05_dec*x[0]+0.05_dec*x[2]+0.15_dec,0.05_dec*x[1]+0.05_dec*x[2]+0.6_dec};
     ValidatedConstrainedImageSet s1(ExactBoxType::unit_box(3),afn1);
     ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25_x);
 
@@ -61,14 +58,14 @@ Int main(Int argc, char **argv)
     ConstraintSet cs1(rf,RealBox(1u,RealInterval(-1,0)));
 
     {
-        double h=10000;
+        ExactDouble h=10000;
         Figure g;
-        g.set_bounding_box(ExactBoxType{{-1.,+1.},{-1*h,+1*h}});
+        g.set_bounding_box(ExactBoxType{{-1.0_x,+1.0_x},{-h,+h}});
         g.set_fill_colour(0.5,1.0,1.0);
         g.set_line_width(10);
-        g << ExactBoxType({{-0.5,+0.0},{-0.5*h, +0.5*h}});
+        g << ExactBoxType({{-0.5_x,+0.0_x},{-h/two, +h/two}});
         g.set_line_width(1);
-        g << ExactBoxType({{0.25,+0.75},{-0.5*h, +0.5*h}});
+        g << ExactBoxType({{0.25_x,+0.75_x},{-h/two, +h/two}});
         g.write("test_graphics-canvas");
     }
 
@@ -93,15 +90,15 @@ Int main(Int argc, char **argv)
     g.clear();
 
 
-    ExactBoxType bx2d(2); bx2d[0]=ExactIntervalType(0.2,0.4); bx2d[1]=ExactIntervalType(0.2,0.5);
-    ExactBoxType bx3d(3); bx3d[0]=ExactIntervalType(0.2,0.4); bx3d[1]=ExactIntervalType(0.2,0.5); bx3d[2]=ExactIntervalType(0.2,0.7);
+    ExactBoxType bx2d(2); bx2d[0]=ExactIntervalType(0.2_pr,0.4_pr); bx2d[1]=ExactIntervalType(0.2_pr,0.5_pr);
+    ExactBoxType bx3d(3); bx3d[0]=ExactIntervalType(0.2_pr,0.4_pr); bx3d[1]=ExactIntervalType(0.2_pr,0.5_pr); bx3d[2]=ExactIntervalType(0.2_pr,0.7_pr);
     g.set_projection(3,0,1);
     g.set_bounding_box(bx3d.bounding_box());
     g.draw(bx3d);
     g.write("test_graphics-bx3");
     g.clear();
 
-    g.set_projection_map(PlanarProjectionMap(2,0,1));
+    g.set_projection_map(Projection2d(2,0,1));
     g.set_bounding_box(bbx1);
 
     ARIADNE_TEST_PRINT(s1);
@@ -110,9 +107,9 @@ Int main(Int argc, char **argv)
     g.write("test_graphics-set");
     g.clear();
 
-    InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0)));
+    InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0_x,dp)));
     for(Int i=1; i<=10; ++i) {
-        Point<FloatDPValue> pt(2); pt[0]=FloatDPValue(i/10.); pt[1]=FloatDPValue(i*i/100.);
+        Point<FloatDPValue> pt(2,dp); pt[0]=FloatDPValue(cast_exact(i/10.),dp); pt[1]=FloatDPValue(cast_exact(i*i/100.),dp);
         cv.insert(i,pt);
     }
     g.set_bounding_box(cv.bounding_box());

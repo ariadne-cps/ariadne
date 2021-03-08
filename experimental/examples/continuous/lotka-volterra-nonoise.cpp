@@ -28,40 +28,40 @@
 using namespace Ariadne;
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
-    RealConstant u1("u1",3.0_dec);
-    RealConstant u2("u2",1.0_dec);
-    RealVariable x1("x1"), x2("x2");
+    RealVariable u1("u1"), u2("u2");
+    RealVariable x("x"), y("y");
 
-    VectorField dynamics({dot(x1)=u1*x1*(1-x2), dot(x2)= u2*x2*(x1-1)});
+    VectorField dynamics({dot(x)=u1*x*(1-y), dot(y)= u2*y*(x-1), dot(u1)=0, dot(u2)=0});
 
-    MaximumError max_err=0.01;
-    TaylorSeriesIntegrator integrator(max_err);
-    std::cout << integrator << std::endl;
-    TaylorPicardIntegrator integrator2(max_err);
-    std::cout << integrator2 << std::endl;
-
+    MaximumError max_err=1e-5;
+    TaylorPicardIntegrator integrator(max_err);
     VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(1.0/50);
-    evolver.configuration().maximum_spacial_error(1e-3);
-    evolver.verbosity = 1;
-    std::cout <<  evolver.configuration() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(1.0/50);
+    evolver.configuration().set_maximum_spacial_error(max_err);
 
-    Real x1_0(1.2);
-    Real x2_0(1.1);
-    Real eps = 1/100000000_q;
-
-    Box<RealInterval> initial_set({{x1_0-eps,x1_0+eps},{x2_0-eps,x2_0+eps}});
+    RealVariablesBox initial_set({x==1.2_dec,y==1.1_dec,2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec});
 
     std::cout << "Initial set: " << initial_set << std::endl;
-    Real evolution_time(10.0);
+    Real evolution_time = 10;
 
     std::cout << "Computing orbit... " << std::flush;
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
-    plot("lotka-volterra",ApproximateBoxType({{0.5,1.5}, {0.5,1.5}}), Colour(1.0,0.75,0.5), orbit);
+    auto bbx = orbit.final().bounding_box();
+    double volume = (bbx[x].width()*bbx[y].width()).get_d();
+    std::cout << "Volume score: " << 1.0/std::pow(volume,1.0/bbx.dimension()) << std::endl;
+
+    Axes2d axes(0.7<=x<=1.4,0.7<=y<=1.4);
+    LabelledFigure fig=LabelledFigure(axes);
+    fig << line_colour(0.0,0.0,0.0);
+    fig << line_style(true);
+    fig << fill_colour(1.0,0.75,0.5);
+    fig.draw(orbit.reach());
+    fig.write("lotka-volterra");
 }

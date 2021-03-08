@@ -74,41 +74,23 @@ TestParadigm::test()
 Void
 TestParadigm::test_concept()
 {
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ApproximateTag,LowerTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsStronger<LowerTag,ApproximateTag>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<EffectiveUpperTag,BoundedTag>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsStronger<EffectiveUpperTag,BoundedTag>>);
-
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<UpperTag,Weaker<EffectiveUpperTag,BoundedTag>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<UpperTag,Weaker<PositiveEffectiveUpperTag,BoundedTag>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<ApproximateTag,ParadigmClass<ParadigmCode::APPROXIMATE>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<LowerTag,ParadigmClass<ParadigmCode::LOWER>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<UpperTag,ParadigmClass<ParadigmCode::UPPER>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<BoundedTag,ParadigmClass<ParadigmCode::BOUNDED>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<MetricTag,ParadigmClass<ParadigmCode::METRIC>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<ValidatedTag,ParadigmClass<ParadigmCode::VALIDATED>>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<PositiveUpperTag,ParadigmClass<ParadigmCode::POSITIVE_UPPER>>);
-
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<ParadigmClass<strengthen(ParadigmCode::BOUNDED)>,ValidatedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<ParadigmClass<strengthen(ParadigmCode::METRIC)>,ValidatedTag>);
-
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,ValidatedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,BoundedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,MetricTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<BoundedTag,ValidatedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<BoundedTag,BoundedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<BoundedTag,MetricTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<MetricTag,ValidatedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<MetricTag,BoundedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<MetricTag,MetricTag>);
-
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ApproximateTag,ApproximateTag>);
     ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ApproximateTag,ValidatedTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ApproximateTag,EffectiveTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ApproximateTag,ExactTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,ValidatedTag>);
     ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,EffectiveTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ValidatedTag,ExactTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<EffectiveTag,EffectiveTag>);
     ARIADNE_TEST_STATIC_ASSERT(IsWeaker<EffectiveTag,ExactTag>);
+    ARIADNE_TEST_STATIC_ASSERT(IsWeaker<ExactTag,ExactTag>);
 
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<EffectiveTag>,ValidatedTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<ValidatedTag>,ApproximateTag>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<Weaken<ApproximateTag>,Void>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<ValidatedTag,ApproximateTag>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<EffectiveTag,ApproximateTag>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<EffectiveTag,ValidatedTag>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<ExactTag,ApproximateTag>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<ExactTag,ValidatedTag>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsWeaker<ExactTag,EffectiveTag>>);
 }
 
 Void
@@ -144,20 +126,16 @@ TestLogical::test_concept()
 Void
 TestLogical::test_conversion_to_bool()
 {
-    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<LogicalType<ExactTag>,Bool>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveUpperTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<EffectiveLowerTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<ValidatedTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<UpperTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<LowerTag>,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LogicalType<ApproximateTag>,Bool>>);
-
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Boolean,Bool>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Sierpinskian,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<NegatedSierpinskian,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Kleenean,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<LowerKleenean,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<UpperKleenean,Bool>>);
     ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedKleenean,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedSierpinskian,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedNegatedSierpinskian,Bool>>);
-    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Fuzzy,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedUpperKleenean,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ValidatedLowerKleenean,Bool>>);
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<ApproximateKleenean,Bool>>);
 }
 
 Void

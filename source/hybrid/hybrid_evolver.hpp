@@ -35,18 +35,18 @@
 #include <iostream>
 
 
-#include "../utility/tuple.hpp"
+#include "utility/tuple.hpp"
 
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_set.hpp"
 
-#include "../solvers/configuration_interface.hpp"
-#include "../hybrid/hybrid_enclosure.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
-#include "../hybrid/hybrid_evolver_interface.hpp"
+#include "solvers/configuration_interface.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
 namespace Ariadne {
 
@@ -58,7 +58,8 @@ class SolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
-//! \relates HybridEnclosure .
+//! \relates HybridEnclosure
+//! \brief <p/>
 using HybridOrbit = Orbit<HybridEnclosure>;
 
 //! \ingroup FunctionModule
@@ -68,7 +69,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorMultivariateFunctionModelDP& f) : ValidatedVectorMultivariateFunctionModelDP(f) { }
-    StepSizeType step_size() const { return static_cast<StepSizeType>(this->time_domain().upper()); }
+    StepSizeType step_size() const { return static_cast<StepSizeType>(this->time_domain().upper_bound()); }
     ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBoxType const codomain() const { return this->ValidatedVectorMultivariateFunctionModelDP::codomain(); }
@@ -103,8 +104,9 @@ class HybridEvolverBase
 {
     friend class HybridEvolverBaseConfiguration;
   public:
+    typedef HybridEvolverInterface Interface;
     typedef HybridEvolverBaseConfiguration ConfigurationType;
-    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
     typedef TimeType::ContinuousTimeType ContinuousTimeType;
@@ -130,7 +132,7 @@ class HybridEvolverBase
     const SystemType& system() const;
 
 
-    //@{
+    //!@{
     //! \name Settng and configuration for the class.
 
     //! \brief A reference to the evolver's configuration parameters.
@@ -152,9 +154,9 @@ class HybridEvolverBase
 
     Bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     Bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
@@ -172,9 +174,9 @@ class HybridEvolverBase
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
@@ -182,7 +184,7 @@ class HybridEvolverBase
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridBoundedConstraintSet& initial_set) const;
 
-    //@}
+    //!@}
 
   protected:
     //! \brief Internal wrapper routing for computing the evolution.
@@ -485,6 +487,10 @@ struct TransitionData
     EffectiveVectorMultivariateFunction reset_function;
     //! \brief The state space in the target location.
     RealSpace target_space;
+    //! \brief The auxliary mapping in the target location.
+    EffectiveVectorMultivariateFunction target_auxiliary_function;
+    //! \brief The auxliary space in the target location.
+    RealSpace target_auxiliary_space;
     //TransitionData() { }
     //TransitionData(DiscreteLocation t, ValidatedScalarMultivariateFunction g, ValidatedVectorMultivariateFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
@@ -598,6 +604,7 @@ OutputStream& operator<<(OutputStream& os, const FinishingKind& crk);
 //! \relates HybridEvolverBase
 struct TimingData
 {
+    TimingData() : step_size(dp) { }
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
@@ -654,9 +661,8 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
   public:
     typedef Nat UnsignedIntType;
-    typedef FloatDPValue RealType;
-    typedef double RawRealType;
-
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
   protected:
 
     HybridEvolverBaseConfiguration(HybridEvolverBase& evolver);
@@ -673,7 +679,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    StepSizeType _maximum_step_size;
+    RealType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -694,17 +700,16 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     const RealType& flow_accuracy() const { return _flow_accuracy; }
     //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
-    Void set_flow_accuracy(const RawRealType value);
+    Void set_flow_accuracy(const ApproximateRealType value);
 
-    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void set_maximum_step_size(const double value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = RealType(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = RealType(value); }
+    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
@@ -732,7 +737,7 @@ class GeneralHybridEvolver
 
     GeneralHybridEvolver(const SystemType& system);
     GeneralHybridEvolver(const SystemType& system,
-                         const ValidatedFunctionModelDPFactoryInterface& factory);
+                         const FunctionFactoryType& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
     virtual OutputStream& _write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
@@ -791,13 +796,13 @@ class GeneralHybridEvolverFactory
 {
   private:
 
-    std::shared_ptr<ValidatedFunctionModelDPFactoryInterface> _function_factory;
+    std::shared_ptr<ValidatedFunctionModelDPFactory::Interface> _function_factory;
 
   public:
 
     GeneralHybridEvolverFactory();
 
-    GeneralHybridEvolverFactory(const ValidatedFunctionModelDPFactoryInterface& factory);
+    GeneralHybridEvolverFactory(const ValidatedFunctionModelDPFactory::Interface& factory);
 
     virtual GeneralHybridEvolverFactory* clone() const { return new GeneralHybridEvolverFactory(*this); }
 

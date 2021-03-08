@@ -41,20 +41,20 @@ template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Boun
 //! \brief The first-order partial differential equation
 //! \f$ A u_{,t} + \sum_{j=1}^{n} B_j u_{,x_j} = f(u). \f$
 struct FirstOrderPDE {
-    Matrix<Real> A; //!< .
-    Array<Matrix<Real>> Bs; //!< .
-    Array<DiagonalMatrix<Real>> const& Ds; //!< .
-    Array<Matrix<Real>> const& Ts; //!< .
-    EffectiveVectorMultivariateFunction const& f; //!< .
+    Matrix<Real> A; //!< <p/>
+    Array<Matrix<Real>> Bs; //!< <p/>
+    Array<DiagonalMatrix<Real>> const& Ds; //!< <p/>
+    Array<Matrix<Real>> const& Ts; //!< <p/>
+    EffectiveVectorMultivariateFunction const& f; //!< <p/>
 };
 
 //! \brief The solution of a first-order partial differential equation.
 //! \relates FirstOrderPDE
 template<class PR> struct FirstOrderPDESolution {
-    FloatValue<PR> h; //!< .
-    FloatValue<PR> tau; //!< .
-    Tensor<3,Vector<FloatBounds<PR>>> uts; //!< .
-    FloatUpperBound<PR> error; //!< .
+    FloatValue<PR> h; //!< <p/>
+    FloatValue<PR> tau; //!< <p/>
+    Tensor<3,Vector<FloatBounds<PR>>> uts; //!< <p/>
+    FloatUpperBound<PR> error; //!< <p/>
 };
 
 //! \brief Solve the first-order partial differential equation

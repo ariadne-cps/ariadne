@@ -29,13 +29,13 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "../output/logging.hpp"
-#include "../utility/container.hpp"
+#include "output/logging.hpp"
+#include "utility/container.hpp"
 
-#include "../utility/declarations.hpp"
-#include "../utility/tribool.hpp"
-#include "../numeric/numeric.hpp"
-#include "../function/constraint.hpp"
+#include "utility/declarations.hpp"
+#include "utility/tribool.hpp"
+#include "numeric/numeric.hpp"
+#include "function/constraint.hpp"
 
 namespace Ariadne {
 
@@ -82,7 +82,7 @@ class ConstraintSolverInterface {
 //! \ingroup OptimisationSubModule
 //! \brief A class for finding solutions of systems of constraints of the form \f$g(y) \leq c\f$.
 class ConstraintSolver
-    : public ConstraintSolverInterface, public Loggable
+    : public ConstraintSolverInterface
 {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
@@ -115,10 +115,10 @@ class ConstraintSolver
     Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& codomain,
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, Nat j) const;
+    Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, Nat j) const;
+    Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<UpperBoxType,UpperBoxType> split(const UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
@@ -126,9 +126,9 @@ class ConstraintSolver
     // Deprecated functions.
     Bool hull_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, Nat j) const {
+    Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
         return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, Nat j) const {
+    Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
     virtual ~ConstraintSolver() = default;

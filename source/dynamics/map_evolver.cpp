@@ -22,27 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../utility/macros.hpp"
-#include "../utility/array.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../algebra/vector.hpp"
-#include "../function/function.hpp"
-#include "../function/constraint.hpp"
-#include "../dynamics/enclosure.hpp"
-#include "../dynamics/orbit.hpp"
+#include "utility/macros.hpp"
+#include "utility/array.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "algebra/vector.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "symbolic/assignment.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 
-#include "../output/logging.hpp"
+#include "output/logging.hpp"
 
-#include "../dynamics/map.hpp"
-#include "../dynamics/map_evolver.hpp"
+#include "dynamics/map.hpp"
+#include "dynamics/map_evolver.hpp"
+
+namespace Ariadne {
 
 namespace {
-
-using namespace Ariadne;
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {
     List<ES> result;
@@ -54,8 +55,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-
-namespace Ariadne {
 
 // The maximum allowable radius of a basic set.
 MapEvolverConfiguration::RealType DEFAULT_MAXIMUM_ENCLOSURE_RADIUS = 100;
@@ -71,11 +70,56 @@ FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_functio
 class DegenerateCrossingException { };
 
 
+EffectiveVectorMultivariateFunction make_auxiliary_function(
+    Space<Real> const& state_space,
+    List<RealAssignment> const& algebraic);
+
+EffectiveVectorMultivariateFunction make_reset_function(
+    Space<Real> const& space,
+    List<RealAssignment> const& algebraic,
+    List<PrimedRealAssignment> const& differential);
+
+
+IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
+    : _update_function(f)
+{
+    ARIADNE_PRECONDITION(f.result_size()==f.argument_size());
+}
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
+    : IteratedMap(updates,List<RealAssignment>()) { }
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates, List<RealAssignment> const& auxiliary)
+    : _updates(updates), _auxiliary(auxiliary)
+    , _update_function(make_reset_function(left_hand_sides(updates),auxiliary,updates))
+    , _auxiliary_function(make_auxiliary_function(left_hand_sides(updates),auxiliary))
+{
+}
+
+RealSpace IteratedMap::state_space() const {
+    return RealSpace(left_hand_sides(this->_updates));
+}
+
+RealSpace IteratedMap::auxiliary_space() const {
+    return RealSpace(left_hand_sides(this->_auxiliary));
+}
+
+
+OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
+    os << "IteratedMap( update_function = " << map.update_function() << ", "
+          "auxiliary_function = " << map.auxiliary_function() << ", "
+          "updates = " << map._updates << ", "
+          "auxiliary = " << map._auxiliary << ")";
+    return os;
+}
+
+
+
+
 MapEvolver::MapEvolver(const SystemType& system)
     : _sys_ptr(system.clone())
     , _configuration(new ConfigurationType())
 {
-    this->charcode = "m";
 }
 
 typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() const {
@@ -83,11 +127,15 @@ typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() co
 }
 
 typename MapEvolver::EnclosureType MapEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
+}
+
+typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealVariablesBox& box) const {
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 Orbit<MapEvolver::EnclosureType>
@@ -118,19 +166,17 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            Bool reach) const
 {
-    verbosity=0;
-
-    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
 
     List< TimedEnclosureType > working_sets;
 
     {
         // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_set = "<<initial_set);
         EnclosureType initial_enclosure(initial_set);
-        ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
         TimeType initial_time = 0;
-        ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
         working_sets.push_back(make_pair(initial_time,initial_enclosure));
     }
 
@@ -140,14 +186,14 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         EnclosureType initial_enclosure=current_set.second;
         TimeType initial_time=current_set.first;
-        FloatDPUpperBound initial_set_radius=initial_enclosure.bounding_box().radius();
+        FloatDPUpperBound initial_set_radius=initial_enclosure.euclidean_set().bounding_box().radius();
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions()
                   && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
-            for(Nat i=0; i!=subdivisions.size(); ++i) {
+            for(SizeType i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
@@ -180,36 +226,36 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Semantics semantics,
                 Bool reach) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     EnclosureType initial_enclosure;
     TimeType initial_time;
 
-    ARIADNE_LOG(9,"working_set = "<<current_set<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"working_set = "<<current_set);
     make_lpair(initial_time,initial_enclosure)=current_set;
 
-    ARIADNE_LOG(6,"initial_time = "<<initial_time<<"");
-    ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
 
-    ARIADNE_LOG(2,"box = "<<initial_enclosure.bounding_box()<<" ");
-    ARIADNE_LOG(2,"radius = "<<initial_enclosure.bounding_box().radius()<<"\n\n");
-    //const Nat nd=initial_enclosure.result_size();
-    //const Nat ng=initial_enclosure.argument_size();
+    ARIADNE_LOG_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
+    ARIADNE_LOG_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
+    //const SizeType nd=initial_enclosure.result_size();
+    //const SizeType ng=initial_enclosure.argument_size();
 
 
     /////////////// Main Evolution ////////////////////////////////
 
 
     // Compute the map model
-    EnclosureType final_enclosure=Ariadne::apply(_sys_ptr->function(),initial_enclosure);
+    EnclosureType& final_enclosure=initial_enclosure;
+    final_enclosure.apply_map(_sys_ptr->function());
     TimeType final_time=initial_time+1;
-    ARIADNE_LOG(6,"final_enclosure = "<<final_enclosure<<"\n");
-    ARIADNE_LOG(4,"Done computing evolution\n");
+    ARIADNE_LOG_PRINTLN("final_enclosure = "<<final_enclosure);
 
     reach_sets.adjoin(final_enclosure);
 
     intermediate_sets.adjoin(final_enclosure);
     working_sets.push_back(make_pair(final_time,final_enclosure));
-
-    ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
 }
 

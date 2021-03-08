@@ -22,68 +22,43 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../numeric/numeric.hpp"
-#include "../algebra/vector.hpp"
-#include "../algebra/algebra.hpp"
-#include "../numeric/operators.hpp"
-#include "../function/function.hpp"
-#include "../function/procedure.hpp"
-#include "../function/constraint.hpp"
-#include "../function/polynomial.hpp"
-#include "../function/taylor_function.hpp"
-#include "../geometry/box.hpp"
-#include "../geometry/grid_paving.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
-#include "../hybrid/hybrid_storage.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/discrete_event.hpp"
-#include "../hybrid/discrete_location.hpp"
+#include "numeric/numeric.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "numeric/operators.hpp"
+#include "function/function.hpp"
+#include "function/procedure.hpp"
+#include "function/constraint.hpp"
+#include "function/polynomial.hpp"
+#include "function/taylor_function.hpp"
+#include "geometry/box.hpp"
+#include "geometry/grid_paving.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_storage.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/discrete_event.hpp"
+#include "hybrid/discrete_location.hpp"
 
-#include "../solvers/linear_programming.hpp"
-#include "../solvers/nonlinear_programming.hpp"
-#include "../solvers/constraint_solver.hpp"
-#include "../geometry/affine_set.hpp"
+#include "solvers/linear_programming.hpp"
+#include "solvers/nonlinear_programming.hpp"
+#include "solvers/constraint_solver.hpp"
+#include "geometry/affine_set.hpp"
 
-#include "../output/graphics_interface.hpp"
-#include "../hybrid/hybrid_enclosure.hpp"
-#include "../hybrid/hybrid_expression_set.hpp"
+#include "output/graphics_interface.hpp"
+#include "hybrid/hybrid_enclosure.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
 
 
 namespace Ariadne {
 
-OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt);
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 
-OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
-    switch (evt) {
-        case EnclosureVariableType::INITIAL: return os << "x";
-        case EnclosureVariableType::TEMPORAL: return os << "t";
-        case EnclosureVariableType::PARAMETER: return os << "a";
-        case EnclosureVariableType::INPUT: return os << "u";
-        case EnclosureVariableType::NOISE: return os << "v";
-        case EnclosureVariableType::ERROR: return os << "e";
-        case EnclosureVariableType::UNKNOWN: default: return os << "s";
-    }
-}
-
-template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
-
-inline List<String> variable_names(const List<EnclosureVariableType>& vt) {
-    std::map<EnclosureVariableType,Nat> counts;
-    List<String> result;
-    for(Nat i=0; i!=vt.size(); ++i) {
-        result.append( str(vt[i]) + str(counts[vt[i]]++) );
-    }
-    return result;
-}
-
 template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
-    std::cerr<<"catenate(List<T>,T,List<T>): "<<lst1<<"; "<<val2<<"; "<<lst3<<"\n";
     lst1.append(val2); return catenate(lst1,lst3); }
 
 struct Variables2d {
@@ -100,56 +75,57 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(), _events(), _state_space(), _set(), _variables()
+    : _location(), _events(), _set()
+{
+}
+
+HybridEnclosure::HybridEnclosure(EnclosureConfiguration const& config)
+    : _location(), _events(), _set(config)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoxSet& hbox,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactoryInterface& factory)
+                                 const ValidatedFunctionModelDPFactory& factory)
     : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),factory)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactoryInterface& factory)
-    : _location(hybrid_set.location()), _events(), _state_space(state_space.variables()), _set(),
-      _variables(state_space.dimension(),EnclosureVariableType::INITIAL)
+                                 const ValidatedFunctionModelDPFactory& factory)
+    : _location(hybrid_set.location()), _events(), _set()
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
-    this->_set=Enclosure(euclidean_set,factory);
+    this->_set=LabelledEnclosure(euclidean_set,state_space,factory);
 }
 
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
-                                 const RealBox& box, const ValidatedFunctionModelDPFactoryInterface& factory)
-    : _location(location), _events(), _state_space(state_space.variables()), _set(box,factory),
-      _variables(box.dimension(),EnclosureVariableType::INITIAL)
+                                 const RealBox& box, const ValidatedFunctionModelDPFactory& factory)
+    : _location(location), _events(), _set(box,state_space,factory)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModelDPFactoryInterface& factory)
+HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModelDPFactory& factory)
     : HybridEnclosure(hbox.location(),hbox.space(),hbox.euclidean_set(),factory)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModelDPFactoryInterface& factory)
-    : HybridEnclosure(hbox.location(),hbox.space(),Enclosure(hbox.euclidean_set(),factory))
+HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModelDPFactory& factory)
+    : HybridEnclosure(hbox.location(),LabelledEnclosure(hbox.euclidean_set(),hbox.space(),factory))
 {
 }
 
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
-    : _location(location), _events(), _state_space(spc.variables()), _set(set),
-      _variables(set.state_dimension(),EnclosureVariableType::INITIAL)
+    : _location(location), _events(), _set(set,spc)
 {
-    if(_variables.size()<set.number_of_parameters()) {
-        _variables.append(EnclosureVariableType::TEMPORAL);
-        while(_variables.size()<set.number_of_parameters()) {
-            _variables.append(EnclosureVariableType::UNKNOWN);
-        }
-    }
+}
+
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const LabelledEnclosure& set)
+    : _location(location), _events(), _set(set)
+{
 }
 
 
@@ -166,7 +142,7 @@ HybridEnclosure::state_time_auxiliary_space() const
 const RealSpace
 HybridEnclosure::state_space() const
 {
-    return RealSpace(this->_state_space);
+    return this->_set.state_space();
 }
 
 const RealVariable
@@ -178,7 +154,7 @@ HybridEnclosure::time_variable() const
 const RealSpace
 HybridEnclosure::auxiliary_space() const
 {
-    return RealSpace(this->_auxiliary_space);
+    return this->_set.auxiliary_space();
 }
 
 List<DiscreteEvent> const&
@@ -193,7 +169,7 @@ HybridEnclosure::configuration() const
     return this->_set.configuration();
 }
 
-ValidatedFunctionModelDPFactoryInterface const&
+ValidatedFunctionModelDPFactory const&
 HybridEnclosure::function_factory() const
 {
     return this->_set.function_factory();
@@ -264,9 +240,8 @@ Void HybridEnclosure::set_time_function(const ValidatedScalarMultivariateFunctio
 UpperBoxType
 HybridEnclosure::state_bounding_box() const
 {
-    ARIADNE_LOG(8,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain())<<"\n");
-    //return this->state_function()(this->_set.reduced_domain());
-    return cast_exact_box(this->_set.bounding_box());
+    ARIADNE_LOG_PRINTLN_AT(1,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain()));
+    return cast_exact_box(this->_set.state_set().bounding_box());
 }
 
 UpperIntervalType
@@ -278,16 +253,15 @@ HybridEnclosure::range_of(EffectiveScalarMultivariateFunction const& g) const
 UpperIntervalType
 HybridEnclosure::time_range() const
 {
-    ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");
-    //return this->time_function().codomain();
+    ARIADNE_LOG_PRINTLN_AT(1,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain()));
     return apply(this->time_function(),this->_set.reduced_domain());
 }
 
 UpperIntervalType
 HybridEnclosure::dwell_time_range() const
 {
-    ARIADNE_LOG(8,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
-                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain())<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
+                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain()));
     return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 
@@ -312,29 +286,26 @@ HybridEnclosure::parameter_domain() const
 HybridUpperBoxType
 HybridEnclosure::bounding_box() const
 {
-    return HybridUpperBoxType(this->_location,this->_state_space,cast_exact_box(this->state_bounding_box()));
+    return HybridUpperBoxType(this->location(),this->state_space(),cast_exact_box(this->state_bounding_box()));
 }
 
 
 Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux)
 {
     if(vars.size()!=aux.result_size()) { std::cerr<<vars<<" "<<aux<<"\n"; }
-    ARIADNE_ASSERT(this->_state_space.size()==aux.argument_size());
+    ARIADNE_ASSERT(this->state_space().size()==aux.argument_size());
     ARIADNE_ASSERT(vars.size()==aux.result_size());
-    this->_auxiliary_space=vars;
-    this->_set.set_auxiliary(aux);
+    this->_set.set_auxiliary(vars,aux);
 }
 
-Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
-    this->_set.new_parameter(ivl);
-    this->_variables.append(vt);
+    this->_set.new_parameter(ivl,vk);
 }
 
-Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
-    this->_set.new_variable(ivl);
-    this->_variables.append(vt);
+    this->_set.new_variable(ivl,vk);
 }
 
 Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
@@ -381,13 +352,12 @@ Void HybridEnclosure::clear_events()
     this->_events.clear();
 }
 
-Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace state_space, const ValidatedVectorMultivariateFunction& map)
+Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace state_space, const ValidatedVectorMultivariateFunction& map, RealSpace auxiliary_space, const EffectiveVectorMultivariateFunction& auxiliary_mapping)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->state_dimension(),"*this="<<*this<<", event="<<event<<", state_space="<<state_space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
     this->_location=target;
-    this->_state_space=state_space.variables();
-    this->_set.apply_map(map);
+    this->_set.apply_map(map,state_space,auxiliary_mapping,auxiliary_space);
 }
 
 Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& elps)
@@ -435,7 +405,7 @@ Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorMultivariateFun
 
 
 Void HybridEnclosure::bound_time(Real tmax) {
-    if(possibly(this->time_range().upper()>tmax)) {
+    if(possibly(this->time_range().upper_bound()>tmax)) {
        this->_set.new_negative_parameter_constraint(this->time_function()-tmax);
     }
 }
@@ -566,10 +536,7 @@ HybridEnclosure::recondition()
 Void
 HybridEnclosure::uniform_error_recondition()
 {
-    Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
-    ExactBoxType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
-    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
     this->_check();
 }
 
@@ -587,7 +554,7 @@ HybridEnclosure::split() const
 {
     List<ExactBoxType> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
-    for(Nat i=0; i!=result.size(); ++i) {
+    for(SizeType i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
     }
     return result;
@@ -610,7 +577,7 @@ HybridEnclosure::_check() const
     const ExactBoxType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->state_function().domain(),"function domain");
-    for(Nat i=0; i!=this->_set.constraints().size(); ++i) {
+    for(SizeType i=0; i!=this->_set.constraints().size(); ++i) {
         check_subset(reduced_domain,this->_set.constraint(i).function().domain(),"constraint");
     }
     check_subset(reduced_domain,this->time_function().domain(),"time");
@@ -641,7 +608,7 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
 OutputStream& HybridEnclosure::_write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
-              << "( variables = " << variable_names(this->_variables)
+              << "( variables = " << canonical_variable_names(this->_set.variable_kinds())
               << ",\n   events=" << this->_events
               << ",\n   location=" << this->_location
               << ",\n   state_space=" << this->state_space()
@@ -698,14 +665,15 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fine
     }
 }
 
-
+/*
 HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat fineness) {
     HybridStorage result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),fineness);
+        result.state_set()[iter->location()].adjoin_outer_approximation(iter->continuous_set().state_set(),fineness);
     }
     return result;
 }
+*/
 
 inline Void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
@@ -726,7 +694,19 @@ ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
     return result;
 }
 
-
+VariablesUpperBoxType
+ListSet<HybridEnclosure>::bounding_box() const
+{
+    ARIADNE_LOG_SCOPE_CREATE;
+    auto iter=this->begin();
+    auto box = iter->state_auxiliary_set().euclidean_set().bounding_box();
+    RealSpace space = join(iter->state_space(),iter->auxiliary_space());
+    ++iter;
+    for(; iter!=this->end(); ++iter) {
+        box = hull(box,iter->state_auxiliary_set().euclidean_set().bounding_box());
+    }
+    return VariablesUpperBoxType(space,box);
+}
 
 
 } // namespace Ariadne

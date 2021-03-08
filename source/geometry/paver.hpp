@@ -29,16 +29,16 @@
 #ifndef ARIADNE_PAVER_HPP
 #define ARIADNE_PAVER_HPP
 
-#include "../geometry/paver_interface.hpp"
+#include "geometry/paver_interface.hpp"
 
 namespace Ariadne {
 
-class Paver {
-    SharedPointer<const PaverInterface> _ptr;
+class Paver
+    : public Handle<const PaverInterface>
+{
   public:
-    using SetType = PaverInterface::SetType;
-    Paver(SharedPointer<const PaverInterface> ptr) : _ptr(ptr) { }
-    Paver(const PaverInterface* ptr) : _ptr(ptr) { }
+    typedef PaverInterface::SetType SetType;
+    using Handle<const PaverInterface>::Handle;
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const {
         this->_ptr->adjoin_outer_approximation(paving,set,fineness); }
     friend OutputStream& operator<<(OutputStream& os, Paver const& pv) { return pv._ptr->_write(os); }

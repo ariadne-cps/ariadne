@@ -53,9 +53,16 @@ Kent G. Budge, James S. Peery, Allen C. Robinson, and Michael K. Won, "C++ and O
 
 \section computable_analysis_references Computable Analysis
 
+G. Gierz, K.H. Hofmann, K. Keimel, J.D. Lawson, M. Mislove & D.S. Scott, <em>A Compendium of Continuous Lattices</em>, Springer, 1980. ISBN 978-3-642-67678-9.
+
 Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkhauser, 1991, ISBN 3-7643-3586-6.
 
+Matthias Schröder, <em>Admissible Representations for Continuous Computations</em>, Ph.D. Thesis, FernUniversität Hagen, 2002.
+
 Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
+
+K. Weihrauch and U. Schreiber, "Embedding metric spaces into CPOs", <i>Theoretical Computer Science</i> <b>16</b>, pp5-24, 1981
+
 
 \section interval_references Interval Arithmetic
 
@@ -83,6 +90,18 @@ Florian Loitsch, "Printing Floating-Point Numbers Quickly and Accurately with In
   <em>Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation</em>, 2010.
 
 
+
+\section linear_algebra_references Linear Algebra
+
+David C. Lay, <em>Linear Algebra and its Applicatons</em>, Addison-Wesley, 2002. ISBN 0-20170-970-8
+
+Gene H. Golub and Charles F. Van Loan, <em>Matrix Computations</em>, Johns Hopkins University Press, 1996. ISBN 0-80185-414-8
+
+
+\section differential_algebra_references Automatic Differentiation
+
+Andreas Griewank and Andrea Walther, <em>Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation</em> 2nd Edition, SIAM 2008. ISBN 0-89871-659-4
+
 \section function_calculus_references Function Calculi (including Taylor models)
 
 M. Berz and G. Hoffstätter, "Computation and Application of Taylor Polynomials with Interval Remainder Bounds",
@@ -90,7 +109,6 @@ M. Berz and G. Hoffstätter, "Computation and Application of Taylor Polynomials 
 
 K. Makino and M. Berz, "Efficient Control of the Dependency Problem Based on Taylor Model Methods",
   <em>Reliable Computing</em> <b>5</b> (1999) 3-12.
-
 
 \section linear_programming_references Linear Programming
 

@@ -1,4 +1,6 @@
-add_library(ariadne-geometry OBJECT
+set(LIBRARY_NAME ariadne-geometry)
+
+add_library(${LIBRARY_NAME} OBJECT
     point.cpp
     interval.cpp
     box.cpp
@@ -9,10 +11,14 @@ add_library(ariadne-geometry OBJECT
     grid_paving.cpp
     paver.cpp
     affine_set.cpp
+
+    geometry.cpp
 )
 
-cotire(ariadne-geometry CONFIGURATIONS None)
+foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
+    target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})
+endforeach()
 
 if(COVERAGE)
-    target_link_libraries(ariadne-geometry PUBLIC coverage_config)
+    target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)
 endif()

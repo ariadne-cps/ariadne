@@ -22,29 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../hybrid/hybrid_expression_set.hpp"
-#include "../hybrid/hybrid_set.hpp"
-#include "../hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_expression_set.hpp"
+#include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 
-#include "../numeric/real.hpp"
+#include "numeric/real.hpp"
 
-#include "../symbolic/expression_set.hpp"
-#include "../geometry/function_set.hpp"
+#include "symbolic/expression_set.hpp"
+#include "geometry/function_set.hpp"
 
-#include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_storage.hpp"
-#include "../hybrid/hybrid_orbit.hpp"
-#include "../hybrid/hybrid_automaton_interface.hpp"
-#include "../output/graphics.hpp"
-#include "../hybrid/hybrid_graphics.hpp"
-#include "../numeric/rounding.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../output/graphics_interface.hpp"
-#include "../geometry/function_set.hpp"
+#include "hybrid/hybrid_space.hpp"
+#include "hybrid/hybrid_time.hpp"
+#include "hybrid/hybrid_storage.hpp"
+#include "hybrid/hybrid_orbit.hpp"
+#include "hybrid/hybrid_automaton_interface.hpp"
+#include "output/graphics.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "numeric/rounding.hpp"
+#include "symbolic/assignment.hpp"
+#include "output/graphics_interface.hpp"
+#include "geometry/function_set.hpp"
 
 namespace Ariadne {
 
@@ -98,7 +98,7 @@ Void HybridGridTreePaving::restrict_to_extent(Nat h) {
     }
 }
 
-Void HybridGridTreePaving::adjoin_inner_approximation(const HybridSetInterface& hset, const Nat fineness) {
+Void HybridGridTreePaving::adjoin_inner_approximation(const EffectiveHybridSetInterface& hset, const Nat fineness) {
     Set<DiscreteLocation> locations=hset.locations();
     for(auto location : locations) {
         RealSpace space = this->space(location);
@@ -116,8 +116,8 @@ Void HybridGridTreePaving::adjoin_inner_approximation(const HybridExactBoxes& hb
     }
 }
 
-Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness) {
-    Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
+Void HybridGridTreePaving::adjoin_lower_approximation(const EffectiveHybridOvertSetInterface& hs, const Nat extent, const Nat fineness) {
+    Set<DiscreteLocation> hlocs=dynamic_cast<const EffectiveHybridBoundedSetInterface&>(hs).locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
         DiscreteLocation loc=*_loc_iter;
@@ -126,7 +126,7 @@ Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterf
     }
 }
 
-Void HybridGridTreePaving::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness) {
+Void HybridGridTreePaving::adjoin_outer_approximation(const EffectiveHybridCompactSetInterface& hs, const Nat fineness) {
     Set<DiscreteLocation> hlocs=hs.locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
@@ -221,12 +221,12 @@ ValidatedLowerKleenean HybridGridTreePaving::inside(const HybridExactBoxes& hbx)
 }
 
 HybridUpperBoxes HybridGridTreePaving::bounding_box() const {
-    HybridExactBoxes result;
+    HybridUpperBoxes result;
     for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
         if( !_loc_iter->second.is_empty() ) {
             DiscreteLocation const& loc = _loc_iter->first;
             RealSpace const& spc=this->space(loc);
-            result.insert(loc,spc,cast_exact_box(_loc_iter->second.bounding_box()));
+            result.insert(loc,spc,_loc_iter->second.bounding_box());
         }
     }
     return result;
@@ -285,9 +285,9 @@ GridTreePaving& HybridGridTreePaving::_provide_location(const DiscreteLocation& 
 
 Grid HybridScalings::grid(const DiscreteLocation& loc, const RealSpace& space) const
 {
-    Vector<RawFloatDP> lengths(space.size());
+    Vector<ExactDouble> lengths(space.size());
     for(SizeType i=0; i!=space.size(); ++i) {
-        lengths[i] = (this->scaling(loc,space.variable(i))).raw();
+        lengths[i] = (this->scaling(loc,space.variable(i)));
     }
     return Grid(lengths);
 }
@@ -317,8 +317,8 @@ HybridGridTreePaving extend_auxiliary(const HybridGridTreePaving& hybrid_paving,
 
 
 struct Orbit<HybridStorage>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    Data(const HybridGrid& grid, HybridAutomatonInterface const& sys)
+        : initial(grid,sys), reach(grid,sys), intermediate(grid,sys), final(grid,sys) { }
     HybridStorage initial;
     HybridStorage reach;
     HybridStorage intermediate;
@@ -327,7 +327,7 @@ struct Orbit<HybridStorage>::Data {
 
 Orbit<HybridStorage>::
 Orbit(const HybridStorage& initial_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.system()))
 {
     this->_data->initial=initial_set;
 }
@@ -337,7 +337,7 @@ Orbit(const HybridStorage& initial_set,
       const HybridStorage& reach_set,
       const HybridStorage& intermediate_set,
       const HybridStorage& final_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.system()))
 {
     this->_data->initial=initial_set;
     this->_data->reach=reach_set;

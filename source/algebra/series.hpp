@@ -29,9 +29,9 @@
 #ifndef ARIADNE_SERIES_HPP
 #define ARIADNE_SERIES_HPP
 
-#include "../utility/array.hpp"
-#include "../utility/container.hpp"
-#include "../numeric/operators.hpp"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -118,6 +118,7 @@ class Series
     OutputStream& _write(OutputStream& os) const;
   public:
     template<class OP> Series(OP op, X const& x);
+    template<class OP, class XX, EnableIf<IsConstructible<X,XX>> =dummy> Series(OP op, XX const& x) : Series(op,X(x)) { }
     const X& operator[](DegreeType n) const;
     const List<X>& coefficients(DegreeType n) const;
     friend OutputStream& operator<<(OutputStream& os, Series<X> const& s) { return s._write(os); }

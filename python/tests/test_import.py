@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################################
 #            test_import.py
 #
-#  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright  2006-20  Pieter Collins
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne import *
+from pyariadne import *
 
 def test_do_nothing():
     assert True

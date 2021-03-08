@@ -26,14 +26,14 @@
 #include <iostream>
 #include <iomanip>
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../function/functional.hpp"
-#include "../utility/macros.hpp"
-#include "../utility/exceptions.hpp"
-#include "../utility/stlio.hpp"
-#include "../geometry/list_set.hpp"
-#include "../geometry/binary_tree.hpp"
+#include "function/functional.hpp"
+#include "utility/macros.hpp"
+#include "utility/exceptions.hpp"
+#include "utility/stlio.hpp"
+#include "geometry/list_set.hpp"
+#include "geometry/binary_tree.hpp"
 
 
 namespace Ariadne {

@@ -22,18 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
+#include "function/functional.hpp"
+#include "config.hpp"
 
-#include "../output/drawer.hpp"
+#include "output/drawer.hpp"
 
-#include "../utility/macros.hpp"
-#include "../output/logging.hpp"
-#include "../geometry/function_set.hpp"
-#include "../geometry/affine_set.hpp"
-#include "../geometry/grid_paving.hpp"
+#include "utility/macros.hpp"
+#include "geometry/function_set.hpp"
+#include "geometry/affine_set.hpp"
+#include "geometry/grid_paving.hpp"
 
-#include "../output/graphics_interface.hpp"
+#include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -82,10 +81,10 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
         return;
     }
 
-    ValidatedVectorMultivariateFunction fg(2u+set.number_of_constraints(),set.domain());
+    ValidatedVectorMultivariateFunction fg(2u+set.number_of_constraints(),set.dimension());
     fg[0]=set.function()[projection.i];
     fg[1]=set.function()[projection.i];
-    for(Nat i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }
+    for(SizeType i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }
     Projection2d identity(2, 0,1);
 //    ValidatedVectorMultivariateFunctionModelDP fg=join(set.state_function(),set.time_function(),set.constraint_function());
 
@@ -96,8 +95,8 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     ExactBoxType splitdomain1,splitdomain2;
     for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; FloatDP err;
+        for(SizeType n=0; n!=unsplitdomains.size(); ++n) {
+            Nat k; FloatDP err(dp);
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==set.number_of_parameters() || err < max_error) {
@@ -117,11 +116,11 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
         ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<set<<" without excessive splitting.");
     }
 
-    for(Nat n=0; n!=subdomains.size(); ++n) {
+    for(SizeType n=0; n!=subdomains.size(); ++n) {
         try {
             set.restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(const std::runtime_error& e) {
-            ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set<<"\n");
+            ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set);
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }

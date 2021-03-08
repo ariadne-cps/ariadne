@@ -1,9 +1,7 @@
 /***************************************************************************
  *            test_grid_paving.cpp
  *
- *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
- *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
 
@@ -57,7 +55,7 @@ namespace {
 Void test_grid_paving_cursor(){
 
     //Allocate the Grid
-    Grid theGrid( Vector<FloatDP>({-0.25, 0.25, 1.5}), Vector<FloatDP>({0.25, 0.25, 0.25}) );
+    Grid theGrid( {-0.25, 0.25, 1.5}, {0.25, 0.25, 0.25} );
 
     //Define the higth of the primary root cell.
     const Nat theExtent = 2;
@@ -190,7 +188,7 @@ Void test_grid_paving_const_iterator(){
     std::vector< GridCell *> expected_result( 8 );
 
     //Allocate the Grid
-    Grid theGrid( Vector<FloatDP>({-0.25, 0.25}), Vector<FloatDP>({0.25, 0.25}) );
+    Grid theGrid( {-0.25, 0.25}, {0.25, 0.25} );
 
     //Define the higth of the primary root cell.
     const Nat theExtent = 2;
@@ -337,8 +335,8 @@ Void test_grid_paving_const_iterator(){
 Void test_grid_sub_paving_one(){
 
     //Allocate the Grid, one Dimension
-    Vector<FloatDP> originOne(1); originOne.set(0, 0.0);
-    Vector<FloatDP> lengthsOne(1); lengthsOne.set(0, 0.5);
+    Vector<ApproximateDouble> originOne(1, 0.0_x);
+    Vector<ApproximateDouble> lengthsOne(1, 0.5_x );
     const Grid theOneDimGrid( originOne, lengthsOne );
 
     //Define the higth of the primary root cell.
@@ -417,7 +415,7 @@ Void test_grid_sub_paving_one(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test Mincing operations of GridTreeSubpaving on the two dimensional Grid");
     //Allocate the Grid, one Dimension
-    const Grid theTwoDimGrid( Vector<FloatDP>({-0.25, 0.5}), Vector<FloatDP>({0.25, 0.5}) );
+    const Grid theTwoDimGrid( {-0.25, 0.5}, {0.25, 0.5} );
 
     //Create the GridTreeSubpaving
     GridTreeSubpaving theGridSPTwoDim( theTwoDimGrid, theRootExtent, thePathToSubPavingRoot, pRootTreeNode );
@@ -548,7 +546,7 @@ Void test_grid_sub_paving_three() {
 
 Void test_grid_paving(){
     //Create a trivial 4-dimensional Grid
-    Grid trivialFourDimGrid( Vector<FloatDP>({0.0,0.0,0.0,0.0}), Vector<FloatDP>({1.0,1.0,1.0,1.0}) );
+    Grid trivialFourDimGrid( {0.0,0.0,0.0,0.0}, {1.0,1.0,1.0,1.0} );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test allocation of a trivial GridTreePaving");
@@ -572,7 +570,7 @@ Void test_grid_paving(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreePaving (Grid, ExactBoxType) constructor");
     //Allocate the Grid, one Dimension
-    const Grid theTwoDimGrid( Vector<FloatDP>({-0.25,0.5}), Vector<FloatDP>({0.25,0.5}) );
+    const Grid theTwoDimGrid( {-0.25,0.5}, {0.25,0.5} );
     //Note: the box is related to the grid, but not to the original space
     GridTreePaving theTwoDimPaving( theTwoDimGrid, make_box("[0,1.5]x[-1.5,3.5]") );
     ARIADNE_PRINT_TEST_COMMENT("The resulting GridTreePaving: ");
@@ -606,7 +604,7 @@ Void test_grid_paving(){
 
     // !!!
     //Create a trivial 2-dimensional Grid
-    Grid trivialTwoDimGrid( Vector<FloatDP>({0.0,0.0}), Vector<FloatDP>({1.0,1.0}) );
+    Grid trivialTwoDimGrid( {0.0,0.0}, {1.0,1.0} );
     ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreePaving::restrict_to_extent( const Nat theExtent )");
     GridTreePaving initialTreeSetOne( trivialTwoDimGrid, 2, make_binary_word("1111001000100"), make_binary_word("10010001") );
     GridTreePaving initialTreeSetOneCopyOne( initialTreeSetOne );
@@ -664,7 +662,7 @@ Void test_grid_cell(){
     ARIADNE_PRINT_TEST_COMMENT( "Dimension: 1, topCellExtent: 2, bottomCellExtent: 2" );
     ARIADNE_TEST_EQUAL( expected_result , theBinaryPath );
 
-    Grid theGrid( Vector<FloatDP>({0.0,0.0}), Vector<FloatDP>({1.0,1.0}) );
+    Grid theGrid( {0.0,0.0}, {1.0,1.0} );
     //pFirstCell_01 == pSecondCell_01
     GridCell * pFirstCell_01 = new GridCell( theGrid, 0, make_binary_word("01") );
     GridCell * pSecondCell_01 = new GridCell( theGrid, 1, make_binary_word("1101") );

@@ -24,12 +24,15 @@
 
 #include <cstdarg>
 #include "ariadne.hpp"
+#include "utility/stopwatch.hpp"
 
 using namespace Ariadne;
 
-
-int main()
+int main(int argc, const char* argv[])
 {
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+
+    ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
     RealConstant mu("mu",1.0_dec);
     RealVariable x("x"), y("y");
@@ -38,39 +41,41 @@ int main()
 
     MaximumError max_err=1e-6;
 
-    GradedTaylorSeriesIntegrator integrator(max_err);
+    TaylorPicardIntegrator integrator(max_err);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    evolver.verbosity = 1;
-    std::cout <<  evolver.configuration() << std::endl;
+    ARIADNE_LOG_PRINTLN(evolver.configuration());
 
-    Real x0(1.40);
-    Real y0(2.40);
+    Real x0(1.40_dec);
+    Real y0(2.40_dec);
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
-    Box<RealInterval> initial_set({{x0-eps_x0,x0+eps_x0},{y0-eps_y0,y0+eps_y0}});
+    RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
-    std::cout << "Initial set: " << initial_set << std::endl;
-    Real evolution_time(7.0);
+    ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
+    Real evolution_time(7.0_dec);
 
-    std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+    StopWatch sw;
+    ARIADNE_LOG_PRINTLN("Computing orbit... ");
+    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER));
+    sw.click();
+    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
-    std::cout << "plotting..." << std::endl;
-    Box<FloatDPUpperInterval> graphics_box(2);
-    graphics_box[0] = FloatDPUpperInterval(-2.5,2.5);
-    graphics_box[1] = FloatDPUpperInterval(-3.0,3.0);
-    Figure fig=Figure();
-    fig.set_bounding_box(graphics_box);
-    fig.set_line_colour(0.0,0.0,0.0);
-    fig.set_line_style(false);
-    fig.set_fill_colour(0.5,0.5,0.5);
-    fig.set_fill_colour(1.0,0.75,0.5);
+    sw.reset();
+    ARIADNE_LOG_PRINTLN("Plotting...");
+    Axes2d axes(-2.5<=x<=2.5,-3.0<=y<=3.0);
+    LabelledFigure fig=LabelledFigure(axes);
+    fig << line_colour(0.0,0.0,0.0);
+    fig << line_style(false);
+    fig << fill_colour(0.5,0.5,0.5);
+    fig << fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");
+
+    sw.click();
+    ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 }

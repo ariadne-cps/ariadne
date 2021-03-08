@@ -31,11 +31,11 @@
 
 #include <map>
 
-#include "../utility/container.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/space.hpp"
-#include "../hybrid/discrete_location.hpp"
-#include "../hybrid/hybrid_set_interface.hpp"
+#include "utility/container.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/space.hpp"
+#include "hybrid/discrete_location.hpp"
+#include "hybrid/hybrid_set_interface.hpp"
 
 
 namespace Ariadne {
@@ -69,21 +69,21 @@ class HybridSpace
     //! \brief The canonical type used for bounding sets in the space.
     typedef HybridExactBoxes BoundingDomainType;
     //! \brief The interface satisified by bounded sets in the space.
-    typedef HybridBoundedSetInterface BoundedSetInterfaceType;
+    typedef EffectiveHybridBoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
-    typedef HybridOvertSetInterface OvertSetInterfaceType;
+    typedef EffectiveHybridOvertSetInterface OvertSetInterfaceType;
     //! \brief The interface satisified by over sets in the space.
-    typedef HybridOpenSetInterface OpenSetInterfaceType;
+    typedef EffectiveHybridOpenSetInterface OpenSetInterfaceType;
     //! \brief The interface satisified by closed sets in the space.
-    typedef HybridClosedSetInterface ClosedSetInterfaceType;
+    typedef EffectiveHybridClosedSetInterface ClosedSetInterfaceType;
     //! \brief The interface satisified by compact sets in the space.
-    typedef HybridCompactSetInterface CompactSetInterfaceType;
+    typedef EffectiveHybridCompactSetInterface CompactSetInterfaceType;
     //! \brief The interface satisified by regular sets in the space.
-    typedef HybridRegularSetInterface RegularSetInterfaceType;
+    typedef EffectiveHybridRegularSetInterface RegularSetInterfaceType;
     //! \brief The interface satisified by located sets in the space.
-    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
+    typedef EffectiveHybridLocatedSetInterface LocatedSetInterfaceType;
     //! \brief The interface satisified by located sets in the space.
-    typedef HybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
+    typedef EffectiveHybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
     typedef HybridGridTreePaving SetApproximationType;
   public:

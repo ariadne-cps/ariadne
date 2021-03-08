@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getLaserTrajectory()
+HybridAutomaton getLaserTrajectory()
 {
     /// Build the Hybrid System
 

@@ -21,11 +21,6 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 10.15 AppleClang",
-            os: macos-10.15,
-            cxx: "clang++"
-          }
-          - {
             name: "macOS 10.15 GCC 10",
             os: macos-10.15,
             cxx: "g++-10"

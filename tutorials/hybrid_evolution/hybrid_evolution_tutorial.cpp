@@ -201,7 +201,7 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
     evolver.configuration().set_maximum_enclosure_radius(3.0);
     evolver.configuration().set_maximum_step_size(0.25);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"Evolver configuration: " << evolver.configuration());
+    ARIADNE_LOG_PRINTLN("Evolver configuration: " << evolver.configuration());
 
     return evolver;
 }
@@ -253,7 +253,6 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
     analyser.configuration().set_lock_to_grid_time(5);
 
     ARIADNE_LOG_PRINTLN("Analyser configuration: " << analyser.configuration());
-    ARIADNE_LOG_PRINTLN("Analyser evolver: " << analyser.evolver());
 
     return analyser;
 }

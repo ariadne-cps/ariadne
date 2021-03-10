@@ -12,7 +12,9 @@ The installation instructions are presented for Debian Linux systems (using Apti
 
 Official packages are available for Debian and macOS, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0 or AppleClang 12).
 
-#### Dependencies
+#### Getting the library
+
+Ariadne has some required/optional dependencies. Supplied packages simply require all the non-build dependencies: MPFR, Cairo and Python 3.
 
 If Ariadne is compiled from sources, then the only required library dependency is MPFR. To enable the graphical output you will require Cairo in order to save into png files. Finally, the Python bindings require the Python headers (version 3 is only supported, since version 2 is discontinued). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to build the Python interface, Git must be installed even if Ariadne has been downloaded as an archive. Download of the dependency is automatic though.
 
@@ -20,9 +22,7 @@ Finally, if you want to build the documentation, you need Doxygen and a working 
 
 Please note that adding new dependencies after preparing the build environment requires to re-run the CMake command.
 
-Supplied packages simply require all the non-build dependencies: MPFR, Cairo and Python 3.
-
-Specific instructions for Ubuntu and macOS follow.
+Specific instructions for Ubuntu and macOS follow, starting from installation from pre-compiled packages.
 
 ##### Ubuntu
 

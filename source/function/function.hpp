@@ -63,7 +63,7 @@ template<class P, class SIG> class FunctionExpression;
 //! \brief Named (static) constructors for constant and coordinate functions.
 template<class P>
 class FunctionConstructors {
-    static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
+    static_assert(Same<P,ApproximateTag> or Same<P,ValidatedTag> or Same<P,EffectiveTag>,"P must be an information level/paradigm.");
     typedef Number<P> Y;
   public:
     typedef Y NumericType;
@@ -175,7 +175,7 @@ class Function
     , public FunctionFacade<P,SIG>
     , public DispatchFunctionOperations<P,SIG>
 {
-    static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
+    static_assert(IsParadigm<P>,"P must be an information level/paradigm.");
     using Y=Number<P>;
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
@@ -244,11 +244,11 @@ class Function
     //!@{
     //
     //! \brief Convert from a function class specifying more information.
-    template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
+    template<StrongerThan<P> PP>
     Function(const Function<PP,SIG>& f)
         : Handle<const Interface>(std::dynamic_pointer_cast< const Interface >(f.managed_pointer())) { }
     //! \brief Assign from a function class specifying more information.
-    template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
+    template<StrongerThan<P> PP>
         Function<P,SIG>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
     //! \brief Set equal to the constant value \a c.
     Function<P,SIG>& operator=(const Result<NumericType>& c) {
@@ -367,7 +367,7 @@ template<class P, class C, class X> inline decltype(auto)
 differential(const MultivariateFunction<P,C>& f, const Vector<X>& x, DegreeType d) {
     return f.differential(x,d); }
 
-template<class P, class SIG, EnableIf<IsSame<typename SignatureTraits<SIG>::ArgumentKind,Real>> =dummy> inline
+template<class P, class SIG> requires Same<typename SignatureTraits<SIG>::ArgumentKind,Real> inline
 Function<P,SIG> derivative(Function<P,SIG> const& f) {
     return f.derivative(SizeOne()); }
 

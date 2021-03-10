@@ -211,32 +211,28 @@ template<class I, class X> Void Expansion<I,X>::remove_zeros() {
     this->resize(static_cast<SizeType>(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin()));
 }
 
-template<class X, class Y> struct CanInplaceAdd {
-    template<class XX, class YY, class = decltype(declval<XX&>()+=declval<YY>())> static True test(int);
-    template<class XX, class YY> static False test(...);
-    static const bool value = decltype(test<X,Y>(1))::value;
-};
+template<class X, class Y> concept CanInplaceAdd = requires(X& x, Y const& y) { x+=y; };
 
-template<class I, class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
-    auto begin=e.begin();
-    auto end=e.end();
-    auto curr=begin;
-    auto adv=begin;
-    while (adv!=end) {
-        curr->index()=adv->index();
-        curr->coefficient()=adv->coefficient();
-        ++adv;
-        while (adv!=end && adv->index()==curr->index()) {
-            curr->coefficient() += adv->coefficient();
+template<class I, class X>Void combine_terms(Expansion<I,X>& e) {
+    if constexpr (CanInplaceAdd<X,X>) {
+        auto begin=e.begin();
+        auto end=e.end();
+        auto curr=begin;
+        auto adv=begin;
+        while (adv!=end) {
+            curr->index()=adv->index();
+            curr->coefficient()=adv->coefficient();
             ++adv;
+            while (adv!=end && adv->index()==curr->index()) {
+                curr->coefficient() += adv->coefficient();
+                ++adv;
+            }
+            ++curr;
         }
-        ++curr;
+        e.resize(static_cast<SizeType>(curr-begin));
+    } else {
+        ARIADNE_ASSERT_MSG(false, "Cannot combine terms of an expansion if the coefficients do not support inplace addition.");
     }
-    e.resize(static_cast<SizeType>(curr-begin));
-}
-
-template<class I, class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
-    ARIADNE_ASSERT_MSG(false, "Cannot combine terms of an expansion if the coefficients do not support inplace addition.");
 }
 
 template<class I, class X> Void Expansion<I,X>::combine_terms() {
@@ -475,8 +471,8 @@ template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeTy
     MultiIndex new_index(new_size);
     for(typename Expansion<I,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->index();
-        static_assert(IsSame<I,MultiIndex>::value or IsSame<I,UniIndex>::value);
-        if constexpr (IsSame<I,MultiIndex>::value) {
+        static_assert(Same<I,MultiIndex> or Same<I,UniIndex>);
+        if constexpr (Same<I,MultiIndex>) {
             for(SizeType j=0; j!=old_size; ++j) { new_index[j+before_size]=old_index[j]; }
         } else {
             new_index[before_size]=old_index;

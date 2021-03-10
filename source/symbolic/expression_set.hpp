@@ -101,7 +101,7 @@ template<class UB> class VariableInterval {
     typedef UB UpperBoundType;
     typedef Interval<UB> IntervalType;
   public:
-    template<class U,EnableIf<IsConstructible<UB,U>> =dummy> VariableInterval(VariableInterval<U> const& eivl)
+    template<class U> requires Constructible<UB,U> VariableInterval(VariableInterval<U> const& eivl)
         : VariableInterval(eivl.variable(), Interval<UB>(eivl.interval())) { }
     VariableInterval(const RealVariable& v, const IntervalType& ivl) : _variable(v), _ivl(ivl) { }
     VariableInterval(const LowerBoundType& l, const Variable<Real>& v, const UpperBoundType& u) : _variable(v), _ivl(l,u) { }
@@ -120,7 +120,7 @@ template<class UB> class VariableInterval {
 //! \ingroup ExpressionSetSubModule
 //! \brief An interval range for a real variable.
 template<class T> template<class XL, class XU> inline VariableInterval<XU> Variable<T>::in(const XL& l, const XU& u) {
-    //static_assert(IsSame<XL,Real>::value,"Can only make box in Real variables.");
+    //static_assert(Same<XL,Real>,"Can only make box in Real variables.");
     ARIADNE_FAIL_MESSAGE("Can't create interval in non-real variable "<<*this);
     assert(false);
 }
@@ -135,14 +135,14 @@ template<class UB> class VariableLowerInterval
     typedef NegationType<UB> LB;
     RealVariable _variable; LB _lower;
   public:
-    template<class U,EnableIf<IsConstructible<UB,U>> =dummy> VariableLowerInterval(VariableLowerInterval<U> const& lv)
+    template<class U> requires Constructible<UB,U> VariableLowerInterval(VariableLowerInterval<U> const& lv)
         : VariableLowerInterval<UB>(UB(lv.lower_bound()),lv.variable()) { }
     VariableLowerInterval(const LB& l, const RealVariable& v) : _variable(v),  _lower(l) { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(_lower,_variable,+infinity); }
     LB lower_bound() const { return _lower; }
     const RealVariable& variable() const { return _variable; }
     operator Expression<Kleenean>() const {
-        static_assert(IsSame<UB,Real>::value,""); return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
+        static_assert(Same<UB,Real>); return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
     friend OutputStream& operator<<(OutputStream& os, const VariableLowerInterval<UB>& elivl) {
         return os << elivl._lower << "<=" << elivl._variable; }
 };
@@ -158,7 +158,7 @@ template<class UB> class VariableUpperInterval
     const RealVariable& variable() const { return _variable; }
     UB upper_bound() const { return _upper; }
     operator Expression<Kleenean>() const {
-        static_assert(IsSame<UB,Real>::value,""); return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
+        static_assert(Same<UB,Real>); return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
     friend OutputStream& operator<<(OutputStream& os, const VariableUpperInterval<UB>& euivl) {
         return os << euivl._variable << "<=" << euivl._upper; }
 };
@@ -213,8 +213,8 @@ template<class X> class VariablesPoint {
     VariablesPoint() : _vals() { }
     VariablesPoint(const RealSpace& spc, const PointType& pt);
     VariablesPoint(const Map<RealVariable,CoordinateType>& vals) : _vals(vals) { }
-    template<class XX, EnableIf<IsConvertible<XX,X>> = dummy> VariablesPoint(const LabelledSet<Point<XX>>& lpt);
-    template<class XX,EnableIf<IsConstructible<X,XX>> =dummy> VariablesPoint(VariablesPoint<XX> const& ept) : _vals(ept.values()) { }
+    template<class XX> requires Convertible<XX,X> VariablesPoint(const LabelledSet<Point<XX>>& lpt);
+    template<class XX> requires Constructible<X,XX> VariablesPoint(VariablesPoint<XX> const& ept) : _vals(ept.values()) { }
     Map<RealVariable,CoordinateType> values() const { return this->_vals; }
     Set<RealVariable> variables() const { return this->_vals.keys(); }
     const CoordinateType& operator[](const RealVariable& v) const { return this->_vals[v]; }
@@ -244,7 +244,7 @@ template<class IVL> class VariablesBox {
     typedef VariablesBox<IVL> VariablesBoxType;
 
     VariablesBox() : _bnds() { }
-    template<class I, EnableIf<IsConvertible<I,IVL>> = dummy> VariablesBox(const LabelledSet<Box<I>>& lbx);
+    template<class I> requires Convertible<I,IVL> VariablesBox(const LabelledSet<Box<I>>& lbx);
     VariablesBox(const RealSpace& spc, const Box<IVL>& bx);
     VariablesBox(const Map<RealVariable,IntervalType>& bnds) : _bnds(bnds) { }
     VariablesBox(const Set<VariableIntervalType>& bnds) : _bnds() {
@@ -252,7 +252,7 @@ template<class IVL> class VariablesBox {
     VariablesBox(const List<VariableIntervalType>& bnds) :  _bnds() {
         for(auto bnd : bnds) { this->_bnds.insert(bnd.variable(),bnd.interval()); } }
     VariablesBox(const InitializerList<VariableIntervalType>& lst) : VariablesBox(List<VariableIntervalType>(lst)) { }
-    template<class I,EnableIf<IsConstructible<IVL,I>> =dummy> VariablesBox(VariablesBox<I> const& ebx) : _bnds(ebx.bounds()) { }
+    template<class I> requires Constructible<IVL,I> VariablesBox(VariablesBox<I> const& ebx) : _bnds(ebx.bounds()) { }
     Map<RealVariable,IntervalType> bounds() const { return this->_bnds; }
     Set<RealVariable> variables() const { return this->_bnds.keys(); }
     const IntervalType& operator[](const RealVariable& v) const { return this->_bnds[v]; }
@@ -272,7 +272,7 @@ template<class IVL> VariablesBox<IVL>::VariablesBox(const RealSpace& spc, const 
 }
 
 template<class T> template<class IVL> inline VariablesBox<IVL> Variables<T>::in(const List<IVL>& bx) const {
-    static_assert(IsSame<T,Real>::value,"Can only make box in Real variables.");
+    static_assert(Same<T,Real>,"Can only make box in Real variables.");
     assert(false);
 }
 
@@ -376,7 +376,7 @@ template<class IVL> VariablesBox<IVL>::operator LabelledSet<Box<IVL>>() const {
     return LabelledSet<Box<IVL>>(spc,this->euclidean_set(spc));
 }
 
-template<class IVL> template<class I,EnableIf<IsConvertible<I,IVL>>> VariablesBox<IVL>::VariablesBox(LabelledSet<Box<I>> const& lbx)
+template<class IVL> template<class I> requires Convertible<I,IVL> VariablesBox<IVL>::VariablesBox(LabelledSet<Box<I>> const& lbx)
     : VariablesBox(lbx.space(),lbx.euclidean_set()) { }
 
 

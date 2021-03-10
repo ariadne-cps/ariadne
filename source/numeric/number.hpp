@@ -53,24 +53,24 @@ namespace Ariadne {
 
 /************ Number *********************************************************/
 
-template<class X> struct IsNumericType;
+template<class X> struct IsNumber;
 
 class NumberInterface;
 
 template<class P> class Number;
-template<class P> struct IsNumericType<Number<P>> : True { };
-template<class P> struct IsNumericType<LowerNumber<P>> : True { };
-template<class P> struct IsNumericType<UpperNumber<P>> : True { };
-
-template<class R> struct IsConcreteNumericType : IsConvertible<R,Real> { };
+template<class P> struct IsNumber<Number<P>> : True { };
+template<class P> struct IsNumber<LowerNumber<P>> : True { };
+template<class P> struct IsNumber<UpperNumber<P>> : True { };
 
 struct DispatchException : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-template<class PR> struct IsPrecision : False { };
-template<> struct IsPrecision<DoublePrecision> : True { };
-template<> struct IsPrecision<MultiplePrecision> : True { };
+template<class PR> struct IsPrecisionTrait : False { };
+template<> struct IsPrecisionTrait<DoublePrecision> : True { };
+template<> struct IsPrecisionTrait<MultiplePrecision> : True { };
+
+template<class PR> concept IsPrecision = IsPrecisionTrait<PR>::value;
 
 template<class P> Positive<Number<P>> cast_positive(Number<P> y);
 template<class P> Positive<UpperNumber<P>> cast_positive(UpperNumber<P> y);
@@ -87,43 +87,36 @@ class DeclareNumberOperators {
     friend ValidatedUpperNumber operator+(ValidatedUpperNumber const& y1, ValidatedUpperNumber const& y2);
     friend ValidatedUpperNumber operator-(ValidatedUpperNumber const& y1, ValidatedLowerNumber const& y2);
 
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator+(N const& y1, D const& d2) -> decltype(y1+Number<ApproximateTag>(d2)) { return y1+Number<ApproximateTag>(d2); }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator-(N const& y1, D const& d2) -> decltype(y1-Number<ApproximateTag>(d2)) { return y1-Number<ApproximateTag>(d2); }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator*(N const& y1, D const& d2) -> decltype(y1*Number<ApproximateTag>(d2)) { return y1*Number<ApproximateTag>(d2); }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator/(N const& y1, D const& d2) -> decltype(y1/Number<ApproximateTag>(d2)) { return y1/Number<ApproximateTag>(d2); }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator+(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)+y2) { return Number<ApproximateTag>(d1)+y2; }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator-(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)-y2) { return Number<ApproximateTag>(d1)-y2; }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator*(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)*y2) { return Number<ApproximateTag>(d1)*y2; }
-    template<class N, class D, EnableIf<IsGenericNumericType<N>> =dummy, EnableIf<IsSame<D,Dbl>> =dummy> friend auto
-    operator/(D const& d1, N const& y2) -> decltype(Number<ApproximateTag>(d1)/y2) { return Number<ApproximateTag>(d1)/y2; }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator+(N const& y1, D const& d2) { return y1+Number<ApproximateTag>(d2); }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator-(N const& y1, D const& d2) { return y1-Number<ApproximateTag>(d2); }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator*(N const& y1, D const& d2) { return y1*Number<ApproximateTag>(d2); }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator/(N const& y1, D const& d2) { return y1/Number<ApproximateTag>(d2); }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator+(D const& d1, N const& y2) { return Number<ApproximateTag>(d1)+y2; }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator-(D const& d1, N const& y2) { return Number<ApproximateTag>(d1)-y2; }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator*(D const& d1, N const& y2) { return Number<ApproximateTag>(d1)*y2; }
+    template<GenericNumber N, BuiltinFloatingPoint D> friend decltype(auto)
+    operator/(D const& d1, N const& y2) { return Number<ApproximateTag>(d1)/y2; }
 
-    template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> friend auto
-    operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) { return Number<Paradigm<R>>(r1)+y2; }
-    template<class R, class P, EnableIf<IsConcreteNumericType<R>> =dummy> friend auto
-    operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) { return y1+Number<Paradigm<R>>(r2); }
-
-};
-
-template<class X, class P=Void> struct HasOperatorNumber {
-    template<class XX, class PP, class=decltype(declval<XX>().operator Number<PP>())> static True test(int);
-    template<class XX, class PP> static False test(...);
-    static const bool value = decltype(test<X,P>(1))::value;
-};
-
-template<class X> struct HasOperatorNumber<X,Void> {
-    template<class XX, class=decltype(declval<XX>().operator Number<Paradigm<XX>>())> static True test(int);
-    template<class XX> static False test(...);
-    static const bool value = decltype(test<X>(1))::value;
+    template<ConcreteNumber R, class P> friend decltype(auto)
+    operator+(R const& r1, Number<P> const& y2) { return Number<Paradigm<R>>(r1)+y2; }
+    template<ConcreteNumber R, class P> friend decltype(auto)
+    operator+(Number<P> const& y1, R const& r2) { return y1+Number<Paradigm<R>>(r2); }
 };
 
 
+template<class X, class P> concept ConvertibleBuiltinFloatingPointToNumber
+    = Same<P,ApproximateTag> and BuiltinFloatingPoint<X>;
+template<class X, class P> concept ConvertibleViaRealToNumber
+    = WeakerThan<P,ParadigmTag<X>> and Convertible<X,Real>;
+template<class X, class P> concept ConvertibleViaNumberToNumber
+    = WeakerThan<P,ParadigmTag<X>> and (not Convertible<X,Real>) and Convertible<X,Number<ParadigmTag<X>>>;
 
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P,  which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
@@ -131,8 +124,8 @@ template<class P> class Number
     : public Handle<NumberInterface>
     , public DeclareNumberOperators
 {
-    static_assert(IsParadigm<P>::value,"P must be a paradigm");
-    static_assert(IsSame<P,ExactTag>::value or IsSame<P,EffectiveTag>::value or IsSame<P,ValidatedTag>::value or IsSame<P,ApproximateTag>::value);
+    static_assert(IsParadigm<P>,"P must be a paradigm");
+    static_assert(Same<P,ExactTag> or Same<P,EffectiveTag> or Same<P,ValidatedTag> or Same<P,ApproximateTag>);
 
     template<class PP> friend class Number;
     template<class PP> friend class LowerNumber;
@@ -140,7 +133,7 @@ template<class P> class Number
 
     template<class PR> using ResultFloatType = FloatType<Weaker<P,ValidatedTag>,PR>;
 
-    template<class X> using IsGettableAs = And<IsNumericType<X>,IsWeaker<typename X::Paradigm,P>,Not<IsSame<typename X::Paradigm,ExactTag>>>;
+    template<class X> static const bool IsGettableAs = ANumber<X> and WeakerThan<typename X::Paradigm,P> and (not Same<typename X::Paradigm,ExactTag>);
   public:
     typedef NumberInterface Interface;
     typedef P Paradigm;
@@ -155,24 +148,19 @@ template<class P> class Number
     Number() : Number(Integer(0)) { }
 
     // Construct from a Number of a stronger paradigm
-    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> Number(const Number<SP>& y) : Number<P>(y.handle()) { }
+    template<StrongerThan<P> SP> Number(const Number<SP>& y) : Number<P>(y.handle()) { }
 
     //! Construct from a builtin integer
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
+    template<BuiltinIntegral N> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy>
-        Number(const X& x) : Number<P>(Dyadic(x)) { }
+    template<ConvertibleBuiltinFloatingPointToNumber<P> X> Number(const X& x) : Number<P>(Dyadic(x)) { }
 
-    //! Construct from a type which is convertible to Real.
-    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
-                               EnableIf<IsConvertible<X,Real>> =dummy>
-        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
+    // Construct from a type which is convertible to Real.
+    template<ConvertibleViaRealToNumber<P> X> Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
     // TODO: Decide conversion properties from concrete type to Number<P>
-    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
-                      DisableIf<IsConvertible<X,Real>> =dummy,
-                      EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy>
+    template<ConvertibleViaNumberToNumber<P> X>
         explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
@@ -181,7 +169,7 @@ template<class P> class Number
     ResultFloatType<MultiplePrecision> get(MultiplePrecision const& prec) const { return this->ref()._get(P(),prec); }
 
     //! \brief Get the value of the number as a floating-point ball with the given precision and error precision.
-    template<class PR, class PRE, EnableIf<And<IsPrecision<PR>,IsPrecision<PRE>,IsWeaker<ValidatedTag,P>>> =dummy>
+    template<class PR, class PRE> requires IsPrecision<PR> and IsPrecision<PRE> and WeakerThan<ValidatedTag,P>
     FloatBall<PR,PRE> get(PR const& prec, PRE const& errprec) const { return this->ref()._get(P(),prec,errprec); }
 
     //! \brief Try to dynamic_cast the object to concrete type \a X.
@@ -253,7 +241,7 @@ template<class P> class Number
 //! \brief Generic lower (real) numbers with computational paradigm \a P, which may be %EffectiveTag or %ValidatedTag.
 template<class P> class LowerNumber
 {
-    static_assert(IsSame<P,EffectiveTag>::value or IsSame<P,ValidatedTag>::value,"P must be a paradigm");
+    static_assert(Same<P,EffectiveTag> or Same<P,ValidatedTag>,"P must be a paradigm");
     friend class UpperNumber<P>;
   private: public:
     Handle<NumberInterface> _handle;
@@ -270,9 +258,9 @@ template<class P> class LowerNumber
     LowerNumber() : LowerNumber(Integer(0)) { }
 
     //! \brief Construct from a LowerNumber of a stronger paradigm
-    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> LowerNumber(const LowerNumber<SP>& y) : LowerNumber<P>(y.handle()) { }
+    template<StrongerThan<P> SP> LowerNumber(const LowerNumber<SP>& y) : LowerNumber<P>(y.handle()) { }
     //! \brief Construct from a type convertible to a Number.
-    template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy> LowerNumber(const X& x) : LowerNumber<P>(Number<P>(x).handle()) { }
+    template<ConvertibleTo<Number<P>> X> LowerNumber(const X& x) : LowerNumber<P>(Number<P>(x).handle()) { }
 
     template<class PR> FloatLowerBound<PR> get(PR pr) const { return this->ref()._get(LowerTag(),pr); }
 
@@ -317,7 +305,7 @@ template<class P> class LowerNumber
 //! \brief Generic upper (real) numbers with computational paradigm \a P, which may be %EffectiveTag or %ValidatedTag.
 template<class P> class UpperNumber
 {
-    static_assert(IsSame<P,EffectiveTag>::value or IsSame<P,ValidatedTag>::value,"P must be a paradigm");
+    static_assert(Same<P,EffectiveTag> or Same<P,ValidatedTag>,"P must be a paradigm");
     friend class LowerNumber<P>;
   private: public:
     Handle<NumberInterface> _handle;
@@ -334,9 +322,9 @@ template<class P> class UpperNumber
     UpperNumber() : UpperNumber(Integer(0)) { }
 
     //! \brief Construct from a UpperNumber of a stronger paradigm
-    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
+    template<StrongerThan<P> SP> UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
     //! \brief Construct from a type convertible to a Number.
-    template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
+    template<ConvertibleTo<Number<P>> X> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
 
     template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->ref()._get(UpperTag(),pr); }
 
@@ -382,13 +370,11 @@ template<class P> class Positive<Number<P>> : public Number<P> {
     friend Number<P> const& unsign(Positive<Number<P>> const& y) { return y; }
   public:
     Positive<Number<P>>() : Number<P>() { }
-    explicit Positive<Number<P>>(Number<P> const& y)
-        : Number<P>(y) { }
-    template<class N, EnableIf<IsBuiltinUnsigned<N>> =dummy>
-        Positive<Number<P>>(N n) : Number<P>(n) { }
-    template<class N, EnableIf<IsConvertible<N,ExactNumber>> =dummy>
+    explicit Positive<Number<P>>(Number<P> const& y) : Number<P>(y) { }
+    template<BuiltinUnsignedIntegral N> Positive<Number<P>>(N n) : Number<P>(n) { }
+    template<class N> requires Convertible<N,ExactNumber>
         Positive<Number<P>>(const Positive<N>& n) : Number<P>(ExactNumber(static_cast<N const&>(n))) { }
-    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy, DisableIf<IsBuiltinIntegral<N>> =dummy>
+    template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
         explicit Positive<Number<P>>(const N& n) : Number<P>(ExactNumber(n)) { }
     explicit operator Number<P> () const { return *this; }
 
@@ -410,11 +396,11 @@ template<class P> class Positive<LowerNumber<P>> : public LowerNumber<P> {
   public:
     Positive<LowerNumber<P>>() : LowerNumber<P>() { }
     explicit Positive<LowerNumber<P>>(LowerNumber<P> const& y) : LowerNumber<P>(y) { }
-    template<class N, EnableIf<IsBuiltinUnsigned<N>> =dummy>
+    template<BuiltinUnsignedIntegral N>
         Positive<LowerNumber<P>>(N n) : LowerNumber<P>(n) { }
-    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy>
+    template<class N> requires Constructible<ExactNumber,N>
         Positive<LowerNumber<P>>(const Positive<N>& n) : LowerNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
-    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy, DisableIf<IsBuiltinIntegral<N>> =dummy>
+    template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
         Positive<LowerNumber<P>>(const N& n) : LowerNumber<P>(ExactNumber(n)) { }
     explicit operator LowerNumber<P> () const { return *this; }
 
@@ -437,11 +423,11 @@ template<class P> class Positive<UpperNumber<P>> : public UpperNumber<P> {
   public:
     Positive<UpperNumber<P>>() : UpperNumber<P>() { }
     explicit Positive<UpperNumber<P>>(UpperNumber<P> const& y) : UpperNumber<P>(y) { }
-    template<class N, EnableIf<IsBuiltinUnsigned<N>> =dummy>
+    template<BuiltinUnsignedIntegral N>
         Positive<UpperNumber<P>>(N n) : UpperNumber<P>(n) { }
-    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy>
+    template<class N> requires Constructible<ExactNumber,N>
         Positive<UpperNumber<P>>(const Positive<N>& n) : UpperNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
-    template<class N, EnableIf<IsConstructible<ExactNumber,N>> =dummy, DisableIf<IsBuiltinIntegral<N>> =dummy>
+    template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
         Positive<UpperNumber<P>>(const N& n) : UpperNumber<P>(ExactNumber(n)) { }
     explicit operator UpperNumber<P> () const { return *this; }
 

@@ -69,8 +69,8 @@ template<class I> class Handle {
     Handle(SharedPointer<I> p) : _ptr(p) { }
     Handle(I&& r) : _ptr(r._move()) { }
     Handle(const I& r) : _ptr(r._copy()) { }
-    template<class T, EnableIf<IsBaseOf<I,T>> =dummy> Handle(T&& t) : _ptr(new T(std::move(t))) { }
-    template<class T, EnableIf<IsBaseOf<I,T>> =dummy, EnableIf<IsCopyConstructible<T>> =dummy> Handle(const T& t)
+    template<DerivedFrom<I> T> Handle(T&& t) : _ptr(new T(std::move(t))) { }
+    template<DerivedFrom<I> T> requires CopyConstructible<T> Handle(const T& t)
         : _ptr(new T(t)) { }
     //Handle(const Handle<I>& h) : _ptr(h._ptr) { }
     //Handle(Handle<I>&& h) : _ptr(h._ptr) { }
@@ -121,7 +121,7 @@ void write_error(OutputStream& os, const WritableInterface* w, const char* i, co
 template<class D, class B> D dynamic_handle_cast(B const& h) {
     typedef typename B::Interface BI;
     typedef typename D::Interface DI;
-    if constexpr (IsSame<decltype(h.managed_pointer()),SharedPointer<BI>>::value) {
+    if constexpr (Same<decltype(h.managed_pointer()),SharedPointer<BI>>) {
         SharedPointer<DI> p=std::dynamic_pointer_cast<DI>(h.managed_pointer());
         if(p) { return D(Handle<DI>(p)); }
     } else {

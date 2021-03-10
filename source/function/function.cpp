@@ -52,15 +52,15 @@ template<class T> inline StringType str(const T& t) {
     StringStream ss; ss << t; return ss.str(); }
 
 // Templated conversions dynamically checked at runtime
-template<class R, class A, EnableIf<IsSame<R,A>> =dummy> R const& checked_same(A const& a) { return a; }
-template<class R, class A, DisableIf<IsSame<R,A>> =dummy> R const& checked_same(A const& a) {
-    ARIADNE_THROW(std::runtime_error,"checked_same<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" does not have the same type as result."); }
-template<class R, class A, EnableIf<IsConvertible<A,R>> =dummy> R checked_convert(A&& a) { return a; }
-template<class R, class A, DisableIf<IsConvertible<A,R>> =dummy> R checked_convert(A&& a) {
-    ARIADNE_THROW(std::runtime_error,"checked_convert<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not convertible to result."); }
-template<class R, class A, EnableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) { return R(a); }
-template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) {
-    ARIADNE_THROW(std::runtime_error,"checked_construct<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not explicitly convertible to result."); }
+template<class R, class A> R const& checked_same(A const& a) {
+    if constexpr(Same<R,A>) { return a; }
+    else { ARIADNE_THROW(std::runtime_error,"checked_same<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" does not have the same type as result."); } }
+template<class R, class A> R checked_convert(A&& a) {
+    if constexpr(Convertible<A,R>) { return a; }
+    else { ARIADNE_THROW(std::runtime_error,"checked_convert<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not convertible to result."); } }
+template<class R, class A> R checked_construct(A const& a) {
+    if constexpr(Constructible<R,A>) { return R(a); }
+    else { ARIADNE_THROW(std::runtime_error,"checked_construct<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not explicitly convertible to result."); } }
 
 
 
@@ -360,14 +360,14 @@ Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f)
 //------------------------ Vector Function ----------------------------------//
 
 template<class P, class SIG> auto Function<P,SIG>::get(SizeType i) const -> ScalarFunction<P,ARG> {
-    ARIADNE_ASSERT((IsSame<ResultSizeType,SizeType>::value));
+    ARIADNE_ASSERT((Same<ResultSizeType,SizeType>));
     const VectorOfFunctionInterface<P,ARG>* vfp = dynamic_cast<const VectorOfFunctionInterface<P,ARG>*>(this->raw_pointer());
     if(!vfp) { std::cerr<<"\nCannot get element of "<<*this<<"\n  of type "<<typeid(this->raw_pointer()).name()<<":"<<typeid(this->reference()).name()<<"\n\n"; }
     return ScalarFunction<P,ARG>(SharedPointer<ScalarFunctionInterface<P,ARG>>(vfp->_get(i)));
 }
 
 template<class P, class SIG> Void Function<P,SIG>::set(SizeType i, ScalarFunction<P,ARG> sf) {
-    ARIADNE_ASSERT((IsSame<ResultSizeType,SizeType>::value));
+    ARIADNE_ASSERT((Same<ResultSizeType,SizeType>));
     const VectorOfScalarFunction<P,ARG>& cvf = dynamic_cast<const VectorOfScalarFunction<P,ARG>&>(this->_ptr.operator*());
     VectorOfScalarFunction<P,ARG>& vf = const_cast<VectorOfScalarFunction<P,ARG>&>(cvf);
     vf[i]=sf;

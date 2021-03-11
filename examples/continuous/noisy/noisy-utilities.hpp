@@ -30,8 +30,9 @@ namespace Ariadne {
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 typedef Real ContinuousTimeType;
 
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, bool draw);
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, bool draw);
+
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
 
@@ -53,8 +54,7 @@ template<class C> struct Reverse {
 };
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
-
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, bool draw) {
     CONCLOG_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
     evolver.configuration().approximations(approximations);
@@ -99,8 +99,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
     }
 }
 
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
-
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, bool draw) {
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         CONCLOG_PRINTLN(appro);

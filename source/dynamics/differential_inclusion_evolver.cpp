@@ -32,28 +32,17 @@
 
 namespace Ariadne {
 
-inline ValidatedVectorMultivariateTaylorFunctionModelDP compose(ValidatedVectorMultivariateFunctionPatch const& g,
-                                                                ValidatedVectorMultivariateTaylorFunctionModelDP const& f)
-{
+inline ValidatedVectorMultivariateTaylorFunctionModelDP compose(ValidatedVectorMultivariateFunctionPatch const& g, ValidatedVectorMultivariateTaylorFunctionModelDP const& f) {
     return compose(cast_unrestricted(g),f);
 }
 
-template<class M> inline VectorScaledFunctionPatch<M> compose(const ValidatedVectorMultivariateFunctionPatch& g, const VectorScaledFunctionPatch<M>& f) {
+template<class M> inline VectorScaledFunctionPatch<M> compose(ValidatedVectorMultivariateFunctionPatch const& g, VectorScaledFunctionPatch<M> const& f) {
     return compose(cast_unrestricted(g),f);
 }
 
 inline FloatDPUpperInterval operator*(PositiveValidatedUpperNumber x, FloatDPUpperInterval ivl) {
     return cast_exact(x.get(double_precision)*ivl); }
 
-/*
-FloatDP volume(Vector<IntervalValidatedRangeType> const& box) {
-    FloatDP result = 1.0;
-    for (auto i: range(box.size())) {
-        result *= box[i].width().raw();
-    }
-    return result;
-}
-*/
 BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
@@ -177,7 +166,7 @@ inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(M
     return result;
 }
 
-DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner)
+DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
     : _system(system)
     , _sweeper(sweeper)
     , _integrator(integrator.clone())

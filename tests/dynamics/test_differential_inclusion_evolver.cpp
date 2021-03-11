@@ -40,11 +40,10 @@
 using namespace Ariadne;
 
 class TestDifferentialInclusionEvolver {
-private:
+
     void run_single_test(String name, DifferentialInclusion const &ivf, BoxDomainType const &initial, Real evolution_time,
                          ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper,
-                        IntegratorInterface const &integrator, ReconditionerHandle const &reconditioner, bool draw) const {
-
+                        IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
         auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
         evolver.configuration().approximations(approximations);
         evolver.configuration().maximum_step_size(step);
@@ -56,7 +55,7 @@ private:
     void run_each_approximation(String name, DifferentialInclusion const &ivf, BoxDomainType const &initial,
                                 Real evolution_time, ExactDouble step, List<InputApproximation> approximations,
                                 SweeperDP sweeper, IntegratorInterface const &integrator,
-                                ReconditionerHandle const &reconditioner, bool draw) const {
+                                Reconditioner const &reconditioner, bool draw) const {
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
             run_single_test(name, ivf, initial, evolution_time, step, singleapproximation, sweeper, integrator,

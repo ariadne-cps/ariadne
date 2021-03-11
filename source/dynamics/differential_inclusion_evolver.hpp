@@ -106,24 +106,19 @@ public:
     virtual Void update_from(InclusionEvolverState const& state) override;
 };
 
-class ReconditionerHandle {
-private:
-    SharedPointer<ReconditionerInterface> _impl;
+class Reconditioner : public Handle<ReconditionerInterface> {
 public:
-    ReconditionerHandle(ReconditionerInterface const& other) : _impl(other.clone()) { }
-    ReconditionerHandle(ReconditionerHandle const& other) : _impl(other._impl) { }
+    using Handle<ReconditionerInterface>::Handle;
 
-    ReconditionerHandle& operator=(ReconditionerHandle const& other) { _impl = other._impl; return *this; }
+    Bool must_reduce_parameters(InclusionEvolverState const& state) const { return _ptr->must_reduce_parameters(state); }
+    Bool must_incorporate_errors(InclusionEvolverState const& state) const { return _ptr->must_incorporate_errors(state); }
 
-    Bool must_reduce_parameters(InclusionEvolverState const& state) const { return _impl->must_reduce_parameters(state); }
-    Bool must_incorporate_errors(InclusionEvolverState const& state) const { return _impl->must_incorporate_errors(state); }
+    Void reduce_parameters(ValidatedVectorMultivariateFunctionPatch& phi) const { _ptr->reduce_parameters(phi); }
+    ValidatedVectorMultivariateFunctionPatch incorporate_errors(ValidatedVectorMultivariateFunctionPatch const& Phi) const { return _ptr->incorporate_errors(Phi); }
 
-    Void reduce_parameters(ValidatedVectorMultivariateFunctionPatch& phi) const { _impl->reduce_parameters(phi); }
-    ValidatedVectorMultivariateFunctionPatch incorporate_errors(ValidatedVectorMultivariateFunctionPatch const& Phi) const { return _impl->incorporate_errors(Phi); }
+    Void update_from(InclusionEvolverState const& state) {_ptr->update_from(state); }
 
-    Void update_from(InclusionEvolverState const& state) {_impl->update_from(state); }
-
-    virtual ~ReconditionerHandle() = default;
+    virtual ~Reconditioner() = default;
 };
 
 class DifferentialInclusionEvolverConfiguration;
@@ -136,10 +131,10 @@ class DifferentialInclusionEvolver {
     SystemType _system;
     SweeperDP _sweeper;
     SharedPointer<IntegratorInterface> _integrator;
-    ReconditionerHandle _reconditioner;
+    Reconditioner _reconditioner;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner);
+    DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
 
     //!@{
     //! \name Configuration for the class.

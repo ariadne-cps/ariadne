@@ -9,6 +9,7 @@ set(EXAMPLES_NOISY
 	order7
 	wiggins1873
 	ross-mcdonald
+	michelson
 )
 
 foreach(example ${EXAMPLES_NOISY})

@@ -62,13 +62,13 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
 
     Stopwatch<Milliseconds> sw;
 
-    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
+    List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();
 
-    List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
+    List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionPatch const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
-    ValidatedVectorMultivariateFunctionModelType evolve_function =
-        partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper_bound());
+    ValidatedVectorMultivariateFunctionPatch evolve_function =
+        partial_evaluate(final_set,final_set.result_size(),static_cast<ExactNumber>(final_set.domain()[final_set.result_size()].upper_bound()));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     CONCLOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
@@ -92,7 +92,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
                 fig.draw(evolve_set);
                 char num_char[64] = "";
                 if (n > 2) snprintf(num_char,64,"[%lu,%lu]",i,j);
-                CONCLOG_RUN_MUTED(fig.write((name+num_char).c_str()));
+                fig.write((name+num_char).c_str());
             }
         }
         CONCLOG_PRINTLN("Done.");
@@ -118,7 +118,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     double sw_threshold = 1e-8;
     ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
-    bool draw = true;
+    bool draw = false;
 
     List<InputApproximation> approximations;
     approximations.append(ZeroApproximation());
@@ -128,10 +128,9 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(PiecewiseApproximation());
 
     TaylorPicardIntegrator integrator(
-            maximum_error=1e-6,
+            step_maximum_error=1e-3,
             sweeper,
             lipschitz_tolerance=0.5_x,
-            step_maximum_error=1e-3,
             minimum_temporal_order=4,
             maximum_temporal_order=12);
 

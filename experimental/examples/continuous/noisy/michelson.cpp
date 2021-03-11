@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ross-mcdonald.cpp
+ *            michelson.cpp
  *
  *  Copyright  2008-21 Luca Geretti
  *
@@ -22,13 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ross-mcdonald.hpp"
+#include "ariadne_main.hpp"
+#include "michelson.hpp"
 #include "noisy-utilities.hpp"
 
-using namespace Ariadne;
-
-int main(int argc, const char* argv[])
+void ariadne_main()
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    run_noisy_system(RM());
+    run_noisy_system(MI());
 }
+

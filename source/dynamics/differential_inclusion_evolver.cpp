@@ -229,7 +229,7 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
         auto approximators_to_use = state.approximators_to_use();
 
         CONCLOG_PRINTLN_AT(2,"approximators to use="<<approximators_to_use);
-
+        
         auto domx = cast_exact_box(evolve_function.range());
 
         UpperBoxType B;

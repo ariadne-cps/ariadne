@@ -207,23 +207,11 @@ struct PiecewiseApproximation : public InputApproximationInterface {
     virtual PiecewiseApproximation* clone() const override { return new PiecewiseApproximation(*this); }
 };
 
-class InputApproximation {
-  private:
-    SharedPointer<InputApproximationInterface> _impl;
+class InputApproximation : public Handle<const InputApproximationInterface> {
   public:
-    InputApproximation(InputApproximationInterface const& impl) : _impl(impl.clone()) { }
-    InputApproximation(InputApproximation const& other) : _impl(other._impl) { }
+    using Handle<const InputApproximationInterface>::Handle;
 
-    InputApproximation& operator=(InputApproximation const& other) { _impl = other._impl; return *this; }
-
-    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*_impl); }
-
-    operator InputApproximationInterface const& () const { return *_impl; }
-    InputApproximation* clone() const { return new InputApproximation(*this); }
-
-    Void write(OutputStream& os) const { os << *_impl; }
-
-    virtual ~InputApproximation() = default;
+    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
 };
 
 template<class A> constexpr Nat const_num_params_per_input();

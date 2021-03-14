@@ -36,7 +36,7 @@
 #include "numeric/upper_number.hpp"
 #include "numeric/lower_number.hpp"
 #include "numeric/float.decl.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 
 #include "../test.hpp"
 #include "test_floats.hpp"

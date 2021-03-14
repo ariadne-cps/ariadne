@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.hpp
+ *            numeric/floats.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric/float.hpp
+/*! \file numeric/floats.hpp
  *  \brief Inclusion header for floating-point numbers.
  */
 
-#ifndef ARIADNE_FLOAT_HPP
-#define ARIADNE_FLOAT_HPP
+#ifndef ARIADNE_FLOATS_HPP
+#define ARIADNE_FLOATS_HPP
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"

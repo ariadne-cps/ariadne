@@ -25,7 +25,7 @@
 #include "expansion.hpp"
 #include "expansion.tpl.hpp"
 
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/rounded_float.hpp"
 #include "geometry/interval.hpp"
 

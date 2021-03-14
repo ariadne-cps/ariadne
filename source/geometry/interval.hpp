@@ -35,7 +35,9 @@
 
 #include "numeric/logical.hpp"
 #include "numeric/number.hpp"
-#include "numeric/float.hpp"
+#include "numeric/upper_number.hpp"
+#include "numeric/lower_number.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/arithmetic.hpp"
 

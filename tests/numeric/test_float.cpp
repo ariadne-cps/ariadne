@@ -32,7 +32,7 @@
 
 #include "config.hpp"
 #include "numeric/rounding.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/numeric.hpp"
 #include "numeric/dyadic.hpp"
 

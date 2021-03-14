@@ -59,8 +59,6 @@ class NumberInterface;
 
 template<class P> class Number;
 template<class P> struct IsNumber<Number<P>> : True { };
-template<class P> struct IsNumber<LowerNumber<P>> : True { };
-template<class P> struct IsNumber<UpperNumber<P>> : True { };
 
 struct DispatchException : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -73,7 +71,6 @@ template<> struct IsPrecisionTrait<MultiplePrecision> : True { };
 template<class PR> concept IsPrecision = IsPrecisionTrait<PR>::value;
 
 template<class P> Positive<Number<P>> cast_positive(Number<P> y);
-template<class P> Positive<UpperNumber<P>> cast_positive(UpperNumber<P> y);
 
 
 class DeclareNumberOperators {
@@ -237,135 +234,6 @@ template<class P> class Number
 };
 
 
-//! \ingroup NumericModule
-//! \brief Generic lower (real) numbers with computational paradigm \a P, which may be %EffectiveTag or %ValidatedTag.
-template<class P> class LowerNumber
-{
-    static_assert(Same<P,EffectiveTag> or Same<P,ValidatedTag>,"P must be a paradigm");
-    friend class UpperNumber<P>;
-  private: public:
-    Handle<NumberInterface> _handle;
-    explicit LowerNumber(NumberInterface* p) : _handle(p) { }
-  private: public:
-    explicit LowerNumber(Handle<NumberInterface> h) : _handle(h) { }
-    Handle<NumberInterface> handle() const { return this->_handle; }
-  private:
-    NumberInterface const& ref() const { return this->_handle.reference(); }
-  public:
-    typedef P Paradigm;
-    typedef LowerNumber<P> NumericType;
-
-    LowerNumber() : LowerNumber(Integer(0)) { }
-
-    //! \brief Construct from a LowerNumber of a stronger paradigm
-    template<StrongerThan<P> SP> LowerNumber(const LowerNumber<SP>& y) : LowerNumber<P>(y.handle()) { }
-    //! \brief Construct from a type convertible to a Number.
-    template<ConvertibleTo<Number<P>> X> LowerNumber(const X& x) : LowerNumber<P>(Number<P>(x).handle()) { }
-
-    template<class PR> FloatLowerBound<PR> get(PR pr) const { return this->ref()._get(LowerTag(),pr); }
-
-    template<class X> X extract() const;
-
-    friend LowerNumber<P> operator+(LowerNumber<P> const& y) { return pos(y); }
-    friend UpperNumber<P> operator-(LowerNumber<P> const& y) { return neg(y); }
-    friend LowerNumber<P> operator+(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return add(y1,y2); }
-    friend LowerNumber<P> operator-(LowerNumber<P> const& y1, UpperNumber<P> const& y2) { return sub(y1,y2); }
-    friend LowerNumber<P>& operator+=(LowerNumber<P>& y1, LowerNumber<P> const& y2) { return y1=y1+y2; }
-    friend LowerNumber<P>& operator-=(LowerNumber<P>& y1, UpperNumber<P> const& y2) { return y1=y1-y2; }
-
-    friend LowerNumber<P> pos(LowerNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Pos())); }
-    friend UpperNumber<P> neg(LowerNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Neg())); }
-    friend LowerNumber<P> add(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Add(),&y2.ref())); }
-    friend LowerNumber<P> sub(LowerNumber<P> const& y1, UpperNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Sub(),&y2.handle().reference())); }
-
-    friend LowerNumber<P> sqrt(LowerNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Sqrt())); }
-    friend LowerNumber<P> exp(LowerNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Exp())); }
-    friend LowerNumber<P> log(LowerNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Log())); }
-    friend LowerNumber<P> atan(LowerNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Atan())); }
-
-    friend LowerNumber<P> max(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Max(),&y2.ref())); }
-    friend LowerNumber<P> min(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Min(),&y2.ref())); }
-
-    friend UpperLogicalType<P> operator==(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1.ref()._equals(y2.handle().reference())); }
-    friend LowerLogicalType<P> operator!=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return not (y1 == y2); }
-    friend UpperLogicalType<P> operator< (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1.ref()._less(y2.handle().reference())); }
-    friend LowerLogicalType<P> operator> (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return y2 <  y1; }
-
-    String class_name() const { return this->ref()._class_name(); }
-
-    friend OutputStream& operator<<(OutputStream& os, LowerNumber<P> const& y) { return y.ref()._write(os); }
-};
-
-
-//! \ingroup NumericModule
-//! \brief Generic upper (real) numbers with computational paradigm \a P, which may be %EffectiveTag or %ValidatedTag.
-template<class P> class UpperNumber
-{
-    static_assert(Same<P,EffectiveTag> or Same<P,ValidatedTag>,"P must be a paradigm");
-    friend class LowerNumber<P>;
-  private: public:
-    Handle<NumberInterface> _handle;
-    explicit UpperNumber(NumberInterface* p) : _handle(p) { }
-  private: public:
-    explicit UpperNumber(Handle<NumberInterface> h) : _handle(h) { }
-    Handle<NumberInterface> handle() const { return this->_handle; }
-  private:
-    NumberInterface const& ref() const { return this->_handle.reference(); }
-  public:
-    typedef P Paradigm;
-    typedef UpperNumber<P> NumericType;
-
-    UpperNumber() : UpperNumber(Integer(0)) { }
-
-    //! \brief Construct from a UpperNumber of a stronger paradigm
-    template<StrongerThan<P> SP> UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
-    //! \brief Construct from a type convertible to a Number.
-    template<ConvertibleTo<Number<P>> X> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
-
-    template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->ref()._get(UpperTag(),pr); }
-
-    template<class X> X extract() const;
-
-    friend UpperNumber<P> operator+(UpperNumber<P> const& y) { return pos(y); }
-    friend LowerNumber<P> operator-(UpperNumber<P> const& y) { return neg(y); }
-    friend UpperNumber<P> operator+(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return add(y1,y2); }
-    friend UpperNumber<P> operator-(UpperNumber<P> const& y1, LowerNumber<P> const& y2) { return sub(y1,y2); }
-    friend UpperNumber<P>& operator+=(UpperNumber<P>& y1, UpperNumber<P> const& y2) { return y1=y1+y2; }
-    friend UpperNumber<P>& operator-=(UpperNumber<P>& y1, LowerNumber<P> const& y2) { return y1=y1-y2; }
-
-    friend UpperNumber<P> pos(UpperNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Pos())); }
-    friend LowerNumber<P> neg(UpperNumber<P> const& y) { return LowerNumber<P>(y.ref()._apply(Neg())); }
-    friend UpperNumber<P> add(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1.ref()._apply(Add(),&y2.ref())); }
-    friend UpperNumber<P> sub(UpperNumber<P> const& y1, LowerNumber<P> const& y2) { return UpperNumber<P>(y1.ref()._apply(Sub(),&y2.handle().reference())); }
-
-    friend UpperNumber<P> sqrt(UpperNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Sqrt())); }
-    friend UpperNumber<P> exp(UpperNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Exp())); }
-    friend UpperNumber<P> log(UpperNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Log())); }
-    friend UpperNumber<P> atan(UpperNumber<P> const& y) { return UpperNumber<P>(y.ref()._apply(Atan())); }
-
-    friend UpperNumber<P> max(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1.ref()._apply(Max(),&y2.ref())); }
-    friend UpperNumber<P> min(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1.ref()._apply(Min(),&y2.ref())); }
-
-    friend UpperLogicalType<P> operator==(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1.ref()._equals(y2.handle().reference())); }
-    friend LowerLogicalType<P> operator!=(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return not (y1 == y2); }
-    friend LowerLogicalType<P> operator< (UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return LowerLogicalType<P>(y1.ref()._less(y2.handle().reference())); }
-    friend UpperLogicalType<P> operator> (UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return y2 <  y1; }
-
-    String class_name() const { return this->ref()._class_name(); }
-
-    friend OutputStream& operator<<(OutputStream& os, UpperNumber<P> const& y) { return y.ref()._write(os); }
-};
-
-
-
 template<class P> class Positive<Number<P>> : public Number<P> {
     friend Number<P> const& unsign(Positive<Number<P>> const& y) { return y; }
   public:
@@ -391,68 +259,17 @@ template<class P> class Positive<Number<P>> : public Number<P> {
     friend Positive<Number<P>> abs(Positive<Number<P>> const& y) { return y; }
 };
 
-template<class P> class Positive<LowerNumber<P>> : public LowerNumber<P> {
-    friend LowerNumber<P> const& unsign(Positive<LowerNumber<P>> const& y) { return y; }
-  public:
-    Positive<LowerNumber<P>>() : LowerNumber<P>() { }
-    explicit Positive<LowerNumber<P>>(LowerNumber<P> const& y) : LowerNumber<P>(y) { }
-    template<BuiltinUnsignedIntegral N>
-        Positive<LowerNumber<P>>(N n) : LowerNumber<P>(n) { }
-    template<class N> requires Constructible<ExactNumber,N>
-        Positive<LowerNumber<P>>(const Positive<N>& n) : LowerNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
-    template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
-        Positive<LowerNumber<P>>(const N& n) : LowerNumber<P>(ExactNumber(n)) { }
-    explicit operator LowerNumber<P> () const { return *this; }
-
-    friend LowerNumber<P> mul(LowerNumber<P> const& y1, LowerNumber<P> const& y2);
-
-    friend Positive<LowerNumber<P>> operator+(Positive<LowerNumber<P>> const& y1, Positive<LowerNumber<P>> const& y2) {
-        return cast_positive(add(unsign(y1),unsign(y2))); }
-    friend Positive<LowerNumber<P>> operator*(Positive<LowerNumber<P>> const& y1, Positive<LowerNumber<P>> const& y2) {
-        return cast_positive(mul(unsign(y1),unsign(y2))); }
-    friend Positive<LowerNumber<P>> add(Positive<LowerNumber<P>> const& y1, Positive<LowerNumber<P>> const& y2) {
-        return cast_positive(add(unsign(y1),unsign(y2))); }
-    friend Positive<LowerNumber<P>> mul(Positive<LowerNumber<P>> const& y1, Positive<LowerNumber<P>> const& y2) {
-        return cast_positive(Number<P>(y1.ref()._apply(Mul(),y2.ref()))); }
-    friend Positive<LowerNumber<P>> max(Positive<LowerNumber<P>> const& y1, Positive<LowerNumber<P>> const& y2) {
-        return cast_positive(max(unsign(y1),unsign(y2))); }
-};
-
-template<class P> class Positive<UpperNumber<P>> : public UpperNumber<P> {
-    friend UpperNumber<P> const& unsign(Positive<UpperNumber<P>> const& y) { return y; }
-  public:
-    Positive<UpperNumber<P>>() : UpperNumber<P>() { }
-    explicit Positive<UpperNumber<P>>(UpperNumber<P> const& y) : UpperNumber<P>(y) { }
-    template<BuiltinUnsignedIntegral N>
-        Positive<UpperNumber<P>>(N n) : UpperNumber<P>(n) { }
-    template<class N> requires Constructible<ExactNumber,N>
-        Positive<UpperNumber<P>>(const Positive<N>& n) : UpperNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
-    template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
-        Positive<UpperNumber<P>>(const N& n) : UpperNumber<P>(ExactNumber(n)) { }
-    explicit operator UpperNumber<P> () const { return *this; }
-
-    friend UpperNumber<P> mul(UpperNumber<P> const& y1, UpperNumber<P> const& y2);
-
-    friend Positive<UpperNumber<P>> operator+(Positive<UpperNumber<P>> const& y1, Positive<UpperNumber<P>> const& y2) {
-        return cast_positive(add(unsign(y1),unsign(y2))); }
-    friend Positive<UpperNumber<P>> operator*(Positive<UpperNumber<P>> const& y1, Positive<UpperNumber<P>> const& y2) {
-        return cast_positive(mul(unsign(y1),unsign(y2))); }
-    friend Positive<UpperNumber<P>> add(Positive<UpperNumber<P>> const& y1, Positive<UpperNumber<P>> const& y2) {
-        return cast_positive(add(unsign(y1),unsign(y2))); }
-    friend Positive<UpperNumber<P>> mul(Positive<UpperNumber<P>> const& y1, Positive<UpperNumber<P>> const& y2) {
-        return cast_positive(Number<P>(y1.ref()._apply(Mul(),y2.ref()))); }
-    friend Positive<UpperNumber<P>> max(Positive<UpperNumber<P>> const& y1, Positive<UpperNumber<P>> const& y2) {
-        return cast_positive(max(unsign(y1),unsign(y2))); }
-};
 
 template<class X> decltype(auto) cast_generic(X const& x) { return x.generic(); }
 
-template<class P> Positive<Number<P>> cast_positive(Number<P> y) { return Positive<Number<P>>(y); }
-template<class P> Positive<UpperNumber<P>> cast_positive(UpperNumber<P> y) { return Positive<UpperNumber<P>>(y); }
-
-template<class P> Positive<ExactNumber> cast_exact(Positive<Number<P>> const& y) { return cast_positive(cast_exact(unsign(y))); }
-template<class P> Positive<ExactNumber> cast_exact(Positive<UpperNumber<P>> const& y) { return cast_positive(cast_exact(unsign(y))); }
-
+template<class P> Positive<Number<P>> cast_positive(Number<P> y) {
+    return Positive<Number<P>>(y); }
+template<class P> Positive<ExactNumber> cast_exact(Positive<Number<P>> const& y) {
+    return cast_positive(cast_exact(unsign(y))); }
+template<class P> Positive<ExactNumber> cast_exact(Positive<UpperNumber<P>> const& y) {
+    return cast_positive(cast_exact(unsign(y))); }
+template<class P> Positive<ExactNumber> cast_exact(Positive<LowerNumber<P>> const& y) {
+    return cast_positive(cast_exact(unsign(y))); }
 
 } // namespace Ariadne
 

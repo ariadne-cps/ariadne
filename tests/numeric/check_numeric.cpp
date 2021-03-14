@@ -36,7 +36,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "config.hpp"
 #include "numeric/logical.hpp"
 #include "numeric/number.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"

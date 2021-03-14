@@ -108,7 +108,7 @@ template<class F> class UpperBound
     //! The compuational properties needed to create the upper bound; equivalent to the precision.
     PropertiesType properties() const { return _u.precision(); }
     //! Downcast to a generic upper bound.
-    GenericType generic() const { return this->operator GenericType(); }
+    GenericType generic() const;
     //! The raw data used to represent the upper bound.
     RawType const& raw() const { return _u; }
     //! A mutable reference to the raw data used to represent the upper bound.

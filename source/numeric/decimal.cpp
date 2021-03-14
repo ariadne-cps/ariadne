@@ -30,7 +30,7 @@
 #include "numeric/dyadic.hpp"
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 
 namespace Ariadne {
 

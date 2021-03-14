@@ -31,6 +31,8 @@
 
 #include "casts.hpp"
 #include "number.hpp"
+#include "lower_number.hpp"
+#include "upper_number.hpp"
 #include "logical.hpp"
 #include "integer.hpp"
 #include "dyadic.hpp"

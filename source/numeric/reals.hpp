@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/module.hpp
+ *            numeric/reals.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,35 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric/module.hpp
- *  \brief
+/*! \file numeric/reals.hpp
+ *  \brief Real numbers, including lower, upper and naive types, and validated versions.
  */
 
+#ifndef ARIADNE_REALS_HPP
+#define ARIADNE_REALS_HPP
 
-
-#ifndef ARIADNE_NUMERIC_MODULE_HPP
-#define ARIADNE_NUMERIC_MODULE_HPP
-
-#include "utility/module.hpp"
-
-#include "logical.decl.hpp"
-#include "number.decl.hpp"
-#include "float.decl.hpp"
-
-#include "paradigm.hpp"
-#include "logical.hpp"
-#include "integer.hpp"
-#include "dyadic.hpp"
-#include "decimal.hpp"
-#include "rational.hpp"
 #include "real.hpp"
+#include "naive_real.hpp"
 #include "validated_real.hpp"
-#include "floatdp.hpp"
-#include "floatmp.hpp"
-#include "number.hpp"
-#include "lower_number.hpp"
-#include "upper_number.hpp"
+#include "approximate_real.hpp"
 
-#include "floats.hpp"
+#include "lower_real.hpp"
+#include "upper_real.hpp"
 
 #endif

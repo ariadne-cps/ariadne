@@ -37,7 +37,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/real.hpp"
 #include "function/projection.hpp"
 #include "geometry/box.hpp"

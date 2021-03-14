@@ -41,7 +41,7 @@
 #include "numeric/rational.hpp"
 #include "numeric/decimal.hpp"
 #include "numeric/dyadic.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/real.hpp"
 #include "numeric/validated_real.hpp"
 #include "numeric/number.hpp"

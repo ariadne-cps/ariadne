@@ -31,6 +31,8 @@
 #include "float_value.hpp"
 #include "float_bounds.hpp"
 
+#include "upper_number.hpp"
+
 namespace Ariadne {
 
 template<class F> Nat Error<F>::output_places = 3;
@@ -40,6 +42,14 @@ template<class F> Error<F>::Error(PositiveBounds<F> const& x)
 
 template<class F> Error<F>::Error(Positive<Value<F>> const& x)
     : _e(x._v) { }
+
+template<class F> Error<F>& Error<F>::operator=(ValidatedErrorNumber y) {
+    return *this=cast_positive(y.get(this->precision()));
+}
+
+template<class F> auto Error<F>::generic() const -> ValidatedErrorNumber {
+    return this->operator ValidatedErrorNumber();
+}
 
 template<class F> struct Operations<Error<F>> {
     static OutputStream& _write(OutputStream& os, Error<F> const& x) {

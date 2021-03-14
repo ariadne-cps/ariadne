@@ -44,6 +44,8 @@
 #include "numeric/float.hpp"
 #include "numeric/real.hpp"
 #include "numeric/number.hpp"
+#include "numeric/lower_number.hpp"
+#include "numeric/upper_number.hpp"
 
 #include "numeric/casts.hpp"
 

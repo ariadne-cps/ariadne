@@ -33,6 +33,8 @@
 #include "numeric/builtin.hpp"
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
+#include "numeric/upper_number.hpp"
+#include "numeric/lower_number.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/float.hpp"
 

@@ -90,11 +90,11 @@ template<class F> class Error
     template<BuiltinUnsignedIntegral M> Error<F>& operator=(Nat m) {
         reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }
     //! Assign from the generic error bound \a y, keeping the same precision.
-    Error<F>& operator=(ValidatedErrorNumber y) { return *this=cast_positive(y.get(this->precision())); }
+    Error<F>& operator=(ValidatedErrorNumber y);
     operator ValidatedErrorNumber() const;
   public:
     //! Downcast to a generic error bound.
-    ValidatedErrorNumber generic() const { return this->operator ValidatedErrorNumber(); }
+    ValidatedErrorNumber generic() const;
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _e.precision(); }
     //! The compuational properties needed to create the error bound; equivalent to the precision.

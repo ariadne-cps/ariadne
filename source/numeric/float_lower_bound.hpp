@@ -107,7 +107,7 @@ template<class F> class LowerBound
     //! The compuational properties needed to create the lower bound; equivalent to the precision.
     PropertiesType properties() const { return _l.precision(); }
     //! Downcast to a generic lower bound.
-    GenericType generic() const { return this->operator GenericType(); }
+    GenericType generic() const;
     //! The raw data used to represent the lower bound.
     RawType const& raw() const { return _l; }
     //! A mutable reference to the raw data used to represent the lower bound.

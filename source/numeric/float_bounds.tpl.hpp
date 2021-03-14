@@ -34,6 +34,9 @@
 #include "float_upper_bound.hpp"
 #include "float_lower_bound.hpp"
 
+#include "number.hpp"
+#include "lower_number.hpp"
+#include "upper_number.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {

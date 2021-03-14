@@ -31,7 +31,7 @@
 #include "symbolic/templates.hpp"
 
 #include "logical.hpp"
-#include "real.hpp"
+#include "reals.hpp"
 #include "integer.hpp"
 #include "rational.hpp"
 

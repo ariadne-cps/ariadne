@@ -27,7 +27,7 @@
 
 #include "numeric/logical.hpp"
 #include "numeric/builtin.hpp"
-#include "numeric/real.hpp"
+#include "numeric/reals.hpp"
 
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"

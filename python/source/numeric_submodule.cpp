@@ -38,6 +38,7 @@
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
+#include "numeric/validated_real.hpp"
 #include "numeric/number.hpp"
 #include "numeric/upper_number.hpp"
 #include "numeric/lower_number.hpp"

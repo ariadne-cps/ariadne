@@ -44,6 +44,7 @@
 #include "decimal.hpp"
 #include "rational.hpp"
 #include "real.hpp"
+#include "validated_real.hpp"
 #include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "number.hpp"

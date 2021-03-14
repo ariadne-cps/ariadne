@@ -26,6 +26,8 @@
 #include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/number.hpp"
+#include "numeric/upper_number.hpp"
+#include "numeric/lower_number.hpp"
 
 #include "numeric/floatdp.hpp"
 #include "numeric/float_value.hpp"

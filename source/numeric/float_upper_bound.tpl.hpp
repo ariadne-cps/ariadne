@@ -33,6 +33,7 @@
 #include "float_bounds.hpp"
 #include "float_lower_bound.hpp"
 
+#include "upper_number.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
@@ -50,6 +51,7 @@ template<class F> UpperBound<F>::UpperBound(ValidatedUpperNumber const& y, PR pr
 template<class F> UpperBound<F>::operator ValidatedUpperNumber() const {
     return ValidatedUpperNumber(Handle<NumberInterface>(new NumberWrapper<UpperBound<F>>(*this)));
 }
+template<class F> auto UpperBound<F>::generic() const -> GenericType { return this->operator GenericType(); }
 
 } // namespace Ariadne
 

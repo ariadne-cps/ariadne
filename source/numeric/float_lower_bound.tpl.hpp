@@ -32,6 +32,7 @@
 #include "float_bounds.hpp"
 #include "float_upper_bound.hpp"
 
+#include "lower_number.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
@@ -48,6 +49,7 @@ template<class F> LowerBound<F>::LowerBound(ValidatedLowerNumber const& y, PR pr
 template<class F> LowerBound<F>::operator ValidatedLowerNumber() const {
     return ValidatedLowerNumber(Handle<NumberInterface>(new NumberWrapper<LowerBound<F>>(*this)));
 }
+template<class F> auto LowerBound<F>::generic() const -> GenericType { return this->operator GenericType(); }
 
 } // namespace Ariadne
 

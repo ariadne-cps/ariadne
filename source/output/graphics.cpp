@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/graphics.cpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
  ****************************************************************************/
 
@@ -36,12 +36,11 @@
 #include "symbolic/expression_set.hpp"
 #include "output/geometry2d.hpp"
 #include "output/graphics.hpp"
+#include "output/null.hpp"
 #include "output/cairo.hpp"
+#include "output/gnuplot.hpp"
 #include "output/progress_indicator.hpp"
 #include "output/logging.hpp"
-
-#include "../output/gnuplot.hpp"
-//#include "algebra/tensor.hpp"
 
 namespace Ariadne {
 
@@ -1040,11 +1039,14 @@ LabelledFigure::write(const Char* filename, Nat drawing_width, Nat drawing_heigh
 SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, GnuplotFileType fileType) {
     return std::make_shared<GnuplotCanvas>(cfilename, fileType, drawing_width, drawing_height);
 }
+
 #else
-SharedPointer<CanvasInterface> make_canvas(const char* filename, Nat drawing_width, Nat drawing_height, GnuplotFileType fileType) {
-    ARIADNE_WARN_ONCE("No facilities for displaying graphics are available.");
+
+SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, GnuplotFileType fileType) {
+    ARIADNE_WARN_ONCE("No facilities for displaying graphics using Gnuplot are available.");
     return std::make_shared<NullCanvas>();
 }
+
 #endif
 
 #ifdef HAVE_CAIRO_H
@@ -1056,9 +1058,10 @@ SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_wi
 #else
 
 SharedPointer<CanvasInterface> make_canvas(const char* filename, Nat drawing_width, Nat drawing_height, CairoFileType fileType) {
-    ARIADNE_WARN_ONCE("No facilities for displaying graphics are available.");
+    ARIADNE_WARN_ONCE("No facilities for displaying graphics using Cairo are available.");
     return std::make_shared<NullCanvas>();
 }
+
 #endif
 
 
@@ -1825,6 +1828,8 @@ void GnuplotCanvas::unset_color_box()
     *gnuplot << "unset colorbox\n";
 }
 
+#endif // DEBUG
+
 Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
     Figure fig(bbox,pr);
     for (auto cset : csets) {
@@ -1832,8 +1837,6 @@ Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType
     }
     fig.write(filename);
 }
-
-#endif // DEBUG
 
 } // namespace Ariadne
 

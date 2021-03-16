@@ -144,8 +144,6 @@ class CanvasInterface {
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
 
-    //Gnuplot animation
-    //virtual Void set_3D_palette() = 0;
     virtual Void plot_data(Array<double> data) = 0;
     virtual Void plot_bounds(Array<Array<double>> bounds) = 0;
     virtual Void plot_tensor_2d_image(Tensor<2, double> tensor) = 0;

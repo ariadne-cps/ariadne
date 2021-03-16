@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/graphics.hpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
  ****************************************************************************/
 
@@ -46,8 +46,6 @@ namespace Ariadne {
 
 typedef ApproximateBoxType GraphicsBoundingBoxType;
 
-class ProjectionFunction;
-
 enum class CairoFileType { PNG };
 enum class GnuplotFileType { PNG, GIF };
 
@@ -60,7 +58,6 @@ struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } LineC
 struct FillStyle { explicit FillStyle(Bool fs) : _style(fs) { } operator Bool() const { return this->_style; } private: Bool _style; };
 struct FillOpacity { explicit FillOpacity(Dbl fo) : _opacity(fo) { } operator Dbl() const { return this->_opacity; } private: Dbl _opacity; };
 struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } FillColour(Dbl r, Dbl g, Dbl b) : Colour(r,g,b) { } };
-//struct Set3D { explicit Set3D(Bool dim) : _dim(dim) { } operator Bool() const { return this->_dim; } private: Bool _dim; };
 struct SetXYProj { explicit SetXYProj() : _xyProj(true) { } operator Bool() const { return this-> _xyProj; } private: Bool _xyProj; };
 struct SetXZProj { explicit SetXZProj() : _xzProj(true){ } operator Bool() const { return this-> _xzProj; } private: Bool _xzProj; };
 struct SetYZProj { explicit SetYZProj() : _yzProj(true){ } operator Bool() const { return this-> _yzProj; } private: Bool _yzProj; };
@@ -73,7 +70,6 @@ inline FillStyle fill_style(Bool s) { return FillStyle(s); }
 inline FillOpacity fill_opacity(Dbl o) { return FillOpacity(o); }
 inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
 inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,g,b)); }
-//inline Set3D set_3D_dim(Bool dim) {return Set3D(dim); }
 inline SetXYProj set_proj_xy() { return SetXYProj(); }
 inline SetXZProj set_proj_xz() { return SetXZProj(); }
 inline SetYZProj set_proj_yz() { return SetYZProj(); }
@@ -382,7 +378,6 @@ inline Figure& operator<<(Figure& g, const FillColour& fc) { g.properties().set_
 inline Figure& operator<<(Figure&g, const SetXYProj& xyproj) {g.properties().set_proj_xy(); return g; }
 inline Figure& operator<<(Figure&g, const SetXZProj& xzproj) {g.properties().set_proj_xz(); return g; }
 inline Figure& operator<<(Figure&g, const SetYZProj& yzproj) {g.properties().set_proj_yz(); return g; }
-
 
 template<class S> class LabelledSet;
 

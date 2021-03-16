@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/gnuplot.hpp
  *
- *  
+ *  Copyright  2020-21  Mirko Albanese, Luca Geretti
  *
  ****************************************************************************/
 /*
@@ -172,6 +172,4 @@ GnuplotCanvas::~GnuplotCanvas()
 
 } // namespace Ariadne
 
-
-
-#endif
+#endif // HAVE_GNUPLOT_H

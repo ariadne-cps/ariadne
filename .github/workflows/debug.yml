@@ -47,7 +47,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr cairo
+        brew install ninja gcc@10 python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
         sudo easy_install pip
         sudo pip3 install --upgrade pip
@@ -56,7 +56,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-11 libcairo2-dev libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
         sudo pip3 install pytest
 
     - name: Create Build Environment

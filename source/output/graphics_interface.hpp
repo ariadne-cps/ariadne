@@ -29,7 +29,10 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_GRAPHICS_INTERFACE_HPP
 
+#include "../config.hpp"
 #include "utility/declarations.hpp"
+#include "algebra/tensor.hpp"
+#include "numeric/float_bounds.hpp"
 
 namespace Ariadne {
 
@@ -49,9 +52,9 @@ class FigureInterface;
 class CanvasInterface;
 
 struct Projection2d;
-typedef Projection2d Projection2d;
-
+struct Projection3d;
 struct Variables2d;
+struct Variables3d;
 
 struct Projection2d {
     DimensionType n, i, j;
@@ -63,8 +66,16 @@ struct Projection2d {
         return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 };
 
-
-SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height);
+struct Projection3d {
+    DimensionType n, i, j, k;
+    Projection3d(DimensionType nn, DimensionType ii, DimensionType jj, DimensionType kk) : n(nn), i(ii), j(jj), k(kk) { }
+    DimensionType argument_size() const { return n; }
+    DimensionType x_coordinate() const { return i; }
+    DimensionType y_coordinate() const { return j; }
+    DimensionType z_coordinate() const { return k; }
+    friend OutputStream& operator<<(OutputStream& os, const Projection3d& p) {
+        return os << "P<R"<<p.n<<";R3>[x"<<p.i<<",x"<<p.j<<",x"<<p.k<<"]"; }
+};
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
@@ -105,6 +116,7 @@ class CanvasInterface {
     //! \brief Destructor
     virtual ~CanvasInterface() = default;
 
+    virtual Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz) = 0;
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual Void finalise() = 0;
 
@@ -131,6 +143,16 @@ class CanvasInterface {
     virtual Void set_fill_opacity(double fo) = 0;
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
+
+    //Gnuplot animation
+    //virtual Void set_3D_palette() = 0;
+    virtual Void plot_data(Array<double> data) = 0;
+    virtual Void plot_bounds(Array<Array<double>> bounds) = 0;
+    virtual Void plot_tensor_2d_image(Tensor<2, double> tensor) = 0;
+    virtual Void plot_tensor_3d_image(Tensor<3, double> tensor) = 0;
+    virtual Void plot_xy_projection(Tensor<3, double> tensor) = 0;  
+    virtual Void plot_xz_projection(Tensor<3, double> tensor) = 0;  
+    virtual Void plot_yz_projection(Tensor<3, double> tensor) = 0;  
 
     //! \brief The scaling of the figure, in user units per pixel.
     virtual Vector2d scaling() const = 0;

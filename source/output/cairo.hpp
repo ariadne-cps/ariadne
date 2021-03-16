@@ -30,8 +30,9 @@
 #include <cairo/cairo.h>
 #endif
 
-
 namespace Ariadne {
+
+template<SizeType N, class X> class Tensor;
 
 struct ImageSize2d {
     Nat nx,ny;
@@ -60,6 +61,7 @@ class CairoCanvas
     CairoCanvas(const ImageSize2d& size);
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
     CairoCanvas(cairo_t *c);
+    Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz);
     Void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
     Void write(const char* filename) const;
     Void finalise();
@@ -75,6 +77,15 @@ class CairoCanvas
     Void set_fill_opacity(double o);
     Void set_fill_colour(double r, double g, double b);
 
+    //GNUPLOT NOT IMPLEMENTED
+    Void plot_tensor_2d_image(Tensor<2, double> tensor);
+    Void plot_tensor_3d_image(Tensor<3, double> tensor);
+    Void plot_data(Array<double> data);
+    Void plot_bounds(Array<Array<double>> bounds);
+    Void plot_xy_projection(Tensor<3, double> tensor);  //TODO
+    Void plot_xz_projection(Tensor<3, double> tensor);  //TODO
+    Void plot_yz_projection(Tensor<3, double> tensor);  //TODO
+
     Vector2d scaling() const;
     Box2d bounds() const;
   public:
@@ -87,6 +98,7 @@ class NullCanvas
     : public CanvasInterface
 {
   public:
+    virtual Void initialise(StringType x, StringType y, StringType z, double lx, double ux, double ly, double uy, double lz, double uz) { };
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) { }
     virtual Void finalise() { }
 
@@ -102,6 +114,9 @@ class NullCanvas
     virtual Void set_line_colour(double r, double g, double b) { }
     virtual Void set_fill_opacity(double fo) { }
     virtual Void set_fill_colour(double r, double g, double b) { }
+  
+    virtual Void plotTensor2D(Tensor<2, FloatDP> tensor){ };
+    virtual Void plotTensor3D(Tensor<3, FloatDP> tensor) { };
 
     virtual Vector2d scaling() const { return Vector2d(0,0); }
     virtual Box2d bounds() const { return Box2d(0,0,0,0); }

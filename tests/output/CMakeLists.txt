@@ -1,6 +1,7 @@
 set(UNIT_TESTS
     test_graphics
     test_logging
+    test_gnuplot
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -9,10 +10,12 @@ foreach(TEST ${UNIT_TESTS})
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
     endif()    
     add_test(${TEST} ${TEST})
-    target_link_libraries(${TEST} ariadne-kernel) 
+    target_link_libraries(${TEST} ariadne-kernel)
+    target_link_libraries(${TEST} ariadne)
     set_property(TEST ${TEST} PROPERTY LABELS "output;primary;kernel")         
 endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+

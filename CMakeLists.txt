@@ -118,12 +118,20 @@ else()
     message(WARNING "Unable to find Cairo. You will not be able to use graphics.")
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
-
-include_directories(${PROJECT_SOURCE_DIR}/source)
+find_package(Gnuplot 5.2.8)
+if(GNUPLOT_FOUND)
+    set(HAVE_GNUPLOT_H ON)
+else()
+    message(WARNING "Unable to find GNUPLOT 5.4. You will not be able to use GNUPLOT.")
+    set(HAVE_GNUPLOT_H OFF)
+endif()
 
 add_custom_target(everything)
 add_custom_target(tests)
+
+configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
+
+include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
 add_subdirectory(python)

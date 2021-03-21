@@ -186,7 +186,7 @@ template<> class Positive<Dyadic> : public Dyadic {
     Positive<Dyadic>() : Dyadic() { }
     template<BuiltinUnsignedIntegral M> Positive<Dyadic>(M m) : Dyadic(m) { }
     Positive<Dyadic>(int n) = delete;
-    explicit Positive<Dyadic>(Dyadic const& z) : Dyadic(z) { assert(z>=0); }
+    explicit Positive<Dyadic>(Dyadic const& z) : Dyadic(z) { ARIADNE_ASSERT(z>=0); }
 };
 inline Positive<Dyadic> cast_positive(Dyadic const& w) { return Positive<Dyadic>(w); }
 

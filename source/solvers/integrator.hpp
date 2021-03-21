@@ -104,7 +104,7 @@ class IntegratorBase
     IntegratorBase(MaximumError e, LipschitzConstant l);
   public:
     //! \brief A threshold for the error estimate of the approximation.
-    virtual Void set_maximum_error(ApproximateDouble e) { assert(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
+    virtual Void set_maximum_error(ApproximateDouble e) { ARIADNE_ASSERT(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
     virtual ExactDouble maximum_error() const  { return this->_maximum_error; }
     //! \brief The fraction L(f)*h used for a time step.
     //! The convergence of the Picard iteration is approximately Lf*h.

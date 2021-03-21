@@ -34,6 +34,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "typedefs.hpp"
 
 #define ARIADNE_USING_CONSTRUCTORS(Class,Base) \
     template<class T,typename std::enable_if<std::is_convertible<T,Base>::value,int>::type=0> \

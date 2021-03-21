@@ -47,7 +47,7 @@ namespace Ariadne {
 Curve::Curve(const EffectiveVectorUnivariateFunction& f)
     : _function(f)
 {
-    assert(this->_function.argument_size()==1);
+    ARIADNE_ASSERT(this->_function.argument_size()==1);
 }
 
 

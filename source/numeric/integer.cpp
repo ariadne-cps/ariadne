@@ -185,7 +185,7 @@ Integer::Integer(Nat64 m) {
     unsigned long long int lrem = larg % lmax;
     unsigned int rem = static_cast<unsigned int>(lrem);
     unsigned int quot = static_cast<unsigned int>(lquot);
-    assert(larg==lquot*lmax+lrem);
+    ARIADNE_ASSERT(larg==lquot*lmax+lrem);
     mpz_set_ui(_mpz,rem);
     if(lquot!=0) {
         *this += Integer(quot)*zmax;
@@ -391,7 +391,7 @@ OutputStream& operator<<(OutputStream& os, Integer const& z) {
     char str[OUTPUT_BUFFER_SIZE];
     str[OUTPUT_BUFFER_SIZE-1]='\0';
     mpz_get_str (str, 10, z._mpz);
-    assert(str[OUTPUT_BUFFER_SIZE-1]=='\0');
+    ARIADNE_ASSERT(str[OUTPUT_BUFFER_SIZE-1]=='\0');
     return os << str;
 }
 
@@ -401,7 +401,7 @@ Integer make_integer(unsigned long long int n) {
     unsigned long long int q = n / m;
     unsigned long long int r = n % m;
     unsigned int rem = static_cast<unsigned int>(r);
-    assert(n==q*m+r);
+    ARIADNE_ASSERT(n==q*m+r);
     if(q==0) {
         return Integer(rem);
     } else {

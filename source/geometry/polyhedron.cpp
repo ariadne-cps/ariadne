@@ -243,7 +243,7 @@ operator>>(InputStream& is, Polyhedron& p)
 
     char c;
     is >> c;
-    assert(c=='[');
+    ARIADNE_ASSERT(c=='[');
 
     c=is.peek();
     while(c=='[') {
@@ -251,7 +251,7 @@ operator>>(InputStream& is, Polyhedron& p)
         read_sequence(is,a,'[',';',',');
         is >> b;
         is >> c;
-        assert(c==']');
+        ARIADNE_ASSERT(c==']');
         Alst.push_back(a);
         Blst.push_back(b);
     }

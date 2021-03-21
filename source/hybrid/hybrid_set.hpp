@@ -293,7 +293,7 @@ class HybridValidatedConstrainedImageSet
         return new HybridValidatedConstrainedImageSet(*this); }
 
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override {
-        assert(loc==this->location()); return this->Base::variables(); }
+        ARIADNE_ASSERT(loc==this->location()); return this->Base::variables(); }
     virtual Set<DiscreteLocation> locations() const override {
         return {this->Base::location()}; }
 

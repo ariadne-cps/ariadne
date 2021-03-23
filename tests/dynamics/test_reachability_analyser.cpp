@@ -261,7 +261,7 @@ class TestReachabilityAnalyser
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
     TestReachabilityAnalyser().test();
     return ARIADNE_TEST_FAILURES;

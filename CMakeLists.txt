@@ -94,6 +94,11 @@ if((${HAVE_DLFCN_H}) AND (${HAVE_EXECINFO_H}) AND (${HAVE_CXXABI_H}))
     set(ARIADNE_ENABLE_STACK_TRACE ON)
 endif()
 
+find_package(Threads)
+if(NOT Threads_FOUND)
+    message(FATAL ERROR "Unable to find Threads library.")
+endif()
+
 find_package(GMP)
 if(GMP_FOUND)
     include_directories(SYSTEM ${GMP_INCLUDES})
@@ -162,9 +167,9 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
     target_link_libraries(ariadne coverage_config)

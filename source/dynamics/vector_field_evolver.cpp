@@ -125,15 +125,15 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {

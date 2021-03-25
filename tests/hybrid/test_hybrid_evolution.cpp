@@ -79,7 +79,7 @@ Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
 
 Void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
-//    ARIADNE_TEST_CALL(test_water_tank());
+    ARIADNE_TEST_CALL(test_water_tank());
 }
 
 Void TestHybridEvolution::test_bouncing_ball() const {
@@ -218,7 +218,6 @@ Int main(Int argc, const char* argv[])
     DRAWING_ACCURACY = 1u;
 
     TestHybridEvolution().test();
-    std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
 

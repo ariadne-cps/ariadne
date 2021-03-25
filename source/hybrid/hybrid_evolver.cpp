@@ -251,7 +251,7 @@ orbit(const HybridExactBoxType& initial_box,
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
     ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
-    HybridEnclosure initial_enclosure(initial_box,this->function_factory());
+    HybridEnclosure initial_enclosure(initial_box,EnclosureConfiguration(this->function_factory()));
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -265,7 +265,7 @@ orbit(const HybridBoxSet& initial_box,
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
     ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
-    HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),this->function_factory());
+    HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),EnclosureConfiguration(this->function_factory()));
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -278,7 +278,7 @@ orbit(const HybridBoundedConstraintSet& initial_set,
 {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("initial_set="<<initial_set);
-    HybridEnclosure initial_enclosure(initial_set,this->system().continuous_state_space(initial_set.location()),this->function_factory());
+    HybridEnclosure initial_enclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -384,13 +384,13 @@ HybridEvolverBase::set_solver(const SolverInterface& solver)
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridExactBox& initial_box) const
 {
-    return HybridEnclosure(initial_box,this->function_factory());
+    return HybridEnclosure(initial_box,EnclosureConfiguration(this->function_factory()));
 }
 
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridBoundedConstraintSet& initial_set) const
 {
-    return HybridEnclosure(initial_set,this->system().continuous_state_space(initial_set.location()),this->function_factory());
+    return HybridEnclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
 }
 
 

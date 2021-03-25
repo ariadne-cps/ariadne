@@ -132,7 +132,7 @@ Void TestContinuousEvolution::test() const
 
     // Over-approximate the initial set by a grid cell
     TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
-    EnclosureType initial_set(initial_box,vanderpol.state_space(),function_factory);
+    EnclosureType initial_set(initial_box,vanderpol.state_space(),EnclosureConfiguration(function_factory));
     ARIADNE_TEST_PRINT(initial_set);
 
     Semantics semantics=Semantics::UPPER;
@@ -200,7 +200,7 @@ Void TestContinuousEvolution::failure_test() const
     evolverone.configuration().set_maximum_step_size(step_size);
 
     TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-10));
-    EnclosureType initial_set(initial_box,failone_vf.state_space(),function_factory);
+    EnclosureType initial_set(initial_box,failone_vf.state_space(),EnclosureConfiguration(function_factory));
     // cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=Semantics::UPPER;
@@ -247,7 +247,7 @@ Void TestContinuousEvolution::failure_test() const
     evolvertwo.configuration().set_maximum_step_size(step_size);
 
     ExactBoxType initial_box2 = ExactBoxType{{0.0_x,0.0_x},{1.0_x,1.0_x},{1.0_x,1.0_x}};
-    initial_set = EnclosureType(initial_box2,failtwo_vf.state_space(),function_factory);
+    initial_set = EnclosureType(initial_box2,failtwo_vf.state_space(),EnclosureConfiguration(function_factory));
 
     time = 1.5_dec;
 

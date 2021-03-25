@@ -34,143 +34,6 @@
 
 using namespace Ariadne;
 
-class TestHybridSystem {
-  public:
-    Void test();
-  private:
-    Void test_build_hybrid_system();
-    Void test_static_analysis();
-  private:
-    RestrictiveHybridAutomaton _system;
-};
-
-Void
-TestHybridSystem::test()
-{
-    std::clog<<std::boolalpha;
-    std::cerr<<std::boolalpha;
-    ARIADNE_TEST_CALL(test_build_hybrid_system());
-    ARIADNE_TEST_CALL(test_static_analysis());
-}
-
-
-Void
-TestHybridSystem::test_build_hybrid_system()
-{
-    // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0_dec);
-    RealConstant hmin("hmin",5.5_dec);
-    RealConstant hmax("hmax",8.0_dec);
-    RealConstant delta("delta",0.05_dec);
-    RealConstant lambda("lambda",0.02_dec);
-    RealConstant rate("rate",0.3_dec);
-
-    // Declare the system variables
-    RealVariable height("height");
-    RealVariable alpha("alpha");
-
-    // Create the tank object
-    RestrictiveHybridAutomaton tank_component;
-    // The water level is always given by the same dynamic
-    // The inflow is controlled by the valve alpha, the outflow depends on the
-    // pressure, which is proportional to the water height.
-    tank_component.new_dynamic(DiscretePredicate(true),{dot(height)=-lambda*height+rate*alpha});
-    tank_component.disable_events(DiscretePredicate(true),complement(EventSet()));
-    ARIADNE_TEST_PRINT(tank_component.mode(DiscreteLocation()));
-    ARIADNE_TEST_PRINT(tank_component);
-
-    // Describe the valve model
-
-    // Declare the events we use in the valve automaton
-    DiscreteEvent start_opening("start_opening");
-    DiscreteEvent start_closing("start_closing");
-    DiscreteEvent finished_opening("finished_opening");
-    DiscreteEvent finished_closing("finished_closing");
-
-    // Declare the locations we use
-    StringConstant open("open");
-    StringConstant opening("opening");
-    StringConstant closed("closed");
-    StringConstant closing("closing");
-
-    RealVariable beta("beta");
-    StringVariable valve("valve");
-
-    RestrictiveHybridAutomaton valve_component;
-
-    valve_component.disable_events(valve==open || valve==opening,complement(EventSet{start_closing,finished_opening}));
-    valve_component.disable_events((valve==closed || valve==closing),complement(EventSet{start_opening,finished_closing}));
-    valve_component.disable_events(valve==open,finished_opening);
-    valve_component.disable_events(valve==closed,finished_closing);
-
-    // Since alpha is a known constant when the valve is open or closed,
-    // specify alpha by an algebraic equation.
-    valve_component.new_auxiliary(valve==open,{let(alpha)=1});
-    valve_component.new_auxiliary(valve==closed,{let(alpha)=-1});
-    // Specify the differential equation for how the valve opens/closes.
-    valve_component.new_dynamic(valve==opening,{dot(alpha)=1/T});
-    valve_component.new_dynamic(valve==closing,{dot(alpha)=-1/T});
-
-    // Specify the invariants valid in each mode. Note that every invariant
-    // must have an action label. This is used internally, for example, to
-    // check non-blockingness of urgent actions.
-    //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
-    valve_component.new_invariant(valve==open,start_closing,height<=hmax);
-    valve_component.new_invariant(valve==opening,start_closing,height<=hmax);
-    valve_component.new_invariant(valve==opening,finished_opening,alpha<=1);
-    valve_component.new_invariant(valve==closed,start_opening,height>=hmin);
-    valve_component.new_invariant(valve==closing,start_opening,height>=hmin);
-    valve_component.new_invariant(valve==closing,finished_closing,alpha>=0);
-
-    valve_component.new_transition(valve==closed,start_opening,(next(valve)=opening),{next(alpha)=alpha},height<=hmin);
-    valve_component.new_transition(valve==closing,start_opening,next(valve)=opening,{next(alpha)=alpha},height<=hmin);
-    valve_component.new_transition(valve==open,start_closing,(next(valve)=closing),{next(alpha)=alpha},height>=hmax);
-    valve_component.new_transition(valve==opening,start_closing,(next(valve)=closing),{next(alpha)=alpha},height>=hmax);
-
-    // Set the transitions for when the valve finished opening.
-    // Since alpha is defined by an algebraic equation in the new mode,
-    // it may not be specified in the reset.
-    valve_component.new_transition(valve==opening,finished_opening,next(valve)=open,alpha>=1);
-    valve_component.new_transition(valve==closing,finished_closing,next(valve)=closed,alpha<=0);
-
-    ARIADNE_TEST_PRINT(valve_component.mode({valve|opening}));
-    ARIADNE_TEST_PRINT(valve_component.mode({valve|closing}));
-    ARIADNE_TEST_PRINT(valve_component.mode({valve|open}));
-    ARIADNE_TEST_PRINT(valve_component.mode({valve|closed}));
-    ARIADNE_TEST_PRINT(valve_component);
-
-    RestrictiveHybridAutomaton watertank_system=compose({tank_component,valve_component});
-    std::cout << "watertank_system:\n" << watertank_system << "\n";
-
-    _system=watertank_system;
-
-    Set<DiscreteLocation> reachable = valve_component.reachable_locations(valve|open);
-    std::cerr << reachable;
-    for(Set<DiscreteLocation>::ConstIterator iter=reachable.begin(); iter!=reachable.end(); ++iter) {
-        std::cerr<<valve_component.mode(*iter)<<"\n";
-        valve_component.check_mode(*iter);
-    }
-
-}
-
-
-
-
-
-Void TestHybridSystem::test_static_analysis()
-{
-    DiscreteLocation valve_opening(StringVariable("valve")|"opening");
-    ARIADNE_TEST_EXECUTE(this->_system.check_mode(valve_opening));
-    //ARIADNE_TEST_EXECUTE(_system.check_mode((tank|draining,valve|open)));
-    //ARIADNE_TEST_EXECUTE(_system.check_reachable_modes((tank|draining,valve|opening)));
-    //ARIADNE_TEST_EXECUTE(_system.discrete_reachability((tank|draining,valve|opening)));
-
-    //DiscreteLocation invalid_location=(tank|"nonexistent",valve|"opening");
-    //ARIADNE_TEST_FAIL(_system.discrete_reachability(invalid_location));
-}
-
-
-
 class TestHybridAutomaton {
   public:
     Void test();
@@ -605,13 +468,8 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 
 }
 
-
-
 Int main() {
-    //ARIADNE_TEST_CALL(TestHybridAutomaton().test_build_atomic_hybrid_automaton());
     ARIADNE_TEST_CALL(TestHybridAutomaton().test());
-
-    //ARIADNE_TEST_CALL(TestHybridSystem().test());
     return ARIADNE_TEST_FAILURES;
 }
 

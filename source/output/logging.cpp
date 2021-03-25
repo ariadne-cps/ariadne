@@ -34,17 +34,6 @@
 
 namespace Ariadne {
 
-std::ofstream log_file_stream;
-
-void redirect_log(const char* filename)
-{
-    if(log_file_stream.is_open()) {
-        log_file_stream.close();
-    }
-    log_file_stream.open(filename);
-    std::clog.rdbuf( log_file_stream.rdbuf() );
-}
-
 std::string very_pretty_function(std::string msg) {
     size_t ariadne_pos = std::string::npos;
     while ((ariadne_pos  = msg.find("Ariadne::")) != std::string::npos) msg.erase(ariadne_pos,9);
@@ -639,6 +628,18 @@ void Logger::use_blocking_scheduler() {
 
 void Logger::use_nonblocking_scheduler() {
     _scheduler.reset(new NonblockingLoggerScheduler());
+}
+
+void Logger::redirect_to_console() {
+    if(_redirect_file.is_open()) _redirect_file.close();
+    std::clog.rdbuf(_default_streambuf);
+}
+
+void Logger::redirect_to_file(const char* filename) {
+    if(_redirect_file.is_open()) _redirect_file.close();
+    _redirect_file.open(filename);
+    _default_streambuf = std::clog.rdbuf();
+    std::clog.rdbuf( _redirect_file.rdbuf() );
 }
 
 void Logger::register_thread(std::thread::id id, std::string name) {

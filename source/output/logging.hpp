@@ -292,6 +292,9 @@ class Logger {
     void use_blocking_scheduler();
     void use_nonblocking_scheduler();
 
+    void redirect_to_file(const char* filename);
+    void redirect_to_console();
+
     void register_thread(std::thread::id id, std::string name);
     void unregister_thread(std::thread::id id, std::string name);
 
@@ -329,6 +332,8 @@ class Logger {
     bool _can_print_thread_name() const;
   private:
     static const unsigned int _MUTE_LEVEL_OFFSET = 1024;
+    std::ofstream _redirect_file;
+    std::basic_streambuf<char>* _default_streambuf;
     std::vector<LogRawMessage> _current_held_stack;
     unsigned int _cached_num_held_columns;
     unsigned int _cached_last_printed_level;
@@ -337,11 +342,8 @@ class Logger {
     LoggerConfiguration _configuration;
 };
 
-// Global log output file
-extern std::ofstream log_file_stream;
-
 //! \brief Redirect logging output to file \a filename.
-void redirect_log(const char* filename);
+std::ofstream redirect_log(const char* filename);
 
 } // namespace Ariadne
 

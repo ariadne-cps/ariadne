@@ -67,6 +67,7 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_handles_multiline_output());
         ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
         ARIADNE_TEST_CALL(test_multiple_threads());
+        ARIADNE_TEST_CALL(test_redirect());
         return 0;
     }
 
@@ -157,6 +158,30 @@ class TestLogging {
         thread1.join();
         thread2.join();
         thread3.join();
+    }
+
+    Void test_redirect() {
+        Logger::instance().use_immediate_scheduler();
+        ARIADNE_LOG_SET_VERBOSITY(1);
+        ARIADNE_LOG_PRINTLN("This is call 1");
+        Logger::instance().redirect_to_file("log.txt");
+        ARIADNE_LOG_PRINTLN("This is call 2");
+        ARIADNE_LOG_PRINTLN("This is call 3");
+        Logger::instance().redirect_to_console();
+        ARIADNE_LOG_PRINTLN("This is call 4");
+        ARIADNE_LOG_PRINTLN("This is call 5");
+
+        std::string line;
+        std::ifstream file("log.txt");
+        unsigned int count = 0;
+        if(file.is_open()) {
+            while(!file.eof()) {
+                getline(file,line);
+                count++;
+            }
+            file.close();
+        }
+        ARIADNE_TEST_EQUALS(count,3);
     }
 
 };

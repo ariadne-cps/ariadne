@@ -97,9 +97,15 @@ class TestVerifySafety
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        GradedTaylorSeriesIntegrator integrator(MaximumError(1e-2_pr));
+        Configuration<TaylorPicardIntegrator> integrator_configuration;
+        integrator_configuration.set_step_maximum_error(1e-5);
+        TaylorPicardIntegrator integrator(integrator_configuration);
 
-        EvolverType evolver(system,integrator);
+        EvolverType evolver(system,Configuration<EvolverType>()
+                .set_integrator(integrator)
+                .set_enable_reconditioning(true)
+                .set_maximum_spacial_error(1e-2)
+        );
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_inclusion_evolver.cpp
  *
- *  Copyright  2008-20  Copyright  2008-20uca Geretti, Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 
@@ -66,17 +66,18 @@ class TestInclusionIntegrator {
         SizeType period_of_parameter_reduction=3;
         ExactDouble ratio_of_parameters_to_keep=3.0_x;
         ExactDouble sw_threshold = 1e-8_pr;
-        ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
-
+        SweeperDP sweeper = ThresholdSweeperDP(DoublePrecision(),sw_threshold);
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
 
-        TaylorPicardIntegrator integrator(
-                maximum_error=1e-3_pr,
-                sweeper,
-                lipschitz_constant=0.5_x,
-                step_maximum_error=1e-3_pr,
-                minimum_temporal_order=4,
-                maximum_temporal_order=12);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+            .set_step_maximum_error(1e-3)
+            .set_sweeper(sweeper)
+            .set_lipschitz_tolerance(0.5)
+            .set_maximum_temporal_order(12)
+            .set_minimum_temporal_order(4)
+        );
+
+        std::cout << "2" << std::endl;
 
         LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 

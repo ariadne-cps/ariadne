@@ -649,7 +649,7 @@ void Logger::register_thread(std::thread::id id, std::string name) {
     else if (bls != nullptr) bls->create_data_instance(id,name);
 }
 
-void Logger::unregister_thread(std::thread::id id, std::string name) {
+void Logger::unregister_thread(std::thread::id id) {
     auto nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
     if (nbls != nullptr) nbls->kill_data_instance(id);
 }

@@ -296,7 +296,7 @@ class Logger {
     void redirect_to_console();
 
     void register_thread(std::thread::id id, std::string name);
-    void unregister_thread(std::thread::id id, std::string name);
+    void unregister_thread(std::thread::id id);
 
     void println(unsigned int level_increase, std::string text);
     void hold(std::string scope, std::string text);

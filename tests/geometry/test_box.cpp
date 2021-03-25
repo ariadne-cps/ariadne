@@ -66,6 +66,14 @@ template<class BX> class TestBoxType {
     ARIADNE_TEST_CONSTRUCT( BoxType, r5, ({{0.0_x,1.1875_x},{0.4375_x,1.0_x}}) );
     ARIADNE_TEST_CONSTRUCT( BoxType, r6, ({{0.0_x,1.0_x},{0.0_x,0.5_x}}) );
 
+    ARIADNE_TEST_EQUALS(r2.volume(),1.75_x);
+    ARIADNE_TEST_EQUALS(r2.semiperimeter(),2.875_x);
+
+    ARIADNE_TEST_EQUALS(r2.widths()[0],2.0_x);
+    ARIADNE_TEST_EQUALS(r2.widths()[1],0.875_x);
+    ARIADNE_TEST_EQUALS(r2.radii()[0],1.0_x);
+    ARIADNE_TEST_EQUALS(r2.radii()[1],0.4375_x);
+
     ARIADNE_TEST_EQUALS(r2.measure(), 1.75_x);
 
     ARIADNE_TEST_ASSERT(r2.midpoint()==PointType({0.5_x,0.0625_x},dp));

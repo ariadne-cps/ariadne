@@ -194,7 +194,7 @@ class Box
     //! The radii of the sides.
     Vector<RadiusType> radii() const;
     //! The sum of the lengths of the sides.
-    RadiusType perimeter() const;
+    RadiusType semiperimeter() const;
     //! Half the length of the longest side.
     RadiusType radius() const;
 

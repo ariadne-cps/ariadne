@@ -157,7 +157,7 @@ template<class I> Vector<typename Box<I>::RadiusType> Box<I>::radii() const
     return r;
 }
 
-template<class I> typename Box<I>::RadiusType Box<I>::perimeter() const
+template<class I> typename Box<I>::RadiusType Box<I>::semiperimeter() const
 {
     const Box<I>& bx=*this;
     ARIADNE_ASSERT(bx.dimension()>0);

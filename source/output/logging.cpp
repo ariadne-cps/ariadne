@@ -267,7 +267,6 @@ class BlockingLoggerScheduler : public LoggerSchedulerInterface {
     void increase_level(unsigned int i) override;
     void decrease_level(unsigned int i) override;
     void create_data_instance(std::thread::id id, std::string name);
-    ~BlockingLoggerScheduler() override = default;
   private:
     std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
     std::mutex _data_mutex;

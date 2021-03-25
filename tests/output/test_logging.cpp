@@ -147,17 +147,15 @@ class TestLogging {
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the main thread without other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::thread thread1([]() { print_something1(); }),
-                            thread2([]() { print_something2(); }),
-                            thread3([]() { print_something3(); });
+        std::thread thread1([]() { print_something1(); }), thread2([]() { print_something2(); });
         Logger::instance().register_thread(thread1.get_id(),"thr1");
         Logger::instance().register_thread(thread2.get_id(),"thr2");
-        Logger::instance().register_thread(thread3.get_id(),"thr3");
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         thread1.join();
         thread2.join();
-        thread3.join();
+        Logger::instance().unregister_thread(thread1.get_id());
+        Logger::instance().unregister_thread(thread2.get_id());
     }
 
     Void test_redirect() {

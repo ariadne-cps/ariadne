@@ -54,13 +54,11 @@ public:
     virtual Void set_fill_opacity(double fo) { }
     virtual Void set_fill_colour(double r, double g, double b) { }
 
-    virtual Void plot_data(Array<double> data) { }
-    virtual Void plot_bounds(Array<Array<double>> bounds) { }
-    virtual Void plot_tensor_2d_image(Tensor<2, double> tensor) { }
-    virtual Void plot_tensor_3d_image(Tensor<3, double> tensor) { }
-    virtual Void plot_xz_projection(Tensor<3, double> tensor) { }
-    virtual Void plot_xy_projection(Tensor<3, double> tensor) { }
-    virtual Void plot_yz_projection(Tensor<3, double> tensor) { }
+    virtual Void set_3d_palette() { }
+    virtual Void set_2d_palette() { }
+    virtual Void fill3d() { }   
+    virtual Void set_map() { }
+    virtual Void is_std() { }
 
     virtual Vector2d scaling() const { return Vector2d(0,0); }
     virtual Box2d bounds() const { return Box2d(0,0,0,0); }

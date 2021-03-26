@@ -26,8 +26,6 @@
 #include "../output/graphics.hpp"
 #include "../config.hpp"
 #include "../utility/string.hpp"
-#include "algebra/tensor.hpp"
-#include "numeric/float_bounds.hpp"
 #include "geometry2d.hpp"
 #include <string>
 #include <ctype.h>
@@ -75,13 +73,7 @@ private:
     bool is3DPalette;
     _Labels labels;
     GnuplotFileType fileType;
-
-private:
-    Void plot_2d(Array<double> data);
-
-    Void plot_2d(Array<Array<double>> data);
-
-    Void plot_3d(Array<Array<double>> data);
+    Bool isStd;
 
 public:
     ~GnuplotCanvas();
@@ -109,15 +101,11 @@ public:
     Box2d bounds() const;
 
     Void set_3d_palette();
+    Void set_2d_palette();
+    Void fill3d();
+    Void set_map();
+    Void is_std();
 
-    Void plot_data(Array<double> data);
-    Void plot_bounds(Array<Array<double>> bounds);
-    Void plot_tensor_2d_image(Tensor<2, double> tensor);
-    Void plot_tensor_3d_image(Tensor<3, double> tensor);
-    Void plot_xy_projection(Tensor<3, double> tensor);
-    Void plot_yz_projection(Tensor<3, double> tensor);
-    Void plot_xz_projection(Tensor<3, double> tensor);
-    //CanvasInterface
 
     //Set Multiplot - Multiple plot on same screen
     void set_multiplot(bool s);
@@ -153,8 +141,6 @@ public:
     void set_xyz_log_axis();
     // Set Legend
     void set_legend();
-    // Set View Projection of a 3D rapresentation
-    void set_map();
     //Set 3D palette
     void set_3d_palette(double min, double max, double step);
     //Set 2D palette
@@ -172,4 +158,6 @@ GnuplotCanvas::~GnuplotCanvas()
 
 } // namespace Ariadne
 
-#endif // HAVE_GNUPLOT_H
+
+
+#endif

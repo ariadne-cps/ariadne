@@ -74,14 +74,11 @@ class CairoCanvas
     Void set_fill_opacity(double o);
     Void set_fill_colour(double r, double g, double b);
 
-    //GNUPLOT NOT IMPLEMENTED
-    Void plot_tensor_2d_image(Tensor<2, double> tensor);
-    Void plot_tensor_3d_image(Tensor<3, double> tensor);
-    Void plot_data(Array<double> data);
-    Void plot_bounds(Array<Array<double>> bounds);
-    Void plot_xy_projection(Tensor<3, double> tensor);  //TODO
-    Void plot_xz_projection(Tensor<3, double> tensor);  //TODO
-    Void plot_yz_projection(Tensor<3, double> tensor);  //TODO
+    Void set_3d_palette();
+    Void set_2d_palette();
+    Void fill3d();
+    Void set_map();
+    Void is_std();
 
     Vector2d scaling() const;
     Box2d bounds() const;

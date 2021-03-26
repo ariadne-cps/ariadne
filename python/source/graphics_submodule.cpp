@@ -88,13 +88,6 @@ Void export_figure(pybind11::module& module)
     figure_class.def("write",(Void(Figure::*)(const Char*, GnuplotFileType)const)&Figure::write);
     figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, CairoFileType)const)&Figure::write);
     figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, GnuplotFileType)const)&Figure::write);
-    figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, GnuplotFileType, Tensor<2, double>)const)&Figure::write);
-    figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, GnuplotFileType, Tensor<3, double>)const)&Figure::write);
-    figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, GnuplotFileType, Array<double>)const)&Figure::write);
-    figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat, GnuplotFileType, Array<Array<double>>)const)&Figure::write);
-
-
-
 
 }
 

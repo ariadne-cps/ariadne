@@ -122,7 +122,7 @@ find_package(Gnuplot 5.2.8)
 if(GNUPLOT_FOUND)
     set(HAVE_GNUPLOT_H ON)
 else()
-    message(WARNING "Unable to find GNUPLOT 5.4. You will not be able to use GNUPLOT.")
+    message(WARNING "Unable to find GNUPLOT 5.2.8. You will not be able to use GNUPLOT.")
     set(HAVE_GNUPLOT_H OFF)
 endif()
 

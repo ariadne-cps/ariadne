@@ -82,7 +82,7 @@ namespace Ariadne{
         SizeType n = 0;
         uts[{0, n}] = 0;
         uts[{Nx - 1, n}] = 0;
-        for (SizeType i = 1; i < Nx - 1; i++)
+        for (SizeType i = 1; i < Nx; i++)
         {
             uts[{i, n+1}] = (uts[{i, n}] - C2*(uts[{i-1, n}] - 2u*uts[{i, n}] + uts[{i+1, n}])/2u
                 + pow(dt,2)*sin(stringParameter.k*space[i])*cos(stringParameter.omega*time[n]));//source(space[i], time[n]));//.value();
@@ -94,7 +94,7 @@ namespace Ariadne{
             uts[{0, n}] = 0;
             uts[{Nx - 1, n}] = 0;
             // Update inner points
-            for (SizeType i = 1; i < Nx - 1; i++)
+            for (SizeType i = 1; i < Nx; i++)
             {
                 uts[{i, n+1}] = ((1/(stringParameter.damping*dt/2u+1))*(2*uts[{i, n}] - uts[{i, n-1}] + (stringParameter.damping*dt/2)*uts[{i, n-1}] +
                     C2*(uts[{i-1, n}] - 2*uts[{i, n}] + uts[{i+1, n}])) + 1000u*pow(dt, 2)*sin(stringParameter.k*space[i])*cos(stringParameter.omega*time[n]));//source(space[i], time[n]));//.value();

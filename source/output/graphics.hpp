@@ -40,7 +40,6 @@
 #include "symbolic/variable.hpp"
 #include "output/colour.hpp"
 #include "output/graphics_interface.hpp"
-#include "algebra/tensor.hpp"
 
 namespace Ariadne {
 
@@ -240,93 +239,7 @@ class Figure
     Figure& draw(const ApproximateBoxType& box);
     Figure& draw(const RealBox& box);
 
-    template<typename T>
-    Figure& draw(const Tensor<2, T> tensor2d)
-    {
-      Tensor<2, double> tensor({tensor2d.size(0), tensor2d.size(1)}, 0);
-      for (SizeType i = 0; i < tensor.size(1); i++)
-      {
-          for (SizeType j = 0; j < tensor.size(0); j++)
-          {
-              tensor[{j, i}] = tensor2d[{j, i}].get_d();
-          }
-      }
-      this->function_to_draw(tensor);
-      return *this;
-    }
-
-    template<typename T>
-    Figure& draw(const Tensor<3, T> tensor3d)
-    {
-      Tensor<3, double> tensor({tensor3d.size(0), tensor3d.size(1), tensor3d.size(2)}, 0);
-      for (SizeType i = 0; i < tensor.size(2); i++)
-      {
-          for (SizeType j = 0; j < tensor.size(1); j++)
-          {
-              for (SizeType z = 0; z < tensor.size(0); z++)
-              {
-                  tensor[{z, j, i}] = tensor3d[{z, j, i}].get_d();
-              }
-          }
-      }
-      this->function_to_draw(tensor);
-      return *this;
-    }
-
-    template<typename T>
-    Figure& draw(Array<T> array)
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-
-    template<typename T>
-    Figure& draw(Vector<T> array)
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-
-    template<typename T>
-    Figure& draw(Vector<Bounds<T>> bounds)
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-    template<typename T>
-    Figure& draw(Array<Bounds<T>> bounds)
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
+    Figure& draw3d(const DrawableInterface3d& shape);
 
     //! Clear the figure.
     Figure& clear();
@@ -343,25 +256,14 @@ class Figure
     Void write(const Char* filename, Nat nx, Nat ny, CairoFileType fileType) const;
     Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType) const;
 
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Tensor<2, double> tensor) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Tensor<3, double> tensor) const;
-
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Array<double> data) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Array<Array<double>> bounds) const;
   public:
     struct Data;
   public:
     Void _paint_all(CanvasInterface& canvas) const;
-    Void _paint_all(CanvasInterface& canvas, GnuplotFileType fileType) const; // Writes all shapes to the canvas
-    Void _paint2d(CanvasInterface& canvas, GnuplotFileType fileType) const;
-    Void _paint3d(CanvasInterface& canvas, GnuplotFileType fileType) const;    
+    Void _paint3d(CanvasInterface& canvas) const;    
   
   private:
     Data* _data;
-    Void function_to_draw(Tensor<2, double> tensor2d);
-    Void function_to_draw(Tensor<3, double> tensor3d);
-    Void function_to_draw(Array<double> array);
-    Void function_to_draw(Array<Array<double>>  vectorBound);
 };
 
 
@@ -408,94 +310,7 @@ class LabelledFigure {
 
     //! Add a set to draw onto the figure.
     LabelledFigure& draw(const LabelledDrawableInterface& shape);
-
-    template<typename T>
-    LabelledFigure& draw(const Tensor<2, T> tensor2d)
-    {
-      Tensor<2, double> tensor({tensor2d.size(0), tensor2d.size(1)}, 0);
-      for (SizeType i = 0; i < tensor.size(1); i++)
-      {
-          for (SizeType j = 0; j < tensor.size(0); j++)
-          {
-              tensor[{j, i}] = tensor2d[{j, i}].get_d();
-          }
-      }
-      this->function_to_draw(tensor);
-      return *this;
-    }
-
-    template<typename T>
-    LabelledFigure& draw(const Tensor<3, T> tensor3d)
-    {
-      Tensor<3, double> tensor({tensor3d.size(0), tensor3d.size(1), tensor3d.size(2)}, 0);
-      for (SizeType i = 0; i < tensor.size(2); i++)
-      {
-          for (SizeType j = 0; j < tensor.size(1); j++)
-          {
-              for (SizeType z = 0; z < tensor.size(0); z++)
-              {
-                  tensor[{z, j, i}] = tensor3d[{z, j, i}].get_d();
-              }
-          }
-      }
-      this->function_to_draw(tensor);
-      return *this;
-    }
-
-    template<typename T>
-    LabelledFigure& draw(Array<T> array)
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-
-    template<typename T>
-    LabelledFigure& draw(Vector<T> array)
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-
-    template<typename T>
-    LabelledFigure& draw(Vector<Bounds<T>> bounds)
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
-    template<typename T>
-    LabelledFigure& draw(Array<Bounds<T>> bounds)
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->function_to_draw(A);
-      return *this;
-    }
+    LabelledFigure& draw3d(const LabelledDrawableInterface3d& shape);
 
     //! Clear the figure.
     LabelledFigure& clear();
@@ -508,80 +323,17 @@ class LabelledFigure {
     Void write(const Char* filename, CairoFileType fileType) const;
     Void write(const Char* filename, GnuplotFileType fileType) const;
 
-    template<typename T>
-    Void write(const Char* filename, Vector<Bounds<T>> bounds) const
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->write(filename, 800,800, GnuplotFileType::PNG, A);
-    }
-
-    template<typename T>
-    Void write(const Char* filename, Array<Bounds<T>> bounds) const
-    {
-      Array<Array<double>> A(2);  //Lower and Upper value
-      A[0].resize(bounds.size());
-      A[1].resize(bounds.size());
-
-      for (SizeType i = 0; i < bounds.size(); i++)
-      {
-        A[0].at(i)=bounds[i].lower().get_d();
-        A[1].at(i)=bounds[i].upper().get_d();
-      }
-      this->write(filename, 800,800, GnuplotFileType::PNG, A);
-    }
-
-    template<typename T>
-    Void write(const Char* filename, Array<T> array) const
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->write(filename, 800,800,GnuplotFileType::PNG, A);
-    }
-    template<typename T>
-    Void write(const Char* filename, Vector<T> array) const
-    {
-      Array<double> A(array.size(), 0);
-      for (SizeType i = 0; i < array.size(); i++)
-      {
-        A[i] = array[i].get_d();
-      }
-      this->write(filename, 800,800,GnuplotFileType::PNG, A);
-    }
-
     //! Write out to file, using width \a nx pixels, and height \a ny pixels
     Void write(const Char* filename, Nat nx, Nat ny, CairoFileType fileType) const;
     Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType) const;
-
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Tensor<2, double> tensor) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Tensor<3, double> tensor) const;
   
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Array<double> data) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType, Array<Array<double>> bounds) const;
   public:
     struct Data;
   public:
     Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
-    Void _paint_all(CanvasInterface& canvas, GnuplotFileType fileType) const; // Writes all shapes to the canvas
-    Void _paint2d(CanvasInterface& canvas, GnuplotFileType fileType) const;
-    Void _paint3d(CanvasInterface& canvas, GnuplotFileType fileType) const;
+    Void _paint3d(CanvasInterface& canvas) const;
   private:
     Data* _data;
-    Void function_to_draw(Tensor<2, double> tensor2d);
-    Void function_to_draw(Tensor<3, double> tensor3d);
-    Void function_to_draw(Array<double> array);
-    Void function_to_draw(Array<Array<double>>  vectorBound);
-    
 };
 
 inline LabelledFigure& operator<<(LabelledFigure& g, const LineStyle& ls) { g.properties().set_line_style(ls); return g; }

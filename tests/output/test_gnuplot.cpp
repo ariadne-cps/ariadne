@@ -1,6 +1,8 @@
 /***************************************************************************
  *            test_gnuplot.cpp
- * 
+ *
+ *  Copyright  2008-21  Mirko Albanese
+ *
  ****************************************************************************
  *  This file is part of Ariadne.
  *
@@ -24,7 +26,8 @@
 #include "ariadne.hpp"
 #include "numeric/numeric.hpp"
 #include "numeric/float_bounds.hpp"
-#include "output/graphics.hpp"
+#include "algebra/tensor.hpp"
+#include "algebra/spec_def.t.hpp"
 
 #ifdef HAVE_GNUPLOT_H
 
@@ -45,51 +48,13 @@ class TestGnuplot
         template<class PR>
         void test(PR pr)
         {
-            ARIADNE_TEST_CALL(defaultSincFunc(pr);)
             ARIADNE_TEST_CALL(stringAnimation(pr));
             ARIADNE_TEST_CALL(gauss3D(pr));
             ARIADNE_TEST_CALL(gauss3DProjXY(pr));
             ARIADNE_TEST_CALL(gauss3DProjXZ(pr));
             ARIADNE_TEST_CALL(gauss3DProjYZ(pr));
             ARIADNE_TEST_CALL(gauss3DAnimation(pr));
-            ARIADNE_TEST_CALL(BoundsData(pr));
         }
-
-        template<class PR>
-        void defaultSincFunc(PR pr)
-        {
-            SizeType dim = 100;
-
-            Array<FloatValue<PR>> data(dim, FloatValue<PR>(0.0_x,pr));
-
-            for (SizeType i = 0; i < dim; i++)
-            {
-                if (i!=0)
-                {
-                    data[i]= FloatValue<PR>(ExactDouble(sin(i)/i), pr);
-                }else
-                {
-                    data[i] = FloatValue<PR>(1.0_x, pr);
-                }
-            }
-        
-            Figure fig1 = Figure(ApproximateBoxType({{0,dim},{-1,1}}), Projection2d(2,0,1));
-            fig1.set_line_colour(0.0,0.0,0.0);
-            fig1.set_line_width(1.0);
-            fig1.set_fill_style(false);
-            fig1.draw(data);
-            fig1.write("Figure-SincFunc"/*, data*/, GnuplotFileType::PNG);
-
-            RealVariable x("x"), y("y");
-            Axes2d axes(0.0<=x<=dim,-1.0<=y<=1.0);
-            LabelledFigure fig2=LabelledFigure(axes);
-            fig2 << line_colour(0.0,0.0,0.0);
-            fig2 << line_width(1.0);
-            fig2 << fill_style(false);
-            fig2 << fill_colour(0.0,0.0,0.0);
-            fig2.draw(data);
-            fig2.write("LabelledFigure-SincFunc"/*, data*/,GnuplotFileType::PNG);
-        }//Sinc Function
 
         template<class PR>
         void stringAnimation(PR pr)
@@ -117,12 +82,13 @@ class TestGnuplot
             stringModel.k = ((2*pi)/wavelength).value();
             stringModel.omega = (2*pi*frequency).value();
 
-            Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx+1, pr);
+            Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0,Nx},{-1,1}}), Projection2d(2,0,1));
+            Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1},{-1,1}}), Projection2d(2,0,1));
             fig1.set_line_colour(0.0,0.0,0.0);
-            fig1.set_line_width(1.0);
+            fig1.set_line_width(4.0);
             fig1.set_fill_style(false);
+            fig1.set_fill_colour(1.0,1.0,1.0);
             fig1.draw(data);
             fig1.write("Figure-StringEvolution", GnuplotFileType::GIF);
 
@@ -130,11 +96,14 @@ class TestGnuplot
             Axes2d axes(0.0<=x<=Nx-1,-1.0<=y<=1.0);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << line_colour(0.0,0.0,0.0);
-            fig2 << line_width(1.0);
+            fig2 << line_width(4.0);
             fig2 << fill_style(false);
-            fig2 << fill_colour(0.0,0.0,0.0);
+            fig2 << fill_colour(1.0,1.0,1.0);
+
             fig2.draw(data);
-            fig2.write("LabelledFigure-StringEvolution"/*, data*/,GnuplotFileType::GIF);
+
+            fig2.write("LabelledFigure-StringEvolution", GnuplotFileType::GIF);
+
         }//String Evolution over time
 
         template<class PR>
@@ -147,15 +116,15 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0,dim},{0,dim},{0,1}}), Projection3d(3,0,1,2));
-            fig1.draw(data);
-            fig1.write("Figure-Gauss3D"/*, data*/, GnuplotFileType::PNG);
+            Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
+            fig1.draw3d(data);
+            fig1.write("Figure-Gauss3D", GnuplotFileType::PNG);
 
             RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim,0<=y<=dim,0<=z<=1);
+            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Gauss3D"/*, data*/,GnuplotFileType::PNG);
+            fig2.draw3d(data);
+            fig2.write("LabelledFigure-Gauss3D",GnuplotFileType::PNG);
             
         }//Gauss 3D
 
@@ -169,18 +138,19 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim}, {0,dim}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xy();
-            fig1.draw(data);
-            fig1.write("FigureGauss3DProjXY"/*,data*/,GnuplotFileType::PNG);
+            fig1.draw3d(data);
+            fig1.write("FigureGauss3DProjXY",GnuplotFileType::PNG);
 
             RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim,0<=y<=dim,0<=z<=1);
+            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xy();
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Gauss3DProjXY"/*, data*/,GnuplotFileType::PNG);
+            fig2.draw3d(data);
+            fig2.write("LabelledFigure-Gauss3DProjXY",GnuplotFileType::PNG);
         }
+
 
         template< class PR>
         void gauss3DProjXZ(PR pr)
@@ -192,17 +162,17 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim}, {0,dim}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xz();
-            fig1.draw(data);
-            fig1.write("Figure-Gauss3DProjXZ"/*, data*/,GnuplotFileType::PNG);
+            fig1.draw3d(data);
+            fig1.write("Figure-Gauss3DProjXZ",GnuplotFileType::PNG);
 
             RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim,0<=y<=dim,0<=z<=1);
+            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xz();
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Gauss3DProjXZ"/*, data*/,GnuplotFileType::PNG);
+            fig2.draw3d(data);
+            fig2.write("LabelledFigure-Gauss3DProjXZ",GnuplotFileType::PNG);
         }
 
         template< class PR>
@@ -215,18 +185,18 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim}, {0,dim}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_yz();
-            fig1.draw(data);
-            fig1.write("Figure-Gauss3DProjYZ"/*, data*/,GnuplotFileType::PNG);
+            fig1.draw3d(data);
+            fig1.write("Figure-Gauss3DProjYZ",GnuplotFileType::PNG);
 
             RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim,0<=y<=dim,0<=z<=1);
+            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_yz();
             //fig << set3Ddim(true);
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Gauss3DProjYZ"/*, data*/,GnuplotFileType::PNG);
+            fig2.draw3d(data);
+            fig2.write("LabelledFigure-Gauss3DProjYZ",GnuplotFileType::PNG);
         }
 
         template<class PR>
@@ -241,52 +211,26 @@ class TestGnuplot
 
             Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0,Nx}, {0,Ny}, {-1,1}}), Projection3d(3, 0, 1, 2));
+            Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
             //fig.set3D(); 
-            fig1.draw(data);
-            fig1.write("Figure-Gauss3DAnimation"/*, data*/,GnuplotFileType::GIF);
+            fig1.draw3d(data);
+            fig1.write("Figure-Gauss3DAnimation",GnuplotFileType::GIF);
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             //fig << set3Ddim(true);
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Gauss3DAnimation"/*, data*/,GnuplotFileType::GIF);
+            fig2.draw3d(data);
+            fig2.write("LabelledFigure-Gauss3DAnimation",GnuplotFileType::GIF);
+
         }
-
-        template <class PR>
-        void BoundsData(PR pr)
-        {
-            FloatBounds<PR> zb(cast_exact(ApproximateDouble(0.0)),pr);
-            FloatBounds<PR> b(cast_exact(ApproximateDouble(1.1)), cast_exact(ApproximateDouble(1.2)), pr);
-
-            Array<FloatBounds<PR>> data(50,zb);
-
-            for (SizeType i = 0; i < data.size(); i++)
-            {
-                data[i] = i*b;
-            }
-
-            Figure fig1 = Figure(ApproximateBoxType({{0,data.size()}, {0,100}}), Projection2d(2, 0, 1));
-            fig1.draw(data);
-            fig1.write("Figure-Bounds"/*, data*/,GnuplotFileType::PNG);
-
-            RealVariable x("x"), y("y");
-            Axes2d axes(0<=x<=data.size(),0<=y<=100);
-            LabelledFigure fig2 = LabelledFigure(axes);
-            fig2.draw(data);
-            fig2.write("LabelledFigure-Bounds"/*, data*/,GnuplotFileType::PNG);
-
-        }//Linear Function - Bounds value
 };
 
 int main(int argc, const char** argv) {
 
     TestGnuplot testGnuplot;
 
-    auto pr = double_precision;
-    
-    testGnuplot.test(pr);
+    testGnuplot.test(double_precision);
 
     return 0;
 }

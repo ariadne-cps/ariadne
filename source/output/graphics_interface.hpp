@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/graphics_interface.hpp
  *
- *  Copyright  2009-20  Davide Bresolin, Pieter Collins
+ *  Copyright  2009-20  Pieter Collins, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -31,7 +31,6 @@
 
 #include "../config.hpp"
 #include "utility/declarations.hpp"
-#include "algebra/tensor.hpp"
 #include "numeric/float_bounds.hpp"
 
 namespace Ariadne {
@@ -55,6 +54,8 @@ struct Projection2d;
 struct Projection3d;
 struct Variables2d;
 struct Variables3d;
+
+enum class ProjType{ no_proj, x1_proj, x2_proj };
 
 struct Projection2d {
     DimensionType n, i, j;
@@ -144,13 +145,12 @@ class CanvasInterface {
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
 
-    virtual Void plot_data(Array<double> data) = 0;
-    virtual Void plot_bounds(Array<Array<double>> bounds) = 0;
-    virtual Void plot_tensor_2d_image(Tensor<2, double> tensor) = 0;
-    virtual Void plot_tensor_3d_image(Tensor<3, double> tensor) = 0;
-    virtual Void plot_xy_projection(Tensor<3, double> tensor) = 0;  
-    virtual Void plot_xz_projection(Tensor<3, double> tensor) = 0;  
-    virtual Void plot_yz_projection(Tensor<3, double> tensor) = 0;  
+    //Gnuplot
+    virtual Void set_3d_palette() = 0;  
+    virtual Void set_2d_palette() = 0;
+    virtual Void fill3d() = 0;   
+    virtual Void set_map() = 0;
+    virtual Void is_std() = 0;
 
     //! \brief The scaling of the figure, in user units per pixel.
     virtual Vector2d scaling() const = 0;
@@ -179,6 +179,22 @@ class DrawableInterface {
     virtual DimensionType dimension() const = 0;
 };
 
+class DrawableInterface3d {
+  public:
+    //! brief The type of data needed to project to a 2d image.
+    typedef Projection3d ProjectionType;
+
+    //! brief Virtual destructor.
+    virtual ~DrawableInterface3d() = default;
+    //! brief Make a dynamically-allocated copy.
+    virtual DrawableInterface3d* clone() const = 0;
+    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
+    virtual Void draw3d(CanvasInterface& c, const Projection3d& p, ProjType proj) const = 0;
+
+    //! brief The dimension of the object in Euclidean space
+    virtual DimensionType dimension() const = 0;
+};
+
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
 class LabelledDrawableInterface {
@@ -191,6 +207,19 @@ class LabelledDrawableInterface {
     virtual LabelledDrawableInterface* clone() const = 0;
     //! brief Draw the projection of object onto variables \a p on the canvas \a c .
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const = 0;
+};
+
+class LabelledDrawableInterface3d {
+  public:
+    //! brief The type of data needed to project to a 2d image.
+    typedef Variables3d ProjectionType;
+    //! brief Virtual destructor.
+    virtual ~LabelledDrawableInterface3d() = default;
+    //! brief Make a dynamically-allocated copy.
+    virtual LabelledDrawableInterface3d* clone() const = 0;
+    //! brief Draw the projection of object onto variables \a p on the canvas \a c .
+    virtual Void draw3d(CanvasInterface& c, const Variables3d& p, ProjType proj) const = 0;
+
 };
 
 } // namespace Ariadne

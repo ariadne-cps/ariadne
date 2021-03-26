@@ -244,7 +244,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver)
 //! [create_analyser]
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 {
-    ARIADNE_LOG_SCOPE_CREATE
+    ARIADNE_LOG_SCOPE_CREATE;
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 

@@ -114,46 +114,6 @@ clone() const
 
 
 
-
-Void
-HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridStorage& reach_cells,
-                                                       HybridStorage& evolve_cells,
-                                                       const HybridStorage& set,
-                                                       const HybridTerminationCriterion& termination,
-                                                       const Nat accuracy,
-                                                       const HybridEvolverInterface& evolver) const
-{
-    ARIADNE_LOG_SCOPE_CREATE;
-    HybridGrid grid=set.grid();
-    HybridGridTreePaving cells=set.state_set();
-    cells.mince(accuracy);
-
-    ProgressIndicator indicator(cells.size());
-    ARIADNE_LOG_PRINTLN("Evolving "<<cells.size()<<" cells");
-    for(HybridGridCell const& cell : cells) {
-        ARIADNE_LOG_PRINTLN_AT(1,"Evolving cell = "<<cell);
-        HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<HybridEnclosure> reach_enclosures;
-        ListSet<HybridEnclosure> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
-        ARIADNE_LOG_PRINTLN_AT(1,"Computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.");
-        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining reach enclosures to grid... ");
-        for(HybridEnclosure const& enclosure : reach_enclosures) {
-            enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
-        }
-        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining final enclosures to grid... ");
-        for(HybridEnclosure const& enclosure : final_enclosures) {
-            enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
-        }
-        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-    }
-    ARIADNE_LOG_PRINTLN("Final reach size = "<<reach_cells.size());
-    ARIADNE_LOG_PRINTLN("Final evolve size = "<<evolve_cells.size());
-}
-
-
-
-
 HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(ReachabilityAnalyser<HybridAutomatonInterface>& analyser)
     : _analyser(analyser)
 {

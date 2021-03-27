@@ -54,7 +54,7 @@ TerminalTextStyle::TerminalTextStyle(uint8_t fontcolor_, uint8_t bgcolor_, bool 
 std::string TerminalTextStyle::operator()() const {
     std::ostringstream ss;
     if (((int)fontcolor) > 0) ss << "\u001b[38;5;" << (int)fontcolor << "m";
-    if (((int)bgcolor) > 0) ss << "\u001b[48;5;" << (int)fontcolor << "m";
+    if (((int)bgcolor) > 0) ss << "\u001b[48;5;" << (int)bgcolor << "m";
     if (bold) ss << "\u001b[1m";
     if (underline) ss << "\u001b[4m";
     return ss.str();

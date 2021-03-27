@@ -1,4 +1,5 @@
 set(UNIT_TESTS
+    test_enclosure
     test_continuous_evolution
     test_inclusion_vector_field
     test_inclusion_evolver

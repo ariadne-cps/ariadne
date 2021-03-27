@@ -1304,23 +1304,6 @@ Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
     this->drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
-Void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    this->reduce();
-    BoxDrawer().draw(canvas,projection,this->state_time_auxiliary_set());
-}
-
-Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, Nat accuracy) const {
-    EnclosureAffineDrawer(accuracy).draw(canvas,projection,this->state_time_auxiliary_set());
-}
-
-Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat fineness) const {
-    GridDrawer(fineness).draw(canvas,projection,this->state_time_auxiliary_set());
-}
-
-
-
-
-
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     Map<K,V> r;
     for(typename Set<K>::ConstIterator iter=s.begin(); iter!=s.end(); ++iter) {

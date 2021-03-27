@@ -7,8 +7,7 @@ add_library(${LIBRARY_NAME} OBJECT
     hybrid_enclosure.cpp
     hybrid_automaton.cpp
     hybrid_automaton-composite.cpp
-    hybrid_automaton-restrictive.cpp
-    hybrid_simulator.cpp
+        hybrid_simulator.cpp
     hybrid_evolver.cpp
     hybrid_reachability_analyser.cpp
     hybrid_graphics.cpp

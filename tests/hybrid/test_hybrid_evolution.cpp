@@ -70,7 +70,6 @@ class TestHybridEvolution
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
-    //evolver->set_integrator(GradedTaylorSeriesIntegrator(1e-5));
     evolver->set_integrator(TaylorPicardIntegrator(1e-5));
     evolver->configuration().set_maximum_step_size(0.25);
     evolver->configuration().set_maximum_enclosure_radius(0.125);
@@ -79,7 +78,7 @@ Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
 
 Void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
-//    ARIADNE_TEST_CALL(test_water_tank());
+    ARIADNE_TEST_CALL(test_water_tank());
 }
 
 Void TestHybridEvolution::test_bouncing_ball() const {
@@ -218,7 +217,6 @@ Int main(Int argc, const char* argv[])
     DRAWING_ACCURACY = 1u;
 
     TestHybridEvolution().test();
-    std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
 

@@ -1,0 +1,94 @@
+/***************************************************************************
+ *            test_enclosure.cpp
+ *
+ *  Copyright  2006-21  Luca Geretti
+ *
+ ****************************************************************************/
+
+/*
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Ariadne is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <fstream>
+#include <iostream>
+
+#include "config.hpp"
+#include "utility/tuple.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/algebra.hpp"
+#include "function/function.hpp"
+#include "function/constraint.hpp"
+#include "function/taylor_function.hpp"
+#include "dynamics/enclosure.hpp"
+#include "geometry/box.hpp"
+#include "geometry/list_set.hpp"
+#include "solvers/integrator.hpp"
+#include "symbolic/expression_set.hpp"
+#include "output/graphics.hpp"
+#include "output/drawer.hpp"
+#include "output/logging.hpp"
+
+#include "function/user_function.hpp"
+
+#include "../test.hpp"
+
+using namespace Ariadne;
+using namespace std;
+
+class TestEnclosure
+{
+  public:
+    Void test() const {
+        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_draw());
+    }
+
+    Void test_construct() const {
+        ExactBoxType box({{0.0_x,1.0_x},{1.0_x,2.0_x}});
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        EnclosureConfiguration configuration(function_factory);
+        Enclosure encl(box,configuration);
+        ARIADNE_TEST_PRINT(encl);
+    }
+
+    Void _draw(Drawer const& drawer, String suffix) const {
+        ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
+        ARIADNE_TEST_PRINT(drawer);
+        ExactBoxType box({{0.0_x,1.0_x},{1.0_x,2.0_x}});
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        EnclosureConfiguration configuration(function_factory);
+        configuration.set_drawer(drawer);
+        Enclosure encl(box,configuration);
+
+        Figure fig;
+        fig.set_bounding_box(encl.bounding_box());
+        fig << line_style(true) << encl;
+        fig.write(("test_enclosure_"+suffix).c_str());
+    }
+
+    Void test_draw() const {
+        _draw(BoxDrawer(),"Box");
+        _draw(GridDrawer(4),"Grid");
+        _draw(AffineDrawer(1),"Affine");
+    }
+};
+
+Int main()
+{
+    ARIADNE_TEST_CALL(TestEnclosure().test());
+    return ARIADNE_TEST_FAILURES;
+}

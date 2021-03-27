@@ -367,14 +367,6 @@ class Enclosure
 
     //! \brief Draw to a canvas.
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const override;
-    //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
-    //! image or when all else fails.
-    [[deprecated]] Void box_draw(CanvasInterface&, const Projection2d& p) const; [[deprecated]]
-    //! \brief Draw the to a canvas by splitting into small enough pieces that
-    //! affine over-approximations yield a good image.
-    [[deprecated]] Void affine_draw(CanvasInterface&, const Projection2d& p, Nat splittings) const;
-    //! \brief Draw the to a canvas by over-approximating on a grid.
-     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat fineness) const;
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

@@ -60,12 +60,14 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_hide_call_function_with_entrance_and_exit());
         ARIADNE_TEST_CALL(test_indents_based_on_level());
         ARIADNE_TEST_CALL(test_hold_line());
-        ARIADNE_TEST_CALL(test_dark_theme());
         ARIADNE_TEST_CALL(test_light_theme());
+        ARIADNE_TEST_CALL(test_dark_theme());
         ARIADNE_TEST_CALL(test_theme_custom_keyword());
+        ARIADNE_TEST_CALL(test_theme_bgcolor_bold_underline());
         ARIADNE_TEST_CALL(test_handles_multiline_output());
         ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
-        ARIADNE_TEST_CALL(test_multiple_threads());
+        ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler());
+        ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
         ARIADNE_TEST_CALL(test_redirect());
         return 0;
     }
@@ -170,17 +172,6 @@ class TestLogging {
         _hold();
     }
 
-    Void test_dark_theme() {
-        Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
-        Logger::instance().configuration().set_theme(TT_THEME_DARK);
-        std::clog << TT_THEME_DARK << std::endl;
-        ARIADNE_LOG_PRINTLN("This is a call on level 1");
-        ARIADNE_LOG_RUN_AT(0,sample_function());
-        ARIADNE_LOG_PRINTLN("This is again a call on level 1");
-        Logger::instance().configuration().set_theme(TT_THEME_NONE);
-    }
-
     Void test_light_theme() {
         Logger::instance().use_immediate_scheduler();
         ARIADNE_LOG_SET_VERBOSITY(2);
@@ -192,19 +183,43 @@ class TestLogging {
         Logger::instance().configuration().set_theme(TT_THEME_NONE);
     }
 
+    Void test_dark_theme() {
+        Logger::instance().use_immediate_scheduler();
+        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_theme(TT_THEME_DARK);
+        std::clog << TT_THEME_DARK << std::endl;
+        ARIADNE_LOG_PRINTLN("This is a call on level 1");
+        ARIADNE_LOG_RUN_AT(0,sample_function());
+        ARIADNE_LOG_PRINTLN("This is again a call on level 1");
+    }
+
     Void test_theme_custom_keyword() {
         Logger::instance().use_immediate_scheduler();
         ARIADNE_LOG_SET_VERBOSITY(1);
-        Logger::instance().configuration().set_theme(TT_THEME_DARK);
         Logger::instance().configuration().add_custom_keyword("first");
         Logger::instance().configuration().add_custom_keyword("second",TT_STYLE_CREAM);
         ARIADNE_LOG_PRINTLN("This is a first custom keyword and a custom styled second one.");
-        Logger::instance().configuration().set_theme(TT_THEME_NONE);
+    }
+
+    Void test_theme_bgcolor_bold_underline() {
+        Logger::instance().use_immediate_scheduler();
+        std::list<TerminalTextStyle> styles;
+        styles.push_back(TerminalTextStyle(0,0,true,false));
+        styles.push_back(TerminalTextStyle(0,0,false,true));
+        styles.push_back(TerminalTextStyle(0,0,true,true));
+        styles.push_back(TerminalTextStyle(0,88,false,false));
+        styles.push_back(TerminalTextStyle(0,88,true,false));
+        styles.push_back(TerminalTextStyle(0,88,false,true));
+        styles.push_back(TerminalTextStyle(0,88,true,true));
+        std::ostringstream ss;
+        for (auto style: styles) {
+            ss << style() << "x" << TerminalTextStyle::RESET << " ";
+        }
+        std::clog << ss.str() << std::endl;
     }
 
     Void test_redirect() {
         Logger::instance().use_immediate_scheduler();
-        Logger::instance().configuration().set_theme(TT_THEME_DARK);
         ARIADNE_LOG_SET_VERBOSITY(1);
         ARIADNE_LOG_PRINTLN("This is call 1");
         Logger::instance().redirect_to_file("log.txt");
@@ -227,9 +242,8 @@ class TestLogging {
         ARIADNE_TEST_EQUALS(count,3);
     }
 
-    Void test_multiple_threads() {
+    Void test_multiple_threads_with_blocking_scheduler() {
         Logger::instance().use_blocking_scheduler();
-        Logger::instance().configuration().set_theme(TT_THEME_DARK);
         ARIADNE_LOG_SET_VERBOSITY(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
@@ -245,6 +259,23 @@ class TestLogging {
         ARIADNE_TEST_PRINT(Logger::instance().cached_last_printed_thread_name());
         ARIADNE_TEST_ASSERT(Logger::instance().cached_last_printed_thread_name().compare("thr1") == 0 or
                                     Logger::instance().cached_last_printed_thread_name().compare("thr2") == 0);
+        Logger::instance().unregister_thread(thread1.get_id());
+        Logger::instance().unregister_thread(thread2.get_id());
+    }
+
+    Void test_multiple_threads_with_nonblocking_scheduler() {
+        Logger::instance().use_nonblocking_scheduler();
+        ARIADNE_LOG_SET_VERBOSITY(3);
+        Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
+        ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::thread thread1([]() { print_something1(); }), thread2([]() { print_something2(); });
+        Logger::instance().register_thread(thread1.get_id(),"thr1");
+        Logger::instance().register_thread(thread2.get_id(),"thr2");
+        ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        thread1.join();
+        thread2.join();
         Logger::instance().unregister_thread(thread1.get_id());
         Logger::instance().unregister_thread(thread2.get_id());
     }

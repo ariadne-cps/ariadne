@@ -591,7 +591,7 @@ void LoggerConfiguration::add_custom_keyword(std::string const& text, TerminalTe
 }
 
 void LoggerConfiguration::add_custom_keyword(std::string const& text) {
-    add_custom_keyword(text,TT_STYLE_NONE);
+    add_custom_keyword(text,theme().keyword);
 }
 
 std::map<std::string,TerminalTextStyle> const& LoggerConfiguration::custom_keywords() const {

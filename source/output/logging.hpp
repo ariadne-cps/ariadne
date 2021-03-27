@@ -70,11 +70,11 @@ inline unsigned int get_verbosity(int argc, const char* argv[]) {
         if(std::strcmp(argv[1],"-v")==0) {
             if(argc>2) {
                 int val = std::atoi(argv[2]);
-                if (val < 0) std::cerr << "Verbosity should be a non-negative value.\n";
+                ARIADNE_ASSERT_MSG(val >= 0,"Verbosity should be a non-negative value.\n");
                 return static_cast<unsigned int>(val);
             }
         } else {
-            std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
+            ARIADNE_FAIL_MSG("Unrecognised command-line option \"" << argv[1] << "\"\n");
         }
     }
     return 0;

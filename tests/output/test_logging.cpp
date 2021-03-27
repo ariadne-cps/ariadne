@@ -51,6 +51,7 @@ class TestLogging {
     }
 
     Int test() {
+        ARIADNE_TEST_CALL(test_get_verbosity());
         ARIADNE_TEST_CALL(test_print_configuration());
         ARIADNE_TEST_CALL(test_shown_single_print());
         ARIADNE_TEST_CALL(test_hidden_single_print());
@@ -70,6 +71,17 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
         ARIADNE_TEST_CALL(test_redirect());
         return 0;
+    }
+
+    void test_get_verbosity() {
+        int argc1 = 1; const char* argv1[1] = {"test_logging"};
+        get_verbosity(argc1,argv1);
+        int argc2 = 2; const char* argv2[2] = {"test_logging","-u"};
+        ARIADNE_TEST_THROWS(get_verbosity(argc2,argv2),std::runtime_error);
+        int argc3 = 3; const char* argv3[3] = {"test_logging","-v","-1"};
+        ARIADNE_TEST_THROWS(get_verbosity(argc3,argv3),std::runtime_error);
+        int argc4 = 3; const char* argv4[3] = {"test_logging","-v","2"};
+        ARIADNE_TEST_EQUALS(get_verbosity(argc4,argv4),2);
     }
 
     Void test_print_configuration() {

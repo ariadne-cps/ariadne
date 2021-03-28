@@ -160,8 +160,6 @@ class HybridEnclosure
     const RealVariable time_variable() const;
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
-    //! \brief The factory used to create functions.
-    const ValidatedFunctionModelDPFactory& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.

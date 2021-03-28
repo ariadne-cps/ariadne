@@ -169,12 +169,6 @@ HybridEnclosure::configuration() const
     return this->_set.configuration();
 }
 
-ValidatedFunctionModelDPFactory const&
-HybridEnclosure::function_factory() const
-{
-    return this->_set.function_factory();
-}
-
 ValidatedScalarMultivariateFunctionModelDP const
 HybridEnclosure::function(RealVariable var) const
 {
@@ -411,7 +405,7 @@ Void HybridEnclosure::bound_time(Real tmax) {
 }
 
 Void HybridEnclosure::bound_time(ValidatedScalarMultivariateFunction tmax) {
-    this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.function_factory().create(this->_set.domain(),tmax));
+    this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.configuration().function_factory().create(this->_set.domain(),tmax));
 }
 
 Void HybridEnclosure::set_time(Real time)
@@ -421,7 +415,7 @@ Void HybridEnclosure::set_time(Real time)
 
 Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 {
-    this->_set.new_zero_parameter_constraint(this->time_function()-this->function_factory().create(this->_set.domain(),time));
+    this->_set.new_zero_parameter_constraint(this->time_function()-this->configuration().function_factory().create(this->_set.domain(),time));
 }
 
 
@@ -469,7 +463,7 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
 }
 
 HybridBasicSet<Enclosure> project(HybridEnclosure const& encl, RealSpace const& spc) {
-    ValidatedVectorMultivariateFunctionModelDP spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
+    ValidatedVectorMultivariateFunctionModelDP spc_funct=encl.configuration().function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
     for(SizeType i=0; i!=spc.dimension(); ++i) { spc_funct[i] = encl.function(spc[i]); }
     Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.configuration());
     return HybridBasicSet<Enclosure>(encl.location(),spc,spc_set);

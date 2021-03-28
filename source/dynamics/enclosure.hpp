@@ -72,16 +72,22 @@ typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> Val
 
 typedef Dyadic StepSizeType;
 
-struct EnclosureConfiguration {
+class EnclosureConfiguration {
+  private:
     ValidatedFunctionModelDPFactory _function_factory;
     Paver _paver;
     Drawer _drawer;
     SizeType _reconditioning_num_blocks;
+  public:
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, SizeType reconditioning_num_blocks = 3u);
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory::Interface const& function_factory, SizeType reconditioning_num_blocks = 3u)
         : EnclosureConfiguration(ValidatedFunctionModelDPFactory(function_factory.clone()),reconditioning_num_blocks) { }
     EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, Drawer drawer, SizeType reconditioning_num_blocks = 3u)
         : _function_factory(function_factory), _paver(paver), _drawer(drawer), _reconditioning_num_blocks(reconditioning_num_blocks) { }
+    ValidatedFunctionModelDPFactory const& function_factory() const { return _function_factory; }
+    Paver const& paver() const { return _paver; }
+    Drawer const& drawer() const { return _drawer; }
+    SizeType reconditioning_num_blocks() const { return _reconditioning_num_blocks; }
     EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
     EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
     EnclosureConfiguration& set_reconditioning_num_blocks(SizeType num_blocks) { _reconditioning_num_blocks = num_blocks; return *this; }
@@ -97,7 +103,6 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-//    , public EuclideanValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -112,7 +117,6 @@ class Enclosure
 
     EnclosureConfiguration _configuration;
   public:
-    typedef DrawableInterface DrawableInterfaceType;
     typedef EnclosureConfiguration ConfigurationType;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
@@ -140,14 +144,6 @@ class Enclosure
 
     //! \brief The classes used to work with the set.
     const EnclosureConfiguration& configuration() const;
-    //! \brief The class used to create new function instances.
-    const ValidatedFunctionModelDPFactory& function_factory() const;
-    //! \brief The class used to discretise the set.
-    const Paver& paver() const;
-    Void set_paver(Paver const&);
-    //! \brief The class used to draw the set.
-    const Drawer& drawer() const;
-    Void set_drawer(Drawer const&);
 
     //! \brief The parameter domain \f$D\f$.
     ExactBoxType domain() const;
@@ -221,12 +217,6 @@ class Enclosure
     Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq\epsilon(s)\f$.
     Void apply_parameter_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
-/*
-    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, FloatDP h);
-    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
-    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
-*/
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     Void new_state_constraint(ValidatedConstraint c);
@@ -309,23 +299,6 @@ class Enclosure
     Storage outer_approximation(const Grid& grid, Nat fineness) const;
     //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
     Void adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by subdividing the parameter domain. Does not require constraint propagation,
-    //! but may be inefficient.
-    Void subdivision_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by first computing affine over-approximations of the set.
-    Void affine_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by using constraint propagation.
-    Void constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by using an interior point method to try to find good barrier functions
-    //! and using constraint propagation to prove disjointness with cells.
-    //! \details Potentially very efficient, but may be unreliable due to the
-    //! use of nonlinear programming to find good Lyapounov multipliers for
-    //! the constraints.
-    Void optimal_constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the

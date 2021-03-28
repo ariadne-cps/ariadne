@@ -53,27 +53,40 @@ class TestEnclosure
 {
   public:
     Void test() const {
-        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_construct_without_domain());
+        ARIADNE_TEST_CALL(test_construct_with_domain());
         ARIADNE_TEST_CALL(test_draw());
     }
 
-    Void test_construct() const {
-        ExactBoxType box({{0.0_x,1.0_x},{1.0_x,2.0_x}});
+    Void test_construct_without_domain() const {
+        Enclosure encl;
         TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
         EnclosureConfiguration configuration(function_factory);
-        Enclosure encl(box,configuration);
+        Enclosure encl_config(configuration);
+    }
+
+    Void test_construct_with_domain() const {
+        ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        EnclosureConfiguration configuration(function_factory);
+        Enclosure encl(dom,configuration);
+        ARIADNE_TEST_PRINT(configuration);
         ARIADNE_TEST_PRINT(encl);
+        ARIADNE_TEST_EQUALS(encl.centre(),FloatDPValuePoint({FloatDPValue(1.0_x,DoublePrecision()),FloatDPValue(2.0_x,DoublePrecision())}));
+        ARIADNE_TEST_EQUALS(encl.radius().raw(),FloatDP(1.0_x,DoublePrecision()));
+        ARIADNE_TEST_ASSERT(dom.inside(encl.codomain()));
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);
-        ExactBoxType box({{0.0_x,1.0_x},{1.0_x,2.0_x}});
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        ExactBoxType dom({{0.0_x,1.0_x},{1.0_x,2.0_x}});
+        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp),0);
+        TaylorFunctionFactory function_factory(swp);
         EnclosureConfiguration configuration(function_factory);
         configuration.set_drawer(drawer);
-        Enclosure encl(box,configuration);
-
+        Enclosure encl(dom,fnc,configuration);
         Figure fig;
         fig.set_bounding_box(encl.bounding_box());
         fig << line_style(true) << encl;

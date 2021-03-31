@@ -10,7 +10,7 @@ Ariadne is a tool for reachability analysis and model checking of hybrid systems
 
 The installation instructions are presented for Ubuntu Linux systems and derivatives (using Aptitude) and macOS systems (using Homebrew). However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
 
-Official packages are available for Ubuntu derivatives and macOS, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0 or AppleClang 12).
+Official packages are available for Ubuntu derivatives and macOS, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0). AppleClang currently does not support C++20 Concepts yet and therefore is not usable on macOS at the moment.
 
 ### Official packages
 
@@ -143,7 +143,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 
 The tutorials directory contains two CMake projects that rely on a correct installation of Ariadne, either by using a package or by building the sources. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
 
-Due to limitations of the C++ standard library on macOS since C++11, you won't be able to build an executable with GCC if the Ariadne library has been built using Clang, and viceversa. Hence on macOS you shall use the same compiler for both Ariadne and any projects that depend on it. If Ariadne comes from the Homebrew package, then it has been built using Clang.
+Due to limitations of the C++ standard library on macOS since C++11, you won't be able to build an executable with GCC if the Ariadne library has been built using Clang, and viceversa. Hence on macOS you shall use the same compiler for both Ariadne and any projects that depend on it. If Ariadne comes from the Homebrew package, then it has been built using g++ 10.
 
 ## Contribution guidelines ##
 

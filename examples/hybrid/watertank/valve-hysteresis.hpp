@@ -69,6 +69,8 @@ inline HybridAutomaton getValve()
     automaton.new_transition(opening,e_stop_opening,opened,aperture>=1,EventKind::URGENT);
     automaton.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
     automaton.new_transition(closing,e_stop_closing,closed,aperture<=0,EventKind::URGENT);
+    automaton.new_transition(opening,e_can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(closing,e_can_open,opening,{next(aperture)=aperture});
 
     return automaton;
 }

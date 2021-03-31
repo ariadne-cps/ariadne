@@ -327,6 +327,8 @@ HybridAutomaton TestHybridAutomaton::_get_valve() {
     automaton.new_transition(opening,stop_opening,opened,aperture>=1,EventKind::URGENT);
     automaton.new_transition(opened,can_close,closing,{next(aperture)=aperture});
     automaton.new_transition(closing,stop_closing,closed,aperture<=0,EventKind::URGENT);
+    automaton.new_transition(opening,can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(closing,can_open,opening,{next(aperture)=aperture});
 
     return automaton;
 }
@@ -387,8 +389,8 @@ TestHybridAutomaton::test_static_analysis()
     ARIADNE_TEST_PRINT(controller_automaton);
 
     ARIADNE_TEST_EXECUTE(_system.check_mode(valve_opening_controller_rising));
-    //ARIADNE_TEST_EXECUTE(_system.discrete_reachability(valve_opening_controller_rising));
-    //ARIADNE_TEST_EXECUTE(_system.check_reachable_modes(valve_opening_controller_rising));
+    ARIADNE_TEST_EXECUTE(_system.discrete_reachability(valve_opening_controller_rising));
+    ARIADNE_TEST_EXECUTE(_system.check_reachable_modes(valve_opening_controller_rising));
 }
 
 

@@ -27,12 +27,12 @@
  */
 
 #include "output/graphics.hpp"
-
+#include "output/graphics_backend_interface.hpp"
 #include "config.hpp"
 
 namespace Ariadne {
 
-#if not(defined(HAVE_CAIRO_H)) || not(defined(HAVE_GNUPLOT_H))
+#if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
 
 class NullCanvas : public CanvasInterface
 {
@@ -62,6 +62,11 @@ public:
 
     virtual Vector2d scaling() const { return Vector2d(0,0); }
     virtual Box2d bounds() const { return Box2d(0,0,0,0); }
+};
+
+class NullGraphicsBackend : public GraphicsBackendInterface {
+  public:
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const override { return std::make_shared<NullCanvas>(); }
 };
 
 #endif

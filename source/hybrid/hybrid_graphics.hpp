@@ -85,10 +85,7 @@ class HybridFigure
     Void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); }
     Void clear() { objects.clear(); }
     Void write(const char* filename) const;
-    Void write(const char* filename, Nat nx, Nat ny, CairoFileType filetype) const;
-    Void write(const char* filename, Nat nx, Nat ny, GnuplotFileType filetype) const;
-    Void write(const char* filename, CairoFileType filetype) const;
-    Void write(const char* filename, GnuplotFileType fileType) const;
+    Void write(const char* filename, Nat nx, Nat ny) const;
 
   public:
     Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas

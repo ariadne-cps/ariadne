@@ -33,6 +33,7 @@
 #include "geometry/box.hpp"
 #include "output/geometry2d.hpp"
 #include "output/graphics.hpp"
+#include "output/graphics_manager.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "geometry/function_set.hpp"
 #include "symbolic/expression_set.hpp"
@@ -58,70 +59,28 @@ HybridFigure::HybridFigure()
 {
 }
 
-Void HybridFigure::write(const char* cfilename) const
+Void
+HybridFigure::write(const char* cfilename) const
 {
-    #ifdef HAVE_CAIRO_H
-        this->write(cfilename, CairoFileType::PNG);
-    #else
-    #ifdef HAVE_GNUPLOT_H
-        this->write(cfilename, GnuplotFileType::PNG);
-    #else
+    this->write(cfilename, HYBRID_DEFAULT_WIDTH, HYBRID_DEFAULT_HEIGHT);
+}
+
+
+Void
+HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
+{
+    #if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
+    #else
+        const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;
+        const Nat canvas_height = drawing_height+HYBRID_BOTTOM_MARGIN+HYBRID_TOP_MARGIN;
+
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename, canvas_width, canvas_height);
+
+        this->_paint_all(*canvas);
+        canvas->write(cfilename);
     #endif
-    #endif
 }
-
-Void
-HybridFigure::write(const char* cfilename, CairoFileType fileType) const
-{
-    this->write(cfilename, HYBRID_DEFAULT_WIDTH, HYBRID_DEFAULT_HEIGHT, fileType);
-}
-
-Void
-HybridFigure::write(const char* cfilename, GnuplotFileType fileType) const
-{
-    this->write(cfilename, HYBRID_DEFAULT_WIDTH, HYBRID_DEFAULT_HEIGHT, fileType);
-}
-
-
-Void
-HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height, CairoFileType fileType) const
-{
-    const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;
-    const Nat canvas_height = drawing_height+HYBRID_BOTTOM_MARGIN+HYBRID_TOP_MARGIN;
-
-    SharedPointer<CanvasInterface> canvas=make_canvas(cfilename, canvas_width, canvas_height, fileType);
-
-    this->_paint_all(*canvas);
-/*
-    StringType filename(cfilename);
-    if(filename.rfind(".") != StringType::npos) {
-    } else {
-        filename=filename+".png";
-    }
-*/
-    canvas->write(cfilename);
-}
-
-Void
-HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height, GnuplotFileType fileType) const
-{
-    const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;
-    const Nat canvas_height = drawing_height+HYBRID_BOTTOM_MARGIN+HYBRID_TOP_MARGIN;
-
-    SharedPointer<CanvasInterface> canvas=make_canvas(cfilename, canvas_width, canvas_height, fileType);
-
-    this->_paint_all(*canvas);
-/*
-    StringType filename(cfilename);
-    if(filename.rfind(".") != StringType::npos) {
-    } else {
-        filename=filename+".png";
-    }
-*/
-    canvas->write(cfilename);
-}
-
 
 Void HybridFigure::_paint_all(CanvasInterface& canvas) const
 {

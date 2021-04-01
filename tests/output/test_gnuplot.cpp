@@ -42,7 +42,7 @@ class TestGnuplot
 {
     public:
 
-        TestGnuplot(){};
+        TestGnuplot(){ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
         ~TestGnuplot(){};
 
         template<class PR>
@@ -90,7 +90,7 @@ class TestGnuplot
             fig1.set_fill_style(false);
             fig1.set_fill_colour(1.0,1.0,1.0);
             fig1.draw(data);
-            fig1.write("Figure-StringEvolution", GnuplotFileType::GIF);
+            fig1.write("Figure-StringEvolution");
 
             RealVariable x("x"), y("y");
             Axes2d axes(0.0<=x<=Nx-1,-1.0<=y<=1.0);
@@ -102,7 +102,7 @@ class TestGnuplot
 
             fig2.draw(data);
 
-            fig2.write("LabelledFigure-StringEvolution", GnuplotFileType::GIF);
+            fig2.write("LabelledFigure-StringEvolution");
 
         }//String Evolution over time
 
@@ -118,13 +118,13 @@ class TestGnuplot
 
             Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3D", GnuplotFileType::PNG);
+            fig1.write("Figure-Gauss3D");
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3D",GnuplotFileType::PNG);
+            fig2.write("LabelledFigure-Gauss3D");
             
         }//Gauss 3D
 
@@ -141,14 +141,14 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xy();
             fig1.draw3d(data);
-            fig1.write("FigureGauss3DProjXY",GnuplotFileType::PNG);
+            fig1.write("FigureGauss3DProjXY");
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xy();
             fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjXY",GnuplotFileType::PNG);
+            fig2.write("LabelledFigure-Gauss3DProjXY");
         }
 
 
@@ -165,14 +165,14 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xz();
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DProjXZ",GnuplotFileType::PNG);
+            fig1.write("Figure-Gauss3DProjXZ");
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xz();
             fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjXZ",GnuplotFileType::PNG);
+            fig2.write("LabelledFigure-Gauss3DProjXZ");
         }
 
         template< class PR>
@@ -188,7 +188,7 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_yz();
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DProjYZ",GnuplotFileType::PNG);
+            fig1.write("Figure-Gauss3DProjYZ");
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
@@ -196,7 +196,7 @@ class TestGnuplot
             fig2 << set_proj_yz();
             //fig << set3Ddim(true);
             fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjYZ",GnuplotFileType::PNG);
+            fig2.write("LabelledFigure-Gauss3DProjYZ");
         }
 
         template<class PR>
@@ -214,14 +214,14 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
             //fig.set3D(); 
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DAnimation",GnuplotFileType::GIF);
+            fig1.write("Figure-Gauss3DAnimation");
 
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             //fig << set3Ddim(true);
             fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DAnimation",GnuplotFileType::GIF);
+            fig2.write("LabelledFigure-Gauss3DAnimation");
 
         }
 };

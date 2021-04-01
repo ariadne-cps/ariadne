@@ -38,18 +38,13 @@
 #include "utility/typedefs.hpp"
 #include "utility/declarations.hpp"
 #include "symbolic/variable.hpp"
-#include "output/colour.hpp"
-#include "output/graphics_interface.hpp"
+#include "colour.hpp"
+#include "graphics_interface.hpp"
+#include "graphics_backend_interface.hpp"
 
 namespace Ariadne {
 
 typedef ApproximateBoxType GraphicsBoundingBoxType;
-
-enum class CairoFileType { PNG };
-enum class GnuplotFileType { PNG, GIF };
-
-SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, CairoFileType fileType);
-SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, GnuplotFileType fileType);
 
 struct LineStyle { explicit LineStyle(Bool ls) : _style(ls) { } operator Bool() const { return this->_style; } private: Bool _style; };
 struct LineWidth { explicit LineWidth(Dbl lw) : _width(lw) { } operator Dbl() const { return this->_width; } private: Dbl _width; };
@@ -247,14 +242,10 @@ class Figure
     Void display() const;
 
     //! Write to \a filename.
-    //STANDARD ODE PLOT
     Void write(const Char* filename) const;
-    Void write(const Char* filename, CairoFileType fileType) const;
-    Void write(const Char* filename, GnuplotFileType fileType) const;
 
     //! Write out to file, using width \a nx pixels, and height \a ny pixels
-    Void write(const Char* filename, Nat nx, Nat ny, CairoFileType fileType) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType) const;
+    Void write(const Char* filename, Nat nx, Nat ny) const;
 
   public:
     struct Data;
@@ -320,12 +311,6 @@ class LabelledFigure {
     Void write(const Char* filename, Nat nx, Nat ny) const;
     //! Write to \a filename.
     Void write(const Char* filename) const;
-    Void write(const Char* filename, CairoFileType fileType) const;
-    Void write(const Char* filename, GnuplotFileType fileType) const;
-
-    //! Write out to file, using width \a nx pixels, and height \a ny pixels
-    Void write(const Char* filename, Nat nx, Nat ny, CairoFileType fileType) const;
-    Void write(const Char* filename, Nat nx, Nat ny, GnuplotFileType fileType) const;
   
   public:
     struct Data;

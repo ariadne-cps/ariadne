@@ -21,20 +21,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-
-#include "../output/graphics.hpp"
-#include "../config.hpp"
-#include "../utility/string.hpp"
-#include "geometry2d.hpp"
-#include <string>
-#include <ctype.h>
+#ifndef ARIADNE_GNUPLOT_HPP
+#define ARIADNE_GNUPLOT_HPP
 
 #ifdef HAVE_GNUPLOT_H
 
-#include "gnuplot-iostream.hpp"
+#include "config.hpp"
+#include "output/graphics.hpp"
+#include "output/geometry2d.hpp"
 
-namespace Ariadne{
+#include "output/gnuplot-iostream.hpp"
+
+namespace Ariadne {
 
 struct  _Range
 {       
@@ -55,8 +53,8 @@ struct  _Labels
 
 class GnuplotCanvas : public CanvasInterface
 {
-friend class Figure;
-private:
+    friend class Figure;
+  private:
     Gnuplot *gnuplot;
     List<Point2d> geom;
     Colour lc, fc;
@@ -72,14 +70,13 @@ private:
     bool is2DPalette;
     bool is3DPalette;
     _Labels labels;
-    GnuplotFileType fileType;
     Bool isStd;
 
-public:
+  public:
     ~GnuplotCanvas();
     // Constructors - Create the canvas
     //Create canvas with dimensions
-    GnuplotCanvas(String filename, GnuplotFileType fileType, Nat X = 800, Nat Y = 800);
+    GnuplotCanvas(String filename, Nat X = 800, Nat Y = 800);
 
     //CanvasInterface
     Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz);
@@ -148,16 +145,15 @@ public:
     void set_2d_palette(double min, double max, double step);
     //Unset colorbox
     void unset_color_box();
-
 };
 
-GnuplotCanvas::~GnuplotCanvas()
-{
-    delete gnuplot;
-}
+class GnuplotGraphicsBackend : public GraphicsBackendInterface {
+  public:
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const;
+};
 
 } // namespace Ariadne
 
+#endif // HAVE_GNUPLOT_H
 
-
-#endif
+#endif // ARIADNE_GNUPLOT_HPP

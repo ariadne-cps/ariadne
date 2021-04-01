@@ -75,6 +75,9 @@ namespace Ariadne {
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
 #include "output/graphics.hpp"
+#include "output/graphics_manager.hpp"
+#include "output/cairo.hpp"
+#include "output/gnuplot.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
 #endif

@@ -22,11 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "output/graphics.hpp"
-
-#include "config.hpp"
+#ifndef ARIADNE_CAIRO_HPP
+#define ARIADNE_CAIRO_HPP
 
 #ifdef HAVE_CAIRO_H
+
+#include "config.hpp"
+#include "output/graphics.hpp"
 
 #include <cairo/cairo.h>
 
@@ -86,8 +88,15 @@ class CairoCanvas
     ImageSize2d size_in_pixels() const;
 };
 
-#endif // HAVE_CAIRO_H
+class CairoGraphicsBackend : public GraphicsBackendInterface {
+  public:
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const;
+};
 
 } // namespace Ariadne
+
+#endif // HAVE_CAIRO_H
+
+#endif // ARIADNE_CAIRO_HPP
 
 

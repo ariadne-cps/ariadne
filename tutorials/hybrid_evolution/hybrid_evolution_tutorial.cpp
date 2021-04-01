@@ -29,8 +29,8 @@ using namespace Ariadne;
 HybridAutomaton get_tank()
 {
     // Declare the system constants
-    RealConstant alpha("alpha",0.02_decimal);
-    RealConstant beta("beta",0.3_decimal);
+    RealConstant alpha("alpha",0.02_dec);
+    RealConstant beta("beta",0.3_dec);
 
     // Declare the variables for the dynamics
     RealVariable aperture("aperture");
@@ -104,9 +104,9 @@ HybridAutomaton get_valve()
 HybridAutomaton get_controller()
 {
     // Declare some constants
-    RealConstant hmin("hmin",5.75_decimal);
-    RealConstant hmax("hmax",7.75_decimal);
-    RealConstant delta("delta",0.02_decimal);
+    RealConstant hmin("hmin",5.75_dec);
+    RealConstant hmax("hmax",7.75_dec);
+    RealConstant delta("delta",0.02_dec);
 
     // Declare the shared system variables
     RealVariable height("height");
@@ -227,7 +227,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver)
     // Define the initial set, by supplying the location as a list of locations for each composed automata, and
     // the continuous set as a list of variable assignments for each variable controlled on that location
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_dec<=height<=7});
     // Define the termination: continuous time and maximum number of transitions
     HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
@@ -275,7 +275,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser)
     String rising("rising");
 
     // Define the initial set and final time
-    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_dec<=height<=7});
     ARIADNE_LOG_PRINTLN("initial_set: " << initial_set);
     HybridTime final_time(30.0_x,5);
     ARIADNE_LOG_PRINTLN("final_time: " << final_time);

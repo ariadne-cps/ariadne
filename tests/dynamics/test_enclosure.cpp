@@ -55,6 +55,7 @@ class TestEnclosure
     Void test() const {
         ARIADNE_TEST_CALL(test_construct_without_domain());
         ARIADNE_TEST_CALL(test_construct_with_domain());
+        ARIADNE_TEST_CALL(test_is_bounded());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -75,6 +76,16 @@ class TestEnclosure
         ARIADNE_TEST_EQUALS(encl.centre(),FloatDPValuePoint({FloatDPValue(1.0_x,DoublePrecision()),FloatDPValue(2.0_x,DoublePrecision())}));
         ARIADNE_TEST_EQUALS(encl.radius().raw(),FloatDP(1.0_x,DoublePrecision()));
         ARIADNE_TEST_ASSERT(dom.inside(encl.codomain()));
+    }
+
+    Void test_is_bounded() const {
+        ExactBoxType bounded_dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        EnclosureConfiguration configuration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8)));
+        Enclosure encl(bounded_dom,configuration);
+        ARIADNE_TEST_ASSERT(encl.is_bounded());
+        ExactBoxType unbounded_dom({{0.0_x,infty},{1.0_x,3.0_x}});
+        Enclosure encl2(unbounded_dom,configuration);
+        ARIADNE_TEST_ASSERT(is_indeterminate(encl2.is_bounded()));
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {

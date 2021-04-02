@@ -330,12 +330,6 @@ Void HybridEnclosure::new_state_time_constraint(DiscreteEvent event, ValidatedCo
     this->_set.new_state_time_constraint(constraint);
 }
 
-
-Void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
-    this->new_state_constraint(event,constraint);
-}
-
-
 Void HybridEnclosure::clear_time()
 {
     this->_set.clear_time();
@@ -417,23 +411,6 @@ Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 {
     this->_set.new_zero_parameter_constraint(this->time_function()-this->configuration().function_factory().create(this->_set.domain(),time));
 }
-
-
-Void HybridEnclosure::set_maximum_time(DiscreteEvent event, FloatDP final_time)
-{
-    this->_set.new_negative_parameter_constraint(this->time_function()-FloatDPValue(final_time)); // Deprecated
-}
-
-Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint) {
-    ARIADNE_NOT_IMPLEMENTED; // Deprecated
-}
-
-Void HybridEnclosure::set_step_time(FloatDPValue time)
-{
-    ARIADNE_NOT_IMPLEMENTED; // Deprecated
-}
-
-
 
 const DiscreteLocation& HybridEnclosure::location() const {
     return this->_location;

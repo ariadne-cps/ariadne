@@ -242,14 +242,6 @@ class HybridEnclosure
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     Void bound_time(Real tmax);
 
-    //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
-    //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
-    Void set_maximum_time(DiscreteEvent event, RawFloatDP tmax);
-    //! \brief Set the current time-step to \f$h\f$. \deprecated
-    Void set_step_time(FloatDPValue h);
-    //! \brief \deprecated
-    Void new_time_step_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction tau);
-
     //! \brief Sets the auxiliary variables and functions.
     Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux);
 
@@ -257,8 +249,6 @@ class HybridEnclosure
     Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduce a new independent variable with domain \a ivl.
     Void new_variable(ExactIntervalType ivl, EnclosureVariableKind);
-    //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
-    Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
     Void new_state_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$(x,t)\f$.

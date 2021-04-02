@@ -233,17 +233,6 @@ template<class M> class ScaledFunctionPatch
     //! \brief Construct the identity function over the domain \a d.
     static VectorScaledFunctionPatch<M> identity(const DomainType& d, PropertiesType prp);
 
-    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
-    static ScaledFunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, PropertiesType prp);
-    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d. // DEPRECATED
-    static ScaledFunctionPatch<M> affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, PropertiesType prp) ;
-
-    //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> constants(const DomainType& d, const Vector<NumericType>& c, PropertiesType prp);
-    //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, PropertiesType prp);
-    //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, PropertiesType prp);
     //!@}
 
     //!@{
@@ -282,8 +271,6 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief The constant term in the expansion.
     const ValueType value() const { return this->_model.value(); }
-    //! \brief The gradient at the centre of the domain.
-//    const ValueType gradient_value(SizeType i) const; // [[deprecated]]
 
     //! \brief A polynomial representation.
     MultivariatePolynomial<NumericType> polynomial() const;
@@ -310,13 +297,6 @@ template<class M> class ScaledFunctionPatch
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
     SizeType number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
-    //!@}
-
-    //!@{
-    //! \name Comparison operators.
-    Bool operator==(const ScaledFunctionPatch<M>& tv) const;
-    //! \brief Inequality operator.
-    Bool operator!=(const ScaledFunctionPatch<M>& tv) const { return !(*this==tv); }
     //!@}
 
     //!@{
@@ -630,11 +610,6 @@ template<class M> class VectorScaledFunctionPatch
 
     explicit VectorScaledFunctionPatch<M> (const VectorFunctionModelType<M>& f);
     VectorScaledFunctionPatch<M>& operator=(const VectorFunctionModelType<M>& f);
-
-    //! \brief Equality operator.
-    Bool operator==(const VectorScaledFunctionPatch<M>& p) const;
-    //! \brief Inequality operator.
-    Bool operator!=(const VectorScaledFunctionPatch<M>& p) const;
 
     // Data access
     //! \brief The properties used to control approximation of the function model.

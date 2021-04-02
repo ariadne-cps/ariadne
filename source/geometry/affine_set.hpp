@@ -107,8 +107,6 @@ class ValidatedAffineConstrainedImageSet
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D);
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
-    //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
-    ValidatedAffineConstrainedImageSet(const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<Affine<FloatDPBounds>>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.

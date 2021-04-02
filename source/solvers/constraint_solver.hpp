@@ -123,7 +123,6 @@ class ConstraintSolver
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<UpperBoxType,UpperBoxType> split(const UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
 
-    // Deprecated functions.
     Bool hull_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
     Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {

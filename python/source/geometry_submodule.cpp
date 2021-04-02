@@ -717,7 +717,6 @@ Void export_affine_set(pybind11::module& module)
     affine_set_class.def(pybind11::init<RealBox>());
     affine_set_class.def(pybind11::init<ExactBoxType>());
     affine_set_class.def(pybind11::init<Vector<ExactIntervalType>, Matrix<FloatDPValue>, Vector<FloatDPValue> >());
-    affine_set_class.def(pybind11::init<Matrix<FloatDPValue>, Vector<FloatDPValue> >());
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<FloatDPBounds>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
     affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);

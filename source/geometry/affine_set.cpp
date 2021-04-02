@@ -179,11 +179,6 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& h)
-{
-    this->construct(Vector<ExactIntervalType>(G.column_size(),ExactIntervalType(-1,+1)),G,h);
-}
-
 Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);

@@ -69,7 +69,7 @@ class TestAffineSet
   public:
     TestAffineSet() :
         figure(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1)),
-        set(Matrix<FloatDPValue>(2,2,dp),Vector<FloatDPValue>(2,dp)) { }
+        set(ExactBoxType::unit_box(2),Matrix<FloatDPValue>(2,2,dp),Vector<FloatDPValue>(2,dp)) { }
 
     Void test_pure_constraint() {
         figure.clear();

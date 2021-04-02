@@ -42,6 +42,7 @@
 #include "algebra/expansion.inl.hpp"
 
 #include "output/graphics_interface.hpp"
+#include "output/graphics_manager.hpp"
 #include "output/drawer.hpp"
 
 namespace Ariadne {
@@ -52,7 +53,6 @@ enum class DiscretisationMethod : std::uint8_t { SUBDIVISION, AFFINE, CONSTRAINT
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DiscretisationMethod DISCRETISATION_METHOD;
 
-DrawingMethod DRAWING_METHOD=DrawingMethod::AFFINE;
 DiscretisationMethod DISCRETISATION_METHOD=DiscretisationMethod::SUBDIVISION;
 uint DRAWING_ACCURACY=1u;
 
@@ -1127,35 +1127,8 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
 
 
 Void
-ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
-{
-    // TODO : seriously improve
-    switch (DRAWING_METHOD) {
-    case DrawingMethod::BOX : box_draw(cnvs,proj); break;
-    case DrawingMethod::AFFINE : affine_draw(cnvs,proj,1); break;
-    case DrawingMethod::GRID : grid_draw(cnvs,proj,3); break;
-    case DrawingMethod::CURVE :
-    default:
-        affine_draw(cnvs,proj,1);
-    }
-}
-
-Void
-ValidatedConstrainedImageSet::box_draw(CanvasInterface& cnvs, const Projection2d& proj) const
-{
-    BoxDrawer().draw(cnvs,proj,*this);
-}
-
-Void
-ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat splittings) const
-{
-    AffineDrawer(splittings).draw(cnvs,proj,*this);
-}
-
-Void
-ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat fineness) const
-{
-    GridDrawer(fineness).draw(cnvs,proj,*this);
+ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const {
+    GraphicsManager::instance().drawer().draw(cnvs,proj,*this);
 }
 
 ValidatedConstrainedImageSet

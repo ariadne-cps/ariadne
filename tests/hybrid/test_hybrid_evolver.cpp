@@ -111,8 +111,6 @@ TestHybridEvolver::TestHybridEvolver(
     : evolver_name(ev_name)
     , evolver_integrator(ev_integrator.clone())
 {
-    DRAWING_METHOD = DrawingMethod::AFFINE;
-    DRAWING_ACCURACY = 1;
 }
 
 Void TestHybridEvolver::_set_evolver(const HybridAutomatonInterface& system) const
@@ -902,9 +900,6 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
-    DRAWING_METHOD = DrawingMethod::AFFINE;
-    DRAWING_ACCURACY = 2u;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
     ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_integrator).test_all());

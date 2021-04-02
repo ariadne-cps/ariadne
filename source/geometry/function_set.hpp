@@ -365,7 +365,6 @@ class ValidatedConstrainedImageSet
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    Void draw(Drawer const& drawer, CanvasInterface&, const Projection2d&) const;
     Void draw(CanvasInterface&, const Projection2d&) const;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;

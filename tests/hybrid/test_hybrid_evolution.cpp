@@ -213,9 +213,6 @@ Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
-    DRAWING_METHOD = DrawingMethod::AFFINE;
-    DRAWING_ACCURACY = 1u;
-
     TestHybridEvolution().test();
     return ARIADNE_TEST_FAILURES;
 }

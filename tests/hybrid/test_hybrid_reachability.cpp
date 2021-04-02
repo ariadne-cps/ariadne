@@ -42,6 +42,8 @@
 #include "output/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
+#include "output/graphics_manager.hpp"
+#include "output/drawer.hpp"
 #include "output/logging.hpp"
 
 #include "../test.hpp"
@@ -119,7 +121,7 @@ Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
-    DRAWING_METHOD = DrawingMethod::GRID;
+    GraphicsManager::instance().set_drawer(GridDrawer(2));
 
     TestHybridReachability().test();
     return ARIADNE_TEST_FAILURES;

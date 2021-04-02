@@ -98,8 +98,7 @@ class TestEnclosure
         EnclosureConfiguration configuration(function_factory);
         configuration.set_drawer(drawer);
         Enclosure encl(dom,fnc,configuration);
-        Figure fig;
-        fig.set_bounding_box(encl.bounding_box());
+        Figure fig(dom,Projection2d(2,0,1));;
         fig << line_style(true) << encl;
         fig.write(("test_enclosure_"+suffix).c_str());
     }

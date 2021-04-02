@@ -50,7 +50,6 @@ Void export_figure(pybind11::module& module)
     colour_class.def(pybind11::init<double,double,double>());
 
     pybind11::class_<Figure> figure_class(module,"Figure");
-    figure_class.def(pybind11::init<>());
     figure_class.def(pybind11::init<GraphicsBoundingBoxType,Projection2d>());
     figure_class.def("set_projection_map",(Figure&(Figure::*)(const Projection2d&)) &Figure::set_projection_map, reference_internal);
     figure_class.def("set_projection",(Figure&(Figure::*)(DimensionType,DimensionType,DimensionType)) &Figure::set_projection, reference_internal);

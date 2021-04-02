@@ -45,6 +45,8 @@ class TestConstrainedImageSet
   private:
     Figure figure;
   public:
+    TestConstrainedImageSet() : figure(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1)) { }
+
     Void test() {
         ExactIntervalType ivl(-4.0_x,4.0_x);
         ivl=ExactIntervalType{-4.0_x,4.0_x};
@@ -93,7 +95,7 @@ class TestConstrainedImageSet
         ExactBoxType box1(2);
         ExactBoxType box2(2);
         ExactBoxType box3(2);
-        Figure fig;
+        Figure fig(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1));
         Colour set_colour(0,0,1);
         Colour box_colour(1,0,1);
 

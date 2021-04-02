@@ -67,7 +67,9 @@ class TestAffineSet
     Vector< Affine<FloatDPBounds> > x;
     ValidatedAffineConstrainedImageSet set;
   public:
-    TestAffineSet() : set(Matrix<FloatDPValue>(2,2,dp),Vector<FloatDPValue>(2,dp)) { }
+    TestAffineSet() :
+        figure(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1)),
+        set(Matrix<FloatDPValue>(2,2,dp),Vector<FloatDPValue>(2,dp)) { }
 
     Void test_pure_constraint() {
         figure.clear();

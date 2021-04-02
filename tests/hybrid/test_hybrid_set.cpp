@@ -67,7 +67,7 @@ TestHybridSet::test_hybrid_paving()
     DiscreteLocation loc;
     HybridGrid hg(hspc);
     HybridGridTreePaving hgts(hg);
-    Figure fig;
+    Figure fig(hgts[loc].bounding_box(),Projection2d(2,0,1));
     hg.has_location(loc);
     g=hg[loc];
 

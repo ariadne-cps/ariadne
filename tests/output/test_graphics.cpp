@@ -61,8 +61,7 @@ class TestGraphics {
 
         {
             ExactDouble h=10000;
-            Figure g;
-            g.set_bounding_box(ExactBoxType{{-1.0_x,+1.0_x},{-h,+h}});
+            Figure g(ExactBoxType{{-1.0_x,+1.0_x},{-h,+h}},Projection2d(2,0,1));
             g.set_fill_colour(0.5,1.0,1.0);
             g.set_line_width(10);
             g << ExactBoxType({{-0.5_x,+0.0_x},{-h/two, +h/two}});
@@ -71,7 +70,7 @@ class TestGraphics {
             g.write("test_graphics-canvas");
         }
 
-        Figure g;
+        Figure g(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1));
         g << fill_colour(0.5,1.0,1.0)
           << line_colour(0.0,0.0,0.0)
           << bx1

@@ -36,6 +36,7 @@
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
+#include "geometry/function_set.hpp"
 #include "solvers/integrator.hpp"
 #include "symbolic/expression_set.hpp"
 #include "output/graphics.hpp"
@@ -57,6 +58,8 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_construct_with_domain());
         ARIADNE_TEST_CALL(test_is_bounded());
         ARIADNE_TEST_CALL(test_subset_separated());
+        ARIADNE_TEST_CALL(test_restriction());
+        ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -97,6 +100,27 @@ class TestEnclosure
         ExactBoxType box2({{2.0_x,3.0_x},{-1.0_x,0.0_x}});
         ARIADNE_TEST_ASSERT(possibly(not encl.subset(box2)));
         ARIADNE_TEST_ASSERT(definitely(encl.separated(box2)));
+    }
+
+    Void test_restriction() const {
+        ExactBoxType box1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        auto codomain1 = encl.codomain();
+        ExactBoxType box2({{0.5_x,1.5_x},{1.5_x,2.5_x}});
+        auto encl2 = restriction(encl,box2);
+        ARIADNE_TEST_ASSERT(definitely(encl2.subset(codomain1)));
+    }
+
+    Void test_auxiliary_map() const {
+        ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
+        encl.set_auxiliary_mapping(auxiliary);
+        ARIADNE_TEST_PRINT(encl.state_auxiliary_function());
+        ARIADNE_TEST_PRINT(encl.state_auxiliary_set());
+        //get_function
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {

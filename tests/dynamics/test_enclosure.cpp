@@ -56,6 +56,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_construct_without_domain());
         ARIADNE_TEST_CALL(test_construct_with_domain());
         ARIADNE_TEST_CALL(test_is_bounded());
+        ARIADNE_TEST_CALL(test_subset_separated());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -86,6 +87,16 @@ class TestEnclosure
         ExactBoxType unbounded_dom({{0.0_x,infty},{1.0_x,3.0_x}});
         Enclosure encl2(unbounded_dom,configuration);
         ARIADNE_TEST_ASSERT(is_indeterminate(encl2.is_bounded()));
+    }
+
+    Void test_subset_separated() const {
+        ExactBoxType box1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        ARIADNE_TEST_ASSERT(definitely(encl.subset(box1)));
+        ARIADNE_TEST_ASSERT(possibly(not encl.separated(box1)));
+        ExactBoxType box2({{2.0_x,3.0_x},{-1.0_x,0.0_x}});
+        ARIADNE_TEST_ASSERT(possibly(not encl.subset(box2)));
+        ARIADNE_TEST_ASSERT(definitely(encl.separated(box2)));
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {

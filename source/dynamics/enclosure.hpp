@@ -294,8 +294,6 @@ class Enclosure
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<ExactBoxType> splitting_subdomains_zeroth_order() const;
-    //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.
-    List<ExactBoxType> splitting_subdomains_first_order() const;
     //! \brief Split into subsets based on the given subdomains.
     List<Enclosure> split(const List<ExactBoxType>& subdomains);
 

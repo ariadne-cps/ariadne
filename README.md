@@ -77,8 +77,7 @@ To allow building the documentation: `brew cask install mactex-no-gui` and `brew
 To build the library from sources in a clean way, it is preferable that you set up a build subdirectory, say:
 
 ```
-$ mkdir build
- $ cd build
+$ mkdir build && cd build
 ```
 
 Then you can prepare the build environment, choosing a Release build for maximum performance:

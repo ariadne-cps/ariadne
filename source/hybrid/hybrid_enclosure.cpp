@@ -292,16 +292,6 @@ Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMult
     this->_set.set_auxiliary(vars,aux);
 }
 
-Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_set.new_parameter(ivl,vk);
-}
-
-Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_set.new_variable(ivl,vk);
-}
-
 Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
     this->_set.new_state_time_bound(gamma);
 }

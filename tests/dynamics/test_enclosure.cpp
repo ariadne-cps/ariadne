@@ -115,6 +115,7 @@ class TestEnclosure
     Void test_auxiliary_map() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
         Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        ARIADNE_TEST_PRINT(encl.auxiliary_function());
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
         EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));

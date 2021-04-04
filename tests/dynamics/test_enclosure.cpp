@@ -61,9 +61,9 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_restriction());
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
+        ARIADNE_TEST_CALL(test_split());
         ARIADNE_TEST_CALL(test_labelled_construction());
         ARIADNE_TEST_CALL(test_labelled_product());
-        ARIADNE_TEST_CALL(test_labelled_split());
         ARIADNE_TEST_CALL(test_labelled_draw());
     }
 
@@ -147,6 +147,17 @@ class TestEnclosure
         ARIADNE_TEST_ASSERT(is_indeterminate(encl.satisfies(-sqr(x0))));
     }
 
+    Void test_split() const {
+        ExactBoxType dom1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom1,swp),0);
+        Enclosure encl(dom1,fnc,EnclosureConfiguration(TaylorFunctionFactory(swp)));
+        ARIADNE_TEST_PRINT(encl.split());
+        ARIADNE_TEST_PRINT(encl.split(1));
+        ARIADNE_TEST_PRINT(encl.splitting_subdomains_zeroth_order());
+        ARIADNE_TEST_PRINT(encl.split_first_order());
+    }
+
     Void test_labelled_construction() const {
         RealVariable x("x"), y("y"), z("z");
         RealSpace spc({x, y});
@@ -185,10 +196,6 @@ class TestEnclosure
         Enclosure e2(dom2,EnclosureConfiguration(TaylorFunctionFactory(swp)));
         LabelledEnclosure le2(e2,RealSpace({z}));
         ARIADNE_TEST_PRINT(product(le1,le2));
-    }
-
-    Void test_labelled_split() const {
-
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {

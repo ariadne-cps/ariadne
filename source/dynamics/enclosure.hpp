@@ -329,8 +329,6 @@ class Enclosure
     //! Equivalent to constructing the set \f$S\times I\f$.
     Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     Void _check() const;
-    Void _solve_zero_constraints();
-    EffectiveVectorMultivariateFunction real_function() const;
   private:
     friend Enclosure product(const Enclosure&, const ExactIntervalType&);
     friend Enclosure product(const Enclosure&, const ExactBoxType&);
@@ -350,8 +348,6 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.
 Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
-//! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
 
 } // namespace Ariadne
 

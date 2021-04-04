@@ -126,8 +126,21 @@ class TestEnclosure
     }
 
     Void test_constraints() const {
-
-
+        ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        encl.new_zero_state_constraint(x0+sqr(x1));
+        encl.new_positive_state_constraint(x0);
+        ARIADNE_TEST_EQUALS(encl.number_of_constraints(),2);
+        ARIADNE_TEST_PRINT(encl.constraint_function());
+        ARIADNE_TEST_PRINT(encl.constraint_models());
+        ARIADNE_TEST_PRINT(encl.constraint(0));
+        ARIADNE_TEST_PRINT(encl.constraint(1));
+        ARIADNE_TEST_PRINT(encl.constraint_bounds());
+        ARIADNE_TEST_ASSERT(definitely(encl.satisfies(x1+x0)));
+        ARIADNE_TEST_ASSERT(definitely(not encl.satisfies(-sqr(x1))));
+        ARIADNE_TEST_ASSERT(is_indeterminate(encl.satisfies(-sqr(x0))));
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {

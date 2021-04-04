@@ -298,17 +298,6 @@ class Enclosure
     //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
     Void adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
 
-    //! \brief An approximation as an affine set.
-    //! \details Most easily computed by dropping all nonlinear terms in the
-    //! image and constraint functions. Potentially a very poor approximation.
-    ValidatedAffineConstrainedImageSet affine_approximation() const;
-    //! \brief An over-approximation as an affine set.
-    //! \details Most easily computed by sweeping all nonlinear terms in the
-    //! image and constraint function to constant error terms.
-    //! Potentially a very poor approximation, but guaranteed to be an over-
-    //! approximation.
-    ValidatedAffineConstrainedImageSet affine_over_approximation() const;
-
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<ExactBoxType> splitting_subdomains_zeroth_order() const;
     //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.

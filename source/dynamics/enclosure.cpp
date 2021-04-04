@@ -990,15 +990,6 @@ ValidatedConstrainedImageSet Enclosure::state_time_auxiliary_set() const
 }
 
 
-ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
-{
-    return this->state_set().affine_over_approximation();
-}
-
-
-
-
-
 Void Enclosure::adjoin_outer_approximation_to(Storage& storage, Nat fineness) const
 {
     if (this->auxiliary_mapping().result_size()!=0 &&
@@ -1285,6 +1276,7 @@ inline const List<ValidatedScalarMultivariateFunctionModelDP>& repr(const List<V
 OutputStream& Enclosure::_write(OutputStream& os) const {
     const Bool LONG_FORMAT=true;
 
+    // TODO: improve by using writers
     if(LONG_FORMAT) {
         os << "Enclosure"
            << "(\n  domain=" << this->domain()
@@ -1309,79 +1301,6 @@ OutputStream& Enclosure::_write(OutputStream& os) const {
 
     } return os;
 }
-
-
-
-
-
-/*
-ValidatedAffineConstrainedImageSet
-Enclosure::affine_approximation() const
-{
-    this->_check();
-    typedef List<ValidatedScalarMultivariateFunctionModelDP>::ConstIterator ConstIterator;
-
-    const SizeType nx=this->state_dimension();
-    const SizeType np=this->number_of_parameters();
-
-    Enclosure set(*this);
-
-    //if(set._zero_constraints.size()>0) { set._solve_zero_constraints(); }
-    this->_check();
-
-    Vector<FloatDP> h(nx);
-    Matrix<FloatDP> G(nx,np);
-    for(SizeType i=0; i!=nx; ++i) {
-        ValidatedScalarMultivariateFunctionModelDP component=set._state_function[i];
-        h[i]=component.model().value();
-        for(SizeType j=0; j!=np; ++j) {
-            G[i][j]=component.model().gradient(j);
-        }
-    }
-    ValidatedAffineConstrainedImageSet result(G,h);
-
-    Vector<FloatDP> a(np);
-    FloatDP b;
-
-    for(ConstIterator iter=set._negative_constraints.begin();
-            iter!=set._negative_constraints.end(); ++iter) {
-        const ValidatedScalarMultivariateFunctionModelDP& constraint=*iter;
-        b=-constraint.model().value();
-        for(SizeType j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-        result.new_inequality_constraint(a,b);
-    }
-
-    for(ConstIterator iter=set._zero_constraints.begin();
-            iter!=set._zero_constraints.end(); ++iter) {
-        const ValidatedScalarMultivariateFunctionModelDP& constraint=*iter;
-        b=-constraint.model().value();
-        for(SizeType j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-        result.new_equality_constraint(a,b);
-    }
-    return result;
-}
-*/
-
-/*
-struct ValidatedAffineModel {
-    FloatDP _c; Vector<FloatDP> _g; FloatDP _e;
-    ValidatedAffineModel(FloatDP c, const Vector<FloatDP>& g, FloatDP e) : _c(c), _g(g), _e(e) { }
-};
-
-ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
-    ValidatedAffineModel result(0.0,Vector<FloatDPValue>(tm.argument_size(),0.0),tm.error());
-    for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        if(iter->index().degree()>=2) { result._e+=abs(iter->coefficient()); }
-        else if(iter->index().degree()==0) {result. _c=iter->coefficient(); }
-        else {
-            for(SizeType j=0; j!=tm.argument_size(); ++j) {
-                if(iter->index()[j]!=0) { result._g[j]=iter->coefficient(); break; }
-            }
-        }
-    }
-    return result;
-}
-*/
 
 
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {

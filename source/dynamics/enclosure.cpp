@@ -1326,12 +1326,6 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     return result;
 }
 
-Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set) {
-    Enclosure result(set);
-    result.apply_map(function);
-    return result;
-}
-
 LabelledEnclosure::LabelledEnclosure(LabelledExactBoxType const& bx, EnclosureConfiguration const& config)
     : Enclosure(bx.euclidean_set(),config), _state_variables(bx.space().variable_names())
 {

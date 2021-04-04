@@ -144,6 +144,7 @@ class TestEnclosure
         ARIADNE_TEST_ASSERT(is_indeterminate(encl.satisfies(-sqr(x0))));
     }
 
+
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);

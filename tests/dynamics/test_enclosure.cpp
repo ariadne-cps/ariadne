@@ -62,7 +62,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
         ARIADNE_TEST_CALL(test_labelled_construction());
-        //ARIADNE_TEST_CALL(test_labelled_product());
+        ARIADNE_TEST_CALL(test_labelled_product());
         ARIADNE_TEST_CALL(test_labelled_split());
         ARIADNE_TEST_CALL(test_labelled_draw());
     }
@@ -183,7 +183,7 @@ class TestEnclosure
         LabelledExactBoxType box2(RealSpace({z}),dom2);
         ARIADNE_TEST_PRINT(product(le1,box2));
         Enclosure e2(dom2,EnclosureConfiguration(TaylorFunctionFactory(swp)));
-        LabelledEnclosure le2(e2,RealSpace({x,y}),RealSpace({z}));
+        LabelledEnclosure le2(e2,RealSpace({z}));
         ARIADNE_TEST_PRINT(product(le1,le2));
     }
 

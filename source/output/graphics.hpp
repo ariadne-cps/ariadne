@@ -137,7 +137,6 @@ class Figure
 {
   public:
     ~Figure();
-    Figure(); //< Deprecated
     //! Construct a figure projecting \a bbx onto the \a proj coordinates
     Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj);
     //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
@@ -283,7 +282,7 @@ draw(Figure& g, const Colour& fc, const SET& set, CSETS const& ... csets) {
 
 template<class... CSETS> Void
 plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, CSETS const&... csets) {
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); draw(g,csets...);  g.write(filename); }
+    Figure g(bbox,pr); draw(g,csets...);  g.write(filename); }
 
 template<class... CSETS> Void
 plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {

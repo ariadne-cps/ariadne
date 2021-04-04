@@ -187,12 +187,6 @@ Figure::~Figure()
     delete this->_data;
 }
 
-
-Figure::Figure()
-    : Figure(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1))
-{
-}
-
 Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
     : _data(new Data(bbx,proj))
 {
@@ -776,7 +770,7 @@ Void CairoCanvas::finalise()
 
 
 Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
-    Figure fig; fig.set_projection_map(pr); fig.set_bounding_box(bbox);
+    Figure fig(bbox,pr);
     for (auto cset : csets) {
         fig.set_fill_colour(cset.first); fig << cset.second;
     }

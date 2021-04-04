@@ -89,8 +89,8 @@ def get_valve():
     automaton.new_transition(opening,stop_opening,opened,aperture>=1,URGENT)
     automaton.new_transition(opened,can_close,closing,[next(aperture)<<aperture])
     automaton.new_transition(closing,stop_closing,closed,aperture<=0,URGENT)
-    automaton.new_transition(opening,can_close,closing,[next(aperture)<<aperture]);
-    automaton.new_transition(closing,can_open,opening,[next(aperture)<<aperture]);
+    automaton.new_transition(opening,can_close,closing,[next(aperture)<<aperture])
+    automaton.new_transition(closing,can_open,opening,[next(aperture)<<aperture])
 
     return automaton
 

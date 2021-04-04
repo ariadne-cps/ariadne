@@ -92,8 +92,8 @@ class Box
     //! A type which can be used for the exact centre of the box.
     typedef Point<C> CentreType;
   public:
-    Box(); // DEPRECATED
-    explicit Box(SizeType n); // DEPRECATED
+    Box();
+    explicit Box(SizeType n);
     Box(SizeType n, IntervalType ivl);
     Box(const InitializerList<IntervalType>& lst);
 

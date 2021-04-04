@@ -82,9 +82,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
         }
         for (SizeType i : range(0,n-1)) {
             for (SizeType j : range(i+1,n)) {
-                Figure fig=Figure();
-                fig.set_bounding_box(graphics_box);
-                fig.set_projection(n,i,j);
+                Figure fig=Figure(graphics_box,Projection2d(n,i,j));
                 fig.set_line_colour(0.0,0.0,0.0);
                 fig.set_line_style(true);
                 fig.set_fill_colour(0.5,0.5,0.5);

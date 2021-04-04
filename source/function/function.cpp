@@ -328,10 +328,6 @@ template<class P, class R, class T, class... AS> Function<P,R(AS...)> make_compo
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     return Function<P,R(AS...)>(new ComposedFunction<P,R,T,AS...>(f,g)); }
 
-[[deprecated]]
-EffectiveScalarMultivariateFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
-    return make_function(spc,expr); }
-
 Formula<Real> make_formula(const EffectiveScalarMultivariateFunction& f) {
     Vector<Formula<Real>> x(f.argument_size());
     for(SizeType i=0; i!=x.size(); ++i) {

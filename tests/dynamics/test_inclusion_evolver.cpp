@@ -46,15 +46,14 @@ class TestInclusionIntegrator {
         auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
         evolver.configuration().approximations(approximations);
         evolver.configuration().maximum_step_size(step);
+        ARIADNE_TEST_PRINT(evolver.configuration());
 
         List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     }
 
     void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
-
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
-            std::cout << appro << std::endl;
             run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,draw);
         }
     }
@@ -64,8 +63,8 @@ class TestInclusionIntegrator {
 
         InclusionVectorField ivf(dynamics,inputs);
 
-        SizeType period_of_parameter_reduction=12;
-        ExactDouble ratio_of_parameters_to_keep=6.0_x;
+        SizeType period_of_parameter_reduction=3;
+        ExactDouble ratio_of_parameters_to_keep=3.0_x;
         ExactDouble sw_threshold = 1e-8_pr;
         ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
@@ -102,7 +101,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real e=1/100_q;
     RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
-    Real evolution_time=1/25_q;
+    Real evolution_time=1/20_q;
     ExactDouble step=1.0_x/pow(two,6);
 
     this->run_test("higgins-selkov",dynamics,inputs,initial,evolution_time,step);
@@ -117,7 +116,7 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Real e1=5/100_q; Real e2=7/100_q;
     RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
 
-    Real evolution_time=1/25_q;
+    Real evolution_time=1/20_q;
     ExactDouble step=1.0_x/pow(two,6);
 
     this->run_test("jet-engine",dynamics,inputs,initial,evolution_time,step);
@@ -131,7 +130,7 @@ void TestInclusionIntegrator::test_rossler() const {
     Real e=1/1024_q;
     RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
 
-    Real evolution_time=1/128_q;
+    Real evolution_time=1/100_q;
     ExactDouble step=1.0_x/pow(two,8);
 
     this->run_test("rossler",dynamics,inputs,initial,evolution_time,step);

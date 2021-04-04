@@ -72,16 +72,22 @@ typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> Val
 
 typedef Dyadic StepSizeType;
 
-struct EnclosureConfiguration {
+class EnclosureConfiguration {
+  private:
     ValidatedFunctionModelDPFactory _function_factory;
     Paver _paver;
     Drawer _drawer;
     SizeType _reconditioning_num_blocks;
+  public:
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, SizeType reconditioning_num_blocks = 3u);
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory::Interface const& function_factory, SizeType reconditioning_num_blocks = 3u)
         : EnclosureConfiguration(ValidatedFunctionModelDPFactory(function_factory.clone()),reconditioning_num_blocks) { }
     EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, Drawer drawer, SizeType reconditioning_num_blocks = 3u)
         : _function_factory(function_factory), _paver(paver), _drawer(drawer), _reconditioning_num_blocks(reconditioning_num_blocks) { }
+    ValidatedFunctionModelDPFactory const& function_factory() const { return _function_factory; }
+    Paver const& paver() const { return _paver; }
+    Drawer const& drawer() const { return _drawer; }
+    SizeType reconditioning_num_blocks() const { return _reconditioning_num_blocks; }
     EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
     EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
     EnclosureConfiguration& set_reconditioning_num_blocks(SizeType num_blocks) { _reconditioning_num_blocks = num_blocks; return *this; }
@@ -97,7 +103,6 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-//    , public EuclideanValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -112,7 +117,6 @@ class Enclosure
 
     EnclosureConfiguration _configuration;
   public:
-    typedef DrawableInterface DrawableInterfaceType;
     typedef EnclosureConfiguration ConfigurationType;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
@@ -140,14 +144,6 @@ class Enclosure
 
     //! \brief The classes used to work with the set.
     const EnclosureConfiguration& configuration() const;
-    //! \brief The class used to create new function instances.
-    const ValidatedFunctionModelDPFactory& function_factory() const;
-    //! \brief The class used to discretise the set.
-    const Paver& paver() const;
-    Void set_paver(Paver const&);
-    //! \brief The class used to draw the set.
-    const Drawer& drawer() const;
-    Void set_drawer(Drawer const&);
 
     //! \brief The parameter domain \f$D\f$.
     ExactBoxType domain() const;
@@ -183,14 +179,6 @@ class Enclosure
 
     //! \brief A list detailing the kind of variable each of the domain parameters represents.
     List<EnclosureVariableKind> const& variable_kinds() const;
-    //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
-    Void new_parameter(ExactIntervalType ivl);
-    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk);
-    //! \brief Introduces a new independent variable with values in the interval \a ivl.
-    //! Equivalent to constructing the set \f$S\times I\f$.
-    Void new_variable(ExactIntervalType ivl);
-    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
-    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     Void substitute(SizeType j, ValidatedScalarMultivariateFunctionModelDP v);
@@ -221,12 +209,6 @@ class Enclosure
     Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq\epsilon(s)\f$.
     Void apply_parameter_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
-/*
-    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, FloatDP h);
-    //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
-    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
-*/
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
     Void new_state_constraint(ValidatedConstraint c);
@@ -309,39 +291,9 @@ class Enclosure
     Storage outer_approximation(const Grid& grid, Nat fineness) const;
     //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
     Void adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by subdividing the parameter domain. Does not require constraint propagation,
-    //! but may be inefficient.
-    Void subdivision_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by first computing affine over-approximations of the set.
-    Void affine_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by using constraint propagation.
-    Void constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
-    //! by using an interior point method to try to find good barrier functions
-    //! and using constraint propagation to prove disjointness with cells.
-    //! \details Potentially very efficient, but may be unreliable due to the
-    //! use of nonlinear programming to find good Lyapounov multipliers for
-    //! the constraints.
-    Void optimal_constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
-
-    //! \brief An approximation as an affine set.
-    //! \details Most easily computed by dropping all nonlinear terms in the
-    //! image and constraint functions. Potentially a very poor approximation.
-    ValidatedAffineConstrainedImageSet affine_approximation() const;
-    //! \brief An over-approximation as an affine set.
-    //! \details Most easily computed by sweeping all nonlinear terms in the
-    //! image and constraint function to constant error terms.
-    //! Potentially a very poor approximation, but guaranteed to be an over-
-    //! approximation.
-    ValidatedAffineConstrainedImageSet affine_over_approximation() const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<ExactBoxType> splitting_subdomains_zeroth_order() const;
-    //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.
-    List<ExactBoxType> splitting_subdomains_first_order() const;
     //! \brief Split into subsets based on the given subdomains.
     List<Enclosure> split(const List<ExactBoxType>& subdomains);
 
@@ -367,21 +319,14 @@ class Enclosure
 
     //! \brief Draw to a canvas.
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const override;
-    //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
-    //! image or when all else fails.
-    [[deprecated]] Void box_draw(CanvasInterface&, const Projection2d& p) const; [[deprecated]]
-    //! \brief Draw the to a canvas by splitting into small enough pieces that
-    //! affine over-approximations yield a good image.
-    [[deprecated]] Void affine_draw(CanvasInterface&, const Projection2d& p, Nat splittings) const;
-    //! \brief Draw the to a canvas by over-approximating on a grid.
-     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat fineness) const;
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;
   private:
-    Void _check(std::string from="") const;
-    Void _solve_zero_constraints();
-    EffectiveVectorMultivariateFunction real_function() const;
+    //! \brief Introduces a new independent variable with values in the interval \a ivl.
+    //! Equivalent to constructing the set \f$S\times I\f$.
+    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
+    Void _check() const;
   private:
     friend Enclosure product(const Enclosure&, const ExactIntervalType&);
     friend Enclosure product(const Enclosure&, const ExactBoxType&);
@@ -398,11 +343,6 @@ Enclosure product(const Enclosure& set, const ExactBoxType& bx);
 //! \related Enclosure \brief The Cartesian product of two constrained image sets.
 //! \pre The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
-
-//! \related Enclosure \brief The image of the \a set under the \a function.
-Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
-//! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
 
 } // namespace Ariadne
 
@@ -471,10 +411,15 @@ class LabelledEnclosure
 
     using Enclosure::draw;
     virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+
+    OutputStream& _write(OutputStream&) const;
   private:
     List<Identifier> _state_variables;
     List<Identifier> _auxiliary_variables;
 };
+
+//! \related Enclosure \brief Stream output operator.
+inline OutputStream& operator<<(OutputStream& os, const LabelledEnclosure& s) { return s._write(os); }
 
 using LabelledEnclosureListSet = LabelledSet<ListSet<Enclosure>>;
 

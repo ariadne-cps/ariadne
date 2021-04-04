@@ -35,27 +35,11 @@
 
 namespace Ariadne {
 
-typedef Int Int;
-
-struct Depth { Int _d; explicit Depth(Int d) : _d(d) { } operator Int() const { return _d; } };
-
 //! \brief Draw a box over-approximation to the set.
 class BoxDrawer : public DrawerInterface
 {
   public:
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
-    OutputStream& _write(OutputStream& os) const;
-};
-
-
-//! \brief Draw an affine over-approximation to the set.
-class EnclosureAffineDrawer : public DrawerInterface
-{
-    Nat _accuracy;
-  public:
-    EnclosureAffineDrawer(Nat accuracy) : _accuracy(accuracy) { }
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat accuracy) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -65,14 +49,6 @@ class AffineDrawer : public DrawerInterface
     Nat _splittings;
   public:
     AffineDrawer(Nat splittings) : _splittings(splittings) { }
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
-    OutputStream& _write(OutputStream& os) const;
-};
-
-//! \brief Subdivide the set and draw affine approximations to small pieces.
-class SubdivisionDrawer : public DrawerInterface
-{
-  public:
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
     OutputStream& _write(OutputStream& os) const;
 };

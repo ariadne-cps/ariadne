@@ -70,11 +70,11 @@ inline unsigned int get_verbosity(int argc, const char* argv[]) {
         if(std::strcmp(argv[1],"-v")==0) {
             if(argc>2) {
                 int val = std::atoi(argv[2]);
-                if (val < 0) std::cerr << "Verbosity should be a non-negative value.\n";
+                ARIADNE_ASSERT_MSG(val >= 0,"Verbosity should be a non-negative value.\n");
                 return static_cast<unsigned int>(val);
             }
         } else {
-            std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
+            ARIADNE_FAIL_MSG("Unrecognised command-line option \"" << argv[1] << "\"\n");
         }
     }
     return 0;
@@ -242,11 +242,11 @@ class LoggerConfiguration {
     void set_theme(TerminalTextTheme const& theme);
     //! \brief Get the current theme used
     TerminalTextTheme const& theme() const;
-    //! \brief Add a keyword to the default ones offered in the them, forcing a given style
+    //! \brief Add a keyword to the default ones offered, forcing a given style
     //! \details Adding an existing keyword has no effect
     void add_custom_keyword(std::string const& text, TerminalTextStyle const& style);
-    //! \brief Add a keyword to the default ones offered in the them, using the default style
-    //! \details Adding an existing keyword has no effect
+    //! \brief Add a keyword to the default ones offered, using the keyword style for the current theme
+    //! \details Adding an existing keyword has no effect. Changing the theme will not apply to this custom keyword.
     void add_custom_keyword(std::string const& text);
     //! \brief Get the map of keywords (a TerminalTextStyle equal to TT_STYLE_NONE implies no custom style forced)
     std::map<std::string,TerminalTextStyle> const& custom_keywords() const;

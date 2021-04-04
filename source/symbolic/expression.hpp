@@ -265,9 +265,6 @@ ScalarMultivariateFunction<EffectiveTag> make_function(const Space<Real>& s, con
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 VectorMultivariateFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
 
-//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
-ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
-
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 

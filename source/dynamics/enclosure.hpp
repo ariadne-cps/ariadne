@@ -346,9 +346,6 @@ Enclosure product(const Enclosure& set, const ExactBoxType& bx);
 //! \pre The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
-//! \related Enclosure \brief The image of the \a set under the \a function.
-Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
-
 } // namespace Ariadne
 
 #include "symbolic/space.hpp"

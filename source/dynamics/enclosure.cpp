@@ -1466,7 +1466,37 @@ Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) c
 }
 
 
+OutputStream& LabelledEnclosure::_write(OutputStream& os) const {
+    const Bool LONG_FORMAT=true;
 
+    // TODO: improve by using writers
+    if(LONG_FORMAT) {
+        os << "LabelledEnclosure"
+           << "(\n  domain=" << this->domain()
+           << ",\n  range=" << this->bounding_box()
+           << ",\n  reduced_domain=" << this->reduced_domain()
+           << ",\n  is_empty=" << this->reduced_domain().is_empty()
+           << ",\n  state_function=" << this->state_function()
+           << ",\n  time_function=" << this->time_function()
+           << ",\n  constraints=" << this->constraints()
+           << ",\n  auxiliary_mapping = [" << this->auxiliary_mapping().argument_size() << "]" << this->auxiliary_mapping()
+           << ",\n  parameters = " << canonical_variable_names(this->variable_kinds())
+           << ",\n  space =" << this->space()
+           << ",\n  auxiliary_space =" << this->auxiliary_space()
+           << "\n)\n";
+    } else {
+        os << "LabelledEnclosure"
+           << "( domain=" << this->domain()
+           << ", range=" << this->bounding_box()
+           << ", state_function=" << repr(this->state_function())
+           << ", time_function=" << repr(this->time_function())
+           << ", constraints=" << this->constraints()
+           << ", auxiliary_mapping = " << this->auxiliary_mapping()
+           << ", space =" << this->space()
+           << ")";
+
+    } return os;
+}
 
 
 

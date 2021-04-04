@@ -382,11 +382,6 @@ Void Enclosure::set_auxiliary_mapping(const EffectiveVectorMultivariateFunction&
     this->_auxiliary_mapping=aux;
 }
 
-Void Enclosure::new_parameter(ExactIntervalType ivl)
-{
-    this->new_parameter(ivl,EnclosureVariableKind::UNKNOWN);
-}
-
 Void Enclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
     this->_domain=product(this->_domain,ivl);
@@ -400,11 +395,6 @@ Void Enclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
     }
     this->_variable_kinds.append(vk);
     this->_check();
-}
-
-Void Enclosure::new_variable(ExactIntervalType ivl)
-{
-    this->new_variable(ivl,EnclosureVariableKind::UNKNOWN);
 }
 
 Void Enclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)

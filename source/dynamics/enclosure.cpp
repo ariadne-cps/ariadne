@@ -423,20 +423,6 @@ Void Enclosure::apply_map(ValidatedVectorMultivariateFunction map, EffectiveVect
     this->_check();
 }
 
-/*
-Void Enclosure::apply_flow(ValidatedVectorMultivariateFunction flow, ExactIntervalType time)
-{
-    ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    this->_state_function=compose(flow,combine(this->_state_function,this->configuration().function_factory().create_identity(ExactBoxType(1u,time))));
-    for(List<ValidatedScalarMultivariateFunctionModelDP>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
-    for(List<ValidatedScalarMultivariateFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
-        *iter=embed(*iter,time);
-    }
-    this->_check();
-}
-*/
 
 Void Enclosure::apply_fixed_evolve_step(ValidatedVectorMultivariateFunction flow, StepSizeType time)
 {
@@ -1345,15 +1331,6 @@ Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclo
     result.apply_map(function);
     return result;
 }
-
-Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set) {
-    Enclosure result(set);
-    const ValidatedVectorMultivariateFunctionModelDP& state_function=result.state_function();
-    const_cast<ValidatedVectorMultivariateFunctionModelDP&>(state_function)=unchecked_compose(function,set.state_function());
-    return result;
-}
-
-
 
 LabelledEnclosure::LabelledEnclosure(LabelledExactBoxType const& bx, EnclosureConfiguration const& config)
     : Enclosure(bx.euclidean_set(),config), _state_variables(bx.space().variable_names())

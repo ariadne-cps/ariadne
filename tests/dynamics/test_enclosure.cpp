@@ -61,6 +61,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_restriction());
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
+        ARIADNE_TEST_CALL(test_product());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -144,6 +145,17 @@ class TestEnclosure
         ARIADNE_TEST_ASSERT(is_indeterminate(encl.satisfies(-sqr(x0))));
     }
 
+    Void test_product() const {
+        ExactBoxType dom1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom1,swp),0);
+        Enclosure encl1(dom1,fnc,EnclosureConfiguration(TaylorFunctionFactory(swp)));
+        ARIADNE_TEST_PRINT(product(encl1,ExactIntervalType(-1.0_x,1.0_x)));
+        ExactBoxType dom2({{1.0_x,5.0_x}});
+        ARIADNE_TEST_PRINT(product(encl1,dom2));
+        Enclosure encl2(dom2,EnclosureConfiguration(TaylorFunctionFactory(swp)));
+        ARIADNE_TEST_PRINT(product(encl1,encl2));
+    }
 
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");

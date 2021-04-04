@@ -60,6 +60,7 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_subset_separated());
         ARIADNE_TEST_CALL(test_restriction());
         ARIADNE_TEST_CALL(test_auxiliary_map());
+        ARIADNE_TEST_CALL(test_constraints());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -120,7 +121,13 @@ class TestEnclosure
         encl.set_auxiliary_mapping(auxiliary);
         ARIADNE_TEST_PRINT(encl.state_auxiliary_function());
         ARIADNE_TEST_PRINT(encl.state_auxiliary_set());
-        //get_function
+        for (SizeType i=0; i<4; ++i)
+            ARIADNE_TEST_PRINT(encl.get_function(i));
+    }
+
+    Void test_constraints() const {
+
+
     }
 
     Void _draw(Drawer const& drawer, String suffix) const {
@@ -139,9 +146,9 @@ class TestEnclosure
     }
 
     Void test_draw() const {
-        _draw(BoxDrawer(),"Box");
-        _draw(GridDrawer(4),"Grid");
-        _draw(AffineDrawer(1),"Affine");
+        _draw(BoxDrawer(),"box");
+        _draw(GridDrawer(4),"grid");
+        _draw(AffineDrawer(1),"affine");
     }
 };
 

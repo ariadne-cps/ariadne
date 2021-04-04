@@ -180,11 +180,9 @@ class Enclosure
     //! \brief A list detailing the kind of variable each of the domain parameters represents.
     List<EnclosureVariableKind> const& variable_kinds() const;
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
-    Void new_parameter(ExactIntervalType ivl);
     Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Introduces a new independent variable with values in the interval \a ivl.
     //! Equivalent to constructing the set \f$S\times I\f$.
-    Void new_variable(ExactIntervalType ivl);
     Void new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.

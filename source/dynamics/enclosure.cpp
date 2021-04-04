@@ -154,7 +154,7 @@ OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
               <<", reconditioning_num_blocks=" << ec._reconditioning_num_blocks <<")";
 }
 
-Void Enclosure::_check(std::string from) const {
+Void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_state_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n");
@@ -382,27 +382,6 @@ Void Enclosure::set_auxiliary_mapping(const EffectiveVectorMultivariateFunction&
     this->_auxiliary_mapping=aux;
 }
 
-Void Enclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_domain=product(this->_domain,ivl);
-    this->_reduced_domain=product(this->_reduced_domain,ivl);
-    this->_state_function=embed(this->_state_function,ivl);
-    this->_time_function=embed(this->_time_function,ivl);
-    this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
-        ValidatedConstraintModel& constraint=this->_constraints[i];
-        constraint.set_function(embed(constraint.function(),ivl));
-    }
-    this->_variable_kinds.append(vk);
-    this->_check();
-}
-
-Void Enclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_unchecked_new_variable(ivl,vk);
-    this->_check();
-}
-
 Void Enclosure::_unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
     ValidatedScalarMultivariateFunctionModelDP variable_function = this->configuration().function_factory().create_identity(ivl);
@@ -411,6 +390,7 @@ Void Enclosure::_unchecked_new_variable(ExactIntervalType ivl, EnclosureVariable
     this->_state_function=combine(this->_state_function,variable_function);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
+
     for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));

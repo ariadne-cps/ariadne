@@ -179,12 +179,6 @@ class Enclosure
 
     //! \brief A list detailing the kind of variable each of the domain parameters represents.
     List<EnclosureVariableKind> const& variable_kinds() const;
-    //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
-    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk);
-    //! \brief Introduces a new independent variable with values in the interval \a ivl.
-    //! Equivalent to constructing the set \f$S\times I\f$.
-    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
-    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     Void substitute(SizeType j, ValidatedScalarMultivariateFunctionModelDP v);
@@ -331,7 +325,10 @@ class Enclosure
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;
   private:
-    Void _check(std::string from="") const;
+    //! \brief Introduces a new independent variable with values in the interval \a ivl.
+    //! Equivalent to constructing the set \f$S\times I\f$.
+    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
+    Void _check() const;
     Void _solve_zero_constraints();
     EffectiveVectorMultivariateFunction real_function() const;
   private:

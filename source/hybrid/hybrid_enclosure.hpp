@@ -245,10 +245,6 @@ class HybridEnclosure
     //! \brief Sets the auxiliary variables and functions.
     Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux);
 
-    //! \brief Introduces a new parameter with domain \a ivl.
-    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind);
-    //! \brief Introduce a new independent variable with domain \a ivl.
-    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
     Void new_state_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$(x,t)\f$.

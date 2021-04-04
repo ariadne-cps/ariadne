@@ -413,10 +413,15 @@ class LabelledEnclosure
 
     using Enclosure::draw;
     virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+
+    OutputStream& _write(OutputStream&) const;
   private:
     List<Identifier> _state_variables;
     List<Identifier> _auxiliary_variables;
 };
+
+//! \related Enclosure \brief Stream output operator.
+inline OutputStream& operator<<(OutputStream& os, const LabelledEnclosure& s) { return s._write(os); }
 
 using LabelledEnclosureListSet = LabelledSet<ListSet<Enclosure>>;
 

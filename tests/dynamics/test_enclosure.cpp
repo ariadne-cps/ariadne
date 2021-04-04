@@ -62,7 +62,9 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_auxiliary_map());
         ARIADNE_TEST_CALL(test_constraints());
         ARIADNE_TEST_CALL(test_product());
+        ARIADNE_TEST_CALL(test_split());
         ARIADNE_TEST_CALL(test_draw());
+        ARIADNE_TEST_CALL(test_labelled());
     }
 
     Void test_construct_without_domain() const {
@@ -157,6 +159,10 @@ class TestEnclosure
         ARIADNE_TEST_PRINT(product(encl1,encl2));
     }
 
+    Void test_split() const {
+
+    }
+
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);
@@ -176,6 +182,29 @@ class TestEnclosure
         _draw(BoxDrawer(),"box");
         _draw(GridDrawer(4),"grid");
         _draw(AffineDrawer(1),"affine");
+    }
+
+    Void test_labelled() const {
+        RealVariable x("x"), y("y"), z("z");
+        RealSpace spc({x, y});
+        ExactBoxType bx({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        LabelledExactBoxType dom(spc, bx);
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        EnclosureConfiguration configuration(function_factory);
+        LabelledEnclosure labelled_encl1(dom, configuration);
+        ARIADNE_TEST_PRINT(labelled_encl1);
+        labelled_encl1.set_state_space(RealSpace({y,z}));
+        ARIADNE_TEST_PRINT(labelled_encl1);
+        Enclosure encl2(bx,configuration);
+        LabelledEnclosure labelled_encl2(encl2,spc);
+        ARIADNE_TEST_PRINT(labelled_encl2);
+        Enclosure encl3(bx,configuration);
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
+        encl3.set_auxiliary_mapping(auxiliary);
+        LabelledEnclosure labelled_encl3(encl3,spc,RealSpace({z}));
+        ARIADNE_TEST_PRINT(labelled_encl3);
     }
 };
 

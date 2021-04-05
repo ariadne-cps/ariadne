@@ -1,5 +1,5 @@
 ##############################################################################
-#            solve_polynomial.py
+#            gdb_printers.py
 #
 #  Copyright  2010  Pieter Collins
 #    Some of these are based on pretty-printers for libstc++.

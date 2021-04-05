@@ -58,7 +58,7 @@ Aptitude packages: `cmake pkg-config git libmpfr-dev libcairo2-dev` and either `
 
 Additional package required for the Python interface: `python3-dev`.
 
-Additional packages required for documentation: `doxygen doxygen-latex` 
+Additional packages required for documentation: `doxygen doxygen-latex`
 
 #### macOS
 
@@ -86,34 +86,21 @@ Then you can prepare the build environment, choosing a Release build for maximum
 $ cmake .. -DCMAKE_BUILD_TYPE=Release
 ```
 
-At this point, if no error arises, you can build the library itself:
+At this point, if no error arises, you can build the C++ library and its Python bindings with:
 
 ```
-$ cmake --build . --target ariadne --parallel
+$ cmake --build . --parallel
 ```
 
-If you prefer to use the Python interface over the C++ library, you should build the Python module with:
+This build does not include the `examples`, `tutorials` and `tests` targets. You can build those by supplying targets with the following:
 
 ```
-$ cmake --build . --target pyariadne --parallel
+$ cmake --build . --target <TARGET> --parallel
 ```
 
-Optionally, you can also build and run the test suite for the library:
+or by using the `everything` target to include all code targets.
 
-```
-$ cmake --build . --target tests --parallel
- $ ctest
-```
-
-where no error should appear.
-
-To build libraries, tests, examples and tutorials, simply type:
-
-```
-$ cmake --build . --target everything --parallel
-```
-
-To build the documentation, instead use:
+To build the `doc` target for documentation, explicitly use:
 
 ```
 $ cmake --build . --target doc --parallel

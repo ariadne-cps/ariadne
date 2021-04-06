@@ -16,7 +16,8 @@ namespace Ariadne
                                         x0(cast_exact(ApproximateDouble(0.0)), pr),
                                         amp(cast_exact(ApproximateDouble(0.0)), pr),
                                         k(cast_exact(ApproximateDouble(0.0)), pr),
-                                        omega(cast_exact(ApproximateDouble(0.0)), pr)
+                                        omega(cast_exact(ApproximateDouble(0.0)), pr),
+                                        is_triangular(false)
                 {}
                 FloatValue<PR> length;
                 FloatValue<PR> tension;
@@ -27,6 +28,7 @@ namespace Ariadne
                 FloatValue<PR> amp;
                 FloatValue<PR> k;
                 FloatValue<PR> omega;
+                Bool is_triangular;
 
         };
 
@@ -41,7 +43,7 @@ namespace Ariadne
             linspaced[0] = L;
             return linspaced;
         }
-        FloatValue<X> delta = (L/(n - 1)).value();
+        FloatValue<X> delta = (L/n).value();
         for (SizeType i = 0; i < (n - 1); i++)
         {
             linspaced[i] = (0 + delta*i).value();
@@ -58,7 +60,7 @@ namespace Ariadne
         if (!isTriangular)
         {   //Sinusoind init condition
             for (SizeType i = 0; i < Nx; i++){
-                uts[{i, 0}] = sin(stringModel.k*spacePoint[i]).value(); 
+                uts[{i, 0}] = (stringModel.amp*sin(stringModel.k*spacePoint[i])).value(); 
             }
         }
         else{
@@ -118,7 +120,7 @@ namespace Ariadne
             for (SizeType i = 1; i < Nx-1; i++)
             {
                 uts[{i, n+1}] = ((1/(stringParameter.damping*dt/2u+1))*(2*uts[{i, n}] - uts[{i, n-1}] + (stringParameter.damping*dt/2)*uts[{i, n-1}] +
-                    C2*(uts[{i-1, n}] - 2*uts[{i, n}] + uts[{i+1, n}])) + 1000u*pow(dt, 2)*sin(stringParameter.k*space[i])*cos(stringParameter.omega*time[n])).value();
+                    C2*(uts[{i-1, n}] - 2*uts[{i, n}] + uts[{i+1, n}])) + pow(dt, 2)*sin(stringParameter.k*space[i])*cos(stringParameter.omega*time[n])).value();
             }
         }//main loop
         return uts;

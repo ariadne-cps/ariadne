@@ -75,7 +75,7 @@ HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height
         const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;
         const Nat canvas_height = drawing_height+HYBRID_BOTTOM_MARGIN+HYBRID_TOP_MARGIN;
 
-        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename, canvas_width, canvas_height);
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename, canvas_width, canvas_height, this->properties.is_animated);
 
         this->_paint_all(*canvas);
         canvas->write(cfilename);

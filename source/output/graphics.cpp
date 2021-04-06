@@ -98,6 +98,7 @@ GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is3D = true; re
 GraphicsProperties& GraphicsProperties::set_proj_xy() {this->isProj=true; this->isXY=true; return *this; }
 GraphicsProperties& GraphicsProperties::set_proj_xz() {this->isProj=true; this->isXZ=true; return *this; }
 GraphicsProperties& GraphicsProperties::set_proj_yz() {this->isProj=true; this->isYZ=true; return *this; }
+GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
     return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
@@ -424,10 +425,13 @@ Figure& Figure::clear() {
     this->_data->objects.clear(); return *this;
 }
 
+Figure& Figure::set_animated(Bool b){
+    this->_data->properties.is_animated = b; return *this;
+}
+
 Figure& operator<<(Figure& fig, const DrawableInterface& shape) {
     fig.draw(shape); return fig;
 }
-
 
 Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
     const Colour& line_colour=properties.line_colour;
@@ -468,18 +472,14 @@ Void Figure::_paint3d(CanvasInterface& canvas) const
     String tz=String("x")+to_str(projection.z_coordinate());
 
     canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);
-    if(!this->_data->properties.isProj){
-        canvas.set_3d_palette();
-    }else if (this->_data->properties.isXY){
-        canvas.set_3d_palette();
-        canvas.set_map();
+    if (this->_data->properties.isXY){
+        canvas.set_heat_map(true);
     }else if(this->_data->properties.isYZ){
         canvas.initialise(ty, tz, yl, yu, zl, zu);
-        canvas.set_2d_palette();
     }else if(this->_data->properties.isXZ) {
         canvas.initialise(tx, tz, xl, xu, zl, zu);
-        canvas.set_2d_palette();
     }
+    canvas.set_colour_palette(); 
 
     for(const GraphicsObject& object : this->_data->objects) {
         const DrawableInterface3d& shape=object.shape3d_ptr.operator*();
@@ -522,7 +522,6 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     String tx=String("x")+to_str(projection.x_coordinate());
     String ty=String("x")+to_str(projection.y_coordinate());
 
-    canvas.is_std();
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
@@ -548,7 +547,7 @@ Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) cons
     #if not(defined(HAVE_CAIRO_H)) || not(defined(HAVE_GNUPLOT_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
-        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height);
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
 
         if(this->_data->properties.is3D){
             this->_paint3d(*canvas);
@@ -642,6 +641,10 @@ LabelledFigure& LabelledFigure::clear() {
     this->_data->objects.clear(); return *this;
 }
 
+LabelledFigure& LabelledFigure::set_animated(Bool b){
+    this->_data->properties.is_animated = b; return *this;
+}
+
 LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape) {
     fig.draw(shape); return fig;
 }
@@ -670,18 +673,14 @@ Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
     ProgressIndicator indicator(total_objects);
 
     canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);
-    if(!this->_data->properties.isProj){
-        canvas.set_3d_palette();
-    }else if (this->_data->properties.isXY){
-        canvas.set_3d_palette();
-        canvas.set_map();
+    if (this->_data->properties.isXY){
+        canvas.set_heat_map(true);
     }else if(this->_data->properties.isYZ){
         canvas.initialise(ty, tz, yl, yu, zl, zu);
-        canvas.set_2d_palette();
     }else if(this->_data->properties.isXZ) {
         canvas.initialise(tx, tz, xl, xu, zl, zu);
-        canvas.set_2d_palette();
     }
+    canvas.set_colour_palette();
 
     for(const LabelledGraphicsObject& object : this->_data->objects) {
         const LabelledDrawableInterface3d& shape=object.shape3d_ptr.operator*();
@@ -715,7 +714,6 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     Dbl yl=numeric_cast<Dbl>(bounds[y].lower_bound());
     Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
 
-    canvas.is_std();
     canvas.initialise(tx,ty,xl,xu,yl,yu);
     // Draw shapes
     SizeType total_objects = this->_data->objects.size();
@@ -744,7 +742,7 @@ LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_heig
     #if not(defined(HAVE_CAIRO_H)) || not(defined(HAVE_GNUPLOT_H))
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
-        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height);
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
 
         if(this->_data->properties.is3D){
             this->_paint3d(*canvas);

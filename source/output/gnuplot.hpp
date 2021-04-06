@@ -67,16 +67,15 @@ class GnuplotCanvas : public CanvasInterface
     Nat sizeX;
     Nat sizeY;
     bool isMultiplot;
-    bool is2DPalette;
-    bool is3DPalette;
+    bool isColourPalette;
+    bool isanimate;
     _Labels labels;
-    Bool isStd;
 
   public:
     ~GnuplotCanvas();
     // Constructors - Create the canvas
     //Create canvas with dimensions
-    GnuplotCanvas(String filename, Nat X = 800, Nat Y = 800);
+    GnuplotCanvas(String filename, Nat X = 800, Nat Y = 800, Bool is_anim = false);
 
     //CanvasInterface
     Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz);
@@ -97,12 +96,9 @@ class GnuplotCanvas : public CanvasInterface
     Vector2d scaling() const;
     Box2d bounds() const;
 
-    Void set_3d_palette();
-    Void set_2d_palette();
+    Void set_colour_palette();
     Void fill3d();
-    Void set_map();
-    Void is_std();
-
+    Void set_heat_map(Bool b);
 
     //Set Multiplot - Multiple plot on same screen
     void set_multiplot(bool s);
@@ -138,18 +134,13 @@ class GnuplotCanvas : public CanvasInterface
     void set_xyz_log_axis();
     // Set Legend
     void set_legend();
-    //Set 3D palette
-    void set_3d_palette(double min, double max, double step);
-    //Set 2D palette
-    //void set2DPalette(Image2D& image, double min, double max, double step);
-    void set_2d_palette(double min, double max, double step);
     //Unset colorbox
     void unset_color_box();
 };
 
 class GnuplotGraphicsBackend : public GraphicsBackendInterface {
   public:
-    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const;
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const;
 };
 
 } // namespace Ariadne

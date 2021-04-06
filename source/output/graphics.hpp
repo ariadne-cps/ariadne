@@ -55,6 +55,7 @@ struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } FillC
 struct SetXYProj { explicit SetXYProj() : _xyProj(true) { } operator Bool() const { return this-> _xyProj; } private: Bool _xyProj; };
 struct SetXZProj { explicit SetXZProj() : _xzProj(true){ } operator Bool() const { return this-> _xzProj; } private: Bool _xzProj; };
 struct SetYZProj { explicit SetYZProj() : _yzProj(true){ } operator Bool() const { return this-> _yzProj; } private: Bool _yzProj; };
+struct SetAnimated { explicit SetAnimated(Bool b) : _anim(b) { } operator Bool() const { return this-> _anim; } private: Bool _anim; };
 
 inline LineStyle line_style(Bool s) { return LineStyle(s); }
 inline LineWidth line_width(Dbl w) { return LineWidth(w); }
@@ -67,12 +68,13 @@ inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,
 inline SetXYProj set_proj_xy() { return SetXYProj(); }
 inline SetXZProj set_proj_xz() { return SetXZProj(); }
 inline SetYZProj set_proj_yz() { return SetYZProj(); }
+inline SetAnimated set_animated(Bool b) { return SetAnimated(b); }
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false), is_animated(false) { }
     GraphicsProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
-        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false) { }
+        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false), is_animated(false) { }
     Dbl dot_radius;
     Bool line_style;
     Dbl line_width;
@@ -85,6 +87,7 @@ struct GraphicsProperties {
     Bool isXY;
     Bool isXZ;
     Bool isYZ;
+    Bool is_animated;
 
     GraphicsProperties& set_dot_radius(Dbl);
     GraphicsProperties& set_line_style(Bool);
@@ -101,6 +104,8 @@ struct GraphicsProperties {
     GraphicsProperties& set_proj_xy();
     GraphicsProperties& set_proj_xz();
     GraphicsProperties& set_proj_yz();
+
+    GraphicsProperties& set_animated(Bool);
 
 
     friend OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp);
@@ -238,6 +243,8 @@ class Figure
 
     //! Clear the figure.
     Figure& clear();
+    //! Set animation
+    Figure& set_animated(Bool b);
     //! Display the figure.
     Void display() const;
 
@@ -271,6 +278,7 @@ inline Figure& operator<<(Figure& g, const FillColour& fc) { g.properties().set_
 inline Figure& operator<<(Figure&g, const SetXYProj& xyproj) {g.properties().set_proj_xy(); return g; }
 inline Figure& operator<<(Figure&g, const SetXZProj& xzproj) {g.properties().set_proj_xz(); return g; }
 inline Figure& operator<<(Figure&g, const SetYZProj& yzproj) {g.properties().set_proj_yz(); return g; }
+inline Figure& operator<<(Figure&g, const SetAnimated& animation) {g.properties().set_animated(animation); return g; }
 
 template<class S> class LabelledSet;
 
@@ -305,6 +313,9 @@ class LabelledFigure {
 
     //! Clear the figure.
     LabelledFigure& clear();
+
+    LabelledFigure& set_animated(Bool b);
+
     //! Display the figure.
     Void display() const;
     //! Write out to file, using width \a nx pixels, and height \a ny pixels
@@ -331,6 +342,8 @@ inline LabelledFigure& operator<<(LabelledFigure& g, const FillColour& fc) { g.p
 inline LabelledFigure& operator<<(LabelledFigure& g, const SetXYProj& xyproj) {g.properties().set_proj_xy(); return g; }
 inline LabelledFigure& operator<<(LabelledFigure& g, const SetXZProj& xzproj) {g.properties().set_proj_xz(); return g; }
 inline LabelledFigure& operator<<(LabelledFigure& g, const SetYZProj& yzproj) {g.properties().set_proj_yz(); return g; }
+inline LabelledFigure& operator<<(LabelledFigure&g, const SetAnimated& animation) {g.properties().set_animated(animation); return g; }
+
 
 template<class S> class LabelledSet;
 template<class S> class LabelledDrawableWrapper : public LabelledDrawableInterface {

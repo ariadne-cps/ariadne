@@ -63,7 +63,7 @@ class TestGnuplot
 
             Parameter1D<PR> stringModel(pr);
 
-            stringModel.length = 1;  // Length
+            stringModel.length = 10;  // Length
             stringModel.tension = 100000;
             stringModel.mass = 1;
 
@@ -89,6 +89,7 @@ class TestGnuplot
             fig1.set_line_width(4.0);
             fig1.set_fill_style(false);
             fig1.set_fill_colour(1.0,1.0,1.0);
+            fig1.set_animated(true);
             fig1.draw(data);
             fig1.write("Figure-StringEvolution");
 
@@ -99,6 +100,7 @@ class TestGnuplot
             fig2 << line_width(4.0);
             fig2 << fill_style(false);
             fig2 << fill_colour(1.0,1.0,1.0);
+            fig2 << set_animated(true);
 
             fig2.draw(data);
 
@@ -208,11 +210,14 @@ class TestGnuplot
             Parameter2D<PR> firstDim(pr), secondDim(pr);
             firstDim.length = 10;
             secondDim.length = 10;
+            firstDim.x0 = 5;
+            secondDim.x0 = 5;
 
             Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
             //fig.set3D(); 
+            fig1.set_animated(true);
             fig1.draw3d(data);
             fig1.write("Figure-Gauss3DAnimation");
 
@@ -220,6 +225,7 @@ class TestGnuplot
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             //fig << set3Ddim(true);
+            fig2 << set_animated(true);
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3DAnimation");
 

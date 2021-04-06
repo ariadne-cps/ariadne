@@ -42,7 +42,7 @@ class CanvasInterface;
 class GraphicsBackendInterface {
   public:
     //! \brief Get a canvas from the backend
-    virtual SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const = 0;
+    virtual SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const = 0;
 
     virtual ~GraphicsBackendInterface() = default;
 };
@@ -53,8 +53,8 @@ class GraphicsBackend
 {
   public:
     using Handle<const GraphicsBackendInterface>::Handle;
-    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const {
-        return this->_ptr->make_canvas(cfilename,drawing_width,drawing_height); }
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const {
+        return this->_ptr->make_canvas(cfilename,drawing_width,drawing_height, is_animated); }
 };
 
 

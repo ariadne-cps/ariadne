@@ -46,7 +46,7 @@ static const Int BOTTOM_MARGIN = 40;
 static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
-SharedPointer<CanvasInterface> CairoGraphicsBackend::make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const {
+SharedPointer<CanvasInterface> CairoGraphicsBackend::make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const {
     return std::make_shared<CairoCanvas>(ImageSize2d(drawing_width,drawing_height));
 }
 
@@ -262,11 +262,9 @@ Void CairoCanvas::finalise()
     cairo_stroke (crp);
 }
 
-Void CairoCanvas::set_3d_palette() {  }
-Void CairoCanvas::set_2d_palette() {  }
+Void CairoCanvas::set_colour_palette() {  }
 Void CairoCanvas::fill3d() {  }
-Void CairoCanvas::set_map() {  }
-Void CairoCanvas::is_std() {  }
+Void CairoCanvas::set_heat_map(Bool b) {  }
 
 #endif
 

@@ -9,10 +9,12 @@ namespace Ariadne
     {
         public:
             Parameter2D(PR pr)  :   length(cast_exact(ApproximateDouble(0.0)), pr),
-                                    damping(cast_exact(ApproximateDouble(0.0)), pr)
+                                    damping(cast_exact(ApproximateDouble(0.0)), pr),
+                                    x0(cast_exact(ApproximateDouble(0.0)), pr)
             {}
             FloatValue<PR> length;     //Length
             FloatValue<PR> damping;    //damping
+            FloatValue<PR> x0;
     }; 
 
 
@@ -27,7 +29,7 @@ namespace Ariadne
         {
             for (SizeType j = 0; j < Ny; j++)
             {
-                u[{i, j}] = (exp(-pow(spacePointX[i]-firstDim.length/2, 2) - pow(spacePointY[j]-secondDim.length/2, 2)).value());
+                u[{i, j}] = (exp(-pow(spacePointX[i]-firstDim.x0, 2) - pow(spacePointY[j]-secondDim.x0, 2)).value());
             }
         }
         return u;
@@ -44,7 +46,7 @@ namespace Ariadne
             linspaced[0] = L;
             return linspaced;
         }
-        FloatValue<PR> delta = (L/(n - 1)).value();
+        FloatValue<PR> delta = (L/n).value();
         for (SizeType i = 0; i < (n - 1); i++)
         {
             linspaced[i] = ((0 + delta*i)).value();
@@ -64,12 +66,12 @@ namespace Ariadne
         auto dx = (spaceX[1] - spaceX[0]).value();
         auto dy = (spaceY[1] - spaceY[0]).value();
 
-        FloatValue<PR> c(cast_exact(ApproximateDouble(10.0)), pr);
-        FloatValue<PR> T(cast_exact(ApproximateDouble(2.5)), pr);
+        FloatValue<PR> c(cast_exact(ApproximateDouble(5.0)), pr);
+        FloatValue<PR> T(cast_exact(ApproximateDouble(2.0)), pr);
 
         FloatValue<PR> zb(cast_exact(ApproximateDouble(0.0)), pr);
 
-        FloatValue<PR> dt(cast_exact(ApproximateDouble(0.015625_x)), pr);
+        FloatValue<PR> dt(cast_exact(ApproximateDouble(0.09_x)), pr);
         
         FloatValue<PR> Nt = round(T/dt).value();
         SizeType Ntime = Nt.get_d();
@@ -83,7 +85,7 @@ namespace Ariadne
         Tensor<2, FloatValue<PR>> u({Nx, Ny}, zb);
         Tensor<3, FloatValue<PR>> uts({Nx, Ny, Ntime}, zb);
 
-        u = set_ic_2d(/*phi0, */firstDim, secondDim, Nx, Ny, spaceX, spaceY, pr);
+        u = set_ic_2d(firstDim, secondDim, Nx, Ny, spaceX, spaceY, pr);
         for (SizeType x = 0; x < Nx; x++)
         {
             for (SizeType y = 0; y < Ny; y++)

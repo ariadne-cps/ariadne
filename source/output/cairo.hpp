@@ -76,11 +76,9 @@ class CairoCanvas
     Void set_fill_opacity(double o);
     Void set_fill_colour(double r, double g, double b);
 
-    Void set_3d_palette();
-    Void set_2d_palette();
+    Void set_colour_palette();
     Void fill3d();
-    Void set_map();
-    Void is_std();
+    Void set_heat_map(Bool b);
 
     Vector2d scaling() const;
     Box2d bounds() const;
@@ -90,7 +88,7 @@ class CairoCanvas
 
 class CairoGraphicsBackend : public GraphicsBackendInterface {
   public:
-    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const;
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const;
 };
 
 } // namespace Ariadne

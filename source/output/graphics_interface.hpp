@@ -145,12 +145,12 @@ class CanvasInterface {
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
 
-    //Gnuplot
-    virtual Void set_3d_palette() = 0;  
-    virtual Void set_2d_palette() = 0;
-    virtual Void fill3d() = 0;   
-    virtual Void set_map() = 0;
-    virtual Void is_std() = 0;
+    //! \brief Set the colour palette.
+    virtual Void set_colour_palette() = 0;  
+    //! \brief Draw and fill a 3d image.
+    virtual Void fill3d() = 0;  
+      //! \brief Set a heatmap projection. 
+    virtual Void set_heat_map(Bool b) = 0;
 
     //! \brief The scaling of the figure, in user units per pixel.
     virtual Vector2d scaling() const = 0;

@@ -8,9 +8,9 @@ namespace Ariadne
     class Parameter2D
     {
         public:
-            Parameter2D(PR pr)  :   length(cast_exact(ApproximateDouble(0.0)), pr),
-                                    damping(cast_exact(ApproximateDouble(0.0)), pr),
-                                    x0(cast_exact(ApproximateDouble(0.0)), pr)
+            Parameter2D(PR pr)  :   length(0, pr),
+                                    damping(0, pr),
+                                    x0(0, pr)
             {}
             FloatValue<PR> length;     //Length
             FloatValue<PR> damping;    //damping
@@ -38,7 +38,7 @@ namespace Ariadne
     template<class PR>
     Array<FloatValue<PR>> linspace2d(FloatValue<PR> L, SizeType n, PR pr)
     {
-        Array<FloatValue<PR>> linspaced(n,FloatValue<PR>(cast_exact(ApproximateDouble(0.0)), pr));
+        Array<FloatValue<PR>> linspaced(n,FloatValue<PR>(0, pr));
         if (n == 0)
             return linspaced;
         if (n == 1)
@@ -69,9 +69,9 @@ namespace Ariadne
         FloatValue<PR> c(cast_exact(ApproximateDouble(5.0)), pr);
         FloatValue<PR> T(cast_exact(ApproximateDouble(2.0)), pr);
 
-        FloatValue<PR> zb(cast_exact(ApproximateDouble(0.0)), pr);
+        FloatValue<PR> zb(0, pr);
 
-        FloatValue<PR> dt(cast_exact(ApproximateDouble(0.09_x)), pr);
+        FloatValue<PR> dt(cast_exact(ApproximateDouble(0.09)), pr);
         
         FloatValue<PR> Nt = round(T/dt).value();
         SizeType Ntime = Nt.get_d();

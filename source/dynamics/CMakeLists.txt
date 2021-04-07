@@ -8,7 +8,7 @@ add_library(${LIBRARY_NAME} OBJECT
     first_order_pde.cpp
     map_evolver.cpp
     vector_field_evolver.cpp
-    simulator.cpp
+        vector_field_simulator.cpp
     reachability_analyser.cpp
 )
 

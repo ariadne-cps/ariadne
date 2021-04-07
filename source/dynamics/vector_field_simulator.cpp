@@ -1,7 +1,7 @@
 /***************************************************************************
- *            dynamics/simulator.cpp
+ *            dynamics/vector_field_simulator.cpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-21  Luca Geretti
  *
  ****************************************************************************/
 
@@ -44,29 +44,29 @@
 
 #include "../dynamics/orbit.hpp"
 #include "../dynamics/vector_field.hpp"
-#include "../dynamics/simulator.hpp"
+#include "../dynamics/vector_field_simulator.hpp"
 
 namespace Ariadne {
 
 template class Orbit<Point<FloatDPApproximation>>;
 
-Simulator::Simulator() : _step_size(0.125_x,dp)
+VectorFieldSimulator::VectorFieldSimulator() : _step_size(0.125_x, dp)
 { }
 
-Void Simulator::set_step_size(double h) {
+Void VectorFieldSimulator::set_step_size(double h) {
     this->_step_size=h;
 }
 
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-auto Simulator::orbit(const VectorField& system, const RealPoint& init_pt, const TerminationType& termination) const
+auto VectorFieldSimulator::orbit(const VectorField& system, const RealPoint& init_pt, const TerminationType& termination) const
     -> Orbit<ApproximatePointType>
 {
     return orbit(system,ApproximatePointType(init_pt,dp),termination);
 }
 
-auto Simulator::orbit(const VectorField& system, const ApproximatePointType& init_pt, const TerminationType& termination) const
+auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePointType& init_pt, const TerminationType& termination) const
     -> Orbit<ApproximatePointType>
 {
     ARIADNE_LOG_SCOPE_CREATE;

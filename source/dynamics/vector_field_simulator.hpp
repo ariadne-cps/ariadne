@@ -1,7 +1,7 @@
 /***************************************************************************
- *            dynamics/simulator.hpp
+ *            dynamics/vector_field_simulator.hpp
  *
- *  Copyright  2009-20  Pieter Collins
+ *  Copyright  2009-21  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/simulator.hpp
+/*! \file dynamics/vector_field_simulator.hpp
  *  \brief Simulator for continuous systems.
  */
 
-#ifndef ARIADNE_SIMULATOR_HPP
-#define ARIADNE_SIMULATOR_HPP
+#ifndef ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
+#define ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 
 #include "../output/logging.hpp"
 #include "../numeric/float.decl.hpp"
@@ -40,9 +40,9 @@ class VectorField;
 
 template<class T> class Orbit;
 
-/*! \brief A class for computing the evolution of a continuous system.
+/*! \brief A class for computing the simulated evolution of a continuous system.
  */
-class Simulator
+class VectorFieldSimulator
 {
   public:
     typedef Point<FloatDPApproximation> ApproximatePointType;
@@ -53,12 +53,12 @@ class Simulator
   public:
 
     //! \brief Default constructor.
-    Simulator();
+    VectorFieldSimulator();
 
     Void set_step_size(double h);
 
     //!@{
-    //! \name Evolution using points.
+    //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
     Orbit<ApproximatePointType> orbit(VectorField const& system, ApproximatePointType const& initial_point, TerminationType const& termination) const;
     Orbit<ApproximatePointType> orbit(VectorField const& system, RealPoint const& initial_point, TerminationType const& termination) const;
@@ -68,4 +68,4 @@ class Simulator
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SIMULATOR_HPP
+#endif // ARIADNE_VECTOR_FIELD_SIMULATOR_HPP

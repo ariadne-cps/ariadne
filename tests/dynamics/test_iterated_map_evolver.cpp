@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_discrete_evolution.cpp
+ *            test_iterated_map_evolver.cpp
  *
  *  Copyright  2006-20  Pieter Collins
  *
@@ -49,7 +49,7 @@
 using namespace Ariadne;
 using namespace std;
 
-class TestMapEvolver
+class TestIteratedMapEvolver
 {
   public:
     Void test() const;
@@ -57,11 +57,11 @@ class TestMapEvolver
 
 Int main()
 {
-    ARIADNE_TEST_CALL(TestMapEvolver().test());
+    ARIADNE_TEST_CALL(TestIteratedMapEvolver().test());
     return ARIADNE_TEST_FAILURES;
 }
 
-Void TestMapEvolver::test() const
+Void TestIteratedMapEvolver::test() const
 {
     typedef DoublePrecision PR;
     DoublePrecision pr;

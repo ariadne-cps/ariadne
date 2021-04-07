@@ -39,8 +39,8 @@
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "dynamics/iterated_map.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
@@ -107,7 +107,7 @@ Void TestMapEvolver::test() const
     double enclosure_radius(0.25);
 
     // Set up the evaluators
-    MapEvolver evolver(henon);
+    IteratedMapEvolver evolver(henon);
     evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
 
     // Compute the reachable sets

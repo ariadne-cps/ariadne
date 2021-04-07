@@ -163,7 +163,7 @@ def simulate_evolution(system):
 
     # Create a simulator object
     simulator = HybridSimulator(system)
-    simulator.set_step_size(0.01)
+    simulator.configuration().set_step_size(0.01)
 
     # Set an initial point for the simulation
     initial_point = HybridRealPoint(DiscreteLocation({valve:opened,controller:rising}),{height:Real(7)})

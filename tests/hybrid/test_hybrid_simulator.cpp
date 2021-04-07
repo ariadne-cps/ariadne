@@ -62,8 +62,6 @@ class TestHybridSimulator
         automaton.new_transition(location1,event3,location2,{next(x)=x,next(y)=y,next(z)=y},x>=1,EventKind::URGENT);
         automaton.new_transition(location2,event4,location1,{next(x)=x,next(y)=y},x<=-1,EventKind::URGENT);
 
-        cout << "Finished creating hybrid automaton." << endl;
-
         return automaton;
     }
 
@@ -83,17 +81,15 @@ class TestHybridSimulator
         const RealVariable x("x");
         const RealVariable y("y");
 
-        // Set up the simulator parameters and grid
-        FloatDP step_size(0.125_x,dp);
-        FloatDP enclosure_radius(0.25_x,dp);
-
-        // Set up the evaluators
-        HybridSimulator simulator(system());
-        simulator.set_step_size(0.0625);
-
         // Make a hybrid automaton for the Van der Pol equation
         HybridAutomaton automaton=system();
         ARIADNE_TEST_PRINT(automaton);
+
+        // Set up the evaluators
+        HybridSimulator simulator(automaton);
+        simulator.configuration().set_step_size(0.0625);
+
+        cout << "configuration=" << simulator.configuration() << endl;
 
         // Define the initial box
         RealSpace space={x,y};

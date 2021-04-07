@@ -172,7 +172,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
 
     // Create a simulator object
     HybridSimulator simulator(system);
-    simulator.set_step_size(0.01);
+    simulator.configuration().set_step_size(0.01);
 
     // Set an initial point for the simulation
     HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});

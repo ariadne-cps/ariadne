@@ -30,6 +30,7 @@
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
 #include "output/logging.hpp"
+#include "solvers/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {
@@ -38,6 +39,8 @@ class HybridTerminationCriterion;
 class HybridAutomatonInterface;
 class DiscreteEvent;
 class DiscreteLocation;
+
+class HybridSimulatorConfiguration;
 
 template<class T> class Orbit;
 
@@ -48,21 +51,24 @@ class HybridSimulator
   public:
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
+    typedef HybridSimulatorConfiguration ConfigurationType;
     typedef HybridAutomatonInterface SystemType;
     typedef HybridApproximatePointType EnclosureType;
     typedef Orbit<HybridApproximatePointType> OrbitType;
     typedef HybridTerminationCriterion TerminationType;
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    FloatDPApproximation _step_size;
+    SharedPointer<SystemType> _sys_ptr;
+    SharedPointer<ConfigurationType> _configuration;
   public:
 
     //! \brief Default constructor.
     HybridSimulator(const SystemType& system);
-    //! \brief Set the step size.
-    Void set_step_size(double h);
-    //! \brief Get the step size.
-    FloatDPApproximation step_size() const;
+
+    //!@{
+    //! \name Configuration for the class.
+    //! \brief A reference to the configuration controlling the evolution.
+    ConfigurationType& configuration() { return *this->_configuration; }
+    const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //!@{
     //! \name Evolution using abstract sets.
@@ -75,7 +81,26 @@ class HybridSimulator
     Bool _satisfies_invariants(const DiscreteLocation& location, const Point<FloatDPApproximation>& point) const;
 };
 
+class HybridSimulatorConfiguration : public ConfigurationInterface {
+public:
+    //! \brief Default constructor gives reasonable values.
+    HybridSimulatorConfiguration();
 
+    virtual ~HybridSimulatorConfiguration() = default;
+
+private:
+
+    //! \brief The step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    FloatDPApproximation _step_size;
+
+public:
+
+    const FloatDPApproximation& step_size() const { return _step_size; }
+    Void set_step_size(ApproximateDouble value) { _step_size = FloatDPApproximation(value,double_precision); }
+
+    virtual OutputStream& _write(OutputStream& os) const;
+};
 
 } // namespace Ariadne
 

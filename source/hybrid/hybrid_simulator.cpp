@@ -57,16 +57,8 @@ namespace Ariadne {
 template<class T> class Orbit;
 
 HybridSimulator::HybridSimulator(const SystemType& system)
-    : _sys_ptr(system.clone()), _step_size(0.125_x,dp)
+    : _sys_ptr(system.clone()), _configuration(new ConfigurationType())
 {
-}
-
-Void HybridSimulator::set_step_size(double h) {
-    this->_step_size=h;
-}
-
-FloatDPApproximation HybridSimulator::step_size() const {
-    return _step_size;
 }
 
 Map<DiscreteEvent,EffectiveScalarMultivariateFunction>
@@ -132,7 +124,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
     HybridAutomatonInterface const& system=*_sys_ptr;
 
     HybridTime t(0.0_x,0);
-    Dyadic h(ExactDouble(this->_step_size.get_d()));
+    Dyadic h(cast_exact(configuration().step_size()));
     HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
 
     DiscreteLocation location=init_pt.location();
@@ -150,7 +142,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
     EffectiveVectorMultivariateFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=_guard_functions(location);
 
-    RungeKutta4Integrator integrator(this->_step_size.get_d());
+    RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
@@ -195,7 +187,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
 
             t._discrete_time += 1;
         } else {
-            next_point = ApproximatePointType(integrator.step(dynamic,point,this->_step_size));
+            next_point = ApproximatePointType(integrator.step(dynamic,point,configuration().step_size()));
             t._continuous_time += h;
         }
         point=next_point;
@@ -206,7 +198,14 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
     return orbit;
 }
 
+HybridSimulatorConfiguration::HybridSimulatorConfiguration() : _step_size(0.125,double_precision) { }
 
+OutputStream& HybridSimulatorConfiguration::_write(OutputStream& os) const {
+    os << "HybridSimulatorConfiguration("
+       << "\n  step_size=" << step_size()
+       << "\n)";
+    return os;
+}
 
 }  // namespace Ariadne
 

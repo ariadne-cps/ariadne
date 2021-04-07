@@ -99,7 +99,7 @@ Void TestHybridSimulator::test() const
     FloatDP enclosure_radius(0.25_x,dp);
 
     // Set up the evaluators
-    HybridSimulator simulator;
+    HybridSimulator simulator(system());
     simulator.set_step_size(0.0625);
 
 
@@ -118,7 +118,7 @@ Void TestHybridSimulator::test() const
 
     // Compute the reachable sets
     cout << "Computing orbit... "<<std::flush;
-    Orbit<HybridApproximatePointType> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
+    Orbit<HybridApproximatePointType> hybrid_orbit=simulator.orbit(initial_hybrid_point,simulation_time);
     cout << "done"<<std::endl;
 
     ARIADNE_TEST_PRINT(hybrid_orbit);

@@ -36,6 +36,8 @@ namespace Ariadne {
 
 class HybridTerminationCriterion;
 class HybridAutomatonInterface;
+class DiscreteEvent;
+class DiscreteLocation;
 
 template<class T> class Orbit;
 
@@ -46,22 +48,31 @@ class HybridSimulator
   public:
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
+    typedef HybridAutomatonInterface SystemType;
     typedef HybridApproximatePointType EnclosureType;
     typedef Orbit<HybridApproximatePointType> OrbitType;
     typedef HybridTerminationCriterion TerminationType;
   private:
+    std::shared_ptr< SystemType > _sys_ptr;
     FloatDPApproximation _step_size;
   public:
 
     //! \brief Default constructor.
-    HybridSimulator();
+    HybridSimulator(const SystemType& system);
+    //! \brief Set the step size.
     Void set_step_size(double h);
+    //! \brief Get the step size.
+    FloatDPApproximation step_size() const;
 
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
-    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const TerminationType& termination) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridRealPoint& initial_point, const TerminationType& termination) const;
+
+  private:
+    Map<DiscreteEvent,EffectiveScalarMultivariateFunction> _guard_functions(const DiscreteLocation& location) const;
+    Bool _satisfies_invariants(const DiscreteLocation& location, const Point<FloatDPApproximation>& point) const;
 };
 
 

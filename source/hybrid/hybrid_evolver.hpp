@@ -457,7 +457,6 @@ class HybridEvolverBase
   protected:
     std::shared_ptr< SolverInterface > _solver_ptr;
     std::shared_ptr< SystemType > _sys_ptr;
-    //std::shared_ptr< EvolutionProfiler >  _profiler;
   protected:
     std::shared_ptr< ConfigurationType > _configuration_ptr;
 };

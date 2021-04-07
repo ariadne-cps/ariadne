@@ -162,7 +162,7 @@ def simulate_evolution(system):
     rising = String("rising")
 
     # Create a simulator object
-    simulator = HybridSimulator()
+    simulator = HybridSimulator(system)
     simulator.set_step_size(0.01)
 
     # Set an initial point for the simulation
@@ -173,7 +173,7 @@ def simulate_evolution(system):
 
     # Compute a simulation trajectory
     print("Computing simulation trajectory...")
-    orbit = simulator.orbit(system,initial_point,termination)
+    orbit = simulator.orbit(initial_point,termination)
 
     # Plot the simulation trajectory using all different projections
     print("Plotting simulation trajectory..")

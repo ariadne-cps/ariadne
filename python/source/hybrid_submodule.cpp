@@ -357,11 +357,11 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
     hybrid_simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
 
     pybind11::class_<HybridSimulator> hybrid_simulator_class(module,name);
-    hybrid_simulator_class.def(pybind11::init<>());
+    hybrid_simulator_class.def(pybind11::init<HybridSimulator::SystemType const&>());
     hybrid_simulator_class.def("set_step_size", &HybridSimulator::set_step_size);
-    hybrid_simulator_class.def("orbit", (OrbitType(HybridSimulator::*)(const HybridAutomatonInterface&, const HybridApproximatePointType&, const TerminationType&)const) &HybridSimulator::orbit);
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridAutomatonInterface const&,HybridApproximatePointType const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridAutomatonInterface const&,HybridRealPoint const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def("orbit", (OrbitType(HybridSimulator::*)(const HybridApproximatePointType&, const TerminationType&)const) &HybridSimulator::orbit);
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridApproximatePointType const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridRealPoint const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
 }
 
 template<class ORB>
@@ -399,7 +399,7 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_class.def(pybind11::init<GeneralHybridEvolver::SystemType const&>());
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const HybridBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
-      evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
+    evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
     evolver_class.def("__repr__",&__cstr__<Evolver>);
 
 

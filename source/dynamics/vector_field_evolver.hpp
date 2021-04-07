@@ -47,14 +47,10 @@
 
 namespace Ariadne {
 
-template<class Sys, class BS, class TRM> class Evolver;
-
 class VectorField;
 template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
-
-class EvolutionProfiler;
 
 //! \brief A class for computing the evolution of a vector_field system.
 //!

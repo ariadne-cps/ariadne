@@ -3,8 +3,8 @@ set(UNIT_TESTS
     test_iterated_map_evolver
     test_vector_field_evolver
     test_vector_field_simulator
-    test_inclusion_vector_field
-    test_inclusion_evolver
+    test_differential_inclusion
+    test_differential_inclusion_evolver
     test_finite_time_reachability
     test_infinite_time_reachability
     test_verify_safety

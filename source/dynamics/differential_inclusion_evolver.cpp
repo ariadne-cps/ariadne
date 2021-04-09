@@ -1,5 +1,5 @@
 /***************************************************************************
- *            inclusion_evolver.cpp
+ *            dynamics/differential_inclusion_evolver.cpp
  *
  *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
@@ -27,7 +27,7 @@
 #include "solvers/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "output/progress_indicator.hpp"
-#include "inclusion_evolver.hpp"
+#include "differential_inclusion_evolver.hpp"
 
 namespace Ariadne {
 /*
@@ -72,7 +72,7 @@ class InclusionEvolverState {
     Map<InclusionIntegratorHandle,Nat> _approximator_global_optima_count;
     Map<InclusionIntegratorHandle,Nat> _approximator_local_optima_count;
   public:
-    InclusionEvolverState(InclusionVectorField const& ivf, List<InputApproximation> const& approximations, IntegratorInterface const& integrator)
+    InclusionEvolverState(DifferentialInclusion const& ivf, List<InputApproximation> const& approximations, IntegratorInterface const& integrator)
         : _step(0u)
     {
         InclusionIntegratorFactory factory(integrator);
@@ -162,7 +162,7 @@ inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(M
     return result;
 }
 
-InclusionEvolver::InclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner)
+DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner)
     : _system(system)
     , _sweeper(sweeper)
     , _integrator(integrator.clone())
@@ -173,7 +173,7 @@ InclusionEvolver::InclusionEvolver(SystemType const& system, SweeperDP const& sw
     ARIADNE_LOG_SCOPE_CREATE;
 }
 
-Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {
+Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {
     if (_reconditioner.must_reduce_parameters(state)) {
         _reconditioner.update_from(state);
         _reconditioner.reduce_parameters(function);
@@ -185,7 +185,7 @@ Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFuncti
     }
 }
 
-List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
+List<ValidatedVectorMultivariateFunctionModelDP> DifferentialInclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN_AT(1,"System: "<<_system);
     ARIADNE_LOG_PRINTLN_AT(1,"Initial: "<<initial);
@@ -415,7 +415,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
 }
 
 
-InclusionEvolverConfiguration::InclusionEvolverConfiguration()
+DifferentialInclusionEvolverConfiguration::DifferentialInclusionEvolverConfiguration()
 {
     this->maximum_step_size(1.0_x);
     this->maximum_enclosure_radius(100.0_x);
@@ -425,9 +425,9 @@ InclusionEvolverConfiguration::InclusionEvolverConfiguration()
 
 
 OutputStream&
-InclusionEvolverConfiguration::_write(OutputStream& os) const
+DifferentialInclusionEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "InclusionEvolverConfiguration"
+    os << "DifferentialInclusionEvolverConfiguration"
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_parameter_reduction=" << enable_parameter_reduction()

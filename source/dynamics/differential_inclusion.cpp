@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/inclusion_vector_field.cpp
+ *            dynamics/differential_inclusion.cpp
  *
  *  Copyright  2008-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "inclusion_vector_field.hpp"
+#include "differential_inclusion.hpp"
 #include "symbolic/expression_set.hpp"
 #include "function/symbolic_function.hpp"
 
@@ -76,7 +76,7 @@ Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transfor
     }
 }
 
-Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
+Void DifferentialInclusion::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
 
     const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(function.reference());
 
@@ -95,7 +95,7 @@ Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunc
     _inputs = transformed_inputs;
 }
 
-InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs)
+DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs)
 {
     List<RealVariable> dyn_var_list = left_hand_sides(dynamics);
     List<RealVariable> inp_var_list;
@@ -109,14 +109,14 @@ InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics
     Set<RealVariable> inp_var_set(inp_var_list);
     for (auto iv : inp_var_set) {
         if(not dyn_arg_set.contains(iv))
-            ARIADNE_THROW(UnusedInputException,"InclusionVectorField(dynamics,inputs) with dynamics="<<dynamics<<" and inputs="<<inputs,"The input '" << iv << "' is not in the arguments of the dynamics");
+            ARIADNE_THROW(UnusedInputException,"DifferentialInclusion(dynamics,inputs) with dynamics="<<dynamics<<" and inputs="<<inputs,"The input '" << iv << "' is not in the arguments of the dynamics");
     }
 
     Set<UntypedVariable> dyn_var_set(dyn_var_list);
     Set<UntypedVariable> inp_var_set_untyped(inp_var_set);
     for (auto av : dyn_arg_set) {
         if (not dyn_var_set.contains(av) and not inp_var_set_untyped.contains(av))
-            ARIADNE_THROW(MissingInputException,"InclusionVectorField(dynamics,inputs) with dynamics="<<dynamics<<" and inputs="<<inputs,"The argument '" << av << "' of the dynamics is not among the inputs");
+            ARIADNE_THROW(MissingInputException,"DifferentialInclusion(dynamics,inputs) with dynamics="<<dynamics<<" and inputs="<<inputs,"The argument '" << av << "' of the dynamics is not among the inputs");
     }
 
     RealSpace var_spc(dyn_var_list);
@@ -128,14 +128,14 @@ InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics
     _transform_and_assign(make_function(spc,Vector<RealExpression>(right_hand_sides(dynamics))),input_bounds_to_domain(inputs));
 }
 
-InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
+DifferentialInclusion::DifferentialInclusion(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
 {
     if (function.argument_size() != function.result_size()+inputs.size())
-        ARIADNE_THROW(FunctionArgumentsMismatchException,"InclusionVectorField(function,inputs) with function="<<function<<" and inputs="<<inputs,
+        ARIADNE_THROW(FunctionArgumentsMismatchException,"DifferentialInclusion(function,inputs) with function="<<function<<" and inputs="<<inputs,
                 "Incompatible inputs size (" << inputs.size() << ") with the provided function (R^" << function.argument_size() << " -> R^" << function.result_size() << ")");
 
     if (dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer()) == nullptr)
-        ARIADNE_THROW(NotFormulaFunctionException,"InclusionVectorField of EffectiveVectorMultivariateFunction","The function must be constructed from a Formula at the moment.");
+        ARIADNE_THROW(NotFormulaFunctionException,"DifferentialInclusion of EffectiveVectorMultivariateFunction","The function must be constructed from a Formula at the moment.");
 
     List<Identifier> variable_names;
     for (auto i : range(0,function.result_size()))
@@ -146,23 +146,23 @@ InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction c
 }
 
 
-RealSpace InclusionVectorField::state_space() const
+RealSpace DifferentialInclusion::state_space() const
 {
     return real_space(this->_variable_names);
 }
 
-Bool InclusionVectorField::is_input_affine() const {
+Bool DifferentialInclusion::is_input_affine() const {
     return is_affine_in(_function,input_indices(dimension(),number_of_inputs()));
 }
 
-Bool InclusionVectorField::is_input_additive() const {
+Bool DifferentialInclusion::is_input_additive() const {
     return is_additive_in(_function,input_indices(dimension(),number_of_inputs()));
 }
 
-EffectiveVectorMultivariateFunction InclusionVectorField::noise_independent_component() const {
+EffectiveVectorMultivariateFunction DifferentialInclusion::noise_independent_component() const {
     return Ariadne::noise_independent_component(_function,number_of_inputs()); }
 //! \brief Return the dynamics components given by the derivatives for each input.
-Vector<EffectiveVectorMultivariateFunction> InclusionVectorField::input_derivatives() const {
+Vector<EffectiveVectorMultivariateFunction> DifferentialInclusion::input_derivatives() const {
     return Ariadne::input_derivatives(_function,number_of_inputs()); }
 
 }

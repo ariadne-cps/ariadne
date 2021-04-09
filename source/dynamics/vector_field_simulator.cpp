@@ -50,19 +50,19 @@ namespace Ariadne {
 
 template class Orbit<Point<FloatDPApproximation>>;
 
-VectorFieldSimulator::VectorFieldSimulator() : _configuration(new VectorFieldSimulatorConfiguration())
+VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(system.clone()), _configuration(new VectorFieldSimulatorConfiguration())
 { }
 
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-auto VectorFieldSimulator::orbit(const VectorField& system, const RealPoint& init_pt, const TerminationType& termination) const
+auto VectorFieldSimulator::orbit(const RealPoint& init_pt, const TerminationType& termination) const
     -> Orbit<ApproximatePointType>
 {
-    return orbit(system,ApproximatePointType(init_pt,dp),termination);
+    return orbit(ApproximatePointType(init_pt,dp),termination);
 }
 
-auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePointType& init_pt, const TerminationType& termination) const
+auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
     -> Orbit<ApproximatePointType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -73,7 +73,7 @@ auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePoi
 
     Orbit<ApproximatePointType> orbit(init_pt);
 
-    EffectiveVectorMultivariateFunction dynamic=system.function();
+    EffectiveVectorMultivariateFunction dynamic=_system->function();
 
     RungeKutta4Integrator integrator(configuration().step_size().get_d());
 

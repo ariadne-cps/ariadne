@@ -69,12 +69,12 @@ class TestContinuousEvolution
 
         Real time = 6.3_dec;
 
-        VectorFieldSimulator simulator;
+        VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 
-        Orbit<PointType> orbit = simulator.orbit(vanderpol,initial_point,time);
+        Orbit<PointType> orbit = simulator.orbit(initial_point,time);
 
         ARIADNE_TEST_ASSERT(distance(orbit.curve().end()->second,PointType(initial_point,double_precision)).raw() <= 0.02);
 

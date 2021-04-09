@@ -51,12 +51,13 @@ class VectorFieldSimulator
     typedef Point<FloatDPApproximation> ApproximatePointType;
     typedef ApproximatePointType EnclosureType;
     typedef Real TerminationType;
+    typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
 
   public:
 
     //! \brief Default constructor.
-    VectorFieldSimulator();
+    VectorFieldSimulator(SystemType const& system);
 
     //!@{
     //! \name Configuration for the class.
@@ -67,12 +68,13 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    Orbit<ApproximatePointType> orbit(VectorField const& system, ApproximatePointType const& initial_point, TerminationType const& termination) const;
-    Orbit<ApproximatePointType> orbit(VectorField const& system, RealPoint const& initial_point, TerminationType const& termination) const;
+    Orbit<ApproximatePointType> orbit(ApproximatePointType const& initial_point, TerminationType const& termination) const;
+    Orbit<ApproximatePointType> orbit(RealPoint const& initial_point, TerminationType const& termination) const;
 
   private:
 
-    SharedPointer<VectorFieldSimulatorConfiguration> _configuration;
+    SharedPointer<SystemType> _system;
+    SharedPointer<ConfigurationType> _configuration;
 };
 
 //! \brief Configuration for a VectorFieldSimulator, essentially to control accuracy of evolution.

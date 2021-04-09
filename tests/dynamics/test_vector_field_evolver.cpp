@@ -43,32 +43,10 @@
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
-#include "function/user_function.hpp"
-
 #include "../test.hpp"
 
 using namespace Ariadne;
 using namespace std;
-
-/// This function diverges heavily
-struct FailOne : VectorMultivariateFunctionData<2,2,1> {
-    template<class R, class A, class P> static Void
-    compute(R& r, const A& x, const P& p) {
-          r[0] = 1;
-          r[1] = -p[0] * x[1] + p[0];
-    }
-};
-
-/// This function diverges heavily
-struct FailTwo : VectorMultivariateFunctionData<3,3,1> {
-    template<class R, class A, class P> static Void
-    compute(R& r, const A& x, const P& p) {
-          r[0] = 1;
-          r[1] = x[1] * x[2] / p[0];
-          r[2] = 0;
-    }
-};
-
 
 class TestContinuousEvolution
 {
@@ -79,12 +57,10 @@ class TestContinuousEvolution
 
 Int main()
 {
-    //std::cerr<<"SKIPPED "; return 1;
     ARIADNE_TEST_CALL(TestContinuousEvolution().test());
     //ARIADNE_TEST_CALL(TestContinuousEvolution().failure_test());
     return ARIADNE_TEST_FAILURES;
 }
-
 
 
 Void TestContinuousEvolution::test() const
@@ -162,7 +138,7 @@ Void TestContinuousEvolution::test() const
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-vdp");
+    fig.write("test_vector_field_evolver-vdp");
 }
 
 Void TestContinuousEvolution::failure_test() const
@@ -223,7 +199,7 @@ Void TestContinuousEvolution::failure_test() const
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-failone");
+    fig.write("test_vector_field_evolver-failone");
 /*
     Figure fig; fig.set_bounding_box( widen(orbit.reach().bounding_box(),+0.25_x));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach().euclidean_set();
@@ -268,7 +244,7 @@ Void TestContinuousEvolution::failure_test() const
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-failtwo");
+    fig.write("test_vector_field_evolver-failtwo");
     std::cout << std::endl;
 }
 

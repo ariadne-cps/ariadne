@@ -212,7 +212,7 @@ IteratedMapEvolverConfiguration::IteratedMapEvolverConfiguration()
 OutputStream&
 IteratedMapEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "MapEvolverSettings"
+    os << "IteratedMapEvolverConfiguration"
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_subdivisions=" << enable_subdivisions()
        << ",\n  enable_premature_termination=" << enable_premature_termination()

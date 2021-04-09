@@ -37,6 +37,7 @@
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
 #include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "dynamics/iterated_map.hpp"
@@ -66,21 +67,17 @@ Void TestIteratedMapEvolver::test() const
     typedef DoublePrecision PR;
     DoublePrecision pr;
 
-    typedef IteratedMap::EnclosureType EnclosureType;
-
-    // Define the initial box
-    ExactBoxType initial_box(2);
-    initial_box[0]=ExactIntervalType(1.01_pr,1.03_pr);
-    initial_box[1]=ExactIntervalType(0.51_pr,0.53_pr);
-
-    ARIADNE_TEST_PRINT(initial_box);
-
     // Set up the map field
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
     Real a=1.5_dyadic; Real b=0.375_dyadic;
     RealVariable x("x"), y("y");
     IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
     ARIADNE_TEST_PRINT(henon);
+
+    // Define the initial set
+    RealVariablesBox initial_box({1.01_dec<=x<=1.03_dec,0.51_dec<=y<=0.53_dec});
+
+    ARIADNE_TEST_PRINT(initial_box);
 
     // Function evaluation sanity check
     Vector<FloatApproximation<PR>> p={{a,b},pr};
@@ -90,48 +87,25 @@ Void TestIteratedMapEvolver::test() const
     Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{{1.0,pr},{0.0,pr}}};
     ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
 
-
-    // Function evaluation sanity check
-    ARIADNE_TEST_PRINT(initial_box);
-    ARIADNE_TEST_PRINT(image(initial_box,henon.update_function()));
-    ARIADNE_TEST_PRINT(jacobian_range(henon.update_function(),cast_vector(initial_box)));
-
-
-
-    // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,henon.state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10))));
-    ARIADNE_TEST_PRINT(initial_set);
-
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);
-    double enclosure_radius(0.25);
 
     // Set up the evaluators
     IteratedMapEvolver evolver(henon);
-    evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
+    evolver.configuration().set_maximum_enclosure_radius(0.25);
 
-    // Compute the reachable sets
-    ListSet<EnclosureType> evolve_set,reach_set;
-    //evolve_set = evolver.evolve(initial_set,time);
-    reach_set = evolver.reach(initial_set,time);
-    ARIADNE_TEST_PRINT(initial_set.bounding_box());
-    //cout << "evolve_bounding_boxes=" << evolve_set.bounding_boxes() << endl;
-    ARIADNE_TEST_PRINT(reach_set.bounding_boxes());
+    ARIADNE_TEST_PRINT(evolver.configuration());
 
-/*
-    // Print the intial, evolve and reach sets
-    Figure fig;
-    fig.set_bounding_box({{-4,2},{-3,3}});
-    fig << line_style(true) << fill_colour(cyan) << reach_set;
-    fig << fill_colour(yellow) << evolve_set;
+    auto initial_set = evolver.enclosure(initial_box,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10))));
+    ARIADNE_TEST_PRINT(initial_set);
+
+    // Compute the orbit
+    auto orbit = evolver.orbit(initial_set,time);
+
+    // Print the initial, evolve and reach sets
+    LabelledFigure fig(Axes2d(-10,x,10, -10,y,10));
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(yellow) << orbit.final();
     fig << fill_colour(blue) << initial_set;
-    fig.write("test_discrete_evolution-henon");
-*/
-
-    // Print the intial, evolve and reach sets
-    LabelledFigure lfig(Axes2d(-4,x,2, -3,y,3));
-    lfig << line_style(true) << fill_colour(cyan) << reach_set;
-    lfig << fill_colour(yellow) << evolve_set;
-    lfig << fill_colour(blue) << initial_set;
-    lfig.write("test_discrete_evolution-henon-labelled");
+    fig.write("test_iterated_map_evolver");
 }

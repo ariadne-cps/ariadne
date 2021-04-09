@@ -51,11 +51,37 @@ class TestContinuousEvolution
 {
   public:
     Void test() const {
-        ARIADNE_TEST_CALL(test_vdp_loop());
+        ARIADNE_TEST_CALL(test_one_vdp_cycle());
     }
 
-    Void test_vdp_loop() const {
+    Void test_one_vdp_cycle() const {
 
+        typedef VectorFieldSimulator::ApproximatePointType PointType;
+
+        Real mu=Dyadic(0.5_x);
+        RealVariable x("x"), v("v");
+
+        VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
+        ARIADNE_TEST_PRINT(vanderpol);
+
+        // Define the initial point
+        RealPoint initial_point({-1.5_dec,1.0_dec});
+
+        Real time = 6.3_dec;
+
+        VectorFieldSimulator simulator;
+        simulator.configuration().set_step_size(0.05);
+
+        ARIADNE_TEST_PRINT(simulator.configuration());
+
+        Orbit<PointType> orbit = simulator.orbit(vanderpol,initial_point,time);
+
+        ARIADNE_TEST_ASSERT(distance(orbit.curve().end()->second,PointType(initial_point,double_precision)).raw() <= 0.02);
+
+        GraphicsBoundingBoxType bx({FloatDPApproximateInterval(-2.5,2.5),FloatDPApproximateInterval(-3,3)});
+        Figure fig(bx,Projection2d(2,0,1));
+        fig << orbit.curve();
+        fig.write("test_vector_field_simulator");
     }
 };
 

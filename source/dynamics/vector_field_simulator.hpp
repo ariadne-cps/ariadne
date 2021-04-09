@@ -34,6 +34,7 @@
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"
 #include "solvers/configuration_interface.hpp"
+#include "dynamics/vector_field.hpp"
 
 namespace Ariadne {
 

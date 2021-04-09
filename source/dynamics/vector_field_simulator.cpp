@@ -22,40 +22,36 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../function/functional.hpp"
+#include "function/functional.hpp"
 
-#include "../algebra/algebra.hpp"
+#include "algebra/algebra.hpp"
 
-#include "../config.hpp"
+#include "config.hpp"
 
-#include "../utility/array.hpp"
-#include "../utility/container.hpp"
-#include "../utility/tuple.hpp"
-#include "../utility/stlio.hpp"
-#include "../symbolic/valuation.hpp"
-#include "../symbolic/assignment.hpp"
-#include "../symbolic/space.hpp"
+#include "utility/array.hpp"
+#include "utility/container.hpp"
+#include "utility/tuple.hpp"
+#include "utility/stlio.hpp"
+#include "symbolic/valuation.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/space.hpp"
 
-#include "../function/function.hpp"
-#include "../function/formula.hpp"
-#include "../function/taylor_model.hpp"
+#include "function/function.hpp"
+#include "function/formula.hpp"
+#include "function/taylor_model.hpp"
 
-#include "../solvers/runge_kutta_integrator.hpp"
+#include "solvers/runge_kutta_integrator.hpp"
 
-#include "../dynamics/orbit.hpp"
-#include "../dynamics/vector_field.hpp"
-#include "../dynamics/vector_field_simulator.hpp"
+#include "dynamics/orbit.hpp"
+#include "dynamics/vector_field.hpp"
+#include "dynamics/vector_field_simulator.hpp"
 
 namespace Ariadne {
 
 template class Orbit<Point<FloatDPApproximation>>;
 
-VectorFieldSimulator::VectorFieldSimulator() : _step_size(0.125_x, dp)
+VectorFieldSimulator::VectorFieldSimulator() : _configuration(new VectorFieldSimulatorConfiguration())
 { }
-
-Void VectorFieldSimulator::set_step_size(double h) {
-    this->_step_size=h;
-}
 
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
@@ -72,14 +68,14 @@ auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePoi
     ARIADNE_LOG_SCOPE_CREATE;
 
     VectorField::TimeType t(0.0_exact);
-    Dyadic h(ExactDouble(this->_step_size.get_d()));
+    Dyadic h(cast_exact(configuration().step_size()));
     VectorField::TimeType tmax(termination);
 
     Orbit<ApproximatePointType> orbit(init_pt);
 
     EffectiveVectorMultivariateFunction dynamic=system.function();
 
-    RungeKutta4Integrator integrator(this->_step_size.get_d());
+    RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
     ApproximatePointType point=init_pt;
 
@@ -90,7 +86,7 @@ auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePoi
                 << " p=" << point
                 << std::setprecision(old_precision));
 
-        point = ApproximatePointType(integrator.step(dynamic,point,this->_step_size));
+        point = ApproximatePointType(integrator.step(dynamic,point,configuration().step_size()));
         t += h;
         orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),point);
     }
@@ -98,7 +94,18 @@ auto VectorFieldSimulator::orbit(const VectorField& system, const ApproximatePoi
     return orbit;
 }
 
+VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
+    _step_size(0.125_x, dp) {
+}
 
+OutputStream&
+VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
+{
+    os << "VectorFieldSimulatorConfiguration("
+       << "\n  step_size=" << step_size()
+       << "\n)";
+    return os;
+}
 
 }  // namespace Ariadne
 

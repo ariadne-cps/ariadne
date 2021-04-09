@@ -106,12 +106,22 @@ class Point
     virtual FloatDPUpperBox bounding_box() const;
 };
 
+template<class X> inline X distance(Point<X> const& pt1, Point<X> const& pt2) {
+    ARIADNE_PRECONDITION(pt1.dimension() == pt2.dimension());
+    ARIADNE_PRECONDITION(pt1.dimension() > 0);
+    X result = sqr(pt1.at(0)-pt2.at(0));
+    auto v1=pt1.vector();
+    auto v2=pt2.vector();
+    for (SizeType i=1; i<pt1.dimension(); ++i) {
+        result += sqr(pt1.at(i)-pt2.at(i));
+    }
+    return sqrt(result);
+}
+
 template<class X> Point(Vector<X>) -> Point<X>;
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Point<X>::Point(InitializerList<ExactDouble> lst, PRS... prs) : Vector<X>(lst,prs...) { }
-
-//Point<Real> make_point(const StringType&);
 
 } // namespace Ariadne
 

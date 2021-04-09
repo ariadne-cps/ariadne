@@ -6,6 +6,7 @@ add_library(${LIBRARY_NAME} OBJECT
     differential_inclusion.cpp
     differential_inclusion_evolver.cpp
     first_order_pde.cpp
+    iterated_map.cpp
     iterated_map_evolver.cpp
     vector_field.cpp
     vector_field_evolver.cpp

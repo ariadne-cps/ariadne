@@ -55,65 +55,7 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-
-// The maximum allowable radius of a basic set.
-IteratedMapEvolverConfiguration::RealType DEFAULT_MAXIMUM_ENCLOSURE_RADIUS = 100;
-// Allow subdivisions in upper evolution.
-const Bool DEFAULT_ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution.
-const Bool DEFAULT_ENABLE_PREMATURE_TERMINATION = false;
-
-using std::shared_ptr;
-
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
-
-class DegenerateCrossingException { };
-
-
-EffectiveVectorMultivariateFunction make_auxiliary_function(
-    Space<Real> const& state_space,
-    List<RealAssignment> const& algebraic);
-
-EffectiveVectorMultivariateFunction make_reset_function(
-    Space<Real> const& space,
-    List<RealAssignment> const& algebraic,
-    List<PrimedRealAssignment> const& differential);
-
-
-IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
-    : _update_function(f)
-{
-    ARIADNE_PRECONDITION(f.result_size()==f.argument_size());
-}
-
-IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
-    : IteratedMap(updates,List<RealAssignment>()) { }
-
-IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates, List<RealAssignment> const& auxiliary)
-    : _updates(updates), _auxiliary(auxiliary)
-    , _update_function(make_reset_function(left_hand_sides(updates),auxiliary,updates))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(updates),auxiliary))
-{
-}
-
-RealSpace IteratedMap::state_space() const {
-    return RealSpace(left_hand_sides(this->_updates));
-}
-
-RealSpace IteratedMap::auxiliary_space() const {
-    return RealSpace(left_hand_sides(this->_auxiliary));
-}
-
-
-OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
-    os << "IteratedMap( update_function = " << map.update_function() << ", "
-          "auxiliary_function = " << map.auxiliary_function() << ", "
-          "updates = " << map._updates << ", "
-          "auxiliary = " << map._auxiliary << ")";
-    return os;
-}
-
-
 
 
 IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
@@ -261,9 +203,9 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 IteratedMapEvolverConfiguration::IteratedMapEvolverConfiguration()
 {
-    set_maximum_enclosure_radius(DEFAULT_MAXIMUM_ENCLOSURE_RADIUS);
-    set_enable_subdivisions(DEFAULT_ENABLE_SUBDIVISIONS);
-    set_enable_premature_termination(DEFAULT_ENABLE_PREMATURE_TERMINATION);
+    set_maximum_enclosure_radius(100);
+    set_enable_subdivisions(false);
+    set_enable_premature_termination(false);
 }
 
 
@@ -272,6 +214,8 @@ IteratedMapEvolverConfiguration::_write(OutputStream& os) const
 {
     os << "MapEvolverSettings"
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  enable_subdivisions=" << enable_subdivisions()
+       << ",\n  enable_premature_termination=" << enable_premature_termination()
        << "\n)\n";
     return os;
 }

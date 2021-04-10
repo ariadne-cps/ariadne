@@ -45,16 +45,11 @@ template class Point<FloatDPApproximation>;
 //template class Point<FloatMPBounds>;
 //template class Point<FloatMPApproximation>;
 
-/*
-Point<Real> make_point(const StringType& str)
-{
-    std::vector<FloatDP> lst;
-    StringStream ss(str);
-    read_sequence(ss,lst,'(',')',',');
-    Vector<Real> vec(lst);
+template<> String class_name<LabelledPoint<Real>>() { return "LabelledPoint<Real>"; }
 
-    return Point<Real>(vec);
-}
-*/
+template<> String class_name<LabelledPoint<FloatDPApproximation>>() { return "LabelledPoint<FloatDPApproximation>"; }
+
+template class LabelledPoint<Real>;
+template class LabelledPoint<FloatDPApproximation>;
 
 } //namespace Ariadne

@@ -31,12 +31,14 @@
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
+#include "symbolic/identifier.hpp"
 
 #include "output/graphics_interface.hpp"
 
 namespace Ariadne {
 
 template<class X> class Point;
+template<class X> class LabelledPoint;
 
 //!@{
 //! \relates Point
@@ -44,6 +46,14 @@ template<class X> class Point;
 using DyadicPoint = Point<Dyadic>; //!< <p/>
 using RationalPoint = Point<Rational>; //!< <p/>
 using RealPoint = Point<Real>; //!< <p/>
+
+using LabelledRealPoint = LabelledPoint<Real>;
+
+template<class T> class Space;
+using RealSpace = Space<Real>;
+template<class T> class Variable;
+using RealVariable = Variable<Real>;
+template<class V,class E> class Assignment;
 
 template<class F> using ExactPoint = Point<Value<F>>;
 template<class F> using ValidatedPoint = Point<Bounds<F>>;
@@ -54,6 +64,9 @@ using FloatDPBoundsPoint = Point<FloatDPBounds>;
 using FloatDPApproximationPoint = Point<FloatDPApproximation>;
 
 typedef ExactPoint<FloatDP> ExactPointType;
+
+template<class IVL> class LabelledBox;
+using LabelledExactBoxType = LabelledBox<ExactIntervalType>;
 //!@}
 
 //! A point in Euclidean space.
@@ -104,6 +117,25 @@ class Point
 
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual FloatDPUpperBox bounding_box() const;
+};
+
+template<class X>
+class LabelledPoint : public LabelledDrawableInterface, public Point<X> {
+  public:
+
+    LabelledPoint(Point<X> const& pt, RealSpace const& state_space);
+    LabelledPoint(List<Assignment<RealVariable,X>> const& val);
+    LabelledPoint(InitializerList<Assignment<RealVariable,X>> const& val);
+
+    LabelledPoint* clone() const override;
+
+    RealSpace state_space() const;
+
+    using Point<X>::draw;
+    virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+
+private:
+    List<Identifier> _state_variables;
 };
 
 template<class X> inline X distance(Point<X> const& pt1, Point<X> const& pt2) {

@@ -30,11 +30,10 @@
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "utility/stlio.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/assignment.hpp"
 
 namespace Ariadne {
-
-//inline ExactIntervalType make_interval(ApproximateNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
-//inline ExactIntervalType make_interval(ExactNumericType x) { return ExactIntervalType(x.raw(),x.raw()); }
 
 template<class X> Point<X>::Point(InitializerList<X> lst)
     : Vector<X>(lst)
@@ -59,6 +58,32 @@ template<class X> BoundingBoxType Point<X>::bounding_box() const {
 template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d& proj) const {
     canv.dot(numeric_cast<double>((*this)[proj.x_coordinate()]),numeric_cast<double>((*this)[proj.y_coordinate()]));
     canv.stroke();
+}
+
+
+
+template<class X> LabelledPoint<X>::LabelledPoint(Point<X> const& pt, RealSpace const& state_space)
+            : Point<X>(pt), _state_variables(state_space.variable_names()) { }
+
+template<class X> LabelledPoint<X>::LabelledPoint(List<Assignment<RealVariable,X>> const& x)
+        : Point<X>(x.size(),[&x](SizeType i){return x[i].right_hand_side();}), _state_variables(RealSpace(left_hand_sides(x)).variable_names()) { }
+
+template<class X> LabelledPoint<X>::LabelledPoint(InitializerList<Assignment<RealVariable,X>> const& x)
+        : LabelledPoint<X>(List<Assignment<RealVariable,X>>(x)) { }
+
+template<class X> LabelledPoint<X>* LabelledPoint<X>::clone() const {
+    return new LabelledPoint(*this);
+}
+
+template<class X> RealSpace LabelledPoint<X>::state_space() const {
+    return RealSpace(this->_state_variables);
+}
+
+Projection2d projection(const RealSpace& spc, const Variables2d& variables);
+
+template<class X> Void LabelledPoint<X>::draw(CanvasInterface& canvas, const Variables2d& axes) const {
+    Projection2d proj=projection(this->state_space(),axes);
+    this->draw(canvas,proj);
 }
 
 } //namespace Ariadne

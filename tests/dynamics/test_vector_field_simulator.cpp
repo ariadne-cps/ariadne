@@ -66,6 +66,7 @@ class TestContinuousEvolution
 
         // Define the initial point
         RealPoint initial_point({-1.5_dec,1.0_dec});
+        LabelledRealPoint pt2({x=-1.5_dec,v=1});
 
         Real time = 6.3_dec;
 

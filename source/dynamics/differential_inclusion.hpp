@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/differential inclusion.hpp
+/*! \file dynamics/differential_inclusion.hpp
  *  \brief Differential inclusion continuous dynamics system class.
  */
 

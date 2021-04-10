@@ -56,7 +56,8 @@ class TestContinuousEvolution
 
     Void test_one_vdp_cycle() const {
 
-        typedef VectorFieldSimulator::ApproximatePointType PointType;
+        //typedef VectorFieldSimulator::ApproximatePointType PointType;
+        typedef Point<FloatDPApproximation> PointType;
 
         Real mu=Dyadic(0.5_x);
         RealVariable x("x"), v("v");
@@ -65,8 +66,7 @@ class TestContinuousEvolution
         ARIADNE_TEST_PRINT(vanderpol);
 
         // Define the initial point
-        RealPoint initial_point({-1.5_dec,1.0_dec});
-        LabelledRealPoint pt2({x=-1.5_dec,v=1});
+        LabelledRealPoint initial_point({x=-1.5_dec,v=1});
 
         Real time = 6.3_dec;
 
@@ -86,53 +86,9 @@ class TestContinuousEvolution
     }
 };
 
-Int main()
+Int main(Int argc, const char* argv[])
 {
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     TestContinuousEvolution().test();
     return ARIADNE_TEST_FAILURES;
 }
-
-
-/*
-Void TestContinuousEvolution::test() const
-{
-    typedef VectorField::EnclosureType EnclosureType;
-
-    // Set up the evolution parameters and grid
-    Real time(2.0_dec);
-    ExactDouble step_size(0.5_x);
-    ExactDouble enclosure_radius(0.25_x);
-
-    // Set up the vector field
-    Real mu=Dyadic(0.5_x);
-    RealVariable x("x"), v("v");
-
-    VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
-    ARIADNE_TEST_PRINT(vanderpol);
-
-    // Define the initial box
-    RealVariablesBox initial_box({x.in(1.01_dec,1.02_dec),v.in(0.51_dec,0.52_dec)});
-
-    VectorFieldSimulator simulator();
-    simulator.set_step_size(0.01);
-
-    // Over-approximate the initial set by a grid cell
-    TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
-    EnclosureType initial_set(initial_box,vanderpol.state_space(),EnclosureConfiguration(function_factory));
-    ARIADNE_TEST_PRINT(initial_set);
-
-    Semantics semantics=Semantics::UPPER;
-
-    // Compute the reachable sets
-    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,time,semantics);
-    ARIADNE_TEST_PRINT(orbit);
-
-    LabelledFigure fig(Axes2d(-1.0<=x<=+21,-1.125<=v<=+1.125));
-    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
-    fig << fill_colour(magenta) << orbit.intermediate();
-    fig << fill_colour(red) << orbit.final();
-    fig << fill_colour(blue) << initial_set;
-    fig.write("test_vector_field_simulator");
-}
-
-*/

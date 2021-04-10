@@ -93,8 +93,6 @@ private:
     std::shared_ptr< InterpolatedCurve > _curve;
 };
 
-
-
 template<>
 class Orbit<Storage>
 {

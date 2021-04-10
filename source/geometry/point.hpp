@@ -126,9 +126,13 @@ class LabelledPoint : public LabelledDrawableInterface, public Point<X> {
     LabelledPoint(Point<X> const& pt, RealSpace const& state_space);
     LabelledPoint(List<Assignment<RealVariable,X>> const& val);
     LabelledPoint(InitializerList<Assignment<RealVariable,X>> const& val);
+    template<class T> requires Convertible<T,X> LabelledPoint(const LabelledPoint<T>& pt) : Point<X>(pt), _state_variables(pt.state_variables()) { }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    LabelledPoint(const LabelledPoint<Y>& pt, PRS... prs) : Point<X>(pt,prs...), _state_variables(pt.state_variables()) { }
 
     LabelledPoint* clone() const override;
 
+    List<Identifier> const& state_variables() const { return _state_variables; }
     RealSpace state_space() const;
 
     using Point<X>::draw;

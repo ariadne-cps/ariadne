@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.hpp"
+
 #include "function/functional.hpp"
 
 #include "algebra/algebra.hpp"
-
-#include "config.hpp"
 
 #include "utility/array.hpp"
 #include "utility/container.hpp"
@@ -56,22 +56,22 @@ VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(s
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-auto VectorFieldSimulator::orbit(const RealPoint& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
+    -> Orbit<Point<FloatDPApproximation>>
 {
     return orbit(ApproximatePointType(init_pt,dp),termination);
 }
 
 auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+    -> Orbit<Point<FloatDPApproximation>>
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    VectorField::TimeType t(0.0_exact);
+    VectorField::TimeType t;
     Dyadic h(cast_exact(configuration().step_size()));
     VectorField::TimeType tmax(termination);
 
-    Orbit<ApproximatePointType> orbit(init_pt);
+    Orbit<Point<FloatDPApproximation>> orbit(init_pt);
 
     EffectiveVectorMultivariateFunction dynamic=_system->function();
 
@@ -86,8 +86,11 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
                 << " p=" << point
                 << std::setprecision(old_precision));
 
-        point = ApproximatePointType(integrator.step(dynamic,point,configuration().step_size()));
+        Point<FloatDPApproximation> new_pt = integrator.step(dynamic,point,configuration().step_size());
+
+        point = ApproximatePointType(new_pt,point.state_space());
         t += h;
+
         orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),point);
     }
 

@@ -102,40 +102,12 @@ class GnuplotCanvas : public CanvasInterface
 
     //Set Multiplot - Multiple plot on same screen
     void set_multiplot(bool s);
-    //Set Multiplot Layout
-    void set_multiplot_layout(int nRow, int nCol, String Title);
-    // Set X Label
-    void set_x_label(String xLabel);
-    // Set Y Label
-    void set_y_label(String yLabel);
-    // Set Z Label
-    void set_z_label(String zLabel);
-    // Set Title
-    void set_title(String title);
-    // Set Labels
-    void set_xyz_label(String xLabel, String yLabel, String zLabel);
     // Set Labels and Title
-    void set_labels(String xLabel, String yLabel, String zLabel, String title);
+    void set_labels(String xLabel, String yLabel, String zLabel = "");
     // Set X, Y Range
     void set_range_2d(double minX, double maxX, double minY, double maxY);
 
     void set_range_3d(double minX, double maxX, double minY,  double maxY, double minZ, double maxZ);
-    // Set X Log axis
-    void set_x_log_axis();
-    // Set Y Log axis
-    void set_y_log_axis();
-    // Set XY Log axis
-    void set_xy_log_axis();
-    // Set XZ Log axis
-    void set_xz_log_axis();
-    // Set YZ Log axis
-    void set_yz_log_axis();
-    // Set XYZ Log axis
-    void set_xyz_log_axis();
-    // Set Legend
-    void set_legend();
-    //Unset colorbox
-    void unset_color_box();
 };
 
 class GnuplotGraphicsBackend : public GraphicsBackendInterface {

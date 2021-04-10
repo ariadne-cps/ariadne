@@ -27,7 +27,11 @@
 #include "numeric/numeric.hpp"
 #include "numeric/float_bounds.hpp"
 #include "algebra/tensor.hpp"
-#include "algebra/spec_def.t.hpp"
+
+#include "dynamics/first_order_pde.hpp"
+
+#include "numeric/numeric.hpp"
+#include "function/function.hpp"
 
 #include "dynamics/1D_pde.hpp"
 #include "dynamics/2D_pde.hpp"
@@ -45,13 +49,14 @@ class TestPdes
         template<class PR>
         void test(PR pr)
         {
-            ARIADNE_TEST_CALL(sinusoidal_string_animation(pr));
-            ARIADNE_TEST_CALL(triangular_string_animation(pr));
-            ARIADNE_TEST_CALL(gauss_3d_animation(pr));
+            ARIADNE_TEST_CALL(test_sinusoidal_string(pr));
+            ARIADNE_TEST_CALL(test_triangular_string(pr));
+            ARIADNE_TEST_CALL(test_gauss_3d(pr));
+            ARIADNE_TEST_CALL(test_first_order_pde(pr));
         }
 
         template<class PR>
-        void sinusoidal_string_animation(PR pr)
+        void test_sinusoidal_string(PR pr)
         {
             SizeType Nx = 200;             // # point in space
 
@@ -81,6 +86,7 @@ class TestPdes
 
             FloatValue<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
 
+            //Check values
             for (SizeType time = 0; time < data.size(1); time++)
             {
                 for (SizeType x1 = 0; x1 < Nx; x1++)
@@ -99,7 +105,7 @@ class TestPdes
         }//String Evolution over time
 
         template<class PR>
-        void triangular_string_animation(PR pr)
+        void test_triangular_string(PR pr)
         {
             SizeType Nx = 200;             // # point in space
 
@@ -130,6 +136,7 @@ class TestPdes
 
             Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx, pr);
 
+            //Check values
             for (SizeType time = 0; time < data.size(1); time++)
             {
                 for (SizeType x1 = 0; x1 < Nx; x1++)
@@ -147,7 +154,7 @@ class TestPdes
         }//String Evolution over time
 
         template<class PR>
-        void gauss_3d_animation(PR pr)
+        void test_gauss_3d(PR pr)
         {
             int Nx = 25;   //Mesh 1° dim
             int Ny = 25;   //Mesh 2° dim
@@ -163,6 +170,7 @@ class TestPdes
 
             Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
+            //Check values
             for (SizeType time = 0; time < data.size(1); time++)
             {
                 for (SizeType x2 = 0; x2 < SizeType(Ny); x2++)
@@ -178,6 +186,79 @@ class TestPdes
                 }                
             }
 
+        }
+
+        template <class PR>
+        void test_first_order_pde(PR pr)
+        {
+            // DimensionType m=2;
+            DimensionType n=3;
+
+            Real rho = 1/2_q; rho=1/2_q;
+            Real c = 1; c=1;
+
+            Matrix<Real> I=Matrix<Real>::identity(n);
+
+            Matrix<Real> A={{rho,0,0},{0,rho,0},{0,0,1}};
+            Matrix<Real> B0={{0,0,1},{0,0,0},{rho*c*c,0,0}};
+            Matrix<Real> B1={{0,0,0},{0,0,1},{0,rho*c*c,0}};;
+
+            Array<Matrix<Real>> Bs={B0,B1};
+
+            auto D0=DiagonalMatrix<Real>(Array<Real>{c,0,-c});
+            auto D1=DiagonalMatrix<Real>(Array<Real>{c,0,-c});
+            Array<DiagonalMatrix<Real>> Ds={D0,D1};
+
+            Real det=sqrt(1+sqr(rho)*sqr(c));
+            Real c1=1/det; Real cr=(rho*c)/det;
+            Matrix<Real> T0={{c1,0,c1},{0,1,0},{cr,0,-cr}};
+            Matrix<Real> T1={{0,1,0},{c1,0,c1},{cr,0,-cr}};
+            Array<Matrix<Real>> Ts={T0,T1};
+
+            Vector<Real> v00=column(T0,0);
+            Vector<Real> v01=column(T0,1);
+            Vector<Real> v02=column(T0,2);
+            Vector<Real> v10=column(T1,0);
+            Vector<Real> v11=column(T1,1);
+            Vector<Real> v12=column(T1,2);
+
+            auto z=EffectiveScalarMultivariateFunction::zero(EuclideanDomain(2));
+            auto x=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
+
+            EffectiveVectorMultivariateFunction f=EffectiveVectorMultivariateFunction::zeros(3,EuclideanDomain(2+1));
+            EffectiveVectorMultivariateFunction phi0={sin(4*x[0]),sin(6*x[1]),z};
+
+            FirstOrderPDE pde{A,Bs,Ds,Ts,f};
+
+            auto solution=first_order_pde(pde,phi0,pr);
+            auto uts=solution.uts;
+
+
+            // Check values
+            for (SizeType step = 0; step < uts.size(2); step++)
+            {
+                for (SizeType x1 = 0; x1 < uts.size(1); x1++)
+                {
+                    for (SizeType x0 = 0; x0 < uts.size(0); x0++)
+                    {
+                        for (SizeType i = 0; i < n; i++)
+                        {
+                            if (uts[{x0,x1,step}].at(i).lower().get_d() > 30000.0 || uts[{x0,x1,step}].at(i).upper().get_d() > 30000.0){
+                                ARIADNE_TEST_ASSERT((abs(uts[{x0,x1,step}].at(i).lower().get_d()) <= 30000.0));
+                                ARIADNE_TEST_ASSERT((abs(uts[{x0,x1,step}].at(i).upper().get_d()) <= 30000.0));
+                                std::cout << "lower: " << uts[{x0,x1,step}].at(i).lower().get_d() << "\nupper: " << uts[{x0,x1,step}].at(i).upper().get_d() << std::endl;
+                                return;
+                            }
+                        }
+                        
+                        
+                    }
+                    
+                }
+                
+            }
+
+            
         }
 };
 

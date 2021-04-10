@@ -194,32 +194,11 @@ public:
     bool debug_messages;
     bool transport_tmpfile;
 private:
-    static std::string get_default_cmd() {
-        GNUPLOT_MSVC_WARNING_4996_PUSH
-        char *from_env = std::getenv("GNUPLOT_IOSTREAM_CMD");
-        GNUPLOT_MSVC_WARNING_4996_POP
-        if(from_env && from_env[0]) {
-            return from_env;
-        } else {
-            return GNUPLOT_DEFAULT_COMMAND;
-        }
-    }
-
     static FileHandleWrapper open_cmdline(const std::string &in) {
-        std::string cmd = in.empty() ? get_default_cmd() : in;
-        assert(!cmd.empty());
-        if(cmd[0] == '>') {
-            std::string fn = cmd.substr(1);
-            GNUPLOT_MSVC_WARNING_4996_PUSH
-            FILE *fh = std::fopen(fn.c_str(), "w");
-            GNUPLOT_MSVC_WARNING_4996_POP
-            if(!fh) throw std::ios_base::failure("cannot open file "+fn);
-            return FileHandleWrapper(fh, false);
-        } else {
-            FILE *fh = GNUPLOT_POPEN(cmd.c_str(), "w");
-            if(!fh) throw std::ios_base::failure("cannot open pipe "+cmd);
-            return FileHandleWrapper(fh, true);
-        }
+        std::string cmd = in;
+        FILE *fh = GNUPLOT_POPEN(cmd.c_str(), "w");
+        if(!fh) throw std::ios_base::failure("cannot open pipe "+cmd);
+        return FileHandleWrapper(fh, true);
     }
 
 public:

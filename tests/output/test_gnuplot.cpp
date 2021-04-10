@@ -48,16 +48,47 @@ class TestGnuplot
         template<class PR>
         void test(PR pr)
         {
-            ARIADNE_TEST_CALL(stringAnimation(pr));
-            ARIADNE_TEST_CALL(gauss3D(pr));
-            ARIADNE_TEST_CALL(gauss3DProjXY(pr));
-            ARIADNE_TEST_CALL(gauss3DProjXZ(pr));
-            ARIADNE_TEST_CALL(gauss3DProjYZ(pr));
-            ARIADNE_TEST_CALL(gauss3DAnimation(pr));
+            ARIADNE_TEST_CALL(test_point(pr));
+            ARIADNE_TEST_CALL(test_interpolateCurve(pr));
+            ARIADNE_TEST_CALL(test_stringAnimation(pr));
+            ARIADNE_TEST_CALL(test_gauss3D(pr));
+            ARIADNE_TEST_CALL(test_gauss3DProjXY(pr));
+            ARIADNE_TEST_CALL(test_gauss3DProjXZ(pr));
+            ARIADNE_TEST_CALL(test_gauss3DProjYZ(pr));
+            ARIADNE_TEST_CALL(test_gauss3DAnimation(pr));
+        }
+
+        template< class PR>
+        void test_point(PR pr)
+        {
+            //2d point
+            Point<FloatValue<PR>> pt1(2, pr);
+            pt1[0]=FloatValue<PR>(cast_exact(2.),pr);
+            pt1[1]=FloatValue<PR>(cast_exact(4.),pr);
+            Figure g1 = Figure(ApproximateBoxType({{0,5},{0,5}}), Projection2d(2,0,1));
+            g1.draw(pt1);
+            g1.write("test-gnuplot-point2d");
+            
         }
 
         template<class PR>
-        void stringAnimation(PR pr)
+        void test_interpolateCurve(PR pr)
+        {
+            InterpolatedCurve cv(0,Point<FloatValue<PR>>(2,FloatValue<PR>(0.0_x,pr)));
+            for(Int i=1; i<=10; ++i) {
+                Point<FloatValue<PR>> pt(2,pr); pt[0]=FloatValue<PR>(cast_exact(i/10.),pr); pt[1]=FloatValue<PR>(cast_exact(i*i/100.),pr);
+                cv.insert(i,pt);
+            }
+            Figure g(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1));
+            g.set_bounding_box(cv.bounding_box());
+            g.set_line_colour(1,0,0);
+            g.draw(cv);
+            g.set_line_colour(0,0,0);
+            g.write("test_gnuplot-curve");
+        }
+
+        template<class PR>
+        void test_stringAnimation(PR pr)
         {
             SizeType Nx = 10;             // # point in space
 
@@ -91,7 +122,7 @@ class TestGnuplot
             fig1.set_fill_colour(1.0,1.0,1.0);
             fig1.set_animated(true);
             fig1.draw(data);
-            fig1.write("Figure-StringEvolution");
+            fig1.write("test-gnuplot-StringEvolution");
 
             RealVariable x("x"), y("y");
             Axes2d axes(0.0<=x<=Nx-1,-1.0<=y<=1.0);
@@ -105,11 +136,11 @@ class TestGnuplot
             fig2.draw(data);
 
             fig2.write("LabelledFigure-StringEvolution");
-
+        
         }//String Evolution over time
 
         template<class PR>
-        void gauss3D(PR pr)
+        void test_gauss3D(PR pr)
         {
             FloatValue<PR> zb(0.0_x, pr);
 
@@ -120,18 +151,18 @@ class TestGnuplot
 
             Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3D");
-
+            fig1.write("test-gnuplot-Gauss3D");
+        
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3D");
-            
+         
         }//Gauss 3D
 
         template< class PR>
-        void gauss3DProjXY(PR pr)
+        void test_gauss3DProjXY(PR pr)
         {
             FloatValue<PR> zb(0.0_x, pr);
 
@@ -143,19 +174,19 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xy();
             fig1.draw3d(data);
-            fig1.write("FigureGauss3DProjXY");
-
+            fig1.write("test-gnuplot-Gauss3DProjXY");
+        
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xy();
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3DProjXY");
+        
         }
 
-
         template< class PR>
-        void gauss3DProjXZ(PR pr)
+        void test_gauss3DProjXZ(PR pr)
         {
             FloatValue<PR> zb(0.0_x, pr);
 
@@ -167,18 +198,19 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_xz();
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DProjXZ");
-
+            fig1.write("test-gnuplot-Gauss3DProjXZ");
+        
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xz();
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3DProjXZ");
+        
         }
 
         template< class PR>
-        void gauss3DProjYZ(PR pr)
+        void test_gauss3DProjYZ(PR pr)
         {           
             FloatValue<PR> zb(0.0_x, pr);
 
@@ -190,19 +222,19 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
             fig1.set_proj_yz();
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DProjYZ");
-
+            fig1.write("test-gnuplot-Gauss3DProjYZ");
+        
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_yz();
-            //fig << set3Ddim(true);
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3DProjYZ");
+        
         }
 
         template<class PR>
-        void gauss3DAnimation(PR pr)
+        void test_gauss3DAnimation(PR pr)
         {
             int Nx = 10;   //Mesh 1° dim
             int Ny = 10;   //Mesh 2° dim
@@ -216,19 +248,17 @@ class TestGnuplot
             Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
-            //fig.set3D(); 
             fig1.set_animated(true);
             fig1.draw3d(data);
-            fig1.write("Figure-Gauss3DAnimation");
-
+            fig1.write("test-gnuplot-Gauss3DAnimation");
+        
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
-            //fig << set3Ddim(true);
             fig2 << set_animated(true);
             fig2.draw3d(data);
             fig2.write("LabelledFigure-Gauss3DAnimation");
-
+        
         }
 };
 
@@ -246,5 +276,4 @@ int main(int arc, const char** argv)
 {}
 
 #endif
-
 

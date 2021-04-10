@@ -50,7 +50,7 @@ SharedPointer<CanvasInterface> GnuplotGraphicsBackend::make_canvas(const char* c
 GnuplotCanvas::GnuplotCanvas(String cfilename, Nat X, Nat Y, Bool is_anim): lc(0.0, 0.0, 0.0, 0.0),
                                             fc(1.0, 1.0, 1.0, 1.0),
                                             lw(0.0),
-                                            dr(0.0),
+                                            dr(2.0),
                                             isdot(false),
                                             sizeX(X),
                                             sizeY(Y),
@@ -84,7 +84,7 @@ GnuplotCanvas::GnuplotCanvas(String cfilename, Nat X, Nat Y, Bool is_anim): lc(0
     }
     
     //Se the initial size of the drawing point
-    this->geom.resize(1024);
+    this->geom.resize(1);
     this->dim = 0;
 
 }
@@ -95,16 +95,13 @@ GnuplotCanvas::~GnuplotCanvas() {
 
 void GnuplotCanvas::initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double zl, double zu)
 {
-    this->set_x_label(x);
-    this->set_y_label(y);
-    this->set_z_label(z);
+    this->set_labels(x, y, z);
     this->set_range_3d(xl, xu, yl, yu, zl, zu);
 }
 
 void GnuplotCanvas::initialise(StringType x, StringType y, double xl, double xu, double yl, double yu)
 {
-    this->set_x_label(x);
-    this->set_y_label(y);
+    this->set_labels(x, y);
     this->set_range_2d(xl, xu, yl, yu);
 }
 
@@ -113,36 +110,44 @@ void GnuplotCanvas::circle(double x, double y, double r) { }
 void GnuplotCanvas::stroke() {
     char hex_string[20];
 
-    //Plot a line path with a colored lines
-    *gnuplot << "plot '-' ";
-    *gnuplot << "w lines ";
-    *gnuplot << "lw " << to_string(this->lw) << " ";
-    *gnuplot << "lc rgb \"#";
-    if (this->lc.red < 9) { *gnuplot << "0" << this->lc.red;}
-    else if (this->lc.red > 255){ *gnuplot << "FF";}
-    else{   
-        sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.red)); 
-        *gnuplot << hex_string;
-        }
-    if (this->lc.green < 9) { *gnuplot << "0" << this->lc.green;}
-    else if (this->lc.green > 255){ *gnuplot << "FF";}
-    else{
-        sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.green)); 
-        *gnuplot << hex_string;
-        }
-    if (this->lc.blue < 9) { *gnuplot << "0" << this->lc.blue;}
-    else if (this->lc.blue > 255){ *gnuplot << "FF";}
-    else{sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.blue)); 
-        *gnuplot <<hex_string;
-        }
-    *gnuplot << "\"\n";
-
-    //Fill the data into gnuplot
-    for (SizeType i = 0; i < this->dim; i++)
+    if (this->isdot)
     {
-        *gnuplot << to_string(this->geom[i].x) << " " << to_string(this->geom[i].y) << "\n";
-    } 
-    *gnuplot << "e\n";
+        //Plot a dot
+        *gnuplot << "plot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w points pt 7 ps " << to_string(this->dr) << "\n";
+        this->isdot = false;
+    }
+    else{
+        //Plot a line path with a colored lines
+        *gnuplot << "plot '-' ";
+        *gnuplot << "w lines ";
+        *gnuplot << "lw " << to_string(this->lw) << " ";
+        *gnuplot << "lc rgb \"#";
+        if (this->lc.red < 9) { *gnuplot << "0" << this->lc.red;}
+        else if (this->lc.red > 255){ *gnuplot << "FF";}
+        else{   
+            sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.red)); 
+            *gnuplot << hex_string;
+            }
+        if (this->lc.green < 9) { *gnuplot << "0" << this->lc.green;}
+        else if (this->lc.green > 255){ *gnuplot << "FF";}
+        else{
+            sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.green)); 
+            *gnuplot << hex_string;
+            }
+        if (this->lc.blue < 9) { *gnuplot << "0" << this->lc.blue;}
+        else if (this->lc.blue > 255){ *gnuplot << "FF";}
+        else{sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.blue)); 
+            *gnuplot <<hex_string;
+            }
+        *gnuplot << "\"\n";
+
+        //Fill the data into gnuplot
+        for (SizeType i = 0; i < this->dim; i++)
+        {
+            *gnuplot << to_string(this->geom[i].x) << " " << to_string(this->geom[i].y) << "\n";
+        } 
+        *gnuplot << "e\n";
+    }
 
     //Reset the dimension of the current object
     this->dim = 0;  
@@ -183,7 +188,7 @@ void GnuplotCanvas::fill()
     if (this->isdot)
     {
         //Plot a dot
-        *gnuplot << "plot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w p ls 7 ps " << to_string(this->dr) << "\n";
+        *gnuplot << "plot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w points pt 7 ps " << to_string(this->dr) << "\n";
         this->isdot = false;
     }
     else
@@ -261,7 +266,7 @@ void GnuplotCanvas::fill()
 Void GnuplotCanvas::fill3d(){
     if (this->isdot)
     {
-        *gnuplot << "splot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w p ls 7 ps " << to_string(this->dr) << "\n";
+        *gnuplot << "splot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w points pt 7 ps " << to_string(this->dr) << "\n";
         this->isdot = false;
     }
     else{
@@ -286,11 +291,6 @@ Void GnuplotCanvas::fill3d(){
 void GnuplotCanvas::write(const char* filename) const
 {
     *gnuplot << "quit\n";
-}
-
-void GnuplotCanvas::set_dot_radius(double _dr)
-{
-    this->dr = _dr;
 }
 
 void GnuplotCanvas::set_line_width(double _lw)
@@ -351,46 +351,17 @@ void GnuplotCanvas::set_multiplot(bool s)
     }
 }
 
-void GnuplotCanvas::set_x_label(String _xLabel)
+void GnuplotCanvas::set_labels(String _xLabel, String _yLabel, String _zLabel)
 {
     *gnuplot << "set xlabel '" << _xLabel << "'\n";
     this->labels.xLabel = _xLabel;
-}
-
-void GnuplotCanvas::set_y_label(String _yLabel)
-{
     *gnuplot << "set ylabel '" << _yLabel << "'\n";
     this->labels.yLabel = _yLabel;
-}
-
-void GnuplotCanvas::set_z_label(String _zLabel)
-{
-    *gnuplot << "set zlabel '" << _zLabel << "'\n";
-    this->labels.zLabel = _zLabel;
-}
-
-void GnuplotCanvas::set_title(String title)
-{
-    *gnuplot << "set title '" << title << "'\n";
-}
-
-void GnuplotCanvas::set_xyz_label(String xLabel, String yLabel, String zLabel = "")
-{
-    *gnuplot << "set xlabel '" << xLabel << "'\n";
-    *gnuplot << "set ylabel '" << yLabel << "'\n";
-    
-    if (zLabel != "")
+    if (_zLabel != "")
     {
-        *gnuplot << "set zlabel '" << zLabel << "'\n";
+        *gnuplot << "set zlabel '" << _zLabel << "'\n";
+        this->labels.zLabel = _zLabel;
     }
-}
-
-void GnuplotCanvas::set_labels(String xLabel, String yLabel, String zLabel, String title)
-{
-    *gnuplot << "set xlabel '" << xLabel << "'\n";
-    *gnuplot << "set ylabel '" << yLabel << "'\n";
-    *gnuplot << "set zlabel '" << zLabel << "'\n";
-    *gnuplot << "set title '" << title << "'\n";
 }
 
 void GnuplotCanvas::set_range_2d(double minX, double maxX, double minY, double maxY)
@@ -415,50 +386,7 @@ void GnuplotCanvas::set_range_3d(double minX, double maxX, double minY, double m
     this->rng.Zmin = minZ;
     this->rng.Zmax = maxZ;
 }
-
-void GnuplotCanvas::set_x_log_axis()
-{
-    *gnuplot << "set logscale x\n";
-}
-
-void GnuplotCanvas::set_y_log_axis()
-{
-    *gnuplot << "set logscale y\n";
-}
-
-void GnuplotCanvas::set_xy_log_axis()
-{
-    *gnuplot << "set logscale xy\n";
-}
-
-void GnuplotCanvas::set_xz_log_axis()
-{
-    *gnuplot << "set logscale xz\n";
-}
-
-void GnuplotCanvas::set_yz_log_axis()
-{
-    *gnuplot << "set logscale yz\n";
-}
-
-void GnuplotCanvas::set_xyz_log_axis()
-{
-    *gnuplot << "set logscale xyz\n";
-}
-
-void GnuplotCanvas::set_legend()
-{
-    *gnuplot << "set key default\n";
-}
-
-
-void GnuplotCanvas::unset_color_box()
-{
-    *gnuplot << "unset colorbox\n";
-}
-
 #endif
 
 } // namespace Ariadne
-
 

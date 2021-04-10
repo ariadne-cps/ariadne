@@ -27,7 +27,7 @@
 #include "numeric/numeric.hpp"
 #include "numeric/float_bounds.hpp"
 #include "algebra/tensor.hpp"
-#include "algebra/spec_def.t.hpp"
+#include "algebra/tensor.tpl.hpp"
 
 #ifdef HAVE_GNUPLOT_H
 

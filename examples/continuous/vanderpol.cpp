@@ -57,7 +57,7 @@ int main(int argc, const char* argv[])
     RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
-    Real evolution_time(7.0_dec);
+    Real evolution_time(7);
 
     StopWatch sw;
     ARIADNE_LOG_PRINTLN("Computing orbit... ");
@@ -66,12 +66,8 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
     sw.reset();
-    ARIADNE_LOG_PRINTLN("Plotting...");
-    Axes2d axes(-2.5<=x<=2.5,-3.0<=y<=3.0);
-    LabelledFigure fig=LabelledFigure(axes);
-    fig << line_colour(0.0,0.0,0.0);
-    fig << line_style(false);
-    fig << fill_colour(0.5,0.5,0.5);
+    ARIADNE_LOG_PRINTLN("Plotting...");;
+    LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");

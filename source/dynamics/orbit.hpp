@@ -93,6 +93,17 @@ private:
     std::shared_ptr< InterpolatedCurve > _curve;
 };
 
+template<class F>
+class Orbit<LabelledPoint<Approximation<F>>>
+{
+public:
+Orbit(const LabelledPoint<Approximation<F>>& pt) : _curve(new LabelledInterpolatedCurve(pt)) { }
+Void insert(Value<F> t, const LabelledPoint<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
+const LabelledInterpolatedCurve& curve() const { return *this->_curve; }
+private:
+std::shared_ptr< LabelledInterpolatedCurve > _curve;
+};
+
 template<>
 class Orbit<Storage>
 {

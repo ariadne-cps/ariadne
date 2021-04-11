@@ -56,17 +56,15 @@ class TestContinuousEvolution
 
     Void test_one_vdp_cycle() const {
 
-        //typedef VectorFieldSimulator::ApproximatePointType PointType;
-        typedef Point<FloatDPApproximation> PointType;
+        typedef VectorFieldSimulator::ApproximatePointType PointType;
 
         Real mu=Dyadic(0.5_x);
-        RealVariable x("x"), v("v");
+        RealVariable x("x"), y("y");
 
-        VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
+        VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x});
         ARIADNE_TEST_PRINT(vanderpol);
 
-        // Define the initial point
-        LabelledRealPoint initial_point({x=-1.5_dec,v=1});
+        LabelledRealPoint initial_point({x=-1.5_dec,y=1});
 
         Real time = 6.3_dec;
 
@@ -79,8 +77,7 @@ class TestContinuousEvolution
 
         ARIADNE_TEST_ASSERT(distance(orbit.curve().end()->second,PointType(initial_point,double_precision)).raw() <= 0.02);
 
-        GraphicsBoundingBoxType bx({FloatDPApproximateInterval(-2.5,2.5),FloatDPApproximateInterval(-3,3)});
-        Figure fig(bx,Projection2d(2,0,1));
+        LabelledFigure fig(Axes2d(-2.5<=x<=2.5,-3.0<=y<=3.0));
         fig << orbit.curve();
         fig.write("test_vector_field_simulator");
     }

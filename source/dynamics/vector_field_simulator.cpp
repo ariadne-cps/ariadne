@@ -57,13 +57,13 @@ inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& 
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
 auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
-    -> Orbit<Point<FloatDPApproximation>>
+    -> Orbit<ApproximatePointType>
 {
     return orbit(ApproximatePointType(init_pt,dp),termination);
 }
 
 auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> Orbit<Point<FloatDPApproximation>>
+    -> Orbit<ApproximatePointType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -71,9 +71,9 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
     Dyadic h(cast_exact(configuration().step_size()));
     VectorField::TimeType tmax(termination);
 
-    Orbit<Point<FloatDPApproximation>> orbit(init_pt);
+    Orbit<ApproximatePointType> orbit(init_pt);
 
-    EffectiveVectorMultivariateFunction dynamic=_system->function();
+    EffectiveVectorMultivariateFunction const& dynamic=_system->function();
 
     RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
@@ -81,10 +81,7 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
 
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG_PRINTLN_AT(1,
-                "t=" << std::setw(4) << std::left << t.compute(Effort(0u))
-                << " p=" << point
-                << std::setprecision(old_precision));
+        ARIADNE_LOG_PRINTLN_AT(1,"t=" << std::setw(4) << std::left << t.compute(Effort(0u)) << " p=" << point << std::setprecision(old_precision));
 
         Point<FloatDPApproximation> new_pt = integrator.step(dynamic,point,configuration().step_size());
 

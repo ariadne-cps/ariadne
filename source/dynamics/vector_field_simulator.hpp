@@ -69,8 +69,8 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    Orbit<Point<FloatDPApproximation>> orbit(EnclosureType const& initial_point, TerminationType const& termination) const;
-    Orbit<Point<FloatDPApproximation>> orbit(RealPointType const& initial_point, TerminationType const& termination) const;
+    Orbit<ApproximatePointType> orbit(EnclosureType const& initial_point, TerminationType const& termination) const;
+    Orbit<ApproximatePointType> orbit(RealPointType const& initial_point, TerminationType const& termination) const;
 
   private:
 

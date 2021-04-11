@@ -153,15 +153,21 @@ template<class X> inline X distance(Point<X> const& pt1, Point<X> const& pt2) {
     }
     return sqrt(result);
 }
-/*
-template<class X> inline X project(Point<X> const& pt, Projection2d const& p) {
 
+
+template<class X> inline Point<X> project(Point<X> const& pt, Projection2d const& p) {
+    ARIADNE_PRECONDITION(pt.dimension() == p.n);
+    Vector<X> rv = pt.vector();
+    rv.resize(2u);
+    rv.set(0,pt.at(p.i));
+    rv.set(1,pt.at(p.j));
+    return Point<X>(rv);
 }
 
-template<class X> inline X project(LabelledPoint<X> const& pt, Variables2d const& v) {
-
+template<class X> inline LabelledPoint<X> project(LabelledPoint<X> const& pt, Variables2d const& v) {
+    Projection2d p = projection(pt.state_space(),v);
+    return LabelledPoint<X>(pt.state_space(),project(pt,p));
 }
-*/
 
 template<class X> Point(Vector<X>) -> Point<X>;
 

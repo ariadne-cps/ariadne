@@ -75,7 +75,9 @@ class TestContinuousEvolution
 
         Orbit<PointType> orbit = simulator.orbit(initial_point,time);
 
-        //ARIADNE_TEST_ASSERT(distance(orbit.curve().end()->second,PointType(initial_point,double_precision)).raw() <= 0.02);
+        auto final_pt_xy = project(orbit.curve().end()->second,Projection2d(3,0,1));
+        auto initial_pt_xy = project(PointType(initial_point,dp),Projection2d(2,0,1));
+        ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02);
 
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
         fig << orbit.curve();

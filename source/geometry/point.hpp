@@ -123,7 +123,7 @@ template<class X>
 class LabelledPoint : public LabelledDrawableInterface, public Point<X> {
   public:
 
-    LabelledPoint(Point<X> const& pt, RealSpace const& state_space);
+    LabelledPoint(RealSpace const& state_space, Point<X> const& pt);
     LabelledPoint(List<Assignment<RealVariable,X>> const& val);
     LabelledPoint(InitializerList<Assignment<RealVariable,X>> const& val);
     template<class T> requires Convertible<T,X> LabelledPoint(const LabelledPoint<T>& pt) : Point<X>(pt), _state_variables(pt.state_variables()) { }

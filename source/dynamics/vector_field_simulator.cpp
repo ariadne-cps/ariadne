@@ -50,6 +50,17 @@ namespace Ariadne {
 
 template class Orbit<Point<FloatDPApproximation>>;
 
+template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Point<X> sapt(saspc.dimension(),spt.zero_element());
+    Point<X> apt = evaluate(auxiliary_function,spt);
+    for(SizeType i=0; i!=sapt.size(); ++i) {
+        RealVariable var = saspc.variable(i);
+        sapt[i]= sspc.contains(var) ? spt[sspc[var]] : apt[aspc[var]];
+    }
+    return LabelledPoint<X>(saspc,sapt);
+}
+
 VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(system.clone()), _configuration(new VectorFieldSimulatorConfiguration())
 { }
 
@@ -71,24 +82,30 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
     Dyadic h(cast_exact(configuration().step_size()));
     VectorField::TimeType tmax(termination);
 
-    Orbit<ApproximatePointType> orbit(init_pt);
+    auto const& dynamic_function =_system->function();
+    auto const& auxiliary_function = _system->auxiliary_function();
 
-    EffectiveVectorMultivariateFunction const& dynamic=_system->function();
+    auto state_space=_system->state_space();
+    auto auxiliary_space = _system->auxiliary_space();
+    auto state_auxiliary_space = _system->state_auxiliary_space();
 
     RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
     ApproximatePointType point=init_pt;
 
+    Orbit<ApproximatePointType> orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
         ARIADNE_LOG_PRINTLN_AT(1,"t=" << std::setw(4) << std::left << t.compute(Effort(0u)) << " p=" << point << std::setprecision(old_precision));
 
-        Point<FloatDPApproximation> new_pt = integrator.step(dynamic,point,configuration().step_size());
+        Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
 
-        point = ApproximatePointType(new_pt,point.state_space());
+        point = ApproximatePointType(state_space,state_pt);
         t += h;
 
-        orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),point);
+        orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),
+                     make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
     }
 
     return orbit;

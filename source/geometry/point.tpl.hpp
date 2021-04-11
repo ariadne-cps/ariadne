@@ -61,7 +61,7 @@ template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d&
 }
 
 
-template<class X> LabelledPoint<X>::LabelledPoint(Point<X> const& pt, RealSpace const& state_space)
+template<class X> LabelledPoint<X>::LabelledPoint(RealSpace const& state_space, Point<X> const& pt)
             : Point<X>(pt), _state_variables(state_space.variable_names()) { }
 
 template<class X> LabelledPoint<X>::LabelledPoint(List<Assignment<RealVariable,X>> const& x)

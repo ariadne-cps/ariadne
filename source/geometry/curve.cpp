@@ -40,6 +40,7 @@
 #include "geometry/curve.hpp"
 #include "symbolic/space.hpp"
 
+#include "output/graphics.hpp"
 
 namespace Ariadne {
 
@@ -176,8 +177,6 @@ LabelledInterpolatedCurve::state_space() const {
 LabelledInterpolatedCurve* LabelledInterpolatedCurve::clone() const {
     return new LabelledInterpolatedCurve(*this);
 }
-
-Projection2d projection(const RealSpace& spc, const Variables2d& variables);
 
 Void
 LabelledInterpolatedCurve::draw(CanvasInterface& c, const Variables2d& v) const

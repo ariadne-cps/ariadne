@@ -274,6 +274,8 @@ template<class S> inline LabelledFigure& operator<<(LabelledFigure& g, const Lab
     return g << LabelledDrawableWrapper<S>(lset);
 }
 
+Projection2d projection(const RealSpace& space, const Variables2d& variables);
+
 inline Void draw(Figure& g) { }
 
 template<class SET, class... CSETS> inline Void

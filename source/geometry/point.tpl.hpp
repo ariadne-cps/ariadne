@@ -32,6 +32,7 @@
 #include "utility/stlio.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
+#include "output/graphics.hpp"
 
 namespace Ariadne {
 
@@ -77,8 +78,6 @@ template<class X> LabelledPoint<X>* LabelledPoint<X>::clone() const {
 template<class X> RealSpace LabelledPoint<X>::state_space() const {
     return RealSpace(this->_state_variables);
 }
-
-Projection2d projection(const RealSpace& spc, const Variables2d& variables);
 
 template<class X> Void LabelledPoint<X>::draw(CanvasInterface& canvas, const Variables2d& axes) const {
     Projection2d proj=projection(this->state_space(),axes);

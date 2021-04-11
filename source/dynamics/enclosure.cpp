@@ -66,6 +66,7 @@
 
 #include "hybrid/discrete_event.hpp"
 
+#include "output/graphics.hpp"
 #include "output/logging.hpp"
 
 #include "function/functional.hpp"
@@ -1456,8 +1457,6 @@ Void LabelledEnclosure::apply_map(ValidatedVectorMultivariateFunction const& f, 
     this->_state_variables=spc.variable_names();
     this->_auxiliary_variables=aux_spc.variable_names();
 }
-
-Projection2d projection(const RealSpace& spc, const Variables2d& variables);
 
 Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) const
 {

@@ -43,7 +43,6 @@ class DiscreteLocation;
 struct Variables2d;
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables);
-Projection2d projection(const RealSpace& spc, const Variables2d& variables);
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects

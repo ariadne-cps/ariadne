@@ -153,6 +153,15 @@ template<class X> inline X distance(Point<X> const& pt1, Point<X> const& pt2) {
     }
     return sqrt(result);
 }
+/*
+template<class X> inline X project(Point<X> const& pt, Projection2d const& p) {
+
+}
+
+template<class X> inline X project(LabelledPoint<X> const& pt, Variables2d const& v) {
+
+}
+*/
 
 template<class X> Point(Vector<X>) -> Point<X>;
 

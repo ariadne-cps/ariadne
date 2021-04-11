@@ -56,37 +56,30 @@ namespace Ariadne {
 
 template<class T> class Orbit;
 
-class DegenerateCrossingException { };
-
-HybridSimulator::HybridSimulator()
-    : _step_size(0.125_x,dp)
+HybridSimulator::HybridSimulator(const SystemType& system)
+    : _sys_ptr(system.clone()), _configuration(new ConfigurationType())
 {
 }
 
-Void HybridSimulator::set_step_size(double h)
-{
-    this->_step_size=h;
-}
-
-namespace {
-
-Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
-    Set<DiscreteEvent> events=system.events(location);
+Map<DiscreteEvent,EffectiveScalarMultivariateFunction>
+HybridSimulator::_guard_functions(const DiscreteLocation& location) const {
+    Set<DiscreteEvent> events=_sys_ptr->events(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards;
     for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
-        EventKind kind = system.event_kind(location,*iter);
+        EventKind kind = _sys_ptr->event_kind(location,*iter);
         if (kind != EventKind::INVARIANT && kind != EventKind::PROGRESS)
-            guards.insert(*iter,system.guard_function(location,*iter));
+            guards.insert(*iter,_sys_ptr->guard_function(location,*iter));
     }
     return guards;
 }
 
-Bool satisfies_invariants(const HybridAutomatonInterface& system, const DiscreteLocation& location, const Point<FloatDPApproximation>& point) {
+Bool
+HybridSimulator::_satisfies_invariants(const DiscreteLocation& location, const Point<FloatDPApproximation>& point) const {
     Bool result=true;
-    Set<DiscreteEvent> events=system.events(location);
+    Set<DiscreteEvent> events=_sys_ptr->events(location);
     for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
-        EventKind kind = system.event_kind(location,*iter);
-        EffectiveScalarMultivariateFunction guard = system.guard_function(location,*iter);
+        EventKind kind = _sys_ptr->event_kind(location,*iter);
+        EffectiveScalarMultivariateFunction guard = _sys_ptr->guard_function(location,*iter);
         if ((kind == EventKind::INVARIANT || kind == EventKind::PROGRESS) && probably(evaluate(guard,point)<0)) {
             result=false;
             break;
@@ -113,26 +106,25 @@ template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const Discret
     return HybridPoint<X>(location,saspc,sapt);
 }
 
-}
-
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-auto HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const TerminationType& termination) const
+auto HybridSimulator::orbit(const HybridRealPoint& init_pt, const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
-    return orbit(system,HybridApproximatePoint(init_pt,dp),termination);
+    return orbit(HybridApproximatePoint(init_pt,dp),termination);
 }
 
-auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
-                            const HybridApproximatePointType& init_pt,
+auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
+    HybridAutomatonInterface const& system=*_sys_ptr;
+
     HybridTime t(0.0_x,0);
-    Dyadic h(ExactDouble(this->_step_size.get_d()));
+    Dyadic h(cast_exact(configuration().step_size()));
     HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
 
     DiscreteLocation location=init_pt.location();
@@ -148,9 +140,9 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             continuous_auxiliary_space,continuous_state_auxiliary_space,system.auxiliary_function(location)));
 
     EffectiveVectorMultivariateFunction dynamic=system.dynamic_function(location);
-    Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=guard_functions(system,location);
+    Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=_guard_functions(location);
 
-    RungeKutta4Integrator integrator(this->_step_size.get_d());
+    RungeKutta4Integrator integrator(configuration().step_size().get_d());
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
@@ -162,7 +154,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
                 << " e=" << std::left << event_trace
                 << std::setprecision(old_precision));
 
-        if (not satisfies_invariants(system, location, point)) {
+        if (not _satisfies_invariants(location, point)) {
             ARIADNE_LOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
             break;
         }
@@ -191,11 +183,11 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             ARIADNE_LOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
 
             dynamic=system.dynamic_function(location);
-            guards=guard_functions(system,location);
+            guards=_guard_functions(location);
 
             t._discrete_time += 1;
         } else {
-            next_point = ApproximatePointType(integrator.step(dynamic,point,this->_step_size));
+            next_point = ApproximatePointType(integrator.step(dynamic,point,configuration().step_size()));
             t._continuous_time += h;
         }
         point=next_point;
@@ -206,7 +198,14 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     return orbit;
 }
 
+HybridSimulatorConfiguration::HybridSimulatorConfiguration() : _step_size(0.125,double_precision) { }
 
+OutputStream& HybridSimulatorConfiguration::_write(OutputStream& os) const {
+    os << "HybridSimulatorConfiguration("
+       << "\n  step_size=" << step_size()
+       << "\n)";
+    return os;
+}
 
 }  // namespace Ariadne
 

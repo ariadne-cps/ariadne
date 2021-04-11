@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/map.hpp
+ *            dynamics/iterated_map.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/map.hpp
- *  \brief Main continuous dynamics system class.
+/*! \file dynamics/iterated_map.hpp
+ *  \brief Main class for discrete-time continuous-space systems.
  */
 
-#ifndef ARIADNE_MAP_HPP
-#define ARIADNE_MAP_HPP
+#ifndef ARIADNE_ITERATED_MAP_HPP
+#define ARIADNE_ITERATED_MAP_HPP
 
 #include <memory>
 
@@ -39,7 +39,6 @@
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
 
-
 namespace Ariadne {
 
 class Enclosure;
@@ -47,24 +46,23 @@ class LabelledEnclosure;
 class Storage;
 class LabelledStorage;
 
-class MapEvolver;
+class IteratedMapEvolver;
 
-//! \brief An iterated function system in Euclidean space.
+//! \brief An iterated function system.
 class IteratedMap
-//    : public ExtendedSystemMixin
 {
   public:
     //! \brief The type used to represent time.
     typedef Integer TimeType;
     //! \brief The type used to represent real numbers.
-    typedef Real RealType ;
-    //! \brief The type used to describe the state space.
-    typedef EuclideanSpace StateSpaceType;
+    typedef Real RealType;
     //! \brief The type used to evolve the system
-    typedef MapEvolver EvolverType;
+    typedef IteratedMapEvolver EvolverType;
     typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
     typedef LabelledStorage StorageType;
+    //! \brief The state space
+    typedef EuclideanSpace StateSpaceType;
   public:
     IteratedMap(const EffectiveVectorMultivariateFunction& f);
     IteratedMap(const List<PrimedRealAssignment>&);
@@ -94,4 +92,4 @@ class IteratedMap
 
 } // namespace Ariadne
 
-#endif // ARIADNE_MAP_HPP
+#endif // ARIADNE_ITERATED_MAP_HPP

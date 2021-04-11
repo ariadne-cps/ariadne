@@ -1,5 +1,5 @@
 /***************************************************************************
- *            inclusion_evolver.hpp
+ *            dynamics/differential_inclusion_evolver.hpp
  *
  *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file inclusion_evolver.hpp
+/*! \file differential_inclusion_evolver.hpp
  *  \brief Evolver for differential inclusion dynamics.
  */
 
-#ifndef ARIADNE_INCLUSION_EVOLVER_HPP
-#define ARIADNE_INCLUSION_EVOLVER_HPP
+#ifndef ARIADNE_DIFFERENTIAL_INCLUSION_EVOLVER_HPP
+#define ARIADNE_DIFFERENTIAL_INCLUSION_EVOLVER_HPP
 
 #include "utility/typedefs.hpp"
 #include "utility/attribute.hpp"
@@ -43,7 +43,7 @@
 #include "solvers/integrator_interface.hpp"
 #include "solvers/inclusion_integrator.hpp"
 #include "solvers/configuration_interface.hpp"
-#include "inclusion_vector_field.hpp"
+#include "differential_inclusion.hpp"
 
 namespace Ariadne {
 
@@ -123,12 +123,12 @@ public:
     virtual ~ReconditionerHandle() = default;
 };
 
-class InclusionEvolverConfiguration;
+class DifferentialInclusionEvolverConfiguration;
 
-class InclusionEvolver {
+class DifferentialInclusionEvolver {
   public:
-    typedef InclusionEvolverConfiguration ConfigurationType;
-    typedef InclusionVectorField SystemType;
+    typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
+    typedef DifferentialInclusion SystemType;
   protected:
     SystemType _system;
     SweeperDP _sweeper;
@@ -136,7 +136,7 @@ class InclusionEvolver {
     ReconditionerHandle _reconditioner;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    InclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner);
+    DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner);
 
     //!@{
     //! \name Configuration for the class.
@@ -150,17 +150,17 @@ class InclusionEvolver {
     Void _recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state);
 };
 
-//! \brief Configuration for an InclusionEvolver, essentially for controlling the accuracy of continuous evolution methods.
-class InclusionEvolverConfiguration : public ConfigurationInterface
+//! \brief Configuration for an DifferentialInclusionEvolver, essentially for controlling the accuracy of continuous evolution methods.
+class DifferentialInclusionEvolverConfiguration : public ConfigurationInterface
 {
   public:
     typedef ExactDouble RealType;
     typedef ApproximateDouble ApproximateRealType;
 
     //! \brief Default constructor gives reasonable values.
-    InclusionEvolverConfiguration();
+    DifferentialInclusionEvolverConfiguration();
 
-    virtual ~InclusionEvolverConfiguration() = default;
+    virtual ~DifferentialInclusionEvolverConfiguration() = default;
 
   private:
 
@@ -200,4 +200,4 @@ class InclusionEvolverConfiguration : public ConfigurationInterface
 
 } // namespace Ariadne;
 
-#endif // ARIADNE_INCLUSION_EVOLVER_HPP
+#endif // ARIADNE_DIFFERENTIAL_INCLUSION_EVOLVER_HPP

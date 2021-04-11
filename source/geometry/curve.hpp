@@ -181,7 +181,27 @@ OutputStream& operator<<(OutputStream& os, const InterpolatedCurve& curve) {
     return os << "InterpolatedCurve( size=" << curve.size() << ", points=" << curve._points << " )";
 }
 
+/*! \brief A linearly interpolated curve in Euclidean space using variables. */
+class LabelledInterpolatedCurve
+    : public LabelledDrawableInterface,
+      public InterpolatedCurve
+{
+  public:
+    typedef LabelledPoint<FloatDPApproximation> PointType;
+  public:
+    explicit LabelledInterpolatedCurve(const PointType& pt);
 
+    List<Identifier> const& state_variables() const { return _state_variables; }
+    RealSpace state_space() const;
+
+    virtual LabelledInterpolatedCurve* clone() const override;
+
+    using InterpolatedCurve::draw;
+    virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+
+  private:
+    List<Identifier> _state_variables;
+};
 
 } // namespace Ariadne
 

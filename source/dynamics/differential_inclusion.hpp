@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/inclusion_vector_field.hpp
+ *            dynamics/differential_inclusion.hpp
  *
  *  Copyright  2018-20  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/inclusion_vector_field.hpp
+/*! \file dynamics/differential_inclusion.hpp
  *  \brief Differential inclusion continuous dynamics system class.
  */
 
-#ifndef ARIADNE_INCLUSION_VECTOR_FIELD_HPP
-#define ARIADNE_INCLUSION_VECTOR_FIELD_HPP
+#ifndef ARIADNE_DIFFERENTIAL_INCLUSION_HPP
+#define ARIADNE_DIFFERENTIAL_INCLUSION_HPP
 
 #include "function/function.hpp"
 #include "geometry/set_interface.hpp"
@@ -55,8 +55,8 @@ class FunctionArgumentsMismatchException : public std::runtime_error {
 class Enclosure;
 class InclusionVectorFieldEvolver;
 
-//! \brief A vector field in Euclidean space, with noisy inputs identifying a family of trajectories.
-class InclusionVectorField
+//! \brief A differential inclusion in Euclidean space.
+class DifferentialInclusion
 {
   public:
     //! \brief The type used to represent time.
@@ -70,11 +70,11 @@ class InclusionVectorField
     typedef Enclosure EnclosureType;
   public:
     //! \brief Construct from expressions with dotted \a dynamics and a given range for the \a inputs.
-    InclusionVectorField(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);
+    DifferentialInclusion(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);
     //! \brief Construct from a \a function for the dynamics and a given range for the \a inputs.
-    InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
-    virtual ~InclusionVectorField() = default;
-    virtual InclusionVectorField* clone() const { return new InclusionVectorField(*this); }
+    DifferentialInclusion(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
+    virtual ~DifferentialInclusion() = default;
+    virtual DifferentialInclusion* clone() const { return new DifferentialInclusion(*this); }
 
     SizeType dimension() const { return _function.result_size(); }
     SizeType number_of_inputs() const { return _inputs.size(); }
@@ -94,8 +94,8 @@ class InclusionVectorField
     //! \brief Return the dynamics components given by the derivatives for each input.
     Vector<EffectiveVectorMultivariateFunction> input_derivatives() const;
 
-    friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
-        return os << "InclusionVectorField( " << vf.function() << ", " << vf.inputs() << " )"; }
+    friend OutputStream& operator<<(OutputStream& os, const DifferentialInclusion& vf) {
+        return os << "DifferentialInclusion( " << vf.function() << ", " << vf.inputs() << " )"; }
   private:
     Void _transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
   private:
@@ -106,4 +106,4 @@ class InclusionVectorField
 
 } // namespace Ariadne
 
-#endif // ARIADNE_INCLUSION_VECTOR_FIELD_HPP
+#endif // ARIADNE_DIFFERENTIAL_INCLUSION_HPP

@@ -36,7 +36,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "dynamics/map.hpp"
+#include "dynamics/iterated_map.hpp"
 #include "dynamics/vector_field.hpp"
 
 

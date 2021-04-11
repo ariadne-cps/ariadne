@@ -171,8 +171,8 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
     String rising("rising");
 
     // Create a simulator object
-    HybridSimulator simulator;
-    simulator.set_step_size(0.01);
+    HybridSimulator simulator(system);
+    simulator.configuration().set_step_size(0.01);
 
     // Set an initial point for the simulation
     HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
@@ -182,7 +182,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
 
     // Compute a simulation trajectory
     ARIADNE_LOG_PRINTLN("Computing simulation trajectory...");
-    auto orbit = simulator.orbit(system,initial_point,termination);
+    auto orbit = simulator.orbit(initial_point,termination);
 
     // Plot the simulation trajectory using all different projections
     ARIADNE_LOG_PRINTLN("Plotting simulation trajectory...");

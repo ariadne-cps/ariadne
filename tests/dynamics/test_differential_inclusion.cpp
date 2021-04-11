@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_inclusion_vector_field.cpp
+ *            test_differential_inclusion.cpp
  *
- *  Copyright  2008-20  Copyright  2008-20uca Geretti, Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-21  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 
@@ -32,14 +32,14 @@
 #include "function/symbolic_function.hpp"
 #include "geometry/function_set.hpp"
 
-#include "dynamics/inclusion_vector_field.hpp"
+#include "dynamics/differential_inclusion.hpp"
 
 
 #include "../test.hpp"
 
 using namespace Ariadne;
 
-class TestInclusionVectorField {
+class TestDifferentialInclusion {
   public:
 
     Void test_not_formula_function() {
@@ -50,7 +50,7 @@ class TestInclusionVectorField {
 
         BoxDomainType inputs(1,{1,2});
 
-        ARIADNE_TEST_THROWS(InclusionVectorField(dynamics,inputs),NotFormulaFunctionException);
+        ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), NotFormulaFunctionException);
     }
 
     Void test_missing_input() {
@@ -58,7 +58,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=y+u,dot(y)=-x+z};
         RealVariableIntervals inputs={-4/100_q<=u<=4/100_q};
 
-        ARIADNE_TEST_THROWS(InclusionVectorField(dynamics,inputs),MissingInputException);
+        ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), MissingInputException);
     }
 
     Void test_unused_input() {
@@ -66,7 +66,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=y,dot(y)=-x};
         RealVariableIntervals inputs={-4/100_q<=u<=4/100_q};
 
-        ARIADNE_TEST_THROWS(InclusionVectorField(dynamics,inputs),UnusedInputException);
+        ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), UnusedInputException);
     }
 
     Void test_mismatching_coordinates() {
@@ -77,7 +77,7 @@ class TestInclusionVectorField {
 
         BoxDomainType inputs(1,{1,2});
 
-        ARIADNE_TEST_THROWS(InclusionVectorField(function,inputs),FunctionArgumentsMismatchException);
+        ARIADNE_TEST_THROWS(DifferentialInclusion(function, inputs), FunctionArgumentsMismatchException);
     }
 
     Void test_dynamics_transformation() {
@@ -85,7 +85,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=-y,dot(y)=x+2*u};
         RealVariableIntervals inputs={1<=u<=2};
 
-        InclusionVectorField ivf(dynamics,inputs);
+        DifferentialInclusion ivf(dynamics, inputs);
 
         ARIADNE_TEST_PRINT(ivf);
 
@@ -119,7 +119,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=u1*u2*x*(1-y),dot(y)=u2*y*(x-1)};
         RealVariableIntervals inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
-        InclusionVectorField ivf(dynamics,inputs);
+        DifferentialInclusion ivf(dynamics, inputs);
 
         ARIADNE_TEST_PRINT(ivf);
         ARIADNE_TEST_PRINT(ivf.noise_independent_component());
@@ -136,7 +136,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=u1*x*(1-y),dot(y)=u2*y*(x-1)};
         RealVariableIntervals inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
-        InclusionVectorField ivf(dynamics,inputs);
+        DifferentialInclusion ivf(dynamics, inputs);
 
         ARIADNE_TEST_PRINT(ivf);
         ARIADNE_TEST_PRINT(ivf.noise_independent_component());
@@ -153,7 +153,7 @@ class TestInclusionVectorField {
         DottedRealAssignments dynamics={dot(x)=-y-z,dot(y)=x+y*0.1_dec,dot(z)=z*(x-6)+u};
         RealVariableIntervals inputs={0.099_dec<=u<=0.101_dec};
 
-        InclusionVectorField ivf(dynamics,inputs);
+        DifferentialInclusion ivf(dynamics, inputs);
 
         ARIADNE_TEST_PRINT(ivf);
         ARIADNE_TEST_PRINT(ivf.noise_independent_component());
@@ -179,6 +179,6 @@ class TestInclusionVectorField {
 
 int main() {
 
-    TestInclusionVectorField().test();
+    TestDifferentialInclusion().test();
     return ARIADNE_TEST_FAILURES;
 }

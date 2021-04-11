@@ -38,7 +38,9 @@
 #include "geometry/box.hpp"
 
 #include "geometry/curve.hpp"
+#include "symbolic/space.hpp"
 
+#include "output/graphics.hpp"
 
 namespace Ariadne {
 
@@ -164,5 +166,23 @@ InterpolatedCurve::_write(OutputStream& os) const
     return os << (*this);
 }
 
+LabelledInterpolatedCurve::LabelledInterpolatedCurve(const PointType& pt)
+            : InterpolatedCurve(CurveInterface::PointType(pt)), _state_variables(pt.state_variables()) { }
+
+RealSpace
+LabelledInterpolatedCurve::state_space() const {
+    return RealSpace(this->_state_variables);
+}
+
+LabelledInterpolatedCurve* LabelledInterpolatedCurve::clone() const {
+    return new LabelledInterpolatedCurve(*this);
+}
+
+Void
+LabelledInterpolatedCurve::draw(CanvasInterface& c, const Variables2d& v) const
+{
+    Projection2d proj=projection(this->state_space(),v);
+    this->draw(c,proj);
+}
 
 } // namespace Ariadne

@@ -26,7 +26,7 @@
 #include "utilities.hpp"
 
 #include "dynamics/orbit.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 
 
@@ -103,9 +103,9 @@ Void evolution_submodule(pybind11::module& module)
 {
     export_semantics(module);
 
-    export_evolver_interface<MapEvolver::Interface>(module,"MapEvolverInterface");
+    export_evolver_interface<IteratedMapEvolver::Interface>(module, "IteratedMapEvolverInterface");
     export_evolver_interface<VectorFieldEvolver::Interface>(module,"VectorFieldEvolverInterface");
 
-    export_evolver<MapEvolver, IteratedMap>(module,"MapEvolver");
+    export_evolver<IteratedMapEvolver, IteratedMap>(module, "IteratedMapEvolver");
     export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
 }

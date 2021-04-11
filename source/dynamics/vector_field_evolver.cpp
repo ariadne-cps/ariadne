@@ -61,61 +61,10 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-EffectiveVectorMultivariateFunction make_auxiliary_function(
-    Space<Real> const& state_space,
-    List<RealAssignment> const& algebraic);
-
-EffectiveVectorMultivariateFunction make_dynamic_function(
-    Space<Real> const& space,
-    List<RealAssignment> const& algebraic,
-    List<DottedRealAssignment> const& differential);
-
-
-VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
-    : VectorField(dynamics, List<RealAssignment>())
-{
-}
-
-VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAssignment> const& auxiliary)
-    : _dynamics(dynamics), _auxiliary(auxiliary)
-    , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
-{
-}
-
-VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
-    : _dynamic_function(function), _auxiliary_function(0u,function.domain())
-{
-    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
-}
-
-RealSpace VectorField::state_space() const {
-    return RealSpace(left_hand_sides(this->_dynamics));
-}
-
-RealSpace VectorField::auxiliary_space() const {
-    return RealSpace(left_hand_sides(this->_auxiliary));
-}
-
-
-OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
-    os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "
-          "auxiliary_function = " << vf.auxiliary_function() << ", "
-          "dynamics = " << vf._dynamics << ", "
-          "auxiliary = " << vf._auxiliary << ")";
-    return os;
-}
-
 // Allow subdivisions in upper evolution
 const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
-
-using std::shared_ptr;
-
-class DegenerateCrossingException { };
-
-
 
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _sys_ptr(system.clone())
@@ -174,12 +123,6 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
         working_sets.push_back(make_pair(initial_time,current_set));
     }
 }
-
-Void test_print() {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("test\r\n");
-}
-
 
 Void
 VectorFieldEvolver::
@@ -301,8 +244,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 
     // Compute flow model
-    // TODO: Modify this for general integrator interface
-    //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);

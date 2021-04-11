@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/map_evolver.hpp
+ *            dynamics/iterated_map_evolver.hpp
  *
  *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,22 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/map_evolver.hpp
- *  \brief Evolver for map systems.
+/*! \file dynamics/iterated_map_evolver.hpp
+ *  \brief Evolver for iterated map systems.
  */
 
-#ifndef ARIADNE_MAP_EVOLVER_HPP
-#define ARIADNE_MAP_EVOLVER_HPP
+#ifndef ARIADNE_ITERATED_MAP_EVOLVER_HPP
+#define ARIADNE_ITERATED_MAP_EVOLVER_HPP
 
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 
-
 #include "utility/tuple.hpp"
 
-#include "dynamics/map.hpp"
+#include "dynamics/iterated_map.hpp"
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "dynamics/evolver_base.hpp"
@@ -46,23 +45,19 @@
 
 namespace Ariadne {
 
-template<class Sys, class BS, class TRM> class Evolver;
-
 class Enclosure;
 class IteratedMap;
 template<class ES> class Orbit;
 
-class MapEvolverConfiguration;
-class EvolutionProfiler;
-
+class IteratedMapEvolverConfiguration;
 
 /*! \brief A class for computing the evolution of an iterated map.
  */
-class MapEvolver
+class IteratedMapEvolver
     : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
 {
   public:
-    typedef MapEvolverConfiguration ConfigurationType;
+    typedef IteratedMapEvolverConfiguration ConfigurationType;
     typedef IteratedMap SystemType;
     typedef Integer TimeType;
     typedef Integer TerminationType;
@@ -74,10 +69,10 @@ class MapEvolver
   public:
 
     //! \brief Default constructor.
-    MapEvolver(const SystemType& system);
+    IteratedMapEvolver(const SystemType& system);
 
     /*! \brief Make a dynamically-allocated copy. */
-    MapEvolver* clone() const { return new MapEvolver(*this); }
+    IteratedMapEvolver* clone() const { return new IteratedMapEvolver(*this); }
 
     /* \brief Get the internal system. */
     virtual const SystemType& system() const { return *_sys_ptr; }
@@ -140,21 +135,20 @@ class MapEvolver
 
   private:
     std::shared_ptr< SystemType > _sys_ptr;
-    //std::shared_ptr< EvolutionProfiler >  _profiler;
     std::shared_ptr< ConfigurationType > _configuration;
 };
 
 
-//! \brief Configuration for a MapEvolver, essentially to control accuracy of evolution.
-class MapEvolverConfiguration : public ConfigurationInterface
+//! \brief Configuration for a IteratedMapEvolver, essentially to control accuracy of evolution.
+class IteratedMapEvolverConfiguration : public ConfigurationInterface
 {
   public:
     typedef double RealType;
 
     //! \brief Default constructor gives reasonable values.
-    MapEvolverConfiguration();
+    IteratedMapEvolverConfiguration();
 
-    virtual ~MapEvolverConfiguration() = default;
+    virtual ~IteratedMapEvolverConfiguration() = default;
 
   private:
 
@@ -188,4 +182,4 @@ class MapEvolverConfiguration : public ConfigurationInterface
 
 } // namespace Ariadne
 
-#endif // ARIADNE_MAP_EVOLVER_HPP
+#endif // ARIADNE_ITERATED_MAP_EVOLVER_HPP

@@ -48,7 +48,7 @@
 #include "solvers/constraint_solver.hpp"
 #include "geometry/affine_set.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "output/graphics.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
@@ -60,14 +60,6 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 
 template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
     lst1.append(val2); return catenate(lst1,lst3); }
-
-struct Variables2d {
-    RealVariable _x,_y;
-    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
-    RealVariable const& x_variable() const { return this->_x; };
-    RealVariable const& y_variable() const { return this->_y; };
-};
-
 
 //-------------- HybridEnclosure -----------------------------------------//
 

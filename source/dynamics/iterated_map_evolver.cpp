@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/map_evolver.cpp
+ *            dynamics/iterated_map_evolver.cpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
@@ -38,8 +38,8 @@
 
 #include "output/logging.hpp"
 
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "dynamics/iterated_map.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
 
 namespace Ariadne {
 
@@ -55,103 +55,45 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-
-// The maximum allowable radius of a basic set.
-MapEvolverConfiguration::RealType DEFAULT_MAXIMUM_ENCLOSURE_RADIUS = 100;
-// Allow subdivisions in upper evolution.
-const Bool DEFAULT_ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution.
-const Bool DEFAULT_ENABLE_PREMATURE_TERMINATION = false;
-
-using std::shared_ptr;
-
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 
-class DegenerateCrossingException { };
 
-
-EffectiveVectorMultivariateFunction make_auxiliary_function(
-    Space<Real> const& state_space,
-    List<RealAssignment> const& algebraic);
-
-EffectiveVectorMultivariateFunction make_reset_function(
-    Space<Real> const& space,
-    List<RealAssignment> const& algebraic,
-    List<PrimedRealAssignment> const& differential);
-
-
-IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
-    : _update_function(f)
-{
-    ARIADNE_PRECONDITION(f.result_size()==f.argument_size());
-}
-
-IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
-    : IteratedMap(updates,List<RealAssignment>()) { }
-
-IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates, List<RealAssignment> const& auxiliary)
-    : _updates(updates), _auxiliary(auxiliary)
-    , _update_function(make_reset_function(left_hand_sides(updates),auxiliary,updates))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(updates),auxiliary))
-{
-}
-
-RealSpace IteratedMap::state_space() const {
-    return RealSpace(left_hand_sides(this->_updates));
-}
-
-RealSpace IteratedMap::auxiliary_space() const {
-    return RealSpace(left_hand_sides(this->_auxiliary));
-}
-
-
-OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
-    os << "IteratedMap( update_function = " << map.update_function() << ", "
-          "auxiliary_function = " << map.auxiliary_function() << ", "
-          "updates = " << map._updates << ", "
-          "auxiliary = " << map._auxiliary << ")";
-    return os;
-}
-
-
-
-
-MapEvolver::MapEvolver(const SystemType& system)
+IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
     : _sys_ptr(system.clone())
     , _configuration(new ConfigurationType())
 {
 }
 
-typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() const {
+typename IteratedMapEvolver::FunctionFactoryType const IteratedMapEvolver::function_factory() const {
     return ValidatedFunctionModelDPFactory(make_taylor_function_factory());
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealBox& box) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
     return EnclosureType(box,this->system().state_space(), config);
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const ExactBoxType& box) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
     return EnclosureType(box,this->system().state_space(), config);
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealVariablesBox& box) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box) const {
     return EnclosureType(box,this->system().state_space(), EnclosureConfiguration(this->function_factory()));
 }
 
-typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
+typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
     return EnclosureType(box,this->system().state_space(), config);
 }
 
-Orbit<MapEvolver::EnclosureType>
-MapEvolver::
+Orbit<IteratedMapEvolver::EnclosureType>
+IteratedMapEvolver::
 orbit(const EnclosureType& initial_set,
       const TerminationType& termination,
       Semantics semantics) const
@@ -169,7 +111,7 @@ orbit(const EnclosureType& initial_set,
 }
 
 Void
-MapEvolver::
+IteratedMapEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
            EnclosureListType& intermediate_sets,
@@ -192,7 +134,6 @@ _evolution(EnclosureListType& final_sets,
         working_sets.push_back(make_pair(initial_time,initial_enclosure));
     }
 
-
     while(!working_sets.empty()) {
         TimedEnclosureType current_set=working_sets.back();
         working_sets.pop_back();
@@ -210,25 +151,17 @@ _evolution(EnclosureListType& final_sets,
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
         } else if(semantics == Semantics::LOWER && this->_configuration->enable_premature_termination() && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
-            ARIADNE_WARN("Terminating lower evolution at time " << initial_time
-                         << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
+            ARIADNE_WARN("Terminating lower evolution at time " << initial_time << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {
             // Compute evolution
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  current_set,maximum_time,
-                                  semantics,reach);
+            this->_evolution_step(working_sets,final_sets,reach_sets,intermediate_sets,current_set,maximum_time,semantics,reach);
         }
     }
 
 }
 
-
-
-
-
 Void
-MapEvolver::
+IteratedMapEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
@@ -251,12 +184,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
     ARIADNE_LOG_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
-    //const SizeType nd=initial_enclosure.result_size();
-    //const SizeType ng=initial_enclosure.argument_size();
-
 
     /////////////// Main Evolution ////////////////////////////////
-
 
     // Compute the map model
     EnclosureType& final_enclosure=initial_enclosure;
@@ -272,19 +201,21 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 }
 
 
-MapEvolverConfiguration::MapEvolverConfiguration()
+IteratedMapEvolverConfiguration::IteratedMapEvolverConfiguration()
 {
-    set_maximum_enclosure_radius(DEFAULT_MAXIMUM_ENCLOSURE_RADIUS);
-    set_enable_subdivisions(DEFAULT_ENABLE_SUBDIVISIONS);
-    set_enable_premature_termination(DEFAULT_ENABLE_PREMATURE_TERMINATION);
+    set_maximum_enclosure_radius(100);
+    set_enable_subdivisions(false);
+    set_enable_premature_termination(false);
 }
 
 
 OutputStream&
-MapEvolverConfiguration::_write(OutputStream& os) const
+IteratedMapEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "MapEvolverSettings"
+    os << "IteratedMapEvolverConfiguration"
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  enable_subdivisions=" << enable_subdivisions()
+       << ",\n  enable_premature_termination=" << enable_premature_termination()
        << "\n)\n";
     return os;
 }

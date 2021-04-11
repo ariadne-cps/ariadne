@@ -43,8 +43,8 @@
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "dynamics/iterated_map.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
@@ -78,8 +78,8 @@ Int main(int argc, const char* argv[])
     LabelledSet<Point<FloatDPBounds>> labelled_fixed_point(henon.state_space(),fixed_point);
 
     // Set up the evaluators
-    MapEvolver evolver(henon);
-    typedef MapEvolver::EnclosureType EnclosureType;
+    IteratedMapEvolver evolver(henon);
+    typedef IteratedMapEvolver::EnclosureType EnclosureType;
     ReachabilityAnalyser<IteratedMap> analyser(evolver);
     analyser.configuration().set_bounding_domain(ExactBoxType({{-4,4},{-4,4}}));
     analyser.configuration().set_maximum_grid_fineness(5);

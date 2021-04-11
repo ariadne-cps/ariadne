@@ -3,11 +3,14 @@ set(LIBRARY_NAME ariadne-dynamics)
 add_library(${LIBRARY_NAME} OBJECT
     enclosure.cpp
     orbit.cpp
-    inclusion_vector_field.cpp
-    inclusion_evolver.cpp
+    differential_inclusion.cpp
+    differential_inclusion_evolver.cpp
     first_order_pde.cpp
-    map_evolver.cpp
+    iterated_map.cpp
+    iterated_map_evolver.cpp
+    vector_field.cpp
     vector_field_evolver.cpp
+    vector_field_simulator.cpp
     reachability_analyser.cpp
 )
 

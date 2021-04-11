@@ -83,6 +83,9 @@ RealSpace VectorField::auxiliary_space() const {
     return RealSpace(left_hand_sides(this->_auxiliary));
 }
 
+RealSpace VectorField::state_auxiliary_space() const {
+    return join(state_space(),auxiliary_space());
+}
 
 OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
     os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "

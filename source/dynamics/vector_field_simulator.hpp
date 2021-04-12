@@ -56,6 +56,7 @@ class VectorFieldSimulator
     typedef Real TerminationType;
     typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
+    typedef Orbit<ApproximatePointType> OrbitType;
 
   public:
 
@@ -71,10 +72,10 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    Orbit<ApproximatePointType> orbit(ApproximatePointType const& initial_point, TerminationType const& termination) const;
-    Orbit<ApproximatePointType> orbit(RealPointType const& initial_point, TerminationType const& termination) const;
-    Orbit<ApproximatePointType> orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
-    Orbit<ApproximatePointType> orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
+    OrbitType orbit(ApproximatePointType const& initial_point, TerminationType const& termination) const;
+    OrbitType orbit(RealPointType const& initial_point, TerminationType const& termination) const;
+    OrbitType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
 
   private:
 

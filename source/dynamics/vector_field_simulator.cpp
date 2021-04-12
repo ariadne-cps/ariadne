@@ -69,7 +69,7 @@ inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& 
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
 auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_set, const TerminationType& termination) const
--> Orbit<ApproximatePointType>
+-> OrbitType
 {
     auto spc = _system->state_space();
     auto midpoint = init_set.euclidean_set(spc).bounding_box().midpoint();
@@ -77,7 +77,7 @@ auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_
 }
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
--> Orbit<ApproximatePointType>
+-> OrbitType
 {
     auto spc = _system->state_space();
     auto midpoint = init_bx.euclidean_set(spc).midpoint();
@@ -85,13 +85,13 @@ auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationTy
 }
 
 auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+    -> OrbitType
 {
     return orbit(ApproximatePointType(init_pt,dp),termination);
 }
 
 auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+    -> OrbitType
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -110,7 +110,7 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
 
     ApproximatePointType point=init_pt;
 
-    Orbit<ApproximatePointType> orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+    OrbitType orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
 
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();

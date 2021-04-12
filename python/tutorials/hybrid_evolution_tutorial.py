@@ -22,6 +22,7 @@
 # Import all classes in the ariadne module
 from pyariadne import *
 
+
 #! [get_tank]
 def get_tank():
     # Declare the system constants
@@ -46,6 +47,7 @@ def get_tank():
     return automaton
 
 #! [/get_tank]
+
 
 #! [get_valve]
 def get_valve():
@@ -95,6 +97,7 @@ def get_valve():
 
 #! [/get_valve]
 
+
 #! [get_controller]
 def get_controller():
     # Declare some constants
@@ -140,31 +143,22 @@ def get_controller():
 
 #! [/get_controller]
 
+
 #! [simulate_evolution]
-def simulate_evolution(system):
+def simulate_evolution(system,initial_set,final_time):
     # Re-introduce the shared system variables required for the initial set
     aperture = RealVariable("aperture")
     height = RealVariable("height")
-
-    valve = StringVariable("valve")
-    controller = StringVariable("controller")
-
-    opened = String("opened")
-    rising = String("rising")
 
     # Create a simulator object
     simulator = HybridSimulator(system)
     simulator.configuration().set_step_size(0.01)
 
-    # Set an initial point for the simulation
-    initial_point = HybridRealPoint(DiscreteLocation({valve:opened,controller:rising}),{height:Real(7)})
-
-    # Define the termination: continuous time and maximum number of transitions
-    termination = HybridTerminationCriterion(Real(exact(30.0)),5)
+    print("simulator.configuration() = ",simulator.configuration())
 
     # Compute a simulation trajectory
     print("Computing simulation trajectory...")
-    orbit = simulator.orbit(initial_point,termination)
+    orbit = simulator.orbit(initial_set,HybridTerminationCriterion(final_time))
 
     # Plot the simulation trajectory using all different projections
     print("Plotting simulation trajectory..")
@@ -175,6 +169,7 @@ def simulate_evolution(system):
 
 #! [/simulate_evolution]
 
+
 #! [create_evolver]
 def create_evolver(system):
     # Create a GeneralHybridEvolver object
@@ -184,35 +179,23 @@ def create_evolver(system):
     evolver.configuration().set_maximum_enclosure_radius(3.0)
     evolver.configuration().set_maximum_step_size(0.25)
 
-    print("Evolver configuration:",evolver.configuration())
+    print("evolver.configuration() =",evolver.configuration())
 
     return evolver
 
 #! [/create_evolver]
 
+
 #! [compute_evolution]
-def compute_evolution(evolver):
+def compute_evolution(evolver,initial_set,final_time):
     # Re-introduce the shared system variables required for the initial set
     aperture = RealVariable("aperture")
     height = RealVariable("height")
     time = TimeVariable()
 
-    valve = StringVariable("valve")
-    controller = StringVariable("controller")
-
-    opened = String("opened")
-    rising = String("rising")
-
-    # Define the initial set, by supplying the location as a list of locations for each composed automata, and
-    # the continuous set as a list of variable assignments for each variable controlled on that location
-    # (the assignment can be either a singleton value using the = symbol or an interval using the <= symbols)
-    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)<=7])
-    # Define the termination: continuous time and maximum number of transitions
-    termination = HybridTerminationCriterion(Real(30),5)
-
     # Compute the evolution flow tube using upper semantics
     print("Computing evolution flow tube...")
-    orbit = evolver.orbit(initial_set,termination,Semantics.UPPER)
+    orbit = evolver.orbit(initial_set,HybridTerminationCriterion(final_time),Semantics.UPPER)
 
     # Plot the flow tube using two different projections
     print("Plotting evolution flow tube...")
@@ -223,6 +206,7 @@ def compute_evolution(evolver):
 
 #! [/compute_evolution]
 
+
 #! [create_analyser]
 def create_analyser(evolver):
     # Create a ReachabilityAnalyser object
@@ -232,29 +216,18 @@ def create_analyser(evolver):
     analyser.configuration().set_maximum_grid_fineness(6)
     analyser.configuration().set_lock_to_grid_time(5)
 
-    print("Analyser configuration:",analyser.configuration())
+    print("analyser.configuration() =",analyser.configuration())
 
     return analyser
 
 #! [/create_analyser]
 
+
 #! [compute_reachability]
-def compute_reachability(analyser):
+def compute_reachability(analyser,initial_set,final_time):
     # Re-introduce the shared system variables required for the initial set
     aperture = RealVariable("aperture")
     height = RealVariable("height")
-
-    valve = StringVariable("valve")
-    controller = StringVariable("controller")
-
-    opened = String("opened")
-    rising = String("rising")
-
-    # Define the initial set
-    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
-    print("Initial set:",initial_set)
-    final_time = HybridTime(Real(exact(30.0)),5)
-    print("Final time:",final_time)
 
     # Compute over-approximation to finite-time reachable set using upper semantics.
     print("Computing upper reach set...")
@@ -272,27 +245,78 @@ def compute_reachability(analyser):
 
 #! [/compute_reachability]
 
-#! [main]
-if __name__ == '__main__':
+
+#! [get_system]
+def get_system():
     # Create the composed automaton
     system = CompositeHybridAutomaton("watertank",[get_tank(),get_valve(),get_controller()])
 
     # Print the system description on the command line
-    print("System: ",system)
+    print("system =",system)
+
+    return system
+
+#! [/get_system]
+
+
+#! [get_initial_set]
+def get_initial_set():
+    # Re-introduce variables to be used for the initial set
+    height = RealVariable("height")
+    valve = StringVariable("valve")
+    controller = StringVariable("controller")
+    opened = String("opened")
+    rising = String("rising")
+
+    # Define the initial set, by supplying the location as a list of locations for each composed automata, and
+    # the continuous set as a list of variable assignments for each variable controlled on that location
+    # (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
+    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
+
+    # Print the initial set on the command line
+    print("initial_set =",initial_set)
+
+    return initial_set
+
+#! [/get_initial_set]
+
+
+#! [get_final_time]
+def get_final_time():
+    # Define the final time: continuous time and maximum number of transitions
+    final_time = HybridTime(Real(exact(30.0)),5)
+    print("final_time =",final_time)
+
+    return final_time
+
+#! [/get_final_time]
+
+
+#! [main]
+if __name__ == '__main__':
+
+    # Get the system
+    system = get_system()
+
+    # Get the initial set
+    initial_set = get_initial_set()
+
+    # Get the final time
+    final_time = get_final_time()
 
     # Compute an approximate simulation of the system evolution
-    simulate_evolution(system)
+    simulate_evolution(system,initial_set,final_time)
 
     # Create an evolver object
     evolver = create_evolver(system)
 
     # Compute the system evolution
-    compute_evolution(evolver)
+    compute_evolution(evolver,initial_set,final_time)
 
     # Create an analyser object
     analyser = create_analyser(evolver)
 
     # Compute the system reachability
-    compute_reachability(analyser)
+    compute_reachability(analyser,initial_set,final_time)
 
 #! [/main]

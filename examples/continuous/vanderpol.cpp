@@ -39,6 +39,9 @@ int main(int argc, const char* argv[])
 
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
+    VectorFieldSimulator simulator(dynamics);
+    simulator.configuration().set_step_size(0.02);
+
     MaximumError max_err=1e-6;
 
     TaylorPicardIntegrator integrator(max_err);
@@ -60,18 +63,24 @@ int main(int argc, const char* argv[])
     Real evolution_time(7);
 
     StopWatch sw;
-    ARIADNE_LOG_PRINTLN("Computing orbit... ");
-    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER));
+    ARIADNE_LOG_PRINTLN("Computing simulation...");
+    ARIADNE_LOG_RUN_AT(1,auto simulation = simulator.orbit(initial_set,evolution_time));
     sw.click();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+    ARIADNE_LOG_PRINTLN("Plotting...");;
+    LabelledFigure sfig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
+    sfig.draw(simulation.curve());
+    sfig.write("vanderpol_simulation");
 
     sw.reset();
-    ARIADNE_LOG_PRINTLN("Plotting...");;
-    LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
-    fig << fill_colour(1.0,0.75,0.5);
-    fig.draw(orbit.reach());
-    fig.write("vanderpol");
-
+    ARIADNE_LOG_PRINTLN("Computing evolution... ");
+    ARIADNE_LOG_RUN_AT(1,auto evolution = evolver.orbit(evolver.enclosure(initial_set),evolution_time));
     sw.click();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+    ARIADNE_LOG_PRINTLN("Plotting...");;
+    LabelledFigure efig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
+    efig.draw(evolution.reach());
+    efig.write("vanderpol_evolution");
 }

@@ -22,7 +22,6 @@
 # Import all classes in the ariadne module
 from pyariadne import *
 
-
 #! [get_tank]
 def get_tank():
     # Declare the system constants
@@ -46,7 +45,7 @@ def get_tank():
 
     return automaton
 
-#! [get_tank]
+#! [/get_tank]
 
 #! [get_valve]
 def get_valve():
@@ -94,7 +93,7 @@ def get_valve():
 
     return automaton
 
-#! [get_valve]
+#! [/get_valve]
 
 #! [get_controller]
 def get_controller():
@@ -139,15 +138,7 @@ def get_controller():
 
     return automaton
 
-#! [get_controller]
-
-#! [get_system]
-def get_system():
-    watertank_system = CompositeHybridAutomaton("watertank",[get_tank(),get_valve(),get_controller()])
-    return watertank_system
-
-#! [get_system]
-
+#! [/get_controller]
 
 #! [simulate_evolution]
 def simulate_evolution(system):
@@ -182,7 +173,7 @@ def simulate_evolution(system):
     plot("simulation_height-aperture",Axes2d(5,height,9, -0.1,aperture,1.1),orbit)
     print("Done computing and plotting simulation trajectory..")
 
-#! [simulate_evolution]
+#! [/simulate_evolution]
 
 #! [create_evolver]
 def create_evolver(system):
@@ -197,7 +188,7 @@ def create_evolver(system):
 
     return evolver
 
-#! End of [create_evolver]
+#! [/create_evolver]
 
 #! [compute_evolution]
 def compute_evolution(evolver):
@@ -230,7 +221,7 @@ def compute_evolution(evolver):
     plot("finite_evolution_height-aperture",Axes2d(5,height,9, -0.1,aperture,1.1),orbit)
     print("Done computing and plotting evolution flow tube!\n")
 
-#! [compute_evolution]
+#! [/compute_evolution]
 
 #! [create_analyser]
 def create_analyser(evolver):
@@ -245,7 +236,7 @@ def create_analyser(evolver):
 
     return analyser
 
-#! [create_analyser]
+#! [/create_analyser]
 
 #! [compute_reachability]
 def compute_reachability(analyser):
@@ -279,22 +270,21 @@ def compute_reachability(analyser):
     plot("outer_chain_reach",Axes2d(5,height,9, -0.1,aperture,1.1),outer_chain_reach)
     print("Done computing and plotting outer chain reach set!\n")
 
-#! [compute_reachability]
-
+#! [/compute_reachability]
 
 #! [main]
 if __name__ == '__main__':
     # Create the composed automaton
-    watertank_system = get_system()
+    system = CompositeHybridAutomaton("watertank",[get_tank(),get_valve(),get_controller()])
 
     # Print the system description on the command line
-    print("System: ",watertank_system)
+    print("System: ",system)
 
     # Compute an approximate simulation of the system evolution
-    simulate_evolution(watertank_system)
+    simulate_evolution(system)
 
     # Create an evolver object
-    evolver = create_evolver(watertank_system)
+    evolver = create_evolver(system)
 
     # Compute the system evolution
     compute_evolution(evolver)
@@ -305,4 +295,4 @@ if __name__ == '__main__':
     # Compute the system reachability
     compute_reachability(analyser)
 
-#! [main]
+#! [/main]

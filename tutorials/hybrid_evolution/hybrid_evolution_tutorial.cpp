@@ -49,7 +49,7 @@ HybridAutomaton get_tank()
 
     return automaton;
 }
-//! [get_tank]
+//! [/get_tank]
 
 //! [get_valve]
 HybridAutomaton get_valve()
@@ -98,7 +98,7 @@ HybridAutomaton get_valve()
 
     return automaton;
 }
-//! [get_valve]
+//! [/get_valve]
 
 //! [get_controller]
 HybridAutomaton get_controller()
@@ -144,16 +144,7 @@ HybridAutomaton get_controller()
 
     return automaton;
 }
-//! [get_controller]
-
-//! [get_system]
-CompositeHybridAutomaton get_system()
-{
-    CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
-    return watertank_system;
-}
-//! [get_system]
-
+//! [/get_controller]
 
 //! [simulate_evolution]
 Void simulate_evolution(const CompositeHybridAutomaton& system)
@@ -191,7 +182,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting simulation trajectory!");
 }
-//! [simulate_evolution]
+//! [/simulate_evolution]
 
 //! [create_evolver]
 GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
@@ -207,7 +198,7 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
 
     return evolver;
 }
-//! End of [create_evolver]
+//! [/create_evolver]
 
 //! [compute_evolution]
 Void compute_evolution(const GeneralHybridEvolver& evolver)
@@ -241,7 +232,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver)
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting evolution flow tube!");
 }
-//! [compute_evolution]
+//! [/compute_evolution]
 
 //! [create_analyser]
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
@@ -258,7 +249,7 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 
     return analyser;
 }
-//! [create_analyser]
+//! [/create_analyser]
 
 //! [compute_reachability]
 Void compute_reachability(const HybridReachabilityAnalyser& analyser)
@@ -294,7 +285,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser)
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
     ARIADNE_LOG_PRINTLN("Done computing and plotting outer chain reach set!");
 }
-//! [compute_reachability]
+//! [/compute_reachability]
 
 //! [main]
 Int main(Int argc, const char* argv[])
@@ -303,16 +294,16 @@ Int main(Int argc, const char* argv[])
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
     // Create the composed automaton
-    CompositeHybridAutomaton watertank_system=get_system();
+    CompositeHybridAutomaton system("watertank",{get_tank(),get_valve(),get_controller()});
 
     // Print the system description on the command line
-    ARIADNE_LOG_PRINTLN("System: " << watertank_system);
+    ARIADNE_LOG_PRINTLN("System: " << system);
 
     // Compute an approximate simulation of the system evolution
-    simulate_evolution(watertank_system);
+    simulate_evolution(system);
 
     // Create an evolver object
-    auto evolver = create_evolver(watertank_system);
+    auto evolver = create_evolver(system);
 
     // Compute the system evolution
     compute_evolution(evolver);
@@ -323,4 +314,4 @@ Int main(Int argc, const char* argv[])
     // Compute the system reachability
     compute_reachability(analyser);
 }
-//! [main]
+//! [/main]

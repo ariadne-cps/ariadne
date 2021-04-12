@@ -114,15 +114,14 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
 
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG_PRINTLN_AT(1,"t=" << std::setw(4) << std::left << t.compute(Effort(0u)) << " p=" << point << std::setprecision(old_precision));
+        ARIADNE_LOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
 
         Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
 
         point = ApproximatePointType(state_space,state_pt);
         t += h;
 
-        orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),
-                     make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+        orbit.insert(t.get(dp).value(),make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
     }
 
     return orbit;

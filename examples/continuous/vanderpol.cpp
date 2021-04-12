@@ -54,7 +54,7 @@ int main(int argc, const char* argv[])
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
-    RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
     Real evolution_time(7);

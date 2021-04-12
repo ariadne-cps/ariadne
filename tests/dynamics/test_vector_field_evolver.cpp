@@ -96,11 +96,8 @@ Void TestContinuousEvolution::test() const
     VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
     ARIADNE_TEST_PRINT(vanderpol);
 
-    // Define the initial box
-    RealVariablesBox initial_box({x.in(1.01_dec,1.02_dec),v.in(0.51_dec,0.52_dec)});
-//    initial_box[0]=ExactIntervalType(1.01,1.02);
-//    initial_box[1]=ExactIntervalType(0.51,0.52);
-
+    // Define the initial set
+    RealExpressionBoundedConstraintSet initial_set({1.01_dec<=x<=1.02_dec,0.51_dec<=v<=0.52_dec});
 
     VectorFieldEvolver evolver(vanderpol,integrator);
     evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
@@ -108,44 +105,26 @@ Void TestContinuousEvolution::test() const
 
     // Over-approximate the initial set by a grid cell
     TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
-    EnclosureType initial_set(initial_box,vanderpol.state_space(),EnclosureConfiguration(function_factory));
-    ARIADNE_TEST_PRINT(initial_set);
+    EnclosureType initial_encl(initial_set.euclidean_set(vanderpol.state_space()),vanderpol.state_space(),EnclosureConfiguration(function_factory));
+    ARIADNE_TEST_PRINT(initial_encl);
 
     Semantics semantics=Semantics::UPPER;
 
     // Compute the reachable sets
-    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,time,semantics);
+    Orbit<EnclosureType> orbit = evolver.orbit(initial_encl,time,semantics);
     ARIADNE_TEST_PRINT(orbit);
 
-/*
-    // Print the intial, evolve and reach sets
-    // cout << "Plotting sets" << endl;
-    // cout << "evolve_set=" << hybrid_evolve_set << endl;
-    // cout << "reach_set=" << hybrid_reach_set << endl;
-    Figure fig;
-    fig.set_bounding_box(ExactBoxType{{-1.0,+21.0},{-1.125,+1.125}});
-    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
-    fig << fill_colour(magenta) << orbit.intermediate();
-    fig << fill_colour(red) << orbit.final();
-    fig << fill_colour(blue) << initial_set;
-    fig.write("test_continuous_evolution-vdp");
-*/
-
-//    LabelledFigure fig(Axes2d(-1.0<=x<=+21,-1.125<=v<=+1.125));
     LabelledFigure fig(Axes2d(-1.0<=x<=+21,-1.125<=v<=+1.125));
-//    fig.set_bounds({x,{-1.0_dec,+21.0_dec}},{v,{-1.125_dec,+1.125_dec}});
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
-    fig << fill_colour(blue) << initial_set;
+    fig << fill_colour(blue) << initial_encl;
     fig.write("test_vector_field_evolver-vdp");
 }
 
 Void TestContinuousEvolution::failure_test() const
 {
     // The systems in this test are stiff and are expected to fail.
-
-    // cout << __PRETTY_FUNCTION__ << endl;
 
     typedef VectorField::EnclosureType EnclosureType;
 

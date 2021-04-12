@@ -46,6 +46,7 @@
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
+#include "symbolic/expression_set.hpp"
 
 namespace Ariadne {
 
@@ -73,28 +74,27 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 {
 }
 
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
+auto VectorFieldEvolver::enclosure(const ExactBoxType& box) const -> EnclosureType {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
+auto VectorFieldEvolver::enclosure(const RealBox& box) const -> EnclosureType {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
+auto VectorFieldEvolver::enclosure(const RealVariablesBox& box) const -> EnclosureType {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
+auto VectorFieldEvolver::enclosure(RealExpressionBoundedConstraintSet const& expression_set) const -> EnclosureType {
+    return EnclosureType(expression_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+}
+
+auto VectorFieldEvolver::function_factory() const -> FunctionFactoryType const& {
     return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
 }
 
-
-Orbit<VectorFieldEvolver::EnclosureType>
-VectorFieldEvolver::
-orbit(const EnclosureType& initial_set,
-      const TimeType& time,
-      Semantics semantics) const
+auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
     Orbit<EnclosureType> orbit(initial_set);
     EnclosureListType final;

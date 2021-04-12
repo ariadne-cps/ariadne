@@ -52,6 +52,8 @@ template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
 
+class RealExpressionBoundedConstraintSet;
+
 //! \brief A class for computing the evolution of a vector_field system.
 //!
 //! The actual evolution steps are performed by the Integrator class.
@@ -87,6 +89,9 @@ class VectorFieldEvolver
 
     //! \brief Make an enclosure from a user set with variables.
     EnclosureType enclosure(RealVariablesBox const&) const;
+
+    //! \brief Make an enclosure from a bounded constraint set with variables.
+    EnclosureType enclosure(RealExpressionBoundedConstraintSet const&) const;
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;

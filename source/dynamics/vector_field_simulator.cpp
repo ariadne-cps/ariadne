@@ -35,6 +35,7 @@
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
+#include "symbolic/expression_set.hpp"
 
 #include "function/function.hpp"
 #include "function/formula.hpp"
@@ -66,6 +67,14 @@ VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(s
 
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
+
+auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_set, const TerminationType& termination) const
+-> Orbit<ApproximatePointType>
+{
+    auto spc = _system->state_space();
+    auto midpoint = init_set.euclidean_set(spc).bounding_box().midpoint();
+    return orbit(ApproximatePointType(spc,midpoint),termination);
+}
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
 -> Orbit<ApproximatePointType>

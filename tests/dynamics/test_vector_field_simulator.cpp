@@ -64,7 +64,7 @@ class TestContinuousEvolution
         VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
         ARIADNE_TEST_PRINT(vanderpol);
 
-        RealVariablesBox initial_box({x==-1.5_dec,y==1});
+        RealExpressionBoundedConstraintSet initial_box({x==-1.5_dec,y==1});
 
         Real time = 6.3_dec;
 
@@ -76,7 +76,7 @@ class TestContinuousEvolution
         Orbit<PointType> orbit = simulator.orbit(initial_box,time);
 
         auto final_pt_xy = project(orbit.curve().end()->second,Projection2d(3,0,1));
-        auto initial_pt_xy = Point<FloatDPApproximation>(initial_box.euclidean_set(vanderpol.state_space()).midpoint(),dp);
+        auto initial_pt_xy = Point<FloatDPApproximation>(initial_box.euclidean_set(vanderpol.state_space()).bounding_box().midpoint(),dp);
         ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02);
 
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});

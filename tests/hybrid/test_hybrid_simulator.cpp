@@ -99,7 +99,6 @@ class TestHybridSimulator
         HybridApproximatePointType initial_hybrid_point(location1,space,approximate_initial_point);
         HybridTime simulation_time(2.25_x,3);
 
-
         // Compute the reachable sets
         cout << "Computing orbit... "<<std::flush;
         Orbit<HybridApproximatePointType> hybrid_orbit=simulator.orbit(initial_hybrid_point,simulation_time);

@@ -67,6 +67,14 @@ VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(s
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
+auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
+-> Orbit<ApproximatePointType>
+{
+    auto spc = _system->state_space();
+    auto midpoint = init_bx.euclidean_set(spc).midpoint();
+    return orbit(RealPointType(spc,midpoint),termination);
+}
+
 auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
     -> Orbit<ApproximatePointType>
 {

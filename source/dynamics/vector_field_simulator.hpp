@@ -41,6 +41,8 @@ namespace Ariadne {
 class VectorField;
 class VectorFieldSimulatorConfiguration;
 
+class RealExpressionBoundedConstraintSet;
+
 template<class T> class Orbit;
 
 /*! \brief A class for computing the simulated evolution of a continuous system.
@@ -50,10 +52,11 @@ class VectorFieldSimulator
   public:
     typedef LabelledPoint<FloatDPApproximation> ApproximatePointType;
     typedef LabelledPoint<Real> RealPointType;
-    typedef ApproximatePointType EnclosureType;
+    typedef RealVariablesBox RealBoxType;
     typedef Real TerminationType;
     typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
+    typedef Orbit<ApproximatePointType> OrbitType;
 
   public:
 
@@ -69,8 +72,10 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    Orbit<ApproximatePointType> orbit(EnclosureType const& initial_point, TerminationType const& termination) const;
-    Orbit<ApproximatePointType> orbit(RealPointType const& initial_point, TerminationType const& termination) const;
+    OrbitType orbit(ApproximatePointType const& initial_point, TerminationType const& termination) const;
+    OrbitType orbit(RealPointType const& initial_point, TerminationType const& termination) const;
+    OrbitType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
 
   private:
 

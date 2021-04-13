@@ -35,6 +35,7 @@
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
+#include "symbolic/expression_set.hpp"
 
 #include "function/function.hpp"
 #include "function/formula.hpp"
@@ -67,14 +68,30 @@ VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(s
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
+auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_set, const TerminationType& termination) const
+-> OrbitType
+{
+    auto spc = _system->state_space();
+    auto midpoint = init_set.euclidean_set(spc).bounding_box().midpoint();
+    return orbit(ApproximatePointType(spc,midpoint),termination);
+}
+
+auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
+-> OrbitType
+{
+    auto spc = _system->state_space();
+    auto midpoint = init_bx.euclidean_set(spc).midpoint();
+    return orbit(RealPointType(spc,midpoint),termination);
+}
+
 auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+    -> OrbitType
 {
     return orbit(ApproximatePointType(init_pt,dp),termination);
 }
 
 auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> Orbit<ApproximatePointType>
+    -> OrbitType
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -93,19 +110,18 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
 
     ApproximatePointType point=init_pt;
 
-    Orbit<ApproximatePointType> orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+    OrbitType orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
 
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG_PRINTLN_AT(1,"t=" << std::setw(4) << std::left << t.compute(Effort(0u)) << " p=" << point << std::setprecision(old_precision));
+        ARIADNE_LOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
 
         Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
 
         point = ApproximatePointType(state_space,state_pt);
         t += h;
 
-        orbit.insert(t.compute_get(Effort(0),DoublePrecision()).value(),
-                     make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+        orbit.insert(t.get(dp).value(),make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
     }
 
     return orbit;

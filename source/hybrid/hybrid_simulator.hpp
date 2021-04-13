@@ -75,6 +75,8 @@ class HybridSimulator
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<HybridApproximatePointType> orbit(const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
     Orbit<HybridApproximatePointType> orbit(const HybridRealPoint& initial_point, const TerminationType& termination) const;
+    //! \brief Currently simulates from the midpoint of the set in the first location only.
+    Orbit<HybridApproximatePointType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination) const;
 
   private:
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> _guard_functions(const DiscreteLocation& location) const;

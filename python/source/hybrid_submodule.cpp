@@ -364,6 +364,7 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
     hybrid_simulator_class.def("orbit", (OrbitType(HybridSimulator::*)(const HybridApproximatePointType&, const TerminationType&)const) &HybridSimulator::orbit);
     hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridApproximatePointType const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
     hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridRealPoint const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridBoundedConstraintSet const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
 
     typedef typename HybridSimulator::ConfigurationType Configuration;
     pybind11::class_<Configuration> hybrid_simulator_configuration_class(module,"HybridSimulatorConfiguration");

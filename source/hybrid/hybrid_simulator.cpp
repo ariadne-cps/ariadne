@@ -109,10 +109,19 @@ template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const Discret
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
+auto HybridSimulator::orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination) const
+    -> Orbit<HybridApproximatePointType>
+{
+    DiscreteLocation first_location = *initial_set.locations().begin();
+    RealSpace spc = this->_sys_ptr->continuous_state_space(first_location);
+    Point<FloatDPApproximation> pt = initial_set.euclidean_set(first_location,spc).bounding_box().midpoint();
+    return orbit(HybridApproximatePointType(first_location,spc,pt),termination);
+}
+
 auto HybridSimulator::orbit(const HybridRealPoint& init_pt, const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
-    return orbit(HybridApproximatePoint(init_pt,dp),termination);
+    return orbit(HybridApproximatePointType(init_pt,dp),termination);
 }
 
 auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,

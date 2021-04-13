@@ -3,7 +3,7 @@ set(UNIT_TESTS
     test_binary_tree
     test_box
     test_point_curve
-    test_function_sets
+    test_constrained_image_set
     test_interval
     test_grid_paving
     test_paving

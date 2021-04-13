@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_function_sets.cpp
+ *            test_constrained_image_set.cpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -52,7 +52,6 @@ class TestConstrainedImageSet
         ivl=ExactIntervalType{-4.0_x,4.0_x};
 
         figure.set_bounding_box(ExactBoxType({{-4.0_x,+4.0_x},{-4.0_x,+4.0_x}}));
-        ARIADNE_TEST_CALL(test_separated()); return;
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_domain());
         ARIADNE_TEST_CALL(test_geometry());
@@ -77,15 +76,14 @@ class TestConstrainedImageSet
         List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
         RealBox d(3,RealInterval(Decimal(-1.1),Decimal(+2.1)));
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
+        ARIADNE_TEST_EQUALS(set.number_of_parameters(),3);
+
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         ExactBoxType bx(cast_exact_box(set.bounding_box()));
         LowerKleenean overlaps = set.overlaps(bx);
         ValidatedLowerKleenean check_overlaps=overlaps.check(Effort::get_default());
-        ARIADNE_TEST_ASSERT(definitely(not check_overlaps));
-        LowerKleenean separated = set.separated(bx);
-        ValidatedLowerKleenean check_separated=separated.check(Effort::get_default());
-        ARIADNE_TEST_ASSERT(definitely(check_separated));
+        ARIADNE_TEST_ASSERT(definitely(check_overlaps));
     }
 
     Void test_geometry() {
@@ -146,17 +144,6 @@ class TestConstrainedImageSet
 
         ARIADNE_TEST_PRINT((ExactPointType({0.375_x,-0.375_x},dp)));
         ARIADNE_TEST_PRINT(f(ExactPointType({0.375_x,-0.375_x},dp)));
-
-        ValidatedConstrainedImageSet idisc(ExactBoxType({{-2.0_x,+2.0_x},{-2.0_x,+2.0_x}}),{x[0],x[1]});
-        idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
-        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.5_x),ExactIntervalType(0.25_x,0.75_x)} );
-        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.75_x),ExactIntervalType(0.25_x,0.75_x)} );
-        box2=ExactBoxType( {ExactIntervalType(1,2),ExactIntervalType(0.5_x,1.0_x)} );
-        box3=ExactBoxType( {ExactIntervalType(0.75_x,2.0_x),ExactIntervalType(-1.0_x,-0.5_x)} );
-        //ARIADNE_TEST_ASSERT(idisc.overlaps(box1));
-        ARIADNE_TEST_ASSERT(idisc.separated(box2));
-        //ARIADNE_TEST_ASSERT(idisc.overlaps(box3));
-        plot("test_function_sets-geometry-idisc",widen(idisc.bounding_box(),0.5_x),set_colour,idisc,box_colour,box1,box_colour,box2,box_colour,box3);
     }
 
     Void test_separated() {
@@ -344,13 +331,39 @@ class TestConstrainedImageSet
     }
 };
 
+class TestValidatedConstrainedImageSet {
+  public:
+    Void test() const {
+        ARIADNE_TEST_CALL(test_geometry());
+    }
 
+    Void test_geometry() const {
+
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        ExactBoxType box1(2);
+        ExactBoxType box2(2);
+        ExactBoxType box3(2);
+        Colour set_colour(0,0,1);
+        Colour box_colour(1,0,1);
+
+        ValidatedConstrainedImageSet idisc(ExactBoxType({{-2.0_x,+2.0_x},{-2.0_x,+2.0_x}}),{x[0],x[1]});
+        idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
+        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.5_x),ExactIntervalType(0.25_x,0.75_x)} );
+        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.75_x),ExactIntervalType(0.25_x,0.75_x)} );
+        box2=ExactBoxType( {ExactIntervalType(1,2),ExactIntervalType(0.5_x,1.0_x)} );
+        box3=ExactBoxType( {ExactIntervalType(0.75_x,2.0_x),ExactIntervalType(-1.0_x,-0.5_x)} );
+        ARIADNE_TEST_ASSERT(idisc.overlaps(box1));
+        ARIADNE_TEST_ASSERT(idisc.separated(box2));
+        ARIADNE_TEST_ASSERT(idisc.overlaps(box3));
+        plot("test_function_sets-geometry-idisc",widen(idisc.bounding_box(),0.5_x),set_colour,idisc,box_colour,box1,box_colour,box2,box_colour,box3);
+    }
+};
 
 
 Int main(Int argc, const char* argv[])
 {
     TestConstrainedImageSet().test();
-    std::cerr<<"INCOMPLETE ";
+    TestValidatedConstrainedImageSet().test();
     return ARIADNE_TEST_FAILURES;
 }
 

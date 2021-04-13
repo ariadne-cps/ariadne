@@ -164,8 +164,11 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType _maximum_spacial_error;
 
-    //! \brief Enable reconditioning of basic sets (false by default).
+    //! \brief Enable reconditioning of basic sets.
     Bool _enable_reconditioning;
+
+    //! \brief Enable subdivisions of basic sets initially (both semantics), or along evolution for upper semantics.
+    Bool _enable_subdivisions;
 
   public:
 
@@ -180,6 +183,9 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
+
+    const Bool& enable_subdivisions() const { return _enable_subdivisions; }
+    Void set_enable_subdivisions(const Bool value) { _enable_subdivisions = value; }
 
   public:
 

@@ -51,8 +51,10 @@ using namespace std;
 class TestVectorFieldEvolver {
 public:
     Void test() const {
-        ARIADNE_TEST_CALL(test_success());
-        ARIADNE_TEST_CALL(test_failure());
+        //ARIADNE_TEST_CALL(test_success());
+        //ARIADNE_TEST_CALL(test_failure());
+        //ARIADNE_TEST_CALL(test_subdivide_initially());
+        ARIADNE_TEST_CALL(test_subdivide_along_evolution());
     }
 
     Void test_success() const {
@@ -93,6 +95,7 @@ public:
         VectorFieldEvolver evolver(vanderpol, integrator);
         evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
         evolver.configuration().set_maximum_step_size(step_size);
+        ARIADNE_TEST_PRINT(evolver.configuration());
 
         Semantics semantics = Semantics::LOWER;
 
@@ -138,17 +141,81 @@ public:
         evolver.configuration().set_maximum_step_size(step_size);
 
         RealVariablesBox initial_box({x==0,y==1,z==1});
-        //auto initial_set = evolver.enclosure(initial_box);
 
         time = 1.5_dec;
 
         // Compute the reachable sets
         ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time));
     }
+
+    Void test_subdivide_initially() const {
+
+        RealConstant mu("mu",1.0_dec);
+        RealVariable x("x"), y("y");
+
+        VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+
+        MaximumError max_err=1e-5;
+
+        TaylorPicardIntegrator integrator(max_err);
+
+        VectorFieldEvolver evolver(dynamics,integrator);
+        evolver.configuration().set_maximum_enclosure_radius(0.1);
+        evolver.configuration().set_maximum_step_size(0.1);
+        evolver.configuration().set_maximum_spacial_error(1e-5);
+
+        Real x0(1.40_dec);
+        Real y0(2.40_dec);
+        Real eps_x0 = 15/100_q;
+        Real eps_y0 = 5/100_q;
+
+        RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+
+        Real evolution_time(1);
+
+        auto evolution = evolver.orbit(initial_set,evolution_time);
+    }
+
+    Void test_subdivide_along_evolution() const {
+
+        RealVariable x("x"), y("y");
+
+        VectorField dynamics({dot(x)=1, dot(y)= sqr(x)});
+
+        MaximumError max_err=1e-5;
+
+        TaylorPicardIntegrator integrator(max_err);
+
+        VectorFieldEvolver evolver(dynamics,integrator);
+        evolver.configuration().set_maximum_enclosure_radius(0.1);
+        evolver.configuration().set_maximum_step_size(0.1);
+        evolver.configuration().set_maximum_spacial_error(1e-5);
+
+        Real x0(1.40_dec);
+        Real y0(2.40_dec);
+        Real eps_x0 = 5/100_q;
+        Real eps_y0 = 5/100_q;
+
+        RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+
+        Real evolution_time(3);
+
+        auto orbit_upper = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+
+        LabelledFigure fig(Axes2d(1 <= x <= 5, 2 <= y <= 30));
+        fig << orbit_upper.reach();
+        fig.write("test_vector_field_evolver-subdivisions");
+
+        auto orbit_lower = evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
+
+        ARIADNE_TEST_ASSERT(orbit_upper.reach().size() > orbit_lower.reach().size());
+    }
 };
 
-Int main()
+Int main(Int argc, const char* argv[])
 {
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+
     TestVectorFieldEvolver().test();
     return ARIADNE_TEST_FAILURES;
 }

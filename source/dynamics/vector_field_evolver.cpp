@@ -62,11 +62,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-// Allow subdivisions in upper evolution
-const Bool ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution
-const Bool ENABLE_PREMATURE_TERMINATION = false;
-
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _sys_ptr(system.clone())
     , _integrator(i.clone())
@@ -110,7 +105,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
                    const EnclosureType& current_set) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+    if (this->_configuration->enable_subdivisions() && possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("initial set too large, splitting");
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
@@ -151,7 +146,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions()
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
@@ -159,7 +154,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
             // Compute evolution
@@ -270,8 +265,9 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
     set_maximum_step_size(1);
     set_maximum_enclosure_radius(100.0);
-    set_enable_reconditioning(true);
     set_maximum_spacial_error(1e-2);
+    set_enable_reconditioning(true);
+    set_enable_subdivisions(true);
 }
 
 
@@ -279,10 +275,11 @@ OutputStream&
 VectorFieldEvolverConfiguration::_write(OutputStream& os) const
 {
     os << "VectorFieldEvolverConfiguration("
-       << "\n  maximum_step_size=" << maximum_step_size()
-       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
-       << ",\n  enable_reconditioning=" << enable_reconditioning()
-       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
+       << "\n maximum_step_size=" << maximum_step_size()
+       << ",\n maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n maximum_spacial_error=" << maximum_spacial_error()
+       << ",\n enable_reconditioning=" << enable_reconditioning()
+       << ",\n enable_subdivisions=" << enable_subdivisions()
        << "\n)";
     return os;
 }

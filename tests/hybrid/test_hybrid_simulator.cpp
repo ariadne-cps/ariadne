@@ -101,10 +101,11 @@ class TestHybridSimulator
 
         // Compute the reachable sets
         cout << "Computing orbit... "<<std::flush;
-        Orbit<HybridApproximatePointType> hybrid_orbit=simulator.orbit(initial_hybrid_point,simulation_time);
+        auto orbit1=simulator.orbit(initial_hybrid_point,simulation_time);
+        auto orbit2=simulator.orbit(HybridBoundedConstraintSet(location1,{x==0,y==0.5_dec}),simulation_time);
         cout << "done"<<std::endl;
 
-        ARIADNE_TEST_PRINT(hybrid_orbit);
+        ARIADNE_TEST_EQUALS(orbit1.curve(0).size(),orbit2.curve(0).size());
     }
 };
 

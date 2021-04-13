@@ -47,7 +47,7 @@
 using namespace Ariadne;
 using namespace std;
 
-class TestContinuousEvolution
+class TestVectorFieldEvolver
 {
   public:
     Void test() const {
@@ -64,7 +64,7 @@ class TestContinuousEvolution
         VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
         ARIADNE_TEST_PRINT(vanderpol);
 
-        RealExpressionBoundedConstraintSet initial_box({x==-1.5_dec,y==1});
+        RealExpressionBoundedConstraintSet initial_set({x==-1.5_dec,y==1});
 
         Real time = 6.3_dec;
 
@@ -73,11 +73,15 @@ class TestContinuousEvolution
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 
-        Orbit<PointType> orbit = simulator.orbit(initial_box,time);
+        Orbit<PointType> orbit = simulator.orbit(initial_set,time);
 
         auto final_pt_xy = project(orbit.curve().end()->second,Projection2d(3,0,1));
-        auto initial_pt_xy = Point<FloatDPApproximation>(initial_box.euclidean_set(vanderpol.state_space()).bounding_box().midpoint(),dp);
+        auto initial_pt_xy = Point<FloatDPApproximation>(initial_set.euclidean_set(vanderpol.state_space()).bounding_box().midpoint(),dp);
         ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02);
+
+        auto orbit2 = simulator.orbit(RealVariablesBox({x==-1.5_dec,y==1}),time);
+        auto final_pt_xy_2 = project(orbit2.curve().end()->second,Projection2d(3,0,1));
+        ARIADNE_TEST_ASSERT(distance(final_pt_xy,final_pt_xy_2).raw() == 0);
 
         LabelledFigure fig({-2.5<=x<=2.5,-3<=y<=3});
         fig << orbit.curve();
@@ -92,6 +96,6 @@ class TestContinuousEvolution
 Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-    TestContinuousEvolution().test();
+    TestVectorFieldEvolver().test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -78,20 +78,16 @@ auto VectorFieldEvolver::enclosure(const ExactBoxType& box) const -> EnclosureTy
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-auto VectorFieldEvolver::enclosure(const RealBox& box) const -> EnclosureType {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-auto VectorFieldEvolver::enclosure(const RealVariablesBox& box) const -> EnclosureType {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-auto VectorFieldEvolver::enclosure(RealExpressionBoundedConstraintSet const& expression_set) const -> EnclosureType {
-    return EnclosureType(expression_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
 auto VectorFieldEvolver::function_factory() const -> FunctionFactoryType const& {
     return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
+}
+
+auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
+    return orbit(EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
+}
+
+auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
+    return orbit(EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
 }
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>

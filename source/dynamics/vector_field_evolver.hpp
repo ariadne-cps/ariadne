@@ -74,24 +74,13 @@ class VectorFieldEvolver
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
-    VectorFieldEvolver(
-    		const SystemType& system,
-            const IntegratorInterface& integrator);
+    VectorFieldEvolver(SystemType const&, IntegratorInterface const&);
 
     //! \brief Make a dynamically-allocated copy.
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
     //! \brief Get the internal system.
     virtual const SystemType& system() const { return *_sys_ptr; }
-
-    //! \brief Make an enclosure from a user set.
-    EnclosureType enclosure(RealBox const&) const;
-
-    //! \brief Make an enclosure from a user set with variables.
-    EnclosureType enclosure(RealVariablesBox const&) const;
-
-    //! \brief Make an enclosure from a bounded constraint set with variables.
-    EnclosureType enclosure(RealExpressionBoundedConstraintSet const&) const;
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
@@ -110,7 +99,9 @@ class VectorFieldEvolver
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
+    OrbitType orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
+    OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
 
     using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
     using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;

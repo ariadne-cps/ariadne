@@ -69,18 +69,18 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
     ARIADNE_LOG_PRINTLN("Plotting...");;
-    LabelledFigure sfig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
-    sfig.draw(simulation.curve());
-    sfig.write("vanderpol_simulation");
+    LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
+    fig.draw(simulation.curve());
+    fig.write("vanderpol_simulation");
 
     sw.reset();
     ARIADNE_LOG_PRINTLN("Computing evolution... ");
-    ARIADNE_LOG_RUN_AT(1,auto evolution = evolver.orbit(evolver.enclosure(initial_set),evolution_time));
+    ARIADNE_LOG_RUN_AT(1,auto evolution = evolver.orbit(initial_set,evolution_time));
     sw.click();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
-    ARIADNE_LOG_PRINTLN("Plotting...");;
-    LabelledFigure efig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
-    efig.draw(evolution.reach());
-    efig.write("vanderpol_evolution");
+    ARIADNE_LOG_PRINTLN("Plotting...");
+    fig.clear();
+    fig.draw(evolution.reach());
+    fig.write("vanderpol_evolution");
 }

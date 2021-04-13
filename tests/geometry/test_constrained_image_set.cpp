@@ -66,10 +66,14 @@ class TestConstrainedImageSet
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
 
         RealBox d(3,RealInterval(-1,+2));
-        EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
-        set.new_parameter_constraint(0<=s[0]+s[1]<=1);
-        set.new_space_constraint(x[0]+x[1]<=2);
-        set.apply({x[0]+x[1],x[0]-x[1]*x[1]});
+        EffectiveConstrainedImageSet set1(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
+        set1.new_parameter_constraint(0<=s[0]+s[1]<=1);
+        set1.new_space_constraint(x[0]+x[1]<=2);
+        set1.apply({x[0]+x[1],x[0]-x[1]*x[1]});
+        ARIADNE_TEST_PRINT(set1);
+
+        EffectiveConstrainedImageSet set2(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2},{0<=s[0]+s[1]<=1,x[0]+x[1]<=2});
+        ARIADNE_TEST_PRINT(set2);
     }
 
     Void test_domain() {
@@ -293,32 +297,6 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    Void test_draw2(const StringType& str, const EffectiveConstrainedImageSet& set, Nat acc) {
-        figure.clear();
-        figure.set_bounding_box(ExactBoxType{{-1.75_x,+1.75_x},{-1.5_x,+2.0_x}});
-        GridTreePaving paving(set.dimension());
-        set.adjoin_outer_approximation_to(paving,acc+3);
-        figure.set_fill_opacity(1.0);
-        figure.set_fill_colour(red);
-        paving.recombine();
-        figure.draw(paving);
-        figure.set_fill_colour(green);
-        figure.set_fill_opacity(0.5);
-        typedef EffectiveConstrainedImageSet CIS;
-        CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;
-        make_lpair(s1,s2)=set.split();
-        make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
-        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
-        make_lpair(s15,s16)=s8.split(); make_lpair(s13,s14)=s7.split(); make_lpair(s11,s12)=s6.split(); make_lpair(s9,s10)=s5.split();
-        make_lpair(s7,s8)=s4.split(); make_lpair(s5,s6)=s3.split(); make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
-        figure.draw(s1); figure.draw(s2); figure.draw(s3); figure.draw(s4);
-        figure.draw(s5); figure.draw(s6); figure.draw(s7); figure.draw(s8);
-        figure.draw(s9); figure.draw(s10); figure.draw(s11); figure.draw(s12);
-        figure.draw(s13); figure.draw(s14); figure.draw(s15); figure.draw(s16);
-        figure.write((StringType("test_function_set-draw-")+str).c_str());
-        figure.clear();
-    }
-
     Void test_draw() {
         EffectiveScalarMultivariateFunction s=EffectiveScalarMultivariateFunction::coordinate(2,0);
         EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(2,1);
@@ -327,14 +305,27 @@ class TestConstrainedImageSet
         Nat acc = 2u;
 
         test_draw("ellipse",EffectiveConstrainedImageSet(RealBox(2,RealInterval(-1,1)),{2*s+t,s+t},{s*s+t*t<=0.75_x}),acc+1u);
-        //test_draw("concave",EffectiveConstrainedImageSet(ExactBoxType(2,-1.01_x,1.01_x,-1.01_x,1.01_x),{s,1.0_x*s*s+t),(2*s+0.25_x*s*s+t-2.0_x<=0}),acc);
+        test_draw("concave",EffectiveConstrainedImageSet(RealBox(2,RealInterval(-1.01_dec,1.01_dec)),{s,1.0_x*s*s+t},{2*s+0.25_x*s*s+t-2.0_x<=0}),acc);
     }
 };
 
 class TestValidatedConstrainedImageSet {
   public:
     Void test() const {
+        ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_geometry());
+    }
+
+    Void test_construct() const {
+        List<ValidatedScalarMultivariateFunction> s=ValidatedScalarMultivariateFunction::coordinates(3);
+        List<ValidatedScalarMultivariateFunction> x=ValidatedScalarMultivariateFunction::coordinates(2);
+
+        ExactBoxType d({{-1.0_x,2.0_x},{1.0_x,3.0_x},{-2.0_x,-1.0_x}});
+        ValidatedConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
+        set.new_parameter_constraint(s[0]*s[1]>=0);
+        set.new_space_constraint(x[0]+x[1]>=0);
+        ARIADNE_TEST_EQUALS(set.dimension(),2);
+        set.apply({x[0]+x[1],x[0]-x[1]*x[1]});
     }
 
     Void test_geometry() const {

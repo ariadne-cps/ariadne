@@ -51,9 +51,9 @@ using namespace std;
 class TestVectorFieldEvolver {
 public:
     Void test() const {
-        //ARIADNE_TEST_CALL(test_success());
-        //ARIADNE_TEST_CALL(test_failure());
-        //ARIADNE_TEST_CALL(test_subdivide_initially());
+        ARIADNE_TEST_CALL(test_success());
+        ARIADNE_TEST_CALL(test_failure());
+        ARIADNE_TEST_CALL(test_subdivide_initially());
         ARIADNE_TEST_CALL(test_subdivide_along_evolution());
     }
 
@@ -171,7 +171,7 @@ public:
 
         RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
-        Real evolution_time(1);
+        Real evolution_time(0.2_dec);
 
         auto evolution = evolver.orbit(initial_set,evolution_time);
     }

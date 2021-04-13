@@ -67,13 +67,13 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     //pybind11::class_<VectorFieldSimulator::OrbitType> simulator_orbit_class(module,"ApproximatePointOrbit");
     //simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
 
-    pybind11::class_<VectorFieldSimulator> hybrid_simulator_class(module,name);
-    hybrid_simulator_class.def(pybind11::init<VectorFieldSimulator::SystemType const&>());
-    hybrid_simulator_class.def("configuration",pybind11::overload_cast<>(&VectorFieldSimulator::configuration),reference_internal);
-    hybrid_simulator_class.def("orbit", (OrbitType(VectorFieldSimulator::*)(const ApproximatePointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<ApproximatePointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<RealPointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<RealExpressionBoundedConstraintSet const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
+    pybind11::class_<VectorFieldSimulator> simulator_class(module,name);
+    simulator_class.def(pybind11::init<VectorFieldSimulator::SystemType const&>());
+    simulator_class.def("configuration",pybind11::overload_cast<>(&VectorFieldSimulator::configuration),reference_internal);
+    simulator_class.def("orbit", (OrbitType(VectorFieldSimulator::*)(const ApproximatePointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
+    simulator_class.def("orbit", pybind11::overload_cast<ApproximatePointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
+    simulator_class.def("orbit", pybind11::overload_cast<RealPointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
+    simulator_class.def("orbit", pybind11::overload_cast<RealExpressionBoundedConstraintSet const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
 
     typedef typename VectorFieldSimulator::ConfigurationType ConfigurationType;
     pybind11::class_<ConfigurationType> simulator_configuration_class(module,"VectorFieldSimulatorConfiguration");
@@ -133,6 +133,7 @@ Void evolution_submodule(pybind11::module& module)
 
     export_evolver_interface<IteratedMapEvolver::Interface>(module, "IteratedMapEvolverInterface");
     export_evolver_interface<VectorFieldEvolver::Interface>(module,"VectorFieldEvolverInterface");
+
 
     export_evolver<IteratedMapEvolver, IteratedMap>(module, "IteratedMapEvolver");
     export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");

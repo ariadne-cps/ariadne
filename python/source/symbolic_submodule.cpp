@@ -188,12 +188,12 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     real_variable_class.def("__rmul__", &__rmul__<RealVariable,Real>);
     real_variable_class.def(__py_rdiv__, &__rdiv__<RealVariable,Real>);
     real_variable_class.def("__pow__", &__pow__<RealVariable,Int>);
-////    real_variable_class.def("__le__", &__le__<RealVariable,RealExpression>);
-////    real_variable_class.def("__ge__", &__ge__<RealVariable,RealExpression>);
+    //real_variable_class.def("__le__", &__le__<RealVariable,RealExpression>);
+    //real_variable_class.def("__ge__", &__ge__<RealVariable,RealExpression>);
     real_variable_class.def("__lt__", &__lt__<RealVariable,RealExpression>);
     real_variable_class.def("__gt__", &__gt__<RealVariable,RealExpression>);
 
-////    real_variable_class.def("__ge__", &__ge__<RealVariable,Real>);
+    //real_variable_class.def("__ge__", &__ge__<RealVariable,Real>);
 
     pybind11::class_<RealVariables> real_variables_class(module,"RealVariables");
     real_variables_class.def(pybind11::init<StringType,SizeType>());
@@ -313,18 +313,18 @@ Void export_expressions(pybind11::module& module)
     real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression>);
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression>);
     real_expression_class.def(__py_rdiv__, &__rdiv__<RealExpression,RealExpression>);
-////    real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
-////    real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
+    real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
+    real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
     real_expression_class.def("__lt__", &__lt__<RealExpression,RealExpression>);
     real_expression_class.def("__gt__", &__gt__<RealExpression,RealExpression>);
     //real_expression_class.def("__cmp__", &__cmp__<RealExpression,RealExpression , Return<ContinuousPredicate> >);
     real_expression_class.def("__str__", &__cstr__<RealExpression>);
     real_expression_class.def("__repr__", &__repr__<RealExpression>);
 
-////    real_expression_class.def("__le__", &__le__<RealExpression,Real>);
-////    real_expression_class.def("__ge__", &__ge__<RealExpression,Real>);
-//    real_expression_class.def("__le__", &__le__<Real,RealExpression>);
-//    real_expression_class.def("__ge__", &__ge__<Real,RealExpression>);
+    real_expression_class.def("__le__", &__le__<RealExpression,Real>);
+    real_expression_class.def("__ge__", &__ge__<RealExpression,Real>);
+    real_expression_class.def("__le__", &__le__<Real,RealExpression>);
+    real_expression_class.def("__ge__", &__ge__<Real,RealExpression>);
 
 
     module.def("max", &_max_<RealExpression,RealExpression>);

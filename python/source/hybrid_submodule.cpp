@@ -407,6 +407,7 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_class.def(pybind11::init<GeneralHybridEvolver::SystemType const&>());
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const HybridBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
+    evolver_class.def("set_integrator",&Evolver::set_integrator);
     evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
     evolver_class.def("__repr__",&__cstr__<Evolver>);
 
@@ -414,6 +415,9 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     pybind11::class_<Configuration> evolver_configuration_class(module,"GeneralHybridEvolverConfiguration");
     evolver_configuration_class.def("set_maximum_enclosure_radius", &Configuration::set_maximum_enclosure_radius);
     evolver_configuration_class.def("set_maximum_step_size", &Configuration::set_maximum_step_size);
+    evolver_configuration_class.def("set_maximum_spacial_error", &Configuration::set_maximum_spacial_error);
+    evolver_configuration_class.def("set_enable_subdivisions", &Configuration::set_enable_subdivisions);
+    evolver_configuration_class.def("set_enable_reconditioning", &Configuration::set_enable_reconditioning);
     evolver_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 

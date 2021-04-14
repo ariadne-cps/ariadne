@@ -284,7 +284,7 @@ def get_initial_set():
 #! [get_final_time]
 def get_final_time():
     # Define the final time: continuous time and maximum number of transitions
-    final_time = HybridTime(Real(exact(30.0)),5)
+    final_time = HybridTime(dec(30.0),5)
     print("final_time =",final_time)
 
     return final_time

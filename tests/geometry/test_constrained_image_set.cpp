@@ -321,11 +321,15 @@ class TestValidatedConstrainedImageSet {
         List<ValidatedScalarMultivariateFunction> x=ValidatedScalarMultivariateFunction::coordinates(2);
 
         ExactBoxType d({{-1.0_x,2.0_x},{1.0_x,3.0_x},{-2.0_x,-1.0_x}});
-        ValidatedConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
-        set.new_parameter_constraint(s[0]*s[1]>=0);
-        set.new_space_constraint(x[0]+x[1]>=0);
-        ARIADNE_TEST_EQUALS(set.dimension(),2);
-        set.apply({x[0]+x[1],x[0]-x[1]*x[1]});
+
+        ValidatedConstrainedImageSet set1(d);
+        ARIADNE_TEST_EQUALS(set1.dimension(),3);
+
+        ValidatedConstrainedImageSet set2(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
+        set2.new_parameter_constraint(s[0]*s[1]>=0);
+        set2.new_space_constraint(x[0]+x[1]>=0);
+        ARIADNE_TEST_EQUALS(set2.dimension(),2);
+        set2.apply({x[0]+x[1],x[0]-x[1]*x[1]});
     }
 
     Void test_geometry() const {

@@ -13,6 +13,7 @@ Legenda for the issue kind:
 
 *Date: /2021*
 
+- [#376](https://github.com/ariadne-cps/ariadne/issues/376) (A) Allow conversion from VectorField to HybridAutomaton, simplifying the construction for automata with one location
 - [#441](https://github.com/ariadne-cps/ariadne/issues/441) (A) Add support for Gnuplot output, including animated gif plot of sets and tridimensional plots for PDEs
 - [#507](https://github.com/ariadne-cps/ariadne/issues/507) (A) Add a simulator for vector field dynamics
 - [#509](https://github.com/ariadne-cps/ariadne/issues/509) (A) Additionally support a set as input in simulators, using the midpoint as the effective point

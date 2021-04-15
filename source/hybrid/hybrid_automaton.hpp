@@ -54,6 +54,7 @@ class DiscreteMode;
 class DiscreteTransition;
 class HybridAutomaton;
 
+class VectorField;
 
 //! \related HybridAutomaton
 //! \brief A discrete transition of a hybrid automaton, representing an instantaneous
@@ -282,6 +283,10 @@ public:
 
     //! \brief Default constructor with "system" name.
     HybridAutomaton();
+
+    //! \brief Constructors from a vector field, for conversion.
+    HybridAutomaton(VectorField const&);
+    HybridAutomaton(Identifier name, VectorField const&);
 
     //! \brief Construct an empty automaton with the given name
     HybridAutomaton(Identifier name);

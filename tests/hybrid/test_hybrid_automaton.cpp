@@ -30,6 +30,7 @@
 
 #include "symbolic/expression.hpp"
 #include "symbolic/valuation.hpp"
+#include "dynamics/vector_field.hpp"
 #include "hybrid/hybrid_automata.hpp"
 
 using namespace Ariadne;
@@ -49,6 +50,8 @@ class TestHybridAutomaton {
 
     Void test_underspecified_mode();
     Void test_underspecified_reset();
+
+    Void test_construct_from_vector_field();
 
     Void test_build_hybrid_system();
     Void test_static_analysis();
@@ -72,6 +75,7 @@ TestHybridAutomaton::test()
     ARIADNE_TEST_CALL(test_overspecified_reset());
     ARIADNE_TEST_CALL(test_underspecified_mode());
     ARIADNE_TEST_CALL(test_underspecified_reset());
+    ARIADNE_TEST_CALL(test_construct_from_vector_field());
     ARIADNE_TEST_CALL(test_build_hybrid_system());
     ARIADNE_TEST_CALL(test_static_analysis());
 }
@@ -362,6 +366,15 @@ HybridAutomaton TestHybridAutomaton::_get_controller() {
     automaton.new_transition(rising,can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
 
     return automaton;
+}
+
+Void
+TestHybridAutomaton::test_construct_from_vector_field()
+{
+    RealVariable x("x"), y("y"), z("z");
+    VectorField vf({dot(x)=y,dot(y)=-x},{let(z)=sqr(x)+sqr(y)});
+    HybridAutomaton automaton(vf);
+    ARIADNE_TEST_PRINT(automaton);
 }
 
 Void

@@ -37,15 +37,7 @@ HybridAutomaton get_tank()
     RealVariable height("height");
 
     // Create the tank automaton
-    HybridAutomaton automaton("tank");
-
-    // Declare a trivial discrete location (we use an empty label since there is only one location).
-    DiscreteLocation flow;
-
-    // The water level is always given by the same dynamic.
-    // The inflow is controlled by the valve aperture, the outflow depends on the
-    // pressure, which is proportional to the water height.
-    automaton.new_mode(flow,{dot(height)=beta*aperture-alpha*height});
+    HybridAutomaton automaton("tank",VectorField(dot(height)=beta*aperture-alpha*height));
 
     return automaton;
 }

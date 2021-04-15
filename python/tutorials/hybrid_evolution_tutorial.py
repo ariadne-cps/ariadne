@@ -34,15 +34,7 @@ def get_tank():
     height = RealVariable("height")
 
     # Create the tank automaton
-    automaton = HybridAutomaton("tank")
-
-    # Declare a trivial discrete location (we use an empty label since there is only one location).
-    flow = DiscreteLocation()
-
-    # The water level is always given by the same dynamic.
-    # The inflow is controlled by the valve aperture, the outflow depends on the
-    # pressure, which is proportional to the water height.
-    automaton.new_mode(flow,[dot(height)<<beta*aperture-alpha*height])
+    automaton = HybridAutomaton("tank",VectorField([dot(height)<<beta*aperture-alpha*height]))
 
     return automaton
 

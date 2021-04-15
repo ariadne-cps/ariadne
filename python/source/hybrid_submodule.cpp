@@ -297,6 +297,8 @@ Void export_hybrid_automaton(pybind11::module& module)
         hybrid_automaton_class(module,"HybridAutomaton");
     hybrid_automaton_class.def(pybind11::init<>());
     hybrid_automaton_class.def(pybind11::init<Identifier>());
+    hybrid_automaton_class.def(pybind11::init<VectorField const&>());
+    hybrid_automaton_class.def(pybind11::init<Identifier,VectorField const&>());
     hybrid_automaton_class.def("locations", &HybridAutomaton::locations);
     hybrid_automaton_class.def("events", &HybridAutomaton::events);
     hybrid_automaton_class.def("event_kind", &HybridAutomaton::event_kind);

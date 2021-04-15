@@ -82,6 +82,9 @@ class VectorField
     RealSpace auxiliary_space() const;
     RealSpace state_auxiliary_space() const;
 
+    List<DottedRealAssignment> dynamic_assignments() const { return _dynamics; }
+    List<RealAssignment> auxiliary_assignments() const { return _auxiliary; }
+
     VectorField* clone() const { return new VectorField(*this); }
     ~VectorField() = default;
     DimensionType dimension() const { return this->_dynamic_function.result_size(); }

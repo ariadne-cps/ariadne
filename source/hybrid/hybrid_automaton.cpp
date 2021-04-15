@@ -33,6 +33,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "function/function.hpp"
+#include "dynamics/vector_field.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_space.hpp"
 
@@ -279,7 +280,6 @@ HybridAutomaton::HybridAutomaton()
 {
 }
 
-
 HybridAutomaton::HybridAutomaton(Identifier name)
     : _name(name),_modes()
 {
@@ -292,8 +292,15 @@ HybridAutomaton::HybridAutomaton(
 {
 }
 
+HybridAutomaton::HybridAutomaton(VectorField const& vf) : HybridAutomaton(String(),vf)
+{
+}
 
-
+HybridAutomaton::HybridAutomaton(Identifier name, VectorField const& vf)
+{
+    this->_name = name;
+    this->new_mode(DiscreteLocation(),vf.dynamic_assignments(),vf.auxiliary_assignments());
+}
 
 
 Void

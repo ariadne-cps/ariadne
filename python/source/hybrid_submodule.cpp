@@ -359,7 +359,7 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
-    pybind11::class_<HybridSimulator::OrbitType> hybrid_simulator_orbit_class(module,"HybridApproximatePointOrbit");
+    pybind11::class_<HybridSimulator::OrbitType,pybind11::bases<HybridDrawableInterface>> hybrid_simulator_orbit_class(module,"HybridApproximatePointOrbit");
     hybrid_simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
 
     pybind11::class_<HybridSimulator> hybrid_simulator_class(module,name);
@@ -376,16 +376,21 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
     hybrid_simulator_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
+Void export_hybrid_drawable_interface(pybind11::module& module)
+{
+    pybind11::class_<HybridDrawableInterface> hybrid_drawable_interface_class(module,"HybridDrawableInterface");
+}
+
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
 {
-    pybind11::class_<ORB> orbit_class(module,name);
+    pybind11::class_<ORB,pybind11::bases<HybridDrawableInterface>> orbit_class(module,name);
+
     orbit_class.def("reach", &ORB::reach);
     orbit_class.def("evolve", &ORB::final);
     orbit_class.def("final", &ORB::final);
     orbit_class.def("__repr__", &__cstr__<ORB>);
 }
-
 
 template<class EV>
 Void export_evolver_interface(pybind11::module& module, const char* name)
@@ -468,6 +473,23 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     reachability_analyser_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
+Void export_hybrid_figure(pybind11::module& module) {
+    static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
+
+    pybind11::class_<HybridFigure> hybrid_figure_class(module,"HybridFigure");
+    hybrid_figure_class.def(pybind11::init<>());
+    hybrid_figure_class.def("set_axes", &HybridFigure::set_axes, reference_internal);
+    hybrid_figure_class.def("set_line_style", &HybridFigure::set_line_style, reference_internal);
+    hybrid_figure_class.def("set_line_width", &HybridFigure::set_line_width, reference_internal);
+    hybrid_figure_class.def("set_line_colour", (Void(HybridFigure::*)(Colour))&HybridFigure::set_line_colour, reference_internal);
+    hybrid_figure_class.def("set_fill_style", &HybridFigure::set_fill_style, reference_internal);
+    hybrid_figure_class.def("set_fill_opacity", &HybridFigure::set_fill_opacity, reference_internal);
+    hybrid_figure_class.def("set_fill_colour", (Void(HybridFigure::*)(Colour))&HybridFigure::set_fill_colour, reference_internal);
+    hybrid_figure_class.def("draw",(Void(HybridFigure::*)(const HybridDrawableInterface&))&HybridFigure::draw, reference_internal);
+    hybrid_figure_class.def("clear", &HybridFigure::clear, reference_internal);
+    hybrid_figure_class.def("write",(Void(HybridFigure::*)(const Char*)const)&HybridFigure::write);
+    hybrid_figure_class.def("write",(Void(HybridFigure::*)(const Char*,Nat,Nat)const)&HybridFigure::write);
+}
 
 Void export_hybrid_plots(pybind11::module& module) {
     module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitType const&))&plot);
@@ -504,15 +526,18 @@ Void hybrid_submodule(pybind11::module& module) {
     export_hybrid_time(module);
     export_hybrid_termination_criterion(module);
 
+    export_hybrid_drawable_interface(module);
+    
     export_simulator<HybridSimulator>(module,"HybridSimulator");
 
-    export_orbit<Orbit<HybridEnclosure>>(module, "HybridOrbit");
+    export_orbit<Orbit<HybridEnclosure>>(module, "HybridEnclosureOrbit");
     export_evolver_interface<HybridEvolverInterface>(module,"HybridEvolverInterface");
     export_evolver<GeneralHybridEvolver>(module,"GeneralHybridEvolver");
 
     export_safety_certificate<HybridReachabilityAnalyser>(module,"HybridSafetyCertificate");
     export_reachability_analyser<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
 
+    export_hybrid_figure(module);
     export_hybrid_plots(module);
 }
 

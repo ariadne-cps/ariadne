@@ -37,7 +37,7 @@ HybridAutomaton get_tank()
     RealVariable height("height");
 
     // Create the tank automaton
-    HybridAutomaton automaton("tank",VectorField(dot(height)=beta*aperture-alpha*height));
+    HybridAutomaton automaton(VectorField(dot(height)=beta*aperture-alpha*height));
 
     return automaton;
 }

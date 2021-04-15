@@ -34,7 +34,7 @@ def get_tank():
     height = RealVariable("height")
 
     # Create the tank automaton
-    automaton = HybridAutomaton("tank",VectorField([dot(height)<<beta*aperture-alpha*height]))
+    automaton = HybridAutomaton(VectorField([dot(height)<<beta*aperture-alpha*height]))
 
     return automaton
 

@@ -188,7 +188,7 @@ def create_evolver(system):
 
 #! [compute_evolution]
 def compute_evolution(evolver,initial_set,final_time):
-    # Re-introduce the shared system variables required for the initial set
+    # Re-introduce the shared system variables required for plotting
     aperture = RealVariable("aperture")
     height = RealVariable("height")
     time = TimeVariable()
@@ -225,7 +225,7 @@ def create_analyser(evolver):
 
 #! [compute_reachability]
 def compute_reachability(analyser,initial_set,final_time):
-    # Re-introduce the shared system variables required for the initial set
+    # Re-introduce the shared system variables required for plotting
     aperture = RealVariable("aperture")
     height = RealVariable("height")
 

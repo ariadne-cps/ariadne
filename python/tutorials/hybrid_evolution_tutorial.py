@@ -188,7 +188,7 @@ def create_evolver(system):
 
 #! [compute_evolution]
 def compute_evolution(evolver,initial_set,final_time):
-    # Re-introduce the shared system variables required for the initial set
+    # Re-introduce the shared system variables required for plotting
     aperture = RealVariable("aperture")
     height = RealVariable("height")
     time = TimeVariable()
@@ -225,7 +225,7 @@ def create_analyser(evolver):
 
 #! [compute_reachability]
 def compute_reachability(analyser,initial_set,final_time):
-    # Re-introduce the shared system variables required for the initial set
+    # Re-introduce the shared system variables required for plotting
     aperture = RealVariable("aperture")
     height = RealVariable("height")
 
@@ -284,7 +284,7 @@ def get_initial_set():
 #! [get_final_time]
 def get_final_time():
     # Define the final time: continuous time and maximum number of transitions
-    final_time = HybridTime(Real(exact(30.0)),5)
+    final_time = HybridTime(dec(30.0),5)
     print("final_time =",final_time)
 
     return final_time

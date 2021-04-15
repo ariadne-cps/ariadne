@@ -288,7 +288,7 @@ HybridBoundedConstraintSet get_initial_set()
 HybridTime get_final_time()
 {
     // Define the final time: continuous time and maximum number of transitions
-    HybridTime final_time(30.0_x,5);
+    HybridTime final_time(30.0_dec,5);
     ARIADNE_LOG_PRINTLN_VAR(final_time);
 
     return final_time;

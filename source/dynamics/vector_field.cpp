@@ -67,12 +67,23 @@ VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAs
     , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
     , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
 {
+    auto lhs_variables = left_hand_sides(dynamics);
+    auto rhs = right_hand_sides(dynamics);
+    List<RealVariable> rhs_variables;
+    for (auto expr : rhs) {
+        for (auto rhs_var : expr.arguments()) {
+            Bool found = false;
+            for (auto lhs_var : lhs_variables)
+                if (lhs_var.name() == rhs_var.name()) found = true;
+            if (not found) ARIADNE_FAIL_MSG("The variable '" << rhs_var.name() << "' in the expression is missing a dynamics expression.");
+        }
+    }
 }
 
 VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
     : _dynamic_function(function), _auxiliary_function(0u,function.domain())
 {
-    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
+    ARIADNE_PRECONDITION(_dynamic_function.result_size()==_dynamic_function.argument_size());
 }
 
 RealSpace VectorField::state_space() const {

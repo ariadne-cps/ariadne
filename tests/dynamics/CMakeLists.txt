@@ -1,6 +1,7 @@
 set(UNIT_TESTS
     test_enclosure
     test_iterated_map_evolver
+    test_vector_field
     test_vector_field_evolver
     test_vector_field_simulator
     test_differential_inclusion

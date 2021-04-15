@@ -114,6 +114,15 @@ def test_predicates():
     x-y<=sqr(x)
     x-y>=sqr(x)
 
+def test_variable_interval():
+
+    x=RealVariable("x")
+    c = Real(dec(0.1))
+
+    [(0<=x)&(x<=1)]
+    [x<<c]
+
 if __name__  == '__main__':
     test_symbolic()
     test_predicates()
+    test_variable_interval()

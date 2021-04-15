@@ -414,10 +414,11 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     real_variable_upper_interval_class.def("__str__",&__cstr__<RealVariableUpperInterval>);
     real_variable_upper_interval_class.def("__bool__", [](RealVariableUpperInterval const&){ARIADNE_THROW(std::runtime_error,"RealVariableUpperInterval.__bool__(self)","Cannot convert RealVariableUpperInterval to bool");});
 
-      real_variable_class.def("__le__", &__le__<Real,RealVariable , Return<RealVariableLowerInterval> >);
+    real_variable_class.def("__le__", &__le__<Real,RealVariable , Return<RealVariableLowerInterval> >);
     real_variable_class.def("__ge__", &__ge__<RealVariable,Real , Return<RealVariableLowerInterval> >);
     real_variable_class.def("__le__", &__le__<RealVariable,Real , Return<RealVariableUpperInterval> >);
     real_variable_class.def("__or__", [](RealVariable const& x, RealInterval ivl){return RealVariableInterval(x,ivl);});
+    real_variable_class.def("__lshift__",&__eq__<RealVariable,Real,Return<RealVariableInterval>>);
 
     real_variable_lower_interval_class.def("__le__", &__le__<RealVariableLowerInterval,Real , Return<RealVariableInterval> >);
 //    real_variable_upper_interval_class.def("__le__", &__le__<Real,RealVariableUpperInterval , Return<RealVariableInterval> >);

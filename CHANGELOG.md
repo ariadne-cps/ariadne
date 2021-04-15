@@ -17,6 +17,7 @@ Legenda for the issue kind:
 - [#507](https://github.com/ariadne-cps/ariadne/issues/507) (A) Add a simulator for vector field dynamics
 - [#509](https://github.com/ariadne-cps/ariadne/issues/509) (A) Additionally support a set as input in simulators, using the midpoint as the effective point
 - [#516](https://github.com/ariadne-cps/ariadne/issues/516) (A) Add missing Python bindings for Real predicates to be used in automata specification
+- [#518](https://github.com/ariadne-cps/ariadne/issues/518) (A) Add missing Python bindings for evolver configuration and initial set assignment
 - [#492](https://github.com/ariadne-cps/ariadne/issues/492) (C) Modify SFINAE code to use C++20 concepts, currently preventing AppleClang compilation under macOS until the compiler supports Concepts
 - [#211](https://github.com/ariadne-cps/ariadne/issues/211) (R) Remove various deprecated functions
 

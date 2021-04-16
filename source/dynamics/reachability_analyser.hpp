@@ -65,9 +65,9 @@ enum class ChainOverspillPolicy : std::uint8_t { IGNORE, WARNING, ERROR };
 using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
-    ValidatedSierpinskian is_safe;
-    Storage chain_reach_set;
-    Storage safe_set;
+    const ValidatedSierpinskian is_safe;
+    const Storage chain_reach_set;
+    const Storage safe_set;
 };
 
 //! \ingroup DynamicsModule

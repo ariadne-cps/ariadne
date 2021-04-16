@@ -252,6 +252,7 @@ Void export_logicals(pymodule& module) {
     export_logical<ValidatedKleenean>(module,"ValidatedKleenean");
     export_logical<ValidatedUpperKleenean>(module,"ValidatedUpperKleenean");
     export_logical<ValidatedLowerKleenean>(module,"ValidatedLowerKleenean");
+    export_logical<ValidatedSierpinskian>(module,"ValidatedSierpinskian");
     export_logical<ApproximateKleenean>(module,"ApproximateKleenean");
 }
 

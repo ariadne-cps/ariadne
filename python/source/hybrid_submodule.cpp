@@ -432,6 +432,9 @@ Void export_safety_certificate(pybind11::module& module) {
 
     pybind11::class_<HybridSafetyCertificate> safety_certificate_class(module,"HybridSafetyCertificate");
     safety_certificate_class.def(pybind11::init<ValidatedSierpinskian,StorageType,StorageType >());
+    safety_certificate_class.def_readonly("is_safe", &HybridSafetyCertificate::is_safe);
+    safety_certificate_class.def_readonly("chain_reach_set", &HybridSafetyCertificate::chain_reach_set);
+    safety_certificate_class.def_readonly("safe_set", &HybridSafetyCertificate::safe_set);
 }
 
 template<class RA, class... PARAMS> Void export_reachability_analyser(pybind11::module& module, const char* name);
@@ -443,6 +446,7 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     typedef typename RA::ConfigurationType Configuration;
     typedef typename RA::StorageType StorageType;
     typedef typename RA::OvertSetInterfaceType OvertSetType;
+    typedef typename RA::OpenSetInterfaceType OpenSetType;
     typedef typename RA::CompactSetInterfaceType CompactSetType;
     typedef typename RA::TimeType TimeType;
 
@@ -455,6 +459,7 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     reachability_analyser_class.def("lower_reach",(StorageType(RA::*)(OvertSetType const&,TimeType const&)const) &RA::lower_reach);
     reachability_analyser_class.def("upper_reach",(StorageType(RA::*)(CompactSetType const&,TimeType const&)const) &RA::upper_reach);
     reachability_analyser_class.def("outer_chain_reach",&RA::outer_chain_reach);
+    reachability_analyser_class.def("verify_safety",(HybridSafetyCertificate(RA::*)(CompactSetType const&, OpenSetType const&)const) &RA::verify_safety);
 
     pybind11::class_<HybridReachabilityAnalyserConfiguration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
     reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &HybridReachabilityAnalyserConfiguration::set_maximum_grid_fineness);

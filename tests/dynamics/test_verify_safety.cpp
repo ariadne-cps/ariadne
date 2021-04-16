@@ -74,12 +74,10 @@ class TestVerifySafety
     RealVariable x;
     RealVariable y;
     ExactBoxType graphics_box;
-    BoundingDomainType bounding;
     SymbolicSetType symbolic_initial_set;
     SetType initial_set;
     SymbolicSetType symbolic_safe_set;
     SetType safe_set;
-    TimeType reach_time;
   public:
 
     static SystemType build_system()
@@ -114,12 +112,10 @@ class TestVerifySafety
           x("x"),
           y("y"),
           graphics_box({{-3,3},{-3,3}}),
-          bounding({{-4,4},{-4,4}}),
           symbolic_initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
           initial_set(symbolic_initial_set.euclidean_set(system.state_space())),
           symbolic_safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec},{sqr(x)+sqr(y)<=sqr((Real)3)}),
-          safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
-          reach_time(3.0_x)
+          safe_set(symbolic_safe_set.euclidean_set(system.state_space()))
     {
         cout << "Done creating initial and safe sets\n" << endl;
 
@@ -128,24 +124,43 @@ class TestVerifySafety
         cout << "safe_set=" << safe_set << endl;
     }
 
-    Void test_verify_safety() {
-        cout << "Verifying safety" << endl;
-
-        cout << analyser.configuration();
-
+    Void test_verify_safety_no_bounding() {
+        analyser.configuration().set_bounding_domain_ptr(nullptr);
         auto safety_certificate=analyser.verify_safety(initial_set,safe_set);
-
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
         auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
-        plot("test_reachability_analyser-verify_safety.png",Projection2d(2,0,1),graphics_box,
+        plot("test_verify_safety-safe.png",Projection2d(2,0,1),graphics_box,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,
              initial_set_colour,initial_set);
     }
 
+    Void test_verify_safety_crossing_bounding() {
+        analyser.configuration().set_bounding_domain(BoundingDomainType(analyser.system().dimension(),{-1,+1}));
+        ARIADNE_TEST_FAIL(analyser.verify_safety(initial_set,safe_set));
+    }
+
+    Void test_verify_safety_crossing_safe() {
+        analyser.configuration().set_bounding_domain_ptr(nullptr);
+        SymbolicSetType smaller_symbolic_safe_set({-2_dec<=x<=2.5_dec,-2_dec<=y<=2.5_dec},{sqr(x)+sqr(y)<=sqr(2.5_dec)});
+        auto smaller_safe_set = smaller_symbolic_safe_set.euclidean_set(system.state_space());
+
+        auto safety_certificate=analyser.verify_safety(initial_set,smaller_safe_set);
+        ARIADNE_TEST_ASSERT(is_indeterminate(safety_certificate.is_safe));
+
+        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
+        plot("test_verify_safety-possibly-unsafe.png",Projection2d(2,0,1),graphics_box,
+             safe_set_colour,safety_certificate.safe_set,
+             reach_set_colour,safety_certificate.chain_reach_set,
+             initial_set_colour,initial_set);
+    }
+
+
     Void test() {
-        ARIADNE_TEST_CALL(test_verify_safety());
+        ARIADNE_TEST_CALL(test_verify_safety_no_bounding());
+        ARIADNE_TEST_CALL(test_verify_safety_crossing_bounding());
+        ARIADNE_TEST_CALL(test_verify_safety_crossing_safe());
     }
 
 };

@@ -732,7 +732,6 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
     set_lock_to_grid_time(1);
     set_maximum_grid_fineness(3);
     set_maximum_grid_extent(16);
-    set_bounding_domain(BoundingDomainType(_analyser.system().dimension(),{-1,+1}));
     set_grid(GridType(_analyser.system()));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
@@ -747,8 +746,9 @@ ReachabilityAnalyserConfiguration<SYS>::_write(OutputStream& os) const
        << ",\n  lock_to_grid_time=" << lock_to_grid_time()
        << ",\n  maximum_grid_fineness=" << maximum_grid_fineness()
        << ",\n  maximum_grid_extent=" << maximum_grid_extent()
-       << ",\n  bounding_domain=" << bounding_domain()
-       << ",\n  grid=" << grid()
+       << ",\n  bounding_domain=";
+    if (bounding_domain_ptr()) os << bounding_domain(); else os << "none";
+    os << ",\n  grid=" << grid()
        << "\n)\n";
     return os;
 }

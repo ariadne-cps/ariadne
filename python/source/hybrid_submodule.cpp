@@ -425,15 +425,16 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
-Void export_safety_certificate(pybind11::module& module) {
-    using RA=HybridReachabilityAnalyser;
+template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {
     typedef typename RA::StorageType StorageType;
+    typedef typename RA::StateSpaceType StateSpaceType;
+    typedef SafetyCertificate<StateSpaceType> SafetyCertificateType;
 
-    pybind11::class_<HybridSafetyCertificate> safety_certificate_class(module,"HybridSafetyCertificate");
+    pybind11::class_<SafetyCertificateType> safety_certificate_class(module,name);
     safety_certificate_class.def(pybind11::init<ValidatedSierpinskian,StorageType,StorageType >());
-    safety_certificate_class.def_readonly("is_safe", &HybridSafetyCertificate::is_safe);
-    safety_certificate_class.def_readonly("chain_reach_set", &HybridSafetyCertificate::chain_reach_set);
-    safety_certificate_class.def_readonly("safe_set", &HybridSafetyCertificate::safe_set);
+    safety_certificate_class.def_readonly("is_safe", &SafetyCertificateType::is_safe);
+    safety_certificate_class.def_readonly("chain_reach_set", &SafetyCertificateType::chain_reach_set);
+    safety_certificate_class.def_readonly("safe_set", &SafetyCertificateType::safe_set);
 }
 
 template<class RA, class... PARAMS> Void export_reachability_analyser(pybind11::module& module, const char* name);
@@ -447,6 +448,7 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     typedef typename RA::OvertSetInterfaceType OvertSetType;
     typedef typename RA::OpenSetInterfaceType OpenSetType;
     typedef typename RA::CompactSetInterfaceType CompactSetType;
+    typedef typename RA::SafetyCertificateType SafetyCertificateType;
     typedef typename RA::TimeType TimeType;
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
@@ -458,12 +460,12 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     reachability_analyser_class.def("lower_reach",(StorageType(RA::*)(OvertSetType const&,TimeType const&)const) &RA::lower_reach);
     reachability_analyser_class.def("upper_reach",(StorageType(RA::*)(CompactSetType const&,TimeType const&)const) &RA::upper_reach);
     reachability_analyser_class.def("outer_chain_reach",&RA::outer_chain_reach);
-    reachability_analyser_class.def("verify_safety",(HybridSafetyCertificate(RA::*)(CompactSetType const&, OpenSetType const&)const) &RA::verify_safety);
+    reachability_analyser_class.def("verify_safety",(SafetyCertificateType(RA::*)(CompactSetType const&, OpenSetType const&)const) &RA::verify_safety);
 
-    pybind11::class_<HybridReachabilityAnalyserConfiguration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
-    reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &HybridReachabilityAnalyserConfiguration::set_maximum_grid_fineness);
-    reachability_analyser_configuration_class.def("set_lock_to_grid_time", &HybridReachabilityAnalyserConfiguration::set_lock_to_grid_time);
-    reachability_analyser_configuration_class.def("__repr__",&__cstr__<HybridReachabilityAnalyserConfiguration>);
+    pybind11::class_<Configuration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
+    reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &Configuration::set_maximum_grid_fineness);
+    reachability_analyser_configuration_class.def("set_lock_to_grid_time", &Configuration::set_lock_to_grid_time);
+    reachability_analyser_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
 
@@ -508,7 +510,7 @@ Void hybrid_submodule(pybind11::module& module) {
     export_evolver_interface<HybridEvolverInterface>(module,"HybridEvolverInterface");
     export_evolver<GeneralHybridEvolver>(module,"GeneralHybridEvolver");
 
-    export_safety_certificate(module);
+    export_safety_certificate<HybridReachabilityAnalyser>(module,"HybridSafetyCertificate");
     export_reachability_analyser<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
 
     export_hybrid_plots(module);

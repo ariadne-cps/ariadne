@@ -426,7 +426,6 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
 }
 
 Void export_safety_certificate(pybind11::module& module) {
-    using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
     using RA=HybridReachabilityAnalyser;
     typedef typename RA::StorageType StorageType;
 

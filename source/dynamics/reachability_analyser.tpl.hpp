@@ -537,6 +537,9 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     -> StorageType
 {
     ARIADNE_LOG_SCOPE_CREATE;
+
+    auto overspill_policy = this->_configuration->outer_overspill_policy();
+
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
     Nat maximum_grid_fineness = this->_configuration->maximum_grid_fineness();
@@ -548,7 +551,6 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     const GridType& grid=this->_configuration->grid();
 
     Bool has_bounding_domain = this->_configuration->bounding_domain_ptr()!=nullptr;
-
     StorageType bounding(grid,this->system());
     if (has_bounding_domain)
         bounding.adjoin_outer_approximation(this->_configuration->bounding_domain(),maximum_grid_fineness);
@@ -558,21 +560,20 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
 
     StorageType initial_cells(grid,this->system());
     initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_fineness);
-    _checked_restriction(initial_cells,bounding);
+    _checked_restriction(initial_cells, bounding, overspill_policy);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_size="<<initial_cells.size());
-
-    Nat stage=0;
 
     StorageType reach_cells(grid,this->system());
     StorageType evolve_cells(grid,this->system());
     if(definitely(transient_time > TimeType(0))) {
         ARIADNE_LOG_PRINTLN("Computing transient evolution...");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_fineness,*_evolver);
-        _checked_restriction(evolve_cells,bounding);
+        _checked_restriction(evolve_cells, bounding, overspill_policy);
         evolve_cells.recombine();
         evolve_cells.mince(maximum_grid_fineness);
+        ARIADNE_LOG_PRINTLN_AT(1,"transient_reach_size="<<reach_cells.size());
         ARIADNE_LOG_PRINTLN_AT(1,"transient evolve_size="<<evolve_cells.size());
-        ARIADNE_LOG_PRINTLN("Found "<<reach_cells.size()<<" cells.");
+        ARIADNE_LOG_PRINTLN_AT(1,"found "<<reach_cells.size()<<" cells.");
     } else {
         evolve_cells=initial_cells;
     }
@@ -581,24 +582,26 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     StorageType starting_cells = evolve_cells;
     StorageType accumulated_evolve_cells = evolve_cells;
 
+    Nat stage=0;
     while(!starting_cells.is_empty()) {
         ++stage;
         ARIADNE_LOG_PRINTLN_AT(1,"stage="<<std::setw(3)<<stage<<
                       " #starting="<<std::setw(4)<<std::left<<starting_cells.size()<<
                       " #reached="<<std::setw(4)<<std::left<<reach_cells.size()<<
                       " #evolved="<<std::setw(4)<<std::left<<accumulated_evolve_cells.size());
+
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_fineness,*_evolver);
         ARIADNE_LOG_PRINTLN_AT(2,"reach.size()="<<reach_cells.size());
         ARIADNE_LOG_PRINTLN_AT(2,"evolve.size()="<<evolve_cells.size());
-        _checked_restriction(evolve_cells,bounding);
+        _checked_restriction(evolve_cells, bounding, overspill_policy);
         starting_cells = evolve_cells;
         starting_cells.remove(accumulated_evolve_cells);
         accumulated_evolve_cells.adjoin(starting_cells);
         starting_cells.mince(maximum_grid_fineness);
         ARIADNE_LOG_PRINTLN_AT(2,"evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.");
     }
-    _checked_restriction(reach_cells,bounding);
+    _checked_restriction(reach_cells,bounding,overspill_policy);
     return reach_cells;
 }
 
@@ -609,13 +612,6 @@ verify_safety(const CompactSetInterfaceType& initial_set,
               const OpenSetInterfaceType& safe_set) const
     -> SafetyCertificateType
 {
-//    const BoundedSetInterfaceType* bounded_safe_set_ptr=dynamic_cast<BoundedSetInterfaceType const*>(&safe_set);
-//    assert(bounded_safe_set_ptr != nullptr);
-//
-//    BoundingDomainType safe_set_bounding_box=cast_exact(bounded_safe_set_ptr->bounding_box());
-//    const GridType& grid=this->_configuration->grid();
-//    StorageType safe_cells=inner_approximation(safe_set, grid, safe_set_bounding_box, this->_configuration->maximum_grid_fineness());
-
     ARIADNE_LOG_SCOPE_CREATE;
     const RegularLocatedSetInterfaceType* bounded_safe_set_ptr=dynamic_cast<RegularLocatedSetInterfaceType const*>(&safe_set);
     assert(bounded_safe_set_ptr != nullptr);
@@ -623,15 +619,27 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     auto safe_paving=inner_approximation(*bounded_safe_set_ptr, grid, this->_configuration->maximum_grid_fineness());
     StorageType safe_cells(safe_paving,this->system());
 
+    auto overspill_policy = ChainOverspillPolicy::ERROR;
+
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
     Nat maximum_grid_fineness = this->_configuration->maximum_grid_fineness();
+    Nat maximum_grid_extent = this->_configuration->maximum_grid_extent();
     ARIADNE_LOG_PRINTLN_AT(1,"transient_time=("<<transient_time<<")");
     ARIADNE_LOG_PRINTLN_AT(1,"lock_to_grid_time=("<<lock_to_grid_time<<")");
     ARIADNE_LOG_PRINTLN_AT(1,"initial_set="<<initial_set);
 
+    Bool has_bounding_domain = this->_configuration->bounding_domain_ptr()!=nullptr;
+    StorageType bounding(grid,this->system());
+    if (has_bounding_domain)
+        bounding.adjoin_outer_approximation(this->_configuration->bounding_domain(),maximum_grid_fineness);
+
+    ARIADNE_LOG_PRINTLN_AT(1,"maximum_grid_extent="<<maximum_grid_extent);
+    ARIADNE_LOG_PRINTLN_AT(1,"bounding_size="<<bounding.size());
+
     StorageType initial_cells(grid,this->system());
     initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_fineness);
+    _checked_restriction(initial_cells, bounding, overspill_policy);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_size="<<initial_cells.size());
 
     if(not subset(initial_cells,safe_cells)) {
@@ -640,49 +648,53 @@ verify_safety(const CompactSetInterfaceType& initial_set,
 
     StorageType reach_cells(grid,this->system());
     StorageType evolve_cells(grid,this->system());
-
     if(definitely(transient_time > 0)) {
         ARIADNE_LOG_PRINTLN("Computing transient evolution...");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_fineness,*_evolver);
+        _checked_restriction(initial_cells, bounding, overspill_policy);
+        evolve_cells.recombine();
         evolve_cells.mince(maximum_grid_fineness);
         ARIADNE_LOG_PRINTLN_AT(1,"transient_reach_size="<<reach_cells.size());
         ARIADNE_LOG_PRINTLN_AT(1,"transient evolve_size="<<evolve_cells.size());
         ARIADNE_LOG_PRINTLN_AT(1,"found "<<reach_cells.size()<<" cells.");
     } else {
-        reach_cells = initial_cells;
         evolve_cells = initial_cells;
     }
 
     ARIADNE_LOG_PRINTLN("Computing recurrent evolution...");
     StorageType starting_cells = evolve_cells;
-    StorageType current_evolve_cells(grid,this->system());
+    StorageType accumulated_evolve_cells = evolve_cells;
 
     Nat stage=0;
     while(!starting_cells.is_empty()) {
-        ARIADNE_LOG_PRINTLN_AT(1,"i="<<std::setw(3)<<++stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size());
+        ++stage;
+        ARIADNE_LOG_PRINTLN_AT(1,"stage="<<std::setw(3)<<stage<<
+            " #starting="<<std::setw(4)<<std::left<<starting_cells.size()<<
+            " #reached="<<std::setw(4)<<std::left<<reach_cells.size()<<
+            " #evolved="<<std::setw(4)<<std::left<<accumulated_evolve_cells.size());
+
         if(not subset(reach_cells,safe_cells)) { return SafetyCertificateType { indeterminate,reach_cells,safe_cells }; }
 
-        current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_fineness,*_evolver);
-        evolve_cells.mince(maximum_grid_fineness);
         ARIADNE_LOG_PRINTLN_AT(2,"reach.size()="<<reach_cells.size());
         ARIADNE_LOG_PRINTLN_AT(2,"evolve.size()="<<evolve_cells.size());
+        _checked_restriction(initial_cells,bounding,overspill_policy);
         starting_cells = evolve_cells;
-        starting_cells.remove(current_evolve_cells);
+        starting_cells.remove(accumulated_evolve_cells);
+        accumulated_evolve_cells.adjoin(starting_cells);
         starting_cells.mince(maximum_grid_fineness);
         ARIADNE_LOG_PRINTLN_AT(2,"evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.");
     }
-
+    _checked_restriction(reach_cells,bounding,overspill_policy);
     return SafetyCertificateType { true,reach_cells,safe_cells };
 }
 
 
 template<class SYS> Void
 ReachabilityAnalyser<SYS>::
-_checked_restriction(StorageType& set, const StorageType& bounding) const
+_checked_restriction(StorageType& set, const StorageType& bounding, ChainOverspillPolicy policy) const
 {
-    ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
     StorageType set_copy(set.grid(),set.auxiliary_data());
 
     if (policy != ChainOverspillPolicy::IGNORE) {
@@ -695,7 +707,7 @@ _checked_restriction(StorageType& set, const StorageType& bounding) const
         set_copy.remove(set);
         if (!set_copy.is_empty()) {
             if (policy == ChainOverspillPolicy::WARNING) {
-                ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is .");
+                ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is not returned.");
             }
             if (policy == ChainOverspillPolicy::ERROR) {
                 ARIADNE_THROW(OuterChainOverspill,"outer_chain_reach","The computed chain reach has been restricted.");

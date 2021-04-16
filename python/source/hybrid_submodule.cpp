@@ -425,7 +425,14 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
+Void export_safety_certificate(pybind11::module& module) {
+    using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
+    using RA=HybridReachabilityAnalyser;
+    typedef typename RA::StorageType StorageType;
 
+    pybind11::class_<HybridSafetyCertificate> safety_certificate_class(module,"HybridSafetyCertificate");
+    safety_certificate_class.def(pybind11::init<ValidatedSierpinskian,StorageType,StorageType >());
+}
 
 template<class RA, class... PARAMS> Void export_reachability_analyser(pybind11::module& module, const char* name);
 
@@ -497,6 +504,7 @@ Void hybrid_submodule(pybind11::module& module) {
     export_evolver_interface<HybridEvolverInterface>(module,"HybridEvolverInterface");
     export_evolver<GeneralHybridEvolver>(module,"GeneralHybridEvolver");
 
+    export_safety_certificate(module);
     export_reachability_analyser<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
 
     export_hybrid_plots(module);

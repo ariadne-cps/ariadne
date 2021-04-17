@@ -66,8 +66,8 @@ using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
     const ValidatedSierpinskian is_safe;
-    const Storage chain_reach_set;
-    const Storage safe_set;
+    const LabelledStorage chain_reach_set;
+    const LabelledStorage safe_set;
 };
 
 //! \ingroup DynamicsModule

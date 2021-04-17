@@ -81,10 +81,8 @@ int main(int argc, const char* argv[]) {
     ARIADNE_LOG_PRINTLN("Computing safety...");
     auto safety = analyser.verify_safety(initial_constraint_set,safe_constraint_set);
     ARIADNE_LOG_PRINTLN_VAR(safety.is_safe);
-    f.clear();
-    f.set_fill_colour(0.5,0.5,0.5);
-    f.draw(safety.safe_set);
-    f.set_fill_colour(ariadneorange);
-    f.draw(safety.chain_reach_set);
-    f.write("attractor_chain_reach");
+    g.clear();
+    g << fill_colour(0.5,0.5,0.5) << safety.safe_set
+      << fill_colour(ariadneorange) << safety.chain_reach_set;
+    g.write("attractor_chain_reach");
 }

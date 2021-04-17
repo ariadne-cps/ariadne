@@ -103,7 +103,7 @@ class IteratedMapEvolver
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-
+    Orbit<EnclosureType> orbit(const RealExpressionBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const {

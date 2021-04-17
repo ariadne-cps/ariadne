@@ -79,7 +79,7 @@ OutputStream& operator<<(OutputStream& os, const Colour& c) {
     return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
 
 
-const Colour transparant=Colour();
+const Colour transparent=Colour();
 
 const Colour white=Colour("white",1.0,1.0,1.0);
 const Colour black=Colour("black",0.0,0.0,0.0);

@@ -21,7 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Ariadne. If not, see <https://www.gnu.org/licenses/>.
 
-# Import all classes in the ariadne module
 from pyariadne import *
 
 x = RealVariable("x")
@@ -39,7 +38,7 @@ safe_constraint_set = safe_set.euclidean_set(system.state_space())
 print(initial_constraint_set)
 print(safe_constraint_set)
 
-evolution_time = Real(50)
+evolution_time = Real(dec(50.0))
 
 simulator = VectorFieldSimulator(system)
 simulator.configuration().set_step_size(0.1)
@@ -47,16 +46,16 @@ print("Simulating...")
 simulator_orbit = simulator.orbit(initial_set,evolution_time)
 
 g = LabelledFigure(Axes2d(-2,x,5, -4,y,6))
-g.draw(simulator_orbit)
+g.draw(simulator_orbit.curve())
 g.write("attractor_simulation")
 
 integrator = TaylorPicardIntegrator(0.01)
 print("Evolving...")
 evolver = VectorFieldEvolver(system,integrator)
 evolver.configuration().set_maximum_step_size(0.1)
-evolver_orbit = evolver.orbit(initial_set,evolution_time)
+evolver_orbit = evolver.orbit(initial_set,evolution_time,Semantics.UPPER)
 g.clear()
-g.draw(evolver_orbit)
+g.draw(evolver_orbit.reach())
 g.write("attractor_evolution")
 
 analyser = ContinuousReachabilityAnalyser(evolver)

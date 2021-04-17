@@ -65,8 +65,8 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
-    //pybind11::class_<VectorFieldSimulator::OrbitType> simulator_orbit_class(module,"ApproximatePointOrbit");
-    //simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
+    pybind11::class_<OrbitType> simulator_orbit_class(module,"ApproximatePointOrbit");
+    simulator_orbit_class.def("curve", &OrbitType::curve);
 
     pybind11::class_<VectorFieldSimulator> simulator_class(module,name);
     simulator_class.def(pybind11::init<VectorFieldSimulator::SystemType const&>());

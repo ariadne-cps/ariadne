@@ -29,38 +29,27 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[]) {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-    Logger::instance().use_blocking_scheduler();
 
     RealVariable x("x"), y("y");
     VectorField system = {{dot(x)=2*x-x*y,dot(y)=2*x*x-y}};
     RealExpressionBoundedConstraintSet initial_set = {{0.9_dec<=x<=1,-2.2_dec<=y<=-2},{sqr(x)+sqr(y+2)<=1}};
     RealExpressionBoundedConstraintSet safe_set = {{-1<=x<=4,-4<=y<=6},{sqr(x-2)+sqr(y-1)<=22}};
-
     ARIADNE_LOG_PRINTLN_VAR(system);
     ARIADNE_LOG_PRINTLN_VAR(initial_set);
     ARIADNE_LOG_PRINTLN_VAR(safe_set);
 
-    BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(system.state_space());
-    BoundedConstraintSet safe_constraint_set = safe_set.euclidean_set(system.state_space());
-
+    auto initial_constraint_set = initial_set.euclidean_set(system.state_space());
+    auto safe_constraint_set = safe_set.euclidean_set(system.state_space());
     ARIADNE_LOG_PRINTLN_VAR(initial_constraint_set);
     ARIADNE_LOG_PRINTLN_VAR(safe_constraint_set);
 
-    Figure f(ApproximateBoxType{{-5,5},{-4,6}},Projection2d(2,0,1));
-    f.set_fill_colour(lightgrey);
-    f.draw(safe_constraint_set);
-    f.set_fill_colour(orange);
-    f.draw(initial_constraint_set);
-    f.write("attractor_initial_safe_sets");
-
-    TimeVariable t;
+    Real evolution_time = 50;
 
     VectorFieldSimulator simulator(system);
     simulator.configuration().set_step_size(0.1);
     ARIADNE_LOG_PRINTLN("Simulating...");
-    auto orbit = simulator.orbit(initial_set,70);
-
-    LabelledFigure g(Axes2d{{-5<=x<=5},{-4<=y<=6}});
+    auto orbit = simulator.orbit(initial_set,evolution_time);
+    LabelledFigure g(Axes2d{{-2<=x<=5},{-4<=y<=6}});
     g << orbit.curve();
     g.write("attractor_simulation");
 
@@ -68,8 +57,7 @@ int main(int argc, const char* argv[]) {
     ARIADNE_LOG_PRINTLN("Evolving...");
     VectorFieldEvolver evolver(system,integrator);
     evolver.configuration().set_maximum_step_size(0.1);
-    auto evolver_orbit = evolver.orbit(initial_set,52.25_dec);
-    ARIADNE_LOG_PRINTLN_VAR(evolver_orbit.reach().bounding_box());
+    auto evolver_orbit = evolver.orbit(initial_set,evolution_time);
     g.clear();
     g << evolver_orbit.reach();
     g.write("attractor_evolution");

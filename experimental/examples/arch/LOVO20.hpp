@@ -123,6 +123,6 @@ void LOVO20()
     HybridTime circle_time(2*pi,1);
     ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time));
 
-    ARIADNE_LOG_RUN_AT(2,plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
+    ARIADNE_LOG_RUN_AT(2,plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit));
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

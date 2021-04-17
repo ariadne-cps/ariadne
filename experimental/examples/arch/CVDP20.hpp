@@ -133,7 +133,7 @@ void CVDP20()
     ARIADNE_LOG_PRINTLN("Plotting...");
 
     LabelledFigure fig(Axes2d(-2.5<=x1<=2.5,-4.05<=y1<=4.05));
-    fig << fill_colour(ariadneorange);
+    fig << fill_colour(orange);
     fig.draw(reach2);
     fig << fill_colour(Colour(0.6,0.6,0.6));
     fig.draw(reach1);

@@ -29,6 +29,7 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[]) {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    Logger::instance().use_blocking_scheduler();
 
     RealVariable x("x"), y("y");
     VectorField system = {{dot(x)=2*x-x*y,dot(y)=2*x*x-y}};
@@ -46,9 +47,9 @@ int main(int argc, const char* argv[]) {
     ARIADNE_LOG_PRINTLN_VAR(safe_constraint_set);
 
     Figure f(ApproximateBoxType{{-5,5},{-4,6}},Projection2d(2,0,1));
-    f.set_fill_colour(0.5,0.5,0.5);
+    f.set_fill_colour(lightgrey);
     f.draw(safe_constraint_set);
-    f.set_fill_colour(ariadneorange);
+    f.set_fill_colour(orange);
     f.draw(initial_constraint_set);
     f.write("attractor_initial_safe_sets");
 
@@ -82,7 +83,7 @@ int main(int argc, const char* argv[]) {
     auto safety = analyser.verify_safety(initial_constraint_set,safe_constraint_set);
     ARIADNE_LOG_PRINTLN_VAR(safety.is_safe);
     g.clear();
-    g << fill_colour(0.5,0.5,0.5) << safety.safe_set
-      << fill_colour(ariadneorange) << safety.chain_reach_set;
+    g << fill_colour(lightgrey) << safety.safe_set
+      << fill_colour(orange) << safety.chain_reach_set;
     g.write("attractor_chain_reach");
 }

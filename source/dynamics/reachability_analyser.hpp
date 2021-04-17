@@ -65,9 +65,9 @@ enum class ChainOverspillPolicy : std::uint8_t { IGNORE, WARNING, ERROR };
 using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
-    ValidatedSierpinskian is_safe;
-    Storage chain_reach_set;
-    Storage safe_set;
+    const ValidatedSierpinskian is_safe;
+    const LabelledStorage chain_reach_set;
+    const LabelledStorage safe_set;
 };
 
 //! \ingroup DynamicsModule
@@ -191,7 +191,7 @@ template<class SYS> class ReachabilityAnalyser
                                     const StorageType& set, const TimeType& time,
                                     const Nat accuracy, const EvolverType& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
-    Void _checked_restriction(StorageType& set, const StorageType& bounding) const;
+    Void _checked_restriction(StorageType& set, const StorageType& bounding, ChainOverspillPolicy policy) const;
 };
 
 //! \brief Configuration for a ReachabilityAnalyser, essentially for controlling the

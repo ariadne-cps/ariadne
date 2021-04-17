@@ -89,7 +89,10 @@ const Colour blue=Colour("blue",0.0,0.0,1.0);
 const Colour yellow=Colour("yellow",1.0,1.0,0.0);
 const Colour cyan=Colour("cyan",0.0,1.0,1.0);
 const Colour magenta=Colour("magenta",1.0,0.0,1.0);
-const Colour ariadneorange=Colour("ariadneorange",1.0,0.75,0.5);
+const Colour orange=Colour("orange",1.0,0.75,0.5);
+const Colour grey=Colour("grey",0.5,0.5,0.5);
+const Colour lightgrey=Colour("lightgrey",0.75,0.75,0.75);
+const Colour darkgrey=Colour("darkgrey",0.25,0.25,0.25);
 
 GraphicsProperties& GraphicsProperties::set_dot_radius(Dbl dr) { this->dot_radius=dr; return *this; }
 GraphicsProperties& GraphicsProperties::set_line_style(Bool ls) { this->line_style=ls; return *this; }

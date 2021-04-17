@@ -37,7 +37,10 @@
 using namespace Ariadne;
 
 
-Int main(Int argc, char **argv) {
+Int main(Int argc, const char* argv[])
+{
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+
     RealVariable x("x"),y("y"),z("z");
     DiscreteLocation location(1);
     HybridRealBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
@@ -50,7 +53,9 @@ Int main(Int argc, char **argv) {
     hfig.set_bounds(z,-8,8);
     hfig.set_variables(x,y);
 
-    hfig << FillColour(1,0,0) << hbx1;
-    hfig << FillColour(0,1,0) << hbx2;
-    hfig.write("test_hybrid_graphics");
+    hfig << fill_colour(red) << fill_opacity(1.0) << line_colour(black) << line_width(1.0) << hbx1;
+    hfig.write("test_hybrid_graphics1");
+    hfig.clear();
+    hfig << fill_colour(green) << fill_opacity(0.1) << line_colour(red) << line_width(4.0) << hbx2;
+    hfig.write("test_hybrid_graphics2");
 }

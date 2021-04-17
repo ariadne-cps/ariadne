@@ -108,8 +108,6 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_f
 inline Void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) { shape.draw(canvas,locations,variables); }
 inline Void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 
-Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects);
-
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
 inline Void draw(HybridFigure& g) { }

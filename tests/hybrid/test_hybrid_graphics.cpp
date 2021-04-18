@@ -40,7 +40,7 @@ class TestHybridGraphics {
   public:
 
     Void test() const {
-        ARIADNE_TEST_CALL(test_boxes);
+        ARIADNE_TEST_CALL(test_boxes());
     }
 
     Void test_boxes() const {

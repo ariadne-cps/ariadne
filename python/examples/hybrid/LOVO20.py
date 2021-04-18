@@ -134,11 +134,15 @@ def check_number_of_events(orbit):
         if (not has_any_two_transitions) and enclosure.previous_events().size() == 2:
             has_any_two_transitions = True
     
-    if has_any_zero_transitions: print("A final set with zero transitions has been found correctly.")
-    else: print("No final set with zero transitions has been found!")
+    if has_any_zero_transitions:
+        print("A final set with zero transitions has been found correctly.")
+    else:
+        print("No final set with zero transitions has been found!")
 
-    if has_any_two_transitions: print("A final set with two transitions has been found correctly.")
-    else: print("No final set with two transitions has been found!")
+    if has_any_two_transitions:
+        print("A final set with two transitions has been found correctly.")
+    else:
+        print("No final set with two transitions has been found!")
 
 #! [/check_number_of_events]
 

@@ -124,6 +124,10 @@ Void export_vector_field_evolver_configuration(pybind11::module& module) {
     vector_field_evolver_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
 }
 
+Void export_labelled_storage(pybind11::module& module) {
+    pybind11::class_<LabelledStorage,pybind11::bases<LabelledDrawableInterface>> labelled_storage_class(module,"LabelledStorage");
+}
+
 template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {
     typedef typename RA::StorageType StorageType;
     typedef typename RA::StateSpaceType StateSpaceType;
@@ -160,9 +164,11 @@ Void export_reachability_analyser(pybind11::module& module, const char* name)
     reachability_analyser_class.def("verify_safety",(SafetyCertificateType(RA::*)(CompactSetType const&, OpenSetType const&)const) &RA::verify_safety);
 
     pybind11::class_<Configuration> reachability_analyser_configuration_class(module,"ReachabilityAnalyserConfiguration");
+    reachability_analyser_configuration_class.def("set_transient_time", &Configuration::set_transient_time);
     reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &Configuration::set_maximum_grid_fineness);
     reachability_analyser_configuration_class.def("set_lock_to_grid_time", &Configuration::set_lock_to_grid_time);
     reachability_analyser_configuration_class.def("set_maximum_grid_extent", &Configuration::set_maximum_grid_extent);
+    reachability_analyser_configuration_class.def("set_bounding_domain", &Configuration::set_bounding_domain);
     reachability_analyser_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
@@ -182,6 +188,8 @@ Void evolution_submodule(pybind11::module& module)
     export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
 
     export_vector_field_evolver_configuration(module);
+
+    export_labelled_storage(module);
 
     export_safety_certificate<ContinuousReachabilityAnalyser>(module,"SafetyCertificate");
     export_reachability_analyser<ContinuousReachabilityAnalyser,VectorFieldEvolver>(module,"ContinuousReachabilityAnalyser");

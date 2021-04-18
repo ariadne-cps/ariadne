@@ -64,7 +64,6 @@ class IteratedMap
     //! \brief The state space
     typedef EuclideanSpace StateSpaceType;
   public:
-    IteratedMap(const EffectiveVectorMultivariateFunction& f);
     IteratedMap(const List<PrimedRealAssignment>&);
     IteratedMap(const List<PrimedRealAssignment>&, List<RealAssignment> const&);
 

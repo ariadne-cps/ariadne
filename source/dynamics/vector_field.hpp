@@ -70,7 +70,6 @@ class VectorField
     //! \brief The type used to define global pavings of reach and evolve sets.
     typedef LabelledStorage StorageType;
   public:
-    VectorField(const EffectiveVectorMultivariateFunction& f);
     VectorField(const List<DottedRealAssignment>&);
     VectorField(const List<DottedRealAssignment>&, List<RealAssignment> const&);
 

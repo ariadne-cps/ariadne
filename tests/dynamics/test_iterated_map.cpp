@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_vector_field.cpp
+ *            test_iterated_map.cpp
  *
  *  Copyright  2006-21  Luca Geretti
  *
@@ -30,12 +30,19 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/algebra.hpp"
-#include "function/function.hpp"
+#include "function/taylor_model.hpp"
+#include "algebra/differential.hpp"
 #include "function/constraint.hpp"
+#include "function/function.hpp"
+#include "function/taylor_function.hpp"
+#include "function/formula.hpp"
+#include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "symbolic/expression_set.hpp"
-#include "dynamics/vector_field.hpp"
+#include "dynamics/iterated_map.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
+#include "output/graphics.hpp"
 #include "output/logging.hpp"
 
 #include "../test.hpp"
@@ -43,36 +50,27 @@
 using namespace Ariadne;
 using namespace std;
 
-class TestVectorField
+class TestIteratedMap
 {
   public:
     Void test() const {
         ARIADNE_TEST_CALL(test_construct());
-        ARIADNE_TEST_CALL(test_missing_dynamics());
     }
 
-    Void test_construct() const {
-
-        Real mu=Dyadic(0.5_x);
+    Void test_construct() const
+    {
+        Real a=1.5_dyadic; Real b=0.375_dyadic;
         RealVariable x("x"), y("y"), z("z");
-
-        VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
-        ARIADNE_TEST_PRINT(vanderpol);
-        ARIADNE_TEST_EQUALS(vanderpol.state_space().dimension(),2);
-        ARIADNE_TEST_EQUALS(vanderpol.auxiliary_space().dimension(),1);
-    }
-
-    Void test_missing_dynamics() const {
-
-        Real mu=Dyadic(0.5_x);
-        RealVariable x("x"), y("y");
-        ARIADNE_TEST_FAIL(VectorField(dot(x)=y));
+        IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x },{let(z)=x+y});
+        ARIADNE_TEST_PRINT(henon);
+        ARIADNE_TEST_EQUALS(henon.state_space().dimension(),2);
+        ARIADNE_TEST_EQUALS(henon.auxiliary_space().dimension(),1);
     }
 };
 
 Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-    TestVectorField().test();
+    TestIteratedMap().test();
     return ARIADNE_TEST_FAILURES;
 }

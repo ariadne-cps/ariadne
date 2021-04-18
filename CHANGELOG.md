@@ -24,6 +24,7 @@ Legenda for the issue kind:
 - [#520](https://github.com/ariadne-cps/ariadne/issues/520) (A) Add missing Python bindings for plotting using HybridFigure
 - [#527](https://github.com/ariadne-cps/ariadne/issues/527) (A) Allow to draw a Labelled/Hybrid orbit directly to a Labelled/Hybrid figure
 - [#492](https://github.com/ariadne-cps/ariadne/issues/492) (C) Modify SFINAE code to use C++20 concepts, currently preventing AppleClang compilation under macOS until the compiler supports Concepts
+- [#529](https://github.com/ariadne-cps/ariadne/issues/529) (C) Disallow construction of VectorField and IteratedMap from a Function, since it was broken
 - [#447](https://github.com/ariadne-cps/ariadne/issues/447) (F) Check that a VectorField is defined with dynamics for all involved variables, fixes a segfault within evolution
 - [#211](https://github.com/ariadne-cps/ariadne/issues/211) (R) Remove various deprecated functions
 

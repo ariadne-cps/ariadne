@@ -113,7 +113,7 @@ public:
     Void test_failure() const {
         // The system in this test is stiff and is expected to fail.
 
-        RealVariable x("x"), y("y"), z("z");
+        RealVariable x("x"), y("y");
 
         // Set up the evolution parameters and grid
         Real time(0.5_dec);
@@ -125,22 +125,14 @@ public:
         // Set up the evaluators
         TaylorPicardIntegrator integrator(maximum_error = 1e-6_pr, sweeper, lipschitz_constant = 0.5_x,
                                           step_maximum_error = 1e-8_pr, minimum_temporal_order = 0,
-                                          maximum_temporal_order = 6);
+                                          maximum_temporal_order = 8);
 
-        // Set up the vector field for the second test
-        auto p = Rational(1, 10);
-        EffectiveScalarMultivariateFunction z3 = EffectiveScalarMultivariateFunction::zero(3);
-        EffectiveScalarMultivariateFunction o3 = EffectiveScalarMultivariateFunction::constant(3, 1.0_q);
-        EffectiveScalarMultivariateFunction x0 = EffectiveScalarMultivariateFunction::coordinate(3, 0);
-        EffectiveScalarMultivariateFunction x1 = EffectiveScalarMultivariateFunction::coordinate(3, 1);
-        EffectiveScalarMultivariateFunction x2 = EffectiveScalarMultivariateFunction::coordinate(3, 1);
-        EffectiveVectorMultivariateFunction fail = {o3, x1 * x2 / p, z3};
-        VectorField fail_vf(fail);
+        VectorField fail_vf({dot(x)=1,dot(y)=y*y*100});
         VectorFieldEvolver evolver(fail_vf, integrator);
         evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
         evolver.configuration().set_maximum_step_size(step_size);
 
-        RealVariablesBox initial_box({x==0,y==1,z==1});
+        RealVariablesBox initial_box({x==0,y==1});
 
         time = 1.5_dec;
 

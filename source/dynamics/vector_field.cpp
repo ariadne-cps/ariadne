@@ -80,12 +80,6 @@ VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAs
     _auxiliary_function = make_auxiliary_function(left_hand_sides(dynamics),auxiliary);
 }
 
-VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
-    : _dynamic_function(function), _auxiliary_function(0u,function.domain())
-{
-    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
-}
-
 RealSpace VectorField::state_space() const {
     return RealSpace(left_hand_sides(this->_dynamics));
 }

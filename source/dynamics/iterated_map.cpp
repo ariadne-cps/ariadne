@@ -52,12 +52,6 @@ EffectiveVectorMultivariateFunction make_reset_function(
     List<PrimedRealAssignment> const& differential);
 
 
-IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
-    : _update_function(f)
-{
-    ARIADNE_PRECONDITION(f.result_size()==f.argument_size());
-}
-
 IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
     : IteratedMap(updates,List<RealAssignment>()) { }
 

@@ -456,6 +456,7 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     pybind11::class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class(module,"RealExpressionBoundedConstraintSet");
     real_expression_bounded_constraint_set_class.def(pybind11::init<List<RealVariableInterval>,List<ContinuousPredicate>>());
     real_expression_bounded_constraint_set_class.def(pybind11::init<RealVariablesBox,RealExpressionConstraintSet>());
+    real_expression_bounded_constraint_set_class.def("euclidean_set", (BoundedConstraintSet(RealExpressionBoundedConstraintSet::*)(RealSpace const&)) &RealExpressionBoundedConstraintSet::euclidean_set);
     real_expression_bounded_constraint_set_class.def("__str__",&__cstr__<RealExpressionBoundedConstraintSet>);
 
     module.def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);

@@ -50,7 +50,7 @@ struct Colour {
 
 OutputStream& operator<<(OutputStream& os, const Colour& c);
 
-extern const Colour transparant;
+extern const Colour transparent;
 
 extern const Colour white;
 extern const Colour black;

@@ -53,59 +53,61 @@ using namespace std;
 class TestIteratedMapEvolver
 {
   public:
-    Void test() const;
+    Void test() const {
+        ARIADNE_TEST_CALL(test_evolve());
+    }
+
+    Void test_evolve() const
+    {
+        typedef DoublePrecision PR;
+        DoublePrecision pr;
+
+        // Set up the map field
+        // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
+        Real a=1.5_dyadic; Real b=0.375_dyadic;
+        RealVariable x("x"), y("y");
+        IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
+        ARIADNE_TEST_PRINT(henon);
+
+        // Define the initial set
+        RealVariablesBox initial_box({1.01_dec<=x<=1.03_dec,0.51_dec<=y<=0.53_dec});
+
+        ARIADNE_TEST_PRINT(initial_box);
+
+        // Function evaluation sanity check
+        Vector<FloatApproximation<PR>> p={{a,b},pr};
+        Vector<FloatApproximation<PR>> xa={{0.5_x,0.25_x},pr};
+        Vector<FloatApproximation<PR>> hxa={p[0]-xa[0]*xa[0]+xa[1]*p[1], xa[0]};
+        ARIADNE_TEST_EQUAL(henon.update_function().evaluate(xa),hxa);
+        Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{{1.0,pr},{0.0,pr}}};
+        ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
+
+        // Set up the evolution parameters and grid
+        IteratedMap::TimeType time(3);
+
+        // Set up the evaluators
+        IteratedMapEvolver evolver(henon);
+        evolver.configuration().set_maximum_enclosure_radius(0.25);
+
+        ARIADNE_TEST_PRINT(evolver.configuration());
+
+        auto initial_set = evolver.enclosure(initial_box,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10))));
+        ARIADNE_TEST_PRINT(initial_set);
+
+        // Compute the orbit
+        auto orbit = evolver.orbit(initial_set,time);
+
+        // Print the initial, evolve and reach sets
+        LabelledFigure fig(Axes2d(-10,x,10, -10,y,10));
+        fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+        fig << fill_colour(yellow) << orbit.final();
+        fig << fill_colour(blue) << initial_set;
+        fig.write("test_iterated_map_evolver");
+    }
 };
 
 Int main()
 {
-    ARIADNE_TEST_CALL(TestIteratedMapEvolver().test());
+    TestIteratedMapEvolver().test();
     return ARIADNE_TEST_FAILURES;
-}
-
-Void TestIteratedMapEvolver::test() const
-{
-    typedef DoublePrecision PR;
-    DoublePrecision pr;
-
-    // Set up the map field
-    // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
-    Real a=1.5_dyadic; Real b=0.375_dyadic;
-    RealVariable x("x"), y("y");
-    IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
-    ARIADNE_TEST_PRINT(henon);
-
-    // Define the initial set
-    RealVariablesBox initial_box({1.01_dec<=x<=1.03_dec,0.51_dec<=y<=0.53_dec});
-
-    ARIADNE_TEST_PRINT(initial_box);
-
-    // Function evaluation sanity check
-    Vector<FloatApproximation<PR>> p={{a,b},pr};
-    Vector<FloatApproximation<PR>> xa={{0.5_x,0.25_x},pr};
-    Vector<FloatApproximation<PR>> hxa={p[0]-xa[0]*xa[0]+xa[1]*p[1], xa[0]};
-    ARIADNE_TEST_EQUAL(henon.update_function().evaluate(xa),hxa);
-    Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{{1.0,pr},{0.0,pr}}};
-    ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
-
-    // Set up the evolution parameters and grid
-    IteratedMap::TimeType time(3);
-
-    // Set up the evaluators
-    IteratedMapEvolver evolver(henon);
-    evolver.configuration().set_maximum_enclosure_radius(0.25);
-
-    ARIADNE_TEST_PRINT(evolver.configuration());
-
-    auto initial_set = evolver.enclosure(initial_box,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10))));
-    ARIADNE_TEST_PRINT(initial_set);
-
-    // Compute the orbit
-    auto orbit = evolver.orbit(initial_set,time);
-
-    // Print the initial, evolve and reach sets
-    LabelledFigure fig(Axes2d(-10,x,10, -10,y,10));
-    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
-    fig << fill_colour(yellow) << orbit.final();
-    fig << fill_colour(blue) << initial_set;
-    fig.write("test_iterated_map_evolver");
 }

@@ -94,6 +94,15 @@ typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const R
 
 Orbit<IteratedMapEvolver::EnclosureType>
 IteratedMapEvolver::
+orbit(const RealExpressionBoundedConstraintSet& initial_set,
+      const TerminationType& termination,
+      Semantics semantics) const
+{
+    return orbit(EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory())),termination,semantics);
+}
+
+Orbit<IteratedMapEvolver::EnclosureType>
+IteratedMapEvolver::
 orbit(const EnclosureType& initial_set,
       const TerminationType& termination,
       Semantics semantics) const
@@ -109,6 +118,7 @@ orbit(const EnclosureType& initial_set,
     orbit.adjoin_final(final);
     return orbit;
 }
+
 
 Void
 IteratedMapEvolver::

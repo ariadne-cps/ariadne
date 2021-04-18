@@ -534,6 +534,8 @@ Void hybrid_submodule(pybind11::module& module) {
     export_evolver_interface<HybridEvolverInterface>(module,"HybridEvolverInterface");
     export_evolver<GeneralHybridEvolver>(module,"GeneralHybridEvolver");
 
+    export_orbit<Orbit<HybridStorage>>(module,"HybridStorageOrbit");
+
     export_safety_certificate<HybridReachabilityAnalyser>(module,"HybridSafetyCertificate");
     export_reachability_analyser<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
 

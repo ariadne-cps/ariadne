@@ -28,6 +28,7 @@
 #include "hybrid/hybrid_expression_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
+#include "hybrid/hybrid_storage.hpp"
 
 #include "numeric/real.hpp"
 #include "numeric/casts.hpp"
@@ -120,6 +121,10 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
 
 
 Void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
+    this->reach().draw(c,l,v);
+}
+
+Void Orbit<HybridStorage>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
     this->reach().draw(c,l,v);
 }
 

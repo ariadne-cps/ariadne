@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_hybrid_graphics.cpp
  *
- *  Copyright  2011-20  Pieter Collins
+ *  Copyright  2011-21  Pieter Collins, Luca Geretti
  *
  ****************************************************************************/
 
@@ -36,26 +36,39 @@
 
 using namespace Ariadne;
 
+class TestHybridGraphics {
+  public:
+
+    Void test() const {
+        ARIADNE_TEST_CALL(test_boxes);
+    }
+
+    Void test_boxes() const {
+
+        RealVariable x("x"),y("y"),z("z");
+        DiscreteLocation location(1);
+        HybridRealBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
+        HybridExactBox hbx2(location,{x,y,z},ExactBoxType{{1.0_x,2.0_x},{3.0_x,4.0_x},{6.0_x,8.0_x}});
+
+        HybridFigure hfig;
+        hfig.set_locations({location});
+        hfig.set_bounds(x,-8,8);
+        hfig.set_bounds(y,-8,8);
+        hfig.set_bounds(z,-8,8);
+        hfig.set_variables(x,y);
+
+        hfig << fill_colour(red) << fill_opacity(1.0) << line_colour(black) << line_width(1.0) << hbx1;
+        hfig.write("test_hybrid_graphics1");
+        hfig.clear();
+        hfig << fill_colour(green) << fill_opacity(0.1) << line_colour(red) << line_width(4.0) << hbx2;
+        hfig.write("test_hybrid_graphics2");
+    }
+};
 
 Int main(Int argc, const char* argv[])
 {
     ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    TestHybridGraphics().test();
 
-    RealVariable x("x"),y("y"),z("z");
-    DiscreteLocation location(1);
-    HybridRealBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
-    HybridExactBox hbx2(location,{x,y,z},ExactBoxType{{1.0_x,2.0_x},{3.0_x,4.0_x},{6.0_x,8.0_x}});
-
-    HybridFigure hfig;
-    hfig.set_locations({location});
-    hfig.set_bounds(x,-8,8);
-    hfig.set_bounds(y,-8,8);
-    hfig.set_bounds(z,-8,8);
-    hfig.set_variables(x,y);
-
-    hfig << fill_colour(red) << fill_opacity(1.0) << line_colour(black) << line_width(1.0) << hbx1;
-    hfig.write("test_hybrid_graphics1");
-    hfig.clear();
-    hfig << fill_colour(green) << fill_opacity(0.1) << line_colour(red) << line_width(4.0) << hbx2;
-    hfig.write("test_hybrid_graphics2");
+    return ARIADNE_TEST_FAILURES;
 }

@@ -92,6 +92,7 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb);
 
 template<>
 class Orbit<HybridStorage>
+    : public HybridDrawableInterface
 {
     struct Data;
   public:
@@ -105,6 +106,8 @@ class Orbit<HybridStorage>
     HybridStorage const& reach() const;
     HybridStorage const& intermediate() const;
     HybridStorage const& final() const;
+
+    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
   private:
     SharedPointer<Data> _data;
 };

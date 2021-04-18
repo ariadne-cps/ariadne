@@ -55,7 +55,7 @@ evolver = VectorFieldEvolver(system,integrator)
 evolver.configuration().set_maximum_step_size(0.1)
 evolver_orbit = evolver.orbit(initial_set,evolution_time,Semantics.UPPER)
 g.clear()
-g.draw(evolver_orbit.reach())
+g.draw(evolver_orbit)
 g.write("attractor_evolution")
 
 analyser = ContinuousReachabilityAnalyser(evolver)

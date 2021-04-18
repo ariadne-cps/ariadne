@@ -59,7 +59,7 @@ int main(int argc, const char* argv[]) {
     evolver.configuration().set_maximum_step_size(0.1);
     auto evolver_orbit = evolver.orbit(initial_set,evolution_time);
     g.clear();
-    g << evolver_orbit.reach();
+    g << evolver_orbit;
     g.write("attractor_evolution");
 
     ContinuousReachabilityAnalyser analyser(evolver);

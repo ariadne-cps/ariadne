@@ -158,6 +158,7 @@ class Orbit<Enclosure>
 
 template<>
 class Orbit<LabelledEnclosure>
+    : public LabelledDrawableInterface
 {
     typedef LabelledEnclosure ES;
     typedef LabelledSet<ListSet<Enclosure>> ESL;
@@ -178,6 +179,9 @@ class Orbit<LabelledEnclosure>
     EnclosureListType const& reach() const { return this->_reach; }
     EnclosureListType const& intermediate() const { return this->_intermediate; }
     EnclosureListType const& final() const { return this->_final; }
+
+    virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _reach.draw(canvas,axes); }
+    virtual LabelledDrawableInterface* clone() const override { return new Orbit<LabelledEnclosure>(*this); }
   private:
     ES _initial;
     ESL _reach;

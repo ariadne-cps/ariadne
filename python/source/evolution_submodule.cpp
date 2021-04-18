@@ -38,7 +38,7 @@ using namespace Ariadne;
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
 {
-    pybind11::class_<ORB> orbit_class(module,name);
+    pybind11::class_<ORB,pybind11::bases<LabelledDrawableInterface>> orbit_class(module,name);
     orbit_class.def("reach", &ORB::reach);
     orbit_class.def("evolve", &ORB::final);
     orbit_class.def("final", &ORB::final);

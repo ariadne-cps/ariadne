@@ -4,8 +4,9 @@ Each release lists the issues it addresses. The issue number is followed by the 
 
 Legenda for the issue kind:
 
-- A: added feature
-- C: changed feature
+- N: new feature
+- A: addition to a feature
+- C: change to the behavior of a feature
 - F: fixed feature
 - R: removed feature
 
@@ -13,8 +14,9 @@ Legenda for the issue kind:
 
 *Date: /2021*
 
-- [#441](https://github.com/ariadne-cps/ariadne/issues/441) (A) Add support for Gnuplot output, including animated gif plot of sets and tridimensional plots for PDEs
-- [#507](https://github.com/ariadne-cps/ariadne/issues/507) (A) Add a simulator for vector field dynamics
+- [#441](https://github.com/ariadne-cps/ariadne/issues/441) (N) Add support for Gnuplot output, including animated gif plot of sets and tridimensional plots for PDEs
+- [#507](https://github.com/ariadne-cps/ariadne/issues/507) (N) Add a simulator for vector field dynamics
+- [#514](https://github.com/ariadne-cps/ariadne/issues/514) (N) Add Python examples in python/examples
 - [#509](https://github.com/ariadne-cps/ariadne/issues/509) (A) Additionally support a set as input in simulators, using the midpoint as the effective point
 - [#513](https://github.com/ariadne-cps/ariadne/issues/513) (A) Add missing Python bindings for verify_safety in (Hybrid)ReachabilityAnalyser
 - [#516](https://github.com/ariadne-cps/ariadne/issues/516) (A) Add missing Python bindings for Real predicates to be used in automata specification
@@ -29,8 +31,8 @@ Legenda for the issue kind:
 
 *Date: 09/03/2021*
 
+- [#412](https://github.com/ariadne-cps/ariadne/issues/412) (N) Supply Aptitude and Homebrew packages for installation
 - [#267](https://github.com/ariadne-cps/ariadne/issues/267) (A) Complete Python bindings for dynamics and hybrid modules
-- [#412](https://github.com/ariadne-cps/ariadne/issues/412) (A) Supply Aptitude and Homebrew packages for installation
 - [#477](https://github.com/ariadne-cps/ariadne/issues/477) (C) Make the tutorials the same for C++ and Python
 
 ### 2.0

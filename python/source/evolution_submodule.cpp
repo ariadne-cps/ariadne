@@ -68,7 +68,7 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     pybind11::class_<LabelledDrawableInterface> labelled_drawable_interface_class(module,"LabelledDrawableInterface");
     pybind11::class_<LabelledInterpolatedCurve,pybind11::bases<LabelledDrawableInterface>> labelled_interpolated_curve_class(module,"LabelledInterpolatedCurve");
 
-    pybind11::class_<OrbitType> simulator_orbit_class(module,"ApproximatePointOrbit");
+    pybind11::class_<OrbitType,pybind11::bases<LabelledDrawableInterface>> simulator_orbit_class(module,"ApproximatePointOrbit");
     simulator_orbit_class.def("curve", &OrbitType::curve);
 
     pybind11::class_<VectorFieldSimulator> simulator_class(module,name);

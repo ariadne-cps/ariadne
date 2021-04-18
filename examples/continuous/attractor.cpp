@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
     ARIADNE_LOG_PRINTLN("Simulating...");
     auto orbit = simulator.orbit(initial_set,evolution_time);
     LabelledFigure g(Axes2d{{-2<=x<=5},{-4<=y<=6}});
-    g << orbit.curve();
+    g << orbit;
     g.write("attractor_simulation");
 
     TaylorPicardIntegrator integrator(0.01);

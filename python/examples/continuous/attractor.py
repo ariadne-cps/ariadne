@@ -46,7 +46,7 @@ print("Simulating...")
 simulator_orbit = simulator.orbit(initial_set,evolution_time)
 
 g = LabelledFigure(Axes2d(-2,x,5, -4,y,6))
-g.draw(simulator_orbit.curve())
+g.draw(simulator_orbit)
 g.write("attractor_simulation")
 
 integrator = TaylorPicardIntegrator(0.01)

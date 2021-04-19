@@ -219,7 +219,8 @@ template<class X> class VariablesPoint {
     Set<RealVariable> variables() const { return this->_vals.keys(); }
     const CoordinateType& operator[](const RealVariable& v) const { return this->_vals[v]; }
     PointType euclidean_set(const RealSpace& spc) const {
-        return PointType(spc.dimension(),[this,&spc](SizeType i){return this->_vals[spc[i]];}); }
+        return PointType(spc.dimension(),[this,&spc](SizeType i){
+            auto entry = this->_vals.find(spc[i]); ARIADNE_ASSERT_MSG(entry != this->_vals.end(),"Variable " << spc[i] << " not found in VariablesPoint."); return entry->second; }); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesPointType& ept) {
         return os << "VariablesPoint"<<class_name<X>()<<"( values=" << ept.values() << " )"; }
     explicit operator LabelledSet<Point<X>> () const;

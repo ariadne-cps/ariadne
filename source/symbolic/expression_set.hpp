@@ -291,7 +291,6 @@ class RealExpressionConstraintSet
 {
     List<ContinuousPredicate> _constraints;
   public:
-    RealExpressionConstraintSet();
     RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints);
     Set<RealVariable> variables() const { return Set<RealVariable>(arguments(this->_constraints)); }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }

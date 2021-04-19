@@ -46,6 +46,7 @@
 
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
+#include "symbolic/expression_set.hpp"
 
 namespace Ariadne {
 
@@ -61,62 +62,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-EffectiveVectorMultivariateFunction make_auxiliary_function(
-    Space<Real> const& state_space,
-    List<RealAssignment> const& algebraic);
-
-EffectiveVectorMultivariateFunction make_dynamic_function(
-    Space<Real> const& space,
-    List<RealAssignment> const& algebraic,
-    List<DottedRealAssignment> const& differential);
-
-
-VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
-    : VectorField(dynamics, List<RealAssignment>())
-{
-}
-
-VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAssignment> const& auxiliary)
-    : _dynamics(dynamics), _auxiliary(auxiliary)
-    , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
-{
-}
-
-VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
-    : _dynamic_function(function), _auxiliary_function(0u,function.domain())
-{
-    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
-}
-
-RealSpace VectorField::state_space() const {
-    return RealSpace(left_hand_sides(this->_dynamics));
-}
-
-RealSpace VectorField::auxiliary_space() const {
-    return RealSpace(left_hand_sides(this->_auxiliary));
-}
-
-
-OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
-    os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "
-          "auxiliary_function = " << vf.auxiliary_function() << ", "
-          "dynamics = " << vf._dynamics << ", "
-          "auxiliary = " << vf._auxiliary << ")";
-    return os;
-}
-
-// Allow subdivisions in upper evolution
-const Bool ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution
-const Bool ENABLE_PREMATURE_TERMINATION = false;
-
-using std::shared_ptr;
-
-class DegenerateCrossingException { };
-
-
-
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _sys_ptr(system.clone())
     , _integrator(i.clone())
@@ -124,28 +69,23 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 {
 }
 
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
+auto VectorFieldEvolver::enclosure(const ExactBoxType& box) const -> EnclosureType {
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
 }
 
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
-}
-
-typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(),this->function_factory());
-}
-
-typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
+auto VectorFieldEvolver::function_factory() const -> FunctionFactoryType const& {
     return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
 }
 
+auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
+    return orbit(EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
+}
 
-Orbit<VectorFieldEvolver::EnclosureType>
-VectorFieldEvolver::
-orbit(const EnclosureType& initial_set,
-      const TimeType& time,
-      Semantics semantics) const
+auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
+    return orbit(EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
+}
+
+auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
     Orbit<EnclosureType> orbit(initial_set);
     EnclosureListType final;
@@ -165,7 +105,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
                    const EnclosureType& current_set) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+    if (this->_configuration->enable_subdivisions() && possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("initial set too large, splitting");
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
@@ -174,12 +114,6 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
         working_sets.push_back(make_pair(initial_time,current_set));
     }
 }
-
-Void test_print() {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("test\r\n");
-}
-
 
 Void
 VectorFieldEvolver::
@@ -212,7 +146,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions()
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
@@ -220,7 +154,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
             // Compute evolution
@@ -301,8 +235,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 
     // Compute flow model
-    // TODO: Modify this for general integrator interface
-    //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
     FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
@@ -333,8 +265,9 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
     set_maximum_step_size(1);
     set_maximum_enclosure_radius(100.0);
-    set_enable_reconditioning(true);
     set_maximum_spacial_error(1e-2);
+    set_enable_reconditioning(true);
+    set_enable_subdivisions(true);
 }
 
 
@@ -342,10 +275,11 @@ OutputStream&
 VectorFieldEvolverConfiguration::_write(OutputStream& os) const
 {
     os << "VectorFieldEvolverConfiguration("
-       << "\n  maximum_step_size=" << maximum_step_size()
-       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
-       << ",\n  enable_reconditioning=" << enable_reconditioning()
-       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
+       << "\n maximum_step_size=" << maximum_step_size()
+       << ",\n maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n maximum_spacial_error=" << maximum_spacial_error()
+       << ",\n enable_reconditioning=" << enable_reconditioning()
+       << ",\n enable_subdivisions=" << enable_subdivisions()
        << "\n)";
     return os;
 }

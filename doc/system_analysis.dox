@@ -59,7 +59,7 @@ Safety specifications are also defined by means of sets. The \ref ConstraintSet 
 Currently there are no facilities for simulation, but an approximation of the trajectory can be computed using the method
  - <c>EvolverInterface::lower_reach(system, point, time, semantics)</c>
 
-\sa \ref MapEvolver, \ref VectorFieldEvolver, \ref HybridEvolverInterface
+\sa \ref IteratedMapEvolver, \ref VectorFieldEvolver, \ref HybridEvolverInterface
 
 
 
@@ -129,7 +129,7 @@ print parameters
 applicator=KuhnApplicator(3)
 
 # Construct an object which can compute the evolution
-evolver = MapEvolver(parameters,applicator)
+evolver = IteratedMapEvolver(parameters,applicator)
 
 # Compute the chain-reachable set
 chain_reachable_set = evolver.chain_reach(henon,initial_set)

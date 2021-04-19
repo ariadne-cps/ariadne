@@ -216,9 +216,9 @@ Void adat(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 template<class X>
 Void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 {
-    assert(S.row_size()==S.column_size());
-    assert(S.column_size()==A.column_size());
-    assert(D.size()==A.row_size());
+    ARIADNE_PRECONDITION(S.row_size()==S.column_size());
+    ARIADNE_PRECONDITION(S.column_size()==A.column_size());
+    ARIADNE_PRECONDITION(D.size()==A.row_size());
 
     const SizeType m=A.column_size();
     const SizeType n=A.row_size();

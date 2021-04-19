@@ -29,27 +29,24 @@ using namespace Ariadne;
 HybridAutomaton get_tank()
 {
     // Declare the system constants
-    RealConstant alpha("alpha",0.02_decimal);
-    RealConstant beta("beta",0.3_decimal);
+    RealConstant alpha("alpha",0.02_dec);
+    RealConstant beta("beta",0.3_dec);
 
     // Declare the variables for the dynamics
     RealVariable aperture("aperture");
     RealVariable height("height");
 
     // Create the tank automaton
-    HybridAutomaton automaton("tank");
-
-    // Declare a trivial discrete location (we use an empty label since there is only one location).
-    DiscreteLocation flow;
+    HybridAutomaton automaton;
 
     // The water level is always given by the same dynamic.
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    automaton.new_mode(flow,{dot(height)=beta*aperture-alpha*height});
+    automaton.new_mode({dot(height)=beta*aperture-alpha*height});
 
     return automaton;
 }
-//! [get_tank]
+//! [/get_tank]
 
 //! [get_valve]
 HybridAutomaton get_valve()
@@ -93,18 +90,20 @@ HybridAutomaton get_valve()
     automaton.new_transition(opening,stop_opening,opened,aperture>=1,EventKind::URGENT);
     automaton.new_transition(opened,can_close,closing,{next(aperture)=aperture});
     automaton.new_transition(closing,stop_closing,closed,aperture<=0,EventKind::URGENT);
+    automaton.new_transition(opening,can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(closing,can_open,opening,{next(aperture)=aperture});
 
     return automaton;
 }
-//! [get_valve]
+//! [/get_valve]
 
 //! [get_controller]
 HybridAutomaton get_controller()
 {
     // Declare some constants
-    RealConstant hmin("hmin",5.75_decimal);
-    RealConstant hmax("hmax",7.75_decimal);
-    RealConstant delta("delta",0.02_decimal);
+    RealConstant hmin("hmin",5.75_dec);
+    RealConstant hmax("hmax",7.75_dec);
+    RealConstant delta("delta",0.02_dec);
 
     // Declare the shared system variables
     RealVariable height("height");
@@ -142,57 +141,37 @@ HybridAutomaton get_controller()
 
     return automaton;
 }
-//! [get_controller]
-
-//! [get_system]
-CompositeHybridAutomaton get_system()
-{
-    CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
-    return watertank_system;
-}
-//! [get_system]
-
+//! [/get_controller]
 
 //! [simulate_evolution]
-Void simulate_evolution(const CompositeHybridAutomaton& system)
+Void simulate_evolution(CompositeHybridAutomaton const& system, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    // Re-introduce the shared system variables required for the initial set
+    // Re-introduce the shared system variables required for plotting
     RealVariable aperture("aperture");
     RealVariable height("height");
     TimeVariable time;
 
-    StringVariable valve("valve");
-    StringVariable controller("controller");
-
-    String opened("opened");
-    String rising("rising");
-
     // Create a simulator object
-    HybridSimulator simulator;
-    simulator.set_step_size(0.01);
+    HybridSimulator simulator(system);
+    simulator.configuration().set_step_size(0.01);
 
-    // Set an initial point for the simulation
-    HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
-
-    // Define the termination: continuous time and maximum number of transitions
-    HybridTerminationCriterion termination(30.0_x,5);
+    ARIADNE_LOG_PRINTLN_VAR(simulator.configuration());
 
     // Compute a simulation trajectory
     ARIADNE_LOG_PRINTLN("Computing simulation trajectory...");
-    auto orbit = simulator.orbit(system,initial_point,termination);
+    auto orbit = simulator.orbit(initial_set,final_time);
 
-    // Plot the simulation trajectory using all different projections
+    // Plot the simulation trajectory using three different projections
     ARIADNE_LOG_PRINTLN("Plotting simulation trajectory...");
     plot("simulation_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
     plot("simulation_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting simulation trajectory!");
 }
-//! [simulate_evolution]
+//! [/simulate_evolution]
 
 //! [create_evolver]
-GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
+GeneralHybridEvolver create_evolver(CompositeHybridAutomaton const& system)
 {
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(system);
@@ -201,50 +180,36 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
     evolver.configuration().set_maximum_enclosure_radius(3.0);
     evolver.configuration().set_maximum_step_size(0.25);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"Evolver configuration: " << evolver.configuration());
+    ARIADNE_LOG_PRINTLN_VAR(evolver.configuration());
 
     return evolver;
 }
-//! End of [create_evolver]
+//! [/create_evolver]
 
 //! [compute_evolution]
-Void compute_evolution(const GeneralHybridEvolver& evolver)
+Void compute_evolution(const GeneralHybridEvolver& evolver, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    // Re-introduce the shared system variables required for the initial set
+    // Re-introduce the shared system variables required for plotting
     RealVariable aperture("aperture");
     RealVariable height("height");
     TimeVariable time;
 
-    StringVariable valve("valve");
-    StringVariable controller("controller");
-
-    String opened("opened");
-    String rising("rising");
-
-    // Define the initial set, by supplying the location as a list of locations for each composed automata, and
-    // the continuous set as a list of variable assignments for each variable controlled on that location
-    // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
-    // Define the termination: continuous time and maximum number of transitions
-    HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
     ARIADNE_LOG_PRINTLN("Computing evolution flow tube...");
-    auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
+    auto orbit = evolver.orbit(initial_set,final_time,Semantics::UPPER);
 
-    // Plot the flow tube using two different projections
+    // Plot the flow tube using three different projections
     ARIADNE_LOG_PRINTLN("Plotting evolution flow tube...");
     plot("finite_evolution_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
     plot("finite_evolution_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting evolution flow tube!");
 }
-//! [compute_evolution]
+//! [/compute_evolution]
 
 //! [create_analyser]
-HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
+HybridReachabilityAnalyser create_analyser(GeneralHybridEvolver const& evolver)
 {
-    ARIADNE_LOG_SCOPE_CREATE
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 
@@ -252,32 +217,18 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
     analyser.configuration().set_maximum_grid_fineness(6);
     analyser.configuration().set_lock_to_grid_time(5);
 
-    ARIADNE_LOG_PRINTLN("Analyser configuration: " << analyser.configuration());
-    ARIADNE_LOG_PRINTLN("Analyser evolver: " << analyser.evolver());
+    ARIADNE_LOG_PRINTLN_VAR(analyser.configuration());
 
     return analyser;
 }
-//! [create_analyser]
+//! [/create_analyser]
 
 //! [compute_reachability]
-Void compute_reachability(const HybridReachabilityAnalyser& analyser)
+Void compute_reachability(HybridReachabilityAnalyser const& analyser, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    // Re-introduce the shared system variables required for the initial set
+    // Re-introduce the shared system variables required for plotting
     RealVariable aperture("aperture");
     RealVariable height("height");
-
-    StringVariable valve("valve");
-    StringVariable controller("controller");
-
-    String opened("opened");
-    String rising("rising");
-
-    // Define the initial set and final time
-    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
-    ARIADNE_LOG_PRINTLN("initial_set: " << initial_set);
-    HybridTime final_time(30.0_x,5);
-    ARIADNE_LOG_PRINTLN("final_time: " << final_time);
 
     // Compute over-approximation to infinite-time reachable set using upper semantics.
     ARIADNE_LOG_PRINTLN("Computing upper reach set...");
@@ -293,33 +244,82 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser)
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
     ARIADNE_LOG_PRINTLN("Done computing and plotting outer chain reach set!");
 }
-//! [compute_reachability]
+//! [/compute_reachability]
+
+//! [get_system]
+CompositeHybridAutomaton get_system()
+{
+    // Create the composed automaton
+    CompositeHybridAutomaton system("watertank",{get_tank(),get_valve(),get_controller()});
+
+    // Print the system description on the command line
+    ARIADNE_LOG_PRINTLN_VAR(system);
+
+    return system;
+}
+//! [/get_system]
+
+//! [get_initial_set]
+HybridBoundedConstraintSet get_initial_set()
+{
+    // Re-introduce variables to be used for the initial set
+    RealVariable height("height");
+    StringVariable valve("valve");
+    StringVariable controller("controller");
+    String opened("opened");
+    String rising("rising");
+
+    // Define the initial set, by supplying the location as a list of locations for each composed automata, and
+    // the continuous set as a list of variable assignments for each variable controlled on that location
+    // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
+    HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_dec<=height<=7});
+
+    // Print the initial set on the command line
+    ARIADNE_LOG_PRINTLN_VAR(initial_set);
+
+    return initial_set;
+}
+//! [/get_initial_set]
+
+//! [get_final_time]
+HybridTime get_final_time()
+{
+    // Define the final time: continuous time and maximum number of transitions
+    HybridTime final_time(30.0_dec,5);
+    ARIADNE_LOG_PRINTLN_VAR(final_time);
+
+    return final_time;
+}
+//! [/get_final_time]
 
 //! [main]
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
-    // Create the composed automaton
-    CompositeHybridAutomaton watertank_system=get_system();
+    // Get the system
+    auto system = get_system();
 
-    // Print the system description on the command line
-    ARIADNE_LOG_PRINTLN("System: " << watertank_system);
+    // Get the initial set
+    auto initial_set = get_initial_set();
+
+    // Get the final time
+    auto final_time = get_final_time();
 
     // Compute an approximate simulation of the system evolution
-    simulate_evolution(watertank_system);
+    simulate_evolution(system,initial_set,final_time);
 
     // Create an evolver object
-    auto evolver = create_evolver(watertank_system);
+    auto evolver = create_evolver(system);
 
     // Compute the system evolution
-    compute_evolution(evolver);
+    compute_evolution(evolver,initial_set,final_time);
 
     // Create an analyser object
     auto analyser = create_analyser(evolver);
 
     // Compute the system reachability
-    compute_reachability(analyser);
+    compute_reachability(analyser,initial_set,final_time);
 }
-//! [main]
+//! [/main]

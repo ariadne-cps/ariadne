@@ -1,4 +1,5 @@
 set(EXAMPLES_CONTINUOUS
+    attractor
     vanderpol
 )
 

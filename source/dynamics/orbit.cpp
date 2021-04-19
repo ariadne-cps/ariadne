@@ -35,6 +35,7 @@
 #include "geometry/curve.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"
+#include "output/graphics.hpp"
 
 namespace Ariadne {
 
@@ -48,8 +49,6 @@ Orbit<ExactPoint<F>>::insert(Value<F> t, const ExactPoint<F>& pt)
 {
     this->_curve->insert(t,pt);
 }
-
-
 
 
 struct Orbit<Storage>::Data {

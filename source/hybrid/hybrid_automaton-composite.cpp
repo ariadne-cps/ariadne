@@ -621,7 +621,7 @@ List<RealAssignment> order(const List<RealAssignment>& assignments, const Set<Re
         }
     }
 
-    assert(result.size()==assignments.size());
+    ARIADNE_ASSERT(result.size()==assignments.size());
     return result;
 }
 

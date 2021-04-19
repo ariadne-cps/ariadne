@@ -44,10 +44,13 @@
 #include "decimal.hpp"
 #include "rational.hpp"
 #include "real.hpp"
+#include "validated_real.hpp"
 #include "floatdp.hpp"
 #include "floatmp.hpp"
 #include "number.hpp"
+#include "lower_number.hpp"
+#include "upper_number.hpp"
 
-#include "float.hpp"
+#include "floats.hpp"
 
 #endif

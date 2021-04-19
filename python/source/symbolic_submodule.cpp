@@ -188,12 +188,12 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     real_variable_class.def("__rmul__", &__rmul__<RealVariable,Real>);
     real_variable_class.def(__py_rdiv__, &__rdiv__<RealVariable,Real>);
     real_variable_class.def("__pow__", &__pow__<RealVariable,Int>);
-////    real_variable_class.def("__le__", &__le__<RealVariable,RealExpression>);
-////    real_variable_class.def("__ge__", &__ge__<RealVariable,RealExpression>);
+    //real_variable_class.def("__le__", &__le__<RealVariable,RealExpression>);
+    //real_variable_class.def("__ge__", &__ge__<RealVariable,RealExpression>);
     real_variable_class.def("__lt__", &__lt__<RealVariable,RealExpression>);
     real_variable_class.def("__gt__", &__gt__<RealVariable,RealExpression>);
 
-////    real_variable_class.def("__ge__", &__ge__<RealVariable,Real>);
+    //real_variable_class.def("__ge__", &__ge__<RealVariable,Real>);
 
     pybind11::class_<RealVariables> real_variables_class(module,"RealVariables");
     real_variables_class.def(pybind11::init<StringType,SizeType>());
@@ -313,18 +313,18 @@ Void export_expressions(pybind11::module& module)
     real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression>);
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression>);
     real_expression_class.def(__py_rdiv__, &__rdiv__<RealExpression,RealExpression>);
-////    real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
-////    real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
+    real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
+    real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
     real_expression_class.def("__lt__", &__lt__<RealExpression,RealExpression>);
     real_expression_class.def("__gt__", &__gt__<RealExpression,RealExpression>);
     //real_expression_class.def("__cmp__", &__cmp__<RealExpression,RealExpression , Return<ContinuousPredicate> >);
     real_expression_class.def("__str__", &__cstr__<RealExpression>);
     real_expression_class.def("__repr__", &__repr__<RealExpression>);
 
-////    real_expression_class.def("__le__", &__le__<RealExpression,Real>);
-////    real_expression_class.def("__ge__", &__ge__<RealExpression,Real>);
-//    real_expression_class.def("__le__", &__le__<Real,RealExpression>);
-//    real_expression_class.def("__ge__", &__ge__<Real,RealExpression>);
+    real_expression_class.def("__le__", &__le__<RealExpression,Real>);
+    real_expression_class.def("__ge__", &__ge__<RealExpression,Real>);
+    real_expression_class.def("__le__", &__le__<Real,RealExpression>);
+    real_expression_class.def("__ge__", &__ge__<Real,RealExpression>);
 
 
     module.def("max", &_max_<RealExpression,RealExpression>);
@@ -414,10 +414,11 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     real_variable_upper_interval_class.def("__str__",&__cstr__<RealVariableUpperInterval>);
     real_variable_upper_interval_class.def("__bool__", [](RealVariableUpperInterval const&){ARIADNE_THROW(std::runtime_error,"RealVariableUpperInterval.__bool__(self)","Cannot convert RealVariableUpperInterval to bool");});
 
-      real_variable_class.def("__le__", &__le__<Real,RealVariable , Return<RealVariableLowerInterval> >);
+    real_variable_class.def("__le__", &__le__<Real,RealVariable , Return<RealVariableLowerInterval> >);
     real_variable_class.def("__ge__", &__ge__<RealVariable,Real , Return<RealVariableLowerInterval> >);
     real_variable_class.def("__le__", &__le__<RealVariable,Real , Return<RealVariableUpperInterval> >);
     real_variable_class.def("__or__", [](RealVariable const& x, RealInterval ivl){return RealVariableInterval(x,ivl);});
+    real_variable_class.def("__lshift__",&__eq__<RealVariable,Real,Return<RealVariableInterval>>);
 
     real_variable_lower_interval_class.def("__le__", &__le__<RealVariableLowerInterval,Real , Return<RealVariableInterval> >);
 //    real_variable_upper_interval_class.def("__le__", &__le__<Real,RealVariableUpperInterval , Return<RealVariableInterval> >);
@@ -455,6 +456,7 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     pybind11::class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class(module,"RealExpressionBoundedConstraintSet");
     real_expression_bounded_constraint_set_class.def(pybind11::init<List<RealVariableInterval>,List<ContinuousPredicate>>());
     real_expression_bounded_constraint_set_class.def(pybind11::init<RealVariablesBox,RealExpressionConstraintSet>());
+    real_expression_bounded_constraint_set_class.def("euclidean_set", (BoundedConstraintSet(RealExpressionBoundedConstraintSet::*)(RealSpace const&)) &RealExpressionBoundedConstraintSet::euclidean_set);
     real_expression_bounded_constraint_set_class.def("__str__",&__cstr__<RealExpressionBoundedConstraintSet>);
 
     module.def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);

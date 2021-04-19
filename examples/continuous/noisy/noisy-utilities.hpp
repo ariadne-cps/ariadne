@@ -30,8 +30,8 @@ namespace Ariadne {
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 typedef Real ContinuousTimeType;
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, bool draw);
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
 
@@ -54,9 +54,9 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
-
-    auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
+    ARIADNE_LOG_SCOPE_CREATE;
+    auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
     evolver.configuration().approximations(approximations);
     evolver.configuration().maximum_step_size(step);
 
@@ -82,9 +82,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
         }
         for (SizeType i : range(0,n-1)) {
             for (SizeType j : range(i+1,n)) {
-                Figure fig=Figure();
-                fig.set_bounding_box(graphics_box);
-                fig.set_projection(n,i,j);
+                Figure fig=Figure(graphics_box,Projection2d(n,i,j));
                 fig.set_line_colour(0.0,0.0,0.0);
                 fig.set_line_style(true);
                 fig.set_fill_colour(0.5,0.5,0.5);
@@ -101,11 +99,11 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
-        std::cout << appro << std::endl;
+        ARIADNE_LOG_PRINTLN(appro);
         run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,draw);
     }
 }
@@ -113,7 +111,7 @@ void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDom
 void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
               const RealVariablesBox& initial, Real evolution_time, double step) {
 
-    InclusionVectorField ivf(dynamics,inputs);
+    DifferentialInclusion ivf(dynamics, inputs);
 
     SizeType period_of_parameter_reduction=12;
     ExactDouble ratio_of_parameters_to_keep=6.0_x;

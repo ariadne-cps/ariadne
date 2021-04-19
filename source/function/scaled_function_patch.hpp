@@ -86,18 +86,10 @@ template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2
 */
 
 // FIXME: Try to abstract away this template
-template<class R, class F, class X> class CanEvaluate {
-    template<class RR, class FF, class XX, class=decltype(declval<RR>()=evaluate(declval<FF>(),declval<XX>()))> static True test(int);
-    template<class RR, class FF, class XX> static False test(...);
-  public:
-    static const bool value = decltype(test<R,F,X>(1))::value;
-};
-template<class R, class F, class X> class CanCall {
-    template<class RR, class FF, class XX, class=decltype(declval<RR>()=declval<FF>()(declval<XX>()))> static True test(int);
-    template<class RR, class FF, class XX> static False test(...);
-  public:
-    static const bool value = decltype(test<R,F,X>(1))::value;
-};
+template<class R, class F, class X> concept CanEvaluate
+    = requires(F const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
+template<class R, class F, class X> concept CanCall
+    = requires(F const& f, X const& x) { { f(x) } -> AssignableTo<R>; };
 
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
@@ -241,17 +233,6 @@ template<class M> class ScaledFunctionPatch
     //! \brief Construct the identity function over the domain \a d.
     static VectorScaledFunctionPatch<M> identity(const DomainType& d, PropertiesType prp);
 
-    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
-    static ScaledFunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, PropertiesType prp);
-    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d. // DEPRECATED
-    static ScaledFunctionPatch<M> affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, PropertiesType prp) ;
-
-    //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> constants(const DomainType& d, const Vector<NumericType>& c, PropertiesType prp);
-    //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, PropertiesType prp);
-    //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, PropertiesType prp);
     //!@}
 
     //!@{
@@ -290,8 +271,6 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief The constant term in the expansion.
     const ValueType value() const { return this->_model.value(); }
-    //! \brief The gradient at the centre of the domain.
-//    const ValueType gradient_value(SizeType i) const; // [[deprecated]]
 
     //! \brief A polynomial representation.
     MultivariatePolynomial<NumericType> polynomial() const;
@@ -318,13 +297,6 @@ template<class M> class ScaledFunctionPatch
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
     SizeType number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
-    //!@}
-
-    //!@{
-    //! \name Comparison operators.
-    Bool operator==(const ScaledFunctionPatch<M>& tv) const;
-    //! \brief Inequality operator.
-    Bool operator!=(const ScaledFunctionPatch<M>& tv) const { return !(*this==tv); }
     //!@}
 
     //!@{
@@ -381,8 +353,7 @@ template<class M> class ScaledFunctionPatch
     friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
     friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
   public:
-    template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
-    template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
+    template<class X> Void _compute(X& r, const Vector<X>& a) const;
   private:
     ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
@@ -438,7 +409,7 @@ template<class M> class ScaledFunctionPatch
         return partial_evaluate(f,k,NumericType(c,f.precision())); }
     friend ArithmeticType<CoefficientType,NumericType> evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         // TODO: Simplify
-        if constexpr (IsInterval<CoefficientType>::value) {
+        if constexpr (AnInterval<CoefficientType>) {
             for(SizeType i=0; i!=x.size(); ++i) {
                 if (!definitely(contains(f.domain()[i],cast_singleton(x[i])))) {
                     ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain()); } }
@@ -465,12 +436,14 @@ template<class M> class ScaledFunctionPatch
 };
 
 
-template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void ScaledFunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
-    r = this->_model(unscale(a,this->_domain));
-}
-template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void ScaledFunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
-    ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>::value),
-                       "evaluate(ScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": Incompatible types for function call");
+template<class M> template<class X> Void ScaledFunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
+    if constexpr (CanCall<X,M,Vector<X>>) {
+        r = this->_model(unscale(a,this->_domain));
+    } else {
+        ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>),
+                           "evaluate(ScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": "
+                           "Incompatible types for function call");
+    }
 }
 
 template<class FP1, class FP2> Void check_function_patch_domain(String const& op_str, const FP1& f1, const FP2& f2) {
@@ -638,11 +611,6 @@ template<class M> class VectorScaledFunctionPatch
     explicit VectorScaledFunctionPatch<M> (const VectorFunctionModelType<M>& f);
     VectorScaledFunctionPatch<M>& operator=(const VectorFunctionModelType<M>& f);
 
-    //! \brief Equality operator.
-    Bool operator==(const VectorScaledFunctionPatch<M>& p) const;
-    //! \brief Inequality operator.
-    Bool operator!=(const VectorScaledFunctionPatch<M>& p) const;
-
     // Data access
     //! \brief The properties used to control approximation of the function model.
     PropertiesType properties() const;
@@ -752,8 +720,7 @@ template<class M> class VectorScaledFunctionPatch
     friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,ARG>;
     friend class TaylorFunctionFactory;
   public:
-    template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
-    template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
     BoxDomainType _domain;
@@ -1027,16 +994,18 @@ template<class M> class VectorScaledFunctionPatch
 
 };
 
-template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
-    ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this));
-    Vector<X> sa=Ariadne::unscale(a,this->_domain);
-    for(SizeType i=0; i!=r.size(); ++i) {
-        r[i]=this->_models[i](sa);
+template<class M> template<class X> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
+    if constexpr(CanCall<X,M,Vector<X>>) {
+        ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this));
+        Vector<X> sa=Ariadne::unscale(a,this->_domain);
+        for(SizeType i=0; i!=r.size(); ++i) {
+            r[i]=this->_models[i](sa);
+        }
+    } else {
+        ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>),
+                           "evaluate(VectorScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": "
+                           "Incompatible types for function call");
     }
-}
-template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
-    ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>::value),
-                       "evaluate(VectorScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": Incompatible types for function call");
 }
 
 template<class M> template<class OP>
@@ -1280,7 +1249,7 @@ template<class M> class ScaledFunctionPatchFactory
     ScaledFunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;
     ScaledFunctionPatch<M> create_constant(const BoxDomainType& domain, const NumericType& value) const {
         return create_constant(domain,Number<P>(value)); };
-    template<class X=CoefficientType, DisableIf<IsSame<X,NumericType>> =dummy> ScaledFunctionPatch<M> create_constant(X) const;
+    template<class X=CoefficientType> requires (not Same<X,NumericType>) ScaledFunctionPatch<M> create_constant(X) const;
 
     ScaledFunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;
     VectorScaledFunctionPatch<M> create_zeros(SizeType result_size, const DomainType& domain) const;

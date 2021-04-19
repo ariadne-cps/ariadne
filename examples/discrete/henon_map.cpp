@@ -43,8 +43,8 @@
 #include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "dynamics/iterated_map.hpp"
+#include "dynamics/iterated_map_evolver.hpp"
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
@@ -62,7 +62,7 @@ using namespace std;
 
 Int main(int argc, const char* argv[])
 {
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
     Real a=Decimal(1.3), b=Decimal(0.3);
@@ -78,36 +78,32 @@ Int main(int argc, const char* argv[])
     LabelledSet<Point<FloatDPBounds>> labelled_fixed_point(henon.state_space(),fixed_point);
 
     // Set up the evaluators
-    MapEvolver evolver(henon);
-    typedef MapEvolver::EnclosureType EnclosureType;
+    IteratedMapEvolver evolver(henon);
+    typedef IteratedMapEvolver::EnclosureType EnclosureType;
     ReachabilityAnalyser<IteratedMap> analyser(evolver);
     analyser.configuration().set_bounding_domain(ExactBoxType({{-4,4},{-4,4}}));
     analyser.configuration().set_maximum_grid_fineness(5);
 
     // Set-up initial set and time for evolution
-    RealVariablesBox initial_box={x.in(0.5_dec,0.6_dec),y.in(0.95_dec,1.05_dec)};
-    EnclosureType initial_set=evolver.enclosure(initial_box);
+    RealExpressionBoundedConstraintSet initial_set={0.5_dec<=x<=0.6_dec,0.95_dec<=y<=1.05_dec};
 
     // Set up the evolution parameters and grid
     Integer evolve_time(6);
 
     // Compute the reachable sets
-    ListSet<EnclosureType> evolve_set,reach_set;
-    tie(reach_set,evolve_set) = evolver.reach_evolve(initial_set,evolve_time);
+    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,evolve_time);
 
     Axes2d figure_axes(-4<=x<=2,-3<=y<=3);
     LabelledFigure fig(figure_axes);
-    fig << fill_colour(magenta) << reach_set;
-    fig << fill_colour(blue) << initial_set;
-    fig << fill_colour(red) << evolve_set;
+    fig << fill_colour(magenta) << orbit.reach();
+    fig << fill_colour(red) << orbit.final();
     fig << line_width(4) << fill_colour(green) << labelled_fixed_point << line_width(1);
     fig.write("henon_map-reach");
 
     // Compute the chain-reach set
-    // FIXME: Use inital_box as starting set
-    LabelledStorage chain_reach_set = analyser.outer_chain_reach(RealBoxSet(initial_box.euclidean_set(henon.state_space())));
+    LabelledStorage chain_reach_set = analyser.outer_chain_reach(initial_set.euclidean_set(henon.state_space()));
 
     fig.clear();
-    fig << fill_colour(blue) << initial_set << fill_colour(cyan) << chain_reach_set;
+    fig << chain_reach_set;
     fig.write("henon_map-chain_reach");
 }

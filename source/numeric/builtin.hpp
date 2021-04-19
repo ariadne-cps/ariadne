@@ -111,8 +111,8 @@ class ExactDouble {
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
     ExactDouble() : _d() { }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
-    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
+    template<BuiltinIntegral N> ExactDouble(N n) : _d(n) { assert(_d==n); }
+    template<BuiltinFloatingPoint X> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
     friend ExactDouble nul(ExactDouble x) { return ExactDouble(0.0); }
@@ -133,7 +133,7 @@ class ExactDouble {
     friend Boolean operator<=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d<=x2._d; }
     friend Boolean operator> (ExactDouble const& x1, ExactDouble const& x2) { return x1._d> x2._d; }
     friend Boolean operator< (ExactDouble const& x1, ExactDouble const& x2) { return x1._d< x2._d; }
-    friend ExactDouble operator"" _x (long double lx) { double x=lx; if (x!=lx) { std::cerr<<"lx="<<lx; assert(x==lx); } return ExactDouble(x); }
+    friend ExactDouble operator"" _x (long double lx) { double x=lx; if (x!=lx) { assert(x==lx); } return ExactDouble(x); }
     friend ExactDouble operator"" _pr (long double lx) { double x=lx; return ExactDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };

@@ -65,7 +65,7 @@ inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(ariadneorange) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange) { }
     GraphicsProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
         : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
     Dbl dot_radius;
@@ -137,7 +137,6 @@ class Figure
 {
   public:
     ~Figure();
-    Figure(); //< Deprecated
     //! Construct a figure projecting \a bbx onto the \a proj coordinates
     Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj);
     //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
@@ -275,6 +274,8 @@ template<class S> inline LabelledFigure& operator<<(LabelledFigure& g, const Lab
     return g << LabelledDrawableWrapper<S>(lset);
 }
 
+Projection2d projection(const RealSpace& space, const Variables2d& variables);
+
 inline Void draw(Figure& g) { }
 
 template<class SET, class... CSETS> inline Void
@@ -283,7 +284,7 @@ draw(Figure& g, const Colour& fc, const SET& set, CSETS const& ... csets) {
 
 template<class... CSETS> Void
 plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, CSETS const&... csets) {
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); draw(g,csets...);  g.write(filename); }
+    Figure g(bbox,pr); draw(g,csets...);  g.write(filename); }
 
 template<class... CSETS> Void
 plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {

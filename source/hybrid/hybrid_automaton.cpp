@@ -68,7 +68,7 @@ DiscreteMode(DiscreteLocation location,
 
 template<class K, class T1, class T2>
 Map<K,Pair<T1,T2> > merge(const Map<K,T1>& m1, const Map<K,T2>& m2) {
-    assert(m1.keys()==m2.keys());
+    ARIADNE_ASSERT(m1.keys()==m2.keys());
     Map<K,Pair<T1,T2> > r;
     Set<K> keys=m1.keys();
     for(typename Set<K>::ConstIterator iter=keys.begin(); iter!=keys.end(); ++iter) {

@@ -142,7 +142,7 @@ template<class I, class X> class ExpansionConstReference
     ExpansionConstReference(const ExpansionReference<I,X>& other) : ExpansionConstReference(other.index(),other.coefficient()) { }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,_c); }
     friend Bool same(ExpansionConstReference<I,X> const& ac1, ExpansionConstReference<I,X> const& ac2) {
-        if constexpr (IsConvertible<EqualityType<X>,Bool>::value) { return ac1.index()==ac2.index() && ac1.coefficient()==ac2.coefficient(); }
+        if constexpr (Convertible<EqualityType<X>,Bool>) { return ac1.index()==ac2.index() && ac1.coefficient()==ac2.coefficient(); }
         else { return ac1.index()==ac2.index() && same(ac1.coefficient(),ac2.coefficient()); } }
 };
 
@@ -244,7 +244,7 @@ template<class I, class X> class ExpansionValueReference {
     operator const X& () const { return _e.get(_a); }
     //operator X& () { return _e.at(_a); }
     ExpansionValueReference<I,X>& operator=(const X& x) { _e.at(_a)=x; return *this; }
-    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> ExpansionValueReference<I,X>& operator=(const Y& y) { _e.at(_a)=y; return *this; }
+    template<class Y> requires Assignable<X,Y> ExpansionValueReference<I,X>& operator=(const Y& y) { _e.at(_a)=y; return *this; }
     ExpansionValueReference<I,X>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
     ExpansionValueReference<I,X>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
     ExpansionValueReference<I,X>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
@@ -252,9 +252,8 @@ template<class I, class X> class ExpansionValueReference {
 };
 
 
-template<class I, class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
-    : Expansion(other.argument_size(),X(other.zero_coefficient(),prs...))
+template<class I, class X> template<class Y, class... PRS> inline
+Void Expansion<I,X>::_fill(Expansion<I,Y> const& other, PRS... prs)
 {
     MultiIndex a(other.argument_size());
     X x=_zero_coefficient;
@@ -266,6 +265,8 @@ Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
         if(decide(x!=0)) { this->append(a,x); }
     }
 }
+
+
 
 
 } // namespace Ariadne

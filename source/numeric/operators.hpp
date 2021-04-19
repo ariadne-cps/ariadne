@@ -439,7 +439,7 @@ template<class... OPS> class OperatorVariant
     : public CodedVariant<OperatorCode, OPS...>
 {
   public:
-    template<class OP, EnableIf<IsOneOf<OP,OPS...>> =dummy> OperatorVariant(OP op) : CodedVariant<OperatorCode,OPS...>(op) { }
+    template<class OP> requires OneOf<OP,OPS...> OperatorVariant(OP op) : CodedVariant<OperatorCode,OPS...>(op) { }
     explicit OperatorVariant(OperatorCode code) : CodedVariant<OperatorCode,OPS...>(code) { }
     OperatorKind kind() const {
         return this->accept([](auto op){return op.kind();}); }
@@ -503,14 +503,11 @@ constexpr Tan inverse(Atan) { return Tan(); }
 
 template<class OP> using InverseType = decltype(inverse(declval<OP>()));
 
+template<class OP> concept HasInverse = requires(OP op) { inverse(op); };
+
 namespace {
-template<class OP> struct HasInverse {
-    template<class O, class=InverseType<O>> static std::true_type test(int);
-    template<class O> static std::false_type test(...);
-    static const bool value = decltype(test<OP>(1))::value;
-};
 template<class OP, class... OPS> Bool _are_inverses(OP const& op1, OperatorVariant<OPS...> const& ops2) {
-    if constexpr(HasInverse<decltype(op1)>::value) { return inverse(op1).code() == ops2.code(); }
+    if constexpr(HasInverse<decltype(op1)>) { return inverse(op1).code() == ops2.code(); }
     else { return false; }
 }
 } // namespace

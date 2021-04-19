@@ -38,9 +38,13 @@
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/real.hpp"
+#include "numeric/validated_real.hpp"
+#include "numeric/number.hpp"
+#include "numeric/upper_number.hpp"
+#include "numeric/lower_number.hpp"
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/complex.hpp"
 
 #include "numeric/casts.hpp"
@@ -128,7 +132,7 @@ template<class X> Void define_infinitary_checks(pybind11::module& module, pybind
 }
 
 template<class X> Void define_infinitary(pybind11::module& module, pybind11::class_<X>& pyclass) {
-    if constexpr (HasPrecisionType<X>::value) {
+    if constexpr (HasPrecisionType<X>) {
         typedef typename X::PrecisionType PR;
         pyclass.def_static("nan", (X(*)(PR)) &X::nan);
         pyclass.def_static("inf", (X(*)(PR)) &X::inf);
@@ -248,6 +252,7 @@ Void export_logicals(pymodule& module) {
     export_logical<ValidatedKleenean>(module,"ValidatedKleenean");
     export_logical<ValidatedUpperKleenean>(module,"ValidatedUpperKleenean");
     export_logical<ValidatedLowerKleenean>(module,"ValidatedLowerKleenean");
+    export_logical<ValidatedSierpinskian>(module,"ValidatedSierpinskian");
     export_logical<ApproximateKleenean>(module,"ApproximateKleenean");
 }
 
@@ -481,12 +486,12 @@ FloatMPApproximation get(ApproximateNumber const& y, MultiplePrecision const& pr
 
 
 template<class X, class Y> void implicitly_convertible_to() {
-    if constexpr(IsConvertible<Y,ApproximateNumber>::value) { implicitly_convertible<X,ApproximateNumber>(); }
-    if constexpr(IsConvertible<Y,ValidatedLowerNumber>::value) { implicitly_convertible<X,ValidatedLowerNumber>(); }
-    if constexpr(IsConvertible<Y,ValidatedUpperNumber>::value) { implicitly_convertible<X,ValidatedUpperNumber>(); }
-    if constexpr(IsConvertible<Y,ValidatedNumber>::value) { implicitly_convertible<X,ValidatedNumber>(); }
-    if constexpr(IsConvertible<Y,EffectiveNumber>::value) { implicitly_convertible<X,EffectiveNumber>(); }
-    if constexpr(IsConvertible<Y,ExactNumber>::value) { implicitly_convertible<X,ExactNumber>(); }
+    if constexpr(Convertible<Y,ApproximateNumber>) { implicitly_convertible<X,ApproximateNumber>(); }
+    if constexpr(Convertible<Y,ValidatedLowerNumber>) { implicitly_convertible<X,ValidatedLowerNumber>(); }
+    if constexpr(Convertible<Y,ValidatedUpperNumber>) { implicitly_convertible<X,ValidatedUpperNumber>(); }
+    if constexpr(Convertible<Y,ValidatedNumber>) { implicitly_convertible<X,ValidatedNumber>(); }
+    if constexpr(Convertible<Y,EffectiveNumber>) { implicitly_convertible<X,EffectiveNumber>(); }
+    if constexpr(Convertible<Y,ExactNumber>) { implicitly_convertible<X,ExactNumber>(); }
 }
 
 void export_numbers(pymodule& module)
@@ -841,7 +846,7 @@ template<class PRE> void export_float_error(pymodule& module)
 
 template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
 {
-    String tag = IsSame<PR,PRE>::value ? numeric_class_tag<PR>() : numeric_class_tag<PR>()+numeric_class_tag<PRE>();
+    String tag = Same<PR,PRE> ? numeric_class_tag<PR>() : numeric_class_tag<PR>()+numeric_class_tag<PRE>();
     pybind11::class_<FloatBall<PR,PRE>> float_ball_class(module,("Float"+tag+"Ball").c_str());
     float_ball_class.def(init<PR,PRE>());
     float_ball_class.def(init<RawFloat<PR>,RawFloat<PRE>>());
@@ -862,9 +867,9 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     float_ball_class.def("precision", &FloatBall<PR,PRE>::precision);
     float_ball_class.def("error_precision", &FloatBall<PR,PRE>::error_precision);
 
-    static_assert(IsSame<decltype(declval<FloatBall<PR,PRE>>()+declval<ValidatedNumber>()),FloatBall<PR,PRE>>::value);
-    static_assert(IsSame<decltype(add(declval<FloatBall<PR,PRE>>(),declval<ValidatedNumber>())),FloatBall<PR,PRE>>::value);
-    static_assert(IsSame<decltype(max(declval<FloatBall<PR,PRE>>(),declval<ValidatedNumber>())),FloatBall<PR,PRE>>::value);
+    static_assert(Same<decltype(declval<FloatBall<PR,PRE>>()+declval<ValidatedNumber>()),FloatBall<PR,PRE>>);
+    static_assert(Same<decltype(add(declval<FloatBall<PR,PRE>>(),declval<ValidatedNumber>())),FloatBall<PR,PRE>>);
+    static_assert(Same<decltype(max(declval<FloatBall<PR,PRE>>(),declval<ValidatedNumber>())),FloatBall<PR,PRE>>);
 
     define_mixed_arithmetic<FloatBall<PR,PRE>,ValidatedNumber>(module,float_ball_class);
     define_mixed_arithmetic<FloatBall<PR,PRE>,Int>(module,float_ball_class);
@@ -914,19 +919,19 @@ template<class PR> void export_float_bounds(pymodule& module)
     float_bounds_class.def("value", &FloatBounds<PR>::value);
     float_bounds_class.def("error", &FloatBounds<PR>::error);
 
-    static_assert(IsSame<decltype(declval<FloatBounds<PR>>()+declval<ValidatedNumber>()),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(add(declval<FloatBounds<PR>>(),declval<ValidatedNumber>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(max(declval<FloatBounds<PR>>(),declval<ValidatedNumber>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(declval<ValidatedNumber>()+declval<FloatBounds<PR>>()),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(add(declval<ValidatedNumber>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(max(declval<ValidatedNumber>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>::value);
+    static_assert(Same<decltype(declval<FloatBounds<PR>>()+declval<ValidatedNumber>()),FloatBounds<PR>>);
+    static_assert(Same<decltype(add(declval<FloatBounds<PR>>(),declval<ValidatedNumber>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(max(declval<FloatBounds<PR>>(),declval<ValidatedNumber>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(declval<ValidatedNumber>()+declval<FloatBounds<PR>>()),FloatBounds<PR>>);
+    static_assert(Same<decltype(add(declval<ValidatedNumber>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(max(declval<ValidatedNumber>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>);
 
-    static_assert(IsSame<decltype(declval<FloatBounds<PR>>()+declval<FloatBall<PR>>()),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(add(declval<FloatBounds<PR>>(),declval<FloatBall<PR>>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(max(declval<FloatBounds<PR>>(),declval<FloatBall<PR>>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(declval<FloatBall<PR>>()+declval<FloatBounds<PR>>()),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(add(declval<FloatBall<PR>>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>::value);
-    static_assert(IsSame<decltype(max(declval<FloatBall<PR>>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>::value);
+    static_assert(Same<decltype(declval<FloatBounds<PR>>()+declval<FloatBall<PR>>()),FloatBounds<PR>>);
+    static_assert(Same<decltype(add(declval<FloatBounds<PR>>(),declval<FloatBall<PR>>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(max(declval<FloatBounds<PR>>(),declval<FloatBall<PR>>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(declval<FloatBall<PR>>()+declval<FloatBounds<PR>>()),FloatBounds<PR>>);
+    static_assert(Same<decltype(add(declval<FloatBall<PR>>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>);
+    static_assert(Same<decltype(max(declval<FloatBall<PR>>(),declval<FloatBounds<PR>>())),FloatBounds<PR>>);
 
     define_mixed_arithmetic<FloatBounds<PR>,ValidatedNumber>(module,float_bounds_class);
     define_mixed_arithmetic<FloatBounds<PR>,Int>(module,float_bounds_class);
@@ -1108,7 +1113,7 @@ template<class PR> Void export_user_floats(pymodule& module) {
     module.def("Value", [](Dyadic const& y, PR pr){return Value(y,pr);});
     module.def("Value", [](RawFloatType<PR> const& v){return Value(v);});
 
-    if constexpr (IsSame<PR,MultiplePrecision>::value) {
+    if constexpr (Same<PR,MultiplePrecision>) {
         module.def("Ball", [](EffectiveNumber const& y, MultiplePrecision pr, DoublePrecision pre){return Ball(y,pr,pre);});
         module.def("Ball", [](ValidatedNumber const& y, MultiplePrecision pr, DoublePrecision pre){return Ball(y,pr,pre);});
         module.def("Ball", [](RawFloatType<MultiplePrecision> const& v, RawFloatType<DoublePrecision> const& e){return Ball(v,e);});
@@ -1168,7 +1173,7 @@ template<class X> Void export_complex(pymodule& module) {
     pybind11::class_<Z> complex_class(module,python_name<Z>());
     complex_class.def(init<X>());
     complex_class.def(init<X,X>());
-    if constexpr (HasGenericType<X>::value) {
+    if constexpr (HasGenericType<X>) {
         typedef GenericType<X> Y;
         typedef PrecisionType<X> PR;
         complex_class.def(init<Y,Y,PR>());
@@ -1188,7 +1193,7 @@ template<class X> Void export_complex(pymodule& module) {
     complex_class.def("argument", &Z::argument);
 
     define_arithmetic<Z>(module,complex_class);
-    if constexpr (not IsSame<X,Rational>::value) {
+    if constexpr (not Same<X,Rational>) {
         module.def("sqrt", _sqrt_<Z>);
         module.def("exp", _exp_<Z>);
         module.def("log", _log_<Z>);
@@ -1204,14 +1209,14 @@ template<class X> Void export_complex(pymodule& module) {
 
     implicitly_convertible<X,Z>();
 
-    if constexpr (IsSame<X,Real>::value) {
+    if constexpr (Same<X,Real>) {
         complex_class.def(init<Complex<Integer>>());
         implicitly_convertible<Complex<Integer>,Complex<Real>>();
         complex_class.def(init<Complex<Rational>>());
         implicitly_convertible<Complex<Rational>,Complex<Real>>();
         define_mixed_arithmetic<Complex<Real>,Complex<Integer>>(module,complex_class);
     }
-    if constexpr (IsSame<X,Rational>::value) {
+    if constexpr (Same<X,Rational>) {
         complex_class.def(init<Complex<Integer>>());
         implicitly_convertible<Complex<Integer>,Complex<Rational>>();
     }

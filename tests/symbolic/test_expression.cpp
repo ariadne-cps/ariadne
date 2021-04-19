@@ -106,8 +106,8 @@ class TestExpression {
         Real zero(0), one(1);
         RealExpression e(x*y+o);
 
-        ARIADNE_TEST_ASSERT((not IsAssignable<Variable<Real>,Expression<Real>>::value));
-        ARIADNE_TEST_ASSERT((not IsConstructible<Assignment<Variable<Real>,Expression<Real>>,Assignment<Variable<Real>,Real>>::value));
+        ARIADNE_TEST_ASSERT((not Assignable<Variable<Real>,Expression<Real>>));
+        ARIADNE_TEST_ASSERT((not Constructible<Assignment<Variable<Real>,Expression<Real>>,Assignment<Variable<Real>,Real>>));
 
         typedef Assignment<Variable<Real>,Real> ConstantRealAssignment;
         ARIADNE_TEST_CONSTRUCT(ConstantRealAssignment,ac,(x=one));
@@ -364,22 +364,22 @@ class TestExpression {
         RealConstant c("5",tc);
 
         RealExpression e1=c;
-        EffectiveScalarMultivariateFunction f1=make_function(e1,RealSpace(List<RealVariable>({x,y,z})));
+        EffectiveScalarMultivariateFunction f1=make_function(RealSpace(List<RealVariable>({x,y,z})),e1);
         ARIADNE_TEST_PRINT(f1);
         ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
 
         RealExpression e2=c+x;
-        EffectiveScalarMultivariateFunction f2=make_function(e2,RealSpace(List<RealVariable>({x,y,z})));
+        EffectiveScalarMultivariateFunction f2=make_function(RealSpace(List<RealVariable>({x,y,z})),e2);
         ARIADNE_TEST_PRINT(f2);
         ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
 
         RealExpression e3=c+x+c*y;
-        EffectiveScalarMultivariateFunction f3=make_function(e3,{x,y,z});
+        EffectiveScalarMultivariateFunction f3=make_function({x,y,z},e3);
         ARIADNE_TEST_PRINT(f3);
         ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
 
         RealExpression e4=exp(c+x);
-        EffectiveScalarMultivariateFunction f4=make_function(e4,{x,y,z});
+        EffectiveScalarMultivariateFunction f4=make_function({x,y,z},e4);
         ARIADNE_TEST_PRINT(f4);
         ARIADNE_TEST_ASSERT(possibly((f4.evaluate(tv) == exp(tc+tx)).check(Effort(0))));
 

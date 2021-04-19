@@ -25,60 +25,11 @@
 #include "ariadne.hpp"
 
 using namespace Ariadne;
-using std::cout; using std::endl; using std::flush;
-
-/// Function for plotting the orbit and reachability set
-template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat& yaxis, const Nat& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
-    // Assigns local variables
-    Figure fig;
-
-    fig.set_projection(numVariables,xaxis,yaxis);
-    fig.set_bounding_box(bbox);
-
-    // If the grid must be shown
-    if (MAX_GRID_DEPTH >= 0)
-    {
-        // The rectangle to be drawn
-        ApproximateBoxType rect (numVariables);
-        // Chooses the fill colour
-        fig << fill_colour(Colour(1.0,1.0,1.0));
-
-        // Gets the number of times each variable interval would be divided by 2
-        Nat numDivisions = static_cast<Nat>(MAX_GRID_DEPTH) / numVariables;
-        // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        ApproximateDouble step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
-        // Initiates the x position to the bounding box left bound
-        ApproximateDouble pos_x = bbox[0].lower_bound().get_d();
-        // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
-        rect[yaxis] = bbox[1];
-        // While between the interval
-        while (pos_x.get_d() < bbox[0].upper_bound().get_d())
-        {
-            rect[xaxis] = ApproximateIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
-            pos_x += step_x; // Shifts the x position
-            fig << rect; // Appends the rectangle
-        }
-
-        // Repeats for the rectangles in the y direction
-        ApproximateDouble step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        ApproximateDouble pos_y = bbox[1].lower_bound().get_d();
-        rect[xaxis] = bbox[0];
-        while (pos_y.get_d() < bbox[1].upper_bound().get_d())
-        {
-            rect[yaxis] = ApproximateIntervalType(pos_y,pos_y+step_y);
-            fig << rect;
-            pos_y += step_y;
-        }
-    }
-    // Draws and creates file
-    fig.set_fill_colour(fc);
-    fig << set;
-    fig.write(filename);
-}
+using namespace std;
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
 
     Real amplitude(4.0_dec);
     Real frequency(50.0_dec);
@@ -222,13 +173,9 @@ Int main(Int argc, const char* argv[])
     RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*parameters[0]});
     HybridSet initial_set(offoff,initial_box);
 
-//    ExactBoxType initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
-//    HybridEnclosureType initial_enclosure(onoff,initial_box);
-
     std::cout << "Initial set=" << initial_set << std::endl;
 
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
-
 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
@@ -244,26 +191,4 @@ Int main(Int argc, const char* argv[])
     plot("rectifier_orbit_t_vin", graphic_axes, Colour(0.0,0.5,1.0), orbit);
     plot("rectifier_orbit_t_vout", graphic_axes, Colour(0.0,0.5,1.0), orbit);
     plot("rectifier_orbit_vin_vout", graphic_axes2, Colour(0.0,0.5,1.0), orbit);
-
-
-/*
-    /// Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
-    analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
-    rectifier_automaton.set_grid(Grid(Vector<FloatDP>({3, 0.25/dp[1], 1.0, 0.5})));
-    std::cout <<  analyser.parameters() << std::endl;
-
-    HybridImageSet initial_set;
-    initial_set[offoff]=initial_box;
-    HybridTime reach_time(TIME_LIMIT,TRAN_LIMIT);
-
-    std::cout << "Computing upper reach set... " << std::endl << std::flush;
-    HybridGridTreeSet reach = analyser.upper_reach(rectifier,initial_set,reach_time);
-    std::cout << "done." << std::endl;
-
-    plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
-    plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), reach, -1);
-    plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), reach, -1);
-*/
 }

@@ -79,7 +79,7 @@ OutputStream& operator<<(OutputStream& os, const Colour& c) {
     return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
 
 
-const Colour transparant=Colour();
+const Colour transparent=Colour();
 
 const Colour white=Colour("white",1.0,1.0,1.0);
 const Colour black=Colour("black",0.0,0.0,0.0);
@@ -89,7 +89,10 @@ const Colour blue=Colour("blue",0.0,0.0,1.0);
 const Colour yellow=Colour("yellow",1.0,1.0,0.0);
 const Colour cyan=Colour("cyan",0.0,1.0,1.0);
 const Colour magenta=Colour("magenta",1.0,0.0,1.0);
-const Colour ariadneorange=Colour("ariadneorange",1.0,0.75,0.5);
+const Colour orange=Colour("orange",1.0,0.75,0.5);
+const Colour grey=Colour("grey",0.5,0.5,0.5);
+const Colour lightgrey=Colour("lightgrey",0.75,0.75,0.75);
+const Colour darkgrey=Colour("darkgrey",0.25,0.25,0.25);
 
 GraphicsProperties& GraphicsProperties::set_dot_radius(Dbl dr) { this->dot_radius=dr; return *this; }
 GraphicsProperties& GraphicsProperties::set_line_style(Bool ls) { this->line_style=ls; return *this; }
@@ -185,12 +188,6 @@ struct Figure::Data
 Figure::~Figure()
 {
     delete this->_data;
-}
-
-
-Figure::Figure()
-    : Figure(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1))
-{
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
@@ -776,7 +773,7 @@ Void CairoCanvas::finalise()
 
 
 Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
-    Figure fig; fig.set_projection_map(pr); fig.set_bounding_box(bbox);
+    Figure fig(bbox,pr);
     for (auto cset : csets) {
         fig.set_fill_colour(cset.first); fig << cset.second;
     }

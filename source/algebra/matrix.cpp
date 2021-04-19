@@ -30,7 +30,7 @@
 #include "symmetric_matrix.hpp"
 
 #include "utility/exceptions.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
 #include "algebra/vector.hpp"

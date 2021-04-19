@@ -27,7 +27,7 @@
 
 #include "numeric/logical.hpp"
 #include "numeric/builtin.hpp"
-#include "numeric/real.hpp"
+#include "numeric/reals.hpp"
 
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
@@ -71,7 +71,7 @@ Decimal operator"" _dec (const char* str, std::size_t) { return Decimal(String(s
 
 } // namespace Ariadne
 
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 
 #include "../test.hpp"
 

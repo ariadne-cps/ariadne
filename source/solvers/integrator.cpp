@@ -415,7 +415,7 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
     const SizeType tmps=f.temporaries_size();
     const SizeType args=f.argument_size();
 
-    assert(args==xs+1u+as or args==xs+as);
+    ARIADNE_ASSERT(args==xs+1u+as or args==xs+as);
     const bool is_autonomous = (args==xs+as);
 
     GradedValidatedDifferential null;

@@ -39,9 +39,9 @@
 #include "output/graphics_interface.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"
+#include "geometry/curve.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
-
 
 namespace Ariadne {
 
@@ -76,10 +76,35 @@ class Orbit<Point<Value<F>>>
 {
   public:
     Orbit(const Point<Value<F>>& pt);
-    Void insert(Value<F> t, const Point<Value<F>>& hpt);
+    Void insert(Value<F> t, const Point<Value<F>>& pt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     std::shared_ptr< InterpolatedCurve > _curve;
+};
+
+template<class F>
+class Orbit<Point<Approximation<F>>>
+{
+public:
+    Orbit(const Point<Approximation<F>>& pt) : _curve(new InterpolatedCurve(0,pt)) { }
+    Void insert(Value<F> t, const Point<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
+    const InterpolatedCurve& curve() const { return *this->_curve; }
+private:
+    std::shared_ptr< InterpolatedCurve > _curve;
+};
+
+template<class F>
+class Orbit<LabelledPoint<Approximation<F>>>
+    : public LabelledDrawableInterface
+{
+  public:
+    Orbit(const LabelledPoint<Approximation<F>>& pt) : _curve(new LabelledInterpolatedCurve(pt)) { }
+    Void insert(Value<F> t, const LabelledPoint<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
+    const LabelledInterpolatedCurve& curve() const { return *this->_curve; }
+    virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _curve->draw(canvas,axes); }
+    virtual LabelledDrawableInterface* clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
+  private:
+    std::shared_ptr< LabelledInterpolatedCurve > _curve;
 };
 
 template<>
@@ -133,6 +158,7 @@ class Orbit<Enclosure>
 
 template<>
 class Orbit<LabelledEnclosure>
+    : public LabelledDrawableInterface
 {
     typedef LabelledEnclosure ES;
     typedef LabelledSet<ListSet<Enclosure>> ESL;
@@ -153,6 +179,9 @@ class Orbit<LabelledEnclosure>
     EnclosureListType const& reach() const { return this->_reach; }
     EnclosureListType const& intermediate() const { return this->_intermediate; }
     EnclosureListType const& final() const { return this->_final; }
+
+    virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _reach.draw(canvas,axes); }
+    virtual LabelledDrawableInterface* clone() const override { return new Orbit<LabelledEnclosure>(*this); }
   private:
     ES _initial;
     ESL _reach;

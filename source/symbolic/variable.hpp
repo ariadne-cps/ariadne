@@ -136,7 +136,7 @@ template<class T> class Variable
 //! \sa Variable
 class TimeVariable : public Variable<Real> {
   public:
-    TimeVariable() : Variable<Real>(" t ") { }
+    TimeVariable() : Variable<Real>("t") { }
 };
 
 //! \ingroup SymbolicModule

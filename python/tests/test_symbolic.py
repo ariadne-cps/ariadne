@@ -74,7 +74,55 @@ def test_symbolic():
     f=make_function(x,[n,q,r,c,x]) # Check construction from a list of expressions without and RealExpression class
     f=make_function([x,y],[n,q,r,c,x,x+y])
 
+def test_predicates():
 
+    c001=Real(dec(0.01))
+    five=RealConstant("five",5)
+    x=RealVariable("x")
+    y=RealVariable("y")
+
+    0<=x
+    0>=x
+    0<=x-y
+    0>=x-y
+
+    c001<=x
+    c001>=x
+    c001<=x-y
+    c001>=x-y
+
+    five<=x
+    five>=x
+    five<=x-y
+    five>=x-y
+
+    x<=0
+    x>=0
+    x<=c001
+    x>=c001
+    x<=five
+    x>=five
+    #x<=x-y
+    #x>=x-y
+
+    x-y<=0
+    x-y>=0
+    x-y<=c001
+    x-y>=c001
+    x-y<=x
+    x-y>=x
+    x-y<=sqr(x)
+    x-y>=sqr(x)
+
+def test_variable_interval():
+
+    x=RealVariable("x")
+    c = Real(dec(0.1))
+
+    [(0<=x)&(x<=1)]
+    [x<<c]
 
 if __name__  == '__main__':
     test_symbolic()
+    test_predicates()
+    test_variable_interval()

@@ -94,14 +94,6 @@ class HybridReachabilityAnalyser
     virtual HybridReachabilityAnalyser* clone() const;
     //!@}
 
-  protected:
-    Void _adjoin_upper_reach_evolve(HybridStorage& reach_cells,
-                                    HybridStorage& evolve_cells,
-                                    const HybridStorage& set,
-                                    const HybridTerminationCriterion& termination,
-                                    const Nat accuracy,
-                                    const HybridEvolverInterface& evolver) const;
-
 };
 
 

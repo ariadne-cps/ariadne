@@ -315,7 +315,7 @@ FloatMP FloatMP::max(MultiplePrecision pr) {
     mpfr_exp_t emax=mpfr_get_emax();
     FloatMP x(2,pr);
     x=sub(down,x,FloatMP::min(pr));
-    assert(x<2);
+    ARIADNE_ASSERT(x<2);
     FloatMP e(pr);
     mpfr_set_ui_2exp(e._mpfr,1u,(emax-1),to_nearest);
     return mul(to_nearest,e,x);

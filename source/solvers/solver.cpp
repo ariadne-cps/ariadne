@@ -66,7 +66,7 @@ operator*(const Matrix<FloatBounds<PR>>& A,const ValidatedVectorMultivariateFunc
 }
 
 template<class PR> FloatError<PR> sup_error(const ValidatedVectorMultivariateFunctionModel<PR>& x) {
-    assert(x.size()>0);
+    ARIADNE_PRECONDITION(x.size()>0);
     FloatError<PR> r(0u,x[0].error().precision());
     for(SizeType i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;

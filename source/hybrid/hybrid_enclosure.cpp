@@ -48,7 +48,7 @@
 #include "solvers/constraint_solver.hpp"
 #include "geometry/affine_set.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "output/graphics.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
@@ -61,14 +61,6 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
     lst1.append(val2); return catenate(lst1,lst3); }
 
-struct Variables2d {
-    RealVariable _x,_y;
-    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
-    RealVariable const& x_variable() const { return this->_x; };
-    RealVariable const& y_variable() const { return this->_y; };
-};
-
-
 //-------------- HybridEnclosure -----------------------------------------//
 
 HybridEnclosure::~HybridEnclosure() {
@@ -79,41 +71,41 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(EnclosureConfiguration const& config)
-    : _location(), _events(), _set(config)
+HybridEnclosure::HybridEnclosure(EnclosureConfiguration const& configuration)
+    : _location(), _events(), _set(configuration)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoxSet& hbox,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactory& factory)
-    : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),factory)
+                                 const EnclosureConfiguration& configuration)
+    : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),configuration)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactory& factory)
+                                 const EnclosureConfiguration& configuration)
     : _location(hybrid_set.location()), _events(), _set()
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
-    this->_set=LabelledEnclosure(euclidean_set,state_space,factory);
+    this->_set=LabelledEnclosure(euclidean_set,state_space,configuration);
 }
 
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
-                                 const RealBox& box, const ValidatedFunctionModelDPFactory& factory)
-    : _location(location), _events(), _set(box,state_space,factory)
+                                 const RealBox& box, const EnclosureConfiguration& configuration)
+    : _location(location), _events(), _set(box,state_space,configuration)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModelDPFactory& factory)
-    : HybridEnclosure(hbox.location(),hbox.space(),hbox.euclidean_set(),factory)
+HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const EnclosureConfiguration& configuration)
+    : HybridEnclosure(hbox.location(),hbox.space(),hbox.euclidean_set(),configuration)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModelDPFactory& factory)
-    : HybridEnclosure(hbox.location(),LabelledEnclosure(hbox.euclidean_set(),hbox.space(),factory))
+HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const EnclosureConfiguration& configuration)
+    : HybridEnclosure(hbox.location(),LabelledEnclosure(hbox.euclidean_set(),hbox.space(),configuration))
 {
 }
 
@@ -167,12 +159,6 @@ EnclosureConfiguration const&
 HybridEnclosure::configuration() const
 {
     return this->_set.configuration();
-}
-
-ValidatedFunctionModelDPFactory const&
-HybridEnclosure::function_factory() const
-{
-    return this->_set.function_factory();
 }
 
 ValidatedScalarMultivariateFunctionModelDP const
@@ -298,16 +284,6 @@ Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMult
     this->_set.set_auxiliary(vars,aux);
 }
 
-Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_set.new_parameter(ivl,vk);
-}
-
-Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
-{
-    this->_set.new_variable(ivl,vk);
-}
-
 Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
     this->_set.new_state_time_bound(gamma);
 }
@@ -335,12 +311,6 @@ Void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstra
 Void HybridEnclosure::new_state_time_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->_set.new_state_time_constraint(constraint);
 }
-
-
-Void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
-    this->new_state_constraint(event,constraint);
-}
-
 
 Void HybridEnclosure::clear_time()
 {
@@ -411,7 +381,7 @@ Void HybridEnclosure::bound_time(Real tmax) {
 }
 
 Void HybridEnclosure::bound_time(ValidatedScalarMultivariateFunction tmax) {
-    this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.function_factory().create(this->_set.domain(),tmax));
+    this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.configuration().function_factory().create(this->_set.domain(),tmax));
 }
 
 Void HybridEnclosure::set_time(Real time)
@@ -421,25 +391,8 @@ Void HybridEnclosure::set_time(Real time)
 
 Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 {
-    this->_set.new_zero_parameter_constraint(this->time_function()-this->function_factory().create(this->_set.domain(),time));
+    this->_set.new_zero_parameter_constraint(this->time_function()-this->configuration().function_factory().create(this->_set.domain(),time));
 }
-
-
-Void HybridEnclosure::set_maximum_time(DiscreteEvent event, FloatDP final_time)
-{
-    this->_set.new_negative_parameter_constraint(this->time_function()-FloatDPValue(final_time)); // Deprecated
-}
-
-Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint) {
-    ARIADNE_NOT_IMPLEMENTED; // Deprecated
-}
-
-Void HybridEnclosure::set_step_time(FloatDPValue time)
-{
-    ARIADNE_NOT_IMPLEMENTED; // Deprecated
-}
-
-
 
 const DiscreteLocation& HybridEnclosure::location() const {
     return this->_location;
@@ -453,7 +406,7 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
 HybridBasicSet<Enclosure> HybridEnclosure::state_time_set() const {
     auto state_time_space=join(this->state_space(),TimeVariable());
     auto state_time_function=join(this->state_function(),this->time_function());
-    Enclosure enclosure(this->parameter_domain(),state_time_function,this->time_function(),this->constraints(),this->function_factory());
+    Enclosure enclosure(this->parameter_domain(),state_time_function,this->time_function(),this->constraints(),this->configuration());
     HybridBasicSet<Enclosure> hset(this->location(),state_time_space,enclosure);
     return hset;
 }
@@ -463,15 +416,15 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
     auto state_auxiliary_function=join(this->state_function(),this->auxiliary_function());
 //    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
 //    ValidatedConstrainedImageSet set(this->parameter_domain(),join(this->state_function(),this->auxiliary_function()),this->constraints());
-    Enclosure enclosure(this->parameter_domain(),state_auxiliary_function,this->time_function(),this->constraints(),this->function_factory());
+    Enclosure enclosure(this->parameter_domain(),state_auxiliary_function,this->time_function(),this->constraints(),this->configuration());
     HybridBasicSet<Enclosure> hset(this->location(),state_auxiliary_space,enclosure);
     return hset;
 }
 
 HybridBasicSet<Enclosure> project(HybridEnclosure const& encl, RealSpace const& spc) {
-    ValidatedVectorMultivariateFunctionModelDP spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
+    ValidatedVectorMultivariateFunctionModelDP spc_funct=encl.configuration().function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
     for(SizeType i=0; i!=spc.dimension(); ++i) { spc_funct[i] = encl.function(spc[i]); }
-    Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.function_factory());
+    Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.configuration());
     return HybridBasicSet<Enclosure>(encl.location(),spc,spc_set);
 }
 

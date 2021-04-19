@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - working
-      - actions
   pull_request:
 
 env:
@@ -20,11 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {
-            name: "macOS 10.15 AppleClang",
-            os: macos-10.15,
-            cxx: "clang++"
-          }
           - {
             name: "macOS 10.15 GCC 10",
             os: macos-10.15,
@@ -107,23 +101,23 @@ jobs:
       run: |
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
-        ./rigorous_numerics_tutorial -v 0 > /dev/null
+        ./rigorous_numerics_tutorial
 
     - name: Check C++ Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/hybrid_evolution
       run: |
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
-        ./hybrid_evolution_tutorial -v 0 > /dev/null
+        ./hybrid_evolution_tutorial
 
     - name: Check Python Rigorous Numerics Tutorial
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
         export LD_LIBRARY_PATH=/usr/local/lib
-        python3 rigorous_numerics_tutorial.py > /dev/null
+        python3 rigorous_numerics_tutorial.py
 
     - name: Check Python Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
         export LD_LIBRARY_PATH=/usr/local/lib
-        python3 hybrid_evolution_tutorial.py > /dev/null
+        python3 hybrid_evolution_tutorial.py

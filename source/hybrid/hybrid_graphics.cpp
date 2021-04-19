@@ -49,14 +49,6 @@ static const Nat HYBRID_TOP_MARGIN = 0;
 static const Nat HYBRID_RIGHT_MARGIN = 0;
 
 
-Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
-    for(SizeType i=0; i!=objects.size(); ++i) {
-        const HybridDrawableInterface& shape=*objects[i].shape_ptr;
-        set_properties(canvas, objects[i].properties);
-        shape.draw(canvas,locations,variables);
-    }
-}
-
 HybridFigure::~HybridFigure() {
 }
 

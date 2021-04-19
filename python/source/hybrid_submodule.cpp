@@ -303,6 +303,10 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("dynamic_function", &HybridAutomaton::dynamic_function);
     hybrid_automaton_class.def("guard_function", &HybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &HybridAutomaton::reset_function);
+    hybrid_automaton_class.def("new_mode",overload_cast<List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
+    hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
+    hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
+    hybrid_automaton_class.def("new_mode",overload_cast<List<DottedRealAssignment>const&,List<RealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation,List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
@@ -353,27 +357,40 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
     typedef HybridSimulator::HybridApproximatePointType HybridApproximatePointType;
     typedef HybridSimulator::OrbitType OrbitType;
 
-    pybind11::class_<HybridSimulator::OrbitType> hybrid_simulator_orbit_class(module,"HybridApproximatePointOrbit");
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
+
+    pybind11::class_<HybridSimulator::OrbitType,pybind11::bases<HybridDrawableInterface>> hybrid_simulator_orbit_class(module,"HybridApproximatePointOrbit");
     hybrid_simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
 
     pybind11::class_<HybridSimulator> hybrid_simulator_class(module,name);
-    hybrid_simulator_class.def(pybind11::init<>());
-    hybrid_simulator_class.def("set_step_size", &HybridSimulator::set_step_size);
-    hybrid_simulator_class.def("orbit", (OrbitType(HybridSimulator::*)(const HybridAutomatonInterface&, const HybridApproximatePointType&, const TerminationType&)const) &HybridSimulator::orbit);
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridAutomatonInterface const&,HybridApproximatePointType const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
-    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridAutomatonInterface const&,HybridRealPoint const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def(pybind11::init<HybridSimulator::SystemType const&>());
+    hybrid_simulator_class.def("configuration",pybind11::overload_cast<>(&HybridSimulator::configuration),reference_internal);
+    hybrid_simulator_class.def("orbit", (OrbitType(HybridSimulator::*)(const HybridApproximatePointType&, const TerminationType&)const) &HybridSimulator::orbit);
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridApproximatePointType const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridRealPoint const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+    hybrid_simulator_class.def("orbit", pybind11::overload_cast<HybridBoundedConstraintSet const&,TerminationType const&>(&HybridSimulator::orbit,pybind11::const_));
+
+    typedef typename HybridSimulator::ConfigurationType Configuration;
+    pybind11::class_<Configuration> hybrid_simulator_configuration_class(module,"HybridSimulatorConfiguration");
+    hybrid_simulator_configuration_class.def("set_step_size", &Configuration::set_step_size);
+    hybrid_simulator_configuration_class.def("__repr__",&__cstr__<Configuration>);
+}
+
+Void export_hybrid_drawable_interface(pybind11::module& module)
+{
+    pybind11::class_<HybridDrawableInterface> hybrid_drawable_interface_class(module,"HybridDrawableInterface");
 }
 
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
 {
-    pybind11::class_<ORB> orbit_class(module,name);
+    pybind11::class_<ORB,pybind11::bases<HybridDrawableInterface>> orbit_class(module,name);
+
     orbit_class.def("reach", &ORB::reach);
     orbit_class.def("evolve", &ORB::final);
     orbit_class.def("final", &ORB::final);
     orbit_class.def("__repr__", &__cstr__<ORB>);
 }
-
 
 template<class EV>
 Void export_evolver_interface(pybind11::module& module, const char* name)
@@ -399,18 +416,31 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_class.def(pybind11::init<GeneralHybridEvolver::SystemType const&>());
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const HybridBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
-      evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
+    evolver_class.def("set_integrator",&Evolver::set_integrator);
+    evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
     evolver_class.def("__repr__",&__cstr__<Evolver>);
 
-
     typedef typename EV::ConfigurationType Configuration;
-    pybind11::class_<typename Evolver::ConfigurationType> evolver_configuration_class(module,"GeneralHybridEvolverConfiguration");
+    pybind11::class_<Configuration> evolver_configuration_class(module,"GeneralHybridEvolverConfiguration");
     evolver_configuration_class.def("set_maximum_enclosure_radius", &Configuration::set_maximum_enclosure_radius);
     evolver_configuration_class.def("set_maximum_step_size", &Configuration::set_maximum_step_size);
+    evolver_configuration_class.def("set_maximum_spacial_error", &Configuration::set_maximum_spacial_error);
+    evolver_configuration_class.def("set_enable_subdivisions", &Configuration::set_enable_subdivisions);
+    evolver_configuration_class.def("set_enable_reconditioning", &Configuration::set_enable_reconditioning);
     evolver_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
+template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {
+    typedef typename RA::StorageType StorageType;
+    typedef typename RA::StateSpaceType StateSpaceType;
+    typedef SafetyCertificate<StateSpaceType> SafetyCertificateType;
 
+    pybind11::class_<SafetyCertificateType> safety_certificate_class(module,name);
+    safety_certificate_class.def(pybind11::init<ValidatedSierpinskian,StorageType,StorageType >());
+    safety_certificate_class.def_readonly("is_safe", &SafetyCertificateType::is_safe);
+    safety_certificate_class.def_readonly("chain_reach_set", &SafetyCertificateType::chain_reach_set);
+    safety_certificate_class.def_readonly("safe_set", &SafetyCertificateType::safe_set);
+}
 
 template<class RA, class... PARAMS> Void export_reachability_analyser(pybind11::module& module, const char* name);
 
@@ -421,7 +451,9 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     typedef typename RA::ConfigurationType Configuration;
     typedef typename RA::StorageType StorageType;
     typedef typename RA::OvertSetInterfaceType OvertSetType;
+    typedef typename RA::OpenSetInterfaceType OpenSetType;
     typedef typename RA::CompactSetInterfaceType CompactSetType;
+    typedef typename RA::SafetyCertificateType SafetyCertificateType;
     typedef typename RA::TimeType TimeType;
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
@@ -433,13 +465,31 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     reachability_analyser_class.def("lower_reach",(StorageType(RA::*)(OvertSetType const&,TimeType const&)const) &RA::lower_reach);
     reachability_analyser_class.def("upper_reach",(StorageType(RA::*)(CompactSetType const&,TimeType const&)const) &RA::upper_reach);
     reachability_analyser_class.def("outer_chain_reach",&RA::outer_chain_reach);
+    reachability_analyser_class.def("verify_safety",(SafetyCertificateType(RA::*)(CompactSetType const&, OpenSetType const&)const) &RA::verify_safety);
 
-    pybind11::class_<HybridReachabilityAnalyserConfiguration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
-    reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &HybridReachabilityAnalyserConfiguration::set_maximum_grid_fineness);
-    reachability_analyser_configuration_class.def("set_lock_to_grid_time", &HybridReachabilityAnalyserConfiguration::set_lock_to_grid_time);
-    reachability_analyser_configuration_class.def("__repr__",&__cstr__<HybridReachabilityAnalyserConfiguration>);
+    pybind11::class_<Configuration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
+    reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &Configuration::set_maximum_grid_fineness);
+    reachability_analyser_configuration_class.def("set_lock_to_grid_time", &Configuration::set_lock_to_grid_time);
+    reachability_analyser_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
+Void export_hybrid_figure(pybind11::module& module) {
+    static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
+
+    pybind11::class_<HybridFigure> hybrid_figure_class(module,"HybridFigure");
+    hybrid_figure_class.def(pybind11::init<>());
+    hybrid_figure_class.def("set_axes", &HybridFigure::set_axes, reference_internal);
+    hybrid_figure_class.def("set_line_style", &HybridFigure::set_line_style, reference_internal);
+    hybrid_figure_class.def("set_line_width", &HybridFigure::set_line_width, reference_internal);
+    hybrid_figure_class.def("set_line_colour", (Void(HybridFigure::*)(Colour))&HybridFigure::set_line_colour, reference_internal);
+    hybrid_figure_class.def("set_fill_style", &HybridFigure::set_fill_style, reference_internal);
+    hybrid_figure_class.def("set_fill_opacity", &HybridFigure::set_fill_opacity, reference_internal);
+    hybrid_figure_class.def("set_fill_colour", (Void(HybridFigure::*)(Colour))&HybridFigure::set_fill_colour, reference_internal);
+    hybrid_figure_class.def("draw",(Void(HybridFigure::*)(const HybridDrawableInterface&))&HybridFigure::draw, reference_internal);
+    hybrid_figure_class.def("clear", &HybridFigure::clear, reference_internal);
+    hybrid_figure_class.def("write",(Void(HybridFigure::*)(const Char*)const)&HybridFigure::write);
+    hybrid_figure_class.def("write",(Void(HybridFigure::*)(const Char*,Nat,Nat)const)&HybridFigure::write);
+}
 
 Void export_hybrid_plots(pybind11::module& module) {
     module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitType const&))&plot);
@@ -476,14 +526,20 @@ Void hybrid_submodule(pybind11::module& module) {
     export_hybrid_time(module);
     export_hybrid_termination_criterion(module);
 
+    export_hybrid_drawable_interface(module);
+    
     export_simulator<HybridSimulator>(module,"HybridSimulator");
 
-    export_orbit<Orbit<HybridEnclosure>>(module, "HybridOrbit");
+    export_orbit<Orbit<HybridEnclosure>>(module, "HybridEnclosureOrbit");
     export_evolver_interface<HybridEvolverInterface>(module,"HybridEvolverInterface");
     export_evolver<GeneralHybridEvolver>(module,"GeneralHybridEvolver");
 
+    export_orbit<Orbit<HybridStorage>>(module,"HybridStorageOrbit");
+
+    export_safety_certificate<HybridReachabilityAnalyser>(module,"HybridSafetyCertificate");
     export_reachability_analyser<HybridReachabilityAnalyser>(module,"HybridReachabilityAnalyser");
 
+    export_hybrid_figure(module);
     export_hybrid_plots(module);
 }
 

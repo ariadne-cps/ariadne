@@ -26,6 +26,8 @@
 #include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/number.hpp"
+#include "numeric/upper_number.hpp"
+#include "numeric/lower_number.hpp"
 
 #include "numeric/floatdp.hpp"
 #include "numeric/float_value.hpp"
@@ -326,7 +328,7 @@ TestDirectedNumber<Y>::test() {
 
 template<class Y> Void
 TestDirectedNumber<Y>::test_concept() {
-    static_assert(IsSame<NegationType<NegationType<Y>>,Y>::value);
+    static_assert(Same<NegationType<NegationType<Y>>,Y>);
     typedef NegationType<Y> NY;
     Y y; NY ny;
     y=+y; ny=-y; y=-ny;
@@ -340,8 +342,8 @@ TestDirectedNumber<Y>::test_concept() {
 
 template<class Y> Void
 TestDirectedNumber<Y>::test_operations() {
-    if constexpr (IsSame<Paradigm<Y>,ValidatedTag>::value) {
-        if constexpr (IsSame<Y,ValidatedLowerNumber>::value) {
+    if constexpr (Same<Paradigm<Y>,ValidatedTag>) {
+        if constexpr (Same<Y,ValidatedLowerNumber>) {
             typedef DoublePrecision PR;
             PR pr;
             Rational q(1,3);

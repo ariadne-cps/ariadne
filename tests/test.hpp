@@ -33,6 +33,7 @@
 #include <cstring>
 #include <iostream>
 #include <exception>
+#include "numeric/logical.hpp"
 
 int ARIADNE_TEST_FAILURES=0;
 int ARIADNE_TEST_SKIPPED=0;
@@ -270,6 +271,20 @@ int test_case_counter = 0;
         }                                                               \
     }                                                                   \
 
+/*! \brief Evaluates \a expression1 and expression2 and checks if the results are not equal. */
+#define ARIADNE_TEST_NOT_EQUAL(expression1,expression2)                 \
+    {                                                                   \
+        std::cout << #expression1 << " != " << #expression2 << ": " << std::flush; \
+        Bool ok = decide((expression1) == (expression2));               \
+        if(ok) {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression1 << ":\n           " << (expression1) \
+                      << "\n     : " << #expression2 << ":\n           " << (expression2) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Inequality `" << #expression1 << " != " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
+        } else {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        }                                                               \
+    }                                                                   \
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_EQUALS(expression,expected)                         \
@@ -511,20 +526,37 @@ int test_case_counter = 0;
         }                                                               \
     }                                                                   \
 
-
-/*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
+/*! \brief Evaluates \a concept in a boolean context and checks if the result is \a true. */
 /*! Use variadic macro argument to allow template parameters */
-#define ARIADNE_TEST_SAME_TYPE(...)                          \
+#define ARIADNE_TEST_CONCEPT(...)                          \
     {                                                                   \
-        std::cout << "IsSame<" << #__VA_ARGS__ << ">: " << std::flush;                 \
-        bool result = ((IsSame<__VA_ARGS__>::value));                                   \
+        std::cout << #__VA_ARGS__ << ": " << std::flush;                 \
+        bool result = ((__VA_ARGS__));                                   \
         if(result) {                                                    \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "false\n" << std::endl;                 \
-            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsSame<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << "\n" << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsSame<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << std::endl; \
+            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Concept `" << #__VA_ARGS__ << "' failed." << "\n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Concept `" << #__VA_ARGS__ << "' failed." << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+
+/*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
+/*! Use variadic macro argument to allow template parameters */
+#define ARIADNE_TEST_SAME_TYPE(...)                          \
+    {                                                                   \
+        std::cout << "Same<" << #__VA_ARGS__ << ">: " << std::flush;                 \
+        bool result = ((Same<__VA_ARGS__>));                                   \
+        if(result) {                                                    \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "false\n" << std::endl;                 \
+            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `Same<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << "\n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `Same<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << std::endl; \
         }                                                               \
     }                                                                   \
 

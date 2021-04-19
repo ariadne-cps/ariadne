@@ -186,16 +186,6 @@ Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) {
     return Sweeper<FloatDP>(std::make_shared<GradedSweeper<FloatDP>>(pr,n)); }
 
 
-
-Void export_expansion(pybind11::module& module)
-{
-//    from_python< Expansion<MultiIndex,FloatDPApproximation> >();
-//    from_python< Expansion<MultiIndex,FloatDPBounds> >();
-//    from_python< Vector< Expansion<MultiIndex,FloatDPApproximation> > >();
-//    from_python< Vector< Expansion<MultiIndex,FloatDPBounds> > >();
-}
-
-
 template<class FLT> Void export_sweeper(pybind11::module& module)
 {
     using PR=PrecisionType<FLT>;
@@ -596,12 +586,11 @@ Void export_vector_taylor_function(pybind11::module& module)
 
 Void calculus_submodule(pybind11::module& module)
 {
-    export_expansion(module);
     export_sweepers(module);
-/*
+
     export_approximate_taylor_model(module);
     export_validated_taylor_model(module);
-*/
+
     export_scalar_function_model(module);
     export_vector_function_model(module);
     export_scalar_taylor_function(module);

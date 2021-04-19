@@ -24,10 +24,6 @@
 # Import all classes in the ariadne module
 from pyariadne import *
 
-# Print a list of all available classes and functions
-print("\nWARNING\n\n")
-#print(dir())
-
 def bits(n):
     return n
 

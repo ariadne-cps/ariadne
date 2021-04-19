@@ -187,10 +187,10 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,ARG,PR,PRE>,ScalarMultivariateFunction<P>>
     , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,ARG,PR,PRE>,Number<P>>
 {
-    static_assert(IsSame<ARG,RealScalar>::value or IsSame<ARG,RealVector>::value,"");
+    static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     using RES=RealScalar; using SIG=RES(ARG);
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
-    static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
+    static_assert(Same<D,IntervalDomainType> or Same<D,BoxDomainType>,"");
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
     typedef ScalarFunction<P,ARG> GenericType;
@@ -435,8 +435,8 @@ template<class P, class ARG, class PR, class PRE> class VectorFunctionModelEleme
 template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVector(ARG),PR,PRE>
     : public Handle<FunctionModelInterface<P,RealVector(ARG),PR,PRE>>
 {
-    static_assert(IsSame<ARG,RealScalar>::value or IsSame<ARG,RealVector>::value,"");
-    static_assert(IsSame<PRE,DoublePrecision>::value or IsSame<PRE,MultiplePrecision>::value,"");
+    static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
+    static_assert(Same<PRE,DoublePrecision> or Same<PRE,MultiplePrecision>,"");
     using RES=RealVector; using SIG=RES(ARG);
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
   public:
@@ -665,15 +665,15 @@ template<class P, class ARG, class PR, class PRE> VectorFunctionModelElement<P,A
 template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
 template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
 
-template<class T> class HasRepr {
-    template<class TT, class = decltype(declval<TT>().repr(declval<OutputStream&>()))> static True test(int);
-    template<class TT> static False test(...);
-  public:
-    static const bool value = decltype(test<T>(1))::value;
-};
+template<class T> concept HasRepr = requires(OutputStream& os, T const& t) { t.repr(os); };
 
-template<class T, EnableIf<HasRepr<T>> =dummy> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { obj.reference().repr(os); return os; }
-template<class T, DisableIf<HasRepr<T>> =dummy> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { return os << obj.reference(); }
+template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) {
+    if constexpr (HasRepr<T>) {
+        obj.reference().repr(os); return os;
+    } else {
+        return os << obj.reference();
+    }
+}
 
 } // namespace Ariadne
 

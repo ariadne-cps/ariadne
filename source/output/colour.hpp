@@ -50,7 +50,7 @@ struct Colour {
 
 OutputStream& operator<<(OutputStream& os, const Colour& c);
 
-extern const Colour transparant;
+extern const Colour transparent;
 
 extern const Colour white;
 extern const Colour black;
@@ -60,8 +60,10 @@ extern const Colour blue;
 extern const Colour yellow;
 extern const Colour cyan;
 extern const Colour magenta;
-extern const Colour ariadneorange;
-
+extern const Colour orange;
+extern const Colour grey;
+extern const Colour lightgrey;
+extern const Colour darkgrey;
 
 } // namespace Ariadne
 

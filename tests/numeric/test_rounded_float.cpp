@@ -32,7 +32,7 @@
 
 #include "config.hpp"
 #include "numeric/rounding.hpp"
-#include "numeric/float.hpp"
+#include "numeric/floats.hpp"
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 #include "numeric/rounded_float.hpp"
@@ -470,7 +470,7 @@ TestRounded<FLT>::test_arithmetic()
     RoundedFloatType five(5,precision);
     RoundedFloatType nine(9,precision);
 
-    if (IsSame<FloatType,FloatDP>::value) {
+    if (Same<FloatType,FloatDP>) {
         RoundedFloatType expected_five_ninths_up(0.55555555555555558023);
         RoundedFloatType::set_rounding_downward();
         ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
-project(Ariadne VERSION 2.1)
+project(Ariadne VERSION 2.2)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     message(WARNING "Intel compiler not supported.")
@@ -16,7 +16,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         message(FATAL_ERROR "Clang version must be at least 11.0!")
     endif()
 else()
-    message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
+    message(WARNING "You are using an unidentified compiler! Compilation has only been tested with Clang and GCC.")
 endif()
 
 set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
@@ -45,9 +45,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 endif()
 if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (NOT APPLE))
     add_compile_options(-frounding-math)
-endif()
-if(NOT CMAKE_BUILD_TYPE)
-    add_compile_options(-O1)
 endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     add_compile_options(-fdiagnostics-color=always)
@@ -92,6 +89,11 @@ check_include_file("execinfo.h" HAVE_EXECINFO_H)
 check_include_file_cxx("cxxabi.h" HAVE_CXXABI_H)
 if((${HAVE_DLFCN_H}) AND (${HAVE_EXECINFO_H}) AND (${HAVE_CXXABI_H}))
     set(ARIADNE_ENABLE_STACK_TRACE ON)
+endif()
+
+find_package(Threads)
+if(NOT Threads_FOUND)
+    message(FATAL ERROR "Unable to find Threads library.")
 endif()
 
 find_package(GMP)
@@ -162,9 +164,9 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
     target_link_libraries(ariadne coverage_config)
@@ -179,8 +181,3 @@ endif()
 
 install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Luca Geretti")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcairo2-dev, libmpfr-dev, python3-dev")
-include(CPack)

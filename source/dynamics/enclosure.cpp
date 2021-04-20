@@ -425,6 +425,13 @@ Void Enclosure::apply_map(ValidatedVectorMultivariateFunction map, EffectiveVect
 }
 
 
+Void Enclosure::apply_discrete_time_map_step(ValidatedVectorMultivariateFunction map)
+{
+    this->apply_map(map);
+    this->_time_function=this->_time_function+StepSizeType(1,0u);
+}
+
+
 Void Enclosure::apply_fixed_evolve_step(ValidatedVectorMultivariateFunction flow, StepSizeType time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);

@@ -199,7 +199,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Compute the map model
     EnclosureType& final_enclosure=initial_enclosure;
-    final_enclosure.apply_map(_sys_ptr->function());
+    final_enclosure.apply_discrete_time_map_step(_sys_ptr->function());
     TimeType final_time=initial_time+1;
     ARIADNE_LOG_PRINTLN("final_enclosure = "<<final_enclosure);
 

@@ -254,5 +254,8 @@ ApproximateKleenean eq(FloatMPApproximateInterval const& ivl1, FloatMPApproximat
 
 template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }
+template<> String class_name<Interval<FloatDPValue>>() { return "FloatDPValueInterval"; }
+template<> String class_name<Interval<FloatMPValue>>() { return "FloatDPValueInterval"; }
+template<> String class_name<Interval<Real>>() { return "RealInterval"; }
 
 } // namespace Ariadne

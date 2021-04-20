@@ -83,12 +83,18 @@ class TestExpressionSet {
     Void test_variables_box() const {
         RealVariablesBox bx1 = {0<=x<=1.2_dec};
         ARIADNE_TEST_ASSERT(not bx1.is_empty());
+        ARIADNE_TEST_PRINT(bx1);
 
         RealVariablesBox bx2(RealSpace({x,y}),RealBox({{0.1_dec,0.5_dec},{-2.3_dec,1}}));
         ARIADNE_TEST_EQUALS(bx2.variables().size(),2);
+        ARIADNE_TEST_PRINT(bx2);
 
         auto labelled_set = LabelledSet<RealBox>(bx2);
         ARIADNE_TEST_EQUALS(labelled_set.dimension(),2);
+
+        ARIADNE_TEST_PRINT(over_approximation(bx2));
+        ARIADNE_TEST_PRINT(approximation(bx2));
+        ARIADNE_TEST_PRINT(under_approximation(bx2));
     }
 
     Void test_real_expression_constraint_set() const {

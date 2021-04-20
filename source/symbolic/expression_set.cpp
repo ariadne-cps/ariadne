@@ -117,7 +117,7 @@ ExactVariablesBoxType over_approximation(const RealVariablesBox& ebx) {
     for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
-        result[iter->first]=over_approximation(iter->second);
+        result.insert(iter->first,over_approximation(iter->second));
     }
     return result;
 }

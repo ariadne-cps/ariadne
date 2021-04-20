@@ -254,7 +254,7 @@ template<class IVL> class VariablesBox {
         for(auto bnd : bnds) { this->_bnds.insert(bnd.variable(),bnd.interval()); } }
     VariablesBox(const InitializerList<VariableIntervalType>& lst) : VariablesBox(List<VariableIntervalType>(lst)) { }
     template<class I> requires Constructible<IVL,I> VariablesBox(VariablesBox<I> const& ebx) : _bnds(ebx.bounds()) { }
-    Map<RealVariable,IntervalType> bounds() const { return this->_bnds; }
+    Map<RealVariable,IntervalType> const& bounds() const { return this->_bnds; }
     Set<RealVariable> variables() const { return this->_bnds.keys(); }
     const IntervalType& operator[](const RealVariable& v) const { return this->_bnds[v]; }
     BoxType euclidean_set(const RealSpace& spc) const {

@@ -117,7 +117,7 @@ ExactVariablesBoxType over_approximation(const RealVariablesBox& ebx) {
     for(Map<RealVariable,RealInterval>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
-        result[iter->first]=over_approximation(iter->second);
+        result.insert(iter->first,over_approximation(iter->second));
     }
     return result;
 }
@@ -192,11 +192,27 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
     ARIADNE_ASSERT(unique_keys(bounds));
 }
 
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds)
+        : RealExpressionBoundedConstraintSet(bounds,List<ContinuousPredicate>())
+{
+}
 
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds, const List<ContinuousPredicate>& constraints)
     : _bounds(bounds), _constraints(constraints)
 {
     ARIADNE_ASSERT( subset(arguments(constraints),Ariadne::variables(_bounds)) );
+}
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const RealVariablesBox& box)
+    : RealExpressionBoundedConstraintSet(box.bounds())
+{
+
+}
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set)
+    : RealExpressionBoundedConstraintSet(box.bounds(), set.constraints())
+{
+
 }
 
 BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {
@@ -232,15 +248,12 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
     ValidatedVectorMultivariateFunction identity=ValidatedVectorMultivariateFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);
-    //List<ValidatedConstraint> constraints;
     for(SizeType i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
         ValidatedScalarMultivariateFunction constraint_function( Ariadne::make_function(space,constraint_expression) );
         result.new_parameter_constraint(constraint_function <= ValidatedNumber(0) );
-        //constraints.append( constraint_function <= 0.0 );
     }
     return result;
-    //return ValidatedConstrainedImageSet(domain,identity,constraints);
 }
 
 

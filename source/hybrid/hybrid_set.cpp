@@ -540,7 +540,6 @@ HybridSpaceSetConstIterator<DS,HBS>::increment_loc()
 
 Vector<FloatDPApproximation> evaluate(ApproximateVectorMultivariateFunction const& f, Vector<FloatDPApproximation> const& v);
 
-template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
 template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
 template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }

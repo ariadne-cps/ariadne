@@ -219,7 +219,8 @@ template<class X> class VariablesPoint {
     Set<RealVariable> variables() const { return this->_vals.keys(); }
     const CoordinateType& operator[](const RealVariable& v) const { return this->_vals[v]; }
     PointType euclidean_set(const RealSpace& spc) const {
-        return PointType(spc.dimension(),[this,&spc](SizeType i){return this->_vals[spc[i]];}); }
+        return PointType(spc.dimension(),[this,&spc](SizeType i){
+            auto entry = this->_vals.find(spc[i]); ARIADNE_ASSERT_MSG(entry != this->_vals.end(),"Variable " << spc[i] << " not found in VariablesPoint."); return entry->second; }); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesPointType& ept) {
         return os << "VariablesPoint"<<class_name<X>()<<"( values=" << ept.values() << " )"; }
     explicit operator LabelledSet<Point<X>> () const;
@@ -253,11 +254,11 @@ template<class IVL> class VariablesBox {
         for(auto bnd : bnds) { this->_bnds.insert(bnd.variable(),bnd.interval()); } }
     VariablesBox(const InitializerList<VariableIntervalType>& lst) : VariablesBox(List<VariableIntervalType>(lst)) { }
     template<class I> requires Constructible<IVL,I> VariablesBox(VariablesBox<I> const& ebx) : _bnds(ebx.bounds()) { }
-    Map<RealVariable,IntervalType> bounds() const { return this->_bnds; }
+    Map<RealVariable,IntervalType> const& bounds() const { return this->_bnds; }
     Set<RealVariable> variables() const { return this->_bnds.keys(); }
     const IntervalType& operator[](const RealVariable& v) const { return this->_bnds[v]; }
     BoxType euclidean_set(const RealSpace& spc) const {
-        return BoxType(spc.dimension(),[this,&spc](SizeType i){return this->_bnds[spc[i]];}); }
+        return BoxType(spc.dimension(),[this,&spc](SizeType i){auto entry = this->_bnds.find(spc[i]); ARIADNE_ASSERT_MSG(entry != this->_bnds.end(),"Variable " << spc[i] << " not found in VariablesBox."); return entry->second; }); }
     decltype(auto) is_empty() const { return any(_bnds,[](auto e){return e.second.is_empty();}); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBoxType& ebx) {
         return os << "VariablesBox"<<class_name<IVL>()<<"( bounds=" << ebx.bounds() << " )"; }
@@ -290,7 +291,6 @@ class RealExpressionConstraintSet
 {
     List<ContinuousPredicate> _constraints;
   public:
-    RealExpressionConstraintSet();
     RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints);
     Set<RealVariable> variables() const { return Set<RealVariable>(arguments(this->_constraints)); }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
@@ -313,10 +313,10 @@ class RealExpressionBoundedConstraintSet
     RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain, const InitializerList<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
-    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& domain, const List<ContinuousPredicate>& constraints);
-    RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }
-    RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set)
-        : _bounds(box.bounds()), _constraints(set.constraints()) { }
+    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds);
+    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds, const List<ContinuousPredicate>& constraints);
+    RealExpressionBoundedConstraintSet(const RealVariablesBox& box);
+    RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set);
     Set<RealVariable> variables() const { return this->_bounds.keys(); }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }

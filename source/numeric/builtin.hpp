@@ -36,6 +36,7 @@
 #include <limits>
 
 #include "utility/metaprogramming.hpp"
+#include "utility/macros.hpp"
 #include "numeric/number.decl.hpp"
 
 #include "logical.hpp"
@@ -133,7 +134,7 @@ class ExactDouble {
     friend Boolean operator<=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d<=x2._d; }
     friend Boolean operator> (ExactDouble const& x1, ExactDouble const& x2) { return x1._d> x2._d; }
     friend Boolean operator< (ExactDouble const& x1, ExactDouble const& x2) { return x1._d< x2._d; }
-    friend ExactDouble operator"" _x (long double lx) { double x=lx; if (x!=lx) { assert(x==lx); } return ExactDouble(x); }
+    friend ExactDouble operator"" _x (long double lx) { double x=lx; ARIADNE_ASSERT(x==lx); return ExactDouble(x); }
     friend ExactDouble operator"" _pr (long double lx) { double x=lx; return ExactDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };

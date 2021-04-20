@@ -64,13 +64,13 @@ class TestIteratedMapEvolver
 
         // Set up the map field
         // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
-        Real a=1.5_dyadic; Real b=0.375_dyadic;
+        Real a=1.3_dec; Real b=0.3_dec;
         RealVariable x("x"), y("y");
         IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
         ARIADNE_TEST_PRINT(henon);
 
         // Define the initial set
-        RealVariablesBox initial_box({1.01_dec<=x<=1.03_dec,0.51_dec<=y<=0.53_dec});
+        RealVariablesBox initial_box({0.4_dec<=x<=0.7_dec,0.9_dec<=y<=1.1_dec});
 
         ARIADNE_TEST_PRINT(initial_box);
 
@@ -83,7 +83,7 @@ class TestIteratedMapEvolver
         ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
 
         // Set up the evolution parameters and grid
-        IteratedMap::TimeType time(3);
+        IteratedMap::TimeType time(6);
 
         // Set up the evaluators
         IteratedMapEvolver evolver(henon);
@@ -97,17 +97,25 @@ class TestIteratedMapEvolver
         // Compute the orbit
         auto orbit = evolver.orbit(initial_set,time);
 
+        //std::cout << orbit.reach() << std::endl;
+
         // Print the initial, evolve and reach sets
-        LabelledFigure fig(Axes2d(-10,x,10, -10,y,10));
+        LabelledFigure fig(Axes2d(-10<=x<=10, -10<=y<=10));
         fig << line_style(true) << fill_colour(cyan) << orbit.reach();
         fig << fill_colour(yellow) << orbit.final();
         fig << fill_colour(blue) << initial_set;
-        fig.write("test_iterated_map_evolver");
+        fig.write("test_iterated_map_evolver_xy");
+
+        LabelledFigure fig2(Axes2d(0<=TimeVariable()<=10, -10<=y<=10));
+        fig2 << orbit.reach();
+        fig2.write("test_iterated_map_evolver_ty");
     }
 };
 
-Int main()
+Int main(Int argc, const char* argv[])
 {
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+
     TestIteratedMapEvolver().test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -192,6 +192,8 @@ class Enclosure
     Void apply_map(ValidatedVectorMultivariateFunction r);
     //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The auxiliary function is updated to \a aux.
     Void apply_map(ValidatedVectorMultivariateFunction r, EffectiveVectorMultivariateFunction aux);
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The state variables are unchanged. Time is increased by one.
+    Void apply_discrete_time_map_step(ValidatedVectorMultivariateFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     Void apply_fixed_evolve_step(ValidatedVectorMultivariateFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.

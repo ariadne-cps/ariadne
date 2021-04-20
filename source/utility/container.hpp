@@ -36,6 +36,7 @@
 #include "metaprogramming.hpp"
 #include "stlio.hpp"
 #include "array.hpp"
+#include "macros.hpp"
 
 namespace Ariadne {
 
@@ -236,17 +237,17 @@ template<class K, class T> class Map : public std::map<K,T> {
     using std::map<K,T>::map;
     using std::map<K,T>::insert;
     T& operator[](K k) { return this->std::map<K,T>::operator[](k); }
-    const T& operator[](K k) const { auto iter=this->find(k); assert(iter!=this->end()); return iter->second; }
+    const T& operator[](K k) const { auto iter=this->find(k); ARIADNE_ASSERT(iter!=this->end()); return iter->second; }
     const T& get(const K& k) const { auto i=this->find(k);
-        assert(i!=this->end()); return i->second; }
+        ARIADNE_ASSERT(i!=this->end()); return i->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
     T& value(const K& k) {
         auto iter=this->find(k);
-        assert(iter!=this->end()); return iter->second; }
+        ARIADNE_ASSERT(iter!=this->end()); return iter->second; }
     const T& value(const K& k) const {
         auto iter=this->find(k);
-        assert(iter!=this->end()); return iter->second; }
+        ARIADNE_ASSERT(iter!=this->end()); return iter->second; }
     void insert(const std::pair<K,T>& kv) {
         this->std::map<K,T>::insert(kv); }
     void insert(const K& k, const T& v) {

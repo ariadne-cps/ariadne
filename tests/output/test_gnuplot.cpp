@@ -56,6 +56,7 @@ class TestGnuplot
             ARIADNE_TEST_CALL(test_gauss3DProjXZ(pr));
             ARIADNE_TEST_CALL(test_gauss3DProjYZ(pr));
             ARIADNE_TEST_CALL(test_gauss3DAnimation(pr));
+            
         }
 
         template< class PR>
@@ -82,9 +83,10 @@ class TestGnuplot
             Figure g(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1));
             g.set_bounding_box(cv.bounding_box());
             g.set_line_colour(1,0,0);
-            g.draw(cv);
             g.set_line_colour(0,0,0);
+            g.draw(cv);
             g.write("test_gnuplot-curve");
+
         }
 
         template<class PR>
@@ -124,6 +126,7 @@ class TestGnuplot
             fig1.draw(data);
             fig1.write("test-gnuplot-StringEvolution");
 
+
             RealVariable x("x"), y("y");
             Axes2d axes(0.0<=x<=Nx-1,-1.0<=y<=1.0);
             LabelledFigure fig2=LabelledFigure(axes);
@@ -135,7 +138,8 @@ class TestGnuplot
 
             fig2.draw(data);
 
-            fig2.write("LabelledFigure-StringEvolution");
+            fig2.write("test-gnuplot-LabelledFigure-StringEvolution");
+
         
         }//String Evolution over time
 
@@ -150,14 +154,14 @@ class TestGnuplot
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
-            fig1.draw3d(data);
+            fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3D");
         
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
-            fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3D");
+            fig2.draw(data);
+            fig2.write("test-gnuplot-LabelledFigure-Gauss3D");
          
         }//Gauss 3D
 
@@ -171,17 +175,17 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,1));
             fig1.set_proj_xy();
-            fig1.draw3d(data);
+            fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjXY");
         
-            RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
+            RealVariable x("x"), y("y");
+            Axes2d axes(0<=x<=dim-1,0<=y<=dim-1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xy();
-            fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjXY");
+            fig2.draw(data);
+            fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjXY");
         
         }
 
@@ -195,17 +199,17 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,2));
             fig1.set_proj_xz();
-            fig1.draw3d(data);
+            fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjXZ");
         
-            RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
+            RealVariable x("x"), y("z");
+            Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_xz();
-            fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjXZ");
+            fig2.draw(data);
+            fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjXZ");
         
         }
 
@@ -219,17 +223,17 @@ class TestGnuplot
 
             data = gaussian_function(data, dim, dim, pr);
 
-            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1}, {0,dim-1}, {0,1}}), Projection3d(3,0,1,2));
+            Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,1,2));
             fig1.set_proj_yz();
-            fig1.draw3d(data);
+            fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjYZ");
         
-            RealVariable x("x"), y("y"), z("z");
-            Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
+            RealVariable x("y"), y("z");
+            Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_proj_yz();
-            fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DProjYZ");
+            fig2.draw(data);
+            fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjYZ");
         
         }
 
@@ -249,15 +253,15 @@ class TestGnuplot
 
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
             fig1.set_animated(true);
-            fig1.draw3d(data);
+            fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DAnimation");
         
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2 << set_animated(true);
-            fig2.draw3d(data);
-            fig2.write("LabelledFigure-Gauss3DAnimation");
+            fig2.draw(data);
+            fig2.write("test-gnuplot-LabelledFigure-Gauss3DAnimation");
         
         }
 };

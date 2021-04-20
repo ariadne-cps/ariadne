@@ -66,7 +66,7 @@ class Box
     typedef decltype(max(declval<L>(),declval<U>())) V;
   public:
     //! \brief The type used for drawing ListSet of Box. FIXME: Should not be present
-    typedef DrawableInterface DrawableInterfaceType;
+    typedef Drawable2dInterface DrawableInterfaceType;
 
     //! \brief The type returned by the dimension() method.
     typedef Ariadne::DimensionType DimensionType;
@@ -567,7 +567,7 @@ template<class IVL> class BoxSet;
 
 template<> class BoxSet<ExactIntervalType>
     : public virtual EffectiveEuclideanRegularLocatedSetInterface
-    ,  public virtual DrawableInterface
+    ,  public virtual Drawable2dInterface
     ,  public Box<ExactIntervalType>
 {
 
@@ -592,7 +592,7 @@ template<> class BoxSet<ExactIntervalType>
 };
 
 template<> class BoxSet<ApproximateIntervalType>
-    : public virtual DrawableInterface
+    : public virtual Drawable2dInterface
     , public Box<ApproximateIntervalType>
 {
 
@@ -609,7 +609,7 @@ template<> class BoxSet<ApproximateIntervalType>
 
 template<> class BoxSet<RealInterval>
     : public virtual RegularLocatedSetInterface<EffectiveTag,RealVector>
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
     , public Box<RealInterval>
 {
     using BoxType = Box<RealInterval>;

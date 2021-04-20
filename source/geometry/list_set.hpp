@@ -51,7 +51,7 @@ struct ListSetSummary { SizeType size; DimensionType dimension; };
  */
 template<class BS>
 class ListSet
-//    : public DrawableInterface
+//    : public Drawable2dInterface
 {
   private:
     std::vector<BS> _data;
@@ -149,7 +149,7 @@ class ListSet
 
     /*! \brief Draw on a canvas.
      *
-     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the geometry/box.hpp header file.
+     *  The ListSet template does not implement the Drawable2dInterface to avoid a dependency on the geometry/box.hpp header file.
      */
     template<class PRJ> Void draw(CanvasInterface& c, const PRJ& p) const {
         for(SizeType i=0; i!=this->size(); ++i) {

@@ -127,7 +127,7 @@ class SubPavingInterface;
 //! This may be an issue in the branch method or when implementing Handle classes.
 class SubPavingInterface
     : public virtual LocatedSetInterface<ValidatedTag,RealVector>
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
 {
     friend class SubPavingHandle;
     friend class PavingHandle;

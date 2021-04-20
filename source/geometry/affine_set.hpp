@@ -97,7 +97,7 @@ template<class F> ValidatedAffineModelConstraint<F> operator==(const ValidatedAf
 //! \sa ValidatedConstrainedImageSet
 class ValidatedAffineConstrainedImageSet
     : public virtual ValidatedEuclideanCompactSetInterface
-	, public virtual DrawableInterface
+	, public virtual Drawable2dInterface
 {
     ExactBoxType  _domain;
     Vector<ValidatedAffineModelDP> _space_models;

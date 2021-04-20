@@ -79,7 +79,7 @@ class Figure;
 
 class Zonotope
     : public CompactSetInterface
-    , public DrawableInterface
+    , public Drawable2dInterface
 {
   private:
     Vector<FloatDP> _centre;

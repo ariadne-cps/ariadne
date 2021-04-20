@@ -102,7 +102,7 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! \brief An enclosure for part of the reachable or evolved set of a dynamical system.
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
-    : public DrawableInterface
+    : public Drawable2dInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -364,10 +364,10 @@ using LabelledUpperBoxType = LabelledBox<UpperIntervalType>;
 using LabelledRealBox = LabelledSet<RealBox>;
 
 class LabelledEnclosure
-    : public LabelledDrawableInterface, public Enclosure
+    : public LabelledDrawable2dInterface, public Enclosure
 {
   public:
-    typedef LabelledDrawableInterface DrawableInterfaceType;
+    typedef LabelledDrawable2dInterface DrawableInterfaceType;
     typedef Box<UpperIntervalType> EuclideanBoundingBoxType;
     typedef LabelledUpperBoxType BoundingBoxType;
   public:
@@ -425,7 +425,7 @@ inline OutputStream& operator<<(OutputStream& os, const LabelledEnclosure& s) { 
 
 using LabelledEnclosureListSet = LabelledSet<ListSet<Enclosure>>;
 
-template<> class ListSet<LabelledEnclosure> : public LabelledDrawableInterface {
+template<> class ListSet<LabelledEnclosure> : public LabelledDrawable2dInterface {
     using BS=LabelledEnclosure;
   private:
     List<BS> _data;

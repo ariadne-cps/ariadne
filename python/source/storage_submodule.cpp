@@ -63,7 +63,7 @@ Void export_grid_tree_set(pybind11::module& module) {
 
     pybind11::class_<GridTreeSubpaving> grid_tree_subpaving_class(module,"GridTreeSubset");
 
-    pybind11::class_<GridTreePaving, pybind11::bases<GridTreeSubpaving,DrawableInterface> > grid_tree_paving_class(module,"GridTreePaving");
+    pybind11::class_<GridTreePaving, pybind11::bases<GridTreeSubpaving,Drawable2dInterface> > grid_tree_paving_class(module,"GridTreePaving");
     grid_tree_paving_class.def(pybind11::init<GridTreePaving>());
     grid_tree_paving_class.def(pybind11::init<Nat>());
     grid_tree_paving_class.def(pybind11::init<Grid>());

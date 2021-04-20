@@ -35,9 +35,9 @@
 namespace Ariadne {
 
 template<SizeType N,class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Projection2d& p) const { }
-template <SizeType N, class X> Void Tensor<N, X>::draw3d(CanvasInterface& canvas, const Projection3d& p, ProjType proj) const { }
+template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
 
-template<> Void Tensor<2ul, Ariadne::Vector<Ariadne::Bounds<Ariadne::FloatDP>>>::draw3d(Ariadne::CanvasInterface&, Ariadne::Variables3d const&, Ariadne::ProjType) const { }
+template<> Void Tensor<2ul, Ariadne::Vector<Ariadne::Bounds<Ariadne::FloatDP>>>::draw(Ariadne::CanvasInterface&, Ariadne::Variables3d const&) const { }
 
 template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
         //2D Drawing
@@ -52,7 +52,7 @@ template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
         }
     }
 
-template<> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasInterface& canvas, const Projection3d& p, ProjType proj) const { }
+template<> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
 
 template<> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
     //2D Drawing
@@ -67,10 +67,122 @@ template<> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasIn
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw3d(CanvasInterface& canvas, const Projection3d& p, ProjType proj) const { }
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const { }
+template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
+template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+    ARIADNE_ASSERT(p.argument_size() == this->dimension());
+    if(p.x_coordinate() == 0 && p.y_coordinate() == 1){
+        canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                for(SizeType x1=0; x1!=_ns[0]; ++x1){
+                    if (x2 == 0 && x1 == 0){
+                        x1++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x_coordinate() == 1 && p.y_coordinate() == 0)
+    {
+        canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                for(SizeType x2=0; x2!=_ns[0]; ++x2){
+                    if (x2 == 0 && x1 == 0){
+                        x2++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x_coordinate() == 0 && p.y_coordinate() == 2)
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x_coordinate() == 2 && p.y_coordinate() == 0)
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        } 
+    }
+    else if(p.x_coordinate() == 1 && p.y_coordinate() == 2){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x_coordinate() == 2 && p.y_coordinate() == 1){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        }
+    }
+    
+ }
 
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasInterface& canvas, const Projection3d& p, ProjType proj) const {
+template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
+    for(SizeType frame=0; frame!=_ns[2]; ++frame){
+    SizeType index = _index({0, 0, frame});
+    canvas.move_to(0.0, _a[index].get_d());
+    for(SizeType x2=0; x2!=_ns[1]; ++x2){
+        for(SizeType x1=0; x1!=_ns[0]; ++x1){
+            if (x2 == 0 && x1 == 0){
+                x1++;
+            }
+            index = _index({x1, x2, frame});
+            canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+        }
+        canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+    }
+    canvas.fill3d();
+    }
+
+ 
+ /*
     if(proj == ProjType::no_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
             SizeType index = _index({0, 0, frame});
@@ -112,11 +224,123 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasI
             }
         }
     }
+*/
 }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const { }
+template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+    ARIADNE_ASSERT(p.argument_size() == this->dimension());
+    if(p.x_coordinate() == 0 && p.y_coordinate() == 1){
+        canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                for(SizeType x1=0; x1!=_ns[0]; ++x1){
+                    if (x2 == 0 && x1 == 0){
+                        x1++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x_coordinate() == 1 && p.y_coordinate() == 0)
+    {   canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                for(SizeType x2=0; x2!=_ns[0]; ++x2){
+                    if (x2 == 0 && x1 == 0){
+                        x2++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x_coordinate() == 0 && p.y_coordinate() == 2)
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x_coordinate() == 2 && p.y_coordinate() == 0)
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        } 
+    }
+    else if(p.x_coordinate() == 1 && p.y_coordinate() == 2){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x_coordinate() == 2 && p.y_coordinate() == 1){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        }
+    }
+ }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw3d(CanvasInterface& canvas, const Projection3d& p, ProjType proj) const {
+template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
+    for(SizeType frame=0; frame!=_ns[2]; ++frame){
+    SizeType index = _index({0, 0, frame});
+    canvas.move_to(0.0, _a[index].get_d());
+    for(SizeType x2=0; x2!=_ns[1]; ++x2){
+        for(SizeType x1=0; x1!=_ns[0]; ++x1){
+            if (x2 == 0 && x1 == 0){
+                x1++;
+            }
+            index = _index({x1, x2, frame});
+            canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+        }
+        canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+    }
+    canvas.fill3d();
+    }
+
+
+
+/*
     if(proj == ProjType::no_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
             SizeType index = _index({0, 0, frame});
@@ -158,10 +382,11 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw3d(Canva
             }
         }
     }
+*/
 }
 
 template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Variables2d& p) const { }
-template <SizeType N, class X> Void Tensor<N, X>::draw3d(CanvasInterface& canvas, const Variables3d& p, ProjType proj) const { }
+template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
 
 template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
     for(SizeType frame=0; frame!=_ns[1]; ++frame){
@@ -175,7 +400,7 @@ template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasInterface& canvas, const Variables3d& p, ProjType proj) const { }
+template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
 template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
     for(SizeType frame=0; frame!=_ns[1]; ++frame){
         SizeType index = _index({0, frame});
@@ -188,9 +413,117 @@ template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw3d(CanvasInterface& canvas, const Variables3d& p, ProjType proj) const { }
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const { }
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasInterface& canvas, const Variables3d& p, ProjType proj) const {
+template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
+template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+    if(p.x() == RealVariable("x") && p.y() == RealVariable("y")){
+        canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                for(SizeType x1=0; x1!=_ns[0]; ++x1){
+                    if (x2 == 0 && x1 == 0){
+                        x1++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x() == RealVariable("y") && p.y() == RealVariable("x"))
+    {   canvas.set_heat_map(true);
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            SizeType index = _index({0, 0, frame});
+            canvas.move_to(0.0, _a[index].get_d());
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                for(SizeType x2=0; x2!=_ns[0]; ++x2){
+                    if (x2 == 0 && x1 == 0){
+                        x2++;
+                    }
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+            }
+            canvas.fill3d();
+        }
+    }
+    else if(p.x() == RealVariable("x") && p.y() == RealVariable("z"))
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x() == RealVariable("z") && p.y() == RealVariable("x"))
+    {
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x2=0; x2!=_ns[1]; ++x2){
+                SizeType index = _index({0, x2, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x1=1; x1!=_ns[0]; ++x1){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        } 
+    }
+    else if(p.x() == RealVariable("y") && p.y() == RealVariable("z")){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+                }
+                canvas.fill();
+            }
+        }
+    }
+    else if(p.x() == RealVariable("z") && p.y() == RealVariable("y")){
+        for(SizeType frame=0; frame!=_ns[2]; ++frame){
+            for(SizeType x1=0; x1!=_ns[1]; ++x1){
+                SizeType index = _index({x1, 0, frame});
+                canvas.move_to(0.0, _a[index].get_d());
+                for(SizeType x2=1; x2!=_ns[0]; ++x2){
+                    index = _index({x1, x2, frame});
+                    canvas.line_to(_a[index].get_d(), numeric_cast<double>(x1));
+                }
+                canvas.fill();
+            }
+        }
+    }
+ }
+
+template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
+    for(SizeType frame=0; frame!=_ns[2]; ++frame){
+    SizeType index = _index({0, 0, frame});
+    canvas.move_to(0.0, _a[index].get_d());
+    for(SizeType x2=0; x2!=_ns[1]; ++x2){
+        for(SizeType x1=0; x1!=_ns[0]; ++x1){
+            if (x2 == 0 && x1 == 0){
+                x1++;
+            }
+            index = _index({x1, x2, frame});
+            canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+        }
+        canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+    }
+    canvas.fill3d();
+    }
+/*
     if(proj == ProjType::no_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
             SizeType index = _index({0, 0, frame});
@@ -236,10 +569,29 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw3d(CanvasI
             }
         }
     }
+*/
 }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const { }
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw3d(CanvasInterface& canvas, const Variables3d& p, ProjType proj) const {
+template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+
+ }
+template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
+    for(SizeType frame=0; frame!=_ns[2]; ++frame){
+    SizeType index = _index({0, 0, frame});
+    canvas.move_to(0.0, _a[index].get_d());
+    for(SizeType x2=0; x2!=_ns[1]; ++x2){
+        for(SizeType x1=0; x1!=_ns[0]; ++x1){
+            if (x2 == 0 && x1 == 0){
+                x1++;
+            }
+            index = _index({x1, x2, frame});
+            canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
+        }
+        canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+    }
+    canvas.fill3d();
+    }
+/*
     if(proj == ProjType::no_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
             SizeType index = _index({0, 0, frame});
@@ -285,6 +637,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw3d(Canva
             }
         }
     }
+*/
 }
 
 }

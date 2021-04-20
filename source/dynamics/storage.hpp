@@ -46,7 +46,7 @@ typedef EffectiveVectorMultivariateFunction Mapping;
 //! \ingroup DynamicsModule
 //! \brief A storage for part of the reachable or evolved set of a dynamical system.
 class Storage
-    : public DrawableInterface
+    : public Drawable2dInterface
 {
     GridTreePaving _state_set;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -188,7 +188,7 @@ class LabelledMapping {
 };
 
 class LabelledStorage
-    : public LabelledDrawableInterface, public Storage
+    : public LabelledDrawable2dInterface, public Storage
 {
     template<class SYS> static LabelledMapping labelled_auxiliary_mapping(SYS const& sys) {
         return LabelledMapping(sys.state_space(),sys.auxilary_mapping(),sys.auxiliary_space()); }

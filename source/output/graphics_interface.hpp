@@ -45,8 +45,8 @@ struct Box2d;
 typedef Box<Interval<FloatDPApproximation>> GraphicsBoundingBoxType;
 struct Colour;
 
-class DrawableInterface;
-class LabelledDrawableInterface;
+class Drawable2dInterface;
+class LabelledDrawable2dInterface;
 class FigureInterface;
 class CanvasInterface;
 
@@ -98,17 +98,17 @@ class FigureInterface {
     virtual Bool get_fill_style() const = 0;
     virtual Dbl get_fill_opacity() const = 0;
     virtual Colour get_fill_colour() const = 0;
-    virtual FigureInterface& draw(const DrawableInterface&) = 0;
+    virtual FigureInterface& draw(const Drawable2dInterface&) = 0;
 };
-inline Void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
+inline Void draw(FigureInterface& fig, const Drawable2dInterface& shape) { fig.draw(shape); }
 
 class Figure;
-Void draw(Figure& fig, const DrawableInterface& shape);
-Figure& operator<<(Figure& fig, const DrawableInterface& shape);
+Void draw(Figure& fig, const Drawable2dInterface& shape);
+Figure& operator<<(Figure& fig, const Drawable2dInterface& shape);
 
 class LabelledFigure;
-Void draw(LabelledFigure& fig, const LabelledDrawableInterface& shape);
-LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape);
+Void draw(LabelledFigure& fig, const LabelledDrawable2dInterface& shape);
+LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawable2dInterface& shape);
 
 //! \ingroup GraphicsModule
 //! \brief Interface to two-dimensional drawing canvas with the ability to draw polyhedra.
@@ -164,32 +164,35 @@ class CanvasInterface {
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
-class DrawableInterface {
+class Drawable2dInterface {
   public:
     //! brief The type of data needed to project to a 2d image.
     typedef Projection2d ProjectionType;
 
     //! brief Virtual destructor.
-    virtual ~DrawableInterface() = default;
+    virtual ~Drawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual DrawableInterface* clone() const = 0;
+    virtual Drawable2dInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
     virtual DimensionType dimension() const = 0;
 };
 
-class DrawableInterface3d {
+class Drawable2d3dInterface
+                                : public Drawable2dInterface {
   public:
     //! brief The type of data needed to project to a 2d image.
     typedef Projection3d ProjectionType;
 
     //! brief Virtual destructor.
-    virtual ~DrawableInterface3d() = default;
+    virtual ~Drawable2d3dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual DrawableInterface3d* clone() const = 0;
+    virtual Drawable2dInterface* clone() const = 0;
+    virtual Drawable2d3dInterface* clone2d3d() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual Void draw3d(CanvasInterface& c, const Projection3d& p, ProjType proj) const = 0;
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
+    virtual Void draw(CanvasInterface& c, const Projection3d& p) const = 0;
 
     //! brief The dimension of the object in Euclidean space
     virtual DimensionType dimension() const = 0;
@@ -197,28 +200,31 @@ class DrawableInterface3d {
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
-class LabelledDrawableInterface {
+class LabelledDrawable2dInterface {
   public:
     //! brief The type of data needed to project to a 2d image.
     typedef Variables2d ProjectionType;
     //! brief Virtual destructor.
-    virtual ~LabelledDrawableInterface() = default;
+    virtual ~LabelledDrawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual LabelledDrawableInterface* clone() const = 0;
+    virtual LabelledDrawable2dInterface* clone() const = 0;
     //! brief Draw the projection of object onto variables \a p on the canvas \a c .
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const = 0;
 };
 
-class LabelledDrawableInterface3d {
+class LabelledDrawable2d3dInterface 
+                                      : public LabelledDrawable2dInterface {
   public:
     //! brief The type of data needed to project to a 2d image.
     typedef Variables3d ProjectionType;
     //! brief Virtual destructor.
-    virtual ~LabelledDrawableInterface3d() = default;
+    virtual ~LabelledDrawable2d3dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual LabelledDrawableInterface3d* clone() const = 0;
+    virtual LabelledDrawable2d3dInterface* clone2d3d() const = 0;
+    virtual LabelledDrawable2dInterface* clone() const = 0;
+
     //! brief Draw the projection of object onto variables \a p on the canvas \a c .
-    virtual Void draw3d(CanvasInterface& c, const Variables3d& p, ProjType proj) const = 0;
+    virtual Void draw(CanvasInterface& c, const Variables3d& p) const = 0;
 
 };
 

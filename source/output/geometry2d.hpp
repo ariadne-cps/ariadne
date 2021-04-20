@@ -68,7 +68,7 @@ inline OutputStream& operator<<(OutputStream& os, const Box2d& bx) {
     return os << "["<<bx.xl<<","<<bx.xu<<"]x["<<bx.yl<<","<<bx.yu<<"]"; }
 
 struct Polytope2d
-    : public DrawableInterface
+    : public Drawable2dInterface
 {
     List<Point2d> boundary;
   public:

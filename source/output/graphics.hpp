@@ -235,11 +235,11 @@ class Figure
     GraphicsProperties const& properties() const;
 
     //! Add a set to draw onto the figure.
-    Figure& draw(const DrawableInterface& shape);
+    Figure& draw(const Drawable2dInterface& shape);
     Figure& draw(const ApproximateBoxType& box);
     Figure& draw(const RealBox& box);
 
-    Figure& draw3d(const DrawableInterface3d& shape);
+    Figure& draw(const Drawable2d3dInterface& shape);
 
     //! Clear the figure.
     Figure& clear();
@@ -308,8 +308,8 @@ class LabelledFigure {
     GraphicsProperties const& properties() const;
 
     //! Add a set to draw onto the figure.
-    LabelledFigure& draw(const LabelledDrawableInterface& shape);
-    LabelledFigure& draw3d(const LabelledDrawableInterface3d& shape);
+    LabelledFigure& draw(const LabelledDrawable2dInterface& shape);
+    LabelledFigure& draw(const LabelledDrawable2d3dInterface& shape);
 
     //! Clear the figure.
     LabelledFigure& clear();
@@ -346,7 +346,7 @@ inline LabelledFigure& operator<<(LabelledFigure&g, const SetAnimated& animation
 
 
 template<class S> class LabelledSet;
-template<class S> class LabelledDrawableWrapper : public LabelledDrawableInterface {
+template<class S> class LabelledDrawableWrapper : public LabelledDrawable2dInterface {
     LabelledSet<S> _lset;
   public:
     LabelledDrawableWrapper(LabelledSet<S> lset) : _lset(lset) { }
@@ -376,7 +376,7 @@ template<class... CSETS> Void
 plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {
     plot(filename, Projection2d(2u,0,1), bbox, csets...); }
 
-Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets);
+Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,Drawable2dInterface const&>> const& csets);
 
 } // namespace Ariadne
 

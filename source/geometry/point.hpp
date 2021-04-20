@@ -73,7 +73,7 @@ using LabelledExactBoxType = LabelledBox<ExactIntervalType>;
 template<class X>
 class Point
     : public Vector<X>
-    , public DrawableInterface
+    , public Drawable2dInterface
 {
   public:
     typedef X RealType;
@@ -120,7 +120,7 @@ class Point
 };
 
 template<class X>
-class LabelledPoint : public LabelledDrawableInterface, public Point<X> {
+class LabelledPoint : public LabelledDrawable2dInterface, public Point<X> {
   public:
 
     LabelledPoint(RealSpace const& state_space, Point<X> const& pt);

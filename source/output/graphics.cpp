@@ -45,7 +45,7 @@ namespace Ariadne {
 static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
+OutputStream& operator<<(OutputStream& os, const Drawable2dInterface& drawable) {
     if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
         os << *writable;
     } else {
@@ -167,12 +167,12 @@ Projection2d projection(const RealSpace& space, const Variables2d& variables) {
 }
 
 
-Void draw(Figure& fig, const DrawableInterface& shape) {
+Void draw(Figure& fig, const Drawable2dInterface& shape) {
     fig.draw(shape);
 }
 
-Void draw3d(Figure& fig, const DrawableInterface3d& shape) {
-    fig.draw3d(shape);
+Void draw(Figure& fig, const Drawable2d3dInterface& shape) {
+    fig.draw(shape);
 }
 
 Void draw(Figure& fig, FloatDPApproximateBox const& box) {
@@ -180,30 +180,30 @@ Void draw(Figure& fig, FloatDPApproximateBox const& box) {
 }
 
 struct GraphicsObject {
-    GraphicsObject(const GraphicsProperties& gp, const DrawableInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
-    GraphicsObject(const GraphicsProperties& gp, const DrawableInterface3d& sh)
-        : properties(gp), shape3d_ptr(sh.clone()) { }
+    GraphicsObject(const GraphicsProperties& gp, const Drawable2dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(nullptr) { }
+    GraphicsObject(const GraphicsProperties& gp, const Drawable2d3dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(sh.clone2d3d()) { }
     GraphicsProperties properties;
-    std::shared_ptr<const DrawableInterface> shape_ptr;
-    std::shared_ptr<const DrawableInterface3d> shape3d_ptr;
+    std::shared_ptr<const Drawable2dInterface> shape_ptr;
+    std::shared_ptr<const Drawable2d3dInterface> shape3d_ptr;
 };
 
 struct LabelledGraphicsObject {
-    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawableInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
-    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawableInterface3d& sh)
-        : properties(gp), shape3d_ptr(sh.clone()) { }
+    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawable2dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(nullptr) { }
+    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawable2d3dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(sh.clone2d3d()) { }
     GraphicsProperties properties;
-    std::shared_ptr<const LabelledDrawableInterface> shape_ptr;
-    std::shared_ptr<const LabelledDrawableInterface3d> shape3d_ptr;
+    std::shared_ptr<const LabelledDrawable2dInterface> shape_ptr;
+    std::shared_ptr<const LabelledDrawable2d3dInterface> shape3d_ptr;
 };
 
 struct Figure::Data
 {
     Data() : properties(), projection(2,0,1), projection3d(3,0,1,2),bounding_box(0), variables(RealVariable(""),RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
-    Data(ApproximateBoxType bbx, Projection2d prj) : properties(), projection(prj), projection3d(3, prj.x_coordinate(), prj.x_coordinate(), 2),bounding_box(bbx),  variables(RealVariable(""),RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
-    Data(ApproximateBoxType bbx, Projection3d prj) : properties(), projection(2, prj.x_coordinate(), prj.y_coordinate()), projection3d(prj), bounding_box(bbx), variables(RealVariable(""), RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
+    Data(ApproximateBoxType bbx, Projection2d prj) : properties(), projection(prj), projection3d(3, 0, 1, 2),bounding_box(bbx),  variables(RealVariable(""),RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
+    Data(ApproximateBoxType bbx, Projection3d prj) : properties(), projection(2, 0, 1), projection3d(prj), bounding_box(bbx), variables(RealVariable(""), RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
 
     GraphicsProperties properties;
 
@@ -217,6 +217,7 @@ struct Figure::Data
     Map<RealVariable,ApproximateDoubleInterval> bounds;
     List<LabelledGraphicsObject> labelled_objects;
 
+
 };
 
 Figure::~Figure()
@@ -228,6 +229,7 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
     : _data(new Data(bbx,proj))
 {
     ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
+    if(proj.argument_size() > 2){ this->_data->properties.isProj = true; }
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
@@ -251,14 +253,15 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionTy
 {
 }
 
-Figure& Figure::draw(const DrawableInterface& shape)
+Figure& Figure::draw(const Drawable2dInterface& shape)
 {
     this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
 }
 
-Figure& Figure::draw3d(const DrawableInterface3d& shape)
+Figure& Figure::draw(const Drawable2d3dInterface& shape)
 {
-    this->_data->properties.is3D = true;
+    if (this->_data->bounding_box.size() == 3) { this->_data->properties.is3D = true; }
+
     this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
 }
 
@@ -412,7 +415,7 @@ Colour Figure::get_fill_colour() const
 Figure& Figure::draw(ApproximateBoxType const& box)
 {
     ApproximateBoxSetType box_set(box);
-    DrawableInterface const& shape=box_set;
+    Drawable2dInterface const& shape=box_set;
     this->draw(shape); return *this;
 }
 
@@ -429,7 +432,7 @@ Figure& Figure::set_animated(Bool b){
     this->_data->properties.is_animated = b; return *this;
 }
 
-Figure& operator<<(Figure& fig, const DrawableInterface& shape) {
+Figure& operator<<(Figure& fig, const Drawable2dInterface& shape) {
     fig.draw(shape); return fig;
 }
 
@@ -447,51 +450,36 @@ Void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
 Void Figure::_paint3d(CanvasInterface& canvas) const
 {
     DimensionType dimension=this->_data->projection.argument_size();
-
     ApproximateBoxType bounding_box=this->_data->bounding_box;
     const Projection3d projection=this->_data->projection3d;
-
     if(bounding_box.dimension()==0) {
         bounding_box=ExactBoxType(dimension,ExactIntervalType(-1,1));
     }
-
     ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
     ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
     ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
     ARIADNE_ASSERT(bounding_box.dimension()>projection.z_coordinate());
-
     Dbl xl=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].lower_bound());
     Dbl xu=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].upper_bound());
     Dbl yl=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].lower_bound());
     Dbl yu=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].upper_bound());
     Dbl zl=numeric_cast<Dbl>(bounding_box[projection.z_coordinate()].lower_bound());
     Dbl zu=numeric_cast<Dbl>(bounding_box[projection.z_coordinate()].upper_bound());
-
     String tx=String("x")+to_str(projection.x_coordinate());
     String ty=String("x")+to_str(projection.y_coordinate());
     String tz=String("x")+to_str(projection.z_coordinate());
-
-    canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);
-    if (this->_data->properties.isXY){
-        canvas.set_heat_map(true);
-    }else if(this->_data->properties.isYZ){
-        canvas.initialise(ty, tz, yl, yu, zl, zu);
-    }else if(this->_data->properties.isXZ) {
-        canvas.initialise(tx, tz, xl, xu, zl, zu);
-    }
+    canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);  
     canvas.set_colour_palette(); 
-
     for(const GraphicsObject& object : this->_data->objects) {
-        const DrawableInterface3d& shape=object.shape3d_ptr.operator*();
-        set_properties(canvas, object.properties);
-        if(this->_data->properties.isXZ) { 
-            shape.draw3d(canvas, this->_data->projection3d, ProjType::x1_proj); 
-        }else if(this->_data->properties.isYZ) { 
-            shape.draw3d(canvas, this->_data->projection3d, ProjType::x2_proj); 
-        }else {
-            shape.draw3d(canvas, this->_data->projection3d, ProjType::no_proj);
+        if(object.shape3d_ptr != nullptr)
+        {
+            const Drawable2d3dInterface& shape=object.shape3d_ptr.operator*();
+            set_properties(canvas, object.properties);
+            shape.draw(canvas, this->_data->projection3d); 
+        }else{
+            ARIADNE_ERROR("ERROR: Cannot draw a 2D object in a 3D graphic");
         }
-    }
+    }      
 }
 
 Void Figure::_paint_all(CanvasInterface& canvas) const
@@ -523,10 +511,12 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     String ty=String("x")+to_str(projection.y_coordinate());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
+    if(this->_data->properties.isProj) { canvas.set_colour_palette(); }
 
     // Draw shapes
     for(const GraphicsObject& object : this->_data->objects) {
-        const DrawableInterface& shape=object.shape_ptr.operator*();
+
+        const Drawable2dInterface& shape=object.shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
         ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
                            "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<this->_data->bounding_box);
@@ -548,8 +538,8 @@ Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) cons
         ARIADNE_ERROR("No facilities for displaying graphics are available.");
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
-
-        if(this->_data->properties.is3D){
+        
+        if(this->_data->properties.is3D && this->_data->properties.isProj==false){
             this->_paint3d(*canvas);
         }else{
             this->_paint_all(*canvas);
@@ -589,6 +579,7 @@ LabelledFigure::LabelledFigure(const Axes2d& axes)
 
 LabelledFigure::LabelledFigure(const Axes3d& axes) 
     : _data(new Data(axes)) {
+        this->_data->properties.is3D = true;
 }
 
 LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
@@ -597,6 +588,7 @@ LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<Appro
 
 LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bnds)
     : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bnds).bounds())){
+        this->_data->properties.is3D = true;
 }
 
 Void LabelledFigure::set_axes(const Axes2d& axes) {
@@ -626,14 +618,14 @@ GraphicsProperties const& LabelledFigure::properties() const {
     return this->_data->properties;
 }
 
-LabelledFigure& LabelledFigure::draw(const LabelledDrawableInterface& shape)
+LabelledFigure& LabelledFigure::draw(const LabelledDrawable2dInterface& shape)
 {
     this->_data->objects.push_back(LabelledGraphicsObject(this->_data->properties,shape)); return *this;
 }
 
-LabelledFigure& LabelledFigure::draw3d(const LabelledDrawableInterface3d& shape)
+LabelledFigure& LabelledFigure::draw(const LabelledDrawable2d3dInterface& shape)
 {
-    this->_data->properties.is3D = true;
+    if(this->_data->bounds.size() == 3) { this->_data->properties.is3D = true; }
     this->_data->objects.push_back(LabelledGraphicsObject(this->_data->properties,shape)); return *this;
 }
 
@@ -645,7 +637,7 @@ LabelledFigure& LabelledFigure::set_animated(Bool b){
     this->_data->properties.is_animated = b; return *this;
 }
 
-LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape) {
+LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawable2dInterface& shape) {
     fig.draw(shape); return fig;
 }
 
@@ -673,24 +665,18 @@ Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
     ProgressIndicator indicator(total_objects);
 
     canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);
-    if (this->_data->properties.isXY){
-        canvas.set_heat_map(true);
-    }else if(this->_data->properties.isYZ){
-        canvas.initialise(ty, tz, yl, yu, zl, zu);
-    }else if(this->_data->properties.isXZ) {
-        canvas.initialise(tx, tz, xl, xu, zl, zu);
-    }
     canvas.set_colour_palette();
 
     for(const LabelledGraphicsObject& object : this->_data->objects) {
-        const LabelledDrawableInterface3d& shape=object.shape3d_ptr.operator*();
-        set_properties(canvas, object.properties);
-        if(this->_data->properties.isXZ) { 
-            shape.draw3d(canvas, this->_data->variables3d, ProjType::x1_proj); 
-        }else if(this->_data->properties.isYZ) { 
-            shape.draw3d(canvas, this->_data->variables3d, ProjType::x2_proj); 
-        }else {
-            shape.draw3d(canvas, this->_data->variables3d, ProjType::no_proj);
+        if(object.shape3d_ptr != nullptr)
+        {
+            const LabelledDrawable2d3dInterface& shape=object.shape3d_ptr.operator*();
+            set_properties(canvas, object.properties);
+            shape.draw(canvas, this->_data->variables3d);
+        }
+        else{
+            ARIADNE_ERROR("ERROR: Cannot draw a 2D object in a 3D graphic");
+            break;
         }
         indicator.update_current(processed_objects++);
     }
@@ -715,13 +701,14 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
+    if(this->_data->properties.isProj) { canvas.set_colour_palette(); }
     // Draw shapes
     SizeType total_objects = this->_data->objects.size();
     SizeType processed_objects = 0;
     ProgressIndicator indicator(total_objects);
     ARIADNE_LOG_PRINTLN("Writing " << total_objects << " object" << (total_objects > 1 ? "s..." : "..."));
     for(const LabelledGraphicsObject& object : this->_data->objects) {
-        const LabelledDrawableInterface& shape=object.shape_ptr.operator*();
+        const LabelledDrawable2dInterface& shape=object.shape_ptr.operator*();
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->variables);
         indicator.update_current(processed_objects++);
@@ -744,7 +731,7 @@ LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_heig
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
 
-        if(this->_data->properties.is3D){
+        if(this->_data->properties.is3D && this->_data->properties.isProj==false){
             this->_paint3d(*canvas);
         }else{
             this->_paint_all(*canvas);
@@ -754,7 +741,7 @@ LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_heig
     #endif
 }
 
-Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
+Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,Drawable2dInterface const&>> const& csets) {
     Figure fig(bbox,pr);
     for (auto cset : csets) {
         fig.set_fill_colour(cset.first); fig << cset.second;

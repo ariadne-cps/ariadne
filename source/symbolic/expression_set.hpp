@@ -258,7 +258,7 @@ template<class IVL> class VariablesBox {
     Set<RealVariable> variables() const { return this->_bnds.keys(); }
     const IntervalType& operator[](const RealVariable& v) const { return this->_bnds[v]; }
     BoxType euclidean_set(const RealSpace& spc) const {
-        return BoxType(spc.dimension(),[this,&spc](SizeType i){return this->_bnds[spc[i]];}); }
+        return BoxType(spc.dimension(),[this,&spc](SizeType i){auto entry = this->_bnds.find(spc[i]); ARIADNE_ASSERT_MSG(entry != this->_bnds.end(),"Variable " << spc[i] << " not found in VariablesBox."); return entry->second; }); }
     decltype(auto) is_empty() const { return any(_bnds,[](auto e){return e.second.is_empty();}); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBoxType& ebx) {
         return os << "VariablesBox"<<class_name<IVL>()<<"( bounds=" << ebx.bounds() << " )"; }

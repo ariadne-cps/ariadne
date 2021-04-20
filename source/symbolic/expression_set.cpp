@@ -232,15 +232,12 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
     ValidatedVectorMultivariateFunction identity=ValidatedVectorMultivariateFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);
-    //List<ValidatedConstraint> constraints;
     for(SizeType i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
         ValidatedScalarMultivariateFunction constraint_function( Ariadne::make_function(space,constraint_expression) );
         result.new_parameter_constraint(constraint_function <= ValidatedNumber(0) );
-        //constraints.append( constraint_function <= 0.0 );
     }
     return result;
-    //return ValidatedConstrainedImageSet(domain,identity,constraints);
 }
 
 

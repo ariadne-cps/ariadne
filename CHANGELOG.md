@@ -25,7 +25,9 @@ Legenda for the issue kind:
 - [#527](https://github.com/ariadne-cps/ariadne/issues/527) (A) Allow to draw a Labelled/Hybrid orbit directly to a Labelled/Hybrid figure
 - [#492](https://github.com/ariadne-cps/ariadne/issues/492) (C) Modify SFINAE code to use C++20 concepts, currently preventing AppleClang compilation under macOS until the compiler supports Concepts
 - [#529](https://github.com/ariadne-cps/ariadne/issues/529) (C) Disallow construction of VectorField and IteratedMap from a Function, since it was broken
+- [#533](https://github.com/ariadne-cps/ariadne/issues/533) (C) Map<K,V> now checks for existing key using ARIADNE_ASSERT, yielding errors also for Release builds
 - [#447](https://github.com/ariadne-cps/ariadne/issues/447) (F) Check that a VectorField is defined with dynamics for all involved variables, fixes a segfault within evolution
+- [#532](https://github.com/ariadne-cps/ariadne/issues/532) (F) RealExpressionBoundedConstraintSet could be constructed in an incoherent way, due to missing checks
 - [#211](https://github.com/ariadne-cps/ariadne/issues/211) (R) Remove various deprecated functions
 
 ### 2.1 

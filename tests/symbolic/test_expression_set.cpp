@@ -116,14 +116,25 @@ class TestExpressionSet {
 
     Void test_real_expression_bounded_constraint_set() const {
         RealExpressionConstraintSet unbounded_set({y>=0,z+y<=2,sqr(z)+sqr(y)>=0});
+        ARIADNE_TEST_PRINT(unbounded_set);
         RealVariable u("u");
-        RealExpressionBoundedConstraintSet set(RealVariablesBox({0.1_dec<=x<=0.5_dec,-2.3_dec<=u<=1}),unbounded_set);
-        ARIADNE_TEST_EXECUTE(RealExpressionBoundedConstraintSet(RealVariablesBox({0.1_dec<=x<=0.5_dec,-2.3_dec<=z<=1,-1<=y<=2}),unbounded_set));
-        ARIADNE_TEST_EXECUTE(approximate_euclidean_set(set,RealSpace({x})));
+        ARIADNE_TEST_FAIL(RealExpressionBoundedConstraintSet(RealVariablesBox({0.1_dec<=x<=0.5_dec,-2.3_dec<=u<=1}),unbounded_set));
         ARIADNE_TEST_EXECUTE(intersection(RealVariablesBox({0.1_dec<=z<=0.5_dec,-2.3_dec<=y<=1}),unbounded_set));
-        ARIADNE_TEST_EXECUTE(make_set(RealSpace({x,u}),set));
-        ARIADNE_TEST_FAIL(make_set(RealSpace({x}),set));
         ARIADNE_TEST_EXECUTE(make_set(RealSpace({y,z}),RealVariablesBox({0.1_dec<=z<=0.5_dec,-2.3_dec<=y<=1}),unbounded_set));
+
+        RealExpressionBoundedConstraintSet set(RealVariablesBox({0.1_dec<=y<=0.5_dec,-2.3_dec<=z<=1}),unbounded_set);
+        ARIADNE_TEST_PRINT(set);
+        ARIADNE_TEST_FAIL(approximate_euclidean_set(set,RealSpace({x})));
+        ARIADNE_TEST_EXECUTE(approximate_euclidean_set(set,RealSpace({y,z})));
+        ARIADNE_TEST_FAIL(approximate_euclidean_set(set,RealSpace({x,y,z})));
+        ARIADNE_TEST_FAIL(make_set(RealSpace({y,z,u}),set));
+
+        RealExpressionBoundedConstraintSet set2(RealVariablesBox({0.3_dec<=x<=1,0.1_dec<=y<=0.5_dec,-2.3_dec<=z<=1}),unbounded_set);
+        ARIADNE_TEST_PRINT(set2);
+        ARIADNE_TEST_FAIL(approximate_euclidean_set(set2,RealSpace({x})));
+        ARIADNE_TEST_EXECUTE(approximate_euclidean_set(set2,RealSpace({y,z})));
+        ARIADNE_TEST_EXECUTE(approximate_euclidean_set(set2,RealSpace({x,y,z})));
+        ARIADNE_TEST_FAIL(make_set(RealSpace({y,z,u}),set2));
     }
 };
 

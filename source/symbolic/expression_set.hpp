@@ -313,10 +313,10 @@ class RealExpressionBoundedConstraintSet
     RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain, const InitializerList<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
-    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& domain, const List<ContinuousPredicate>& constraints);
-    RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }
-    RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set)
-        : _bounds(box.bounds()), _constraints(set.constraints()) { }
+    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds);
+    RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds, const List<ContinuousPredicate>& constraints);
+    RealExpressionBoundedConstraintSet(const RealVariablesBox& box);
+    RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set);
     Set<RealVariable> variables() const { return this->_bounds.keys(); }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }

@@ -192,11 +192,27 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
     ARIADNE_ASSERT(unique_keys(bounds));
 }
 
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds)
+        : RealExpressionBoundedConstraintSet(bounds,List<ContinuousPredicate>())
+{
+}
 
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& bounds, const List<ContinuousPredicate>& constraints)
     : _bounds(bounds), _constraints(constraints)
 {
     ARIADNE_ASSERT( subset(arguments(constraints),Ariadne::variables(_bounds)) );
+}
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const RealVariablesBox& box)
+    : RealExpressionBoundedConstraintSet(box.bounds())
+{
+
+}
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const RealVariablesBox& box, const RealExpressionConstraintSet& set)
+    : RealExpressionBoundedConstraintSet(box.bounds(), set.constraints())
+{
+
 }
 
 BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {

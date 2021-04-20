@@ -92,6 +92,8 @@ class TestExpressionSet {
         auto labelled_set = LabelledSet<RealBox>(bx2);
         ARIADNE_TEST_EQUALS(labelled_set.dimension(),2);
 
+        ARIADNE_TEST_EQUALS(variables(bx2.bounds()).size(),2);
+
         ARIADNE_TEST_PRINT(over_approximation(bx2));
         ARIADNE_TEST_PRINT(approximation(bx2));
         ARIADNE_TEST_PRINT(under_approximation(bx2));

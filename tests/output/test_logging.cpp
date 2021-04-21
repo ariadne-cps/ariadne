@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "../test.hpp"
 #include "output/progress_indicator.hpp"
+#include "concurrency/loggable_smart_thread.hpp"
 #include "output/logging.hpp"
 
 using namespace Ariadne;
@@ -67,9 +68,9 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_theme_bgcolor_bold_underline());
         ARIADNE_TEST_CALL(test_handles_multiline_output());
         ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
+        ARIADNE_TEST_CALL(test_redirect());
         ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler());
         ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
-        ARIADNE_TEST_CALL(test_redirect());
         return 0;
     }
 
@@ -280,16 +281,12 @@ class TestLogging {
         ARIADNE_LOG_SET_VERBOSITY(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::thread thread1([]() { print_something1(); }), thread2([]() { print_something2(); });
-        Logger::instance().register_thread(thread1.get_id(),"thr1");
-        Logger::instance().register_thread(thread2.get_id(),"thr2");
+        LoggableSmartThread thread1("thr1",[]() { print_something1(); });
+        LoggableSmartThread thread2("thr2",[]() { print_something2(); });
+        thread1.activate();
+        thread2.activate();
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        thread1.join();
-        thread2.join();
-        Logger::instance().unregister_thread(thread1.get_id());
-        Logger::instance().unregister_thread(thread2.get_id());
     }
 };
 

@@ -24,6 +24,7 @@ Legenda for the issue kind:
 - [#520](https://github.com/ariadne-cps/ariadne/issues/520) (A) Add missing Python bindings for plotting using HybridFigure
 - [#543](https://github.com/ariadne-cps/ariadne/issues/543) (A) Add missing Python bindings for iterating across ListSet of Enclosure classes
 - [#527](https://github.com/ariadne-cps/ariadne/issues/527) (A) Allow to draw a Labelled/Hybrid orbit directly to a Labelled/Hybrid figure
+- [#538](https://github.com/ariadne-cps/ariadne/issues/538) (A) Add a concurrency module with basic primitives for parallel execution
 - [#492](https://github.com/ariadne-cps/ariadne/issues/492) (C) Modify SFINAE code to use C++20 concepts, currently preventing AppleClang compilation under macOS until the compiler supports Concepts
 - [#529](https://github.com/ariadne-cps/ariadne/issues/529) (C) Disallow construction of VectorField and IteratedMap from a Function, since it was broken
 - [#533](https://github.com/ariadne-cps/ariadne/issues/533) (C) Map<K,V> now checks for existing key using ARIADNE_ASSERT, yielding errors also for Release builds

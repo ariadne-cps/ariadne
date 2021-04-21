@@ -1,6 +1,7 @@
 set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
+            loggable_smart_thread.cpp
             concurrency_manager.cpp
             )
 

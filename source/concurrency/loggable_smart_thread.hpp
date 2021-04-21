@@ -34,49 +34,29 @@
 #include <future>
 #include <mutex>
 #include <atomic>
-#include <string>
-#include "output/logging.hpp"
+#include "utility/typedefs.hpp"
+#include "utility/string.hpp"
 
 namespace Ariadne {
 
+class String;
+
+typedef std::thread::id ThreadId;
+
 class LoggableSmartThread {
   public:
-    LoggableSmartThread(std::string name, std::function<void(void)> task) {
-        _name = name;
-        _thread = std::thread([=,this]() {
-                    _id = std::this_thread::get_id();
-                    _start_promise.set_value();
-                    _activate_future.get();
-                    if(_active) task();
-                });
-        _start_future.get();
-    }
+    LoggableSmartThread(String name, std::function<Void(Void)> task);
 
-    std::thread::id id() const {
-        return _id;
-    }
+    ThreadId id() const;
+    String name() const;
 
-    std::string name() const {
-        return _name;
-    }
+    Void activate();
 
-    void activate()  {
-        if (!_active) {
-            _active = true;
-            Logger::instance().register_thread(_id,_name);
-            _activate_promise.set_value();
-        }
-    }
-
-    ~LoggableSmartThread() {
-        if(!_active) _activate_promise.set_value();
-        _thread.join();
-        Logger::instance().unregister_thread(_id);
-    }
+    ~LoggableSmartThread();
 
   private:
-    std::thread::id _id;
-    std::string _name;
+    ThreadId _id;
+    String _name;
     std::atomic<bool> _active = false;
     std::thread _thread;
     std::promise<void> _activate_promise;

@@ -25,6 +25,7 @@
 #include <thread>
 #include "concurrency/buffer.hpp"
 #include "concurrency/loggable_smart_thread.hpp"
+#include "utility/string.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;

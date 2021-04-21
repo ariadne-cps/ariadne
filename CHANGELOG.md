@@ -29,6 +29,7 @@ Legenda for the issue kind:
 - [#533](https://github.com/ariadne-cps/ariadne/issues/533) (C) Map<K,V> now checks for existing key using ARIADNE_ASSERT, yielding errors also for Release builds
 - [#447](https://github.com/ariadne-cps/ariadne/issues/447) (F) Check that a VectorField is defined with dynamics for all involved variables, fixes a segfault within evolution
 - [#532](https://github.com/ariadne-cps/ariadne/issues/532) (F) RealExpressionBoundedConstraintSet could be constructed in an incoherent way, due to missing checks
+- [#536](https://github.com/ariadne-cps/ariadne/issues/536) (F) Discrete evolution did not update the enclosure time, resulting in incorrect plots vs time  
 - [#211](https://github.com/ariadne-cps/ariadne/issues/211) (R) Remove various deprecated functions
 
 ### 2.1 

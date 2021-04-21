@@ -1,4 +1,5 @@
 set(UNIT_TESTS
+    test_smart_thread
     test_buffer
     test_concurrency_manager
 )

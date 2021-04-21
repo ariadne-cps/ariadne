@@ -22,10 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <thread>
 #include "concurrency/buffer.hpp"
 #include "concurrency/smart_thread.hpp"
-#include "utility/string.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -56,7 +54,7 @@ class TestBuffer {
                     break;
                 }
             }
-        });
+        },false);
         ib.push(4);
         ib.push(2);
         thread.start();

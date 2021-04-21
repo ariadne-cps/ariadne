@@ -48,11 +48,11 @@ typedef std::function<Void(Void)> VoidFunction;
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
 //! a readable \a name for logging purposes. An \a entry function can be specified to be run just before the task starts running, and
 //! an \a exit function to be run just after the thread joins. The thread joins automatically when exiting scope.
-//! The thread task can be started immediately, as soon as the id is retrieved (false by default).
+//! The thread task can be started immediately, as soon as the id is retrieved, or not (true by default).
 class SmartThread {
   public:
-    SmartThread(String name, VoidFunction task, Bool start_immediately=false);
-    SmartThread(String name, VoidFunction task, VoidFunction entry, VoidFunction exit, Bool start_immediately=false);
+    SmartThread(String name, VoidFunction task, Bool start_immediately=true);
+    SmartThread(String name, VoidFunction task, VoidFunction entry, VoidFunction exit, Bool start_immediately=true);
 
     //! \brief Get the thread id
     ThreadId id() const;

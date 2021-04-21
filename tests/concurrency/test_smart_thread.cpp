@@ -23,6 +23,7 @@
  */
 
 #include "concurrency/smart_thread.hpp"
+#include "concurrency/concurrency_manager.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -61,11 +62,25 @@ class TestSmartThread {
         ARIADNE_TEST_EQUALS(a,3);
     }
 
+    void test_atomic_multiple_threads() const {
+        SizeType n_threads = 10*ConcurrencyManager::instance().maximum_concurrency();
+        ARIADNE_TEST_PRINT(n_threads);
+        List<SharedPointer<SmartThread>> threads;
+
+        std::atomic<SizeType> a = 0;
+        for (SizeType i=0; i<n_threads; ++i)
+            threads.append(SharedPointer<SmartThread>(new SmartThread("++"+to_string(i),[&a](){ a++; })));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ARIADNE_TEST_EQUALS(a,n_threads);
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_create_simplest());
         ARIADNE_TEST_CALL(test_start_deferred());
         ARIADNE_TEST_CALL(test_task());
         ARIADNE_TEST_CALL(test_entry_exit());
+        ARIADNE_TEST_CALL(test_atomic_multiple_threads());
     }
 };
 

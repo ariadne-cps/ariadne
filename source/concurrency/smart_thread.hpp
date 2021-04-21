@@ -63,7 +63,10 @@ class SmartThread {
     Void start();
 
     //! \brief Whether the thread is running the task.
-    Bool has_started();
+    Bool has_started() const;
+
+    //! \brief Whether the thread has finished the task.
+    Bool has_finished() const;
 
     ~SmartThread();
 
@@ -73,6 +76,7 @@ class SmartThread {
     VoidFunction _exit;
     ThreadId _id;
     std::atomic<bool> _has_started = false;
+    std::atomic<bool> _has_finished = false;
     std::thread _thread;
     std::promise<void> _has_started_promise;
     std::future<void> _has_started_future = _has_started_promise.get_future();

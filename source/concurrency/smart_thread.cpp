@@ -39,6 +39,7 @@ SmartThread::SmartThread(String name, std::function<Void(Void)> task, std::funct
         _got_id_promise.set_value();
         _has_started_future.get();
         task();
+        _has_finished = true;
     });
     _got_id_future.get();
     if (start_immediately)
@@ -61,7 +62,11 @@ Void SmartThread::start()  {
     }
 }
 
-Bool SmartThread::has_started() {
+Bool SmartThread::has_finished() const {
+    return _has_finished;
+}
+
+Bool SmartThread::has_started() const {
     return _has_started;
 }
 

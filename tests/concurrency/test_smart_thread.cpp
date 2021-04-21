@@ -40,9 +40,13 @@ class TestSmartThread {
 
     void test_start_deferred() const {
         SmartThread thread("thr",[](){},false);
+        ARIADNE_TEST_ASSERT(not thread.has_started());
+        ARIADNE_TEST_ASSERT(not thread.has_finished());
         thread.start();
+        ARIADNE_TEST_ASSERT(not thread.has_finished());
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_ASSERT(thread.has_started());
+        ARIADNE_TEST_ASSERT(thread.has_finished());
     }
 
     void test_task() const {

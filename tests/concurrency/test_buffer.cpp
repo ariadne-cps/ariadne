@@ -24,7 +24,7 @@
 
 #include <thread>
 #include "concurrency/buffer.hpp"
-#include "concurrency/loggable_smart_thread.hpp"
+#include "concurrency/smart_thread.hpp"
 #include "utility/string.hpp"
 #include "../test.hpp"
 
@@ -47,7 +47,7 @@ class TestBuffer {
         Buffer<unsigned int> ib(2);
         Buffer<unsigned int> ob(2);
 
-        LoggableSmartThread thread("test",[&ib,&ob]() {
+        SmartThread thread("test",[&ib,&ob]() {
             while (true) {
                 try {
                     auto i = ib.pop();
@@ -59,7 +59,7 @@ class TestBuffer {
         });
         ib.push(4);
         ib.push(2);
-        thread.activate();
+        thread.start();
         auto o1 = ob.pop();
         ARIADNE_TEST_EQUALS(o1,4);
         auto o2 = ob.pop();

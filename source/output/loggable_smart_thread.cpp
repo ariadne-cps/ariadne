@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/loggable_smart_thread.cpp
+ *            output/loggable_smart_thread.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -23,41 +23,15 @@
  */
 
 #include "loggable_smart_thread.hpp"
-#include "output/logging.hpp"
+#include "logging.hpp"
 
 namespace Ariadne {
 
-LoggableSmartThread::LoggableSmartThread(String name, std::function<Void(Void)> task) {
-    _name = name;
-    _thread = std::thread([=,this]() {
-                    _id = std::this_thread::get_id();
-                    _start_promise.set_value();
-                    _activate_future.get();
-                    if(_active) task();
-             });
-    _start_future.get();
-}
-
-ThreadId LoggableSmartThread::id() const {
-    return _id;
-}
-
-String LoggableSmartThread::name() const {
-    return _name;
-}
-
-Void LoggableSmartThread::activate()  {
-    if (!_active) {
-        _active = true;
-        Logger::instance().register_thread(_id,_name);
-        _activate_promise.set_value();
-    }
-}
-
-LoggableSmartThread::~LoggableSmartThread() {
-    if(!_active) _activate_promise.set_value();
-    _thread.join();
-    Logger::instance().unregister_thread(_id);
+LoggableSmartThread::LoggableSmartThread(String name, std::function<Void(Void)> task, Bool start_immediately)
+    : SmartThread(name,task,[this](){ Logger::instance().register_thread(this->id(),this->name()); },
+                                         [this](){ Logger::instance().unregister_thread(this->id()); },
+                                         start_immediately)
+{
 }
 
 } // namespace Ariadne

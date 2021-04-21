@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/loggable_smart_thread.hpp
+ *            output/loggable_smart_thread.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,47 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/loggable_smart_thread.hpp
- *  \brief A wrapper for smart handling of a thread
+/*! \file output/loggable_smart_thread.hpp
+ *  \brief A smart thread with entry/exit handlers for registration/unregistration
  */
 
 #ifndef ARIADNE_LOGGABLE_SMART_THREAD_HPP
 #define ARIADNE_LOGGABLE_SMART_THREAD_HPP
 
-#include <utility>
-#include <thread>
-#include <future>
-#include <mutex>
-#include <atomic>
-#include "utility/typedefs.hpp"
-#include "utility/string.hpp"
+#include "concurrency/smart_thread.hpp"
 
 namespace Ariadne {
 
-class String;
-
-typedef std::thread::id ThreadId;
-
-class LoggableSmartThread {
+class LoggableSmartThread : public SmartThread {
   public:
-    LoggableSmartThread(String name, std::function<Void(Void)> task);
+    LoggableSmartThread(String name, std::function<Void(Void)> task, Bool start_immediately=false);
 
-    ThreadId id() const;
-    String name() const;
-
-    Void activate();
-
-    ~LoggableSmartThread();
-
-  private:
-    ThreadId _id;
-    String _name;
-    std::atomic<bool> _active = false;
-    std::thread _thread;
-    std::promise<void> _activate_promise;
-    std::future<void> _activate_future = _activate_promise.get_future();
-    std::promise<void> _start_promise;
-    std::future<void> _start_future = _start_promise.get_future();
+    virtual ~LoggableSmartThread() = default;
 };
 
 } // namespace Ariadne

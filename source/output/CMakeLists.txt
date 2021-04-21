@@ -2,6 +2,7 @@ set(LIBRARY_NAME ariadne-output)
 
 add_library(${LIBRARY_NAME} OBJECT
     logging.cpp
+    loggable_smart_thread.cpp
     graphics.cpp
     cairo.cpp
     gnuplot.cpp

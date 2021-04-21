@@ -1078,6 +1078,13 @@ void Logger::_release(LogRawMessage const& msg) {
     }
 }
 
+LoggableSmartThread::LoggableSmartThread(String name, std::function<Void(Void)> task, Bool start_immediately)
+        : SmartThread(name,task,[this](){ Logger::instance().register_thread(this->id(),this->name()); },
+                      [this](){ Logger::instance().unregister_thread(this->id()); },
+                      start_immediately)
+{
+}
+
 } // namespace Ariadne
 
 inline bool startup_logging() {

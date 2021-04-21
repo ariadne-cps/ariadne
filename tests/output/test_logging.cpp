@@ -23,10 +23,9 @@
  */
 
 #include "config.hpp"
-#include "../test.hpp"
 #include "output/progress_indicator.hpp"
-#include "output/loggable_smart_thread.hpp"
 #include "output/logging.hpp"
+#include "../test.hpp"
 
 using namespace Ariadne;
 

@@ -41,6 +41,7 @@
 #include <mutex>
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
+#include "concurrency/smart_thread.hpp"
 
 // Set the verbosity, i.e., the maximum level to be shown from println calls
 #define ARIADNE_LOG_SET_VERBOSITY(level) Logger::instance().configuration().set_verbosity(level);
@@ -64,6 +65,8 @@
 #define ARIADNE_LOG_SCOPE_PRINTHOLD(text) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().hold(logscopemanager.scope(),logger_stream.str()); } }
 
 namespace Ariadne {
+
+class SmartThread;
 
 inline unsigned int get_verbosity(int argc, const char* argv[]) {
     if(argc>1) {
@@ -342,8 +345,12 @@ class Logger {
     LoggerConfiguration _configuration;
 };
 
-//! \brief Redirect logging output to file \a filename.
-std::ofstream redirect_log(const char* filename);
+//! \brief A smart thread that specifically handles registration/deregistration of a thread onto the Logger
+class LoggableSmartThread : public SmartThread {
+public:
+    LoggableSmartThread(String name, std::function<Void(Void)> task, Bool start_immediately=true);
+    virtual ~LoggableSmartThread() = default;
+};
 
 } // namespace Ariadne
 

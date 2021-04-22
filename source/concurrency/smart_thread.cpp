@@ -22,6 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "output/logging.hpp"
 #include "smart_thread.hpp"
 
 namespace Ariadne {
@@ -58,7 +59,7 @@ String SmartThread::name() const {
 SmartThread::~SmartThread() {
     _function_buffer.stop_consuming();
     _thread.join();
-    Logger::instance().unregister_thread(this->id());
+    Logger::instance().unregister_thread(_id);
 }
 
 } // namespace Ariadne

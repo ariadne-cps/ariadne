@@ -39,7 +39,6 @@
 #include "utility/string.hpp"
 #include "utility/metaprogramming.hpp"
 #include "concurrency/buffer.hpp"
-#include "output/logging.hpp"
 
 namespace Ariadne {
 

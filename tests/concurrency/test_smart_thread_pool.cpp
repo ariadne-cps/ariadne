@@ -30,12 +30,38 @@ using namespace Ariadne;
 class TestSmartThreadPool {
   public:
 
-    void test_push() {
-
+    void test_construct() {
         auto max_concurrency = std::thread::hardware_concurrency();
-
         SmartThreadPool pool(max_concurrency);
-        std::vector<std::future<SizeType> > results;
+        ARIADNE_TEST_EQUALS(pool.num_threads(),max_concurrency);
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+    }
+
+    void test_execute_single() {
+        SmartThreadPool pool(1);
+        ARIADNE_TEST_EQUALS(pool.num_threads(),1);
+        VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        pool.execute(fn);
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+    }
+
+    void test_execute_multiple() {
+        SizeType num_threads = 2;
+        SmartThreadPool pool(num_threads);
+        ARIADNE_TEST_EQUALS(pool.num_threads(),2);
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+        VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        for (SizeType i=0; i<2*num_threads; ++i) pool.execute(fn);
+        ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(400*num_threads));
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+    }
+
+    void test_process_on_atomic_type() {
+        auto max_concurrency = std::thread::hardware_concurrency();
+        SmartThreadPool pool(max_concurrency);
+        std::vector<Future<SizeType>> results;
         std::atomic<SizeType> x;
 
         for (SizeType i = 0; i < 2 * max_concurrency; ++i) {
@@ -58,11 +84,14 @@ class TestSmartThreadPool {
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_push());
+        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_execute_single());
+        ARIADNE_TEST_CALL(test_execute_multiple());
+        ARIADNE_TEST_CALL(test_process_on_atomic_type());
     }
 };
 
-int main() {
+Int main() {
     TestSmartThreadPool().test();
     return ARIADNE_TEST_FAILURES;
 }

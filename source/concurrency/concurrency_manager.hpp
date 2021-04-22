@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-//! \brief Manages threads and sets runners based on concurrency availability.
+//! \brief Manages threads based on concurrency availability.
 class ConcurrencyManager {
   private:
     ConcurrencyManager();
@@ -62,7 +62,7 @@ class ConcurrencyManager {
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
-    std::mutex _data_mutex;
+    std::mutex _mutex;
 };
 
 } // namespace Ariadne

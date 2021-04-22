@@ -46,6 +46,11 @@ class SmartThreadPool {
     template<class F, class... AS>
     auto execute(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
 
+    //! \brief The number of threads
+    SizeType num_threads();
+    //! \brief The size of the tasks queue
+    SizeType queue_size();
+
     ~SmartThreadPool();
 
   private:

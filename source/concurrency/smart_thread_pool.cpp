@@ -48,9 +48,19 @@ SmartThreadPool::SmartThreadPool(SizeType size)
     }
 }
 
+SizeType SmartThreadPool::num_threads() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return _threads.size();
+}
+
+SizeType SmartThreadPool::queue_size() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return _tasks.size();
+}
+
 SmartThreadPool::~SmartThreadPool() {
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        std::lock_guard<std::mutex> lock(_mutex);
         _stop = true;
     }
     _availability_condition.notify_all();

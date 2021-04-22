@@ -39,7 +39,7 @@ SizeType ConcurrencyManager::concurrency() const {
 
 void ConcurrencyManager::set_concurrency(SizeType value) {
     ARIADNE_PRECONDITION(value <= _maximum_concurrency and value > 0);
-    std::lock_guard<std::mutex> lock(_data_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     _concurrency = value;
 }
 

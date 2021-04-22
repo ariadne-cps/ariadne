@@ -1,7 +1,7 @@
 set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
-            smart_thread.cpp
+        smart_thread.cpp
             concurrency_manager.cpp
             )
 

@@ -26,25 +26,6 @@
 
 namespace Ariadne {
 
-SmartThread::SmartThread(String name, std::function<Void(Void)> task, Bool start_immediately)
-    : SmartThread(name, task, [](){}, [](){}, start_immediately)
-{
-}
-
-SmartThread::SmartThread(String name, std::function<Void(Void)> task, std::function<Void(Void)> entry, std::function<Void(Void)> exit, Bool start_immediately)
-    : _name(name), _entry(std::move(entry)), _exit(std::move(exit))
-{
-    _thread = std::thread([=,this]() {
-        _id = std::this_thread::get_id();
-        _got_id_promise.set_value();
-        _has_started_future.get();
-        task();
-        _has_finished = true;
-    });
-    _got_id_future.get();
-    if (start_immediately)
-        start();
-}
 
 ThreadId SmartThread::id() const {
     return _id;
@@ -57,7 +38,6 @@ String SmartThread::name() const {
 Void SmartThread::start()  {
     if (!_has_started) {
         _has_started = true;
-        _entry();
         _has_started_promise.set_value();
     }
 }
@@ -73,7 +53,7 @@ Bool SmartThread::has_started() const {
 SmartThread::~SmartThread() {
     if(!_has_started) _has_started_promise.set_value();
     _thread.join();
-    _exit();
+    Logger::instance().unregister_thread(this->id());
 }
 
 } // namespace Ariadne

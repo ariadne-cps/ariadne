@@ -32,18 +32,16 @@ class TestSmartThread {
   public:
 
     void test_create_simplest() const {
-        SmartThread thread("thr",[](){});
+        SmartThread thread("thr", [](){});
         ARIADNE_TEST_EXECUTE(thread.id());
-        ARIADNE_TEST_ASSERT(thread.has_started());
+        ARIADNE_TEST_ASSERT(not thread.has_started());
+        ARIADNE_TEST_ASSERT(not thread.has_finished());
         ARIADNE_TEST_EQUALS(thread.name(),"thr");
     }
 
-    void test_start_deferred() const {
-        SmartThread thread("thr",[](){},false);
-        ARIADNE_TEST_ASSERT(not thread.has_started());
-        ARIADNE_TEST_ASSERT(not thread.has_finished());
+    void test_start() const {
+        SmartThread thread("thr", [](){});
         thread.start();
-        ARIADNE_TEST_ASSERT(not thread.has_finished());
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_ASSERT(thread.has_started());
         ARIADNE_TEST_ASSERT(thread.has_finished());
@@ -51,19 +49,10 @@ class TestSmartThread {
 
     void test_task() const {
         int a = 0;
-        SmartThread thread("thr",[&a](){ a++; });
+        SmartThread thread("thr", [&a](){ a++; });
+        thread.start();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(a,1);
-    }
-
-    void test_entry_exit() const {
-        int a = 0;
-        {
-            SmartThread thread("thr",[&a](){ a*=2; },[&a](){ a++; },[&a](){ a++; });
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            ARIADNE_TEST_EQUALS(a,2);
-        }
-        ARIADNE_TEST_EQUALS(a,3);
     }
 
     void test_atomic_multiple_threads() const {
@@ -72,18 +61,30 @@ class TestSmartThread {
         List<SharedPointer<SmartThread>> threads;
 
         std::atomic<SizeType> a = 0;
-        for (SizeType i=0; i<n_threads; ++i)
-            threads.append(SharedPointer<SmartThread>(new SmartThread("++"+to_string(i),[&a](){ a++; })));
+        for (SizeType i=0; i<n_threads; ++i) {
+            threads.append(SharedPointer<SmartThread>(new SmartThread("++" + to_string(i), [&a]() { a++; })));
+            threads[i]->start();
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(a,n_threads);
     }
 
+    void test_task_arguments() const {
+        int x = 3;
+        int y = 5;
+        int z = 0;
+        SmartThread thread("thr", [&z](int x, int y){ z = x * y; }, x, y);
+        thread.start();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ARIADNE_TEST_EQUALS(z,15);
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_create_simplest());
-        ARIADNE_TEST_CALL(test_start_deferred());
+        ARIADNE_TEST_CALL(test_start());
         ARIADNE_TEST_CALL(test_task());
-        ARIADNE_TEST_CALL(test_entry_exit());
+        ARIADNE_TEST_CALL(test_task_arguments());
         ARIADNE_TEST_CALL(test_atomic_multiple_threads());
     }
 };

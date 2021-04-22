@@ -45,7 +45,7 @@ class TestBuffer {
         Buffer<unsigned int> ib(2);
         Buffer<unsigned int> ob(2);
 
-        SmartThread thread("test",[&ib,&ob]() {
+        SmartThread thread("test", [&ib,&ob]() {
             while (true) {
                 try {
                     auto i = ib.pop();
@@ -54,7 +54,7 @@ class TestBuffer {
                     break;
                 }
             }
-        },false);
+        });
         ib.push(4);
         ib.push(2);
         thread.start();

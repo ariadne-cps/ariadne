@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.hpp
+ *            concurrency/buffered_smart_thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/smart_thread.hpp
- *  \brief A wrapper for smart handling of a thread
+/*! \file concurrency/buffered_smart_thread.hpp
+ *  \brief A wrapper for smart handling of a thread with a buffer for incoming tasks
  */
 
-#ifndef ARIADNE_SMART_THREAD_HPP
-#define ARIADNE_SMART_THREAD_HPP
+#ifndef ARIADNE_BUFFERED_SMART_THREAD_HPP
+#define ARIADNE_BUFFERED_SMART_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -53,14 +53,14 @@ template<class T> using PackagedTask = std::packaged_task<T>;
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
 //! a readable \a name for logging purposes. The thread can execute only one task at a time, but multiple tasks can
 //! be enqueued based on the internal buffer capacity.
-class SmartThread {
+class BufferedSmartThread {
   public:
 
     //! \brief Construct with a name.
     //! \details The thread will start and store the id, then register to the Logger
-    SmartThread(String name);
+    BufferedSmartThread(String name);
     //! \brief Construct using the thread id as the name.
-    SmartThread();
+    BufferedSmartThread();
 
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details If the buffer is full, successive calls will block until an execution is started.
@@ -81,7 +81,7 @@ class SmartThread {
     Void set_queue_capacity(SizeType capacity);
 
     //! \brief Destroy the instance, also unregistering from the Logger
-    ~SmartThread();
+    ~BufferedSmartThread();
 
   private:
     String _name;
@@ -92,7 +92,7 @@ class SmartThread {
     Future<void> _got_id_future;
 };
 
-template<class F, class... AS> auto SmartThread::enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
+template<class F, class... AS> auto BufferedSmartThread::enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
 {
     using ReturnType = ResultOf<F(AS...)>;
 
@@ -104,4 +104,4 @@ template<class F, class... AS> auto SmartThread::enqueue(F&& f, AS&&... args) ->
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SMART_THREAD_HPP
+#endif // ARIADNE_BUFFERED_SMART_THREAD_HPP

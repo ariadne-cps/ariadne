@@ -28,57 +28,68 @@ namespace Ariadne {
 
 const String THREAD_NAME_PREFIX = "thr";
 
+VoidFunction SmartThreadPool::_task_wrapper_function() {
+    return [=, this] {
+        while (true) {
+            VoidFunction task;
+            {
+                std::unique_lock<std::mutex> lock(_task_availability_mutex);
+                _task_availability_condition.wait(lock, [=, this] { return _stop or not _tasks.empty(); });
+                if (_stop and _tasks.empty()) return;
+                task = std::move(_tasks.front());
+                _tasks.pop();
+            }
+            task();
+            {
+                std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
+                if (_threads_to_remove > 0) {
+                    _threads_to_remove--;
+                    return;
+                }
+            }
+        }
+    };
+}
+
 SmartThreadPool::SmartThreadPool(SizeType size)
-        : _stop(false) {
+        : _stop(false), _threads_to_remove(0) {
     ARIADNE_PRECONDITION(size > 0);
     for (SizeType i = 0; i < size; ++i) {
-        _threads.append(make_shared<SmartThread>(THREAD_NAME_PREFIX + to_string(i)));
-        _threads.at(i)->enqueue(
-                [=, this] {
-                    while (true) {
-                        VoidFunction task;
-                        {
-                            std::unique_lock<std::mutex> lock(_mutex);
-                            _availability_condition.wait(lock, [=, this] { return _stop or not _tasks.empty(); });
-                            if (_stop and _tasks.empty()) return;
-                            task = std::move(_tasks.front());
-                            _tasks.pop();
-                        }
-                        task();
-                    }
-                }
-        );
+        _threads.append(make_shared<BufferedSmartThread>(THREAD_NAME_PREFIX + to_string(i)));
+        _threads.at(i)->enqueue(_task_wrapper_function());
     }
 }
 
 SizeType SmartThreadPool::num_threads() const {
-    std::lock_guard<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     return _threads.size();
 }
 
 Void SmartThreadPool::set_num_threads(SizeType number) {
     ARIADNE_PRECONDITION(number > 0);
+    std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     const SizeType previous_number = _threads.size();
     if (number > previous_number) {
         _threads.resize(number);
-        for (SizeType i=previous_number; i<number; ++i)
-            _threads.at(i) = make_shared<SmartThread>(THREAD_NAME_PREFIX + to_string(i));
-    } else if (number < previous_number) {
-
-    }
+        for (SizeType i=previous_number; i<number; ++i) {
+            _threads.at(i) = make_shared<BufferedSmartThread>(THREAD_NAME_PREFIX + to_string(i));
+            _threads.at(i)->enqueue(_task_wrapper_function());
+        }
+    } else
+        _threads_to_remove = previous_number - number;
 }
 
 SizeType SmartThreadPool::queue_size() const {
-    std::lock_guard<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_task_availability_mutex);
     return _tasks.size();
 }
 
 SmartThreadPool::~SmartThreadPool() {
     {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard<std::mutex> lock(_task_availability_mutex);
         _stop = true;
     }
-    _availability_condition.notify_all();
+    _task_availability_condition.notify_all();
     _threads.clear();
 }
 

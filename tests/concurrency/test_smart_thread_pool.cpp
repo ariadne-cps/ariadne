@@ -112,8 +112,8 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EXECUTE(pool.set_num_threads(2));
         ARIADNE_TEST_EQUALS(pool.num_threads(),2);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
-        //pool.enqueue(fn);
-        //pool.enqueue(fn);
+        pool.enqueue(fn);
+        pool.enqueue(fn);
         ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
         ARIADNE_TEST_EQUALS(pool.num_threads(),3);
     }

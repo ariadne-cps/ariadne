@@ -31,15 +31,16 @@
 
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "smart_thread.hpp"
+#include "buffered_smart_thread.hpp"
 
 namespace Ariadne {
 
 //! \brief Exception for stopping a thread pool
 class StoppedThreadPoolException : public std::exception { };
 
-//! \brief A pool of SmartThread objects managed internally given a (variable) number of threads
-//! \details Differently from threads, the task queue for a pool is not upper-bounded
+//! \brief A pool of BufferedSmartThread objects managed internally given a (variable) number of threads
+//! \details Differently from managing a single BufferedSmartThread, the task queue for a pool is not upper-bounded, i.e., BufferedSmartThread
+//! objects use a buffer of one element, which receives once the wrapped task that consumes elements from the task queue.
 class SmartThreadPool {
   public:
     //! \brief Construct from a given number of threads
@@ -63,12 +64,16 @@ class SmartThreadPool {
     ~SmartThreadPool();
 
   private:
-    List<SharedPointer<SmartThread>> _threads;
+    List<SharedPointer<BufferedSmartThread>> _threads;
     std::queue<VoidFunction> _tasks;
 
-    mutable std::mutex _mutex;
-    std::condition_variable _availability_condition;
+    VoidFunction _task_wrapper_function();
+
+    mutable std::mutex _task_availability_mutex;
+    std::condition_variable _task_availability_condition;
     Bool _stop;
+    Nat _threads_to_remove;
+    mutable std::mutex _threads_to_remove_mutex;
 };
 
 template<class F, class... AS>
@@ -78,11 +83,11 @@ auto SmartThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>
     auto task = std::make_shared<PackagedTask<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
     Future<ReturnType> result = task->get_future();
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        std::unique_lock<std::mutex> lock(_task_availability_mutex);
         if (_stop) throw StoppedThreadPoolException();
         _tasks.emplace([task]() { (*task)(); });
     }
-    _availability_condition.notify_one();
+    _task_availability_condition.notify_one();
     return result;
 }
 

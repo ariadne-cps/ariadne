@@ -23,11 +23,11 @@
  */
 
 #include "output/logging.hpp"
-#include "smart_thread.hpp"
+#include "buffered_smart_thread.hpp"
 
 namespace Ariadne {
 
-SmartThread::SmartThread(String name)
+BufferedSmartThread::BufferedSmartThread(String name)
         : _name(name), _task_buffer(1), _got_id_future(_got_id_promise.get_future())
 {
     _thread = std::thread([=,this]() {
@@ -44,31 +44,31 @@ SmartThread::SmartThread(String name)
     Logger::instance().register_thread(_id,_name);
 }
 
-SmartThread::SmartThread() : SmartThread(String()) {
+BufferedSmartThread::BufferedSmartThread() : BufferedSmartThread(String()) {
     _name = to_string(_id);
 }
 
-ThreadId SmartThread::id() const {
+ThreadId BufferedSmartThread::id() const {
     return _id;
 }
 
-String SmartThread::name() const {
+String BufferedSmartThread::name() const {
     return _name;
 }
 
-SizeType SmartThread::queue_size() const {
+SizeType BufferedSmartThread::queue_size() const {
     return _task_buffer.size();
 }
 
-SizeType SmartThread::queue_capacity() const {
+SizeType BufferedSmartThread::queue_capacity() const {
     return _task_buffer.capacity();
 }
 
-Void SmartThread::set_queue_capacity(SizeType capacity) {
+Void BufferedSmartThread::set_queue_capacity(SizeType capacity) {
     return _task_buffer.set_capacity(capacity);
 }
 
-SmartThread::~SmartThread() {
+BufferedSmartThread::~BufferedSmartThread() {
     _task_buffer.stop_consuming();
     _thread.join();
     Logger::instance().unregister_thread(_id);

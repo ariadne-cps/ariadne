@@ -38,18 +38,25 @@ namespace Ariadne {
 //! \brief Exception for stopping a thread pool
 class StoppedThreadPoolException : public std::exception { };
 
-//! \brief A pool of SmartThread objects managed internally given a capacity
+//! \brief A pool of SmartThread objects managed internally given a (variable) number of threads
 class SmartThreadPool {
   public:
+    //! \brief Construct from a given number of threads
     SmartThreadPool(SizeType size);
 
     template<class F, class... AS>
     auto execute(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
 
-    //! \brief The number of threads
-    SizeType num_threads();
     //! \brief The size of the tasks queue
-    SizeType queue_size();
+    SizeType queue_size() const;
+
+    //! \brief The number of threads
+    SizeType num_threads() const;
+
+    //! \brief Re-set the number of threads
+    //! \details If downsizing, threads will still be allowed to complete; since completion is not guaranteed to happen any time
+    //! before destruction of the pool, the requested downsizing is simply scheduled.
+    void set_num_threads(SizeType size);
 
     ~SmartThreadPool();
 
@@ -57,7 +64,7 @@ class SmartThreadPool {
     List<SharedPointer<SmartThread>> _threads;
     std::queue<VoidFunction> _tasks;
 
-    std::mutex _mutex;
+    mutable std::mutex _mutex;
     std::condition_variable _availability_condition;
     Bool _stop;
 };

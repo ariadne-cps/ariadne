@@ -35,6 +35,7 @@ class TestSmartThreadPool {
         SmartThreadPool pool(max_concurrency);
         ARIADNE_TEST_EQUALS(pool.num_threads(),max_concurrency);
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+        ARIADNE_TEST_FAIL(SmartThreadPool(0));
     }
 
     void test_execute_single() {

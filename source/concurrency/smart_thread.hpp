@@ -73,9 +73,9 @@ class SmartThread {
     String name() const;
 
     //! \brief The current size of the queue
-    SizeType queue_size();
+    SizeType queue_size() const;
     //! \brief The capacity of the tasks to execute
-    SizeType queue_capacity();
+    SizeType queue_capacity() const;
     //! \brief Change the queue capacity
     //! \details Capacity cannot be changed to a value lower than the current size
     Void set_queue_capacity(SizeType capacity);

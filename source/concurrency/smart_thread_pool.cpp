@@ -28,6 +28,7 @@ namespace Ariadne {
 
 SmartThreadPool::SmartThreadPool(SizeType size)
         : _stop(false) {
+    ARIADNE_PRECONDITION(size > 0);
     for (SizeType i = 0; i < size; ++i) {
         _threads.append(SharedPointer<SmartThread>(new SmartThread("thr" + to_string(i))));
         _threads.at(i)->enqueue(
@@ -48,12 +49,16 @@ SmartThreadPool::SmartThreadPool(SizeType size)
     }
 }
 
-SizeType SmartThreadPool::num_threads() {
+SizeType SmartThreadPool::num_threads() const {
     std::lock_guard<std::mutex> lock(_mutex);
     return _threads.size();
 }
 
-SizeType SmartThreadPool::queue_size() {
+Void SmartThreadPool::set_num_threads(SizeType size) {
+    ARIADNE_PRECONDITION(size > 0);
+}
+
+SizeType SmartThreadPool::queue_size() const {
     std::lock_guard<std::mutex> lock(_mutex);
     return _tasks.size();
 }

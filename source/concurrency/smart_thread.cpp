@@ -56,11 +56,11 @@ String SmartThread::name() const {
     return _name;
 }
 
-SizeType SmartThread::queue_size() {
+SizeType SmartThread::queue_size() const {
     return _task_buffer.size();
 }
 
-SizeType SmartThread::queue_capacity() {
+SizeType SmartThread::queue_capacity() const {
     return _task_buffer.capacity();
 }
 

@@ -50,7 +50,7 @@ template<class E> class Buffer
     //! \brief Push an object into the buffer
     //! \details Will block if the capacity has been reached
     void push(E const& e) {
-        std::unique_lock<std::mutex> locker(mu);
+        std::unique_lock<std::mutex> locker(mux);
         cond.wait(locker, [this](){return _queue.size() < _capacity;});
         _queue.push(e);
         locker.unlock();
@@ -60,7 +60,7 @@ template<class E> class Buffer
     //! \brief Pulls an object from the buffer
     //! \details Will block if the capacity is zero
     E pull() {
-        std::unique_lock<std::mutex> locker(mu);
+        std::unique_lock<std::mutex> locker(mux);
         cond.wait(locker, [this](){return _queue.size() > 0 || _stop_consuming;});
         if (_stop_consuming) { throw BufferStoppedConsumingException(); }
         E back = _queue.front();
@@ -71,13 +71,13 @@ template<class E> class Buffer
     }
 
     //! \brief The current size of the queue
-    SizeType size() {
-        std::lock_guard<std::mutex> locker(mu);
+    SizeType size() const {
+        std::lock_guard<std::mutex> locker(mux);
         return _queue.size();
     }
 
     //! \brief The maximum size for the queue
-    SizeType capacity() {
+    SizeType capacity() const {
         return _capacity;
     }
 
@@ -95,7 +95,7 @@ template<class E> class Buffer
     }
 
 private:
-    std::mutex mu;
+    mutable std::mutex mux;
     std::condition_variable cond;
     std::queue<E> _queue;
     std::atomic<SizeType> _capacity;

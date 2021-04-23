@@ -1,7 +1,7 @@
 /***************************************************************************
  *            concurrency/smart_thread.hpp
  *
- *  Copyright  2007-20  Luca Geretti
+ *  Copyright  2007-21  Luca Geretti
  *
  ****************************************************************************/
 
@@ -34,65 +34,64 @@
 #include <future>
 #include <mutex>
 #include <atomic>
+#include <functional>
 #include "utility/typedefs.hpp"
 #include "utility/string.hpp"
+#include "utility/metaprogramming.hpp"
+#include "concurrency/buffer.hpp"
 #include "output/logging.hpp"
 
 namespace Ariadne {
 
-class String;
-
-typedef std::thread::id ThreadId;
+using Thread = std::thread;
+using ThreadId = Thread::id;
+using VoidFunction = std::function<Void()>;
+template<class T> using Future = std::future<T>;
+template<class T> using Promise = std::promise<T>;
 
 //! \brief A class for handling a thread in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
-//! a readable \a name for logging purposes. The thread does not start immediately.
+//! a readable \a name for logging purposes. The thread can execute only one task at a time: an additional execute
+//! will block while the previous one is executing.
 class SmartThread {
   public:
 
-    template<class Function, class... Args>
-    explicit SmartThread(String name, Function&& f, Args&&... args);
+    //! \brief Construct with a name.
+    //! \details The thread will start and store the id, then register to the Logger
+    SmartThread(String name);
+    //! \brief Construct using the thread id as the name.
+    SmartThread();
+
+    //! \brief Execute the supplied function.
+    //! \details Successive calls will block until the previous result has been computed.
+    template<class F, class... AS>
+    auto execute(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>;
 
     //! \brief Get the thread id
     ThreadId id() const;
     //! \brief Get the readable name
     String name() const;
 
-    //! \brief Start the thread. Can be done once for the object; if already started, this does not do anything.
-    Void start();
-
-    //! \brief Whether the thread is running the task.
-    Bool has_started() const;
-
-    //! \brief Whether the thread has finished the task.
-    Bool has_finished() const;
-
+    //! \brief Destroy the instance, also unregistering from the Logger
     ~SmartThread();
 
   private:
     String _name;
     ThreadId _id;
-    std::atomic<bool> _has_started = false;
-    std::atomic<bool> _has_finished = false;
-    std::thread _thread;
-    std::promise<void> _has_started_promise;
-    std::future<void> _has_started_future = _has_started_promise.get_future();
-    std::promise<void> _got_id_promise;
-    std::future<void> _got_id_future = _got_id_promise.get_future();
+    Thread _thread;
+    Buffer<VoidFunction> _function_buffer;
+    Promise<void> _got_id_promise;
+    Future<void> _got_id_future;
 };
 
-template<class Function, class... Args> SmartThread::SmartThread(String name, Function&& f, Args&&... args)
-    : _name(name)
+template<class F, class... AS> auto SmartThread::execute(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
 {
-    _thread = std::thread([=,this]() {
-        _id = std::this_thread::get_id();
-        _got_id_promise.set_value();
-        _has_started_future.get();
-        f(args...);
-        _has_finished = true;
-    });
-    _got_id_future.get();
-    Logger::instance().register_thread(_id,_name);
+    using ReturnType = ResultOf<F(AS...)>;
+
+    auto task = std::make_shared<std::packaged_task<ReturnType()>>(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
+    Future<ReturnType> result = task->get_future();
+    _function_buffer.push([task](){ (*task)(); });
+    return result;
 }
 
 } // namespace Ariadne

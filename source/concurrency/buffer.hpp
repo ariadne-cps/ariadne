@@ -1,7 +1,7 @@
 /***************************************************************************
  *            concurrency/buffer.hpp
  *
- *  Copyright  2007-20  Luca Geretti
+ *  Copyright  2007-21  Luca Geretti
  *
  ****************************************************************************/
 
@@ -38,11 +38,16 @@
 
 namespace Ariadne {
 
+//! \brief Exception useful when the buffer is allowed to stay in the receiving condition
+class BufferStoppedConsumingException : public std::exception { };
+
 template<class E> class Buffer
 {
   public:
-    Buffer(SizeType cap) : _capacity(cap), _end_consuming(false) { }
+    Buffer(SizeType cap) : _capacity(cap), _stop_consuming(false) { }
 
+    //! \brief Push an object into the buffer
+    //! \details Will block if the capacity has been reached
     void push(E const& e) {
         std::unique_lock<std::mutex> locker(mu);
         cond.wait(locker, [this](){return _queue.size() < _capacity;});
@@ -50,11 +55,13 @@ template<class E> class Buffer
         locker.unlock();
         cond.notify_all();
     }
-    E pop() {
-        std::unique_lock<std::mutex> locker(mu);
-        cond.wait(locker, [this](){return _queue.size() > 0 || _end_consuming;});
 
-        if (_end_consuming) throw std::exception();
+    //! \brief Pulls an object from the buffer
+    //! \details Will block if the capacity is zero
+    E pull() {
+        std::unique_lock<std::mutex> locker(mu);
+        cond.wait(locker, [this](){return _queue.size() > 0 || _stop_consuming;});
+        if (_stop_consuming) { throw BufferStoppedConsumingException(); }
         E back = _queue.front();
         _queue.pop();
         locker.unlock();
@@ -62,17 +69,16 @@ template<class E> class Buffer
         return back;
     }
 
-    SizeType size() const {
+    //! \brief Get the size of the queue
+    SizeType size() {
+        std::lock_guard<std::mutex> locker(mu);
         return _queue.size();
     }
 
-    void end_consuming() {
-        _end_consuming = true;
+    //! \brief Trigger a stop to consuming in the case that the buffer was in the waiting state for input
+    void stop_consuming() {
+        _stop_consuming = true;
         cond.notify_all();
-    }
-
-    bool ended_consuming() const {
-        return _end_consuming;
     }
 
 private:
@@ -80,7 +86,7 @@ private:
     std::condition_variable cond;
     std::queue<E> _queue;
     const unsigned int _capacity;
-    std::atomic<bool> _end_consuming;
+    std::atomic<bool> _stop_consuming;
 };
 
 } // namespace Ariadne

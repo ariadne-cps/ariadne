@@ -261,10 +261,9 @@ class TestLogging {
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
         ARIADNE_TEST_EQUALS(Logger::instance().cached_last_printed_thread_name().compare("main"),0);
-        SmartThread thread1("thr1",[]() { print_something1(); });
-        SmartThread thread2("thr2",[]() { print_something2(); });
-        thread1.start();
-        thread2.start();
+        SmartThread thread1("thr1"), thread2("thr2");
+        thread1.execute([] { print_something1(); });
+        thread2.execute([] { print_something2(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_PRINT(Logger::instance().cached_last_printed_thread_name());
@@ -277,10 +276,9 @@ class TestLogging {
         ARIADNE_LOG_SET_VERBOSITY(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
-        SmartThread thread1("thr1",[]() { print_something1(); });
-        SmartThread thread2("thr2",[]() { print_something2(); });
-        thread1.start();
-        thread2.start();
+        SmartThread thread1("thr1"), thread2("thr2");
+        thread1.execute([] { print_something1(); });
+        thread2.execute([] { print_something2(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

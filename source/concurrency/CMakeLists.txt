@@ -2,8 +2,9 @@ set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
         smart_thread.cpp
-            concurrency_manager.cpp
-            )
+        smart_thread_pool.cpp
+        concurrency_manager.cpp
+)
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
     target_compile_options(${LIBRARY_NAME} PUBLIC -W${WARN})

@@ -26,6 +26,26 @@
 
 namespace Ariadne {
 
+SmartThread::SmartThread(String name)
+        : _name(name), _function_buffer(1), _got_id_future(_got_id_promise.get_future())
+{
+    _thread = std::thread([=,this]() {
+        _id = std::this_thread::get_id();
+        _got_id_promise.set_value();
+        while(true) {
+            try {
+                VoidFunction task = _function_buffer.pull();
+                task();
+            } catch(BufferStoppedConsumingException& e) { break; }
+        }
+    });
+    _got_id_future.get();
+    Logger::instance().register_thread(_id,_name);
+}
+
+SmartThread::SmartThread() : SmartThread(String()) {
+    _name = to_string(_id);
+}
 
 ThreadId SmartThread::id() const {
     return _id;
@@ -35,23 +55,8 @@ String SmartThread::name() const {
     return _name;
 }
 
-Void SmartThread::start()  {
-    if (!_has_started) {
-        _has_started = true;
-        _has_started_promise.set_value();
-    }
-}
-
-Bool SmartThread::has_finished() const {
-    return _has_finished;
-}
-
-Bool SmartThread::has_started() const {
-    return _has_started;
-}
-
 SmartThread::~SmartThread() {
-    if(!_has_started) _has_started_promise.set_value();
+    _function_buffer.stop_consuming();
     _thread.join();
     Logger::instance().unregister_thread(this->id());
 }

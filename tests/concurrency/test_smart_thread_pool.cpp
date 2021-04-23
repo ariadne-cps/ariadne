@@ -65,11 +65,7 @@ class TestSmartThreadPool {
         std::atomic<SizeType> x;
 
         for (SizeType i = 0; i < 2 * max_concurrency; ++i) {
-            results.emplace_back(
-                    pool.execute([&x] {
-                        SizeType r = ++x;
-                        return r * r;
-                    })
+            results.emplace_back(pool.execute([&x] { SizeType r = ++x; return r*r; })
             );
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

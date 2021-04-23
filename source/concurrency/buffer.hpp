@@ -34,6 +34,7 @@
 #include <condition_variable>
 #include <queue>
 #include "utility/typedefs.hpp"
+#include "utility/macros.hpp"
 #include "numeric/logical.hpp"
 
 namespace Ariadne {
@@ -44,7 +45,7 @@ class BufferStoppedConsumingException : public std::exception { };
 template<class E> class Buffer
 {
   public:
-    Buffer(SizeType cap) : _capacity(cap), _stop_consuming(false) { }
+    Buffer(SizeType cap) : _capacity(cap), _stop_consuming(false) { ARIADNE_PRECONDITION(cap>0); }
 
     //! \brief Push an object into the buffer
     //! \details Will block if the capacity has been reached
@@ -69,10 +70,22 @@ template<class E> class Buffer
         return back;
     }
 
-    //! \brief Get the size of the queue
+    //! \brief The current size of the queue
     SizeType size() {
         std::lock_guard<std::mutex> locker(mu);
         return _queue.size();
+    }
+
+    //! \brief The maximum size for the queue
+    SizeType capacity() {
+        return _capacity;
+    }
+
+    //! \brief Change the capacity
+    Void set_capacity(SizeType capacity) {
+        ARIADNE_PRECONDITION(capacity>0);
+        ARIADNE_ASSERT_MSG(capacity>=size(),"Reducing capacity below currenty buffer size is not allowed.");
+        _capacity = capacity;
     }
 
     //! \brief Trigger a stop to consuming in the case that the buffer was in the waiting state for input
@@ -85,8 +98,8 @@ private:
     std::mutex mu;
     std::condition_variable cond;
     std::queue<E> _queue;
-    const unsigned int _capacity;
-    std::atomic<bool> _stop_consuming;
+    std::atomic<SizeType> _capacity;
+    Bool _stop_consuming;
 };
 
 } // namespace Ariadne

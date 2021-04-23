@@ -31,19 +31,50 @@ using namespace Ariadne;
 class TestBuffer {
   public:
 
-    void test_single_buffer() {
-        Buffer<unsigned int> buffer(2);
+    void test_construct() {
+        Buffer<Nat> buffer(2);
+        ARIADNE_TEST_EQUALS(buffer.size(),0);
+        ARIADNE_TEST_EQUALS(buffer.capacity(),2);
+    }
+
+    void test_construct_invalid() {
+        ARIADNE_TEST_FAIL(Buffer<Nat>(0));
+    }
+
+    void test_set_capacity_when_empty() {
+        Buffer<Nat> buffer(2);
+        buffer.set_capacity(5);
+        ARIADNE_TEST_EQUALS(buffer.capacity(),5);
+        buffer.set_capacity(3);
+        ARIADNE_TEST_EQUALS(buffer.capacity(),3);
+        ARIADNE_TEST_FAIL(buffer.set_capacity(0));
+    }
+
+    void test_set_capacity_when_filled() {
+        Buffer<Nat> buffer(2);
         buffer.push(4);
         buffer.push(2);
+        ARIADNE_TEST_EXECUTE(buffer.set_capacity(5));
+        ARIADNE_TEST_FAIL(buffer.set_capacity(1));
+        buffer.pull();
+        ARIADNE_TEST_EXECUTE(buffer.set_capacity(1));
+    }
+
+    void test_single_buffer() {
+        Buffer<SizeType> buffer(2);
+        buffer.push(4);
+        buffer.push(2);
+        ARIADNE_TEST_EQUALS(buffer.size(),2);
         auto o1 = buffer.pull();
         auto o2 = buffer.pull();
+        ARIADNE_TEST_EQUALS(buffer.size(),0);
         ARIADNE_TEST_EQUALS(o1,4);
         ARIADNE_TEST_EQUALS(o2,2);
     }
 
     void test_io_buffer() {
-        Buffer<unsigned int> ib(2);
-        Buffer<unsigned int> ob(2);
+        Buffer<Nat> ib(2);
+        Buffer<Nat> ob(2);
 
         std::thread thread([&ib,&ob]() {
             while (true) {
@@ -71,6 +102,10 @@ class TestBuffer {
     }
 
     void test() {
+        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_construct_invalid());
+        ARIADNE_TEST_CALL(test_set_capacity_when_empty());
+        ARIADNE_TEST_CALL(test_set_capacity_when_filled());
         ARIADNE_TEST_CALL(test_single_buffer());
         ARIADNE_TEST_CALL(test_io_buffer());
     }

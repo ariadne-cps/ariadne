@@ -45,7 +45,7 @@ class BufferStoppedConsumingException : public std::exception { };
 template<class E> class Buffer
 {
   public:
-    Buffer(SizeType cap) : _capacity(cap), _stop_consuming(false) { ARIADNE_PRECONDITION(cap>0); }
+    Buffer(SizeType capacity) : _capacity(capacity), _stop_consuming(false) { ARIADNE_PRECONDITION(capacity>0); }
 
     //! \brief Push an object into the buffer
     //! \details Will block if the capacity has been reached

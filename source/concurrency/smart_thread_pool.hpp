@@ -66,7 +66,7 @@ template<class F, class... AS>
 auto SmartThreadPool::execute(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     using ReturnType = ResultOf<F(AS...)>;
 
-    auto task = std::make_shared<std::packaged_task<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
+    auto task = std::make_shared<PackagedTask<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
     Future<ReturnType> result = task->get_future();
     {
         std::unique_lock<std::mutex> lock(_mutex);

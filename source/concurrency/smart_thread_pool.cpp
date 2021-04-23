@@ -30,13 +30,13 @@ SmartThreadPool::SmartThreadPool(SizeType size)
         : _stop(false) {
     for (SizeType i = 0; i < size; ++i) {
         _threads.append(SharedPointer<SmartThread>(new SmartThread("thr" + to_string(i))));
-        _threads.at(i)->execute(
-                [=,this] {
-                    while(true) {
+        _threads.at(i)->enqueue(
+                [=, this] {
+                    while (true) {
                         VoidFunction task;
                         {
                             std::unique_lock<std::mutex> lock(_mutex);
-                            _availability_condition.wait(lock,[=,this] { return _stop or not _tasks.empty(); });
+                            _availability_condition.wait(lock, [=, this] { return _stop or not _tasks.empty(); });
                             if (_stop and _tasks.empty()) break;
                             task = std::move(_tasks.front());
                             _tasks.pop();

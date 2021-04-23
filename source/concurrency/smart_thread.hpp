@@ -47,11 +47,12 @@ using ThreadId = Thread::id;
 using VoidFunction = std::function<Void()>;
 template<class T> using Future = std::future<T>;
 template<class T> using Promise = std::promise<T>;
+template<class T> using PackagedTask = std::packaged_task<T>;
 
 //! \brief A class for handling a thread in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
-//! a readable \a name for logging purposes. The thread can execute only one task at a time: an additional execute
-//! will block while the previous one is executing.
+//! a readable \a name for logging purposes. The thread can execute only one task at a time, but multiple tasks can
+//! be enqueued based on the internal buffer capacity.
 class SmartThread {
   public:
 
@@ -61,15 +62,23 @@ class SmartThread {
     //! \brief Construct using the thread id as the name.
     SmartThread();
 
-    //! \brief Execute the supplied function.
-    //! \details Successive calls will block until the previous result has been computed.
+    //! \brief Enqueue the supplied task for execution.
+    //! \details If the buffer is full, successive calls will block until an execution is started.
     template<class F, class... AS>
-    auto execute(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>;
+    auto enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>;
 
     //! \brief Get the thread id
     ThreadId id() const;
     //! \brief Get the readable name
     String name() const;
+
+    //! \brief The current size of the queue
+    SizeType queue_size();
+    //! \brief The capacity of the tasks to execute
+    SizeType queue_capacity();
+    //! \brief Change the queue capacity
+    //! \details Capacity cannot be changed to a value lower than the current size
+    Void set_queue_capacity(SizeType capacity);
 
     //! \brief Destroy the instance, also unregistering from the Logger
     ~SmartThread();
@@ -78,18 +87,18 @@ class SmartThread {
     String _name;
     ThreadId _id;
     Thread _thread;
-    Buffer<VoidFunction> _function_buffer;
+    Buffer<VoidFunction> _task_buffer;
     Promise<void> _got_id_promise;
     Future<void> _got_id_future;
 };
 
-template<class F, class... AS> auto SmartThread::execute(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
+template<class F, class... AS> auto SmartThread::enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
 {
     using ReturnType = ResultOf<F(AS...)>;
 
-    auto task = std::make_shared<std::packaged_task<ReturnType()>>(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
+    auto task = std::make_shared<PackagedTask<ReturnType()>>(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
     Future<ReturnType> result = task->get_future();
-    _function_buffer.push([task](){ (*task)(); });
+    _task_buffer.push([task](){ (*task)(); });
     return result;
 }
 

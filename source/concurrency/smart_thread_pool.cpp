@@ -28,7 +28,7 @@ namespace Ariadne {
 
 const String THREAD_NAME_PREFIX = "thr";
 
-VoidFunction SmartThreadPool::_task_wrapper_function() {
+VoidFunction ThreadPool::_task_wrapper_function() {
     return [=, this] {
         while (true) {
             VoidFunction task;
@@ -51,7 +51,7 @@ VoidFunction SmartThreadPool::_task_wrapper_function() {
     };
 }
 
-SmartThreadPool::SmartThreadPool(SizeType size)
+ThreadPool::ThreadPool(SizeType size)
         : _stop(false), _threads_to_remove(0) {
     ARIADNE_PRECONDITION(size > 0);
     for (SizeType i = 0; i < size; ++i) {
@@ -60,12 +60,12 @@ SmartThreadPool::SmartThreadPool(SizeType size)
     }
 }
 
-SizeType SmartThreadPool::num_threads() const {
+SizeType ThreadPool::num_threads() const {
     std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     return _threads.size();
 }
 
-Void SmartThreadPool::set_num_threads(SizeType number) {
+Void ThreadPool::set_num_threads(SizeType number) {
     ARIADNE_PRECONDITION(number > 0);
     std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     const SizeType previous_number = _threads.size();
@@ -79,12 +79,12 @@ Void SmartThreadPool::set_num_threads(SizeType number) {
         _threads_to_remove = previous_number - number;
 }
 
-SizeType SmartThreadPool::queue_size() const {
+SizeType ThreadPool::queue_size() const {
     std::lock_guard<std::mutex> lock(_task_availability_mutex);
     return _tasks.size();
 }
 
-SmartThreadPool::~SmartThreadPool() {
+ThreadPool::~ThreadPool() {
     {
         std::lock_guard<std::mutex> lock(_task_availability_mutex);
         _stop = true;

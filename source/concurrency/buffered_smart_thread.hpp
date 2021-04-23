@@ -39,15 +39,9 @@
 #include "utility/string.hpp"
 #include "utility/metaprogramming.hpp"
 #include "concurrency/buffer.hpp"
+#include "concurrency/concurrency_typedefs.hpp"
 
 namespace Ariadne {
-
-using Thread = std::thread;
-using ThreadId = Thread::id;
-using VoidFunction = std::function<Void()>;
-template<class T> using Future = std::future<T>;
-template<class T> using Promise = std::promise<T>;
-template<class T> using PackagedTask = std::packaged_task<T>;
 
 //! \brief A class for handling a thread in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with

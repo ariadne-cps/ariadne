@@ -41,10 +41,10 @@ class StoppedThreadPoolException : public std::exception { };
 //! \brief A pool of BufferedSmartThread objects managed internally given a (variable) number of threads
 //! \details Differently from managing a single BufferedSmartThread, the task queue for a pool is not upper-bounded, i.e., BufferedSmartThread
 //! objects use a buffer of one element, which receives once the wrapped task that consumes elements from the task queue.
-class SmartThreadPool {
+class ThreadPool {
   public:
     //! \brief Construct from a given number of threads
-    SmartThreadPool(SizeType num_threads);
+    ThreadPool(SizeType num_threads);
 
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details The is no limits on the number of tasks to enqueue
@@ -61,7 +61,7 @@ class SmartThreadPool {
     //! before destruction of the pool, the requested downsizing is simply scheduled.
     void set_num_threads(SizeType number);
 
-    ~SmartThreadPool();
+    ~ThreadPool();
 
   private:
     List<SharedPointer<BufferedSmartThread>> _threads;
@@ -77,7 +77,7 @@ class SmartThreadPool {
 };
 
 template<class F, class... AS>
-auto SmartThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
+auto ThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     using ReturnType = ResultOf<F(AS...)>;
 
     auto task = std::make_shared<PackagedTask<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));

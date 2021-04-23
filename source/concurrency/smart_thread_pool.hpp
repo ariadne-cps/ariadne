@@ -39,13 +39,15 @@ namespace Ariadne {
 class StoppedThreadPoolException : public std::exception { };
 
 //! \brief A pool of SmartThread objects managed internally given a (variable) number of threads
+//! \details Differently from threads, the task queue for a pool is not upper-bounded
 class SmartThreadPool {
   public:
     //! \brief Construct from a given number of threads
-    SmartThreadPool(SizeType size);
+    SmartThreadPool(SizeType num_threads);
 
-    template<class F, class... AS>
-    auto execute(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
+    //! \brief Enqueue a task for execution, returning the future handler
+    //! \details The is no limits on the number of tasks to enqueue
+    template<class F, class... AS> auto enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
 
     //! \brief The size of the tasks queue
     SizeType queue_size() const;
@@ -56,7 +58,7 @@ class SmartThreadPool {
     //! \brief Re-set the number of threads
     //! \details If downsizing, threads will still be allowed to complete; since completion is not guaranteed to happen any time
     //! before destruction of the pool, the requested downsizing is simply scheduled.
-    void set_num_threads(SizeType size);
+    void set_num_threads(SizeType number);
 
     ~SmartThreadPool();
 
@@ -70,7 +72,7 @@ class SmartThreadPool {
 };
 
 template<class F, class... AS>
-auto SmartThreadPool::execute(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
+auto SmartThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     using ReturnType = ResultOf<F(AS...)>;
 
     auto task = std::make_shared<PackagedTask<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));

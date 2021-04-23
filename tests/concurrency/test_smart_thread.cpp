@@ -48,6 +48,11 @@ class TestSmartThread {
         ARIADNE_TEST_EXECUTE(thread.set_queue_capacity(1));
     }
 
+    void test_destroy_before_completion() const {
+        SmartThread thread;
+        thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+    }
+
     void test_has_queued_tasks() const {
         SmartThread thread;
         thread.set_queue_capacity(2);
@@ -128,6 +133,7 @@ class TestSmartThread {
     void test() {
         ARIADNE_TEST_CALL(test_create());
         ARIADNE_TEST_CALL(test_set_queue_capacity());
+        ARIADNE_TEST_CALL(test_destroy_before_completion());
         ARIADNE_TEST_CALL(test_has_queued_tasks());
         ARIADNE_TEST_CALL(test_set_queue_capacity_down_failure());
         ARIADNE_TEST_CALL(test_task_return());

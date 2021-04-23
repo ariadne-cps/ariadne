@@ -62,7 +62,7 @@ class SmartThread {
     //! \brief Construct using the thread id as the name.
     SmartThread();
 
-    //! \brief Enqueue the supplied task for execution.
+    //! \brief Enqueue a task for execution, returning the future handler
     //! \details If the buffer is full, successive calls will block until an execution is started.
     template<class F, class... AS>
     auto enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>;

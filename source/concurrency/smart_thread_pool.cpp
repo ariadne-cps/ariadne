@@ -26,11 +26,13 @@
 
 namespace Ariadne {
 
+const String THREAD_NAME_PREFIX = "thr";
+
 SmartThreadPool::SmartThreadPool(SizeType size)
         : _stop(false) {
     ARIADNE_PRECONDITION(size > 0);
     for (SizeType i = 0; i < size; ++i) {
-        _threads.append(SharedPointer<SmartThread>(new SmartThread("thr" + to_string(i))));
+        _threads.append(make_shared<SmartThread>(THREAD_NAME_PREFIX + to_string(i)));
         _threads.at(i)->enqueue(
                 [=, this] {
                     while (true) {
@@ -38,7 +40,7 @@ SmartThreadPool::SmartThreadPool(SizeType size)
                         {
                             std::unique_lock<std::mutex> lock(_mutex);
                             _availability_condition.wait(lock, [=, this] { return _stop or not _tasks.empty(); });
-                            if (_stop and _tasks.empty()) break;
+                            if (_stop and _tasks.empty()) return;
                             task = std::move(_tasks.front());
                             _tasks.pop();
                         }
@@ -54,8 +56,16 @@ SizeType SmartThreadPool::num_threads() const {
     return _threads.size();
 }
 
-Void SmartThreadPool::set_num_threads(SizeType size) {
-    ARIADNE_PRECONDITION(size > 0);
+Void SmartThreadPool::set_num_threads(SizeType number) {
+    ARIADNE_PRECONDITION(number > 0);
+    const SizeType previous_number = _threads.size();
+    if (number > previous_number) {
+        _threads.resize(number);
+        for (SizeType i=previous_number; i<number; ++i)
+            _threads.at(i) = make_shared<SmartThread>(THREAD_NAME_PREFIX + to_string(i));
+    } else if (number < previous_number) {
+
+    }
 }
 
 SizeType SmartThreadPool::queue_size() const {
@@ -69,6 +79,7 @@ SmartThreadPool::~SmartThreadPool() {
         _stop = true;
     }
     _availability_condition.notify_all();
+    _threads.clear();
 }
 
 }

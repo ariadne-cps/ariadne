@@ -42,18 +42,42 @@ class TestSmartThreadPool {
         SmartThreadPool pool(1);
         ARIADNE_TEST_EQUALS(pool.num_threads(),1);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
-        pool.execute(fn);
+        pool.enqueue(fn);
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
     }
 
-    void test_execute_multiple() {
+    void test_destroy_before_completion() {
+        SmartThreadPool pool(1);
+        VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        pool.enqueue(fn);
+    }
+
+    void test_execute_multiple_sequentially() {
+        SmartThreadPool pool(1);
+        ARIADNE_TEST_EQUALS(pool.num_threads(),1);
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+        VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        for (SizeType i=0; i<2; ++i) pool.enqueue(fn);
+        ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+    }
+
+    void test_execute_multiple_concurrently() {
         SizeType num_threads = 2;
         SmartThreadPool pool(num_threads);
         ARIADNE_TEST_EQUALS(pool.num_threads(),2);
-        ARIADNE_TEST_EQUALS(pool.queue_size(),0);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
-        for (SizeType i=0; i<2*num_threads; ++i) pool.execute(fn);
+        for (SizeType i=0; i<2; ++i) pool.enqueue(fn);
+        std::this_thread::sleep_for(std::chrono::milliseconds(400*num_threads));
+    }
+
+    void test_execute_multiple_concurrently_sequentially() {
+        SizeType num_threads = 2;
+        SmartThreadPool pool(num_threads);
+        VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        for (SizeType i=0; i<2*num_threads; ++i) pool.enqueue(fn);
         ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
         std::this_thread::sleep_for(std::chrono::milliseconds(400*num_threads));
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
@@ -66,7 +90,10 @@ class TestSmartThreadPool {
         std::atomic<SizeType> x;
 
         for (SizeType i = 0; i < 2 * max_concurrency; ++i) {
-            results.emplace_back(pool.execute([&x] { SizeType r = ++x; return r*r; })
+            results.emplace_back(pool.enqueue([&x] {
+                                     SizeType r = ++x;
+                                     return r * r;
+                                 })
             );
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -80,11 +107,32 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EQUAL(actual_sum,expected_sum);
     }
 
+    void test_set_num_threads_up() const {
+        SmartThreadPool pool(1);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(2));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),2);
+        VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        //pool.enqueue(fn);
+        //pool.enqueue(fn);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),3);
+    }
+
+    void test_set_num_threads_down() const {
+        SmartThreadPool pool(1);
+        ARIADNE_TEST_FAIL(pool.set_num_threads(0));
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_execute_single());
-        ARIADNE_TEST_CALL(test_execute_multiple());
+        ARIADNE_TEST_CALL(test_destroy_before_completion());
+        ARIADNE_TEST_CALL(test_execute_multiple_sequentially());
+        ARIADNE_TEST_CALL(test_execute_multiple_concurrently());
+        ARIADNE_TEST_CALL(test_execute_multiple_concurrently_sequentially());
         ARIADNE_TEST_CALL(test_process_on_atomic_type());
+        ARIADNE_TEST_CALL(test_set_num_threads_up());
+        ARIADNE_TEST_CALL(test_set_num_threads_down());
     }
 };
 

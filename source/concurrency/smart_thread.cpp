@@ -37,7 +37,7 @@ SmartThread::SmartThread(String name)
             try {
                 VoidFunction task = _task_buffer.pull();
                 task();
-            } catch(BufferStoppedConsumingException& e) { break; }
+            } catch(BufferStoppedConsumingException& e) { return; }
         }
     });
     _got_id_future.get();

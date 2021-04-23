@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/thread_pool_worker.hpp
+ *            concurrency/smart_thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/thread_pool_worker.hpp
+/*! \file concurrency/smart_thread.hpp
  *  \brief A wrapper for smart handling of a thread
  */
 
-#ifndef ARIADNE_THREAD_POOL_WORKER_HPP
-#define ARIADNE_THREAD_POOL_WORKER_HPP
+#ifndef ARIADNE_SMART_THREAD_HPP
+#define ARIADNE_SMART_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -45,12 +45,12 @@ namespace Ariadne {
 //! \brief A class for handling a thread for a pool in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
 //! a readable \a name for logging purposes.
-class ThreadPoolWorker {
+class SmartThread {
   public:
 
     //! \brief Construct with an optional name.
     //! \details The thread will start and store the id, then register to the Logger
-    ThreadPoolWorker(VoidFunction task, String name = String());
+    SmartThread(VoidFunction task, String name = String());
 
     //! \brief Get the thread id
     ThreadId id() const;
@@ -58,7 +58,7 @@ class ThreadPoolWorker {
     String name() const;
 
     //! \brief Destroy the instance, also unregistering from the Logger
-    ~ThreadPoolWorker();
+    ~SmartThread();
 
   private:
     String _name;
@@ -70,4 +70,4 @@ class ThreadPoolWorker {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_THREAD_POOL_WORKER_HPP
+#endif // ARIADNE_SMART_THREAD_HPP

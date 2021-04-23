@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "utility/container.hpp"
 #include "concurrency/buffered_smart_thread.hpp"
-#include "concurrency/concurrency_manager.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -116,18 +116,19 @@ class TestBufferedSmartThread {
     }
 
     void test_atomic_multiple_threads() const {
-        SizeType n_threads = 10*ConcurrencyManager::instance().maximum_concurrency();
+        SizeType n_threads = 10*std::thread::hardware_concurrency();
         ARIADNE_TEST_PRINT(n_threads);
         List<SharedPointer<BufferedSmartThread>> threads;
 
         std::atomic<SizeType> a = 0;
         for (SizeType i=0; i<n_threads; ++i) {
-            threads.append(SharedPointer<BufferedSmartThread>(new BufferedSmartThread("add" + to_string(i))));
+            threads.append(make_shared<BufferedSmartThread>(("add" + to_string(i))));
             threads.at(i)->enqueue([&a] { a++; });
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(a,n_threads);
+        threads.clear();
     }
 
     void test() {

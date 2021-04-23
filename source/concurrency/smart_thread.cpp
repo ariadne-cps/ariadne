@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/thread_pool_worker.cpp
+ *            concurrency/smart_thread.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -23,11 +23,11 @@
  */
 
 #include "output/logging.hpp"
-#include "thread_pool_worker.hpp"
+#include "smart_thread.hpp"
 
 namespace Ariadne {
 
-ThreadPoolWorker::ThreadPoolWorker(VoidFunction task, String name)
+SmartThread::SmartThread(VoidFunction task, String name)
         : _name(name), _got_id_future(_got_id_promise.get_future())
 {
     _thread = std::thread([=,this]() {
@@ -36,18 +36,19 @@ ThreadPoolWorker::ThreadPoolWorker(VoidFunction task, String name)
         task();
     });
     _got_id_future.get();
+    if (_name == String()) _name = to_string(_id);
     Logger::instance().register_thread(_id,_name);
 }
 
-ThreadId ThreadPoolWorker::id() const {
+ThreadId SmartThread::id() const {
     return _id;
 }
 
-String ThreadPoolWorker::name() const {
+String SmartThread::name() const {
     return _name;
 }
 
-ThreadPoolWorker::~ThreadPoolWorker() {
+SmartThread::~SmartThread() {
     _thread.join();
     Logger::instance().unregister_thread(_id);
 }

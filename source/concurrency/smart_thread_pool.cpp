@@ -28,7 +28,7 @@ namespace Ariadne {
 
 const String THREAD_NAME_PREFIX = "thr";
 
-VoidFunction ThreadPool::_task_wrapper_function() {
+VoidFunction SmartThreadPool::_task_wrapper_function() {
     return [=, this] {
         while (true) {
             VoidFunction task;
@@ -51,40 +51,38 @@ VoidFunction ThreadPool::_task_wrapper_function() {
     };
 }
 
-ThreadPool::ThreadPool(SizeType size)
+SmartThreadPool::SmartThreadPool(SizeType size)
         : _stop(false), _threads_to_remove(0) {
     ARIADNE_PRECONDITION(size > 0);
     for (SizeType i = 0; i < size; ++i) {
-        _threads.append(make_shared<BufferedSmartThread>(THREAD_NAME_PREFIX + to_string(i)));
-        _threads.at(i)->enqueue(_task_wrapper_function());
+        _threads.append(make_shared<SmartThread>(SmartThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
     }
 }
 
-SizeType ThreadPool::num_threads() const {
+SizeType SmartThreadPool::num_threads() const {
     std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     return _threads.size();
 }
 
-Void ThreadPool::set_num_threads(SizeType number) {
+Void SmartThreadPool::set_num_threads(SizeType number) {
     ARIADNE_PRECONDITION(number > 0);
     std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
     const SizeType previous_number = _threads.size();
     if (number > previous_number) {
         _threads.resize(number);
         for (SizeType i=previous_number; i<number; ++i) {
-            _threads.at(i) = make_shared<BufferedSmartThread>(THREAD_NAME_PREFIX + to_string(i));
-            _threads.at(i)->enqueue(_task_wrapper_function());
+            _threads.at(i) = make_shared<SmartThread>(SmartThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
         }
     } else
         _threads_to_remove = previous_number - number;
 }
 
-SizeType ThreadPool::queue_size() const {
+SizeType SmartThreadPool::queue_size() const {
     std::lock_guard<std::mutex> lock(_task_availability_mutex);
     return _tasks.size();
 }
 
-ThreadPool::~ThreadPool() {
+SmartThreadPool::~SmartThreadPool() {
     {
         std::lock_guard<std::mutex> lock(_task_availability_mutex);
         _stop = true;

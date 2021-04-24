@@ -135,9 +135,6 @@ Int main(Int argc, const char* argv[])
 
 
     // Set colours for drawing
-    DRAWING_METHOD = DrawingMethod::AFFINE;
-    DRAWING_ACCURACY += 1;
-
     Colour guard_colour(0.5,0.5,0.5);
     Colour midnight_guard_colour(0.75,0.75,0.75);
     Colour picard_orbit_colour(0.0,1.0,1.0);

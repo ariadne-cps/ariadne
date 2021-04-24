@@ -10,6 +10,7 @@ set(UNIT_TESTS
     test_finite_time_reachability
     test_infinite_time_reachability
     test_verify_safety
+    test_pdes
 )
 
 foreach(TEST ${UNIT_TESTS})

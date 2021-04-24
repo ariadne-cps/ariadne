@@ -38,7 +38,7 @@ using namespace Ariadne;
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
 {
-    pybind11::class_<ORB,pybind11::bases<LabelledDrawableInterface>> orbit_class(module,name);
+    pybind11::class_<ORB,pybind11::bases<LabelledDrawable2dInterface>> orbit_class(module,name);
     orbit_class.def("reach", &ORB::reach);
     orbit_class.def("evolve", &ORB::final);
     orbit_class.def("final", &ORB::final);
@@ -65,10 +65,10 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
-    pybind11::class_<LabelledDrawableInterface> labelled_drawable_interface_class(module,"LabelledDrawableInterface");
-    pybind11::class_<LabelledInterpolatedCurve,pybind11::bases<LabelledDrawableInterface>> labelled_interpolated_curve_class(module,"LabelledInterpolatedCurve");
+    pybind11::class_<LabelledDrawable2dInterface> labelled_drawable_interface_class(module,"LabelledDrawable2dInterface");
+    pybind11::class_<LabelledInterpolatedCurve,pybind11::bases<LabelledDrawable2dInterface>> labelled_interpolated_curve_class(module,"LabelledInterpolatedCurve");
 
-    pybind11::class_<OrbitType,pybind11::bases<LabelledDrawableInterface>> simulator_orbit_class(module,"ApproximatePointOrbit");
+    pybind11::class_<OrbitType,pybind11::bases<LabelledDrawable2dInterface>> simulator_orbit_class(module,"ApproximatePointOrbit");
     simulator_orbit_class.def("curve", &OrbitType::curve);
 
     pybind11::class_<VectorFieldSimulator> simulator_class(module,name);
@@ -125,7 +125,7 @@ Void export_vector_field_evolver_configuration(pybind11::module& module) {
 }
 
 Void export_labelled_storage(pybind11::module& module) {
-    pybind11::class_<LabelledStorage,pybind11::bases<LabelledDrawableInterface>> labelled_storage_class(module,"LabelledStorage");
+    pybind11::class_<LabelledStorage,pybind11::bases<LabelledDrawable2dInterface>> labelled_storage_class(module,"LabelledStorage");
 }
 
 template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {

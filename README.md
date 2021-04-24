@@ -14,7 +14,7 @@ Official packages are available for Ubuntu derivatives and macOS, but if your ar
 
 ### Official packages
 
-Supplied packages are published using the official Launchpad platform for Ubuntu, and a custom Homebrew tap repository for macOS. Packages simply require all the dependencies, namely: MPFR, Cairo and Python 3.
+Supplied packages are published using the official Launchpad platform for Ubuntu, and a custom Homebrew tap repository for macOS. Packages simply require all the dependencies, namely: MPFR, Cairo, Gnuplot and Python 3.
 
 #### Ubuntu
 
@@ -44,7 +44,7 @@ which in one line both sets up the "tap" for Ariadne and installs the package al
 
 ### Dependencies
 
-If installed from sources, the only required library dependency is MPFR. To enable the graphical output you will require Cairo in order to save into png files. Finally, the Python bindings require the Python headers (version 3 is only supported, since version 2 is discontinued). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to build the Python interface, Git must be installed even if Ariadne has been downloaded as an archive. Download of the dependency is automatic though.
+If installed from sources, the only required library dependency is MPFR. To enable the graphical output you will require either Cairo or Gnuplot in order to save into png files. Finally, the Python bindings require the Python headers (version 3 is only supported, since version 2 is discontinued). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to build the Python interface, Git must be installed even if Ariadne has been downloaded as an archive. Download of the dependency is automatic though.
 
 Finally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
@@ -54,7 +54,7 @@ Specific instructions for Ubuntu and macOS follow, starting from installation fr
 
 #### Ubuntu
 
-Aptitude packages: `cmake pkg-config git libmpfr-dev libcairo2-dev` and either `clang-11` or `g++-10` for the compiler toolchain.
+Aptitude packages: `cmake pkg-config git libmpfr-dev libcairo2-dev gnuplot` and either `clang-11` or `g++-10` for the compiler toolchain.
 
 Additional package required for the Python interface: `python3-dev`.
 
@@ -62,7 +62,7 @@ Additional packages required for documentation: `doxygen doxygen-latex`
 
 #### macOS
 
-Homebrew packages: `cmake git mpfr cairo` and `gcc@10` if using GCC.
+Homebrew packages: `cmake git mpfr cairo gnuplot` and `gcc@10` if using GCC.
 
 For Cairo support, you may need to set up a permanent variable for the path of pkgconfig by adding the following line in your `~\.bash_profile`:
 

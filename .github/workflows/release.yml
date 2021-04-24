@@ -52,13 +52,13 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr cairo
+        brew install ninja gcc@10 python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-11 g++-10 libcairo2-dev libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-11 g++-10 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

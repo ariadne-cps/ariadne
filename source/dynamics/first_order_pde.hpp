@@ -33,6 +33,8 @@
 #include "algebra/tensor.hpp"
 #include "function/function.decl.hpp"
 
+#include "algebra/tensor.tpl.hpp"
+
 namespace Ariadne {
 
 //! \brief Compute the value of the multiaffine interpolation of the data \a us at the point \a x.

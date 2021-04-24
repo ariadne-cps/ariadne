@@ -78,12 +78,13 @@ Void export_figure(pybind11::module& module)
     figure_class.def("set_fill_style", (Figure&(Figure::*)(Bool)) &Figure::set_fill_style, reference_internal);
     figure_class.def("set_fill_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_fill_colour, reference_internal);
     figure_class.def("set_fill_opacity", (Figure&(Figure::*)(double)) &Figure::set_fill_opacity, reference_internal);
-    figure_class.def("draw",(Figure&(Figure::*)(const DrawableInterface&))&Figure::draw, reference_internal);
+    figure_class.def("draw",(Figure&(Figure::*)(const Drawable2dInterface&))&Figure::draw, reference_internal);
     figure_class.def("draw",(Figure&(Figure::*)(const RealBox&))&Figure::draw, reference_internal);
     figure_class.def("draw",(Figure&(Figure::*)(const ApproximateBoxType&))&Figure::draw, reference_internal);
     figure_class.def("clear",&Figure::clear, reference_internal);
     figure_class.def("write",(Void(Figure::*)(const Char*)const)&Figure::write);
-    figure_class.def("write",(Void(Figure::*)(const Char*,Nat,Nat)const)&Figure::write);
+    figure_class.def("write",(Void(Figure::*)(const Char*, Nat, Nat)const)&Figure::write);
+
 }
 
 Void export_graphics_properties(pybind11::module& module)
@@ -113,7 +114,7 @@ Void export_labelled_figure(pybind11::module& module)
     labelled_figure_class.def("set_axes",(Void(LabelledFigure::*)(const Axes2d&)) &LabelledFigure::set_axes, reference_internal);
     labelled_figure_class.def("properties",(GraphicsProperties&(LabelledFigure::*)())&LabelledFigure::properties, reference_internal);
 
-    labelled_figure_class.def("draw",(LabelledFigure&(LabelledFigure::*)(const LabelledDrawableInterface&))&LabelledFigure::draw, reference_internal);
+    labelled_figure_class.def("draw",(LabelledFigure&(LabelledFigure::*)(const LabelledDrawable2dInterface&))&LabelledFigure::draw, reference_internal);
     labelled_figure_class.def("clear",&LabelledFigure::clear, reference_internal);
     labelled_figure_class.def("write",(Void(LabelledFigure::*)(const Char*)const)&LabelledFigure::write);
     labelled_figure_class.def("write",(Void(LabelledFigure::*)(const Char*,Nat,Nat)const)&LabelledFigure::write);
@@ -121,7 +122,7 @@ Void export_labelled_figure(pybind11::module& module)
 
 Void export_plot(pybind11::module& module)
 {
-    module.def("plot",(Void(*)(const char*,Projection2d const&,ApproximateBoxType const&,List<Pair<Colour,DrawableInterface const&>> const&)) &plot);
+    module.def("plot",(Void(*)(const char*,Projection2d const&,ApproximateBoxType const&,List<Pair<Colour,Drawable2dInterface const&>> const&)) &plot);
 }
 
 Void graphics_submodule(pybind11::module& module) {

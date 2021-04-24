@@ -49,10 +49,10 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInter
 
 
 class DrawableWrapper
-  : public pybind11::wrapper< DrawableInterface >
+  : public pybind11::wrapper< Drawable2dInterface >
 {
   public:
-    virtual DrawableInterface* clone() const { return this->get_override("clone")(); }
+    virtual Drawable2dInterface* clone() const { return this->get_override("clone")(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const { this->get_override("draw")(c,p); }
     virtual DimensionType dimension() const { return this->get_override("dimension")(); }
     virtual OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
@@ -305,10 +305,10 @@ template<class BX> BX box_from_list(pybind11::list lst) {
 
 
 Void export_drawable_interface(pybind11::module& module) {
-    pybind11::class_<DrawableInterface,DrawableWrapper> drawable_class(module, "Drawable");
-    drawable_class.def("clone", &DrawableInterface::clone);
-    drawable_class.def("draw", &DrawableInterface::draw);
-    drawable_class.def("dimension", &DrawableInterface::dimension);
+    pybind11::class_<Drawable2dInterface,DrawableWrapper> drawable_class(module, "Drawable");
+    drawable_class.def("clone", &Drawable2dInterface::clone);
+    drawable_class.def("draw", &Drawable2dInterface::draw);
+    drawable_class.def("dimension", &Drawable2dInterface::dimension);
 }
 
 
@@ -366,7 +366,7 @@ template<class PT> PT point_from_python(pybind11::list pylst) {
 template<class PT> Void export_point(pybind11::module& module, std::string name)
 {
     typedef typename PT::ValueType X;
-    pybind11::class_<PT, DrawableInterface> point_class(module,name.c_str());
+    pybind11::class_<PT, Drawable2dInterface> point_class(module,name.c_str());
     point_class.def(pybind11::init(&point_from_python<PT>));
     point_class.def(pybind11::init<PT>());
     if constexpr (DefaultConstructible<X>) {
@@ -543,8 +543,8 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     typedef decltype(covers(declval<BX>(),declval<BX>())) CoversType;
     typedef decltype(inside(declval<BX>(),declval<BX>())) InsideType;
 
-    //NOTE: Boxes do not inherit SetInterface<T>s or DrawableInterface in C++ API
-    //pybind11::class_<BasicSetType,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,DrawableInterface>>
+    //NOTE: Boxes do not inherit SetInterface<T>s or Drawable2dInterface in C++ API
+    //pybind11::class_<BasicSetType,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,Drawable2dInterface>>
     pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init<BoxType>());
     box_class.def(pybind11::init<DimensionType>());
@@ -658,7 +658,7 @@ Void export_boxes(pybind11::module& module) {
 
 Void export_zonotope(pybind11::module& module)
 {
-    pybind11::class_<Zonotope,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,DrawableInterface>> zonotope_class(module,"Zonotope");
+    pybind11::class_<Zonotope,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,Drawable2dInterface>> zonotope_class(module,"Zonotope");
     zonotope_class.def(pybind11::init<Zonotope>());
     zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>,Vector<FloatDPError>>());
     zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>>());
@@ -685,7 +685,7 @@ Void export_zonotope(pybind11::module& module)
 
 Void export_polytope(pybind11::module& module)
 {
-    pybind11::class_<Polytope,pybind11::bases<LocatedSetInterface<T>,DrawableInterface>> polytope_class(module,"Polytope");
+    pybind11::class_<Polytope,pybind11::bases<LocatedSetInterface<T>,Drawable2dInterface>> polytope_class(module,"Polytope");
     polytope_class.def(pybind11::init<Polytope>());
     polytope_class.def(pybind11::init<Int>());
     polytope_class.def("new_vertex",&Polytope::new_vertex);
@@ -697,7 +697,7 @@ Void export_polytope(pybind11::module& module)
 
 Void export_curve(pybind11::module& module)
 {
-    pybind11::class_<InterpolatedCurve, DrawableInterface> interpolated_curve_class(module,"InterpolatedCurve");
+    pybind11::class_<InterpolatedCurve, Drawable2dInterface> interpolated_curve_class(module,"InterpolatedCurve");
     interpolated_curve_class.def(pybind11::init<InterpolatedCurve>());
     interpolated_curve_class.def(pybind11::init<FloatDPValue,FloatDPValuePoint>());
     interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDPValue&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
@@ -711,7 +711,7 @@ Void export_curve(pybind11::module& module)
 
 Void export_affine_set(pybind11::module& module)
 {
-    pybind11::class_<ValidatedAffineConstrainedImageSet,pybind11::bases<DrawableInterface,ValidatedEuclideanCompactSetInterface>>
+    pybind11::class_<ValidatedAffineConstrainedImageSet,pybind11::bases<Drawable2dInterface,ValidatedEuclideanCompactSetInterface>>
         affine_set_class(module,"ValidatedAffineConstrainedImageSet", pybind11::multiple_inheritance());
     affine_set_class.def(pybind11::init<ValidatedAffineConstrainedImageSet>());
     affine_set_class.def(pybind11::init<RealBox>());
@@ -744,7 +744,7 @@ Void export_constraint_set(pybind11::module& module)
     constraint_set_class.def("__str__", &__cstr__<ConstraintSet>);
 
 //    pybind11::class_<BoundedConstraintSet,pybind11::bases<DrawableWrapper> >
-    pybind11::class_<BoundedConstraintSet,pybind11::bases<EffectiveEuclideanRegularSetInterface,EffectiveEuclideanLocatedSetInterface,DrawableInterface> >
+    pybind11::class_<BoundedConstraintSet,pybind11::bases<EffectiveEuclideanRegularSetInterface,EffectiveEuclideanLocatedSetInterface,Drawable2dInterface> >
         bounded_constraint_set_class(module,"BoundedConstraintSet", pybind11::multiple_inheritance());
     bounded_constraint_set_class.def(pybind11::init<BoundedConstraintSet>());
     bounded_constraint_set_class.def(pybind11::init< RealBox, List<EffectiveConstraint> >());
@@ -770,7 +770,7 @@ Void export_constrained_image_set(pybind11::module& module)
 {
 //    from_python< List<ValidatedConstraint> >();
 
-    pybind11::class_<ConstrainedImageSet,pybind11::bases<EffectiveEuclideanLocatedSetInterface,DrawableInterface> >
+    pybind11::class_<ConstrainedImageSet,pybind11::bases<EffectiveEuclideanLocatedSetInterface,Drawable2dInterface> >
         constrained_image_set_class(module,"ConstrainedImageSet");
     constrained_image_set_class.def(pybind11::init<ConstrainedImageSet>());
     constrained_image_set_class.def(pybind11::init<BoundedConstraintSet>());
@@ -780,8 +780,8 @@ Void export_constrained_image_set(pybind11::module& module)
 //    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("__str__",&__cstr__<ConstrainedImageSet>);
 
-//    pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<CompactSetInterface<T>,DrawableInterface> >
-    pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<ValidatedEuclideanLocatedSetInterface,DrawableInterface> >
+//    pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<CompactSetInterface<T>,Drawable2dInterface> >
+    pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<ValidatedEuclideanLocatedSetInterface,Drawable2dInterface> >
         validated_constrained_image_set_class(module,"ValidatedConstrainedImageSet", pybind11::multiple_inheritance());
     validated_constrained_image_set_class.def(pybind11::init<ValidatedConstrainedImageSet>());
     validated_constrained_image_set_class.def(pybind11::init<ExactBoxType>());

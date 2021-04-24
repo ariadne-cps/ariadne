@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/graphics_interface.hpp
  *
- *  Copyright  2009-20  Davide Bresolin, Pieter Collins
+ *  Copyright  2009-20  Pieter Collins, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -29,7 +29,9 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_GRAPHICS_INTERFACE_HPP
 
+#include "../config.hpp"
 #include "utility/declarations.hpp"
+#include "numeric/float_bounds.hpp"
 
 namespace Ariadne {
 
@@ -43,15 +45,17 @@ struct Box2d;
 typedef Box<Interval<FloatDPApproximation>> GraphicsBoundingBoxType;
 struct Colour;
 
-class DrawableInterface;
-class LabelledDrawableInterface;
+class Drawable2dInterface;
+class LabelledDrawable2dInterface;
 class FigureInterface;
 class CanvasInterface;
 
 struct Projection2d;
-typedef Projection2d Projection2d;
-
+struct Projection3d;
 struct Variables2d;
+struct Variables3d;
+
+enum class ProjType{ no_proj, x1_proj, x2_proj };
 
 struct Projection2d {
     DimensionType n, i, j;
@@ -63,8 +67,16 @@ struct Projection2d {
         return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 };
 
-
-SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height);
+struct Projection3d {
+    DimensionType n, i, j, k;
+    Projection3d(DimensionType nn, DimensionType ii, DimensionType jj, DimensionType kk) : n(nn), i(ii), j(jj), k(kk) { }
+    DimensionType argument_size() const { return n; }
+    DimensionType x_coordinate() const { return i; }
+    DimensionType y_coordinate() const { return j; }
+    DimensionType z_coordinate() const { return k; }
+    friend OutputStream& operator<<(OutputStream& os, const Projection3d& p) {
+        return os << "P<R"<<p.n<<";R3>[x"<<p.i<<",x"<<p.j<<",x"<<p.k<<"]"; }
+};
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
@@ -86,17 +98,17 @@ class FigureInterface {
     virtual Bool get_fill_style() const = 0;
     virtual Dbl get_fill_opacity() const = 0;
     virtual Colour get_fill_colour() const = 0;
-    virtual FigureInterface& draw(const DrawableInterface&) = 0;
+    virtual FigureInterface& draw(const Drawable2dInterface&) = 0;
 };
-inline Void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
+inline Void draw(FigureInterface& fig, const Drawable2dInterface& shape) { fig.draw(shape); }
 
 class Figure;
-Void draw(Figure& fig, const DrawableInterface& shape);
-Figure& operator<<(Figure& fig, const DrawableInterface& shape);
+Void draw(Figure& fig, const Drawable2dInterface& shape);
+Figure& operator<<(Figure& fig, const Drawable2dInterface& shape);
 
 class LabelledFigure;
-Void draw(LabelledFigure& fig, const LabelledDrawableInterface& shape);
-LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape);
+Void draw(LabelledFigure& fig, const LabelledDrawable2dInterface& shape);
+LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawable2dInterface& shape);
 
 //! \ingroup GraphicsModule
 //! \brief Interface to two-dimensional drawing canvas with the ability to draw polyhedra.
@@ -105,6 +117,7 @@ class CanvasInterface {
     //! \brief Destructor
     virtual ~CanvasInterface() = default;
 
+    virtual Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz) = 0;
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual Void finalise() = 0;
 
@@ -132,10 +145,12 @@ class CanvasInterface {
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
 
-    //! \brief The scaling of the figure, in user units per pixel.
-    virtual Vector2d scaling() const = 0;
-    //! brief The lower and upper bounds of the x- and y- coordinates of the drawing region.
-    virtual Box2d bounds() const = 0;
+    //! \brief Set the colour palette.
+    virtual Void set_colour_palette() = 0;  
+    //! \brief Draw and fill a 3d image.
+    virtual Void fill_3d() = 0;
+      //! \brief Set a heatmap projection. 
+    virtual Void set_heat_map(Bool b) = 0;
   public:
     template<class X, class Y> Void move_to(X x, Y y) { this->move_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
     template<class X, class Y> Void line_to(X x, Y y) { this->line_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
@@ -144,33 +159,51 @@ class CanvasInterface {
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
-class DrawableInterface {
+class Drawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Projection2d ProjectionType;
-
     //! brief Virtual destructor.
-    virtual ~DrawableInterface() = default;
+    virtual ~Drawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual DrawableInterface* clone() const = 0;
+    virtual Drawable2dInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
     virtual DimensionType dimension() const = 0;
 };
 
+class Drawable2d3dInterface : public Drawable2dInterface {
+  public:
+    //! brief Virtual destructor.
+    virtual ~Drawable2d3dInterface() = default;
+    virtual Drawable2d3dInterface* clone2d3d() const = 0;
+    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
+    virtual Void draw(CanvasInterface& c, const Projection3d& p) const = 0;
+    using Drawable2dInterface::draw;	
+};
+
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
-class LabelledDrawableInterface {
+class LabelledDrawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Variables2d ProjectionType;
     //! brief Virtual destructor.
-    virtual ~LabelledDrawableInterface() = default;
+    virtual ~LabelledDrawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
-    virtual LabelledDrawableInterface* clone() const = 0;
+    virtual LabelledDrawable2dInterface* clone() const = 0;
     //! brief Draw the projection of object onto variables \a p on the canvas \a c .
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const = 0;
+};
+
+class LabelledDrawable2d3dInterface : public LabelledDrawable2dInterface {
+  public:
+    //! brief Virtual destructor.
+    virtual ~LabelledDrawable2d3dInterface() = default;
+    //! brief Make a dynamically-allocated copy.
+    virtual LabelledDrawable2d3dInterface* clone2d3d() const = 0;
+    virtual LabelledDrawable2dInterface* clone() const = 0;
+
+    //! brief Draw the projection of object onto variables \a p on the canvas \a c .
+    virtual Void draw(CanvasInterface& c, const Variables3d& p) const = 0;
+    using LabelledDrawable2dInterface::draw;
 };
 
 } // namespace Ariadne

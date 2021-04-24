@@ -122,7 +122,7 @@ class ConstraintSet
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class BoundedConstraintSet
     : public virtual EffectiveEuclideanRegularLocatedSetInterface
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
 {
     RealBox _domain;
     List< EffectiveConstraint > _constraints;
@@ -177,7 +177,7 @@ class BoundedConstraintSet
 //! \see ValidatedConstrainedImageSet
 class ConstrainedImageSet
     : public virtual EffectiveEuclideanLocatedSetInterface
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
 {
     RealBox _domain;
     EffectiveVectorMultivariateFunction _function;
@@ -274,7 +274,7 @@ class ConstrainedImageSet
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 class ValidatedConstrainedImageSet
     : public virtual ValidatedEuclideanLocatedSetInterface
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
 {
     ExactBoxType _domain;
     ExactBoxType _reduced_domain;
@@ -365,7 +365,6 @@ class ValidatedConstrainedImageSet
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    Void draw(Drawer const& drawer, CanvasInterface&, const Projection2d&) const;
     Void draw(CanvasInterface&, const Projection2d&) const;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;

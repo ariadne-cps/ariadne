@@ -1,7 +1,7 @@
 /***************************************************************************
  *            output/graphics.cpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
  ****************************************************************************/
 
@@ -36,25 +36,16 @@
 #include "symbolic/expression_set.hpp"
 #include "output/geometry2d.hpp"
 #include "output/graphics.hpp"
-#include "output/cairo.hpp"
-#include "output/progress_indicator.hpp"
 #include "output/logging.hpp"
+#include "output/progress_indicator.hpp"
+#include "output/graphics_manager.hpp"
 
 namespace Ariadne {
 
 static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
-#ifdef HAVE_CAIRO_H
-
-static const Int LEFT_MARGIN = 160;
-static const Int BOTTOM_MARGIN = 40;
-static const Int TOP_MARGIN = 10;
-static const Int RIGHT_MARGIN = 10;
-
-#endif
-
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
+OutputStream& operator<<(OutputStream& os, const Drawable2dInterface& drawable) {
     if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
         os << *writable;
     } else {
@@ -62,8 +53,6 @@ OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
     }
     return os;
 }
-
-
 
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
@@ -105,14 +94,17 @@ GraphicsProperties& GraphicsProperties::set_fill_opacity(Dbl fo) { this->fill_co
 GraphicsProperties& GraphicsProperties::set_fill_colour(Colour fc) { this->fill_colour=fc; return *this; }
 GraphicsProperties& GraphicsProperties::set_fill_colour(Dbl r, Dbl g, Dbl b) {
     this->set_fill_colour(Colour(r,g,b,this->fill_colour.opacity)); return *this; }
+GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is_3d = true; return *this; }
+GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
     return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
         << ", line_style=" << gp.line_style<<", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
         << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ")"; }
 
-
 Variables2d::Variables2d(const RealVariable& x, const RealVariable& y) : _x(x.name()), _y(y.name()) { }
+
+Variables3d::Variables3d(const RealVariable& x, const RealVariable& y, const RealVariable& z) : _x(x.name()), _y(y.name()), _z(z.name()) { }
 
 RealVariable Variables2d::x() const { return RealVariable(_x); }
 
@@ -121,6 +113,18 @@ RealVariable Variables2d::y() const { return RealVariable(_y); }
 RealVariable Variables2d::x_variable() const { return RealVariable(_x); }
 
 RealVariable Variables2d::y_variable() const { return RealVariable(_y); }
+
+RealVariable Variables3d::x() const { return RealVariable(_x); }
+
+RealVariable Variables3d::y() const { return RealVariable(_y); }
+
+RealVariable Variables3d::z() const { return RealVariable(_z); }
+
+RealVariable Variables3d::x_variable() const { return RealVariable(_x); }
+
+RealVariable Variables3d::y_variable() const { return RealVariable(_y); }
+
+RealVariable Variables3d::z_variable() const { return RealVariable(_z); }
 
 Axes2d::Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y)
         : variables(x.variable(),y.variable()), bounds() {
@@ -134,6 +138,19 @@ Axes2d::Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu
     bounds.insert(y,ApproximateDoubleInterval(yl,yu));
 }
 
+Axes3d::Axes3d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval y, const ApproximateDoubleVariableInterval z)
+        : variables3d(x.variable(), y.variable(), z.variable()), bounds() {
+    bounds.insert(x.variable(), x.interval());
+    bounds.insert(y.variable(), y.interval());
+    bounds.insert(z.variable(), z.interval());
+}
+
+Axes3d::Axes3d(ApproximateDouble xl, const RealVariable x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable y, ApproximateDouble yu, ApproximateDouble zl, const RealVariable z, ApproximateDouble zu)
+        : variables3d(x, y, z), bounds() {
+    bounds.insert(x, ApproximateDoubleInterval(xl, xu));
+    bounds.insert(y, ApproximateDoubleInterval(yl, yu));
+    bounds.insert(z, ApproximateDoubleInterval(zl, zu));
+}
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
     return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
@@ -147,7 +164,11 @@ Projection2d projection(const RealSpace& space, const Variables2d& variables) {
 }
 
 
-Void draw(Figure& fig, const DrawableInterface& shape) {
+Void draw(Figure& fig, const Drawable2dInterface& shape) {
+    fig.draw(shape);
+}
+
+Void draw(Figure& fig, const Drawable2d3dInterface& shape) {
     fig.draw(shape);
 }
 
@@ -156,33 +177,44 @@ Void draw(Figure& fig, FloatDPApproximateBox const& box) {
 }
 
 struct GraphicsObject {
-    GraphicsObject(const GraphicsProperties& gp, const DrawableInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
+    GraphicsObject(const GraphicsProperties& gp, const Drawable2dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(nullptr) { }
+    GraphicsObject(const GraphicsProperties& gp, const Drawable2d3dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(sh.clone2d3d()) { }
     GraphicsProperties properties;
-    std::shared_ptr<const DrawableInterface> shape_ptr;
+    std::shared_ptr<const Drawable2dInterface> shape_ptr;
+    std::shared_ptr<const Drawable2d3dInterface> shape3d_ptr;
 };
 
 struct LabelledGraphicsObject {
-    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawableInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
+    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawable2dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(nullptr) { }
+    LabelledGraphicsObject(const GraphicsProperties& gp, const LabelledDrawable2d3dInterface& sh)
+        : properties(gp), shape_ptr(sh.clone()), shape3d_ptr(sh.clone2d3d()) { }
     GraphicsProperties properties;
-    std::shared_ptr<const LabelledDrawableInterface> shape_ptr;
+    std::shared_ptr<const LabelledDrawable2dInterface> shape_ptr;
+    std::shared_ptr<const LabelledDrawable2d3dInterface> shape3d_ptr;
 };
 
 struct Figure::Data
 {
-    Data() : properties(), projection(2,0,1), bounding_box(0), variables(RealVariable(""),RealVariable("")) { }
-    Data(ApproximateBoxType bbx, Projection2d prj) : properties(), projection(prj), bounding_box(bbx),  variables(RealVariable(""),RealVariable("")) { }
+    Data() : properties(), projection(2,0,1), projection3d(3,0,1,2),bounding_box(0), variables(RealVariable(""),RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
+    Data(ApproximateBoxType bbx, Projection2d prj) : properties(), projection(prj), projection3d(3, 0, 1, 2),bounding_box(bbx),  variables(RealVariable(""),RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
+    Data(ApproximateBoxType bbx, Projection3d prj) : properties(), projection(2, 0, 1), projection3d(prj), bounding_box(bbx), variables(RealVariable(""), RealVariable("")), variables3d(RealVariable(""), RealVariable(""), RealVariable("")) { }
 
     GraphicsProperties properties;
 
     Projection2d projection;
+    Projection3d projection3d;
     ApproximateBoxType bounding_box;
     List<GraphicsObject> objects;
 
     Variables2d variables;
+    Variables3d variables3d;
     Map<RealVariable,ApproximateDoubleInterval> bounds;
     List<LabelledGraphicsObject> labelled_objects;
+
+
 };
 
 Figure::~Figure()
@@ -194,6 +226,7 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
     : _data(new Data(bbx,proj))
 {
     ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
+    if(proj.argument_size() > 2){ this->_data->properties.is_projected = true; }
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
@@ -206,17 +239,37 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionT
 {
 }
 
-Figure& Figure::draw(const DrawableInterface& shape)
+Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection3d& proj)
+    : _data(new Data(bbx, proj))
+{
+    ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
+}
+
+Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy, DimensionType iz)
+    : Figure(bbx, Projection3d(bbx.dimension(), ix, iy, iz))
+{
+}
+
+Figure& Figure::draw(const Drawable2dInterface& shape)
 {
     this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
 }
 
+Figure& Figure::draw(const Drawable2d3dInterface& shape)
+{
+    if (this->_data->bounding_box.size() == 3) { this->_data->properties.is_3d = true; }
 
-
+    this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
+}
 
 Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy)
 {
     this->_data->projection=Projection2d(as,ix,iy); return *this;
+}
+
+Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy, DimensionType iz)
+{
+    this->_data->projection3d=Projection3d(as, ix,iy,iz); return *this;
 }
 
 Figure& Figure::set_projection_map(const Projection2d& p)
@@ -224,14 +277,24 @@ Figure& Figure::set_projection_map(const Projection2d& p)
     this->_data->projection=p; return *this;
 }
 
+Figure& Figure::set_projection_map(const Projection3d& p)
+{
+    this->_data->projection3d=p; return *this;
+}
+
 Figure& Figure::set_bounding_box(const ApproximateBoxType& bx)
 {
     this->_data->bounding_box=bx; return *this;
 }
 
-Projection2d Figure::get_projection_map() const
+Projection2d Figure::get_2d_projection_map() const
 {
     return this->_data->projection;
+}
+
+Projection3d Figure::get_3d_projection_map() const
+{
+    return this->_data->projection3d;
 }
 
 ApproximateBoxType Figure::get_bounding_box() const
@@ -331,7 +394,7 @@ Colour Figure::get_fill_colour() const
 Figure& Figure::draw(ApproximateBoxType const& box)
 {
     ApproximateBoxSetType box_set(box);
-    DrawableInterface const& shape=box_set;
+    Drawable2dInterface const& shape=box_set;
     this->draw(shape); return *this;
 }
 
@@ -344,10 +407,13 @@ Figure& Figure::clear() {
     this->_data->objects.clear(); return *this;
 }
 
-Figure& operator<<(Figure& fig, const DrawableInterface& shape) {
-    fig.draw(shape); return fig;
+Figure& Figure::set_animated(Bool b){
+    this->_data->properties.is_animated = b; return *this;
 }
 
+Figure& operator<<(Figure& fig, const Drawable2dInterface& shape) {
+    fig.draw(shape); return fig;
+}
 
 Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
     const Colour& line_colour=properties.line_colour;
@@ -358,6 +424,41 @@ Void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     else { canvas.set_fill_opacity(properties.fill_colour.opacity); }
     canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
+}
+
+Void Figure::_paint3d(CanvasInterface& canvas) const
+{
+    DimensionType dimension=this->_data->projection.argument_size();
+    ApproximateBoxType bounding_box=this->_data->bounding_box;
+    const Projection3d projection=this->_data->projection3d;
+    if(bounding_box.dimension()==0) {
+        bounding_box=ExactBoxType(dimension,ExactIntervalType(-1,1));
+    }
+    ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.z_coordinate());
+    Dbl xl=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].lower_bound());
+    Dbl xu=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].upper_bound());
+    Dbl yl=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].lower_bound());
+    Dbl yu=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].upper_bound());
+    Dbl zl=numeric_cast<Dbl>(bounding_box[projection.z_coordinate()].lower_bound());
+    Dbl zu=numeric_cast<Dbl>(bounding_box[projection.z_coordinate()].upper_bound());
+    String tx=String("x")+to_str(projection.x_coordinate());
+    String ty=String("x")+to_str(projection.y_coordinate());
+    String tz=String("x")+to_str(projection.z_coordinate());
+    canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);  
+    canvas.set_colour_palette(); 
+    for(const GraphicsObject& object : this->_data->objects) {
+        if(object.shape3d_ptr != nullptr)
+        {
+            const Drawable2d3dInterface& shape=object.shape3d_ptr.operator*();
+            set_properties(canvas, object.properties);
+            shape.draw(canvas, this->_data->projection3d); 
+        }else{
+            ARIADNE_ERROR("ERROR: Cannot draw a 2D object in a 3D graphic");
+        }
+    }      
 }
 
 Void Figure::_paint_all(CanvasInterface& canvas) const
@@ -389,10 +490,12 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     String ty=String("x")+to_str(projection.y_coordinate());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
+    if(this->_data->properties.is_projected) { canvas.set_colour_palette(); }
 
     // Draw shapes
     for(const GraphicsObject& object : this->_data->objects) {
-        const DrawableInterface& shape=object.shape_ptr.operator*();
+
+        const Drawable2dInterface& shape=object.shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
         ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
                            "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<this->_data->bounding_box);
@@ -402,40 +505,47 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
 }
 
 Void
-Figure::write(const char* cfilename) const
+Figure::write(const Char* cfilename) const
 {
     this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
-
-
+  
 Void
-Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
+Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    SharedPointer<CanvasInterface> canvas=make_canvas(drawing_width,drawing_height);
+    #if not(defined(HAVE_CAIRO_H)) || not(defined(HAVE_GNUPLOT_H))
+        ARIADNE_ERROR("No facilities for displaying graphics are available.");
+    #else
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
+        
+        if(this->_data->properties.is_3d && this->_data->properties.is_projected == false){
+            this->_paint3d(*canvas);
+        }else{
+            this->_paint_all(*canvas);
+        }
 
-    this->_paint_all(*canvas);
-
-    StringType filename(cfilename);
-    if(filename.rfind(".") != StringType::npos) {
-    } else {
-        filename=filename+".png";
-    }
-
-    canvas->write(filename.c_str());
+        canvas->write(cfilename);
+    #endif
 }
 
 struct LabelledFigure::Data
 {
     Data(Axes2d axes)
-        : properties(), variables(axes.variables), bounds(axes.bounds) { }
+        : properties(), variables(axes.variables), variables3d(axes.variables.x_variable(),axes.variables.y_variable(), RealVariable(Identifier("z"))), bounds(axes.bounds) { }
     Data(const Variables2d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
-        : properties(), variables(vars), bounds(bnds) { }
+        : properties(), variables(vars), variables3d(vars.x_variable(), vars.y_variable(), RealVariable(Identifier("z"))) ,bounds(bnds) { }
+    Data(Axes3d axes)
+        : properties(), variables(axes.variables3d.x_variable(), axes.variables3d.y_variable()) ,variables3d(axes.variables3d), bounds(axes.bounds) { }
+    Data(const Variables3d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
+        : properties(), variables(vars.x_variable(), vars.y_variable()) ,variables3d(vars), bounds(bnds) { }
 
     GraphicsProperties properties;
 
     Variables2d variables;
+    Variables3d variables3d;
     Map<RealVariable,ApproximateDoubleInterval> bounds;
     List<LabelledGraphicsObject> objects;
+
 };
 
 LabelledFigure::~LabelledFigure() {
@@ -446,12 +556,26 @@ LabelledFigure::LabelledFigure(const Axes2d& axes)
     : _data(new Data(axes)) {
 }
 
+LabelledFigure::LabelledFigure(const Axes3d& axes) 
+    : _data(new Data(axes)) {
+        this->_data->properties.is_3d = true;
+}
+
 LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
     : _data(new Data(vars,VariablesBox<ApproximateDoubleInterval>(bbx).bounds())) {
 }
 
+LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bnds)
+    : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bnds).bounds())){
+        this->_data->properties.is_3d = true;
+}
+
 Void LabelledFigure::set_axes(const Axes2d& axes) {
     _data->bounds=axes.bounds; _data->variables=axes.variables;
+}
+
+Void LabelledFigure::set_axes(const Axes3d& axes) {
+    _data->bounds=axes.bounds; _data->variables3d=axes.variables3d;
 }
 
 Void LabelledFigure::set_bounds(const RealVariable& x, const ApproximateDoubleInterval& ivl) {
@@ -473,8 +597,14 @@ GraphicsProperties const& LabelledFigure::properties() const {
     return this->_data->properties;
 }
 
-LabelledFigure& LabelledFigure::draw(const LabelledDrawableInterface& shape)
+LabelledFigure& LabelledFigure::draw(const LabelledDrawable2dInterface& shape)
 {
+    this->_data->objects.push_back(LabelledGraphicsObject(this->_data->properties,shape)); return *this;
+}
+
+LabelledFigure& LabelledFigure::draw(const LabelledDrawable2d3dInterface& shape)
+{
+    if(this->_data->bounds.size() == 3) { this->_data->properties.is_3d = true; }
     this->_data->objects.push_back(LabelledGraphicsObject(this->_data->properties,shape)); return *this;
 }
 
@@ -482,8 +612,54 @@ LabelledFigure& LabelledFigure::clear() {
     this->_data->objects.clear(); return *this;
 }
 
-LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape) {
+LabelledFigure& LabelledFigure::set_animated(Bool b){
+    this->_data->properties.is_animated = b; return *this;
+}
+
+LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawable2dInterface& shape) {
     fig.draw(shape); return fig;
+}
+
+Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
+{
+    ARIADNE_LOG_SCOPE_CREATE;
+    auto const& bounds = this->_data->bounds;
+    RealVariable const& x=this->_data->variables.x_variable();
+    RealVariable const& y=this->_data->variables.y_variable();
+    RealVariable const& z=this->_data->variables3d.z_variable();
+
+    String tx=x.name();
+    String ty=y.name();
+    String tz=z.name();
+
+    Dbl xl=numeric_cast<Dbl>(bounds[x].lower_bound());
+    Dbl xu=numeric_cast<Dbl>(bounds[x].upper_bound());
+    Dbl yl=numeric_cast<Dbl>(bounds[y].lower_bound());
+    Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
+    Dbl zl=numeric_cast<Dbl>(bounds[z].lower_bound());
+    Dbl zu=numeric_cast<Dbl>(bounds[z].upper_bound());   
+
+    SizeType total_objects = this->_data->objects.size();
+    SizeType processed_objects = 0;
+    ProgressIndicator indicator(total_objects);
+
+    canvas.initialise(tx, ty, tz, xl, xu, yl, yu, zl, zu);
+    canvas.set_colour_palette();
+
+    for(const LabelledGraphicsObject& object : this->_data->objects) {
+        if(object.shape3d_ptr != nullptr)
+        {
+            const LabelledDrawable2d3dInterface& shape=object.shape3d_ptr.operator*();
+            set_properties(canvas, object.properties);
+            shape.draw(canvas, this->_data->variables3d);
+        }
+        else{
+            ARIADNE_ERROR("ERROR: Cannot draw a 2D object in a 3D graphic");
+            break;
+        }
+        indicator.update_current(processed_objects++);
+    }
+
 }
 
 Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
@@ -492,6 +668,7 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     auto const& bounds = this->_data->bounds;
     RealVariable const& x=this->_data->variables.x_variable();
     RealVariable const& y=this->_data->variables.y_variable();
+    
     ARIADNE_ASSERT(x.name()!="" && y.name()!="");
 
     String tx=x.name();
@@ -503,15 +680,14 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
-
+    if(this->_data->properties.is_projected) { canvas.set_colour_palette(); }
     // Draw shapes
-
     SizeType total_objects = this->_data->objects.size();
     SizeType processed_objects = 0;
     ProgressIndicator indicator(total_objects);
     ARIADNE_LOG_PRINTLN("Writing " << total_objects << " object" << (total_objects > 1 ? "s..." : "..."));
     for(const LabelledGraphicsObject& object : this->_data->objects) {
-        const LabelledDrawableInterface& shape=object.shape_ptr.operator*();
+        const LabelledDrawable2dInterface& shape=object.shape_ptr.operator*();
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->variables);
         indicator.update_current(processed_objects++);
@@ -521,258 +697,30 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
 }
 
 Void
-LabelledFigure::write(const char* cfilename) const
+LabelledFigure::write(const Char* cfilename) const
 {
     this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
-
 Void
-LabelledFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
+LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    SharedPointer<CanvasInterface> canvas=make_canvas(drawing_width,drawing_height);
+    #if not(defined(HAVE_CAIRO_H)) || not(defined(HAVE_GNUPLOT_H))
+        ARIADNE_ERROR("No facilities for displaying graphics are available.");
+    #else
+        SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
 
-    this->_paint_all(*canvas);
+        if(this->_data->properties.is_3d && this->_data->properties.is_projected == false){
+            this->_paint3d(*canvas);
+        }else{
+            this->_paint_all(*canvas);
+        }
 
-    StringType filename(cfilename);
-    if(filename.rfind(".") != StringType::npos) {
-    } else {
-        filename=filename+".png";
-    }
-
-    canvas->write(filename.c_str());
+        canvas->write(cfilename);
+    #endif
 }
 
-
-
-
-
-#ifdef HAVE_CAIRO_H
-
-SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height) {
-    return std::make_shared<CairoCanvas>(ImageSize2d(drawing_width,drawing_height));
-}
-
-#else
-
-SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height) {
-    ARIADNE_WARN_ONCE("No facilities for displaying graphics are available.");
-    return std::make_shared<NullCanvas>();
-}
-
-#endif
-
-
-#ifdef HAVE_CAIRO_H
-
-CairoCanvas::~CairoCanvas()
-{
-    cairo_surface_destroy(cairo_get_target(cr));
-    cairo_destroy(cr);
-}
-
-CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
-{
-}
-
-CairoCanvas::CairoCanvas(const ImageSize2d& size)
-    : cr(0), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
-{
-    const Int canvas_width = static_cast<Int>(size.nx)+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = static_cast<Int>(size.ny)+BOTTOM_MARGIN+TOP_MARGIN;
-
-    cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
-    cr = cairo_create (surface);
-}
-
-CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
-    : CairoCanvas(size)
-{
-}
-
-Vector2d CairoCanvas::scaling() const
-{
-    ImageSize2d sz = this->size_in_pixels();
-    Box2d bb=this->bounds();
-    return Vector2d((bb.xu-bb.xl)/sz.nx,(bb.yu-bb.yl)/sz.ny);
-}
-
-Box2d CairoCanvas::bounds() const
-{
-    double xl=LEFT_MARGIN;
-    double yu=TOP_MARGIN;
-    double xu=cairo_image_surface_get_width(cairo_get_target(cr))-RIGHT_MARGIN;
-    double yl=cairo_image_surface_get_height(cairo_get_target(cr))-BOTTOM_MARGIN;
-    cairo_device_to_user(cr,&xl,&yu);
-    cairo_device_to_user(cr,&xu,&yl);
-    return Box2d(xl,xu,yl,yu);
-}
-
-Void CairoCanvas::stroke()
-{
-    cairo_save(cr);
-
-    // Set user and device space identical so that the line width is interpreted as pixels
-    cairo_identity_matrix(cr);
-
-    cairo_set_source_rgb(cr, lc.red,lc.green,lc.blue);
-    cairo_set_line_width(cr, lw);
-    cairo_stroke (this->cr);
-
-    cairo_restore(cr);
-}
-
-Void CairoCanvas::fill() {
-    cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity);
-    cairo_fill_preserve (cr);
-    this->stroke();
-}
-
-ImageSize2d CairoCanvas::size_in_pixels() const {
-    return ImageSize2d(cairo_image_surface_get_width(cairo_get_target(cr))-(LEFT_MARGIN+RIGHT_MARGIN),
-                       cairo_image_surface_get_height(cairo_get_target(cr))-(BOTTOM_MARGIN+TOP_MARGIN));
-}
-
-Void CairoCanvas::move_to(double x, double y) { cairo_move_to (cr, x, y); }
-Void CairoCanvas::line_to(double x, double y) { cairo_line_to (cr, x, y); }
-Void CairoCanvas::circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
-Void CairoCanvas::dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
-Void CairoCanvas::set_dot_radius(double radius) { this->dr=radius; }
-Void CairoCanvas::set_line_width(double width) { this->lw=width; }
-Void CairoCanvas::set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
-Void CairoCanvas::set_fill_opacity(double o) { fc.opacity=o; }
-Void CairoCanvas::set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
-
-
-// TODO: Use generic canvas routines; move cairo-specific functionality
-// into CairoCanvas class.
-Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, double xu, double yl, double yu)
-{
-
-
-    CairoCanvas& cairo_canvas=*this;
-    cairo_t *crp=cairo_canvas.cr;
-
-    const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
-    const Int drawing_width = static_cast<Int>(drawing_size.nx);
-    const Int drawing_height = static_cast<Int>(drawing_size.ny);
-
-    //const Int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
-    //const Int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
-
-    const Int left_margin = LEFT_MARGIN;
-    //const Int right_margin = RIGHT_MARGIN;
-    //const Int bottom_margin = BOTTOM_MARGIN;
-    const Int top_margin = TOP_MARGIN;
-
-    // clear background
-    cairo_set_source_rgb (crp, 1,1,1);
-    cairo_paint (crp);
-
-    // Set text font
-    cairo_select_font_face (crp, "roman",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (crp, 30);
-
-    // Set text colour
-    cairo_set_source_rgb (crp, 0., 0., 0.);
-
-    // Get axis label text
-    StringType text_xl=to_str(xl);
-    StringType text_xu=to_str(xu);
-    StringType text_yl=to_str(yl);
-    StringType text_yu=to_str(yu);
-
-    // Write axis labels
-    cairo_text_extents_t te;
-    cairo_text_extents (crp, text_xl.c_str(), &te);
-    cairo_move_to(crp, left_margin-2, top_margin+drawing_height+4+te.height);
-    cairo_show_text (crp, text_xl.c_str());
-    cairo_text_extents (crp, text_xu.c_str(), &te);
-    cairo_move_to(crp, left_margin+drawing_width-te.width-4, top_margin+drawing_height+4+te.height);
-    cairo_show_text (crp, text_xu.c_str());
-    cairo_text_extents (crp, text_x.c_str(), &te);
-    cairo_move_to(crp, left_margin+drawing_width/2-te.width/2-3, top_margin+drawing_height+4+te.height);
-    cairo_show_text (crp, text_x.c_str());
-
-    cairo_text_extents (crp, text_yl.c_str(), &te);
-    cairo_move_to(crp, left_margin-te.width-6, top_margin+drawing_height+2);
-    cairo_show_text (crp, text_yl.c_str());
-    cairo_text_extents (crp, text_yu.c_str(), &te);
-    cairo_move_to(crp, left_margin-te.width-6, top_margin+te.height+2);
-    cairo_show_text (crp, text_yu.c_str());
-    cairo_text_extents (crp, text_y.c_str(), &te);
-    cairo_move_to(crp, left_margin-te.width-6, top_margin+drawing_height/2+te.height+2);
-    cairo_show_text (crp, text_y.c_str());
-
-
-    // Save unclipped state and canvas coordinates
-    cairo_save (crp);
-
-    // Set clipping region
-    cairo_move_to (crp, left_margin, top_margin+drawing_height);
-    cairo_line_to (crp, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (crp, left_margin+drawing_width, top_margin);
-    cairo_line_to (crp, left_margin, top_margin);
-    cairo_line_to (crp, left_margin, top_margin+drawing_height);
-
-    // Fill clipping region with a very light colour to indicate where figure
-    // should be drawn
-    cairo_set_source_rgb(crp, 0.97,0.97,0.97);
-    cairo_fill_preserve (crp);
-    cairo_clip (crp);
-    cairo_new_path (crp);
-
-    //std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<xl<<" xu="<<xu<<"\n";
-    //std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<yl<<" yu="<<yu<<"\n";
-
-    // compute device to user coordinate transformation
-    double ctr0=left_margin;
-    double ctr1=top_margin;
-    double sc0=(drawing_width)/(xu-xl);
-    double sc1=-(drawing_height)/(yu-yl);
-    double utr0=(-xl);
-    double utr1=(-yu);
-
-    // Scale to user coordinates
-    cairo_translate(crp, ctr0, ctr1);
-    cairo_scale (crp, sc0,sc1);
-    cairo_translate(crp, utr0, utr1);
-}
-
-Void CairoCanvas::write(const char* filename) const {
-    cairo_surface_t* surface = cairo_get_target (cr);
-    cairo_surface_write_to_png (surface, filename);
-}
-
-Void CairoCanvas::finalise()
-{
-    cairo_t *crp=this->cr;
-
-    // Restore canvas coordinates and unclipped state
-    cairo_restore (crp);
-
-    const ImageSize2d drawing_size = this->size_in_pixels();
-    const Int drawing_width = static_cast<Int>(drawing_size.nx);
-    const Int drawing_height = static_cast<Int>(drawing_size.ny);
-
-    const Int left_margin = LEFT_MARGIN;
-    const Int top_margin = TOP_MARGIN;
-
-    cairo_set_line_width (crp, 2.0);
-    cairo_set_source_rgb (crp, 0.0, 0.0, 0.0);
-    cairo_move_to (crp, left_margin, top_margin+drawing_height);
-    cairo_line_to (crp, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (crp, left_margin+drawing_width, top_margin);
-    cairo_line_to (crp, left_margin, top_margin);
-    cairo_line_to (crp, left_margin, top_margin+drawing_height);
-    cairo_stroke (crp);
-}
-
-#endif
-
-
-Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,DrawableInterface const&>> const& csets) {
+Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, List<Pair<Colour,Drawable2dInterface const&>> const& csets) {
     Figure fig(bbox,pr);
     for (auto cset : csets) {
         fig.set_fill_colour(cset.first); fig << cset.second;

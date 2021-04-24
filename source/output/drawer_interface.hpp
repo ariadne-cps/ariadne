@@ -40,15 +40,6 @@ struct Projection2d;
 typedef Projection2d Projection2d;
 class ValidatedConstrainedImageSet;
 
-//! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
-enum class DrawingMethod : std::uint8_t { CURVE, BOX, AFFINE, GRID };
-//! \related TaylorConstrainedImageSet \brief The type of method currently used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DrawingMethod DRAWING_METHOD;
-//! \related TaylorConstrainedImageSet \brief The accuracy used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern uint DRAWING_ACCURACY;
-
 //! \brief A class for computing outer approximations to sets defined by functions.
 class DrawerInterface : public WritableInterface
 {

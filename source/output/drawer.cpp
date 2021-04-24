@@ -48,10 +48,11 @@ OutputStream& AffineDrawer::_write(OutputStream& os) const {
 OutputStream& GridDrawer::_write(OutputStream& os) const {
     return os << "GridDrawer(fineness=" << this->_fineness << ")"; }
 
-Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
+Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const {
+    box_draw(cnvs,proj,set);
+}
 
-Void AffineDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const
-{
+Void AffineDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const {
     affine_draw(cnvs,proj,set,this->_splittings);
 }
 

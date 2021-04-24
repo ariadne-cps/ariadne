@@ -1,10 +1,9 @@
 /***************************************************************************
- *            output/cairo.hpp
+ *            output/gnuplot.hpp
  *
- *  Copyright  2011-20  Pieter Collins
+ *  Copyright  2020-21  Mirko Albanese, Luca Geretti
  *
  ****************************************************************************/
-
 /*
  *  This file is part of Ariadne.
  *
@@ -22,42 +21,63 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARIADNE_CAIRO_HPP
-#define ARIADNE_CAIRO_HPP
+#ifndef ARIADNE_GNUPLOT_HPP
+#define ARIADNE_GNUPLOT_HPP
 
-#ifdef HAVE_CAIRO_H
+#ifdef HAVE_GNUPLOT_H
 
 #include "config.hpp"
 #include "output/graphics.hpp"
+#include "output/geometry2d.hpp"
 
-#include <cairo/cairo.h>
+#include "output/gnuplot-iostream.hpp"
 
 namespace Ariadne {
 
-template<SizeType N, class X> class Tensor;
-
-struct ImageSize2d {
-    Nat nx,ny;
-    ImageSize2d(Nat _nx,Nat _ny) : nx(_nx), ny(_ny) { }
-    ImageSize2d(Int _nx,Int _ny) {
-        ARIADNE_ASSERT(_nx > 0 && _ny > 0);
-        nx = static_cast<Nat>(_nx);
-        ny= static_cast<Nat>(_ny);
-    }
+struct  _Range
+{       
+    double Xmin;
+    double Xmax;
+    double Ymin;
+    double Ymax;
+    double Zmin;
+    double Zmax; 
 };
 
-class CairoCanvas
-    : public CanvasInterface
+struct  _Labels
+{
+    String xLabel = "";
+    String yLabel = "";
+    String zLabel = "";
+};
+
+class GnuplotCanvas : public CanvasInterface
 {
     friend class Figure;
   private:
-    cairo_t *cr;
-    double lw; // The line width in pixels
-    double dr; // The dot radius in pixels
-    Colour lc,fc; // The line and fill colours
+    Gnuplot *gnuplot;
+    List<Point2d> geom;
+    Colour lc, fc;
+    double lw;
+    _Range rng;
+    Nat dim;
+    Point2d Cpoint;
+    double dr;
+    bool isdot;
+    Nat sizeX;
+    Nat sizeY;
+    bool isMultiplot;
+    bool isColourPalette;
+    bool isanimate;
+    _Labels labels;
+
   public:
-    ~CairoCanvas();
-    CairoCanvas(const ImageSize2d& size);
+    ~GnuplotCanvas();
+    // Constructors - Create the canvas
+    //Create canvas with dimensions
+    GnuplotCanvas(String filename, Nat X = 800, Nat Y = 800, Bool is_anim = false);
+
+    //CanvasInterface
     Void initialise(StringType x, StringType y, StringType z, double xl, double xu, double yl, double yu, double lz, double uz);
     Void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
     Void write(const char* filename) const;
@@ -73,23 +93,30 @@ class CairoCanvas
     Void set_line_colour(double r, double g, double b);
     Void set_fill_opacity(double o);
     Void set_fill_colour(double r, double g, double b);
+    Vector2d scaling() const;
+    Box2d bounds() const;
 
     Void set_colour_palette();
     Void fill_3d();
     Void set_heat_map(Bool b);
-  public:
-    ImageSize2d size_in_pixels() const;
+
+    //Set Multiplot - Multiple plot on same screen
+    void set_multiplot(bool s);
+    // Set Labels and Title
+    void set_labels(String xLabel, String yLabel, String zLabel = "");
+    // Set X, Y Range
+    void set_range_2d(double minX, double maxX, double minY, double maxY);
+
+    void set_range_3d(double minX, double maxX, double minY,  double maxY, double minZ, double maxZ);
 };
 
-class CairoGraphicsBackend : public GraphicsBackendInterface {
+class GnuplotGraphicsBackend : public GraphicsBackendInterface {
   public:
     SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const;
 };
 
 } // namespace Ariadne
 
-#endif // HAVE_CAIRO_H
+#endif // HAVE_GNUPLOT_H
 
-#endif // ARIADNE_CAIRO_HPP
-
-
+#endif // ARIADNE_GNUPLOT_HPP

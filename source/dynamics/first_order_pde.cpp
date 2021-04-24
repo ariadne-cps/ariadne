@@ -26,7 +26,6 @@
 #include "numeric/float_bounds.hpp"
 #include "numeric/float_value.hpp"
 #include "algebra/expansion.inl.hpp"
-#include "algebra/tensor.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"

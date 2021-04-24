@@ -119,7 +119,6 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
     bool draw = true;
-    DRAWING_METHOD = DrawingMethod::AFFINE;
 
     List<InputApproximation> approximations;
     approximations.append(ZeroApproximation());

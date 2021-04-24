@@ -62,7 +62,7 @@ FloatDP slope2d(const ExactPoint& pt1, const ExactPoint& pt2);
 //! A polytope in Euclidean space, defined by a list of extreme points.
 class Polytope
     : public LocatedSetInterface
-    , public DrawableInterface
+    , public Drawable2dInterface
 {
   public:
     typedef std::vector<ExactPoint>::const_iterator ConstIterator;

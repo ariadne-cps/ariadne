@@ -3,6 +3,9 @@ set(LIBRARY_NAME ariadne-output)
 add_library(${LIBRARY_NAME} OBJECT
     logging.cpp
     graphics.cpp
+    cairo.cpp
+    gnuplot.cpp
+    graphics_manager.cpp
     drawer.cpp
 )
 

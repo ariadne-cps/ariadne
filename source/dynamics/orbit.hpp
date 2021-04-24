@@ -95,14 +95,14 @@ private:
 
 template<class F>
 class Orbit<LabelledPoint<Approximation<F>>>
-    : public LabelledDrawableInterface
+    : public LabelledDrawable2dInterface
 {
   public:
     Orbit(const LabelledPoint<Approximation<F>>& pt) : _curve(new LabelledInterpolatedCurve(pt)) { }
     Void insert(Value<F> t, const LabelledPoint<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
     const LabelledInterpolatedCurve& curve() const { return *this->_curve; }
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _curve->draw(canvas,axes); }
-    virtual LabelledDrawableInterface* clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
+    virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
   private:
     std::shared_ptr< LabelledInterpolatedCurve > _curve;
 };
@@ -158,7 +158,7 @@ class Orbit<Enclosure>
 
 template<>
 class Orbit<LabelledEnclosure>
-    : public LabelledDrawableInterface
+    : public LabelledDrawable2dInterface
 {
     typedef LabelledEnclosure ES;
     typedef LabelledSet<ListSet<Enclosure>> ESL;
@@ -181,7 +181,7 @@ class Orbit<LabelledEnclosure>
     EnclosureListType const& final() const { return this->_final; }
 
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _reach.draw(canvas,axes); }
-    virtual LabelledDrawableInterface* clone() const override { return new Orbit<LabelledEnclosure>(*this); }
+    virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<LabelledEnclosure>(*this); }
   private:
     ES _initial;
     ESL _reach;

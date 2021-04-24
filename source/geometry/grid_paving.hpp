@@ -105,7 +105,7 @@ GridTreePaving image(const GridTreePaving& theSet, const Projection& theProjecti
 //! responsible for deallocation of that original tree.
 class GridTreeSubpaving
     : public virtual SubPavingInterface
-    , public virtual DrawableInterface
+    , public virtual Drawable2dInterface
 {
   protected:
 
@@ -193,7 +193,7 @@ class GridTreeSubpaving
     //! \brief A copy constructor that only copies the pointer to the root of the binary tree and the cell
     GridTreeSubpaving( const GridTreeSubpaving &otherSubset);
 
-    //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for DrawableInterface.
+    //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for Drawable2dInterface.
     GridTreeSubpaving* clone() const;
 
     //!@}

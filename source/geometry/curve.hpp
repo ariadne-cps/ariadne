@@ -120,7 +120,7 @@ class Curve
 
 /*! \brief A linearly interpolated curve in Euclidean space. */
 class InterpolatedCurve
-    : public DrawableInterface
+    : public Drawable2dInterface
 {
   public:
     typedef DoublePrecision PrecisionType;
@@ -183,7 +183,7 @@ OutputStream& operator<<(OutputStream& os, const InterpolatedCurve& curve) {
 
 /*! \brief A linearly interpolated curve in Euclidean space using variables. */
 class LabelledInterpolatedCurve
-    : public LabelledDrawableInterface,
+    : public LabelledDrawable2dInterface,
       public InterpolatedCurve
 {
   public:

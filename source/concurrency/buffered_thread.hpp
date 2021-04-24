@@ -51,10 +51,8 @@ class BufferedThread {
   public:
 
     //! \brief Construct with a name.
-    //! \details The thread will start and store the id.
-    BufferedThread(String name);
-    //! \brief Construct using the thread id as the name.
-    BufferedThread();
+    //! \details The thread will start and store the id. The name will be the id if left empty
+    BufferedThread(String name = String());
 
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details If the buffer is full, successive calls will block until an execution is started.

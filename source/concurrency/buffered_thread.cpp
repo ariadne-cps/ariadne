@@ -41,10 +41,7 @@ BufferedThread::BufferedThread(String name)
         }
     });
     _got_id_future.get();
-}
-
-BufferedThread::BufferedThread() : BufferedThread(String()) {
-    _name = to_string(_id);
+    if (name == String()) _name = to_string(_id);
 }
 
 ThreadId BufferedThread::id() const {

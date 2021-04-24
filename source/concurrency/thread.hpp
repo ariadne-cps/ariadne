@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.hpp
+ *            concurrency/thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/smart_thread.hpp
+/*! \file concurrency/thread.hpp
  *  \brief A wrapper for smart handling of a thread
  */
 
-#ifndef ARIADNE_SMART_THREAD_HPP
-#define ARIADNE_SMART_THREAD_HPP
+#ifndef ARIADNE_THREAD_HPP
+#define ARIADNE_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -44,30 +44,30 @@ namespace Ariadne {
 
 //! \brief A class for handling a thread for a pool in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
-//! a readable \a name for logging purposes.
-class SmartThread {
+//! a readable \a name.
+class Thread {
   public:
 
     //! \brief Construct with an optional name.
-    //! \details The thread will start and store the id, then register to the Logger
-    SmartThread(VoidFunction task, String name = String());
+    //! \details The thread will start and store the id
+    Thread(VoidFunction task, String name = String());
 
     //! \brief Get the thread id
     ThreadId id() const;
     //! \brief Get the readable name
     String name() const;
 
-    //! \brief Destroy the instance, also unregistering from the Logger
-    ~SmartThread();
+    //! \brief Destroy the instance
+    ~Thread();
 
   private:
     String _name;
     ThreadId _id;
-    Thread _thread;
+    std::thread _thread;
     Promise<void> _got_id_promise;
     Future<void> _got_id_future;
 };
 
 } // namespace Ariadne
 
-#endif // ARIADNE_SMART_THREAD_HPP
+#endif // ARIADNE_THREAD_HPP

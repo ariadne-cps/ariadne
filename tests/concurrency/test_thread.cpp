@@ -23,7 +23,7 @@
  */
 
 #include "utility/container.hpp"
-#include "concurrency/smart_thread.hpp"
+#include "concurrency/thread.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -32,20 +32,20 @@ class TestBufferedSmartThread {
   public:
 
     void test_create() const {
-        SmartThread thread1([]{},"thr");
+        Thread thread1([]{}, "thr");
         ARIADNE_TEST_EXECUTE(thread1.id());
         ARIADNE_TEST_EQUALS(thread1.name(),"thr");
-        SmartThread thread2([]{});
+        Thread thread2([]{});
         ARIADNE_TEST_EQUALS(to_string(thread2.id()),thread2.name());
     }
 
     void test_destroy_before_completion() const {
-        SmartThread thread([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        Thread thread([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
     }
 
     void test_task_capture() const {
         int a = 0;
-        SmartThread thread([&a] { a++; });
+        Thread thread([&a] { a++; });
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(a,1);
     }
@@ -53,11 +53,11 @@ class TestBufferedSmartThread {
     void test_atomic_multiple_threads() const {
         SizeType n_threads = 10*std::thread::hardware_concurrency();
         ARIADNE_TEST_PRINT(n_threads);
-        List<SharedPointer<SmartThread>> threads;
+        List<SharedPointer<Thread>> threads;
 
         std::atomic<SizeType> a = 0;
         for (SizeType i=0; i<n_threads; ++i) {
-            threads.append(std::make_shared<SmartThread>([&a] { a++; }));
+            threads.append(std::make_shared<Thread>([&a] { a++; }));
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

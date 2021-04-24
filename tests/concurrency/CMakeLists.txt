@@ -1,8 +1,8 @@
 set(UNIT_TESTS
     test_buffer
-    test_buffered_smart_thread
-    test_smart_thread
-    test_smart_thread_pool
+    test_buffered_thread
+    test_thread
+    test_thread_pool
     test_concurrency_manager
 )
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.cpp
+ *            concurrency/thread.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -23,55 +23,32 @@
  */
 
 #include "output/logging.hpp"
-#include "buffered_smart_thread.hpp"
+#include "thread.hpp"
 
 namespace Ariadne {
 
-BufferedSmartThread::BufferedSmartThread(String name)
-        : _name(name), _task_buffer(1), _got_id_future(_got_id_promise.get_future())
+Thread::Thread(VoidFunction task, String name)
+        : _name(name), _got_id_future(_got_id_promise.get_future())
 {
     _thread = std::thread([=,this]() {
         _id = std::this_thread::get_id();
         _got_id_promise.set_value();
-        while(true) {
-            try {
-                VoidFunction task = _task_buffer.pull();
-                task();
-            } catch(BufferStoppedConsumingException& e) { return; }
-        }
+        task();
     });
     _got_id_future.get();
-    Logger::instance().register_thread(_id,_name);
+    if (_name == String()) _name = to_string(_id);
 }
 
-BufferedSmartThread::BufferedSmartThread() : BufferedSmartThread(String()) {
-    _name = to_string(_id);
-}
-
-ThreadId BufferedSmartThread::id() const {
+ThreadId Thread::id() const {
     return _id;
 }
 
-String BufferedSmartThread::name() const {
+String Thread::name() const {
     return _name;
 }
 
-SizeType BufferedSmartThread::queue_size() const {
-    return _task_buffer.size();
-}
-
-SizeType BufferedSmartThread::queue_capacity() const {
-    return _task_buffer.capacity();
-}
-
-Void BufferedSmartThread::set_queue_capacity(SizeType capacity) {
-    return _task_buffer.set_capacity(capacity);
-}
-
-BufferedSmartThread::~BufferedSmartThread() {
-    _task_buffer.stop_consuming();
+Thread::~Thread() {
     _thread.join();
-    Logger::instance().unregister_thread(_id);
 }
 
 } // namespace Ariadne

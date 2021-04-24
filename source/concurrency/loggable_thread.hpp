@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.cpp
+ *            concurrency/loggable_thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,35 +22,30 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*! \file concurrency/loggable_thread.hpp
+ *  \brief A wrapper for smart handling of a thread, also handling registration/deregistration to the Logger
+ */
+
+#ifndef ARIADNE_LOGGABLE_THREAD_HPP
+#define ARIADNE_LOGGABLE_THREAD_HPP
+
 #include "output/logging.hpp"
-#include "smart_thread.hpp"
+#include "thread.hpp"
 
 namespace Ariadne {
 
-SmartThread::SmartThread(VoidFunction task, String name)
-        : _name(name), _got_id_future(_got_id_promise.get_future())
-{
-    _thread = std::thread([=,this]() {
-        _id = std::this_thread::get_id();
-        _got_id_promise.set_value();
-        task();
-    });
-    _got_id_future.get();
-    if (_name == String()) _name = to_string(_id);
-    Logger::instance().register_thread(_id,_name);
-}
+//! \brief A thread extension with handling of registration/deregistration to the logger
+class LoggableThread : public Thread {
+public:
+    LoggableThread(VoidFunction task, String name = String()) : Thread(task, name) {
+        Logger::instance().register_thread(this->id(),this->name());
+    }
 
-ThreadId SmartThread::id() const {
-    return _id;
-}
-
-String SmartThread::name() const {
-    return _name;
-}
-
-SmartThread::~SmartThread() {
-    _thread.join();
-    Logger::instance().unregister_thread(_id);
-}
+    ~LoggableThread() {
+        Logger::instance().unregister_thread(this->id());
+    }
+};
 
 } // namespace Ariadne
+
+#endif // ARIADNE_LOGGABLE_THREAD_HPP

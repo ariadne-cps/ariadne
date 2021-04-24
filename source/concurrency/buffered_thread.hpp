@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/buffered_smart_thread.hpp
+ *            concurrency/buffered_thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/buffered_smart_thread.hpp
+/*! \file concurrency/buffered_thread.hpp
  *  \brief A wrapper for smart handling of a thread with a buffer for incoming tasks
  */
 
-#ifndef ARIADNE_BUFFERED_SMART_THREAD_HPP
-#define ARIADNE_BUFFERED_SMART_THREAD_HPP
+#ifndef ARIADNE_BUFFERED_THREAD_HPP
+#define ARIADNE_BUFFERED_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -45,16 +45,16 @@ namespace Ariadne {
 
 //! \brief A class for handling a thread in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
-//! a readable \a name for logging purposes. The thread can execute only one task at a time, but multiple tasks can
+//! a readable \a name. The thread can execute only one task at a time, but multiple tasks can
 //! be enqueued based on the internal buffer capacity.
-class BufferedSmartThread {
+class BufferedThread {
   public:
 
     //! \brief Construct with a name.
-    //! \details The thread will start and store the id, then register to the Logger
-    BufferedSmartThread(String name);
+    //! \details The thread will start and store the id.
+    BufferedThread(String name);
     //! \brief Construct using the thread id as the name.
-    BufferedSmartThread();
+    BufferedThread();
 
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details If the buffer is full, successive calls will block until an execution is started.
@@ -74,19 +74,19 @@ class BufferedSmartThread {
     //! \details Capacity cannot be changed to a value lower than the current size
     Void set_queue_capacity(SizeType capacity);
 
-    //! \brief Destroy the instance, also unregistering from the Logger
-    ~BufferedSmartThread();
+    //! \brief Destroy the instance
+    ~BufferedThread();
 
   private:
     String _name;
     ThreadId _id;
-    Thread _thread;
+    std::thread _thread;
     Buffer<VoidFunction> _task_buffer;
     Promise<void> _got_id_promise;
     Future<void> _got_id_future;
 };
 
-template<class F, class... AS> auto BufferedSmartThread::enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
+template<class F, class... AS> auto BufferedThread::enqueue(F&& f, AS&&... args) -> Future<ResultOf<F(AS...)>>
 {
     using ReturnType = ResultOf<F(AS...)>;
 
@@ -98,4 +98,4 @@ template<class F, class... AS> auto BufferedSmartThread::enqueue(F&& f, AS&&... 
 
 } // namespace Ariadne
 
-#endif // ARIADNE_BUFFERED_SMART_THREAD_HPP
+#endif // ARIADNE_BUFFERED_THREAD_HPP

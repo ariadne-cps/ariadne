@@ -23,7 +23,8 @@
  */
 
 #include "config.hpp"
-#include "concurrency/buffered_smart_thread.hpp"
+#include "concurrency/loggable_thread.hpp"
+#include "concurrency/loggable_buffered_thread.hpp"
 #include "output/progress_indicator.hpp"
 #include "output/logging.hpp"
 #include "../test.hpp"
@@ -71,6 +72,7 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_redirect());
         ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler());
         ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
+        //ARIADNE_TEST_CALL(test_nonblocking_scheduler_with_nonbuffered_threads());
         return 0;
     }
 
@@ -261,7 +263,7 @@ class TestLogging {
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
         ARIADNE_TEST_EQUALS(Logger::instance().cached_last_printed_thread_name().compare("main"),0);
-        BufferedSmartThread thread1("thr1"), thread2("thr2");
+        LoggableBufferedThread thread1("thr1"), thread2("thr2");
         thread1.enqueue([] { print_something1(); });
         thread2.enqueue([] { print_something2(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
@@ -276,9 +278,19 @@ class TestLogging {
         ARIADNE_LOG_SET_VERBOSITY(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
-        BufferedSmartThread thread1("thr1"), thread2("thr2");
+        LoggableBufferedThread thread1("thr1"), thread2("thr2");
         thread1.enqueue([] { print_something1(); });
         thread2.enqueue([] { print_something2(); });
+        ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    Void test_nonblocking_scheduler_with_nonbuffered_threads() {
+        Logger::instance().use_nonblocking_scheduler();
+        ARIADNE_LOG_SET_VERBOSITY(3);
+        Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
+        ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
+        LoggableThread thread1([] { print_something1(); },"thr1"), thread2([] { print_something2(); },"thr2");
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

@@ -23,7 +23,7 @@
  */
 
 #include "utility/container.hpp"
-#include "concurrency/buffered_smart_thread.hpp"
+#include "concurrency/buffered_thread.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -32,29 +32,29 @@ class TestBufferedSmartThread {
   public:
 
     void test_create() const {
-        BufferedSmartThread thread1("thr");
+        BufferedThread thread1("thr");
         ARIADNE_TEST_EXECUTE(thread1.id());
         ARIADNE_TEST_EQUALS(thread1.name(),"thr");
         ARIADNE_TEST_EQUALS(thread1.queue_size(),0);
         ARIADNE_TEST_EQUALS(thread1.queue_capacity(),1);
-        BufferedSmartThread thread2;
+        BufferedThread thread2;
         ARIADNE_TEST_EQUALS(to_string(thread2.id()),thread2.name());
     }
 
     void test_set_queue_capacity() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         ARIADNE_TEST_FAIL(thread.set_queue_capacity(0));
         ARIADNE_TEST_EXECUTE(thread.set_queue_capacity(2));
         ARIADNE_TEST_EXECUTE(thread.set_queue_capacity(1));
     }
 
     void test_destroy_before_completion() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
     }
 
     void test_has_queued_tasks() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         thread.set_queue_capacity(2);
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
@@ -64,7 +64,7 @@ class TestBufferedSmartThread {
     }
 
     void test_set_queue_capacity_down_failure() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         thread.set_queue_capacity(3);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         thread.enqueue(fn);
@@ -76,7 +76,7 @@ class TestBufferedSmartThread {
     }
 
     void test_task_return() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         auto result = thread.enqueue([] { return 42; });
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(result.get(),42);
@@ -84,7 +84,7 @@ class TestBufferedSmartThread {
 
     void test_task_capture() const {
         int a = 0;
-        BufferedSmartThread thread;
+        BufferedThread thread;
         thread.enqueue([&a] { a++; });
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(a,1);
@@ -93,7 +93,7 @@ class TestBufferedSmartThread {
     void test_task_arguments() const {
         int x = 3;
         int y = 5;
-        BufferedSmartThread thread;
+        BufferedThread thread;
         auto future = thread.enqueue([](int x, int y) { return x * y; }, x, y);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         auto r = future.get();
@@ -101,7 +101,7 @@ class TestBufferedSmartThread {
     }
 
     void test_multiple_tasks() const {
-        BufferedSmartThread thread;
+        BufferedThread thread;
         int a = 4;
         thread.enqueue([&a] {
             a += 2;
@@ -118,11 +118,11 @@ class TestBufferedSmartThread {
     void test_atomic_multiple_threads() const {
         SizeType n_threads = 10*std::thread::hardware_concurrency();
         ARIADNE_TEST_PRINT(n_threads);
-        List<SharedPointer<BufferedSmartThread>> threads;
+        List<SharedPointer<BufferedThread>> threads;
 
         std::atomic<SizeType> a = 0;
         for (SizeType i=0; i<n_threads; ++i) {
-            threads.append(make_shared<BufferedSmartThread>(("add" + to_string(i))));
+            threads.append(make_shared<BufferedThread>(("add" + to_string(i))));
             threads.at(i)->enqueue([&a] { a++; });
         }
 

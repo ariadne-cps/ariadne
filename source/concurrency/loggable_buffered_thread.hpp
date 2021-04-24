@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/concurrency_typedefs.hpp
+ *            concurrency/loggable_buffered_thread.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,27 +22,31 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/concurrency_typedefs.hpp
- *  \brief Typedefs for the module.
+/*! \file concurrency/loggable_buffered_thread.hpp
+ *  \brief A wrapper for smart handling of a thread with a buffer for incoming tasks, also handling Logger registration/deregistration
  */
 
-#ifndef ARIADNE_CONCURRENCY_TYPEDEFS_HPP
-#define ARIADNE_CONCURRENCY_TYPEDEFS_HPP
+#ifndef ARIADNE_LOGGABLE_BUFFERED_THREAD_HPP
+#define ARIADNE_LOGGABLE_BUFFERED_THREAD_HPP
 
-#include <utility>
-#include <mutex>
-#include <thread>
-#include <future>
-#include "utility/typedefs.hpp"
+#include "output/logging.hpp"
+#include "buffered_thread.hpp"
 
 namespace Ariadne {
 
-using ThreadId = std::thread::id;
-using VoidFunction = std::function<Void()>;
-template<class T> using Future = std::future<T>;
-template<class T> using Promise = std::promise<T>;
-template<class T> using PackagedTask = std::packaged_task<T>;
+//! \brief A class for handling Logger registration/deregistration for a buffered thread
+class LoggableBufferedThread : public BufferedThread {
+  public:
+
+    LoggableBufferedThread(String name = String()) : BufferedThread(name) {
+        Logger::instance().register_thread(this->id(), this->name());
+    }
+
+    ~LoggableBufferedThread() {
+        Logger::instance().unregister_thread(this->id());
+    }
+};
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONCURRENCY_TYPEDEFS_HPP
+#endif // ARIADNE_LOGGABLE_BUFFERED_THREAD_HPP

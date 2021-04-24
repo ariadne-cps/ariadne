@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "concurrency/smart_thread_pool.hpp"
+#include "concurrency/thread_pool.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -32,13 +32,13 @@ class TestSmartThreadPool {
 
     void test_construct() {
         auto max_concurrency = std::thread::hardware_concurrency();
-        SmartThreadPool pool(max_concurrency);
+        ThreadPool pool(max_concurrency);
         ARIADNE_TEST_EQUALS(pool.num_threads(),max_concurrency);
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
     }
 
     void test_construct_empty() {
-        SmartThreadPool pool(0);
+        ThreadPool pool(0);
         ARIADNE_TEST_EQUALS(pool.num_threads(),0);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
@@ -46,7 +46,7 @@ class TestSmartThreadPool {
     }
 
     void test_execute_single() {
-        SmartThreadPool pool(1);
+        ThreadPool pool(1);
         ARIADNE_TEST_EQUALS(pool.num_threads(),1);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
@@ -55,13 +55,13 @@ class TestSmartThreadPool {
     }
 
     void test_destroy_before_completion() {
-        SmartThreadPool pool(1);
+        ThreadPool pool(1);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
     }
 
     void test_execute_multiple_sequentially() {
-        SmartThreadPool pool(1);
+        ThreadPool pool(1);
         ARIADNE_TEST_EQUALS(pool.num_threads(),1);
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
@@ -73,7 +73,7 @@ class TestSmartThreadPool {
 
     void test_execute_multiple_concurrently() {
         SizeType num_threads = 2;
-        SmartThreadPool pool(num_threads);
+        ThreadPool pool(num_threads);
         ARIADNE_TEST_EQUALS(pool.num_threads(),2);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<2; ++i) pool.enqueue(fn);
@@ -82,7 +82,7 @@ class TestSmartThreadPool {
 
     void test_execute_multiple_concurrently_sequentially() {
         SizeType num_threads = 2;
-        SmartThreadPool pool(num_threads);
+        ThreadPool pool(num_threads);
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<2*num_threads; ++i) pool.enqueue(fn);
         ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
@@ -92,7 +92,7 @@ class TestSmartThreadPool {
 
     void test_process_on_atomic_type() {
         auto max_concurrency = std::thread::hardware_concurrency();
-        SmartThreadPool pool(max_concurrency);
+        ThreadPool pool(max_concurrency);
         std::vector<Future<SizeType>> results;
         std::atomic<SizeType> x;
 
@@ -115,7 +115,7 @@ class TestSmartThreadPool {
     }
 
     void test_add_threads() const {
-        SmartThreadPool pool(0);
+        ThreadPool pool(0);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -132,7 +132,7 @@ class TestSmartThreadPool {
     }
 
     void test_schedule_stop_threads() const {
-        SmartThreadPool pool(2);
+        ThreadPool pool(2);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<16; ++i)
             pool.enqueue(fn);
@@ -146,12 +146,12 @@ class TestSmartThreadPool {
     }
 
     void test_improperly_remove_threads() const {
-        SmartThreadPool pool(2);
+        ThreadPool pool(2);
         ARIADNE_TEST_FAIL(pool.remove_threads());
     }
 
     void test_resize_pool_down() const {
-        SmartThreadPool pool(3);
+        ThreadPool pool(3);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<6; ++i)
             pool.enqueue(fn);

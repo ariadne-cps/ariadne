@@ -897,7 +897,7 @@ void Logger::_print_preamble_for_firstline(unsigned int level, std::string threa
     if (can_print_thread_name and _configuration.thread_name_printing_policy() == ThreadNamePrintingPolicy::AFTER) {
         if (thread_name_changed) {
             if (theme.at.is_styled()) std::clog << theme.at() << "@" << TerminalTextStyle::RESET << thread_name;
-            else std::clog << thread_name << "@";
+            else std::clog << "@" << thread_name;
         } else std::clog << std::string(largest_thread_name_size+1, ' ');
     }
 

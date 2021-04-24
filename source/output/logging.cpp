@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include "config.hpp"
+#include "concurrency/thread.hpp"
 #include "output/logging.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
@@ -290,13 +291,17 @@ class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
     ~NonblockingLoggerScheduler() override;
   private:
     //! \brief Extracts one message from the largest queue, also removing dead data instances
-    SharedPointer<LogRawMessage> _dequeue_and_cleanup();
+    LogRawMessage _dequeue_and_cleanup();
     void _consume_msgs();
+    Bool _is_queue_empty() const;
  private:
+    std::mutex _message_availability_mutex;
+    std::condition_variable _message_availability_condition;
+    mutable std::mutex _data_mutex;
+
+    Bool _terminate;
+    SharedPointer<Thread> _dequeueing_thread;
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
-    std::thread _dequeueing_thread;
-    std::atomic<bool> _terminate;
-    std::mutex _data_mutex;
 };
 
 ImmediateLoggerScheduler::ImmediateLoggerScheduler() : _current_level(1) { }
@@ -384,15 +389,21 @@ void BlockingLoggerScheduler::release(std::string scope) {
     Logger::instance()._release(LogRawMessage(_data.find(std::this_thread::get_id())->second.second, scope, _data.find(std::this_thread::get_id())->second.first, std::string()));
 }
 
-NonblockingLoggerScheduler::NonblockingLoggerScheduler() {
-    _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,"main"))});
-    _dequeueing_thread = std::thread(&NonblockingLoggerScheduler::_consume_msgs, this);
-    _terminate = false;
+NonblockingLoggerScheduler::NonblockingLoggerScheduler() : _terminate(false) {
+    {
+        std::lock_guard<std::mutex> lock(_data_mutex);
+        _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,"main"))});
+    }
+    _dequeueing_thread = std::make_shared<Thread>([=,this] { _consume_msgs(); });
 }
 
 NonblockingLoggerScheduler::~NonblockingLoggerScheduler() {
-    _terminate = true;
-    _dequeueing_thread.join();
+    {
+        std::lock_guard<std::mutex> lock(_message_availability_mutex);
+        _terminate = true;
+    }
+    _message_availability_condition.notify_one();
+    _dequeueing_thread.reset();
 }
 
 void NonblockingLoggerScheduler::create_data_instance(std::thread::id id, std::string name) {
@@ -434,21 +445,31 @@ void NonblockingLoggerScheduler::decrease_level(unsigned int i) {
 void NonblockingLoggerScheduler::println(unsigned int level_increase, std::string text) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_println(level_increase,text);
+    _message_availability_condition.notify_one();
 }
 
 void NonblockingLoggerScheduler::hold(std::string scope, std::string text) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_hold(scope,text);
+    _message_availability_condition.notify_one();
 }
 
 void NonblockingLoggerScheduler::release(std::string scope) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     _data.find(std::this_thread::get_id())->second->enqueue_release(scope);
+    _message_availability_condition.notify_one();
 }
 
-SharedPointer<LogRawMessage> NonblockingLoggerScheduler::_dequeue_and_cleanup() {
+Bool NonblockingLoggerScheduler::_is_queue_empty() const {
+    std::lock_guard<std::mutex> lock(_data_mutex);
+    for (auto entry : _data) {
+        if (entry.second->queue_size() > 0) return false;
+    }
+    return true;
+}
+
+LogRawMessage NonblockingLoggerScheduler::_dequeue_and_cleanup() {
     // TODO: address cleanup that causes segfaults
-    SharedPointer<LogRawMessage> result;
     SharedPointer<LoggerData> largest_data;
     SizeType largest_size = 0;
     std::lock_guard<std::mutex> lock(_data_mutex);
@@ -467,28 +488,20 @@ SharedPointer<LogRawMessage> NonblockingLoggerScheduler::_dequeue_and_cleanup() 
             ++it;
         }
     }
-    if (largest_size > 0)
-        result.reset(new LogRawMessage(largest_data->thread_name(),largest_data->dequeue()));
-
-    return result;
+    return LogRawMessage(largest_data->thread_name(),largest_data->dequeue());
 }
 
 void NonblockingLoggerScheduler::_consume_msgs() {
     while(true) {
-        auto msg_ptr = _dequeue_and_cleanup();
-        if (msg_ptr != nullptr) {
-            LogRawMessage msg = *msg_ptr;
-            switch (msg.kind()) {
-                case RawMessageKind::PRINTLN : Logger::instance()._println(msg); break;
-                case RawMessageKind::HOLD : Logger::instance()._hold(msg); break;
-                case RawMessageKind::RELEASE : Logger::instance()._release(msg); break;
-                default: ARIADNE_FAIL_MSG("Unhandled RawMessageKind for printing.");
-            }
-        } else {
-            // Allow the thread to sleep, for a larger time in the case of high verbosity (for verbosity 1, a 50ms sleep)
-            // The current level is used as an average of the levels printed
-            if (not _terminate) std::this_thread::sleep_for(std::chrono::microseconds(std::max(1,100000>>Logger::instance().cached_last_printed_level())));
-            else break;
+        std::unique_lock<std::mutex> lock(_message_availability_mutex);
+        _message_availability_condition.wait(lock, [=, this] { return _terminate or not _is_queue_empty(); });
+        if (_terminate and _is_queue_empty()) return;
+        auto msg = _dequeue_and_cleanup();
+        switch (msg.kind()) {
+            case RawMessageKind::PRINTLN : Logger::instance()._println(msg); break;
+            case RawMessageKind::HOLD : Logger::instance()._hold(msg); break;
+            case RawMessageKind::RELEASE : Logger::instance()._release(msg); break;
+            default: ARIADNE_FAIL_MSG("Unhandled RawMessageKind for printing.");
         }
     }
 }

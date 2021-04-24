@@ -282,7 +282,6 @@ class TestLogging {
         thread1.enqueue([] { print_something1(); });
         thread2.enqueue([] { print_something2(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     Void test_nonblocking_scheduler_with_nonbuffered_threads() {

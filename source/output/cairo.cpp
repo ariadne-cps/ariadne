@@ -56,12 +56,6 @@ CairoCanvas::~CairoCanvas()
     cairo_destroy(cr);
 }
 
-CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
-{
-}
-
-
 CairoCanvas::CairoCanvas(const ImageSize2d& size)
     : cr(0), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
@@ -71,29 +65,6 @@ CairoCanvas::CairoCanvas(const ImageSize2d& size)
     cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
     
-}
-
-CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
-    : CairoCanvas(size)
-{
-}
-
-Vector2d CairoCanvas::scaling() const
-{
-    ImageSize2d sz = this->size_in_pixels();
-    Box2d bb=this->bounds();
-    return Vector2d((bb.xu-bb.xl)/sz.nx,(bb.yu-bb.yl)/sz.ny);
-}
-
-Box2d CairoCanvas::bounds() const
-{
-    double xl=LEFT_MARGIN;
-    double yu=TOP_MARGIN;
-    double xu=cairo_image_surface_get_width(cairo_get_target(cr))-RIGHT_MARGIN;
-    double yl=cairo_image_surface_get_height(cairo_get_target(cr))-BOTTOM_MARGIN;
-    cairo_device_to_user(cr,&xl,&yu);
-    cairo_device_to_user(cr,&xu,&yl);
-    return Box2d(xl,xu,yl,yu);
 }
 
 Void CairoCanvas::stroke()
@@ -263,7 +234,7 @@ Void CairoCanvas::finalise()
 }
 
 Void CairoCanvas::set_colour_palette() {  }
-Void CairoCanvas::fill3d() {  }
+Void CairoCanvas::fill_3d() {  }
 Void CairoCanvas::set_heat_map(Bool b) {  }
 
 #endif

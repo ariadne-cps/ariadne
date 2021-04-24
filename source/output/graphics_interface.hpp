@@ -148,14 +148,9 @@ class CanvasInterface {
     //! \brief Set the colour palette.
     virtual Void set_colour_palette() = 0;  
     //! \brief Draw and fill a 3d image.
-    virtual Void fill3d() = 0;  
+    virtual Void fill_3d() = 0;
       //! \brief Set a heatmap projection. 
     virtual Void set_heat_map(Bool b) = 0;
-
-    //! \brief The scaling of the figure, in user units per pixel.
-    virtual Vector2d scaling() const = 0;
-    //! brief The lower and upper bounds of the x- and y- coordinates of the drawing region.
-    virtual Box2d bounds() const = 0;
   public:
     template<class X, class Y> Void move_to(X x, Y y) { this->move_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
     template<class X, class Y> Void line_to(X x, Y y) { this->line_to(numeric_cast<double>(x),numeric_cast<double>(y)); }

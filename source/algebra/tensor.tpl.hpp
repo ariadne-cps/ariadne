@@ -85,7 +85,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x_coordinate() == 1 && p.y_coordinate() == 0)
@@ -104,7 +104,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x_coordinate() == 0 && p.y_coordinate() == 2)
@@ -178,7 +178,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
         }
         canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     }
-    canvas.fill3d();
+        canvas.fill_3d();
     }
 
  
@@ -197,7 +197,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }else if(proj ==ProjType::x1_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
@@ -244,7 +244,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x_coordinate() == 1 && p.y_coordinate() == 0)
@@ -262,7 +262,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x_coordinate() == 0 && p.y_coordinate() == 2)
@@ -335,7 +335,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
         }
         canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     }
-    canvas.fill3d();
+        canvas.fill_3d();
     }
 
 
@@ -355,7 +355,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }else if(proj ==ProjType::x1_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
@@ -430,7 +430,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x() == RealVariable("y") && p.y() == RealVariable("x"))
@@ -448,7 +448,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }
     else if(p.x() == RealVariable("x") && p.y() == RealVariable("z"))
@@ -521,7 +521,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
         }
         canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     }
-    canvas.fill3d();
+        canvas.fill_3d();
     }
 /*
     if(proj == ProjType::no_proj){
@@ -538,7 +538,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }else if(proj ==ProjType::x1_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
@@ -589,7 +589,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
         }
         canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     }
-    canvas.fill3d();
+        canvas.fill_3d();
     }
 /*
     if(proj == ProjType::no_proj){
@@ -606,7 +606,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
                 }
                 canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
             }
-            canvas.fill3d();
+            canvas.fill_3d();
         }
     }else if(proj ==ProjType::x1_proj){
         for(SizeType frame=0; frame!=_ns[2]; ++frame){

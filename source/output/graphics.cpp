@@ -94,10 +94,7 @@ GraphicsProperties& GraphicsProperties::set_fill_opacity(Dbl fo) { this->fill_co
 GraphicsProperties& GraphicsProperties::set_fill_colour(Colour fc) { this->fill_colour=fc; return *this; }
 GraphicsProperties& GraphicsProperties::set_fill_colour(Dbl r, Dbl g, Dbl b) {
     this->set_fill_colour(Colour(r,g,b,this->fill_colour.opacity)); return *this; }
-GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is3D = true; return *this; }
-GraphicsProperties& GraphicsProperties::set_proj_xy() {this->isProj=true; this->isXY=true; return *this; }
-GraphicsProperties& GraphicsProperties::set_proj_xz() {this->isProj=true; this->isXZ=true; return *this; }
-GraphicsProperties& GraphicsProperties::set_proj_yz() {this->isProj=true; this->isYZ=true; return *this; }
+GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is_3d = true; return *this; }
 GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
@@ -229,7 +226,7 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
     : _data(new Data(bbx,proj))
 {
     ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
-    if(proj.argument_size() > 2){ this->_data->properties.isProj = true; }
+    if(proj.argument_size() > 2){ this->_data->properties.is_projected = true; }
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
@@ -260,7 +257,7 @@ Figure& Figure::draw(const Drawable2dInterface& shape)
 
 Figure& Figure::draw(const Drawable2d3dInterface& shape)
 {
-    if (this->_data->bounding_box.size() == 3) { this->_data->properties.is3D = true; }
+    if (this->_data->bounding_box.size() == 3) { this->_data->properties.is_3d = true; }
 
     this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape)); return *this;
 }
@@ -493,7 +490,7 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     String ty=String("x")+to_str(projection.y_coordinate());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
-    if(this->_data->properties.isProj) { canvas.set_colour_palette(); }
+    if(this->_data->properties.is_projected) { canvas.set_colour_palette(); }
 
     // Draw shapes
     for(const GraphicsObject& object : this->_data->objects) {
@@ -521,7 +518,7 @@ Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) cons
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
         
-        if(this->_data->properties.is3D && this->_data->properties.isProj==false){
+        if(this->_data->properties.is_3d && this->_data->properties.is_projected == false){
             this->_paint3d(*canvas);
         }else{
             this->_paint_all(*canvas);
@@ -561,7 +558,7 @@ LabelledFigure::LabelledFigure(const Axes2d& axes)
 
 LabelledFigure::LabelledFigure(const Axes3d& axes) 
     : _data(new Data(axes)) {
-        this->_data->properties.is3D = true;
+        this->_data->properties.is_3d = true;
 }
 
 LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
@@ -570,7 +567,7 @@ LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<Appro
 
 LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bnds)
     : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bnds).bounds())){
-        this->_data->properties.is3D = true;
+        this->_data->properties.is_3d = true;
 }
 
 Void LabelledFigure::set_axes(const Axes2d& axes) {
@@ -607,7 +604,7 @@ LabelledFigure& LabelledFigure::draw(const LabelledDrawable2dInterface& shape)
 
 LabelledFigure& LabelledFigure::draw(const LabelledDrawable2d3dInterface& shape)
 {
-    if(this->_data->bounds.size() == 3) { this->_data->properties.is3D = true; }
+    if(this->_data->bounds.size() == 3) { this->_data->properties.is_3d = true; }
     this->_data->objects.push_back(LabelledGraphicsObject(this->_data->properties,shape)); return *this;
 }
 
@@ -683,7 +680,7 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
-    if(this->_data->properties.isProj) { canvas.set_colour_palette(); }
+    if(this->_data->properties.is_projected) { canvas.set_colour_palette(); }
     // Draw shapes
     SizeType total_objects = this->_data->objects.size();
     SizeType processed_objects = 0;
@@ -713,7 +710,7 @@ LabelledFigure::write(const Char* cfilename, Nat drawing_width, Nat drawing_heig
     #else
         SharedPointer<CanvasInterface> canvas=GraphicsManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
 
-        if(this->_data->properties.is3D && this->_data->properties.isProj==false){
+        if(this->_data->properties.is_3d && this->_data->properties.is_projected == false){
             this->_paint3d(*canvas);
         }else{
             this->_paint_all(*canvas);

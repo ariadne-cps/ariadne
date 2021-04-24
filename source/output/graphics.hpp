@@ -52,10 +52,7 @@ struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } LineC
 struct FillStyle { explicit FillStyle(Bool fs) : _style(fs) { } operator Bool() const { return this->_style; } private: Bool _style; };
 struct FillOpacity { explicit FillOpacity(Dbl fo) : _opacity(fo) { } operator Dbl() const { return this->_opacity; } private: Dbl _opacity; };
 struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } FillColour(Dbl r, Dbl g, Dbl b) : Colour(r,g,b) { } };
-struct SetXYProj { explicit SetXYProj() : _xyProj(true) { } operator Bool() const { return this-> _xyProj; } private: Bool _xyProj; };
-struct SetXZProj { explicit SetXZProj() : _xzProj(true){ } operator Bool() const { return this-> _xzProj; } private: Bool _xzProj; };
-struct SetYZProj { explicit SetYZProj() : _yzProj(true){ } operator Bool() const { return this-> _yzProj; } private: Bool _yzProj; };
-struct SetAnimated { explicit SetAnimated(Bool b) : _anim(b) { } operator Bool() const { return this-> _anim; } private: Bool _anim; };
+struct Animated { explicit Animated(Bool b) : _anim(b) { } operator Bool() const { return this-> _anim; } private: Bool _anim; };
 
 inline LineStyle line_style(Bool s) { return LineStyle(s); }
 inline LineWidth line_width(Dbl w) { return LineWidth(w); }
@@ -65,16 +62,13 @@ inline FillStyle fill_style(Bool s) { return FillStyle(s); }
 inline FillOpacity fill_opacity(Dbl o) { return FillOpacity(o); }
 inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
 inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,g,b)); }
-inline SetXYProj set_proj_xy() { return SetXYProj(); }
-inline SetXZProj set_proj_xz() { return SetXZProj(); }
-inline SetYZProj set_proj_yz() { return SetYZProj(); }
-inline SetAnimated set_animated(Bool b) { return SetAnimated(b); }
+inline Animated set_animated(Bool b) { return Animated(b); }
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false), is_animated(false) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is_projected(false), is_3d(false), is_animated(false) { }
     GraphicsProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
-        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is3D(false), isProj(false),isXY(false), isXZ(false), isYZ(false), is_animated(false) { }
+        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is_3d(false), is_animated(false) { }
     Dbl dot_radius;
     Bool line_style;
     Dbl line_width;
@@ -82,11 +76,8 @@ struct GraphicsProperties {
     Bool fill_style;
     Colour fill_colour;
 
-    Bool is3D;
-    Bool isProj;
-    Bool isXY;
-    Bool isXZ;
-    Bool isYZ;
+    Bool is_projected;
+    Bool is_3d;
     Bool is_animated;
 
     GraphicsProperties& set_dot_radius(Dbl);
@@ -100,10 +91,8 @@ struct GraphicsProperties {
     GraphicsProperties& set_fill_colour(Dbl, Dbl, Dbl);
     GraphicsProperties& set_fill_opacity(Dbl);
 
+    GraphicsProperties& set_is_projected(Bool);
     GraphicsProperties& set_3d(Bool);
-    GraphicsProperties& set_proj_xy();
-    GraphicsProperties& set_proj_xz();
-    GraphicsProperties& set_proj_yz();
 
     GraphicsProperties& set_animated(Bool);
 
@@ -269,11 +258,7 @@ inline Figure& operator<<(Figure& g, const LineColour& lc) { g.properties().set_
 inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.properties().set_fill_style(fs); return g; }
 inline Figure& operator<<(Figure& g, const FillOpacity& fo) { g.properties().set_fill_opacity(fo); return g; }
 inline Figure& operator<<(Figure& g, const FillColour& fc) { g.properties().set_fill_colour(fc); return g; }
-//inline Figure& operator<<(Figure& g, const Set3D& dim) {g.properties().set_3D(dim); return g; }
-inline Figure& operator<<(Figure&g, const SetXYProj& xyproj) {g.properties().set_proj_xy(); return g; }
-inline Figure& operator<<(Figure&g, const SetXZProj& xzproj) {g.properties().set_proj_xz(); return g; }
-inline Figure& operator<<(Figure&g, const SetYZProj& yzproj) {g.properties().set_proj_yz(); return g; }
-inline Figure& operator<<(Figure&g, const SetAnimated& animation) {g.properties().set_animated(animation); return g; }
+inline Figure& operator<<(Figure&g, const Animated& animation) {g.properties().set_animated(animation); return g; }
 
 template<class S> class LabelledSet;
 
@@ -333,11 +318,7 @@ inline LabelledFigure& operator<<(LabelledFigure& g, const LineColour& lc) { g.p
 inline LabelledFigure& operator<<(LabelledFigure& g, const FillStyle& fs) { g.properties().set_fill_style(fs); return g; }
 inline LabelledFigure& operator<<(LabelledFigure& g, const FillOpacity& fo) { g.properties().set_fill_opacity(fo); return g; }
 inline LabelledFigure& operator<<(LabelledFigure& g, const FillColour& fc) { g.properties().set_fill_colour(fc); return g; }
-//inline LabelledFigure& operator<<(LabelledFigure& g, const Set3D& dim) { g.properties().set_3D(dim); return g; }
-inline LabelledFigure& operator<<(LabelledFigure& g, const SetXYProj& xyproj) {g.properties().set_proj_xy(); return g; }
-inline LabelledFigure& operator<<(LabelledFigure& g, const SetXZProj& xzproj) {g.properties().set_proj_xz(); return g; }
-inline LabelledFigure& operator<<(LabelledFigure& g, const SetYZProj& yzproj) {g.properties().set_proj_yz(); return g; }
-inline LabelledFigure& operator<<(LabelledFigure&g, const SetAnimated& animation) {g.properties().set_animated(animation); return g; }
+inline LabelledFigure& operator<<(LabelledFigure&g, const Animated& animation) {g.properties().set_animated(animation); return g; }
 
 
 template<class S> class LabelledSet;

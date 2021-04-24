@@ -263,7 +263,7 @@ void GnuplotCanvas::fill()
     this->dim = 0;       
 }
 
-Void GnuplotCanvas::fill3d(){
+Void GnuplotCanvas::fill_3d(){
     if (this->isdot)
     {
         *gnuplot << "splot \"<echo '" << to_string(this->Cpoint.x) << " " << to_string(this->Cpoint.y) << "'\" w points pt 7 ps " << to_string(this->dr) << "\n";
@@ -335,10 +335,6 @@ void GnuplotCanvas::set_heat_map(Bool hm)
         *gnuplot << "unset view\n";
     } 
 }
-
-
-Vector2d GnuplotCanvas::scaling() const { return Vector2d(0, 0); }
-Box2d GnuplotCanvas::bounds() const { return Box2d(0, 0, 0, 0); }
 
 void GnuplotCanvas::set_multiplot(bool s)
 {

@@ -97,7 +97,7 @@ class GnuplotCanvas : public CanvasInterface
     Box2d bounds() const;
 
     Void set_colour_palette();
-    Void fill3d();
+    Void fill_3d();
     Void set_heat_map(Bool b);
 
     //Set Multiplot - Multiple plot on same screen

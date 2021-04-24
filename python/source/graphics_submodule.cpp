@@ -114,7 +114,7 @@ Void export_labelled_figure(pybind11::module& module)
     labelled_figure_class.def("set_axes",(Void(LabelledFigure::*)(const Axes2d&)) &LabelledFigure::set_axes, reference_internal);
     labelled_figure_class.def("properties",(GraphicsProperties&(LabelledFigure::*)())&LabelledFigure::properties, reference_internal);
 
-    labelled_figure_class.def("draw",(LabelledFigure&(LabelledFigure::*)(const LabelledDrawableInterface&))&LabelledFigure::draw, reference_internal);
+    labelled_figure_class.def("draw",(LabelledFigure&(LabelledFigure::*)(const LabelledDrawable2dInterface&))&LabelledFigure::draw, reference_internal);
     labelled_figure_class.def("clear",&LabelledFigure::clear, reference_internal);
     labelled_figure_class.def("write",(Void(LabelledFigure::*)(const Char*)const)&LabelledFigure::write);
     labelled_figure_class.def("write",(Void(LabelledFigure::*)(const Char*,Nat,Nat)const)&LabelledFigure::write);

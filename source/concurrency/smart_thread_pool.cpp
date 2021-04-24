@@ -34,47 +34,59 @@ VoidFunction SmartThreadPool::_task_wrapper_function() {
             VoidFunction task;
             {
                 std::unique_lock<std::mutex> lock(_task_availability_mutex);
-                _task_availability_condition.wait(lock, [=, this] { return _stop or not _tasks.empty(); });
-                if (_stop and _tasks.empty()) return;
+                _task_availability_condition.wait(lock, [=, this] { return _finish_all_and_stop or not _tasks.empty(); });
+                if (_finish_all_and_stop and _tasks.empty()) return;
                 task = std::move(_tasks.front());
                 _tasks.pop();
             }
             task();
-            {
-                std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
-                if (_threads_to_remove > 0) {
-                    _threads_to_remove--;
-                    return;
-                }
+            if (_finish_current_and_stop) {
+                _num_stopped_threads++;
+                return;
             }
         }
     };
 }
 
 SmartThreadPool::SmartThreadPool(SizeType size)
-        : _stop(false), _threads_to_remove(0) {
-    ARIADNE_PRECONDITION(size > 0);
+        : _finish_all_and_stop(false), _finish_current_and_stop(false), _num_stopped_threads(0) {
     for (SizeType i = 0; i < size; ++i) {
         _threads.append(make_shared<SmartThread>(SmartThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
     }
 }
 
 SizeType SmartThreadPool::num_threads() const {
-    std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
+    std::lock_guard<std::mutex> lock(_num_threads_mutex);
     return _threads.size();
 }
 
-Void SmartThreadPool::set_num_threads(SizeType number) {
-    ARIADNE_PRECONDITION(number > 0);
-    std::lock_guard<std::mutex> lock(_threads_to_remove_mutex);
-    const SizeType previous_number = _threads.size();
-    if (number > previous_number) {
-        _threads.resize(number);
-        for (SizeType i=previous_number; i<number; ++i) {
-            _threads.at(i) = make_shared<SmartThread>(SmartThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
-        }
-    } else
-        _threads_to_remove = previous_number - number;
+Void SmartThreadPool::add_threads(SizeType number) {
+    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    auto old_size = _threads.size();
+    if (old_size == 0) {
+        _finish_current_and_stop = false;
+    }
+    _threads.resize(old_size+number);
+    for (SizeType i=old_size; i<old_size+number; ++i) {
+        _threads.at(i) = make_shared<SmartThread>(SmartThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
+    }
+}
+
+Void SmartThreadPool::schedule_stop_threads() {
+    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    _finish_current_and_stop = true;
+}
+
+SizeType SmartThreadPool::num_stopped_threads() const {
+    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    return _num_stopped_threads;
+}
+
+Void SmartThreadPool::remove_threads() {
+    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    ARIADNE_PRECONDITION(_num_stopped_threads == _threads.size());
+    _threads.clear();
+    _num_stopped_threads = 0;
 }
 
 SizeType SmartThreadPool::queue_size() const {
@@ -84,8 +96,8 @@ SizeType SmartThreadPool::queue_size() const {
 
 SmartThreadPool::~SmartThreadPool() {
     {
-        std::lock_guard<std::mutex> lock(_task_availability_mutex);
-        _stop = true;
+        std::lock_guard<std::mutex> task_availability_lock(_task_availability_mutex);
+        _finish_all_and_stop = true;
     }
     _task_availability_condition.notify_all();
     _threads.clear();

@@ -57,10 +57,24 @@ class SmartThreadPool {
     //! \brief The number of threads
     SizeType num_threads() const;
 
-    //! \brief Re-set the number of threads
-    //! \details If downsizing, threads will still be allowed to complete; since completion is not guaranteed to happen any time
-    //! before destruction of the pool, the requested downsizing is simply scheduled.
-    void set_num_threads(SizeType number);
+    //! \brief Add the \a number of threads
+    Void add_threads(SizeType number);
+
+    //! \brief Schedule the threads to stop
+    //! \details The threads will stop as soon as their last task is completed;
+    //! threads in the waiting state will not be able to stop, i.e., this method is
+    //! not meant to be used on an inactive pool but an active one.
+    Void schedule_stop_threads();
+
+    //! \brief Force the threads to stop and remove the threads
+    Void stop_and_remove_threads();
+
+    //! \brief The number of threads already stopped but not removed
+    SizeType num_stopped_threads() const;
+
+    //! \brief Remove the stopped threads
+    //! \details Throws an exception if there are still threads to stop
+    Void remove_threads();
 
     ~SmartThreadPool();
 
@@ -72,9 +86,10 @@ class SmartThreadPool {
 
     mutable std::mutex _task_availability_mutex;
     std::condition_variable _task_availability_condition;
-    Bool _stop;
-    Nat _threads_to_remove;
-    mutable std::mutex _threads_to_remove_mutex;
+    Bool _finish_all_and_stop; // Wait till the queue is empty before stopping the thread, used for destruction
+    Bool _finish_current_and_stop; // Wait till the current one is completed before stopping the thread
+    std::atomic<Nat> _num_stopped_threads;
+    mutable std::mutex _num_threads_mutex;
 };
 
 template<class F, class... AS>
@@ -85,7 +100,7 @@ auto SmartThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>
     Future<ReturnType> result = task->get_future();
     {
         std::unique_lock<std::mutex> lock(_task_availability_mutex);
-        if (_stop) throw StoppedThreadPoolException();
+        if (_finish_all_and_stop) throw StoppedThreadPoolException();
         _tasks.emplace([task]() { (*task)(); });
     }
     _task_availability_condition.notify_one();

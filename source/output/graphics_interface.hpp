@@ -166,9 +166,6 @@ class CanvasInterface {
 //! \brief Base interface for drawable objects
 class Drawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Projection2d ProjectionType;
-
     //! brief Virtual destructor.
     virtual ~Drawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
@@ -179,31 +176,20 @@ class Drawable2dInterface {
     virtual DimensionType dimension() const = 0;
 };
 
-class Drawable2d3dInterface
-                                : public Drawable2dInterface {
+class Drawable2d3dInterface : public Drawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Projection3d ProjectionType;
-
     //! brief Virtual destructor.
     virtual ~Drawable2d3dInterface() = default;
-    //! brief Make a dynamically-allocated copy.
-    virtual Drawable2dInterface* clone() const = 0;
     virtual Drawable2d3dInterface* clone2d3d() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     virtual Void draw(CanvasInterface& c, const Projection3d& p) const = 0;
-
-    //! brief The dimension of the object in Euclidean space
-    virtual DimensionType dimension() const = 0;
+    using Drawable2dInterface::draw;	
 };
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
 class LabelledDrawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Variables2d ProjectionType;
     //! brief Virtual destructor.
     virtual ~LabelledDrawable2dInterface() = default;
     //! brief Make a dynamically-allocated copy.
@@ -212,11 +198,8 @@ class LabelledDrawable2dInterface {
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const = 0;
 };
 
-class LabelledDrawable2d3dInterface 
-                                      : public LabelledDrawable2dInterface {
+class LabelledDrawable2d3dInterface : public LabelledDrawable2dInterface {
   public:
-    //! brief The type of data needed to project to a 2d image.
-    typedef Variables3d ProjectionType;
     //! brief Virtual destructor.
     virtual ~LabelledDrawable2d3dInterface() = default;
     //! brief Make a dynamically-allocated copy.
@@ -225,7 +208,7 @@ class LabelledDrawable2d3dInterface
 
     //! brief Draw the projection of object onto variables \a p on the canvas \a c .
     virtual Void draw(CanvasInterface& c, const Variables3d& p) const = 0;
-
+    using LabelledDrawable2dInterface::draw;
 };
 
 } // namespace Ariadne

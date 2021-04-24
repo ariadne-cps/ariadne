@@ -903,7 +903,7 @@ void Logger::_print_preamble_for_firstline(unsigned int level, std::string threa
 
     if (not level_changed and _configuration.prints_level_on_change_only() and theme.level_hidden_separator.is_styled()) {
         std::clog << theme.level_hidden_separator() << "|" << TerminalTextStyle::RESET;
-    } else if (level_changed and theme.level_shown_separator.is_styled()) {
+    } else if ((level_changed and theme.level_shown_separator.is_styled()) or not _configuration.prints_level_on_change_only()) {
         std::clog << theme.level_shown_separator() << "|" << TerminalTextStyle::RESET;
     } else {
         std::clog << "|";

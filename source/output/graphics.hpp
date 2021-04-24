@@ -189,8 +189,8 @@ class Figure
     Figure& set_projection_map(const Projection2d&);
     Figure& set_projection_map(const Projection3d&);
     
-    Projection2d get_projection_map() const;
-    Projection3d get_3dprojection_map() const;
+    Projection2d get_2d_projection_map() const;
+    Projection3d get_3d_projection_map() const;
 
     Figure& set_bounding_box(const GraphicsBoundingBoxType&);
     
@@ -215,11 +215,6 @@ class Figure
     Figure& set_fill_colour(Dbl, Dbl, Dbl);
     //! Set the opacity of shapes. An opacity of 0 means no fill.
     Figure& set_fill_opacity(Dbl);
-
-    Figure& set3d_(Bool);
-    Figure& set_proj_xy(); 
-    Figure& set_proj_xz(); 
-    Figure& set_proj_yz(); 
 
     Bool get_line_style() const;
     Dbl get_line_width() const;

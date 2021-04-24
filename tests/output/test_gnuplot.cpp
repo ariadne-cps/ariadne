@@ -176,14 +176,12 @@ class TestGnuplot
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,1));
-            fig1.set_proj_xy();
             fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjXY");
         
             RealVariable x("x"), y("y");
             Axes2d axes(0<=x<=dim-1,0<=y<=dim-1);
             LabelledFigure fig2=LabelledFigure(axes);
-            fig2 << set_proj_xy();
             fig2.draw(data);
             fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjXY");
         
@@ -200,14 +198,12 @@ class TestGnuplot
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,2));
-            fig1.set_proj_xz();
             fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjXZ");
         
             RealVariable x("x"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
-            fig2 << set_proj_xz();
             fig2.draw(data);
             fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjXZ");
         
@@ -224,14 +220,12 @@ class TestGnuplot
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,1,2));
-            fig1.set_proj_yz();
             fig1.draw(data);
             fig1.write("test-gnuplot-Gauss3DProjYZ");
         
             RealVariable x("y"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
-            fig2 << set_proj_yz();
             fig2.draw(data);
             fig2.write("test-gnuplot-LabelledFigure-Gauss3DProjYZ");
         
@@ -262,7 +256,6 @@ class TestGnuplot
             fig2 << set_animated(true);
             fig2.draw(data);
             fig2.write("test-gnuplot-LabelledFigure-Gauss3DAnimation");
-        
         }
 };
 

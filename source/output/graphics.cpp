@@ -290,12 +290,12 @@ Figure& Figure::set_bounding_box(const ApproximateBoxType& bx)
     this->_data->bounding_box=bx; return *this;
 }
 
-Projection2d Figure::get_projection_map() const
+Projection2d Figure::get_2d_projection_map() const
 {
     return this->_data->projection;
 }
 
-Projection3d Figure::get_3dprojection_map() const
+Projection3d Figure::get_3d_projection_map() const
 {
     return this->_data->projection3d;
 }
@@ -358,24 +358,6 @@ Figure& Figure::set_fill_colour(Dbl r, Dbl g, Dbl b)
     this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity)); return *this;
 }
 
-Figure& Figure::set_proj_xy()
-{
-    this->_data->properties.isProj = true;
-    this->_data->properties.isXY = true;
-    return *this;
-}
-Figure& Figure::set_proj_xz()
-{
-    this->_data->properties.isProj = true;
-    this->_data->properties.isXZ = true;
-    return *this;
-}
-Figure& Figure::set_proj_yz()
-{
-    this->_data->properties.isProj = true;
-    this->_data->properties.isYZ = true;
-    return *this;
-}
 Bool Figure::get_line_style() const
 {
     return this->_data->properties.line_style;

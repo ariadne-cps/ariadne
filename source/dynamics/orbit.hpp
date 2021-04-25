@@ -161,7 +161,7 @@ class Orbit<LabelledEnclosure>
     : public LabelledDrawable2dInterface
 {
     typedef LabelledEnclosure ES;
-    typedef LabelledSet<ListSet<Enclosure>> ESL;
+    typedef ListSet<LabelledEnclosure> ESL;
   public:
     typedef ES EnclosureType;
     typedef ESL EnclosureListType;

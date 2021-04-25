@@ -1592,31 +1592,6 @@ Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& 
     }
 }
 
-const RealSpace LabelledSet<ListSet<Enclosure>>::space() const {
-    return (*this)[0].space();
-}
-
-const RealSpace LabelledSet<ListSet<Enclosure>>::state_space() const {
-    return (*this)[0].state_space();
-}
-
-const ListSet<Enclosure> LabelledSet<ListSet<Enclosure>>::euclidean_set() const {
-    ListSet<Enclosure> result;
-    for (SizeType i=0; i!=this->size(); ++i) {
-        result.adjoin((*this)[i].euclidean_set());
-    }
-    return result;
-}
-
-const LabelledUpperBoxType LabelledSet<ListSet<Enclosure>>::bounding_box() const {
-    if (this->empty()) { return LabelledUpperBoxType(this->space(),UpperBoxType(this->space().dimension())); }
-    UpperBoxType bbx=(*this)[0].euclidean_set().bounding_box();
-    for (SizeType i=1; i!=this->size(); ++i) {
-        bbx=hull(bbx,(*this)[i].euclidean_set().bounding_box());
-    }
-    return LabelledUpperBoxType(this->state_space(),bbx);
-}
-
 } // namespace Ariadne
 
 

@@ -446,17 +446,6 @@ template<> class ListSet<LabelledEnclosure> : public LabelledDrawable2dInterface
     virtual Void draw(CanvasInterface&, const Variables2d&) const override;
 };
 
-template<> class LabelledSet<ListSet<Enclosure>> : public ListSet<LabelledEnclosure> {
-  public:
-    LabelledSet<ListSet<Enclosure>>() : ListSet<LabelledEnclosure>() { }
-    LabelledSet<ListSet<Enclosure>>(ListSet<LabelledEnclosure> lst) : ListSet<LabelledEnclosure>(lst) { }
-
-    const RealSpace state_space() const;
-    const RealSpace space() const;
-    const ListSet<Enclosure> euclidean_set() const;
-    const LabelledUpperBoxType bounding_box() const;
-};
-
 } //namespace Ariadne
 
 #endif /* ARIADNE_ENCLOSURE_HPP */

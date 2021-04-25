@@ -34,6 +34,37 @@
 
 using namespace Ariadne;
 
+Void export_labelled_drawable_2d_interface(pybind11::module& module) {
+    pybind11::class_<LabelledDrawable2dInterface> labelled_drawable_interface_class(module,"LabelledDrawable2dInterface");
+}
+
+Void export_semantics(pybind11::module& module) {
+    pybind11::enum_<Semantics> semantics_enum(module,"Semantics");
+    semantics_enum.value("UPPER", Semantics::UPPER);
+    semantics_enum.value("LOWER", Semantics::LOWER);
+    //    semantics_enum.def("__repr__" , &__cstr__<Semantics>);
+}
+
+Void export_storage(pybind11::module& module) {
+    pybind11::class_<Storage,pybind11::bases<Drawable2dInterface>> storage_class(module,"Storage");
+    pybind11::class_<LabelledStorage,pybind11::bases<LabelledDrawable2dInterface>> labelled_storage_class(module,"LabelledStorage");
+}
+
+Void export_enclosure(pybind11::module& module) {
+    pybind11::class_<Enclosure,pybind11::bases<Drawable2dInterface>> enclosure_class(module,"Enclosure");
+    enclosure_class.def("bounding_box",&Enclosure::bounding_box);
+    enclosure_class.def("__str__", &__cstr__<Enclosure>);
+    pybind11::class_<LabelledEnclosure,pybind11::bases<LabelledDrawable2dInterface,Enclosure>> labelled_enclosure_class(module,"LabelledEnclosure");
+    labelled_enclosure_class.def("bounding_box",&LabelledEnclosure::bounding_box);
+    labelled_enclosure_class.def("__str__", &__cstr__<LabelledEnclosure>);
+}
+
+template<class T> Void export_list_set(pybind11::module& module, const char* name) {
+    pybind11::class_<ListSet<T>> list_set_class(module,name);
+    list_set_class.def("__iter__", [](ListSet<T> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_class.def("size",&ListSet<T>::size);
+}
+
 
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
@@ -44,15 +75,6 @@ Void export_orbit(pybind11::module& module, const char* name)
     orbit_class.def("final", &ORB::final);
     orbit_class.def("__str__", &__cstr__<ORB>);
 }
-
-
-Void export_semantics(pybind11::module& module) {
-    pybind11::enum_<Semantics> semantics_enum(module,"Semantics");
-    semantics_enum.value("UPPER", Semantics::UPPER);
-    semantics_enum.value("LOWER", Semantics::LOWER);
-    //    semantics_enum.def("__repr__" , &__cstr__<Semantics>);
-}
-
 
 template<class SIM> Void export_simulator(pybind11::module& module, const char* name);
 
@@ -65,7 +87,6 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
-    pybind11::class_<LabelledDrawable2dInterface> labelled_drawable_interface_class(module,"LabelledDrawable2dInterface");
     pybind11::class_<LabelledInterpolatedCurve,pybind11::bases<LabelledDrawable2dInterface>> labelled_interpolated_curve_class(module,"LabelledInterpolatedCurve");
 
     pybind11::class_<OrbitType,pybind11::bases<LabelledDrawable2dInterface>> simulator_orbit_class(module,"ApproximatePointOrbit");
@@ -124,10 +145,6 @@ Void export_vector_field_evolver_configuration(pybind11::module& module) {
     vector_field_evolver_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
 }
 
-Void export_labelled_storage(pybind11::module& module) {
-    pybind11::class_<LabelledStorage,pybind11::bases<LabelledDrawable2dInterface>> labelled_storage_class(module,"LabelledStorage");
-}
-
 template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {
     typedef typename RA::StorageType StorageType;
     typedef typename RA::StateSpaceType StateSpaceType;
@@ -175,7 +192,14 @@ Void export_reachability_analyser(pybind11::module& module, const char* name)
 
 Void evolution_submodule(pybind11::module& module)
 {
+    export_labelled_drawable_2d_interface(module);
+
     export_semantics(module);
+
+    export_storage(module);
+    export_enclosure(module);
+
+    export_list_set<LabelledEnclosure>(module,"LabelledEnclosureListSet");
 
     export_simulator<VectorFieldSimulator>(module,"VectorFieldSimulator");
 
@@ -188,8 +212,6 @@ Void evolution_submodule(pybind11::module& module)
     export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
 
     export_vector_field_evolver_configuration(module);
-
-    export_labelled_storage(module);
 
     export_safety_certificate<ContinuousReachabilityAnalyser>(module,"SafetyCertificate");
     export_reachability_analyser<ContinuousReachabilityAnalyser,VectorFieldEvolver>(module,"ContinuousReachabilityAnalyser");

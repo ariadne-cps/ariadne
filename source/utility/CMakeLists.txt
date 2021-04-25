@@ -1,7 +1,7 @@
 set(LIBRARY_NAME ariadne-utility)
 
 add_library(${LIBRARY_NAME} OBJECT
-    utility.cpp
+        stack_trace.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

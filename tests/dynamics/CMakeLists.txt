@@ -20,7 +20,7 @@ foreach(TEST ${UNIT_TESTS})
     endif()    
     target_link_libraries(${TEST} ariadne)
     add_test(${TEST} ${TEST})    
-    set_property(TEST ${TEST} PROPERTY LABELS "dynamics;primary")
+    set_property(TEST ${TEST} PROPERTY LABELS "dynamics")
 endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})

@@ -11,7 +11,7 @@ foreach(TEST ${UNIT_TESTS})
     endif()    
     add_test(${TEST} ${TEST})
     target_link_libraries(${TEST} ariadne-kernel)
-    set_property(TEST ${TEST} PROPERTY LABELS "output;primary;kernel")         
+    set_property(TEST ${TEST} PROPERTY LABELS "output;kernel")
 endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})

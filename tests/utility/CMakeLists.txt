@@ -1,6 +1,7 @@
 set(UNIT_TESTS
-    test_expression
-    test_expression_set
+    test_array
+    test_container
+    test_stack_trace
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -10,7 +11,7 @@ foreach(TEST ${UNIT_TESTS})
     endif()    
     target_link_libraries(${TEST} ariadne-kernel)  
     add_test(${TEST} ${TEST})
-    set_property(TEST ${TEST} PROPERTY LABELS "symbolic;kernel")
+    set_property(TEST ${TEST} PROPERTY LABELS "utility;kernel")
 endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})

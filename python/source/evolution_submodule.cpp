@@ -53,15 +53,18 @@ Void export_storage(pybind11::module& module) {
 Void export_enclosure(pybind11::module& module) {
     pybind11::class_<Enclosure,pybind11::bases<Drawable2dInterface>> enclosure_class(module,"Enclosure");
     enclosure_class.def("bounding_box",&Enclosure::bounding_box);
+    enclosure_class.def("__str__", &__cstr__<Enclosure>);
     pybind11::class_<LabelledEnclosure,pybind11::bases<LabelledDrawable2dInterface,Enclosure>> labelled_enclosure_class(module,"LabelledEnclosure");
     labelled_enclosure_class.def("bounding_box",&LabelledEnclosure::bounding_box);
+    labelled_enclosure_class.def("__str__", &__cstr__<LabelledEnclosure>);
 }
 
-template<class T> Void export_labelled_list_set(pybind11::module& module, const char* name) {
-    pybind11::class_<LabelledSet<ListSet<T>>> labelled_list_set_class(module,name);
-    labelled_list_set_class.def("__iter__", [](LabelledSet<ListSet<T>> const& l){return pybind11::make_iterator(l.begin(),l.end());});
-    labelled_list_set_class.def("bounding_box",&LabelledSet<ListSet<T>>::bounding_box);
+template<class T> Void export_list_set(pybind11::module& module, const char* name) {
+    pybind11::class_<ListSet<T>> list_set_class(module,name);
+    list_set_class.def("__iter__", [](ListSet<T> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_class.def("size",&ListSet<T>::size);
 }
+
 
 template<class ORB>
 Void export_orbit(pybind11::module& module, const char* name)
@@ -194,9 +197,9 @@ Void evolution_submodule(pybind11::module& module)
     export_semantics(module);
 
     export_storage(module);
-    //export_enclosure(module);
+    export_enclosure(module);
 
-    export_labelled_list_set<Enclosure>(module,"LabelledEnclosureListSet");
+    export_list_set<LabelledEnclosure>(module,"LabelledEnclosureListSet");
 
     export_simulator<VectorFieldSimulator>(module,"VectorFieldSimulator");
 

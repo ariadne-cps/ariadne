@@ -12,7 +12,7 @@ Legenda for the issue kind:
 
 ### 2.2
 
-*Date: /2021*
+*Date: 25/04/2021*
 
 - [#441](https://github.com/ariadne-cps/ariadne/issues/441) (N) Add support for Gnuplot output, including animated gif plot of sets and tridimensional plots for PDEs
 - [#507](https://github.com/ariadne-cps/ariadne/issues/507) (N) Add a simulator for vector field dynamics
@@ -22,6 +22,7 @@ Legenda for the issue kind:
 - [#516](https://github.com/ariadne-cps/ariadne/issues/516) (A) Add missing Python bindings for Real predicates to be used in automata specification
 - [#518](https://github.com/ariadne-cps/ariadne/issues/518) (A) Add missing Python bindings for evolver configuration and initial set assignment
 - [#520](https://github.com/ariadne-cps/ariadne/issues/520) (A) Add missing Python bindings for plotting using HybridFigure
+- [#543](https://github.com/ariadne-cps/ariadne/issues/543) (A) Add missing Python bindings for iterating across ListSet of Enclosure classes
 - [#527](https://github.com/ariadne-cps/ariadne/issues/527) (A) Allow to draw a Labelled/Hybrid orbit directly to a Labelled/Hybrid figure
 - [#492](https://github.com/ariadne-cps/ariadne/issues/492) (C) Modify SFINAE code to use C++20 concepts, currently preventing AppleClang compilation under macOS until the compiler supports Concepts
 - [#529](https://github.com/ariadne-cps/ariadne/issues/529) (C) Disallow construction of VectorField and IteratedMap from a Function, since it was broken

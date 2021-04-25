@@ -812,8 +812,6 @@ Void export_constrained_image_set(pybind11::module& module)
     //module.def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const BasicSetType&)) &product);
 }
 
-
-
 Void geometry_submodule(pybind11::module& module) {
     export_drawable_interface(module);
     export_set_interface(module);

@@ -23,7 +23,7 @@ foreach(TEST ${UNIT_TESTS})
     endif()
     target_link_libraries(${TEST} ariadne-core)
     add_test(${TEST} ${TEST})
-    set_property(TEST ${TEST} PROPERTY LABELS "numeric;primary;core;kernel")
+    set_property(TEST ${TEST} PROPERTY LABELS "numeric;core;kernel")
 endforeach()
 
 add_dependencies(tests-core ${UNIT_TESTS})

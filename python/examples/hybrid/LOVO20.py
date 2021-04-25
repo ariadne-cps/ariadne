@@ -129,9 +129,9 @@ def check_number_of_events(orbit):
     has_any_two_transitions = False
 
     for enclosure in orbit.final():
-        if (not has_any_zero_transitions) and enclosure.previous_events().size() == 0:
+        if (not has_any_zero_transitions) and len(enclosure.previous_events()) == 0:
             has_any_zero_transitions = True
-        if (not has_any_two_transitions) and enclosure.previous_events().size() == 2:
+        if (not has_any_two_transitions) and len(enclosure.previous_events()) == 2:
             has_any_two_transitions = True
     
     if has_any_zero_transitions:
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     LOVO20_orbit = evolver.orbit(initial_set,final_time,Semantics.UPPER)
 
     # Check number of events
-    #check_number_of_events(LOVO20_orbit)
+    check_number_of_events(LOVO20_orbit)
 
     # Get the orbit of the circle to plot, by points
     circle_orbit = get_circle_orbit()

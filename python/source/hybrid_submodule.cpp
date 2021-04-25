@@ -280,8 +280,17 @@ Void export_hybrid_storage(pybind11::module& module) {
 }
 
 Void export_hybrid_enclosure(pybind11::module& module) {
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
+
     pybind11::class_<HybridEnclosure> hybrid_enclosure_class(module,"HybridEnclosure");
+    hybrid_enclosure_class.def("previous_events", &HybridEnclosure::previous_events,reference_internal);
     hybrid_enclosure_class.def("__repr__", &__cstr__<HybridEnclosure>);
+}
+
+Void export_list_set_hybrid_enclosure(pybind11::module& module) {
+    pybind11::class_<ListSet<HybridEnclosure>> list_set_hybrid_enclosure_class(module,"HybridEnclosureListSet");
+    list_set_hybrid_enclosure_class.def("__iter__", [](ListSet<HybridEnclosure> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_hybrid_enclosure_class.def("bounding_box",&ListSet<HybridEnclosure>::bounding_box);
 }
 
 Void export_hybrid_automaton(pybind11::module& module)
@@ -520,8 +529,9 @@ Void hybrid_submodule(pybind11::module& module) {
     export_hybrid_storage(module);
     export_hybrid_enclosure(module);
 
-    export_hybrid_automaton(module);
+    export_list_set_hybrid_enclosure(module);
 
+    export_hybrid_automaton(module);
 
     export_hybrid_time(module);
     export_hybrid_termination_criterion(module);

@@ -69,7 +69,7 @@ void LOVO20()
     RealPoint ic({1.3_dec,1.0_dec});
     Real e(0.008_dec);
     HybridSet initial_set(lotkavolterra|outside,{ic[0]-e<=x<=ic[0]+e,y==ic[1],cnt==0});
-    HybridTime evolution_time(3.64,3);
+    HybridTime evolution_time(3.64_dec,3u);
 
     StopWatch sw;
 
@@ -97,7 +97,7 @@ void LOVO20()
     else ARIADNE_LOG_PRINTLN("No final set with two transitions has been found!");
 
     ARIADNE_LOG_PRINTLN("Trajectory stays within " << (radius*100).get_d() << "% of the equilibrium for at most " <<
-                        final_bounds[cnt].upper() << " time units: " << ((definitely(final_bounds[cnt] <= 0.2_dec)) ?
+                        final_bounds[cnt].upper_bound() << " time units: " << ((definitely(final_bounds[cnt] <= 0.2_dec)) ?
                         "constraint satisfied." : "constraint not satisfied!"));
 
     ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
@@ -109,7 +109,7 @@ void LOVO20()
         instance.set_verified(1)
                 .set_execution_time(sw.elapsed())
                 .add_loss((final_bounds[x].width()*final_bounds[y].width()).get_d())
-                .add_loss(final_bounds[cnt].upper().get_d());
+                .add_loss(final_bounds[cnt].upper_bound().get_d());
     }
     instance.write();
 
@@ -117,11 +117,11 @@ void LOVO20()
     DiscreteLocation rotate;
     RealVariable t("t");
     circle.new_mode(rotate,{let(x)=cx+radius*cos(t),let(y)=cy-radius*sin(t)},{dot(t)=1});
-    HybridSimulator simulator;
-    simulator.set_step_size(0.1);
+    HybridSimulator simulator(circle);
+    simulator.configuration().set_step_size(0.1);
     HybridRealPoint circle_initial(rotate,{t=0});
     HybridTime circle_time(2*pi,1);
-    ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time));
+    ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time));
 
     ARIADNE_LOG_RUN_AT(2,plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit));
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");

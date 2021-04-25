@@ -1,6 +1,7 @@
 set(UNIT_TESTS
     test_array
     test_container
+    test_stack_trace
 )
 
 foreach(TEST ${UNIT_TESTS})

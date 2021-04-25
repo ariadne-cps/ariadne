@@ -32,13 +32,24 @@
 
 using namespace Ariadne;
 
+struct TestConvertibleTo {
+    TestConvertibleTo(int a_) : a(a_) { }
+    int a;
+};
+
+struct TestClass {
+    TestClass(int a_) : a(a_) { }
+    explicit TestClass(TestConvertibleTo const& c) : TestClass(c.a) { }
+    int a;
+};
+
 class TestArray {
   public:
 
     Void test_convert() {
-        Array<int> ia = {1, 2};
-        Array<double> da(ia);
-        ARIADNE_TEST_ASSERT(da[0] == ia[0] and da[1] == ia[1]);
+        Array<TestClass> tca = {TestClass(1), TestClass(2)};
+        Array<TestConvertibleTo> tcta = {TestConvertibleTo(1), TestConvertibleTo(2)};
+        ARIADNE_TEST_EXECUTE(Array<TestClass> tcac(tcta));
     }
 
     Void test_print() {

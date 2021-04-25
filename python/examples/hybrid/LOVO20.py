@@ -122,8 +122,8 @@ def plot_all(LOVO20_orbit,circle_orbit):
 #! [/compute_evolution]
 
 
-#! [check_number_of_events]
-def check_number_of_events(orbit):
+#! [verify]
+def verify(orbit):
 
     has_any_zero_transitions = False
     has_any_two_transitions = False
@@ -144,7 +144,17 @@ def check_number_of_events(orbit):
     else:
         print("No final set with two transitions has been found!")
 
-#! [/check_number_of_events]
+    x = RealVariable("x")
+    y = RealVariable("y")
+    cnt = RealVariable("cnt")
+
+    final_bounds = orbit.final().bounding_box()
+
+    print("Trajectory stays in the reference circle for at most", final_bounds[cnt].upper_bound(), "time units: ", end='')
+    print("constraint satisfied") if final_bounds[cnt].upper_bound().raw() <= FloatDP(0.2,DoublePrecision()) else print("constraint NOT satisfied!")
+
+
+#! [/verify]
 
 #! [main]
 if __name__ == '__main__':
@@ -165,7 +175,7 @@ if __name__ == '__main__':
     LOVO20_orbit = evolver.orbit(initial_set,final_time,Semantics.UPPER)
 
     # Check number of events
-    check_number_of_events(LOVO20_orbit)
+    verify(LOVO20_orbit)
 
     # Get the orbit of the circle to plot, by points
     circle_orbit = get_circle_orbit()

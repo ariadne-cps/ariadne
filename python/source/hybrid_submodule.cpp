@@ -302,8 +302,7 @@ Void export_hybrid_automaton(pybind11::module& module)
 
     pybind11::class_<HybridAutomatonInterface> hybrid_automaton_interface_class(module,"HybridAutomatonInterface");
 
-    pybind11::class_<HybridAutomaton,pybind11::bases<HybridAutomatonInterface>>
-        hybrid_automaton_class(module,"HybridAutomaton");
+    pybind11::class_<HybridAutomaton,pybind11::bases<HybridAutomatonInterface>> hybrid_automaton_class(module,"HybridAutomaton");
     hybrid_automaton_class.def(pybind11::init<>());
     hybrid_automaton_class.def(pybind11::init<Identifier>());
     hybrid_automaton_class.def("locations", &HybridAutomaton::locations);

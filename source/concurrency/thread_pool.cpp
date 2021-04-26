@@ -51,7 +51,7 @@ VoidFunction ThreadPool::_task_wrapper_function() {
 ThreadPool::ThreadPool(SizeType size)
         : _finish_all_and_stop(false), _finish_current_and_stop(false), _num_stopped_threads(0) {
     for (SizeType i = 0; i < size; ++i) {
-        _threads.append(make_shared<LoggableThread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
+        _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
     }
 }
 
@@ -68,7 +68,7 @@ Void ThreadPool::add_threads(SizeType number) {
     }
     _threads.resize(old_size+number);
     for (SizeType i=old_size; i<old_size+number; ++i) {
-        _threads.at(i) = make_shared<LoggableThread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
+        _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
     }
 }
 

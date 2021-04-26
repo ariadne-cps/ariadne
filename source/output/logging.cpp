@@ -26,14 +26,31 @@
 #include <cassert>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <thread>
+#include <future>
+#include <mutex>
+#include <atomic>
+#include <functional>
 
 #include "config.hpp"
-#include "concurrency/thread.hpp"
 #include "output/logging.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 
 namespace Ariadne {
+
+class MessageConsumptionThread {
+  public:
+    MessageConsumptionThread(std::function<Void()> task) : _started_future(_started_promise.get_future()) {
+        _thread = std::thread([=, this]() { _started_promise.set_value(); task(); });
+        _started_future.get();
+    }
+    ~MessageConsumptionThread() {  _thread.join(); }
+  private:
+    std::thread _thread;
+    std::promise<void> _started_promise;
+    std::future<void> _started_future;
+};
 
 std::string very_pretty_function(std::string msg) {
     size_t ariadne_pos = std::string::npos;
@@ -234,6 +251,7 @@ class LoggerSchedulerInterface {
     virtual SizeType largest_thread_name_size() const = 0;
     virtual void increase_level(unsigned int i) = 0;
     virtual void decrease_level(unsigned int i) = 0;
+    virtual void terminate() = 0;
     virtual ~LoggerSchedulerInterface() = default;
 };
 
@@ -250,7 +268,10 @@ class ImmediateLoggerScheduler : public LoggerSchedulerInterface {
     SizeType largest_thread_name_size() const override;
     void increase_level(unsigned int i) override;
     void decrease_level(unsigned int i) override;
- private:
+    void terminate() override;
+  private:
+    void _dequeue_pending();
+  private:
     unsigned int _current_level;
 };
 
@@ -268,6 +289,7 @@ class BlockingLoggerScheduler : public LoggerSchedulerInterface {
     void increase_level(unsigned int i) override;
     void decrease_level(unsigned int i) override;
     void create_data_instance(std::thread::id id, std::string name);
+    void terminate() override;
   private:
     std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
     std::mutex _data_mutex;
@@ -288,19 +310,24 @@ class NonblockingLoggerScheduler : public LoggerSchedulerInterface {
     void decrease_level(unsigned int i) override;
     void create_data_instance(std::thread::id id, std::string name);
     void kill_data_instance(std::thread::id id);
+    void terminate() override;
     ~NonblockingLoggerScheduler() override;
   private:
-    //! \brief Extracts one message from the largest queue, also removing dead data instances
-    LogRawMessage _dequeue_and_cleanup();
+    //! \brief Extracts one message from the largest queue
+    LogRawMessage _dequeue();
     void _consume_msgs();
     Bool _is_queue_empty() const;
+    Bool _are_alive_threads_registered() const;
  private:
     std::mutex _message_availability_mutex;
     std::condition_variable _message_availability_condition;
     mutable std::mutex _data_mutex;
 
     Bool _terminate;
-    SharedPointer<Thread> _dequeueing_thread;
+    Bool _no_alive_thread_registered;
+    std::promise<Void> _termination_promise;
+    std::future<Void> _termination_future;
+    SharedPointer<MessageConsumptionThread> _dequeueing_thread;
     std::map<std::thread::id,SharedPointer<LoggerData>> _data;
 };
 
@@ -340,8 +367,10 @@ void ImmediateLoggerScheduler::release(std::string scope) {
     Logger::instance()._release(LogRawMessage(scope, _current_level, std::string()));
 }
 
+void ImmediateLoggerScheduler::terminate() { }
+
 BlockingLoggerScheduler::BlockingLoggerScheduler() {
-    _data.insert({std::this_thread::get_id(),std::make_pair<unsigned int,std::string>(1,"main")});
+    _data.insert({std::this_thread::get_id(),std::make_pair(1,Logger::_MAIN_THREAD_NAME)});
 }
 
 void BlockingLoggerScheduler::create_data_instance(std::thread::id id, std::string name) {
@@ -389,33 +418,49 @@ void BlockingLoggerScheduler::release(std::string scope) {
     Logger::instance()._release(LogRawMessage(_data.find(std::this_thread::get_id())->second.second, scope, _data.find(std::this_thread::get_id())->second.first, std::string()));
 }
 
-NonblockingLoggerScheduler::NonblockingLoggerScheduler() : _terminate(false) {
+void BlockingLoggerScheduler::terminate() { }
+
+NonblockingLoggerScheduler::NonblockingLoggerScheduler() : _terminate(false), _no_alive_thread_registered(true), _termination_future(_termination_promise.get_future()) {
     {
         std::lock_guard<std::mutex> lock(_data_mutex);
-        _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,"main"))});
+        _data.insert({std::this_thread::get_id(),SharedPointer<LoggerData>(new LoggerData(1,Logger::_MAIN_THREAD_NAME))});
     }
-    _dequeueing_thread = std::make_shared<Thread>([=,this] { _consume_msgs(); });
+    _dequeueing_thread = std::make_shared<MessageConsumptionThread>([=,this] { _consume_msgs(); });
 }
 
-NonblockingLoggerScheduler::~NonblockingLoggerScheduler() {
-    {
-        std::lock_guard<std::mutex> lock(_message_availability_mutex);
-        _terminate = true;
-    }
+void NonblockingLoggerScheduler::terminate() {
+    _terminate = true;
     _message_availability_condition.notify_one();
-    _dequeueing_thread.reset();
+    _termination_future.get();
 }
+
+NonblockingLoggerScheduler::~NonblockingLoggerScheduler() { }
 
 void NonblockingLoggerScheduler::create_data_instance(std::thread::id id, std::string name) {
     std::lock_guard<std::mutex> lock(_data_mutex);
     // Won't replace if it already exists
     _data.insert({id,SharedPointer<LoggerData>(new LoggerData(current_level(),name))});
+    if (name != Logger::_MAIN_THREAD_NAME) {
+        _no_alive_thread_registered = false;
+        _message_availability_condition.notify_one();
+    }
 }
 
 void NonblockingLoggerScheduler::kill_data_instance(std::thread::id id) {
-    std::lock_guard<std::mutex> lock(_data_mutex);
+    std::unique_lock<std::mutex> lock(_data_mutex);
     auto entry = _data.find(id);
     if (entry != _data.end()) entry->second->kill();
+
+    if (not _are_alive_threads_registered()) {
+        _no_alive_thread_registered = true;
+        _message_availability_condition.notify_one();
+    }
+}
+
+Bool NonblockingLoggerScheduler::_are_alive_threads_registered() const {
+    for (auto d : _data)
+        if (d.second->thread_name() != Logger::_MAIN_THREAD_NAME and not d.second->is_dead()) return true;
+    return false;
 }
 
 unsigned int NonblockingLoggerScheduler::current_level() const {
@@ -468,25 +513,18 @@ Bool NonblockingLoggerScheduler::_is_queue_empty() const {
     return true;
 }
 
-LogRawMessage NonblockingLoggerScheduler::_dequeue_and_cleanup() {
-    // TODO: address cleanup that causes segfaults
+LogRawMessage NonblockingLoggerScheduler::_dequeue() {
     SharedPointer<LoggerData> largest_data;
     SizeType largest_size = 0;
     std::lock_guard<std::mutex> lock(_data_mutex);
     auto it = _data.begin();
     while (it != _data.end()) {
         SizeType size = it->second->queue_size();
-        if (size == 0 and it->second->is_dead()) {
-            //_data.erase(it);
-            ++it;
-            //--it;
-        } else {
-            if (size > largest_size) {
-                largest_data = it->second;
-                largest_size = size;
-            }
-            ++it;
+        if (size > largest_size) {
+            largest_data = it->second;
+            largest_size = size;
         }
+        ++it;
     }
     return LogRawMessage(largest_data->thread_name(),largest_data->dequeue());
 }
@@ -494,9 +532,9 @@ LogRawMessage NonblockingLoggerScheduler::_dequeue_and_cleanup() {
 void NonblockingLoggerScheduler::_consume_msgs() {
     while(true) {
         std::unique_lock<std::mutex> lock(_message_availability_mutex);
-        _message_availability_condition.wait(lock, [=, this] { return _terminate or not _is_queue_empty(); });
-        if (_terminate and _is_queue_empty()) return;
-        auto msg = _dequeue_and_cleanup();
+        _message_availability_condition.wait(lock, [=, this] { return (_terminate and _no_alive_thread_registered) or not _is_queue_empty(); });
+        if (_terminate and _no_alive_thread_registered and _is_queue_empty()) { _termination_promise.set_value(); return; }
+        auto msg = _dequeue();
         switch (msg.kind()) {
             case RawMessageKind::PRINTLN : Logger::instance()._println(msg); break;
             case RawMessageKind::HOLD : Logger::instance()._hold(msg); break;
@@ -628,17 +666,27 @@ OutputStream& operator<<(OutputStream& os, LoggerConfiguration const& c) {
 
 Logger::Logger() :
     _cached_num_held_columns(0), _cached_last_printed_level(0), _cached_last_printed_thread_name(std::string()),
-    _scheduler(SharedPointer<LoggerSchedulerInterface>(new NonblockingLoggerScheduler())) { }
+    _scheduler(std::make_shared<NonblockingLoggerScheduler>()) { }
+
+const std::string Logger::_MAIN_THREAD_NAME = "main";
+const unsigned int Logger::_MUTE_LEVEL_OFFSET = 1024;
+
+Logger::~Logger() {
+    _scheduler->terminate();
+}
 
 void Logger::use_immediate_scheduler() {
+    _scheduler->terminate();
     _scheduler.reset(new ImmediateLoggerScheduler());
 }
 
 void Logger::use_blocking_scheduler() {
+    _scheduler->terminate();
     _scheduler.reset(new BlockingLoggerScheduler());
 }
 
 void Logger::use_nonblocking_scheduler() {
+    _scheduler->terminate();
     _scheduler.reset(new NonblockingLoggerScheduler());
 }
 
@@ -981,20 +1029,15 @@ void Logger::_cover_held_columns_with_whitespaces(unsigned int printed_columns) 
 }
 
 void Logger::_println(LogRawMessage const& msg) {
-
     const unsigned int preamble_columns = (msg.level>9 ? 3:2)+(_can_print_thread_name() ? _scheduler->largest_thread_name_size()+1 : 0)+msg.level;
-
     // If holding, we must write over the held line first
     if (_is_holding()) std::clog << '\r';
 
     _print_preamble_for_firstline(msg.level,msg.identifier);
-
     std::string text = msg.text;
     if (configuration().discards_newlines_and_indentation()) text = _discard_newlines_and_indentation(text);
-
     if (configuration().handles_multiline_output() and msg.text.size() > 0) {
         const unsigned int max_columns = _get_window_columns();
-
         size_t text_ptr = 0;
         const size_t text_size = text.size();
         while(true) {
@@ -1045,7 +1088,6 @@ void Logger::_println(LogRawMessage const& msg) {
         std::clog << '\n';
         if (_is_holding()) _print_held_line();
     }
-
     _cached_last_printed_level = msg.level;
     _cached_last_printed_thread_name = msg.identifier;
 }

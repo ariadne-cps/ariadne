@@ -32,7 +32,7 @@
 #include <queue>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "loggable_thread.hpp"
+#include "thread.hpp"
 
 namespace Ariadne {
 
@@ -79,7 +79,7 @@ class ThreadPool {
     ~ThreadPool();
 
   private:
-    List<SharedPointer<LoggableThread>> _threads;
+    List<SharedPointer<Thread>> _threads;
     std::queue<VoidFunction> _tasks;
 
     VoidFunction _task_wrapper_function();

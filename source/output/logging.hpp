@@ -279,6 +279,7 @@ class Logger {
     friend class NonblockingLoggerScheduler;
 
     Logger();
+    ~Logger();
   public:
     Logger(Logger const&) = delete;
     void operator=(Logger const&) = delete;
@@ -331,7 +332,8 @@ class Logger {
     bool _is_holding() const;
     bool _can_print_thread_name() const;
   private:
-    static const unsigned int _MUTE_LEVEL_OFFSET = 1024;
+    static const unsigned int _MUTE_LEVEL_OFFSET;
+    static const std::string _MAIN_THREAD_NAME;
     std::ofstream _redirect_file;
     std::basic_streambuf<char>* _default_streambuf;
     std::vector<LogRawMessage> _current_held_stack;

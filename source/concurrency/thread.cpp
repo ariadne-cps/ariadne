@@ -37,6 +37,7 @@ Thread::Thread(VoidFunction task, String name)
     });
     _got_id_future.get();
     if (_name == String()) _name = to_string(_id);
+    Logger::instance().register_thread(this->id(),this->name());
 }
 
 ThreadId Thread::id() const {
@@ -49,6 +50,7 @@ String Thread::name() const {
 
 Thread::~Thread() {
     _thread.join();
+    Logger::instance().unregister_thread(this->id());
 }
 
 } // namespace Ariadne

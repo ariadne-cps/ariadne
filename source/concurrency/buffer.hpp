@@ -40,12 +40,13 @@
 namespace Ariadne {
 
 //! \brief Exception useful when the buffer is allowed to stay in the receiving condition
-class BufferStoppedConsumingException : public std::exception { };
+class BufferInterruptPullingException : public std::exception { };
 
+//! \brief A class for handling a buffer
 template<class E> class Buffer
 {
   public:
-    Buffer(SizeType capacity) : _capacity(capacity), _stop_consuming(false) { ARIADNE_PRECONDITION(capacity>0); }
+    Buffer(SizeType capacity) : _capacity(capacity), _interrupt(false) { ARIADNE_PRECONDITION(capacity > 0); }
 
     //! \brief Push an object into the buffer
     //! \details Will block if the capacity has been reached
@@ -53,7 +54,6 @@ template<class E> class Buffer
         std::unique_lock<std::mutex> locker(mux);
         cond.wait(locker, [this](){return _queue.size() < _capacity;});
         _queue.push(e);
-        locker.unlock();
         cond.notify_all();
     }
 
@@ -61,11 +61,10 @@ template<class E> class Buffer
     //! \details Will block if the capacity is zero
     E pull() {
         std::unique_lock<std::mutex> locker(mux);
-        cond.wait(locker, [this](){return _queue.size() > 0 || _stop_consuming;});
-        if (_stop_consuming) { throw BufferStoppedConsumingException(); }
+        cond.wait(locker, [this](){return not _queue.empty() || _interrupt;});
+        if (_interrupt and _queue.empty()) { _interrupt = false; throw BufferInterruptPullingException(); }
         E back = _queue.front();
         _queue.pop();
-        locker.unlock();
         cond.notify_all();
         return back;
     }
@@ -88,9 +87,10 @@ template<class E> class Buffer
         _capacity = capacity;
     }
 
-    //! \brief Trigger a stop to consuming in the case that the buffer was in the waiting state for input
-    void stop_consuming() {
-        _stop_consuming = true;
+    //! \brief Interrupt consuming in the case that the queue is empty and the buffer in the waiting state for input
+    //! \details Needs to
+    void interrupt_consuming() {
+        _interrupt = true;
         cond.notify_all();
     }
 
@@ -99,7 +99,7 @@ private:
     std::condition_variable cond;
     std::queue<E> _queue;
     std::atomic<SizeType> _capacity;
-    Bool _stop_consuming;
+    Bool _interrupt;
 };
 
 } // namespace Ariadne

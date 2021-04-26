@@ -81,7 +81,7 @@ class TestBuffer {
                 try {
                     auto i = ib.pull();
                     ob.push(i);
-                } catch (BufferStoppedConsumingException& e) {
+                } catch (BufferInterruptPullingException& e) {
                     break;
                 }
             }
@@ -97,7 +97,7 @@ class TestBuffer {
         auto o2 = ob.pull();
         ARIADNE_TEST_EQUALS(ob.size(),0);
         ARIADNE_TEST_EQUALS(o2,2);
-        ib.stop_consuming();
+        ib.interrupt_consuming();
         thread.join();
     }
 

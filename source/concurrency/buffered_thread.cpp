@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/smart_thread.cpp
+ *            concurrency/buffered_thread.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -37,11 +37,12 @@ BufferedThread::BufferedThread(String name)
             try {
                 VoidFunction task = _task_buffer.pull();
                 task();
-            } catch(BufferStoppedConsumingException& e) { return; }
+            } catch(BufferInterruptPullingException& e) { return; }
         }
     });
     _got_id_future.get();
     if (name == String()) _name = to_string(_id);
+    Logger::instance().register_thread(this->id(), this->name());
 }
 
 ThreadId BufferedThread::id() const {
@@ -65,8 +66,9 @@ Void BufferedThread::set_queue_capacity(SizeType capacity) {
 }
 
 BufferedThread::~BufferedThread() {
-    _task_buffer.stop_consuming();
+    _task_buffer.interrupt_consuming();
     _thread.join();
+    Logger::instance().unregister_thread(this->id());
 }
 
 } // namespace Ariadne

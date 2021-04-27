@@ -10,6 +10,13 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
+### 2.3
+
+*Date:  /  /2021*
+
+- [538](https://github.com/ariadne-cps/ariadne/issues/538) (N) Introduce a concurrency module designed for parallel execution of internal tasks
+- [539](https://github.com/ariadne-cps/ariadne/issues/539) (F) A segmentation fault sometimes would be issued when terminating the executable, due to logging
+
 ### 2.2
 
 *Date: 25/04/2021*

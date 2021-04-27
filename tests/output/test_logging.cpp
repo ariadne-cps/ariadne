@@ -287,7 +287,6 @@ class TestLogging {
         thread5.enqueue([] { print_something1(); });
         thread6.enqueue([] { print_something1(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
-        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 };
 

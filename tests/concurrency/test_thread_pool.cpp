@@ -114,60 +114,48 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EQUAL(actual_sum,expected_sum);
     }
 
-    void test_add_threads() const {
+    void test_set_num_threads_up() const {
         ThreadPool pool(0);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(pool.queue_size(),1);
-        ARIADNE_TEST_EXECUTE(pool.add_threads(0));
-        ARIADNE_TEST_EXECUTE(pool.add_threads(1));
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(1));
         ARIADNE_TEST_EQUALS(pool.num_threads(),1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
         pool.enqueue(fn);
         pool.enqueue(fn);
-        ARIADNE_TEST_EXECUTE(pool.add_threads(2));
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
         ARIADNE_TEST_EQUALS(pool.num_threads(),3);
     }
 
-    void test_schedule_stop_threads() const {
-        ThreadPool pool(2);
-        VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
-        for (SizeType i=0; i<16; ++i)
-            pool.enqueue(fn);
-        pool.schedule_stop_threads();
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        ARIADNE_TEST_ASSERT(pool.num_threads() > 0);
-        ARIADNE_TEST_EQUALS(pool.num_stopped_threads(),pool.num_threads());
-        ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
-        pool.remove_threads();
-        ARIADNE_TEST_EQUALS(pool.num_threads(),0);
+    void test_set_num_threads_same() const {
+        ThreadPool pool(3);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),3);
     }
 
-    void test_improperly_remove_threads() const {
-        ThreadPool pool(2);
-        ARIADNE_TEST_FAIL(pool.remove_threads());
-    }
-
-    void test_resize_pool_down() const {
+    void test_set_num_threads_down() const {
         ThreadPool pool(3);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
-        for (SizeType i=0; i<6; ++i)
+        for (SizeType i=0; i<5; ++i)
             pool.enqueue(fn);
-        pool.schedule_stop_threads();
-        while(true) {
-            try {
-                pool.remove_threads();
-                break;
-            } catch(...) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-        }
-        ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
-        pool.add_threads(2);
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(2));
+        ARIADNE_TEST_EQUAL(pool.num_threads(),2);
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
+    }
+
+    void test_set_num_threads_to_zero() const {
+        ThreadPool pool(3);
+        VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        for (SizeType i=0; i<5; ++i)
+            pool.enqueue(fn);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(0));
+        ARIADNE_TEST_EQUAL(pool.num_threads(),0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ARIADNE_TEST_ASSERT(pool.queue_size() > 0);
     }
 
     void test() {
@@ -179,10 +167,10 @@ class TestSmartThreadPool {
         ARIADNE_TEST_CALL(test_execute_multiple_concurrently());
         ARIADNE_TEST_CALL(test_execute_multiple_concurrently_sequentially());
         ARIADNE_TEST_CALL(test_process_on_atomic_type());
-        ARIADNE_TEST_CALL(test_add_threads());
-        ARIADNE_TEST_CALL(test_schedule_stop_threads());
-        ARIADNE_TEST_CALL(test_improperly_remove_threads());
-        ARIADNE_TEST_CALL(test_resize_pool_down());
+        ARIADNE_TEST_CALL(test_set_num_threads_up());
+        ARIADNE_TEST_CALL(test_set_num_threads_same());
+        ARIADNE_TEST_CALL(test_set_num_threads_down());
+        ARIADNE_TEST_CALL(test_set_num_threads_to_zero());
     }
 };
 

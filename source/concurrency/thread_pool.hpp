@@ -57,24 +57,11 @@ class ThreadPool {
     //! \brief The number of threads
     SizeType num_threads() const;
 
-    //! \brief Add the \a number of threads
-    Void add_threads(SizeType number);
-
-    //! \brief Schedule the threads to stop
-    //! \details The threads will stop as soon as their last task is completed;
-    //! threads in the waiting state will not be able to stop, i.e., this method is
-    //! not meant to be used on an inactive pool but an active one.
-    Void schedule_stop_threads();
-
-    //! \brief Force the threads to stop and remove the threads
-    Void stop_and_remove_threads();
-
-    //! \brief The number of threads already stopped but not removed
-    SizeType num_stopped_threads() const;
-
-    //! \brief Remove the stopped threads
-    //! \details Throws an exception if there are still threads to stop
-    Void remove_threads();
+    //! \brief Set the number of threads
+    //! \details If reducing the current number, this method will block until
+    //! all the previous tasks are completed, previous threads are destroyed
+    //! and new threads are spawned
+    Void set_num_threads(SizeType number);
 
     ~ThreadPool();
 
@@ -88,8 +75,11 @@ class ThreadPool {
     std::condition_variable _task_availability_condition;
     Bool _finish_all_and_stop; // Wait till the queue is empty before stopping the thread, used for destruction
     Bool _finish_current_and_stop; // Wait till the current one is completed before stopping the thread
-    std::atomic<Nat> _num_stopped_threads;
+    Nat _num_stopped_threads;
+    mutable std::mutex _num_stopped_threads_mutex;
     mutable std::mutex _num_threads_mutex;
+    Promise<Void> _all_threads_stopped_promise;
+    Future<Void> _all_threads_stopped_future;
 };
 
 template<class F, class... AS>

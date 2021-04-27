@@ -41,7 +41,9 @@ VoidFunction ThreadPool::_task_wrapper_function() {
             }
             task();
             if (_finish_current_and_stop) {
+                std::unique_lock<std::mutex> lock(_num_stopped_threads_mutex);
                 _num_stopped_threads++;
+                if (_num_stopped_threads == _threads.size()) _all_threads_stopped_promise.set_value();
                 return;
             }
         }
@@ -49,7 +51,9 @@ VoidFunction ThreadPool::_task_wrapper_function() {
 }
 
 ThreadPool::ThreadPool(SizeType size)
-        : _finish_all_and_stop(false), _finish_current_and_stop(false), _num_stopped_threads(0) {
+        : _finish_all_and_stop(false), _finish_current_and_stop(false),
+          _num_stopped_threads(0), _all_threads_stopped_future(_all_threads_stopped_promise.get_future())
+{
     for (SizeType i = 0; i < size; ++i) {
         _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
     }
@@ -60,33 +64,26 @@ SizeType ThreadPool::num_threads() const {
     return _threads.size();
 }
 
-Void ThreadPool::add_threads(SizeType number) {
+Void ThreadPool::set_num_threads(SizeType number) {
     std::lock_guard<std::mutex> lock(_num_threads_mutex);
     auto old_size = _threads.size();
-    if (old_size == 0) {
+    if (number > old_size) {
+        _threads.resize(number);
+        for (SizeType i=old_size; i<number; ++i) {
+            _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
+        }
+    } else if (number < old_size) {
+        _finish_current_and_stop = true;
+        _all_threads_stopped_future.get();
+        _threads.clear();
+        _num_stopped_threads = 0;
         _finish_current_and_stop = false;
+        _all_threads_stopped_promise = Promise<Void>();
+        _all_threads_stopped_future = _all_threads_stopped_promise.get_future();
+        for (SizeType i=0; i<number; ++i) {
+            _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
+        }
     }
-    _threads.resize(old_size+number);
-    for (SizeType i=old_size; i<old_size+number; ++i) {
-        _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
-    }
-}
-
-Void ThreadPool::schedule_stop_threads() {
-    std::lock_guard<std::mutex> lock(_num_threads_mutex);
-    _finish_current_and_stop = true;
-}
-
-SizeType ThreadPool::num_stopped_threads() const {
-    std::lock_guard<std::mutex> lock(_num_threads_mutex);
-    return _num_stopped_threads;
-}
-
-Void ThreadPool::remove_threads() {
-    std::lock_guard<std::mutex> lock(_num_threads_mutex);
-    ARIADNE_PRECONDITION(_num_stopped_threads == _threads.size());
-    _threads.clear();
-    _num_stopped_threads = 0;
 }
 
 SizeType ThreadPool::queue_size() const {

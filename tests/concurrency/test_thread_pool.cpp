@@ -137,7 +137,7 @@ class TestSmartThreadPool {
         for (SizeType i=0; i<16; ++i)
             pool.enqueue(fn);
         pool.schedule_stop_threads();
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
         ARIADNE_TEST_ASSERT(pool.num_threads() > 0);
         ARIADNE_TEST_EQUALS(pool.num_stopped_threads(),pool.num_threads());
         ARIADNE_TEST_ASSERT(pool.queue_size() > 0);

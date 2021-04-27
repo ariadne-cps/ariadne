@@ -429,8 +429,11 @@ NonblockingLoggerScheduler::NonblockingLoggerScheduler() : _terminate(false), _n
 }
 
 void NonblockingLoggerScheduler::terminate() {
-    _terminate = true;
-    _message_availability_condition.notify_one();
+    {
+        std::unique_lock<std::mutex> lock(_message_availability_mutex);
+        _terminate = true;
+        _message_availability_condition.notify_one();
+    }
     _termination_future.get();
 }
 

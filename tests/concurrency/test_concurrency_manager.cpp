@@ -38,8 +38,17 @@ class TestConcurrencyManager {
         ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+max_concurrency));
     }
 
+    void test_run_task() {
+        ConcurrencyManager::instance().set_concurrency(1);
+        int a = 10;
+        auto future = ConcurrencyManager::instance().enqueue([&a]{ return a*a; });
+        auto result = future.get();
+        ARIADNE_TEST_EQUALS(result,100);
+    }
+
     void test() {
         ARIADNE_TEST_CALL(test_set_concurrency());
+        ARIADNE_TEST_CALL(test_run_task());
     }
 };
 

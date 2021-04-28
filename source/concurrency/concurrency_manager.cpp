@@ -27,7 +27,7 @@
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(0) {}
+ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(0), _pool(0) {}
 
 SizeType ConcurrencyManager::maximum_concurrency() const {
     return _maximum_concurrency;
@@ -41,6 +41,7 @@ void ConcurrencyManager::set_concurrency(SizeType value) {
     ARIADNE_PRECONDITION(value <= _maximum_concurrency);
     LockGuard<Mutex> lock(_concurrency_mutex);
     _concurrency = value;
+    _pool.set_num_threads(value);
 }
 
 }

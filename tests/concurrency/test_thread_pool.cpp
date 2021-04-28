@@ -127,7 +127,27 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EQUAL(actual_sum,expected_sum);
     }
 
-    void test_set_num_threads_up() const {
+    void test_set_num_threads_up_statically() const {
+        ThreadPool pool(0);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(1));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),1);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),3);
+    }
+
+    void test_set_num_threads_same_statically() const {
+        ThreadPool pool(3);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
+        ARIADNE_TEST_EQUALS(pool.num_threads(),3);
+    }
+
+    void test_set_num_threads_down_statically() const {
+        ThreadPool pool(3);
+        ARIADNE_TEST_EXECUTE(pool.set_num_threads(1));
+        ARIADNE_TEST_EQUAL(pool.num_threads(),1);
+    }
+
+    void test_set_num_threads_up_dynamically() const {
         ThreadPool pool(0);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
@@ -143,13 +163,7 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EQUALS(pool.num_threads(),3);
     }
 
-    void test_set_num_threads_same() const {
-        ThreadPool pool(3);
-        ARIADNE_TEST_EXECUTE(pool.set_num_threads(3));
-        ARIADNE_TEST_EQUALS(pool.num_threads(),3);
-    }
-
-    void test_set_num_threads_down() const {
+    void test_set_num_threads_down_dynamically() const {
         ThreadPool pool(3);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<5; ++i)
@@ -160,7 +174,7 @@ class TestSmartThreadPool {
         ARIADNE_TEST_EQUALS(pool.queue_size(),0);
     }
 
-    void test_set_num_threads_to_zero() const {
+    void test_set_num_threads_to_zero_dynamically() const {
         ThreadPool pool(3);
         VoidFunction fn([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         for (SizeType i=0; i<5; ++i)
@@ -182,10 +196,12 @@ class TestSmartThreadPool {
         ARIADNE_TEST_CALL(test_execute_multiple_concurrently());
         ARIADNE_TEST_CALL(test_execute_multiple_concurrently_sequentially());
         ARIADNE_TEST_CALL(test_process_on_atomic_type());
-        ARIADNE_TEST_CALL(test_set_num_threads_up());
-        ARIADNE_TEST_CALL(test_set_num_threads_same());
-        ARIADNE_TEST_CALL(test_set_num_threads_down());
-        ARIADNE_TEST_CALL(test_set_num_threads_to_zero());
+        ARIADNE_TEST_CALL(test_set_num_threads_up_statically());
+        ARIADNE_TEST_CALL(test_set_num_threads_same_statically());
+        ARIADNE_TEST_CALL(test_set_num_threads_down_statically());
+        ARIADNE_TEST_CALL(test_set_num_threads_up_dynamically());
+        ARIADNE_TEST_CALL(test_set_num_threads_down_dynamically());
+        ARIADNE_TEST_CALL(test_set_num_threads_to_zero_dynamically());
     }
 };
 

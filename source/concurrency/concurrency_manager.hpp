@@ -32,7 +32,7 @@
 #include <algorithm>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "concurrency_typedefs.hpp"
+#include "concurrency/thread_pool.hpp"
 
 namespace Ariadne {
 
@@ -53,15 +53,23 @@ class ConcurrencyManager {
     //! \brief Get the maximum concurrency allowed by this machine
     SizeType maximum_concurrency() const;
     //! \brief Get the preferred concurrency to be used
+    //! \details A concurrency of zero is allowed, meaning that a task
+    //! will be run sequentially
     SizeType concurrency() const;
 
     //! \brief Synchronised method for updating the preferred concurrency to be used
     void set_concurrency(SizeType value);
 
+    //! \brief Enqueue a task for execution, returning the future handler
+    //! \details The is no limits on the number of tasks to enqueue
+    template<class F, class... AS> auto enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> { return _pool.enqueue(f,args...); }
+
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
     mutable Mutex _concurrency_mutex;
+
+    ThreadPool _pool;
 };
 
 } // namespace Ariadne

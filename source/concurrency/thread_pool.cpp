@@ -38,16 +38,22 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
     return [i, this] {
         while (true) {
             VoidFunction task;
+            Bool got_task = false;
             {
                 UniqueLock<Mutex> lock(_task_availability_mutex);
-                _task_availability_condition.wait(lock, [=, this] { return _finish_all_and_stop or not _tasks.empty(); });
+                _task_availability_condition.wait(lock, [=, this] {
+                    return _finish_all_and_stop or (_num_active_threads > _num_threads_to_use) or not _tasks.empty();
+                });
                 if (_finish_all_and_stop and _tasks.empty()) return;
-                task = std::move(_tasks.front());
-                _tasks.pop();
+                if (not _tasks.empty()) {
+                    task = std::move(_tasks.front());
+                    _tasks.pop();
+                    got_task = true;
+                }
             }
-            task();
+            if (got_task) task();
             if (i>=_num_threads_to_use) {
-                UniqueLock<Mutex> lock(_num_active_threads_mutex);
+                UniqueLock<Mutex> active_threads_lock(_num_active_threads_mutex);
                 _num_active_threads--;
                 if (_num_active_threads == _num_threads_to_use) _all_unused_threads_stopped_promise.set_value();
                 return;
@@ -86,6 +92,7 @@ Void ThreadPool::set_num_threads(SizeType number) {
         _num_active_threads = number;
         _append_thread_range(old_size,number);
     } else if (number < old_size) {
+        _task_availability_condition.notify_all();
         _all_unused_threads_stopped_future.get();
         _threads.resize(number);
         _all_unused_threads_stopped_promise = Promise<Void>();

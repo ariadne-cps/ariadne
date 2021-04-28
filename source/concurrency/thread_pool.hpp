@@ -69,17 +69,19 @@ class ThreadPool {
     List<SharedPointer<Thread>> _threads;
     std::queue<VoidFunction> _tasks;
 
-    VoidFunction _task_wrapper_function();
+    //! \brief The function wrapper handling the extraction from the queue
+    //! \details Takes \a i as the index of the thread in the list, for identification when stopping selectively
+    VoidFunction _task_wrapper_function(SizeType i);
 
     mutable std::mutex _task_availability_mutex;
     std::condition_variable _task_availability_condition;
     Bool _finish_all_and_stop; // Wait till the queue is empty before stopping the thread, used for destruction
-    Bool _finish_current_and_stop; // Wait till the current one is completed before stopping the thread
-    Nat _num_stopped_threads;
-    mutable std::mutex _num_stopped_threads_mutex;
+    Nat _num_active_threads; // Down-counter for checking whether all the threads to stop have been stopped
+    Nat _num_threads_to_use; // Reference on the number of threads to use: if lower than the threads size, the last threads will stop
+    mutable std::mutex _num_active_threads_mutex;
     mutable std::mutex _num_threads_mutex;
-    Promise<Void> _all_threads_stopped_promise;
-    Future<Void> _all_threads_stopped_future;
+    Promise<Void> _all_unused_threads_stopped_promise;
+    Future<Void> _all_unused_threads_stopped_future;
 };
 
 template<class F, class... AS>

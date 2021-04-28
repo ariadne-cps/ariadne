@@ -28,8 +28,8 @@ namespace Ariadne {
 
 const String THREAD_NAME_PREFIX = "thr";
 
-VoidFunction ThreadPool::_task_wrapper_function() {
-    return [=, this] {
+VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
+    return [i, this] {
         while (true) {
             VoidFunction task;
             {
@@ -40,10 +40,10 @@ VoidFunction ThreadPool::_task_wrapper_function() {
                 _tasks.pop();
             }
             task();
-            if (_finish_current_and_stop) {
-                std::unique_lock<std::mutex> lock(_num_stopped_threads_mutex);
-                _num_stopped_threads++;
-                if (_num_stopped_threads == _threads.size()) _all_threads_stopped_promise.set_value();
+            if (i>=_num_threads_to_use) {
+                std::unique_lock<std::mutex> lock(_num_active_threads_mutex);
+                _num_active_threads--;
+                if (_num_active_threads == _num_threads_to_use) _all_unused_threads_stopped_promise.set_value();
                 return;
             }
         }
@@ -51,11 +51,11 @@ VoidFunction ThreadPool::_task_wrapper_function() {
 }
 
 ThreadPool::ThreadPool(SizeType size)
-        : _finish_all_and_stop(false), _finish_current_and_stop(false),
-          _num_stopped_threads(0), _all_threads_stopped_future(_all_threads_stopped_promise.get_future())
+        : _finish_all_and_stop(false), _num_active_threads(size), _num_threads_to_use(size),
+          _all_unused_threads_stopped_future(_all_unused_threads_stopped_promise.get_future())
 {
     for (SizeType i = 0; i < size; ++i) {
-        _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
+        _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(i), THREAD_NAME_PREFIX + to_string(i)));
     }
 }
 
@@ -67,22 +67,18 @@ SizeType ThreadPool::num_threads() const {
 Void ThreadPool::set_num_threads(SizeType number) {
     std::lock_guard<std::mutex> lock(_num_threads_mutex);
     auto old_size = _threads.size();
+    _num_threads_to_use = number;
     if (number > old_size) {
         _threads.resize(number);
+        _num_active_threads = number;
         for (SizeType i=old_size; i<number; ++i) {
-            _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i));
+            _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(i), THREAD_NAME_PREFIX + to_string(i));
         }
     } else if (number < old_size) {
-        _finish_current_and_stop = true;
-        _all_threads_stopped_future.get();
-        _threads.clear();
-        _num_stopped_threads = 0;
-        _finish_current_and_stop = false;
-        _all_threads_stopped_promise = Promise<Void>();
-        _all_threads_stopped_future = _all_threads_stopped_promise.get_future();
-        for (SizeType i=0; i<number; ++i) {
-            _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(), THREAD_NAME_PREFIX + to_string(i)));
-        }
+        _all_unused_threads_stopped_future.get();
+        _threads.resize(number);
+        _all_unused_threads_stopped_promise = Promise<Void>();
+        _all_unused_threads_stopped_future = _all_unused_threads_stopped_promise.get_future();
     }
 }
 

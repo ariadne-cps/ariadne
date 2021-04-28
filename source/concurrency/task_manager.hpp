@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/concurrency_manager.hpp
+ *            concurrency/task_manager.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/concurrency_manager.hpp
- *  \brief Singleton class for managing concurrency across the library
+/*! \file concurrency/task_manager.hpp
+ *  \brief Singleton class for managing tasks across the library
  */
 
-#ifndef ARIADNE_CONCURRENCY_MANAGER_HPP
-#define ARIADNE_CONCURRENCY_MANAGER_HPP
+#ifndef ARIADNE_TASK_MANAGER_HPP
+#define ARIADNE_TASK_MANAGER_HPP
 
 #include <algorithm>
 #include "utility/container.hpp"
@@ -36,17 +36,17 @@
 
 namespace Ariadne {
 
-//! \brief Manages threads based on concurrency availability.
-class ConcurrencyManager {
+//! \brief Manages tasks based on concurrency availability.
+class TaskManager {
   private:
-    ConcurrencyManager();
+    TaskManager();
   public:
-    ConcurrencyManager(ConcurrencyManager const&) = delete;
-    void operator=(ConcurrencyManager const&) = delete;
+    TaskManager(TaskManager const&) = delete;
+    void operator=(TaskManager const&) = delete;
 
     //! \brief The singleton instance of this class
-    static ConcurrencyManager& instance() {
-        static ConcurrencyManager instance;
+    static TaskManager& instance() {
+        static TaskManager instance;
         return instance;
     }
 
@@ -73,7 +73,7 @@ class ConcurrencyManager {
     ThreadPool _pool;
 };
 
-template<class F, class... AS> auto ConcurrencyManager::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
+template<class F, class... AS> auto TaskManager::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     if (_concurrency == 0) {
         using ReturnType = ResultOf<F(AS...)>;
         auto task = PackagedTask<ReturnType()>(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
@@ -85,4 +85,4 @@ template<class F, class... AS> auto ConcurrencyManager::enqueue(F &&f, AS &&... 
 
 } // namespace Ariadne
 
-#endif // ARIADNE_CONCURRENCY_MANAGER_HPP
+#endif // ARIADNE_TASK_MANAGER_HPP

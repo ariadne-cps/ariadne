@@ -4,7 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
         buffered_thread.cpp
         thread.cpp
         thread_pool.cpp
-        concurrency_manager.cpp
+        task_manager.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

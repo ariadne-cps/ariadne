@@ -36,7 +36,7 @@
 #include "output/logging.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
-#include "concurrency/concurrency_manager.hpp"
+#include "concurrency/task_manager.hpp"
 
 namespace Ariadne {
 
@@ -676,7 +676,7 @@ const std::string Logger::_MAIN_THREAD_NAME = "main";
 const unsigned int Logger::_MUTE_LEVEL_OFFSET = 1024;
 
 Logger::~Logger() {
-    ConcurrencyManager::instance().set_concurrency(0); // It's necessary that all threads in the ConcurrencyManager static object unregister before terminating
+    TaskManager::instance().set_concurrency(0); // It's necessary that all threads in the TaskManager static object unregister before terminating
     _scheduler->terminate();
 }
 

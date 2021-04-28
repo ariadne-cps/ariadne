@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_concurrency_manager.cpp
+ *            test_task_manager.cpp
  *
  *  Copyright  2008-21  Luca Geretti
  *
@@ -23,39 +23,39 @@
  */
 
 #include <thread>
-#include "concurrency/concurrency_manager.hpp"
+#include "concurrency/task_manager.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
 
-class TestConcurrencyManager {
+class TestTaskManager {
   public:
 
     void test_set_concurrency() {
-        auto max_concurrency = ConcurrencyManager::instance().maximum_concurrency();
-        ConcurrencyManager::instance().set_concurrency(max_concurrency);
-        ARIADNE_TEST_EQUALS(ConcurrencyManager::instance().concurrency(),max_concurrency);
-        ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+max_concurrency));
+        auto max_concurrency = TaskManager::instance().maximum_concurrency();
+        TaskManager::instance().set_concurrency(max_concurrency);
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency);
+        ARIADNE_TEST_FAIL(TaskManager::instance().set_concurrency(1 + max_concurrency));
     }
 
     void test_run_task_with_one_thread() {
-        ConcurrencyManager::instance().set_concurrency(1);
+        TaskManager::instance().set_concurrency(1);
         int a = 10;
-        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
+        auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
         ARIADNE_TEST_EQUALS(result,100);
     }
 
     void test_run_task_with_multiple_threads() {
-        ConcurrencyManager::instance().set_concurrency(ConcurrencyManager::instance().maximum_concurrency());
+        TaskManager::instance().set_concurrency(TaskManager::instance().maximum_concurrency());
         int a = 10;
-        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
+        auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
         ARIADNE_TEST_EQUALS(result,100);
     }
 
     void test_run_task_with_no_threads() {
-        ConcurrencyManager::instance().set_concurrency(0);
+        TaskManager::instance().set_concurrency(0);
         int a = 10;
-        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
+        auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
         ARIADNE_TEST_EQUALS(result,100);
     }
 
@@ -68,6 +68,6 @@ class TestConcurrencyManager {
 };
 
 int main() {
-    TestConcurrencyManager().test();
+    TestTaskManager().test();
     return ARIADNE_TEST_FAILURES;
 }

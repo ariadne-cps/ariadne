@@ -3,7 +3,7 @@ set(UNIT_TESTS
     test_buffered_thread
     test_thread
     test_thread_pool
-    test_concurrency_manager
+    test_task_manager
 )
 
 foreach(TEST ${UNIT_TESTS})

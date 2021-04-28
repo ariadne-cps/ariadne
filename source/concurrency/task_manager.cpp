@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/concurrency_manager.cpp
+ *            concurrency/task_manager.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -23,21 +23,21 @@
  */
 
 #include "utility/macros.hpp"
-#include "concurrency/concurrency_manager.hpp"
+#include "concurrency/task_manager.hpp"
 
 namespace Ariadne {
 
-ConcurrencyManager::ConcurrencyManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(0), _pool(0) {}
+TaskManager::TaskManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(0), _pool(0) {}
 
-SizeType ConcurrencyManager::maximum_concurrency() const {
+SizeType TaskManager::maximum_concurrency() const {
     return _maximum_concurrency;
 }
 
-SizeType ConcurrencyManager::concurrency() const {
+SizeType TaskManager::concurrency() const {
     return _concurrency;
 }
 
-void ConcurrencyManager::set_concurrency(SizeType value) {
+void TaskManager::set_concurrency(SizeType value) {
     ARIADNE_PRECONDITION(value <= _maximum_concurrency);
     LockGuard<Mutex> lock(_concurrency_mutex);
     _concurrency = value;

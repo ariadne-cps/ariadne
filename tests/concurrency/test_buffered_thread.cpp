@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_buffered_smart_thread.cpp
+ *            test_buffered_thread.cpp
  *
  *  Copyright  2008-21  Luca Geretti
  *
@@ -28,7 +28,7 @@
 
 using namespace Ariadne;
 
-class TestBufferedSmartThread {
+class TestBufferedThread {
   public:
 
     void test_create() const {
@@ -147,6 +147,6 @@ class TestBufferedSmartThread {
 };
 
 int main() {
-    TestBufferedSmartThread().test();
+    TestBufferedThread().test();
     return ARIADNE_TEST_FAILURES;
 }

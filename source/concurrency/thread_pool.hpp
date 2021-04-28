@@ -36,6 +36,8 @@
 
 namespace Ariadne {
 
+const String THREAD_POOL_DEFAULT_NAME = "thr";
+
 //! \brief Exception for stopping a thread pool
 class StoppedThreadPoolException : public std::exception { };
 
@@ -44,12 +46,15 @@ class StoppedThreadPoolException : public std::exception { };
 //! objects use a buffer of one element, which receives once the wrapped task that consumes elements from the task queue.
 class ThreadPool {
   public:
-    //! \brief Construct from a given number of threads
-    ThreadPool(SizeType num_threads);
+    //! \brief Construct from a given number of threads and possibly a name
+    ThreadPool(SizeType num_threads, String name = THREAD_POOL_DEFAULT_NAME);
 
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details The is no limits on the number of tasks to enqueue
     template<class F, class... AS> auto enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
+
+    //! \brief The name of the pool
+    String name() const;
 
     //! \brief The size of the tasks queue
     SizeType queue_size() const;
@@ -66,12 +71,17 @@ class ThreadPool {
     ~ThreadPool();
 
   private:
-    List<SharedPointer<Thread>> _threads;
-    std::queue<VoidFunction> _tasks;
 
     //! \brief The function wrapper handling the extraction from the queue
     //! \details Takes \a i as the index of the thread in the list, for identification when stopping selectively
     VoidFunction _task_wrapper_function(SizeType i);
+    //! \brief Append threads in the given range
+    Void _append_thread_range(SizeType lower, SizeType upper);
+
+  private:
+    const String _name;
+    List<SharedPointer<Thread>> _threads;
+    std::queue<VoidFunction> _tasks;
 
     mutable Mutex _task_availability_mutex;
     ConditionVariable _task_availability_condition;
@@ -98,6 +108,10 @@ auto ThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     _task_availability_condition.notify_one();
     return result;
 }
+
+//! \brief Utility function to construct a thread name from a \a prefix and a \a number,
+//! accounting for a maximum number of threads given by \a max_number
+String construct_thread_name(String prefix, SizeType number, SizeType max_number);
 
 }
 

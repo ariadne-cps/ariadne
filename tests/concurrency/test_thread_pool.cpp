@@ -30,6 +30,12 @@ using namespace Ariadne;
 class TestSmartThreadPool {
   public:
 
+    void test_construct_thread_name() const {
+        ARIADNE_TEST_EQUALS(construct_thread_name("name",9,9),"name9");
+        ARIADNE_TEST_EQUALS(construct_thread_name("name",9,10),"name09");
+        ARIADNE_TEST_EQUALS(construct_thread_name("name",10,11),"name10");
+    }
+
     void test_construct() {
         auto max_concurrency = std::thread::hardware_concurrency();
         ThreadPool pool(max_concurrency);
@@ -43,6 +49,13 @@ class TestSmartThreadPool {
         VoidFunction fn([]{ std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         pool.enqueue(fn);
         ARIADNE_TEST_EQUALS(pool.queue_size(),1);
+    }
+
+    void test_construct_with_name() {
+        ThreadPool pool(1);
+        ARIADNE_TEST_EQUALS(pool.name(),THREAD_POOL_DEFAULT_NAME);
+        ThreadPool pool2(1,"name");
+        ARIADNE_TEST_EQUALS(pool2.name(),"name");
     }
 
     void test_execute_single() {
@@ -159,8 +172,10 @@ class TestSmartThreadPool {
     }
 
     void test() {
+        ARIADNE_TEST_CALL(test_construct_thread_name());
         ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_construct_empty());
+        ARIADNE_TEST_CALL(test_construct_with_name());
         ARIADNE_TEST_CALL(test_execute_single());
         ARIADNE_TEST_CALL(test_destroy_before_completion());
         ARIADNE_TEST_CALL(test_execute_multiple_sequentially());

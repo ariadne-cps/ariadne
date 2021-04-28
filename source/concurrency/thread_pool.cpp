@@ -26,7 +26,13 @@
 
 namespace Ariadne {
 
-const String THREAD_NAME_PREFIX = "thr";
+String construct_thread_name(String prefix, SizeType number, SizeType max_number) {
+    std::ostringstream ss;
+    ss << prefix;
+    if (max_number > 9 and number <= 9) ss << "0";
+    ss << number;
+    return ss.str();
+}
 
 VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
     return [i, this] {
@@ -50,13 +56,21 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
     };
 }
 
-ThreadPool::ThreadPool(SizeType size)
-        : _finish_all_and_stop(false), _num_active_threads(size), _num_threads_to_use(size),
+Void ThreadPool::_append_thread_range(SizeType lower, SizeType upper) {
+    for (SizeType i=lower; i<upper; ++i) {
+        _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(i), construct_thread_name(_name,i,upper)));
+    }
+}
+
+ThreadPool::ThreadPool(SizeType size, String name)
+        : _name(name), _finish_all_and_stop(false), _num_active_threads(size), _num_threads_to_use(size),
           _all_unused_threads_stopped_future(_all_unused_threads_stopped_promise.get_future())
 {
-    for (SizeType i = 0; i < size; ++i) {
-        _threads.append(make_shared<Thread>(ThreadPool::_task_wrapper_function(i), THREAD_NAME_PREFIX + to_string(i)));
-    }
+    _append_thread_range(0,size);
+}
+
+String ThreadPool::name() const {
+    return _name;
 }
 
 SizeType ThreadPool::num_threads() const {
@@ -69,11 +83,8 @@ Void ThreadPool::set_num_threads(SizeType number) {
     auto old_size = _threads.size();
     _num_threads_to_use = number;
     if (number > old_size) {
-        _threads.resize(number);
         _num_active_threads = number;
-        for (SizeType i=old_size; i<number; ++i) {
-            _threads.at(i) = make_shared<Thread>(ThreadPool::_task_wrapper_function(i), THREAD_NAME_PREFIX + to_string(i));
-        }
+        _append_thread_range(old_size,number);
     } else if (number < old_size) {
         _all_unused_threads_stopped_future.get();
         _threads.resize(number);

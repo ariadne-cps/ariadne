@@ -37,11 +37,16 @@
 
 namespace Ariadne {
 
+using ConditionVariable = std::condition_variable;
+using Mutex = std::mutex;
+template<class T> using LockGuard = std::lock_guard<T>;
+template<class T> using UniqueLock = std::unique_lock<T>;
 using ThreadId = std::thread::id;
 using VoidFunction = std::function<Void()>;
 template<class T> using Future = std::future<T>;
 template<class T> using Promise = std::promise<T>;
 template<class T> using PackagedTask = std::packaged_task<T>;
+
 
 } // namespace Ariadne
 

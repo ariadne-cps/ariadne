@@ -33,7 +33,7 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
         while (true) {
             VoidFunction task;
             {
-                std::unique_lock<std::mutex> lock(_task_availability_mutex);
+                UniqueLock<Mutex> lock(_task_availability_mutex);
                 _task_availability_condition.wait(lock, [=, this] { return _finish_all_and_stop or not _tasks.empty(); });
                 if (_finish_all_and_stop and _tasks.empty()) return;
                 task = std::move(_tasks.front());
@@ -41,7 +41,7 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
             }
             task();
             if (i>=_num_threads_to_use) {
-                std::unique_lock<std::mutex> lock(_num_active_threads_mutex);
+                UniqueLock<Mutex> lock(_num_active_threads_mutex);
                 _num_active_threads--;
                 if (_num_active_threads == _num_threads_to_use) _all_unused_threads_stopped_promise.set_value();
                 return;
@@ -60,12 +60,12 @@ ThreadPool::ThreadPool(SizeType size)
 }
 
 SizeType ThreadPool::num_threads() const {
-    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    LockGuard<Mutex> lock(_num_threads_mutex);
     return _threads.size();
 }
 
 Void ThreadPool::set_num_threads(SizeType number) {
-    std::lock_guard<std::mutex> lock(_num_threads_mutex);
+    LockGuard<Mutex> lock(_num_threads_mutex);
     auto old_size = _threads.size();
     _num_threads_to_use = number;
     if (number > old_size) {
@@ -83,13 +83,13 @@ Void ThreadPool::set_num_threads(SizeType number) {
 }
 
 SizeType ThreadPool::queue_size() const {
-    std::lock_guard<std::mutex> lock(_task_availability_mutex);
+    LockGuard<Mutex> lock(_task_availability_mutex);
     return _tasks.size();
 }
 
 ThreadPool::~ThreadPool() {
     {
-        std::lock_guard<std::mutex> task_availability_lock(_task_availability_mutex);
+        LockGuard<Mutex> task_availability_lock(_task_availability_mutex);
         _finish_all_and_stop = true;
     }
     _task_availability_condition.notify_all();

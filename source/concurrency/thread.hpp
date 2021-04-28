@@ -64,8 +64,8 @@ class Thread {
     String _name;
     ThreadId _id;
     std::thread _thread;
-    Promise<void> _got_id_promise;
-    Future<void> _got_id_future;
+    Promise<Void> _got_id_promise;
+    Future<Void> _got_id_future;
 };
 
 } // namespace Ariadne

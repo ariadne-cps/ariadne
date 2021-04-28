@@ -73,13 +73,13 @@ class ThreadPool {
     //! \details Takes \a i as the index of the thread in the list, for identification when stopping selectively
     VoidFunction _task_wrapper_function(SizeType i);
 
-    mutable std::mutex _task_availability_mutex;
-    std::condition_variable _task_availability_condition;
+    mutable Mutex _task_availability_mutex;
+    ConditionVariable _task_availability_condition;
     Bool _finish_all_and_stop; // Wait till the queue is empty before stopping the thread, used for destruction
     Nat _num_active_threads; // Down-counter for checking whether all the threads to stop have been stopped
     Nat _num_threads_to_use; // Reference on the number of threads to use: if lower than the threads size, the last threads will stop
-    mutable std::mutex _num_active_threads_mutex;
-    mutable std::mutex _num_threads_mutex;
+    mutable Mutex _num_active_threads_mutex;
+    mutable Mutex _num_threads_mutex;
     Promise<Void> _all_unused_threads_stopped_promise;
     Future<Void> _all_unused_threads_stopped_future;
 };
@@ -91,7 +91,7 @@ auto ThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     auto task = std::make_shared<PackagedTask<ReturnType()> >(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
     Future<ReturnType> result = task->get_future();
     {
-        std::unique_lock<std::mutex> lock(_task_availability_mutex);
+        UniqueLock<Mutex> lock(_task_availability_mutex);
         if (_finish_all_and_stop) throw StoppedThreadPoolException();
         _tasks.emplace([task]() { (*task)(); });
     }

@@ -35,7 +35,7 @@
 #include <queue>
 #include "utility/typedefs.hpp"
 #include "utility/macros.hpp"
-#include "numeric/logical.hpp"
+#include "concurrency_typedefs.hpp"
 
 namespace Ariadne {
 
@@ -51,7 +51,7 @@ template<class E> class Buffer
     //! \brief Push an object into the buffer
     //! \details Will block if the capacity has been reached
     void push(E const& e) {
-        std::unique_lock<std::mutex> locker(mux);
+        UniqueLock<Mutex> locker(mux);
         cond.wait(locker, [this](){return _queue.size() < _capacity;});
         _queue.push(e);
         cond.notify_all();
@@ -60,7 +60,7 @@ template<class E> class Buffer
     //! \brief Pulls an object from the buffer
     //! \details Will block if the capacity is zero
     E pull() {
-        std::unique_lock<std::mutex> locker(mux);
+        UniqueLock<Mutex> locker(mux);
         cond.wait(locker, [this](){return not _queue.empty() || _interrupt;});
         if (_interrupt and _queue.empty()) { _interrupt = false; throw BufferInterruptPullingException(); }
         E back = _queue.front();
@@ -71,7 +71,7 @@ template<class E> class Buffer
 
     //! \brief The current size of the queue
     SizeType size() const {
-        std::lock_guard<std::mutex> locker(mux);
+        LockGuard<Mutex> locker(mux);
         return _queue.size();
     }
 
@@ -95,8 +95,8 @@ template<class E> class Buffer
     }
 
 private:
-    mutable std::mutex mux;
-    std::condition_variable cond;
+    mutable Mutex mux;
+    ConditionVariable cond;
     std::queue<E> _queue;
     std::atomic<SizeType> _capacity;
     Bool _interrupt;

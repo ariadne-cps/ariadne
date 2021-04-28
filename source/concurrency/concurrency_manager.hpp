@@ -29,11 +29,10 @@
 #ifndef ARIADNE_CONCURRENCY_MANAGER_HPP
 #define ARIADNE_CONCURRENCY_MANAGER_HPP
 
-#include <thread>
-#include <mutex>
 #include <algorithm>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
+#include "concurrency_typedefs.hpp"
 
 namespace Ariadne {
 
@@ -62,7 +61,7 @@ class ConcurrencyManager {
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
-    mutable std::mutex _mutex;
+    mutable Mutex _mutex;
 };
 
 } // namespace Ariadne

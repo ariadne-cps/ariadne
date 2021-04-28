@@ -19,8 +19,8 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 10.15 GCC 10 [Release]",
-            os: macos-10.15,
+            name: "macOS 11.0 GCC 10 [Release]",
+            os: macos-11.0,
             cxx: "g++-10"
           }
           - {

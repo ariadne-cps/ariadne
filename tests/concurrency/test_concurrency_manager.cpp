@@ -38,17 +38,32 @@ class TestConcurrencyManager {
         ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+max_concurrency));
     }
 
-    void test_run_task() {
+    void test_run_task_with_one_thread() {
         ConcurrencyManager::instance().set_concurrency(1);
         int a = 10;
-        auto future = ConcurrencyManager::instance().enqueue([&a]{ return a*a; });
-        auto result = future.get();
+        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
+        ARIADNE_TEST_EQUALS(result,100);
+    }
+
+    void test_run_task_with_multiple_threads() {
+        ConcurrencyManager::instance().set_concurrency(ConcurrencyManager::instance().maximum_concurrency());
+        int a = 10;
+        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
+        ARIADNE_TEST_EQUALS(result,100);
+    }
+
+    void test_run_task_with_no_threads() {
+        ConcurrencyManager::instance().set_concurrency(0);
+        int a = 10;
+        auto result = ConcurrencyManager::instance().enqueue([&a]{ return a*a; }).get();
         ARIADNE_TEST_EQUALS(result,100);
     }
 
     void test() {
         ARIADNE_TEST_CALL(test_set_concurrency());
-        ARIADNE_TEST_CALL(test_run_task());
+        ARIADNE_TEST_CALL(test_run_task_with_one_thread());
+        ARIADNE_TEST_CALL(test_run_task_with_multiple_threads());
+        ARIADNE_TEST_CALL(test_run_task_with_no_threads());
     }
 };
 

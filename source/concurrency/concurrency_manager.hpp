@@ -61,8 +61,9 @@ class ConcurrencyManager {
     void set_concurrency(SizeType value);
 
     //! \brief Enqueue a task for execution, returning the future handler
-    //! \details The is no limits on the number of tasks to enqueue
-    template<class F, class... AS> auto enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> { return _pool.enqueue(f,args...); }
+    //! \details The is no limits on the number of tasks to enqueue. If concurrency is zero,
+    //! then the task is executed sequentially with no threads involved
+    template<class F, class... AS> auto enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>>;
 
   private:
     const SizeType _maximum_concurrency;
@@ -71,6 +72,16 @@ class ConcurrencyManager {
 
     ThreadPool _pool;
 };
+
+template<class F, class... AS> auto ConcurrencyManager::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
+    if (_concurrency == 0) {
+        using ReturnType = ResultOf<F(AS...)>;
+        auto task = PackagedTask<ReturnType()>(std::bind(std::forward<F>(f), std::forward<AS>(args)...));
+        Future<ReturnType> result = task.get_future();
+        task();
+        return result;
+    } else return _pool.enqueue(f,args...);
+}
 
 } // namespace Ariadne
 

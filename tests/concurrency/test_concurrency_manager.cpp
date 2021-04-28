@@ -31,20 +31,14 @@ using namespace Ariadne;
 class TestConcurrencyManager {
   public:
 
-    void test_check_nonzero_maximum_concurrency() {
-        ARIADNE_TEST_ASSERT(ConcurrencyManager::instance().maximum_concurrency()>0);
-    }
-
     void test_set_concurrency() {
         auto max_concurrency = ConcurrencyManager::instance().maximum_concurrency();
         ConcurrencyManager::instance().set_concurrency(max_concurrency);
         ARIADNE_TEST_EQUALS(ConcurrencyManager::instance().concurrency(),max_concurrency);
-        ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(0));
         ARIADNE_TEST_FAIL(ConcurrencyManager::instance().set_concurrency(1+max_concurrency));
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_check_nonzero_maximum_concurrency());
         ARIADNE_TEST_CALL(test_set_concurrency());
     }
 };

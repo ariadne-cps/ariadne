@@ -61,7 +61,7 @@ class ConcurrencyManager {
   private:
     const SizeType _maximum_concurrency;
     SizeType _concurrency;
-    mutable Mutex _mutex;
+    mutable Mutex _concurrency_mutex;
 };
 
 } // namespace Ariadne

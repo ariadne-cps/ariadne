@@ -43,10 +43,10 @@
 
 namespace Ariadne {
 
-//! \brief A class for handling a thread in a smarter way.
+//! \brief A class for handling a thread that accepts multiple tasks to be enqueued.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
-//! a readable \a name. The thread can execute only one task at a time, but multiple tasks can
-//! be enqueued based on the internal buffer capacity.
+//! a readable \a name. The thread can execute only one task at a time. Compared with Thread, this is meant to be used in
+//! isolation, not in pool. It is functionally equivalent to a ThreadPool of one Thread only.
 class BufferedThread {
   public:
 

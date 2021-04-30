@@ -27,57 +27,65 @@
 
 using namespace Ariadne;
 
-using WorkloadType = Workload<int,SharedPointer<List<int>>>;
+template<class T> class SynchronisedList : public List<T> {
+  public:
+    Void append(T const& v) {
+        LockGuard<Mutex> guard(_mux);
+        return List<T>::append(v);
+    }
+    SizeType size() const {
+        return List<T>::size();
+    }
+  private:
+    Mutex mutable _mux;
+};
+
+using WorkloadType = Workload<int,SharedPointer<SynchronisedList<int>>>;
 using WorkloadAccessType = WorkloadType::StackAccess;
 
-Void square_and_store(WorkloadAccessType& wl, int val, SharedPointer<List<int>> results) {
+Void square_and_store(WorkloadAccessType& wl, int val, SharedPointer<SynchronisedList<int>> results) {
     val *= val;
-    results->push_back(val);
     if (val < 46340) {
         wl.push(val);
     }
+    results->append(val);
 }
-
-struct WorkloadUser {
-
-    List<int> process(int initial) {
-        SharedPointer<List<int>> result = std::make_shared<List<int>>();
-        WorkloadType wl([=,this](WorkloadAccessType& wl, int val, SharedPointer<List<int>> results){ _square_and_store(wl, val, results); },result);
-        result->push_back(initial);
-        wl.add(initial);
-        wl.process();
-        return *result;
-    }
-
-  private:
-
-    Void _square_and_store(WorkloadAccessType& wl, int val, SharedPointer<List<int>> results) {
-        square_and_store(wl,val,results);
-    }
-};
 
 class TestWorkload {
   public:
 
-    void test_construction_from_function() {
-        SharedPointer<List<int>> result = std::make_shared<List<int>>();
+    void test_construction() {
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         WorkloadType wl(&square_and_store,result);
     }
 
-    void test_construction_from_method() {
-        ARIADNE_TEST_EXECUTE(WorkloadUser());
+    void test_serial_processing() {
+        TaskManager::instance().set_concurrency(0);
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        result->append(2);
+        WorkloadType wl(&square_and_store,result);
+        wl.add(2);
+        wl.process();
+        ARIADNE_TEST_PRINT(*result);
+        ARIADNE_TEST_EQUALS(result->size(),5);
     }
 
-    void test_method_processing() {
-        WorkloadUser wu;
-        auto result = wu.process(2);
-        ARIADNE_TEST_EQUALS(result.size(),5);
+    void test_concurrent_processing() {
+        TaskManager::instance().set_concurrency(1);
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        result->append(2);
+        WorkloadType wl(&square_and_store,result);
+        wl.add(2);
+        wl.process();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        ARIADNE_TEST_PRINT(*result);
+        ARIADNE_TEST_EQUALS(result->size(),5);
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_construction_from_function());
-        ARIADNE_TEST_CALL(test_construction_from_method());
-        ARIADNE_TEST_CALL(test_method_processing());
+        ARIADNE_TEST_CALL(test_construction());
+        ARIADNE_TEST_CALL(test_serial_processing());
+        ARIADNE_TEST_CALL(test_concurrent_processing());
     }
 
 };

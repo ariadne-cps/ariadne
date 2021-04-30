@@ -34,6 +34,7 @@ SizeType TaskManager::maximum_concurrency() const {
 }
 
 SizeType TaskManager::concurrency() const {
+    LockGuard<Mutex> lock(_concurrency_mutex);
     return _concurrency;
 }
 

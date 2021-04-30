@@ -27,12 +27,12 @@
 
 using namespace Ariadne;
 
-using WorkloadType = Workload<int,List<int>&>;
+using WorkloadType = Workload<int,SharedPointer<List<int>>>;
 using WorkloadAccessType = WorkloadType::StackAccess;
 
-Void square_and_store(WorkloadAccessType& wl, int val, List<int>& results) {
+Void square_and_store(WorkloadAccessType& wl, int val, SharedPointer<List<int>> results) {
     val *= val;
-    results.push_back(val);
+    results->push_back(val);
     if (val < 46340) {
         wl.push(val);
     }
@@ -41,17 +41,17 @@ Void square_and_store(WorkloadAccessType& wl, int val, List<int>& results) {
 struct WorkloadUser {
 
     List<int> process(int initial) {
-        WorkloadType wl([=,this](WorkloadAccessType& wl, int val, List<int>& results){ _square_and_store(wl, val, results); });
-        List<int> result;
+        SharedPointer<List<int>> result = std::make_shared<List<int>>();
+        WorkloadType wl([=,this](WorkloadAccessType& wl, int val, SharedPointer<List<int>> results){ _square_and_store(wl, val, results); },result);
+        result->push_back(initial);
         wl.add(initial);
-        result.push_back(initial);
-        wl.process(result);
-        return result;
+        wl.process();
+        return *result;
     }
 
   private:
 
-    Void _square_and_store(WorkloadAccessType& wl, int val, List<int>& results) {
+    Void _square_and_store(WorkloadAccessType& wl, int val, SharedPointer<List<int>> results) {
         square_and_store(wl,val,results);
     }
 };
@@ -60,7 +60,8 @@ class TestWorkload {
   public:
 
     void test_construction_from_function() {
-        WorkloadType wl(&square_and_store);
+        SharedPointer<List<int>> result = std::make_shared<List<int>>();
+        WorkloadType wl(&square_and_store,result);
     }
 
     void test_construction_from_method() {

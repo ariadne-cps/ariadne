@@ -7,5 +7,5 @@ Homepage: https://www.ariadne.cps.org
 
 Package: ariadne
 Architecture: any
-Depends: libmpfr-dev, libcairo2-dev, python3-dev
+Depends: libmpfr-dev, libcairo2-dev, gnuplot, python3-dev
 Description: C++ Library and Python Module for rigorous numerics and formal verification of cyber-physical systems. 

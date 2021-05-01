@@ -23,9 +23,11 @@
  */
 
 #include "config.hpp"
-#include "../test.hpp"
+#include "concurrency/thread.hpp"
+#include "concurrency/buffered_thread.hpp"
 #include "output/progress_indicator.hpp"
 #include "output/logging.hpp"
+#include "../test.hpp"
 
 using namespace Ariadne;
 
@@ -67,9 +69,9 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_theme_bgcolor_bold_underline());
         ARIADNE_TEST_CALL(test_handles_multiline_output());
         ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
+        ARIADNE_TEST_CALL(test_redirect());
         ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler());
         ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
-        ARIADNE_TEST_CALL(test_redirect());
         return 0;
     }
 
@@ -260,36 +262,31 @@ class TestLogging {
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
         ARIADNE_TEST_EQUALS(Logger::instance().cached_last_printed_thread_name().compare("main"),0);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::thread thread1([]() { print_something1(); }), thread2([]() { print_something2(); });
-        Logger::instance().register_thread(thread1.get_id(),"thr1");
-        Logger::instance().register_thread(thread2.get_id(),"thr2");
+        BufferedThread thread1("thr1"), thread2("thr2");
+        thread1.enqueue([] { print_something1(); });
+        thread2.enqueue([] { print_something2(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        thread1.join();
-        thread2.join();
         ARIADNE_TEST_PRINT(Logger::instance().cached_last_printed_thread_name());
         ARIADNE_TEST_ASSERT(Logger::instance().cached_last_printed_thread_name().compare("thr1") == 0 or
                                     Logger::instance().cached_last_printed_thread_name().compare("thr2") == 0);
-        Logger::instance().unregister_thread(thread1.get_id());
-        Logger::instance().unregister_thread(thread2.get_id());
     }
 
     Void test_multiple_threads_with_nonblocking_scheduler() {
         Logger::instance().use_nonblocking_scheduler();
+        Logger::instance().configuration().set_theme(TT_THEME_DARK);
         ARIADNE_LOG_SET_VERBOSITY(3);
-        Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::AFTER);
+        Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
+
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::thread thread1([]() { print_something1(); }), thread2([]() { print_something2(); });
-        Logger::instance().register_thread(thread1.get_id(),"thr1");
-        Logger::instance().register_thread(thread2.get_id(),"thr2");
+        BufferedThread thread1, thread2, thread3, thread4, thread5, thread6;
+        thread1.enqueue([] { print_something1(); });
+        thread2.enqueue([] { print_something1(); });
+        thread3.enqueue([] { print_something1(); });
+        thread4.enqueue([] { print_something1(); });
+        thread5.enqueue([] { print_something1(); });
+        thread6.enqueue([] { print_something1(); });
         ARIADNE_LOG_PRINTLN("Printing again on the main thread, but with other threads");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        thread1.join();
-        thread2.join();
-        Logger::instance().unregister_thread(thread1.get_id());
-        Logger::instance().unregister_thread(thread2.get_id());
     }
 };
 

@@ -154,6 +154,7 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
+    $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>
@@ -165,6 +166,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
+    $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>

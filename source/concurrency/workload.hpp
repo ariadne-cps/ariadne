@@ -60,11 +60,16 @@ public:
     using FunctionType = std::function<Void(Workload<E,AS...>::StackAccess&, E, AS...)>;
     using BoundFunctionType = std::function<Void(E)>;
 
-    Workload(FunctionType f, AS... as) : _sa(StackAccess(*this)), _f(std::bind(
-            std::forward<FunctionType const>(f),
-            std::forward<Workload<E,AS...>::StackAccess const&>(_sa),
-            std::placeholders::_1,
-            std::forward<AS>(as)...)) { }
+    Workload(FunctionType f, AS... as) :
+            _sa(StackAccess(*this)),
+            _f(std::bind(
+                std::forward<FunctionType const>(f),
+                std::forward<Workload<E,AS...>::StackAccess const&>(_sa),
+                std::placeholders::_1,
+                std::forward<AS>(as)...)),
+            _num_pending_elements(0),
+            _num_processing_elements(0),
+            _num_processed_elements(0) { }
 
     //! \brief Process the given elements
     Void process() {
@@ -72,12 +77,18 @@ public:
         while (not _elements.empty()) {
             auto e = _elements.back();
             _elements.pop_back();
-            if (_uses_concurrency()) TaskManager::instance().enqueue([e]{ (*e)(); });
-            else (*e)();
+            _num_pending_elements--;
+            _num_processing_elements++;
+            if (_uses_concurrency()) TaskManager::instance().enqueue([this,e]{
+                (*e)();
+                LockGuard<Mutex> lock(_mux);
+                _num_processed_elements++;
+            });
+            else {
+                (*e)();
+                _num_processed_elements++;
+            }
         }
-
-        //FIXME: use a future for termination
-        //FIXME: account for concurrency being set to 0 again after the _elements list is exhausted
     }
 
     //! \brief Add one element to process
@@ -99,9 +110,10 @@ public:
     }
 
     Void _enqueue(E const& e) {
+        _num_pending_elements++;
         if (_uses_concurrency()) TaskManager::instance().enqueue([=,this](E const& e){ _f(e); },e);
         else {
-            LockGuard<Mutex> lock(_mux); // Necessary only in the case that concurrency becomes >0 while multiple threads have yet to enqueue
+            LockGuard<Mutex> lock(_mux);
             add(e);
         }
     }
@@ -110,6 +122,10 @@ public:
     List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
     StackAccess const _sa;
     BoundFunctionType const _f;
+
+    SizeType _num_pending_elements;
+    SizeType _num_processing_elements;
+    SizeType _num_processed_elements;
 
     Mutex _mux;
 };

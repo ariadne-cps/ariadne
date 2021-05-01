@@ -4,6 +4,7 @@ set(UNIT_TESTS
     test_thread
     test_thread_pool
     test_task_manager
+    test_workload_progress
     test_workload
 )
 

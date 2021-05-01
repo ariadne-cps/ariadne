@@ -28,7 +28,7 @@
 
 using namespace Ariadne;
 
-class TestTaskManager {
+class TestWorkloadProgress {
   public:
 
     void test_set_concurrency() {
@@ -68,6 +68,6 @@ class TestTaskManager {
 };
 
 int main() {
-    TestTaskManager().test();
+    TestWorkloadProgress().test();
     return ARIADNE_TEST_FAILURES;
 }

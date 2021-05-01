@@ -1,6 +1,7 @@
 set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
+        workload_progress.cpp
         buffered_thread.cpp
         thread.cpp
         thread_pool.cpp

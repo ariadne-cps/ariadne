@@ -37,7 +37,7 @@ struct TestClass {
     }
 };
 
-class TestStackTrace {
+class TestLRUCache {
   public:
 
     Void test_free_function() {
@@ -56,6 +56,6 @@ class TestStackTrace {
 };
 
 Int main() {
-    TestStackTrace().test();
+    TestLRUCache().test();
     return ARIADNE_TEST_FAILURES;
 }

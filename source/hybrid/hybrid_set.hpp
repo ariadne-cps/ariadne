@@ -164,7 +164,7 @@ class HybridDenotableSet
     EDS euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
         return this->operator[](loc).euclidean_set(spc); }
 
-    bool has_location(DiscreteLocation const& loc) const { return this->_esets.has_key(loc); }
+    bool has_location(DiscreteLocation const& loc) const { return this->_esets.has_label(loc); }
 
     friend OutputStream& operator<<(OutputStream& os, const HybridDenotableSet<EDS>& hds) {
         return os << "Hybrid" << class_name<EDS>() << static_cast<Base const&>(hds);

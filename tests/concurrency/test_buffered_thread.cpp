@@ -59,7 +59,7 @@ class TestBufferedThread {
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
         ARIADNE_TEST_ASSERT(thread.queue_size()>0);
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
         ARIADNE_TEST_EQUALS(thread.queue_size(),0);
     }
 

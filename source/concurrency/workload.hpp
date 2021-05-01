@@ -34,6 +34,7 @@
 #include "utility/pointer.hpp"
 #include "concurrency_typedefs.hpp"
 #include "task_manager.hpp"
+#include "workload_advancement.hpp"
 
 namespace Ariadne {
 
@@ -43,91 +44,105 @@ namespace Ariadne {
 //!              in the concurrent case is up to the designer
 //!          The workload handles the non-concurrent case separately, in order to unroll the tasks breadth-first: if
 //!          tasks were instead enqueued to the TaskManager, a depth-first execution would be performed.
+//!          A workload object has a lifetime of multiple processings, if necessary.
 template<class E, class... AS>
 class Workload {
 public:
-    //! \brief Access for pushing elements to the stack when processing the workload
-    class StackAccess {
+    //! \brief Interface for appending elements while processing the workload in the function
+    class Appender {
         friend Workload;
     protected:
-        StackAccess(Workload& parent) : _load(parent) { }
+        Appender(Workload& parent) : _load(parent) { }
     public:
-        Void push(E const &e) { _load._enqueue(e); }
+        Void append(E const &e) { _load._enqueue(e); }
     private:
         Workload& _load;
     };
 public:
-    using FunctionType = std::function<Void(Workload<E,AS...>::StackAccess&, E, AS...)>;
+    using FunctionType = std::function<Void(Workload<E,AS...>::Appender&, E, AS...)>;
     using BoundFunctionType = std::function<Void(E)>;
 
     Workload(FunctionType f, AS... as) :
-            _sa(StackAccess(*this)),
+            _appender(Appender(*this)),
             _f(std::bind(
                 std::forward<FunctionType const>(f),
-                std::forward<Workload<E,AS...>::StackAccess const&>(_sa),
+                std::forward<Workload<E,AS...>::Appender const&>(_appender),
                 std::placeholders::_1,
                 std::forward<AS>(as)...)),
-            _num_pending_elements(0),
-            _num_processing_elements(0),
-            _num_processed_elements(0) { }
+            _advancement(0) { }
 
-    //! \brief Process the given elements
+    //! \brief Process the given elements until completion
     Void process() {
         ARIADNE_PRECONDITION(not _elements.empty());
-        while (not _elements.empty()) {
+        while (true) {
+            UniqueLock<Mutex> lock(_element_availability_mutex);
+            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _elements.empty(); });
+            if (_advancement.has_finished()) return;
+
             auto e = _elements.back();
             _elements.pop_back();
-            _num_pending_elements--;
-            _num_processing_elements++;
-            if (_uses_concurrency()) TaskManager::instance().enqueue([this,e]{
+            if (_using_concurrency()) {
+                TaskManager::instance().enqueue([this, e] {
+                    _advancement.add_to_processing();
+                    (*e)();
+                    _advancement.add_to_completed();
+                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
+                });
+            } else {
+                _advancement.add_to_processing();
                 (*e)();
-                LockGuard<Mutex> lock(_mux);
-                _num_processed_elements++;
-            });
-            else {
-                (*e)();
-                _num_processed_elements++;
+                _advancement.add_to_completed();
             }
         }
     }
 
-    //! \brief Add one element to process
-    Void add(E const& e) {
+    //! \brief The size of the workload, i.e., the number of elements to process
+    SizeType size() const { return _elements.size(); }
+
+    //! \brief Append one element to process
+    Void append(E const& e) {
+        _advancement.add_to_waiting();
         _elements.push_back(std::make_shared<PackagedTask<Void()>>(std::bind(
                 std::forward<BoundFunctionType const>(_f),
                 std::forward<E const&>(e))));
     }
 
-    //! \brief Add a list of elements to process
-    Void add(List<E> const& es) {
-        for (auto e : es) add(e);
-    }
+    //! \brief Append a list of elements to process
+    Void append(List<E> const& es) { for (auto e : es) append(e); }
 
   private:
 
-    Bool _uses_concurrency() const {
-        return TaskManager::instance().concurrency() > 0;
-    }
+    Bool _using_concurrency() const { return TaskManager::instance().concurrency() > 0; }
 
     Void _enqueue(E const& e) {
-        _num_pending_elements++;
-        if (_uses_concurrency()) TaskManager::instance().enqueue([=,this](E const& e){ _f(e); },e);
-        else {
-            LockGuard<Mutex> lock(_mux);
-            add(e);
+        if (_using_concurrency()) {
+            _advancement.add_to_waiting();
+            TaskManager::instance().enqueue([=,this](E const& e){
+                    _advancement.add_to_processing();
+                    _f(e);
+                    _advancement.add_to_completed();
+                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
+                }, e);
+        } else {
+            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _elements
+            {
+                LockGuard<Mutex> lock(_element_appending_mutex);
+                append(e);
+            }
+            _element_availability_condition.notify_one();
         }
     }
 
   private:
     List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
-    StackAccess const _sa;
+    Appender const _appender;
     BoundFunctionType const _f;
 
-    SizeType _num_pending_elements;
-    SizeType _num_processing_elements;
-    SizeType _num_processed_elements;
+    WorkloadAdvancement _advancement;
 
-    Mutex _mux;
+    Mutex _element_appending_mutex;
+    Mutex _element_availability_mutex;
+    ConditionVariable _element_availability_condition;
 };
 
 }

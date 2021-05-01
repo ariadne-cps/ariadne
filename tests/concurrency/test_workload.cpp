@@ -41,12 +41,12 @@ template<class T> class SynchronisedList : public List<T> {
 };
 
 using WorkloadType = Workload<int,SharedPointer<SynchronisedList<int>>>;
-using WorkloadAccessType = WorkloadType::StackAccess;
+using WorkloadAppenderType = WorkloadType::Appender;
 
-Void square_and_store(WorkloadAccessType& wl, int val, SharedPointer<SynchronisedList<int>> results) {
+Void square_and_store(WorkloadAppenderType& wla, int val, SharedPointer<SynchronisedList<int>> results) {
     val *= val;
     if (val < 46340) {
-        wl.push(val);
+        wla.append(val);
     }
     results->append(val);
 }
@@ -54,9 +54,24 @@ Void square_and_store(WorkloadAccessType& wl, int val, SharedPointer<Synchronise
 class TestWorkload {
   public:
 
-    void test_construction() {
+    void test_construct() {
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         WorkloadType wl(&square_and_store,result);
+    }
+
+    void test_invalid_process() {
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        WorkloadType wl(&square_and_store,result);
+        ARIADNE_TEST_FAIL(wl.process());
+    }
+
+    void test_append() {
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        WorkloadType wl(&square_and_store,result);
+        wl.append(2);
+        ARIADNE_TEST_EQUALS(wl.size(),1);
+        wl.append({10,20});
+        ARIADNE_TEST_EQUALS(wl.size(),3);
     }
 
     void test_serial_processing() {
@@ -64,7 +79,7 @@ class TestWorkload {
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         result->append(2);
         WorkloadType wl(&square_and_store,result);
-        wl.add(2);
+        wl.append(2);
         wl.process();
         ARIADNE_TEST_PRINT(*result);
         ARIADNE_TEST_EQUALS(result->size(),5);
@@ -75,17 +90,47 @@ class TestWorkload {
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         result->append(2);
         WorkloadType wl(&square_and_store,result);
-        wl.add(2);
+        wl.append(2);
         wl.process();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        ARIADNE_TEST_PRINT(*result);
+        ARIADNE_TEST_EQUALS(result->size(),5);
+    }
+
+    void test_multiple_append() {
+        TaskManager::instance().set_concurrency(2);
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        WorkloadType wl(&square_and_store,result);
+        result->append(2);
+        result->append(3);
+        wl.append({2,3});
+        wl.process();
+        ARIADNE_TEST_PRINT(*result);
+        ARIADNE_TEST_EQUALS(result->size(),10);
+    }
+
+    void test_multiple_process() {
+        TaskManager::instance().set_concurrency(2);
+        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
+        result->append(2);
+        WorkloadType wl(&square_and_store,result);
+        wl.append(2);
+        wl.process();
+        result->clear();
+        result->append(3);
+        wl.append(3);
+        wl.process();
         ARIADNE_TEST_PRINT(*result);
         ARIADNE_TEST_EQUALS(result->size(),5);
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_construction());
+        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_append());
+        ARIADNE_TEST_CALL(test_invalid_process());
         ARIADNE_TEST_CALL(test_serial_processing());
         ARIADNE_TEST_CALL(test_concurrent_processing());
+        ARIADNE_TEST_CALL(test_multiple_append());
+        ARIADNE_TEST_CALL(test_multiple_process());
     }
 
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/workload_progress.hpp
+ *            concurrency/workload_advancement.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file concurrency/workload_progress.hpp
+/*! \file concurrency/workload_advancement.hpp
  *  \brief Synchronised class to manage the status of multiple elements to process
  */
 
-#ifndef ARIADNE_WORKLOAD_PROGRESS_HPP
-#define ARIADNE_WORKLOAD_PROGRESS_HPP
+#ifndef ARIADNE_WORKLOAD_ADVANCEMENT_HPP
+#define ARIADNE_WORKLOAD_ADVANCEMENT_HPP
 
 #include <algorithm>
 #include "utility/container.hpp"
@@ -37,9 +37,9 @@
 namespace Ariadne {
 
 //! \brief Synchronised class to manage the status of multiple elements to process
-class WorkloadProgress {
+class WorkloadAdvancement {
   public:
-    WorkloadProgress(SizeType initial = 0);
+    WorkloadAdvancement(SizeType initial = 0);
 
     //! \brief The elements waiting to be processed
     SizeType waiting() const;
@@ -51,9 +51,9 @@ class WorkloadProgress {
     //! \brief Add n elements to waiting
     Void add_to_waiting(SizeType n = 1);
     //! \brief Move n waiting to processing
-    Void move_to_processing(SizeType n = 1);
+    Void add_to_processing(SizeType n = 1);
     //! \brief Move n processing to completed
-    Void move_to_completed(SizeType n = 1);
+    Void add_to_completed(SizeType n = 1);
 
     //! \brief The rate of completion r (0<=r<=1) related to the progress
     Double completion_rate() const;
@@ -71,4 +71,4 @@ class WorkloadProgress {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_WORKLOAD_PROGRESS_HPP
+#endif // ARIADNE_WORKLOAD_ADVANCEMENT_HPP

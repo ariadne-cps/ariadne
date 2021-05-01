@@ -1,5 +1,5 @@
 /***************************************************************************
- *            concurrency/progress_status.cpp
+ *            concurrency/workload_advancement.cpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,54 +22,54 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "workload_progress.hpp"
+#include "workload_advancement.hpp"
 
 namespace Ariadne {
 
-WorkloadProgress::WorkloadProgress(SizeType initial) : _num_waiting(initial), _num_processing(0), _num_completed(0) { }
+WorkloadAdvancement::WorkloadAdvancement(SizeType initial) : _num_waiting(initial), _num_processing(0), _num_completed(0) { }
 
-SizeType WorkloadProgress::waiting() const {
+SizeType WorkloadAdvancement::waiting() const {
     LockGuard<Mutex> lock(_mux);
     return _num_waiting;
 }
 
-SizeType WorkloadProgress::processing() const {
+SizeType WorkloadAdvancement::processing() const {
     LockGuard<Mutex> lock(_mux);
     return _num_processing;
 }
 
-SizeType WorkloadProgress::completed() const {
+SizeType WorkloadAdvancement::completed() const {
     LockGuard<Mutex> lock(_mux);
     return _num_completed;
 }
 
-Void WorkloadProgress::add_to_waiting(SizeType n) {
+Void WorkloadAdvancement::add_to_waiting(SizeType n) {
     ARIADNE_PRECONDITION(n > 0);
     LockGuard<Mutex> lock(_mux);
     _num_waiting+=n;
 }
 
-Void WorkloadProgress::move_to_processing(SizeType n) {
+Void WorkloadAdvancement::add_to_processing(SizeType n) {
     ARIADNE_PRECONDITION(n <= _num_waiting);
     LockGuard<Mutex> lock(_mux);
     _num_waiting-=n;
     _num_processing+=n;
 }
 
-Void WorkloadProgress::move_to_completed(SizeType n) {
+Void WorkloadAdvancement::add_to_completed(SizeType n) {
     ARIADNE_PRECONDITION(n <=_num_processing);
     LockGuard<Mutex> lock(_mux);
     _num_processing-=n;
     _num_completed+=n;
 }
 
-Double WorkloadProgress::completion_rate() const {
+Double WorkloadAdvancement::completion_rate() const {
     LockGuard<Mutex> lock(_mux);
     Double total = _num_waiting + _num_processing + _num_completed;
     return ((Double)_num_completed) / total;
 }
 
-Bool WorkloadProgress::has_finished() const {
+Bool WorkloadAdvancement::has_finished() const {
     LockGuard<Mutex> lock(_mux);
     return _num_processing == 0 and _num_waiting == 0;
 }

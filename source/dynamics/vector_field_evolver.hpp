@@ -120,16 +120,16 @@ class VectorFieldEvolver
     //!@}
 
   protected:
-    virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+    Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics) const;
+                            Semantics semantics) const override;
 
-    virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
+    Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics) const;
 
-    virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
+    Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 
   private:
     std::shared_ptr< SystemType > _sys_ptr;
@@ -148,7 +148,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
 
-    virtual ~VectorFieldEvolverConfiguration() = default;
+    ~VectorFieldEvolverConfiguration() override = default;
 
   private:
 

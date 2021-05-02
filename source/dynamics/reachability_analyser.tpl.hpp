@@ -99,17 +99,13 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
     StorageType& reach_cells=result.first; StorageType& evolve_cells=result.second;
 
     for(auto initial_enclosure : initial_enclosures) {
-        ListSet<EnclosureType> current_reach_enclosures;
-        ListSet<EnclosureType> current_evolve_enclosures;
 
-        make_lpair(current_reach_enclosures,current_evolve_enclosures) = evolver.reach_evolve(initial_enclosure,time,semantics);
+        auto orbit = evolver.orbit(initial_enclosure,time,semantics);
 
-        for(auto enclosure : current_reach_enclosures) {
-            enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
-        }
+        for(auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         ARIADNE_LOG_PRINTLN_AT(1,"final reach size = "<<reach_cells.size());
 
-        for(auto enclosure : current_evolve_enclosures) {
+        for(auto enclosure : orbit.final()) {
             ARIADNE_LOG_PRINTLN_AT(2,"enclosure = "<<enclosure);
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
             EnclosureType new_enclosure = enclosure;
@@ -138,7 +134,7 @@ _upper_reach(const StorageType& set,
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,Semantics::UPPER);
+        ListSet<EnclosureType> reach = evolver.orbit(initial_enclosure,time,Semantics::UPPER).reach();
         for(auto enclosure : reach) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -158,13 +154,11 @@ _upper_evolve(const StorageType& set,
     ARIADNE_LOG_SCOPE_CREATE;
     GridType grid=set.grid();
     StorageType result(grid,this->system()); StorageType cells=set; cells.mince(accuracy);
-    for(auto cell : cells) {
+    for (auto cell : cells) {
         ARIADNE_LOG_PRINTLN_AT(1,"Evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,Semantics::UPPER);
-        for(auto enclosure : final) {
-            enclosure.adjoin_outer_approximation_to(result,accuracy);
-        }
+        ListSet<EnclosureType> final = evolver.orbit(initial_enclosure,time,Semantics::UPPER).final();
+        for (auto enclosure : final) enclosure.adjoin_outer_approximation_to(result,accuracy);
     }
     ARIADNE_LOG_PRINTLN("_upper_evolve result size = "<<result.size());
     return result;
@@ -187,20 +181,14 @@ _adjoin_upper_reach_evolve(StorageType& reach_cells,
 
     ARIADNE_LOG_PRINTLN("Evolving "<<cells.size()<<" cells");
     ProgressIndicator indicator(cells.size());
-    for(auto const& cell : cells) {
+    for (auto const& cell : cells) {
         ARIADNE_LOG_PRINTLN_AT(1,"evolving cell = "<<cell);
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures;
-        ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,Semantics::UPPER);
-        ARIADNE_LOG_PRINTLN_AT(1,"computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.");
+        auto orbit = evolver.orbit(initial_enclosure,time,Semantics::UPPER);
+        ARIADNE_LOG_PRINTLN_AT(1,"computed "<<orbit.reach().size()<<" reach enclosures and "<<orbit.final().size()<<" final enclosures.");
 
-        for(auto enclosure : reach_enclosures) {
-            enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
-        }
-        for(auto enclosure : final_enclosures) {
-            enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
-        }
+        for (auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
+        for (auto enclosure : orbit.final()) enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% of cells evolved.");
     }
 
@@ -229,7 +217,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,Semantics::LOWER);
+        ListSet<EnclosureType> final_enclosures=_evolver->orbit(initial_enclosure,time,Semantics::LOWER).final();
         for(auto enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(final_cells,grid_fineness);
         }
@@ -258,12 +246,10 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_extent,grid_fineness+4);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
-    for(auto cell : initial_cells) {
+    for (auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,Semantics::LOWER);
-        for(auto enclosure : reach_enclosures) {
-            enclosure.adjoin_outer_approximation_to(reach_cells,grid_fineness);
-        }
+        ListSet<EnclosureType> reach_enclosures=_evolver->orbit(initial_enclosure,time,Semantics::LOWER).reach();
+        for (auto enclosure : reach_enclosures) enclosure.adjoin_outer_approximation_to(reach_cells,grid_fineness);
     }
     return reach_cells;
 }
@@ -291,17 +277,11 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
     initial_cells.adjoin_lower_approximation(initial_set,grid_extent,grid_fineness+4);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
 
-    for(auto cell : initial_cells) {
+    for (auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures;
-        ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,Semantics::LOWER);
-        for(auto enclosure : reach_enclosures) {
-            enclosure.adjoin_outer_approximation_to(reach,grid_fineness);
-        }
-        for(auto enclosure : final_enclosures) {
-            enclosure.adjoin_outer_approximation_to(evolve_cells,grid_fineness);
-        }
+        auto orbit = _evolver->orbit(initial_enclosure,time,Semantics::LOWER);
+        for (auto enclosure : orbit.reach()) enclosure.adjoin_outer_approximation_to(reach,grid_fineness);
+        for (auto enclosure : orbit.final())  enclosure.adjoin_outer_approximation_to(evolve_cells,grid_fineness);
     }
     return make_pair(reach,evolve_cells);
 }
@@ -342,11 +322,11 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
     StorageType reach_cells(grid,this->system());
 
-    if(possibly(transient_time > TimeType(0))) {
+    if (possibly(transient_time > TimeType(0))) {
         ARIADNE_LOG_PRINTLN("Computing transient evolution...");
 
         ListSet<EnclosureType> initial_enclosures;
-        for(auto cell : initial_cells)
+        for (auto cell : initial_cells)
             initial_enclosures.adjoin(_evolver->enclosure(cell.box()));
 
         make_lpair(reach_cells,evolve_cells) =
@@ -363,7 +343,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
     }
     ARIADNE_LOG_PRINTLN("Computing recurrent evolution...");
 
-    while(!evolve_cells.is_empty()) {
+    while (!evolve_cells.is_empty()) {
 
         StorageType new_reach_cells(grid,this->system());
         ListSet<EnclosureType> new_evolve_enclosures;

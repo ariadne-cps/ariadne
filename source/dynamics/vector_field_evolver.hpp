@@ -103,20 +103,6 @@ class VectorFieldEvolver
     OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
     OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
 
-    using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
-    using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
-
-    //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER);
-        return final; }
-
-    //! \brief Compute an approximation to the reachable set under upper semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER);
-        return reachable; }
     //!@}
 
   protected:

@@ -58,18 +58,6 @@ template<class SYS, class ES, class TRM> class EvolverBase
 
     virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const = 0;
 
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return final; }
-
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return reachable; }
-
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return std::make_pair(reachable,final); }
-
     //!@}
 
   protected:

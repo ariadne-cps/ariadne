@@ -98,7 +98,6 @@ class IteratedMapEvolver
 
     //!@}
 
-
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.

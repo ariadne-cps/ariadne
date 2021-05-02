@@ -87,27 +87,6 @@ class EvolverInterface
           const TerminationType& time,
           Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolved set under the given semantics.
-    virtual
-    EnclosureListType
-    evolve(const EnclosureType& initial_set,
-           const TerminationType& time,
-           Semantics semantics) const = 0;
-
-    //! \brief Compute an approximation to the reachable set under the given semantics.
-    virtual
-    EnclosureListType
-    reach(const EnclosureType& initial_set,
-          const TerminationType& time,
-          Semantics semantics) const = 0;
-
-    //! \brief Compute an approximation to the evolved and reachable sets under the given semantics.
-    virtual
-    Pair<EnclosureListType,EnclosureListType>
-    reach_evolve(const EnclosureType& initial_set,
-                 const TerminationType& time,
-                 Semantics semantics) const = 0;
-
     //!@}
 
 };

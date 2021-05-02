@@ -91,7 +91,7 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     initial_set,time,semantics,false);
+                     initial_set,time,semantics);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -121,8 +121,7 @@ _evolution(EnclosureListType& final_sets,
            EnclosureListType& intermediate_sets,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
-           Semantics semantics,
-           Bool reach) const
+           Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -157,7 +156,7 @@ _evolution(EnclosureListType& final_sets,
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   current_timed_set,maximum_time,
-                                  semantics,reach);
+                                  semantics);
         }
 
         ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
@@ -181,8 +180,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& intermediate_sets,
                 const TimedEnclosureType& working_timed_set_model,
                 const TimeType& maximum_time,
-                Semantics semantics,
-                Bool reach) const
+                Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 

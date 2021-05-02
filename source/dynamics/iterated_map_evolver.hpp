@@ -108,12 +108,12 @@ class IteratedMapEvolver
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TerminationType& termination,
-                            Semantics semantics, Bool reach) const;
+                            Semantics semantics) const;
 
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TerminationType& termination,
-                                 Semantics semantics, Bool reach) const;
+                                 Semantics semantics) const;
 
   private:
     std::shared_ptr< SystemType > _sys_ptr;

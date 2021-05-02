@@ -60,22 +60,22 @@ template<class SYS, class ES, class TRM> class EvolverBase
 
     EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,false); return final; }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return final; }
 
     EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return reachable; }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return reachable; }
 
     Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return std::make_pair(reachable,final); }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics); return std::make_pair(reachable,final); }
 
     //!@}
 
   protected:
     //! \brief Main routine for computing the evolution.
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, const EnclosureType& initial,
-                            const TerminationType& termination, Semantics semantics, Bool reach) const = 0;
+                            const TerminationType& termination, Semantics semantics) const = 0;
 };
 
 

@@ -109,25 +109,25 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER);
         return final; }
 
     //! \brief Compute an approximation to the reachable set under upper semantics.
     EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER);
         return reachable; }
     //!@}
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, Bool reach) const;
+                            Semantics semantics) const;
 
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TimeType& time,
-                                 Semantics semantics, Bool reach) const;
+                                 Semantics semantics) const;
 
     virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 

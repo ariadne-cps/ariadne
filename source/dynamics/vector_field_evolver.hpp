@@ -177,7 +177,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual OutputStream& _write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const override;
 };
 
 } // namespace Ariadne

@@ -137,7 +137,7 @@ public:
         time = 1.5_dec;
 
         // Compute the reachable sets
-        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time));
+        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time, Semantics::UPPER));
     }
 
     Void test_subdivide_initially() const {
@@ -165,7 +165,7 @@ public:
 
         Real evolution_time(0.2_dec);
 
-        auto evolution = evolver.orbit(initial_set,evolution_time);
+        auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     }
 
     Void test_subdivide_along_evolution() const {

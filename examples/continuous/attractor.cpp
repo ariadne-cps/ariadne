@@ -57,7 +57,7 @@ int main(int argc, const char* argv[]) {
     ARIADNE_LOG_PRINTLN("Evolving...");
     VectorFieldEvolver evolver(system,integrator);
     evolver.configuration().set_maximum_step_size(0.1);
-    auto evolver_orbit = evolver.orbit(initial_set,evolution_time);
+    auto evolver_orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     g.clear();
     g << evolver_orbit;
     g.write("attractor_evolution");

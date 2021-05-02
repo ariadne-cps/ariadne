@@ -75,7 +75,7 @@ int main(int argc, const char* argv[])
 
     sw.reset();
     ARIADNE_LOG_PRINTLN("Computing evolution... ");
-    ARIADNE_LOG_RUN_AT(1,auto evolution = evolver.orbit(initial_set,evolution_time));
+    ARIADNE_LOG_RUN_AT(1,auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER));
     sw.click();
     ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 

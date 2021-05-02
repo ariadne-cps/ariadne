@@ -102,9 +102,9 @@ class VectorFieldEvolver
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    OrbitType orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
-    OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
-    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
+    OrbitType orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const;
+    OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const;
 
     //!@}
 

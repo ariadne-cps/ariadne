@@ -91,7 +91,7 @@ Int main(int argc, const char* argv[])
     Integer evolve_time(6);
 
     // Compute the reachable sets
-    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,evolve_time);
+    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,evolve_time,Semantics::UPPER);
 
     Axes2d figure_axes(-4<=x<=2,-3<=y<=3);
     LabelledFigure fig(figure_axes);

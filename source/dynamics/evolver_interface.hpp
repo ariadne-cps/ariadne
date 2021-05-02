@@ -78,11 +78,7 @@ class EvolverInterface
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
-    virtual
-    Orbit<EnclosureType>
-    orbit(const EnclosureType& initial_set,
-          const TerminationType& time,
-          Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& time, Semantics semantics) const = 0;
 
     //!@}
 

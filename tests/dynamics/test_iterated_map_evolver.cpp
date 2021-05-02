@@ -95,7 +95,7 @@ class TestIteratedMapEvolver
         ARIADNE_TEST_PRINT(initial_set);
 
         // Compute the orbit
-        auto orbit = evolver.orbit(initial_set,time);
+        auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
 
         //std::cout << orbit.reach() << std::endl;
 

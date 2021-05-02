@@ -33,6 +33,7 @@
 #include "geometry/function_set.hpp"
 #include "geometry/grid_paving.hpp"
 #include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
 #include "symbolic/expression_set.hpp"

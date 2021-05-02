@@ -71,6 +71,7 @@ class VectorFieldEvolver
     typedef LabelledEnclosure EnclosureType;
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
+    typedef SynchronisedOrbit<EnclosureType> SynchronisedOrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
   public:
@@ -108,12 +109,13 @@ class VectorFieldEvolver
     //!@}
 
   protected:
-    Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics) const;
+    Void _evolution(SharedPointer<SynchronisedOrbitType> orbit, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
 
-    Void _evolution_step(List< TimedEnclosureType >& working_sets,
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+    /*Void _process_enclosure(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbitType> orbit,
+                         const TimedEnclosureType& current_set, const TimeType& time,
+                         Semantics semantics) const;*/
+
+    Void _process_enclosure_step(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbitType> orbit,
                                  const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics) const;
 

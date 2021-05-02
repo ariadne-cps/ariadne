@@ -38,8 +38,8 @@
 #include "geometry/list_set.hpp"
 #include "solvers/integrator.hpp"
 #include "symbolic/expression_set.hpp"
-#include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/orbit.hpp"
+#include "dynamics/vector_field_evolver.hpp"
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 

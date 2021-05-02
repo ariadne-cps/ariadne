@@ -86,16 +86,10 @@ auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
-    Orbit<EnclosureType> orbit(initial_set);
-    EnclosureListType final;
-    EnclosureListType reachable;
-    EnclosureListType intermediate;
-    this->_evolution(final,reachable,intermediate,
-                     initial_set,time,semantics);
-    orbit.adjoin_intermediate(intermediate);
-    orbit.adjoin_reach(reachable);
-    orbit.adjoin_final(final);
-    return orbit;
+    auto orbit = std::make_shared<SynchronisedOrbitType>(initial_set);
+
+    this->_evolution(orbit,initial_set,time,semantics);
+    return std::move(*orbit);
 }
 
 Void VectorFieldEvolver::
@@ -116,9 +110,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
 
 Void
 VectorFieldEvolver::
-_evolution(EnclosureListType& final_sets,
-           EnclosureListType& reach_sets,
-           EnclosureListType& intermediate_sets,
+_evolution(SharedPointer<SynchronisedOrbitType> orbit,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
            Semantics semantics) const
@@ -135,16 +127,15 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
 
         ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
-                                 <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                                 <<"#r="<<std::setw(4)<<std::left<<orbit->reach().size()
                                  <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                                  <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
                                  <<" r="<<std::setw(7)<<current_set_model.radius()
                                  <<" c="<<current_set_model.centre())
 
         if(definitely(current_time>=maximum_time)) {
-            final_sets.adjoin(current_set_model);
-        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions()
-                  && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+            orbit->adjoin_final(current_set_model);
+        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions() && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
             for(SizeType i=0; i!=subdivisions.size(); ++i) {
@@ -154,10 +145,7 @@ _evolution(EnclosureListType& final_sets,
         } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_LOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
         } else {
-            this->_evolution_step(working_sets,
-                                  final_sets,reach_sets,intermediate_sets,
-                                  current_timed_set,maximum_time,
-                                  semantics);
+            this->_process_enclosure_step(working_sets,orbit,current_timed_set,maximum_time,semantics);
         }
     }
 }
@@ -168,10 +156,8 @@ _evolution(EnclosureListType& final_sets,
 
 Void
 VectorFieldEvolver::
-_evolution_step(List< TimedEnclosureType >& working_sets,
-                EnclosureListType& final_sets,
-                EnclosureListType& reach_sets,
-                EnclosureListType& intermediate_sets,
+_process_enclosure_step(List< TimedEnclosureType >& working_sets,
+                SharedPointer<SynchronisedOrbitType> orbit,
                 const TimedEnclosureType& working_timed_set_model,
                 const TimeType& maximum_time,
                 Semantics semantics) const
@@ -231,8 +217,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     next_set_model.apply_fixed_evolve_step(flow_model,step_size);
     ARIADNE_LOG_PRINTLN_AT(1,"next_set_model = "<<next_set_model)
 
-    reach_sets.adjoin(reach_set_model);
-    intermediate_sets.adjoin(next_set_model);
+    orbit->adjoin_reach(reach_set_model);
+    orbit->adjoin_intermediate(next_set_model);
 
     working_sets.push_back({next_time,next_set_model});
 }

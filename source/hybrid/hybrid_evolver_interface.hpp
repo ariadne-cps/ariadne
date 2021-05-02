@@ -69,8 +69,6 @@ class HybridEvolverInterface
     //!   Useful for computing the evolution starting from user-provided set.
     virtual Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const = 0;
     //!@}
 
     //!@{

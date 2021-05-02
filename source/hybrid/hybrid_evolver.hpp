@@ -166,14 +166,6 @@ class HybridEvolverBase
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
-    //! \brief Compute an approximation to the evolution set using the given semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
     //!@}
 
     //!@{

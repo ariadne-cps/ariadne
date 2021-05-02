@@ -39,7 +39,6 @@
 #include "solvers/integrator.hpp"
 
 #include "output/logging.hpp"
-#include "output/progress_indicator.hpp"
 
 #include "dynamics/vector_field.hpp"
 #include "dynamics/vector_field_evolver.hpp"
@@ -135,9 +134,6 @@ _evolution(EnclosureListType& final_sets,
         _append_initial_set(working_sets,initial_time,initial_set);
     }
 
-    ProgressIndicator initials_indicator(working_sets.size());
-    ProgressIndicator time_indicator(maximum_time.get_d());
-
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();
@@ -170,11 +166,6 @@ _evolution(EnclosureListType& final_sets,
                             <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
                             <<" r="<<std::setw(7)<<current_set_model.radius()
                             <<" c="<<current_set_model.centre());
-
-        initials_indicator.update_current(final_sets.size());
-        time_indicator.update_current(current_time.get_d());
-        if (initials_indicator.final_value() > 1) { ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << initials_indicator.percentage() << "% of sets, " << time_indicator.percentage() << "% of current set"); }
-        else ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << time_indicator.percentage() << "%");
     }
 }
 

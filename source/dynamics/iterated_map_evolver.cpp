@@ -59,7 +59,7 @@ FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_functio
 
 
 IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
-    : _sys_ptr(system.clone())
+    : _system(system.clone())
     , _configuration(new ConfigurationType())
 {
 }
@@ -197,7 +197,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Compute the map model
     EnclosureType& final_enclosure=initial_enclosure;
-    final_enclosure.apply_discrete_time_map_step(_sys_ptr->function());
+    final_enclosure.apply_discrete_time_map_step(_system->function());
     TimeType final_time=initial_time+1;
     ARIADNE_LOG_PRINTLN("final_enclosure = "<<final_enclosure);
 

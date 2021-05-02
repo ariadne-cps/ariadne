@@ -73,9 +73,6 @@ class EvolverInterface
     //! \brief Gets the system associated with the evolver.
     virtual const SystemType& system() const = 0;
 
-    //! \brief Write to an output stream.
-    virtual OutputStream& _write(OutputStream& os) const = 0;
-
   public:
     //!@{
     //! \name Main evolution functions.
@@ -90,14 +87,6 @@ class EvolverInterface
     //!@}
 
 };
-
-
-template<class SYS, class ES, class TRM> inline
-OutputStream&
-operator<<(OutputStream& os, const EvolverInterface<SYS,ES,TRM>& e) {
-    return e._write(os);
-}
-
 
 //! \brief Factory for evolver interface classes.
 template<class SYS, class ES, class TRM>

@@ -62,7 +62,7 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 } // namespace
 
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
-    : _sys_ptr(system.clone())
+    : _system(system.clone())
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
@@ -202,7 +202,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     }
 
     /////////////// Main Evolution ////////////////////////////////
-    const FunctionType& dynamic=_sys_ptr->function();
+    const FunctionType& dynamic=_system->function();
 
     // Set evolution parameters
     const StepSizeType maximum_step_size=this->_configuration->maximum_step_size();

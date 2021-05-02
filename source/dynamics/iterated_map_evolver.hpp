@@ -39,7 +39,7 @@
 #include "dynamics/iterated_map.hpp"
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "dynamics/evolver_interface.hpp"
 
 #include "output/logging.hpp"
 
@@ -54,9 +54,10 @@ class IteratedMapEvolverConfiguration;
 /*! \brief A class for computing the evolution of an iterated map.
  */
 class IteratedMapEvolver
-    : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
+    : public EvolverInterface<IteratedMap,LabelledEnclosure,Integer>
 {
   public:
+    typedef EvolverInterface<IteratedMap,LabelledEnclosure,Integer> Interface;
     typedef IteratedMapEvolverConfiguration ConfigurationType;
     typedef IteratedMap SystemType;
     typedef Integer TimeType;
@@ -75,7 +76,7 @@ class IteratedMapEvolver
     IteratedMapEvolver* clone() const { return new IteratedMapEvolver(*this); }
 
     /* \brief Get the internal system. */
-    virtual const SystemType& system() const { return *_sys_ptr; }
+    virtual const SystemType& system() const { return *_system; }
 
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
@@ -115,8 +116,8 @@ class IteratedMapEvolver
                                  Semantics semantics) const;
 
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    std::shared_ptr< ConfigurationType > _configuration;
+    SharedPointer<SystemType> _system;
+    SharedPointer<ConfigurationType> _configuration;
 };
 
 

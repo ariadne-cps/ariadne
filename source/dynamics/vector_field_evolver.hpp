@@ -41,7 +41,7 @@
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "solvers/integrator_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "dynamics/evolver_interface.hpp"
 
 #include "output/logging.hpp"
 
@@ -58,11 +58,13 @@ class RealExpressionBoundedConstraintSet;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
+    : public EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType>
 {
   public:
+    typedef EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType> Interface;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
+    typedef IntegratorInterface IntegratorType;
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
@@ -80,7 +82,7 @@ class VectorFieldEvolver
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
     //! \brief Get the internal system.
-    virtual const SystemType& system() const { return *_sys_ptr; }
+    virtual const SystemType& system() const { return *_system; }
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
@@ -108,7 +110,7 @@ class VectorFieldEvolver
   protected:
     Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics) const override;
+                            Semantics semantics) const;
 
     Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
@@ -118,9 +120,9 @@ class VectorFieldEvolver
     Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    std::shared_ptr< IntegratorInterface > _integrator;
-    std::shared_ptr< ConfigurationType > _configuration;
+    SharedPointer<SystemType> _system;
+    SharedPointer<IntegratorType> _integrator;
+    SharedPointer<ConfigurationType> _configuration;
 };
 
 

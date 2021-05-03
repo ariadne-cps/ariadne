@@ -64,10 +64,10 @@ public:
     using BoundFunctionType = std::function<Void(E)>;
 
     Workload(FunctionType f, AS... as) :
-            _appender(Access(*this)),
+            _access(Access(*this)),
             _f(std::bind(
                 std::forward<FunctionType const>(f),
-                std::forward<Workload<E,AS...>::Access const&>(_appender),
+                std::forward<Workload<E,AS...>::Access const&>(_access),
                 std::placeholders::_1,
                 std::forward<AS>(as)...)),
             _advancement(0) { }
@@ -136,7 +136,7 @@ public:
 
   private:
     List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
-    Access const _appender;
+    Access const _access;
     BoundFunctionType const _f;
 
     WorkloadAdvancement _advancement;

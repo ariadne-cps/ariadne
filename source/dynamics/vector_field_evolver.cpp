@@ -89,7 +89,7 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
 
     WorkloadType workload(
-            [=,this](WorkloadType::Appender& w,TimedEnclosureType te,TimeType const& t,Semantics s,SharedPointer<SynchronisedOrbit> r)
+            [=,this](WorkloadType::Access& w, TimedEnclosureType te, TimeType const& t, Semantics s, SharedPointer<SynchronisedOrbit> r)
             { this->_process_timed_enclosure(w,te,t,s,r);}, time, semantics, result);
 
     _append_initial_set(workload,TimeStepType(0u),initial_set);
@@ -114,7 +114,7 @@ _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, co
 
 Void
 VectorFieldEvolver::
-_process_timed_enclosure(WorkloadType::Appender& appender,
+_process_timed_enclosure(WorkloadType::Access& workload,
                          TimedEnclosureType current_timed_set,
                          TimeType const& maximum_time,
                          Semantics semantics,
@@ -123,9 +123,10 @@ _process_timed_enclosure(WorkloadType::Appender& appender,
     EnclosureType current_set=current_timed_set.second;
     FloatDPUpperBound current_set_radius=current_set.euclidean_set().bounding_box().radius();
 
-    ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<0
-                             <<"#r="<<std::setw(4)<<std::left<<result->reach().size()
-                             <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
+    ARIADNE_LOG_PRINTLN("#[w="<<std::setw(2)<<std::left<<workload.advancement().waiting()
+                             <<" p="<<std::setw(2)<<std::left<<workload.advancement().processing()
+                             <<" c="<<std::setw(3)<<std::left<<workload.advancement().completed()
+                             <<"] t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                              <<" p="<<std::setw(4)<<std::left<<current_set.number_of_parameters()
                              <<" r="<<std::setw(7)<<current_set.radius()
                              <<" c="<<current_set.centre())
@@ -137,18 +138,18 @@ _process_timed_enclosure(WorkloadType::Appender& appender,
         List< EnclosureType > subdivisions=subdivide(current_set);
         for(SizeType i=0; i!=subdivisions.size(); ++i) {
             EnclosureType const& subdivided_set_model=subdivisions[i];
-            appender.append({current_time,subdivided_set_model});
+            workload.append({current_time,subdivided_set_model});
         }
     } else if (semantics == Semantics::LOWER and decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set << " due to maximum radius being exceeded.")
     } else {
-        this->_process_timed_enclosure_step(appender,current_timed_set,maximum_time,semantics,result);
+        this->_process_timed_enclosure_step(workload,current_timed_set,maximum_time,semantics,result);
     }
 }
 
 Void
 VectorFieldEvolver::
-_process_timed_enclosure_step(WorkloadType::Appender& appender,
+_process_timed_enclosure_step(WorkloadType::Access& workload,
                               TimedEnclosureType const& working_timed_set_model,
                               TimeType const& maximum_time,
                               Semantics semantics,
@@ -173,7 +174,7 @@ _process_timed_enclosure_step(WorkloadType::Appender& appender,
     if (this->_configuration->enable_reconditioning() && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
         ARIADNE_LOG_PRINTLN("reconditioning from errors " << current_set.state_function().errors())
         current_set.recondition();
-        appender.append({current_time,current_set});
+        workload.append({current_time,current_set});
         return;
     }
 
@@ -210,7 +211,7 @@ _process_timed_enclosure_step(WorkloadType::Appender& appender,
     result->adjoin_reach(reach_set);
     result->adjoin_intermediate(next_set);
 
-    appender.append({next_time,next_set});
+    workload.append({next_time,next_set});
 }
 
 

@@ -48,25 +48,26 @@ namespace Ariadne {
 template<class E, class... AS>
 class Workload {
 public:
-    //! \brief Interface for appending elements while processing the workload in the function
-    class Appender {
+    //! \brief Reduced interface to be used by the processing function (and any function called by it)
+    class Access {
         friend Workload;
     protected:
-        Appender(Workload& parent) : _load(parent) { }
+        Access(Workload& parent) : _load(parent) { }
     public:
         Void append(E const &e) { _load._enqueue(e); }
+        WorkloadAdvancement const& advancement() const { return _load._advancement; }
     private:
         Workload& _load;
     };
 public:
-    using FunctionType = std::function<Void(Workload<E,AS...>::Appender&, E, AS...)>;
+    using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E, AS...)>;
     using BoundFunctionType = std::function<Void(E)>;
 
     Workload(FunctionType f, AS... as) :
-            _appender(Appender(*this)),
+            _appender(Access(*this)),
             _f(std::bind(
                 std::forward<FunctionType const>(f),
-                std::forward<Workload<E,AS...>::Appender const&>(_appender),
+                std::forward<Workload<E,AS...>::Access const&>(_appender),
                 std::placeholders::_1,
                 std::forward<AS>(as)...)),
             _advancement(0) { }
@@ -135,7 +136,7 @@ public:
 
   private:
     List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
-    Appender const _appender;
+    Access const _appender;
     BoundFunctionType const _f;
 
     WorkloadAdvancement _advancement;

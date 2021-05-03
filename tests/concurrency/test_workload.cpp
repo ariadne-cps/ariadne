@@ -41,9 +41,8 @@ template<class T> class SynchronisedList : public List<T> {
 };
 
 using WorkloadType = Workload<int,SharedPointer<SynchronisedList<int>>>;
-using WorkloadAppenderType = WorkloadType::Appender;
 
-Void square_and_store(WorkloadAppenderType& wla, int val, SharedPointer<SynchronisedList<int>> results) {
+Void square_and_store(WorkloadType::Access& wla, int val, SharedPointer<SynchronisedList<int>> results) {
     val *= val;
     if (val < 46340) {
         wla.append(val);

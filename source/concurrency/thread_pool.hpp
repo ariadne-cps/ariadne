@@ -36,6 +36,8 @@
 
 namespace Ariadne {
 
+using ExceptionPtrQueue = std::queue<std::exception_ptr>;
+
 const String THREAD_POOL_DEFAULT_NAME = "thr";
 
 //! \brief Exception for stopping a thread pool

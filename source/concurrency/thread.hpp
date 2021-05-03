@@ -42,6 +42,8 @@
 
 namespace Ariadne {
 
+using ExceptionPtr = std::exception_ptr;
+
 //! \brief A class for handling a thread for a pool in a smarter way.
 //! \details It allows to wait for the start of the \a task before extracting the thread id, which is held along with
 //! a readable \a name.
@@ -57,6 +59,9 @@ class Thread {
     //! \brief Get the readable name
     String name() const;
 
+    //! \brief The exception, if it exists
+    ExceptionPtr const& exception() const;
+
     //! \brief Destroy the instance
     ~Thread();
 
@@ -66,6 +71,7 @@ class Thread {
     std::thread _thread;
     Promise<Void> _got_id_promise;
     Future<Void> _got_id_future;
+    ExceptionPtr _exception;
 };
 
 } // namespace Ariadne

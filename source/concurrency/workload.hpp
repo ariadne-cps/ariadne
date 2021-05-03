@@ -47,7 +47,7 @@ namespace Ariadne {
 //!          A workload object has a lifetime of multiple processings, if necessary.
 template<class E, class... AS>
 class Workload {
-public:
+  public:
     //! \brief Reduced interface to be used by the processing function (and any function called by it)
     class Access {
         friend Workload;
@@ -59,9 +59,10 @@ public:
     private:
         Workload& _load;
     };
-public:
+  public:
     using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E, AS...)>;
-    using BoundFunctionType = std::function<Void(E)>;
+    using PartiallyBoundFunctionType = std::function<Void(E)>;
+    using CompletelyBoundFunctionType = VoidFunction;
 
     Workload(FunctionType f, AS... as) :
             _access(Access(*this)),
@@ -77,7 +78,8 @@ public:
         ARIADNE_PRECONDITION(not _elements.empty());
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
-            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _elements.empty(); });
+            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _elements.empty() or _exception != nullptr; });
+            if (_exception != nullptr) throw _exception;
             if (_advancement.has_finished()) return;
 
             auto e = _elements.back();
@@ -85,13 +87,21 @@ public:
             if (_using_concurrency()) {
                 TaskManager::instance().enqueue([this, e] {
                     _advancement.add_to_processing();
-                    (*e)();
+                    try {
+                        e();
+                    } catch (...) {
+                        {
+                            LockGuard<Mutex> exc_lock(_exception_mutex);
+                            _exception = std::current_exception();
+                        }
+                        _element_availability_condition.notify_one();
+                    }
                     _advancement.add_to_completed();
                     if (_advancement.has_finished()) _element_availability_condition.notify_one();
                 });
             } else {
                 _advancement.add_to_processing();
-                (*e)();
+                e();
                 _advancement.add_to_completed();
             }
         }
@@ -103,9 +113,7 @@ public:
     //! \brief Append one element to process
     Void append(E const& e) {
         _advancement.add_to_waiting();
-        _elements.push_back(std::make_shared<PackagedTask<Void()>>(std::bind(
-                std::forward<BoundFunctionType const>(_f),
-                std::forward<E const&>(e))));
+        _elements.push_back(std::bind(std::forward<PartiallyBoundFunctionType const>(_f), std::forward<E const&>(e)));
     }
 
     //! \brief Append a list of elements to process
@@ -120,12 +128,21 @@ public:
             _advancement.add_to_waiting();
             TaskManager::instance().enqueue([=,this](E const& elem){
                     _advancement.add_to_processing();
-                    _f(elem);
+                    try {
+                        _f(elem);
+                    } catch (...) {
+                        {
+                            LockGuard<Mutex> exc_lock(_exception_mutex);
+                            _exception = std::current_exception();
+                        }
+                        _element_availability_condition.notify_one();
+                    }
+
                     _advancement.add_to_completed();
                     if (_advancement.has_finished()) _element_availability_condition.notify_one();
                 }, e);
         } else {
-            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _elements
+            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _elements respectively
             {
                 LockGuard<Mutex> lock(_element_appending_mutex);
                 append(e);
@@ -135,15 +152,18 @@ public:
     }
 
   private:
-    List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
+    List<CompletelyBoundFunctionType> _elements; // Used for initial consumption and for consumption when using no concurrency
     Access const _access;
-    BoundFunctionType const _f;
+    PartiallyBoundFunctionType const _f;
 
     WorkloadAdvancement _advancement;
 
     Mutex _element_appending_mutex;
     Mutex _element_availability_mutex;
+    Mutex _exception_mutex;
     ConditionVariable _element_availability_condition;
+
+    ExceptionPtr _exception;
 };
 
 }

@@ -56,7 +56,7 @@ void PRDE20() {
     {
         RealVariablesBox initial_set({9.5_dec<=x<=10,y==0.01_dec,z==0.01_dec,a==0.3_dec});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I' setup... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -89,7 +89,7 @@ void PRDE20() {
     {
         RealVariablesBox initial_set({x==10,y==0.01_dec,z==0.01_dec,0.296_dec<=a<=0.304_dec});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'P' setup... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -122,7 +122,7 @@ void PRDE20() {
     {
         RealVariablesBox initial_set({9.7_dec<=x<=10,y==0.01_dec,z==0.01_dec,0.298_dec<=a<=0.302_dec});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I+P' setup... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));

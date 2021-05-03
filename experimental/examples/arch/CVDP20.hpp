@@ -53,7 +53,7 @@ void CVDP20()
 
         Real evolution_time(7);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
@@ -101,7 +101,7 @@ void CVDP20()
 
         Real evolution_time(8);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));

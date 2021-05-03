@@ -78,7 +78,7 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.1 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -98,7 +98,7 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.4 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -139,7 +139,7 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.8 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));

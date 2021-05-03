@@ -71,7 +71,7 @@ void LOVO20()
     HybridSet initial_set(lotkavolterra|outside,{ic[0]-e<=x<=ic[0]+e,y==ic[1],cnt==0});
     HybridTime evolution_time(3.64_dec,3u);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     ARIADNE_LOG_PRINTLN("Computing evolution... ");
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);

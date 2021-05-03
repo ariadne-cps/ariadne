@@ -77,7 +77,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -131,7 +131,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -185,7 +185,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));

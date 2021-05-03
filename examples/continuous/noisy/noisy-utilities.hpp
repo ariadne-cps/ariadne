@@ -60,7 +60,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
     evolver.configuration().approximations(approximations);
     evolver.configuration().maximum_step_size(step);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();

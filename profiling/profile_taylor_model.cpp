@@ -158,7 +158,7 @@ Void profile(Nat ntries, const char* name, const T& run)
     typename T::result_type res=run();
     //std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     for(Nat i=0; i!=ntries; ++i) {
         res=run();

@@ -20,6 +20,7 @@ Legenda for the issue kind:
 - [#553](https://github.com/ariadne-cps/ariadne/issues/553) (C) Remove ability to write an evolver object to the standard output, since it was implemented as a fixed string for all evolvers anyway
 - [#556](https://github.com/ariadne-cps/ariadne/issues/556) (C) Disallow unsafe default value of upper semantics for orbit methods  
 - [#539](https://github.com/ariadne-cps/ariadne/issues/539) (F) A segmentation fault sometimes would be issued when terminating the executable, due to logging
+- [#557](https://github.com/ariadne-cps/ariadne/issues/557) (F) Fix behavior of StopWatch utility for concurrent code, enhance the class for choosing a duration type
 
 ### 2.2
 

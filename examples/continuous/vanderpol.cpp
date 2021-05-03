@@ -62,7 +62,7 @@ int main(int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
     Real evolution_time(7);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
     ARIADNE_LOG_PRINTLN("Computing simulation...");
     ARIADNE_LOG_RUN_AT(1,auto simulation = simulator.orbit(initial_set,evolution_time));
     sw.click();

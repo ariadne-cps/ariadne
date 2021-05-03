@@ -53,7 +53,7 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
             }
             if (got_task) task();
             if (i>=_num_threads_to_use) {
-                UniqueLock<Mutex> active_threads_lock(_num_active_threads_mutex);
+                LockGuard<Mutex> active_threads_lock(_num_active_threads_mutex);
                 _num_active_threads--;
                 if (_num_active_threads == _num_threads_to_use) _all_unused_threads_stopped_promise.set_value();
                 return;

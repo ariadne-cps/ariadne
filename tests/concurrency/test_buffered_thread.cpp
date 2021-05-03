@@ -53,6 +53,12 @@ class TestBufferedThread {
         thread.enqueue([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
     }
 
+    void test_exception() const {
+        BufferedThread thread;
+        auto future = thread.enqueue([] { throw new std::exception(); });
+        ARIADNE_TEST_FAIL(future.get());
+    }
+
     void test_has_queued_tasks() const {
         BufferedThread thread;
         thread.set_queue_capacity(2);
@@ -135,6 +141,7 @@ class TestBufferedThread {
         ARIADNE_TEST_CALL(test_create());
         ARIADNE_TEST_CALL(test_set_queue_capacity());
         ARIADNE_TEST_CALL(test_destroy_before_completion());
+        ARIADNE_TEST_CALL(test_exception());
         ARIADNE_TEST_CALL(test_has_queued_tasks());
         ARIADNE_TEST_CALL(test_set_queue_capacity_down_failure());
         ARIADNE_TEST_CALL(test_task_return());

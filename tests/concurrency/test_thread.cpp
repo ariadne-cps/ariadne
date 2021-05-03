@@ -28,7 +28,9 @@
 
 using namespace Ariadne;
 
-class TestBufferedThread {
+using namespace std::chrono_literals;
+
+class TestThread {
   public:
 
     void test_create() const {
@@ -40,20 +42,20 @@ class TestBufferedThread {
     }
 
     void test_destroy_before_completion() const {
-        Thread thread([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        Thread thread([] { std::this_thread::sleep_for(100ms); });
     }
 
     void test_task() const {
         int a = 0;
         Thread thread([&a] { a++; });
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(10ms);
         ARIADNE_TEST_EQUALS(a,1)
         ARIADNE_TEST_ASSERT(thread.exception() == nullptr)
     }
 
     void test_exception() const {
-        Thread thread([] { ARIADNE_FAIL_MSG("error") });
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        Thread thread([] { throw new std::exception(); });
+        std::this_thread::sleep_for(10ms);
         ARIADNE_TEST_ASSERT(thread.exception() != nullptr)
     }
 
@@ -67,7 +69,7 @@ class TestBufferedThread {
             threads.append(std::make_shared<Thread>([&a] { a++; }));
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(100ms);
         ARIADNE_TEST_EQUALS(a,n_threads)
         threads.clear();
     }
@@ -83,6 +85,6 @@ class TestBufferedThread {
 };
 
 int main() {
-    TestBufferedThread().test();
+    TestThread().test();
     return ARIADNE_TEST_FAILURES;
 }

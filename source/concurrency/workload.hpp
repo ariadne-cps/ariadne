@@ -117,9 +117,9 @@ public:
     Void _enqueue(E const& e) {
         if (_using_concurrency()) {
             _advancement.add_to_waiting();
-            TaskManager::instance().enqueue([=,this](E const& e){
+            TaskManager::instance().enqueue([=,this](E const& elem){
                     _advancement.add_to_processing();
-                    _f(e);
+                    _f(elem);
                     _advancement.add_to_completed();
                     if (_advancement.has_finished()) _element_availability_condition.notify_one();
                 }, e);

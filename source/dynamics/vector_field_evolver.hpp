@@ -43,6 +43,8 @@
 #include "solvers/integrator_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 
+#include "concurrency/workload.hpp"
+
 #include "output/logging.hpp"
 
 namespace Ariadne {
@@ -83,6 +85,7 @@ class VectorFieldEvolver
       private:
         Mutex _mux;
     };
+    typedef Workload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -120,13 +123,13 @@ class VectorFieldEvolver
   protected:
     Void _evolution(SharedPointer<SynchronisedOrbit> result, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
 
-    Void _process_timed_enclosure(List<TimedEnclosureType>& working_sets, SharedPointer<SynchronisedOrbit> result,
-                                  TimedEnclosureType const& current_timed_set, TimeType const& maximum_time, Semantics semantics) const;
+    Void _process_timed_enclosure(WorkloadType::Appender& appender, TimedEnclosureType current_timed_set,
+                                  TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
 
-    Void _process_timed_enclosure_step(List<TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbit> result,
-                                       TimedEnclosureType const& current_timed_set, TimeType const& maximum_time, Semantics semantics) const;
+    Void _process_timed_enclosure_step(WorkloadType::Appender& appender, TimedEnclosureType const& current_timed_set,
+                                       TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
 
-    Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
+    Void _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 
   private:
     SharedPointer<SystemType> _system;

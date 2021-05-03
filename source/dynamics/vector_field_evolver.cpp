@@ -123,68 +123,75 @@ _evolution(SharedPointer<SynchronisedOrbit> result,
     while(!working_sets.empty()) {
         TimedEnclosureType current_timed_set=working_sets.back();
         working_sets.pop_back();
-        TimeStepType current_time=current_timed_set.first;
-        EnclosureType current_set_model=current_timed_set.second;
-        FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
-
-        ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
-                                 <<"#r="<<std::setw(4)<<std::left<<result->reach().size()
-                                 <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
-                                 <<" p="<<std::setw(4)<<std::left<<current_set_model.number_of_parameters()
-                                 <<" r="<<std::setw(7)<<current_set_model.radius()
-                                 <<" c="<<current_set_model.centre())
-
-        if(definitely(current_time>=maximum_time)) {
-            result->adjoin_final(current_set_model);
-        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions() && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
-            // Subdivide
-            List< EnclosureType > subdivisions=subdivide(current_set_model);
-            for(SizeType i=0; i!=subdivisions.size(); ++i) {
-                EnclosureType const& subdivided_set_model=subdivisions[i];
-                working_sets.push_back({current_time,subdivided_set_model});
-            }
-        } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
-            ARIADNE_LOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set_model << " due to maximum radius being exceeded.")
-        } else {
-            this->_process_enclosure_step(working_sets,result,current_timed_set,maximum_time,semantics);
-        }
+        this->_process_timed_enclosure(working_sets,result,current_timed_set,maximum_time,semantics);
     }
 }
 
+Void
+VectorFieldEvolver::
+_process_timed_enclosure(List<TimedEnclosureType>& working_sets,
+                         SharedPointer<SynchronisedOrbit> result,
+                         TimedEnclosureType const& current_timed_set,
+                         TimeType const& maximum_time,
+                         Semantics semantics) const {
+    TimeStepType current_time=current_timed_set.first;
+    EnclosureType current_set=current_timed_set.second;
+    FloatDPUpperBound current_set_radius=current_set.euclidean_set().bounding_box().radius();
 
+    ARIADNE_LOG_PRINTLN("#w="<<std::setw(4)<<working_sets.size()
+                             <<"#r="<<std::setw(4)<<std::left<<result->reach().size()
+                             <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
+                             <<" p="<<std::setw(4)<<std::left<<current_set.number_of_parameters()
+                             <<" r="<<std::setw(7)<<current_set.radius()
+                             <<" c="<<current_set.centre())
 
+    if(definitely(current_time>=maximum_time)) {
+        result->adjoin_final(current_set);
+    } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions() && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        // Subdivide
+        List< EnclosureType > subdivisions=subdivide(current_set);
+        for(SizeType i=0; i!=subdivisions.size(); ++i) {
+            EnclosureType const& subdivided_set_model=subdivisions[i];
+            working_sets.push_back({current_time,subdivided_set_model});
+        }
+    } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        ARIADNE_LOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set << " due to maximum radius being exceeded.")
+    } else {
+        this->_process_timed_enclosure_step(working_sets,result,current_timed_set,maximum_time,semantics);
+    }
 
+}
 
 Void
 VectorFieldEvolver::
-_process_enclosure_step(List< TimedEnclosureType >& working_sets,
+_process_timed_enclosure_step(List<TimedEnclosureType>& working_sets,
                 SharedPointer<SynchronisedOrbit> result,
-                const TimedEnclosureType& working_timed_set_model,
-                const TimeType& maximum_time,
+                TimedEnclosureType const& working_timed_set_model,
+                TimeType const& maximum_time,
                 Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE
 
     typedef EffectiveVectorMultivariateFunction FunctionType;
 
-    EnclosureType current_set_model;
+    EnclosureType current_set;
     TimeStepType current_time;
     ARIADNE_LOG_PRINTLN_AT(1,"working_timed_set_model = "<<working_timed_set_model)
-    make_lpair(current_time,current_set_model)=working_timed_set_model;
+    make_lpair(current_time, current_set)=working_timed_set_model;
 
     ARIADNE_LOG_PRINTLN("current_time = "<<current_time)
-    ARIADNE_LOG_PRINTLN("current_set_model = "<<current_set_model)
+    ARIADNE_LOG_PRINTLN("current_set = " << current_set)
 
-    ARIADNE_LOG_PRINTLN("box = "<<current_set_model.bounding_box())
-    ARIADNE_LOG_PRINTLN("radius = "<<current_set_model.euclidean_set().bounding_box().radius())
+    ARIADNE_LOG_PRINTLN("box = " << current_set.bounding_box())
+    ARIADNE_LOG_PRINTLN("radius = " << current_set.euclidean_set().bounding_box().radius())
 
     // Test to see if set requires reconditioning
     if(this->_configuration->enable_reconditioning() &&
-       possibly(norm(current_set_model.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+       possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
 
-        ARIADNE_LOG_PRINTLN("reconditioning from errors "<<current_set_model.state_function().errors())
-        current_set_model.recondition();
-        working_sets.append(make_pair(current_time,current_set_model));
+        ARIADNE_LOG_PRINTLN("reconditioning from errors " << current_set.state_function().errors())
+        current_set.recondition();
+        working_sets.append(make_pair(current_time, current_set));
         return;
     }
 
@@ -195,7 +202,7 @@ _process_enclosure_step(List< TimedEnclosureType >& working_sets,
     const StepSizeType maximum_step_size=this->_configuration->maximum_step_size();
 
     // Get bounding boxes for time and space bounding_box
-    auto current_set_bounds=cast_exact_box(current_set_model.euclidean_set().bounding_box());
+    auto current_set_bounds=cast_exact_box(current_set.euclidean_set().bounding_box());
     ARIADNE_LOG_PRINTLN("current_set_bounds = "<<current_set_bounds)
 
     // Compute flow model
@@ -211,17 +218,17 @@ _process_enclosure_step(List< TimedEnclosureType >& working_sets,
     TimeStepType next_time=current_time+TimeStepType(step_size);
     ARIADNE_LOG_PRINTLN_AT(1,"next_time = "<<next_time)
     // Compute the flow tube (reachable set) model and the final set
-    EnclosureType reach_set_model=current_set_model;
-    reach_set_model.apply_full_reach_step(flow_model);
-    ARIADNE_LOG_PRINTLN_AT(1,"reach_set_model = "<<reach_set_model)
-    EnclosureType next_set_model=current_set_model;
-    next_set_model.apply_fixed_evolve_step(flow_model,step_size);
-    ARIADNE_LOG_PRINTLN_AT(1,"next_set_model = "<<next_set_model)
+    EnclosureType reach_set=current_set;
+    reach_set.apply_full_reach_step(flow_model);
+    ARIADNE_LOG_PRINTLN_AT(1,"reach_set = " << reach_set)
+    EnclosureType next_set=current_set;
+    next_set.apply_fixed_evolve_step(flow_model, step_size);
+    ARIADNE_LOG_PRINTLN_AT(1,"next_set = " << next_set)
 
-    result->adjoin_reach(reach_set_model);
-    result->adjoin_intermediate(next_set_model);
+    result->adjoin_reach(reach_set);
+    result->adjoin_intermediate(next_set);
 
-    working_sets.push_back({next_time,next_set_model});
+    working_sets.push_back({next_time, next_set});
 }
 
 

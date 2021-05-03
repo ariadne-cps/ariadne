@@ -120,13 +120,11 @@ class VectorFieldEvolver
   protected:
     Void _evolution(SharedPointer<SynchronisedOrbit> result, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
 
-    /*Void _process_enclosure(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbitType> orbit,
-                         const TimedEnclosureType& current_set, const TimeType& time,
-                         Semantics semantics) const;*/
+    Void _process_timed_enclosure(List<TimedEnclosureType>& working_sets, SharedPointer<SynchronisedOrbit> result,
+                                  TimedEnclosureType const& current_timed_set, TimeType const& maximum_time, Semantics semantics) const;
 
-    Void _process_enclosure_step(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbit> result,
-                                 const TimedEnclosureType& current_set, const TimeType& time,
-                                 Semantics semantics) const;
+    Void _process_timed_enclosure_step(List<TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbit> result,
+                                       TimedEnclosureType const& current_timed_set, TimeType const& maximum_time, Semantics semantics) const;
 
     Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
 

@@ -97,7 +97,7 @@ Void VectorFieldEvolver::
 _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, const EnclosureType& current_set) const
 {
     ARIADNE_LOG_SCOPE_CREATE
-    if (this->_configuration->enable_subdivisions() && possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("initial set too large, splitting")
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(workload,initial_time,split_sets.first); }
@@ -230,7 +230,7 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
     set_maximum_enclosure_radius(100.0);
     set_maximum_spacial_error(1e-2);
     set_enable_reconditioning(true);
-    set_enable_subdivisions(true);
+    set_enable_subdivisions(false);
 }
 
 

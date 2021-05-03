@@ -167,7 +167,8 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Enable reconditioning of basic sets.
     Bool _enable_reconditioning;
 
-    //! \brief Enable subdivisions of basic sets initially (both semantics), or along evolution for upper semantics.
+    //! \brief Enable subdivisions of basic sets along evolution for upper semantics.
+    //! \details Subdivisions are always allowed on the initial set.
     Bool _enable_subdivisions;
 
   public:

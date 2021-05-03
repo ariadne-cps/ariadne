@@ -51,13 +51,13 @@ using namespace std;
 class TestVectorFieldEvolver {
 public:
     Void test() const {
-        ARIADNE_TEST_CALL(test_success());
+        ARIADNE_TEST_CALL(test_single_trajectory());
         ARIADNE_TEST_CALL(test_failure());
         ARIADNE_TEST_CALL(test_subdivide_initially());
         ARIADNE_TEST_CALL(test_subdivide_along_evolution());
     }
 
-    Void test_success() const {
+    Void test_single_trajectory() const {
 
         typedef VectorField::EnclosureType EnclosureType;
 
@@ -155,6 +155,7 @@ public:
         evolver.configuration().set_maximum_enclosure_radius(0.1);
         evolver.configuration().set_maximum_step_size(0.1);
         evolver.configuration().set_maximum_spacial_error(1e-5);
+        evolver.configuration().set_enable_subdivisions(true);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);
@@ -166,6 +167,8 @@ public:
         Real evolution_time(0.2_dec);
 
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+
+        ARIADNE_TEST_ASSERT(evolution.final().size()>1);
     }
 
     Void test_subdivide_along_evolution() const {
@@ -182,6 +185,7 @@ public:
         evolver.configuration().set_maximum_enclosure_radius(0.1);
         evolver.configuration().set_maximum_step_size(0.1);
         evolver.configuration().set_maximum_spacial_error(1e-5);
+        evolver.configuration().set_enable_subdivisions(true);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);

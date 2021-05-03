@@ -65,7 +65,6 @@ template<class E> class Orbit {
 #endif
 
 template<class ES> class Orbit;
-template<class ES> class SynchronisedOrbit;
 template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 
 template<class BS> class ListSet;
@@ -190,27 +189,6 @@ class Orbit<LabelledEnclosure>
     ESL _reach;
     ESL _intermediate;
     ESL _final;
-};
-
-//! \brief Synchronised version of orbit to allow concurrent adjoining only
-template<> class SynchronisedOrbit<LabelledEnclosure> : public Orbit<LabelledEnclosure> {
-  public:
-    typedef LabelledEnclosure ES;
-    typedef ListSet<LabelledEnclosure> ESL;
-    typedef ES EnclosureType;
-    typedef ESL EnclosureListType;
-  public:
-    SynchronisedOrbit(const ES& set) : Orbit(set) { }
-
-    Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_reach(set); }
-    Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_intermediate(set); }
-    Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_final(set); }
-
-    Void adjoin_reach(const EnclosureListType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_reach(set); }
-    Void adjoin_intermediate(const EnclosureListType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_intermediate(set); }
-    Void adjoin_final(const EnclosureListType& set) override { LockGuard<Mutex> lock(_mux); Orbit::adjoin_final(set); }
-  private:
-    Mutex _mux;
 };
 
 template<class ES> OutputStream& operator<<(OutputStream& os, const Orbit< ES >& orb);

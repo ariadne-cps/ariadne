@@ -69,11 +69,20 @@ class VectorFieldEvolver
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
     typedef LabelledEnclosure EnclosureType;
-    typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
-    typedef Orbit<EnclosureType> OrbitType;
-    typedef SynchronisedOrbit<EnclosureType> SynchronisedOrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
+    typedef Pair<TimeStepType,EnclosureType> TimedEnclosureType;
+    typedef Orbit<EnclosureType> OrbitType;
     typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
+  private:
+    //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
+    struct SynchronisedOrbit : public OrbitType {
+        SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
+        Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
+        Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
+        Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+      private:
+        Mutex _mux;
+    };
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -109,13 +118,13 @@ class VectorFieldEvolver
     //!@}
 
   protected:
-    Void _evolution(SharedPointer<SynchronisedOrbitType> orbit, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
+    Void _evolution(SharedPointer<SynchronisedOrbit> result, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
 
     /*Void _process_enclosure(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbitType> orbit,
                          const TimedEnclosureType& current_set, const TimeType& time,
                          Semantics semantics) const;*/
 
-    Void _process_enclosure_step(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbitType> orbit,
+    Void _process_enclosure_step(List< TimedEnclosureType >& working_sets, SharedPointer<SynchronisedOrbit> result,
                                  const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics) const;
 

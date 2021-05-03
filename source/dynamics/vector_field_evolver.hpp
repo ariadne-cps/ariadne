@@ -121,7 +121,6 @@ class VectorFieldEvolver
     //!@}
 
   protected:
-    Void _evolution(SharedPointer<SynchronisedOrbit> result, const EnclosureType& initial, const TimeType& time, Semantics semantics) const;
 
     Void _process_timed_enclosure(WorkloadType::Appender& appender, TimedEnclosureType current_timed_set,
                                   TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;

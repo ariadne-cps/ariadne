@@ -88,7 +88,12 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
 {
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
 
-    this->_evolution(result,initial_set,time,semantics);
+    WorkloadType workload(
+            [=,this](WorkloadType::Appender& w,TimedEnclosureType te,TimeType const& t,Semantics s,SharedPointer<SynchronisedOrbit> r)
+            { this->_process_timed_enclosure(w,te,t,s,r);}, time, semantics, result);
+
+    _append_initial_set(workload,TimeStepType(0u),initial_set);
+    workload.process();
 
     return std::move(*result);
 }
@@ -109,21 +114,6 @@ _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, co
 
 Void
 VectorFieldEvolver::
-_evolution(SharedPointer<SynchronisedOrbit> result,
-           const EnclosureType& initial_set,
-           const TimeType& maximum_time,
-           Semantics semantics) const
-{
-    WorkloadType workload(
-            [=,this](WorkloadType::Appender& w,TimedEnclosureType te,TimeType const& t,Semantics s,SharedPointer<SynchronisedOrbit> r)
-            { this->_process_timed_enclosure(w,te,t,s,r);}, maximum_time, semantics, result);
-
-    _append_initial_set(workload,TimeStepType(0u),initial_set);
-    workload.process();
-}
-
-Void
-VectorFieldEvolver::
 _process_timed_enclosure(WorkloadType::Appender& appender,
                          TimedEnclosureType current_timed_set,
                          TimeType const& maximum_time,
@@ -140,16 +130,16 @@ _process_timed_enclosure(WorkloadType::Appender& appender,
                              <<" r="<<std::setw(7)<<current_set.radius()
                              <<" c="<<current_set.centre())
 
-    if(definitely(current_time>=maximum_time)) {
+    if (definitely(current_time>=maximum_time)) {
         result->adjoin_final(current_set);
-    } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions() && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+    } else if (semantics == Semantics::UPPER and this->_configuration->enable_subdivisions() and decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
         // Subdivide
         List< EnclosureType > subdivisions=subdivide(current_set);
         for(SizeType i=0; i!=subdivisions.size(); ++i) {
             EnclosureType const& subdivided_set_model=subdivisions[i];
             appender.append({current_time,subdivided_set_model});
         }
-    } else if(semantics == Semantics::LOWER && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+    } else if (semantics == Semantics::LOWER and decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG_PRINTLN("Terminating lower evolution at time " << current_time << " and set " << current_set << " due to maximum radius being exceeded.")
     } else {
         this->_process_timed_enclosure_step(appender,current_timed_set,maximum_time,semantics,result);
@@ -180,7 +170,7 @@ _process_timed_enclosure_step(WorkloadType::Appender& appender,
     ARIADNE_LOG_PRINTLN("radius = " << current_set.euclidean_set().bounding_box().radius())
 
     // Test to see if set requires reconditioning
-    if(this->_configuration->enable_reconditioning() && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
+    if (this->_configuration->enable_reconditioning() && possibly(norm(current_set.state_function().errors()) > this->_configuration->maximum_spacial_error())) {
         ARIADNE_LOG_PRINTLN("reconditioning from errors " << current_set.state_function().errors())
         current_set.recondition();
         appender.append({current_time,current_set});

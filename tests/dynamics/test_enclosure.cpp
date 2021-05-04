@@ -81,6 +81,7 @@ class TestEnclosure
         Enclosure encl(dom,configuration);
         ARIADNE_TEST_PRINT(configuration);
         ARIADNE_TEST_PRINT(encl);
+        ARIADNE_TEST_EQUALS(encl.dimension(),2);
         ARIADNE_TEST_EQUALS(encl.centre(),FloatDPValuePoint({FloatDPValue(1.0_x,DoublePrecision()),FloatDPValue(2.0_x,DoublePrecision())}));
         ARIADNE_TEST_EQUALS(encl.radius().raw(),FloatDP(1.0_x,DoublePrecision()));
         ARIADNE_TEST_ASSERT(dom.inside(encl.codomain()));
@@ -125,6 +126,7 @@ class TestEnclosure
         encl.set_auxiliary_mapping(auxiliary);
         ARIADNE_TEST_PRINT(encl.state_auxiliary_function());
         ARIADNE_TEST_PRINT(encl.state_auxiliary_set());
+        ARIADNE_TEST_EQUALS(encl.dimension(),3);
         for (SizeType i=0; i<4; ++i)
             ARIADNE_TEST_PRINT(encl.get_function(i));
     }

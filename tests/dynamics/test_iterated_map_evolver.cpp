@@ -55,6 +55,7 @@ class TestIteratedMapEvolver
   public:
     Void test() const {
         ARIADNE_TEST_CALL(test_evolve());
+        ARIADNE_TEST_CALL(test_subdivide());
     }
 
     Void test_evolve() const
@@ -70,9 +71,9 @@ class TestIteratedMapEvolver
         ARIADNE_TEST_PRINT(henon);
 
         // Define the initial set
-        RealVariablesBox initial_box({0.4_dec<=x<=0.7_dec,0.9_dec<=y<=1.1_dec});
+        RealExpressionBoundedConstraintSet initial_set({0.4_dec<=x<=0.7_dec,0.9_dec<=y<=1.1_dec});
 
-        ARIADNE_TEST_PRINT(initial_box);
+        ARIADNE_TEST_PRINT(initial_set);
 
         // Function evaluation sanity check
         Vector<FloatApproximation<PR>> p={{a,b},pr};
@@ -91,9 +92,6 @@ class TestIteratedMapEvolver
 
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        auto initial_set = evolver.enclosure(initial_box,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10))));
-        ARIADNE_TEST_PRINT(initial_set);
-
         // Compute the orbit
         auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
 
@@ -103,12 +101,30 @@ class TestIteratedMapEvolver
         LabelledFigure fig(Axes2d(-10<=x<=10, -10<=y<=10));
         fig << line_style(true) << fill_colour(cyan) << orbit.reach();
         fig << fill_colour(yellow) << orbit.final();
-        fig << fill_colour(blue) << initial_set;
+        fig << fill_colour(blue) << evolver.enclosure(cast_exact_box(initial_set.euclidean_set(henon.state_space()).bounding_box()));
         fig.write("test_iterated_map_evolver_xy");
 
         LabelledFigure fig2(Axes2d(0<=TimeVariable()<=10, -10<=y<=10));
         fig2 << orbit.reach();
         fig2.write("test_iterated_map_evolver_ty");
+    }
+
+    Void test_subdivide() const
+    {
+        Real a=1.3_dec; Real b=0.3_dec;
+        RealVariable x("x"), y("y");
+        IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
+
+        RealExpressionBoundedConstraintSet initial_set({0.4_dec<=x<=0.7_dec,0.9_dec<=y<=1.1_dec});
+
+        IteratedMap::TimeType time(6);
+
+        IteratedMapEvolver evolver(henon);
+        evolver.configuration().set_maximum_enclosure_radius(0.1);
+
+        auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
+
+        ARIADNE_TEST_ASSERT(orbit.final().size()>0);
     }
 };
 

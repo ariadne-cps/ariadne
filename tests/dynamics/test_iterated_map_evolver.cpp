@@ -95,13 +95,14 @@ class TestIteratedMapEvolver
         // Compute the orbit
         auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
 
-        //std::cout << orbit.reach() << std::endl;
+        auto initial_enclosure = LabelledEnclosure(cast_exact_box(initial_set.euclidean_set(henon.state_space()).bounding_box()),
+                                                   henon.state_space(),EnclosureConfiguration(evolver.function_factory()));
 
         // Print the initial, evolve and reach sets
         LabelledFigure fig(Axes2d(-10<=x<=10, -10<=y<=10));
         fig << line_style(true) << fill_colour(cyan) << orbit.reach();
         fig << fill_colour(yellow) << orbit.final();
-        fig << fill_colour(blue) << evolver.enclosure(cast_exact_box(initial_set.euclidean_set(henon.state_space()).bounding_box()));
+        fig << fill_colour(blue) << initial_enclosure;
         fig.write("test_iterated_map_evolver_xy");
 
         LabelledFigure fig2(Axes2d(0<=TimeVariable()<=10, -10<=y<=10));
@@ -121,10 +122,11 @@ class TestIteratedMapEvolver
 
         IteratedMapEvolver evolver(henon);
         evolver.configuration().set_maximum_enclosure_radius(0.1);
+        evolver.configuration().enable_subdivisions();
 
         auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
 
-        ARIADNE_TEST_ASSERT(orbit.final().size()>0);
+        ARIADNE_TEST_ASSERT(orbit.final().size()>1);
     }
 };
 

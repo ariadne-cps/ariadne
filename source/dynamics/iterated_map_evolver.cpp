@@ -68,28 +68,8 @@ typename IteratedMapEvolver::FunctionFactoryType const IteratedMapEvolver::funct
     return ValidatedFunctionModelDPFactory(make_taylor_function_factory());
 }
 
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
-}
-
 typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(), EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
 }
 
 Orbit<IteratedMapEvolver::EnclosureType>

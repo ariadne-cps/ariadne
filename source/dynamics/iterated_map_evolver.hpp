@@ -78,14 +78,8 @@ class IteratedMapEvolver
     /* \brief Get the internal system. */
     virtual const SystemType& system() const { return *_system; }
 
-    //! \brief Make an enclosure from a user set.
-    EnclosureType enclosure(RealBox const&) const;
-    EnclosureType enclosure(RealBox const&, EnclosureConfiguration const&) const;
-    EnclosureType enclosure(RealVariablesBox const&) const;
-    EnclosureType enclosure(RealVariablesBox const&, EnclosureConfiguration const&) const;
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
-    EnclosureType enclosure(ExactBoxType const&, EnclosureConfiguration const&) const;
 
     //!@{
     //! \name Configuration for the class.

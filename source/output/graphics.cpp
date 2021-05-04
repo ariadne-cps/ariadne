@@ -47,12 +47,8 @@ static const Int DEFAULT_HEIGHT = 800;
 
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
-Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : Colour("",rd,gr,bl,op) { }
-Colour::Colour(const Char* nm, Dbl rd, Dbl gr, Dbl bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(const char* nm, Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
 OutputStream& operator<<(OutputStream& os, const Colour& c) {
@@ -223,11 +219,13 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
     : Figure(bbx,Projection2d(bbx.dimension(),ix,iy))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy)
     : Figure(bbx,Projection2d(bbx.dimension(),ixy.first,ixy.second))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection3d& proj)
@@ -239,6 +237,7 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection3d& proj)
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy, DimensionType iz)
     : Figure(bbx, Projection3d(bbx.dimension(), ix, iy, iz))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=3,"The bounding box must be at least 3-dimensional.");
 }
 
 Figure& Figure::draw(const Drawable2dInterface& shape)
@@ -255,21 +254,25 @@ Figure& Figure::draw(const Drawable2d3dInterface& shape)
 
 Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy)
 {
+    ARIADNE_ASSERT_MSG(as==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection=Projection2d(as,ix,iy); return *this;
 }
 
 Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy, DimensionType iz)
 {
+    ARIADNE_ASSERT_MSG(as==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection3d=Projection3d(as, ix,iy,iz); return *this;
 }
 
 Figure& Figure::set_projection_map(const Projection2d& p)
 {
+    ARIADNE_ASSERT_MSG(p.argument_size()==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection=p; return *this;
 }
 
 Figure& Figure::set_projection_map(const Projection3d& p)
 {
+    ARIADNE_ASSERT_MSG(p.argument_size()==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection3d=p; return *this;
 }
 

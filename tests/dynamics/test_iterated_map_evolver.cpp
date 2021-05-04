@@ -122,11 +122,16 @@ class TestIteratedMapEvolver
 
         IteratedMapEvolver evolver(henon);
         evolver.configuration().set_maximum_enclosure_radius(0.1);
-        evolver.configuration().enable_subdivisions();
+        evolver.configuration().set_enable_subdivisions(true);
 
         auto orbit = evolver.orbit(initial_set,time,Semantics::UPPER);
 
         ARIADNE_TEST_ASSERT(orbit.final().size()>1);
+
+        LabelledFigure fig(Axes2d(-10<=x<=10, -10<=y<=10));
+        fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+        fig << fill_colour(yellow) << orbit.final();
+        fig.write("test_iterated_map_evolver_xy_subdivisions");
     }
 };
 

@@ -45,15 +45,6 @@ namespace Ariadne {
 static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
-OutputStream& operator<<(OutputStream& os, const Drawable2dInterface& drawable) {
-    if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
-        os << *writable;
-    } else {
-        os << "Drawable";
-    }
-    return os;
-}
-
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
 Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Bool tr)
@@ -497,8 +488,7 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
 
         const Drawable2dInterface& shape=object.shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-        ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
-                           "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<this->_data->bounding_box);
+        ARIADNE_ASSERT(dimension==shape.dimension());
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->projection);
     }

@@ -84,33 +84,17 @@ class Workload {
             if (_exception != nullptr) throw _exception;
             if (_advancement.has_finished()) return;
 
-            auto e = _tasks.back();
+            auto task = _tasks.back();
             _tasks.pop_back();
             if (_using_concurrency()) {
-                TaskManager::instance().enqueue([this, e] {
-                    _advancement.add_to_processing();
-                    try {
-                        Logger::instance().set_level(_logger_level);
-                        e();
-                    } catch (...) {
-                        {
-                            LockGuard<Mutex> exc_lock(_exception_mutex);
-                            _exception = std::current_exception();
-                        }
-                        _element_availability_condition.notify_one();
-                    }
-                    _advancement.add_to_completed();
-                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
-                });
+                TaskManager::instance().enqueue([this, task] { _concurrent_task_wrapper(task); });
             } else {
-                _advancement.add_to_processing();
-                e();
-                _advancement.add_to_completed();
+                _advancement.add_to_processing(); task(); _advancement.add_to_completed();
             }
         }
     }
 
-    //! \brief The size of the workload, i.e., the number of elements to process
+    //! \brief The size of the workload, i.e., the number of tasks to process
     SizeType size() const { return _tasks.size(); }
 
     //! \brief Append one element to process
@@ -126,25 +110,28 @@ class Workload {
 
     Bool _using_concurrency() const { return TaskManager::instance().concurrency() > 0; }
 
+    Void _concurrent_task_wrapper(CompletelyBoundFunctionType const& task) {
+        _advancement.add_to_processing();
+        try {
+            Logger::instance().set_level(_logger_level);
+            task();
+        } catch (...) {
+            {
+                LockGuard<Mutex> exc_lock(_exception_mutex);
+                _exception = std::current_exception();
+            }
+            _element_availability_condition.notify_one();
+        }
+
+        _advancement.add_to_completed();
+        if (_advancement.has_finished()) _element_availability_condition.notify_one();
+    }
+
     Void _enqueue(E const& e) {
         if (_using_concurrency()) {
             _advancement.add_to_waiting();
-            TaskManager::instance().enqueue([=,this](E const& elem){
-                    _advancement.add_to_processing();
-                    try {
-                        Logger::instance().set_level(_logger_level);
-                        _f(elem);
-                    } catch (...) {
-                        {
-                            LockGuard<Mutex> exc_lock(_exception_mutex);
-                            _exception = std::current_exception();
-                        }
-                        _element_availability_condition.notify_one();
-                    }
-
-                    _advancement.add_to_completed();
-                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
-                }, e);
+            auto task = std::bind(std::forward<PartiallyBoundFunctionType const>(_f), std::forward<E const&>(e));
+            TaskManager::instance().enqueue([this,task]{ _concurrent_task_wrapper(task); });
         } else {
             // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _tasks respectively
             {

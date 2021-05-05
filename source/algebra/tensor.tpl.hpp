@@ -180,51 +180,6 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
         canvas.fill_3d();
     }
-
- 
- /*
-    if(proj == ProjType::no_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            SizeType index = _index({0, 0, frame});
-            canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                for(SizeType x1=0; x1!=_ns[0]; ++x1){
-                    if (x2 == 0 && x1 == 0){
-                        x1++;
-                    }
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-            }
-            canvas.fill_3d();
-        }
-    }else if(proj ==ProjType::x1_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                SizeType index = _index({0, x2, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x1=1; x1!=_ns[0]; ++x1){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }else if(proj == ProjType::x2_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            for(SizeType x1=0; x1!=_ns[1]; ++x1){
-                SizeType index = _index({x1, 0, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x2=1; x2!=_ns[0]; ++x2){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }
-*/
 }
 
 template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
@@ -337,52 +292,6 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
     }
         canvas.fill_3d();
     }
-
-
-
-/*
-    if(proj == ProjType::no_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            SizeType index = _index({0, 0, frame});
-            canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                for(SizeType x1=0; x1!=_ns[0]; ++x1){
-                    if (x2 == 0 && x1 == 0){
-                        x1++;
-                    }
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-            }
-            canvas.fill_3d();
-        }
-    }else if(proj ==ProjType::x1_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                SizeType index = _index({0, x2, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x1=1; x1!=_ns[0]; ++x1){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }else if(proj == ProjType::x2_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            for(SizeType x1=0; x1!=_ns[1]; ++x1){
-                SizeType index = _index({x1, 0, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x2=1; x2!=_ns[0]; ++x2){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }
-*/
 }
 
 template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Variables2d& p) const { }
@@ -523,53 +432,6 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
         canvas.fill_3d();
     }
-/*
-    if(proj == ProjType::no_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            SizeType index = _index({0, 0, frame});
-            canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                for(SizeType x1=0; x1!=_ns[0]; ++x1){
-                    if (x2 == 0 && x1 == 0){
-                        x1++;
-                    }
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-            }
-            canvas.fill_3d();
-        }
-    }else if(proj ==ProjType::x1_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            //SizeType index = _index({0, 0, frame});
-            //canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                SizeType index = _index({0, x2, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x1=1; x1!=_ns[0]; ++x1){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }else if(proj == ProjType::x2_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            //SizeType index = _index({0, 0, frame});
-            //canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x1=0; x1!=_ns[1]; ++x1){
-                SizeType index = _index({x1, 0, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x2=1; x2!=_ns[0]; ++x2){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }
-*/
 }
 
 template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
@@ -591,53 +453,6 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
     }
         canvas.fill_3d();
     }
-/*
-    if(proj == ProjType::no_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            SizeType index = _index({0, 0, frame});
-            canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                for(SizeType x1=0; x1!=_ns[0]; ++x1){
-                    if (x2 == 0 && x1 == 0){
-                        x1++;
-                    }
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.line_to(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-            }
-            canvas.fill_3d();
-        }
-    }else if(proj ==ProjType::x1_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            //SizeType index = _index({0, 0, frame});
-            //canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x2=0; x2!=_ns[1]; ++x2){
-                SizeType index = _index({0, x2, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x1=1; x1!=_ns[0]; ++x1){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }else if(proj == ProjType::x2_proj){
-        for(SizeType frame=0; frame!=_ns[2]; ++frame){
-            //SizeType index = _index({0, 0, frame});
-            //canvas.move_to(0.0, _a[index].get_d());
-            for(SizeType x1=0; x1!=_ns[1]; ++x1){
-                SizeType index = _index({x1, 0, frame});
-                canvas.move_to(0.0, _a[index].get_d());
-                for(SizeType x2=1; x2!=_ns[0]; ++x2){
-                    index = _index({x1, x2, frame});
-                    canvas.line_to(numeric_cast<double>(x1), _a[index].get_d());
-                }
-                canvas.fill();
-            }
-        }
-    }
-*/
 }
 
 }

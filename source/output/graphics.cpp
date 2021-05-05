@@ -81,7 +81,6 @@ GraphicsProperties& GraphicsProperties::set_fill_opacity(Dbl fo) { this->fill_co
 GraphicsProperties& GraphicsProperties::set_fill_colour(Colour fc) { this->fill_colour=fc; return *this; }
 GraphicsProperties& GraphicsProperties::set_fill_colour(Dbl r, Dbl g, Dbl b) {
     this->set_fill_colour(Colour(r,g,b,this->fill_colour.opacity)); return *this; }
-GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is_3d = true; return *this; }
 GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {

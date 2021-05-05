@@ -91,9 +91,6 @@ struct GraphicsProperties {
     GraphicsProperties& set_fill_colour(Dbl, Dbl, Dbl);
     GraphicsProperties& set_fill_opacity(Dbl);
 
-    GraphicsProperties& set_is_projected(Bool);
-    GraphicsProperties& set_3d(Bool);
-
     GraphicsProperties& set_animated(Bool);
 
 

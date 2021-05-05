@@ -303,6 +303,7 @@ class Logger {
     void hold(std::string scope, std::string text);
     void release(std::string scope);
 
+    void set_level(unsigned int i);
     void increase_level(unsigned int i);
     void decrease_level(unsigned int i);
     void mute_increase_level();

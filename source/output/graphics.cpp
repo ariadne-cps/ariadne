@@ -96,21 +96,11 @@ RealVariable Variables2d::x() const { return RealVariable(_x); }
 
 RealVariable Variables2d::y() const { return RealVariable(_y); }
 
-RealVariable Variables2d::x_variable() const { return RealVariable(_x); }
-
-RealVariable Variables2d::y_variable() const { return RealVariable(_y); }
-
 RealVariable Variables3d::x() const { return RealVariable(_x); }
 
 RealVariable Variables3d::y() const { return RealVariable(_y); }
 
 RealVariable Variables3d::z() const { return RealVariable(_z); }
-
-RealVariable Variables3d::x_variable() const { return RealVariable(_x); }
-
-RealVariable Variables3d::y_variable() const { return RealVariable(_y); }
-
-RealVariable Variables3d::z_variable() const { return RealVariable(_z); }
 
 Axes2d::Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y)
         : variables(x.variable(),y.variable()), bounds() {
@@ -139,13 +129,13 @@ Axes3d::Axes3d(ApproximateDouble xl, const RealVariable x, ApproximateDouble xu,
 }
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
-    return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
+    return ( (variables.x().name()==TimeVariable().name()) || space.contains(variables.x()) ) && space.contains(variables.y());
 }
 
 Projection2d projection(const RealSpace& space, const Variables2d& variables) {
     ARIADNE_ASSERT(valid_axis_variables(space,variables));
-    Nat x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
-    Nat y_index = space.index(variables.y_variable());
+    Nat x_index = (variables.x()==TimeVariable() && !space.contains(variables.x())) ? space.dimension() : space.index(variables.x());
+    Nat y_index = space.index(variables.y());
     return Projection2d(space.dimension(),x_index,y_index);
 }
 
@@ -523,13 +513,13 @@ Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) cons
 struct LabelledFigure::Data
 {
     Data(Axes2d axes)
-        : properties(), variables(axes.variables), variables3d(axes.variables.x_variable(),axes.variables.y_variable(), RealVariable(Identifier("z"))), bounds(axes.bounds) { }
+        : properties(), variables(axes.variables), variables3d(axes.variables.x(),axes.variables.y(), RealVariable(Identifier("z"))), bounds(axes.bounds) { }
     Data(const Variables2d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
-        : properties(), variables(vars), variables3d(vars.x_variable(), vars.y_variable(), RealVariable(Identifier("z"))) ,bounds(bnds) { }
+        : properties(), variables(vars), variables3d(vars.x(), vars.y(), RealVariable(Identifier("z"))) ,bounds(bnds) { }
     Data(Axes3d axes)
-        : properties(), variables(axes.variables3d.x_variable(), axes.variables3d.y_variable()) ,variables3d(axes.variables3d), bounds(axes.bounds) { }
+        : properties(), variables(axes.variables3d.x(), axes.variables3d.y()) ,variables3d(axes.variables3d), bounds(axes.bounds) { }
     Data(const Variables3d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
-        : properties(), variables(vars.x_variable(), vars.y_variable()) ,variables3d(vars), bounds(bnds) { }
+        : properties(), variables(vars.x(), vars.y()) ,variables3d(vars), bounds(bnds) { }
 
     GraphicsProperties properties;
 
@@ -616,9 +606,9 @@ Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     auto const& bounds = this->_data->bounds;
-    RealVariable const& x=this->_data->variables.x_variable();
-    RealVariable const& y=this->_data->variables.y_variable();
-    RealVariable const& z=this->_data->variables3d.z_variable();
+    RealVariable const& x=this->_data->variables.x();
+    RealVariable const& y=this->_data->variables.y();
+    RealVariable const& z=this->_data->variables3d.z();
 
     String tx=x.name();
     String ty=y.name();
@@ -658,8 +648,8 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     auto const& bounds = this->_data->bounds;
-    RealVariable const& x=this->_data->variables.x_variable();
-    RealVariable const& y=this->_data->variables.y_variable();
+    RealVariable const& x=this->_data->variables.x();
+    RealVariable const& y=this->_data->variables.y();
     
     ARIADNE_ASSERT(x.name()!="" && y.name()!="");
 

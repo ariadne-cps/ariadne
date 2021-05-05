@@ -126,8 +126,6 @@ struct Variables2d {
     Variables2d(const RealVariable& x, const RealVariable& y);
     RealVariable x() const;
     RealVariable y() const;
-    RealVariable x_variable() const;
-    RealVariable y_variable() const;
 };
 
 struct Variables3d {
@@ -136,9 +134,6 @@ struct Variables3d {
   RealVariable x() const;
   RealVariable y() const;
   RealVariable z() const;
-  RealVariable x_variable() const;
-  RealVariable y_variable() const;
-  RealVariable z_variable() const;
 };
 
 struct Axes2d {

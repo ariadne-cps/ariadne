@@ -229,7 +229,7 @@ OutputStream& HybridBoxSet::_write(OutputStream& os) const {
 Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
     if(qs.empty() || qs.contains(this->location())) {
         RealSpace spc(List<RealVariable>(this->variables()));
-        Projection2d prj(spc.dimension(),spc.index(vs.x_variable()),spc.index(vs.y_variable()));
+        Projection2d prj(spc.dimension(),spc.index(vs.x()),spc.index(vs.y()));
         this->euclidean_set(spc).draw(c,prj);
     }
 }
@@ -481,7 +481,7 @@ template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(Hybr
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {
     if(set.location()==location) {
-        Projection2d projection(set.euclidean_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
+        Projection2d projection(set.euclidean_set().dimension(),set.space().index(axes.x()),set.space().index(axes.y()));
         set.euclidean_set().draw(canvas,projection);
     }
 }
@@ -505,7 +505,7 @@ template<class IVL> Void HybridBoxes<IVL>::draw(CanvasInterface& canvas, const S
     for(auto loc_iter=this->begin(); loc_iter!=this->end(); ++loc_iter) {
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
-            Projection2d projection(space.dimension(),space.index(axis_variables.x_variable()),space.index(axis_variables.y_variable()));
+            Projection2d projection(space.dimension(),space.index(axis_variables.x()),space.index(axis_variables.y()));
             loc_iter->second.euclidean_set().draw(canvas,projection);
         }
     }

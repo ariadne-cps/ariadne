@@ -60,8 +60,8 @@ class Workload {
         Workload& _load;
     };
   public:
-    using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E, AS...)>;
-    using PartiallyBoundFunctionType = std::function<Void(E)>;
+    using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E const&, AS...)>;
+    using PartiallyBoundFunctionType = std::function<Void(E const&)>;
     using CompletelyBoundFunctionType = VoidFunction;
 
     Workload(FunctionType f, AS... as) :

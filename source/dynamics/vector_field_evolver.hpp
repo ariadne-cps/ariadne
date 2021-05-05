@@ -114,7 +114,7 @@ class VectorFieldEvolver
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    OrbitType orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const;
+    OrbitType orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const;
     OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const;
     OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const;
 
@@ -122,13 +122,13 @@ class VectorFieldEvolver
 
   protected:
 
-    Void _process_timed_enclosure(WorkloadType::Access& workload, TimedEnclosureType current_timed_set,
+    Void _process_timed_enclosure(WorkloadType::Access& workload, TimedEnclosureType const& current_timed_set,
                                   TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
 
     Void _process_timed_enclosure_step(WorkloadType::Access& workload, TimedEnclosureType const& current_timed_set,
                                        TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
 
-    Void _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, const EnclosureType& current_set) const;
+    Void _append_initial_set(WorkloadType& workload, TimeStepType const& initial_time, EnclosureType const& current_set) const;
 
   private:
     SharedPointer<SystemType> _system;

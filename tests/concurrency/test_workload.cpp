@@ -36,26 +36,26 @@ template<class T> class SynchronisedList : public List<T> {
 
 using WorkloadType = Workload<int,SharedPointer<SynchronisedList<int>>>;
 
-Void square_and_store(WorkloadType::Access& wla, int val, SharedPointer<SynchronisedList<int>> results) {
-    val *= val;
-    if (val < 46340) {
-        wla.append(val);
+Void square_and_store(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+    int next_val = val*val;
+    if (next_val < 46340) {
+        wla.append(next_val);
     }
-    results->append(val);
+    results->append(next_val);
 }
 
-Void check_processing(WorkloadType::Access& wla, int val, SharedPointer<SynchronisedList<int>> results) {
+Void check_processing(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     ARIADNE_TEST_EQUALS(wla.advancement().processing(),1)
 }
 
-Void throw_exception_immediately(WorkloadType::Access& wla, int val, SharedPointer<SynchronisedList<int>> results) {
+Void throw_exception_immediately(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     throw new std::exception();
 }
 
-Void throw_exception_later(WorkloadType::Access& wla, int val, SharedPointer<SynchronisedList<int>> results) {
-    val += 1;
-    if (val > 4) throw new std::exception();
-    else wla.append(val);
+Void throw_exception_later(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+    int next_val = val+1;
+    if (next_val > 4) throw new std::exception();
+    else wla.append(next_val);
 }
 
 class TestWorkload {

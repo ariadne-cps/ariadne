@@ -99,7 +99,7 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
 }
 
 Void VectorFieldEvolver::
-_append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, const EnclosureType& current_set) const
+_append_initial_set(WorkloadType& workload, TimeStepType const& initial_time, EnclosureType const& current_set) const
 {
     ARIADNE_LOG_SCOPE_CREATE
     if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
@@ -115,7 +115,7 @@ _append_initial_set(WorkloadType& workload, const TimeStepType& initial_time, co
 Void
 VectorFieldEvolver::
 _process_timed_enclosure(WorkloadType::Access& workload,
-                         TimedEnclosureType current_timed_set,
+                         TimedEnclosureType const& current_timed_set,
                          TimeType const& maximum_time,
                          Semantics semantics,
                          SharedPointer<SynchronisedOrbit> result) const {

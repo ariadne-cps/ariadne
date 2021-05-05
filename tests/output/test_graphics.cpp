@@ -44,7 +44,8 @@ class TestGraphics {
         ARIADNE_TEST_CALL(test_graphics_properties())
         ARIADNE_TEST_CALL(test_construct_figure())
         ARIADNE_TEST_CALL(test_figure_projection())
-        ARIADNE_TEST_CALL(test_labelled_figure())
+        ARIADNE_TEST_CALL(test_construct_labelled_figure())
+        ARIADNE_TEST_CALL(test_labelled_figure_projection())
         ARIADNE_TEST_CALL(test_default_drawer())
     }
 
@@ -78,7 +79,8 @@ class TestGraphics {
         ARIADNE_TEST_FAIL(Figure(bx1,Projection3d(3,2,1,0)))
         Figure fig(bx3,0,1);
         ARIADNE_TEST_PRINT(fig.get_bounding_box())
-        ARIADNE_TEST_PRINT(fig.properties())
+        auto const& p = fig.properties();
+        ARIADNE_TEST_PRINT(p)
     }
 
     void test_figure_projection() {
@@ -99,7 +101,7 @@ class TestGraphics {
         ARIADNE_TEST_PRINT(f.get_3d_projection_map())
     }
 
-    void test_labelled_figure() {
+    void test_construct_labelled_figure() {
         RealVariable x("x"), y("y"), z("z");
         GraphicsBoundingBoxType bx1d({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)}});
         GraphicsBoundingBoxType bx2d({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)},
@@ -112,8 +114,18 @@ class TestGraphics {
         ARIADNE_TEST_FAIL(LabelledFigure(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y}),bx2d)))
         ARIADNE_TEST_EXECUTE(LabelledFigure(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y,z}),bx3d)))
         LabelledFigure f(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y,z}),bx3d));
-        ARIADNE_TEST_PRINT(f.properties())
+        auto const& p = f.properties();
+        ARIADNE_TEST_PRINT(p)
+    }
 
+    void test_labelled_figure_projection() {
+        RealVariable x("x"), y("y"), z("z");
+        LabelledFigure f(Axes2d({0<=x<=1,-1<=y<=2}));
+        ARIADNE_TEST_EXECUTE(f.set_axes(Axes2d({0<=z<=1,-1<=y<=2})))
+        ARIADNE_TEST_EXECUTE(f.set_axes(Axes3d({0<=z<=1,-1<=y<=2,0<=x<=2})))
+        ARIADNE_TEST_EXECUTE(f.set_bounds(x,ApproximateDoubleInterval(1.0,2.0)))
+        ARIADNE_TEST_EXECUTE(f.set_bounds({{x,ApproximateDoubleInterval(1.0,2.0)},{y,ApproximateDoubleInterval(0.0,1.0)}}))
+        ARIADNE_TEST_EXECUTE(f.set_bounding_box(VariablesBox<ApproximateIntervalType>(RealSpace({x}),GraphicsBoundingBoxType({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)}}))))
     }
 
     void test_default_drawer()

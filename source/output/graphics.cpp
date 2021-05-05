@@ -86,7 +86,7 @@ GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
     return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
         << ", line_style=" << gp.line_style<<", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
-        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ")"; }
+        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << "is_animated" << gp.is_animated << ")"; }
 
 Variables2d::Variables2d(const RealVariable& x, const RealVariable& y) : _x(x.name()), _y(y.name()) { }
 
@@ -545,18 +545,22 @@ LabelledFigure::LabelledFigure(const Axes3d& axes)
 
 LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
     : _data(new Data(vars,VariablesBox<ApproximateDoubleInterval>(bbx).bounds())) {
+    ARIADNE_ASSERT_MSG(bbx.bounds().size()>=2,"The box must be at least two-dimensional.")
 }
 
-LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bnds)
-    : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bnds).bounds())){
-        this->_data->properties.is_3d = true;
+LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
+    : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bbx).bounds())){
+    this->_data->properties.is_3d = true;
+    ARIADNE_ASSERT_MSG(bbx.bounds().size()>=3,"The box must be at least three-dimensional.")
 }
 
 Void LabelledFigure::set_axes(const Axes2d& axes) {
+    this->_data->properties.is_3d = false;
     _data->bounds=axes.bounds; _data->variables=axes.variables;
 }
 
 Void LabelledFigure::set_axes(const Axes3d& axes) {
+    this->_data->properties.is_3d = true;
     _data->bounds=axes.bounds; _data->variables3d=axes.variables3d;
 }
 

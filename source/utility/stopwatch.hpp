@@ -43,15 +43,15 @@ public:
     using ResolutionType = std::chrono::high_resolution_clock;
     using TimePointType = std::chrono::time_point<ResolutionType>;
 
-    Stopwatch() { reset(); }
+    Stopwatch() { restart(); }
 
     //! \brief Get the duration in the given type
     D duration() const { return std::chrono::duration_cast<D>(_clicked-_initial); }
     //! \brief Get the duration in seconds, in double precision
-    Double elapsed() const { return std::chrono::duration_cast<std::chrono::duration<Double>>(duration()).count(); }
+    Double elapsed_seconds() const { return std::chrono::duration_cast<std::chrono::duration<Double>>(duration()).count(); }
 
-    //! \brief Reset the watch time to zero
-    Stopwatch& reset() { _initial = ResolutionType::now(); _clicked = _initial; return *this; }
+    //! \brief Restart the watch time to zero
+    Stopwatch& restart() { _initial = ResolutionType::now(); _clicked = _initial; return *this; }
     //! \brief Save the current time
     Stopwatch& click() { _clicked = ResolutionType::now(); return *this; }
 

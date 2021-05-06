@@ -78,11 +78,11 @@ void PRDE20() {
         ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 	
 	    sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("I");
         if (num_failures==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(volume.get_d());
         instance.write();
     }
 
@@ -111,11 +111,11 @@ void PRDE20() {
         ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("P");
         if (num_failures==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(volume.get_d());
         instance.write();
     }
 
@@ -144,11 +144,11 @@ void PRDE20() {
         ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("IP");
         if (num_failures==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(volume.get_d());
         instance.write();
     }
 

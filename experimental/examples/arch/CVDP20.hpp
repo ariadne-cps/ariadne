@@ -74,10 +74,10 @@ void CVDP20()
         }
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu1");
-        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
         reach1.adjoin(orbit.reach());
@@ -122,10 +122,10 @@ void CVDP20()
         }
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu2");
-        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
         reach2.adjoin(orbit.reach());

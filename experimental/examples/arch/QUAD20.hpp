@@ -84,9 +84,9 @@ void QUAD20()
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-        auto instance = benchmark.create_instance("delta01").set_verified(1).set_execution_time(sw.elapsed());
+        auto instance = benchmark.create_instance("delta01").set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 
@@ -123,11 +123,11 @@ void QUAD20()
             }
         }
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("delta04");
         if (num_failures==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 
@@ -145,9 +145,9 @@ void QUAD20()
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-        auto instance = benchmark.create_instance("delta08").set_verified(0).set_execution_time(sw.elapsed());
+        auto instance = benchmark.create_instance("delta08").set_verified(0).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 

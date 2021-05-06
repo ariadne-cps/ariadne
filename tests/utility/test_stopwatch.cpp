@@ -44,7 +44,7 @@ class TestStopwatch {
         std::this_thread::sleep_for(10ms);
         auto duration = sw.click().duration();
         ARIADNE_TEST_ASSERT(duration.count()>10000);
-        ARIADNE_TEST_ASSERT(sw.elapsed()>0.01);
+        ARIADNE_TEST_ASSERT(sw.elapsed_seconds() > 0.01);
     }
 
     Void test() {

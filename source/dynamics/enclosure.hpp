@@ -440,6 +440,7 @@ template<> class ListSet<LabelledEnclosure> : public LabelledDrawable2dInterface
     Void adjoin(LabelledEnclosure const& other) { this->_data.append(other); }
     Void adjoin(ListSet<LabelledEnclosure> const& other) { this->_data.concatenate(other._data); }
 
+    LabelledUpperBoxType bounding_box() const;
     const ListSet<LabelledSet<UpperBoxType>> bounding_boxes() const;
 
     virtual ListSet<LabelledEnclosure>* clone() const override;

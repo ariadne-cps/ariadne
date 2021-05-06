@@ -1562,11 +1562,21 @@ Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) con
     this->euclidean_set().draw(canvas,proj);
 }
 
-
-
-
 LabelledUpperBoxType LabelledEnclosure::bounding_box() const {
     return LabelledBox(this->state_space(), this->euclidean_set().bounding_box());
+}
+
+LabelledUpperBoxType
+ListSet<LabelledEnclosure>::bounding_box() const
+{
+    auto iter=this->begin();
+    auto box = iter->state_auxiliary_set().bounding_box();
+    RealSpace space = join(iter->state_space(),iter->auxiliary_space());
+    ++iter;
+    for(; iter!=this->end(); ++iter) {
+        box = hull(box,iter->state_auxiliary_set().bounding_box());
+    }
+    return LabelledUpperBoxType(space,box);
 }
 
 const ListSet<LabelledSet<UpperBoxType>> ListSet<LabelledEnclosure>::bounding_boxes() const {

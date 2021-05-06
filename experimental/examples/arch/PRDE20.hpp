@@ -51,7 +51,7 @@ void PRDE20() {
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
-    Real evolution_time(100.0);
+    Real evolution_time(100);
 
     {
         RealVariablesBox initial_set({9.5_dec<=x<=10,y==0.01_dec,z==0.01_dec,a==0.3_dec});
@@ -59,7 +59,7 @@ void PRDE20() {
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I' setup... ");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
@@ -92,7 +92,7 @@ void PRDE20() {
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'P' setup... ");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
@@ -125,7 +125,7 @@ void PRDE20() {
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I+P' setup... ");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 

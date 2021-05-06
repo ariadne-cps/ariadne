@@ -32,22 +32,22 @@ void LALO20() {
 
     RealVariable x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), t("t");
 
-    VectorField dynamics({dot(x1) = Real(1.4) * x3 - Real(0.9) * x1,
-                                 dot(x2) = Real(2.5) * x5 - Real(1.5) * x2,
-                                 dot(x3) = Real(0.6) * x7 - Real(0.8) * x2 * x3,
-                                 dot(x4) = Real(2) - Real(1.3) * x3 * x4,
-                                 dot(x5) = Real(0.7) * x1 - x4 * x5,
-                                 dot(x6) = Real(0.3) * x1 - Real(3.1) * x6,
-                                 dot(x7) = Real(1.8) * x6 - Real(1.5) * x2 * x7
+    VectorField dynamics({dot(x1) = 1.4_dec * x3 - 0.9_dec * x1,
+                                 dot(x2) = 2.5_dec * x5 - 1.5_dec * x2,
+                                 dot(x3) = 0.6_dec * x7 - 0.8_dec * x2 * x3,
+                                 dot(x4) = 2 - 1.3_dec * x3 * x4,
+                                 dot(x5) = 0.7_dec * x1 - x4 * x5,
+                                 dot(x6) = 0.3_dec * x1 - 3.1_dec * x6,
+                                 dot(x7) = 1.8_dec * x6 - 1.5_dec * x2 * x7
                          });
 
-    Real x1_0(1.2);
-    Real x2_0(1.05);
-    Real x3_0(1.5);
-    Real x4_0(2.4);
-    Real x5_0(1.0);
-    Real x6_0(0.1);
-    Real x7_0(0.45);
+    Real x1_0(1.2_dec);
+    Real x2_0(1.05_dec);
+    Real x3_0(1.5_dec);
+    Real x4_0(2.4_dec);
+    Real x5_0(1.0_dec);
+    Real x6_0(0.1_dec);
+    Real x7_0(0.45_dec);
 
     ARIADNE_LOG_PRINTLN("Laub-Loomis benchmark (LALO20):");
 
@@ -75,12 +75,12 @@ void LALO20() {
                                       x7_0 - eps <= x7 <= x7_0 + eps
                                      });
 
-        Real evolution_time(20.0);
+        Real evolution_time(20);
 
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
         ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
@@ -129,12 +129,12 @@ void LALO20() {
                                       x7_0 - eps <= x7 <= x7_0 + eps
                                      });
 
-        Real evolution_time(20.0);
+        Real evolution_time(20);
 
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
         ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
@@ -183,12 +183,12 @@ void LALO20() {
                                       x7_0 - eps <= x7 <= x7_0 + eps
                                      });
 
-        Real evolution_time(20.0);
+        Real evolution_time(20);
 
         Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
         ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
@@ -200,7 +200,8 @@ void LALO20() {
             }
         }
 
-        auto x4_width = orbit.final().bounding_box()[x4].width();
+        auto final_bounds = orbit.final().bounding_box();
+        auto x4_width = final_bounds[x4].width();
 
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);

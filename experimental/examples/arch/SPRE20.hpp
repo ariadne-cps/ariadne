@@ -134,7 +134,7 @@ void SPRE20()
     Stopwatch<Milliseconds> sw;
 
     ARIADNE_LOG_PRINTLN("Computing orbit...");
-    HybridTime evolution_time(200.0,3);
+    HybridTime evolution_time(200,3);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
     StringVariable spacecraft("spacecraft");
@@ -145,12 +145,13 @@ void SPRE20()
     ARIADNE_LOG_PRINTLN("Checking properties...");
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
-        if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
-            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe");
+        auto reach_box = HybridExactBox(reach.location(),reach.state_space(),cast_exact_box(reach.bounding_box().euclidean_set()));
+        if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach_box)))) {
+            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
             ++num_ce;
         }
-        if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach.bounding_box())))) {
-            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe");
+        if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach_box)))) {
+            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
             ++num_ce;
         }
     }

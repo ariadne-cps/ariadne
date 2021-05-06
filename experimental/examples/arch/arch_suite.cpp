@@ -25,7 +25,6 @@
 #include "PRDE20.hpp"
 #include "CVDP20.hpp"
 #include "LALO20.hpp"
-#include "QUAD20.hpp"
 #include "LOVO20.hpp"
 #include "SPRE20.hpp"
 
@@ -37,7 +36,6 @@ Int main(Int argc, const char* argv[])
     PRDE20();
     CVDP20();
     LALO20();
-    QUAD20();
     LOVO20();
     SPRE20();
 }

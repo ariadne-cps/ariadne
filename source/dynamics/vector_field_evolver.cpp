@@ -87,11 +87,7 @@ auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
-
-    WorkloadType workload(
-            [=,this](WorkloadType::Access& w, TimedEnclosureType te, TimeType const& t, Semantics s, SharedPointer<SynchronisedOrbit> r)
-            { this->_process_timed_enclosure(w,te,t,s,r);}, time, semantics, result);
-
+    WorkloadType workload(std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
     _append_initial_set(workload,TimeStepType(0u),initial_set);
     workload.process();
 

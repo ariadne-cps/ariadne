@@ -29,27 +29,35 @@
 #ifndef ARIADNE_STOPWATCH_HPP
 #define ARIADNE_STOPWATCH_HPP
 
-#include <sys/times.h>
-#include <sys/resource.h>
-#include <unistd.h>
+#include <chrono>
+#include "typedefs.hpp"
 
 namespace Ariadne {
 
-using TimeUnit = double;
+using Seconds = std::chrono::seconds;
+using Milliseconds = std::chrono::milliseconds;
+using Microseconds = std::chrono::microseconds;
 
-static const clock_t Hz = static_cast<clock_t>(sysconf(_SC_CLK_TCK));
-
-class StopWatch {
+template<class D> class Stopwatch {
 public:
-    StopWatch() { reset(); }
+    using ResolutionType = std::chrono::high_resolution_clock;
+    using TimePointType = std::chrono::time_point<ResolutionType>;
 
-    TimeUnit elapsed() const { return TimeUnit(_clicked_time.tms_utime - _start_time.tms_utime)/TimeUnit(Hz); }
-    void reset() { times(&_start_time); _clicked_time = _start_time; }
-    void click() { times(&_clicked_time); }
+    Stopwatch() { restart(); }
+
+    //! \brief Get the duration in the given type
+    D duration() const { return std::chrono::duration_cast<D>(_clicked-_initial); }
+    //! \brief Get the duration in seconds, in double precision
+    Double elapsed_seconds() const { return std::chrono::duration_cast<std::chrono::duration<Double>>(duration()).count(); }
+
+    //! \brief Restart the watch time to zero
+    Stopwatch& restart() { _initial = ResolutionType::now(); _clicked = _initial; return *this; }
+    //! \brief Save the current time
+    Stopwatch& click() { _clicked = ResolutionType::now(); return *this; }
 
 private:
-    tms _start_time;
-    tms _clicked_time;
+    TimePointType _initial;
+    TimePointType _clicked;
 };
 
 } // namespace Ariadne

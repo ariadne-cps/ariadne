@@ -129,7 +129,6 @@ Void export_evolver(pybind11::module& module, const char* name)
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const RealExpressionBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("configuration",(ConfigurationType&(Evolver::*)())&Evolver::configuration,reference_internal);
-    evolver_class.def("__str__",&__cstr__<Evolver>);
 }
 
 Void export_vector_field_evolver_configuration(pybind11::module& module) {

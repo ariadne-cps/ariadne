@@ -47,64 +47,60 @@ namespace Ariadne {
 //!          A workload object has a lifetime of multiple processings, if necessary.
 template<class E, class... AS>
 class Workload {
-public:
-    //! \brief Interface for appending elements while processing the workload in the function
-    class Appender {
+  public:
+    //! \brief Reduced interface to be used by the processing function (and any function called by it)
+    class Access {
         friend Workload;
     protected:
-        Appender(Workload& parent) : _load(parent) { }
+        Access(Workload& parent) : _load(parent) { }
     public:
         Void append(E const &e) { _load._enqueue(e); }
+        WorkloadAdvancement const& advancement() const { return _load._advancement; }
     private:
         Workload& _load;
     };
-public:
-    using FunctionType = std::function<Void(Workload<E,AS...>::Appender&, E, AS...)>;
-    using BoundFunctionType = std::function<Void(E)>;
+  public:
+    using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E const&, AS...)>;
+    using PartiallyBoundFunctionType = std::function<Void(E const&)>;
+    using CompletelyBoundFunctionType = VoidFunction;
 
     Workload(FunctionType f, AS... as) :
-            _appender(Appender(*this)),
+            _access(Access(*this)),
             _f(std::bind(
                 std::forward<FunctionType const>(f),
-                std::forward<Workload<E,AS...>::Appender const&>(_appender),
+                std::forward<Workload<E,AS...>::Access const&>(_access),
                 std::placeholders::_1,
                 std::forward<AS>(as)...)),
+            _logger_level(0),
             _advancement(0) { }
 
     //! \brief Process the given elements until completion
     Void process() {
-        ARIADNE_PRECONDITION(not _elements.empty());
+        _logger_level = Logger::instance().current_level();
+        ARIADNE_PRECONDITION(not _tasks.empty());
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
-            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _elements.empty(); });
+            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _tasks.empty() or _exception != nullptr; });
+            if (_exception != nullptr) throw _exception;
             if (_advancement.has_finished()) return;
 
-            auto e = _elements.back();
-            _elements.pop_back();
+            auto task = _tasks.back();
+            _tasks.pop_back();
             if (_using_concurrency()) {
-                TaskManager::instance().enqueue([this, e] {
-                    _advancement.add_to_processing();
-                    (*e)();
-                    _advancement.add_to_completed();
-                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
-                });
+                TaskManager::instance().enqueue([this, task] { _concurrent_task_wrapper(task); });
             } else {
-                _advancement.add_to_processing();
-                (*e)();
-                _advancement.add_to_completed();
+                _advancement.add_to_processing(); task(); _advancement.add_to_completed();
             }
         }
     }
 
-    //! \brief The size of the workload, i.e., the number of elements to process
-    SizeType size() const { return _elements.size(); }
+    //! \brief The size of the workload, i.e., the number of tasks to process
+    SizeType size() const { return _tasks.size(); }
 
     //! \brief Append one element to process
     Void append(E const& e) {
         _advancement.add_to_waiting();
-        _elements.push_back(std::make_shared<PackagedTask<Void()>>(std::bind(
-                std::forward<BoundFunctionType const>(_f),
-                std::forward<E const&>(e))));
+        _tasks.push_back(std::bind(std::forward<PartiallyBoundFunctionType const>(_f), std::forward<E const&>(e)));
     }
 
     //! \brief Append a list of elements to process
@@ -114,17 +110,30 @@ public:
 
     Bool _using_concurrency() const { return TaskManager::instance().concurrency() > 0; }
 
+    Void _concurrent_task_wrapper(CompletelyBoundFunctionType const& task) {
+        _advancement.add_to_processing();
+        try {
+            Logger::instance().set_level(_logger_level);
+            task();
+        } catch (...) {
+            {
+                LockGuard<Mutex> exc_lock(_exception_mutex);
+                _exception = std::current_exception();
+            }
+            _element_availability_condition.notify_one();
+        }
+
+        _advancement.add_to_completed();
+        if (_advancement.has_finished()) _element_availability_condition.notify_one();
+    }
+
     Void _enqueue(E const& e) {
         if (_using_concurrency()) {
             _advancement.add_to_waiting();
-            TaskManager::instance().enqueue([=,this](E const& e){
-                    _advancement.add_to_processing();
-                    _f(e);
-                    _advancement.add_to_completed();
-                    if (_advancement.has_finished()) _element_availability_condition.notify_one();
-                }, e);
+            auto task = std::bind(std::forward<PartiallyBoundFunctionType const>(_f), std::forward<E const&>(e));
+            TaskManager::instance().enqueue([this,task]{ _concurrent_task_wrapper(task); });
         } else {
-            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _elements
+            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _tasks respectively
             {
                 LockGuard<Mutex> lock(_element_appending_mutex);
                 append(e);
@@ -134,15 +143,19 @@ public:
     }
 
   private:
-    List<SharedPointer<PackagedTask<Void()>>> _elements; // Used for initial consumption and for consumption when using no concurrency
-    Appender const _appender;
-    BoundFunctionType const _f;
+    List<CompletelyBoundFunctionType> _tasks; // Used for initial consumption and for consumption when using no concurrency
+    Access const _access;
+    PartiallyBoundFunctionType const _f;
 
+    Nat _logger_level; // The logger level to impose to the running threads
     WorkloadAdvancement _advancement;
 
     Mutex _element_appending_mutex;
     Mutex _element_availability_mutex;
+    Mutex _exception_mutex;
     ConditionVariable _element_availability_condition;
+
+    ExceptionPtr _exception;
 };
 
 }

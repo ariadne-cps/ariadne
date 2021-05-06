@@ -34,6 +34,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <mutex>
 
 #include "numeric/numeric.hpp"
 #include "output/graphics_interface.hpp"
@@ -42,6 +43,7 @@
 #include "geometry/curve.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/storage.hpp"
+#include "concurrency/concurrency_typedefs.hpp"
 
 namespace Ariadne {
 
@@ -167,13 +169,13 @@ class Orbit<LabelledEnclosure>
     typedef ESL EnclosureListType;
 
     Orbit(const ES& set) : _initial(set) { }
-    Void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }
-    Void adjoin_intermediate(const EnclosureType& set) { this->_intermediate.adjoin(set); }
-    Void adjoin_final(const EnclosureType& set) { this->_final.adjoin(set); }
+    virtual Void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }
+    virtual Void adjoin_intermediate(const EnclosureType& set) { this->_intermediate.adjoin(set); }
+    virtual Void adjoin_final(const EnclosureType& set) { this->_final.adjoin(set); }
 
-    Void adjoin_reach(const EnclosureListType& set) { this->_reach.adjoin(set); }
-    Void adjoin_intermediate(const EnclosureListType& set) { this->_intermediate.adjoin(set); }
-    Void adjoin_final(const EnclosureListType& set) { this->_final.adjoin(set); }
+    virtual Void adjoin_reach(const EnclosureListType& set) { this->_reach.adjoin(set); }
+    virtual Void adjoin_intermediate(const EnclosureListType& set) { this->_intermediate.adjoin(set); }
+    virtual Void adjoin_final(const EnclosureListType& set) { this->_final.adjoin(set); }
 
     EnclosureType const& initial() const { return this->_initial; }
     EnclosureListType const& reach() const { return this->_reach; }

@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_array
     test_container
     test_lru_cache
+    test_stopwatch
     test_stack_trace
 )
 

@@ -41,7 +41,9 @@
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "solvers/integrator_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "dynamics/evolver_interface.hpp"
+
+#include "concurrency/workload.hpp"
 
 #include "output/logging.hpp"
 
@@ -58,19 +60,32 @@ class RealExpressionBoundedConstraintSet;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
+    : public EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType>
 {
   public:
+    typedef EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType> Interface;
     typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField SystemType;
+    typedef IntegratorInterface IntegratorType;
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
     typedef LabelledEnclosure EnclosureType;
-    typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
-    typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
+    typedef Pair<TimeStepType,EnclosureType> TimedEnclosureType;
+    typedef Orbit<EnclosureType> OrbitType;
     typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
+  private:
+    //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
+    struct SynchronisedOrbit : public OrbitType {
+        SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
+        Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
+        Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
+        Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+      private:
+        Mutex _mux;
+    };
+    typedef Workload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -80,7 +95,7 @@ class VectorFieldEvolver
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
     //! \brief Get the internal system.
-    virtual const SystemType& system() const { return *_sys_ptr; }
+    virtual const SystemType& system() const { return *_system; }
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
@@ -99,42 +114,26 @@ class VectorFieldEvolver
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    OrbitType orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
-    OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
-    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics=Semantics::UPPER) const;
+    OrbitType orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const;
+    OrbitType orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const;
 
-    using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
-    using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
-
-    //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,false);
-        return final; }
-
-    //! \brief Compute an approximation to the reachable set under upper semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
-        return reachable; }
     //!@}
 
   protected:
-    virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, Bool reach) const;
 
-    virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                 const TimedEnclosureType& current_set, const TimeType& time,
-                                 Semantics semantics, Bool reach) const;
+    Void _process_timed_enclosure(WorkloadType::Access& workload, TimedEnclosureType const& current_timed_set,
+                                  TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
 
-    virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
+    Void _process_timed_enclosure_step(WorkloadType::Access& workload, TimedEnclosureType const& current_timed_set,
+                                       TimeType const& maximum_time, Semantics semantics, SharedPointer<SynchronisedOrbit> result) const;
+
+    Void _append_initial_set(WorkloadType& workload, TimeStepType const& initial_time, EnclosureType const& current_set) const;
 
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    std::shared_ptr< IntegratorInterface > _integrator;
-    std::shared_ptr< ConfigurationType > _configuration;
+    SharedPointer<SystemType> _system;
+    SharedPointer<IntegratorType> _integrator;
+    SharedPointer<ConfigurationType> _configuration;
 };
 
 
@@ -148,7 +147,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
 
-    virtual ~VectorFieldEvolverConfiguration() = default;
+    ~VectorFieldEvolverConfiguration() override = default;
 
   private:
 
@@ -167,7 +166,8 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Enable reconditioning of basic sets.
     Bool _enable_reconditioning;
 
-    //! \brief Enable subdivisions of basic sets initially (both semantics), or along evolution for upper semantics.
+    //! \brief Enable subdivisions of basic sets along evolution for upper semantics.
+    //! \details Subdivisions are always allowed on the initial set.
     Bool _enable_subdivisions;
 
   public:
@@ -189,7 +189,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual OutputStream& _write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const override;
 };
 
 } // namespace Ariadne

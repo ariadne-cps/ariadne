@@ -77,7 +77,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -97,11 +97,11 @@ void LALO20() {
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W001");
         if (ce==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(x4_width.get_d());
         instance.write();
 
         reach1.adjoin(orbit.reach());
@@ -131,7 +131,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -151,11 +151,11 @@ void LALO20() {
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W005");
         if (ce==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(x4_width.get_d());
         instance.write();
 
         reach2.adjoin(orbit.reach());
@@ -185,7 +185,7 @@ void LALO20() {
 
         Real evolution_time(20.0);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
         ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -205,11 +205,11 @@ void LALO20() {
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("W01");
         if (ce==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(x4_width.get_d());
         instance.write();
 
         reach3.adjoin(orbit.reach());

@@ -32,6 +32,7 @@
 #include <queue>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
+#include "output/logging.hpp"
 #include "thread.hpp"
 
 namespace Ariadne {
@@ -103,7 +104,7 @@ auto ThreadPool::enqueue(F &&f, AS &&... args) -> Future<ResultOf<F(AS...)>> {
     {
         UniqueLock<Mutex> lock(_task_availability_mutex);
         if (_finish_all_and_stop) throw StoppedThreadPoolException();
-        _tasks.emplace([task]() { (*task)(); });
+        _tasks.emplace([task]{ (*task)(); });
     }
     _task_availability_condition.notify_one();
     return result;

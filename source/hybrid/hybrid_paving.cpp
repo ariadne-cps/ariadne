@@ -266,7 +266,7 @@ Void HybridGridTreePaving::draw(CanvasInterface& canvas, const Set<DiscreteLocat
     for(LocationsConstIterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
-            Projection2d projection(space.dimension(),space.index(axis_variables.x_variable()),space.index(axis_variables.y_variable()));
+            Projection2d projection(space.dimension(),space.index(axis_variables.x()),space.index(axis_variables.y()));
             loc_iter->second.draw(canvas,projection);
         }
     }

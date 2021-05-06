@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include "config.hpp"
 #include "concurrency/thread.hpp"
 #include "concurrency/buffered_thread.hpp"
@@ -52,27 +54,27 @@ class TestLogging {
         Logger::instance().configuration().set_prints_level_on_change_only(false);
     }
 
-    Int test() {
-        ARIADNE_TEST_CALL(test_get_verbosity());
-        ARIADNE_TEST_CALL(test_print_configuration());
-        ARIADNE_TEST_CALL(test_shown_single_print());
-        ARIADNE_TEST_CALL(test_hidden_single_print());
-        ARIADNE_TEST_CALL(test_use_blocking_scheduler());
-        ARIADNE_TEST_CALL(test_use_nonblocking_scheduler());
-        ARIADNE_TEST_CALL(test_shown_call_function_with_entrance_and_exit());
-        ARIADNE_TEST_CALL(test_hide_call_function_with_entrance_and_exit());
-        ARIADNE_TEST_CALL(test_indents_based_on_level());
-        ARIADNE_TEST_CALL(test_hold_line());
-        ARIADNE_TEST_CALL(test_light_theme());
-        ARIADNE_TEST_CALL(test_dark_theme());
-        ARIADNE_TEST_CALL(test_theme_custom_keyword());
-        ARIADNE_TEST_CALL(test_theme_bgcolor_bold_underline());
-        ARIADNE_TEST_CALL(test_handles_multiline_output());
-        ARIADNE_TEST_CALL(test_discards_newlines_and_indentation());
-        ARIADNE_TEST_CALL(test_redirect());
-        ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler());
-        ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler());
-        return 0;
+    Void test() {
+        ARIADNE_TEST_CALL(test_get_verbosity())
+        ARIADNE_TEST_CALL(test_print_configuration())
+        ARIADNE_TEST_CALL(test_shown_single_print())
+        ARIADNE_TEST_CALL(test_hidden_single_print())
+        ARIADNE_TEST_CALL(test_use_blocking_scheduler())
+        ARIADNE_TEST_CALL(test_use_nonblocking_scheduler())
+        ARIADNE_TEST_CALL(test_shown_call_function_with_entrance_and_exit())
+        ARIADNE_TEST_CALL(test_hide_call_function_with_entrance_and_exit())
+        ARIADNE_TEST_CALL(test_indents_based_on_level())
+        ARIADNE_TEST_CALL(test_hold_line())
+        ARIADNE_TEST_CALL(test_hold_long_line())
+        ARIADNE_TEST_CALL(test_light_theme())
+        ARIADNE_TEST_CALL(test_dark_theme())
+        ARIADNE_TEST_CALL(test_theme_custom_keyword())
+        ARIADNE_TEST_CALL(test_theme_bgcolor_bold_underline())
+        ARIADNE_TEST_CALL(test_handles_multiline_output())
+        ARIADNE_TEST_CALL(test_discards_newlines_and_indentation())
+        ARIADNE_TEST_CALL(test_redirect())
+        ARIADNE_TEST_CALL(test_multiple_threads_with_blocking_scheduler())
+        ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler())
     }
 
     void test_get_verbosity() {
@@ -167,7 +169,7 @@ class TestLogging {
         ARIADNE_LOG_PRINTLN("This text should be in two lines\n          where the second one starts several whitespaces in.");
     }
 
-    Void _hold() {
+    Void _hold_short_line() {
         ARIADNE_LOG_SCOPE_CREATE;
         ProgressIndicator indicator(10.0);
         for (unsigned int i=0; i<10; ++i) {
@@ -179,11 +181,34 @@ class TestLogging {
 
     Void test_hold_line() {
         Logger::instance().use_immediate_scheduler();
-        _hold();
+        _hold_short_line();
         Logger::instance().use_blocking_scheduler();
-        _hold();
+        _hold_short_line();
         Logger::instance().use_nonblocking_scheduler();
-        _hold();
+        _hold_short_line();
+    }
+
+    Void test_hold_long_line() {
+        Logger::instance().use_immediate_scheduler();
+        ARIADNE_LOG_SCOPE_CREATE;
+
+        const unsigned int DEFAULT_COLUMNS = 80;
+        struct winsize ws;
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+        SizeType num_cols = (ws.ws_col > 0 ? ws.ws_col : DEFAULT_COLUMNS);
+
+        std::string exactly_str(num_cols-4,'x'); // exactly the length required to fill the columns (given a prefix of 4 chars)
+        std::string larger_str(num_cols,'x'); // larger enough
+
+        for (unsigned int i=0; i<10; ++i) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            ARIADNE_LOG_SCOPE_PRINTHOLD(exactly_str);
+        }
+
+        for (unsigned int i=0; i<10; ++i) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            ARIADNE_LOG_SCOPE_PRINTHOLD(larger_str);
+        }
     }
 
     Void test_light_theme() {

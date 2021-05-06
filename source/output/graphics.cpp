@@ -45,23 +45,10 @@ namespace Ariadne {
 static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
-OutputStream& operator<<(OutputStream& os, const Drawable2dInterface& drawable) {
-    if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
-        os << *writable;
-    } else {
-        os << "Drawable";
-    }
-    return os;
-}
-
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
-Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : Colour("",rd,gr,bl,op) { }
-Colour::Colour(const Char* nm, Dbl rd, Dbl gr, Dbl bl, Bool tr)
-    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(const char* nm, Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
 OutputStream& operator<<(OutputStream& os, const Colour& c) {
@@ -94,13 +81,12 @@ GraphicsProperties& GraphicsProperties::set_fill_opacity(Dbl fo) { this->fill_co
 GraphicsProperties& GraphicsProperties::set_fill_colour(Colour fc) { this->fill_colour=fc; return *this; }
 GraphicsProperties& GraphicsProperties::set_fill_colour(Dbl r, Dbl g, Dbl b) {
     this->set_fill_colour(Colour(r,g,b,this->fill_colour.opacity)); return *this; }
-GraphicsProperties& GraphicsProperties::set_3d(Bool dim) { this->is_3d = true; return *this; }
 GraphicsProperties& GraphicsProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
     return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
         << ", line_style=" << gp.line_style<<", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
-        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ")"; }
+        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << "is_animated" << gp.is_animated << ")"; }
 
 Variables2d::Variables2d(const RealVariable& x, const RealVariable& y) : _x(x.name()), _y(y.name()) { }
 
@@ -110,21 +96,11 @@ RealVariable Variables2d::x() const { return RealVariable(_x); }
 
 RealVariable Variables2d::y() const { return RealVariable(_y); }
 
-RealVariable Variables2d::x_variable() const { return RealVariable(_x); }
-
-RealVariable Variables2d::y_variable() const { return RealVariable(_y); }
-
 RealVariable Variables3d::x() const { return RealVariable(_x); }
 
 RealVariable Variables3d::y() const { return RealVariable(_y); }
 
 RealVariable Variables3d::z() const { return RealVariable(_z); }
-
-RealVariable Variables3d::x_variable() const { return RealVariable(_x); }
-
-RealVariable Variables3d::y_variable() const { return RealVariable(_y); }
-
-RealVariable Variables3d::z_variable() const { return RealVariable(_z); }
 
 Axes2d::Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y)
         : variables(x.variable(),y.variable()), bounds() {
@@ -153,13 +129,13 @@ Axes3d::Axes3d(ApproximateDouble xl, const RealVariable x, ApproximateDouble xu,
 }
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
-    return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
+    return ( (variables.x().name()==TimeVariable().name()) || space.contains(variables.x()) ) && space.contains(variables.y());
 }
 
 Projection2d projection(const RealSpace& space, const Variables2d& variables) {
     ARIADNE_ASSERT(valid_axis_variables(space,variables));
-    Nat x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
-    Nat y_index = space.index(variables.y_variable());
+    Nat x_index = (variables.x()==TimeVariable() && !space.contains(variables.x())) ? space.dimension() : space.index(variables.x());
+    Nat y_index = space.index(variables.y());
     return Projection2d(space.dimension(),x_index,y_index);
 }
 
@@ -232,11 +208,13 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj)
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
     : Figure(bbx,Projection2d(bbx.dimension(),ix,iy))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy)
     : Figure(bbx,Projection2d(bbx.dimension(),ixy.first,ixy.second))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
 }
 
 Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection3d& proj)
@@ -248,6 +226,7 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const Projection3d& proj)
 Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy, DimensionType iz)
     : Figure(bbx, Projection3d(bbx.dimension(), ix, iy, iz))
 {
+    ARIADNE_ASSERT_MSG(bbx.dimension()>=3,"The bounding box must be at least 3-dimensional.");
 }
 
 Figure& Figure::draw(const Drawable2dInterface& shape)
@@ -264,21 +243,25 @@ Figure& Figure::draw(const Drawable2d3dInterface& shape)
 
 Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy)
 {
+    ARIADNE_ASSERT_MSG(as==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection=Projection2d(as,ix,iy); return *this;
 }
 
 Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy, DimensionType iz)
 {
+    ARIADNE_ASSERT_MSG(as==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection3d=Projection3d(as, ix,iy,iz); return *this;
 }
 
 Figure& Figure::set_projection_map(const Projection2d& p)
 {
+    ARIADNE_ASSERT_MSG(p.argument_size()==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection=p; return *this;
 }
 
 Figure& Figure::set_projection_map(const Projection3d& p)
 {
+    ARIADNE_ASSERT_MSG(p.argument_size()==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
     this->_data->projection3d=p; return *this;
 }
 
@@ -497,8 +480,7 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
 
         const Drawable2dInterface& shape=object.shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-        ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
-                           "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<this->_data->bounding_box);
+        ARIADNE_ASSERT(dimension==shape.dimension());
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->projection);
     }
@@ -531,13 +513,13 @@ Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) cons
 struct LabelledFigure::Data
 {
     Data(Axes2d axes)
-        : properties(), variables(axes.variables), variables3d(axes.variables.x_variable(),axes.variables.y_variable(), RealVariable(Identifier("z"))), bounds(axes.bounds) { }
+        : properties(), variables(axes.variables), variables3d(axes.variables.x(),axes.variables.y(), RealVariable(Identifier("z"))), bounds(axes.bounds) { }
     Data(const Variables2d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
-        : properties(), variables(vars), variables3d(vars.x_variable(), vars.y_variable(), RealVariable(Identifier("z"))) ,bounds(bnds) { }
+        : properties(), variables(vars), variables3d(vars.x(), vars.y(), RealVariable(Identifier("z"))) ,bounds(bnds) { }
     Data(Axes3d axes)
-        : properties(), variables(axes.variables3d.x_variable(), axes.variables3d.y_variable()) ,variables3d(axes.variables3d), bounds(axes.bounds) { }
+        : properties(), variables(axes.variables3d.x(), axes.variables3d.y()) ,variables3d(axes.variables3d), bounds(axes.bounds) { }
     Data(const Variables3d& vars, const Map<RealVariable,ApproximateDoubleInterval>& bnds)
-        : properties(), variables(vars.x_variable(), vars.y_variable()) ,variables3d(vars), bounds(bnds) { }
+        : properties(), variables(vars.x(), vars.y()) ,variables3d(vars), bounds(bnds) { }
 
     GraphicsProperties properties;
 
@@ -563,18 +545,22 @@ LabelledFigure::LabelledFigure(const Axes3d& axes)
 
 LabelledFigure::LabelledFigure(const Variables2d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
     : _data(new Data(vars,VariablesBox<ApproximateDoubleInterval>(bbx).bounds())) {
+    ARIADNE_ASSERT_MSG(bbx.bounds().size()>=2,"The box must be at least two-dimensional.")
 }
 
-LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bnds)
-    : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bnds).bounds())){
-        this->_data->properties.is_3d = true;
+LabelledFigure::LabelledFigure(const Variables3d& vars, const VariablesBox<ApproximateIntervalType>& bbx)
+    : _data(new Data(vars, VariablesBox<ApproximateDoubleInterval>(bbx).bounds())){
+    this->_data->properties.is_3d = true;
+    ARIADNE_ASSERT_MSG(bbx.bounds().size()>=3,"The box must be at least three-dimensional.")
 }
 
 Void LabelledFigure::set_axes(const Axes2d& axes) {
+    this->_data->properties.is_3d = false;
     _data->bounds=axes.bounds; _data->variables=axes.variables;
 }
 
 Void LabelledFigure::set_axes(const Axes3d& axes) {
+    this->_data->properties.is_3d = true;
     _data->bounds=axes.bounds; _data->variables3d=axes.variables3d;
 }
 
@@ -624,9 +610,9 @@ Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     auto const& bounds = this->_data->bounds;
-    RealVariable const& x=this->_data->variables.x_variable();
-    RealVariable const& y=this->_data->variables.y_variable();
-    RealVariable const& z=this->_data->variables3d.z_variable();
+    RealVariable const& x=this->_data->variables.x();
+    RealVariable const& y=this->_data->variables.y();
+    RealVariable const& z=this->_data->variables3d.z();
 
     String tx=x.name();
     String ty=y.name();
@@ -666,8 +652,8 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     auto const& bounds = this->_data->bounds;
-    RealVariable const& x=this->_data->variables.x_variable();
-    RealVariable const& y=this->_data->variables.y_variable();
+    RealVariable const& x=this->_data->variables.x();
+    RealVariable const& y=this->_data->variables.y();
     
     ARIADNE_ASSERT(x.name()!="" && y.name()!="");
 

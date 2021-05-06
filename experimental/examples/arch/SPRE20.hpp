@@ -131,7 +131,7 @@ void SPRE20()
     evolver.configuration().set_maximum_spacial_error(1e-3);
     evolver.configuration().set_enable_subdivisions(true);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     ARIADNE_LOG_PRINTLN("Computing orbit...");
     HybridTime evolution_time(200.0,3);
@@ -157,7 +157,7 @@ void SPRE20()
     if (num_ce>0) ARIADNE_LOG_PRINTLN("Number of counterexamples: " << num_ce);
 
     sw.click();
-    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
+    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 

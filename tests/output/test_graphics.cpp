@@ -33,13 +33,99 @@
 #include "geometry/curve.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/grid_paving.hpp"
+#include "symbolic/expression_set.hpp"
 
 using namespace Ariadne;
 
 class TestGraphics {
   public:
     void test() {
-        test_default_drawer();
+        ARIADNE_TEST_CALL(test_colour())
+        ARIADNE_TEST_CALL(test_graphics_properties())
+        ARIADNE_TEST_CALL(test_construct_figure())
+        ARIADNE_TEST_CALL(test_figure_projection())
+        ARIADNE_TEST_CALL(test_construct_labelled_figure())
+        ARIADNE_TEST_CALL(test_labelled_figure_projection())
+        ARIADNE_TEST_CALL(test_default_drawer())
+    }
+
+    void test_colour() {
+        ARIADNE_TEST_PRINT(Colour(1,1,1,0))
+        ARIADNE_TEST_PRINT(Colour("white",1,1,1))
+    }
+
+    void test_graphics_properties() {
+        GraphicsProperties p;
+        p.set_line_colour(0,0,1)
+         .set_fill_opacity(0.5)
+         .set_fill_colour(0,1,0);
+        ARIADNE_TEST_PRINT(p)
+    }
+
+    void test_construct_figure() {
+        GraphicsBoundingBoxType bx3({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)},
+                                    {FloatDPApproximation(-1.0,dp),FloatDPApproximation(0.0,dp)},
+                                    {FloatDPApproximation(-2.0,dp),FloatDPApproximation(2.0,dp)}});
+        ARIADNE_TEST_EXECUTE(Figure(bx3,0,1))
+        ARIADNE_TEST_EXECUTE(Figure(bx3,{0,1}))
+        ARIADNE_TEST_EXECUTE(Figure(bx3,0,1,2))
+        ARIADNE_TEST_EXECUTE(Figure(bx3,Projection2d(3,0,1)))
+        ARIADNE_TEST_EXECUTE(Figure(bx3,Projection3d(3,2,1,0)))
+        GraphicsBoundingBoxType bx1({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)}});
+        ARIADNE_TEST_FAIL(Figure(bx1,0,1))
+        ARIADNE_TEST_FAIL(Figure(bx1,{0,1}))
+        ARIADNE_TEST_FAIL(Figure(bx1,0,1,2))
+        ARIADNE_TEST_FAIL(Figure(bx1,Projection2d(2,0,1)))
+        ARIADNE_TEST_FAIL(Figure(bx1,Projection3d(3,2,1,0)))
+        Figure fig(bx3,0,1);
+        ARIADNE_TEST_PRINT(fig.get_bounding_box())
+        auto const& p = fig.properties();
+        ARIADNE_TEST_PRINT(p)
+    }
+
+    void test_figure_projection() {
+        GraphicsBoundingBoxType bx({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)},
+                                    {FloatDPApproximation(-1.0,dp),FloatDPApproximation(0.0,dp)},
+                                    {FloatDPApproximation(-2.0,dp),FloatDPApproximation(2.0,dp)}});
+        Figure f(bx,0,1,2);
+        f.set_projection(3,0,2,1);
+        ARIADNE_TEST_FAIL(f.set_projection(4,0,1))
+        ARIADNE_TEST_FAIL(f.set_projection(4,0,1,2))
+        ARIADNE_TEST_EXECUTE(f.set_projection(3,0,1))
+        ARIADNE_TEST_EXECUTE(f.set_projection(3,0,1,2))
+        ARIADNE_TEST_FAIL(f.set_projection_map(Projection2d(4,0,1)))
+        ARIADNE_TEST_FAIL(f.set_projection_map(Projection3d(4,0,1,2)))
+        ARIADNE_TEST_EXECUTE(f.set_projection_map(Projection2d(3,0,1)))
+        ARIADNE_TEST_EXECUTE(f.set_projection_map(Projection3d(3,2,0,1)))
+        ARIADNE_TEST_PRINT(f.get_2d_projection_map())
+        ARIADNE_TEST_PRINT(f.get_3d_projection_map())
+    }
+
+    void test_construct_labelled_figure() {
+        RealVariable x("x"), y("y"), z("z");
+        GraphicsBoundingBoxType bx1d({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)}});
+        GraphicsBoundingBoxType bx2d({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)},
+                                      {FloatDPApproximation(-1.0,dp),FloatDPApproximation(0.0,dp)}});
+        GraphicsBoundingBoxType bx3d({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)},
+                                    {FloatDPApproximation(-1.0,dp),FloatDPApproximation(0.0,dp)},
+                                    {FloatDPApproximation(-2.0,dp),FloatDPApproximation(2.0,dp)}});
+        ARIADNE_TEST_FAIL(LabelledFigure(Variables2d({x,y}),VariablesBox<ApproximateIntervalType>(RealSpace({x}),bx1d)))
+        ARIADNE_TEST_EXECUTE(LabelledFigure(Variables2d({x,y}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y}),bx2d)))
+        ARIADNE_TEST_FAIL(LabelledFigure(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y}),bx2d)))
+        ARIADNE_TEST_EXECUTE(LabelledFigure(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y,z}),bx3d)))
+        LabelledFigure f(Variables3d({x,y,z}),VariablesBox<ApproximateIntervalType>(RealSpace({x,y,z}),bx3d));
+        auto const& p = f.properties();
+        ARIADNE_TEST_PRINT(p)
+    }
+
+    void test_labelled_figure_projection() {
+        RealVariable x("x"), y("y"), z("z");
+        LabelledFigure f(Axes2d({0<=x<=1,-1<=y<=2}));
+        ARIADNE_TEST_EXECUTE(f.set_axes(Axes2d({0<=z<=1,-1<=y<=2})))
+        ARIADNE_TEST_EXECUTE(f.set_axes(Axes3d({0<=z<=1,-1<=y<=2,0<=x<=2})))
+        ARIADNE_TEST_EXECUTE(f.set_bounds(x,ApproximateDoubleInterval(1.0,2.0)))
+        ARIADNE_TEST_EXECUTE(f.set_bounds({{x,ApproximateDoubleInterval(1.0,2.0)},{y,ApproximateDoubleInterval(0.0,1.0)}}))
+        ARIADNE_TEST_EXECUTE(f.set_bounding_box(VariablesBox<ApproximateIntervalType>(RealSpace({x}),GraphicsBoundingBoxType({{FloatDPApproximation(0.0,dp),FloatDPApproximation(1.0,dp)}}))))
     }
 
     void test_default_drawer()
@@ -92,14 +178,14 @@ class TestGraphics {
 
         ExactBoxType bx2d(2); bx2d[0]=ExactIntervalType(0.2_pr,0.4_pr); bx2d[1]=ExactIntervalType(0.2_pr,0.5_pr);
         ExactBoxType bx3d(3); bx3d[0]=ExactIntervalType(0.2_pr,0.4_pr); bx3d[1]=ExactIntervalType(0.2_pr,0.5_pr); bx3d[2]=ExactIntervalType(0.2_pr,0.7_pr);
-        g.set_projection(3,0,1);
         g.set_bounding_box(bx3d.bounding_box());
+        g.set_projection(3,0,1);
         g.draw(bx3d);
         g.write("test_graphics-bx3");
         g.clear();
 
-        g.set_projection_map(Projection2d(2,0,1));
         g.set_bounding_box(bbx1);
+        g.set_projection_map(Projection2d(2,0,1));
 
         g << fill_colour(0.0,0.5,0.5)
           << s1;

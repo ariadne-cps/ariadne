@@ -60,7 +60,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
     evolver.configuration().approximations(approximations);
     evolver.configuration().maximum_step_size(step);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();
@@ -71,7 +71,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
         partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper_bound());
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
-    ARIADNE_LOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s");
+    ARIADNE_LOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
 
     if (draw) {
         ARIADNE_LOG_PRINTLN("Plotting...");

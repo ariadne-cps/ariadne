@@ -28,31 +28,40 @@
 
 using namespace Ariadne;
 
-class TestBufferedThread {
+using namespace std::chrono_literals;
+
+class TestThread {
   public:
 
     void test_create() const {
         Thread thread1([]{}, "thr");
-        ARIADNE_TEST_EXECUTE(thread1.id());
-        ARIADNE_TEST_EQUALS(thread1.name(),"thr");
+        ARIADNE_TEST_EXECUTE(thread1.id())
+        ARIADNE_TEST_EQUALS(thread1.name(),"thr")
         Thread thread2([]{});
-        ARIADNE_TEST_EQUALS(to_string(thread2.id()),thread2.name());
+        ARIADNE_TEST_EQUALS(to_string(thread2.id()),thread2.name())
     }
 
     void test_destroy_before_completion() const {
-        Thread thread([] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        Thread thread([] { std::this_thread::sleep_for(100ms); });
     }
 
-    void test_task_capture() const {
+    void test_task() const {
         int a = 0;
         Thread thread([&a] { a++; });
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ARIADNE_TEST_EQUALS(a,1);
+        std::this_thread::sleep_for(10ms);
+        ARIADNE_TEST_EQUALS(a,1)
+        ARIADNE_TEST_ASSERT(thread.exception() == nullptr)
+    }
+
+    void test_exception() const {
+        Thread thread([] { throw new std::exception(); });
+        std::this_thread::sleep_for(10ms);
+        ARIADNE_TEST_ASSERT(thread.exception() != nullptr)
     }
 
     void test_atomic_multiple_threads() const {
         SizeType n_threads = 10*std::thread::hardware_concurrency();
-        ARIADNE_TEST_PRINT(n_threads);
+        ARIADNE_TEST_PRINT(n_threads)
         List<SharedPointer<Thread>> threads;
 
         std::atomic<SizeType> a = 0;
@@ -60,21 +69,22 @@ class TestBufferedThread {
             threads.append(std::make_shared<Thread>([&a] { a++; }));
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ARIADNE_TEST_EQUALS(a,n_threads);
+        std::this_thread::sleep_for(100ms);
+        ARIADNE_TEST_EQUALS(a,n_threads)
         threads.clear();
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_create());
-        ARIADNE_TEST_CALL(test_destroy_before_completion());
-        ARIADNE_TEST_CALL(test_task_capture());
-        ARIADNE_TEST_CALL(test_atomic_multiple_threads());
+        ARIADNE_TEST_CALL(test_create())
+        ARIADNE_TEST_CALL(test_destroy_before_completion())
+        ARIADNE_TEST_CALL(test_task())
+        ARIADNE_TEST_CALL(test_exception())
+        ARIADNE_TEST_CALL(test_atomic_multiple_threads())
     }
 
 };
 
 int main() {
-    TestBufferedThread().test();
+    TestThread().test();
     return ARIADNE_TEST_FAILURES;
 }

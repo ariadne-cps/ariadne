@@ -78,15 +78,15 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.1 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-        auto instance = benchmark.create_instance("delta01").set_verified(1).set_execution_time(sw.elapsed());
+        auto instance = benchmark.create_instance("delta01").set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 
@@ -98,7 +98,7 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.4 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
@@ -123,11 +123,11 @@ void QUAD20()
             }
         }
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("delta04");
         if (num_failures==0)
-            instance.set_verified(1).set_execution_time(sw.elapsed());
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 
@@ -139,15 +139,15 @@ void QUAD20()
                  -eps <= x6 <= eps,
                  x6 == 0, x7 == 0, x8 == 0, x9 == 0, x10 == 0, x11 == 0, t == 0});
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.8 ... ");
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
         sw.click();
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-        auto instance = benchmark.create_instance("delta08").set_verified(0).set_execution_time(sw.elapsed());
+        auto instance = benchmark.create_instance("delta08").set_verified(0).set_execution_time(sw.elapsed_seconds());
         instance.write();
     }
 

@@ -59,7 +59,7 @@ FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_functio
 
 
 IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
-    : _sys_ptr(system.clone())
+    : _system(system.clone())
     , _configuration(new ConfigurationType())
 {
 }
@@ -68,28 +68,8 @@ typename IteratedMapEvolver::FunctionFactoryType const IteratedMapEvolver::funct
     return ValidatedFunctionModelDPFactory(make_taylor_function_factory());
 }
 
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box) const {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealBox& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
-}
-
 typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box) const {
     return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box) const {
-    return EnclosureType(box,this->system().state_space(), EnclosureConfiguration(this->function_factory()));
-}
-
-typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const RealVariablesBox& box, const EnclosureConfiguration& config) const {
-    return EnclosureType(box,this->system().state_space(), config);
 }
 
 Orbit<IteratedMapEvolver::EnclosureType>
@@ -112,7 +92,7 @@ orbit(const EnclosureType& initial_set,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     initial_set,termination,semantics,false);
+                     initial_set,termination,semantics);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -127,8 +107,7 @@ _evolution(EnclosureListType& final_sets,
            EnclosureListType& intermediate_sets,
            const EnclosureType& initial_set,
            const TerminationType& maximum_time,
-           Semantics semantics,
-           Bool reach) const
+           Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -164,7 +143,7 @@ _evolution(EnclosureListType& final_sets,
             ARIADNE_WARN("Terminating lower evolution at time " << initial_time << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {
             // Compute evolution
-            this->_evolution_step(working_sets,final_sets,reach_sets,intermediate_sets,current_set,maximum_time,semantics,reach);
+            this->_evolution_step(working_sets,final_sets,reach_sets,intermediate_sets,current_set,maximum_time,semantics);
         }
     }
 
@@ -178,8 +157,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& intermediate_sets,
                 const TimedEnclosureType& current_set,
                 const TimeType& maximum_time,
-                Semantics semantics,
-                Bool reach) const
+                Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -199,7 +177,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Compute the map model
     EnclosureType& final_enclosure=initial_enclosure;
-    final_enclosure.apply_discrete_time_map_step(_sys_ptr->function());
+    final_enclosure.apply_discrete_time_map_step(_system->function());
     TimeType final_time=initial_time+1;
     ARIADNE_LOG_PRINTLN("final_enclosure = "<<final_enclosure);
 

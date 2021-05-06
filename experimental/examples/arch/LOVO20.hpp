@@ -71,7 +71,7 @@ void LOVO20()
     HybridSet initial_set(lotkavolterra|outside,{ic[0]-e<=x<=ic[0]+e,y==ic[1],cnt==0});
     HybridTime evolution_time(3.64_dec,3u);
 
-    StopWatch sw;
+    Stopwatch<Milliseconds> sw;
 
     ARIADNE_LOG_PRINTLN("Computing evolution... ");
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
@@ -100,14 +100,14 @@ void LOVO20()
                         final_bounds[cnt].upper_bound() << " time units: " << ((definitely(final_bounds[cnt] <= 0.2_dec)) ?
                         "constraint satisfied." : "constraint not satisfied!"));
 
-    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
+    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
     ARIADNE_LOG_PRINTLN("# of final sets: " << orbit.final().size());
     ARIADNE_LOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width());
 
     auto instance = benchmark.create_instance();
     if (has_any_zero_transitions and has_any_two_transitions and (definitely(final_bounds[cnt] <= 0.2_dec))) {
         instance.set_verified(1)
-                .set_execution_time(sw.elapsed())
+                .set_execution_time(sw.elapsed_seconds())
                 .add_loss((final_bounds[x].width()*final_bounds[y].width()).get_d())
                 .add_loss(final_bounds[cnt].upper_bound().get_d());
     }

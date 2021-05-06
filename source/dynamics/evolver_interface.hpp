@@ -73,52 +73,16 @@ class EvolverInterface
     //! \brief Gets the system associated with the evolver.
     virtual const SystemType& system() const = 0;
 
-    //! \brief Write to an output stream.
-    virtual OutputStream& _write(OutputStream& os) const = 0;
-
   public:
     //!@{
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
-    virtual
-    Orbit<EnclosureType>
-    orbit(const EnclosureType& initial_set,
-          const TerminationType& time,
-          Semantics semantics) const = 0;
-
-    //! \brief Compute an approximation to the evolved set under the given semantics.
-    virtual
-    EnclosureListType
-    evolve(const EnclosureType& initial_set,
-           const TerminationType& time,
-           Semantics semantics) const = 0;
-
-    //! \brief Compute an approximation to the reachable set under the given semantics.
-    virtual
-    EnclosureListType
-    reach(const EnclosureType& initial_set,
-          const TerminationType& time,
-          Semantics semantics) const = 0;
-
-    //! \brief Compute an approximation to the evolved and reachable sets under the given semantics.
-    virtual
-    Pair<EnclosureListType,EnclosureListType>
-    reach_evolve(const EnclosureType& initial_set,
-                 const TerminationType& time,
-                 Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& time, Semantics semantics) const = 0;
 
     //!@}
 
 };
-
-
-template<class SYS, class ES, class TRM> inline
-OutputStream&
-operator<<(OutputStream& os, const EvolverInterface<SYS,ES,TRM>& e) {
-    return e._write(os);
-}
-
 
 //! \brief Factory for evolver interface classes.
 template<class SYS, class ES, class TRM>

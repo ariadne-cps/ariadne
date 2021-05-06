@@ -51,12 +51,12 @@ void CVDP20()
 
         RealVariablesBox initial_set({1.25_dec<=x1<=1.55_dec,2.35_dec<=y1<=2.45_dec,1.25_dec<=x2<=1.55_dec,2.35_dec<=y2<=2.45_dec});
 
-        Real evolution_time(7.0);
+        Real evolution_time(7);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
         ARIADNE_LOG_PRINTLN_AT(1,"Checking properties...");
 
@@ -74,14 +74,15 @@ void CVDP20()
         }
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu1");
-        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
         reach1.adjoin(orbit.reach());
     }
+
     {
         ARIADNE_LOG_PRINTLN_AT(1,"Running for mu=2...");
 
@@ -98,12 +99,12 @@ void CVDP20()
 
         RealVariablesBox initial_set({1.55_dec<=x1<=1.85_dec,2.35_dec<=y1<=2.45_dec,1.55_dec<=x2<=1.85_dec,2.35_dec<=y2<=2.45_dec});
 
-        Real evolution_time(8.0);
+        Real evolution_time(8);
 
-        StopWatch sw;
+        Stopwatch<Milliseconds> sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
         ARIADNE_LOG_PRINTLN_AT(1,"Checking properties...");
 
@@ -121,10 +122,10 @@ void CVDP20()
         }
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu2");
-        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
         reach2.adjoin(orbit.reach());

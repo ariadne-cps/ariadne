@@ -228,7 +228,7 @@ Void profile_dot(Int n, Int nn) {
 
     double m=0,r=0,l=0,u=0;
 
-    StopWatch sw; double t=0;
+    Stopwatch<Milliseconds> sw; double t=0;
 
     double ql=0; double qu=0;
     dot_lu_rat(ql,qu,n,x,y);

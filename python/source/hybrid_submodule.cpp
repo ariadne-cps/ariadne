@@ -426,7 +426,6 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const HybridBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("set_integrator",&Evolver::set_integrator);
     evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
-    evolver_class.def("__repr__",&__cstr__<Evolver>);
 
     typedef typename EV::ConfigurationType Configuration;
     pybind11::class_<Configuration> evolver_configuration_class(module,"GeneralHybridEvolverConfiguration");

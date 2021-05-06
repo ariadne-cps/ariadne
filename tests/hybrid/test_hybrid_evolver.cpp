@@ -608,7 +608,7 @@ TestHybridEvolver::test_affine_flow() const
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(initial_set);
 
     HybridTime evolution_time=HybridTime(1.5_x,2);
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1);
     ARIADNE_TEST_COMPARE(orbit.reach().size(),>=,3);
@@ -649,7 +649,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     RealVariablesBox initial_box({-r<=x<=+r, -r<=y<=+r});
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time=HybridTime(4.0_x,2);
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),4u);
@@ -710,7 +710,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
     evolution_time=HybridTime(1.0_x,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),1u);
@@ -720,7 +720,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
     evolution_time=HybridTime(2.0_x,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
@@ -730,7 +730,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
     evolution_time=HybridTime(4.0_x,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
@@ -740,7 +740,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
     evolution_time=HybridTime(6.0_x,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
@@ -751,7 +751,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
     evolution_time=HybridTime(8.0_x,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);

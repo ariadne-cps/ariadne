@@ -45,18 +45,20 @@ class TestGnuplot
         TestGnuplot(){ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
         ~TestGnuplot(){};
 
+        void test_fixed_precision() {
+            ARIADNE_TEST_CALL(test_point(double_precision));
+            ARIADNE_TEST_CALL(test_interpolateCurve(double_precision));
+        }
+
         template<class PR>
-        void test(PR pr)
+        void test_variable_precision(PR pr)
         {
-            ARIADNE_TEST_CALL(test_point(pr));
-            ARIADNE_TEST_CALL(test_interpolateCurve(pr));
             ARIADNE_TEST_CALL(test_stringAnimation(pr));
             ARIADNE_TEST_CALL(test_gauss3D(pr));
             ARIADNE_TEST_CALL(test_gauss3DProjXY(pr));
             ARIADNE_TEST_CALL(test_gauss3DProjXZ(pr));
             ARIADNE_TEST_CALL(test_gauss3DProjYZ(pr));
             ARIADNE_TEST_CALL(test_gauss3DAnimation(pr));
-            
         }
 
         template< class PR>
@@ -263,7 +265,9 @@ int main(int argc, const char** argv) {
 
     TestGnuplot testGnuplot;
 
-    testGnuplot.test(double_precision);
+    testGnuplot.test_fixed_precision();
+    testGnuplot.test_variable_precision(double_precision);
+    testGnuplot.test_variable_precision(MultiplePrecision(128));
 
     return 0;
 }

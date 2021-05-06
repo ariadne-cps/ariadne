@@ -39,7 +39,7 @@
 #include "dynamics/iterated_map.hpp"
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "dynamics/evolver_interface.hpp"
 
 #include "output/logging.hpp"
 
@@ -54,9 +54,10 @@ class IteratedMapEvolverConfiguration;
 /*! \brief A class for computing the evolution of an iterated map.
  */
 class IteratedMapEvolver
-    : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
+    : public EvolverInterface<IteratedMap,LabelledEnclosure,Integer>
 {
   public:
+    typedef EvolverInterface<IteratedMap,LabelledEnclosure,Integer> Interface;
     typedef IteratedMapEvolverConfiguration ConfigurationType;
     typedef IteratedMap SystemType;
     typedef Integer TimeType;
@@ -75,16 +76,10 @@ class IteratedMapEvolver
     IteratedMapEvolver* clone() const { return new IteratedMapEvolver(*this); }
 
     /* \brief Get the internal system. */
-    virtual const SystemType& system() const { return *_sys_ptr; }
+    virtual const SystemType& system() const { return *_system; }
 
-    //! \brief Make an enclosure from a user set.
-    EnclosureType enclosure(RealBox const&) const;
-    EnclosureType enclosure(RealBox const&, EnclosureConfiguration const&) const;
-    EnclosureType enclosure(RealVariablesBox const&) const;
-    EnclosureType enclosure(RealVariablesBox const&, EnclosureConfiguration const&) const;
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
-    EnclosureType enclosure(ExactBoxType const&, EnclosureConfiguration const&) const;
 
     //!@{
     //! \name Configuration for the class.
@@ -98,26 +93,25 @@ class IteratedMapEvolver
 
     //!@}
 
-
     //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-    Orbit<EnclosureType> orbit(const RealExpressionBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const;
+    Orbit<EnclosureType> orbit(const RealExpressionBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics) const;
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TerminationType& termination,
-                            Semantics semantics, Bool reach) const;
+                            Semantics semantics) const;
 
     virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TerminationType& termination,
-                                 Semantics semantics, Bool reach) const;
+                                 Semantics semantics) const;
 
   private:
-    std::shared_ptr< SystemType > _sys_ptr;
-    std::shared_ptr< ConfigurationType > _configuration;
+    SharedPointer<SystemType> _system;
+    SharedPointer<ConfigurationType> _configuration;
 };
 
 

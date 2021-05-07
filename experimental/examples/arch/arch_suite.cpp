@@ -25,7 +25,7 @@
 #include "PRDE20.hpp"
 #include "CVDP20.hpp"
 #include "LALO20.hpp"
-#include "LOVO20.hpp"
+#include "LOVO21.hpp"
 #include "SPRE20.hpp"
 
 using namespace Ariadne;
@@ -36,6 +36,6 @@ Int main(Int argc, const char* argv[])
     PRDE20();
     CVDP20();
     LALO20();
-    LOVO20();
+    LOVO21();
     SPRE20();
 }

@@ -1,7 +1,7 @@
 set(EXAMPLES_EXPERIMENTAL_ARCH
     CVDP20
 	LALO20
-    LOVO20
+    LOVO21
     PRDE20
     SPRE20
     arch_suite

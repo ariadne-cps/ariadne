@@ -38,7 +38,7 @@
 
 #include "solvers/integrator.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "dynamics/vector_field.hpp"
 

@@ -35,9 +35,9 @@
 #include <iostream>
 
 #include "utility/declarations.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "utility/container.hpp"
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 #include "function/affine.hpp"
 #include "function/affine_model.hpp"
 #include "function/constraint.hpp"

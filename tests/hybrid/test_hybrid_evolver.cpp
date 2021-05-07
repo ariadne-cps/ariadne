@@ -35,8 +35,8 @@
 #include "geometry/affine_set.hpp"
 #include "solvers/integrator.hpp"
 #include "dynamics/orbit.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/graphics.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
@@ -44,7 +44,7 @@
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_automaton-composite.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "../test.hpp"
 

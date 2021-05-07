@@ -36,7 +36,7 @@
 #include "geometry/list_set.hpp"
 #include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "../test.hpp"
 

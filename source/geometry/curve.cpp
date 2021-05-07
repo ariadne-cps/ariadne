@@ -40,7 +40,7 @@
 #include "geometry/curve.hpp"
 #include "symbolic/space.hpp"
 
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 
 namespace Ariadne {
 

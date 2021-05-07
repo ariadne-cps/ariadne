@@ -40,7 +40,7 @@
 #include "utility/declarations.hpp"
 #include "utility/attribute.hpp"
 #include "numeric/dyadic.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "utility/pointer.hpp"
 #include "function/affine.hpp"
 #include "algebra/sweeper.hpp"

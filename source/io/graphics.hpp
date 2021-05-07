@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics.hpp
+ *            io/graphics.hpp
  *
  *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/graphics.hpp
+/*! \file io/graphics.hpp
  *  \brief Graphics class for drawing and outputting shapes in Euclidean space.
  */
 

@@ -30,8 +30,8 @@
 #include "geometry/affine_set.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/grid_paving.hpp"
-#include "output/graphics.hpp"
-#include "output/geometry2d.hpp"
+#include "io/graphics.hpp"
+#include "io/geometry2d.hpp"
 
 #include "../test.hpp"
 

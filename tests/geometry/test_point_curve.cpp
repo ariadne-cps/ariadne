@@ -27,7 +27,7 @@
 #include "geometry/curve.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 
 #include "../test.hpp"
 

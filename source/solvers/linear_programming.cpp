@@ -34,7 +34,7 @@
 #include "solvers/linear_programming.hpp"
 
 #include "utility/macros.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 namespace Ariadne {
 

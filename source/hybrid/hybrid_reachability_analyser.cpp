@@ -62,8 +62,8 @@
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
 
-#include "output/logging.hpp"
-#include "output/graphics.hpp"
+#include "io/logging.hpp"
+#include "io/graphics.hpp"
 #include "solvers/linear_programming.hpp"
 
 #include "hybrid/hybrid_graphics.hpp"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics.cpp
+ *            io/graphics.cpp
  *
  *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
@@ -34,11 +34,11 @@
 #include "symbolic/variable.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/logging.hpp"
-#include "output/progress_indicator.hpp"
-#include "output/graphics_manager.hpp"
+#include "io/geometry2d.hpp"
+#include "io/graphics.hpp"
+#include "io/logging.hpp"
+#include "io/progress_indicator.hpp"
+#include "io/graphics_manager.hpp"
 
 namespace Ariadne {
 

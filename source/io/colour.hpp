@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/colour.hpp
+ *            io/colour.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/colour.hpp
+/*! \file io/colour.hpp
  *  \brief Colours for graphics objects.
  */
 

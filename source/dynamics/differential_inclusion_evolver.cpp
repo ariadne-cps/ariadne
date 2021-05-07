@@ -26,7 +26,7 @@
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
-#include "output/progress_indicator.hpp"
+#include "io/progress_indicator.hpp"
 #include "differential_inclusion_evolver.hpp"
 
 namespace Ariadne {

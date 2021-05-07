@@ -27,9 +27,9 @@
 
 #include "config.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
-#include "output/geometry2d.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/graphics.hpp"
+#include "io/geometry2d.hpp"
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "function/function.hpp"

@@ -38,10 +38,10 @@
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "../test.hpp"
 

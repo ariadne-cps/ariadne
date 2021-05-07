@@ -27,8 +27,8 @@
 #include "config.hpp"
 #include "concurrency/thread.hpp"
 #include "concurrency/buffered_thread.hpp"
-#include "output/progress_indicator.hpp"
-#include "output/logging.hpp"
+#include "io/progress_indicator.hpp"
+#include "io/logging.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;

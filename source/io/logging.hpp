@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/logging.hpp
+ *            io/logging.hpp
  *
  *  Copyright  2007-21  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/logging.hpp
+/*! \file io/logging.hpp
  *  \brief Support for writing debugging output to a logging stream.
  */
 

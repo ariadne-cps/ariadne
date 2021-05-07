@@ -1,4 +1,4 @@
-set(LIBRARY_NAME ariadne-output)
+set(LIBRARY_NAME ariadne-io)
 
 add_library(${LIBRARY_NAME} OBJECT
     logging.cpp

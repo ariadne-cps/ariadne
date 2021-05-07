@@ -30,7 +30,7 @@
 
 #include "solvers/solver.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/differential.hpp"

@@ -37,7 +37,7 @@
 
 #include "hybrid/discrete_event.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 namespace Ariadne {
 

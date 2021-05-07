@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/cairo.cpp
+ *            io/cairo.cpp
  *
  *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
@@ -32,10 +32,10 @@
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "symbolic/variable.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/cairo.hpp"
-#include "output/logging.hpp"
+#include "io/geometry2d.hpp"
+#include "io/graphics.hpp"
+#include "io/cairo.hpp"
+#include "io/logging.hpp"
 
 namespace Ariadne {
 

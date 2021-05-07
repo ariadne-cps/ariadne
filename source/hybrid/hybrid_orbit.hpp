@@ -36,7 +36,7 @@
 #include <memory>
 
 #include "numeric/numeric.hpp"
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 #include "geometry/function_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_enclosure.hpp"

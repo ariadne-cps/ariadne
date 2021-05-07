@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics_backend_interface.hpp
+ *            io/graphics_backend_interface.hpp
  *
  *  Copyright  2011-21  Luca Geretti, Mirko Albanese
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/graphics_backend_interface.hpp
+/*! \file io/graphics_backend_interface.hpp
  *  \brief Interface for a graphics backend.
  */
 

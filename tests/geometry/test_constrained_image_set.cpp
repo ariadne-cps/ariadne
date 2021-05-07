@@ -33,7 +33,7 @@
 #include "geometry/affine_set.hpp"
 #include "geometry/function_set.hpp"
 #include "function/formula.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 
 #include "../test.hpp"
 

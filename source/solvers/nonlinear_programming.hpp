@@ -31,7 +31,7 @@
 
 #include "utility/declarations.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 

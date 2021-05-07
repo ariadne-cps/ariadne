@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "buffered_thread.hpp"
 
 namespace Ariadne {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics_interface.hpp
+ *            io/graphics_interface.hpp
  *
  *  Copyright  2009-20  Pieter Collins, Mirko Albanese
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/graphics_interface.hpp
+/*! \file io/graphics_interface.hpp
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
 

@@ -227,7 +227,6 @@ Void HybridEnclosure::set_time_function(const ValidatedScalarMultivariateFunctio
 UpperBoxType
 HybridEnclosure::state_bounding_box() const
 {
-    ARIADNE_LOG_PRINTLN_AT(1,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain()));
     return cast_exact_box(this->_set.state_set().bounding_box());
 }
 
@@ -240,15 +239,12 @@ HybridEnclosure::range_of(EffectiveScalarMultivariateFunction const& g) const
 UpperIntervalType
 HybridEnclosure::time_range() const
 {
-    ARIADNE_LOG_PRINTLN_AT(1,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain()));
     return apply(this->time_function(),this->_set.reduced_domain());
 }
 
 UpperIntervalType
 HybridEnclosure::dwell_time_range() const
 {
-    ARIADNE_LOG_PRINTLN_AT(1,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
-                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain()));
     return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 

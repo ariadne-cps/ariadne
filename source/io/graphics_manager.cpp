@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics_manager.cpp
+ *            io/graphics_manager.cpp
  *
  *  Copyright  2008-21  Mirko Albanese, Luca Geretti
  *
@@ -24,14 +24,14 @@
 
 #include "config.hpp"
 #include "utility/handle.hpp"
-#include "output/graphics_backend_interface.hpp"
-#include "output/graphics_manager.hpp"
-#include "output/graphics.hpp"
-#include "output/geometry2d.hpp"
-#include "output/cairo.hpp"
-#include "output/gnuplot.hpp"
-#include "output/drawer.hpp"
-#include "output/null.hpp"
+#include "io/graphics_backend_interface.hpp"
+#include "io/graphics_manager.hpp"
+#include "io/graphics.hpp"
+#include "io/geometry2d.hpp"
+#include "io/cairo.hpp"
+#include "io/gnuplot.hpp"
+#include "io/drawer.hpp"
+#include "io/null.hpp"
 
 namespace Ariadne {
 

@@ -51,9 +51,9 @@
 
 #include "dynamics/reachability_analyser.hpp"
 
-#include "output/logging.hpp"
-#include "output/graphics.hpp"
-#include "output/progress_indicator.hpp"
+#include "io/logging.hpp"
+#include "io/graphics.hpp"
+#include "io/progress_indicator.hpp"
 #include "solvers/linear_programming.hpp"
 
 namespace Ariadne {

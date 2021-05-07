@@ -33,7 +33,7 @@
 #include "algebra/vector.hpp"
 #include "symbolic/identifier.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 
 namespace Ariadne {
 

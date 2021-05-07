@@ -43,7 +43,7 @@
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_storage.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 
 namespace Ariadne {

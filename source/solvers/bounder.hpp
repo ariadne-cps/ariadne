@@ -34,7 +34,7 @@
 #include "algebra/algebra.hpp"
 #include "function/domain.hpp"
 #include "function/function_model.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "integrator_interface.hpp"
 
 namespace Ariadne {

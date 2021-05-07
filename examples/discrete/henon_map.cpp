@@ -45,8 +45,8 @@
 #include "geometry/list_set.hpp"
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
-#include "output/graphics.hpp"
-#include "output/logging.hpp"
+#include "io/graphics.hpp"
+#include "io/logging.hpp"
 
 #include "geometry/grid_paving.hpp"
 #include "dynamics/reachability_analyser.hpp"

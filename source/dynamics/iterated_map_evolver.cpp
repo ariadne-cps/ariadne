@@ -36,7 +36,7 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"

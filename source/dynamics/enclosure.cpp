@@ -60,14 +60,14 @@
 #include "solvers/constraint_solver.hpp"
 #include "solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
-#include "output/progress_indicator.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/drawer.hpp"
+#include "io/progress_indicator.hpp"
 
 #include "hybrid/discrete_event.hpp"
 
-#include "output/graphics.hpp"
-#include "output/logging.hpp"
+#include "io/graphics.hpp"
+#include "io/logging.hpp"
 
 #include "function/functional.hpp"
 

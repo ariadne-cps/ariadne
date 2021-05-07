@@ -30,7 +30,7 @@
 #define ARIADNE_CALCULUS_BASE_HPP
 
 #include "utility/tribool.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "function/function_interface.hpp"
 #include "calculus_interface.hpp"
 

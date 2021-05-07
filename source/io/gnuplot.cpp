@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/gnuplot.cpp
+ *            io/gnuplot.cpp
  *
  *  Copyright  2008-21  Mirko Albanese, Luca Geretti
  *
@@ -34,10 +34,10 @@
 #include "symbolic/variable.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/gnuplot.hpp"
-#include "output/logging.hpp"
+#include "io/geometry2d.hpp"
+#include "io/graphics.hpp"
+#include "io/gnuplot.hpp"
+#include "io/logging.hpp"
 
 namespace Ariadne {
 

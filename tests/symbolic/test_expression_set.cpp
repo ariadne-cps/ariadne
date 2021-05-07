@@ -36,7 +36,7 @@
 #include "geometry/function_set.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 
 #include "../test.hpp"
 

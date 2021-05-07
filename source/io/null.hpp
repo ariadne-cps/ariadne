@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/null.hpp
+ *            io/null.hpp
  *
  *  Copyright  2020-21  Mirko Albanese, Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/null.hpp
+/*! \file io/null.hpp
  *  \brief Null output in the case of missing graphics support.
  */
 
-#include "output/graphics.hpp"
-#include "output/graphics_backend_interface.hpp"
+#include "io/graphics.hpp"
+#include "io/graphics_backend_interface.hpp"
 #include "config.hpp"
 
 namespace Ariadne {

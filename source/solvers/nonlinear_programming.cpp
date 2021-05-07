@@ -32,7 +32,7 @@
 #include <limits>
 
 #include "utility/macros.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "utility/tuple.hpp"
 #include "utility/tribool.hpp"
 #include "numeric/numeric.hpp"

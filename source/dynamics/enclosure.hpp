@@ -35,8 +35,8 @@
 #include "algebra/vector.hpp"
 #include "geometry/set_interface.hpp"
 #include "symbolic/identifier.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/drawer_interface.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/drawer_interface.hpp"
 
 #include "function/function_model.hpp"
 

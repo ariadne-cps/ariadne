@@ -38,7 +38,7 @@
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
 #include "symbolic/expression_set.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "solvers/integrator_interface.hpp"
 
 namespace Ariadne {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/gnuplot.hpp
+ *            io/gnuplot.hpp
  *
  *  Copyright  2020-21  Mirko Albanese, Luca Geretti
  *
@@ -27,10 +27,10 @@
 #ifdef HAVE_GNUPLOT_H
 
 #include "config.hpp"
-#include "output/graphics.hpp"
-#include "output/geometry2d.hpp"
+#include "io/graphics.hpp"
+#include "io/geometry2d.hpp"
 
-#include "output/gnuplot-iostream.hpp"
+#include "io/gnuplot-iostream.hpp"
 
 namespace Ariadne {
 

@@ -48,7 +48,7 @@
 #include "solvers/constraint_solver.hpp"
 #include "geometry/affine_set.hpp"
 
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/cairo.hpp
+ *            io/cairo.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -28,7 +28,7 @@
 #ifdef HAVE_CAIRO_H
 
 #include "config.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 
 #include <cairo/cairo.h>
 

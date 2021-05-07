@@ -33,8 +33,8 @@
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "diagonal_matrix.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/graphics.hpp"
 
 namespace Ariadne {
 

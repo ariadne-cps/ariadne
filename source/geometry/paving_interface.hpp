@@ -33,7 +33,7 @@
 #include "utility/declarations.hpp"
 #include "geometry/grid_cell.hpp"
 #include "geometry/set_interface.hpp"
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 
 namespace Ariadne {
 

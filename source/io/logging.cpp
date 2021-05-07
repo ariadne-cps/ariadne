@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/logging.cpp
+ *            io/logging.cpp
  *
  *  Copyright  2007-20  Pieter Collins
  *
@@ -33,7 +33,7 @@
 #include <functional>
 
 #include "config.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
 #include "concurrency/task_manager.hpp"

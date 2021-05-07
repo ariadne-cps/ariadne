@@ -37,7 +37,7 @@
 #include <mutex>
 
 #include "numeric/numeric.hpp"
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"
 #include "geometry/curve.hpp"

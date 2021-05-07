@@ -36,7 +36,7 @@
 #include "solvers/solver_interface.hpp"
 #include "function/function_interface.hpp"
 
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "utility/attribute.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"

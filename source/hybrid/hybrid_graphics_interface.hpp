@@ -29,7 +29,7 @@
 #ifndef ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_HYBRID_GRAPHICS_INTERFACE_HPP
 
-#include "output/graphics_interface.hpp"
+#include "io/graphics_interface.hpp"
 
 namespace Ariadne {
 

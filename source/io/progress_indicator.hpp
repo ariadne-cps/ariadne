@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/progress_indicator.hpp
+ *            io/progress_indicator.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/progress_indicator.hpp
+/*! \file io/progress_indicator.hpp
  *  \brief Support for showing progress with respect to a given metric.
  */
 

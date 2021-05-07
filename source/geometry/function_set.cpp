@@ -26,7 +26,7 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
-#include "output/logging.hpp"
+#include "io/logging.hpp"
 #include "function/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
@@ -41,9 +41,9 @@
 #include "algebra/algebra.hpp"
 #include "algebra/expansion.inl.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/graphics_manager.hpp"
-#include "output/drawer.hpp"
+#include "io/graphics_interface.hpp"
+#include "io/graphics_manager.hpp"
+#include "io/drawer.hpp"
 
 namespace Ariadne {
 

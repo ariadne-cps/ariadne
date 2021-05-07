@@ -32,7 +32,7 @@
 #include "utility/stlio.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
-#include "output/graphics.hpp"
+#include "io/graphics.hpp"
 
 namespace Ariadne {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/drawer.hpp
+ *            io/drawer.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/drawer.hpp
+/*! \file io/drawer.hpp
  *  \brief Class for drawing affine and nonlinear sets.
  */
 
@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 #include "utility/declarations.hpp"
-#include "output/drawer_interface.hpp"
+#include "io/drawer_interface.hpp"
 
 namespace Ariadne {
 

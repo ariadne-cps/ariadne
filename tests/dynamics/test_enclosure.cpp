@@ -39,9 +39,9 @@
 #include "geometry/function_set.hpp"
 #include "solvers/integrator.hpp"
 #include "symbolic/expression_set.hpp"
-#include "output/graphics.hpp"
-#include "output/drawer.hpp"
-#include "output/logging.hpp"
+#include "io/graphics.hpp"
+#include "io/drawer.hpp"
+#include "io/logging.hpp"
 
 #include "function/user_function.hpp"
 

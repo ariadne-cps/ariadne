@@ -1,5 +1,5 @@
 /***************************************************************************
- *            output/graphics_manager.hpp
+ *            io/graphics_manager.hpp
  *
  *  Copyright  2009-21  Luca Geretti, Mirko Albanese
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file output/graphics_manager.hpp
+/*! \file io/graphics_manager.hpp
  *  \brief Graphics singleton class for managing graphics and holding preferences.
  */
 

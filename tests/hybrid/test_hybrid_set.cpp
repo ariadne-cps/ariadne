@@ -105,7 +105,7 @@ public:
         ++loc_iter;
         ARIADNE_TEST_ASSERT(loc_iter == hls.locations_end());
     }
-    
+
     Void test_compile_incorrect_hybrid_paving() {
         Grid g;
         GridTreePaving gts;

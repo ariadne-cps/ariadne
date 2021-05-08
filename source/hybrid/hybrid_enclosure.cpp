@@ -128,7 +128,8 @@ HybridEnclosure* HybridEnclosure::clone() const {
 const RealSpace
 HybridEnclosure::state_time_auxiliary_space() const
 {
-    return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
+    auto state_time_space=(this->state_space().contains(this->time_variable()) ? this->state_space() : join(this->state_space(),this->time_variable()));
+    return join(state_time_space,this->auxiliary_space());
 }
 
 const RealSpace
@@ -404,7 +405,7 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
 }
 
 HybridBasicSet<Enclosure> HybridEnclosure::state_time_set() const {
-    auto state_time_space=join(this->state_space(),TimeVariable());
+    auto state_time_space=(this->state_space().contains(TimeVariable()) ? this->state_space() : join(this->state_space(),TimeVariable()));
     auto state_time_function=join(this->state_function(),this->time_function());
     Enclosure enclosure(this->parameter_domain(),state_time_function,this->time_function(),this->constraints(),this->configuration());
     HybridBasicSet<Enclosure> hset(this->location(),state_time_space,enclosure);

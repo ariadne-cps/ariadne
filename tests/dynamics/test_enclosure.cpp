@@ -161,27 +161,29 @@ class TestEnclosure
     }
 
     Void test_labelled_construction() const {
-        RealVariable x("x"), y("y"), z("z");
+        RealVariable x("x"), y("y"), z("z"), t("t");
         RealSpace spc({x, y});
         ExactBoxType bx({{0.0_x,2.0_x},{1.0_x,3.0_x}});
         LabelledExactBoxType dom(spc, bx);
         TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
         EnclosureConfiguration configuration(function_factory);
         LabelledEnclosure labelled_encl1(dom, configuration);
-        ARIADNE_TEST_PRINT(labelled_encl1);
+        ARIADNE_TEST_PRINT(labelled_encl1)
         labelled_encl1.set_state_space(RealSpace({y,z}));
-        ARIADNE_TEST_PRINT(labelled_encl1);
+        ARIADNE_TEST_PRINT(labelled_encl1)
         Enclosure encl2(bx,configuration);
         LabelledEnclosure labelled_encl2(encl2,spc);
-        ARIADNE_TEST_PRINT(labelled_encl2);
+        ARIADNE_TEST_PRINT(labelled_encl2)
         Enclosure encl3(bx,configuration);
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
         EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
         encl3.set_auxiliary_mapping(auxiliary);
         LabelledEnclosure labelled_encl3(encl3,spc,RealSpace({z}));
-        ARIADNE_TEST_PRINT(labelled_encl3);
-        ARIADNE_TEST_PRINT(labelled_encl3.state_auxiliary_space());
+        ARIADNE_TEST_PRINT(labelled_encl3)
+        ARIADNE_TEST_PRINT(labelled_encl3.state_auxiliary_space())
+        LabelledEnclosure labelled_encl4(encl3,RealSpace({x,t}),RealSpace({z}));
+        ARIADNE_TEST_PRINT(labelled_encl4.state_time_auxiliary_space())
     }
 
     Void test_labelled_product() const {

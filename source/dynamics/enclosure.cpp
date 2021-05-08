@@ -1398,7 +1398,8 @@ const RealSpace LabelledEnclosure::state_auxiliary_space() const {
 
 const RealSpace LabelledEnclosure::state_time_auxiliary_space() const
 {
-    return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
+    auto state_time_space=(this->state_space().contains(this->time_variable()) ? this->state_space() : join(this->state_space(),this->time_variable()));
+    return join(state_time_space,this->auxiliary_space());
 }
 
 

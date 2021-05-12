@@ -741,30 +741,6 @@ class GeneralHybridEvolver
                      Map<DiscreteEvent,CrossingData>& crossings,
                      Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
-
-/*
-    virtual
-    Void
-    _compute_finishing_time(TimingData& result,
-                            Real final_time,
-                            FlowFunctionModel const& flow,
-                            HybridEnclosure const& initial_set) const;
-
-    virtual
-    Void
-    _compute_unwind_time(TimingData& result,
-                         Real final_time,
-                         FlowFunctionModel const& flow,
-                         HybridEnclosure const& initial_set) const;
-    virtual
-    Void
-    _compute_creep_time(TimingData& result,
-                        Real final_time,
-                        FlowFunctionModel const& flow,
-                        Map<DiscreteEvent,CrossingData>& crossings,
-                        Map<DiscreteEvent,TransitionData> const& transitions,
-                        HybridEnclosure const& initial_set) const;
-*/
 };
 
 

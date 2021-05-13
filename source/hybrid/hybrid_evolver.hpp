@@ -37,6 +37,8 @@
 
 #include "utility/tuple.hpp"
 
+#include "concurrency/workload.hpp"
+
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
 
@@ -78,10 +80,6 @@ class FlowFunctionModel
 struct TransitionData;
 struct CrossingData;
 struct TimingData;
-struct InitialData;
-struct FinalData;
-struct EvolutionData;
-
 
 //! \ingroup AnalysisModule
 //! \ingroup HybridDynamicsSubModule
@@ -128,6 +126,8 @@ class HybridEvolverBase
     private:
         mutable Mutex _mux;
     };
+    typedef Pair<EnclosureType,Bool> WorkloadElementType;
+    typedef Workload<WorkloadElementType,TerminationType const&,Semantics const&,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.
@@ -202,7 +202,7 @@ class HybridEvolverBase
     //! evolution is possible.
     virtual
     Void
-    _process_working_set(EvolutionData& evolution_data,
+    _process_working_set(WorkloadType::Access& workload,
                          Pair<HybridEnclosure,Bool> const& working_set,
                          TerminationType const& termination,
                          Semantics const& semantics,
@@ -212,7 +212,7 @@ class HybridEvolverBase
     //! events have already been processed and only the continuous \a final_time is necessary.
     virtual
     Void
-    _evolution_step(EvolutionData& evolution_data,
+    _evolution_step(WorkloadType::Access& workload,
                     HybridEnclosure const& enclosure,
                     Real const& final_time,
                     Semantics const& semantics,
@@ -312,7 +312,7 @@ class HybridEvolverBase
 
     virtual
     Void
-    _process_jumped_set(EvolutionData& evolution_data,
+    _process_jumped_set(WorkloadType::Access& workload,
                         HybridEnclosure const& jumped_set,
                         TerminationType const& termination,
                         SharedPointer<SynchronisedOrbit> result) const;
@@ -333,7 +333,7 @@ class HybridEvolverBase
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
     Void
-    _process_starting_events(EvolutionData& evolution_data,
+    _process_starting_events(WorkloadType::Access& workload,
                              HybridEnclosure const& starting_set,
                              Map<DiscreteEvent,TransitionData> const& transitions,
                              SharedPointer<SynchronisedOrbit> result) const;
@@ -435,7 +435,7 @@ class HybridEvolverBase
     //! TODO: This method might be better split into even simpler events.
     virtual
     Void
-    _apply_evolution_step(EvolutionData& evolution_data,
+    _apply_evolution_step(WorkloadType::Access& workload,
                           HybridEnclosure const& starting_set,
                           ValidatedVectorMultivariateFunctionModelDP const& flow,
                           TimingData const& timing_data,
@@ -448,7 +448,7 @@ class HybridEvolverBase
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     Void
-    _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
+    _log_summary(WorkloadType::Access& workload, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
 
   protected:
     Void _create(const SystemType& system, FunctionFactoryType* factory);
@@ -623,17 +623,6 @@ struct TimingData
     ValidatedScalarMultivariateFunctionModelDP evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 OutputStream& operator<<(OutputStream& os, const TimingData& timing);
-
-//! \ingroup HybridDynamicsSubModule
-//! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
-//! \relates HybridEvolverBase
-struct EvolutionData
-{
-    //! \brief Sets to process, along with a flag that informs whether they
-    //! need to be processed for initially active events.
-    List<Pair<HybridEnclosure,Bool>> working_sets;
-};
-
 
 //! \relates HybridEvolverBase
 //! \brief Configuration for HybridEvolverBase, for controlling the accuracy of continuous evolution methods.

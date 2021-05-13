@@ -268,13 +268,10 @@ orbit(const HybridEnclosure& initial,
     const_cast<HybridEnclosure&>(initial).set_auxiliary(auxiliary_space.variables(),auxiliary_function);
 
     auto result = std::make_shared<SynchronisedOrbit>(initial);
+    WorkloadType workload(std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
+    workload.append({initial,true});
+    workload.process();
 
-    EvolutionData evolution_data;
-    evolution_data.working_sets.append({initial,true});
-    while(not evolution_data.working_sets.empty()) {
-        auto working_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
-        this->_process_working_set(evolution_data, working_set, termination, semantics, result);
-    }
     return std::move(*result);
 }
 
@@ -369,17 +366,19 @@ struct EvolutionStepData {
 
 Void
 HybridEvolverBase::
-_log_summary(const EvolutionData& evolution_data, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const
+_log_summary(WorkloadType::Access& workload, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const
 {
     UpperBoxType starting_bounding_box=starting_set.state_bounding_box();
     UpperIntervalType starting_time_range=starting_set.time_range();
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
     ARIADNE_LOG_PRINTLN(
-            "#w="<<std::setw(4)<<std::left<<evolution_data.working_sets.size()+1u
-            <<"#r="<<std::setw(5)<<std::left<<result->reach_size()
-            <<"#f="<<std::setw(4)<<std::left<<result->final_size()
-            <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
+            "#[w="<<std::setw(2)<<std::left<<workload.advancement().waiting()
+            <<" p="<<std::setw(2)<<std::left<<workload.advancement().processing()
+            <<" c="<<std::setw(3)<<std::left<<workload.advancement().completed()
+            <<"] #r="<<std::setw(5)<<std::left<<result->reach_size()
+            <<" #f="<<std::setw(4)<<std::left<<result->final_size()
+            <<" #e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
             <<" #c="<<std::setw(1)<<std::left<<starting_set.number_of_constraints()
             <<" t=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_time_range.lower_bound()
@@ -460,7 +459,7 @@ _apply_invariants(HybridEnclosure& initial_set,
 
 Void
 HybridEvolverBase::
-_process_starting_events(EvolutionData& evolution_data,
+_process_starting_events(WorkloadType::Access& workload,
                          HybridEnclosure const& initial_set,
                          Map<DiscreteEvent,TransitionData> const& transitions,
                          SharedPointer<SynchronisedOrbit> result) const
@@ -500,7 +499,7 @@ _process_starting_events(EvolutionData& evolution_data,
                         immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
                         ARIADNE_LOG_PRINTLN_AT(2,"immediate_jump_set="<<immediate_jump_set);
                         result->adjoin_intermediate(immediate_jump_set);
-                        evolution_data.working_sets.append({immediate_jump_set,true});
+                        workload.append({immediate_jump_set,true});
                     }
                 }
                 if(transition.event_kind!=EventKind::PERMISSIVE) {
@@ -512,7 +511,7 @@ _process_starting_events(EvolutionData& evolution_data,
 
     // Put the flowable set in the starting sets for ordinary evolution
     if(!definitely(flowable_set.is_empty())) {
-        evolution_data.working_sets.append({flowable_set,false});
+        workload.append({flowable_set,false});
     }
 }
 
@@ -1111,7 +1110,7 @@ _apply_guard(List<HybridEnclosure>& sets,
 
 Void
 HybridEvolverBase::
-_process_jumped_set(EvolutionData& evolution_data,
+_process_jumped_set(WorkloadType::Access& workload,
                     HybridEnclosure const& jumped_set,
                     TerminationType const& termination,
                     SharedPointer<SynchronisedOrbit> result) const
@@ -1162,12 +1161,12 @@ _process_jumped_set(EvolutionData& evolution_data,
     // Process the initially active events; cut out active points to leave initial flowable set.
     ARIADNE_LOG_PRINTLN_AT(2,"initial_set has not reached the discrete termination condition");
 
-    this->_process_starting_events(evolution_data, initial_set,transitions,result);
+    this->_process_starting_events(workload, initial_set,transitions,result);
 }
 
 Void
 HybridEvolverBase::
-_process_working_set(EvolutionData& evolution_data,
+_process_working_set(WorkloadType::Access& workload,
                      Pair<HybridEnclosure,Bool> const& working_set,
                      HybridTerminationCriterion const& termination,
                      Semantics const& semantics,
@@ -1176,16 +1175,16 @@ _process_working_set(EvolutionData& evolution_data,
     ARIADNE_LOG_SCOPE_CREATE;
 
     if (working_set.second) {
-        this->_process_jumped_set(evolution_data, working_set.first, termination,result);
+        this->_process_jumped_set(workload, working_set.first, termination,result);
         return;
     }
 
-    this->_evolution_step(evolution_data, working_set.first, termination.maximum_time(),semantics,result);
+    this->_evolution_step(workload, working_set.first, termination.maximum_time(),semantics,result);
 }
 
 Void
 HybridEvolverBase::
-_evolution_step(EvolutionData& evolution_data,
+_evolution_step(WorkloadType::Access& workload,
                 HybridEnclosure const& set,
                 Real const& final_time,
                 Semantics const& semantics,
@@ -1199,7 +1198,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     ARIADNE_LOG_PRINTLN_AT(2,"dynamic="<<dynamic);
 
-    _log_summary(evolution_data,starting_set,result);
+    _log_summary(workload,starting_set,result);
 
     ARIADNE_LOG_PRINTLN_AT(2,"starting_set="<<starting_set);
     ARIADNE_LOG_PRINTLN_AT(2,"starting_time="<<starting_set.time_function());
@@ -1223,7 +1222,7 @@ _evolution_step(EvolutionData& evolution_data,
         ARIADNE_LOG_PRINTLN_AT(1,"reconditioning: errors "<<starting_set.state_function().errors());
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
-        evolution_data.working_sets.append({reconditioned_set,false});
+        workload.append({reconditioned_set,false});
         return;
     }
 
@@ -1236,7 +1235,7 @@ _evolution_step(EvolutionData& evolution_data,
             ARIADNE_LOG_PRINTLN_AT(1,"Set too large, splitting");
             List<HybridEnclosure> split_sets = starting_set.split();
             for(SizeType i=0; i!=split_sets.size(); ++i) {
-                if(!definitely(split_sets[i].is_empty())) { evolution_data.working_sets.append({split_sets[i],false}); }
+                if(!definitely(split_sets[i].is_empty())) { workload.append({split_sets[i],false}); }
             }
             return;
         }
@@ -1276,12 +1275,12 @@ _evolution_step(EvolutionData& evolution_data,
 
     // Apply the time step
     HybridEnclosure reach_set, evolve_set;
-    this->_apply_evolution_step(evolution_data,starting_set,flow_model,timing_data,crossings,dynamic,transitions,semantics,result);
+    this->_apply_evolution_step(workload,starting_set,flow_model,timing_data,crossings,dynamic,transitions,semantics,result);
 }
 
 
 Void HybridEvolverBase::
-_apply_evolution_step(EvolutionData& evolution_data,
+_apply_evolution_step(WorkloadType::Access& workload,
                       HybridEnclosure const& starting_set,
                       ValidatedVectorMultivariateFunctionModelDP const& flow,
                       TimingData const& timing_data,
@@ -1368,7 +1367,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     }
 
     // Compute final set depending on whether the finishing kind is exactly AT_FINAL_TIME.
-    // Insert sets into evolution_data as appropriate
+    // Insert sets into workload as appropriate
     if(timing_data.finishing_kind==FinishingKind::AT_FINAL_TIME) {
         for(List<HybridEnclosure>::ConstIterator evolve_set_iter=evolve_sets.begin();
             evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter)
@@ -1401,7 +1400,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 if(!definitely(evolve_set.is_empty())) {
                     ARIADNE_LOG_PRINTLN("evolve_set="<<evolve_set);
                     ARIADNE_LOG_PRINTLN("next_working_set="<<next_working_set);
-                    evolution_data.working_sets.append({next_working_set,false});
+                    workload.append({next_working_set,false});
                     result->adjoin_intermediate(evolve_set);
                     _step_data.progress = true;
                 }
@@ -1416,7 +1415,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 if(!definitely(evolve_set.is_empty())) {
                     ARIADNE_LOG_PRINTLN("evolve_set="<<evolve_set);
                     ARIADNE_LOG_PRINTLN("next_working_set="<<next_working_set);
-                    evolution_data.working_sets.append({next_working_set,false});
+                    workload.append({next_working_set,false});
                     result->adjoin_intermediate(evolve_set);
                     _step_data.progress = true;
                 }
@@ -1508,7 +1507,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 ARIADNE_LOG_PRINTLN_AT(2,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target));
                 TransitionData const& transition=transitions[event];
                 _jump_set.apply_reset(event,target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
-               evolution_data.working_sets.append({_jump_set,true});
+               workload.append({_jump_set,true});
                 _step_data.events.insert(event);
                 ARIADNE_LOG_PRINTLN_AT(2,"jump_set="<<_jump_set);
             }

@@ -17,15 +17,16 @@ Legenda for the issue kind:
 - [#538](https://github.com/ariadne-cps/ariadne/issues/538) (N) Introduce a concurrency module designed for parallel execution of internal tasks
 - [#549](https://github.com/ariadne-cps/ariadne/issues/549) (N) Introduce a Least Recently Used cache utility for holding a limited number of homogeneous objects 
 - [#551](https://github.com/ariadne-cps/ariadne/issues/551) (C) Make VectorFieldEvolver process sets in parallel (when splitting initially or during evolution)
-- [#552](https://github.com/ariadne-cps/ariadne/issues/552) (C) Remove evolve/reach/reach_evolve methods from EvolverInterface, relying on orbit generation only
-- [#553](https://github.com/ariadne-cps/ariadne/issues/553) (C) Remove ability to write an evolver object to the standard output, since it was implemented as a fixed string for all evolvers anyway
+- [#566](https://github.com/ariadne-cps/ariadne/issues/566) (C) Make HybridEvolver process sets in parallel (due to either splitting or multiple trajectories)
 - [#556](https://github.com/ariadne-cps/ariadne/issues/556) (C) Disallow unsafe default value of upper semantics for orbit methods
-- [#558](https://github.com/ariadne-cps/ariadne/issues/558) (C) Remove unnecessary IteratedMapEvolver::enclosure methods 
 - [#563](https://github.com/ariadne-cps/ariadne/issues/563) (C) Rename the 'output' module into the 'io' module to support future classes related to input
 - [#573](https://github.com/ariadne-cps/ariadne/issues/573) (C) Use an LRU cache for modes in CompositeHybridAutomaton, avoid exhausting a given mode in HybridEvolver before changing mode
 - [#539](https://github.com/ariadne-cps/ariadne/issues/539) (F) A segmentation fault sometimes would be issued when terminating the executable, due to logging
 - [#557](https://github.com/ariadne-cps/ariadne/issues/557) (F) Fix behavior of StopWatch utility for concurrent code, enhance the class for choosing a duration type
 - [#567](https://github.com/ariadne-cps/ariadne/issues/567) (F) Fix problem with state_time space creation when state space already contains the 't' variable
+- [#558](https://github.com/ariadne-cps/ariadne/issues/558) (R) Remove unnecessary IteratedMapEvolver::enclosure methods
+- [#552](https://github.com/ariadne-cps/ariadne/issues/552) (R) Remove evolve/reach/reach_evolve methods from EvolverInterface, relying on orbit generation only
+- [#553](https://github.com/ariadne-cps/ariadne/issues/553) (R) Remove ability to write an evolver object to the standard output, since it was implemented as a fixed string for all evolvers anyway
 
 ### 2.2
 

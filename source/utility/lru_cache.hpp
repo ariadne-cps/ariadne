@@ -55,7 +55,7 @@ template<class L, class V> class LRUCache {
         auto e = _elements.find(label);
         ARIADNE_ASSERT_MSG(e != _elements.end(), "Cache has no element for label " << label);
         for (auto& other : _elements) {
-            if (other.first != e->first and other.second.age < e->second.age)
+            if (other.second.age < e->second.age)
                 other.second.age++;
         }
         e->second.age = 0;

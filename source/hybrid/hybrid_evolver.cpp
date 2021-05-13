@@ -268,11 +268,10 @@ orbit(const HybridEnclosure& initial,
     const_cast<HybridEnclosure&>(initial).set_auxiliary(auxiliary_space.variables(),auxiliary_function);
 
     EvolutionData evolution_data;
-    evolution_data.semantics=semantics;
     evolution_data.working_sets.append({initial,true});
     while(not evolution_data.working_sets.empty()) {
         auto working_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
-        this->_process_working_set(evolution_data, working_set, termination);
+        this->_process_working_set(evolution_data, working_set, termination, semantics);
     }
 
     Orbit<HybridEnclosure> orbit(initial);
@@ -305,7 +304,6 @@ HybridEvolverBase::_create(
     this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
-    //this->_configuration_ptr=std::shared_ptr<ConfigurationType>(new ConfigurationType());
 }
 
 
@@ -1170,7 +1168,8 @@ Void
 HybridEvolverBase::
 _process_working_set(EvolutionData& evolution_data,
                      Pair<HybridEnclosure,Bool> const& working_set,
-                     HybridTerminationCriterion const& termination) const
+                     HybridTerminationCriterion const& termination,
+                     Semantics const& semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -1179,12 +1178,12 @@ _process_working_set(EvolutionData& evolution_data,
         return;
     }
 
-    this->_evolution_step(evolution_data, working_set.first, termination.maximum_time());
+    this->_evolution_step(evolution_data, working_set.first, termination.maximum_time(),semantics);
 }
 
 Void
 HybridEvolverBase::
-_evolution_step(EvolutionData& evolution_data, HybridEnclosure const& set, Real const& final_time) const
+_evolution_step(EvolutionData& evolution_data, HybridEnclosure const& set, Real const& final_time, Semantics const& semantics) const
 {
     HybridEnclosure starting_set=set;
 
@@ -1224,7 +1223,7 @@ _evolution_step(EvolutionData& evolution_data, HybridEnclosure const& set, Real 
 
     // Handle a set that is too large, based on semantics
     if (possibly(starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius())) {
-        if (evolution_data.semantics == Semantics::LOWER) {
+        if (semantics == Semantics::LOWER) {
             ARIADNE_LOG_PRINTLN_AT(1,"Set too large, discarding");
             return;
         } else if (this->_configuration_ptr->enable_subdivisions()) {
@@ -1271,7 +1270,7 @@ _evolution_step(EvolutionData& evolution_data, HybridEnclosure const& set, Real 
 
     // Apply the time step
     HybridEnclosure reach_set, evolve_set;
-    this->_apply_evolution_step(evolution_data,starting_set,flow_model,timing_data,crossings,dynamic,transitions);
+    this->_apply_evolution_step(evolution_data,starting_set,flow_model,timing_data,crossings,dynamic,transitions,semantics);
 }
 
 
@@ -1282,7 +1281,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
                       TimingData const& timing_data,
                       Map<DiscreteEvent,CrossingData> const& crossings,
                       EffectiveVectorMultivariateFunction const& dynamic,
-                      Map<DiscreteEvent,TransitionData> const& transitions) const
+                      Map<DiscreteEvent,TransitionData> const& transitions,
+                      Semantics const& semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -1295,9 +1295,6 @@ _apply_evolution_step(EvolutionData& evolution_data,
         ARIADNE_WARN("empty starting_set "<<representation(starting_set));
         return;
     }
-    //ARIADNE_ASSERT_MSG(!definitely(starting_set.empty()),"starting_set="<<repr(starting_set));
-
-    Semantics semantics = evolution_data.semantics;
 
     // Compute events enabling transitions and events blocking continuous evolution
     Set<DiscreteEvent> active_events=crossings.keys();

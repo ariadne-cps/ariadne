@@ -115,6 +115,16 @@ class HybridEvolverBase
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<HybridEnclosure> EnclosureListType;
 
+  private:
+    //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
+    struct SynchronisedOrbit : public OrbitType {
+        SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
+        Void adjoin_reach(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
+        Void adjoin_intermediate(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
+        Void adjoin_final(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+    private:
+        Mutex _mux;
+    };
   public:
 
     //! \brief Default constructor.
@@ -191,7 +201,8 @@ class HybridEvolverBase
     Void
     _process_working_set(EvolutionData& evolution_data,
                          Pair<HybridEnclosure,Bool> const& working_set,
-                         TerminationType const& termination) const;
+                         TerminationType const& termination,
+                         Semantics const& semantics) const;
 
     //! \brief Performs an evolution step on an \a enclosure, where initially active
     //! events have already been processed and only the continuous \a final_time is necessary.
@@ -199,7 +210,8 @@ class HybridEvolverBase
     Void
     _evolution_step(EvolutionData& evolution_data,
                     HybridEnclosure const& enclosure,
-                    Real const& final_time) const;
+                    Real const& final_time,
+                    Semantics const& semantics) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
     //! \details For some systems, extracting the information about the
@@ -418,7 +430,8 @@ class HybridEvolverBase
                           TimingData const& timing_data,
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
                           EffectiveVectorMultivariateFunction const& dynamic,
-                          Map<DiscreteEvent,TransitionData> const& transitions) const;
+                          Map<DiscreteEvent,TransitionData> const& transitions,
+                          Semantics const& semantics) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
@@ -617,9 +630,6 @@ struct EvolutionData
     //! \brief Intermediate sets reached after each time step. Not relevant for
     //! the result, but useful for plotting, especially for debugging.
     List<HybridEnclosure> intermediate_sets;
-
-    //! \brief The semantics used to compute the evolution. Defaults to Semantics::UPPER.
-    Semantics semantics;
 };
 
 

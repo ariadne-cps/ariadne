@@ -179,44 +179,26 @@ class HybridEvolverBase
     //!@}
 
   protected:
-    //! \brief Internal wrapper routing for computing the evolution.
-    //!
-    //! \param final Output parameter containing the final (evolve) set.
-    //! \param reachable Output parameter containing the reachable set.
-    //! \param intermediate Output parameter containing the intermediate sets
-    //!   attained after every time step.
-    //! \param initial The inital set of the evolution.
-    //! \param termination The termination condition of evolution; such as the stopping time
-    //!   or the maximum number of steps.
-    //! \param semantics The semantics used for the solution trajectories.
-    //!   Either \a #Semantics::LOWER, in which case trajectories terminate at
-    //!   discontinuities, or \a #Semantics::UPPER, in which case all branches
-    //!   are taken.
-    //! \param reach A flag indicating whether the reachable sets should
-    //!   be computed.
-    virtual Void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
-                            const EnclosureType& initial, const TerminationType& termination,
-                            Semantics semantics, Bool reach) const;
 
-    //! \brief Compute the evolution within a single discrete mode.
+    //! \brief Processes a single working set.
     //!
-    //! Takes a set from evolution_data.starting_sets and processes the active
-    //! events using _process_starting_sets.
-    //! The resulting set is then evolved using _upper_evolution_step until
-    //! either the maximum continuous time is reached, or no furter continuous
+    //! Takes a set from evolution_data.starting_sets and possibly processes the active
+    //! events.
+    //! The resulting set is then evolved using until
+    //! either the maximum continuous time is reached, or no further continuous
     //! evolution is possible.
     virtual
     Void
-    _evolution_in_mode(EvolutionData& evolution_data,
-                       TerminationType const& maximum_time) const;
+    _process_working_set(EvolutionData& evolution_data,
+                         Pair<HybridEnclosure,Bool> const& working_set,
+                         TerminationType const& termination) const;
 
-    //! \brief Performs an evolution step on one of the sets listed in \a
-    //! evolution_data.initial_sets.
+    //! \brief Performs an evolution step on an \a enclosure, where initially active
+    //! events have already been processed and only the continuous \a final_time is necessary.
     virtual
     Void
     _evolution_step(EvolutionData& evolution_data,
-                    EffectiveVectorMultivariateFunction const& dynamic,
-                    Map<DiscreteEvent,TransitionData> const& transitions,
+                    HybridEnclosure const& enclosure,
                     Real const& final_time) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
@@ -311,6 +293,10 @@ class HybridEvolverBase
     Void
     _recondition(HybridEnclosure& set) const;
 
+    virtual
+    Void
+    _process_jumped_set(EvolutionData& evolution_data, HybridEnclosure const& jumped_set, TerminationType const& termination) const;
+
     //! \brief Process the \a starting_set to find any
     //!  <em>immediately active</em> events, and compute the relevant \em jump sets
     //!  and the <em>flowable</em> or <em>progress</em> set.
@@ -327,9 +313,7 @@ class HybridEvolverBase
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
     Void
-    _process_starting_events(EvolutionData& evolution_data,
-                            HybridEnclosure const& starting_set,
-                            Map<DiscreteEvent,TransitionData> const& transitions) const;
+    _process_starting_events(EvolutionData& evolution_data, HybridEnclosure const& starting_set, Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
     //! to obtain the single-step unconstrained reachable set.
@@ -620,17 +604,10 @@ OutputStream& operator<<(OutputStream& os, const TimingData& timing);
 //! \relates HybridEvolverBase
 struct EvolutionData
 {
-    //! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
-    //! The set needs to be processed by finding initially active events,
-    //! and moving the set into working_sets.
-    List<HybridEnclosure> starting_sets;
-    //! \brief Sets which have been processed for initially active events.
-    //! Sets in this list can be assumed to satisfy all invariants and progress
-    //! predicates.
-    List<HybridEnclosure> working_sets;
+    //! \brief Sets to process, along with a flag that informs whether they
+    //! need to be processed for initially active events.
+    List<Pair<HybridEnclosure,Bool>> working_sets;
 
-    //! \brief The initial sets for the evolution.
-    List<HybridEnclosure> initial_sets;
     //! \brief Sets which have been computed as reach sets for the current
     //! evolution.
     List<HybridEnclosure> reach_sets;

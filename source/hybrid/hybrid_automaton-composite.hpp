@@ -35,6 +35,7 @@
 #include <set>
 #include <map>
 
+#include "utility/lru_cache.hpp"
 #include "function/function.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
@@ -65,8 +66,6 @@ class CompositeHybridAutomaton;
 class CompositeHybridAutomaton
     : public HybridAutomatonInterface
 {
-    mutable DiscreteMode _cached_mode;
-    Void _cache_mode(DiscreteLocation) const;
     static Writer<CompositeHybridAutomaton> _default_writer;
   public:
     static Void set_default_writer(Writer<CompositeHybridAutomaton> w) { _default_writer=w; }
@@ -229,6 +228,8 @@ class CompositeHybridAutomaton
     Identifier _name;
   private:
     List<HybridAutomaton> _components;
+    mutable LRUCache<DiscreteLocation,DiscreteMode> _modes_cache;
+    Void _cache_mode(DiscreteLocation) const;
 };
 
 CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components);

@@ -40,6 +40,8 @@
 
 namespace Ariadne {
 
+const SizeType MODES_CACHE_SIZE = 4;
+
 class CompositeHybridStateSpace
     : public HybridSpaceInterface
 {
@@ -103,22 +105,20 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 // Declare functions from hybrid_automaton.cpp
 EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
 
-CompositeHybridAutomaton::CompositeHybridAutomaton()
-    : _name("system"),_components() { }
-
-CompositeHybridAutomaton::CompositeHybridAutomaton(Identifier name)
-    : _name(name),_components() { }
-
 CompositeHybridAutomaton::CompositeHybridAutomaton(const HybridAutomaton& automaton)
-    : _name(automaton.name()),_components(1u,automaton) { }
+    : _name(automaton.name()), _components(1u,automaton), _modes_cache(MODES_CACHE_SIZE) { }
 
 CompositeHybridAutomaton::CompositeHybridAutomaton(const List<HybridAutomaton>& components)
-    : _name(name_composition(components)),_components(components) { }
+    : _name(name_composition(components)), _components(components), _modes_cache(MODES_CACHE_SIZE) { }
 
-CompositeHybridAutomaton::CompositeHybridAutomaton(
-		Identifier name,
-		const List<HybridAutomaton>& components)
-    : _name(name),_components(components) { }
+CompositeHybridAutomaton::CompositeHybridAutomaton(Identifier name, const List<HybridAutomaton>& components)
+    : _name(name), _components(components), _modes_cache(MODES_CACHE_SIZE) { }
+
+CompositeHybridAutomaton::CompositeHybridAutomaton()
+    : CompositeHybridAutomaton("system",List<HybridAutomaton>()) { }
+
+CompositeHybridAutomaton::CompositeHybridAutomaton(Identifier name)
+    : CompositeHybridAutomaton(name,List<HybridAutomaton>()) { }
 
 Nat
 CompositeHybridAutomaton::number_of_components() const
@@ -193,16 +193,13 @@ CompositeHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent 
 
 DiscreteMode const& CompositeHybridAutomaton::mode(DiscreteLocation location) const
 {
-    if(this->_cached_mode.location().values().keys()!=location.values().keys() || !(this->_cached_mode._location==location)) {
-        this->_cache_mode(location);
-    }
-    return this->_cached_mode;
+    if(not this->_modes_cache.has_label(location)) this->_cache_mode(location);
+    return this->_modes_cache.get(location);
 }
 
 Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
 {
-    DiscreteMode& cached_mode=this->_cached_mode;
-    cached_mode=DiscreteMode();
+    DiscreteMode cached_mode;
 
     for(List<HybridAutomaton>::ConstIterator component_iter=this->_components.begin();
         component_iter!=this->_components.end(); ++component_iter)
@@ -273,6 +270,8 @@ Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
     if(false and not are_same(cached_mode._location,location)) {
         ARIADNE_THROW(OverspecifiedLocationException,"CompositeHybridAutomaton::mode(DiscreteLocation)","Automaton has mode "<<cached_mode._location<<" overspecified by location "<<location);
     }
+
+    _modes_cache.put(location,cached_mode);
 }
 
 

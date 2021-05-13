@@ -122,8 +122,11 @@ class HybridEvolverBase
         Void adjoin_reach(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
         Void adjoin_intermediate(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
         Void adjoin_final(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+        SizeType reach_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::reach().size(); }
+        SizeType intermediate_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::intermediate().size(); }
+        SizeType final_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::final().size(); }
     private:
-        Mutex _mux;
+        mutable Mutex _mux;
     };
   public:
 
@@ -202,7 +205,8 @@ class HybridEvolverBase
     _process_working_set(EvolutionData& evolution_data,
                          Pair<HybridEnclosure,Bool> const& working_set,
                          TerminationType const& termination,
-                         Semantics const& semantics) const;
+                         Semantics const& semantics,
+                         SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Performs an evolution step on an \a enclosure, where initially active
     //! events have already been processed and only the continuous \a final_time is necessary.
@@ -211,7 +215,8 @@ class HybridEvolverBase
     _evolution_step(EvolutionData& evolution_data,
                     HybridEnclosure const& enclosure,
                     Real const& final_time,
-                    Semantics const& semantics) const;
+                    Semantics const& semantics,
+                    SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
     //! \details For some systems, extracting the information about the
@@ -307,7 +312,10 @@ class HybridEvolverBase
 
     virtual
     Void
-    _process_jumped_set(EvolutionData& evolution_data, HybridEnclosure const& jumped_set, TerminationType const& termination) const;
+    _process_jumped_set(EvolutionData& evolution_data,
+                        HybridEnclosure const& jumped_set,
+                        TerminationType const& termination,
+                        SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Process the \a starting_set to find any
     //!  <em>immediately active</em> events, and compute the relevant \em jump sets
@@ -325,7 +333,10 @@ class HybridEvolverBase
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
     Void
-    _process_starting_events(EvolutionData& evolution_data, HybridEnclosure const& starting_set, Map<DiscreteEvent,TransitionData> const& transitions) const;
+    _process_starting_events(EvolutionData& evolution_data,
+                             HybridEnclosure const& starting_set,
+                             Map<DiscreteEvent,TransitionData> const& transitions,
+                             SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
     //! to obtain the single-step unconstrained reachable set.
@@ -431,12 +442,13 @@ class HybridEvolverBase
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
                           EffectiveVectorMultivariateFunction const& dynamic,
                           Map<DiscreteEvent,TransitionData> const& transitions,
-                          Semantics const& semantics) const;
+                          Semantics const& semantics,
+                          SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     Void
-    _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
+    _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
 
   protected:
     Void _create(const SystemType& system, FunctionFactoryType* factory);
@@ -620,16 +632,6 @@ struct EvolutionData
     //! \brief Sets to process, along with a flag that informs whether they
     //! need to be processed for initially active events.
     List<Pair<HybridEnclosure,Bool>> working_sets;
-
-    //! \brief Sets which have been computed as reach sets for the current
-    //! evolution.
-    List<HybridEnclosure> reach_sets;
-    //! \brief Sets which have been computed as final sets (i.e. satisfying
-    //! either the final time or the maximum number of stesp).
-    List<HybridEnclosure> final_sets;
-    //! \brief Intermediate sets reached after each time step. Not relevant for
-    //! the result, but useful for plotting, especially for debugging.
-    List<HybridEnclosure> intermediate_sets;
 };
 
 

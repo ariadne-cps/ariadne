@@ -34,7 +34,7 @@ int main(int argc, const char* argv[])
 
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
-    RealConstant mu("mu",1.0_dec);
+    RealConstant mu("mu",1);
     RealVariable x("x"), y("y");
 
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
@@ -52,15 +52,15 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN(evolver.configuration());
 
-    Real x0(1.40_dec);
-    Real y0(2.40_dec);
-    Real eps_x0 = 15/100_q;
-    Real eps_y0 = 5/100_q;
+    Real x0 = 1.40_dec;
+    Real y0 = 2.40_dec;
+    Real eps_x0 = 0.15_dec;
+    Real eps_y0 = 0.05_dec;
 
     RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
-    Real evolution_time(7);
+    Real evolution_time = 7;
 
     Stopwatch<Milliseconds> sw;
     ARIADNE_LOG_PRINTLN("Computing simulation...");
@@ -70,7 +70,7 @@ int main(int argc, const char* argv[])
 
     ARIADNE_LOG_PRINTLN("Plotting...");;
     LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
-    fig.draw(simulation.curve());
+    fig.draw(simulation);
     fig.write("vanderpol_simulation");
 
     sw.restart();
@@ -81,6 +81,6 @@ int main(int argc, const char* argv[])
 
     ARIADNE_LOG_PRINTLN("Plotting...");
     fig.clear();
-    fig.draw(evolution.reach());
+    fig.draw(evolution);
     fig.write("vanderpol_evolution");
 }

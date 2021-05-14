@@ -1,7 +1,7 @@
 /***************************************************************************
- *            arch_suite.cpp
+ *            SUTR21.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2021  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,22 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "PRDE20.hpp"
-#include "CVDP20.hpp"
-#include "LALO20.hpp"
 #include "SUTR21.hpp"
-#include "LOVO21.hpp"
-#include "SPRE20.hpp"
 
 using namespace Ariadne;
 
-Int main(Int argc, const char* argv[])
-{
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    PRDE20();
-    CVDP20();
-    LALO20();
+Int main(Int argc, const char* argv[]) {
+
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
     SUTR21();
-    LOVO21();
-    SPRE20();
 }

@@ -43,8 +43,6 @@
 #include "io/drawer.hpp"
 #include "io/logging.hpp"
 
-#include "function/user_function.hpp"
-
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -64,7 +62,8 @@ class TestEnclosure
         ARIADNE_TEST_CALL(test_split());
         ARIADNE_TEST_CALL(test_labelled_construction());
         ARIADNE_TEST_CALL(test_labelled_product());
-        ARIADNE_TEST_CALL(test_labelled_draw());
+        ARIADNE_TEST_CALL(test_labelled_drawers());
+        ARIADNE_TEST_CALL(test_labelled_with_auxiliary_draw());
     }
 
     Void test_construct_without_domain() const {
@@ -214,15 +213,31 @@ class TestEnclosure
         Enclosure encl(dom,fnc,configuration);
         RealVariable x("x"),y("y");
         LabelledEnclosure lencl(encl,RealSpace({x,y}));
-        LabelledFigure fig(Axes2d(-1.0<=x<=1.0,-1.5<=y<=1.5));;
+        LabelledFigure fig(Axes2d(-1.0<=x<=1.0,-1.5<=y<=1.5));
         fig << line_style(true) << lencl;
         fig.write(("test_enclosure_"+suffix).c_str());
     }
 
-    Void test_labelled_draw() const {
+    Void test_labelled_drawers() const {
         _draw(BoxDrawer(),"box");
         _draw(GridDrawer(4),"grid");
         _draw(AffineDrawer(1),"affine");
+    }
+
+    void test_labelled_with_auxiliary_draw() const {
+        ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        EnclosureConfiguration config(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8)));
+        config.set_drawer(AffineDrawer(1));
+        Enclosure encl(dom,config);
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
+        encl.set_auxiliary_mapping(auxiliary);
+        RealVariable x("x"), y("y"), z("z");
+        LabelledEnclosure lencl(encl,RealSpace({x,y}),RealSpace({z}));
+        LabelledFigure fig(Axes2d(-1.0<=x<=3,-1<=z<=11));
+        fig << lencl;
+        fig.write("test_enclosure_auxiliary");
     }
 };
 

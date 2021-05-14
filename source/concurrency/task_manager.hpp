@@ -60,6 +60,9 @@ class TaskManager {
     //! \brief Synchronised method for updating the preferred concurrency to be used
     void set_concurrency(SizeType value);
 
+    //! \brief Set the concurrency to the maximum allowed by this machine
+    void set_maximum_concurrency();
+
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details The is no limits on the number of tasks to enqueue. If concurrency is zero,
     //! then the task is executed sequentially with no threads involved

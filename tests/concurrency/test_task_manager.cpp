@@ -35,6 +35,8 @@ class TestWorkloadAdvancement {
         auto max_concurrency = TaskManager::instance().maximum_concurrency();
         TaskManager::instance().set_concurrency(max_concurrency);
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency);
+        TaskManager::instance().set_maximum_concurrency();
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency);
         ARIADNE_TEST_FAIL(TaskManager::instance().set_concurrency(1 + max_concurrency));
     }
 

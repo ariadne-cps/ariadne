@@ -40,6 +40,7 @@ class TestHybridEnclosure {
     Void test() {
         ARIADNE_TEST_CALL(test_construct())
         ARIADNE_TEST_CALL(test_space_having_time())
+        ARIADNE_TEST_CALL(test_auxiliary())
     }
 
     void test_construct() {
@@ -66,6 +67,34 @@ class TestHybridEnclosure {
         HybridRealBox box(DiscreteLocation(),{1<=t<=2,0<=x<=1});
         HybridEnclosure encl(box,config);
         ARIADNE_TEST_PRINT(encl.state_time_auxiliary_space())
+    }
+
+    void test_auxiliary() {
+        ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        ARIADNE_TEST_PRINT(encl.auxiliary_function());
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
+        RealVariable x("x"), y("y"), z("z");
+        HybridEnclosure he(DiscreteLocation(),RealSpace({x,y}),encl);
+        he.set_auxiliary({z},auxiliary);
+        ARIADNE_TEST_EQUALS(he.dimension(),3)
+        ARIADNE_TEST_EXECUTE(he.function(x))
+        ARIADNE_TEST_EXECUTE(he.function(y))
+        ARIADNE_TEST_EXECUTE(he.function(z))
+        ARIADNE_TEST_EXECUTE(he.function(TimeVariable()))
+        ARIADNE_TEST_FAIL(he.function(RealVariable("u")))
+        ARIADNE_TEST_EQUALS(he.auxiliary_function().result_size(),1)
+        ARIADNE_TEST_EQUALS(he.state_auxiliary_function().result_size(),3)
+        ARIADNE_TEST_EQUALS(he.state_time_auxiliary_function().result_size(),4)
+        ARIADNE_TEST_EQUALS(he.state_set().dimension(),2)
+        ARIADNE_TEST_EQUALS(he.state_time_set().dimension(),3)
+        ARIADNE_TEST_EQUALS(he.state_auxiliary_set().dimension(),3)
+
+        ARIADNE_TEST_EQUALS(project(he,RealSpace({x})).dimension(),1)
+        ARIADNE_TEST_EQUALS(project(he,RealSpace({y,z})).dimension(),2)
+        ARIADNE_TEST_FAIL(project(he,RealSpace({RealVariable("u")})))
     }
 };
 

@@ -400,8 +400,8 @@ const DiscreteLocation& HybridEnclosure::location() const {
 }
 
 HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
-    ValidatedConstrainedImageSet set(this->parameter_domain(),this->state_function(),this->constraints());
-    return HybridBasicSet<Enclosure>(this->location(),this->state_space(),this->continuous_set());
+    Enclosure enclosure(this->parameter_domain(),this->state_function(),this->time_function(),this->constraints(),this->configuration());
+    return HybridBasicSet<Enclosure>(this->location(),this->state_space(),enclosure);
 }
 
 HybridBasicSet<Enclosure> HybridEnclosure::state_time_set() const {

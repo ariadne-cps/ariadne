@@ -77,11 +77,15 @@ auto VectorFieldEvolver::function_factory() const -> FunctionFactoryType const& 
 }
 
 auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    return orbit(EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
+    auto enclosure = EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
+    return orbit(enclosure,time,semantics);
 }
 
 auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    return orbit(EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory())),time,semantics);
+    auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
+    return orbit(enclosure,time,semantics);
 }
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>

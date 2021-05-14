@@ -37,6 +37,8 @@
 
 #include "utility/tuple.hpp"
 
+#include "concurrency/workload.hpp"
+
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
 
@@ -78,10 +80,6 @@ class FlowFunctionModel
 struct TransitionData;
 struct CrossingData;
 struct TimingData;
-struct InitialData;
-struct FinalData;
-struct EvolutionData;
-
 
 //! \ingroup AnalysisModule
 //! \ingroup HybridDynamicsSubModule
@@ -115,6 +113,21 @@ class HybridEvolverBase
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<HybridEnclosure> EnclosureListType;
 
+  private:
+    //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
+    struct SynchronisedOrbit : public OrbitType {
+        SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
+        Void adjoin_reach(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
+        Void adjoin_intermediate(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
+        Void adjoin_final(const EnclosureType& set) { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+        SizeType reach_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::reach().size(); }
+        SizeType intermediate_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::intermediate().size(); }
+        SizeType final_size() const { LockGuard<Mutex> lock(_mux); return OrbitType::final().size(); }
+    private:
+        mutable Mutex _mux;
+    };
+    typedef Pair<EnclosureType,Bool> WorkloadElementType;
+    typedef Workload<WorkloadElementType,TerminationType const&,Semantics const&,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.
@@ -189,17 +202,21 @@ class HybridEvolverBase
     //! evolution is possible.
     virtual
     Void
-    _process_working_set(EvolutionData& evolution_data,
+    _process_working_set(WorkloadType::Access& workload,
                          Pair<HybridEnclosure,Bool> const& working_set,
-                         TerminationType const& termination) const;
+                         TerminationType const& termination,
+                         Semantics const& semantics,
+                         SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Performs an evolution step on an \a enclosure, where initially active
     //! events have already been processed and only the continuous \a final_time is necessary.
     virtual
     Void
-    _evolution_step(EvolutionData& evolution_data,
+    _evolution_step(WorkloadType::Access& workload,
                     HybridEnclosure const& enclosure,
-                    Real const& final_time) const;
+                    Real const& final_time,
+                    Semantics const& semantics,
+                    SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Extracts the transitions valid in \a location of \a system.
     //! \details For some systems, extracting the information about the
@@ -295,7 +312,10 @@ class HybridEvolverBase
 
     virtual
     Void
-    _process_jumped_set(EvolutionData& evolution_data, HybridEnclosure const& jumped_set, TerminationType const& termination) const;
+    _process_jumped_set(WorkloadType::Access& workload,
+                        HybridEnclosure const& jumped_set,
+                        TerminationType const& termination,
+                        SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Process the \a starting_set to find any
     //!  <em>immediately active</em> events, and compute the relevant \em jump sets
@@ -313,7 +333,10 @@ class HybridEvolverBase
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
     Void
-    _process_starting_events(EvolutionData& evolution_data, HybridEnclosure const& starting_set, Map<DiscreteEvent,TransitionData> const& transitions) const;
+    _process_starting_events(WorkloadType::Access& workload,
+                             HybridEnclosure const& starting_set,
+                             Map<DiscreteEvent,TransitionData> const& transitions,
+                             SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
     //! to obtain the single-step unconstrained reachable set.
@@ -412,18 +435,20 @@ class HybridEvolverBase
     //! TODO: This method might be better split into even simpler events.
     virtual
     Void
-    _apply_evolution_step(EvolutionData& evolution_data,
+    _apply_evolution_step(WorkloadType::Access& workload,
                           HybridEnclosure const& starting_set,
                           ValidatedVectorMultivariateFunctionModelDP const& flow,
                           TimingData const& timing_data,
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
                           EffectiveVectorMultivariateFunction const& dynamic,
-                          Map<DiscreteEvent,TransitionData> const& transitions) const;
+                          Map<DiscreteEvent,TransitionData> const& transitions,
+                          Semantics const& semantics,
+                          SharedPointer<SynchronisedOrbit> result) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     Void
-    _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
+    _log_summary(WorkloadType::Access& workload, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
 
   protected:
     Void _create(const SystemType& system, FunctionFactoryType* factory);
@@ -598,30 +623,6 @@ struct TimingData
     ValidatedScalarMultivariateFunctionModelDP evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 OutputStream& operator<<(OutputStream& os, const TimingData& timing);
-
-//! \ingroup HybridDynamicsSubModule
-//! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
-//! \relates HybridEvolverBase
-struct EvolutionData
-{
-    //! \brief Sets to process, along with a flag that informs whether they
-    //! need to be processed for initially active events.
-    List<Pair<HybridEnclosure,Bool>> working_sets;
-
-    //! \brief Sets which have been computed as reach sets for the current
-    //! evolution.
-    List<HybridEnclosure> reach_sets;
-    //! \brief Sets which have been computed as final sets (i.e. satisfying
-    //! either the final time or the maximum number of stesp).
-    List<HybridEnclosure> final_sets;
-    //! \brief Intermediate sets reached after each time step. Not relevant for
-    //! the result, but useful for plotting, especially for debugging.
-    List<HybridEnclosure> intermediate_sets;
-
-    //! \brief The semantics used to compute the evolution. Defaults to Semantics::UPPER.
-    Semantics semantics;
-};
-
 
 //! \relates HybridEvolverBase
 //! \brief Configuration for HybridEvolverBase, for controlling the accuracy of continuous evolution methods.

@@ -66,7 +66,7 @@ class ArchBenchmarkInstance {
 
 class ArchBenchmark {
   public:
-    ArchBenchmark(String const& name) : _name(name) { }
+    ArchBenchmark(String const& name) : _name(name) { TaskManager::instance().set_maximum_concurrency(); }
     ArchBenchmarkInstance create_instance() const { return ArchBenchmarkInstance(_name); }
     ArchBenchmarkInstance create_instance(String const& instance_name) const { return ArchBenchmarkInstance(_name,instance_name); }
     String name() const { return _name; }

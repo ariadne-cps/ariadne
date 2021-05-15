@@ -87,6 +87,7 @@ orbit(const EnclosureType& initial_set,
       const TerminationType& termination,
       Semantics semantics) const
 {
+    ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
     Orbit<EnclosureType> orbit(initial_set);
     EnclosureListType final;
     EnclosureListType reachable;

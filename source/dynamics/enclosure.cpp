@@ -938,6 +938,9 @@ Enclosure::split(SizeType d) const
     result1._dwell_time_function=dwell_time_function1;
     result2._dwell_time_function=dwell_time_function2;
 
+    result1._auxiliary_mapping=this->_auxiliary_mapping;
+    result2._auxiliary_mapping=this->_auxiliary_mapping;
+
     result1._check();
     result2._check();
     return result;
@@ -1562,11 +1565,21 @@ Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) con
     this->euclidean_set().draw(canvas,proj);
 }
 
-
-
-
 LabelledUpperBoxType LabelledEnclosure::bounding_box() const {
     return LabelledBox(this->state_space(), this->euclidean_set().bounding_box());
+}
+
+LabelledUpperBoxType
+ListSet<LabelledEnclosure>::bounding_box() const
+{
+    auto iter=this->begin();
+    auto box = iter->state_auxiliary_set().bounding_box();
+    RealSpace space = join(iter->state_space(),iter->auxiliary_space());
+    ++iter;
+    for(; iter!=this->end(); ++iter) {
+        box = hull(box,iter->state_auxiliary_set().bounding_box());
+    }
+    return LabelledUpperBoxType(space,box);
 }
 
 const ListSet<LabelledSet<UpperBoxType>> ListSet<LabelledEnclosure>::bounding_boxes() const {

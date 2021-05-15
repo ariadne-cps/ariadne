@@ -45,4 +45,8 @@ void TaskManager::set_concurrency(SizeType value) {
     _pool.set_num_threads(value);
 }
 
+void TaskManager::set_maximum_concurrency() {
+    set_concurrency(_maximum_concurrency);
+}
+
 }

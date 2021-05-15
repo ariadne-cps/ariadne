@@ -153,10 +153,17 @@ class TestEnclosure
         auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom1,swp),0);
         Enclosure encl(dom1,fnc,EnclosureConfiguration(TaylorFunctionFactory(swp)));
-        ARIADNE_TEST_PRINT(encl.split());
-        ARIADNE_TEST_PRINT(encl.split(1));
-        ARIADNE_TEST_PRINT(encl.splitting_subdomains_zeroth_order());
-        ARIADNE_TEST_PRINT(encl.split_first_order());
+        auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
+        auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction auxiliary(1,x0+sqr(x1));
+        encl.set_auxiliary_mapping(auxiliary);
+        auto split1 = encl.split();
+        ARIADNE_TEST_EQUALS(split1.first.auxiliary_function().result_size(),1)
+        auto split2 =encl.split(1);
+        ARIADNE_TEST_EQUALS(split2.first.auxiliary_function().result_size(),1)
+        auto split3 =encl.split_first_order();
+        ARIADNE_TEST_EQUALS(split3.first.auxiliary_function().result_size(),1)
+        ARIADNE_TEST_PRINT(encl.splitting_subdomains_zeroth_order())
     }
 
     Void test_labelled_construction() const {

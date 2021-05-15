@@ -152,14 +152,16 @@ class HybridEnclosure
     const EnclosureConfiguration& configuration() const;
     //! \brief The current location.
     const DiscreteLocation& location() const;
-    //! \brief The Euclidean space of the location, including state, time and auxiliary functions.
-    const RealSpace state_time_auxiliary_space() const;
     //! \brief The Euclidean state space of the location.
     const RealSpace state_space() const;
-    //! \brief The global evolution time variable.
-    const RealVariable time_variable() const;
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
+    //! \brief The Euclidean state space of the location including state and auxiliary functions.
+    const RealSpace state_auxiliary_space() const;
+    //! \brief The Euclidean space of the location, including state, time and auxiliary functions.
+    const RealSpace state_time_auxiliary_space() const;
+    //! \brief The global evolution time variable.
+    const RealVariable time_variable() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.

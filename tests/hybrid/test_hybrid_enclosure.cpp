@@ -55,6 +55,8 @@ class TestHybridEnclosure {
         RealVariable x("x"), y("y");
         HybridRealBox box(location,{1<=x<=2,0<=y<=1});
         HybridEnclosure encl3(box,config);
+        ARIADNE_TEST_EQUALS(encl3.number_of_parameters(),2)
+        ARIADNE_TEST_EQUALS(encl3.number_of_constraints(),0)
 
         Enclosure cencl(config);
         HybridEnclosure(location,RealSpace({x,y}),cencl);
@@ -66,7 +68,7 @@ class TestHybridEnclosure {
         RealVariable x("x"), t("t");
         HybridRealBox box(DiscreteLocation(),{1<=t<=2,0<=x<=1});
         HybridEnclosure encl(box,config);
-        ARIADNE_TEST_PRINT(encl.state_time_auxiliary_space())
+        ARIADNE_TEST_ASSERT(encl.state_time_auxiliary_space() == RealSpace({t,x}))
     }
 
     void test_auxiliary() {
@@ -91,6 +93,8 @@ class TestHybridEnclosure {
         ARIADNE_TEST_EQUALS(he.state_set().dimension(),2)
         ARIADNE_TEST_EQUALS(he.state_time_set().dimension(),3)
         ARIADNE_TEST_EQUALS(he.state_auxiliary_set().dimension(),3)
+
+        ARIADNE_TEST_ASSERT(he.state_auxiliary_space() == RealSpace({x,y,z}))
 
         ARIADNE_TEST_EQUALS(project(he,RealSpace({x})).dimension(),1)
         ARIADNE_TEST_EQUALS(project(he,RealSpace({y,z})).dimension(),2)

@@ -81,7 +81,7 @@ class Workload {
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
             _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _tasks.empty() or _exception != nullptr; });
-            if (_exception != nullptr) throw _exception;
+            if (_exception != nullptr) rethrow_exception(_exception);
             if (_advancement.has_finished()) return;
 
             auto task = _tasks.back();

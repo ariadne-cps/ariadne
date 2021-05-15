@@ -126,6 +126,12 @@ HybridEnclosure* HybridEnclosure::clone() const {
 }
 
 const RealSpace
+HybridEnclosure::state_auxiliary_space() const
+{
+    return join(this->state_space(),this->auxiliary_space());
+}
+
+const RealSpace
 HybridEnclosure::state_time_auxiliary_space() const
 {
     auto state_time_space=(this->state_space().contains(this->time_variable()) ? this->state_space() : join(this->state_space(),this->time_variable()));

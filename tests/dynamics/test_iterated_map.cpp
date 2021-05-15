@@ -54,7 +54,7 @@ class TestIteratedMap
 {
   public:
     Void test() const {
-        ARIADNE_TEST_CALL(test_construct());
+        ARIADNE_TEST_CALL(test_construct())
     }
 
     Void test_construct() const
@@ -63,14 +63,15 @@ class TestIteratedMap
         RealVariable x("x"), y("y"), z("z");
         IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x },{let(z)=x+y});
         ARIADNE_TEST_PRINT(henon);
-        ARIADNE_TEST_EQUALS(henon.state_space().dimension(),2);
-        ARIADNE_TEST_EQUALS(henon.auxiliary_space().dimension(),1);
+        ARIADNE_TEST_EQUALS(henon.state_space().dimension(),2)
+        ARIADNE_TEST_EQUALS(henon.auxiliary_space().dimension(),1)
+        ARIADNE_TEST_EQUALS(henon.state_auxiliary_space().dimension(),3)
     }
 };
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv))
     TestIteratedMap().test();
     return ARIADNE_TEST_FAILURES;
 }

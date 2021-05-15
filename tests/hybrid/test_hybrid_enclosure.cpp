@@ -55,6 +55,8 @@ class TestHybridEnclosure {
         RealVariable x("x"), y("y");
         HybridRealBox box(location,{1<=x<=2,0<=y<=1});
         HybridEnclosure encl3(box,config);
+        ARIADNE_TEST_EQUALS(encl3.number_of_parameters(),2)
+        ARIADNE_TEST_EQUALS(encl3.number_of_constraints(),0)
 
         Enclosure cencl(config);
         HybridEnclosure(location,RealSpace({x,y}),cencl);

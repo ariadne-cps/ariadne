@@ -214,6 +214,14 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
     return events;
 }
 
+Void set_auxiliary(HybridAutomatonInterface const& system, HybridEnclosure& enclosure) {
+    DiscreteLocation initial_location=enclosure.location();
+    ARIADNE_ASSERT(system.state_space().has_location(initial_location))
+    RealSpace auxiliary_space=system.continuous_auxiliary_space(initial_location);
+    EffectiveVectorMultivariateFunction auxiliary_function=system.auxiliary_function(initial_location);
+    enclosure.set_auxiliary(auxiliary_space.variables(),auxiliary_function);
+}
+
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridExactBoxType& initial_box,
@@ -224,6 +232,7 @@ orbit(const HybridExactBoxType& initial_box,
     ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
     ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,EnclosureConfiguration(this->function_factory()));
+    set_auxiliary(this->system(),initial_enclosure);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -238,6 +247,7 @@ orbit(const HybridBoxSet& initial_box,
     ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
     ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),EnclosureConfiguration(this->function_factory()));
+    set_auxiliary(this->system(),initial_enclosure);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -251,6 +261,7 @@ orbit(const HybridBoundedConstraintSet& initial_set,
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("initial_set="<<initial_set);
     HybridEnclosure initial_enclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
+    set_auxiliary(this->system(),initial_enclosure);
     ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
@@ -262,10 +273,8 @@ orbit(const HybridEnclosure& initial,
       const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
-    DiscreteLocation initial_location=initial.location();
-    RealSpace auxiliary_space=this->system().continuous_auxiliary_space(initial_location);
-    EffectiveVectorMultivariateFunction auxiliary_function=this->system().auxiliary_function(initial_location);
-    const_cast<HybridEnclosure&>(initial).set_auxiliary(auxiliary_space.variables(),auxiliary_function);
+    ARIADNE_PRECONDITION(this->system().state_auxiliary_space().has_location(initial.location()))
+    ARIADNE_PRECONDITION(this->system().state_auxiliary_space()[initial.location()] == initial.state_auxiliary_space())
 
     auto result = std::make_shared<SynchronisedOrbit>(initial);
     WorkloadType workload(std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
@@ -347,13 +356,17 @@ HybridEvolverBase::set_solver(const SolverInterface& solver)
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridExactBox& initial_box) const
 {
-    return HybridEnclosure(initial_box,EnclosureConfiguration(this->function_factory()));
+    HybridEnclosure result(initial_box,EnclosureConfiguration(this->function_factory()));
+    set_auxiliary(this->system(),result);
+    return result;
 }
 
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridBoundedConstraintSet& initial_set) const
 {
-    return HybridEnclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
+    HybridEnclosure result(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
+    set_auxiliary(this->system(),result);
+    return result;
 }
 
 

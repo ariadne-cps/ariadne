@@ -1,7 +1,7 @@
 /***************************************************************************
- *            PRDE20.cpp
+ *            PRDE21.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2021  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "PRDE20.hpp"
+#include "PRDE21.hpp"
 
 using namespace Ariadne;
 
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    PRDE20();
+    PRDE21();
 }

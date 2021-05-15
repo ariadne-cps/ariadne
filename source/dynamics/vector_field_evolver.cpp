@@ -90,6 +90,7 @@ auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
+    ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
     WorkloadType workload(std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
     _append_initial_set(workload,TimeStepType(0u),initial_set);

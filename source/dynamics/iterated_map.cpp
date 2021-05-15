@@ -70,6 +70,10 @@ RealSpace IteratedMap::auxiliary_space() const {
     return RealSpace(left_hand_sides(this->_auxiliary));
 }
 
+RealSpace IteratedMap::state_auxiliary_space() const {
+    return join(state_space(),auxiliary_space());
+}
+
 OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
     os << "IteratedMap( update_function = " << map.update_function() << ", "
           "auxiliary_function = " << map.auxiliary_function() << ", "

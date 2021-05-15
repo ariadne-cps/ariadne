@@ -938,6 +938,9 @@ Enclosure::split(SizeType d) const
     result1._dwell_time_function=dwell_time_function1;
     result2._dwell_time_function=dwell_time_function2;
 
+    result1._auxiliary_mapping=this->_auxiliary_mapping;
+    result2._auxiliary_mapping=this->_auxiliary_mapping;
+
     result1._check();
     result2._check();
     return result;

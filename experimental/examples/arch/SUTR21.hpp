@@ -54,9 +54,9 @@ void SUTR21() {
     evolver.configuration().set_maximum_step_size(10.0);
     evolver.configuration().set_maximum_spacial_error(1e-3);
 
-    RealExpressionBoundedConstraintSet initial_set({0.5_dec<=SA<=0.6_dec,
-                                                    0.1_dec<=SI<=0.2_dec,
-                                                    0.1_dec<=A<=0.15_dec,
+    RealExpressionBoundedConstraintSet initial_set({0.5_dec<=SA<=0.7_dec,
+                                                    0.2_dec<=SI<=0.3_dec,
+                                                    0.1_dec<=A<=0.14_dec,
                                                     0.01_dec<=I<=0.05_dec,
                                                     RA==0,RI==0,D==0});
 

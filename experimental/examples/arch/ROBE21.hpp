@@ -1,5 +1,5 @@
 /***************************************************************************
- *            PRDE21.hpp
+ *            ROBE21.hpp
  *
  *  Copyright  2021  Luca Geretti
  *
@@ -26,16 +26,16 @@
 
 using namespace Ariadne;
 
-void PRDE21() {
+void ROBE21() {
 
-    ArchBenchmark benchmark("PRDE21");
+    ArchBenchmark benchmark("ROBE21");
 
     TaskManager::instance().set_concurrency(0);
 
     RealVariable x("x"), y("y"), z("z"), s("s");
     RealConstant alpha("alpha",0.4_dec);
 
-    ARIADNE_LOG_PRINTLN("Production-destruction system:");
+    ARIADNE_LOG_PRINTLN("Robertson chemical reaction system:");
 
     MaximumError max_err = 1e-6;
     //TaylorPicardIntegrator integrator(max_err);

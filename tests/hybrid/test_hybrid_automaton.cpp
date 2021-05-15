@@ -76,7 +76,6 @@ TestHybridAutomaton::test()
     ARIADNE_TEST_CALL(test_static_analysis());
 }
 
-
 Void
 TestHybridAutomaton::test_distinct_modes()
 {
@@ -295,6 +294,8 @@ HybridAutomaton TestHybridAutomaton::_get_tank() {
     DiscreteLocation flow;
 
     automaton.new_mode(flow,{dot(height)=beta*aperture-alpha*height});
+
+    ARIADNE_TEST_EQUALS(automaton.input_variables(flow),Set<RealVariable>({aperture}));
 
     return automaton;
 }

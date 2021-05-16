@@ -34,9 +34,14 @@ template<class T> class SynchronisedList : public List<T> {
     Mutex _mux;
 };
 
-using WorkloadType = Workload<int,SharedPointer<SynchronisedList<int>>>;
+using StaticWorkloadType = StaticWorkload<int,SharedPointer<std::atomic<int>>>;
+using DynamicWorkloadType = DynamicWorkload<int,SharedPointer<SynchronisedList<int>>>;
 
-Void square_and_store(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+void sum_all(int const& val, SharedPointer<std::atomic<int>> result) {
+    result->operator+=(val);
+}
+
+Void square_and_store(DynamicWorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     int next_val = val*val;
     if (next_val < 46340) {
         wla.append(next_val);
@@ -44,15 +49,15 @@ Void square_and_store(WorkloadType::Access& wla, int const& val, SharedPointer<S
     results->append(next_val);
 }
 
-Void check_processing(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+Void check_processing(DynamicWorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     ARIADNE_TEST_EQUALS(wla.advancement().processing(),1)
 }
 
-Void throw_exception_immediately(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+Void throw_exception_immediately(DynamicWorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     throw new std::exception();
 }
 
-Void throw_exception_later(WorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
+Void throw_exception_later(DynamicWorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     int next_val = val+1;
     if (next_val > 4) throw new std::exception();
     else wla.append(next_val);
@@ -61,23 +66,29 @@ Void throw_exception_later(WorkloadType::Access& wla, int const& val, SharedPoin
 class TestWorkload {
   public:
 
-    void test_construct() {
+    void test_construct_static() {
+        TaskManager::instance().set_concurrency(0);
+        auto result = std::make_shared<std::atomic<int>>();
+        StaticWorkloadType wl(&sum_all, result);
+    }
+
+    void test_construct_dynamic() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
     }
 
     void test_invalid_process() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         ARIADNE_TEST_FAIL(wl.process())
     }
 
     void test_append() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         wl.append(2);
         ARIADNE_TEST_EQUALS(wl.size(),1)
         wl.append({10,20});
@@ -88,18 +99,28 @@ class TestWorkload {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         result->append(2);
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         wl.append(2);
         wl.process();
         ARIADNE_TEST_PRINT(*result)
         ARIADNE_TEST_EQUALS(result->size(),5)
     }
 
-    void test_concurrent_processing() {
+    void test_concurrent_processing_static() {
+        TaskManager::instance().set_maximum_concurrency();
+        auto result = std::make_shared<std::atomic<int>>();
+        *result = 0;
+        StaticWorkloadType wl(&sum_all, result);
+        wl.append({2,7,-3,5,8,10,5,8});
+        wl.process();
+        ARIADNE_TEST_EQUALS(*result,42)
+    }
+
+    void test_concurrent_processing_dynamic() {
         TaskManager::instance().set_concurrency(1);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         result->append(2);
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         wl.append(2);
         wl.process();
         ARIADNE_TEST_PRINT(*result)
@@ -109,7 +130,7 @@ class TestWorkload {
     void test_throw_serial_exception_immediately() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&throw_exception_immediately, result);
+        DynamicWorkloadType wl(&throw_exception_immediately, result);
         wl.append(2);
         ARIADNE_TEST_FAIL(wl.process())
     }
@@ -117,7 +138,7 @@ class TestWorkload {
     void test_throw_serial_exception_later() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&throw_exception_later, result);
+        DynamicWorkloadType wl(&throw_exception_later, result);
         wl.append(2);
         ARIADNE_TEST_FAIL(wl.process())
     }
@@ -125,7 +146,7 @@ class TestWorkload {
     void test_throw_concurrent_exception_immediately() {
         TaskManager::instance().set_concurrency(1);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&throw_exception_immediately, result);
+        DynamicWorkloadType wl(&throw_exception_immediately, result);
         wl.append(2);
         ARIADNE_TEST_FAIL(wl.process())
     }
@@ -133,7 +154,7 @@ class TestWorkload {
     void test_throw_concurrent_exception_later() {
         TaskManager::instance().set_concurrency(1);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&throw_exception_later,result);
+        DynamicWorkloadType wl(&throw_exception_later, result);
         wl.append(2);
         ARIADNE_TEST_FAIL(wl.process())
     }
@@ -141,7 +162,7 @@ class TestWorkload {
     void test_multiple_append() {
         TaskManager::instance().set_concurrency(2);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         result->append(2);
         result->append(3);
         wl.append({2,3});
@@ -154,7 +175,7 @@ class TestWorkload {
         TaskManager::instance().set_concurrency(2);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
         result->append(2);
-        WorkloadType wl(&square_and_store,result);
+        DynamicWorkloadType wl(&square_and_store, result);
         wl.append(2);
         wl.process();
         result->clear();
@@ -168,17 +189,19 @@ class TestWorkload {
     void test_advancement() {
         TaskManager::instance().set_concurrency(1);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        WorkloadType wl(&check_processing,result);
+        DynamicWorkloadType wl(&check_processing, result);
         wl.append(0);
         wl.process();
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_construct())
+        ARIADNE_TEST_CALL(test_construct_static())
+        ARIADNE_TEST_CALL(test_construct_dynamic())
         ARIADNE_TEST_CALL(test_append())
         ARIADNE_TEST_CALL(test_invalid_process())
         ARIADNE_TEST_CALL(test_serial_processing())
-        ARIADNE_TEST_CALL(test_concurrent_processing())
+        ARIADNE_TEST_CALL(test_concurrent_processing_static())
+        ARIADNE_TEST_CALL(test_concurrent_processing_dynamic())
         ARIADNE_TEST_CALL(test_throw_serial_exception_immediately())
         ARIADNE_TEST_CALL(test_throw_serial_exception_later())
         ARIADNE_TEST_CALL(test_throw_concurrent_exception_immediately())

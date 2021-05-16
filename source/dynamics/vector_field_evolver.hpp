@@ -85,7 +85,7 @@ class VectorFieldEvolver
       private:
         Mutex _mux;
     };
-    typedef Workload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef DynamicWorkload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.

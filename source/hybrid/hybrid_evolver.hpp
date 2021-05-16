@@ -127,7 +127,7 @@ class HybridEvolverBase
         mutable Mutex _mux;
     };
     typedef Pair<EnclosureType,Bool> WorkloadElementType;
-    typedef Workload<WorkloadElementType,TerminationType const&,Semantics const&,SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef DynamicWorkload<WorkloadElementType,TerminationType const&,Semantics const&,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.

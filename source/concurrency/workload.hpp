@@ -33,49 +33,22 @@
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
 #include "concurrency_typedefs.hpp"
+#include "workload_interface.hpp"
 #include "task_manager.hpp"
 #include "workload_advancement.hpp"
 
 namespace Ariadne {
 
-//! \brief A workload expressed as a stack of elements to work on, supplied with a function to process them
-//! \details E: stack element type
-//!          AS: optional input arguments for processing the elements; if used as output, their synchronisation
-//!              in the concurrent case is up to the designer
-//!          The workload handles the non-concurrent case separately, in order to unroll the tasks breadth-first: if
-//!          tasks were instead enqueued to the TaskManager, a depth-first execution would be performed.
-//!          A workload object has a lifetime of multiple processings, if necessary.
+//! \brief Base class implementation
 template<class E, class... AS>
-class Workload {
+class WorkloadBase : public WorkloadInterface<E,AS...> {
   public:
-    //! \brief Reduced interface to be used by the processing function (and any function called by it)
-    class Access {
-        friend Workload;
-    protected:
-        Access(Workload& parent) : _load(parent) { }
-    public:
-        Void append(E const &e) { _load._enqueue(e); }
-        WorkloadAdvancement const& advancement() const { return _load._advancement; }
-    private:
-        Workload& _load;
-    };
-  public:
-    using FunctionType = std::function<Void(Workload<E,AS...>::Access&, E const&, AS...)>;
-    using PartiallyBoundFunctionType = std::function<Void(E const&)>;
+    using PartiallyBoundFunctionType = std::function<Void(E const &)>;
     using CompletelyBoundFunctionType = VoidFunction;
 
-    Workload(FunctionType f, AS... as) :
-            _access(Access(*this)),
-            _f(std::bind(
-                std::forward<FunctionType const>(f),
-                std::forward<Workload<E,AS...>::Access const&>(_access),
-                std::placeholders::_1,
-                std::forward<AS>(as)...)),
-            _logger_level(0),
-            _advancement(0) { }
+    WorkloadBase() : _advancement(0), _logger_level(0) { }
 
-    //! \brief Process the given elements until completion
-    Void process() {
+    Void process() override {
         _logger_level = Logger::instance().current_level();
         ARIADNE_PRECONDITION(not _tasks.empty());
         while (true) {
@@ -94,17 +67,14 @@ class Workload {
         }
     }
 
-    //! \brief The size of the workload, i.e., the number of tasks to process
-    SizeType size() const { return _tasks.size(); }
+    SizeType size() const override { return _tasks.size(); }
 
-    //! \brief Append one element to process
     Void append(E const& e) {
         _advancement.add_to_waiting();
         _tasks.push_back(std::bind(std::forward<PartiallyBoundFunctionType const>(_f), std::forward<E const&>(e)));
     }
 
-    //! \brief Append a list of elements to process
-    Void append(List<E> const& es) { for (auto e : es) append(e); }
+    Void append(List<E> const& es) override { for (auto e : es) append(e); }
 
   private:
 
@@ -127,6 +97,8 @@ class Workload {
         if (_advancement.has_finished()) _element_availability_condition.notify_one();
     }
 
+  protected:
+
     Void _enqueue(E const& e) {
         if (_using_concurrency()) {
             _advancement.add_to_waiting();
@@ -142,13 +114,16 @@ class Workload {
         }
     }
 
+  protected:
+
+    WorkloadAdvancement _advancement;
+    PartiallyBoundFunctionType _f;
+
   private:
+
     List<CompletelyBoundFunctionType> _tasks; // Used for initial consumption and for consumption when using no concurrency
-    Access const _access;
-    PartiallyBoundFunctionType const _f;
 
     Nat _logger_level; // The logger level to impose to the running threads
-    WorkloadAdvancement _advancement;
 
     Mutex _element_appending_mutex;
     Mutex _element_availability_mutex;
@@ -156,6 +131,46 @@ class Workload {
     ConditionVariable _element_availability_condition;
 
     ExceptionPtr _exception;
+};
+
+//! \brief A basic static workload where all elements are appended and then processed
+template<class E, class... AS>
+class StaticWorkload : public WorkloadBase<E,AS...> {
+public:
+    using FunctionType = std::function<Void(E const&, AS...)>;
+
+    StaticWorkload(FunctionType f, AS... as) : WorkloadBase<E, AS...>() {
+        this->_f = std::bind(std::forward<FunctionType const>(f), std::placeholders::_1, std::forward<AS>(as)...);
+    }
+};
+
+//! \brief A dynamic workload in which it is possible to append new elements from the called function
+template<class E, class... AS>
+class DynamicWorkload : public WorkloadBase<E,AS...> {
+  public:
+    //! \brief Reduced interface to be used by the processing function (and any function called by it)
+    class Access {
+        friend DynamicWorkload;
+    protected:
+        Access(DynamicWorkload& parent) : _load(parent) { }
+    public:
+        Void append(E const &e) { _load._enqueue(e); }
+        WorkloadAdvancement const& advancement() const { return _load._advancement; }
+    private:
+        DynamicWorkload& _load;
+    };
+  public:
+    using FunctionType = std::function<Void(DynamicWorkload<E,AS...>::Access&, E const&, AS...)>;
+
+    DynamicWorkload(FunctionType f, AS... as) : WorkloadBase<E, AS...>(), _access(Access(*this)) {
+        this->_f = std::bind(std::forward<FunctionType const>(f),
+                             std::forward<DynamicWorkload<E,AS...>::Access const&>(_access),
+                             std::placeholders::_1,
+                             std::forward<AS>(as)...);
+    }
+
+  private:
+    Access const _access;
 };
 
 }

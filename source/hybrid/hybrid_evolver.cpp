@@ -229,11 +229,10 @@ orbit(const HybridExactBoxType& initial_box,
       Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
-    ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
+    ARIADNE_LOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -244,11 +243,10 @@ orbit(const HybridBoxSet& initial_box,
       Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN_AT(2,"factory="<<this->function_factory());
-    ARIADNE_LOG_PRINTLN("initial_box="<<initial_box);
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_box="<<initial_box);
     HybridEnclosure initial_enclosure(initial_box,this->system().continuous_state_space(initial_box.location()),EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
+    ARIADNE_LOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -259,10 +257,10 @@ orbit(const HybridBoundedConstraintSet& initial_set,
       Semantics semantics) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("initial_set="<<initial_set);
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_set="<<initial_set);
     HybridEnclosure initial_enclosure(initial_set,this->system().continuous_state_space(initial_set.location()),EnclosureConfiguration(this->function_factory()));
     set_auxiliary(this->system(),initial_enclosure);
-    ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure="<<initial_enclosure);
+    ARIADNE_LOG_PRINTLN_AT(2,"initial_enclosure="<<initial_enclosure);
     return this->orbit(initial_enclosure,termination,semantics);
 }
 
@@ -275,9 +273,13 @@ orbit(const HybridEnclosure& initial,
 {
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space().has_location(initial.location()))
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space()[initial.location()] == initial.state_auxiliary_space())
-
+    
     auto result = std::make_shared<SynchronisedOrbit>(initial);
-    WorkloadType workload(std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
+    WorkloadType workload([termination](std::pair<HybridEnclosure,Bool> const& enclosure_jumped, SharedPointer<ProgressIndicator> indicator){
+                              indicator->update_current(enclosure_jumped.first.time_range().lower_bound().get_d());
+                              indicator->update_final(termination.maximum_time().get_d());
+                          },
+                          std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
     workload.append({initial,true});
     workload.process();
 
@@ -379,17 +381,14 @@ struct EvolutionStepData {
 
 Void
 HybridEvolverBase::
-_log_summary(WorkloadType::Access& workload, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const
+_log_summary(HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const
 {
     UpperBoxType starting_bounding_box=starting_set.state_bounding_box();
     UpperIntervalType starting_time_range=starting_set.time_range();
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
     ARIADNE_LOG_PRINTLN(
-            "#[w="<<std::setw(2)<<std::left<<workload.advancement().waiting()
-            <<" p="<<std::setw(2)<<std::left<<workload.advancement().processing()
-            <<" c="<<std::setw(3)<<std::left<<workload.advancement().completed()
-            <<"] #r="<<std::setw(5)<<std::left<<result->reach_size()
+            "#r="<<std::setw(5)<<std::left<<result->reach_size()
             <<" #f="<<std::setw(4)<<std::left<<result->final_size()
             <<" #e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
@@ -1211,7 +1210,7 @@ _evolution_step(WorkloadType::Access& workload,
 
     ARIADNE_LOG_PRINTLN_AT(2,"dynamic="<<dynamic);
 
-    _log_summary(workload,starting_set,result);
+    _log_summary(starting_set,result);
 
     ARIADNE_LOG_PRINTLN_AT(2,"starting_set="<<starting_set);
     ARIADNE_LOG_PRINTLN_AT(2,"starting_time="<<starting_set.time_function());

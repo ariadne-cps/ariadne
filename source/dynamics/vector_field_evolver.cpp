@@ -90,9 +90,14 @@ auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial
 
 auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType>
 {
+    ARIADNE_LOG_SCOPE_CREATE
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
-    WorkloadType workload(std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
+    WorkloadType workload([time](TimedEnclosureType const& timed_enclosure, SharedPointer<ProgressIndicator> indicator){
+                                indicator->update_current(timed_enclosure.first.get_d());
+                                indicator->update_final(time.get_d());
+                              },
+                          std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
     _append_initial_set(workload,TimeStepType(0u),initial_set);
     workload.process();
 
@@ -119,14 +124,13 @@ _process_timed_enclosure(WorkloadType::Access& workload,
                          TimeType const& maximum_time,
                          Semantics semantics,
                          SharedPointer<SynchronisedOrbit> result) const {
+    ARIADNE_LOG_SCOPE_CREATE
     TimeStepType current_time=current_timed_set.first;
     EnclosureType current_set=current_timed_set.second;
     FloatDPUpperBound current_set_radius=current_set.euclidean_set().bounding_box().radius();
 
-    ARIADNE_LOG_PRINTLN("#[w="<<std::setw(2)<<std::left<<workload.advancement().waiting()
-                             <<" p="<<std::setw(2)<<std::left<<workload.advancement().processing()
-                             <<" c="<<std::setw(3)<<std::left<<workload.advancement().completed()
-                             <<"] t="<<std::setw(7)<<std::fixed<<current_time.get_d()
+    ARIADNE_LOG_PRINTLN("#r="<<std::setw(5)<<std::left<<result->reach_size()
+                             <<" t="<<std::setw(7)<<std::fixed<<current_time.get_d()
                              <<" p="<<std::setw(4)<<std::left<<current_set.number_of_parameters()
                              <<" r="<<std::setw(7)<<current_set.radius()
                              <<" c="<<current_set.centre())
@@ -156,7 +160,6 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
                               SharedPointer<SynchronisedOrbit> result) const
 {
     ARIADNE_LOG_SCOPE_CREATE
-
     typedef EffectiveVectorMultivariateFunction FunctionType;
 
     EnclosureType current_set;

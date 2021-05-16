@@ -158,10 +158,10 @@ private:
     Bool _is_dead;
 };
 
-LogScopeManager::LogScopeManager(std::string scope)
-    : _scope(scope)
+LogScopeManager::LogScopeManager(std::string scope, std::size_t level_increase)
+    : _scope(scope), _level_increase(level_increase)
 {
-    Logger::instance().increase_level(1);
+    Logger::instance().increase_level(_level_increase);
     if ((!Logger::instance().is_muted_at(0)) and Logger::instance().configuration().prints_scope_entrance()) {
         Logger::instance().println(0,"Enters '"+very_pretty_function(this->scope())+"'");
     }
@@ -175,7 +175,7 @@ LogScopeManager::~LogScopeManager() {
     if ((!Logger::instance().is_muted_at(0)) and Logger::instance().configuration().prints_scope_exit()) {
         Logger::instance().println(0,"Exits '"+very_pretty_function(this->scope())+"'");
     }
-    Logger::instance().decrease_level(1);
+    Logger::instance().decrease_level(_level_increase);
     Logger::instance().release(this->scope());
 }
 

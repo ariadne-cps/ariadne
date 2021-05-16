@@ -644,6 +644,7 @@ Void LabelledFigure::_paint3d(CanvasInterface& canvas) const
             break;
         }
         indicator.update_current(processed_objects++);
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
 
 }

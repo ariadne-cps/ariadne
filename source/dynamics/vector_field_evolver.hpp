@@ -82,10 +82,11 @@ class VectorFieldEvolver
         Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
         Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
         Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+        SizeType reach_size() { LockGuard<Mutex> lock(_mux); return OrbitType::reach().size(); }
       private:
         Mutex _mux;
     };
-    typedef Workload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef DynamicWorkload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.

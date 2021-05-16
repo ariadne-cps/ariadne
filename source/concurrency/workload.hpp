@@ -50,7 +50,6 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     Void process() override {
         _logger_level = Logger::instance().current_level();
-        ARIADNE_PRECONDITION(not _tasks.empty());
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
             _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _tasks.empty() or _exception != nullptr; });

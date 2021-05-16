@@ -54,7 +54,9 @@ class TestWorkloadAdvancement {
 
     void test_finished() {
         WorkloadAdvancement wp;
+        ARIADNE_TEST_ASSERT(wp.has_finished());
         wp.add_to_waiting(2);
+        ARIADNE_TEST_ASSERT(not wp.has_finished());
         wp.add_to_processing(2);
         wp.add_to_completed(2);
         ARIADNE_TEST_EQUALS(wp.completion_rate(),1.0);

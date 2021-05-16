@@ -78,13 +78,6 @@ class TestWorkload {
         DynamicWorkloadType wl(&square_and_store, result);
     }
 
-    void test_invalid_process() {
-        TaskManager::instance().set_concurrency(0);
-        SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
-        DynamicWorkloadType wl(&square_and_store, result);
-        ARIADNE_TEST_FAIL(wl.process())
-    }
-
     void test_append() {
         TaskManager::instance().set_concurrency(0);
         SharedPointer<SynchronisedList<int>> result = std::make_shared<SynchronisedList<int>>();
@@ -93,6 +86,13 @@ class TestWorkload {
         ARIADNE_TEST_EQUALS(wl.size(),1)
         wl.append({10,20});
         ARIADNE_TEST_EQUALS(wl.size(),3)
+    }
+
+    void test_process_nothing() {
+        TaskManager::instance().set_maximum_concurrency();
+        auto result = std::make_shared<std::atomic<int>>();
+        StaticWorkloadType wl(&sum_all, result);
+        ARIADNE_TEST_EXECUTE(wl.process())
     }
 
     void test_serial_processing() {
@@ -198,7 +198,7 @@ class TestWorkload {
         ARIADNE_TEST_CALL(test_construct_static())
         ARIADNE_TEST_CALL(test_construct_dynamic())
         ARIADNE_TEST_CALL(test_append())
-        ARIADNE_TEST_CALL(test_invalid_process())
+        ARIADNE_TEST_CALL(test_process_nothing())
         ARIADNE_TEST_CALL(test_serial_processing())
         ARIADNE_TEST_CALL(test_concurrent_processing_static())
         ARIADNE_TEST_CALL(test_concurrent_processing_dynamic())

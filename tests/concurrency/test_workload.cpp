@@ -41,6 +41,11 @@ void sum_all(int const& val, SharedPointer<std::atomic<int>> result) {
     result->operator+=(val);
 }
 
+void print(int const& val) {
+    ARIADNE_LOG_PRINTLN_VAR(val)
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
 Void square_and_store(DynamicWorkloadType::Access& wla, int const& val, SharedPointer<SynchronisedList<int>> results) {
     int next_val = val*val;
     if (next_val < 46340) {
@@ -108,7 +113,7 @@ class TestWorkload {
     }
 
     void test_concurrent_processing_static() {
-        TaskManager::instance().set_maximum_concurrency();
+        TaskManager::instance().set_concurrency(1);
         auto result = std::make_shared<std::atomic<int>>();
         *result = 0;
         StaticWorkloadType wl(&sum_all, result);
@@ -126,6 +131,16 @@ class TestWorkload {
         wl.process();
         ARIADNE_TEST_PRINT(*result)
         ARIADNE_TEST_EQUALS(result->size(),5)
+    }
+
+    void test_print_hold() {
+        TaskManager::instance().set_concurrency(0);
+        Logger::instance().configuration().set_verbosity(2);
+        StaticWorkload<int> wl(&print);
+        wl.append({1,2,3,4,5});
+        wl.process();
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        Logger::instance().configuration().set_verbosity(0);
     }
 
     void test_throw_serial_exception_immediately() {
@@ -195,6 +210,7 @@ class TestWorkload {
         ARIADNE_TEST_CALL(test_serial_processing())
         ARIADNE_TEST_CALL(test_concurrent_processing_static())
         ARIADNE_TEST_CALL(test_concurrent_processing_dynamic())
+        ARIADNE_TEST_CALL(test_print_hold())
         ARIADNE_TEST_CALL(test_throw_serial_exception_immediately())
         ARIADNE_TEST_CALL(test_throw_serial_exception_later())
         ARIADNE_TEST_CALL(test_throw_concurrent_exception_immediately())

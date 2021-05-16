@@ -448,7 +448,7 @@ class HybridEvolverBase
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
     Void
-    _log_summary(WorkloadType::Access& workload, HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
+    _log_summary(HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbit> result) const;
 
   protected:
     Void _create(const SystemType& system, FunctionFactoryType* factory);

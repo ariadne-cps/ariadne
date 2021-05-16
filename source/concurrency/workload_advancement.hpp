@@ -48,6 +48,9 @@ class WorkloadAdvancement {
     //! \brief The completed elements
     SizeType completed() const;
 
+    //! \brief All the elements (sum of waiting, processing and completed)
+    SizeType total() const;
+
     //! \brief Add n elements to waiting
     Void add_to_waiting(SizeType n = 1);
     //! \brief Move n waiting to processing

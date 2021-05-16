@@ -43,6 +43,11 @@ SizeType WorkloadAdvancement::completed() const {
     return _num_completed;
 }
 
+SizeType WorkloadAdvancement::total() const {
+    LockGuard<Mutex> lock(_mux);
+    return _num_waiting + _num_processing + _num_completed;
+}
+
 Void WorkloadAdvancement::add_to_waiting(SizeType n) {
     ARIADNE_PRECONDITION(n > 0);
     LockGuard<Mutex> lock(_mux);

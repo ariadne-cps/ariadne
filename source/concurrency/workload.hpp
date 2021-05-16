@@ -32,6 +32,7 @@
 #include <functional>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
+#include "io/progress_indicator.hpp"
 #include "concurrency_typedefs.hpp"
 #include "workload_interface.hpp"
 #include "task_manager.hpp"
@@ -49,19 +50,24 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
     WorkloadBase() : _advancement(0), _logger_level(0) { }
 
     Void process() override {
+        _log_scope_manager.reset(new LogScopeManager(ARIADNE_PRETTY_FUNCTION,0));
+        _progress_indicator.reset(new ProgressIndicator(_tasks.size()));
         _logger_level = Logger::instance().current_level();
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
             _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _tasks.empty() or _exception != nullptr; });
             if (_exception != nullptr) rethrow_exception(_exception);
-            if (_advancement.has_finished()) return;
+            if (_advancement.has_finished()) { _log_scope_manager.reset(); return; }
 
             auto task = _tasks.back();
             _tasks.pop_back();
             if (_using_concurrency()) {
                 TaskManager::instance().enqueue([this, task] { _concurrent_task_wrapper(task); });
             } else {
-                _advancement.add_to_processing(); task(); _advancement.add_to_completed();
+                _advancement.add_to_processing();
+                _print_hold();
+                task();
+                _advancement.add_to_completed();
             }
         }
     }
@@ -81,6 +87,7 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     Void _concurrent_task_wrapper(CompletelyBoundFunctionType const& task) {
         _advancement.add_to_processing();
+        _print_hold();
         try {
             Logger::instance().set_level(_logger_level);
             task();
@@ -94,6 +101,20 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
         _advancement.add_to_completed();
         if (_advancement.has_finished()) _element_availability_condition.notify_one();
+    }
+
+    void _print_hold() {
+        _progress_indicator->update_current(_advancement.completed());
+        _progress_indicator->update_final(_advancement.total());
+        if (not Logger::instance().is_muted_at(0)) {
+            std::ostringstream logger_stream;
+            logger_stream << "[" << _progress_indicator->symbol() << "] " << _progress_indicator->percentage() << "% ";
+            logger_stream << " (w="<<std::setw(2)<<std::left<<_advancement.waiting()
+                          << " p="<<std::setw(2)<<std::left<<_advancement.processing()
+                          << " c="<<std::setw(3)<<std::left<<_advancement.completed()
+                          << ")";
+            Logger::instance().hold(_log_scope_manager->scope(),logger_stream.str());
+        }
     }
 
   protected:
@@ -123,6 +144,8 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
     List<CompletelyBoundFunctionType> _tasks; // Used for initial consumption and for consumption when using no concurrency
 
     Nat _logger_level; // The logger level to impose to the running threads
+    SharedPointer<LogScopeManager> _log_scope_manager; // The scope manager required to properly hold print
+    SharedPointer<ProgressIndicator> _progress_indicator; // The progress indicator to hold print
 
     Mutex _element_appending_mutex;
     Mutex _element_availability_mutex;
@@ -154,7 +177,6 @@ class DynamicWorkload : public WorkloadBase<E,AS...> {
         Access(DynamicWorkload& parent) : _load(parent) { }
     public:
         Void append(E const &e) { _load._enqueue(e); }
-        WorkloadAdvancement const& advancement() const { return _load._advancement; }
     private:
         DynamicWorkload& _load;
     };

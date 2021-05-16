@@ -61,7 +61,7 @@
 // Print a text at the bottom line, holding it until the function scope ends; this requires creation of the scope.
 // Nested calls in separate functions append to the held line.
 // The text for obvious reasons shouldn't have newlines and carriage returns; for efficiency purposes this is not checked.
-#define ARIADNE_LOG_SCOPE_PRINTHOLD(text) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().hold(logscopemanager.scope(),logger_stream.str()); } }
+#define ARIADNE_LOG_SCOPE_PRINTHOLD(text) { if (!Logger::instance().is_muted_at(0)) { std::ostringstream logger_stream; logger_stream << std::boolalpha << text; Logger::instance().hold(ARIADNE_PRETTY_FUNCTION,logger_stream.str()); } }
 
 namespace Ariadne {
 
@@ -162,12 +162,14 @@ static TerminalTextTheme TT_THEME_LIGHT = TerminalTextTheme(TT_STYLE_BRIGHTORANG
 //! (but work as expected in terms of level management)
 class LogScopeManager {
   public:
-    LogScopeManager(std::string scope);
+    //! \brief Construct with a given scope, and optionally choosing the amount of level increase
+    LogScopeManager(std::string scope, std::size_t level_increase=1);
     std::string scope() const;
   public:
     virtual ~LogScopeManager();
   private:
-    mutable std::string _scope;
+    std::string _scope;
+    std::size_t _level_increase;
 };
 
 //! \brief Supported kinds of log messages

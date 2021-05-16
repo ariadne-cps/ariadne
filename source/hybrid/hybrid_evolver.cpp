@@ -222,6 +222,11 @@ Void set_auxiliary(HybridAutomatonInterface const& system, HybridEnclosure& encl
     enclosure.set_auxiliary(auxiliary_space.variables(),auxiliary_function);
 }
 
+void progress_acknowledge(double final_time, std::pair<HybridEnclosure,Bool> enclosure_jumped, SharedPointer<ProgressIndicator> indicator) {
+    indicator->update_current(enclosure_jumped.first.time_range().lower_bound().get_d());
+    indicator->update_final(final_time);
+}
+
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridExactBoxType& initial_box,
@@ -275,7 +280,8 @@ orbit(const HybridEnclosure& initial,
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space()[initial.location()] == initial.state_auxiliary_space())
     
     auto result = std::make_shared<SynchronisedOrbit>(initial);
-    WorkloadType workload(std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
+    WorkloadType workload(std::bind_front(&progress_acknowledge,termination.maximum_time().get_d()),
+                          std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
     workload.append({initial,true});
     workload.process();
 

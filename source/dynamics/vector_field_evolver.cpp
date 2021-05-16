@@ -61,6 +61,11 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
+void progress_acknowledge(double final_time, typename VectorFieldEvolver::TimedEnclosureType const& timed_enclosure, SharedPointer<ProgressIndicator> indicator) {
+    indicator->update_current(timed_enclosure.first.get_d());
+    indicator->update_final(final_time);
+}
+
 VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
     : _system(system.clone())
     , _integrator(i.clone())
@@ -93,7 +98,8 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
     ARIADNE_LOG_SCOPE_CREATE
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
-    WorkloadType workload(std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
+    WorkloadType workload(std::bind_front(&progress_acknowledge,time.get_d()),
+                          std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
     _append_initial_set(workload,TimeStepType(0u),initial_set);
     workload.process();
 

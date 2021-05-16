@@ -43,16 +43,15 @@ namespace Ariadne {
 //! \brief Base class implementation
 template<class E, class... AS>
 class WorkloadBase : public WorkloadInterface<E,AS...> {
+  protected:
+    WorkloadBase() : _progress_acknowledge_func(std::bind_front(&WorkloadBase::_default_progress_acknowledge, this)), _advancement(0), _logger_level(0), _progress_indicator(new ProgressIndicator(0)) { }
   public:
-    using PartiallyBoundFunctionType = std::function<Void(E const &)>;
+    using TaskFunctionType = std::function<Void(E const &)>;
+    using ProgressAcknowledgeFunctionType = std::function<Void(E const &, SharedPointer<ProgressIndicator>)>;
     using CompletelyBoundFunctionType = VoidFunction;
-
-    WorkloadBase() : _progress_acknowledge_func(std::bind_front(&WorkloadBase::_default_progress_acknowledge, this)),
-                     _advancement(0), _logger_level(0) { }
 
     Void process() override {
         _log_scope_manager.reset(new LogScopeManager(ARIADNE_PRETTY_FUNCTION,0));
-        _progress_indicator.reset(new ProgressIndicator(_stash.size()));
         _logger_level = Logger::instance().current_level();
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
@@ -67,8 +66,7 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
                 TaskManager::instance().enqueue([this, task, progress_acknowledge] { _concurrent_task_wrapper(task,progress_acknowledge); });
             } else {
                 _advancement.add_to_processing();
-                progress_acknowledge();
-                _print_hold();
+                if (not Logger::instance().is_muted_at(0)) { progress_acknowledge(); _print_hold(); }
                 task();
                 _advancement.add_to_completed();
             }
@@ -77,10 +75,11 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     SizeType size() const override { return _stash.size(); }
 
-    Void append(E const& e) {
+    Void append(E const& e) override {
         _advancement.add_to_waiting();
-        _stash.push_back(std::make_pair(std::bind(std::forward<PartiallyBoundFunctionType const>(_task_func), std::forward<E const&>(e)),
-                                        std::bind(std::forward<PartiallyBoundFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e))
+        _stash.push_back(std::make_pair(std::bind(std::forward<TaskFunctionType const>(_task_func), std::forward<E const&>(e)),
+                                        std::bind(std::forward<ProgressAcknowledgeFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e),
+                                                  _progress_indicator)
                          ));
     }
 
@@ -92,8 +91,7 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     Void _concurrent_task_wrapper(CompletelyBoundFunctionType const& task, CompletelyBoundFunctionType const& progress_acknowledge) {
         _advancement.add_to_processing();
-        progress_acknowledge();
-        _print_hold();
+        if (not Logger::instance().is_muted_at(0)) { progress_acknowledge(); _print_hold(); }
         try {
             Logger::instance().set_level(_logger_level);
             task();
@@ -109,21 +107,19 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
         if (_advancement.has_finished()) _element_availability_condition.notify_one();
     }
 
-    void _default_progress_acknowledge(E const& e) {
-        _progress_indicator->update_current(_advancement.completed());
-        _progress_indicator->update_final(_advancement.total());
+    void _default_progress_acknowledge(E const& e, SharedPointer<ProgressIndicator> indicator) {
+        indicator->update_current(_advancement.completed());
+        indicator->update_final(_advancement.total());
     }
 
     void _print_hold() {
-        if (not Logger::instance().is_muted_at(0)) {
-            std::ostringstream logger_stream;
-            logger_stream << "[" << _progress_indicator->symbol() << "] " << _progress_indicator->percentage() << "% ";
-            logger_stream << " (w="<<std::setw(2)<<std::left<<_advancement.waiting()
-                          << " p="<<std::setw(2)<<std::left<<_advancement.processing()
-                          << " c="<<std::setw(3)<<std::left<<_advancement.completed()
-                          << ")";
-            Logger::instance().hold(_log_scope_manager->scope(),logger_stream.str());
-        }
+        std::ostringstream logger_stream;
+        logger_stream << "[" << _progress_indicator->symbol() << "] " << _progress_indicator->percentage() << "% ";
+        logger_stream << " (w="<<std::setw(2)<<std::left<<_advancement.waiting()
+                      << " p="<<std::setw(2)<<std::left<<_advancement.processing()
+                      << " c="<<std::setw(3)<<std::left<<_advancement.completed()
+                      << ")";
+        Logger::instance().hold(_log_scope_manager->scope(),logger_stream.str());
     }
 
   protected:
@@ -131,8 +127,9 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
     Void _enqueue(E const& e) {
         if (_using_concurrency()) {
             _advancement.add_to_waiting();
-            auto task = std::bind(std::forward<PartiallyBoundFunctionType const>(_task_func), std::forward<E const&>(e));
-            auto progress_acknowledge = std::bind(std::forward<PartiallyBoundFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e));
+            auto task = std::bind(std::forward<TaskFunctionType const>(_task_func), std::forward<E const&>(e));
+            auto progress_acknowledge = std::bind(std::forward<ProgressAcknowledgeFunctionType const>(_progress_acknowledge_func),
+                                                  std::forward<E const&>(e), _progress_indicator);
             TaskManager::instance().enqueue([this,task,progress_acknowledge]{ _concurrent_task_wrapper(task,progress_acknowledge); });
         } else {
             // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _stash respectively
@@ -146,8 +143,8 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
   protected:
 
-    PartiallyBoundFunctionType _task_func;
-    PartiallyBoundFunctionType _progress_acknowledge_func;
+    TaskFunctionType _task_func;
+    ProgressAcknowledgeFunctionType _progress_acknowledge_func;
     WorkloadAdvancement _advancement;
 
   private:
@@ -171,10 +168,10 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 template<class E, class... AS>
 class StaticWorkload : public WorkloadBase<E,AS...> {
 public:
-    using FunctionType = std::function<Void(E const&, AS...)>;
+    using TaskFunctionType = std::function<Void(E const&, AS...)>;
 
-    StaticWorkload(FunctionType f, AS... as) : WorkloadBase<E, AS...>() {
-        this->_task_func = std::bind(std::forward<FunctionType const>(f), std::placeholders::_1, std::forward<AS>(as)...);
+    StaticWorkload(TaskFunctionType f, AS... as) : WorkloadBase<E, AS...>() {
+        this->_task_func = std::bind(std::forward<TaskFunctionType const>(f), std::placeholders::_1, std::forward<AS>(as)...);
     }
 };
 
@@ -193,13 +190,15 @@ class DynamicWorkload : public WorkloadBase<E,AS...> {
         DynamicWorkload& _load;
     };
   public:
-    using FunctionType = std::function<Void(DynamicWorkload<E,AS...>::Access&, E const&, AS...)>;
+    using TaskFunctionType = std::function<Void(DynamicWorkload<E,AS...>::Access&, E const&, AS...)>;
+    using ProgressAcknowledgeFunctionType = std::function<Void(E const&, SharedPointer<ProgressIndicator>)>;
 
-    DynamicWorkload(FunctionType f, AS... as) : WorkloadBase<E, AS...>(), _access(Access(*this)) {
-        this->_task_func = std::bind(std::forward<FunctionType const>(f),
+    DynamicWorkload(ProgressAcknowledgeFunctionType p, TaskFunctionType t, AS... as) : WorkloadBase<E, AS...>(), _access(Access(*this)) {
+        this->_task_func = std::bind(std::forward<TaskFunctionType const>(t),
                                      std::forward<DynamicWorkload<E,AS...>::Access const&>(_access),
                                      std::placeholders::_1,
                                      std::forward<AS>(as)...);
+        this->_progress_acknowledge_func = p;
     }
 
   private:

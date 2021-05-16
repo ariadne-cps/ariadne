@@ -35,7 +35,7 @@ namespace Ariadne {
 
 class ProgressIndicator {
   public:
-    ProgressIndicator(double final_value) : _final_value(final_value), _current_value(0u), _step(0u) { }
+    ProgressIndicator(double final_value = 0.0) : _final_value(final_value), _current_value(0u), _step(0u) { }
     double final_value() const { return _final_value; }
     double current_value() const { return _current_value; }
     void update_current(double new_value) { if (_current_value != new_value) { _current_value = new_value; ++_step; } }

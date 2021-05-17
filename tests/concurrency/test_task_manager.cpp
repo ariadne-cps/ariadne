@@ -27,6 +27,7 @@
 #include "../test.hpp"
 
 using namespace Ariadne;
+using namespace std::chrono_literals;
 
 class TestWorkloadAdvancement {
   public:
@@ -34,38 +35,51 @@ class TestWorkloadAdvancement {
     void test_set_concurrency() {
         auto max_concurrency = TaskManager::instance().maximum_concurrency();
         TaskManager::instance().set_concurrency(max_concurrency);
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency);
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency)
         TaskManager::instance().set_maximum_concurrency();
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency);
-        ARIADNE_TEST_FAIL(TaskManager::instance().set_concurrency(1 + max_concurrency));
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(), max_concurrency)
+        ARIADNE_TEST_FAIL(TaskManager::instance().set_concurrency(1 + max_concurrency))
     }
 
     void test_run_task_with_one_thread() {
         TaskManager::instance().set_concurrency(1);
         int a = 10;
         auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
-        ARIADNE_TEST_EQUALS(result,100);
+        ARIADNE_TEST_EQUALS(result,100)
     }
 
     void test_run_task_with_multiple_threads() {
         TaskManager::instance().set_concurrency(TaskManager::instance().maximum_concurrency());
         int a = 10;
         auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
-        ARIADNE_TEST_EQUALS(result,100);
+        ARIADNE_TEST_EQUALS(result,100)
     }
 
     void test_run_task_with_no_threads() {
         TaskManager::instance().set_concurrency(0);
         int a = 10;
         auto result = TaskManager::instance().enqueue([&a]{ return a * a; }).get();
-        ARIADNE_TEST_EQUALS(result,100);
+        ARIADNE_TEST_EQUALS(result,100)
+    }
+
+    void test_change_concurrency_and_log_scheduler() {
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(0))
+        ARIADNE_TEST_EXECUTE(Logger::instance().use_nonblocking_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(0))
+        ARIADNE_TEST_EXECUTE(Logger::instance().use_immediate_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_maximum_concurrency())
+        ARIADNE_TEST_EXECUTE(Logger::instance().use_nonblocking_scheduler())
+        ARIADNE_TEST_EXECUTE(Logger::instance().use_immediate_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(0))
+        ARIADNE_TEST_EXECUTE(Logger::instance().use_nonblocking_scheduler())
     }
 
     void test() {
-        ARIADNE_TEST_CALL(test_set_concurrency());
-        ARIADNE_TEST_CALL(test_run_task_with_one_thread());
-        ARIADNE_TEST_CALL(test_run_task_with_multiple_threads());
-        ARIADNE_TEST_CALL(test_run_task_with_no_threads());
+        ARIADNE_TEST_CALL(test_set_concurrency())
+        ARIADNE_TEST_CALL(test_run_task_with_one_thread())
+        ARIADNE_TEST_CALL(test_run_task_with_multiple_threads())
+        ARIADNE_TEST_CALL(test_run_task_with_no_threads())
+        ARIADNE_TEST_CALL(test_change_concurrency_and_log_scheduler())
     }
 };
 

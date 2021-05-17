@@ -298,6 +298,7 @@ class BlockingLoggerScheduler : public LoggerSchedulerInterface {
     void increase_level(unsigned int i) override;
     void decrease_level(unsigned int i) override;
     void create_data_instance(std::thread::id id, std::string name);
+    void kill_data_instance(std::thread::id id);
     void terminate() override;
   private:
     std::map<std::thread::id,std::pair<unsigned int,std::string>> _data;
@@ -391,6 +392,12 @@ void BlockingLoggerScheduler::create_data_instance(std::thread::id id, std::stri
     std::lock_guard<std::mutex> lock(_data_mutex);
     // Won't replace if it already exists
     _data.insert({id,make_pair(current_level(),name)});
+}
+
+void BlockingLoggerScheduler::kill_data_instance(std::thread::id id) {
+    std::unique_lock<std::mutex> lock(_data_mutex);
+    auto entry = _data.find(id);
+    if (entry != _data.end()) _data.erase(entry);
 }
 
 unsigned int BlockingLoggerScheduler::current_level() const {
@@ -704,17 +711,20 @@ Logger::~Logger() {
 }
 
 void Logger::use_immediate_scheduler() {
-    _scheduler->terminate();
+    if (TaskManager::instance().concurrency() > 0) throw LoggerSchedulerChangeWithRegisteredThreadsException();
+    else { _scheduler->terminate(); }
     _scheduler.reset(new ImmediateLoggerScheduler());
 }
 
 void Logger::use_blocking_scheduler() {
-    _scheduler->terminate();
+    if (TaskManager::instance().concurrency() > 0) throw LoggerSchedulerChangeWithRegisteredThreadsException();
+    else _scheduler->terminate();
     _scheduler.reset(new BlockingLoggerScheduler());
 }
 
 void Logger::use_nonblocking_scheduler() {
-    _scheduler->terminate();
+    if (TaskManager::instance().concurrency() > 0) throw LoggerSchedulerChangeWithRegisteredThreadsException();
+    else _scheduler->terminate();
     _scheduler.reset(new NonblockingLoggerScheduler());
 }
 
@@ -739,7 +749,9 @@ void Logger::register_thread(std::thread::id id, std::string name) {
 
 void Logger::unregister_thread(std::thread::id id) {
     auto nbls = dynamic_cast<NonblockingLoggerScheduler*>(_scheduler.get());
+    auto bls = dynamic_cast<BlockingLoggerScheduler*>(_scheduler.get());
     if (nbls != nullptr) nbls->kill_data_instance(id);
+    else if (bls != nullptr) bls->kill_data_instance(id);
 }
 
 void Logger::set_level(unsigned int i) {

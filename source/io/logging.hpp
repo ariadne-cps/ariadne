@@ -65,6 +65,9 @@
 
 namespace Ariadne {
 
+//! \brief Exception for trying to change the scheduler while there are registered threads
+class LoggerSchedulerChangeWithRegisteredThreadsException : public std::exception { };
+
 inline unsigned int get_verbosity(int argc, const char* argv[]) {
     if(argc>1) {
         if(std::strcmp(argv[1],"-v")==0) {

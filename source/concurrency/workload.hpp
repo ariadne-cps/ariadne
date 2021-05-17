@@ -97,14 +97,17 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
             task();
         } catch (...) {
             {
-                LockGuard<Mutex> exc_lock(_exception_mutex);
+                LockGuard<Mutex> lock(_element_availability_mutex);
                 _exception = std::current_exception();
             }
             _element_availability_condition.notify_one();
         }
 
-        _advancement.add_to_completed();
-        if (_advancement.has_finished()) _element_availability_condition.notify_one();
+        {
+            LockGuard<Mutex> lock(_element_availability_mutex);
+            _advancement.add_to_completed();
+        }
+        if (_advancement.has_finished()) { _element_availability_condition.notify_one(); }
     }
 
     void _default_progress_acknowledge(E const& e, SharedPointer<ProgressIndicator> indicator) {
@@ -158,7 +161,6 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     Mutex _element_appending_mutex;
     Mutex _element_availability_mutex;
-    Mutex _exception_mutex;
     ConditionVariable _element_availability_condition;
 
     ExceptionPtr _exception;

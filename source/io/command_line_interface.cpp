@@ -67,6 +67,8 @@ class ArgumentParserBase : public ArgumentParserInterface {
 
     Bool is_consumable(ArgumentStream const& stream) const override;
     String help_description() const override;
+
+    virtual ~ArgumentParserBase() = default;
   private:
     String _short_id;
     String _long_id;

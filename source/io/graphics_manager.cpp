@@ -31,7 +31,7 @@
 #include "io/cairo.hpp"
 #include "io/gnuplot.hpp"
 #include "io/drawer.hpp"
-#include "io/null.hpp"
+#include "io/null_graphics.hpp"
 
 namespace Ariadne {
 

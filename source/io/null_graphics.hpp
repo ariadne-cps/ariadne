@@ -1,5 +1,5 @@
 /***************************************************************************
- *            io/null.hpp
+ *            io/null_graphics.hpp
  *
  *  Copyright  2020-21  Mirko Albanese, Luca Geretti
  *
@@ -22,9 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file io/null.hpp
+/*! \file io/null_graphics.hpp
  *  \brief Null output in the case of missing graphics support.
  */
+
+#ifndef ARIADNE_NULL_GRAPHICS_HPP
+#define ARIADNE_NULL_GRAPHICS_HPP
 
 #include "io/figure.hpp"
 #include "io/graphics_backend_interface.hpp"
@@ -75,5 +78,7 @@ class NullGraphicsBackend : public GraphicsBackendInterface {
 #endif
 
 } // namespace Ariadne
+
+#endif // ARIADNE_NULL_GRAPHICS_HPP
 
 

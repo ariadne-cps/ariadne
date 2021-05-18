@@ -96,6 +96,7 @@ class ArgumentParserHandle : public Handle<ArgumentParserInterface> {
 class CommandLineInterface {
   private:
     CommandLineInterface();
+    void _print_help() const;
   public:
     CommandLineInterface(CommandLineInterface const&) = delete;
     Void operator=(CommandLineInterface const&) = delete;

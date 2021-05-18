@@ -39,6 +39,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_verbosity_parsing())
         ARIADNE_TEST_CALL(test_concurrency_parsing())
         ARIADNE_TEST_CALL(test_multiple_argument_parsing())
+        ARIADNE_TEST_CALL(test_unrecognised_arguments())
     }
 
     void test_empty_argument_stream() {
@@ -71,8 +72,8 @@ class TestCommandLineInterface {
 
     void test_verbosity_parsing() {
         const char* argv[] = {nullptr, "-v", "5"};
-        Bool success = CommandLineInterface::instance().acquire(3,argv);
-        ARIADNE_TEST_ASSERT(success)
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),5)
         const char* argv2[] = {nullptr, "--verbosity", "0"};
         Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
@@ -91,8 +92,8 @@ class TestCommandLineInterface {
 
     void test_concurrency_parsing() {
         const char* argv[] = {nullptr, "-c", "5"};
-        Bool success = CommandLineInterface::instance().acquire(3,argv);
-        ARIADNE_TEST_ASSERT(success)
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),5)
         const char* argv2[] = {nullptr, "--concurrency", "0"};
         Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
@@ -119,6 +120,12 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(success)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),4)
+    }
+
+    void test_unrecognised_arguments() {
+        const char* argv[] = {nullptr, "--invalid"};
+        Bool success = CommandLineInterface::instance().acquire(2,argv);
+        ARIADNE_TEST_ASSERT(not success)
     }
 
 };

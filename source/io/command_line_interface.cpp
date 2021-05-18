@@ -65,6 +65,9 @@ class ArgumentParserBase : public ArgumentParserInterface {
     Bool has_short_id() const { return not _short_id.empty(); }
     String instructions() const { return _instructions; }
 
+    //! \brief If a value is required for this argument
+    virtual Bool requires_value() const = 0;
+
     Bool is_consumable(ArgumentStream const& stream) const override;
     String help_description() const override;
 
@@ -79,20 +82,35 @@ String ArgumentParserBase::help_description() const {
     StringStream ss;
     ss << "[";
     if (has_short_id()) ss << "-" << short_id() << " | ";
-    ss << "--" << long_id() << "]\t" << instructions();
+    ss << "--" << long_id() << "]";
+    if (requires_value()) ss << " <value>";
+    ss << "\t" << instructions();
     return ss.str();
 }
 
 Bool ArgumentParserBase::is_consumable(const ArgumentStream &stream) const {
     auto arg = stream.peek();
-    String short_argument = "-"+short_id();
+    if (has_short_id()) {
+        String short_argument = "-"+short_id();
+        if (arg == short_argument) return true;
+    }
     String long_argument = "--"+long_id();
-    return (arg == short_argument or arg == long_argument);
+    return (arg == long_argument);
 }
 
-class VerbosityArgumentParser : public ArgumentParserBase {
+struct ValuedArgumentParserBase : ArgumentParserBase {
+    ValuedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
+    Bool requires_value() const override { return true; }
+};
+
+struct UnvaluedArgumentParserBase : ArgumentParserBase {
+    UnvaluedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
+    Bool requires_value() const override { return false; }
+};
+
+class VerbosityArgumentParser : public ValuedArgumentParserBase {
   public:
-    VerbosityArgumentParser() : ArgumentParserBase(
+    VerbosityArgumentParser() : ValuedArgumentParserBase(
             "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
 
     Void consume(ArgumentStream& stream) const override {
@@ -108,9 +126,9 @@ class VerbosityArgumentParser : public ArgumentParserBase {
     }
 };
 
-class ConcurrencyArgumentParser : public ArgumentParserBase {
+class ConcurrencyArgumentParser : public ValuedArgumentParserBase {
 public:
-    ConcurrencyArgumentParser() : ArgumentParserBase(
+    ConcurrencyArgumentParser() : ValuedArgumentParserBase(
             "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
 
     Void consume(ArgumentStream& stream) const override {
@@ -130,7 +148,7 @@ public:
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({VerbosityArgumentParser(),ConcurrencyArgumentParser()}) { }
+CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),VerbosityArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);
@@ -142,21 +160,30 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                 try {
                     parser.consume(stream);
                 } catch(MissingArgumentValueException& exc) {
-                    std::cout << "A value is required by the argument, but it is not supplied." << std::endl;
+                    std::clog << "A value is required by the argument, but it is not supplied." <<
+                    std::endl << std::endl << parser.help_description() << std::endl;
                     return false;
                 } catch(InvalidArgumentValueException& exc) {
-                    std::cout << exc.what() << std::endl;
+                    std::clog << exc.what() << std::endl << std::endl << parser.help_description() << std::endl;
                     return false;
                 }
                 break;
             }
         }
         if (not consumed) {
-            std::cout << "Unrecognised command-line option \"" << stream.peek() << "\"" << std::endl;
+            std::clog << "Unrecognised command-line option '" << stream.peek() << "'" << std::endl << std::endl;
+            _print_help();
             return false;
         }
     }
     return true;
+}
+
+void CommandLineInterface::_print_help() const {
+    std::clog << "Supported arguments:" << std::endl;
+    for (auto& parser : _parsers) {
+        std::clog << "    " << parser.help_description() << std::endl;
+    }
 }
 
 } // namespace Ariadne

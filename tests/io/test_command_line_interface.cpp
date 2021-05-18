@@ -24,6 +24,7 @@
 
 #include "config.hpp"
 #include "io/command_line_interface.hpp"
+#include "io/logging.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -35,6 +36,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_empty_argument_stream())
         ARIADNE_TEST_CALL(test_nonempty_argument_stream())
         ARIADNE_TEST_CALL(test_cli_instantiation())
+        ARIADNE_TEST_CALL(test_verbosity_parsing())
     }
 
     void test_empty_argument_stream() {
@@ -63,6 +65,26 @@ class TestCommandLineInterface {
 
     void test_cli_instantiation() {
         ARIADNE_TEST_EXECUTE(CommandLineInterface::instance())
+    }
+
+    void test_verbosity_parsing() {
+        const char* argv[] = {nullptr, "-v", "5"};
+        Bool success = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success)
+        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),5)
+        const char* argv2[] = {nullptr, "--verbosity", "0"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),0)
+        const char* argv3[] = {nullptr, "-v", "-2"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-v", "q"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(not success4)
+        const char* argv5[] = {nullptr, "-v"};
+        Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
+        ARIADNE_TEST_ASSERT(not success5)
     }
 
 };

@@ -38,9 +38,13 @@
 namespace Ariadne {
 
 //! \brief Exception for when the argument is not recognised by any parser
-class UnrecognisedArgumentException : public std::exception { };
+struct UnrecognisedArgumentException : public std::exception { };
+//! \brief Exception for when no value is available, but it should be supplied
+struct MissingArgumentValueException : public std::exception { };
 //! \brief Exception for when a parser recognises the value argument as invalid
-class InvalidArgumentValueException : public std::exception { };
+struct InvalidArgumentValueException : public std::runtime_error {
+    InvalidArgumentValueException(String what) : std::runtime_error(what) { }
+};
 
 //! \brief Stream of arguments to be consumed by parsers
 class ArgumentStream {
@@ -72,15 +76,20 @@ struct ArgumentParserInterface {
 
     //! \brief Consume the stream
     //! \throws InvalidArgumentValueException if the value is incorrect
-    virtual Void consume(ArgumentStream& stream) = 0;
+    //! \details Assumes that it has already been checked by is_consumable
+    virtual Void consume(ArgumentStream& stream) const = 0;
+
+    //! \brief The description to print for the help
+    virtual String help_description() const = 0;
 };
 
-//! \brief Handle for the parser
+//! \brief Handle for a parser
 class ArgumentParserHandle : public Handle<ArgumentParserInterface> {
   public:
     using Handle<ArgumentParserInterface>::Handle;
     Bool is_consumable(ArgumentStream const& stream) const { return this->_ptr->is_consumable(stream); }
-    Void consume(ArgumentStream& stream) { this->_ptr->consume(stream); }
+    Void consume(ArgumentStream& stream) const { this->_ptr->consume(stream); }
+    String help_description() const { return this->_ptr->help_description(); }
 };
 
 //! \brief A static class for acquisition of CLI arguments
@@ -97,7 +106,9 @@ class CommandLineInterface {
     }
 
     //! \brief Acquire the CLI arguments
-    Void acquire(int argc, const char* argv[]) const;
+    //! \details Returns whether the acquisition was a success and
+    //! any subsequent code should be run
+    Bool acquire(int argc, const char* argv[]) const;
 
   private:
     List<ArgumentParserHandle> const _parsers;

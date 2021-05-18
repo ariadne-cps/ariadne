@@ -22,9 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne.hpp"
 #include "utility/stopwatch.hpp"
-#include "io/main.hpp"
+#include "ariadne_main.hpp"
 
 void ariadne_main()
 {

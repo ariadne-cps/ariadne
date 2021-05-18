@@ -1,5 +1,5 @@
 /***************************************************************************
- *            io/main.hpp
+ *            main.hpp
  *
  *  Copyright  2008-21  Luca Geretti
  *
@@ -22,19 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file io/main.hpp
- *  \brief Main function to be used when wanting to use CLI cleanly.
+/*! \file ariadne_main.hpp
+ *  \brief Main function to be used when creating executables that exploit the CLI.
  */
 
-#ifndef ARIADNE_MAIN_HPP
-#define ARIADNE_MAIN_HPP
+#ifndef ARIADNE_ARIADNE_MAIN_HPP
+#define ARIADNE_ARIADNE_MAIN_HPP
 
-#include "command_line_interface.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
 //! \brief Wrapping function for actual main, to be defined in executable file
-extern void ariadne_main();
+void ariadne_main();
 
 //! \brief Call to main with proper harness, handling CLI arguments
 int main(int argc, const char* argv[])
@@ -44,4 +44,4 @@ int main(int argc, const char* argv[])
     }
 }
 
-#endif // ARIADNE_MAIN_HPP
+#endif // ARIADNE_ARIADNE_MAIN_HPP

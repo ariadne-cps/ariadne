@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.hpp"
 #include "io/command_line_interface.hpp"
 #include "io/logging.hpp"
+#include "concurrency/task_manager.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -37,6 +37,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_nonempty_argument_stream())
         ARIADNE_TEST_CALL(test_cli_instantiation())
         ARIADNE_TEST_CALL(test_verbosity_parsing())
+        ARIADNE_TEST_CALL(test_concurrency_parsing())
     }
 
     void test_empty_argument_stream() {
@@ -85,6 +86,30 @@ class TestCommandLineInterface {
         const char* argv5[] = {nullptr, "-v"};
         Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
         ARIADNE_TEST_ASSERT(not success5)
+    }
+
+    void test_concurrency_parsing() {
+        const char* argv[] = {nullptr, "-c", "5"};
+        Bool success = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success)
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),5)
+        const char* argv2[] = {nullptr, "--concurrency", "0"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),0)
+        const char* argv3[] = {nullptr, "-c", "-2"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-c", "q"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(not success4)
+        const char* argv5[] = {nullptr, "-c"};
+        Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
+        ARIADNE_TEST_ASSERT(not success5)
+        const char* argv6[] = {nullptr, "-c", "max"};
+        Bool success6 = CommandLineInterface::instance().acquire(3,argv6);
+        ARIADNE_TEST_ASSERT(success6)
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),TaskManager::instance().maximum_concurrency())
     }
 
 };

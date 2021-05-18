@@ -22,6 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "concurrency/task_manager.hpp"
 #include "logging.hpp"
 #include "command_line_interface.hpp"
 
@@ -90,7 +91,7 @@ Bool ArgumentParserBase::is_consumable(const ArgumentStream &stream) const {
 class VerbosityArgumentParser : public ArgumentParserBase {
   public:
     VerbosityArgumentParser() : ArgumentParserBase(
-            "v","verbosity","Choose the logging verbosity as a positive integer <value> (default: 0)") { }
+            "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
 
     Void consume(ArgumentStream& stream) const override {
         stream.pop(); // Pop out the identifier
@@ -105,7 +106,29 @@ class VerbosityArgumentParser : public ArgumentParserBase {
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({VerbosityArgumentParser()}) { }
+class ConcurrencyArgumentParser : public ArgumentParserBase {
+public:
+    ConcurrencyArgumentParser() : ArgumentParserBase(
+            "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
+
+    Void consume(ArgumentStream& stream) const override {
+        stream.pop(); // Pop out the identifier
+        if (stream.empty()) { throw MissingArgumentValueException(); }
+        try {
+            String arg = stream.pop();
+            if (arg == "max") TaskManager::instance().set_maximum_concurrency();
+            else {
+                int val = std::stoi(arg);
+                if (val < 0) throw InvalidArgumentValueException("Concurrency should be a non-negative value.");
+                TaskManager::instance().set_concurrency(static_cast<unsigned int>(val));
+            }
+        } catch (...) {
+            throw InvalidArgumentValueException("Concurrency should be a non-negative integer value.");
+        }
+    }
+};
+
+CommandLineInterface::CommandLineInterface() : _parsers({VerbosityArgumentParser(),ConcurrencyArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);

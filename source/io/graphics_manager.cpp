@@ -45,7 +45,7 @@ GraphicsBackend default_backend() {
     #endif
 }
 
-GraphicsManager::GraphicsManager() : _backend(default_backend()), _drawer(AffineDrawer(1)) {
+GraphicsManager::GraphicsManager() : _backend(default_backend()), _drawer(AffineDrawer(0)) {
 }
 
 GraphicsManager& GraphicsManager::instance() {

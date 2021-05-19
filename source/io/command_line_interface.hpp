@@ -38,11 +38,12 @@
 namespace Ariadne {
 
 //! \brief Exception for when the argument is not recognised by any parser
-struct UnrecognisedArgumentException : public std::exception { };
+class UnrecognisedArgumentException : public std::exception { };
 //! \brief Exception for when no value is available, but it should be supplied
-struct MissingArgumentValueException : public std::exception { };
+class MissingArgumentValueException : public std::exception { };
 //! \brief Exception for when a parser recognises the value argument as invalid
-struct InvalidArgumentValueException : public std::runtime_error {
+class InvalidArgumentValueException : public std::runtime_error {
+  public:
     InvalidArgumentValueException(String what) : std::runtime_error(what) { }
 };
 
@@ -69,7 +70,8 @@ class ArgumentStream {
 };
 
 //! \brief Interface for a parser for a given CLI argument
-struct ArgumentParserInterface {
+class ArgumentParserInterface {
+  public:
     //! \brief If the tip of the stream is consumable by this parser
     //! \details Checks only the kind, not the value
     virtual Bool is_consumable(ArgumentStream const& stream) const = 0;
@@ -83,8 +85,8 @@ struct ArgumentParserInterface {
     virtual String help_description() const = 0;
 };
 
-//! \brief Handle for a parser
-class ArgumentParserHandle : public Handle<ArgumentParserInterface> {
+//! \brief An argument parser
+class ArgumentParser : public Handle<ArgumentParserInterface> {
   public:
     using Handle<ArgumentParserInterface>::Handle;
     Bool is_consumable(ArgumentStream const& stream) const { return this->_ptr->is_consumable(stream); }
@@ -112,7 +114,7 @@ class CommandLineInterface {
     Bool acquire(int argc, const char* argv[]) const;
 
   private:
-    List<ArgumentParserHandle> const _parsers;
+    List<ArgumentParser> const _parsers;
 };
 
 } // namespace Ariadne

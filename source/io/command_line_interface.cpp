@@ -98,12 +98,14 @@ Bool ArgumentParserBase::is_consumable(const ArgumentStream &stream) const {
     return (arg == long_argument);
 }
 
-struct ValuedArgumentParserBase : ArgumentParserBase {
+class ValuedArgumentParserBase : public ArgumentParserBase {
+  public:
     ValuedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
     Bool requires_value() const override { return true; }
 };
 
-struct UnvaluedArgumentParserBase : ArgumentParserBase {
+class UnvaluedArgumentParserBase : public ArgumentParserBase {
+  public:
     UnvaluedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
     Bool requires_value() const override { return false; }
 };

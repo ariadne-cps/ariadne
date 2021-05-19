@@ -52,6 +52,7 @@
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
+#include "concurrency/workload.hpp"
 
 namespace Ariadne {
 
@@ -631,13 +632,6 @@ HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const Hyb
 }
 */
 
-inline Void
-draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
-    for(ListSet<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
-        draw(figure,iter->continuous_set());
-    }
-}
-
 ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 {
@@ -648,6 +642,15 @@ ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
         }
     }
     return result;
+}
+
+Void
+ListSet<HybridEnclosure>::draw(CanvasInterface& cnvs, const Set<DiscreteLocation>& locs, const Variables2d& vars) const {
+    StaticWorkload<HybridEnclosure, CanvasInterface*, Set<DiscreteLocation> const&, Variables2d const&> workload(
+            [](HybridEnclosure const& e, CanvasInterface* c, Set<DiscreteLocation> const& l, Variables2d const& v)
+            { e.draw(*c, l, v); }, &cnvs, locs, vars);
+    workload.append(_list);
+    workload.process();
 }
 
 VariablesUpperBoxType

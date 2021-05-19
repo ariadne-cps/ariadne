@@ -67,6 +67,7 @@
 #include "hybrid/discrete_event.hpp"
 
 #include "io/graphics.hpp"
+#include "io/graphics_manager.hpp"
 #include "io/logging.hpp"
 
 #include "function/functional.hpp"
@@ -1235,7 +1236,7 @@ inline ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMult
 }
 
 Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    this->configuration().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
+    GraphicsManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {

@@ -77,6 +77,7 @@
 
 #include "algebra/expansion.inl.hpp"
 
+#include "concurrency/workload.hpp"
 
 namespace Ariadne {
 
@@ -1595,15 +1596,10 @@ ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
 }
 
 Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
-    ARIADNE_LOG_SCOPE_CREATE;
-    SizeType total_sets = this->_data.size();
-    SizeType processed_sets = 0;
-    ProgressIndicator indicator(total_sets);
-    for (auto set : this->_data) {
-        set.draw(cnvs, prj);
-        indicator.update_current(processed_sets++);
-        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-    }
+    StaticWorkload<LabelledEnclosure,CanvasInterface*,Variables2d const&> workload(
+            [](LabelledEnclosure const& e, CanvasInterface* c, Variables2d const& p){ e.draw(*c, p); },&cnvs,prj);
+    workload.append(this->_data);
+    workload.process();
 }
 
 } // namespace Ariadne

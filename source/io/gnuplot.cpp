@@ -154,7 +154,7 @@ void GnuplotCanvas::stroke() {
  }
 
 void GnuplotCanvas::move_to(double x, double y)
-{   
+{
     this->Cpoint.x = this->geom[0].x = x;
     this->Cpoint.y = this->geom[0].y = y;
     this->dim = 1;
@@ -286,6 +286,18 @@ Void GnuplotCanvas::fill_3d(){
 
     //Reset the dimension of the current object
     this->dim = 0; 
+}
+
+void GnuplotCanvas::fill_boundary(List<Point2d> const& boundary) {
+    LockGuard<Mutex> lock(_mux);
+    if(boundary.size()==1) { this->dot(boundary[0].x,boundary[0].y); }
+
+    this->move_to(boundary[0].x,boundary[0].y);
+    for(SizeType i=1; i!=boundary.size(); ++i) {
+        this->line_to(boundary[i].x,boundary[i].y);
+    }
+    this->line_to(boundary[0].x,boundary[0].y);
+    this->fill();
 }
 
 void GnuplotCanvas::write(const char* filename) const

@@ -31,6 +31,7 @@
 #include "io/geometry2d.hpp"
 
 #include "io/gnuplot-iostream.hpp"
+#include "concurrency/concurrency_typedefs.hpp"
 
 namespace Ariadne {
 
@@ -71,6 +72,8 @@ class GnuplotCanvas : public CanvasInterface
     bool isanimate;
     _Labels labels;
 
+    Mutex _mux;
+
   public:
     ~GnuplotCanvas();
     // Constructors - Create the canvas
@@ -95,6 +98,8 @@ class GnuplotCanvas : public CanvasInterface
     Void set_fill_colour(double r, double g, double b);
     Vector2d scaling() const;
     Box2d bounds() const;
+
+    Void fill_boundary(List<Point2d> const& boundary);
 
     Void set_colour_palette();
     Void fill_3d();

@@ -199,6 +199,18 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     cairo_translate(crp, utr0, utr1);
 }
 
+void CairoCanvas::fill_boundary(List<Point2d> const& boundary) {
+    LockGuard<Mutex> lock(_mux);
+    if(boundary.size()==1) { this->dot(boundary[0].x,boundary[0].y); }
+
+    this->move_to(boundary[0].x,boundary[0].y);
+    for(SizeType i=1; i!=boundary.size(); ++i) {
+        this->line_to(boundary[i].x,boundary[i].y);
+    }
+    this->line_to(boundary[0].x,boundary[0].y);
+    this->fill();
+}
+
 Void CairoCanvas::write(const char* cfilename) const {
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {

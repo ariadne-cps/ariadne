@@ -135,6 +135,10 @@ class CanvasInterface {
     virtual Void stroke() = 0;
     //! \brief Draw and fill the working line.
     virtual Void fill() = 0;
+
+    //! \brief Draw the lines from the \a boundary and fill the corresponding closed polytope
+    virtual Void fill_boundary(List<Point2d> const& boundary) = 0;
+
     //! Set the width of the lines bounding shapes, in pixels.
     virtual Void set_line_width(double lw) = 0;
     //! \brief Set the colour of subsequent line to be drawn. The \a r, \a g and \a b

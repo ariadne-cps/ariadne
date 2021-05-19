@@ -148,12 +148,11 @@ inline Pair<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivaria
 }
 
 EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, SizeType reconditioning_num_blocks)
-    : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(0)), _reconditioning_num_blocks(reconditioning_num_blocks) { }
+    : _function_factory(function_factory), _paver(new AffinePaver()), _reconditioning_num_blocks(reconditioning_num_blocks) { }
 
 OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
     return os << "EnclosureConfiguration( function_factory=" << ec._function_factory
               << ", paver=" << ec._paver
-              <<", drawer=" << ec._drawer
               <<", reconditioning_num_blocks=" << ec._reconditioning_num_blocks <<")";
 }
 
@@ -235,7 +234,7 @@ Enclosure::Enclosure()
     , _time_function(), _dwell_time_function()
     , _reduced_domain(), _is_fully_reduced(true)
     , _variable_kinds()
-    , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr),Drawer(nullptr))
+    , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr))
 {
 }
 

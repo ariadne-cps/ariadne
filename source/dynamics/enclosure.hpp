@@ -76,20 +76,17 @@ class EnclosureConfiguration {
   private:
     ValidatedFunctionModelDPFactory _function_factory;
     Paver _paver;
-    Drawer _drawer;
     SizeType _reconditioning_num_blocks;
   public:
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, SizeType reconditioning_num_blocks = 3u);
     explicit EnclosureConfiguration(ValidatedFunctionModelDPFactory::Interface const& function_factory, SizeType reconditioning_num_blocks = 3u)
         : EnclosureConfiguration(ValidatedFunctionModelDPFactory(function_factory.clone()),reconditioning_num_blocks) { }
-    EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, Drawer drawer, SizeType reconditioning_num_blocks = 3u)
-        : _function_factory(function_factory), _paver(paver), _drawer(drawer), _reconditioning_num_blocks(reconditioning_num_blocks) { }
+    EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, SizeType reconditioning_num_blocks = 3u)
+        : _function_factory(function_factory), _paver(paver), _reconditioning_num_blocks(reconditioning_num_blocks) { }
     ValidatedFunctionModelDPFactory const& function_factory() const { return _function_factory; }
     Paver const& paver() const { return _paver; }
-    Drawer const& drawer() const { return _drawer; }
     SizeType reconditioning_num_blocks() const { return _reconditioning_num_blocks; }
     EnclosureConfiguration& set_paver(Paver paver) { _paver=paver; return *this; }
-    EnclosureConfiguration& set_drawer(Drawer drawer) { _drawer=drawer; return *this; }
     EnclosureConfiguration& set_reconditioning_num_blocks(SizeType num_blocks) { _reconditioning_num_blocks = num_blocks; return *this; }
     friend OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec);
 };

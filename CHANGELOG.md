@@ -22,6 +22,7 @@ Legenda for the issue kind:
 - [#563](https://github.com/ariadne-cps/ariadne/issues/563) (C) Rename the 'output' module into the 'io' module to support future classes related to input
 - [#573](https://github.com/ariadne-cps/ariadne/issues/573) (C) Use an LRU cache for modes in CompositeHybridAutomaton, avoid exhausting a given mode in HybridEvolver before changing mode
 - [#580](https://github.com/ariadne-cps/ariadne/issues/580) (C) VectorFieldEvolver, IteratedMapEvolver and HybridEvolver now check that the initial enclosure is consistent
+- [#592](https://github.com/ariadne-cps/ariadne/issues/592) (C) Enclosure now uses the global GraphicsManager drawer instead of having a dedicated configuration field   
 - [#539](https://github.com/ariadne-cps/ariadne/issues/539) (F) A segmentation fault sometimes would be issued when terminating the executable, due to logging
 - [#557](https://github.com/ariadne-cps/ariadne/issues/557) (F) Fix behavior of StopWatch utility for concurrent code, enhance the class for choosing a duration type
 - [#567](https://github.com/ariadne-cps/ariadne/issues/567) (F) Fix problem with state_time space creation when state space already contains the 't' variable

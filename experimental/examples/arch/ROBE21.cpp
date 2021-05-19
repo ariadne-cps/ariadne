@@ -23,10 +23,9 @@
  */
 
 #include "ROBE21.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-Int main(Int argc, const char* argv[]) {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
+void ariadne_main()
+{
     ROBE21();
 }

@@ -23,11 +23,9 @@
  */
 
 #include "SUTR21.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-Int main(Int argc, const char* argv[]) {
-
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+void ariadne_main()
+{
     SUTR21();
 }

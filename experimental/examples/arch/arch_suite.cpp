@@ -28,12 +28,10 @@
 #include "SUTR21.hpp"
 #include "LOVO21.hpp"
 #include "SPRE20.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-Int main(Int argc, const char* argv[])
+void ariadne_main()
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     ROBE21();
     CVDP20();
     LALO20();

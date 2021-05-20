@@ -41,6 +41,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_multiple_argument_parsing())
         ARIADNE_TEST_CALL(test_unrecognised_argument())
         ARIADNE_TEST_CALL(test_duplicate_argument())
+        ARIADNE_TEST_CALL(test_print_help())
     }
 
     void test_empty_argument_stream() {
@@ -132,6 +133,12 @@ class TestCommandLineInterface {
     void test_duplicate_argument() {
         const char* argv[] = {nullptr, "--verbosity", "2", "-v", "5"};
         Bool success = CommandLineInterface::instance().acquire(5,argv);
+        ARIADNE_TEST_ASSERT(not success)
+    }
+
+    void test_print_help() {
+        const char* argv[] = {nullptr, "-h"};
+        Bool success = CommandLineInterface::instance().acquire(2,argv);
         ARIADNE_TEST_ASSERT(not success)
     }
 

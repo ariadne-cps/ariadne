@@ -163,7 +163,7 @@ class VerbosityArgumentParser : public ValuedArgumentParserBase {
         if (stream.empty()) { throw MissingArgumentValueException(); }
         try {
             int val = std::stoi(stream.pop());
-            if (val < 0) throw InvalidArgumentValueException("Verbosity should be a non-negative value.");
+            if (val < 0) throw std::exception();
             f = [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
         } catch (...) {
             throw InvalidArgumentValueException("Verbosity should be a non-negative integer value.");
@@ -210,8 +210,9 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                     if (packs.contains(p)) {
                         std::clog << "Argument '" << p.id() << "' specified multiple times.\n\n"
                             << parser.help_description(4) << std::endl;
+                        return false;
                     } else if (p.id() == "help") {
-                        _print_help();
+                        p.process(); _print_help();
                         return false;
                     } else if (p.id() == "concurrency") {
                         // Need to process this before the others

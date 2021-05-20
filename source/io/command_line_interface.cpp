@@ -54,6 +54,20 @@ SizeType ArgumentStream::size() const {
     return _args.size();
 }
 
+ArgumentPack::ArgumentPack(String const& id, VoidFunction const& processor) : _id(id), _processor(processor) { }
+
+String const& ArgumentPack::id() const {
+    return _id;
+}
+
+Void ArgumentPack::process() const {
+    _processor();
+}
+
+Bool ArgumentPack::operator<(ArgumentPack const& other) const {
+    return this->_id < other._id;
+}
+
 //! \brief Supplies base behavior for argument parsers
 class ArgumentParserBase : public ArgumentParserInterface {
   protected:
@@ -65,6 +79,8 @@ class ArgumentParserBase : public ArgumentParserInterface {
     Bool has_short_id() const { return not _short_id.empty(); }
     String instructions() const { return _instructions; }
 
+    ArgumentPack consume(ArgumentStream& stream) const override;
+
     //! \brief If a value is required for this argument
     virtual Bool requires_value() const = 0;
 
@@ -72,6 +88,10 @@ class ArgumentParserBase : public ArgumentParserInterface {
     String help_description() const override;
 
     virtual ~ArgumentParserBase() = default;
+
+  protected:
+    virtual VoidFunction create_processor(ArgumentStream& stream) const = 0;
+
   private:
     String _short_id;
     String _long_id;
@@ -98,6 +118,11 @@ Bool ArgumentParserBase::is_consumable(const ArgumentStream &stream) const {
     return (arg == long_argument);
 }
 
+ArgumentPack ArgumentParserBase::consume(ArgumentStream& stream) const {
+    stream.pop(); // Pop out the identifier already recognised as the one for this parser
+    return ArgumentPack(_long_id,create_processor(stream));
+}
+
 class ValuedArgumentParserBase : public ArgumentParserBase {
   public:
     ValuedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
@@ -110,21 +135,32 @@ class UnvaluedArgumentParserBase : public ArgumentParserBase {
     Bool requires_value() const override { return false; }
 };
 
+class HelpArgumentParser : public UnvaluedArgumentParserBase {
+public:
+    HelpArgumentParser() : UnvaluedArgumentParserBase(
+            "h","help","Show this list of supported arguments.") { }
+
+    VoidFunction create_processor(ArgumentStream& stream) const override {
+        return []{};
+    }
+};
+
 class VerbosityArgumentParser : public ValuedArgumentParserBase {
   public:
     VerbosityArgumentParser() : ValuedArgumentParserBase(
             "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
 
-    Void consume(ArgumentStream& stream) const override {
-        stream.pop(); // Pop out the identifier
+    VoidFunction create_processor(ArgumentStream& stream) const override {
+        VoidFunction f;
         if (stream.empty()) { throw MissingArgumentValueException(); }
         try {
             int val = std::stoi(stream.pop());
             if (val < 0) throw InvalidArgumentValueException("Verbosity should be a non-negative value.");
-            Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val));
+            f = [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
         } catch (...) {
             throw InvalidArgumentValueException("Verbosity should be a non-negative integer value.");
         }
+        return f;
     }
 };
 
@@ -133,51 +169,66 @@ public:
     ConcurrencyArgumentParser() : ValuedArgumentParserBase(
             "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
 
-    Void consume(ArgumentStream& stream) const override {
-        stream.pop(); // Pop out the identifier
+    VoidFunction create_processor(ArgumentStream& stream) const override {
+        VoidFunction f;
         if (stream.empty()) { throw MissingArgumentValueException(); }
         try {
             String arg = stream.pop();
-            if (arg == "max") TaskManager::instance().set_maximum_concurrency();
+            if (arg == "max") f = []{ TaskManager::instance().set_maximum_concurrency(); };
             else {
                 int val = std::stoi(arg);
-                if (val < 0) throw InvalidArgumentValueException("Concurrency should be a non-negative value.");
-                TaskManager::instance().set_concurrency(static_cast<unsigned int>(val));
+                if (val < 0) throw std::exception();
+                f = [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
             }
         } catch (...) {
             throw InvalidArgumentValueException("Concurrency should be a non-negative integer value.");
         }
+        return f;
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),VerbosityArgumentParser()}) { }
+CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),HelpArgumentParser(),VerbosityArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);
+    Set<ArgumentPack> packs;
     while (not stream.empty()) {
         Bool consumed = false;
         for (auto& parser : _parsers) {
             if (parser.is_consumable(stream)) {
                 consumed = true;
                 try {
-                    parser.consume(stream);
+                    auto p = parser.consume(stream);
+                    if (packs.contains(p)) {
+                        std::clog << "Argument '" << p.id() << "' specified multiple times.\n\n"
+                            << parser.help_description() << std::endl;
+                    } else if (p.id() == "help") {
+                        _print_help();
+                        return false;
+                    } else if (p.id() == "concurrency") {
+                        // Need to process this before the others
+                        p.process();
+                    } else packs.insert(p);
                 } catch(MissingArgumentValueException& exc) {
-                    std::clog << "A value is required by the argument, but it is not supplied." <<
-                    std::endl << std::endl << parser.help_description() << std::endl;
+                    std::clog << "A value is required by the argument, but it is not supplied.\n\n"
+                        << parser.help_description() << std::endl;
                     return false;
                 } catch(InvalidArgumentValueException& exc) {
-                    std::clog << exc.what() << std::endl << std::endl << parser.help_description() << std::endl;
+                    std::clog << exc.what() << "\n\n" << parser.help_description() << std::endl;
                     return false;
                 }
                 break;
             }
         }
         if (not consumed) {
-            std::clog << "Unrecognised command-line option '" << stream.peek() << "'" << std::endl << std::endl;
+            std::clog << "Unrecognised command-line argument '" << stream.peek() << "'" << std::endl << std::endl;
             _print_help();
             return false;
         }
     }
+
+    for (auto p : packs) p.process();
+
     return true;
 }
 

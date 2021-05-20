@@ -39,7 +39,8 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_verbosity_parsing())
         ARIADNE_TEST_CALL(test_concurrency_parsing())
         ARIADNE_TEST_CALL(test_multiple_argument_parsing())
-        ARIADNE_TEST_CALL(test_unrecognised_arguments())
+        ARIADNE_TEST_CALL(test_unrecognised_argument())
+        ARIADNE_TEST_CALL(test_duplicate_argument())
     }
 
     void test_empty_argument_stream() {
@@ -122,9 +123,15 @@ class TestCommandLineInterface {
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),4)
     }
 
-    void test_unrecognised_arguments() {
+    void test_unrecognised_argument() {
         const char* argv[] = {nullptr, "--invalid"};
         Bool success = CommandLineInterface::instance().acquire(2,argv);
+        ARIADNE_TEST_ASSERT(not success)
+    }
+
+    void test_duplicate_argument() {
+        const char* argv[] = {nullptr, "--verbosity", "2", "-v", "5"};
+        Bool success = CommandLineInterface::instance().acquire(5,argv);
         ARIADNE_TEST_ASSERT(not success)
     }
 

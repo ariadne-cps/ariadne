@@ -37,6 +37,8 @@
 
 namespace Ariadne {
 
+using VoidFunction = std::function<Void()>;
+
 //! \brief Exception for when the argument is not recognised by any parser
 class UnrecognisedArgumentException : public std::exception { };
 //! \brief Exception for when no value is available, but it should be supplied
@@ -69,6 +71,18 @@ class ArgumentStream {
     std::queue<String> _args;
 };
 
+//! \brief A pack for an argument with its \a id and the \a processor to process the input
+class ArgumentPack {
+public:
+    ArgumentPack(String const& id, VoidFunction const& processor);
+    String const& id() const;
+    Void process() const;
+    Bool operator<(ArgumentPack const& other) const;
+private:
+    String const _id;
+    VoidFunction const _processor;
+};
+
 //! \brief Interface for a parser for a given CLI argument
 class ArgumentParserInterface {
   public:
@@ -76,10 +90,10 @@ class ArgumentParserInterface {
     //! \details Checks only the kind, not the value
     virtual Bool is_consumable(ArgumentStream const& stream) const = 0;
 
-    //! \brief Consume the stream
+    //! \brief Consume the stream, returning a pack of the arguments for processing
     //! \throws InvalidArgumentValueException if the value is incorrect
     //! \details Assumes that it has already been checked by is_consumable
-    virtual Void consume(ArgumentStream& stream) const = 0;
+    virtual ArgumentPack consume(ArgumentStream& stream) const = 0;
 
     //! \brief The description to print for the help
     virtual String help_description() const = 0;
@@ -90,7 +104,7 @@ class ArgumentParser : public Handle<ArgumentParserInterface> {
   public:
     using Handle<ArgumentParserInterface>::Handle;
     Bool is_consumable(ArgumentStream const& stream) const { return this->_ptr->is_consumable(stream); }
-    Void consume(ArgumentStream& stream) const { this->_ptr->consume(stream); }
+    ArgumentPack consume(ArgumentStream& stream) const { return this->_ptr->consume(stream); }
     String help_description() const { return this->_ptr->help_description(); }
 };
 

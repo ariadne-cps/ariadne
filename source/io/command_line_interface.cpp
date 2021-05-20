@@ -138,6 +138,18 @@ class ValuedArgumentParserBase : public ArgumentParserBase {
   public:
     ValuedArgumentParserBase(String const& s, String const& l, String const& i) : ArgumentParserBase(s,l,i) { }
     Bool requires_value() const override { return true; }
+    VoidFunction create_processor(ArgumentStream& stream) const override final {
+        VoidFunction f;
+        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
+        try {
+            f = _create_processor(stream);
+        } catch (std::exception& e) {
+            throw InvalidArgumentValueException(long_id());
+        }
+        return f;
+    }
+  protected:
+    virtual VoidFunction _create_processor(ArgumentStream& stream) const = 0;
 };
 
 class UnvaluedArgumentParserBase : public ArgumentParserBase {
@@ -161,17 +173,10 @@ class VerbosityArgumentParser : public ValuedArgumentParserBase {
     VerbosityArgumentParser() : ValuedArgumentParserBase(
             "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
 
-    VoidFunction create_processor(ArgumentStream& stream) const override {
-        VoidFunction f;
-        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
-        try {
-            int val = std::stoi(stream.pop());
-            if (val < 0) throw std::exception();
-            f = [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
-        } catch (std::exception& e) {
-            throw InvalidArgumentValueException(long_id());
-        }
-        return f;
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        int val = std::stoi(stream.pop());
+        if (val < 0) throw std::exception();
+        return [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
     }
 };
 
@@ -180,29 +185,22 @@ public:
     DrawerArgumentParser() : ValuedArgumentParserBase(
             "d","drawer","Choose the drawer as a <value> in [ box | grid@X | affine@X ] with X a non-negative integer (default: affine@0)") { }
 
-    VoidFunction create_processor(ArgumentStream& stream) const override {
-        VoidFunction f;
-        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
-        try {
-            String value = stream.pop();
-            Drawer drawer = BoxDrawer();
-            if (value != "box") {
-                std::size_t at_pos = value.find('@',0);
-                if (at_pos == std::string::npos) throw std::exception();
-                else {
-                    int accuracy = stoi(value.substr(at_pos+1));
-                    if (accuracy < 0) throw std::exception();
-                    String drawer_name = value.substr(0,at_pos);
-                    if (drawer_name == "grid") drawer = GridDrawer((Nat)accuracy);
-                    else if (drawer_name == "affine") drawer = AffineDrawer((Nat)accuracy);
-                    else throw std::exception();
-                }
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        String value = stream.pop();
+        Drawer drawer = BoxDrawer();
+        if (value != "box") {
+            std::size_t at_pos = value.find('@',0);
+            if (at_pos == std::string::npos) throw std::exception();
+            else {
+                int accuracy = stoi(value.substr(at_pos+1));
+                if (accuracy < 0) throw std::exception();
+                String drawer_name = value.substr(0,at_pos);
+                if (drawer_name == "grid") drawer = GridDrawer((Nat)accuracy);
+                else if (drawer_name == "affine") drawer = AffineDrawer((Nat)accuracy);
+                else throw std::exception();
             }
-            f = [drawer]{ GraphicsManager::instance().set_drawer(drawer); };
-        } catch (std::exception& e) {
-            throw InvalidArgumentValueException(long_id());
         }
-        return f;
+        return [drawer]{ GraphicsManager::instance().set_drawer(drawer); };
     }
 };
 
@@ -211,21 +209,14 @@ public:
     ConcurrencyArgumentParser() : ValuedArgumentParserBase(
             "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
 
-    VoidFunction create_processor(ArgumentStream& stream) const override {
-        VoidFunction f;
-        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
-        try {
-            String arg = stream.pop();
-            if (arg == "max") f = []{ TaskManager::instance().set_maximum_concurrency(); };
-            else {
-                int val = std::stoi(arg);
-                if (val < 0) throw std::exception();
-                f = [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
-            }
-        } catch (std::exception& e) {
-            throw InvalidArgumentValueException(long_id());
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        String arg = stream.pop();
+        if (arg == "max") return []{ TaskManager::instance().set_maximum_concurrency(); };
+        else {
+            int val = std::stoi(arg);
+            if (val < 0) throw std::exception();
+            return [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
         }
-        return f;
     }
 };
 

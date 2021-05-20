@@ -38,6 +38,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_cli_instantiation())
         ARIADNE_TEST_CALL(test_concurrency_parsing())
         ARIADNE_TEST_CALL(test_drawer_parsing())
+        ARIADNE_TEST_CALL(test_theme_parsing())
         ARIADNE_TEST_CALL(test_verbosity_parsing())
         ARIADNE_TEST_CALL(test_multiple_argument_parsing())
         ARIADNE_TEST_CALL(test_unrecognised_argument())
@@ -128,6 +129,27 @@ class TestCommandLineInterface {
         const char* argv10[] = {nullptr, "-d"};
         Bool success10 = CommandLineInterface::instance().acquire(2,argv10);
         ARIADNE_TEST_ASSERT(not success10)
+    }
+
+    void test_theme_parsing() {
+        const char* argv[] = {nullptr, "-t", "none"};
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
+        const char* argv2[] = {nullptr, "--theme", "none"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        const char* argv3[] = {nullptr, "-t", "nn"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-t", "light"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(success4)
+        const char* argv5[] = {nullptr, "-t", "dark"};
+        Bool success5 = CommandLineInterface::instance().acquire(3,argv5);
+        ARIADNE_TEST_ASSERT(success5)
+        const char* argv6[] = {nullptr, "-t"};
+        Bool success6 = CommandLineInterface::instance().acquire(2,argv6);
+        ARIADNE_TEST_ASSERT(not success6)
     }
 
     void test_verbosity_parsing() {

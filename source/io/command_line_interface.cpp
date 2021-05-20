@@ -158,30 +158,24 @@ class UnvaluedArgumentParserBase : public ArgumentParserBase {
     Bool requires_value() const override { return false; }
 };
 
-class HelpArgumentParser : public UnvaluedArgumentParserBase {
-public:
-    HelpArgumentParser() : UnvaluedArgumentParserBase(
-            "h","help","Show this list of supported arguments") { }
-
-    VoidFunction create_processor(ArgumentStream& stream) const override {
-        return []{};
-    }
-};
-
-class VerbosityArgumentParser : public ValuedArgumentParserBase {
+class ConcurrencyArgumentParser : public ValuedArgumentParserBase {
   public:
-    VerbosityArgumentParser() : ValuedArgumentParserBase(
-            "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
+    ConcurrencyArgumentParser() : ValuedArgumentParserBase(
+            "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
-        int val = std::stoi(stream.pop());
-        if (val < 0) throw std::exception();
-        return [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
+        String arg = stream.pop();
+        if (arg == "max") return []{ TaskManager::instance().set_maximum_concurrency(); };
+        else {
+            int val = std::stoi(arg);
+            if (val < 0) throw std::exception();
+            return [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
+        }
     }
 };
 
 class DrawerArgumentParser : public ValuedArgumentParserBase {
-public:
+  public:
     DrawerArgumentParser() : ValuedArgumentParserBase(
             "d","drawer","Choose the drawer as a <value> in [ box | grid@X | affine@X ] with X a non-negative integer (default: affine@0)") { }
 
@@ -204,23 +198,46 @@ public:
     }
 };
 
-class ConcurrencyArgumentParser : public ValuedArgumentParserBase {
-public:
-    ConcurrencyArgumentParser() : ValuedArgumentParserBase(
-            "c","concurrency","Choose the concurrency as a non-negative integer <value> or use 'max' to choose the hardware concurrency of this machine (default: 0)") { }
+class HelpArgumentParser : public UnvaluedArgumentParserBase {
+  public:
+    HelpArgumentParser() : UnvaluedArgumentParserBase(
+            "h","help","Show this list of supported arguments") { }
 
-    VoidFunction _create_processor(ArgumentStream& stream) const override {
-        String arg = stream.pop();
-        if (arg == "max") return []{ TaskManager::instance().set_maximum_concurrency(); };
-        else {
-            int val = std::stoi(arg);
-            if (val < 0) throw std::exception();
-            return [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
-        }
+    VoidFunction create_processor(ArgumentStream& stream) const override {
+        return []{};
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),VerbosityArgumentParser()}) { }
+class ThemeArgumentParser : public ValuedArgumentParserBase {
+  public:
+    ThemeArgumentParser() : ValuedArgumentParserBase(
+            "t","theme","Choose the logging theme as a as a <value> in [ none | light | dark ] (default: none)") { }
+
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        TerminalTextTheme theme = TT_THEME_NONE;
+        String val = stream.pop();
+        if (val != "none") {
+            if (val == "light") theme = TT_THEME_LIGHT;
+            else if (val == "dark") theme = TT_THEME_DARK;
+            else throw std::exception();
+        }
+        return [theme]{ Logger::instance().configuration().set_theme(theme); };
+    }
+};
+
+class VerbosityArgumentParser : public ValuedArgumentParserBase {
+  public:
+    VerbosityArgumentParser() : ValuedArgumentParserBase(
+            "v","verbosity","Choose the logging verbosity as a non-negative integer <value> (default: 0)") { }
+
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        int val = std::stoi(stream.pop());
+        if (val < 0) throw std::exception();
+        return [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
+    }
+};
+
+CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),ThemeArgumentParser(),VerbosityArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);

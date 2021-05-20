@@ -208,6 +208,20 @@ class HelpArgumentParser : public UnvaluedArgumentParserBase {
     }
 };
 
+class SchedulerArgumentParser : public ValuedArgumentParserBase {
+public:
+    SchedulerArgumentParser() : ValuedArgumentParserBase(
+            "s","scheduler","Choose the logging scheduler as a as a <value> in [ immediate | blocking | nonblocking ] (default: nonblocking)") { }
+
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        String val = stream.pop();
+        if (val == "immediate") return []{ Logger::instance().use_immediate_scheduler(); };
+        else if (val == "blocking") return []{ Logger::instance().use_blocking_scheduler(); };
+        else if (val == "nonblocking") return []{ Logger::instance().use_nonblocking_scheduler(); };
+        else throw std::exception();
+    }
+};
+
 class ThemeArgumentParser : public ValuedArgumentParserBase {
   public:
     ThemeArgumentParser() : ValuedArgumentParserBase(
@@ -237,7 +251,7 @@ class VerbosityArgumentParser : public ValuedArgumentParserBase {
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),ThemeArgumentParser(),VerbosityArgumentParser()}) { }
+CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),SchedulerArgumentParser(),ThemeArgumentParser(),VerbosityArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);
@@ -256,7 +270,7 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                     } else if (p.id() == "help") {
                         p.process(); _print_help();
                         return false;
-                    } else if (p.id() == "concurrency") {
+                    } else if (p.id() == "scheduler") {
                         // Need to process this before the others
                         p.process();
                     } else packs.insert(p);

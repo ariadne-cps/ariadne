@@ -36,7 +36,7 @@
 #include "solvers/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "io/graphics_interface.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"

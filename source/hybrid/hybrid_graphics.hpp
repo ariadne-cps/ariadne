@@ -36,7 +36,7 @@
 #include "io/colour.hpp"
 #include "symbolic/variable.hpp"
 #include "io/graphics_interface.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "symbolic/expression_set.hpp"
@@ -123,4 +123,4 @@ Void plot(const char* filename, const Axes2d& axes, CSETS const&... csets) {
 
 } // namespace Ariadne
 
-#endif // ARIADNE_GRAPHICS_HPP
+#endif // ARIADNE_FIGURE_HPP

@@ -1,5 +1,5 @@
 set(UNIT_TESTS
-    test_graphics
+    test_figure
     test_logging
     test_gnuplot
 )

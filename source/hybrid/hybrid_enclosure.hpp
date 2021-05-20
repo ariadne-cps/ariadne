@@ -370,8 +370,7 @@ class ListSet<HybridEnclosure>
     Iterator end() { return _list.end(); }
     ConstIterator begin() const { return _list.begin(); }
     ConstIterator end() const { return _list.end(); }
-    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-        for(SizeType i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
+    Void draw(CanvasInterface& cnvs, const Set<DiscreteLocation>& locs, const Variables2d& vars) const;
 
     friend ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
         ValidatedLowerKleenean result=true; for(auto iter=set.begin(); iter!=set.end(); ++iter) { result = result && inside(*iter,bx); } return result; }

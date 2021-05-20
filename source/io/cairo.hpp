@@ -28,7 +28,7 @@
 #ifdef HAVE_CAIRO_H
 
 #include "config.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 #include <cairo/cairo.h>
 
@@ -47,7 +47,7 @@ struct ImageSize2d {
 };
 
 class CairoCanvas
-    : public CanvasInterface
+    : public CanvasBase
 {
     friend class Figure;
   private:
@@ -68,6 +68,7 @@ class CairoCanvas
     Void dot(double x, double y);
     Void stroke();
     Void fill();
+
     Void set_dot_radius(double dr);
     Void set_line_width(double lw);
     Void set_line_colour(double r, double g, double b);

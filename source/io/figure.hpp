@@ -1,5 +1,5 @@
 /***************************************************************************
- *            io/graphics.hpp
+ *            io/figure.hpp
  *
  *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file io/graphics.hpp
- *  \brief Graphics class for drawing and outputting shapes in Euclidean space.
+/*! \file io/figure.hpp
+ *  \brief Figure classes for drawing and outputting shapes in Euclidean space.
  */
 
-#ifndef ARIADNE_GRAPHICS_HPP
-#define ARIADNE_GRAPHICS_HPP
+#ifndef ARIADNE_FIGURE_HPP
+#define ARIADNE_FIGURE_HPP
 
 #include "config.hpp"
 
@@ -39,7 +39,7 @@
 #include "utility/declarations.hpp"
 #include "symbolic/variable.hpp"
 #include "colour.hpp"
-#include "graphics_interface.hpp"
+#include "graphics_base.hpp"
 #include "graphics_backend_interface.hpp"
 
 namespace Ariadne {
@@ -348,5 +348,5 @@ Void plot(const char* filename, const Projection2d& pr, const ApproximateBoxType
 
 } // namespace Ariadne
 
-#endif // ARIADNE_GRAPHICS_HPP
+#endif // ARIADNE_FIGURE_HPP
 

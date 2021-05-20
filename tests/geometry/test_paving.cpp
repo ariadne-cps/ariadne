@@ -30,7 +30,7 @@
 #include "geometry/grid_paving.hpp"
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

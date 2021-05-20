@@ -35,7 +35,7 @@
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
 #include "io/geometry2d.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/gnuplot.hpp"
 #include "io/logging.hpp"
 
@@ -154,7 +154,7 @@ void GnuplotCanvas::stroke() {
  }
 
 void GnuplotCanvas::move_to(double x, double y)
-{   
+{
     this->Cpoint.x = this->geom[0].x = x;
     this->Cpoint.y = this->geom[0].y = y;
     this->dim = 1;

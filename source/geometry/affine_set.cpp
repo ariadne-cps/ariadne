@@ -854,15 +854,8 @@ Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
     }
 
     if(boundary.empty()) { return; }
-    if(boundary.size()==1) { canvas.dot(boundary[0].x,boundary[0].y); }
 
-    // Trace boundary
-    canvas.move_to(boundary[0].x,boundary[0].y);
-    for(SizeType i=1; i!=boundary.size(); ++i) {
-        canvas.line_to(boundary[i].x,boundary[i].y);
-    }
-    canvas.line_to(boundary[0].x,boundary[0].y);
-    canvas.fill();
+    canvas.fill_boundary(boundary);
 }
 
 

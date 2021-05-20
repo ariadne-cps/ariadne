@@ -55,13 +55,13 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
         _logger_level = Logger::instance().current_level();
         while (true) {
             UniqueLock<Mutex> lock(_element_availability_mutex);
-            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _stash.empty() or _exception != nullptr; });
+            _element_availability_condition.wait(lock, [=,this] { return _advancement.has_finished() or not _sequential_queue.empty() or _exception != nullptr; });
             if (_exception != nullptr) rethrow_exception(_exception);
             if (_advancement.has_finished()) { _log_scope_manager.reset(); return; }
 
             CompletelyBoundFunctionType task, progress_acknowledge;
-            make_lpair(task,progress_acknowledge) = _stash.back();
-            _stash.pop_back();
+            make_lpair(task,progress_acknowledge) = _sequential_queue.front();
+            _sequential_queue.pop();
             if (_using_concurrency()) {
                 TaskManager::instance().enqueue([this, task, progress_acknowledge] { _concurrent_task_wrapper(task,progress_acknowledge); });
             } else {
@@ -73,12 +73,12 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
         }
     }
 
-    SizeType size() const override { return _stash.size(); }
+    SizeType size() const override { return _sequential_queue.size(); }
 
     Void append(E const& e) override {
         _advancement.add_to_waiting();
-        _stash.push_back(std::make_pair(std::bind(std::forward<TaskFunctionType const>(_task_func), std::forward<E const&>(e)),
-                                        std::bind(std::forward<ProgressAcknowledgeFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e),
+        _sequential_queue.push(std::make_pair(std::bind(std::forward<TaskFunctionType const>(_task_func), std::forward<E const&>(e)),
+                                                   std::bind(std::forward<ProgressAcknowledgeFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e),
                                                   _progress_indicator)
                          ));
     }
@@ -135,7 +135,7 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
                                                   std::forward<E const&>(e), _progress_indicator);
             TaskManager::instance().enqueue([this,task,progress_acknowledge]{ _concurrent_task_wrapper(task,progress_acknowledge); });
         } else {
-            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _stash respectively
+            // Locking and notification are used when concurrency is set to zero during processing, in order to avoid a race and to resume processing _sequential_queue respectively
             {
                 LockGuard<Mutex> lock(_element_appending_mutex);
                 append(e);
@@ -152,8 +152,8 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
   private:
 
-    // Stash of task-progress_acknowledge pairs for initial consumption and for consumption when using no concurrency
-    List<Pair<CompletelyBoundFunctionType,CompletelyBoundFunctionType>> _stash;
+    // Queue of task-progress_acknowledge pairs for initial consumption and for consumption when using no concurrency
+    std::queue<Pair<CompletelyBoundFunctionType,CompletelyBoundFunctionType>> _sequential_queue;
 
     Nat _logger_level; // The logger level to impose to the running threads
     SharedPointer<LogScopeManager> _log_scope_manager; // The scope manager required to properly hold print

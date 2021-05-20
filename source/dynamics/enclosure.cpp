@@ -66,7 +66,8 @@
 
 #include "hybrid/discrete_event.hpp"
 
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
+#include "io/graphics_manager.hpp"
 #include "io/logging.hpp"
 
 #include "function/functional.hpp"
@@ -77,6 +78,7 @@
 
 #include "algebra/expansion.inl.hpp"
 
+#include "concurrency/workload.hpp"
 
 namespace Ariadne {
 
@@ -146,12 +148,11 @@ inline Pair<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivaria
 }
 
 EnclosureConfiguration::EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, SizeType reconditioning_num_blocks)
-    : _function_factory(function_factory), _paver(new AffinePaver()), _drawer(new AffineDrawer(0)), _reconditioning_num_blocks(reconditioning_num_blocks) { }
+    : _function_factory(function_factory), _paver(new AffinePaver()), _reconditioning_num_blocks(reconditioning_num_blocks) { }
 
 OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
     return os << "EnclosureConfiguration( function_factory=" << ec._function_factory
               << ", paver=" << ec._paver
-              <<", drawer=" << ec._drawer
               <<", reconditioning_num_blocks=" << ec._reconditioning_num_blocks <<")";
 }
 
@@ -233,7 +234,7 @@ Enclosure::Enclosure()
     , _time_function(), _dwell_time_function()
     , _reduced_domain(), _is_fully_reduced(true)
     , _variable_kinds()
-    , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr),Drawer(nullptr))
+    , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr))
 {
 }
 
@@ -1234,7 +1235,7 @@ inline ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMult
 }
 
 Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    this->configuration().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
+    GraphicsManager::instance().drawer().draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
@@ -1595,15 +1596,10 @@ ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
 }
 
 Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
-    ARIADNE_LOG_SCOPE_CREATE;
-    SizeType total_sets = this->_data.size();
-    SizeType processed_sets = 0;
-    ProgressIndicator indicator(total_sets);
-    for (auto set : this->_data) {
-        set.draw(cnvs, prj);
-        indicator.update_current(processed_sets++);
-        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-    }
+    StaticWorkload<LabelledEnclosure,CanvasInterface*,Variables2d const&> workload(
+            [](LabelledEnclosure const& e, CanvasInterface* c, Variables2d const& p){ e.draw(*c, p); },&cnvs,prj);
+    workload.append(this->_data);
+    workload.process();
 }
 
 } // namespace Ariadne

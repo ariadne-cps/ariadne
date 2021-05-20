@@ -38,6 +38,8 @@
 
 #include "algebra/algebra.hpp"
 
+#include "io/geometry2d.hpp"
+
 namespace Ariadne {
 
 typedef FloatDPBounds ValidatedNumericType;
@@ -68,14 +70,12 @@ template class Box<Interval<FloatDPLowerBound>>;
 template class Box<Interval<FloatDPApproximation>>;
 
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
-    SizeType ix=p.x_coordinate(); SizeType iy=p.y_coordinate();
-    ApproximateIntervalType x=bx[ix]; ApproximateIntervalType y=bx[iy];
-    c.move_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
-    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.lower_bound()));
-    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.upper_bound()));
-    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.upper_bound()));
-    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
-    c.fill();
+    auto const& xl = numeric_cast<double>(bx[p.x_coordinate()].lower_bound());
+    auto const& xu = numeric_cast<double>(bx[p.x_coordinate()].upper_bound());
+    auto const& yl = numeric_cast<double>(bx[p.y_coordinate()].lower_bound());
+    auto const& yu = numeric_cast<double>(bx[p.y_coordinate()].upper_bound());
+    List<Point2d> boundary = {Point2d(xl,yl),Point2d(xu,yl),Point2d(xu,yu),Point2d(xl,yu)};
+    c.fill_boundary(boundary);
 }
 
 ExactBoxType make_box(const String& str)

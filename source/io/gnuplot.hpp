@@ -27,8 +27,7 @@
 #ifdef HAVE_GNUPLOT_H
 
 #include "config.hpp"
-#include "io/graphics.hpp"
-#include "io/geometry2d.hpp"
+#include "io/figure.hpp"
 
 #include "io/gnuplot-iostream.hpp"
 
@@ -51,7 +50,7 @@ struct  _Labels
     String zLabel = "";
 };
 
-class GnuplotCanvas : public CanvasInterface
+class GnuplotCanvas : public CanvasBase
 {
     friend class Figure;
   private:
@@ -70,6 +69,8 @@ class GnuplotCanvas : public CanvasInterface
     bool isColourPalette;
     bool isanimate;
     _Labels labels;
+
+    Mutex _mux;
 
   public:
     ~GnuplotCanvas();

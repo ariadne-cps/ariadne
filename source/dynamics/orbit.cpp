@@ -35,7 +35,7 @@
 #include "geometry/curve.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 namespace Ariadne {
 

@@ -26,7 +26,7 @@
  *  \brief Null output in the case of missing graphics support.
  */
 
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/graphics_backend_interface.hpp"
 #include "config.hpp"
 
@@ -49,6 +49,9 @@ public:
     virtual Void dot(double x, double y) { }
     virtual Void stroke() { }
     virtual Void fill() { }
+
+    virtual Void fill_boundary(List<Point2d> const& boundary) { }
+
     virtual Void set_line_width(double lw) { }
     virtual Void set_line_colour(double r, double g, double b) { }
     virtual Void set_fill_opacity(double fo) { }

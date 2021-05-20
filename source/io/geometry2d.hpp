@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file io/graphics_interface.hpp
- *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
+/*! \file io/geometry2d.hpp
+ *  \brief 2D geometric objects exclusively for drawing.
  */
 
 #ifndef ARIADNE_GEOMETRY2D_HPP

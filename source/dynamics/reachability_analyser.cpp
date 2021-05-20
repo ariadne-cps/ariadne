@@ -58,7 +58,7 @@
 #include "dynamics/reachability_analyser.hpp"
 
 #include "io/logging.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "solvers/linear_programming.hpp"
 
 #include "dynamics/reachability_analyser.tpl.hpp"

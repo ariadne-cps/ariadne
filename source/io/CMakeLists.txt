@@ -2,7 +2,7 @@ set(LIBRARY_NAME ariadne-io)
 
 add_library(${LIBRARY_NAME} OBJECT
     logging.cpp
-    graphics.cpp
+    figure.cpp
     cairo.cpp
     gnuplot.cpp
     graphics_manager.cpp

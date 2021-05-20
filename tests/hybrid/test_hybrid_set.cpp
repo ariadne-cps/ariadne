@@ -35,7 +35,7 @@
 #include "geometry/function_set.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 using namespace std;
 using namespace Ariadne;

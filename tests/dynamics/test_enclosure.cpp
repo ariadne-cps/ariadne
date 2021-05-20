@@ -39,8 +39,9 @@
 #include "geometry/function_set.hpp"
 #include "solvers/integrator.hpp"
 #include "symbolic/expression_set.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/drawer.hpp"
+#include "io/graphics_manager.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"
@@ -211,12 +212,12 @@ class TestEnclosure
     Void _draw(Drawer const& drawer, String suffix) const {
         ARIADNE_PRINT_TEST_COMMENT("Drawing with " + suffix + " method");
         ARIADNE_TEST_PRINT(drawer);
+        GraphicsManager::instance().set_drawer(drawer);
         ExactBoxType dom({{0.0_x,1.0_x},{1.0_x,2.0_x}});
         auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp),0);
         TaylorFunctionFactory function_factory(swp);
         EnclosureConfiguration configuration(function_factory);
-        configuration.set_drawer(drawer);
         Enclosure encl(dom,fnc,configuration);
         RealVariable x("x"),y("y");
         LabelledEnclosure lencl(encl,RealSpace({x,y}));
@@ -234,7 +235,6 @@ class TestEnclosure
     void test_labelled_with_auxiliary_draw() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
         EnclosureConfiguration config(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8)));
-        config.set_drawer(AffineDrawer(1));
         Enclosure encl(dom,config);
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
@@ -244,6 +244,7 @@ class TestEnclosure
         LabelledEnclosure lencl(encl,RealSpace({x,y}),RealSpace({z}));
         LabelledFigure fig(Axes2d(-1.0<=x<=3,-1<=z<=11));
         fig << lencl;
+        GraphicsManager::instance().set_drawer(AffineDrawer(1));
         fig.write("test_enclosure_auxiliary");
     }
 };

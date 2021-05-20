@@ -39,7 +39,7 @@
 #include "hybrid/hybrid_storage.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "numeric/rounding.hpp"
 #include "symbolic/assignment.hpp"

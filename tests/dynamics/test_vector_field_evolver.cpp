@@ -40,7 +40,7 @@
 #include "symbolic/expression_set.hpp"
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

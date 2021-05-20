@@ -34,7 +34,7 @@
 #include "matrix.hpp"
 #include "diagonal_matrix.hpp"
 #include "io/graphics_interface.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 namespace Ariadne {
 

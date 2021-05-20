@@ -26,7 +26,7 @@
 #include "utility/handle.hpp"
 #include "io/graphics_backend_interface.hpp"
 #include "io/graphics_manager.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/geometry2d.hpp"
 #include "io/cairo.hpp"
 #include "io/gnuplot.hpp"
@@ -45,7 +45,7 @@ GraphicsBackend default_backend() {
     #endif
 }
 
-GraphicsManager::GraphicsManager() : _backend(default_backend()), _drawer(AffineDrawer(1)) {
+GraphicsManager::GraphicsManager() : _backend(default_backend()), _drawer(AffineDrawer(0)) {
 }
 
 GraphicsManager& GraphicsManager::instance() {

@@ -23,6 +23,9 @@
  */
 
 #include "concurrency/task_manager.hpp"
+#include "utility/handle.hpp"
+#include "io/drawer.hpp"
+#include "io/graphics_manager.hpp"
 #include "logging.hpp"
 #include "command_line_interface.hpp"
 
@@ -146,7 +149,7 @@ class UnvaluedArgumentParserBase : public ArgumentParserBase {
 class HelpArgumentParser : public UnvaluedArgumentParserBase {
 public:
     HelpArgumentParser() : UnvaluedArgumentParserBase(
-            "h","help","Show this list of supported arguments.") { }
+            "h","help","Show this list of supported arguments") { }
 
     VoidFunction create_processor(ArgumentStream& stream) const override {
         return []{};
@@ -160,13 +163,44 @@ class VerbosityArgumentParser : public ValuedArgumentParserBase {
 
     VoidFunction create_processor(ArgumentStream& stream) const override {
         VoidFunction f;
-        if (stream.empty()) { throw MissingArgumentValueException(); }
+        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
         try {
             int val = std::stoi(stream.pop());
             if (val < 0) throw std::exception();
             f = [val]{ Logger::instance().configuration().set_verbosity(static_cast<unsigned int>(val)); };
-        } catch (...) {
-            throw InvalidArgumentValueException("Verbosity should be a non-negative integer value.");
+        } catch (std::exception& e) {
+            throw InvalidArgumentValueException(long_id());
+        }
+        return f;
+    }
+};
+
+class DrawerArgumentParser : public ValuedArgumentParserBase {
+public:
+    DrawerArgumentParser() : ValuedArgumentParserBase(
+            "d","drawer","Choose the drawer as a <value> in [ box | grid@X | affine@X ] with X a non-negative integer (default: affine@0)") { }
+
+    VoidFunction create_processor(ArgumentStream& stream) const override {
+        VoidFunction f;
+        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
+        try {
+            String value = stream.pop();
+            Drawer drawer = BoxDrawer();
+            if (value != "box") {
+                std::size_t at_pos = value.find('@',0);
+                if (at_pos == std::string::npos) throw std::exception();
+                else {
+                    int accuracy = stoi(value.substr(at_pos+1));
+                    if (accuracy < 0) throw std::exception();
+                    String drawer_name = value.substr(0,at_pos);
+                    if (drawer_name == "grid") drawer = GridDrawer((Nat)accuracy);
+                    else if (drawer_name == "affine") drawer = AffineDrawer((Nat)accuracy);
+                    else throw std::exception();
+                }
+            }
+            f = [drawer]{ GraphicsManager::instance().set_drawer(drawer); };
+        } catch (std::exception& e) {
+            throw InvalidArgumentValueException(long_id());
         }
         return f;
     }
@@ -179,7 +213,7 @@ public:
 
     VoidFunction create_processor(ArgumentStream& stream) const override {
         VoidFunction f;
-        if (stream.empty()) { throw MissingArgumentValueException(); }
+        if (stream.empty()) { throw MissingArgumentValueException(long_id()); }
         try {
             String arg = stream.pop();
             if (arg == "max") f = []{ TaskManager::instance().set_maximum_concurrency(); };
@@ -188,14 +222,14 @@ public:
                 if (val < 0) throw std::exception();
                 f = [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
             }
-        } catch (...) {
-            throw InvalidArgumentValueException("Concurrency should be a non-negative integer value.");
+        } catch (std::exception& e) {
+            throw InvalidArgumentValueException(long_id());
         }
         return f;
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),HelpArgumentParser(),VerbosityArgumentParser()}) { }
+CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),VerbosityArgumentParser()}) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);
@@ -219,11 +253,11 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                         p.process();
                     } else packs.insert(p);
                 } catch(MissingArgumentValueException& exc) {
-                    std::clog << "A value is required by the argument, but it is not supplied.\n\n"
+                    std::clog << "A value is required by the '" << exc.what() << "' argument, but it is not supplied.\n\n"
                         << parser.help_description(4) << std::endl;
                     return false;
                 } catch(InvalidArgumentValueException& exc) {
-                    std::clog << exc.what() << "\n\n" << parser.help_description(4) << std::endl;
+                    std::clog << "Invalid '" << exc.what() << "' argument value, see the usage below:" << "\n\n" << parser.help_description(4) << std::endl;
                     return false;
                 }
                 break;

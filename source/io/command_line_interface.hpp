@@ -39,14 +39,15 @@ namespace Ariadne {
 
 using VoidFunction = std::function<Void()>;
 
-//! \brief Exception for when the argument is not recognised by any parser
-class UnrecognisedArgumentException : public std::exception { };
 //! \brief Exception for when no value is available, but it should be supplied
-class MissingArgumentValueException : public std::exception { };
+class MissingArgumentValueException : public std::runtime_error {
+public:
+    MissingArgumentValueException(String argument) : std::runtime_error(argument) { }
+};
 //! \brief Exception for when a parser recognises the value argument as invalid
 class InvalidArgumentValueException : public std::runtime_error {
   public:
-    InvalidArgumentValueException(String what) : std::runtime_error(what) { }
+    InvalidArgumentValueException(String argument) : std::runtime_error(argument) { }
 };
 
 //! \brief Stream of arguments to be consumed by parsers

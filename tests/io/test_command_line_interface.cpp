@@ -36,8 +36,9 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_empty_argument_stream())
         ARIADNE_TEST_CALL(test_nonempty_argument_stream())
         ARIADNE_TEST_CALL(test_cli_instantiation())
-        ARIADNE_TEST_CALL(test_verbosity_parsing())
         ARIADNE_TEST_CALL(test_concurrency_parsing())
+        ARIADNE_TEST_CALL(test_drawer_parsing())
+        ARIADNE_TEST_CALL(test_verbosity_parsing())
         ARIADNE_TEST_CALL(test_multiple_argument_parsing())
         ARIADNE_TEST_CALL(test_unrecognised_argument())
         ARIADNE_TEST_CALL(test_duplicate_argument())
@@ -72,26 +73,6 @@ class TestCommandLineInterface {
         ARIADNE_TEST_EXECUTE(CommandLineInterface::instance())
     }
 
-    void test_verbosity_parsing() {
-        const char* argv[] = {nullptr, "-v", "5"};
-        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
-        ARIADNE_TEST_ASSERT(success1)
-        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),5)
-        const char* argv2[] = {nullptr, "--verbosity", "0"};
-        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
-        ARIADNE_TEST_ASSERT(success2)
-        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),0)
-        const char* argv3[] = {nullptr, "-v", "-2"};
-        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
-        ARIADNE_TEST_ASSERT(not success3)
-        const char* argv4[] = {nullptr, "-v", "q"};
-        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
-        ARIADNE_TEST_ASSERT(not success4)
-        const char* argv5[] = {nullptr, "-v"};
-        Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
-        ARIADNE_TEST_ASSERT(not success5)
-    }
-
     void test_concurrency_parsing() {
         const char* argv[] = {nullptr, "-c", "5"};
         Bool success1 = CommandLineInterface::instance().acquire(3,argv);
@@ -114,6 +95,59 @@ class TestCommandLineInterface {
         Bool success6 = CommandLineInterface::instance().acquire(3,argv6);
         ARIADNE_TEST_ASSERT(success6)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),TaskManager::instance().maximum_concurrency())
+    }
+
+    void test_drawer_parsing() {
+        const char* argv[] = {nullptr, "-d", "box"};
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
+        const char* argv2[] = {nullptr, "--drawer", "box"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        const char* argv3[] = {nullptr, "-d", "bx"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-d", "affine"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(not success4)
+        const char* argv5[] = {nullptr, "-d", "affine@e"};
+        Bool success5 = CommandLineInterface::instance().acquire(3,argv5);
+        ARIADNE_TEST_ASSERT(not success5)
+        const char* argv6[] = {nullptr, "-d", "affine@2"};
+        Bool success6 = CommandLineInterface::instance().acquire(3,argv6);
+        ARIADNE_TEST_ASSERT(success6)
+        const char* argv7[] = {nullptr, "-d", "grid"};
+        Bool success7 = CommandLineInterface::instance().acquire(3,argv7);
+        ARIADNE_TEST_ASSERT(not success7)
+        const char* argv8[] = {nullptr, "-d", "grid@e"};
+        Bool success8 = CommandLineInterface::instance().acquire(3,argv8);
+        ARIADNE_TEST_ASSERT(not success8)
+        const char* argv9[] = {nullptr, "-d", "grid@2"};
+        Bool success9 = CommandLineInterface::instance().acquire(3,argv9);
+        ARIADNE_TEST_ASSERT(success9)
+        const char* argv10[] = {nullptr, "-d"};
+        Bool success10 = CommandLineInterface::instance().acquire(2,argv10);
+        ARIADNE_TEST_ASSERT(not success10)
+    }
+
+    void test_verbosity_parsing() {
+        const char* argv[] = {nullptr, "-v", "5"};
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
+        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),5)
+        const char* argv2[] = {nullptr, "--verbosity", "0"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),0)
+        const char* argv3[] = {nullptr, "-v", "-2"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-v", "q"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(not success4)
+        const char* argv5[] = {nullptr, "-v"};
+        Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
+        ARIADNE_TEST_ASSERT(not success5)
     }
 
     void test_multiple_argument_parsing() {

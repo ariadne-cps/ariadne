@@ -184,13 +184,7 @@ class TestGraphics {
         g.write("test_graphics-bx3");
         g.clear();
 
-        g.set_bounding_box(bbx1);
-        g.set_projection_map(Projection2d(2,0,1));
-
-        g << fill_colour(0.0,0.5,0.5)
-          << s1;
-        g.write("test_graphics-set");
-        g.clear();
+        plot("test_graphics_set",Projection2d(2,0,1),bbx1,{{orange,s1}});
 
         InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0_x,dp)));
         for(Int i=1; i<=10; ++i) {
@@ -198,6 +192,7 @@ class TestGraphics {
             cv.insert(i,pt);
         }
         g.set_bounding_box(cv.bounding_box());
+        g.set_projection(2,0,1);
         g.set_line_colour(1,0,0);
         g.draw(cv);
         g.set_line_colour(0,0,0);
@@ -214,6 +209,7 @@ class TestGraphics {
 
         ExactBoxType bbox(2); bbox[0]=ExactIntervalType(-2,2); bbox[1]=ExactIntervalType(-2,2);
         g.set_bounding_box(bbox);
+        g.set_projection(2,0,1);
         g << gts;
         g.write("test_graphics-paving");
         g.clear();

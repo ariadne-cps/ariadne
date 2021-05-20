@@ -29,7 +29,6 @@
 
 #include "config.hpp"
 #include "io/graphics.hpp"
-#include "concurrency/concurrency_typedefs.hpp"
 
 #include <cairo/cairo.h>
 
@@ -48,7 +47,7 @@ struct ImageSize2d {
 };
 
 class CairoCanvas
-    : public CanvasInterface
+    : public CanvasBase
 {
     friend class Figure;
   private:
@@ -56,8 +55,6 @@ class CairoCanvas
     double lw; // The line width in pixels
     double dr; // The dot radius in pixels
     Colour lc,fc; // The line and fill colours
-
-    Mutex _mux;
   public:
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size);
@@ -71,8 +68,6 @@ class CairoCanvas
     Void dot(double x, double y);
     Void stroke();
     Void fill();
-
-    Void fill_boundary(List<Point2d> const& boundary);
 
     Void set_dot_radius(double dr);
     Void set_line_width(double lw);

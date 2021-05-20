@@ -47,7 +47,7 @@ class GraphicsBackendInterface {
     virtual ~GraphicsBackendInterface() = default;
 };
 
-//! \brief A class for computing outer approximations to sets defined by functions.
+//! \brief Handle for graphics backends
 class GraphicsBackend
     : public Handle<const GraphicsBackendInterface>
 {

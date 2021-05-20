@@ -39,7 +39,7 @@
 #include "utility/declarations.hpp"
 #include "symbolic/variable.hpp"
 #include "colour.hpp"
-#include "graphics_interface.hpp"
+#include "graphics_base.hpp"
 #include "graphics_backend_interface.hpp"
 
 namespace Ariadne {

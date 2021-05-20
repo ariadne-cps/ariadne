@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "ariadne_main.hpp"
+
 #include "higgins-selkov.hpp"
 #include "chemical-reactor.hpp"
 #include "lotka-volterra.hpp"
@@ -32,16 +34,10 @@
 #include "rossler-attractor.hpp"
 #include "jerk16.hpp"
 #include "dc-dc.hpp"
-
 #include "noisy-utilities.hpp"
 
-using namespace Ariadne;
-
-
-int main(int argc, const char* argv[])
+void ariadne_main()
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
     List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC()};
 
     for (SystemType s : systems) {

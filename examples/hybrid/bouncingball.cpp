@@ -21,16 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-using std::cout; using std::endl; using std::flush;
-
-Int main(Int argc, const char* argv[])
+void ariadne_main()
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters

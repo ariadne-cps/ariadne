@@ -22,59 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-#include <iostream>
+#include "ariadne_main.hpp"
 
-#include "config.hpp"
-#include "utility/attribute.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/algebra.hpp"
-#include "symbolic/space.hpp"
-#include "symbolic/expression.hpp"
-#include "function/taylor_model.hpp"
-#include "algebra/differential.hpp"
-#include "function/constraint.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "solvers/solver.hpp"
-#include "symbolic/expression_set.hpp"
-#include "dynamics/enclosure.hpp"
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "dynamics/iterated_map.hpp"
-#include "dynamics/iterated_map_evolver.hpp"
-#include "io/figure.hpp"
-#include "io/logging.hpp"
-
-#include "geometry/grid_paving.hpp"
-#include "dynamics/reachability_analyser.hpp"
-
-    #include "geometry/function_set.hpp"
-    #include "geometry/affine_set.hpp"
-
-using namespace Ariadne;
-using namespace std;
-
-#define ARIADNE_PRINT(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
-
-
-Int main(int argc, const char* argv[])
+void ariadne_main()
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
     Real a=Decimal(1.3), b=Decimal(0.3);
     RealVariable x("x"), y("y");
     IteratedMap henon({next(x)=a-x*x+b*y,next(y)=x});
-    ARIADNE_PRINT(henon);
+    ARIADNE_LOG_PRINTLN_VAR(henon);
 
     // Compute a fixed point
     IntervalNewtonSolver solver(maximum_error=1e-2, maximum_number_of_steps=16);
     ExactBoxType search_box({{0,1},{0,1}});
     Point<FloatDPBounds> fixed_point = Point(solver.fixed_point(henon.update_function(),search_box));
-    ARIADNE_PRINT(fixed_point);
+    ARIADNE_LOG_PRINTLN_VAR(fixed_point);
     LabelledSet<Point<FloatDPBounds>> labelled_fixed_point(henon.state_space(),fixed_point);
 
     // Set up the evaluators

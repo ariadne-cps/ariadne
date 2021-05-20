@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_figure
     test_logging
     test_gnuplot
+    test_command_line_interface
 )
 
 foreach(TEST ${UNIT_TESTS})

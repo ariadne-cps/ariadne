@@ -22,14 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne.hpp"
+#include "ariadne_main.hpp"
 
-using namespace std;
-using namespace Ariadne;
-
-int main(int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
+void ariadne_main()
+{
     RealVariable x("x"), y("y");
     VectorField system = {{dot(x)=2*x-x*y,dot(y)=2*x*x-y}};
     RealExpressionBoundedConstraintSet initial_set = {{0.9_dec<=x<=1,-2.2_dec<=y<=-2},{sqr(x)+sqr(y+2)<=1}};

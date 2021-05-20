@@ -22,16 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
 #include "utility/stopwatch.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-int main(int argc, const char* argv[])
+void ariadne_main()
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-
     ARIADNE_LOG_PRINTLN("van der Pol oscillator");
 
     RealConstant mu("mu",1);

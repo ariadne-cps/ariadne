@@ -15,7 +15,9 @@ Legenda for the issue kind:
 *Date:  /  /2021*
 
 - [#538](https://github.com/ariadne-cps/ariadne/issues/538) (N) Introduce a concurrency module designed for parallel execution of internal tasks
-- [#549](https://github.com/ariadne-cps/ariadne/issues/549) (N) Introduce a Least Recently Used cache utility for holding a limited number of homogeneous objects 
+- [#549](https://github.com/ariadne-cps/ariadne/issues/549) (N) Introduce a Least Recently Used cache utility for holding a limited number of homogeneous objects
+- [#559](https://github.com/ariadne-cps/ariadne/issues/559) (N) Introduce an optional ariadne_main.hpp that offers an ariadne_main() function handling all header tasks for an executable   
+- [#562](https://github.com/ariadne-cps/ariadne/issues/562) (N) Introduce a command line interface class for acquiring CLI input arguments setting logger verbosity, theme and scheduler, along with concurrency and drawer  
 - [#551](https://github.com/ariadne-cps/ariadne/issues/551) (C) Make VectorFieldEvolver process sets in parallel (when splitting initially or during evolution)
 - [#556](https://github.com/ariadne-cps/ariadne/issues/556) (C) Disallow unsafe default value of upper semantics for orbit methods
 - [#565](https://github.com/ariadne-cps/ariadne/issues/565) (C) Draw lists of (Labelled/Hybrid)Enclosure in parallel  
@@ -24,6 +26,7 @@ Legenda for the issue kind:
 - [#573](https://github.com/ariadne-cps/ariadne/issues/573) (C) Use an LRU cache for modes in CompositeHybridAutomaton, avoid exhausting a given mode in HybridEvolver before changing mode
 - [#580](https://github.com/ariadne-cps/ariadne/issues/580) (C) VectorFieldEvolver, IteratedMapEvolver and HybridEvolver now check that the initial enclosure is consistent
 - [#592](https://github.com/ariadne-cps/ariadne/issues/592) (C) Enclosure now uses the global GraphicsManager drawer instead of having a dedicated configuration field
+- [#595](https://github.com/ariadne-cps/ariadne/issues/595) (C) Modify examples to use ariadne_main function for simplicity, tutorials are not changed  
 - [#539](https://github.com/ariadne-cps/ariadne/issues/539) (F) A segmentation fault sometimes would be issued when terminating the executable, due to logging
 - [#557](https://github.com/ariadne-cps/ariadne/issues/557) (F) Fix behavior of StopWatch utility for concurrent code, enhance the class for choosing a duration type
 - [#567](https://github.com/ariadne-cps/ariadne/issues/567) (F) Fix problem with state_time space creation when state space already contains the 't' variable

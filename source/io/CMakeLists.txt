@@ -7,6 +7,7 @@ add_library(${LIBRARY_NAME} OBJECT
     gnuplot.cpp
     graphics_manager.cpp
     drawer.cpp
+    command_line_interface.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

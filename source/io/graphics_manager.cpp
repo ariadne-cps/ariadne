@@ -26,7 +26,7 @@
 #include "utility/handle.hpp"
 #include "io/graphics_backend_interface.hpp"
 #include "io/graphics_manager.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/geometry2d.hpp"
 #include "io/cairo.hpp"
 #include "io/gnuplot.hpp"

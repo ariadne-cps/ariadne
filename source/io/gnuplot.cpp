@@ -35,7 +35,7 @@
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
 #include "io/geometry2d.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/gnuplot.hpp"
 #include "io/logging.hpp"
 

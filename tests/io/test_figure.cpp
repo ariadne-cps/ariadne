@@ -26,7 +26,7 @@
 #include "../test.hpp"
 
 #include "function/function.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/drawer.hpp"
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"

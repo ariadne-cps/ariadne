@@ -39,7 +39,7 @@
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "io/graphics_interface.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "io/logging.hpp"
 

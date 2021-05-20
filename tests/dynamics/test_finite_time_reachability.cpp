@@ -38,7 +38,7 @@
 #include "dynamics/reachability_analyser.hpp"
 #include "symbolic/expression_set.hpp"
 #include "solvers/integrator.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

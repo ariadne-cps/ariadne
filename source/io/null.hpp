@@ -26,7 +26,7 @@
  *  \brief Null output in the case of missing graphics support.
  */
 
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/graphics_backend_interface.hpp"
 #include "config.hpp"
 

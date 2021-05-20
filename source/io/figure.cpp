@@ -1,5 +1,5 @@
 /***************************************************************************
- *            io/graphics.cpp
+ *            io/figure.cpp
  *
  *  Copyright  2008-21  Pieter Collins, Mirko Albanese, Luca Geretti
  *
@@ -35,7 +35,7 @@
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
 #include "io/geometry2d.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 #include "io/progress_indicator.hpp"
 #include "io/graphics_manager.hpp"

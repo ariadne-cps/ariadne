@@ -31,7 +31,7 @@
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 #include "symbolic/expression_set.hpp"
 

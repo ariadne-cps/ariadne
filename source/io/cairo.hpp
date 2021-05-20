@@ -28,7 +28,7 @@
 #ifdef HAVE_CAIRO_H
 
 #include "config.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 #include <cairo/cairo.h>
 

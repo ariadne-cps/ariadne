@@ -34,7 +34,7 @@
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_simulator.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

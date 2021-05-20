@@ -74,7 +74,7 @@ namespace Ariadne {
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
 #include "io/cairo.hpp"
 #include "io/gnuplot.hpp"

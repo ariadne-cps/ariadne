@@ -32,7 +32,7 @@
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
 #include "io/geometry2d.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "geometry/function_set.hpp"

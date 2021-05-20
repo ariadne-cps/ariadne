@@ -37,7 +37,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/discrete_location.hpp"

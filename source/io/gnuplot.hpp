@@ -27,7 +27,7 @@
 #ifdef HAVE_GNUPLOT_H
 
 #include "config.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 
 #include "io/gnuplot-iostream.hpp"
 

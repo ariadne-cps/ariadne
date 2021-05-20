@@ -42,7 +42,7 @@
 #include "geometry/list_set.hpp"
 #include "dynamics/iterated_map.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

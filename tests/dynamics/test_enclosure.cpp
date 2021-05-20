@@ -39,7 +39,7 @@
 #include "geometry/function_set.hpp"
 #include "solvers/integrator.hpp"
 #include "symbolic/expression_set.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/drawer.hpp"
 #include "io/graphics_manager.hpp"
 #include "io/logging.hpp"

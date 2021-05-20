@@ -52,7 +52,7 @@
 #include "dynamics/reachability_analyser.hpp"
 
 #include "io/logging.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/progress_indicator.hpp"
 #include "solvers/linear_programming.hpp"
 

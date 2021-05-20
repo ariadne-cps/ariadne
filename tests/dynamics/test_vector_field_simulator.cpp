@@ -39,7 +39,7 @@
 #include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field_simulator.hpp"
 #include "dynamics/orbit.hpp"
-#include "io/graphics.hpp"
+#include "io/figure.hpp"
 #include "io/logging.hpp"
 
 #include "../test.hpp"

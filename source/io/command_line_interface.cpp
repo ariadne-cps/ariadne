@@ -85,7 +85,8 @@ class ArgumentParserBase : public ArgumentParserInterface {
     virtual Bool requires_value() const = 0;
 
     Bool is_consumable(ArgumentStream const& stream) const override;
-    String help_description() const override;
+    SizeType help_description_header_size() const override;
+    String help_description(SizeType num_chars_to_align_instructions) const override;
 
     virtual ~ArgumentParserBase() = default;
 
@@ -98,13 +99,20 @@ class ArgumentParserBase : public ArgumentParserInterface {
     String _instructions;
 };
 
-String ArgumentParserBase::help_description() const {
+SizeType ArgumentParserBase::help_description_header_size() const {
+    SizeType result = 4+long_id().size();
+    if (has_short_id()) result+= 4+short_id().size();
+    if (requires_value()) result += 8;
+    return result;
+}
+
+String ArgumentParserBase::help_description(SizeType num_chars_to_separate_instructions) const {
     StringStream ss;
     ss << "[";
-    if (has_short_id()) ss << "-" << short_id() << " | ";
+    if (has_short_id()) { ss << "-" << short_id() << " | "; }
     ss << "--" << long_id() << "]";
-    if (requires_value()) ss << " <value>";
-    ss << "\t" << instructions();
+    if (requires_value()) { ss << " <value>"; }
+    ss << std::string(num_chars_to_separate_instructions,' ') << instructions();
     return ss.str();
 }
 
@@ -201,7 +209,7 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                     auto p = parser.consume(stream);
                     if (packs.contains(p)) {
                         std::clog << "Argument '" << p.id() << "' specified multiple times.\n\n"
-                            << parser.help_description() << std::endl;
+                            << parser.help_description(4) << std::endl;
                     } else if (p.id() == "help") {
                         _print_help();
                         return false;
@@ -211,10 +219,10 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
                     } else packs.insert(p);
                 } catch(MissingArgumentValueException& exc) {
                     std::clog << "A value is required by the argument, but it is not supplied.\n\n"
-                        << parser.help_description() << std::endl;
+                        << parser.help_description(4) << std::endl;
                     return false;
                 } catch(InvalidArgumentValueException& exc) {
-                    std::clog << exc.what() << "\n\n" << parser.help_description() << std::endl;
+                    std::clog << exc.what() << "\n\n" << parser.help_description(4) << std::endl;
                     return false;
                 }
                 break;
@@ -233,9 +241,17 @@ Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
 }
 
 void CommandLineInterface::_print_help() const {
+
+    List<SizeType> chars(_parsers.size(),0);
+    SizeType max_chars = 0;
+    for (SizeType i=0; i<_parsers.size(); ++i)  {
+        chars[i] = _parsers[i].help_description_header_size();
+        if (chars[i] > max_chars) max_chars = chars[i];
+    }
+
     std::clog << "Supported arguments:" << std::endl;
-    for (auto& parser : _parsers) {
-        std::clog << "    " << parser.help_description() << std::endl;
+    for (SizeType i=0; i<_parsers.size(); ++i) {
+        std::clog << "    " << _parsers[i].help_description(4+max_chars-chars[i]) << std::endl;
     }
 }
 

@@ -95,8 +95,13 @@ class ArgumentParserInterface {
     //! \details Assumes that it has already been checked by is_consumable
     virtual ArgumentPack consume(ArgumentStream& stream) const = 0;
 
+    //! \brief The size in characters of the help description header for the argument
+    virtual SizeType help_description_header_size() const = 0;
+
     //! \brief The description to print for the help
-    virtual String help_description() const = 0;
+    //! \details Takes \a num_chars_to_separate_instructions as the number of spaces that
+    //! separate the instructions in the help summary for the argument
+    virtual String help_description(SizeType num_chars_to_separate_instructions) const = 0;
 };
 
 //! \brief An argument parser
@@ -105,7 +110,8 @@ class ArgumentParser : public Handle<ArgumentParserInterface> {
     using Handle<ArgumentParserInterface>::Handle;
     Bool is_consumable(ArgumentStream const& stream) const { return this->_ptr->is_consumable(stream); }
     ArgumentPack consume(ArgumentStream& stream) const { return this->_ptr->consume(stream); }
-    String help_description() const { return this->_ptr->help_description(); }
+    SizeType help_description_header_size() const { return this->_ptr->help_description_header_size(); }
+    String help_description(SizeType num_chars_to_separate_instructions) const { return this->_ptr->help_description(num_chars_to_separate_instructions); }
 };
 
 //! \brief A static class for acquisition of CLI arguments

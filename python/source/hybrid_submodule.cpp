@@ -290,6 +290,7 @@ Void export_hybrid_enclosure(pybind11::module& module) {
 Void export_list_set_hybrid_enclosure(pybind11::module& module) {
     pybind11::class_<ListSet<HybridEnclosure>> list_set_hybrid_enclosure_class(module,"HybridEnclosureListSet");
     list_set_hybrid_enclosure_class.def("__iter__", [](ListSet<HybridEnclosure> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_hybrid_enclosure_class.def("__getitem__",&ListSet<HybridEnclosure>::get);
     list_set_hybrid_enclosure_class.def("bounding_box",&ListSet<HybridEnclosure>::bounding_box);
 }
 

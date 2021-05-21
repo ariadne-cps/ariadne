@@ -357,7 +357,8 @@ class ListSet<HybridEnclosure>
             this->adjoin(*iter); } }
     Void append(const HybridEnclosure& hes) { this->_list.append(hes); }
     SizeType size() const { return _list.size(); }
-    const HybridEnclosure& operator[](SizeType i) const { return _list[i]; }
+    const HybridEnclosure& operator[](SizeType i) const { return get(i); }
+    const HybridEnclosure& get(SizeType i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
     VariablesUpperBoxType bounding_box() const;
     Void reduce() { for(auto& set : _list ) { set.reduce(); } }

@@ -36,7 +36,7 @@
 #include "geometry/list_set.hpp"
 #include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -72,7 +72,7 @@ class TestVectorField
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     TestVectorField().test();
     return ARIADNE_TEST_FAILURES;
 }

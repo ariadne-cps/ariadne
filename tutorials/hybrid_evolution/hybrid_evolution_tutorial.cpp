@@ -296,7 +296,7 @@ HybridTime get_final_time()
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     // Get the system
     auto system = get_system();

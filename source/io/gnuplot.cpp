@@ -69,10 +69,7 @@ GnuplotCanvas::GnuplotCanvas(String cfilename, Nat X, Nat Y, Bool is_anim): lc(0
         *gnuplot << "set terminal gif animate nocrop ";
     }
 
-    *gnuplot << "size " << to_string(this->sizeX) << ", " <<
-        to_string(this->sizeY);
-
-    *gnuplot << "\n";
+    *gnuplot << "size " << to_string(this->sizeX) << ", " << to_string(this->sizeY) << "\n";
 
     if(not(isanimate)) {
         *gnuplot << "set output \"" << cfilename << ".png\"\n";
@@ -86,7 +83,6 @@ GnuplotCanvas::GnuplotCanvas(String cfilename, Nat X, Nat Y, Bool is_anim): lc(0
     //Se the initial size of the drawing point
     this->geom.resize(1);
     this->dim = 0;
-
 }
 
 GnuplotCanvas::~GnuplotCanvas() {

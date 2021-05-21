@@ -42,8 +42,6 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 
-// Set the verbosity, i.e., the maximum level to be shown from println calls
-#define ARIADNE_LOG_SET_VERBOSITY(level) Logger::instance().configuration().set_verbosity(level);
 // Automatic level increase/decrease in a scope; meant to be used once within a function, at top scope; necessary for print holding.
 #define ARIADNE_LOG_SCOPE_CREATE auto logscopemanager = LogScopeManager(ARIADNE_PRETTY_FUNCTION);
 // Managed level increase/decrease around the function fn; if the function throws, manual decrease of the proper level is required.
@@ -67,21 +65,6 @@ namespace Ariadne {
 
 //! \brief Exception for trying to change the scheduler while there are registered threads
 class LoggerSchedulerChangeWithRegisteredThreadsException : public std::exception { };
-
-inline unsigned int get_verbosity(int argc, const char* argv[]) {
-    if(argc>1) {
-        if(std::strcmp(argv[1],"-v")==0) {
-            if(argc>2) {
-                int val = std::atoi(argv[2]);
-                ARIADNE_ASSERT_MSG(val >= 0,"Verbosity should be a non-negative value.\n");
-                return static_cast<unsigned int>(val);
-            }
-        } else {
-            ARIADNE_FAIL_MSG("Unrecognised command-line option \"" << argv[1] << "\"\n");
-        }
-    }
-    return 0;
-}
 
 //! \brief A styling for a text character
 //! \details Refer to https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors

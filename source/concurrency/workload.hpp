@@ -75,15 +75,16 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     SizeType size() const override { return _sequential_queue.size(); }
 
-    Void append(E const& e) override {
+    WorkloadInterface<E,AS...>& append(E const& e) override {
         _advancement.add_to_waiting();
         _sequential_queue.push(std::make_pair(std::bind(std::forward<TaskFunctionType const>(_task_func), std::forward<E const&>(e)),
                                                    std::bind(std::forward<ProgressAcknowledgeFunctionType const>(_progress_acknowledge_func), std::forward<E const&>(e),
                                                   _progress_indicator)
                          ));
+        return *this;
     }
 
-    Void append(List<E> const& es) override { for (auto e : es) append(e); }
+    WorkloadInterface<E,AS...>& append(List<E> const& es) override { for (auto e : es) append(e); return *this; }
 
   private:
 
@@ -175,6 +176,9 @@ public:
     StaticWorkload(TaskFunctionType f, AS... as) : WorkloadBase<E, AS...>() {
         this->_task_func = std::bind(std::forward<TaskFunctionType const>(f), std::placeholders::_1, std::forward<AS>(as)...);
     }
+
+    //StaticWorkload& append(E const& e) { WorkloadBase<E,AS...>::append(e); return *this; }
+    //StaticWorkload& append(List<E> const& es) { WorkloadBase<E,AS...>::append(es); return *this; }
 };
 
 //! \brief A dynamic workload in which it is possible to append new elements from the called function

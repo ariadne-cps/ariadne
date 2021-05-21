@@ -44,7 +44,7 @@
 #include "hybrid/hybrid_reachability_analyser.hpp"
 #include "io/graphics_manager.hpp"
 #include "io/drawer.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -119,7 +119,7 @@ Void TestHybridReachability::test_bouncing_ball() const {
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     GraphicsManager::instance().set_drawer(GridDrawer(2));
 

@@ -101,9 +101,10 @@ class TestAffineSet
         set.new_parameter_constraint(1.0_x*x[0]+0.5_x*x[1]+0.25_x*x[2]<=0.75_x);
         set.new_parameter_constraint(-2.0_x*x[0]-3.0_x*x[1]-1.0_x*x[2]<=3.00_x);
 
-        ARIADNE_TEST_PRINT(set);
+        ARIADNE_TEST_PRINT(set)
         Polytope2d expected_set({{-3.0,-3.0}, {-3.0,-3.66667}, {2.0,-2.0}, {4.0,-1.0},
                                      {3.0,-0.5}, {1.0,-1.0}, {-2.0,-2.0}, {-3.0,-2.5}});
+        ARIADNE_TEST_PRINT(expected_set)
 
         figure.clear(); figure.set_bounding_box(ExactBoxType{{-7.0_x,+7.0_x},{-5.0_x,+1.0_x}}); figure.set_fill_opacity(0.05);
         figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;

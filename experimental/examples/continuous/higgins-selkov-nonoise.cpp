@@ -30,7 +30,7 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     RealVariable v0("v0"), k1("k1"), k2("k2");
     RealVariable S("S"), P("P");

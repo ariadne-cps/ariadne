@@ -31,6 +31,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/valuation.hpp"
 #include "hybrid/hybrid_automata.hpp"
+#include "io/command_line_interface.hpp"
 
 using namespace Ariadne;
 
@@ -396,7 +397,7 @@ TestHybridAutomaton::test_static_analysis()
 
 
 Int main(Int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     ARIADNE_TEST_CALL(TestHybridAutomaton().test());
     return ARIADNE_TEST_FAILURES;
 }

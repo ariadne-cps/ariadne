@@ -38,6 +38,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_CALL(test_cli_instantiation())
         ARIADNE_TEST_CALL(test_concurrency_parsing())
         ARIADNE_TEST_CALL(test_drawer_parsing())
+        ARIADNE_TEST_CALL(test_graphics_parsing())
         ARIADNE_TEST_CALL(test_scheduler_parsing())
         ARIADNE_TEST_CALL(test_theme_parsing())
         ARIADNE_TEST_CALL(test_verbosity_parsing())
@@ -76,10 +77,10 @@ class TestCommandLineInterface {
     }
 
     void test_concurrency_parsing() {
-        const char* argv[] = {nullptr, "-c", "5"};
+        const char* argv[] = {nullptr, "-c", "2"};
         Bool success1 = CommandLineInterface::instance().acquire(3,argv);
         ARIADNE_TEST_ASSERT(success1)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),5)
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
         const char* argv2[] = {nullptr, "--concurrency", "0"};
         Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
         ARIADNE_TEST_ASSERT(success2)
@@ -129,13 +130,32 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(success9)
         const char* argv10[] = {nullptr, "-d", "gri@2"};
         Bool success10 = CommandLineInterface::instance().acquire(3,argv10);
-        ARIADNE_TEST_ASSERT(success10)
+        ARIADNE_TEST_ASSERT(not success10)
         const char* argv11[] = {nullptr, "-d"};
         Bool success11 = CommandLineInterface::instance().acquire(2,argv11);
         ARIADNE_TEST_ASSERT(not success11)
     }
 
+    void test_graphics_parsing() {
+        const char* argv[] = {nullptr, "-g", "cairo"};
+        Bool success1 = CommandLineInterface::instance().acquire(3,argv);
+        ARIADNE_TEST_ASSERT(success1)
+        const char* argv2[] = {nullptr, "--graphics", "cairo"};
+        Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
+        ARIADNE_TEST_ASSERT(success2)
+        const char* argv3[] = {nullptr, "-g", "none"};
+        Bool success3 = CommandLineInterface::instance().acquire(3,argv3);
+        ARIADNE_TEST_ASSERT(not success3)
+        const char* argv4[] = {nullptr, "-g", "gnuplot"};
+        Bool success4 = CommandLineInterface::instance().acquire(3,argv4);
+        ARIADNE_TEST_ASSERT(success4)
+        const char* argv5[] = {nullptr, "-g"};
+        Bool success5 = CommandLineInterface::instance().acquire(2,argv5);
+        ARIADNE_TEST_ASSERT(not success5)
+    }
+
     void test_scheduler_parsing() {
+        TaskManager::instance().set_concurrency(0);
         const char* argv[] = {nullptr, "-s", "immediate"};
         Bool success1 = CommandLineInterface::instance().acquire(3,argv);
         ARIADNE_TEST_ASSERT(success1)
@@ -154,6 +174,9 @@ class TestCommandLineInterface {
         const char* argv6[] = {nullptr, "-s"};
         Bool success6 = CommandLineInterface::instance().acquire(2,argv6);
         ARIADNE_TEST_ASSERT(not success6)
+        const char* argv7[] = {nullptr, "-c", "max", "-s", "immediate"};
+        Bool success7 = CommandLineInterface::instance().acquire(5,argv7);
+        ARIADNE_TEST_ASSERT(success7)
     }
 
     void test_theme_parsing() {
@@ -227,6 +250,6 @@ class TestCommandLineInterface {
 
 Int main(Int argc, const char* argv[]) {
     TestCommandLineInterface().test();
-    return 0;
+    return ARIADNE_TEST_FAILURES;
 }
 

@@ -38,7 +38,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     // Declare the shared system variables
     RealVariable aperture1("aperture1");

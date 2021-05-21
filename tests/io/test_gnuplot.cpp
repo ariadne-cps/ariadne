@@ -279,7 +279,7 @@ int main(int argc, const char** argv) {
     testGnuplot.test_variable_precision(double_precision);
     testGnuplot.test_variable_precision(MultiplePrecision(128));
 
-    return 0;
+    return ARIADNE_TEST_FAILURES;
 }
 
 #else

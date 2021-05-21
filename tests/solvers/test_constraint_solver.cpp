@@ -36,7 +36,7 @@
 #include "function/procedure.hpp"
 #include "solvers/constraint_solver.hpp"
 #include "geometry/box.hpp"
-
+#include "io/command_line_interface.hpp"
 
 using namespace std;
 using namespace Ariadne;
@@ -189,7 +189,7 @@ class TestConstraintSolver
 };
 
 Int main(Int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     TestConstraintSolver().test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -37,6 +37,7 @@
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "function/formula.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -191,7 +192,7 @@ class TestSolver
 
 Int main(Int argc, const char **argv) {
 
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();

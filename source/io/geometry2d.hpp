@@ -94,6 +94,11 @@ struct Polytope2d
     Polytope2d operator+(const Vector2d& v) {
         Polytope2d r(*this); for(SizeType i=0; i!=r.boundary.size(); ++i) { r.boundary[i]+=v; } return r;
     }
+
+    friend OutputStream& operator<<(OutputStream& os, const Polytope2d& p) {
+        return p._write(os);
+    }
+
   private:
     virtual OutputStream& _write(OutputStream& os) const { return os << "Polytope2d(boundary="<<boundary<<")"; }
 };

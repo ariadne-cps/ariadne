@@ -649,8 +649,7 @@ ListSet<HybridEnclosure>::draw(CanvasInterface& cnvs, const Set<DiscreteLocation
     StaticWorkload<HybridEnclosure, CanvasInterface*, Set<DiscreteLocation> const&, Variables2d const&> workload(
             [](HybridEnclosure const& e, CanvasInterface* c, Set<DiscreteLocation> const& l, Variables2d const& v)
             { e.draw(*c, l, v); }, &cnvs, locs, vars);
-    workload.append(_list);
-    workload.process();
+    workload.append(_list).process();
 }
 
 VariablesUpperBoxType

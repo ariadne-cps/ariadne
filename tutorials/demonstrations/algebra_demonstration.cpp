@@ -52,8 +52,7 @@ void linear_algebra_demonstration() {
 
 
 int main(int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
-    ARIADNE_LOG_SCOPE_CREATE;
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     linear_algebra_demonstration();
 }

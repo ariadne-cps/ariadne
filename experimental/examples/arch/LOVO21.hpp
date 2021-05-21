@@ -62,7 +62,7 @@ void LOVO21()
     GeneralHybridEvolver evolver(automaton);
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.09);
+    evolver.configuration().set_maximum_step_size(0.07);
     evolver.configuration().set_maximum_spacial_error(1e-5);
 
     RealPoint ic({1.3_dec,1.0_dec});
@@ -72,7 +72,7 @@ void LOVO21()
 
     Stopwatch<Milliseconds> sw;
     EnclosureConfiguration config(evolver.function_factory());
-    config.set_reconditioning_num_blocks(4);
+    config.set_reconditioning_num_blocks(5);
     auto initial_enclosure = HybridEnclosure(initial_set,RealSpace({x,y}),config);
 
     ARIADNE_LOG_PRINTLN("Computing evolution... ")
@@ -121,6 +121,7 @@ void LOVO21()
     HybridTime circle_time(2*pi,1);
     ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time))
 
-    ARIADNE_LOG_RUN_AT(2,plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit))
+    ARIADNE_LOG_PRINTLN("Drawing figure... ")
+    plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit);
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.")
 }

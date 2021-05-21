@@ -24,8 +24,10 @@
 
 #include "concurrency/task_manager.hpp"
 #include "utility/handle.hpp"
-#include "io/drawer.hpp"
-#include "io/graphics_manager.hpp"
+#include "drawer.hpp"
+#include "graphics_manager.hpp"
+#include "gnuplot.hpp"
+#include "cairo.hpp"
 #include "logging.hpp"
 #include "command_line_interface.hpp"
 
@@ -198,6 +200,19 @@ class DrawerArgumentParser : public ValuedArgumentParserBase {
     }
 };
 
+class GraphicsBackendArgumentParser : public ValuedArgumentParserBase {
+  public:
+    GraphicsBackendArgumentParser() : ValuedArgumentParserBase(
+            "g","graphics","Choose the graphics backend as a <value> in [ cairo | gnuplot ] (default: cairo)") { }
+
+    VoidFunction _create_processor(ArgumentStream& stream) const override {
+        String val = stream.pop();
+        if (val == "cairo") return []{ GraphicsManager::instance().set_backend(CairoGraphicsBackend()); };
+        else if (val == "gnuplot") return []{ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
+        else throw std::exception();
+    }
+};
+
 class HelpArgumentParser : public UnvaluedArgumentParserBase {
   public:
     HelpArgumentParser() : UnvaluedArgumentParserBase(
@@ -211,7 +226,7 @@ class HelpArgumentParser : public UnvaluedArgumentParserBase {
 class SchedulerArgumentParser : public ValuedArgumentParserBase {
 public:
     SchedulerArgumentParser() : ValuedArgumentParserBase(
-            "s","scheduler","Choose the logging scheduler as a as a <value> in [ immediate | blocking | nonblocking ] (default: nonblocking)") { }
+            "s","scheduler","Choose the logging scheduler as a <value> in [ immediate | blocking | nonblocking ] (default: nonblocking)") { }
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         String val = stream.pop();
@@ -225,7 +240,7 @@ public:
 class ThemeArgumentParser : public ValuedArgumentParserBase {
   public:
     ThemeArgumentParser() : ValuedArgumentParserBase(
-            "t","theme","Choose the logging theme as a as a <value> in [ none | light | dark ] (default: none)") { }
+            "t","theme","Choose the logging theme as a <value> in [ none | light | dark ] (default: none)") { }
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         TerminalTextTheme theme = TT_THEME_NONE;
@@ -251,7 +266,10 @@ class VerbosityArgumentParser : public ValuedArgumentParserBase {
     }
 };
 
-CommandLineInterface::CommandLineInterface() : _parsers({ConcurrencyArgumentParser(),DrawerArgumentParser(),HelpArgumentParser(),SchedulerArgumentParser(),ThemeArgumentParser(),VerbosityArgumentParser()}) { }
+CommandLineInterface::CommandLineInterface() : _parsers({
+    ConcurrencyArgumentParser(),DrawerArgumentParser(),GraphicsBackendArgumentParser(),HelpArgumentParser(),
+    SchedulerArgumentParser(),ThemeArgumentParser(),VerbosityArgumentParser()
+    }) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     ArgumentStream stream(argc,argv);

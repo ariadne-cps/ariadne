@@ -53,10 +53,10 @@ public:
     virtual SizeType size() const = 0;
 
     //! \brief Append one element to process
-    virtual Void append(E const &e) = 0;
+    virtual WorkloadInterface& append(E const &e) = 0;
 
     //! \brief Append a list of elements to process
-    virtual Void append(List<E> const &es) = 0;
+    virtual WorkloadInterface& append(List<E> const &es) = 0;
 
 };
 

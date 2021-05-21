@@ -1598,8 +1598,7 @@ ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
 Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
     StaticWorkload<LabelledEnclosure,CanvasInterface*,Variables2d const&> workload(
             [](LabelledEnclosure const& e, CanvasInterface* c, Variables2d const& p){ e.draw(*c, p); },&cnvs,prj);
-    workload.append(this->_data);
-    workload.process();
+    workload.append(this->_data).process();
 }
 
 } // namespace Ariadne

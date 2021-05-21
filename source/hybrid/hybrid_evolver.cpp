@@ -280,8 +280,7 @@ orbit(const HybridEnclosure& initial,
                               indicator->update_final(termination.maximum_time().get_d());
                           },
                           std::bind_front(&HybridEvolverBase::_process_working_set,this),termination,semantics,result);
-    workload.append({initial,true});
-    workload.process();
+    workload.append({initial,true}).process();
 
     return std::move(*result);
 }

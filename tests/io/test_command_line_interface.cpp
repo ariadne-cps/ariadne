@@ -77,10 +77,10 @@ class TestCommandLineInterface {
     }
 
     void test_concurrency_parsing() {
-        const char* argv[] = {nullptr, "-c", "5"};
+        const char* argv[] = {nullptr, "-c", "2"};
         Bool success1 = CommandLineInterface::instance().acquire(3,argv);
         ARIADNE_TEST_ASSERT(success1)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),5)
+        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
         const char* argv2[] = {nullptr, "--concurrency", "0"};
         Bool success2 = CommandLineInterface::instance().acquire(3,argv2);
         ARIADNE_TEST_ASSERT(success2)

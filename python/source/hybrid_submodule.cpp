@@ -284,12 +284,18 @@ Void export_hybrid_enclosure(pybind11::module& module) {
 
     pybind11::class_<HybridEnclosure> hybrid_enclosure_class(module,"HybridEnclosure");
     hybrid_enclosure_class.def("previous_events", &HybridEnclosure::previous_events,reference_internal);
+    hybrid_enclosure_class.def("location", &HybridEnclosure::location,reference_internal);
+    hybrid_enclosure_class.def("continuous_set", &HybridEnclosure::continuous_set,reference_internal);
+    hybrid_enclosure_class.def("time_range", &HybridEnclosure::time_range);
+    hybrid_enclosure_class.def("state_bounding_box", &HybridEnclosure::state_bounding_box);
     hybrid_enclosure_class.def("__repr__", &__cstr__<HybridEnclosure>);
 }
 
 Void export_list_set_hybrid_enclosure(pybind11::module& module) {
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
     pybind11::class_<ListSet<HybridEnclosure>> list_set_hybrid_enclosure_class(module,"HybridEnclosureListSet");
     list_set_hybrid_enclosure_class.def("__iter__", [](ListSet<HybridEnclosure> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_hybrid_enclosure_class.def("__getitem__",&ListSet<HybridEnclosure>::get,reference_internal);
     list_set_hybrid_enclosure_class.def("bounding_box",&ListSet<HybridEnclosure>::bounding_box);
 }
 

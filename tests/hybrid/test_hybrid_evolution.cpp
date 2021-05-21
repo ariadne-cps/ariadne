@@ -193,7 +193,7 @@ Void TestHybridEvolution::test_water_tank() const {
         ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
-    HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
+    HybridEnclosure final_enclosure=HybridEnclosure(orbit.final()[0]);
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
     ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridRealBox(open,{height.in(ehl,ehu),aperture.in((Rational)eal,(Rational)eau)}));

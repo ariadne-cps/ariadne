@@ -319,6 +319,6 @@ Int main(Int argc, const char* argv[]) {
 
     TestLogging().test();
 
-    return 0;
+    return ARIADNE_TEST_FAILURES;
 }
 

@@ -17,7 +17,7 @@ Legenda for the issue kind:
 - [#538](https://github.com/ariadne-cps/ariadne/issues/538) (N) Introduce a concurrency module designed for parallel execution of internal tasks
 - [#549](https://github.com/ariadne-cps/ariadne/issues/549) (N) Introduce a Least Recently Used cache utility for holding a limited number of homogeneous objects
 - [#559](https://github.com/ariadne-cps/ariadne/issues/559) (N) Introduce an optional ariadne_main.hpp that offers an ariadne_main() function handling all header tasks for an executable   
-- [#562](https://github.com/ariadne-cps/ariadne/issues/562) (N) Introduce a command line interface class for acquiring CLI input arguments setting logger verbosity, theme and scheduler, along with concurrency and drawer  
+- [#562](https://github.com/ariadne-cps/ariadne/issues/562) (N) Introduce a command line interface class for acquiring CLI input arguments setting logger verbosity, theme and scheduler, along with concurrency, graphics backend and drawer  
 - [#551](https://github.com/ariadne-cps/ariadne/issues/551) (C) Make VectorFieldEvolver process sets in parallel (when splitting initially or during evolution)
 - [#556](https://github.com/ariadne-cps/ariadne/issues/556) (C) Disallow unsafe default value of upper semantics for orbit methods
 - [#565](https://github.com/ariadne-cps/ariadne/issues/565) (C) Draw lists of (Labelled/Hybrid)Enclosure in parallel  

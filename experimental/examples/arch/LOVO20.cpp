@@ -27,6 +27,6 @@ using namespace Ariadne;
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     LOVO20();
 }

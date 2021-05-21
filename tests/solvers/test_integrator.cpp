@@ -36,6 +36,7 @@
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -252,7 +253,7 @@ class TestIntegrator
 };
 
 Int main(Int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-10);
 

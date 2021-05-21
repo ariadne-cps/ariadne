@@ -55,7 +55,6 @@ class TestLogging {
     }
 
     Void test() {
-        ARIADNE_TEST_CALL(test_get_verbosity())
         ARIADNE_TEST_CALL(test_print_configuration())
         ARIADNE_TEST_CALL(test_shown_single_print())
         ARIADNE_TEST_CALL(test_hidden_single_print())
@@ -77,52 +76,41 @@ class TestLogging {
         ARIADNE_TEST_CALL(test_multiple_threads_with_nonblocking_scheduler())
     }
 
-    void test_get_verbosity() {
-        int argc1 = 1; const char* argv1[1] = {"test_logging"};
-        get_verbosity(argc1,argv1);
-        int argc2 = 2; const char* argv2[2] = {"test_logging","-u"};
-        ARIADNE_TEST_THROWS(get_verbosity(argc2,argv2),std::runtime_error);
-        int argc3 = 3; const char* argv3[3] = {"test_logging","-v","-1"};
-        ARIADNE_TEST_THROWS(get_verbosity(argc3,argv3),std::runtime_error);
-        int argc4 = 3; const char* argv4[3] = {"test_logging","-v","2"};
-        ARIADNE_TEST_EQUALS(get_verbosity(argc4,argv4),2);
-    }
-
     Void test_print_configuration() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN(Logger::instance().configuration());
     }
 
     Void test_shown_single_print() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
     }
 
     Void test_hidden_single_print() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(0);
+        Logger::instance().configuration().set_verbosity(0);
         ARIADNE_LOG_PRINTLN("This is a hidden call on level 1");
     }
 
     Void test_use_blocking_scheduler() {
         Logger::instance().use_blocking_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN("This is a call");
         ARIADNE_LOG_PRINTLN("This is another call");
     }
 
     Void test_use_nonblocking_scheduler() {
         Logger::instance().use_nonblocking_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN("This is a call");
         ARIADNE_LOG_PRINTLN("This is another call");
     }
 
     Void test_shown_call_function_with_entrance_and_exit() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_prints_scope_entrance(true);
         Logger::instance().configuration().set_prints_scope_exit(true);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -132,7 +120,7 @@ class TestLogging {
 
     Void test_hide_call_function_with_entrance_and_exit() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_prints_scope_entrance(false);
         Logger::instance().configuration().set_prints_scope_exit(false);
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -142,7 +130,7 @@ class TestLogging {
 
     Void test_indents_based_on_level() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_indents_based_on_level(true);
         ARIADNE_LOG_PRINTLN("Call at level 1");
         ARIADNE_LOG_PRINTLN_AT(1,"Call at level 2");
@@ -153,7 +141,7 @@ class TestLogging {
 
     Void test_handles_multiline_output() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_handles_multiline_output(true);
         ARIADNE_LOG_PRINTLN("This is a very long string for this test that will most definitely be longer than just one line, at least if the number of columns in the terminal is not excessively large, but this should suffice I believe. Just to be sure, let's add some more characters to the line and the result should get into a second line.");
         Logger::instance().configuration().set_handles_multiline_output(false);
@@ -162,7 +150,7 @@ class TestLogging {
 
     Void test_discards_newlines_and_indentation() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_discards_newlines_and_indentation(true);
         ARIADNE_LOG_PRINTLN("This text should just be in a single line \n       with no extra whitespaces.");
         Logger::instance().configuration().set_discards_newlines_and_indentation(false);
@@ -213,7 +201,7 @@ class TestLogging {
 
     Void test_light_theme() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_theme(TT_THEME_LIGHT);
         std::clog << TT_THEME_LIGHT << std::endl;
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -224,7 +212,7 @@ class TestLogging {
 
     Void test_dark_theme() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(2);
+        Logger::instance().configuration().set_verbosity(2);
         Logger::instance().configuration().set_theme(TT_THEME_DARK);
         std::clog << TT_THEME_DARK << std::endl;
         ARIADNE_LOG_PRINTLN("This is a call on level 1");
@@ -234,7 +222,7 @@ class TestLogging {
 
     Void test_theme_custom_keyword() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         Logger::instance().configuration().add_custom_keyword("first");
         Logger::instance().configuration().add_custom_keyword("second",TT_STYLE_CREAM);
         ARIADNE_LOG_PRINTLN("This is a first custom keyword and a custom styled second one.");
@@ -259,7 +247,7 @@ class TestLogging {
 
     Void test_redirect() {
         Logger::instance().use_immediate_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(1);
+        Logger::instance().configuration().set_verbosity(1);
         ARIADNE_LOG_PRINTLN("This is call 1");
         Logger::instance().redirect_to_file("log.txt");
         ARIADNE_LOG_PRINTLN("This is call 2");
@@ -283,7 +271,7 @@ class TestLogging {
 
     Void test_multiple_threads_with_blocking_scheduler() {
         Logger::instance().use_blocking_scheduler();
-        ARIADNE_LOG_SET_VERBOSITY(3);
+        Logger::instance().configuration().set_verbosity(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");
         ARIADNE_TEST_EQUALS(Logger::instance().cached_last_printed_thread_name().compare("main"),0);
@@ -300,7 +288,7 @@ class TestLogging {
     Void test_multiple_threads_with_nonblocking_scheduler() {
         Logger::instance().use_nonblocking_scheduler();
         Logger::instance().configuration().set_theme(TT_THEME_DARK);
-        ARIADNE_LOG_SET_VERBOSITY(3);
+        Logger::instance().configuration().set_verbosity(3);
         Logger::instance().configuration().set_thread_name_printing_policy(ThreadNamePrintingPolicy::BEFORE);
 
         ARIADNE_LOG_PRINTLN("Printing on the " << Logger::instance().current_thread_name() << " thread without other threads");

@@ -36,7 +36,7 @@
 #include "geometry/function_set.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -140,7 +140,7 @@ class TestExpressionSet {
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     TestExpressionSet().test();
     return ARIADNE_TEST_FAILURES;

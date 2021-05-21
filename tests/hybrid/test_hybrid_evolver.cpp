@@ -44,7 +44,7 @@
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_automaton-composite.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -899,7 +899,7 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
     ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_integrator).test_all());

@@ -33,6 +33,7 @@
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_paving.hpp"
+#include "io/command_line_interface.hpp"
 
 using namespace Ariadne;
 
@@ -67,7 +68,7 @@ class TestHybridGraphics {
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     TestHybridGraphics().test();
 
     return ARIADNE_TEST_FAILURES;

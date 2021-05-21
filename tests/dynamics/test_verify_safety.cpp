@@ -39,7 +39,7 @@
 #include "symbolic/expression_set.hpp"
 #include "solvers/integrator.hpp"
 #include "io/figure.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -169,7 +169,7 @@ class TestVerifySafety
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     TestVerifySafety().test();
     return ARIADNE_TEST_FAILURES;

@@ -41,7 +41,7 @@
 #include "io/graphics_interface.hpp"
 #include "io/figure.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 #include "../test.hpp"
 
@@ -211,7 +211,7 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     TestHybridEvolution().test();
     return ARIADNE_TEST_FAILURES;

@@ -37,7 +37,7 @@
 #include "function/formula.hpp"
 #include "solvers/nonlinear_programming.hpp"
 #include "geometry/box.hpp"
-
+#include "io/command_line_interface.hpp"
 
 using namespace std;
 using namespace Ariadne;
@@ -200,7 +200,7 @@ class TestOptimiser
 };
 
 Int main(Int argc, const char* argv[]) {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();

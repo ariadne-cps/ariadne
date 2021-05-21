@@ -35,7 +35,7 @@ using namespace Ariadne;
 
 int main(int argc, const char* argv[])
 {
-    Nat verbosity=get_verbosity(argc,argv);
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     /// Build the Hybrid System
 

@@ -32,7 +32,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "solvers/linear_programming.hpp"
-
+#include "io/command_line_interface.hpp"
 
 using namespace std;
 using namespace Ariadne;
@@ -112,7 +112,7 @@ class TestInteriorPointSolver
 
 Int main(Int argc, const char* argv[])
 {
-    ARIADNE_LOG_SET_VERBOSITY(get_verbosity(argc,argv));
+    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     InteriorPointSolver interior_point_optimiser;
     TestInteriorPointSolver(interior_point_optimiser).test();

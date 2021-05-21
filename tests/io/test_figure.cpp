@@ -40,6 +40,7 @@ using namespace Ariadne;
 class TestGraphics {
   public:
     void test() {
+        ARIADNE_TEST_CALL(test_point2d())
         ARIADNE_TEST_CALL(test_colour())
         ARIADNE_TEST_CALL(test_graphics_properties())
         ARIADNE_TEST_CALL(test_construct_figure())
@@ -47,6 +48,10 @@ class TestGraphics {
         ARIADNE_TEST_CALL(test_construct_labelled_figure())
         ARIADNE_TEST_CALL(test_labelled_figure_projection())
         ARIADNE_TEST_CALL(test_default_drawer())
+    }
+
+    void test_point2d() {
+        ARIADNE_TEST_PRINT(Point2d(1,1))
     }
 
     void test_colour() {

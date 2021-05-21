@@ -32,8 +32,9 @@ void CVDP20()
 
     RealVariable x1("x1"), y1("y1"), x2("x2"), y2("y2");
 
+    LabelledFigure fig(Axes2d(-2.5<=x1<=2.5,-4.05<=y1<=4.05));
+
     ARIADNE_LOG_PRINTLN("Coupled van der Pol Oscillator system:")
-    ListSet<LabelledEnclosure> reach1, reach2;
 
     {
         ARIADNE_LOG_PRINTLN_AT(1,"Running for mu=1...");
@@ -80,7 +81,8 @@ void CVDP20()
         if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
-        reach1.adjoin(orbit.reach());
+        fig << fill_colour(orange);
+        fig.draw(orbit.reach());
     }
 
     {
@@ -128,16 +130,11 @@ void CVDP20()
         if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
         instance.write();
 
-        reach2.adjoin(orbit.reach());
+        fig << fill_colour(Colour(0.6,0.6,0.6));
+        fig.draw(orbit.reach());
     }
 
     ARIADNE_LOG_PRINTLN("Plotting...");
-
-    LabelledFigure fig(Axes2d(-2.5<=x1<=2.5,-4.05<=y1<=4.05));
-    fig << fill_colour(orange);
-    fig.draw(reach2);
-    fig << fill_colour(Colour(0.6,0.6,0.6));
-    fig.draw(reach1);
     fig.write(benchmark.name().c_str());
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

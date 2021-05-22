@@ -36,6 +36,14 @@
 
 using namespace Ariadne;
 
+Void export_point2d(pybind11::module& module) {
+    pybind11::class_<Point2d> point2d_class(module, "Point2d");
+    point2d_class.def(pybind11::init<double, double>());
+    point2d_class.def_readwrite("x", &Point2d::x);
+    point2d_class.def_readwrite("y", &Point2d::y);
+    point2d_class.def("__repr__", &__cstr__<Point2d>);
+}
+
 Void export_colour(pybind11::module& module)
 {
     pybind11::class_<Colour> colour_class(module,"Colour");
@@ -126,6 +134,7 @@ Void export_plot(pybind11::module& module)
 }
 
 Void graphics_submodule(pybind11::module& module) {
+    export_point2d(module);
     export_colour(module);
     export_figure(module);
     export_graphics_properties(module);

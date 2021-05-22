@@ -53,6 +53,9 @@ Void export_storage(pybind11::module& module) {
 Void export_enclosure(pybind11::module& module) {
     pybind11::class_<Enclosure,pybind11::bases<Drawable2dInterface>> enclosure_class(module,"Enclosure");
     enclosure_class.def("bounding_box",&Enclosure::bounding_box);
+    enclosure_class.def("state_set",&Enclosure::state_set);
+    enclosure_class.def("state_auxiliary_set",&Enclosure::state_auxiliary_set);
+    enclosure_class.def("state_time_auxiliary_set",&Enclosure::state_time_auxiliary_set);
     enclosure_class.def("__str__", &__cstr__<Enclosure>);
     pybind11::class_<LabelledEnclosure,pybind11::bases<LabelledDrawable2dInterface,Enclosure>> labelled_enclosure_class(module,"LabelledEnclosure");
     labelled_enclosure_class.def("bounding_box",&LabelledEnclosure::bounding_box);

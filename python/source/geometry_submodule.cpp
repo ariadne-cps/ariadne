@@ -799,6 +799,7 @@ Void export_constrained_image_set(pybind11::module& module)
     validated_constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const ValidatedConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
     validated_constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
     validated_constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
+    validated_constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
     validated_constrained_image_set_class.def("adjoin_outer_approximation_to", &ValidatedConstrainedImageSet::adjoin_outer_approximation_to);
     validated_constrained_image_set_class.def("bounding_box", &ValidatedConstrainedImageSet::bounding_box);
     validated_constrained_image_set_class.def("inside", &ValidatedConstrainedImageSet::inside);

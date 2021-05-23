@@ -26,6 +26,7 @@
 #include "utilities.hpp"
 
 #include "io/logging.hpp"
+#include "io/command_line_interface.hpp"
 
 using namespace Ariadne;
 
@@ -54,9 +55,19 @@ Void export_logger(pybind11::module& module)
     logger_class.def("use_nonblocking_scheduler", &Logger::use_nonblocking_scheduler);
 }
 
+Void export_cli(pybind11::module& module)
+{
+    auto const& reference = pybind11::return_value_policy::reference;
+
+    pybind11::class_<CommandLineInterface> cli_class(module,"CommandLineInterface");
+    cli_class.def_static("instance", &CommandLineInterface::instance, reference);
+    cli_class.def("acquire", pybind11::overload_cast<List<String> const&>(&CommandLineInterface::acquire,pybind11::const_));
+}
+
 Void io_submodule(pybind11::module& module)
 {
     export_theme(module);
     export_logger(module);
+    export_cli(module);
 }
 

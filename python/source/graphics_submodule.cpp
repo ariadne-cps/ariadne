@@ -28,6 +28,10 @@
 #include "config.hpp"
 
 #include "io/graphics_interface.hpp"
+#include "io/graphics_manager.hpp"
+#include "io/drawer.hpp"
+#include "io/gnuplot.hpp"
+#include "io/cairo.hpp"
 #include "io/figure.hpp"
 #include "io/geometry2d.hpp"
 #include "geometry/point.hpp"
@@ -133,6 +137,52 @@ Void export_plot(pybind11::module& module)
     module.def("plot",(Void(*)(const char*,Projection2d const&,ApproximateBoxType const&,List<Pair<Colour,Drawable2dInterface const&>> const&)) &plot);
 }
 
+Void export_backend(pybind11::module& module) {
+    pybind11::class_<GraphicsBackend> backend_class(module,"GraphicsBackend");
+
+    #ifdef HAVE_CAIRO_H
+        pybind11::class_<GnuplotGraphicsBackend> gnuplot_backend_class(module,"GnuplotGraphicsBackend");
+        gnuplot_backend_class.def(pybind11::init<>());
+        pybind11::implicitly_convertible<GnuplotGraphicsBackend,GraphicsBackend>();
+        backend_class.def(pybind11::init<GnuplotGraphicsBackend>());
+    #endif
+    #ifdef HAVE_GNUPLOT_H
+        pybind11::class_<CairoGraphicsBackend> cairo_backend_class(module,"CairoGraphicsBackend");
+        cairo_backend_class.def(pybind11::init<>());
+        pybind11::implicitly_convertible<CairoGraphicsBackend,GraphicsBackend>();
+        backend_class.def(pybind11::init<CairoGraphicsBackend>());
+    #endif
+}
+
+Void export_drawer(pybind11::module& module) {
+    pybind11::class_<Drawer> drawer_class(module,"Drawer");
+
+    pybind11::class_<AffineDrawer> affine_drawer_class(module,"AffineDrawer");
+    affine_drawer_class.def(pybind11::init<Nat>());
+    pybind11::implicitly_convertible<AffineDrawer,Drawer>();
+    drawer_class.def(pybind11::init<AffineDrawer>());
+
+    pybind11::class_<GridDrawer> grid_drawer_class(module,"GridDrawer");
+    grid_drawer_class.def(pybind11::init<Nat>());
+    pybind11::implicitly_convertible<GridDrawer,Drawer>();
+    drawer_class.def(pybind11::init<GridDrawer>());
+
+    pybind11::class_<BoxDrawer> box_drawer_class(module,"BoxDrawer");
+    box_drawer_class.def(pybind11::init<>());
+    pybind11::implicitly_convertible<BoxDrawer,Drawer>();
+    drawer_class.def(pybind11::init<BoxDrawer>());
+}
+
+Void export_graphics_manager(pybind11::module& module)
+{
+    auto const& reference = pybind11::return_value_policy::reference;
+
+    pybind11::class_<GraphicsManager> graphics_manager_class(module,"GraphicsManager");
+    graphics_manager_class.def_static("instance", &GraphicsManager::instance, reference);
+    graphics_manager_class.def("set_backend", &GraphicsManager::set_backend);
+    graphics_manager_class.def("set_drawer", &GraphicsManager::set_drawer);
+}
+
 Void graphics_submodule(pybind11::module& module) {
     export_point2d(module);
     export_colour(module);
@@ -140,5 +190,8 @@ Void graphics_submodule(pybind11::module& module) {
     export_graphics_properties(module);
     export_labelled_figure(module);
     export_plot(module);
+    export_backend(module);
+    export_drawer(module);
+    export_graphics_manager(module);
 }
 

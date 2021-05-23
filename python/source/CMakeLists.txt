@@ -27,6 +27,7 @@ add_library(pyariadne-extra-submodule-obj OBJECT
     optimization_submodule.cpp
     function_submodule.cpp
     geometry_submodule.cpp
+    io_submodule.cpp
     concurrency_submodule.cpp
     solver_submodule.cpp
     storage_submodule.cpp

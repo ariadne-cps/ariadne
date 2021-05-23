@@ -267,8 +267,8 @@ class Logger {
     friend class NonblockingLoggerScheduler;
 
     Logger();
-    ~Logger();
   public:
+    ~Logger();
     Logger(Logger const&) = delete;
     void operator=(Logger const&) = delete;
 

@@ -53,8 +53,8 @@ class InvalidArgumentValueException : public std::runtime_error {
 //! \brief Stream of arguments to be consumed by parsers
 class ArgumentStream {
   public:
-    //! \brief Construct from CLI arguments
-    ArgumentStream(int argc, const char* argv[]);
+    //! \brief Construct from a list of String
+    ArgumentStream(List<String> const& args);
 
     //! \brief Peek the head of the stream
     String peek() const;
@@ -133,6 +133,9 @@ class CommandLineInterface {
     //! \details Returns whether the acquisition was a success and
     //! any subsequent code should be run
     Bool acquire(int argc, const char* argv[]) const;
+
+    //! \brief Acquire from a list of strings
+    Bool acquire(List<String> const& args) const;
 
   private:
     List<ArgumentParser> const _parsers;

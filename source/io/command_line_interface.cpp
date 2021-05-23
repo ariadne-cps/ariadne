@@ -33,11 +33,9 @@
 
 namespace Ariadne {
 
-ArgumentStream::ArgumentStream(int argc, const char* argv[]) {
-    ARIADNE_PRECONDITION(argc > 0)
-    for (int i=1; i<argc; ++i) {
-        _args.push(String(argv[i]));
-    }
+ArgumentStream::ArgumentStream(List<String> const& args) {
+    ARIADNE_PRECONDITION(args.size() > 0)
+    for (auto arg : args) _args.push(arg);
 }
 
 String ArgumentStream::peek() const {
@@ -272,7 +270,14 @@ CommandLineInterface::CommandLineInterface() : _parsers({
     }) { }
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
-    ArgumentStream stream(argc,argv);
+    List<String> args;
+    for (int i = 1; i < argc; ++i) args.append(String(argv[i]));
+    return acquire(args);
+}
+
+Bool CommandLineInterface::acquire(List<String> const& args) const {
+    ArgumentStream stream(args);
+
     Set<ArgumentPack> packs;
     while (not stream.empty()) {
         Bool consumed = false;

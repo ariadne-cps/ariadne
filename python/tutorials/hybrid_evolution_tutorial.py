@@ -22,7 +22,6 @@
 # Import all classes in the ariadne module
 from pyariadne import *
 
-
 #! [get_tank]
 def get_tank():
     # Declare the system constants
@@ -291,6 +290,10 @@ def get_final_time():
 
 #! [main]
 if __name__ == '__main__':
+
+    from sys import argv
+    if not CommandLineInterface.instance().acquire(argv):
+        exit()
 
     # Get the system
     system = get_system()

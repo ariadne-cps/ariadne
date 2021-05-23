@@ -295,7 +295,7 @@ HybridTime get_final_time()
 //! [main]
 Int main(Int argc, const char* argv[])
 {
-    // Acquire the verbosity value from the command line
+    // Acquire arguments from the command line, use "-h" to see options
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
     // Get the system

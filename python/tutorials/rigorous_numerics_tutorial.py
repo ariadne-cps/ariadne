@@ -31,6 +31,11 @@ def PRINT(expr):
     print(expr,":",eval(expr),type(eval(expr)))
 
 if __name__=='__main__':
+
+    from sys import argv
+    if not CommandLineInterface.instance().acquire(argv):
+        exit()
+
 #! [numeric_demonstration]
     print("Numeric")
     r = 6 * atan(1/sqrt(Real(3)))

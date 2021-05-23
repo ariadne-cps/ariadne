@@ -27,6 +27,7 @@ add_library(pyariadne-extra-submodule-obj OBJECT
     optimization_submodule.cpp
     function_submodule.cpp
     geometry_submodule.cpp
+    concurrency_submodule.cpp
     solver_submodule.cpp
     storage_submodule.cpp
     system_submodule.cpp
@@ -47,12 +48,3 @@ foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
     target_compile_options(pyariadne-extra-submodule-obj PUBLIC -W${WARN})
     target_compile_options(pyariadne-module-obj PUBLIC -W${WARN})
 endforeach()
-
-if(COVERAGE)
-    target_link_libraries(pyariadne-numeric-submodule-obj PUBLIC coverage_config)
-    target_link_libraries(pyariadne-numeric-module-obj PUBLIC coverage_config)
-    target_link_libraries(pyariadne-algebra-submodule-obj PUBLIC coverage_config)
-    target_link_libraries(pyariadne-algebra-module-obj PUBLIC coverage_config)
-    target_link_libraries(pyariadne-extra-submodule-obj PUBLIC coverage_config)
-    target_link_libraries(pyariadne-module-obj PUBLIC coverage_config)
-endif()

@@ -21,9 +21,9 @@ Legenda for the issue kind:
 - [#561](https://github.com/ariadne-cps/ariadne/issues/561) (A) Add Python bindings for TaskManager in order to control concurrency
 - [#570](https://github.com/ariadne-cps/ariadne/issues/570) (A) Add Python bindings for GraphicsManager in order to control drawer and graphics backend  
 - [#571](https://github.com/ariadne-cps/ariadne/issues/571) (A) Add Python bindings for Logger in order to expose (themed) logging
-- [#585](https://github.com/ariadne-cps/ariadne/issues/585) (A) Add Python bindings for CommandLineInterface, to acquire arguments to a Python script
 - [#599](https://github.com/ariadne-cps/ariadne/issues/599) (A) Add extra Python bindings for HybridEnclosure, add Python subscripting for ListSet<HybridEnclosure> 
 - [#602](https://github.com/ariadne-cps/ariadne/issues/602) (A) Add extra Python bindings for Enclosure, add Python bindings for Point2d for graphics
+- [#605](https://github.com/ariadne-cps/ariadne/issues/605) (A) Add Python bindings for CommandLineInterface, to acquire arguments to a Python script  
 - [#551](https://github.com/ariadne-cps/ariadne/issues/551) (C) Make VectorFieldEvolver process sets in parallel (when splitting initially or during evolution)
 - [#556](https://github.com/ariadne-cps/ariadne/issues/556) (C) Disallow unsafe default value of upper semantics for orbit methods
 - [#565](https://github.com/ariadne-cps/ariadne/issues/565) (C) Draw lists of (Labelled/Hybrid)Enclosure in parallel  

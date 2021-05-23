@@ -65,7 +65,6 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(stream.empty())
         ARIADNE_TEST_FAIL(stream.peek())
         ARIADNE_TEST_FAIL(stream.pop())
-        ARIADNE_TEST_EXECUTE(ArgumentStream({"a","b"}))
     }
 
     void test_cli_instantiation() {
@@ -73,136 +72,137 @@ class TestCommandLineInterface {
     }
 
     void test_from_c_arguments() {
-        const char* argv1[] = {nullptr};
-        ARIADNE_TEST_FAIL(CommandLineInterface::instance().acquire(1,argv1))
-        const char* argv2[] = {nullptr,""};
+        const char* argv1[] = {""};
+        Bool success1 = CommandLineInterface::instance().acquire(1,argv1);
+        ARIADNE_TEST_ASSERT(success1)
+        const char* argv2[] = {"",""};
         Bool success2 = CommandLineInterface::instance().acquire(2,argv2);
         ARIADNE_TEST_ASSERT(not success2)
     }
 
     void test_concurrency_parsing() {
-        Bool success1 = CommandLineInterface::instance().acquire({"-c", "2"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-c", "2"});
         ARIADNE_TEST_ASSERT(success1)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
-        Bool success2 = CommandLineInterface::instance().acquire({"--concurrency", "0"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--concurrency", "0"});
         ARIADNE_TEST_ASSERT(success2)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),0)
-        Bool success3 = CommandLineInterface::instance().acquire({"-c", "-2"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-c", "-2"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-c", "q"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-c", "q"});
         ARIADNE_TEST_ASSERT(not success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-c"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-c"});
         ARIADNE_TEST_ASSERT(not success5)
-        Bool success6 = CommandLineInterface::instance().acquire({"-c", "max"});
+        Bool success6 = CommandLineInterface::instance().acquire({"", "-c", "max"});
         ARIADNE_TEST_ASSERT(success6)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),TaskManager::instance().maximum_concurrency())
     }
 
     void test_drawer_parsing() {
-        Bool success1 = CommandLineInterface::instance().acquire({"-d", "box"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-d", "box"});
         ARIADNE_TEST_ASSERT(success1)
-        Bool success2 = CommandLineInterface::instance().acquire({"--drawer", "box"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--drawer", "box"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"-d", "bx"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-d", "bx"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-d", "affine"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-d", "affine"});
         ARIADNE_TEST_ASSERT(not success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-d", "affine@e"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-d", "affine@e"});
         ARIADNE_TEST_ASSERT(not success5)
-        Bool success6 = CommandLineInterface::instance().acquire({"-d", "affine@2"});
+        Bool success6 = CommandLineInterface::instance().acquire({"", "-d", "affine@2"});
         ARIADNE_TEST_ASSERT(success6)
-        Bool success7 = CommandLineInterface::instance().acquire({"-d", "grid"});
+        Bool success7 = CommandLineInterface::instance().acquire({"", "-d", "grid"});
         ARIADNE_TEST_ASSERT(not success7)
-        Bool success8 = CommandLineInterface::instance().acquire({"-d", "grid@e"});
+        Bool success8 = CommandLineInterface::instance().acquire({"", "-d", "grid@e"});
         ARIADNE_TEST_ASSERT(not success8)
-        Bool success9 = CommandLineInterface::instance().acquire({"-d", "grid@2"});
+        Bool success9 = CommandLineInterface::instance().acquire({"", "-d", "grid@2"});
         ARIADNE_TEST_ASSERT(success9)
-        Bool success10 = CommandLineInterface::instance().acquire({"-d", "gri@2"});
+        Bool success10 = CommandLineInterface::instance().acquire({"", "-d", "gri@2"});
         ARIADNE_TEST_ASSERT(not success10)
-        Bool success11 = CommandLineInterface::instance().acquire({"-d"});
+        Bool success11 = CommandLineInterface::instance().acquire({"", "-d"});
         ARIADNE_TEST_ASSERT(not success11)
     }
 
     void test_graphics_parsing() {
-        Bool success1 = CommandLineInterface::instance().acquire({"-g", "cairo"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-g", "cairo"});
         ARIADNE_TEST_ASSERT(success1)
-        Bool success2 = CommandLineInterface::instance().acquire({"--graphics", "cairo"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--graphics", "cairo"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"-g", "none"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-g", "none"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-g", "gnuplot"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-g", "gnuplot"});
         ARIADNE_TEST_ASSERT(success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-g"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-g"});
         ARIADNE_TEST_ASSERT(not success5)
     }
 
     void test_scheduler_parsing() {
         TaskManager::instance().set_concurrency(0);
-        Bool success1 = CommandLineInterface::instance().acquire({"-s", "immediate"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-s", "immediate"});
         ARIADNE_TEST_ASSERT(success1)
-        Bool success2 = CommandLineInterface::instance().acquire({"--scheduler", "immediate"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--scheduler", "immediate"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"-s", "none"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-s", "none"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-s", "blocking"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-s", "blocking"});
         ARIADNE_TEST_ASSERT(success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-s", "nonblocking"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-s", "nonblocking"});
         ARIADNE_TEST_ASSERT(success5)
-        Bool success6 = CommandLineInterface::instance().acquire({"-s"});
+        Bool success6 = CommandLineInterface::instance().acquire({"", "-s"});
         ARIADNE_TEST_ASSERT(not success6)
-        Bool success7 = CommandLineInterface::instance().acquire({"-c", "max", "-s", "immediate"});
+        Bool success7 = CommandLineInterface::instance().acquire({"", "-c", "max", "-s", "immediate"});
         ARIADNE_TEST_ASSERT(success7)
     }
 
     void test_theme_parsing() {
-        Bool success1 = CommandLineInterface::instance().acquire({"-t", "none"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-t", "none"});
         ARIADNE_TEST_ASSERT(success1)
-        Bool success2 = CommandLineInterface::instance().acquire({"--theme", "none"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--theme", "none"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"-t", "nn"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-t", "nn"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-t", "light"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-t", "light"});
         ARIADNE_TEST_ASSERT(success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-t", "dark"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-t", "dark"});
         ARIADNE_TEST_ASSERT(success5)
-        Bool success6 = CommandLineInterface::instance().acquire({"-t"});
+        Bool success6 = CommandLineInterface::instance().acquire({"", "-t"});
         ARIADNE_TEST_ASSERT(not success6)
     }
 
     void test_verbosity_parsing() {
-        Bool success1 = CommandLineInterface::instance().acquire({"-v", "5"});
+        Bool success1 = CommandLineInterface::instance().acquire({"", "-v", "5"});
         ARIADNE_TEST_ASSERT(success1)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),5)
-        Bool success2 = CommandLineInterface::instance().acquire({"--verbosity", "0"});
+        Bool success2 = CommandLineInterface::instance().acquire({"", "--verbosity", "0"});
         ARIADNE_TEST_ASSERT(success2)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),0)
-        Bool success3 = CommandLineInterface::instance().acquire({"-v", "-2"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-v", "-2"});
         ARIADNE_TEST_ASSERT(not success3)
-        Bool success4 = CommandLineInterface::instance().acquire({"-v", "q"});
+        Bool success4 = CommandLineInterface::instance().acquire({"", "-v", "q"});
         ARIADNE_TEST_ASSERT(not success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"-v"});
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-v"});
         ARIADNE_TEST_ASSERT(not success5)
     }
 
     void test_multiple_argument_parsing() {
-        Bool success = CommandLineInterface::instance().acquire({"-c", "2", "--verbosity", "4"});
+        Bool success = CommandLineInterface::instance().acquire({"", "-c", "2", "--verbosity", "4"});
         ARIADNE_TEST_ASSERT(success)
         ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),4)
     }
 
     void test_unrecognised_argument() {
-        Bool success = CommandLineInterface::instance().acquire({"--invalid"});
+        Bool success = CommandLineInterface::instance().acquire({"", "--invalid"});
         ARIADNE_TEST_ASSERT(not success)
     }
 
     void test_duplicate_argument() {
-        Bool success = CommandLineInterface::instance().acquire({"--verbosity", "2", "-v", "5"});
+        Bool success = CommandLineInterface::instance().acquire({"", "--verbosity", "2", "-v", "5"});
         ARIADNE_TEST_ASSERT(not success)
     }
 
     void test_print_help() {
-        Bool success = CommandLineInterface::instance().acquire({"-h"});
+        Bool success = CommandLineInterface::instance().acquire({"", "-h"});
         ARIADNE_TEST_ASSERT(not success)
     }
 

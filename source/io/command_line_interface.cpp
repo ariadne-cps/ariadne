@@ -271,12 +271,13 @@ CommandLineInterface::CommandLineInterface() : _parsers({
 
 Bool CommandLineInterface::acquire(int argc, const char* argv[]) const {
     List<String> args;
-    for (int i = 1; i < argc; ++i) args.append(String(argv[i]));
+    for (int i = 0; i < argc; ++i) args.append(String(argv[i]));
     return acquire(args);
 }
 
 Bool CommandLineInterface::acquire(List<String> const& args) const {
     ArgumentStream stream(args);
+    stream.pop(); // Pop out the function pointer or script name
 
     Set<ArgumentPack> packs;
     while (not stream.empty()) {

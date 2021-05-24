@@ -22,6 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.hpp"
 #include "concurrency/task_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
@@ -205,9 +206,13 @@ class GraphicsBackendArgumentParser : public ValuedArgumentParserBase {
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         String val = stream.pop();
-        if (val == "cairo") return []{ GraphicsManager::instance().set_backend(CairoGraphicsBackend()); };
-        else if (val == "gnuplot") return []{ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
-        else throw std::exception();
+        #ifdef HAVE_CAIRO_H
+	if (val == "cairo") return []{ GraphicsManager::instance().set_backend(CairoGraphicsBackend()); };
+        #endif
+        #ifdef HAVE_GNUPLOT_H
+	if (val == "gnuplot") return []{ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
+        #endif
+	throw std::exception();
     }
 };
 

@@ -1,6 +1,6 @@
-ariadne (2.2-1) focal; urgency=medium
+ariadne (2.3-2) focal; urgency=medium
 
-  * Version 2.2 with additions to dynamics and hybrid modules, increased
-    coverage of Python bindings
+  * Add support for concurrent code, make evolution routines and graphics
+    concurrent, introduce CLI settings import
 
- -- Luca Geretti <luca.geretti@gmail.com>  Sun, 25 Apr 2021 21:05:00 +0100
+ -- Luca Geretti <luca.geretti@gmail.com>  Mon, 24 May 2021 14:54:00 +0100

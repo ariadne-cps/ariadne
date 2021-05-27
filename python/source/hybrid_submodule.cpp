@@ -286,6 +286,10 @@ Void export_hybrid_enclosure(pybind11::module& module) {
     hybrid_enclosure_class.def("previous_events", &HybridEnclosure::previous_events,reference_internal);
     hybrid_enclosure_class.def("location", &HybridEnclosure::location,reference_internal);
     hybrid_enclosure_class.def("continuous_set", &HybridEnclosure::continuous_set,reference_internal);
+    hybrid_enclosure_class.def("state_space", &HybridEnclosure::state_space);
+    hybrid_enclosure_class.def("auxiliary_space", &HybridEnclosure::auxiliary_space);
+    hybrid_enclosure_class.def("state_auxiliary_space", &HybridEnclosure::state_auxiliary_space);
+    hybrid_enclosure_class.def("state_time_auxiliary_space", &HybridEnclosure::state_time_auxiliary_space);
     hybrid_enclosure_class.def("time_range", &HybridEnclosure::time_range);
     hybrid_enclosure_class.def("state_bounding_box", &HybridEnclosure::state_bounding_box);
     hybrid_enclosure_class.def("__repr__", &__cstr__<HybridEnclosure>);

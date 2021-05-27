@@ -36,6 +36,7 @@
 #include "io/geometry2d.hpp"
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
+#include "symbolic/space.hpp"
 #include "function/function.hpp"
 
 using namespace Ariadne;
@@ -72,6 +73,16 @@ Void export_figure(pybind11::module& module)
 {
     pybind11::class_<Projection2d> planar_projection_map_class(module,"Projection2d");
     planar_projection_map_class.def(pybind11::init<DimensionType,DimensionType,DimensionType>());
+    planar_projection_map_class.def_readwrite("n",&Projection2d::n);
+    planar_projection_map_class.def_readwrite("i",&Projection2d::i);
+    planar_projection_map_class.def_readwrite("j",&Projection2d::j);
+
+    pybind11::class_<Variables2d> variables2d_class(module,"Variables2d");
+    variables2d_class.def(pybind11::init<RealVariable,RealVariable>());
+    variables2d_class.def("x", &Variables2d::x);
+    variables2d_class.def("y", &Variables2d::y);
+
+    module.def("projection",&projection);
 
     pybind11::class_<Axes2d> axes2d_class(module,"Axes2d");
     axes2d_class.def(pybind11::init<double,RealVariable,double,double,RealVariable,double>());

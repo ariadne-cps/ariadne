@@ -10,6 +10,12 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
+### 2.4
+
+*Date:   /  /2021*
+
+- [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors
+
 ### 2.3
 
 *Date: 24/05/2021*

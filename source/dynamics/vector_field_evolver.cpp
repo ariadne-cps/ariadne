@@ -212,7 +212,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     ARIADNE_LOG_PRINTLN_AT(1,"next_set = " << next_set)
 
     result->adjoin_reach(reach_set);
-    result->adjoin_intermediate(next_set);
+    //result->adjoin_intermediate(next_set);
 
     workload.append({next_time,next_set});
 }

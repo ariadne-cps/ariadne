@@ -37,7 +37,7 @@ void CVDP20()
     ARIADNE_LOG_PRINTLN("Coupled van der Pol Oscillator system:")
 
     {
-        ARIADNE_LOG_PRINTLN_AT(1,"Running for mu=1...");
+        ARIADNE_LOG_PRINTLN("Running for mu=1...");
 
         RealConstant mu("mu",1.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
@@ -86,7 +86,7 @@ void CVDP20()
     }
 
     {
-        ARIADNE_LOG_PRINTLN_AT(1,"Running for mu=2...");
+        ARIADNE_LOG_PRINTLN("Running for mu=2...");
 
         RealConstant mu("mu",2.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
@@ -124,7 +124,7 @@ void CVDP20()
         }
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu2");
         if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());

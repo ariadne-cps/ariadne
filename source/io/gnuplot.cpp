@@ -63,6 +63,9 @@ GnuplotCanvas::GnuplotCanvas(String cfilename, Nat X, Nat Y, Bool is_anim): lc(0
     //meantime these command are executed by gnuplot
     gnuplot = new Gnuplot("tee "+cfilename+".gnu | gnuplot > /dev/null 2>&1");
 
+    // Disable legend
+    *gnuplot << "unset key\n";
+    //*gnuplot << "set key noautotitle\n";
     if(not(isanimate)){
         *gnuplot << "set terminal pngcairo nocrop ";
     } else {

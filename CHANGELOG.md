@@ -15,6 +15,7 @@ Legenda for the issue kind:
 *Date:   /  /2021*
 
 - [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors
+- [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 
 ### 2.3
 

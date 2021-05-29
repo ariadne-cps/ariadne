@@ -389,12 +389,38 @@ template<class OP, class A, template<class>class E, class VARS> inline Bool is_c
 template<class OP, class A, class VARS> inline Bool is_constant_in(Symbolic<OP,A,Int> const& s, VARS const& vars) {
     return _is_constant_in_graded_impl(s._op,s._arg,s._num,vars); }
 
-
-
+template<class E, class VARS> inline Bool _is_affine_in_impl(Atan, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Acos, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Asin, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Cos, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Sin, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Tan, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Abs, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Sqr, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Log, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Sqrt, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Exp, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Rec, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Hlf, E const& e, VARS const& vars) {
+    return is_affine_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Pos, E const& e, VARS const& vars) {
+    return is_affine_in(e,vars); }
 template<class E, class VARS> inline Bool _is_affine_in_impl(Neg, E const& e, VARS const& vars) {
     return is_affine_in(e,vars); }
-template<class OP, class E, class VARS> inline Bool _is_affine_in_impl(OP, E const& e, VARS const& vars) {
-    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_affine_in_impl(Nul, E const& e, VARS const& vars) {
+    return true; }
 template<class E1, class E2, class VARS> inline Bool _is_affine_in_impl(Add, E1 const& e1, E2 const& e2, VARS const& vars) {
     return is_affine_in(e1,vars) && is_affine_in(e2,vars); }
 template<class E1, class E2, class VARS> inline Bool _is_affine_in_impl(Sub, E1 const& e1, E2 const& e2, VARS const& vars) {
@@ -437,40 +463,78 @@ template<class OP, class A, class VARS> Bool is_affine_in(Symbolic<OP,A,Int> con
     return _is_affine_in_impl(s._op,s._arg,s._num,vars); }
 
 
-template<class E, class VARS> Bool _is_polynomial_in_impl(Neg, E const& e, VARS const& vars) { return is_polynomial_in(e, vars); }
-template<class OP, class E, class VARS> Bool _is_polynomial_in_impl(OP, E const& e, VARS const& vars) { return is_constant_in(e, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Add, E1 const& e1, E2 const& e2, VARS const& vars) {
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Atan, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Acos, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Asin, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Cos, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Sin, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Tan, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Abs, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Log, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Sqrt, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Exp, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Rec, E const& e, VARS const& vars) {
+    return is_constant_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Sqr, E const& e, VARS const& vars) {
+    return is_polynomial_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Hlf, E const& e, VARS const& vars) {
+    return is_polynomial_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Pos, E const& e, VARS const& vars) {
+    return is_polynomial_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Neg, E const& e, VARS const& vars) {
+    return is_polynomial_in(e,vars); }
+template<class E, class VARS> inline Bool _is_polynomial_in_impl(Nul, E const& e, VARS const& vars) {
+    return true; }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Add, E1 const& e1, E2 const& e2, VARS const& vars) {
+    return is_polynomial_in(e1,vars) && is_polynomial_in(e2,vars); }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Sub, E1 const& e1, E2 const& e2, VARS const& vars) {
+    return is_polynomial_in(e1,vars) && is_polynomial_in(e2,vars); }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Mul, E1 const& e1, E2 const& e2, VARS const& vars) {
     return is_polynomial_in(e1, vars) && is_polynomial_in(e2, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Sub, E1 const& e1, E2 const& e2, VARS const& vars) {
-    return is_polynomial_in(e1, vars) && is_polynomial_in(e2, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Mul, E1 const& e1, E2 const& e2, VARS const& vars) { return is_polynomial_in(e1, vars) && is_polynomial_in(e2, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Div, E1 const& e1, E2 const& e2, VARS const& vars) { return is_polynomial_in(e1, vars) && is_constant_in(e2, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Max, E1 const& e1, E2 const& e2, VARS const& vars) { return is_constant_in(e1, vars) && is_constant_in(e2, vars); }
-template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Min, E1 const& e1, E2 const& e2, VARS const& vars) { return is_constant_in(e1, vars) && is_constant_in(e2, vars); }
-template<class E, class N, class VARS> Bool _is_polynomial_in_impl(Pow, E const& e, N const& n, VARS const& vars) { return n==0 || (n>0 && is_polynomial_in(e, vars)) || (n<0 && is_constant_in(e,vars)); }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Div, E1 const& e1, E2 const& e2, VARS const& vars) {
+    return (is_polynomial_in(e1,vars) && is_constant_in(e2,vars)); }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Max, E1 const& e1, E2 const& e2, VARS const& vars) {
+    return is_constant_in(e1,vars) && is_constant_in(e2,vars); }
+template<class E1, class E2, class VARS> inline Bool _is_polynomial_in_impl(Min, E1 const& e1, E2 const& e2, VARS const& vars) {
+    return is_constant_in(e1,vars) && is_constant_in(e2,vars); }
+template<class E, class N, class VARS> inline Bool _is_polynomial_in_impl(Pow, E const& e1, N n2, VARS const& vars) {
+    return n2==0 || (n2>0 && is_polynomial_in(e1, vars)); }
 
-template<class E, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E const& e, VARS const& vars) {
+template<class E, class... OPS, class VARS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E const& e, VARS const& vars) {
     return ops.accept([&e,&vars](auto op){return _is_polynomial_in_impl(op,e, vars);}); }
-template<class E1, class E2, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, E2 const& e2, VARS const& vars) {
+template<class E1, class E2, class... OPS, class VARS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, E2 const& e2, VARS const& vars) {
     return ops.accept([&e1,&e2,&vars](auto op){return _is_polynomial_in_impl(op,e1,e2, vars);}); }
-template<class E1, class E2, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, Int n2, VARS const& vars) {
-    return ops.accept([&e1,n2,&vars](auto op){return _is_polynomial_in_impl(op,e1,n2, vars);}); }
-
+template<class E, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E const& e, Int n, VARS const& vars) {
+    return ops.accept([&e,n,&vars](auto op){return _is_polynomial_in_impl(op,e,n, vars);}); }
+template<class OP, class E, class N, class VARS> inline Bool _is_polynomial_in_impl(GradedElementaryOperator ops, E const& e, N n, VARS const& vars) {
+    return ops.accept([&e,n,&vars](auto op){return _is_polynomial_in_impl(op,e,n,vars);}); }
 
 template<class T, class VARS> constexpr Bool is_polynomial_in(Constant<T> const&, VARS const& vars) {
-    return true; }
+return true; }
 template<class T, class VARS> constexpr Bool is_polynomial_in(Variable<T> const&, VARS const& vars) {
-    return true; }
+return true; }
 template<class T, class VARS> constexpr Bool is_polynomial_in(Symbolic<Cnst,T> const&, VARS const& vars) {
-    return true; }
+return true; }
 template<class I, class VARS> constexpr Bool is_polynomial_in(Symbolic<Var,I> const& v, VARS const& vars) {
-    return true; }
+return true; }
 template<class OP, class A, class VARS> Bool is_polynomial_in(Symbolic<OP,A> const& s, VARS const& vars) {
-    return _is_polynomial_in_impl(s._op,s._arg,vars); }
+return _is_polynomial_in_impl(s._op,s._arg,vars); }
 template<class OP, class A1, class A2, class VARS> Bool is_polynomial_in(Symbolic<OP,A1,A2> const& s, VARS const& vars) {
-    return _is_polynomial_in_impl(s._op,s._arg1,s._arg2,vars); }
+return _is_polynomial_in_impl(s._op,s._arg1,s._arg2,vars); }
+template<class OP, class A, template<class>class E, class VARS> Bool is_polynomial_in(Symbolic<OP,A,E<A>> const& s, VARS const& vars) {
+return _is_polynomial_in_impl(s._op,E<A>(s._cnst),s._arg,vars); }
 template<class OP, class A, class VARS> Bool is_polynomial_in(Symbolic<OP,A,Int> const& s, VARS const& vars) {
-    return _is_polynomial_in_impl(s._op,s._arg,s._num,vars); }
+return _is_polynomial_in_impl(s._op,s._arg,s._num,vars); }
 
 }
 

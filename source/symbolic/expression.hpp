@@ -204,6 +204,9 @@ Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& 
 //! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
 Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
+//! \brief Returns \a true if the expression \a e is syntactically polynomial in the variables \a vs.
+Bool is_polynomial_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
 
 //! \brief Returns true if the expressions are mutual negations. <br>
 //! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)

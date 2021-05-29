@@ -96,7 +96,7 @@ void ROBE21() {
         evolver.configuration().set_maximum_step_size(0.002);
         evolver.configuration().set_maximum_spacial_error(1e-6);
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
-        reach1 = orbit.reach();
+        reach2 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
         auto width = bb[s].width();
@@ -132,7 +132,7 @@ void ROBE21() {
         evolver.configuration().set_maximum_step_size(0.002);
         evolver.configuration().set_maximum_spacial_error(1e-6);
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
-        reach1 = orbit.reach();
+        reach3 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
         auto width = bb[s].width();
@@ -155,9 +155,9 @@ void ROBE21() {
     fig << line_style(false);
     //fig << fill_colour(grey);
     //fig.draw(reach3);
-    fig << fill_colour(black);
-    fig.draw(reach2);
     fig << fill_colour(orange);
+    fig.draw(reach2);
+    fig << fill_colour(black);
     fig.draw(reach1);
     ARIADNE_LOG_RUN_AT(2,fig.write(benchmark.name().c_str()))
 

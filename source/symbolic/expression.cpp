@@ -306,6 +306,13 @@ Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& spc)
     return e.node_ref().accept([&spc](auto en){return is_polynomial_in(en,spc);});
 }
 
+Bool is_polynomial_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& spc) {
+    for (auto i : range(e.size())) {
+        if (not is_polynomial_in(e[i],spc)) return false;
+    }
+    return true;
+}
+
 Bool is_constant_in(const Expression<Real>& e, const Variable<Real>& var) { return is_constant_in(e,Set<RealVariable>{var}); }
 
 namespace {

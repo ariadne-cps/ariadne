@@ -302,9 +302,7 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(identical(substitution,-(u1+1)*x*y+2*pow(x+u1*x,2)));
     }
 
-    Void test_scalar_properties()
-    {
-        RealVariable u("u");
+    Void test_is_constant_in() {
         Real c(3);
         ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
         ARIADNE_TEST_ASSERT(is_constant_in(pow(x,2),{y}));
@@ -314,37 +312,9 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*c)-2*sin(c)*cos(c))*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*x)-2*sin(x)*cos(x))*y,{y}));
         ARIADNE_TEST_ASSERT(is_constant_in(simplify(0*y),{y}));
-
-        ARIADNE_TEST_ASSERT(is_affine_in(sqr(x),{y}));
-        ARIADNE_TEST_ASSERT(is_affine_in(neg(x),{x}));
-        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3),{y}));
-        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3)+y,{y}));
-        ARIADNE_TEST_ASSERT(is_affine_in(2+3*x-5*y-x,{x,y}));
-        ARIADNE_TEST_ASSERT(is_affine_in(3*y,{x,y}));
-        ARIADNE_TEST_ASSERT(is_affine_in(x*y,{x}));
-        ARIADNE_TEST_ASSERT(is_affine_in(3*x/y,{x}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(pow(x,3),{x}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(sqr(x),{x}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(x*y,{x,y}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));
-        ARIADNE_TEST_ASSERT(not is_affine_in(x/y,{y}));
-
-        ARIADNE_TEST_ASSERT(is_polynomial_in(1,{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(x,{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(x*x,{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(sqr(x),{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(neg(x),{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x,2),{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x,3),{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x+sqr(x),3),{x}))
-        ARIADNE_TEST_ASSERT(is_polynomial_in(x/y,{x}))
-        ARIADNE_TEST_ASSERT(not is_polynomial_in(x/y,{y}))
-        ARIADNE_TEST_ASSERT(not is_polynomial_in(x/y,{x,y}))
     }
 
-    Void test_vector_properties()
-    {
+    Void test_is_additive_in() {
         RealVariable u1("u1"), u2("u2");
         ARIADNE_TEST_ASSERT(is_additive_in(u1,u1));
         ARIADNE_TEST_ASSERT(is_additive_in(x,u1));
@@ -361,6 +331,65 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+u1}),{u1}));
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x*u1,y+u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+sqr(u2)}),{u1,u2}));
+    }
+
+    Void test_is_affine_in() {
+        ARIADNE_TEST_ASSERT(is_affine_in(sqr(x),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(neg(x),{x}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3)+y,{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(2+3*x-5*y-x,{x,y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(3*y,{x,y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(x*y,{x}));
+        ARIADNE_TEST_ASSERT(is_affine_in(3*x/y,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(atan(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(acos(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(asin(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(cos(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(sin(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(tan(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(abs(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(log(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(sqrt(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(exp(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(rec(x),{x}))
+        ARIADNE_TEST_ASSERT(is_affine_in(hlf(x),{x}))
+        ARIADNE_TEST_ASSERT(is_affine_in(nul(exp(x)),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(sqr(x),{x}))
+        ARIADNE_TEST_ASSERT(is_affine_in(neg(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_affine_in(pow(x,3),{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(sqr(x),{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x*y,{x,y}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(x/y,{y}));
+    }
+
+    Void test_is_polynomial_in() {
+        ARIADNE_TEST_ASSERT(is_polynomial_in(1,{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(x,{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(x*x,{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(atan(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(acos(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(asin(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(cos(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(sin(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(tan(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(abs(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(log(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(sqrt(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(exp(x),{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(rec(x),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(hlf(x),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(nul(exp(x)),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(sqr(x),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(neg(x),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x,2),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x,3),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(pow(x+sqr(x),3),{x}))
+        ARIADNE_TEST_ASSERT(is_polynomial_in(x/y,{x}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(x/y,{y}))
+        ARIADNE_TEST_ASSERT(not is_polynomial_in(x/y,{x,y}))
         ARIADNE_TEST_ASSERT(is_polynomial_in({x,sqr(y)},{x,y}))
         ARIADNE_TEST_ASSERT(not is_polynomial_in({x/y,sqr(y)},{x,y}))
     }
@@ -398,12 +427,6 @@ class TestExpression {
         ARIADNE_TEST_PRINT(f4);
         ARIADNE_TEST_ASSERT(possibly((f4.evaluate(tv) == exp(tc+tx)).check(Effort(0))));
 
-        //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
-
-        //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
-
         RealElementaryAlgebra ax=RealExpression(x);
         RealElementaryAlgebra ay=RealExpression(y);
         RealElementaryAlgebra az=RealExpression(z);
@@ -416,8 +439,6 @@ class TestExpression {
         ARIADNE_TEST_PRINT(g3);
         ARIADNE_TEST_PRINT(5+va[0]+5*va[1]);
         ARIADNE_TEST_EQUALS(evaluate(g3,tw),evaluate(e3,tw));
-
-
     }
 
     Void test() {
@@ -435,9 +456,11 @@ class TestExpression {
         ARIADNE_TEST_CALL(test_count_distinct_node_pointers());
         ARIADNE_TEST_CALL(test_eliminate_common_subexpressions());
         ARIADNE_TEST_CALL(test_substitute());
-        ARIADNE_TEST_CALL(test_scalar_properties());
-        ARIADNE_TEST_CALL(test_vector_properties());
-        //ARIADNE_TEST_CALL(test_function());
+        ARIADNE_TEST_CALL(test_is_constant_in());
+        ARIADNE_TEST_CALL(test_is_additive_in());
+        ARIADNE_TEST_CALL(test_is_affine_in());
+        ARIADNE_TEST_CALL(test_is_polynomial_in());
+        ARIADNE_TEST_CALL(test_function());
     }
 
 };

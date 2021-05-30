@@ -262,9 +262,6 @@ class Polynomial
     template<class XX, class A> friend A evaluate(const MultivariatePolynomial<XX>& p, const Vector<A>& v);
     template<class II, class XX> friend Polynomial<II,XX> compose(const UnivariatePolynomial<XX>& p, const Scalar<Polynomial<II,XX>>& q);
     template<class II, class XX> friend Polynomial<II,XX> compose(const MultivariatePolynomial<XX>& p, const Vector<Polynomial<II,XX>>& q);
-    template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
-    template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
-    template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
     //!@}
 
     Void check() const;
@@ -404,29 +401,43 @@ template<class I, class X, class A> Vector<A> evaluate(const Vector<Polynomial<I
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> derivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> antiderivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> truncate(const Vector<Polynomial<I,X>>& p, DegreeType d) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;
 }
 
 template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<Polynomial<I,X>>& p) {
-    Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size());
+    Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
     return r;
 }
 
+//! \brief Compute the Lie derivative of \a g with respect to the vector field \a f
+template<class I, class X> Vector<Polynomial<I,X>> lie_derivative(Vector<Polynomial<I,X>> const& f, Vector<Polynomial<I,X>> const& g) {
+    Bool is_not_autonomous = (f[0].argument_size() == f.size() + 1);
+    SizeType num_args = (is_not_autonomous ? f[0].argument_size()-1 : f[0].argument_size());
+
+    Vector<Polynomial<I,X>> r(f.size(),f[0].create_zero());
+    for (SizeType d=0; d!=f.size(); ++d) {
+        for (SizeType i=0; i!=num_args; ++i) {
+            r[d] += derivative(g[d],i)*f[i];
+        }
+        if (is_not_autonomous) r[d] += derivative(g[d],f[d].argument_size()-1);
+    }
+    return r;
+}
 
 } // namespace Ariadne
 

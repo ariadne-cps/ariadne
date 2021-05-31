@@ -42,7 +42,6 @@
 #include "algebra/operations.hpp"
 #include "algebra/differential.hpp"
 
-
 namespace Ariadne {
 
 template<class T> class Array;
@@ -426,16 +425,34 @@ template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpo
 
 //! \brief Compute the Lie derivative of \a g with respect to the vector field \a f
 template<class I, class X> Vector<Polynomial<I,X>> lie_derivative(Vector<Polynomial<I,X>> const& f, Vector<Polynomial<I,X>> const& g) {
-    Bool is_not_autonomous = (f[0].argument_size() == f.size() + 1);
-    SizeType num_args = (is_not_autonomous ? f[0].argument_size()-1 : f[0].argument_size());
-
-    Vector<Polynomial<I,X>> r(f.size(),f[0].create_zero());
-    for (SizeType d=0; d!=f.size(); ++d) {
-        for (SizeType i=0; i!=num_args; ++i) {
+    const SizeType rs = f.size();
+    Vector<Polynomial<I,X>> r(rs,f[0].create_zero());
+    for (SizeType d=0; d!=rs; ++d) {
+        for (SizeType i=0; i!=rs; ++i) {
             r[d] += derivative(g[d],i)*f[i];
         }
-        if (is_not_autonomous) r[d] += derivative(g[d],f[d].argument_size()-1);
+        r[d] += derivative(g[d],rs);
     }
+    return r;
+}
+
+//! \brief Compute the flow polynomial from the vector field \a f, with order \a d
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f[0].argument_size();
+
+    auto t = Polynomial<I,X>::variable(as,rs,dp);
+    auto ti = t;
+    Vector<Polynomial<I,X>> g(rs,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=rs; ++i) g[i] = Polynomial<I,X>::variable(as,i,dp);
+    Vector<Polynomial<I,X>> r = g;
+
+    for (DegreeType i=1; i!=d+1; ++i) {
+        g = truncate(lie_derivative(f,g),d-i);
+        r += g*ti*rec(Factorial(i));
+        ti *= t;
+    }
+
     return r;
 }
 

@@ -319,32 +319,9 @@ Void TestPolynomial::test_differentiation()
     Vector<PolynomialType> f(2,PolynomialType({{}},dp));
     f[0] = PolynomialType({ {{0,0,0},1.0_x}, {{0,1,0},1.0_x} },dp);
     f[1] = PolynomialType({ {{2,0,0},-1.0_x}},dp);
-    auto x0 = PolynomialType::variable(3,0,dp);
-    auto x1 = PolynomialType::variable(3,1,dp);
-    auto t = PolynomialType::variable(3,2,dp);
-    Vector<PolynomialType> g(2,PolynomialType({{}},dp));
-    g[0] = x0;
-    g[1] = x1;
-    ARIADNE_TEST_PRINT(f)
-    ARIADNE_TEST_PRINT(g)
-    auto lie1 = lie_derivative(f,g);
-    ARIADNE_TEST_PRINT(lie1)
-    auto trunc1 = truncate(lie1,3);
-    ARIADNE_TEST_PRINT(trunc1)
-    auto lie2 = lie_derivative(f,trunc1);
-    ARIADNE_TEST_PRINT(lie2)
-    auto trunc2 = truncate(lie2,2);
-    ARIADNE_TEST_PRINT(trunc2)
-    auto lie3 = lie_derivative(f,trunc2);
-    ARIADNE_TEST_PRINT(lie3)
-    auto trunc3 = truncate(lie3,1);
-    ARIADNE_TEST_PRINT(trunc3)
-    auto lie4 = lie_derivative(f,trunc3);
-    ARIADNE_TEST_PRINT(lie4)
-    auto trunc4 = truncate(lie4,0);
-    ARIADNE_TEST_PRINT(trunc4)
-    Vector<PolynomialType> phi = g+trunc1*t+trunc2*t*t/FloatDPBounds(2,dp)+trunc3*t*t*t/FloatDPBounds(6,dp)+trunc4*t*t*t*t/FloatDPBounds(24,dp);
-    ARIADNE_TEST_PRINT(phi)
+
+    auto phi2 = flow_polynomial(f,4);
+    ARIADNE_TEST_PRINT(phi2)
 }
 
 Int main() {

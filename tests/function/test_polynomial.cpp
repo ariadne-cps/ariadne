@@ -54,7 +54,7 @@ class TestPolynomial
     Void test_arithmetic();
     Void test_variables();
     Void test_find();
-    Void test_differentiation();
+    Void test_flow();
 };
 
 
@@ -66,7 +66,7 @@ Void TestPolynomial::test()
     ARIADNE_TEST_CALL(test_arithmetic())
     ARIADNE_TEST_CALL(test_variables())
     ARIADNE_TEST_CALL(test_find())
-    ARIADNE_TEST_CALL(test_differentiation())
+    ARIADNE_TEST_CALL(test_flow())
 }
 
 
@@ -313,15 +313,17 @@ Void TestPolynomial::test_find()
     ARIADNE_TEST_EQUAL(p.find(a),p.end())
 }
 
-Void TestPolynomial::test_differentiation()
+Void TestPolynomial::test_flow()
 {
     using PolynomialType = MultivariatePolynomial<FloatDPBounds>;
     Vector<PolynomialType> f(2,PolynomialType({{}},dp));
     f[0] = PolynomialType({ {{0,0,0},1.0_x}, {{0,1,0},1.0_x} },dp);
     f[1] = PolynomialType({ {{2,0,0},-1.0_x}},dp);
 
-    auto phi2 = flow_polynomial(f,4);
-    ARIADNE_TEST_PRINT(phi2)
+    auto phi_picard = flow_polynomial_picard_iteration(f,3);
+    auto phi_lie = flow_polynomial_lie_derivative(f,3);
+    ARIADNE_TEST_ASSERT(possibly(phi_picard == phi_lie))
+    ARIADNE_TEST_PRINT(phi_picard)
 }
 
 Int main() {

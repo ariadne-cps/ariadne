@@ -320,8 +320,8 @@ Void TestPolynomial::test_flow()
     f[0] = PolynomialType({ {{0,0,0},1.0_x}, {{0,1,0},1.0_x} },dp);
     f[1] = PolynomialType({ {{2,0,0},-1.0_x}},dp);
 
-    auto phi_picard = flow_polynomial_picard_iteration(f,3);
-    auto phi_lie = flow_polynomial_lie_derivative(f,3);
+    auto phi_picard = flow_polynomial_picard_iteration(f,4);
+    auto phi_lie = flow_polynomial_lie_derivative(f,4);
     ARIADNE_TEST_ASSERT(possibly(phi_picard == phi_lie))
     ARIADNE_TEST_PRINT(phi_picard)
 }

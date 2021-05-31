@@ -457,6 +457,10 @@ template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_picard_iterat
         r = truncate(g + antiderivative(compose(f,r),rs),i);
     }
 
+    Vector<Polynomial<I,X>> ext(as,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=as; ++i) ext[i] = Polynomial<I,X>::variable(as+rs,i,dp);
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
     return r;
 }
 
@@ -477,12 +481,16 @@ template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_lie_derivativ
         ti *= t;
     }
 
+    Vector<Polynomial<I,X>> ext(as,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=as; ++i) ext[i] = Polynomial<I,X>::variable(as+rs,i,dp);
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
     return r;
 }
 
 //! \brief Compute the flow polynomial from the vector field \a f, with order \a d
 template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial(Vector<Polynomial<I,X>> const& f, DegreeType d) {
-    return flow_polynomial_lie_derivative(f,d);
+    return flow_polynomial_picard_iteration(f,d);
 }
 
 } // namespace Ariadne

@@ -116,10 +116,7 @@ void ROBE21() {
         RealConstant gamma("gamma",10000000);
 
         ARIADNE_LOG_PRINTLN("Instance 3:");
-        ARIADNE_LOG_PRINTLN("(skipped)")
-
-        /*
-
+        
         VectorField dynamics({dot(x) = -alpha*x + beta*y*z, dot(y) = alpha*x - beta*y*z - gamma*sqr(y), dot(z) = gamma*sqr(y)},{let(s)=x+y+z});
 
         RealVariablesBox initial_set({x==1,y==0,z==0});
@@ -142,7 +139,7 @@ void ROBE21() {
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-         */
+
 
         auto instance = benchmark.create_instance("3");
         //instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
@@ -153,8 +150,8 @@ void ROBE21() {
     ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=evolution_time,0.999<=s<=1.001}));
     fig << line_style(false);
-    //fig << fill_colour(grey);
-    //fig.draw(reach3);
+    fig << fill_colour(grey);
+    fig.draw(reach3);
     fig << fill_colour(orange);
     fig.draw(reach2);
     fig << fill_colour(black);

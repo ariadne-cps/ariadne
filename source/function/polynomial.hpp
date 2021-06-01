@@ -348,6 +348,12 @@ template<class X> inline X evaluate(const UnivariatePolynomial<X>& p, const Scal
 template<class X> inline X evaluate(const MultivariatePolynomial<X>& p, const Vector<X>& v) {
     return MultivariatePolynomial<X>::_evaluate(p,v); }
 
+template<class X> inline Vector<X> evaluate(Vector<MultivariatePolynomial<X>> const& p, Vector<X> const& v) {
+    Vector<X> r(p.size(),v.zero_element());
+    for (SizeType i=0; i!= p.size(); ++i) r[i] = evaluate(p[i],v);
+    return r;
+}
+
 template<class I, class X> inline Polynomial<I,X> compose(const UnivariatePolynomial<X>& p, const Polynomial<I,X>& q) {
     return UnivariatePolynomial<X>::_compose(p,q); }
 

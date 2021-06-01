@@ -147,25 +147,6 @@ class IntegratorBase
               StepSizeType& suggested_time_step) const;
 
     virtual FlowStepModelType
-    flow_to(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& time) const;
-
-    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual FlowModelType
-    flow(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& minimum_time,
-         const Real& maximum_time) const;
-
-    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual FlowModelType
-    flow(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& maximum_time) const;
-
-
-    virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,

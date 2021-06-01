@@ -89,12 +89,6 @@ class IntegratorWrapper
         return this->get_override("flow_step")(vf,D,h); }
     FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
-    FlowStepModelType flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
-        return this->get_override("flow_to")(vf,D,tf); }
-    FlowModelType flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
-        return this->get_override("flow")(vf,D,t0,tf); }
-    FlowModelType flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
-        return this->get_override("flow")(vf,D,tf); }
     Void _write(OutputStream& os) const {
         this->get_override("_write")(os); }
 };
@@ -140,8 +134,6 @@ Void export_integrators(pybind11::module& module)
     integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_to",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
-    integrator_interface_class.def("flow",(FlowModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");

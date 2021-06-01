@@ -18,6 +18,7 @@ Legenda for the issue kind:
 - [#617](https://github.com/ariadne-cps/ariadne/issues/617) (A) Add is_polynomial_in predicate for symbolic expressions
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates
+- [#620](https://github.com/ariadne-cps/ariadne/issues/620) (F) EulerBounder did not reset the bounding domain between refinements to the step size
 
 ### 2.3
 

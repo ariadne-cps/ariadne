@@ -74,7 +74,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     UpperBoxType B=D;
     Bool success=false;
     while(!success) {
-        B=this->_formula(f,D,T,A,B,BOX_RADIUS_WIDENING,INITIAL_STARTING_WIDENING);
+        B=this->_formula(f,D,T,A,D,BOX_RADIUS_WIDENING,INITIAL_STARTING_WIDENING);
         for(CounterType i=0; i<EXPANSION_STEPS; ++i) {
             UpperBoxType Br=this->_refinement(f,D,T,A,B);
             if(not definitely(is_bounded(Br))) {

@@ -67,11 +67,6 @@ class IntegratorInterface
     //! \brief Write to an output stream.
     virtual Void _write(OutputStream& os) const = 0;
 
-    //! \brief Get the maximum allowable error in the flow.
-    virtual ExactDouble maximum_error() const = 0;
-    //! \brief Set the maximum allowable error in the flow.
-    virtual Void set_maximum_error(ApproximateDouble) = 0;
-
     //! \brief Compute a pair \f$(h,B)\f$ consisting of a bound \a B for the flow
     //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
     //! <br>

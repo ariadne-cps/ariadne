@@ -37,7 +37,7 @@ void ariadne_main()
     VectorFieldSimulator simulator(dynamics);
     simulator.configuration().set_step_size(0.02);
 
-    MaximumError max_err=1e-6;
+    StepMaximumError max_err=1e-6;
 
     TaylorPicardIntegrator integrator(max_err);
 

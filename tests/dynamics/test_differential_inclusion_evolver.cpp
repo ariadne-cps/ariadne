@@ -78,10 +78,9 @@ private:
                                                    SinusoidalApproximation(), PiecewiseApproximation()};
 
         TaylorPicardIntegrator integrator(
-                maximum_error = 1e-3_pr,
+                step_maximum_error = 1e-6_pr,
                 sweeper,
                 lipschitz_constant = 0.5_x,
-                step_maximum_error = 1e-3_pr,
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 
@@ -166,10 +165,9 @@ public:
         ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
 
         TaylorPicardIntegrator integrator(
-                maximum_error = 1e-3_pr,
+                step_maximum_error = 1e-6_pr,
                 sweeper,
                 lipschitz_constant = 0.5_x,
-                step_maximum_error = 1e-3_pr,
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 

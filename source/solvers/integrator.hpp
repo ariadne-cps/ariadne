@@ -58,8 +58,11 @@ typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedF
 typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
+struct StepMaximumError : Attribute<ApproximateDouble> {
+    StepMaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }
+    StepMaximumError(double x) : Attribute<ApproximateDouble>(x) { }
+};
 struct LipschitzConstant : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
-struct StepMaximumError : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
 struct StepSweepThreshold : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
 struct Order : Attribute<DegreeType> { Order(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
@@ -69,8 +72,8 @@ struct MinimumTemporalOrder : Attribute<DegreeType> { MinimumTemporalOrder(Degre
 struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 
-static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
+static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepSweepThreshold> step_sweep_threshold = Generator<StepSweepThreshold>();
 static const Generator<Order> order = Generator<Order>();
 static const Generator<SpacialOrder> spacial_order = Generator<SpacialOrder>();
@@ -100,12 +103,9 @@ class IntegratorBase
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l);
-    IntegratorBase(MaximumError e, LipschitzConstant l);
+    IntegratorBase(Sweeper<FloatDP> sweeper, LipschitzConstant l);
+    IntegratorBase(LipschitzConstant l);
   public:
-    //! \brief A threshold for the error estimate of the approximation.
-    virtual Void set_maximum_error(ApproximateDouble e) { ARIADNE_ASSERT(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
-    virtual ExactDouble maximum_error() const  { return this->_maximum_error; }
     //! \brief The fraction L(f)*h used for a time step.
     //! The convergence of the Picard iteration is approximately Lf*h.
     Void set_lipschitz_tolerance(ApproximateDouble lt) { _lipschitz_tolerance = cast_exact(lt); }
@@ -160,7 +160,6 @@ class IntegratorBase
               const UpperBoxType& bounding_box) const = 0;
 
   public:
-    ExactDouble _maximum_error;
     ExactDouble _lipschitz_tolerance;
     FunctionFactoryPointer _function_factory_ptr;
     BounderPointer _bounder_ptr;
@@ -168,8 +167,8 @@ class IntegratorBase
 
 class UnboundedIntegratorBase : public IntegratorBase {
   protected:
-    UnboundedIntegratorBase(MaximumError e, GradedSweeper<FloatDP> sweeper, LipschitzConstant lipschitz) :
-        IntegratorBase(e, sweeper, lipschitz) { }
+    UnboundedIntegratorBase(GradedSweeper<FloatDP> sweeper, LipschitzConstant lipschitz) :
+        IntegratorBase(sweeper, lipschitz) { }
 
   public:
 
@@ -191,11 +190,11 @@ class TaylorPicardIntegrator
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
-    TaylorPicardIntegrator(MaximumError err);
+    TaylorPicardIntegrator(StepMaximumError err);
 
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
+    TaylorPicardIntegrator(StepMaximumError lerr, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                           MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in time.
     DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
@@ -244,7 +243,7 @@ class UnboundedTaylorPicardIntegrator
     DegreeType _order;
 public:
     //! \brief Default constructor.
-    UnboundedTaylorPicardIntegrator(MaximumError err, Order order);
+    UnboundedTaylorPicardIntegrator(StepMaximumError err, Order order);
 
     //! \brief The order of the method.
     DegreeType order() const { return this->_order; }
@@ -292,11 +291,9 @@ class TaylorSeriesIntegrator
     DegreeType _order;
   public:
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, Order order);
-
+    TaylorSeriesIntegrator(StepMaximumError err, Order order);
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           Order order);
+    TaylorSeriesIntegrator(Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, Order order);
 
     //! \brief The order of the method in space and time.
     DegreeType order() const { return this->_order; }
@@ -327,9 +324,6 @@ class TaylorSeriesIntegrator
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
-
-  private:
-
 };
 
 
@@ -345,21 +339,19 @@ class GradedTaylorSeriesIntegrator
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err);
+    GradedTaylorSeriesIntegrator(StepMaximumError err);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr, MaximumTemporalOrder maxto);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, MaximumTemporalOrder maxto);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr,
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
                            MinimumSpacialOrder minso, MinimumTemporalOrder minto,
                            MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
 
@@ -418,8 +410,8 @@ class AffineIntegrator
     DegreeType _spacial_order;
     DegreeType _temporal_order;
   public:
-    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
-    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
+    AffineIntegrator(TemporalOrder temporal_order);
+    AffineIntegrator(SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
     DegreeType spacial_order() const { return this->_spacial_order; }

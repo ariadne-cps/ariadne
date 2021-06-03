@@ -37,7 +37,7 @@ void ROBE21() {
 
     ARIADNE_LOG_PRINTLN("Robertson chemical reaction system:");
 
-    MaximumError max_err = 1e-6;
+    StepMaximumError max_err = 1e-9;
     //TaylorPicardIntegrator integrator(max_err);
     GradedTaylorSeriesIntegrator integrator(max_err);
 
@@ -139,11 +139,8 @@ void ROBE21() {
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
-
-
         auto instance = benchmark.create_instance("3");
-        //instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
-        instance.set_verified(0);
+        instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
         instance.write();
     }
 

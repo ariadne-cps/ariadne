@@ -58,8 +58,11 @@ typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedF
 typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
-struct LipschitzConstant : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
-struct StepMaximumError : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
+struct StepMaximumError : Attribute<ApproximateDouble> {
+    StepMaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }
+    StepMaximumError(double x) : Attribute<ApproximateDouble>(x) { }
+};
+
 struct StepSweepThreshold : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
 struct Order : Attribute<DegreeType> { Order(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
@@ -69,7 +72,6 @@ struct MinimumTemporalOrder : Attribute<DegreeType> { MinimumTemporalOrder(Degre
 struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 
-static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
 static const Generator<StepSweepThreshold> step_sweep_threshold = Generator<StepSweepThreshold>();
 static const Generator<Order> order = Generator<Order>();
@@ -99,22 +101,41 @@ class IntegratorBase
     : public IntegratorInterface
 {
   protected:
-    //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l);
-    IntegratorBase(MaximumError e, LipschitzConstant l);
+    //! \brief Construct with a sweeper for the function factory
+    IntegratorBase(Sweeper<FloatDP> sweeper);
   public:
-    //! \brief A threshold for the error estimate of the approximation.
-    virtual Void set_maximum_error(ApproximateDouble e) { ARIADNE_ASSERT(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
-    virtual ExactDouble maximum_error() const  { return this->_maximum_error; }
-    //! \brief The fraction L(f)*h used for a time step.
-    //! The convergence of the Picard iteration is approximately Lf*h.
-    Void set_lipschitz_tolerance(ApproximateDouble lt) { _lipschitz_tolerance = cast_exact(lt); }
-    ExactDouble lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
 
     //! \brief The class which constructs functions for representing the flow.
     const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
     //! \brief Set the class which constructs functions for representing the flow.
     Void set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory);
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              StepSizeType& suggested_time_step) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const = 0;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const = 0;
+
+  private:
+    FunctionFactoryPointer _function_factory_ptr;
+};
+
+class BoundedIntegratorBase : public IntegratorBase {
+  protected:
+    BoundedIntegratorBase(Sweeper<FloatDP> sweeper, LipschitzTolerance lipschitz_tolerance);
+  public:
 
     //! \brief The class that computes bounds.
     const BounderInterface& bounder() const;
@@ -144,50 +165,17 @@ class IntegratorBase
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              StepSizeType& suggested_time_step) const;
+              StepSizeType& suggested_time_step) const override;
 
-    virtual FlowStepModelType
-    flow_to(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& time) const;
+    using IntegratorBase::flow_step;
 
-    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual FlowModelType
-    flow(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& minimum_time,
-         const Real& maximum_time) const;
-
-    //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual FlowModelType
-    flow(const ValidatedVectorMultivariateFunction& vector_field,
-         const ExactBoxType& state_domain,
-         const Real& maximum_time) const;
-
-
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
-              const ExactBoxType& state_domain,
-              const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const = 0;
-
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
-              const ExactBoxType& state_domain,
-              const Interval<StepSizeType>& time_domain,
-              const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const = 0;
-
-  public:
-    ExactDouble _maximum_error;
-    ExactDouble _lipschitz_tolerance;
-    FunctionFactoryPointer _function_factory_ptr;
+  private:
     BounderPointer _bounder_ptr;
 };
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
 class TaylorPicardIntegrator
-    : public IntegratorBase
+    : public BoundedIntegratorBase
 {
     ExactDouble _step_maximum_error;
     Sweeper<FloatDP> _sweeper;
@@ -195,11 +183,11 @@ class TaylorPicardIntegrator
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
-    TaylorPicardIntegrator(MaximumError err);
+    TaylorPicardIntegrator(StepMaximumError err);
 
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
+    TaylorPicardIntegrator(StepMaximumError lerr, Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip,
+                           MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in time.
     DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
@@ -208,7 +196,6 @@ class TaylorPicardIntegrator
     Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model.
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the maximum error of a single step.
     ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
@@ -240,36 +227,28 @@ class TaylorPicardIntegrator
                const UpperBoxType& bounding_box) const;
 };
 
-
-
-//! \brief An integrator which computes the Taylor series of the flow function with remainder term.
-class TaylorSeriesIntegrator
-    : public IntegratorBase
+class GradedTaylorPicardIntegrator
+        : public IntegratorBase
 {
-    Sweeper<FloatDP> _sweeper;
+    ExactDouble _step_maximum_error;
+    GradedSweeper<FloatDP> _sweeper;
+    ExactDouble _error_refinement_minimum_improvement_percentage;
     DegreeType _order;
-  public:
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, Order order);
+public:
+    //! \brief Default constructor.
+    GradedTaylorPicardIntegrator(StepMaximumError err, Order order);
 
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           Order order);
-
-    //! \brief The order of the method in space and time.
+    //! \brief The order of the method.
     DegreeType order() const { return this->_order; }
-    Void set_order(DegreeType n) { this->_order=n; }
-    //! \brief  Set the sweep threshold of the Taylor model.
-    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
+    Void set_order(Nat m) { this->_order=m; this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m); }
+    //! \brief  Set the maximum error of a single step.
+    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
+    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
+    ExactDouble error_refinement_minimum_improvement_percentage() const { return this->_error_refinement_minimum_improvement_percentage; }
+    Void set_error_refinement_minimum_improvement_percentage(ApproximateDouble e) { _error_refinement_minimum_improvement_percentage = cast_exact(e); }
 
-    virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
+    virtual GradedTaylorPicardIntegrator* clone() const { return new GradedTaylorPicardIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
-
-    virtual Pair<StepSizeType,UpperBoxType>
-    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
-                const ExactBoxType& state_domain,
-                const StepSizeType& suggested_time_step) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
@@ -284,16 +263,59 @@ class TaylorSeriesIntegrator
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
-    using IntegratorBase::flow_step;
+private:
+    FlowStepModelType
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
+};
 
-  private:
 
+
+//! \brief An integrator which computes the Taylor series of the flow function with remainder term.
+class TaylorSeriesIntegrator
+    : public BoundedIntegratorBase
+{
+    Sweeper<FloatDP> _sweeper;
+    DegreeType _order;
+  public:
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(StepMaximumError err, Order order);
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip, Order order);
+
+    //! \brief The order of the method in space and time.
+    DegreeType order() const { return this->_order; }
+    Void set_order(DegreeType n) { this->_order=n; }
+    //! \brief  Set the sweep threshold of the Taylor model.
+    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
+
+    virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
+    virtual Void _write(OutputStream& os) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
+    using BoundedIntegratorBase::flow_step;
 };
 
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class GradedTaylorSeriesIntegrator
-    : public IntegratorBase
+    : public BoundedIntegratorBase
 {
     ExactDouble _step_maximum_error;
     Sweeper<FloatDP> _sweeper;
@@ -303,23 +325,21 @@ class GradedTaylorSeriesIntegrator
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err);
+    GradedTaylorSeriesIntegrator(StepMaximumError err);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr, MaximumTemporalOrder maxto);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip, MaximumTemporalOrder maxto);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr,
-                           MinimumSpacialOrder minso, MinimumTemporalOrder minto,
-                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
+    GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip,
+                                 MinimumSpacialOrder minso, MinimumTemporalOrder minto,
+                                 MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in space.
     DegreeType minimum_spacial_order() const { return this->_minimum_spacial_order; }
@@ -343,11 +363,6 @@ class GradedTaylorSeriesIntegrator
     virtual GradedTaylorSeriesIntegrator* clone() const { return new GradedTaylorSeriesIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
 
-    virtual Pair<StepSizeType,UpperBoxType>
-    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
-                const ExactBoxType& state_domain,
-                const StepSizeType& suggested_time_step) const;
-
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
@@ -361,7 +376,7 @@ class GradedTaylorSeriesIntegrator
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
-    using IntegratorBase::flow_step;
+    using BoundedIntegratorBase::flow_step;
 
   private:
 
@@ -371,13 +386,12 @@ class GradedTaylorSeriesIntegrator
 //! \brief An integrator computes a approximation to the flow which is affine in space.
 //! \internal This code is written to allow higher-spacial order approximations.
 class AffineIntegrator
-    : public IntegratorBase
+    : public BoundedIntegratorBase
 {
     DegreeType _spacial_order;
     DegreeType _temporal_order;
   public:
-    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
-    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
+    AffineIntegrator(SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
     DegreeType spacial_order() const { return this->_spacial_order; }
@@ -399,7 +413,7 @@ class AffineIntegrator
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
-    using IntegratorBase::flow_step;
+    using BoundedIntegratorBase::flow_step;
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     Vector<Differential<FloatDPBounds>>

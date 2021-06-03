@@ -128,10 +128,9 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(PiecewiseApproximation());
 
     TaylorPicardIntegrator integrator(
-            maximum_error=1e-3,
-            sweeper,
-            lipschitz_constant=0.5,
             step_maximum_error=1e-3,
+            sweeper,
+            lipschitz_tolerance=0.5_x,
             minimum_temporal_order=4,
             maximum_temporal_order=12);
 

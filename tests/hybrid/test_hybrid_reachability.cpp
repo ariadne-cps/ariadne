@@ -72,7 +72,7 @@ class TestHybridReachability
 Void TestHybridReachability::_set_analyser(const HybridAutomatonInterface& system) const
 {
     GeneralHybridEvolver evolver(system);
-    evolver.set_integrator(TaylorPicardIntegrator(1e-5));
+    evolver.set_integrator(TaylorPicardIntegrator(StepMaximumError(1e-5)));
     evolver.configuration().set_maximum_step_size(0.25);
     evolver.configuration().set_maximum_enclosure_radius(0.125);
     evolver.configuration().set_maximum_enclosure_radius(0.5);

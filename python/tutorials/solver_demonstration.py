@@ -63,25 +63,9 @@ def differential_solver_demonstration():
     f=ValidatedVectorMultivariateFunction.identity(1)
 
     print(f,dom,h)
-    phis=integrator.flow(f,dom,h)
-    assert(len(phis)==1)
-    phi=phis[0]
+    phi=integrator.flow(f,dom,h)
     print("phi:",phi,type(phi))
 
-    # Compute two time steps of the flow of the Taylor function f starting in domain D for the interval [h,2h]
-    phi0=phi
-    print("phi.domain():",phi.domain())
-    print("h:",h)
-    phi0h=partial_evaluate(phi,1,FloatDPBounds(h,dp))
-    dom1=phi0h.codomain()
-    phi=integrator.flow(f,dom1,h)[0]
-    print("phi:",phi)
-    swp=GradedSweeperDP(dp,6);
-    tr=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate([{0:2*h}],0,swp)-h
-    tr=ValidatedScalarMultivariateFunctionModelDP(tr)
-    phi1=compose(phi,combine(phi0h,tr))
-    print("phi0:",phi0)
-    print("phi1:",phi1)
     #! [Differential Solver demonstration]
 
 

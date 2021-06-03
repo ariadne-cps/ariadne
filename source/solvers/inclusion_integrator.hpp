@@ -328,7 +328,6 @@ class InclusionIntegratorInterface {
     virtual Nat num_params_per_input() const = 0;
     virtual List<ValidatedVectorMultivariateFunctionModelType> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
     virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const = 0;
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const = 0;
 
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorInterface& approximator) { approximator.write(os); return os; }
 };
@@ -350,7 +349,6 @@ class InclusionIntegrator : public InclusionIntegratorInterface {
     virtual Void write(OutputStream& os) const override { os << A(); }
     virtual List<ValidatedVectorMultivariateFunctionModelType> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const override;
     virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const override;
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const override;
 
     virtual Bool operator==(const InclusionIntegratorInterface& rhs) const override;
     virtual Bool operator<(const InclusionIntegratorInterface& rhs) const override;
@@ -392,7 +390,6 @@ class InclusionIntegratorHandle {
 
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorHandle& approximator) { os << *approximator._impl; return os; }
 
-    Pair<StepSizeType,UpperBoxType> flow_bounds(BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const { return _impl->flow_bounds(domx,doma,hsug); }
     List<ValidatedVectorMultivariateFunctionModelType> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _impl->reach(D,evolve_function,B,t,h); }
     ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const { return _impl->evolve(reach_function,t); }
   public:

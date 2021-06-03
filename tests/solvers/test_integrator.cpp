@@ -206,7 +206,7 @@ class TestIntegrator
         ExactBoxType d={ExactIntervalType(-0.5_x,1.5_x),ExactIntervalType(-0.5_x,2.5_x),ExactIntervalType(0.0_x,1.0_x)};
         StepSizeType t0=3.0_x;
         StepSizeType hsug=0.0625_x;
-        Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,d,t0,ExactBoxType(0u),hsug);
+        Pair<StepSizeType,UpperBoxType> step_bounds = EulerBounder().compute(f,d,t0,ExactBoxType(0u),hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
         ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(t0,t0+h),ExactBoxType(0u),B);
@@ -234,7 +234,7 @@ class TestIntegrator
         StepSizeType t0=0.0_x;
         StepSizeType hsug=0.0625_x;
         ExactBoxType domp={ExactIntervalType{2.0_x,2.5_x},ExactIntervalType{-0.5_x,1.0_x},ExactIntervalType{0.5_x,1.0_x}};
-        Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,domx,t0,domp,hsug);
+        Pair<StepSizeType,UpperBoxType> step_bounds = EulerBounder().compute(f,domx,t0,domp,hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
         Interval<StepSizeType> domt(t0,t0+h);

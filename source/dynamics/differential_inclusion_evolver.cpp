@@ -192,6 +192,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> DifferentialInclusionEvolver::r
 
     StepSizeType hsug(_configuration->maximum_step_size());
 
+    EulerBounder bounder;
+
     ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial,this->_sweeper);
 
     TimeStepType t;
@@ -218,7 +220,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> DifferentialInclusionEvolver::r
         UpperBoxType B;
         StepSizeType h;
 
-        ARIADNE_LOG_RUN_AT(1,std::tie(h,B)=approximators_to_use.at(0).flow_bounds(domx,_system.inputs(),hsug));
+        ARIADNE_LOG_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),hsug));
         ARIADNE_LOG_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
 
         TimeStepType new_t = lower_bound(t+h);

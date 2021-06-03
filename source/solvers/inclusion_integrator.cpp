@@ -403,11 +403,6 @@ EffectiveVectorMultivariateFunction substitute_v_with_w(EffectiveVectorMultivari
     return compose(F,substitution);
 }
 
-
-template<class A> Pair<StepSizeType,UpperBoxType> InclusionIntegrator<A>::flow_bounds(BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const {
-    return EulerBounder().compute(_f,domx,doma,hsug);
-}
-
 template<class A> BoxDomainType InclusionIntegrator<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
     for (SizeType i=0; i<this->_num_params_per_input; ++i)

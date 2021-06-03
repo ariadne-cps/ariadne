@@ -166,6 +166,21 @@ class IntegratorBase
     BounderPointer _bounder_ptr;
 };
 
+class UnboundedIntegratorBase : public IntegratorBase {
+  protected:
+    UnboundedIntegratorBase(MaximumError e, GradedSweeper<FloatDP> sweeper, LipschitzConstant lipschitz) :
+        IntegratorBase(e, sweeper, lipschitz) { }
+
+  public:
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              StepSizeType& suggested_time_step) const override;
+
+    using IntegratorBase::flow_step;
+};
+
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
 class TaylorPicardIntegrator
     : public IntegratorBase
@@ -189,7 +204,6 @@ class TaylorPicardIntegrator
     Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model.
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the maximum error of a single step.
     ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
@@ -213,6 +227,53 @@ class TaylorPicardIntegrator
     using IntegratorBase::flow_step;
 
   private:
+    FlowStepModelType
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
+};
+
+class UnboundedTaylorPicardIntegrator
+        : public UnboundedIntegratorBase
+{
+    ExactDouble _step_maximum_error;
+    ExactDouble _error_refinement_minimum_improvement_percentage;
+    GradedSweeper<FloatDP> _sweeper;
+    DegreeType _order;
+public:
+    //! \brief Default constructor.
+    UnboundedTaylorPicardIntegrator(MaximumError err, Order order);
+
+    //! \brief The order of the method.
+    DegreeType order() const { return this->_order; }
+    Void set_order(Nat m) { this->_order=m; this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m); }
+    //! \brief  Set the maximum error of a single step.
+    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
+    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
+    ExactDouble error_refinement_minimum_improvement_percentage() const { return this->_error_refinement_minimum_improvement_percentage; }
+    Void set_error_refinement_minimum_improvement_percentage(ApproximateDouble e) { _error_refinement_minimum_improvement_percentage = cast_exact(e); }
+
+    virtual UnboundedTaylorPicardIntegrator* clone() const { return new UnboundedTaylorPicardIntegrator(*this); }
+    virtual Void _write(OutputStream& os) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
+    using UnboundedIntegratorBase::flow_step;
+
+private:
     FlowStepModelType
     _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
                const ExactBoxType& state_domain,

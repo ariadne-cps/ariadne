@@ -148,6 +148,19 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     }
 }
 
+FlowStepModelType
+UnboundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
+{
+    StepSizeType& h=hmax;
+    while(true) {
+        try {
+            return flow_step(vf,dx,h,dx);
+        } catch(const FlowTimeStepException& e) {
+            h=hlf(h);
+        }
+    }
+}
+
 inline ExactDouble operator*(ExactDouble, TwoExp);
 inline ExactDouble operator/(ExactDouble, TwoExp);
 
@@ -225,14 +238,8 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error());
     }
 
-    FlowStepModelType res=restriction(phi,dom);
-
-    ARIADNE_LOG_PRINTLN("result="<<res);
-    return res;
-
+    return phi;
 }
-
-
 
 Void TaylorPicardIntegrator::_write(OutputStream& os) const {
     os << "TaylorPicardIntegrator"
@@ -245,6 +252,111 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << " )";
 }
+
+UnboundedTaylorPicardIntegrator::UnboundedTaylorPicardIntegrator(MaximumError err, Order order)
+        : UnboundedIntegratorBase(err,GradedSweeper<FloatDP>(DoublePrecision(),order),LipschitzConstant(0.5)),
+          _step_maximum_error(cast_exact(err.value())), _error_refinement_minimum_improvement_percentage(cast_exact(0.02)), _sweeper(GradedSweeper<FloatDP>(DoublePrecision(), order)), _order(order) { }
+
+FlowStepModelType
+UnboundedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
+{
+    ARIADNE_PRECONDITION(vf.result_size()==dx.dimension());
+    ARIADNE_PRECONDITION(vf.argument_size()==dx.dimension());
+    ARIADNE_PRECONDITION(bx.dimension()==dx.dimension());
+    return this->_flow_step(vf,dx,IntervalDomainType(0,h),BoxDomainType(0u),bx);
+}
+
+FlowStepModelType
+UnboundedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_PRECONDITION(f.result_size()==D.dimension());
+    ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+T.dimension()+A.dimension());
+    ARIADNE_PRECONDITION(B.dimension()==D.dimension());
+    return this->_flow_step(f,D,IntervalDomainType(T),A,B);
+}
+
+FlowStepModelType
+UnboundedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("f="<<f);
+    ARIADNE_LOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
+
+    const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
+
+    const SizeType nx=D.size();
+    const SizeType na=A.size();
+
+    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na);
+
+    StepSizeType t=static_cast<StepSizeType>(T.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(T.upper_bound())-t;
+
+    // Time interval centred on initial time, which will make the antiderivative more efficient
+    ExactIntervalType wT(t-h,t+h);
+    ARIADNE_ASSERT(t==med(wT));
+
+    ExactBoxType dom=join(D,T,A);
+    ExactBoxType wdom=join(D,wT,A);
+    UpperBoxType const& bx=B;
+    ARIADNE_LOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
+
+    FlowStepModelType phi0=this->function_factory().create_projection(wdom,range(0,nx));
+    ARIADNE_LOG_PRINTLN_AT(1,"phi0="<<phi0);
+    FlowStepModelType phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
+    FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
+
+    ARIADNE_LOG_PRINTLN_AT(1,"phi="<<phi);
+    for (DegreeType k=0; k!=this->_order; ++k) {
+        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
+        ARIADNE_LOG_PRINTLN_AT(2,"fphi="<<fphi);
+        phi=antiderivative(fphi,nx)+phi0;
+        ARIADNE_LOG_PRINTLN_AT(2,"phi="<<phi);
+    }
+    auto errors = phi.errors();
+    ARIADNE_LOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
+    FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
+    phi=antiderivative(fphi,nx)+phi0;
+    auto new_errors = phi.errors();
+    for (SizeType i=0; i<errors.size(); ++i) {
+        if (not refines(new_errors[i],errors[i])) {
+            ARIADNE_THROW(FlowTimeStepException,"UnboundedTaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has errors "<<new_errors<<", which are not smaller than previous errors " << errors);
+        }
+    }
+    errors = new_errors;
+    ARIADNE_LOG_PRINTLN_AT(2,"validated errors=" << errors);
+    while (true) {
+        fphi=compose(f,join(std::move(phi),ta));
+        phi=antiderivative(fphi,nx)+phi0;
+        new_errors = phi.errors();
+        Bool has_improved = false;
+        for (SizeType i=0; i<errors.size(); ++i) {
+            auto error_improvement = cast_exact((errors[i]-new_errors[i])/errors[i]);
+            if (error_improvement >= this->_error_refinement_minimum_improvement_percentage) {
+                has_improved = true;
+                break;
+            }
+        }
+        if (not has_improved) break;
+        errors = new_errors;
+        ARIADNE_LOG_PRINTLN_VAR_AT(2,errors);
+    }
+
+    if (phi.error().raw()>this->maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException,"UnboundedTaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<", which exceeds maximum error "<<this->maximum_error());
+    }
+
+    return phi;
+}
+
+Void UnboundedTaylorPicardIntegrator::_write(OutputStream& os) const {
+    os << "UnboundedTaylorPicardIntegrator"
+       << "(maximum_error = " << this->maximum_error()
+       << ", function_factory = " << this->function_factory()
+       << ", order = " << this->order()
+       << " )";
+}
+
 
 } // namespace Ariadne
 

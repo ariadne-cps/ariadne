@@ -68,25 +68,9 @@ void differential_solver_demonstration() {
     auto h=1/two;
     auto f=ValidatedVectorMultivariateFunction::identity(1);
 
-    auto phis=integrator.flow(f,dom,h);
-    assert(phis.size()==1);
-    auto phi=phis[0];
+    auto phi=integrator.flow_step(f,dom,h);
     print("phi:",phi);
 
-    // Compute two time steps of the flow of the Taylor function f starting in domain D for the interval [h,2h]
-    auto phi0=phi;
-    print("phi.domain():",phi.domain());
-    print("h:",h);
-    auto phi0h=partial_evaluate(phi,1,FloatDPBounds(h,dp));
-    auto dom1=phi0h.codomain();
-    phi=integrator.flow(f,dom1,h)[0];
-    print("phi:",phi);
-    SweeperDP swp=GradedSweeperDP(dp,6);
-    auto tr=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate({{0,2*h}},0,swp)-h;
-    tr=ValidatedScalarMultivariateFunctionModelDP(tr);
-    auto phi1=compose(phi,combine(phi0h,tr));
-    print("phi0:",phi0);
-    print("phi1:",phi1);
     //! [Differential Solver demonstration]
 }
 

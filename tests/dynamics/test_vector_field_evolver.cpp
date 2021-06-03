@@ -69,10 +69,10 @@ public:
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
         // Set up the evaluators
-        TaylorPicardIntegrator picard_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_constant = 0.5_x,
+        TaylorPicardIntegrator picard_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_tolerance = 0.5_x,
                                                  minimum_temporal_order = 0, maximum_temporal_order = 8);
         // Set up the evaluators
-        GradedTaylorSeriesIntegrator series_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_constant = 0.5_x,
+        GradedTaylorSeriesIntegrator series_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_tolerance = 0.5_x,
                                                        minimum_spacial_order = 1, minimum_temporal_order = 4,
                                                        maximum_spacial_order = 3, maximum_temporal_order = 8);
 
@@ -121,7 +121,7 @@ public:
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
         // Set up the evaluators
-        TaylorPicardIntegrator integrator(step_maximum_error = 1e-6_pr, sweeper, lipschitz_constant = 0.5_x,
+        TaylorPicardIntegrator integrator(step_maximum_error = 1e-6_pr, sweeper, lipschitz_tolerance = 0.5_x,
                                           minimum_temporal_order = 0, maximum_temporal_order = 8);
 
         VectorField fail_vf({dot(x)=1,dot(y)=y*y*100});

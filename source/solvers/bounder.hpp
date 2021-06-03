@@ -44,6 +44,10 @@ class BoundingNotFoundException : public std::runtime_error {
     BoundingNotFoundException(const String& str) : std::runtime_error(str) { }
 };
 
+struct LipschitzTolerance : Attribute<ExactDouble> { using Attribute<ExactDouble>::Attribute; };
+static const Generator<LipschitzTolerance> lipschitz_tolerance = Generator<LipschitzTolerance>();
+static const LipschitzTolerance DEFAULT_LIPSCHITZ_TOLERANCE(0.5_x);
+
 //! \ingroup SolverModule EvaluationModule
 //! \brief Interface for classes calculating the bounds of a flow.
 class BounderInterface {
@@ -81,14 +85,18 @@ class BounderInterface {
 
 class BounderBase : public BounderInterface {
   public:
+    BounderBase(LipschitzTolerance lipschitz);
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
+  protected:
+    const LipschitzTolerance _lipschitz_tolerance;
 };
 
 class EulerBounder final : public BounderBase {
   public:
+    EulerBounder(LipschitzTolerance lipschitz = DEFAULT_LIPSCHITZ_TOLERANCE);
     using BounderBase::compute;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override;

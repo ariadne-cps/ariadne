@@ -136,14 +136,14 @@ Void export_integrators(pybind11::module& module)
     taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
     taylor_picard_integrator_class.def("set_step_maximum_error",&TaylorPicardIntegrator::set_step_maximum_error);
 
-    pybind11::class_<UnboundedTaylorPicardIntegrator,IntegratorInterface> unbounded_taylor_picard_integrator_class(module,"UnboundedTaylorPicardIntegrator");
+    pybind11::class_<GradedTaylorPicardIntegrator,IntegratorInterface> unbounded_taylor_picard_integrator_class(module, "GradedTaylorPicardIntegrator");
     unbounded_taylor_picard_integrator_class.def(pybind11::init<ApproximateDouble,Order>());
-    unbounded_taylor_picard_integrator_class.def("order",&UnboundedTaylorPicardIntegrator::order);
-    unbounded_taylor_picard_integrator_class.def("step_maximum_error",&UnboundedTaylorPicardIntegrator::step_maximum_error);
-    unbounded_taylor_picard_integrator_class.def("error_refinement_minimum_improvement_percentage",&UnboundedTaylorPicardIntegrator::error_refinement_minimum_improvement_percentage);
-    unbounded_taylor_picard_integrator_class.def("set_order",&UnboundedTaylorPicardIntegrator::set_order);
-    unbounded_taylor_picard_integrator_class.def("set_step_maximum_error",&UnboundedTaylorPicardIntegrator::set_step_maximum_error);
-    unbounded_taylor_picard_integrator_class.def("set_error_refinement_minimum_improvement_percentage",&UnboundedTaylorPicardIntegrator::set_error_refinement_minimum_improvement_percentage);
+    unbounded_taylor_picard_integrator_class.def("order",&GradedTaylorPicardIntegrator::order);
+    unbounded_taylor_picard_integrator_class.def("step_maximum_error",&GradedTaylorPicardIntegrator::step_maximum_error);
+    unbounded_taylor_picard_integrator_class.def("error_refinement_minimum_improvement_percentage",&GradedTaylorPicardIntegrator::error_refinement_minimum_improvement_percentage);
+    unbounded_taylor_picard_integrator_class.def("set_order",&GradedTaylorPicardIntegrator::set_order);
+    unbounded_taylor_picard_integrator_class.def("set_step_maximum_error",&GradedTaylorPicardIntegrator::set_step_maximum_error);
+    unbounded_taylor_picard_integrator_class.def("set_error_refinement_minimum_improvement_percentage",&GradedTaylorPicardIntegrator::set_error_refinement_minimum_improvement_percentage);
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
     taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());

@@ -80,7 +80,7 @@ private:
         TaylorPicardIntegrator integrator(
                 step_maximum_error = 1e-6_pr,
                 sweeper,
-                lipschitz_constant = 0.5_x,
+                lipschitz_tolerance = 0.5_x,
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 
@@ -167,7 +167,7 @@ public:
         TaylorPicardIntegrator integrator(
                 step_maximum_error = 1e-6_pr,
                 sweeper,
-                lipschitz_constant = 0.5_x,
+                lipschitz_tolerance = 0.5_x,
                 minimum_temporal_order = 4,
                 maximum_temporal_order = 12);
 

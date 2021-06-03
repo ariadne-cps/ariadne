@@ -52,8 +52,10 @@
 
 namespace Ariadne {
 
-typedef ValidatedVectorMultivariateTaylorFunctionModelDP FlowStepTaylorModelType;
 
+static const LipschitzConstant DEFAULT_LIPSCHITZ_CONSTANT(0.5_x);
+
+typedef ValidatedVectorMultivariateTaylorFunctionModelDP FlowStepTaylorModelType;
 
 OutputStream& operator<<(OutputStream& os, FlowStepModelType const& fsm) {
     return os << static_cast<ValidatedVectorMultivariateFunctionModelDP const&>(fsm);
@@ -79,18 +81,8 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
-IntegratorBase::IntegratorBase(LipschitzConstant l)
-    : _lipschitz_tolerance(cast_exact_double(l)), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
-{
-    ARIADNE_PRECONDITION(_lipschitz_tolerance>0.0_x)
-}
-
-IntegratorBase::IntegratorBase(Sweeper<FloatDP> s, LipschitzConstant l)
-    :  _lipschitz_tolerance(cast_exact_double(l))
-    , _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
-{
-    ARIADNE_PRECONDITION(_lipschitz_tolerance>0.0_x);
-}
+IntegratorBase::IntegratorBase(Sweeper<FloatDP> s)
+    : _function_factory_ptr(make_taylor_function_factory(s)) { }
 
 Void
 IntegratorBase::set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory)
@@ -104,35 +96,54 @@ IntegratorBase::function_factory() const
     return *this->_function_factory_ptr;
 }
 
-Void
-IntegratorBase::set_bounder(const BounderInterface& bounder)
+FlowStepModelType
+IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
 {
-    this->_bounder_ptr=BounderPointer(bounder.clone());
+    StepSizeType& h=hmax;
+    while(true) {
+        try {
+            return flow_step(vf,dx,h,dx);
+        } catch(const FlowTimeStepException& e) {
+            h=hlf(h);
+        }
+    }
+}
+
+BoundedIntegratorBase::BoundedIntegratorBase(Sweeper<FloatDP> sweeper, LipschitzConstant lipschitz) :
+        IntegratorBase(sweeper), _lipschitz_tolerance(cast_exact_double(lipschitz)), _bounder_ptr(new EulerBounder())
+{
+    ARIADNE_PRECONDITION(_lipschitz_tolerance>0.0_x)
 }
 
 const BounderInterface&
-IntegratorBase::bounder() const
+BoundedIntegratorBase::bounder() const
 {
     return *this->_bounder_ptr;
 }
 
+Void
+BoundedIntegratorBase::set_bounder(const BounderInterface& bounder)
+{
+    this->_bounder_ptr=BounderPointer(bounder.clone());
+}
+
 Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
     return this->_bounder_ptr->compute(vf,D,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
     return this->_bounder_ptr->compute(vf,D,A,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
     return this->_bounder_ptr->compute(vf,D,t,A,hsug);
 }
 
 FlowStepModelType
-IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
+BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
 {
     StepSizeType& h=hmax;
     UpperBoxType bx;
@@ -146,28 +157,15 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
     }
 }
 
-FlowStepModelType
-UnboundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
-{
-    StepSizeType& h=hmax;
-    while(true) {
-        try {
-            return flow_step(vf,dx,h,dx);
-        } catch(const FlowTimeStepException& e) {
-            h=hlf(h);
-        }
-    }
-}
-
 inline ExactDouble operator*(ExactDouble, TwoExp);
 inline ExactDouble operator/(ExactDouble, TwoExp);
 
 TaylorPicardIntegrator::TaylorPicardIntegrator(StepMaximumError err)
-    : TaylorPicardIntegrator(err,ThresholdSweeper<FloatDP>(DP(),err.value()/8),LipschitzConstant(0.5),MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
+    : TaylorPicardIntegrator(err,ThresholdSweeper<FloatDP>(DP(),err.value()/8),DEFAULT_LIPSCHITZ_CONSTANT,MinimumTemporalOrder(0),MaximumTemporalOrder(12)) { }
 
 TaylorPicardIntegrator::TaylorPicardIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
                                                MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
-    : IntegratorBase(sweeper,lip), _step_maximum_error(cast_exact(err.value())), _sweeper(sweeper)
+    : BoundedIntegratorBase(sweeper, lip), _step_maximum_error(cast_exact(err.value())), _sweeper(sweeper)
     , _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
 FlowStepModelType
@@ -250,8 +248,9 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
 }
 
 UnboundedTaylorPicardIntegrator::UnboundedTaylorPicardIntegrator(StepMaximumError err, Order order)
-        : UnboundedIntegratorBase(GradedSweeper<FloatDP>(DoublePrecision(),order),LipschitzConstant(0.5)),
-          _step_maximum_error(cast_exact(err.value())), _error_refinement_minimum_improvement_percentage(cast_exact(0.02)), _sweeper(GradedSweeper<FloatDP>(DoublePrecision(), order)), _order(order) { }
+        : IntegratorBase(GradedSweeper<FloatDP>(DoublePrecision(), order)),
+          _step_maximum_error(cast_exact(err.value())), _sweeper(GradedSweeper<FloatDP>(DoublePrecision(), order)),
+          _error_refinement_minimum_improvement_percentage(cast_exact(0.02)), _order(order) { }
 
 FlowStepModelType
 UnboundedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
@@ -361,22 +360,19 @@ Void UnboundedTaylorPicardIntegrator::_write(OutputStream& os) const {
 
 #include "algebra/graded.hpp"
 #include "function/procedure.hpp"
+
 namespace Ariadne {
 
-class FormulaFunction;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 typedef Differential<FloatDPBounds> ValidatedDifferential;
-typedef MultivariatePolynomial<FloatDPBounds> ValidatedMultivariatelynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 typedef FloatDPBounds ValidatedNumericType;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
-static const TwoExp STEP_ERROR_RATIO=TwoExp(-7);
 static const TwoExp SWEEP_THRESHOLD_RATIO=TwoExp(-10);
-static const LipschitzConstant DEFAULT_LIPSCHITZ_CONSTANT(0.5_x);
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(Sweeper<FloatDP> const& sweeper, LipschitzConstant lip, Order ord)
-    : IntegratorBase(sweeper,lip), _sweeper(sweeper), _order(ord)
+    : BoundedIntegratorBase(sweeper, lip), _sweeper(sweeper), _order(ord)
 { }
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(StepMaximumError err, Order ord)
@@ -401,7 +397,7 @@ GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(StepMaximumError err,
 GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
         MinimumSpacialOrder minso, MinimumTemporalOrder minto,
         MaximumSpacialOrder maxso, MaximumTemporalOrder maxto)
-    : IntegratorBase(sweeper,lip), _step_maximum_error(cast_exact(err.value())), _sweeper(sweeper)
+    : BoundedIntegratorBase(sweeper, lip), _step_maximum_error(cast_exact(err.value())), _sweeper(sweeper)
     , _minimum_spacial_order(minso), _minimum_temporal_order(minto), _maximum_spacial_order(maxso), _maximum_temporal_order(maxto)
 { }
 
@@ -861,12 +857,6 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     return tphi;
 }
 
-Pair<StepSizeType,UpperBoxType>
-TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
-{
-    return this->bounder().compute(vf,dx,hmax);
-}
-
 Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
     os << "TaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
@@ -875,7 +865,6 @@ Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
        << ", order = " << this->order()
        << " )";
 }
-
 
 
 FlowStepModelType
@@ -913,12 +902,6 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     return tphi;
 }
 
-Pair<StepSizeType,UpperBoxType>
-GradedTaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
-{
-    return this->bounder().compute(vf,dx,hmax);
-}
-
 Void GradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
     os << "GradedTaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
@@ -954,11 +937,8 @@ template<class X> Void truncate(Vector< Differential<X> >& x, DegreeType spacial
     for(DegreeType i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order_,temporal_order_); }
 }
 
-AffineIntegrator::AffineIntegrator(TemporalOrder temporal_order_)
-    : IntegratorBase(lipschitz_constant=0.5), _spacial_order(1u), _temporal_order(temporal_order_) { }
-
 AffineIntegrator::AffineIntegrator(SpacialOrder spacial_order_, TemporalOrder temporal_order_)
-    : IntegratorBase(lipschitz_constant=0.5), _spacial_order(spacial_order_), _temporal_order(temporal_order_) { }
+    : BoundedIntegratorBase(Sweeper<FloatDP>(),lipschitz_constant=DEFAULT_LIPSCHITZ_CONSTANT), _spacial_order(spacial_order_), _temporal_order(temporal_order_) { }
 
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& dom) const

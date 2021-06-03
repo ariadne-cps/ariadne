@@ -259,24 +259,24 @@ Int main(Int argc, const char* argv[]) {
 
     TaylorPicardIntegrator taylor_picard_integrator(
             step_maximum_error=1e-8, sweeper, lipschitz_tolerance=0.5_x, minimum_temporal_order=0, maximum_temporal_order=16);
-    //ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));
+    ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));
 
 
     GradedTaylorPicardIntegrator unbounded_taylor_picard_integrator(
-            step_maximum_error=1e-8,order=5);
+            step_maximum_error=1e-8,order=8);
     ARIADNE_TEST_CLASS("GradedTaylorPicardIntegrator",TestIntegrator(unbounded_taylor_picard_integrator));
 
     TaylorSeriesIntegrator taylor_series_integrator(sweeper, lipschitz_tolerance=0.5_x, order=6);
-    //ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator));
+    ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator));
 
     GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
-            step_maximum_error=1e-8, sweeper, lipschitz_tolerance=0.5_x,
+            step_maximum_error=1e-7, sweeper, lipschitz_tolerance=0.5_x,
             minimum_spacial_order=1, minimum_temporal_order=4,
             maximum_spacial_order=4, maximum_temporal_order=8);
-    //ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
+    ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
 
     ARIADNE_PRINT_TEST_CASE_TITLE("AffineIntegrator");
-    AffineIntegrator affine_integrator(1e-6, 6);
+    AffineIntegrator affine_integrator(1, 6);
     //TestIntegrator(affine_integrator).test_affine();
     ARIADNE_TEST_WARN("AffineIntegrator does not work correctly.");
 

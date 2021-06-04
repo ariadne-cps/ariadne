@@ -56,7 +56,7 @@ void LALO20() {
     {
         ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.01...");
 
-        MaximumError max_err = 1e-3;
+        StepMaximumError max_err = 1e-6;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
@@ -110,11 +110,11 @@ void LALO20() {
     {
         ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.05...");
 
-        MaximumError max_err = 1e-3;
+        StepMaximumError max_err = 1e-6;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
-        evolver.configuration().set_maximum_enclosure_radius(0.04);
+        evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(0.2);
         evolver.configuration().set_maximum_spacial_error(1e-3);
 
@@ -164,11 +164,11 @@ void LALO20() {
     {
         ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.1...");
 
-        MaximumError max_err = 1e-3;
+        StepMaximumError max_err = 1e-6;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
-        evolver.configuration().set_maximum_enclosure_radius(0.09);
+        evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(0.2);
         evolver.configuration().set_maximum_spacial_error(1e-3);
 
@@ -226,6 +226,6 @@ void LALO20() {
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write(benchmark.name().c_str());
+    ARIADNE_LOG_RUN_MUTED(fig.write(benchmark.name().c_str()))
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

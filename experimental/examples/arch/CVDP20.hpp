@@ -42,8 +42,9 @@ void CVDP20()
         RealConstant mu("mu",1.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
 
-        MaximumError max_err = 1e-5;
+        StepMaximumError max_err = 8e-8;
         TaylorPicardIntegrator integrator(max_err);
+        //GradedTaylorSeriesIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(0.08);
@@ -91,7 +92,7 @@ void CVDP20()
         RealConstant mu("mu",2.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
 
-        MaximumError max_err = 5e-6;
+        StepMaximumError max_err = 4e-8;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);

@@ -60,7 +60,7 @@ void ROBE21() {
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.002);
+        evolver.configuration().set_maximum_step_size(0.004);
         evolver.configuration().set_maximum_spacial_error(1e-6);
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
@@ -93,7 +93,7 @@ void ROBE21() {
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.002);
+        evolver.configuration().set_maximum_step_size(0.004);
         evolver.configuration().set_maximum_spacial_error(1e-6);
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
@@ -126,7 +126,7 @@ void ROBE21() {
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.002);
+        evolver.configuration().set_maximum_step_size(0.004);
         evolver.configuration().set_maximum_spacial_error(1e-6);
         ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
@@ -147,12 +147,12 @@ void ROBE21() {
     ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=evolution_time,0.999<=s<=1.001}));
     fig << line_style(false);
-    fig << fill_colour(grey);
-    fig.draw(reach3);
     fig << fill_colour(orange);
     fig.draw(reach2);
-    fig << fill_colour(black);
+    fig << fill_colour(grey);
     fig.draw(reach1);
+    fig << fill_colour(black);
+    fig.draw(reach3);
     ARIADNE_LOG_RUN_AT(2,fig.write(benchmark.name().c_str()))
 
     ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");

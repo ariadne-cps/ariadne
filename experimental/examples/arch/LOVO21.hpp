@@ -56,8 +56,8 @@ void LOVO21()
     automaton.new_transition(lotkavolterra|outside,enter,lotkavolterra|inside,{next(x)=x,next(y)=y},sqr(x-cx)+sqr(y-cy)<=sqr(radius),EventKind::IMPACT);
     automaton.new_transition(lotkavolterra|inside,exit,lotkavolterra|outside,{next(x)=x,next(y)=y},sqr(x-cx)+sqr(y-cy)>=sqr(radius),EventKind::IMPACT);
 
-    MaximumError max_err=1e-5;
-    TaylorPicardIntegrator integrator(max_err);
+    StepMaximumError max_err=1e-7;
+    GradedTaylorSeriesIntegrator integrator(max_err);
 
     GeneralHybridEvolver evolver(automaton);
     evolver.set_integrator(integrator);
@@ -80,7 +80,7 @@ void LOVO21()
 
     ARIADNE_LOG_PRINTLN("Checking properties... ")
 
-    ARIADNE_LOG_RUN_AT(2,auto final_bounds = orbit.final().bounding_box())
+    ListSet<HybridEnclosure> actual_final;
 
     Bool has_2_number_of_transitions = false;
     Bool has_4_number_of_transitions = false;
@@ -90,8 +90,11 @@ void LOVO21()
             if (encl.previous_events().size() == 2) has_2_number_of_transitions = true;
             else if (encl.previous_events().size() == 4) has_4_number_of_transitions = true;
             else has_different_number_of_transitions = true;
+            actual_final.append(encl);
         }
     }
+
+    ARIADNE_LOG_RUN_AT(2,auto final_bounds = actual_final.bounding_box())
 
     sw.click();
 
@@ -100,7 +103,7 @@ void LOVO21()
     } else { ARIADNE_LOG_PRINTLN("Final set with a different number of transitions have been found!") }
 
     ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
-    ARIADNE_LOG_PRINTLN("# of final sets: " << orbit.final().size())
+    ARIADNE_LOG_PRINTLN("# of final sets: " << actual_final.size())
     ARIADNE_LOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width())
 
     auto instance = benchmark.create_instance();

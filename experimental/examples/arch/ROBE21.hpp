@@ -38,7 +38,6 @@ void ROBE21() {
     ARIADNE_LOG_PRINTLN("Robertson chemical reaction system:");
 
     StepMaximumError max_err = 1e-9;
-    //TaylorPicardIntegrator integrator(max_err);
     GradedTaylorSeriesIntegrator integrator(max_err);
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
@@ -147,11 +146,11 @@ void ROBE21() {
     ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=evolution_time,0.999<=s<=1.001}));
     fig << line_style(false);
-    fig << fill_colour(orange);
-    fig.draw(reach2);
-    fig << fill_colour(grey);
-    fig.draw(reach1);
     fig << fill_colour(black);
+    fig.draw(reach2);
+    fig << fill_colour(white);
+    fig.draw(reach1);
+    fig << fill_colour(orange);
     fig.draw(reach3);
     ARIADNE_LOG_RUN_AT(2,fig.write(benchmark.name().c_str()))
 

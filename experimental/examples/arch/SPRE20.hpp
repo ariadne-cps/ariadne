@@ -121,7 +121,7 @@ void SPRE20()
     RealSpace initial_space = system.state_space()[initial_location];
     BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(initial_location,initial_space);
 
-    MaximumError max_err=1e-3;
+    StepMaximumError max_err=8e-6;
     TaylorSeriesIntegrator integrator(max_err,Order(3u));
 
     GeneralHybridEvolver evolver(system);

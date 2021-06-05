@@ -46,7 +46,7 @@ void SUTR21() {
                           dot(D) = eta*I
                          },{let(AplusI) = A+I});
 
-    MaximumError max_err = 1e-3;
+    StepMaximumError max_err = 8e-6;
     TaylorPicardIntegrator integrator(max_err);
 
     VectorFieldEvolver evolver(dynamics, integrator);

@@ -25,7 +25,6 @@
 #include "ROBE21.hpp"
 #include "CVDP20.hpp"
 #include "LALO20.hpp"
-#include "SUTR21.hpp"
 #include "LOVO21.hpp"
 #include "SPRE20.hpp"
 #include "ariadne_main.hpp"
@@ -35,7 +34,6 @@ void ariadne_main()
     ROBE21();
     CVDP20();
     LALO20();
-    SUTR21();
     LOVO21();
     SPRE20();
 }

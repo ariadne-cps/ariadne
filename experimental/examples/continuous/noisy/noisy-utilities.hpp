@@ -30,8 +30,8 @@ namespace Ariadne {
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 typedef Real ContinuousTimeType;
 
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, bool draw);
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, bool draw);
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
 
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
@@ -46,15 +46,7 @@ inline ApproximateDouble score(ValidatedConstrainedImageSet const& evolve_set) {
     return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }
 
-template<class C> struct Reverse {
-    C const& _c;
-    Reverse(C const& c) :  _c(c) {}
-    typename C::const_reverse_iterator begin() const{ return _c.rbegin(); }
-    typename C::const_reverse_iterator end() const { return _c.rend(); }
-};
-template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
-
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, bool draw) {
+void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     CONCLOG_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
     evolver.configuration().approximations(approximations);
@@ -73,37 +65,28 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
 
     CONCLOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
 
-    if (draw) {
-        CONCLOG_PRINTLN("Plotting...");
-        auto n = ivf.dimension();
-        Box<FloatDPUpperInterval> graphics_box(n);
-        for (auto set: reach_sets) {
-            graphics_box = hull(graphics_box,set.bounding_box());
+    CONCLOG_PRINTLN("Plotting...");
+    auto n = ivf.dimension();
+    Box<FloatDPUpperInterval> graphics_box(n);
+    for (auto set: reach_sets) {
+        graphics_box = hull(graphics_box,set.bounding_box());
+    }
+    for (SizeType i : range(0,n-1)) {
+        for (SizeType j : range(i+1,n)) {
+            Figure fig=Figure(graphics_box,Projection2d(n,i,j));
+            for (auto set : reach_sets) { fig.draw(set); }
+            char num_char[64] = "";
+            if (n > 2) sprintf(num_char,"[%lu,%lu]",i,j);
+            CONCLOG_RUN_AT(1,fig.write((name+num_char).c_str()));
         }
-        for (SizeType i : range(0,n-1)) {
-            for (SizeType j : range(i+1,n)) {
-                Figure fig=Figure(graphics_box,Projection2d(n,i,j));
-                fig.set_line_colour(0.0,0.0,0.0);
-                fig.set_line_style(true);
-                fig.set_fill_colour(0.5,0.5,0.5);
-                fig.draw(initial);
-                fig.set_fill_colour(1.0,0.75,0.5);
-                for (auto set : reverse(reach_sets)) { fig.draw(set); }
-                fig.draw(evolve_set);
-                char num_char[64] = "";
-                if (n > 2) snprintf(num_char,64,"[%lu,%lu]",i,j);
-                fig.write((name+num_char).c_str());
-            }
-        }
-        CONCLOG_PRINTLN("Done.");
     }
 }
 
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, bool draw) {
+void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         CONCLOG_PRINTLN(appro);
-        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,draw);
+        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner);
     }
 }
 
@@ -116,8 +99,6 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     ExactDouble ratio_of_parameters_to_keep=6.0_x;
     double sw_threshold = 1e-8;
     ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
-
-    bool draw = false;
 
     List<InputApproximation> approximations;
     approximations.append(ZeroApproximation());
@@ -135,8 +116,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
-    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,draw);
-    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,draw);
+    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner);
+    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner);
 }
 
 void run_noisy_system(SystemType system) {

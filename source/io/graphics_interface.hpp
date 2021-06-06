@@ -31,6 +31,7 @@
 
 #include "../config.hpp"
 #include "utility/declarations.hpp"
+#include "numeric/numeric.hpp"
 #include "numeric/float_bounds.hpp"
 
 namespace Ariadne {

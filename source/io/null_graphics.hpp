@@ -31,11 +31,9 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_backend_interface.hpp"
-#include "config.hpp"
+#include "io/drawer_interface.hpp"
 
 namespace Ariadne {
-
-#if not(defined(HAVE_CAIRO_H)) and not(defined(HAVE_GNUPLOT_H))
 
 class NullCanvas : public CanvasInterface
 {
@@ -60,11 +58,9 @@ public:
     virtual Void set_fill_opacity(double fo) { }
     virtual Void set_fill_colour(double r, double g, double b) { }
 
-    virtual Void set_3d_palette() { }
-    virtual Void set_2d_palette() { }
-    virtual Void fill3d() { }   
-    virtual Void set_map() { }
-    virtual Void is_std() { }
+    virtual Void set_heat_map(Bool b) { }
+    virtual Void set_colour_palette() { }
+    virtual Void fill_3d() { }
 
     virtual Vector2d scaling() const { return Vector2d(0,0); }
     virtual Box2d bounds() const { return Box2d(0,0,0,0); }
@@ -72,10 +68,15 @@ public:
 
 class NullGraphicsBackend : public GraphicsBackendInterface {
   public:
-    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height) const override { return std::make_shared<NullCanvas>(); }
+    SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const override { return std::make_shared<NullCanvas>(); }
 };
 
-#endif
+class NullDrawer : public DrawerInterface
+{
+  public:
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { }
+    OutputStream& _write(OutputStream& os) const { return os << "NullDrawer()"; }
+};
 
 } // namespace Ariadne
 

@@ -12,6 +12,7 @@
 
 #cmakedefine ARIADNE_ENABLE_STACK_TRACE
 
+#cmakedefine HAVE_YAML_H
 #cmakedefine HAVE_CAIRO_H
 #cmakedefine HAVE_GNUPLOT_H
 

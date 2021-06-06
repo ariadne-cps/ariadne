@@ -17,6 +17,7 @@ Legenda for the issue kind:
 - [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors
 - [#617](https://github.com/ariadne-cps/ariadne/issues/617) (A) Add is_polynomial_in predicate for symbolic expressions
 - [#622](https://github.com/ariadne-cps/ariadne/issues/622) (A) Implement GradedTaylorPicardIterator that avoids initial use of Bounder
+- [#626](https://github.com/ariadne-cps/ariadne/issues/626) (A) Allow 'none' graphics backend or drawer from CLI, to temporarily switch off graphics when desired  
 - [#628](https://github.com/ariadne-cps/ariadne/issues/628) (A) Implement some methods for Polynomial, in particular for vectors thereof  
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates

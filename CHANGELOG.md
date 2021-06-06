@@ -22,6 +22,7 @@ Legenda for the issue kind:
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates
 - [#620](https://github.com/ariadne-cps/ariadne/issues/620) (F) EulerBounder did not reset the bounding domain between refinements to the step size
+- [#631](https://github.com/ariadne-cps/ariadne/issues/631) (F) Conditional disabling of graphics in absence of both Cairo and Gnuplot was incorrect  
 - [#623](https://github.com/ariadne-cps/ariadne/issues/620) (R) Simplify IntegratorInterface with only one flow step, removing flow/flow_to and hiding flow_bounds
 
 ### 2.3

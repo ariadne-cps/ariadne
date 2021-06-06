@@ -42,7 +42,6 @@
 #include "algebra/operations.hpp"
 #include "algebra/differential.hpp"
 
-
 namespace Ariadne {
 
 template<class T> class Array;
@@ -262,9 +261,6 @@ class Polynomial
     template<class XX, class A> friend A evaluate(const MultivariatePolynomial<XX>& p, const Vector<A>& v);
     template<class II, class XX> friend Polynomial<II,XX> compose(const UnivariatePolynomial<XX>& p, const Scalar<Polynomial<II,XX>>& q);
     template<class II, class XX> friend Polynomial<II,XX> compose(const MultivariatePolynomial<XX>& p, const Vector<Polynomial<II,XX>>& q);
-    template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
-    template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
-    template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
     //!@}
 
     Void check() const;
@@ -352,14 +348,26 @@ template<class X> inline X evaluate(const UnivariatePolynomial<X>& p, const Scal
 template<class X> inline X evaluate(const MultivariatePolynomial<X>& p, const Vector<X>& v) {
     return MultivariatePolynomial<X>::_evaluate(p,v); }
 
+template<class X> inline Vector<X> evaluate(Vector<MultivariatePolynomial<X>> const& p, Vector<X> const& v) {
+    Vector<X> r(p.size(),v.zero_element());
+    for (SizeType i=0; i!= p.size(); ++i) r[i] = evaluate(p[i],v);
+    return r;
+}
+
 template<class I, class X> inline Polynomial<I,X> compose(const UnivariatePolynomial<X>& p, const Polynomial<I,X>& q) {
     return UnivariatePolynomial<X>::_compose(p,q); }
 
 template<class I, class X> inline Polynomial<I,X> compose(const MultivariatePolynomial<X>& p, const Vector<Polynomial<I,X>>& q) {
     return MultivariatePolynomial<X>::_compose(p,q); }
 
-template<class I, class X> inline Vector<Polynomial<I,X>> compose(const Vector<Polynomial<I,X>>& p, const Vector<Polynomial<I,X>>& q) {
-    return Polynomial<I,X>::_compose(p,q); }
+template<class I, class X> inline Vector<Polynomial<I,X>> compose(const Vector<MultivariatePolynomial<X>>& p, const Vector<Polynomial<I,X>>& q) {
+    const SizeType rs = p.size();
+    Vector<Polynomial<I,X>> r(rs,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=rs; ++i) {
+        r[i] = compose(p[i],q);
+    }
+    return r;
+}
 
 template<class X, class A> inline A evaluate(const UnivariatePolynomial<X>& p, const Scalar<A>& v) {
     return horner_evaluate(p.expansion(),v); }
@@ -404,29 +412,92 @@ template<class I, class X, class A> Vector<A> evaluate(const Vector<Polynomial<I
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> derivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> antiderivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> truncate(const Vector<Polynomial<I,X>>& p, DegreeType d) {
-    Vector<Polynomial<I,X>> r(p.size());
+    Vector<Polynomial<I,X>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;
 }
 
 template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<Polynomial<I,X>>& p) {
-    Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size());
+    Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size(),p[0].create_zero());
     for(SizeType i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
     return r;
 }
 
+//! \brief Compute the Lie derivative of \a g with respect to the vector field \a f
+template<class I, class X> Vector<Polynomial<I,X>> lie_derivative(Vector<Polynomial<I,X>> const& f, Vector<Polynomial<I,X>> const& g) {
+    const SizeType rs = f.size();
+    Vector<Polynomial<I,X>> r(rs,f[0].create_zero());
+    for (SizeType d=0; d!=rs; ++d) {
+        for (SizeType i=0; i!=rs; ++i) {
+            r[d] += derivative(g[d],i)*f[i];
+        }
+        r[d] += derivative(g[d],rs);
+    }
+    return r;
+}
+
+
+
+//! \brief Compute the flow polynomial from the vector field \a f, with order \a d, using Picard iteration
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_picard_iteration(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f[0].argument_size();
+
+    Vector<Polynomial<I,X>> r(rs,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=rs; ++i) r[i] = Polynomial<I,X>::variable(as,i,dp);
+    auto g = r;
+
+    for (DegreeType i=1; i!=d+1; ++i) {
+        r = truncate(g + antiderivative(compose(f,r),rs),i);
+    }
+
+    Vector<Polynomial<I,X>> ext(as,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=as; ++i) ext[i] = Polynomial<I,X>::variable(as+rs,i,dp);
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
+    return r;
+}
+
+//! \brief Compute the flow polynomial from the vector field \a f, with order \a d, using Lie derivative
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_lie_derivative(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f[0].argument_size();
+
+    auto t = Polynomial<I,X>::variable(as,rs,dp);
+    auto ti = t;
+    Vector<Polynomial<I,X>> g(rs,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=rs; ++i) g[i] = Polynomial<I,X>::variable(as,i,dp);
+    Vector<Polynomial<I,X>> r = g;
+
+    for (DegreeType i=1; i!=d+1; ++i) {
+        g = truncate(lie_derivative(f,g),d-i);
+        r += g*ti*rec(Factorial(i));
+        ti *= t;
+    }
+
+    Vector<Polynomial<I,X>> ext(as,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=as; ++i) ext[i] = Polynomial<I,X>::variable(as+rs,i,dp);
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
+    return r;
+}
+
+//! \brief Compute the flow polynomial from the vector field \a f, with order \a d
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    return flow_polynomial_picard_iteration(f,d);
+}
 
 } // namespace Ariadne
 

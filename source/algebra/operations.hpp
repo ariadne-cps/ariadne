@@ -307,6 +307,13 @@ template<class A, class X> struct DispatchElementaryAlgebraOperations
     : DispatchTranscendentalAlgebraOperations<A,X>, DispatchLatticeAlgebraOperations<A,X> {
 };
 
+struct Factorial {
+    Nat _n;
+    Factorial(Nat n) : _n(n) { }
+    operator FloatDPBounds() { FloatDPBounds r(1,dp); for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+    friend FloatDPBounds rec(Factorial x) { return rec(FloatDPBounds(x)); }
+};
+
 
 } // namespace Ariadne
 

@@ -36,13 +36,6 @@ template<class A> struct IsGradedAlgebra : False { };
 template<class A> concept ANormedAlgebra = IsNormedAlgebra<A>::value;
 template<class A> concept AGradedAlgebra = IsNormedAlgebra<A>::value;
 
-struct Factorial {
-    Nat _n;
-    Factorial(Nat n) : _n(n) { }
-    operator FloatDPBounds() { FloatDPBounds r(1,dp); for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
-    friend FloatDPBounds rec(Factorial x) { return rec(FloatDPBounds(x)); }
-};
-
 template<AGradedAlgebra A> A
 compose(const Series<typename A::NumericType>& x, const A& y)
 {

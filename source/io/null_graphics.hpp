@@ -31,7 +31,7 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_backend_interface.hpp"
-#include "config.hpp"
+#include "io/drawer_interface.hpp"
 
 namespace Ariadne {
 
@@ -69,6 +69,13 @@ public:
 class NullGraphicsBackend : public GraphicsBackendInterface {
   public:
     SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const override { return std::make_shared<NullCanvas>(); }
+};
+
+class NullDrawer : public DrawerInterface
+{
+  public:
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { }
+    OutputStream& _write(OutputStream& os) const { return os << "NullDrawer()"; }
 };
 
 } // namespace Ariadne

@@ -179,21 +179,25 @@ class ConcurrencyArgumentParser : public ValuedArgumentParserBase {
 class DrawerArgumentParser : public ValuedArgumentParserBase {
   public:
     DrawerArgumentParser() : ValuedArgumentParserBase(
-            "d","drawer","Choose the drawer as a <value> in [ box | grid@X | affine@X ] with X a non-negative integer (default: affine@0)") { }
+            "d","drawer","Choose the drawer as a <value> in [ box | grid@X | affine@X | none ] with X a non-negative integer, where none disables drawing (default: affine@0)") { }
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         String value = stream.pop();
-        Drawer drawer = BoxDrawer();
-        if (value != "box") {
-            std::size_t at_pos = value.find('@',0);
-            if (at_pos == std::string::npos) throw std::exception();
-            else {
-                int accuracy = stoi(value.substr(at_pos+1));
-                if (accuracy < 0) throw std::exception();
-                String drawer_name = value.substr(0,at_pos);
-                if (drawer_name == "grid") drawer = GridDrawer((Nat)accuracy);
-                else if (drawer_name == "affine") drawer = AffineDrawer((Nat)accuracy);
-                else throw std::exception();
+        Drawer drawer = NullDrawer();
+        if (value != "none") {
+            if (value == "box") {
+                drawer = BoxDrawer();
+            } else {
+                std::size_t at_pos = value.find('@',0);
+                if (at_pos == std::string::npos) throw std::exception();
+                else {
+                    int accuracy = stoi(value.substr(at_pos+1));
+                    if (accuracy < 0) throw std::exception();
+                    String drawer_name = value.substr(0,at_pos);
+                    if (drawer_name == "grid") drawer = GridDrawer((Nat)accuracy);
+                    else if (drawer_name == "affine") drawer = AffineDrawer((Nat)accuracy);
+                    else throw std::exception();
+                }
             }
         }
         return [drawer]{ GraphicsManager::instance().set_drawer(drawer); };

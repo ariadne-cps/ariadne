@@ -121,6 +121,8 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(not success10)
         Bool success11 = CommandLineInterface::instance().acquire({"", "-d"});
         ARIADNE_TEST_ASSERT(not success11)
+        Bool success12 = CommandLineInterface::instance().acquire({"", "-d", "none"});
+        ARIADNE_TEST_ASSERT(success12)
     }
 
     void test_graphics_parsing() {
@@ -128,12 +130,14 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(success1)
         Bool success2 = CommandLineInterface::instance().acquire({"", "--graphics", "cairo"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"", "-g", "none"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-g", "wrong"});
         ARIADNE_TEST_ASSERT(not success3)
         Bool success4 = CommandLineInterface::instance().acquire({"", "-g", "gnuplot"});
         ARIADNE_TEST_ASSERT(success4)
-        Bool success5 = CommandLineInterface::instance().acquire({"", "-g"});
-        ARIADNE_TEST_ASSERT(not success5)
+        Bool success5 = CommandLineInterface::instance().acquire({"", "-g", "none"});
+        ARIADNE_TEST_ASSERT(success5)
+        Bool success6 = CommandLineInterface::instance().acquire({"", "-g"});
+        ARIADNE_TEST_ASSERT(not success6)
     }
 
     void test_scheduler_parsing() {
@@ -142,7 +146,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(success1)
         Bool success2 = CommandLineInterface::instance().acquire({"", "--scheduler", "immediate"});
         ARIADNE_TEST_ASSERT(success2)
-        Bool success3 = CommandLineInterface::instance().acquire({"", "-s", "none"});
+        Bool success3 = CommandLineInterface::instance().acquire({"", "-s", "wrong"});
         ARIADNE_TEST_ASSERT(not success3)
         Bool success4 = CommandLineInterface::instance().acquire({"", "-s", "blocking"});
         ARIADNE_TEST_ASSERT(success4)

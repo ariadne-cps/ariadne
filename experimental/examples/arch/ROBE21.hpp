@@ -30,8 +30,6 @@ void ROBE21() {
 
     ArchBenchmark benchmark("ROBE21");
 
-    TaskManager::instance().set_concurrency(0);
-
     RealVariable x("x"), y("y"), z("z"), s("s");
     RealConstant alpha("alpha",0.4_dec);
 

@@ -29,6 +29,7 @@
 #include "graphics_manager.hpp"
 #include "gnuplot.hpp"
 #include "cairo.hpp"
+#include "null_graphics.hpp"
 #include "logging.hpp"
 #include "command_line_interface.hpp"
 
@@ -202,17 +203,18 @@ class DrawerArgumentParser : public ValuedArgumentParserBase {
 class GraphicsBackendArgumentParser : public ValuedArgumentParserBase {
   public:
     GraphicsBackendArgumentParser() : ValuedArgumentParserBase(
-            "g","graphics","Choose the graphics backend as a <value> in [ cairo | gnuplot ] (default: cairo)") { }
+            "g","graphics","Choose the graphics backend as a <value> in [ cairo | gnuplot | none ], where none disables writing to file (default: cairo)") { }
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         String val = stream.pop();
         #ifdef HAVE_CAIRO_H
-	if (val == "cairo") return []{ GraphicsManager::instance().set_backend(CairoGraphicsBackend()); };
+	    if (val == "cairo") return []{ GraphicsManager::instance().set_backend(CairoGraphicsBackend()); };
         #endif
         #ifdef HAVE_GNUPLOT_H
-	if (val == "gnuplot") return []{ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
+	    if (val == "gnuplot") return []{ GraphicsManager::instance().set_backend(GnuplotGraphicsBackend()); };
         #endif
-	throw std::exception();
+        if (val == "none") return []{ GraphicsManager::instance().set_backend(NullGraphicsBackend()); };
+	    throw std::exception();
     }
 };
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            CVDP20.cpp
+ *            ROBE21.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2021  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CVDP20.hpp"
+#include "ROBE21.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    CVDP20();
+    ROBE21();
 }

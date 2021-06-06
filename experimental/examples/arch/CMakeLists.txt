@@ -1,9 +1,9 @@
 set(EXAMPLES_EXPERIMENTAL_ARCH
+    ROBE21
     CVDP20
 	LALO20
-	QUAD20
-    LOVO20
-    PRDE20
+    SUTR21
+    LOVO21
     SPRE20
     arch_suite
 )

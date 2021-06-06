@@ -22,22 +22,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "PRDE20.hpp"
+#include "ROBE21.hpp"
 #include "CVDP20.hpp"
 #include "LALO20.hpp"
-#include "QUAD20.hpp"
-#include "LOVO20.hpp"
+#include "LOVO21.hpp"
 #include "SPRE20.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-Int main(Int argc, const char* argv[])
+void ariadne_main()
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    PRDE20();
+    ROBE21();
     CVDP20();
     LALO20();
-    QUAD20();
-    LOVO20();
+    LOVO21();
     SPRE20();
 }

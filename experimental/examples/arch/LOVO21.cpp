@@ -1,5 +1,5 @@
 /***************************************************************************
- *            LOVO20.cpp
+ *            LOVO21.cpp
  *
  *  Copyright  2020  Luca Geretti
  *
@@ -21,12 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "LOVO20.hpp"
+#include "LOVO21.hpp"
+#include "ariadne_main.hpp"
 
-using namespace Ariadne;
-
-Int main(Int argc, const char* argv[])
+void ariadne_main()
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    LOVO20();
+    LOVO21();
 }

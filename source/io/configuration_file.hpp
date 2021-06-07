@@ -43,7 +43,8 @@ class ConfigurationFile {
     }
 
     //! \brief Load the preferences.
-    Void load() const;
+    //! \details Return true in case of successful loading.
+    Bool load() const;
 };
 
 } // namespace Ariadne

@@ -39,7 +39,7 @@ void ariadne_main();
 //! \brief Call to main with proper harness, handling CLI arguments
 int main(int argc, const char* argv[])
 {
-    if (CommandLineInterface::instance().acquire(argc,argv)) {
+    if (ConfigurationFile::instance().load() and CommandLineInterface::instance().acquire(argc,argv)) {
         ariadne_main();
     }
 }

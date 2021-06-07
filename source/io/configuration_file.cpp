@@ -21,21 +21,39 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <iostream>
 #include "config.hpp"
 #include "configuration_file.hpp"
 #include "utility/string.hpp"
+
+#ifdef HAVE_YAML_H
+
+#include "yaml-cpp/yaml.h"
+
+#endif
 
 namespace Ariadne {
 
 static String CONFIGURATION_FILE_NAME = ".ariadne.yml";
 
-Void ConfigurationFile::load() const {
+Bool ConfigurationFile::load() const {
 
+    #ifdef HAVE_YAML_H
+
+    const char *homedir = getpwuid(getuid())->pw_dir;
+
+    std::cout << homedir << std::endl;
+
+    YAML::Node config = YAML::LoadFile(homedir+CONFIGURATION_FILE_NAME);
+    //auto verbosity = config["verbosity"].as<SizeType>();
+
+    #endif
+
+    return true;
 }
-
-#ifdef HAVE_YAML_H
-
-#endif // HAVE_YAML_H
 
 } // namespace Ariadne
 

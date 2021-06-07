@@ -187,7 +187,7 @@ endif()
 
 if(YAML_FOUND)
     target_link_libraries(ariadne ${YAML_LIBRARIES})
-    target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
+    target_link_libraries(ariadne-kernel ${YAML_LIBRARIES})
 endif()
 
 if(CAIRO_FOUND)

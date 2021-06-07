@@ -24,11 +24,11 @@
 #ifndef ARIADNE_GNUPLOT_HPP
 #define ARIADNE_GNUPLOT_HPP
 
+#include "config.hpp"
+
 #ifdef HAVE_GNUPLOT_H
 
-#include "config.hpp"
 #include "io/figure.hpp"
-
 #include "io/gnuplot-iostream.hpp"
 
 namespace Ariadne {

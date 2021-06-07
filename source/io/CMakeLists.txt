@@ -8,6 +8,7 @@ add_library(${LIBRARY_NAME} OBJECT
     graphics_manager.cpp
     drawer.cpp
     command_line_interface.cpp
+    configuration_file.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

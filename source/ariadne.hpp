@@ -80,6 +80,7 @@ namespace Ariadne {
 #include "io/cairo.hpp"
 #include "io/gnuplot.hpp"
 #include "io/command_line_interface.hpp"
+#include "io/configuration_file.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
 #endif

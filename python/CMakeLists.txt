@@ -34,7 +34,7 @@ if(PYTHON3_FOUND)
             $<TARGET_OBJECTS:pyariadne-extra-submodule-obj>
             )
     set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "pyariadne" SUFFIX ".so")
-    target_link_libraries (pyariadne PUBLIC ariadne ${GCOV_LIBRARIES} PRIVATE pybind11::module)
+    target_link_libraries (pyariadne PUBLIC ariadne PRIVATE pybind11::module)
 
     add_library(pyariadne-numeric MODULE
             $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
@@ -43,7 +43,7 @@ if(PYTHON3_FOUND)
             $<TARGET_OBJECTS:ariadne-numeric>
             )
     set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
-    target_link_libraries (pyariadne-numeric PUBLIC ${GCOV_LIBRARIES} ${MPFR_LIBRARIES} ${GMP_LIBRARIES} PRIVATE pybind11::module)
+    target_link_libraries (pyariadne-numeric PUBLIC ${MPFR_LIBRARIES} ${GMP_LIBRARIES} PRIVATE pybind11::module)
 
     add_library(pyariadne-algebra MODULE
             $<TARGET_OBJECTS:pyariadne-algebra-module-obj>
@@ -51,7 +51,7 @@ if(PYTHON3_FOUND)
             $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
             )
     set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
-    target_link_libraries (pyariadne-algebra PUBLIC ${GCOV_LIBRARIES} ariadne PRIVATE pybind11::module)
+    target_link_libraries (pyariadne-algebra PUBLIC ariadne PRIVATE pybind11::module)
 
     set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}"
             CACHE STRING "Install destination for Python targets")

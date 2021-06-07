@@ -25,12 +25,12 @@
 #ifndef ARIADNE_CAIRO_HPP
 #define ARIADNE_CAIRO_HPP
 
+#include "config.hpp"
+
 #ifdef HAVE_CAIRO_H
 
-#include "config.hpp"
-#include "io/figure.hpp"
-
 #include <cairo/cairo.h>
+#include "io/figure.hpp"
 
 namespace Ariadne {
 

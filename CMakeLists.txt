@@ -121,6 +121,10 @@ if(GNUPLOT_FOUND)
     set(HAVE_GNUPLOT_H ON)
 endif()
 
+if(NOT CAIRO_FOUND AND NOT GNUPLOT_FOUND)
+    message(STATUS "No Cairo or Gnuplot backend support found: figures can't be written to file.")
+endif()
+
 add_custom_target(everything)
 add_custom_target(tests)
 

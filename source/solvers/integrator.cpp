@@ -97,11 +97,15 @@ FlowStepModelType
 IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
 {
     StepSizeType& h=hmax;
+    StepSizeType hprev=h*1.5_dy;
     while(true) {
         try {
             return flow_step(vf,dx,h,dx);
         } catch(const FlowTimeStepException& e) {
-            h=hlf(h);
+            StepSizeType hnew=hlf(hprev);
+            hprev=h;
+            h=StepSizeType(hnew.get_d());
+            ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
         }
     }
 }
@@ -145,11 +149,15 @@ BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, 
     StepSizeType& h=hmax;
     UpperBoxType bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
+    StepSizeType hprev=h*1.5_dy;
     while(true) {
         try {
             return this->flow_step(vf,dx,h,bx);
         } catch(const FlowTimeStepException& e) {
-            h=hlf(h);
+            StepSizeType hnew=hlf(hprev);
+            hprev=h;
+            h=StepSizeType(hnew.get_d());
+            ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
         }
     }
 }

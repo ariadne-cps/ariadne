@@ -19,6 +19,7 @@ Legenda for the issue kind:
 - [#622](https://github.com/ariadne-cps/ariadne/issues/622) (A) Implement GradedTaylorPicardIterator that avoids initial use of Bounder
 - [#626](https://github.com/ariadne-cps/ariadne/issues/626) (A) Allow 'none' graphics backend or drawer from CLI, to temporarily switch off graphics when desired  
 - [#628](https://github.com/ariadne-cps/ariadne/issues/628) (A) Implement some methods for Polynomial, in particular for vectors thereof  
+- [#636](https://github.com/ariadne-cps/ariadne/issues/636) (A) Add Python bindings for hybrid automaton target method  
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates
 - [#620](https://github.com/ariadne-cps/ariadne/issues/620) (F) EulerBounder did not reset the bounding domain between refinements to the step size

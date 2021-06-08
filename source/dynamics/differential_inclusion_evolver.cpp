@@ -173,7 +173,7 @@ DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& sys
     , _reconditioner(reconditioner)
     , _configuration(new ConfigurationType())
 {
-    assert(system.inputs().size() > 0);
+    ARIADNE_PRECONDITION(system.inputs().size() > 0);
     CONCLOG_SCOPE_CREATE;
 }
 

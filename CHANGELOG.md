@@ -14,13 +14,15 @@ Legenda for the issue kind:
 
 *Date:   /  /2021*
 
+- [#357](https://github.com/ariadne-cps/ariadne/issues/357) (N) Introduce a TaylorSeriesBounderIntegrator, that identifies the bounds from the expansion without resorting to a Bounder initially
 - [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors
 - [#617](https://github.com/ariadne-cps/ariadne/issues/617) (A) Add is_polynomial_in predicate for symbolic expressions
 - [#622](https://github.com/ariadne-cps/ariadne/issues/622) (A) Implement GradedTaylorPicardIterator that avoids initial use of Bounder
 - [#626](https://github.com/ariadne-cps/ariadne/issues/626) (A) Allow 'none' graphics backend or drawer from CLI, to temporarily switch off graphics when desired  
-- [#628](https://github.com/ariadne-cps/ariadne/issues/628) (A) Implement some methods for Polynomial, in particular for vectors thereof  
+- [#628](https://github.com/ariadne-cps/ariadne/issues/628) (A) Implement some methods for Polynomial, in particular for vectors thereof
 - [#636](https://github.com/ariadne-cps/ariadne/issues/636) (A) Add Python bindings for hybrid automaton target method  
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
+- [#639](https://github.com/ariadne-cps/ariadne/issues/639) (C) Use a finer (3/4) refinement strategy for the step size when computing a flow step based on an accuracy threshold
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates
 - [#620](https://github.com/ariadne-cps/ariadne/issues/620) (F) EulerBounder did not reset the bounding domain between refinements to the step size
 - [#631](https://github.com/ariadne-cps/ariadne/issues/631) (F) Conditional disabling of graphics in absence of both Cairo and Gnuplot was incorrect  

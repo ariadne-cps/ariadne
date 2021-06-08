@@ -267,7 +267,11 @@ Int main(Int argc, const char* argv[]) {
     ARIADNE_TEST_CLASS("GradedTaylorPicardIntegrator",TestIntegrator(unbounded_taylor_picard_integrator));
 
     TaylorSeriesIntegrator taylor_series_integrator(sweeper, lipschitz_tolerance=0.5_x, order=6);
-    ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator));
+    ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator))
+
+    TaylorSeriesBounderIntegrator taylor_series_bounder_integrator(
+            step_maximum_error=1e-6,sweeper,lipschitz_tolerance=0.5_x,order=6);
+    ARIADNE_TEST_CLASS("TaylorSeriesBounderIntegrator",TestIntegrator(taylor_series_bounder_integrator));
 
     GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
             step_maximum_error=1e-7, sweeper, lipschitz_tolerance=0.5_x,

@@ -118,6 +118,9 @@ class ExactDouble {
     operator ExactNumber() const;
     friend ExactDouble nul(ExactDouble x) { return ExactDouble(0.0); }
     friend ExactDouble abs(ExactDouble x) { return ExactDouble(std::abs(x._d)); }
+    static ExactDouble inf() { return ExactDouble(std::numeric_limits<double>::infinity()); }
+    static ExactDouble nan() { return ExactDouble(std::numeric_limits<double>::quiet_NaN()); }
+    friend Bool is_finite(ExactDouble x) { return std::isfinite(x._d); }
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }
     friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._d); }
     friend ApproximateDouble operator+(ApproximateDouble x1, ApproximateDouble x2);

@@ -310,7 +310,37 @@ class TaylorSeriesIntegrator
               const UpperBoxType& bounding_box) const;
 
     using BoundedIntegratorBase::flow_step;
+
+  private:
 };
+
+//! \brief An integrator which computes the Taylor series of the flow function with remainder term.
+class TaylorSeriesBounderIntegrator
+    : public TaylorSeriesIntegrator
+{
+  public:
+    //! \brief Constructor.
+    TaylorSeriesBounderIntegrator(StepMaximumError err, Order order);
+
+    //! \brief Constructor.
+    TaylorSeriesBounderIntegrator(StepMaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip,
+                                   Order order);
+
+    virtual TaylorSeriesBounderIntegrator* clone() const { return new TaylorSeriesBounderIntegrator(*this); }
+    virtual Void _write(OutputStream& os) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              StepSizeType& suggested_time_step) const;
+
+    using TaylorSeriesIntegrator::flow_step;
+
+  private:
+    ExactDouble _step_maximum_error;
+};
+
+
 
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
@@ -377,9 +407,6 @@ class GradedTaylorSeriesIntegrator
               const UpperBoxType& bounding_box) const;
 
     using BoundedIntegratorBase::flow_step;
-
-  private:
-
 };
 
 

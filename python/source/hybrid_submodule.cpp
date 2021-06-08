@@ -321,6 +321,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("dynamic_function", &HybridAutomaton::dynamic_function);
     hybrid_automaton_class.def("guard_function", &HybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &HybridAutomaton::reset_function);
+    hybrid_automaton_class.def("target", &HybridAutomaton::target);
     hybrid_automaton_class.def("new_mode",overload_cast<List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);

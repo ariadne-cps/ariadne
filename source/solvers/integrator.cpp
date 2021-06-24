@@ -1097,11 +1097,13 @@ AffineIntegrator::AffineIntegrator(SpacialOrder spacial_order_, TemporalOrder te
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& dom) const
 {
-    Vector<ValidatedDifferential> dx=
-        ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,
-                                         join(dom,zero));
-    dx[dom.size()]=zero;
+    DegreeType const deg = this->_spacial_order+this->_temporal_order;
+    Vector<ValidatedDifferential> dx(f.result_size(),ValidatedDifferential(f.result_size()+1,deg,zero));
+    for (SizeType i=0; i<f.result_size(); ++i) {
+        dx[i]=ValidatedDifferential::variable(f.result_size()+1,deg,dom[i],i);
+    }
     Vector<ValidatedDifferential> dphi = dx;
+
     for(DegreeType i=0; i!=_temporal_order; ++i) {
         dphi = antiderivative(f.evaluate(dphi),dom.size())+dx;
     }

@@ -424,18 +424,19 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
 
 DifferentialInclusionEvolverConfiguration::DifferentialInclusionEvolverConfiguration()
 {
-    this->maximum_step_size(1.0_x);
-    this->maximum_enclosure_radius(100.0_x);
-    enable_parameter_reduction(true);
-    approximations({ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()});
+    this->set_maximum_step_size(1.0_x);
+    this->set_maximum_enclosure_radius(100.0_x);
+    set_enable_parameter_reduction(true);
+    set_approximations({ZeroApproximation(), ConstantApproximation(), AffineApproximation(), SinusoidalApproximation(),
+                        PiecewiseApproximation()});
 }
 
 
 OutputStream&
 DifferentialInclusionEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "DifferentialInclusionEvolverConfiguration"
-       << ",\n  maximum_step_size=" << maximum_step_size()
+    os << "DifferentialInclusionEvolverConfiguration("
+       << "\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_parameter_reduction=" << enable_parameter_reduction()
        << ",\n  approximations=" << approximations()

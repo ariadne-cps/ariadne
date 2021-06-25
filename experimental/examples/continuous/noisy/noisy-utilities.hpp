@@ -49,8 +49,8 @@ inline ApproximateDouble score(ValidatedConstrainedImageSet const& evolve_set) {
 void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     CONCLOG_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
-    evolver.configuration().approximations(approximations);
-    evolver.configuration().maximum_step_size(step);
+    evolver.configuration().set_approximations(approximations);
+    evolver.configuration().set_maximum_step_size(step);
 
     Stopwatch<Milliseconds> sw;
 

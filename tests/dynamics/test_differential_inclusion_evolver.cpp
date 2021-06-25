@@ -45,8 +45,8 @@ class TestDifferentialInclusionEvolver {
                          ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper,
                         IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
         auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
-        evolver.configuration().approximations(approximations);
-        evolver.configuration().maximum_step_size(step);
+        evolver.configuration().set_approximations(approximations);
+        evolver.configuration().set_maximum_step_size(step);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
         List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial, evolution_time);

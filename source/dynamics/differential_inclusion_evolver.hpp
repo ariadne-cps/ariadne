@@ -180,16 +180,16 @@ class DifferentialInclusionEvolverConfiguration : public ConfigurationInterface
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const Bool& enable_parameter_reduction() const { return _enable_parameter_reduction; }
-    Void enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }
+    Void set_enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }
 
     List<InputApproximation> const& approximations() const { return _approximations; }
-    Void approximations(List<InputApproximation> const& value) { assert(value.size()>0); _approximations = value; }
+    Void set_approximations(List<InputApproximation> const& value) { assert(value.size() > 0); _approximations = value; }
 
   public:
 

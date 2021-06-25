@@ -189,16 +189,18 @@ Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultiv
     }
 }
 
-List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
+List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::reach(RealVariablesBox const& initial, Real const& tmax) {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"System: "<<_system);
     CONCLOG_PRINTLN_AT(1,"Initial: "<<initial);
+
+    auto initial_box = initial_ranges_to_box(initial);
 
     StepSizeType hsug(_configuration->maximum_step_size());
 
     EulerBounder bounder;
 
-    ValidatedVectorMultivariateFunctionPatch evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial,this->_sweeper);
+    ValidatedVectorMultivariateFunctionPatch evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial_box,this->_sweeper);
 
     TimeStepType t;
 

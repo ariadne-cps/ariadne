@@ -30,8 +30,8 @@ namespace Ariadne {
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 typedef Real ContinuousTimeType;
 
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
+void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
+void run_each_approximation(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
 
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
@@ -46,7 +46,7 @@ inline ApproximateDouble score(ValidatedConstrainedImageSet const& evolve_set) {
     return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }
 
-void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
+void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     CONCLOG_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
     evolver.configuration().set_approximations(approximations);
@@ -82,7 +82,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
     }
 }
 
-void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
+void run_each_approximation(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         CONCLOG_PRINTLN(appro);
@@ -116,8 +116,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
-    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner);
-    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner);
+    run_single(name,ivf,initial,evolution_time,step,approximations,sweeper,integrator,reconditioner);
+    //run_each_approximation(name,ivf,initial,evolution_time,step,approximations,sweeper,integrator,reconditioner);
 }
 
 void run_noisy_system(SystemType system) {

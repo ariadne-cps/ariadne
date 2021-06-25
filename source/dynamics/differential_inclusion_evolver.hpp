@@ -67,8 +67,6 @@ using SweeperDP = Sweeper<FloatDP>;
 
 using TimeStepType = Dyadic;
 
-BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges);
-
 FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
 class InclusionEvolverState;
@@ -143,7 +141,7 @@ class DifferentialInclusionEvolver {
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
   public:
-    List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& initial, Real const& T);
+    List<ValidatedVectorMultivariateFunctionPatch> reach(RealVariablesBox const& initial, Real const& T);
   private:
     Void _recondition_and_update(ValidatedVectorMultivariateFunctionPatch& function, InclusionEvolverState& state);
 };

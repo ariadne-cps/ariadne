@@ -128,27 +128,6 @@ DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynami
     _transform_and_assign(make_function(spc,Vector<RealExpression>(right_hand_sides(dynamics))),input_bounds_to_domain(inputs));
 }
 
-DifferentialInclusion::DifferentialInclusion(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
-{
-    if (function.argument_size() != function.result_size()+inputs.size())
-        ARIADNE_THROW(FunctionArgumentsMismatchException,"DifferentialInclusion(function,inputs) with function="<<function<<" and inputs="<<inputs,
-                "Incompatible inputs size (" << inputs.size() << ") with the provided function (R^" << function.argument_size() << " -> R^" << function.result_size() << ")");
-
-    if (dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer()) == nullptr)
-        ARIADNE_THROW(NotFormulaFunctionException,"DifferentialInclusion of EffectiveVectorMultivariateFunction","The function must be constructed from a Formula at the moment.");
-
-    List<Identifier> variable_names;
-    for (auto i : range(0,function.result_size())) {
-        std::stringstream strstr;
-        strstr << "x" << std::to_string(i);
-        variable_names.append(strstr.str());
-    }
-    _variable_names = variable_names;
-
-    _transform_and_assign(function,inputs);
-}
-
-
 RealSpace DifferentialInclusion::state_space() const
 {
     return real_space(this->_variable_names);

@@ -47,11 +47,6 @@ class UnusedInputException : public std::runtime_error {
     UnusedInputException(const String& str) : std::runtime_error(str) { }
 };
 
-class FunctionArgumentsMismatchException : public std::runtime_error {
-  public:
-    FunctionArgumentsMismatchException(const String& str) : std::runtime_error(str) { }
-};
-
 class Enclosure;
 class InclusionVectorFieldEvolver;
 
@@ -71,8 +66,6 @@ class DifferentialInclusion
   public:
     //! \brief Construct from expressions with dotted \a dynamics and a given range for the \a inputs.
     DifferentialInclusion(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);
-    //! \brief Construct from a \a function for the dynamics and a given range for the \a inputs.
-    DifferentialInclusion(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
     virtual ~DifferentialInclusion() = default;
     virtual DifferentialInclusion* clone() const { return new DifferentialInclusion(*this); }
 

@@ -316,7 +316,6 @@ class InclusionIntegratorInterface {
     virtual Nat num_params_per_input() const = 0;
     virtual List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
     virtual ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const = 0;
-
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorInterface& approximator) { approximator.write(os); return os; }
 };
 
@@ -335,6 +334,7 @@ class InclusionIntegratorImpl : public InclusionIntegratorInterface {
     const Nat _num_params_per_input;
   public:
     virtual Void write(OutputStream& os) const override { os << A(); }
+
     virtual List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const override;
     virtual ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const override;
 

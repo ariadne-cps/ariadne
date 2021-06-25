@@ -282,6 +282,7 @@ InclusionIntegratorImpl<A>::operator<(const InclusionIntegratorInterface& rhs) c
 template<class A> List<ValidatedVectorMultivariateFunctionPatch>
 InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
     CONCLOG_SCOPE_CREATE;
+
     TimeStepType new_t = lower_bound(t+h);
 
     Interval<TimeStepType> domt(t,new_t);
@@ -511,8 +512,6 @@ InclusionIntegratorImpl<PiecewiseApproximation>::reach(BoxDomainType const& domx
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
 
-    result.append(intermediate_reach);
-
     auto intermediate_evolve=this->evolve(intermediate_reach,intermediate_t);
 
     auto domx_second = cast_exact_box(intermediate_evolve.range());
@@ -524,9 +523,8 @@ InclusionIntegratorImpl<PiecewiseApproximation>::reach(BoxDomainType const& domx
     auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);
 
-    result.append(this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t));
-
-    return result;
+    // The reach set is only the second part, but this is ok since we can't use this reach set except for construction of the evolve set
+    return this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
 }
 
 } // namespace Ariadne;

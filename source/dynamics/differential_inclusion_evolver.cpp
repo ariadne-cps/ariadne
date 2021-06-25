@@ -116,10 +116,6 @@ class InclusionEvolverState {
         _increase_optima_count(best);
     }
 
-    Void append_to_schedule(Nat const& step, InclusionIntegrator const& approximator) {
-        _schedule.push_back(ScheduledApproximator(step,approximator));
-    }
-
     List<InclusionIntegrator> approximators_to_use() const {
         List<InclusionIntegrator> result;
         for (auto i = _schedule.size(); i > 0; --i) {
@@ -225,7 +221,7 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
         auto approximators_to_use = state.approximators_to_use();
 
         CONCLOG_PRINTLN_AT(2,"approximators to use="<<approximators_to_use);
-        
+
         auto domx = cast_exact_box(evolve_function.range());
 
         UpperBoxType B;
@@ -263,19 +259,17 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
         state.update_with_best(best);
 
-        reach_functions = best_reach_functions;
         evolve_function = best_evolve_function;
 
         CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 
-        result.concatenate(reach_functions);
+        result.push_back(best_reach_functions.at(0));
 
         CONCLOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
 
         state.next_step();
         t=new_t;
         indicator.update_current(t.get_d());
-
         CONCLOG_PRINTLN_AT(2,"updated schedule: " << state.schedule());
     }
 
@@ -347,7 +341,6 @@ ValidatedVectorMultivariateFunctionPatch LohnerReconditioner::incorporate_errors
 Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionPatch& f) const {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("f="<<f);
-
     auto m=f.argument_size();
     auto n=f.result_size();
 
@@ -374,7 +367,6 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
     }
 
     CONCLOG_PRINTLN_AT(1,"C"<<C);
-
     Array<IndexedFloatDPError> Ce(m);
     for (auto j : range(m)) {
         Ce[j].index = j;

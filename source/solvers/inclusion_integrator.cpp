@@ -258,29 +258,29 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
     return process(norms,h);
 }
 
-InclusionIntegratorHandle
+InclusionIntegrator
 InclusionIntegratorFactory::create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, InputApproximation const& approximation) const {
-    if (approximation.handles(ZeroApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<ZeroApproximation>(f,inputs,_integrator)));
-    if (approximation.handles(ConstantApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<ConstantApproximation>(f,inputs,_integrator)));
-    if (approximation.handles(AffineApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<AffineApproximation>(f,inputs,_integrator)));
-    if (approximation.handles(SinusoidalApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<SinusoidalApproximation>(f,inputs,_integrator)));
-    if (approximation.handles(PiecewiseApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<PiecewiseApproximation>(f,inputs,_integrator)));
+    if (approximation.handles(ZeroApproximation())) return InclusionIntegrator(new InclusionIntegratorImpl<ZeroApproximation>(f, inputs, _integrator));
+    if (approximation.handles(ConstantApproximation())) return InclusionIntegrator(new InclusionIntegratorImpl<ConstantApproximation>(f, inputs, _integrator));
+    if (approximation.handles(AffineApproximation())) return InclusionIntegrator(new InclusionIntegratorImpl<AffineApproximation>(f, inputs, _integrator));
+    if (approximation.handles(SinusoidalApproximation())) return InclusionIntegrator(new InclusionIntegratorImpl<SinusoidalApproximation>(f, inputs, _integrator));
+    if (approximation.handles(PiecewiseApproximation())) return InclusionIntegrator(new InclusionIntegratorImpl<PiecewiseApproximation>(f, inputs, _integrator));
     ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation);
 }
 
 
 template<class A> Bool
-InclusionIntegrator<A>::operator==(const InclusionIntegratorInterface& rhs) const {
-    return instance_of<InclusionIntegrator<A>>(&rhs);
+InclusionIntegratorImpl<A>::operator==(const InclusionIntegratorInterface& rhs) const {
+    return instance_of<InclusionIntegratorImpl<A>>(&rhs);
 }
 
 template<class A> Bool
-InclusionIntegrator<A>::operator<(const InclusionIntegratorInterface& rhs) const {
+InclusionIntegratorImpl<A>::operator<(const InclusionIntegratorInterface& rhs) const {
     return this->index() < rhs.index();
 }
 
 template<class A> List<ValidatedVectorMultivariateFunctionPatch>
-InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
     CONCLOG_SCOPE_CREATE;
     TimeStepType new_t = lower_bound(t+h);
 
@@ -303,7 +303,7 @@ InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivar
     return result;
 }
 
-template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegratorImpl<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -317,7 +317,7 @@ template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrato
     return result;
 }
 
-template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegrator<A>::build_secondhalf_piecewise_reach_function(
+template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegratorImpl<A>::build_secondhalf_piecewise_reach_function(
         ValidatedVectorMultivariateFunctionPatch const& evolve_function, ValidatedVectorMultivariateFunctionPatch const& Phi, TimeStepType const& t,
         TimeStepType const& new_t) const {
 
@@ -347,7 +347,7 @@ template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegrator<A
     return compose(Phi,join(ef,tf,bf));
 }
 
-template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegrator<A>::build_reach_function(
+template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegratorImpl<A>::build_reach_function(
         ValidatedVectorMultivariateFunctionPatch const& evolve_function, ValidatedVectorMultivariateFunctionPatch const& Phi, TimeStepType const& t,
         TimeStepType const& new_t) const {
 
@@ -377,7 +377,7 @@ template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegrator<A
     return compose(Phi,join(ef,tf,bf));
 }
 
-template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegrator<A>::evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const {
+template<class A> ValidatedVectorMultivariateFunctionPatch InclusionIntegratorImpl<A>::evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const {
     return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
@@ -408,7 +408,7 @@ EffectiveVectorMultivariateFunction substitute_v_with_w(EffectiveVectorMultivari
     return compose(F,substitution);
 }
 
-template<class A> BoxDomainType InclusionIntegrator<A>::build_parameter_domain(BoxDomainType const& V) const {
+template<class A> BoxDomainType InclusionIntegratorImpl<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
     for (SizeType i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
@@ -485,7 +485,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Piecewi
 }
 
 template<> List<ValidatedVectorMultivariateFunctionPatch>
-InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+InclusionIntegratorImpl<PiecewiseApproximation>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
     CONCLOG_SCOPE_CREATE;
 
     List<ValidatedVectorMultivariateFunctionPatch> result;

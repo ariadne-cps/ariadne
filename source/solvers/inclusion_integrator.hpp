@@ -258,14 +258,14 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind
 
 template<class A> Vector<EffectiveScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m);
 
-class InclusionIntegratorHandle;
+class InclusionIntegrator;
 class InclusionIntegratorInterface;
 
 class InclusionIntegratorFactory {
     SharedPointer<IntegratorInterface> _integrator;
 public:
     InclusionIntegratorFactory(IntegratorInterface const& integrator) : _integrator(integrator.clone()) { }
-    InclusionIntegratorHandle create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, InputApproximation const& approximation) const;
+    InclusionIntegrator create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, InputApproximation const& approximation) const;
     InclusionIntegratorFactory* clone() const { return new InclusionIntegratorFactory(*this); }
 };
 
@@ -322,14 +322,14 @@ class InclusionIntegratorInterface {
 
 
 template<class A>
-class InclusionIntegrator : public InclusionIntegratorInterface {
+class InclusionIntegratorImpl : public InclusionIntegratorInterface {
     friend class InclusionIntegratorFactory;
   protected:
     EffectiveVectorMultivariateFunction const& _f;
     BoxDomainType const& _inputs;
     SharedPointer<IntegratorInterface> _integrator;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
-    InclusionIntegrator(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, SharedPointer<IntegratorInterface> const& integrator) :
+    InclusionIntegratorImpl(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, SharedPointer<IntegratorInterface> const& integrator) :
         _f(f), _inputs(inputs), _integrator(integrator), _processor(ApproximationErrorProcessorFactory<A>().create(f,inputs)), _num_params_per_input(const_num_params_per_input<A>()) { }
   private:
     const Nat _num_params_per_input;
@@ -345,7 +345,7 @@ class InclusionIntegrator : public InclusionIntegratorInterface {
 
     virtual Nat num_params_per_input() const override { return _num_params_per_input; }
 
-    virtual ~InclusionIntegrator() = default;
+    virtual ~InclusionIntegratorImpl() = default;
   private:
     Vector<ErrorType> compute_errors(StepSizeType const& h, UpperBoxType const& B) const { return _processor->process(PositiveFloatDP(h,DoublePrecision()),B); };
     BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
@@ -354,34 +354,25 @@ class InclusionIntegrator : public InclusionIntegratorInterface {
     Vector<EffectiveScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
 };
 
-
-class InclusionIntegratorHandle {
-    friend class InclusionIntegratorFactory;
-  private:
-    SharedPointer<InclusionIntegratorInterface> _impl;
-    InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface> const& other) : _impl(other) { }
+class InclusionIntegrator : public Handle<const InclusionIntegratorInterface> {
   public:
-    InclusionIntegratorHandle(InclusionIntegratorHandle const& other) : _impl(other._impl) { }
-    InclusionIntegratorHandle& operator=(InclusionIntegratorHandle const& other) { _impl = other._impl; return *this; }
+    using Handle<const InclusionIntegratorInterface>::Handle;
+    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
 
-    friend Bool operator==(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
-        return lhs._impl->operator==(*rhs._impl); }
-    friend Bool operator<(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
-        return lhs._impl->operator<(*rhs._impl); }
+    friend Bool operator==(const InclusionIntegrator& lhs, const InclusionIntegrator& rhs) {
+        return lhs._ptr->operator==(*rhs._ptr); }
+    friend Bool operator<(const InclusionIntegrator& lhs, const InclusionIntegrator& rhs) {
+        return lhs._ptr->operator<(*rhs._ptr); }
 
-    template<class A> Bool handles(A const& a) const { return instance_of<A>(&*_impl); }
+    virtual Nat num_params_per_input() const { return _ptr->num_params_per_input(); }
 
-    virtual Nat num_params_per_input() const { return _impl->num_params_per_input(); }
+    friend std::ostream& operator<<(std::ostream& os, const InclusionIntegrator& approximator) { os << *approximator._ptr; return os; }
 
-    operator InclusionIntegratorInterface const& () const { return *_impl; }
-    InclusionIntegratorHandle* clone() const { return new InclusionIntegratorHandle(*this); }
+    operator InclusionIntegratorInterface const& () const { return *_ptr; }
+    InclusionIntegrator* clone() const { return new InclusionIntegrator(*this); }
 
-    friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorHandle& approximator) { os << *approximator._impl; return os; }
-
-    List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _impl->reach(D,evolve_function,B,t,h); }
-    ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const { return _impl->evolve(reach_function,t); }
-  public:
-    virtual ~InclusionIntegratorHandle() = default;
+    List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _ptr->reach(D,evolve_function,B,t,h); }
+    ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const { return _ptr->evolve(reach_function,t); }
 };
 
 

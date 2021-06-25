@@ -125,6 +125,7 @@ class DifferentialInclusionEvolver {
   public:
     typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
     typedef DifferentialInclusion SystemType;
+    typedef SystemType::EnclosureType EnclosureType;
   protected:
     SystemType _system;
     SweeperDP _sweeper;

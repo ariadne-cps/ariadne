@@ -41,9 +41,8 @@ template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& l
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }
 
-inline ApproximateDouble score(ValidatedConstrainedImageSet const& evolve_set) {
-    auto bbx = evolve_set.bounding_box();
-    return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
+inline ApproximateDouble score(ListSet<LabelledEnclosure> const& bbx) {
+    return 1.0/std::pow(volume(bbx.bounding_box().euclidean_set()).get_d(),1.0/bbx.bounding_box().dimension());
 }
 
 void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
@@ -53,33 +52,32 @@ void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox 
     evolver.configuration().set_maximum_step_size(step);
 
     Stopwatch<Milliseconds> sw;
-
-    List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial,evolution_time);
+    CONCLOG_PRINTLN("Evolving...");
+    auto orbit = evolver.orbit(initial,evolution_time);
+    CONCLOG_PRINTLN("Done.")
     sw.click();
 
-    List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionPatch const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
-    auto final_set = flow_functions.back();
-    ValidatedVectorMultivariateFunctionPatch evolve_function =
-        partial_evaluate(final_set,final_set.result_size(),static_cast<ExactNumber>(final_set.domain()[final_set.result_size()].upper_bound()));
-    auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
-
-    CONCLOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
+    CONCLOG_PRINTLN("Score: " << score(orbit.final()) << ", time: " << sw.elapsed_seconds() << " s");
 
     CONCLOG_PRINTLN("Plotting...");
     auto n = ivf.dimension();
-    Box<FloatDPUpperInterval> graphics_box(n);
-    for (auto set: reach_sets) {
-        graphics_box = hull(graphics_box,set.bounding_box());
+    DifferentialInclusion::EnclosureType::BoundingBoxType::EuclideanSetType graphics_box(n);
+    for (auto set: orbit.reach()) {
+        graphics_box = hull(graphics_box,set.euclidean_set().bounding_box());
     }
-    for (SizeType i : range(0,n-1)) {
-        for (SizeType j : range(i+1,n)) {
-            Figure fig=Figure(graphics_box,Projection2d(n,i,j));
-            for (auto set : reach_sets) { fig.draw(set); }
+    for (SizeType xi = 0; xi < n; ++xi) {
+        auto x = ivf.state_space()[xi];
+        for (SizeType yi = xi+1; yi < n; ++yi) {
+            auto y = ivf.state_space()[yi];
+            LabelledFigure fig(Axes2d(graphics_box[xi].lower_bound().get_d(),x,graphics_box[xi].upper_bound().get_d(),
+                                      graphics_box[yi].lower_bound().get_d(),y,graphics_box[yi].upper_bound().get_d()));
+            fig.draw(orbit);
             char num_char[64] = "";
-            if (n > 2) sprintf(num_char,"[%lu,%lu]",i,j);
-            CONCLOG_RUN_AT(1,fig.write((name+num_char).c_str()));
+            if (n > 2) sprintf(num_char,"[%s,%s]",x.name().c_str(),y.name().c_str());
+            fig.write((name+num_char).c_str());
         }
     }
+    CONCLOG_PRINTLN("Done.")
 }
 
 void run_each_approximation(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {

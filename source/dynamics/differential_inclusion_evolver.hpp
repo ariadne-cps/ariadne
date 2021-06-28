@@ -70,6 +70,7 @@ using TimeStepType = Dyadic;
 FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
 class InclusionEvolverState;
+template<class T> class Orbit;
 
 class ReconditionerInterface {
   public:
@@ -126,6 +127,7 @@ class DifferentialInclusionEvolver {
     typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
     typedef DifferentialInclusion SystemType;
     typedef SystemType::EnclosureType EnclosureType;
+    typedef Orbit<EnclosureType> OrbitType;
   protected:
     SystemType _system;
     SweeperDP _sweeper;
@@ -142,7 +144,7 @@ class DifferentialInclusionEvolver {
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
   public:
-    List<ValidatedVectorMultivariateFunctionPatch> reach(RealVariablesBox const& initial, Real const& T);
+    OrbitType orbit(RealVariablesBox const& initial, Real const& T);
   private:
     Void _recondition_and_update(ValidatedVectorMultivariateFunctionPatch& function, InclusionEvolverState& state);
 };

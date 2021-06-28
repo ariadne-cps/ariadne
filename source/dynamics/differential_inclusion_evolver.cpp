@@ -32,6 +32,7 @@
 
 #include "differential_inclusion_evolver.hpp"
 #include "enclosure.hpp"
+#include "orbit.hpp"
 
 namespace Ariadne {
 
@@ -188,7 +189,7 @@ Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultiv
     }
 }
 
-List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::reach(RealVariablesBox const& initial, Real const& tmax) {
+auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real const& tmax) -> OrbitType {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"System: "<<_system);
     CONCLOG_PRINTLN_AT(1,"Initial: "<<initial);
@@ -199,7 +200,9 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
     EulerBounder bounder;
 
-    EnclosureType evolve(initial,_system.state_space(),EnclosureConfiguration(std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory()));
+    EnclosureConfiguration config(std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+
+    EnclosureType evolve(initial,_system.state_space(),config);
     CONCLOG_PRINTLN_VAR_AT(1,evolve)
     ValidatedVectorMultivariateFunctionPatch evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial_box,this->_sweeper);
 
@@ -207,7 +210,7 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
     InclusionEvolverState state(_system,_configuration->approximations(),*_integrator);
 
-    List<ValidatedVectorMultivariateFunctionPatch> result;
+    OrbitType result(evolve);
 
     ProgressIndicator indicator(tmax.get_d());
 
@@ -220,7 +223,12 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
         auto approximators_to_use = state.approximators_to_use();
 
-        CONCLOG_PRINTLN_AT(2,"approximators to use="<<approximators_to_use);
+        CONCLOG_PRINTLN_AT(1,"#s="<<std::setw(4)<<result.reach().size()
+                                 <<" t="<<std::setw(7)<<t.get_d()
+                                 <<" p="<<std::setw(4)<<evolve_function.argument_size()
+                                 <<" r="<<std::setw(7)<<evolve_function.range().radius()
+                                 <<" c="<<evolve_function.range().centre()
+                                 <<" a="<<approximators_to_use)
 
         auto domx = cast_exact_box(evolve_function.range());
 
@@ -232,7 +240,7 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
         TimeStepType new_t = lower_bound(t+h);
 
-        List<ValidatedVectorMultivariateFunctionPatch> reach_functions;
+        ValidatedVectorMultivariateFunctionPatch reach_function;
         List<ValidatedVectorMultivariateFunctionPatch> best_reach_functions;
         ValidatedVectorMultivariateFunctionPatch best_evolve_function;
         InclusionIntegrator best = approximators_to_use.at(0);
@@ -260,12 +268,19 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
         state.update_with_best(best);
 
         evolve_function = best_evolve_function;
+        reach_function = best_reach_functions.at(0);
 
         CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 
-        result.push_back(best_reach_functions.at(0));
-
         CONCLOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
+
+        auto time_ivl_function = ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(reach_function.domain(),reach_function.result_size(),this->_sweeper);
+        EnclosureType reach_enclosure(Enclosure(reach_function.domain(),reach_function,time_ivl_function,List<ValidatedConstraint>(),config),_system.state_space());
+        result.adjoin_reach(reach_enclosure);
+
+        auto time_function = ValidatedScalarMultivariateTaylorFunctionModelDP::constant(evolve_function.domain(),new_t,this->_sweeper);
+        evolve = EnclosureType(Enclosure(evolve_function.domain(), evolve_function, time_function, List<ValidatedConstraint>(), config), _system.state_space());
+        result.adjoin_intermediate(evolve);
 
         state.next_step();
         t=new_t;
@@ -274,6 +289,7 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
     }
 
     CONCLOG_PRINTLN_AT(1,"approximation % ="<<convert_to_percentages(state.global_optima_count()));
+    result.adjoin_final(evolve);
 
     return result;
 }

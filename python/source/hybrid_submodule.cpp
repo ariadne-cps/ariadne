@@ -315,13 +315,19 @@ Void export_hybrid_automaton(pybind11::module& module)
     pybind11::class_<HybridAutomaton,pybind11::bases<HybridAutomatonInterface>> hybrid_automaton_class(module,"HybridAutomaton");
     hybrid_automaton_class.def(pybind11::init<>());
     hybrid_automaton_class.def(pybind11::init<Identifier>());
+    hybrid_automaton_class.def("name", &HybridAutomaton::name);
     hybrid_automaton_class.def("locations", &HybridAutomaton::locations);
     hybrid_automaton_class.def("events", &HybridAutomaton::events);
     hybrid_automaton_class.def("event_kind", &HybridAutomaton::event_kind);
+    hybrid_automaton_class.def("target", &HybridAutomaton::target);
     hybrid_automaton_class.def("dynamic_function", &HybridAutomaton::dynamic_function);
     hybrid_automaton_class.def("guard_function", &HybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &HybridAutomaton::reset_function);
-    hybrid_automaton_class.def("target", &HybridAutomaton::target);
+    hybrid_automaton_class.def("guard_predicate", &HybridAutomaton::guard_predicate);
+    hybrid_automaton_class.def("invariant_predicate", &HybridAutomaton::invariant_predicate);
+    hybrid_automaton_class.def("dynamic_assignments", &HybridAutomaton::dynamic_assignments);
+    hybrid_automaton_class.def("auxiliary_assignments", &HybridAutomaton::auxiliary_assignments);
+    hybrid_automaton_class.def("reset_assignments", &HybridAutomaton::reset_assignments);
     hybrid_automaton_class.def("new_mode",overload_cast<List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
@@ -341,7 +347,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     composite_hybrid_automaton_class.def(pybind11::init<const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def(pybind11::init<Identifier,const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def("__repr__", &__cstr__<CompositeHybridAutomaton>);
-
+    composite_hybrid_automaton_class.def("__iter__", [](CompositeHybridAutomaton const& c){return pybind11::make_iterator(c.begin(),c.end());});
 }
 
 

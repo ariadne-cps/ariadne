@@ -347,7 +347,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     composite_hybrid_automaton_class.def(pybind11::init<const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def(pybind11::init<Identifier,const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def("__repr__", &__cstr__<CompositeHybridAutomaton>);
-
+    composite_hybrid_automaton_class.def("__iter__", [](CompositeHybridAutomaton const& c){return pybind11::make_iterator(c.begin(),c.end());});
 }
 
 

@@ -22,6 +22,7 @@ Legenda for the issue kind:
 - [#628](https://github.com/ariadne-cps/ariadne/issues/628) (A) Implement some methods for Polynomial, in particular for vectors thereof
 - [#636](https://github.com/ariadne-cps/ariadne/issues/636) (A) Add Python bindings for hybrid automaton target method
 - [#642](https://github.com/ariadne-cps/ariadne/issues/642) (A) Add Python bindings for hybrid automaton name and symbolic expressions in dynamics/guards/invariants/resets
+- [#643](https://github.com/ariadne-cps/ariadne/issues/643) (A) Add C++ and Python support for iteration through components of a CompositeHybridAutomaton  
 - [#612](https://github.com/ariadne-cps/ariadne/issues/612) (C) Remove unused legend from Gnuplot output
 - [#639](https://github.com/ariadne-cps/ariadne/issues/639) (C) Use a finer (3/4) refinement strategy for the step size when computing a flow step based on an accuracy threshold
 - [#616](https://github.com/ariadne-cps/ariadne/issues/616) (F) Fix behavior of unary symbolic expression predicates

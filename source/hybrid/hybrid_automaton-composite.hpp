@@ -72,6 +72,7 @@ class CompositeHybridAutomaton
     static Writer<CompositeHybridAutomaton> default_writer() { return _default_writer; }
   public:
     typedef HybridTime TimeType;
+    typedef List<HybridAutomaton>::ConstIterator ConstIterator;
   public:
     //!@{
     //! \name Constructors.
@@ -107,6 +108,12 @@ class CompositeHybridAutomaton
     Nat number_of_components() const;
     //! \brief The \a i<sup>th</sup> component automaton.
     const HybridAutomaton& component(Nat i) const;
+
+    //! \brief Iterator begin
+    ConstIterator begin() const { return _components.begin(); }
+    //! \brief Iterator end
+    ConstIterator end() const { return _components.end(); }
+
     //!@}
 
     //!@{

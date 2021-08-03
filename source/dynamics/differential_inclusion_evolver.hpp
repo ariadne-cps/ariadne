@@ -53,9 +53,9 @@ struct StepSize : public Attribute<StepSizeType> { };
 struct NumberOfStepsBetweenSimplifications : public Attribute<Nat> { };
 struct NumberOfVariablesToKeep : public Attribute<Nat> { };
 
-Generator<StepSize> step_size;
-Generator<NumberOfStepsBetweenSimplifications> number_of_steps_between_simplifications;
-Generator<NumberOfVariablesToKeep> number_of_variables_to_keep;
+static const Generator<StepSize> step_size = Generator<StepSize>();
+static const Generator<NumberOfStepsBetweenSimplifications> number_of_steps_between_simplifications = Generator<NumberOfStepsBetweenSimplifications>();
+static const Generator<NumberOfVariablesToKeep> number_of_variables_to_keep = Generator<NumberOfVariablesToKeep>();
 
 using ThresholdSweeperDP = ThresholdSweeper<FloatDP>;
 using GradedSweeperDP = GradedSweeper<FloatDP>;

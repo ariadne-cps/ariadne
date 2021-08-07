@@ -1,4 +1,4 @@
-ariadne (2.4) focal; urgency=medium
+ariadne (2.4-1) focal; urgency=medium
 
   * Add new integrators, supplement Python interface, minor fixes
 

@@ -1,6 +1,5 @@
-ariadne (2.3-2) focal; urgency=medium
+ariadne (2.4) focal; urgency=medium
 
-  * Add support for concurrent code, make evolution routines and graphics
-    concurrent, introduce CLI settings import
+  * Add new integrators, supplement Python interface, minor fixes
 
- -- Luca Geretti <luca.geretti@gmail.com>  Mon, 24 May 2021 14:54:00 +0100
+ -- Luca Geretti <luca.geretti@gmail.com>  Sat, 07 Aug 2021 11:28:00 +0100

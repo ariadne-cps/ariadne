@@ -10,9 +10,9 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
-### 2.4
+### 2.4.1
 
-*Date:   /  /2021*
+*Date: 07/08/2021*
 
 - [#357](https://github.com/ariadne-cps/ariadne/issues/357) (N) Introduce a TaylorSeriesBounderIntegrator, that identifies the bounds from the expansion without resorting to a Bounder initially
 - [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors
@@ -29,7 +29,7 @@ Legenda for the issue kind:
 - [#620](https://github.com/ariadne-cps/ariadne/issues/620) (F) EulerBounder did not reset the bounding domain between refinements to the step size
 - [#631](https://github.com/ariadne-cps/ariadne/issues/631) (F) Conditional disabling of graphics in absence of both Cairo and Gnuplot was incorrect
 - [#645](https://github.com/ariadne-cps/ariadne/issues/645) (F) Use only static const Generator objects, addressing linking issue for the whole library
-- [#623](https://github.com/ariadne-cps/ariadne/issues/620) (R) Simplify IntegratorInterface with only one flow step, removing flow/flow_to and hiding flow_bounds
+- [#623](https://github.com/ariadne-cps/ariadne/issues/623) (R) Simplify IntegratorInterface with only one flow step, removing flow/flow_to and hiding flow_bounds
 
 ### 2.3
 

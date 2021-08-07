@@ -12,7 +12,7 @@ Legenda for the issue kind:
 
 ### 2.4
 
-*Date:   /  /2021*
+*Date: 07/08/2021*
 
 - [#357](https://github.com/ariadne-cps/ariadne/issues/357) (N) Introduce a TaylorSeriesBounderIntegrator, that identifies the bounds from the expansion without resorting to a Bounder initially
 - [#613](https://github.com/ariadne-cps/ariadne/issues/613) (A) Add Python bindings for Variables2d, Projection2d fields, HybridEnclosure space accessors

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            union_of_intervals.hpp
  *
- *  Copyright  2020  Pieter Collins
+ *  Copyright  2020-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -33,10 +33,6 @@
 
 namespace Ariadne {
 
-struct LowerUpperBoundLess {
-    template<class U> decltype(auto) operator() (Interval<U> const& ivl1, Interval<U> const& ivl2) const {
-        return ivl1.lower_bound()<ivl2.lower_bound() or (ivl1.lower_bound()==ivl2.lower_bound() and ivl1.upper_bound()<ivl2.upper_bound()); }
-};
 
 template<class U> class UnionOfIntervals {
   private: public:
@@ -112,106 +108,14 @@ template<class U> UnionOfIntervals<U> interior(UnionOfIntervals<U> ivls, Negatio
     List<Interval<U>> rivls;
     rivls.reserve(ivls.size());
     for (auto ivl : ivls) {
-        Interval<U> rivl(ivl.lower()+eps, ivl.upper()-eps);
-        if (not rivl.empty()) {
+        Interval<U> rivl(ivl.lower_bound()+eps, ivl.upper_bound()-eps);
+        if (not definitely(rivl.is_empty())) {
             rivls.append(rivl);
         }
     }
     return UnionOfIntervals<U>(rivls);
 }
 
-
-template<class U> UnionOfIntervals<U> UnionOfIntervals<U>::_intersection(UnionOfIntervals<U> const& ivls1, UnionOfIntervals<U> const& ivls2) {
-    // TODO: Make more efficient
-    List<Interval<U>> rivls;
-    auto iter1=ivls1.begin();
-    auto iter2=ivls2.begin();
-    while (iter1!=ivls1.end() && iter2!=ivls2.end()) {
-        if (iter1->lower_bound() >= iter2->upper_bound()) {
-            ++iter1;
-        } else if (iter2->lower_bound() >= iter1->upper_bound()) {
-            ++iter2;
-        } else {
-            rivls.append(Interval<U>(max(iter1->lower_bound(),iter2->lower_bound()),min(iter1->upper_bound(),iter2->upper_bound())));
-            if (iter1->upper_bound()<iter2->upper_bound()) { ++iter1; } else { ++iter2; }
-        }
-    }
-    return UnionOfIntervals<U>(rivls);
-}
-
-template<class U> UnionOfIntervals<U> UnionOfIntervals<U>::_join(UnionOfIntervals<U> const& ivls1, UnionOfIntervals<U> const& ivls2) {
-    // TODO: Make more efficient
-    return UnionOfIntervals<U>(catenate(ivls1._data,ivls2._data));
-}
-
-template<class U> Bool UnionOfIntervals<U>::_intersect(UnionOfIntervals<U> const& ivls1, UnionOfIntervals<U> const& ivls2) {
-    auto iter1=ivls1.begin();
-    auto iter2=ivls2.begin();
-    while (iter1!=ivls1.end() && iter2!=ivls2.end()) {
-        if (iter1->lower_bound() >= iter2->upper_bound()) {
-            ++iter2;
-        } else if (iter1->upper_bound() <= iter2->lower_bound()) {
-            ++iter1;
-        } else {
-            return true;
-        }
-    }
-    return false;
-}
-
-template<class U> Bool UnionOfIntervals<U>::_subset(UnionOfIntervals<U> const& ivls1, UnionOfIntervals<U> const& ivls2) {
-    auto iter1=ivls1.begin();
-    auto iter2=ivls2.begin();
-    while (iter1!=ivls1.end() && iter2!=ivls2.end()) {
-        if (iter1->lower_bound() >= iter2->upper_bound()) {
-            ++iter2;
-        } else if (iter1->lower_bound() >= iter2->lower_bound() && iter1->upper_bound() <= iter2->upper_bound()) {
-            ++iter1;
-        } else {
-            return false;
-        }
-    }
-    if (iter1==ivls1.end()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-
-template<class U> auto UnionOfIntervals<U>::measure() const -> MeasureType {
-    MeasureType r(nul(_data[0].width()));
-    for (auto ivl : this->_data) {
-        r+=ivl.width();
-    }
-    return r;
-}
-
-template<class U> Interval<U> UnionOfIntervals<U>::bounding_box() const {
-    ARIADNE_ASSERT(!_data.empty());
-    return Interval<U>(this->_data.front().lower_bound(),this->_data.back().upper_bound());
-}
-
-template<class U> Void UnionOfIntervals<U>::_sort() {
-    std::sort(this->_data.begin(),this->_data.end(),LowerUpperBoundLess());
-}
-
-template<class U> Void UnionOfIntervals<U>::_combine() {
-    ConstIterator start=begin();
-    Iterator curr=_data.begin();
-    ConstIterator next=curr;
-    while (next!=end()) {
-        *curr=*next;
-        ++next;
-        while (next!=end() && next->lower_bound()<=curr->upper_bound()) {
-            curr->set_upper_bound(max(curr->upper_bound(),next->upper_bound()));
-            ++next;
-        }
-        ++curr;
-    }
-
-    _data.resize(static_cast<SizeType>(curr-start));
-}
 
 } // namespace Ariadne
 

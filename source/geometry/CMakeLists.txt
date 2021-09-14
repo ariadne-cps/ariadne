@@ -11,6 +11,7 @@ add_library(${LIBRARY_NAME} OBJECT
     grid_paving.cpp
     paver.cpp
     affine_set.cpp
+    measurable_set.cpp
 
     geometry.cpp
 )

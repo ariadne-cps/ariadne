@@ -34,6 +34,7 @@
 #include "geometry/set.hpp"
 #include "geometry/set_wrapper.hpp"
 #include "geometry/measurable_set.hpp"
+#include "geometry/union_of_intervals.hpp"
 
 #include "../test.hpp"
 

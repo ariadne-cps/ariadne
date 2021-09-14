@@ -1,7 +1,7 @@
 /***************************************************************************
  *            measurable_function.hpp
  *
- *  Copyright  2020  Pieter Collins
+ *  Copyright  2020-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -37,6 +37,8 @@
 #include "geometry/set.hpp"
 #include "geometry/measurable_set.hpp"
 #include "geometry/set_wrapper.hpp"
+
+#include "../geometry/union_of_intervals.hpp"
 
 namespace Ariadne {
 
@@ -150,7 +152,7 @@ template<class PR> Interval<UpperBound<PR>> image(Interval<UpperBound<PR>> const
     return f(cast_singleton(ivl));
 }
 
-ValidatedOpenSet<Real> preimage(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> const& ops, IntervalDomainType dom, Accuracy acc);
+template<class ARG, class RES> ValidatedOpenSet<ARG> preimage(ValidatedContinuousFunction<RES(ARG)> const& f, ValidatedOpenSet<RES> const& ops, DomainOfType<ARG> dom, Accuracy acc);
 
 template<class PR, class PRE> auto
 FanModel<Real(Real),PR,PRE>::preimage(ValidatedOpenSet<Real> const& rng) const -> ValidatedLowerMeasurableSet<Real> {
@@ -168,43 +170,12 @@ FanModel<Real(Real),PR,PRE>::preimage(ValidatedOpenSet<Real> const& rng) const -
 
 
 
-template<class PR> UnionOfIntervals<Value<PR>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedRegularSet<Real> rgs, Interval<Value<PR>> ivl, Accuracy acc) {
-    Interval<Value<PR>> rng=cast_exact(image(ivl,f));
-    if (definitely(rgs.covers(rng))) {
-        return {cast_exact_interval(ivl)};
-    } else if (definitely(rgs.separated(rng))) {
-        return {{},ivl.precision()};
-    } else if (definitely(ivl.width()<acc.error())) {
-        return {{},ivl.precision()};
-    } else {
-        Pair<Interval<Value<PR>>,Interval<Value<PR>>> subivls=split(ivl);
-        return join(preimage_intervals(f,rgs,subivls.first,acc),preimage_intervals(f,rgs,subivls.second,acc));
-    }
-}
+//! \brief Compute the intersection of the preimage of \a set under \a f which lies within \a bnd to an accuracy of \a acc with respect to Lebesgue measure.
+UnionOfIntervals<Dyadic> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedRegularSet<Real> set, Interval<Dyadic> bnd, Accuracy acc);
 
-template<class PR> UnionOfIntervals<Value<PR>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> ops, Interval<Value<PR>> ivl, Accuracy acc) {
-    if (definitely(ops.covers(cast_exact(image(ivl,f))))) {
-        return {ivl};
-    } else if (definitely(ivl.width()<acc.error())) {
-        return {{},ivl.precision()};
-    } else {
-        Pair<Interval<Value<PR>>,Interval<Value<PR>>> subivls=split(ivl);
-        return join(preimage_intervals(f,ops,subivls.first,acc),preimage_intervals(f,ops,subivls.second,acc));
-    }
-}
+template<class PR> UnionOfIntervals<Value<PR>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedRegularSet<Real> rgs, Interval<Value<PR>> ivl, Accuracy acc);
 
-ValidatedOpenSet<Real> preimage(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> const& ops, IntervalDomainType dom, Accuracy acc) {
-    DoublePrecision pr;
-    Interval<Value<FloatDP>> ivl=cast_exact(Interval<UpperBound<FloatDP>>(dom,pr));
-    auto rgsp=dynamic_pointer_cast<ValidatedRegularSet<Real>::Interface>(ops.managed_pointer());
-    if (false and rgsp) {
-        auto rgs=ValidatedRegularSet<Real>(rgsp);
-        return ValidatedOpenSet<Real>(wrap_open(preimage_intervals(f,rgs,ivl,acc)));
-    } else {
-        return ValidatedOpenSet<Real>(wrap_open(preimage_intervals(f,ops,ivl,acc)));
-    }
-}
-
+template<class PR> UnionOfIntervals<Value<PR>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> ops, Interval<Value<PR>> ivl, Accuracy acc);
 
 
 } // namespace Ariadne

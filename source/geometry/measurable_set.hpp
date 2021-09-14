@@ -1,7 +1,7 @@
 /***************************************************************************
  *            measurable_set.hpp
  *
- *  Copyright  2020  Pieter Collins
+ *  Copyright  2020-21  Pieter Collins
  *
  ****************************************************************************/
 
@@ -36,11 +36,13 @@
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/twoexp.hpp"
+
+#include "set_interface.hpp"
 #include "interval.hpp"
 
 namespace Ariadne {
 
-TwoExp exp2(Integer z) {
+inline TwoExp exp2(Integer z) {
     Int n=z.get_si();
     ARIADNE_ASSERT(n==z);
     return exp2(n);
@@ -139,7 +141,7 @@ template<class S, class E> class LowerMeasurableSetModel {
     typedef typename S::BasicSetType BasicSetType;
     typedef decltype(cast_positive(measure(declval<S>())-declval<E>())) MeasureType;
 
-    explicit LowerMeasurableSetModel(S s, E e) : _set(s), _error(min(max(e,nul(e)),measure(s))) { }
+    explicit LowerMeasurableSetModel(S s, E e) : _set(s), _error(max(e,nul(e))) { }
     template<class... PRES> requires Constructible<E,Nat,PRES...>
         explicit LowerMeasurableSetModel(S s, PRES... pres) : _set(s), _error(0u,pres...) { }
     friend MeasureType measure(LowerMeasurableSetModel<S,E> const& lms) {
@@ -154,20 +156,9 @@ template<class S, class E> class LowerMeasurableSetModel {
         return os << lms._set << "+/-" << lms._error; }
   private:
     MeasureType _measure() const {
-        //return MeasureType(cast_positive(max(PositiveFloatDPBounds(FloatDPBounds(2,2,dp))-this->_error,0u))); }
         return cast_positive(max(measure(this->_set)-this->_error,0u)); }
 };
 
-
-
-
-} // namespace Ariadne
-
-#include "union_of_intervals.hpp"
-
-namespace Ariadne {
-template class LowerMeasurableSetModel<UnionOfIntervals<Dyadic>,Dyadic>;
-template class LowerMeasurableSetModel<UnionOfIntervals<Value<FloatDP>>,Error<FloatDP>>;
 } // namespace Ariadne
 
 #endif

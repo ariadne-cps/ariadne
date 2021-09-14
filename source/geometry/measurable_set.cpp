@@ -1,5 +1,5 @@
 /***************************************************************************
- *            measurable_function.cpp
+ *            measurable_set.cpp
  *
  *  Copyright  2020-21  Pieter Collins
  *
@@ -22,18 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "measurable_function.hpp"
-#include "measurable_function.tpl.hpp"
-
-#include "../geometry/union_of_intervals.tpl.hpp"
+#include "measurable_set.tpl.hpp"
+#include "union_of_intervals.tpl.hpp"
 
 namespace Ariadne {
 
-template ValidatedOpenSet<Real> preimage(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> const& ops, IntervalDomainType dom, Accuracy acc);
+template class UnionOfIntervals<Dyadic>;
+template class UnionOfIntervals<Value<FloatDP>>;
+template class UnionOfIntervals<LowerBound<FloatDP>>;
 
-template UnionOfIntervals<Value<FloatDP>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedRegularSet<Real> rgps, Interval<Value<FloatDP>> ivl, Accuracy acc);
-template UnionOfIntervals<Value<FloatDP>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> ops, Interval<Value<FloatDP>> ivl, Accuracy acc);
-template UnionOfIntervals<LowerBound<FloatDP>> preimage_intervals(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> ops, Interval<LowerBound<FloatDP>> ivl, Accuracy acc);
-
+template class LowerMeasurableSetModel<UnionOfIntervals<Dyadic>,Dyadic>;
+template class LowerMeasurableSetModel<UnionOfIntervals<Value<FloatDP>>,Error<FloatDP>>;
+template class LowerMeasurableSetModel<UnionOfIntervals<LowerBound<FloatDP>>,Error<FloatDP>>;
 
 } // namespace Ariadne

@@ -134,14 +134,13 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
         return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
 
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _compose(const ScalarUnivariateFunction<P>& f) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return heap_copy(compose(f,static_cast<const FM&>(*this))); }
     VectorFunctionModelInterface<P,ARG,PR,PRE>* _compose(const VectorUnivariateFunction<P>& f) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return heap_copy(compose(f,static_cast<const FM&>(*this))); }
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const ScalarUnivariateFunction<P>& f) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return this->_compose(f); }
     VectorFunctionModelInterface<P,ARG,PR,PRE>* _unchecked_compose(const VectorUnivariateFunction<P>& f) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
-
+        return this->_compose(f); }
 
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _embed(const BoxDomainType& d1, const BoxDomainType& d2) const override {
         return new FM(embed(d1,static_cast<const FM&>(*this),d2)); }

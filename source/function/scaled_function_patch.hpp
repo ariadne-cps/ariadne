@@ -432,6 +432,13 @@ template<class M> class ScaledFunctionPatch
     friend ArithmeticType<CoefficientType,NumericType> unchecked_evaluate(const ScaledFunctionPatch<M>& f, const Vector<GenericNumericType>& x) {
         return unchecked_evaluate(f,Vector<NumericType>(x,f.precision())); }
 
+    friend ScaledFunctionPatch<M> compose(const ScalarUnivariateFunction<P>& g, const ScaledFunctionPatch<M>& f) {
+        return ScaledFunctionPatch<M>(f.domain(),g.evaluate(f.model()));
+    }
+    friend VectorScaledFunctionPatch<M> compose(const VectorUnivariateFunction<P>& g, const ScaledFunctionPatch<M>& f) {
+        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.model()));
+    }
+
     friend NormType norm(const ScaledFunctionPatch<M>& f) {
         return norm(f.model()); }
     friend NormType distance(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) {

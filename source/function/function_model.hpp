@@ -271,6 +271,11 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     friend ScalarFunctionModel<P,ARG,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j, const Number<P>& c) {
         return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
 
+    friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarUnivariateFunction<P>& f, const ScalarFunctionModel<P,ARG,PR,PRE>& g) {
+        return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorUnivariateFunction<P>& f, const ScalarFunctionModel<P,ARG,PR,PRE>& g) {
+        return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+
     friend NormType norm(const ScalarFunctionModel<P,ARG,PR,PRE>& f) {
         return f._ptr->_concrete_norm(); }
     friend ScalarFunctionModel<P,ARG,PR,PRE> derivative(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j) {

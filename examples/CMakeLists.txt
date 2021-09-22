@@ -6,3 +6,5 @@ add_subdirectory(discrete)
 add_subdirectory(continuous)
 add_subdirectory(hybrid)
 add_subdirectory(pdes)
+
+add_subdirectory(stochastic)

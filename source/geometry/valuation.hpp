@@ -108,7 +108,6 @@ Valuation<P,T>::Valuation(V const& v)
     : Valuation(std::make_shared<ValuationWrapper<V,P,T>>(v)) {
 }
 
-
 } // namespace Ariadne
 
 #endif

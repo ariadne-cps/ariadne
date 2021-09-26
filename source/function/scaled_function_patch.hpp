@@ -89,7 +89,7 @@ template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2
 template<class R, class F, class X> concept CanEvaluate
     = requires(F const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
 template<class R, class F, class X> concept CanCall
-    = requires(F const& f, X const& x) { { f(x) } -> AssignableTo<R>; };
+    = requires(F const& f, X const& x) { { f(x) } -> ConvertibleTo<R>; };
 
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
@@ -353,7 +353,7 @@ template<class M> class ScaledFunctionPatch
     friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
     friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
   public:
-    template<class X> Void _compute(X& r, const Vector<X>& a) const;
+    template<class X> X operator()(const Vector<X>& a) const;
   private:
     ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
@@ -436,13 +436,16 @@ template<class M> class ScaledFunctionPatch
 };
 
 
-template<class M> template<class X> Void ScaledFunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
+template<class M> template<class X> X ScaledFunctionPatch<M>::operator()(const Vector<X>& a) const {
     if constexpr (CanCall<X,M,Vector<X>>) {
-        r = this->_model(unscale(a,this->_domain));
+        return this->_model(unscale(a,this->_domain));
+    } else if constexpr (CanCall<X,ScaledFunctionPatch<M>,Vector<X>>) {
+        return this->operator()(a);
     } else {
         ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>),
                            "evaluate(ScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": "
                            "Incompatible types for function call");
+        std::abort();
     }
 }
 
@@ -720,7 +723,7 @@ template<class M> class VectorScaledFunctionPatch
     friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,ARG>;
     friend class TaylorFunctionFactory;
   public:
-    template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
+    template<class X> Vector<X> operator()(const Vector<X>& a) const;
   private:
     /* Domain of definition. */
     BoxDomainType _domain;
@@ -994,17 +997,19 @@ template<class M> class VectorScaledFunctionPatch
 
 };
 
-template<class M> template<class X> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
+template<class M> template<class X> Vector<X> VectorScaledFunctionPatch<M>::operator()(const Vector<X>& a) const {
     if constexpr(CanCall<X,M,Vector<X>>) {
-        ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this));
         Vector<X> sa=Ariadne::unscale(a,this->_domain);
+        Vector<X> r(this->result_size(), a.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) {
             r[i]=this->_models[i](sa);
         }
+        return r;
     } else {
         ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>),
                            "evaluate(VectorScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": "
                            "Incompatible types for function call");
+        std::abort();
     }
 }
 

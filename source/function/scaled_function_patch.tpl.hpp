@@ -225,7 +225,7 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
     : _domain(d), _model(f.argument_size(),prp)
 {
     if constexpr (AnInterval<typename M::NumericType>) {
-        ARIADNE_ERROR("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function."); abort();
+        ARIADNE_FAIL_MSG("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function.");
     } else {
         ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
         Vector<ModelType> x=ModelType::scalings(d,prp);
@@ -373,7 +373,7 @@ template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Multivariat
 template<class M> ScalarFunctionType<M> ScaledFunctionPatch<M>::function() const
 {
     if constexpr (AnInterval<CoefficientType>) {
-        ARIADNE_ERROR("IntervalTaylorModel object "<<*this<<" cannot be converted to a function.");
+        ARIADNE_FAIL_MSG("IntervalTaylorModel object "<<*this<<" cannot be converted to a function.");
         abort();
     } else {
         return ScalarFunctionType<M>(new ScaledFunctionPatch<M>(*this));
@@ -415,7 +415,7 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBoun
 {
     const ScaledFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not definitely and element of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not definitely an element of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
@@ -425,13 +425,12 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValu
     return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const -> ValidatedNumber
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& y) const -> ValidatedNumber
 {
     if constexpr (AnInterval<CoefficientType>) {
-        ARIADNE_ERROR("Cannot evaluate an IntervalTaylorModel on a generic Number");
-        abort();
+        ARIADNE_FAIL_MSG("Cannot evaluate an IntervalTaylorModel on a generic Number");
     } else {
-        return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+        return this->operator()(Vector<FloatBounds<PR>>(y,this->precision()));
     }
 }
 
@@ -759,7 +758,7 @@ template<class M> auto VectorScaledFunctionPatch<M>::error() const -> ErrorType 
 template<class M> VectorFunctionType<M> VectorScaledFunctionPatch<M>::function() const
 {
     if constexpr (AnInterval<CoefficientType>) {
-        ARIADNE_ERROR("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function."); abort();
+        ARIADNE_FAIL_MSG("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function.");
     } else {
         return VectorFunctionType<M>(new VectorScaledFunctionPatch<M>(*this));
     }
@@ -945,16 +944,20 @@ template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<Flo
 {
     const VectorScaledFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
-        ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely and element of tf.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely an element of tf.domain()="<<f.domain());
     }
     Vector<FloatBounds<PR>> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
+template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& y) const
     -> Vector<ArithmeticType<CoefficientType,ValidatedNumber>>
 {
-    return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+    if constexpr (AnInterval<CoefficientType>) {
+        ARIADNE_FAIL_MSG("Cannot evaluate an IntervalTaylorModel on a generic Number");
+    } else {
+        return this->operator()(Vector<FloatBounds<PR>>(y,this->precision()));
+    }
 }
 
 template<class M> auto VectorScaledFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const -> Matrix<NumericType>

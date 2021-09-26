@@ -41,15 +41,15 @@ template<class X> Vector<X> create_result(SizeType n, X z) { return Vector<X>(n,
 
 template<class F, class SIG> template<class X> auto
 FunctionMixin<F,Void,SIG>::_base_evaluate(const ElementType<D,X>& x) const -> ElementType<C,X> {
-    ElementType<C,X> r=create_result<X>(this->result_size(),zero_element(x));
-    static_cast<const F*>(this)->_compute(r,x); return r;
+    const F& f=static_cast<const F&>(*this);
+    return f(x);
 }
 
 /*
 template<class F, class D> template<class X> auto
 FunctionMixin<F,Void,D,IntervalDomainType>::_base_evaluate(const ElementType<D,X>& x) const -> X {
     ElementType<IntervalDomainType,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
-    static_cast<const F*>(this)->_compute(r,x); return r;
+    static_cast<const F*>(this)->_call(r,x); return r;
 }
 */
 

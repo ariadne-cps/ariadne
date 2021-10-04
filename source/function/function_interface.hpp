@@ -38,6 +38,9 @@ namespace Ariadne {
 
 static const Int SMOOTH=255;
 
+template<class T> struct Representation;
+template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,SIG>>& f);
+
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 template<class S> using ElementKind = typename ElementTraits<S>::Kind;
@@ -106,6 +109,9 @@ template<class... ARGS> class VectorOfFunctionInterface<EffectiveTag,ARGS...>
 template<class P, class SIG> class FunctionInterface;
 
 
+template<class T> struct Representation;
+template<class P, class S> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,S>>& f);
+
 template<class SIG>
 class FunctionInterface<Void,SIG>
 {
@@ -126,13 +132,14 @@ class FunctionInterface<Void,SIG>
 //    virtual DomainType const domain() const = 0;
 //    virtual CodomainType const codomain() const = 0;
 
-    virtual OutputStream& repr(OutputStream& os) const = 0;
+    virtual OutputStream& _repr(OutputStream& os) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,SIG>* _clone() const = 0;
     inline FunctionInterface<Void,SIG>* _copy() const { return this->_clone(); }
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,SIG>& f) { return f._write(os); }
+    template<class P, class S> friend OutputStream& operator<<(OutputStream& os, const Representation<Function<P,S>>& f);
 };
 
 //! \ingroup FunctionModule

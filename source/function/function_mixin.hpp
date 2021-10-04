@@ -87,9 +87,9 @@ class FunctionMixin<F,Void,SIG>
   public:
     virtual ArgumentSizeType argument_size() const override = 0;
     virtual ResultSizeType result_size() const override = 0;
-
-    virtual OutputStream& _write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->_write(os); }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << static_cast<F const&>(*this); }
+    virtual OutputStream& _repr(OutputStream& os) const override { return this->_write(os); }
 };
 
 

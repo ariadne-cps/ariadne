@@ -64,7 +64,7 @@ template<class PR> String numeric_class_tag();
 //ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
 
 template<class P, class SIG, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< FunctionModel<P,SIG,PR,PRE> >& frepr) {
-    static_cast<const FunctionModelInterface<P,SIG,PR,PRE>&>(frepr.reference()).repr(os); return os;
+    static_cast<const FunctionModelInterface<P,SIG,PR,PRE>&>(frepr.reference())._repr(os); return os;
 }
 
 ValidatedVectorMultivariateTaylorFunctionModelDP __getslice__(const ValidatedVectorMultivariateTaylorFunctionModelDP& tf, Int start, Int stop) {

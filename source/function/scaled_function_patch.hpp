@@ -337,8 +337,6 @@ template<class M> class ScaledFunctionPatch
 
     //!@{
     //! \name Stream input/output operators.
-    //! \brief Write to an output stream.
-    OutputStream& _write(OutputStream& os) const;
     //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
     //! \brief Write to an output stream.
@@ -358,6 +356,7 @@ template<class M> class ScaledFunctionPatch
     ScaledFunctionPatch<M>* _clone() const;
     ScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
+    OutputStream& _write(OutputStream& os) const;
   public:
 //    using ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, BoxDomainType, typename M::PrecisionType, typename M::ErrorPrecisionType>::_apply;
 
@@ -705,7 +704,8 @@ template<class M> class VectorScaledFunctionPatch
     Void adjoin(const ScaledFunctionPatch<M>& sf);
 
     //! \brief Write to an output stream.
-    OutputStream& _write(OutputStream& os) const;
+    friend OutputStream& operator<<(OutputStream& os, const VectorScaledFunctionPatch<M>& p) {
+        return p._write(os); }
 
     //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
@@ -718,6 +718,7 @@ template<class M> class VectorScaledFunctionPatch
     virtual VectorScaledFunctionPatch<M>* _clone() const;
     virtual VectorScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
+    OutputStream& _write(OutputStream& os) const;
   private:
     friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,ARG>;
     friend class TaylorFunctionFactory;
@@ -984,9 +985,6 @@ template<class M> class VectorScaledFunctionPatch
         return distance(f1,VectorScaledFunctionPatch<M>(f1.domain(),f2,f1.properties()));
     }
 
-    friend OutputStream& operator<<(OutputStream& os, const VectorScaledFunctionPatch<M>& p) {
-        return p._write(os);
-    }
 
 
     friend Vector< MultivariatePolynomial<NumericType> > polynomials(const VectorScaledFunctionPatch<M>& tfn) {

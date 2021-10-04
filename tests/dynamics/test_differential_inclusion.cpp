@@ -100,13 +100,13 @@ class TestDifferentialInclusion {
         EffectiveFormula xf = EffectiveFormula::coordinate(0);
         EffectiveFormula yf = EffectiveFormula::coordinate(1);
 
-        ARIADNE_TEST_ASSERT(identical(noise_independent_component._formulae,{-yf,xf+twice*one_point_five}));
+        ARIADNE_TEST_ASSERT(identical(noise_independent_component.formulae(),{-yf,xf+twice*one_point_five}));
 
         auto id = ivf.input_derivatives();
         const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(id[0].reference());
         ARIADNE_TEST_PRINT(input_derivatives);
 
-        ARIADNE_TEST_ASSERT(identical(input_derivatives._formulae,{zero,one}));
+        ARIADNE_TEST_ASSERT(identical(input_derivatives.formulae(),{zero,one}));
 
         ARIADNE_TEST_EQUAL(ivf.dimension(),2);
         ARIADNE_TEST_EQUAL(ivf.number_of_inputs(),1);

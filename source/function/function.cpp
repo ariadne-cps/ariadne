@@ -345,7 +345,7 @@ Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f)
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=make_formula((*vf)[i]); }
         return r;
     } else if( (ff=dynamic_cast<const VectorFormulaFunction<Real>*>(&fi)) ) {
-        return ff->_formulae;
+        return ff->formulae();
     } else {
         ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f);
     }
@@ -910,25 +910,25 @@ using std::dynamic_pointer_cast;
 
 template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalarMultivariateFunction,EffectiveNumber>::apply(UnaryElementaryOperator op, EffectiveScalarMultivariateFunction const& f) {
     auto e=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f.managed_pointer());
-    if(e) { return make_formula_function(e->_argument_size,op(e->_formula)); }
+    if(e) { return make_formula_function(e->argument_size(),op(e->formula())); }
     else { return EffectiveScalarMultivariateFunction(new UnaryMultivariateFunction<EffectiveTag>(op,f)); }
 }
 template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalarMultivariateFunction,EffectiveNumber>::apply(BinaryElementaryOperator op, EffectiveScalarMultivariateFunction const& f1, EffectiveScalarMultivariateFunction const& f2) {
     auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
     auto e2=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f2.managed_pointer());
-    if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
-        return make_formula_function(e1->_argument_size,op(e1->_formula,e2->_formula));
+    if(e1 && e2 && e1->argument_size()==e2->argument_size()) {
+        return make_formula_function(e1->argument_size(),op(e1->formula(),e2->formula()));
     }
     else { return EffectiveScalarMultivariateFunction(new BinaryMultivariateFunction<EffectiveTag>(op,f1,f2)); }
 }
 template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalarMultivariateFunction,EffectiveNumber>::apply(BinaryElementaryOperator op, EffectiveScalarMultivariateFunction const& f1, EffectiveNumber const& c2) {
     auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
-    if(e1) { return make_formula_function(e1->_argument_size,op(e1->_formula,c2)); }
+    if(e1) { return make_formula_function(e1->argument_size(),op(e1->formula(),c2)); }
     else { return op(f1,EffectiveScalarMultivariateFunction::constant(f1.argument_size(),c2)); }
 }
 template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalarMultivariateFunction,EffectiveNumber>::apply(BinaryElementaryOperator op, EffectiveNumber const& c1, EffectiveScalarMultivariateFunction const& f2) {
     auto e2=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f2.managed_pointer());
-    if(e2) { return make_formula_function(e2->_argument_size,op(c1,e2->_formula)); }
+    if(e2) { return make_formula_function(e2->argument_size(),op(c1,e2->formula())); }
     else { return op(EffectiveScalarMultivariateFunction::constant(f2.argument_size(),c1),f2); }
 }
 template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalarMultivariateFunction,EffectiveNumber>::apply(GradedElementaryOperator op, EffectiveScalarMultivariateFunction const& f, Int n) {

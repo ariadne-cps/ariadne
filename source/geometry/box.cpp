@@ -46,22 +46,26 @@ typedef FloatDPBounds ValidatedNumericType;
 typedef Interval<FloatDPUpperBound> UpperIntervalType;
 
 UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    if (definitely(ivl.is_empty())) { return UpperIntervalType::empty_interval(); }
     return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
 UpperBoxType apply(ValidatedVectorUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    if (definitely(ivl.is_empty())) { return UpperBoxType(f.result_size(),UpperIntervalType::empty_interval()); }
     return static_cast<UpperBoxType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
 UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& bx) {
+    if (definitely(bx.is_empty())) { return UpperIntervalType::empty_interval(); }
     return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
 UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& bx) {
+    if (definitely(bx.is_empty())) { return UpperBoxType(f.result_size(),UpperIntervalType::empty_interval()); }
     return static_cast<UpperBoxType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
 
 UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateFunction const& f) {
-    return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+    return apply(f,ivl); }
 UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f) {
-    return static_cast<UpperBoxType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+    return apply(f,ivl); }
 UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f) {
-    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
+    return apply(f,bx); }
 UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f) {
-    return static_cast<UpperBoxType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
+    return apply(f,bx); }
 
 template class Box<Interval<Real>>;
 template class Box<Interval<FloatDPValue>>;

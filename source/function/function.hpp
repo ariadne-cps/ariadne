@@ -108,7 +108,7 @@ class FunctionConstructors {
 
 };
 
-template<class P, class X> using EvaluateType = decltype(declval<ScalarMultivariateFunctionInterface<P>>()._evaluate(declval<Vector<X>>()));
+template<class P, class X> using EvaluateType = decltype(declval<ScalarMultivariateFunctionInterface<P>>()._call(declval<Vector<X>>()));
 
 //! \brief Function operations which depend on the scalar/vector nature of the arguments and result.
 template<class P, class SIG> class FunctionFacade {
@@ -276,11 +276,11 @@ class Function
     //!@{
     //
     //! \brief Call the function on an argument of concrete scalar type \a X.
-    template<class X> auto operator() (const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
-        return this->reference()._evaluate(x); }
+    template<class X> auto operator() (const Argument<X>& x) const -> decltype(this->reference()._call(x)) {
+        return this->reference()._call(x); }
     //! \brief Call the function on an argument of concrete scalar type \a X. \deprecated
-    template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
-        return this->reference()._evaluate(x); }
+    template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._call(x)) {
+        return this->reference()._call(x); }
     //!@}
 
     //! \name Differential function operations.
@@ -288,7 +288,7 @@ class Function
     //
     //! \brief The differential (partial derivatives) of the function at the point \a x, computed to degree \a d.
     template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
-        return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }
+        return this->_ptr->_call(Differential<EvaluateType<P,X>>::identity(d,x)); }
     //! \brief The derivative of the function with respect to the \a k -th variable.
     Function<P,SIG> derivative(ElementIndexType<D> k) const {
         return Function<P,SIG>(this->reference()._derivative(k)); }

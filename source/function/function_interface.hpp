@@ -38,6 +38,9 @@ namespace Ariadne {
 
 static const Int SMOOTH=255;
 
+template<class T> struct Representation;
+template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,SIG>>& f);
+
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 template<class S> using ElementKind = typename ElementTraits<S>::Kind;
@@ -106,6 +109,9 @@ template<class... ARGS> class VectorOfFunctionInterface<EffectiveTag,ARGS...>
 template<class P, class SIG> class FunctionInterface;
 
 
+template<class T> struct Representation;
+template<class P, class S> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,S>>& f);
+
 template<class SIG>
 class FunctionInterface<Void,SIG>
 {
@@ -126,13 +132,14 @@ class FunctionInterface<Void,SIG>
 //    virtual DomainType const domain() const = 0;
 //    virtual CodomainType const codomain() const = 0;
 
-    virtual OutputStream& repr(OutputStream& os) const = 0;
+    virtual OutputStream& _repr(OutputStream& os) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,SIG>* _clone() const = 0;
     inline FunctionInterface<Void,SIG>* _copy() const { return this->_clone(); }
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,SIG>& f) { return f._write(os); }
+    template<class P, class S> friend OutputStream& operator<<(OutputStream& os, const Representation<Function<P,S>>& f);
 };
 
 //! \ingroup FunctionModule
@@ -149,14 +156,14 @@ class FunctionInterface<ApproximateTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual Result<FloatDPApproximation> _evaluate(const Argument<FloatDPApproximation>& x) const = 0;
-    virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const = 0;
-    virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument< Differential<FloatDPApproximation> >& x) const = 0;
-    virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument< Differential<FloatMPApproximation> >& x) const = 0;
-    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
-    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
-    virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
-    virtual Result<ElementaryAlgebra<ApproximateNumber>> _evaluate(const Argument< ElementaryAlgebra<ApproximateNumber> >& x) const = 0;
+    virtual Result<FloatDPApproximation> _call(const Argument<FloatDPApproximation>& x) const = 0;
+    virtual Result<FloatMPApproximation> _call(const Argument<FloatMPApproximation>& x) const = 0;
+    virtual Result<Differential<FloatDPApproximation>> _call(const Argument< Differential<FloatDPApproximation> >& x) const = 0;
+    virtual Result<Differential<FloatMPApproximation>> _call(const Argument< Differential<FloatMPApproximation> >& x) const = 0;
+    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _call(const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
+    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _call(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
+    virtual Result<Formula<ApproximateNumber>> _call(const Argument< Formula<ApproximateNumber> >& x) const = 0;
+    virtual Result<ElementaryAlgebra<ApproximateNumber>> _call(const Argument< ElementaryAlgebra<ApproximateNumber> >& x) const = 0;
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
@@ -178,25 +185,25 @@ class FunctionInterface<ValidatedTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionInterface<AP,SIG>::_evaluate;
-    virtual Result<FloatDPBounds> _evaluate(const Argument<FloatDPBounds>& x) const = 0;
-    virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const = 0;
-    virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument< Differential<FloatDPBounds> >& x) const = 0;
-    virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument< Differential<FloatMPBounds> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const = 0;
+    using FunctionInterface<AP,SIG>::_call;
+    virtual Result<FloatDPBounds> _call(const Argument<FloatDPBounds>& x) const = 0;
+    virtual Result<FloatMPBounds> _call(const Argument<FloatMPBounds>& x) const = 0;
+    virtual Result<Differential<FloatDPBounds>> _call(const Argument< Differential<FloatDPBounds> >& x) const = 0;
+    virtual Result<Differential<FloatMPBounds>> _call(const Argument< Differential<FloatMPBounds> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _call(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _call(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const = 0;
 
-    virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
-    virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument< ElementaryAlgebra<ValidatedNumber> >& x) const = 0;
+    virtual Result<Formula<ValidatedNumber>> _call(const Argument< Formula<ValidatedNumber> >& x) const = 0;
+    virtual Result<ElementaryAlgebra<ValidatedNumber>> _call(const Argument< ElementaryAlgebra<ValidatedNumber> >& x) const = 0;
 
-    virtual Result<ScalarMultivariateFunction<ValidatedTag>> _evaluate(const Argument< ScalarMultivariateFunction<ValidatedTag> >& x) const = 0;
+    virtual Result<ScalarMultivariateFunction<ValidatedTag>> _call(const Argument< ScalarMultivariateFunction<ValidatedTag> >& x) const = 0;
 
-    inline Result<FloatDPBounds> _evaluate(const Argument<FloatDPValue>& x) const {
-        return this->_evaluate(Argument<FloatDPBounds>(x)); }
-    inline Result<FloatMPBounds> _evaluate(const Argument<FloatMPValue>& x) const {
-        return this->_evaluate(Argument<FloatMPBounds>(x)); }
+    inline Result<FloatDPBounds> _call(const Argument<FloatDPValue>& x) const {
+        return this->_call(Argument<FloatDPBounds>(x)); }
+    inline Result<FloatMPBounds> _call(const Argument<FloatMPValue>& x) const {
+        return this->_call(Argument<FloatMPBounds>(x)); }
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
@@ -218,12 +225,12 @@ class FunctionInterface<EffectiveTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionInterface<WP,SIG>::_evaluate;
-    virtual Result<Real> _evaluate(const Argument<Real>& x) const = 0;
-    virtual Result<ElementaryAlgebra<Real>> _evaluate(const Argument<ElementaryAlgebra<Real>>& x) const = 0;
-    virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const = 0;
-    virtual Result<ElementaryAlgebra<EffectiveNumber>> _evaluate(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const = 0;
-    virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
+    using FunctionInterface<WP,SIG>::_call;
+    virtual Result<Real> _call(const Argument<Real>& x) const = 0;
+    virtual Result<ElementaryAlgebra<Real>> _call(const Argument<ElementaryAlgebra<Real>>& x) const = 0;
+    virtual Result<Formula<Real>> _call(const Argument<Formula<Real>>& x) const = 0;
+    virtual Result<ElementaryAlgebra<EffectiveNumber>> _call(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const = 0;
+    virtual Result<Formula<EffectiveNumber>> _call(const Argument<Formula<EffectiveNumber>>& x) const = 0;
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }

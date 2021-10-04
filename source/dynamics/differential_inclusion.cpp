@@ -84,7 +84,7 @@ Void DifferentialInclusion::_transform_and_assign(EffectiveVectorMultivariateFun
     CoordinateFormulaPairs centering_substitution = transformation.first;
     BoxDomainType transformed_inputs = transformation.second;
 
-    Vector<EffectiveFormula> transformed_formulae = substitute(ff._formulae,centering_substitution);
+    Vector<EffectiveFormula> transformed_formulae = substitute(ff.formulae(),centering_substitution);
 
     List<SizeType> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
     if (is_additive_in(transformed_formulae,input_indices)) {

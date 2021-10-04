@@ -125,7 +125,7 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface
 
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _restriction(const DomainType& d) const = 0;
 
-    virtual FunctionModelInterface<P,SIG,PR,PRE>* _derivative(ArgumentIndexType j) const = 0;
+//    virtual FunctionModelInterface<P,SIG,PR,PRE>* _derivative(ArgumentIndexType j) const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _antiderivative(ArgumentIndexType j) const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _antiderivative(ArgumentIndexType j, CanonicalNumericType<P,PR,PRE> c) const = 0;
 

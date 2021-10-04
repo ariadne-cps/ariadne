@@ -83,13 +83,13 @@ class FunctionMixin<F,Void,SIG>
     typedef typename FunctionInterface<Void,SIG>::ResultSizeType ResultSizeType;
   protected:
     FunctionMixin() { }
-    template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
+    template<class X> ElementType<C,X> _base_call(const ElementType<D,X>& x) const;
   public:
     virtual ArgumentSizeType argument_size() const override = 0;
     virtual ResultSizeType result_size() const override = 0;
-
-    virtual OutputStream& _write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->_write(os); }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << static_cast<F const&>(*this); }
+    virtual OutputStream& _repr(OutputStream& os) const override { return this->_write(os); }
 };
 
 
@@ -98,20 +98,23 @@ class FunctionMixin<F,ApproximateTag,SIG>
     : public virtual FunctionInterface<ApproximateTag,SIG>
     , public FunctionMixin<F,Void,SIG>
 {
+    using P=ApproximateTag;
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
+  public:
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     virtual FunctionInterface<ApproximateTag,SIG>* _clone() const override;
-    virtual Result<FloatDPApproximation> _evaluate(const Argument<FloatDPApproximation>& x) const override;
-    virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
-    virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument<Differential<FloatDPApproximation>>& x) const override;
-    virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument<Differential<FloatMPApproximation>>& x) const override;
-    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatDP>>& x) const override;
-    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
-    virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument<Formula<ApproximateNumber>>& x) const override;
-    virtual Result<ElementaryAlgebra<ApproximateNumber>> _evaluate(const Argument<ElementaryAlgebra<ApproximateNumber>>& x) const override;
+    virtual FunctionInterface<ApproximateTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<FloatDPApproximation> _call(const Argument<FloatDPApproximation>& x) const override;
+    virtual Result<FloatMPApproximation> _call(const Argument<FloatMPApproximation>& x) const override;
+    virtual Result<Differential<FloatDPApproximation>> _call(const Argument<Differential<FloatDPApproximation>>& x) const override;
+    virtual Result<Differential<FloatMPApproximation>> _call(const Argument<Differential<FloatMPApproximation>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _call(const Argument<TaylorModel<ApproximateTag,FloatDP>>& x) const override;
+    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _call(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
+    virtual Result<Formula<ApproximateNumber>> _call(const Argument<Formula<ApproximateNumber>>& x) const override;
+    virtual Result<ElementaryAlgebra<ApproximateNumber>> _call(const Argument<ElementaryAlgebra<ApproximateNumber>>& x) const override;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -125,20 +128,21 @@ class FunctionMixin<F,ValidatedTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionMixin<F,ApproximateTag,SIG>::_evaluate;
+    using FunctionMixin<F,ApproximateTag,SIG>::_call;
     virtual FunctionInterface<ValidatedTag,SIG>* _clone() const override;
-    virtual Result<FloatDPBounds> _evaluate(const Argument<FloatDPBounds>& x) const override;
-    virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
-    virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument<Differential<FloatDPBounds>>& x) const override;
-    virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
-    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
-    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
-    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const override;
-    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const override;
-    virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
-    virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const override;
+    virtual FunctionInterface<ValidatedTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<FloatDPBounds> _call(const Argument<FloatDPBounds>& x) const override;
+    virtual Result<FloatMPBounds> _call(const Argument<FloatMPBounds>& x) const override;
+    virtual Result<Differential<FloatDPBounds>> _call(const Argument<Differential<FloatDPBounds>>& x) const override;
+    virtual Result<Differential<FloatMPBounds>> _call(const Argument<Differential<FloatMPBounds>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _call(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _call(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const override;
+    virtual Result<Formula<ValidatedNumber>> _call(const Argument<Formula<ValidatedNumber>>& x) const override;
+    virtual Result<ElementaryAlgebra<ValidatedNumber>> _call(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const override;
 
-    virtual Result<ValidatedScalarMultivariateFunction> _evaluate(const Argument<ValidatedScalarMultivariateFunction>& x) const override;
+    virtual Result<ValidatedScalarMultivariateFunction> _call(const Argument<ValidatedScalarMultivariateFunction>& x) const override;
 
 };
 
@@ -153,13 +157,14 @@ class FunctionMixin<F,EffectiveTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionMixin<F,ValidatedTag,SIG>::_evaluate;
+    using FunctionMixin<F,ValidatedTag,SIG>::_call;
     virtual FunctionInterface<EffectiveTag,SIG>* _clone() const override;
-    virtual Result<Real> _evaluate(const Argument<Real>& x) const override;
-    virtual Result<ElementaryAlgebra<Real>> _evaluate(const Argument<ElementaryAlgebra<Real>>& x) const override;
-    virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const override;
-    virtual Result<ElementaryAlgebra<EffectiveNumber>> _evaluate(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const override;
-    virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const override;
+    virtual FunctionInterface<EffectiveTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<Real> _call(const Argument<Real>& x) const override;
+    virtual Result<ElementaryAlgebra<Real>> _call(const Argument<ElementaryAlgebra<Real>>& x) const override;
+    virtual Result<Formula<Real>> _call(const Argument<Formula<Real>>& x) const override;
+    virtual Result<ElementaryAlgebra<EffectiveNumber>> _call(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const override;
+    virtual Result<Formula<EffectiveNumber>> _call(const Argument<Formula<EffectiveNumber>>& x) const override;
 };
 
 template<class F, class P, class... ARGS> class ScalarFunctionMixin
@@ -180,6 +185,18 @@ template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F
     return new F(static_cast<const F&>(*this)); }
 template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_clone() const {
     return new F(static_cast<const F&>(*this)); }
+
+template<class T> inline T* _heap_move(T&& t) { return new T(std::forward<T>(t)); }
+template<class P, class SIG> inline FunctionInterface<P,SIG>* _heap_move(Function<P,SIG>&& f) {
+    return f.raw_pointer()->_clone(); }
+
+template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F,ValidatedTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+
 
 
 

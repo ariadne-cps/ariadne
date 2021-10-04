@@ -82,7 +82,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex
 }
 
 template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation< Function<P,SIG> >& frepr) {
-    static_cast<const FunctionInterface<P,SIG>&>(frepr.reference()).repr(os); return os;
+    static_cast<const FunctionInterface<P,SIG>&>(frepr.reference())._repr(os); return os;
 }
 
 }// namespace Ariadne

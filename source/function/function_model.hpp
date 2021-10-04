@@ -230,9 +230,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     inline PrecisionType const precision() const { return this->value().precision(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
-        return this->_ptr->_evaluate(x); }
+        return this->_ptr->_call(x); }
     template<class X> X evaluate(const Vector<X>& x) const {
-        return this->_ptr->_evaluate(x); }
+        return this->_ptr->_call(x); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
@@ -250,9 +250,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
   public:
   public:
     friend CanonicalNumericType<P,PR,PRE> evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
-        return f._ptr->_evaluate(x); }
+        return f._ptr->_call(x); }
     friend Number<P> evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const Vector<Number<P>>& x) {
-        return f._ptr->_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+        return f._ptr->_call(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
     friend CanonicalNumericType<P,PR,PRE> unchecked_evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
     friend Number<P> unchecked_evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const Vector<Number<P>>& x) {
@@ -477,8 +477,8 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     inline SizeType size() const { return this->_ptr->result_size(); }
-    template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
-    template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
+    template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_call(v); }
+    template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_call(v); }
     inline ScalarFunctionModel<P,ARG,PR,PRE> const get(SizeType i) const { return ScalarFunctionModel<P,ARG,PR,PRE>(this->_ptr->_get(i)); }
     inline Void set(SizeType i, ScalarFunctionModel<P,ARG,PR,PRE> const& sf) { this->pointer()->_set(i,sf); }
     inline ScalarFunctionModel<P,ARG,PR,PRE> const operator[](SizeType i) const { return this->get(i); }
@@ -494,7 +494,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     inline ErrorType const error() const { return this->_ptr->_error(); }
     inline Void clobber() { this->pointer()->clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
-//        Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));
+//        Vector<Differential<NumericType>> dfx=this->_ptr->_call(Differential<NumericType>::variables(1u,x));
 //        return dfx.jacobian(); }
 
     inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
@@ -568,9 +568,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
         return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_restriction(d)); }
 
     friend Vector<CanonicalNumericType<P,PR,PRE>> evaluate(const VectorFunctionModel<P,ARG,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
-        return f._ptr->_evaluate(x); }
+        return f._ptr->_call(x); }
     friend Vector<Number<P>> evaluate(const VectorFunctionModel<P,ARG,PR,PRE>& f, const Vector<Number<P>>& x) {
-        return f._ptr->_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+        return f._ptr->_call(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
 
     friend Vector<CanonicalNumericType<P,PR,PRE>> unchecked_evaluate(const VectorFunctionModel<P,ARG,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
@@ -665,11 +665,11 @@ template<class P, class ARG, class PR, class PRE> VectorFunctionModelElement<P,A
 template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
 template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
 
-template<class T> concept HasRepr = requires(OutputStream& os, T const& t) { t.repr(os); };
+template<class T> concept HasRepr = requires(OutputStream& os, T const& t) { t._repr(os); };
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) {
     if constexpr (HasRepr<T>) {
-        obj.reference().repr(os); return os;
+        obj.reference()._repr(os); return os;
     } else {
         return os << obj.reference();
     }

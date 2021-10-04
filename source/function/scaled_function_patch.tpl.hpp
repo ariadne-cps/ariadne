@@ -394,11 +394,6 @@ template<class M> Bool ScaledFunctionPatch<M>::operator==(const ScaledFunctionPa
 */
 
 
-template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_derivative(SizeType j) const
-{
-    return new ScaledFunctionPatch<M>(derivative(*this,j));
-}
-
 template<class M> auto ScaledFunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const
     -> ArithmeticType<CoefficientType,FloatApproximation<PR>>
 {

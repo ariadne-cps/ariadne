@@ -355,7 +355,6 @@ template<class M> class ScaledFunctionPatch
   public:
     template<class X> X operator()(const Vector<X>& a) const;
   private:
-    ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
     ScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
@@ -942,7 +941,6 @@ template<class M> class VectorScaledFunctionPatch
     friend VectorScaledFunctionPatch<M> unchecked_compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
     }
-
 
 
     friend VectorScaledFunctionPatch<M> derivative(const VectorScaledFunctionPatch<M>& f, SizeType k) {

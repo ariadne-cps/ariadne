@@ -67,9 +67,9 @@ class ScalarUnivariateFormulaFunction
     virtual SizeOne argument_size() const final { return SizeOne(); }
     virtual SizeOne result_size() const final { return SizeOne(); }
     template<class X> X operator() (const X& x) const { return Ariadne::evaluate(_formula,Vector<X>({x})); }
+    friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, SizeOne j) {
+        return ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(f._formula,0)); }
   private:
-    virtual typename ScalarUnivariateFunction<P>::Interface* _derivative(SizeOne j) const final {
-    return new ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(_formula,0)); }
     virtual OutputStream& _write(OutputStream& os) const final { return os << this->_formula; }
     virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_formula<<")"; }
 };
@@ -95,10 +95,11 @@ class VectorUnivariateFormulaFunction
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeOne argument_size() const { return SizeOne(); }
     template<class X> Vector<X> operator() (const X& x) const { return Ariadne::evaluate(this->_formulae,Vector<X>({x})); }
+    friend VectorUnivariateFormulaFunction<Y> derivative(VectorUnivariateFormulaFunction<Y> const& f, SizeOne j) {
+        return VectorUnivariateFormulaFunction<Y>(Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
   private:
-    virtual ScalarUnivariateFormulaFunction<Y>* _get(SizeType i) const { return new ScalarUnivariateFormulaFunction<Y>(this->_formulae[i]); }
-    virtual VectorUnivariateFormulaFunction<Y>* _derivative(SizeOne k) const {
-        return new VectorUnivariateFormulaFunction<Y>(Vector<Formula<Y>>(this->_formulae.size(),[&](SizeType i){return derivative(this->_formulae[i],k);})); }
+    virtual ScalarUnivariateFormulaFunction<Y>* _get(SizeType i) const {
+        return new ScalarUnivariateFormulaFunction<Y>(this->_formulae[i]); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << this->_formulae; }
     virtual OutputStream& repr(OutputStream& os) const {
@@ -123,9 +124,9 @@ class ScalarFormulaFunction
     virtual SizeType argument_size() const final { return _argument_size; }
     virtual SizeOne result_size() const final { return SizeOne(); }
     template<class X> X operator() (const Vector<X>& x) const { return Ariadne::evaluate(_formula,x); }
+    friend ScalarFormulaFunction<Y> derivative(ScalarFormulaFunction<Y> const& f, SizeType j) {
+        return ScalarFormulaFunction<Y>(f._argument_size,Ariadne::derivative(f._formula,j)); }
   private:
-    virtual ScalarMultivariateFunctionInterface<P>* _derivative(SizeType j) const final {
-        return new ScalarFormulaFunction<Y>(_argument_size,Ariadne::derivative(_formula,j)); }
     virtual OutputStream& _write(OutputStream& os) const final {
         return os << this->_formula; }
     virtual OutputStream& repr(OutputStream& os) const final {
@@ -152,10 +153,10 @@ class VectorFormulaFunction
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeType argument_size() const { return this->_argument_size; }
     template<class X> Vector<X> operator() (const Vector<X>& x) const { return Ariadne::evaluate(this->_formulae,x); }
+    friend VectorFormulaFunction<Y> derivative(VectorFormulaFunction<Y> const& f, SizeType j) {
+        return VectorFormulaFunction<Y>(f._argument_size, Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
   private:
     virtual ScalarFormulaFunction<Y>* _get(SizeType i) const { return new ScalarFormulaFunction<Y>(this->_argument_size,this->_formulae[i]); }
-    virtual VectorFormulaFunction<Y>* _derivative(SizeType k) const {
-        return new VectorFormulaFunction<Y>(this->_argument_size, Vector<Formula<Y>>(this->_formulae.size(),[&](SizeType i){return derivative(this->_formulae[i],k);})); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_formulae; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
 };
@@ -250,9 +251,11 @@ class ConstantFunction
     virtual SizeOne result_size() const { return SizeOne(); }
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
-        return _make_constant(_value,x); }
+        return _make_constant(this->_value,x); }
+    friend ConstantFunction<Y,ARGS...> derivative(ConstantFunction<Y,ARGS...> const& f, ElementIndexType<D> j) {
+        return ConstantFunction<Y,ARGS...>(f._domain,Y(0)); }
+
   private:
-    virtual ScalarFunctionInterface<P,ARGS...>* _derivative(ElementIndexType<D> j) const { return new ConstantFunction<Y,ARGS...>(_domain,Y(0)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_value; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
   private:
@@ -290,12 +293,13 @@ class CoordinateFunction
     virtual ArgumentSizeType argument_size() const { return _domain.dimension(); }
     virtual SizeOne result_size() const { return SizeOne(); }
 
-    template<class X> inline X operator() (const Vector<X>& x) const { return x[_index]; }
+    template<class X> inline X operator() (const Vector<X>& x) const { return x[this->_index]; }
     template<class X> inline X operator() (const Scalar<X>& x) const { return x; }
+
+    friend ConstantFunction<Y,ARGS...> derivative(CoordinateFunction<P,ARGS...> const& f, ArgumentIndexType j) {
+        if(j==f._index) { return ConstantFunction<Y,ARGS...>(f.domain(),Y(1)); }
+        else { return ConstantFunction<Y,ARGS...>(f.domain(),Y(0)); } }
   private:
-    virtual ScalarFunctionInterface<P,ARGS...>* _derivative(ArgumentIndexType j) const {
-        if(j==_index) { return new ConstantFunction<Y,ARGS...>(_domain,Y(1)); }
-        else { return new ConstantFunction<Y,ARGS...>(_domain,Y(0)); } }
     virtual OutputStream& _write(OutputStream& os) const { return os << "x"<<this->_index; }
     virtual OutputStream& _repr(OutputStream& os) const { return os << "IF[R"<<this->argument_size()<<"](x"<<this->_index<<")"; }
 };
@@ -322,18 +326,13 @@ class UnaryFunction
     virtual SizeOne result_size() const { return SizeOne(); }
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
-        return _op(_arg.evaluate(x)); }
+        return this->_op(this->_arg(x)); }
+    friend ScalarFunction<P,ARGS...> derivative(UnaryFunction<P,ARGS...> const& f, ArgumentIndexType j) {
+        return f._op.accept([&](auto op){
+            if constexpr(Same<decltype(op),Abs>) { assert(false); return f._arg.derivative(j); }
+            else { return op.derivative(f._arg,f._arg.derivative(j)); } } );
+    }
   private:
-    virtual ScalarFunctionInterface<P,ARGS...>* _derivative(ArgumentIndexType j) const {
-        return static_cast<const ScalarFunctionInterface<P,ARGS...>&>(this->derivative(j))._clone();
-    }
-
-    virtual ScalarFunction<P,ARGS...> derivative(ArgumentIndexType j) const {
-        return _op.accept([&](auto op){
-            if constexpr(Same<decltype(op),Abs>) { assert(false); return _arg.derivative(j); }
-            else { return op.derivative(this->_arg,_arg.derivative(j)); } } );
-    }
-
     virtual OutputStream& _repr(OutputStream& os) const {
         return os << "UF[R" << this->argument_size() << "](" << *this << ")"; }
     virtual OutputStream& _write(OutputStream& os) const {
@@ -376,18 +375,16 @@ class BinaryFunction
         return SizeOne(); }
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
-        return _op(_arg1.evaluate(x),_arg2.evaluate(x)); }
+        return this->_op(this->_arg1(x),this->_arg2(x)); }
 
+    friend ScalarFunction<P,ARGS...> derivative(BinaryFunction<P,ARGS...> const& f, ElementIndexType<D> j) {
+        return f._op.accept([&](auto op){
+            if constexpr(Same<decltype(op),Max> || Same<decltype(op),Min>) { assert(false); return f._arg1.derivative(j); }
+            else { return op.derivative(f._arg1,f._arg1.derivative(j),f._arg2,f._arg2.derivative(j)); }
+        });
+    }
   private:
     virtual BinaryFunction<P,ARGS...>* clone() const { return new BinaryFunction<P,ARGS...>(*this); }
-
-    virtual ScalarFunctionInterface<P,ARGS...>* _derivative(ElementIndexType<D> j) const {
-        return static_cast<const ScalarFunctionInterface<P,ARGS...>&>(this->derivative(j))._clone(); }
-
-    virtual ScalarFunction<P,ARGS...> derivative(ElementIndexType<D> j) const {
-        return _op.accept([&](auto op){
-            if constexpr(Same<decltype(op),Max> || Same<decltype(op),Min>) { assert(false); return _arg1.derivative(j); }
-            else { return op.derivative(_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); } }); }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
@@ -408,7 +405,7 @@ class GradedFunction
     : public ScalarFunctionMixin< GradedFunction<P,ARGS...>, P,ARGS... >
 {
     typedef Number<P> Y;
-    using SIG=RealVector(ARGS...);
+    using SIG=Real(ARGS...);
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
@@ -424,22 +421,16 @@ class GradedFunction
         return SizeOne(); }
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
-        return _op(_arg1.evaluate(x),_arg2); }
+        return this->_op(this->_arg1.evaluate(x),this->_arg2); }
+
+    friend Function<P,SIG> derivative(GradedFunction<P,ARGS...> const& f, ElementIndexType<D> j) {
+        return f._op.accept([&](auto op){ return op.derivative(f._arg1, f._arg1.derivative(j), f._arg2);}); }
 
   private:
-    virtual ScalarFunctionInterface<P,ARGS...>* _derivative(ElementIndexType<D> j) const {
-        ARIADNE_NOT_IMPLEMENTED;
-    }
-
-    virtual ScalarFunction<P,ARGS...> derivative(ElementIndexType<D> j) const {
-        return _op.accept([&](auto op){ return op.derivative(_arg1, _arg1.derivative(j), _arg2);});
-    }
-
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "GF["<<this->argument_size()<<"]("<< *this <<")"; }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << _op.code() << "(" << _arg1 << "," << _arg2 << ")"; }
-
   private:
     GradedElementaryOperator _op;
     ScalarFunction<P,ARGS...> _arg1;
@@ -509,13 +500,13 @@ class VectorOfScalarFunction
             r[i]=_vec[i].evaluate(x); }
         return r; }
 
+    friend VectorOfScalarFunction<P,ARGS...> derivative(VectorOfScalarFunction<P,ARGS...> const& f, ArgumentIndexType k) {
+        return VectorOfScalarFunction<P,ARGS...>(Vector<ScalarFunction<P,ARGS...>>(f._vec.size(),[&](SizeType i){return derivative(f._vec[i],k);})); }
   private:
     virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const final {
         return this->_vec[i].raw_pointer()->_clone(); }
     virtual Void _set(SizeType i, const ScalarFunctionInterface<P,ARGS...>* sf) final {
         this->_vec[i]=ScalarFunction<P,ARGS...>(sf->_clone()); }
-    virtual VectorFunctionInterface<P,ARGS...>* _derivative(ArgumentIndexType k) const {
-        return new VectorOfScalarFunction<P,ARGS...>(Vector<ScalarFunction<P,ARGS...>>(this->_vec.size(),[&](SizeType i){return derivative(this->_vec[i],k);})); }
 
     virtual OutputStream& _write(OutputStream& os) const {
         os << "[";
@@ -599,8 +590,9 @@ class EmbeddedFunction
     template<class X> inline ElementType<C,X> operator() (const Vector<X>& x) const {
         Vector<X> px=project(x,Range(_dom1.dimension(),_dom1.dimension()+_f2.argument_size()));
         return _f2.evaluate(px); }
+    friend EmbeddedFunction<P,D1,D2,D3,C> derivative(EmbeddedFunction<P,D1,D2,D3,C> const& f, ArgumentSizeType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
-    virtual FunctionInterface<P,RES(ARG)>* _derivative(ArgumentSizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << "EmbeddedFunction( dom1="<<_dom1<<", f2="<<_f2<<", dom3="<<_dom3<<" )"; }
   private:
     D1 _dom1;
@@ -638,8 +630,9 @@ class ComposedFunction<P,RealScalar,T,AS...>
 
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return _f.evaluate(_g.evaluate(x)); }
+    friend ComposedFunction<P,R,T,AS...> derivative(ComposedFunction<P,R,T,AS...> const& f, ArgumentIndexType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
-    virtual FunctionInterface<P,R(AS...)>* _derivative(ArgumentIndexType j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
   private:
     Function<P,R(T)> _f;
@@ -672,8 +665,9 @@ class ComposedFunction<P,RealVector,T,AS...>
     ScalarFunction<P,AS...> operator[](SizeType i) const { return compose(_f[i],_g); }
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return _f.evaluate(_g.evaluate(x)); }
+    friend ComposedFunction<P,R,T,AS...> derivative(ComposedFunction<P,R,T,AS...> const& f, ArgumentIndexType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
-    virtual FunctionInterface<P,R(AS...)>* _derivative(ArgumentIndexType j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
   private:
     Function<P,R(T)> _f;
@@ -709,13 +703,14 @@ class JoinedFunction
     virtual ArgumentSizeType argument_size() const { return _f1.argument_size(); }
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return join(_f1.evaluate(x),_f2.evaluate(x)); }
+    friend JoinedFunction<P,D,C1,C2> derivative(JoinedFunction<P,D,C1,C2> const& f, ArgumentIndexType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
     virtual OutputStream& _write(OutputStream& os) const { return os << "JoinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
     virtual ScalarFunctionInterface<P,ARG>* _get(SizeType i) const {
         return (i<_f1.result_size()) ? dynamic_cast<VectorOfFunctionInterface<P,ARG>const*>(_f1.raw_pointer())->_get(i)
                                      : dynamic_cast<VectorOfFunctionInterface<P,ARG>const*>(_f2.raw_pointer())->_get(i-_f1.result_size());
     }
-    virtual VectorFunctionInterface<P,ARG>* _derivative(ArgumentIndexType j) const { ARIADNE_NOT_IMPLEMENTED; }
   private:
     Function<P,RES1(ARG)> _f1;
     Function<P,RES2(ARG)> _f2;
@@ -737,6 +732,7 @@ class CombinedFunction
     typedef C CodomainType;
     typedef ElementSizeType<D> ArgumentSizeType;
     typedef ElementSizeType<C> ResultSizeType;
+    typedef ElementIndexType<D> ArgumentIndexType;
 
     CombinedFunction(FunctionType<P,D1,C1> f1, FunctionType<P,D2,C2> f2)
         : _f1(f1), _f2(f2) { }
@@ -747,8 +743,9 @@ class CombinedFunction
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return join(_f1.evaluate(project(x,range(0,_f1.argument_size()))),
                     _f2.evaluate(project(x,range(_f1.argument_size(),this->argument_size())))); }
+    virtual CombinedFunction<P,D1,D2,C1,C2> derivative(CombinedFunction<P,D1,D2,C1,C2> const& f, ArgumentIndexType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
-    virtual FunctionInterfaceType<P,D,C>* _derivative(ElementIndexType<D> j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << "CombinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
   private:
     FunctionType<P,D1,C1> _f1;
@@ -764,6 +761,7 @@ class ProjectedFunction
     Projection _prj;
   public:
     typedef ElementSizeType<D> ArgumentSizeType;
+    typedef ElementIndexType<D> ArgumentIndexType;
 
     ProjectedFunction(VectorFunction<P,D> f, Projection prj)
         : _f(f), _prj(prj) { ARIADNE_PRECONDITION(f.result_size()==prj.argument_size()); }
@@ -772,9 +770,10 @@ class ProjectedFunction
 
     template<class X> inline Vector<X> operator() (const ElementType<D,X>& x) const {
         return _prj(_f(x)); }
+    friend ProjectedFunction<P,D> derivative(ProjectedFunction<P,D> const& f, ArgumentIndexType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
     virtual OutputStream& _write(OutputStream& os) const { return os << "ProjectedFunction( f="<<_f<<", prj="<<_prj<<" )"; }
-    virtual VectorFunctionInterface<P,D>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
 };
 
 
@@ -802,8 +801,9 @@ class LieDerivativeFunction
         }
         return r;
     }
+    friend LieDerivativeFunction<P> derivative(LieDerivativeFunction<P> const& f, SizeType j) {
+        ARIADNE_NOT_IMPLEMENTED; }
   private:
-    virtual ScalarMultivariateFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& _write(OutputStream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
   private:
     ScalarMultivariateFunction<P> _g;

@@ -449,12 +449,13 @@ template<class... OPS> class OperatorVariant
         return this->accept([&as...](auto op){return op(std::forward<AS>(as)...);}); }
     template<class R, class... AS> R call_as(AS&& ... as) const {
         return this->accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+    template<class... AS> friend decltype(auto) evaluate(OperatorVariant<OPS...>const& ops, AS&& ... as) {
+        return ops.call(as...); }
     template<class R, class... AS> friend R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
-        return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
-    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) { op.accept([&os](auto op_){os << op_;}); return os; }
+        return ops.call_as(as...); }
+    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) {
+        op.accept([&os](auto op_){os << op_;}); return os; }
 };
-//template<class R, class... OPS, class... AS> R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
-//    return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
 
 
 

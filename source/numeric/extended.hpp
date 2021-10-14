@@ -50,30 +50,30 @@ template<class X> class ExtendedOperations {
     typedef FiniteOperations<X> Finite;
     typedef ExtensionOperations<X> Extension;
   public:
-    
+
     static Bool is_nan(X const& x) { return Extension::is_nan(x); }
     static Bool is_inf(X const& x) { return Extension::is_inf(x); }
     static Bool is_finite(X const& x) { return Extension::is_finite(x); }
     static Bool is_zero(X const& x) { return Extension::is_zero(x); }
-    
+
     static Void set_nan(X& r) { Extension::set_nan(r); }
     static Void set_inf(X& r, Sign sgn) { Extension::set_inf(r,sgn); }
     static Void set_zero(X& r) { Extension::set_zero(r); }
 
     static Sign sgn(X const& x) { return Extension::sgn(x); }
-    
+
     static Sign abs(Sign s) { return (s==Sign::NEGATIVE) ? -s : s; }
     static Sign pow(Sign s, Nat m) { return (s==Sign::NEGATIVE && (m%2==0)) ? Sign::POSITIVE : s; }
-    
+
     static Void neg(X& r, X const& x) {
         if (is_finite(x)) { Finite::neg(r,x); }
         else { set_inf(r,-sgn(x)); } }
-        
+
     static Void add(X& r, X const& x1, X const& x2) {
         if (is_finite(x1) and is_finite(x2)) { Finite::add(r, x1,x2); }
         else if(is_finite(x1)) { set_inf(r,sgn(x2)); } else if(is_finite(x2)) { set_inf(r,sgn(x1)); }
         else if(sgn(x1)==sgn(x2)) { set_inf(r,sgn(x1)); } else { set_nan(r); } }
-        
+
     static Void sub(X& r, X const& x1, X const& x2) {
         if (is_finite(x1) and is_finite(x2)) { Finite::sub(r, x1,x2); }
         else if(is_finite(x1)) { set_inf(r,-sgn(x2)); } else if(is_finite(x2)) { set_inf(r,sgn(x1)); }
@@ -83,7 +83,7 @@ template<class X> class ExtendedOperations {
         else { set_inf(r,sgn(x1)*sgn(x2)); } }
     static Void div(X& r, X const& x1, X const& x2) {
         if (is_finite(x1) and is_finite(x2)) { Finite::div(r,x1,x2); } else { rec(r,x2); mul(r,x1,r); } }
-  
+
     static Void sqr(X& r, X const& x) {
         if (is_finite(x)) { Finite::sqr(r,x); } else { set_inf(r,abs(sgn(x))); } }
     static Void pow(X& r, X const& x, Nat m) {
@@ -91,7 +91,7 @@ template<class X> class ExtendedOperations {
         else { set_inf(r, (sgn(x)==Sign::POSITIVE || (m%2==0)) ? Sign::POSITIVE : Sign::NEGATIVE); } }
     static Void pow(X& r, X const& x, Int n) {
         if (is_finite(x)) { Finite::pow(r,x,n); } else { assert(false); } }
-        
+
     static Void hlf(X& r, X const& x) {
         if (is_finite(x)) { Finite::hlf(r, x); } else { set_inf(r, sgn(x)); } }
     static Void rec(X& r, X const& x) {
@@ -113,13 +113,15 @@ template<class X> class ExtendedOperations {
     static Boolean eq(X const& x1, X const& x2) {
         if(is_finite(x1) and is_finite(x2)) {
             return Finite::eq(x1,x2);
+        } else if(is_finite(x1) or is_finite(x2)) {
+            return false;
         } else if(is_nan(x1) or is_nan(x2)) {
             return false;
         } else {
             return sgn(x1)==sgn(x2);
         }
     }
-        
+
     static Comparison cmp(X const& x1, X const& x2) {
         if(is_finite(x1) and is_finite(x2)) {
             return Finite::cmp(x1,x2);
@@ -133,7 +135,7 @@ template<class X> class ExtendedOperations {
             return cmp((int)sgn(x1),(int)sgn(x2));
         }
     }
-    
+
     static OutputStream& write(OutputStream& os, X const& x) {
         if(is_finite(x)) { return os << x; }
         else if(is_nan(x)) { return os << "nan"; }

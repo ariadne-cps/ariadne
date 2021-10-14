@@ -264,7 +264,6 @@ TestNumber<Y>::test_comparisons() {
 
 template<> Void
 TestNumber<ExactNumber>::test_comparisons() {
-    return;
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y1,(Rational(2,3)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y2,(Rational(683,1024)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,pinf,(+ExactDouble::inf()));

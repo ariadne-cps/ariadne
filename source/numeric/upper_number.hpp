@@ -72,6 +72,7 @@ template<class P> class UpperNumber
     Handle<NumberInterface> handle() const { return this->_handle; }
   private:
     NumberInterface const& ref() const { return this->_handle.reference(); }
+    NumberInterface const* ptr() const { return this->_handle.pointer(); }
   public:
     typedef P Paradigm;
     typedef UpperNumber<P> NumericType;
@@ -108,11 +109,11 @@ template<class P> class UpperNumber
     friend UpperNumber<P> min(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1.ref()._apply(Min(),&y2.ref())); }
 
     friend UpperLogicalType<P> operator==(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return UpperLogicalType<P>(*y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.handle().pointer())); }
+        return Detail::logical_type_from_pointer<Equality<P>>(y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.ptr())); }
     friend LowerLogicalType<P> operator!=(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
         return not (y1 == y2); }
     friend LowerLogicalType<P> operator< (UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return LowerLogicalType<P>(*y1.ref()._apply(BinaryComparisonOperator(Less()),y2.handle().pointer())); }
+        return Detail::logical_type_from_pointer<LessThan<P>>(y1.ref()._apply(BinaryComparisonOperator(Less()),y2.ptr())); }
     friend UpperLogicalType<P> operator> (UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
         return y2 <  y1; }
     friend LowerLogicalType<P> operator<=(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {

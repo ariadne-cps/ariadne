@@ -264,7 +264,6 @@ TestNumber<Y>::test_comparisons() {
 
 template<> Void
 TestNumber<ExactNumber>::test_comparisons() {
-#warning
     return;
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y1,(Rational(2,3)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y2,(Rational(683,1024)));
@@ -320,6 +319,18 @@ TestNumber<EffectiveNumber>::test_comparisons() {
     ARIADNE_TEST_ASSERT(definitely(not (EffectiveNumber(Real(-inf))>EffectiveNumber(Real(0)))));
     ARIADNE_TEST_ASSERT(definitely(not (EffectiveNumber(Real(0))<EffectiveNumber(Real(-inf)))));
     ARIADNE_TEST_ASSERT(definitely(EffectiveNumber(Real(-inf))<=EffectiveNumber(Real(0))));
+
+    ARIADNE_TEST_CONSTRUCT(Real,r1,(1/3_q));
+    ARIADNE_TEST_CONSTRUCT(Real,r2,(ExactDouble(0.333333333333333333)));
+    ARIADNE_TEST_ASSERT(not definitely((r1>r2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(possibly(not (r1>r2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(definitely((r1>r2).check(Effort(64))));
+
+    ARIADNE_TEST_CONSTRUCT(EffectiveNumber,y1,(r1));
+    ARIADNE_TEST_CONSTRUCT(EffectiveNumber,y2,(r2));
+    ARIADNE_TEST_ASSERT(not definitely((y1>y2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(possibly(not (y1>y2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(definitely((y1>y2).check(Effort(64))));
 }
 
 template<class Y> class TestDirectedNumber

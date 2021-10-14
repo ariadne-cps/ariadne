@@ -46,10 +46,14 @@ template<class Y> class Expression<Sgn,Y> : public LogicalInterface {
     Y _y;
   public:
     Expression(Sgn, Y y) : _y(y) { }
+    virtual LogicalInterface* _clone() const override;
     virtual OutputStream& _write(OutputStream& os) const override;
     virtual LogicalValue _check(Effort eff) const override;
 };
 
+template<class Y> LogicalInterface* Expression<Sgn,Y>::_clone() const {
+    return new Expression<Sgn,Y>(*this);
+}
 template<class Y> OutputStream& Expression<Sgn,Y>::_write(OutputStream& os) const {
     return os << "sgn(" << _y << ")";
 }

@@ -101,6 +101,7 @@ template<> struct InterfaceTraits<NumberInterface> {
     template<class X> using WrapperType = NumberWrapper<X>;
 };
 
+using Detail::LogicalBaseInterface;
 
 template<class X> inline X const* extract(NumberInterface const* y) {
      return dynamic_cast<NumberWrapper<X>const*>(y);
@@ -143,7 +144,6 @@ struct MakeNumberWrapper {
 
 template<class R, class X1, class X2> inline R _concrete_apply(BinaryElementaryOperator op, X1 const& x1, X2 const& x2) {
     static_assert(Same<R,NumberInterface*>);
-    using RES=decltype(op(x1,x2));
     return op.accept([&x1,x2](auto _op){return _make_number_wrapper(_op(x1,x2));});
 }
 
@@ -166,21 +166,17 @@ template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op,
 
 
 template<class R, class OP, class X1, class X2> inline R _concrete_operator_apply(OP op, X1 const& x1, X2 const& x2) {
-    using RES=decltype(op(x1,x2));
-    RES res=op(x1,x2);
-    if constexpr (ConstructibleFrom<LogicalValue,RES>) {
-        return new LogicalValue(res);
+    auto res=op(x1,x2);
+    if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
+        return new Detail::LogicalValueWrapper(res.repr());
     } else {
-#warning
-        auto cres=op(Bounds(x1,dp),Bounds(x2,dp)); std::cerr<<cres<<"\n";
-        return new LogicalValue(op(Bounds(x1,dp),Bounds(x2,dp)));
-        auto val=res.check(Effort(0)); std::cerr<<val<<"\n";
-        return new LogicalValue(res.check(Effort(0)));
+        static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
+        return res.repr().pointer()->_clone();
     }
 }
 
 template<class R, class X1, class X2> inline R _concrete_apply(BinaryComparisonOperator op, X1 const& x1, X2 const& x2) {
-    static_assert(Same<R,LogicalValue*>);
+    static_assert(Same<R,LogicalBaseInterface*>);
     return op.accept( [&x1,&x2](auto _op){return _concrete_operator_apply<R>(_op,x1,x2);} );
 }
 
@@ -261,19 +257,19 @@ template<class Y, class F, class FE> class ElementaryBinaryNumberDispatcherMixin
 template<class X, class DI=DispatcherInterface<X>> class ComparisonBinaryNumberDispatcherMixin;
 
 template<class Y> class ComparisonBinaryNumberDispatcherMixin<Y,AlgebraicNumberInterface>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalValue*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
 template<class Y, class F> class ComparisonBinaryNumberDispatcherMixin<Y,ConcreteNumberInterface<F>>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalValue*,BinaryComparisonOperator,ManagedTypes<ConcreteNumberInterface<F>>>
-    , public OperableMixin<Y,NumberInterface,LogicalValue*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteNumberInterface<F>>>
+    , public OperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
 template<class Y, class F, class FE> class ComparisonBinaryNumberDispatcherMixin<Y,ConcreteBallInterface<F,FE>>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalValue*,BinaryComparisonOperator,ManagedTypes<ConcreteBallInterface<F,FE>>>
-    , public OperableMixin<Y,NumberInterface,LogicalValue*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteBallInterface<F,FE>>>
+    , public OperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
@@ -282,7 +278,7 @@ template<class Y, class F, class FE> class ComparisonBinaryNumberDispatcherMixin
 
 
 
-inline LogicalValue* make_symbolic(BinaryComparisonOperator op, NumberInterface const* yp1, NumberInterface const* yp2) {
+inline LogicalBaseInterface* make_symbolic(BinaryComparisonOperator op, NumberInterface const* yp1, NumberInterface const* yp2) {
     String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
@@ -313,7 +309,7 @@ template<class X,class N=Int> struct ElementaryGradedNumberOperationsMixin
     : public GradedOperationMixin<X,NumberInterface,GradedElementaryOperator,NumberInterface,N> { };
 
 template<class X> struct ComparisonBinaryNumberOperationsMixin
-    : public BinaryOperationMixin<X,LogicalValue,BinaryComparisonOperator,NumberInterface> { };
+    : public BinaryOperationMixin<X,LogicalBaseInterface,BinaryComparisonOperator,NumberInterface> { };
 
 inline OutputStream& operator<<(OutputStream& os, ParadigmCode cd) {
     switch (cd) {
@@ -336,14 +332,13 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual NumberInterface* _copy() const override { return new NumberWrapper<X>(_cast(*this)); }
     virtual NumberInterface* _move() override { return new NumberWrapper<X>(std::move(_cast(*this))); }
 
-    virtual LogicalValue _is_pos() const override {
+    virtual LogicalBaseInterface* _is_pos() const override {
         auto res=(_cast(*this) > 0);
-        if constexpr (ConstructibleFrom<LogicalValue,decltype(res)>) {
-            return LogicalValue(res);
+        if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
+            return new Detail::LogicalValueWrapper(res.repr());
         } else {
-#warning
-            if constexpr (not SameAs<decltype(res),Kleenean>) { return static_cast<LogicalValue>(res); }
-            std::abort();
+            static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
+            return res.repr().pointer()->_clone();
         }
     }
 

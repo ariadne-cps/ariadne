@@ -275,6 +275,7 @@ template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2
     : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
 {
     using Symbolic<OP,ARG1,ARG2>::Symbolic;
+    virtual LogicalInterface* _clone() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
     virtual LogicalValue _check(Effort eff) const { return this->_op(this->_arg1,this->_arg2,eff).repr(); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
 };

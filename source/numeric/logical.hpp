@@ -38,6 +38,8 @@ namespace Ariadne {
 
 template<class X> class Sequence;
 
+template<class T> String class_name();
+
 //! \ingroup LogicalModule
 //! \brief The amount of work used in performing a calculation or checking a quasidecidable predicate.
 //! \details The Effort should roughly reflect the time needed to perform a computation.
@@ -88,12 +90,18 @@ namespace Detail {
     inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return not (lv1==lv2); }
     OutputStream& operator<<(OutputStream& os, LogicalValue l);
 
-    class LogicalInterface {
+    class LogicalBaseInterface {
       public:
-        virtual ~LogicalInterface() = default;
-        virtual LogicalValue _check(Effort) const = 0;
+        virtual ~LogicalBaseInterface() = default;
         virtual OutputStream& _write(OutputStream&) const = 0;
     };
+
+    class LogicalInterface : public virtual LogicalBaseInterface {
+      public:
+        virtual LogicalInterface* _clone() const = 0;
+        virtual LogicalValue _check(Effort) const = 0;
+    };
+
 
     typedef SharedPointer<LogicalInterface> LogicalPointer;
 
@@ -103,6 +111,8 @@ namespace Detail {
         LogicalHandle(LogicalPointer const& ptr) : _ptr(ptr) { }
         operator LogicalPointer const& () const { return _ptr; }
         explicit LogicalHandle(LogicalValue);
+        SharedPointer<LogicalInterface> pointer() { return _ptr; }
+        SharedPointer<const LogicalInterface> pointer() const { return _ptr; }
         LogicalValue check(Effort eff) const { return _ptr->_check(eff); }
         friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {
             return l._ptr->_write(os); }
@@ -124,6 +134,31 @@ namespace Detail {
     LogicalHandle negation(LogicalHandle l);
     LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
     LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
+
+
+    class LogicalValueWrapper : public virtual LogicalBaseInterface {
+        LogicalValue _value;
+      public:
+        LogicalValueWrapper(LogicalValue value) : _value(value) { }
+        virtual LogicalValue _check() const { return this->_value; }
+        virtual OutputStream& _write(OutputStream& os) const { return os << this->_value; }
+    };
+
+    template<class P> LogicalType<P> logical_type_from_pointer(LogicalBaseInterface* ptr) {
+        if constexpr (ConstructibleFrom<LogicalType<P>,LogicalHandle>) {
+            auto elptr=dynamic_cast<LogicalInterface*>(ptr);
+            if (elptr) {
+                return LogicalType<P>(LogicalHandle(LogicalPointer(elptr)));
+            }
+        }
+        static_assert (ConstructibleFrom<LogicalType<P>,LogicalValue>);
+        auto vlptr=dynamic_cast<LogicalValueWrapper*>(ptr);
+        using std::runtime_error;
+        if (!vlptr) { throw std::runtime_error("logical_type_from_pointer: No conversion from abstract to concrete logical value"); }
+        return LogicalType<P>(SharedPointer<LogicalValueWrapper>(vlptr)->_check());
+    }
+
+
 }
 
 using Detail::LogicalValue;

@@ -47,7 +47,7 @@ class UnaryOperatorInterface;
 template<class... YS> struct Aware;
 template<class X> class NumberWrapper;
 
-
+namespace Detail { class LogicalBaseInterface; }
 
 class NumberInterface
     : public virtual WritableInterface
@@ -68,8 +68,8 @@ class NumberInterface
     virtual NumberInterface* _rapply(BinaryElementaryOperator op, NumberInterface const* y) const = 0;
     virtual NumberInterface* _apply(GradedElementaryOperator op, Int n) const = 0;
 
-    virtual LogicalValue* _apply(BinaryComparisonOperator op, NumberInterface const* y) const = 0;
-    virtual LogicalValue* _rapply(BinaryComparisonOperator op, NumberInterface const* y) const = 0;
+    virtual Detail::LogicalBaseInterface* _apply(BinaryComparisonOperator op, NumberInterface const* y) const = 0;
+    virtual Detail::LogicalBaseInterface* _rapply(BinaryComparisonOperator op, NumberInterface const* y) const = 0;
 
     virtual Rational _get_q() const = 0;
 
@@ -94,7 +94,7 @@ class NumberInterface
     FloatDPBounds _get(ValidatedTag, DoublePrecision pr) const;
     FloatMPBounds _get(ValidatedTag, MultiplePrecision pr) const;
 
-    virtual LogicalValue _is_pos() const = 0;
+    virtual Detail::LogicalBaseInterface* _is_pos() const = 0;
 
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;

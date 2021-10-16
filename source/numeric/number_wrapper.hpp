@@ -171,7 +171,7 @@ template<class R, class OP, class X1, class X2> inline R _concrete_operator_appl
         return new Detail::LogicalValueWrapper(res.repr());
     } else {
         static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
-        return res.repr().pointer()->_clone();
+        return res.repr().pointer()->_copy();
     }
 }
 
@@ -338,7 +338,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
             return new Detail::LogicalValueWrapper(res.repr());
         } else {
             static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
-            return res.repr().pointer()->_clone();
+            return res.repr().pointer()->_copy();
         }
     }
 

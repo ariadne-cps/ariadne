@@ -275,15 +275,15 @@ template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2
     : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
 {
     using Symbolic<OP,ARG1,ARG2>::Symbolic;
-    virtual LogicalInterface* _clone() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
+    virtual LogicalInterface* _copy() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
     virtual LogicalValue _check(Effort eff) const { return this->_op(this->_arg1,this->_arg2,eff).repr(); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
 };
 
 } // namespace Detail
 
-template<class OP, class ARG1, class ARG2> decltype(auto) make_shared_logical_expression(OP const& op, ARG1 const& arg1, ARG2 const& arg2) {
-    return std::make_shared<Detail::LogicalExpression<OP,ARG1,ARG2>>(op,arg1,arg2); }
+template<class OP, class ARG1, class ARG2> decltype(auto) make_logical_expression_handle(OP const& op, ARG1 const& arg1, ARG2 const& arg2) {
+    return LogicalHandle(std::make_shared<Detail::LogicalExpression<OP,ARG1,ARG2>>(op,arg1,arg2)); }
 
 ConstraintSet::ConstraintSet(const EffectiveVectorMultivariateFunction& f, const RealBox& b)
     : _dimension(f.argument_size()), _constraints()
@@ -323,19 +323,19 @@ ConstraintSet::dimension() const
 LowerKleenean
 ConstraintSet::separated(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Separated(),*this,bx));
 }
 
 LowerKleenean
 ConstraintSet::overlaps(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Overlap(),*this,bx));
 }
 
 LowerKleenean
 ConstraintSet::covers(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Covers(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Covers(),*this,bx));
 }
 
 ValidatedLowerKleenean
@@ -419,25 +419,25 @@ BoundedConstraintSet::dimension() const
 LowerKleenean
 BoundedConstraintSet::separated(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Separated(),*this,bx));
 }
 
 LowerKleenean
 BoundedConstraintSet::overlaps(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Overlap(),*this,bx));
 }
 
 LowerKleenean
 BoundedConstraintSet::covers(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Covers(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Covers(),*this,bx));
 }
 
 LowerKleenean
 BoundedConstraintSet::inside(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Inside(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Inside(),*this,bx));
 }
 
 ValidatedLowerKleenean
@@ -633,19 +633,19 @@ ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, 
 LowerKleenean
 ConstrainedImageSet::inside(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Inside(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Inside(),*this,bx));
 }
 
 LowerKleenean
 ConstrainedImageSet::separated(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Separated(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Separated(),*this,bx));
 }
 
 LowerKleenean
 ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 {
-    return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
+    return LowerKleenean(make_logical_expression_handle(Overlap(),*this,bx));
 }
 
 //! \brief Test if the set is contained in (the interior of) a box.

@@ -30,6 +30,7 @@
 
 #include "utility/stdlib.hpp"
 #include "utility/typedefs.hpp"
+#include "utility/handle.hpp"
 #include "numeric/paradigm.hpp"
 
 #include "logical.decl.hpp"
@@ -98,24 +99,17 @@ namespace Detail {
 
     class LogicalInterface : public virtual LogicalBaseInterface {
       public:
-        virtual LogicalInterface* _clone() const = 0;
+        virtual LogicalInterface* _copy() const = 0;
         virtual LogicalValue _check(Effort) const = 0;
     };
 
-
-    typedef SharedPointer<LogicalInterface> LogicalPointer;
-
-    class LogicalHandle {
-        LogicalPointer _ptr;
+    class LogicalHandle : public Handle<LogicalInterface> {
        public:
-        LogicalHandle(LogicalPointer const& ptr) : _ptr(ptr) { }
-        operator LogicalPointer const& () const { return _ptr; }
+        explicit LogicalHandle(SharedPointer<LogicalInterface> const& ptr) : Handle<LogicalInterface>(ptr) { }
         explicit LogicalHandle(LogicalValue);
-        SharedPointer<LogicalInterface> pointer() { return _ptr; }
-        SharedPointer<const LogicalInterface> pointer() const { return _ptr; }
-        LogicalValue check(Effort eff) const { return _ptr->_check(eff); }
+        LogicalValue check(Effort eff) const { return this->pointer()->_check(eff); }
         friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {
-            return l._ptr->_write(os); }
+            return l.pointer()->_write(os); }
     };
 
     inline LogicalValue check(LogicalHandle l, Effort e) { return l.check(e); }
@@ -148,7 +142,7 @@ namespace Detail {
         if constexpr (ConstructibleFrom<LogicalType<P>,LogicalHandle>) {
             auto elptr=dynamic_cast<LogicalInterface*>(ptr);
             if (elptr) {
-                return LogicalType<P>(LogicalHandle(LogicalPointer(elptr)));
+                return LogicalType<P>(LogicalHandle(SharedPointer<LogicalInterface>(elptr)));
             }
         }
         static_assert (ConstructibleFrom<LogicalType<P>,LogicalValue>);
@@ -164,7 +158,6 @@ namespace Detail {
 using Detail::LogicalValue;
 using Detail::LogicalHandle;
 using Detail::LogicalInterface;
-using Detail::LogicalPointer;
 
 
 
@@ -302,7 +295,7 @@ class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinski
     typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
     explicit Sierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
-    explicit Sierpinskian(LogicalPointer l) : Base(l) { }
+    explicit Sierpinskian(LogicalHandle l) : Base(l) { }
     explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     Sierpinskian(Indeterminate) : Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     //! \brief Check the value using effort \a e.
@@ -332,7 +325,7 @@ class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sie
     typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
     explicit NegatedSierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
-    explicit NegatedSierpinskian(LogicalPointer l) : Base(l) { }
+    explicit NegatedSierpinskian(LogicalHandle l) : Base(l) { }
     explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     //! \brief Check the value using effort \a e.
@@ -361,7 +354,7 @@ class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sie
 class Kleenean : public Logical<Kleenean,LogicalHandle> {
     typedef Logical<Kleenean,LogicalHandle> Base;
   public:
-    explicit Kleenean(LogicalPointer const& l) : Base(l) { }
+    explicit Kleenean(LogicalHandle const& l) : Base(l) { }
     explicit Kleenean(LogicalValue l) : Base(LogicalHandle(l)) { } // FIXME: Remove
   public:
     //! \brief Convert from a built-in boolean value, defaulting to \c true.
@@ -398,7 +391,7 @@ class Kleenean : public Logical<Kleenean,LogicalHandle> {
 class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> {
     typedef Logical<LowerKleenean,LogicalHandle,UpperKleenean> Base;
   public:
-    explicit LowerKleenean(LogicalPointer const& l) : Base(l) { }
+    explicit LowerKleenean(LogicalHandle const& l) : Base(l) { }
     LowerKleenean(bool b) : LowerKleenean(Boolean(b)) { }
     LowerKleenean(Indeterminate) : LowerKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     LowerKleenean(Boolean b) : LowerKleenean(Kleenean(b)) { }
@@ -427,7 +420,7 @@ class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> 
 class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> {
     typedef Logical<UpperKleenean,LogicalHandle,LowerKleenean> Base;
   public:
-    explicit UpperKleenean(LogicalPointer const& l) : Base(l) { }
+    explicit UpperKleenean(LogicalHandle const& l) : Base(l) { }
     UpperKleenean(bool b) : UpperKleenean(Kleenean(b)) { }
     UpperKleenean(Indeterminate) : UpperKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     UpperKleenean(Boolean b) : UpperKleenean(Kleenean(b)) { }
@@ -462,7 +455,7 @@ UpperKleenean conjunction(Sequence<UpperKleenean> const& uk);
 class NaiveKleenean : public Logical<NaiveKleenean,LogicalHandle> {
     typedef Logical<NaiveKleenean,LogicalHandle> Base;
   public:
-    explicit NaiveKleenean(LogicalPointer const& l) : Base(l) { }
+    explicit NaiveKleenean(LogicalHandle const& l) : Base(l) { }
     NaiveKleenean(bool b) : NaiveKleenean(Kleenean(b)) { }
     NaiveKleenean(Indeterminate i) : NaiveKleenean(Kleenean(i)) { }
     NaiveKleenean(Boolean b) : NaiveKleenean(Kleenean(b)) { }

@@ -43,7 +43,7 @@ class LogicalConstant : public LogicalInterface {
     LogicalValue _v;
   public:
     LogicalConstant(LogicalValue v) : _v(v) { };
-    virtual LogicalInterface* _clone() const { return new LogicalConstant(this->_v); }
+    virtual LogicalInterface* _copy() const { return new LogicalConstant(this->_v); }
     virtual LogicalValue _check(Effort e) const { return _v; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_v; }
 };
@@ -54,7 +54,7 @@ template<class OP, class ARG> struct LogicalExpression<OP,ARG>
     : virtual LogicalInterface, Symbolic<OP,ARG>
 {
     using Symbolic<OP,ARG>::Symbolic;
-    virtual LogicalInterface* _clone() const { return new LogicalExpression<OP,ARG>(*this); }
+    virtual LogicalInterface* _copy() const { return new LogicalExpression<OP,ARG>(*this); }
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg,e)); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<Symbolic<OP,ARG>const&>(*this); }
@@ -64,14 +64,14 @@ template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2
     : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
 {
     using Symbolic<OP,ARG1,ARG2>::Symbolic;
-    virtual LogicalInterface* _clone() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
+    virtual LogicalInterface* _copy() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
 };
 
 LogicalHandle::LogicalHandle(LogicalValue l)
-    : _ptr(std::make_shared<LogicalConstant>(l)) {
+    : LogicalHandle(std::make_shared<LogicalConstant>(l)) {
 }
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
@@ -149,7 +149,7 @@ template<> struct LogicalExpression<OrOp,Sequence<LowerKleenean>> : public Logic
     Sequence<LowerKleenean> _seq;
   public:
     LogicalExpression(OrOp, Sequence<LowerKleenean> seq) : _seq(seq) { }
-    LogicalInterface* _clone() const { return new LogicalExpression<OrOp,Sequence<LowerKleenean>>(*this); }
+    LogicalInterface* _copy() const { return new LogicalExpression<OrOp,Sequence<LowerKleenean>>(*this); }
     LogicalValue _check(Effort eff) const {
         for(Natural k=0u; k!=eff.work(); ++k) {
             if ( definitely(_seq[k].check(eff)) ) { return LogicalValue::TRUE; }
@@ -166,7 +166,7 @@ template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public Logi
     Sequence<UpperKleenean> _seq;
   public:
     LogicalExpression(AndOp, Sequence<UpperKleenean> seq) : _seq(seq) { }
-    LogicalInterface* _clone() const { return new LogicalExpression<AndOp,Sequence<UpperKleenean>>(*this); }
+    LogicalInterface* _copy() const { return new LogicalExpression<AndOp,Sequence<UpperKleenean>>(*this); }
     LogicalValue _check(Effort eff) const {
         for(Natural k=0u; k!=eff.work(); ++k) {
             if ( definitely(not _seq[k].check(eff)) ) { return LogicalValue::FALSE; }

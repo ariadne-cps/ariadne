@@ -91,22 +91,19 @@ namespace Detail {
     inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return not (lv1==lv2); }
     OutputStream& operator<<(OutputStream& os, LogicalValue l);
 
-    class LogicalBaseInterface {
+    class LogicalInterface {
       public:
-        virtual ~LogicalBaseInterface() = default;
-        virtual OutputStream& _write(OutputStream&) const = 0;
-    };
-
-    class LogicalInterface : public virtual LogicalBaseInterface {
-      public:
+        virtual ~LogicalInterface() = default;
         virtual LogicalInterface* _copy() const = 0;
         virtual LogicalValue _check(Effort) const = 0;
+        virtual OutputStream& _write(OutputStream&) const = 0;
     };
 
     class LogicalHandle : public Handle<LogicalInterface> {
        public:
+        using Handle<LogicalInterface>::Handle;
         explicit LogicalHandle(SharedPointer<LogicalInterface> const& ptr) : Handle<LogicalInterface>(ptr) { }
-        explicit LogicalHandle(LogicalValue);
+        static LogicalHandle constant(LogicalValue v);
         LogicalValue check(Effort eff) const { return this->pointer()->_check(eff); }
         friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {
             return l.pointer()->_write(os); }
@@ -129,16 +126,10 @@ namespace Detail {
     LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
     LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
 
+    LogicalValue logical_value_from_pointer(LogicalInterface* ptr);
+    LogicalInterface* new_logical_pointer_from_value(LogicalValue);
 
-    class LogicalValueWrapper : public virtual LogicalBaseInterface {
-        LogicalValue _value;
-      public:
-        LogicalValueWrapper(LogicalValue value) : _value(value) { }
-        virtual LogicalValue _check() const { return this->_value; }
-        virtual OutputStream& _write(OutputStream& os) const { return os << this->_value; }
-    };
-
-    template<class P> LogicalType<P> logical_type_from_pointer(LogicalBaseInterface* ptr) {
+    template<class P> LogicalType<P> logical_type_from_pointer(LogicalInterface* ptr) {
         if constexpr (ConstructibleFrom<LogicalType<P>,LogicalHandle>) {
             auto elptr=dynamic_cast<LogicalInterface*>(ptr);
             if (elptr) {
@@ -146,10 +137,7 @@ namespace Detail {
             }
         }
         static_assert (ConstructibleFrom<LogicalType<P>,LogicalValue>);
-        auto vlptr=dynamic_cast<LogicalValueWrapper*>(ptr);
-        using std::runtime_error;
-        if (!vlptr) { throw std::runtime_error("logical_type_from_pointer: No conversion from abstract to concrete logical value"); }
-        return LogicalType<P>(SharedPointer<LogicalValueWrapper>(vlptr)->_check());
+        return LogicalType<P>(logical_value_from_pointer(ptr));
     }
 
 
@@ -294,10 +282,10 @@ class Boolean : public Logical<Boolean,LogicalValue> {
 class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> {
     typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
-    explicit Sierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
+    explicit Sierpinskian(LogicalValue l) : Base(LogicalHandle::constant(l)) { }
     explicit Sierpinskian(LogicalHandle l) : Base(l) { }
-    explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
-    Sierpinskian(Indeterminate) : Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
+    explicit Sierpinskian(bool b=true) : Sierpinskian(Detail::make_logical_value(b)) { }
+    Sierpinskian(Indeterminate) : Sierpinskian(LogicalValue::INDETERMINATE) { }
     //! \brief Check the value using effort \a e.
     ValidatedSierpinskian check(Effort e) const;
     //! \brief Check the value of \a s using effort \a e.
@@ -324,10 +312,10 @@ class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinski
 class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> {
     typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
-    explicit NegatedSierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
+    explicit NegatedSierpinskian(LogicalValue l) : Base(LogicalHandle::constant(l)) { }
     explicit NegatedSierpinskian(LogicalHandle l) : Base(l) { }
-    explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
-    NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
+    explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(Detail::make_logical_value(b)) { }
+    NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalValue::INDETERMINATE) { }
     //! \brief Check the value using effort \a e.
     ValidatedNegatedSierpinskian check(Effort e) const;
     //! \brief Check the value of \a s using effort \a e.
@@ -355,7 +343,7 @@ class Kleenean : public Logical<Kleenean,LogicalHandle> {
     typedef Logical<Kleenean,LogicalHandle> Base;
   public:
     explicit Kleenean(LogicalHandle const& l) : Base(l) { }
-    explicit Kleenean(LogicalValue l) : Base(LogicalHandle(l)) { } // FIXME: Remove
+    explicit Kleenean(LogicalValue l) : Base(LogicalHandle::constant(l)) { }  // FIXME: Remove
   public:
     //! \brief Convert from a built-in boolean value, defaulting to \c true.
     Kleenean(bool b=true) : Kleenean(Boolean(b)) { }
@@ -393,7 +381,7 @@ class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> 
   public:
     explicit LowerKleenean(LogicalHandle const& l) : Base(l) { }
     LowerKleenean(bool b) : LowerKleenean(Boolean(b)) { }
-    LowerKleenean(Indeterminate) : LowerKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
+    LowerKleenean(Indeterminate) : LowerKleenean(LogicalHandle::constant(LogicalValue::INDETERMINATE)) { }
     LowerKleenean(Boolean b) : LowerKleenean(Kleenean(b)) { }
     LowerKleenean(Sierpinskian s) : LowerKleenean(Kleenean(s)) { }
     //! \brief Convert from a %Kleenean predicate.
@@ -422,7 +410,7 @@ class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> 
   public:
     explicit UpperKleenean(LogicalHandle const& l) : Base(l) { }
     UpperKleenean(bool b) : UpperKleenean(Kleenean(b)) { }
-    UpperKleenean(Indeterminate) : UpperKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
+    UpperKleenean(Indeterminate) : UpperKleenean(LogicalHandle::constant(LogicalValue::INDETERMINATE)) { }
     UpperKleenean(Boolean b) : UpperKleenean(Kleenean(b)) { }
     UpperKleenean(NegatedSierpinskian ns) : UpperKleenean(Kleenean(ns)) { }
     //! \brief Convert from a %Kleenean predicate.

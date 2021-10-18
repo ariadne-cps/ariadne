@@ -39,80 +39,97 @@ namespace Ariadne {
 
 namespace Detail {
 
-class LogicalConstant : public LogicalInterface {
+inline LogicalValue check(LogicalHandle l, Effort e);
+inline LogicalValue check(LogicalValue l, Effort e) { return l; }
+template<class OP, class ARG> decltype(auto) check(Symbolic<OP,ARG> const& s, Effort e) { return s._op(check(s._arg,e)); }
+template<class OP, class ARG1, class ARG2> decltype(auto) check(Symbolic<OP,ARG1,ARG2> const& s, Effort e) { return s._op(check(s._arg1,e),check(s._arg2,e)); }
+
+template<class L> class LogicalWrapper
+    : public virtual LogicalInterface, public L
+{
+    using L::L;
+  private:
+    virtual LogicalInterface* _copy() const { return new LogicalWrapper<L>(*this); }
+    virtual LogicalValue _check(Effort e) const { return check(static_cast<L const&>(*this),e); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<L const&>(*this); }
+};
+
+template<> class LogicalWrapper<LogicalValue>
+    : public virtual LogicalInterface
+{
     LogicalValue _v;
   public:
-    LogicalConstant(LogicalValue v) : _v(v) { };
-    virtual LogicalInterface* _copy() const { return new LogicalConstant(this->_v); }
-    virtual LogicalValue _check(Effort e) const { return _v; }
+    LogicalWrapper(LogicalValue v) : _v(v) { }
+    operator LogicalValue() const { return this->_v; }
+  private:
+    virtual LogicalInterface* _copy() const { return new LogicalWrapper<LogicalValue>(*this); }
+    virtual LogicalValue _check(Effort e) const { return this->_v; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_v; }
 };
 
-template<class OP, class... ARGS> struct LogicalExpression;
 
-template<class OP, class ARG> struct LogicalExpression<OP,ARG>
-    : virtual LogicalInterface, Symbolic<OP,ARG>
-{
-    using Symbolic<OP,ARG>::Symbolic;
-    virtual LogicalInterface* _copy() const { return new LogicalExpression<OP,ARG>(*this); }
-    virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg,e)); }
-    virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<Symbolic<OP,ARG>const&>(*this); }
+class LogicalConstant : public LogicalWrapper<LogicalValue> {
+    using LogicalWrapper<LogicalValue>::LogicalWrapper;
 };
 
-template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
-    : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
-{
-    using Symbolic<OP,ARG1,ARG2>::Symbolic;
-    virtual LogicalInterface* _copy() const { return new LogicalExpression<OP,ARG1,ARG2>(*this); }
-    virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
-    virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
+template<class OP, class... ARGS> class LogicalExpression : public LogicalWrapper<Symbolic<OP,ARGS...>> {
+    using LogicalWrapper<Symbolic<OP,ARGS...>>::LogicalWrapper;
 };
 
-LogicalHandle::LogicalHandle(LogicalValue l)
-    : LogicalHandle(std::make_shared<LogicalConstant>(l)) {
+
+LogicalInterface* new_logical_pointer_from_value(LogicalValue v) {
+    return new LogicalWrapper<LogicalValue>(v);
+}
+
+LogicalValue logical_value_from_pointer(LogicalInterface* ptr) {
+    auto vlptr=dynamic_cast<LogicalWrapper<LogicalValue>*>(ptr);
+    if (!vlptr) { throw std::runtime_error("logical_type_from_pointer: No conversion from abstract to concrete logical value"); }
+    return *vlptr;
+}
+
+LogicalHandle LogicalHandle::constant(LogicalValue l) {
+    return LogicalHandle(make_handle<LogicalConstant>(l));
 }
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
 }
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
 }
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
 }
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
 }
 
 LogicalHandle operator!(LogicalHandle l) {
-    return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 }
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
 }
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
 }
 
 LogicalHandle negation(LogicalHandle l) {
-    return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 }
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
 }
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
 }
 
 
@@ -182,10 +199,10 @@ template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public Logi
 
 
 LowerKleenean disjunction(Sequence<LowerKleenean> const& l) {
-    return LowerKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
+    return LowerKleenean(LogicalHandle(make_handle<Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
 }
 UpperKleenean conjunction(Sequence<UpperKleenean> const& l) {
-    return UpperKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
+    return UpperKleenean(LogicalHandle(make_handle<Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
 }
 
 Nat Effort::_default = 0u;

@@ -101,8 +101,6 @@ template<> struct InterfaceTraits<NumberInterface> {
     template<class X> using WrapperType = NumberWrapper<X>;
 };
 
-using Detail::LogicalBaseInterface;
-
 template<class X> inline X const* extract(NumberInterface const* y) {
      return dynamic_cast<NumberWrapper<X>const*>(y);
 }
@@ -168,7 +166,7 @@ template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op,
 template<class R, class OP, class X1, class X2> inline R _concrete_operator_apply(OP op, X1 const& x1, X2 const& x2) {
     auto res=op(x1,x2);
     if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
-        return new Detail::LogicalValueWrapper(res.repr());
+        return new_logical_pointer_from_value(res.repr());
     } else {
         static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
         return res.repr().pointer()->_copy();
@@ -176,7 +174,7 @@ template<class R, class OP, class X1, class X2> inline R _concrete_operator_appl
 }
 
 template<class R, class X1, class X2> inline R _concrete_apply(BinaryComparisonOperator op, X1 const& x1, X2 const& x2) {
-    static_assert(Same<R,LogicalBaseInterface*>);
+    static_assert(Same<R,LogicalInterface*>);
     return op.accept( [&x1,&x2](auto _op){return _concrete_operator_apply<R>(_op,x1,x2);} );
 }
 
@@ -257,19 +255,19 @@ template<class Y, class F, class FE> class ElementaryBinaryNumberDispatcherMixin
 template<class X, class DI=DispatcherInterface<X>> class ComparisonBinaryNumberDispatcherMixin;
 
 template<class Y> class ComparisonBinaryNumberDispatcherMixin<Y,AlgebraicNumberInterface>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
 template<class Y, class F> class ComparisonBinaryNumberDispatcherMixin<Y,ConcreteNumberInterface<F>>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteNumberInterface<F>>>
-    , public OperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteNumberInterface<F>>>
+    , public OperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
 template<class Y, class F, class FE> class ComparisonBinaryNumberDispatcherMixin<Y,ConcreteBallInterface<F,FE>>
-    : public SelfOperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteBallInterface<F,FE>>>
-    , public OperableMixin<Y,NumberInterface,LogicalBaseInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<ConcreteBallInterface<F,FE>>>
+    , public OperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
 {
 };
 
@@ -278,7 +276,7 @@ template<class Y, class F, class FE> class ComparisonBinaryNumberDispatcherMixin
 
 
 
-inline LogicalBaseInterface* make_symbolic(BinaryComparisonOperator op, NumberInterface const* yp1, NumberInterface const* yp2) {
+inline LogicalInterface* make_symbolic(BinaryComparisonOperator op, NumberInterface const* yp1, NumberInterface const* yp2) {
     String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
@@ -309,7 +307,7 @@ template<class X,class N=Int> struct ElementaryGradedNumberOperationsMixin
     : public GradedOperationMixin<X,NumberInterface,GradedElementaryOperator,NumberInterface,N> { };
 
 template<class X> struct ComparisonBinaryNumberOperationsMixin
-    : public BinaryOperationMixin<X,LogicalBaseInterface,BinaryComparisonOperator,NumberInterface> { };
+    : public BinaryOperationMixin<X,LogicalInterface,BinaryComparisonOperator,NumberInterface> { };
 
 inline OutputStream& operator<<(OutputStream& os, ParadigmCode cd) {
     switch (cd) {
@@ -332,10 +330,10 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual NumberInterface* _copy() const override { return new NumberWrapper<X>(_cast(*this)); }
     virtual NumberInterface* _move() override { return new NumberWrapper<X>(std::move(_cast(*this))); }
 
-    virtual LogicalBaseInterface* _is_pos() const override {
+    virtual LogicalInterface* _is_pos() const override {
         auto res=(_cast(*this) > 0);
         if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
-            return new Detail::LogicalValueWrapper(res.repr());
+            return new_logical_pointer_from_value(res.repr());
         } else {
             static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
             return res.repr().pointer()->_copy();

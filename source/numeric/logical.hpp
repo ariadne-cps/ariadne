@@ -102,7 +102,6 @@ namespace Detail {
     class LogicalHandle : public Handle<LogicalInterface> {
        public:
         using Handle<LogicalInterface>::Handle;
-        explicit LogicalHandle(SharedPointer<LogicalInterface> const& ptr) : Handle<LogicalInterface>(ptr) { }
         static LogicalHandle constant(LogicalValue v);
         LogicalValue check(Effort eff) const { return this->pointer()->_check(eff); }
         friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {

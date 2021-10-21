@@ -39,7 +39,6 @@ namespace Ariadne {
 
 namespace Detail {
 
-inline LogicalValue check(LogicalHandle l, Effort e);
 inline LogicalValue check(LogicalValue l, Effort e) { return l; }
 template<class OP, class ARG> decltype(auto) check(Symbolic<OP,ARG> const& s, Effort e) { return s._op(check(s._arg,e)); }
 template<class OP, class ARG1, class ARG2> decltype(auto) check(Symbolic<OP,ARG1,ARG2> const& s, Effort e) { return s._op(check(s._arg1,e),check(s._arg2,e)); }

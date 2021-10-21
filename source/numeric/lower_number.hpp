@@ -109,11 +109,11 @@ template<class P> class LowerNumber
     friend LowerNumber<P> min(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Min(),&y2.ref())); }
 
     friend UpperLogicalType<P> operator==(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return Detail::logical_type_from_pointer<Equality<P>>(y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.ptr())); }
+        return Detail::logical_type_from_pointer<Equality<P>>(y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.handle().pointer())); }
     friend LowerLogicalType<P> operator!=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
         return not (y1 == y2); }
     friend UpperLogicalType<P> operator< (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return Detail::logical_type_from_pointer<LessThan<P>>(y1.ref()._apply(BinaryComparisonOperator(Less()),y2.ptr())); }
+        return Detail::logical_type_from_pointer<LessThan<P>>(y1.ref()._apply(BinaryComparisonOperator(Less()),y2.handle().pointer())); }
     friend LowerLogicalType<P> operator> (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
         return y2 <  y1; }
     friend UpperLogicalType<P> operator<=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {

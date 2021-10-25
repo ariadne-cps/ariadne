@@ -264,7 +264,6 @@ TestNumber<Y>::test_comparisons() {
 
 template<> Void
 TestNumber<ExactNumber>::test_comparisons() {
-    return;
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y1,(Rational(2,3)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,y2,(Rational(683,1024)));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,pinf,(+ExactDouble::inf()));
@@ -310,7 +309,28 @@ TestNumber<ExactNumber>::test_comparisons() {
 
 }
 
+template<> Void
+TestNumber<EffectiveNumber>::test_comparisons() {
+    ARIADNE_TEST_ASSERT(definitely(EffectiveNumber(Real(-inf))<EffectiveNumber(Real(0))));
+    ARIADNE_TEST_ASSERT(definitely(EffectiveNumber(Real(0))>EffectiveNumber(Real(-inf))));
+    ARIADNE_TEST_ASSERT(not possibly(EffectiveNumber(Real(-inf))>EffectiveNumber(Real(0))));
+    ARIADNE_TEST_ASSERT(not possibly(EffectiveNumber(Real(0))<EffectiveNumber(Real(-inf))));
+    ARIADNE_TEST_ASSERT(definitely(not (EffectiveNumber(Real(-inf))>EffectiveNumber(Real(0)))));
+    ARIADNE_TEST_ASSERT(definitely(not (EffectiveNumber(Real(0))<EffectiveNumber(Real(-inf)))));
+    ARIADNE_TEST_ASSERT(definitely(EffectiveNumber(Real(-inf))<=EffectiveNumber(Real(0))));
 
+    ARIADNE_TEST_CONSTRUCT(Real,r1,(1/3_q));
+    ARIADNE_TEST_CONSTRUCT(Real,r2,(ExactDouble(0.333333333333333333)));
+    ARIADNE_TEST_ASSERT(not definitely((r1>r2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(possibly(not (r1>r2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(definitely((r1>r2).check(Effort(64))));
+
+    ARIADNE_TEST_CONSTRUCT(EffectiveNumber,y1,(r1));
+    ARIADNE_TEST_CONSTRUCT(EffectiveNumber,y2,(r2));
+    ARIADNE_TEST_ASSERT(not definitely((y1>y2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(possibly(not (y1>y2).check(Effort(0))));
+    ARIADNE_TEST_ASSERT(definitely((y1>y2).check(Effort(64))));
+}
 
 template<class Y> class TestDirectedNumber
 {
@@ -340,29 +360,64 @@ TestDirectedNumber<Y>::test_concept() {
     ny==y; ny!=y; ny<y; ny>y;
 }
 
+
 template<class Y> Void
 TestDirectedNumber<Y>::test_operations() {
-    if constexpr (Same<Paradigm<Y>,ValidatedTag>) {
-        if constexpr (Same<Y,ValidatedLowerNumber>) {
-            typedef DoublePrecision PR;
-            PR pr;
-            Rational q(1,3);
-            FloatBounds<PR> x(q,pr);
-            FloatLowerBound<PR> xl=x;
-            FloatUpperBound<PR> xu=4*x;
+    if constexpr (Same<Y,ValidatedLowerNumber>) {
+        typedef DoublePrecision PR;
+        PR pr;
+        Rational q(1,3);
+        FloatBounds<PR> x(q,pr);
+        FloatLowerBound<PR> xl=x;
+        FloatUpperBound<PR> xu=x*7/8;
 
-            ValidatedLowerNumber yl(xl);
-            ValidatedUpperNumber yu(xu);
+        ValidatedNumber y(x);
+        ValidatedLowerNumber yl(xl);
+        ValidatedUpperNumber yu(xu);
 
-            // Tests
-            ARIADNE_TEST_ASSERT(not definitely (yl > q));
-            ARIADNE_TEST_ASSERT(not definitely (-yl < -q));
-            ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
-            ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
-            ARIADNE_TEST_ASSERT(not definitely (yl - yu > -1));
-            ARIADNE_TEST_ASSERT(not definitely (yl - yu > -2));
-            std::cerr << (yl-yu) << "\n";
-        }
+        // Tests
+        ARIADNE_TEST_ASSERT(not possibly (yu == yl));
+        ARIADNE_TEST_ASSERT(definitely (yu != yl));
+        ARIADNE_TEST_ASSERT(not definitely (yl > q));
+        ARIADNE_TEST_ASSERT(not definitely (-yl < -q));
+        ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
+        ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
+        ARIADNE_TEST_ASSERT(definitely (yu < yl));
+        ARIADNE_TEST_ASSERT(definitely (yl > yu));
+
+        ARIADNE_TEST_ASSERT(not definitely (yl > q));
+
+        static_assert(Same<DifferenceType<ExactNumber,ValidatedUpperNumber>,ValidatedLowerNumber>);
+        static_assert(Same<DifferenceType<ValidatedLowerNumber,ValidatedUpperNumber>,ValidatedLowerNumber>);
+        static_assert(Same<DifferenceType<ValidatedLowerNumber,ValidatedNumber>,ValidatedLowerNumber>);
+
+        static_assert(Same<DifferenceType<Integer,FloatDPUpperBound>,FloatDPLowerBound>);
+        static_assert(Same<DifferenceType<Dyadic,FloatDPUpperBound>,FloatDPLowerBound>);
+        static_assert(Same<DifferenceType<FloatDPUpperBound,Integer>,FloatDPUpperBound>);
+        static_assert(Same<DifferenceType<FloatDPUpperBound,Dyadic>,FloatDPUpperBound>);
+
+        static_assert(Same<decltype(Add().operator()(xu,xu)),FloatDPUpperBound>);
+        static_assert(Same<decltype(Sub().operator()(xu,xl)),FloatDPUpperBound>);
+        static_assert(Same<decltype(BinaryElementaryOperator(Add()).operator()(xu,xu)),FloatDPApproximation>);
+        static_assert(Same<decltype(BinaryElementaryOperator(Sub()).operator()(xu,xl)),FloatDPApproximation>);
+
+        ARIADNE_TEST_NOTIFY("BinaryElementaryOperator returns common arithmetical type, which may differ from type of actual operation.");
+
+        Integer z(5);
+        Dyadic w(1.375_x);
+        ARIADNE_TEST_PRINT(w<yu);
+        ARIADNE_TEST_PRINT(ExactNumber(w).class_name());
+        ARIADNE_TEST_PRINT(ValidatedLowerNumber(w).class_name());
+
+        ARIADNE_TEST_EQUALS(ExactNumber(w).class_name(),"Dyadic");
+        ARIADNE_TEST_EQUALS((yl+yl).class_name(),"FloatDPLowerBound");
+        ARIADNE_TEST_EQUALS((yl-yu).class_name(),"FloatDPLowerBound");
+        ARIADNE_TEST_EQUALS((yu+yu).class_name(),"FloatDPUpperBound");
+        ARIADNE_TEST_EQUALS((yu-yl).class_name(),"FloatDPUpperBound");
+        ARIADNE_TEST_EQUALS((ExactNumber(z)-yu).class_name(),"FloatDPLowerBound");
+
+        ARIADNE_TEST_ASSERT(not possibly(w<yu));
+
     }
 }
 

@@ -384,10 +384,14 @@ template<class O, class... ARGS> struct LogicalWrapper;
 template<class O> struct LogicalWrapper<O,Real> : virtual LogicalInterface, Symbolic<O,Real> {
     LogicalWrapper(O o, Real a)
         : Symbolic<O,Real>(o,a) { }
+    virtual LogicalInterface* _copy() const;
     virtual LogicalValue _check(Effort e) const;
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<Symbolic<O,Real> const&>(*this); }
 };
+
+template<class O> LogicalInterface* LogicalWrapper<O,Real>::_copy() const {
+    return new LogicalWrapper<O,Real>(*this); }
 
 template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
     return static_cast<LogicalValue>(this->_op(this->_arg.compute(e)));
@@ -398,11 +402,14 @@ template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
 template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, Symbolic<O,Real,Real> {
     LogicalWrapper(O o, Real a1, Real a2)
         : Symbolic<O,Real,Real>(o,a1,a2) { }
+    virtual LogicalInterface* _copy() const;
     virtual LogicalValue _check(Effort e) const;
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<Symbolic<O,Real,Real> const&>(*this); }
 };
 
+template<class O> LogicalInterface* LogicalWrapper<O,Real,Real>::_copy() const {
+    return new LogicalWrapper<O,Real,Real>(*this); }
 template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {
     return static_cast<LogicalValue>(this->_op(this->_arg1.compute(e),this->_arg2.compute(e)));
 //    if(e==0u) { DoublePrecision p; return static_cast<LogicalValue>(this->_op(this->_arg1.get(p),this->_arg2.get(p))); }
@@ -410,7 +417,7 @@ template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) con
 }
 
 template<class R, class O, class... ARGS> R make_logical(O op, ARGS ...args) {
-    return R(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
+    return R(LogicalHandle(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...)));
 }
 template<class P, class O, class... ARGS> LogicalType<P> make_logical_type(O op, ARGS ...args) {
     return LogicalType<P>(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));

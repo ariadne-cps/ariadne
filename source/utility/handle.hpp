@@ -115,6 +115,10 @@ template<class I> class Handle {
     template<class D, class B> friend const Handle<D> dynamic_handle_cast(const Handle<B>& h);
 };
 
+template<class T, class... AS> Handle<T> make_handle(AS&& ... as) {
+    return Handle<T>(std::make_shared<T>(as...));
+}
+
 inline void write_error(OutputStream& os, const char* i, const char* c, const char* t) {
     os << "Error in dynamic_handle_cast: cannot convert object of static type " << c << " and dynamic type " << i << " to type " << t << "\n";
 }

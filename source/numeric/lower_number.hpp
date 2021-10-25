@@ -72,6 +72,7 @@ template<class P> class LowerNumber
     Handle<NumberInterface> handle() const { return this->_handle; }
   private:
     NumberInterface const& ref() const { return this->_handle.reference(); }
+    NumberInterface const* ptr() const { return this->_handle.pointer(); }
   public:
     typedef P Paradigm;
     typedef LowerNumber<P> NumericType;
@@ -108,17 +109,32 @@ template<class P> class LowerNumber
     friend LowerNumber<P> min(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1.ref()._apply(Min(),&y2.ref())); }
 
     friend UpperLogicalType<P> operator==(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1.ref()._equals(y2.handle().reference())); }
+        return Detail::logical_type_from_pointer<Equality<P>>(y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.handle().pointer())); }
     friend LowerLogicalType<P> operator!=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
         return not (y1 == y2); }
     friend UpperLogicalType<P> operator< (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1.ref()._less(y2.handle().reference())); }
+        return Detail::logical_type_from_pointer<LessThan<P>>(y1.ref()._apply(BinaryComparisonOperator(Less()),y2.handle().pointer())); }
     friend LowerLogicalType<P> operator> (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
         return y2 <  y1; }
+    friend UpperLogicalType<P> operator<=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
+        return not (y2 <  y1); }
+    friend LowerLogicalType<P> operator>=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
+        return not (y1 <  y2); }
+    friend LowerLogicalType<P> operator< (UpperNumber<P> const& y1, LowerNumber<P> const& y2);
+    friend UpperLogicalType<P> operator> (UpperNumber<P> const& y1, LowerNumber<P> const& y2);
+    friend LowerLogicalType<P> operator<=(UpperNumber<P> const& y1, LowerNumber<P> const& y2);
+    friend UpperLogicalType<P> operator>=(UpperNumber<P> const& y1, LowerNumber<P> const& y2);
 
     String class_name() const { return this->ref()._class_name(); }
 
     friend OutputStream& operator<<(OutputStream& os, LowerNumber<P> const& y) { return y.ref()._write(os); }
+
+    struct Zero { };
+    friend LowerLogicalType<P> operator>(LowerNumber<P> const& y, Zero const& z) {
+        return LowerLogicalType<P>(y.ref()._is_pos()); }
+    friend UpperLogicalType<P> operator<(LowerNumber<P> const& y, Zero const& z) {
+        return UpperLogicalType<P>(not y.ref()._is_pos()); }
+
 };
 
 

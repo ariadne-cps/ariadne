@@ -213,9 +213,9 @@ template<class P> class Number
 
 
     friend LogicalType<Equality<P>> operator==(Number<P> const& y1, Number<P> const& y2) {
-        return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); } //! <p/>
+        return Detail::logical_type_from_pointer<Equality<P>>(y1.ref()._apply(BinaryComparisonOperator(Equal()),y2.ptr())); }
     friend LogicalType<LessThan<P>> operator< (Number<P> const& y1, Number<P> const& y2) {
-        return LogicalType<LessThan<P>>(y1.ref()._less(y2.ref())); } //! <p/>
+        return Detail::logical_type_from_pointer<LessThan<P>>(y1.ref()._apply(BinaryComparisonOperator(Less()),y2.ptr())); }
     friend LogicalType<LessThan<P>> operator> (Number<P> const& y1, Number<P> const& y2) { return (y2<y1); } //! <p/>
     friend LogicalNegationType<LogicalType<Equality<P>>> operator!=(Number<P> const& y1, Number<P> const& y2) { return !(y1==y2); } //! <p/>
     friend LogicalType<LessThan<P>> operator<=(Number<P> const& y1, Number<P> const& y2) { return !(y1>y2); } //! <p/>

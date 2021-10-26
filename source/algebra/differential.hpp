@@ -60,7 +60,7 @@ template<class X> class DifferentialFactory {
     typedef PrecisionType<X> PR;
     PR _pr;
   public:
-    DifferentialFactory<X>(PR const& pr) : _pr(pr) { }
+    DifferentialFactory(PR const& pr) : _pr(pr) { }
 
     template<class Y> requires Constructible<X,Y,PR> X create(Y const& y) { return X(y,_pr); }
     template<class Y> UnivariateDifferential<X> create(UnivariateDifferential<Y> const&);

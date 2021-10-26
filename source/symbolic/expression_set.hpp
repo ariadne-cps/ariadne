@@ -153,7 +153,7 @@ template<class UB> class VariableUpperInterval
     typedef NegationType<UB> LB;
     RealVariable _variable; UB _upper;
   public:
-    VariableUpperInterval<UB>(const RealVariable& v, const UB& u) : _variable(v), _upper(u)  { }
+    VariableUpperInterval(const RealVariable& v, const UB& u) : _variable(v), _upper(u)  { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(-infinity,_variable,_upper); }
     const RealVariable& variable() const { return _variable; }
     UB upper_bound() const { return _upper; }

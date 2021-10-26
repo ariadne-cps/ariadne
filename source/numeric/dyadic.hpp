@@ -183,10 +183,10 @@ template<BuiltinIntegral N> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
 template<> class Positive<Dyadic> : public Dyadic {
   public:
-    Positive<Dyadic>() : Dyadic() { }
-    template<BuiltinUnsignedIntegral M> Positive<Dyadic>(M m) : Dyadic(m) { }
-    Positive<Dyadic>(int n) = delete;
-    explicit Positive<Dyadic>(Dyadic const& z) : Dyadic(z) { ARIADNE_ASSERT(z>=0); }
+    Positive() : Dyadic() { }
+    template<BuiltinUnsignedIntegral M> Positive(M m) : Dyadic(m) { }
+    Positive(int n) = delete;
+    explicit Positive(Dyadic const& z) : Dyadic(z) { ARIADNE_ASSERT(z>=0); }
 };
 inline Positive<Dyadic> cast_positive(Dyadic const& w) { return Positive<Dyadic>(w); }
 
@@ -210,12 +210,12 @@ using PositiveDyadicBounds = Positive<Bounds<Dyadic>>; //!< <p/>
 template<> class Bounds<Dyadic> {
     Dyadic _l, _u;
   public:
-    Bounds<Dyadic>(Dyadic w) : _l(w), _u(w) { }
-    template<ConvertibleTo<Dyadic> X> Bounds<Dyadic>(X const& x)
-        : Bounds<Dyadic>(Dyadic(x)) { }
-    Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
-    template<class X> requires Constructible<Dyadic,X> Bounds<Dyadic>(Bounds<X> const& x)
-        : Bounds<Dyadic>(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
+    Bounds(Dyadic w) : _l(w), _u(w) { }
+    template<ConvertibleTo<Dyadic> X> Bounds(X const& x)
+        : Bounds(Dyadic(x)) { }
+    Bounds(Dyadic l, Dyadic u) : _l(l), _u(u) { }
+    template<class X> requires Constructible<Dyadic,X> Bounds(Bounds<X> const& x)
+        : Bounds(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
     operator ValidatedNumber() const;
     Bounds<Dyadic> pm(Dyadic e) { return Bounds<Dyadic>(_l-e,_u+e); }
     Dyadic lower() const { return _l; }
@@ -267,12 +267,12 @@ template<> class Bounds<Dyadic> {
 template<> class Ball<Dyadic,Dyadic> {
     Dyadic _v, _e;
   public:
-    Ball<Dyadic,Dyadic>(Dyadic w) : _v(w), _e(0) { }
-    Ball<Dyadic,Dyadic>(Dyadic v, Dyadic e) : _v(v), _e(e) { }
+    Ball(Dyadic w) : _v(w), _e(0) { }
+    Ball(Dyadic v, Dyadic e) : _v(v), _e(e) { }
     template<class X, class XE> requires Constructible<Dyadic,X> and Constructible<Dyadic,XE>
-    Ball<Dyadic,Dyadic>(Ball<X,XE> const& x)
-        : Ball<Dyadic,Dyadic>(Dyadic(x.value_raw()),Dyadic(x.error_raw())) { }
-    explicit Ball<Dyadic,Dyadic>(Bounds<Dyadic> const& w) : _v(hlf(w.lower()+w.upper())), _e(hlf(w.upper()-w.lower())) { }
+    Ball(Ball<X,XE> const& x)
+        : Ball(Dyadic(x.value_raw()),Dyadic(x.error_raw())) { }
+    explicit Ball(Bounds<Dyadic> const& w) : _v(hlf(w.lower()+w.upper())), _e(hlf(w.upper()-w.lower())) { }
     explicit operator Bounds<Dyadic>() const { return Bounds<Dyadic>(_v-_e,_v+_e); }
     operator ValidatedNumber() const;
     Dyadic value() const { return _v; }
@@ -294,10 +294,10 @@ template<> class Ball<Dyadic,Dyadic> {
 template<> class LowerBound<Dyadic> {
     Dyadic _l;
   public:
-    LowerBound<Dyadic>(Dyadic l) : _l(l) { }
-    LowerBound<Dyadic>(Bounds<Dyadic> lu) : _l(lu.lower_raw()) { }
-    LowerBound<Dyadic>(LowerBound<FloatDP> const& x);
-    LowerBound<Dyadic>(LowerBound<FloatMP> const& x);
+    LowerBound(Dyadic l) : _l(l) { }
+    LowerBound(Bounds<Dyadic> lu) : _l(lu.lower_raw()) { }
+    LowerBound(LowerBound<FloatDP> const& x);
+    LowerBound(LowerBound<FloatMP> const& x);
     Dyadic raw() const { return _l; }
     LowerBound<FloatDP> get(DoublePrecision pr) const;
     LowerBound<FloatMP> get(MultiplePrecision pr) const;
@@ -307,10 +307,10 @@ template<> class LowerBound<Dyadic> {
 template<> class UpperBound<Dyadic> {
     Dyadic _u;
   public:
-    explicit UpperBound<Dyadic>(Dyadic u) : _u(u) { }
-    UpperBound<Dyadic>(Bounds<Dyadic> lu) : _u(lu.upper_raw()) { }
-    UpperBound<Dyadic>(UpperBound<FloatDP> const& x);
-    UpperBound<Dyadic>(UpperBound<FloatMP> const& x);
+    explicit UpperBound(Dyadic u) : _u(u) { }
+    UpperBound(Bounds<Dyadic> lu) : _u(lu.upper_raw()) { }
+    UpperBound(UpperBound<FloatDP> const& x);
+    UpperBound(UpperBound<FloatMP> const& x);
     Dyadic raw() const { return _u; }
     UpperBound<FloatDP> get(DoublePrecision pr) const;
     UpperBound<FloatMP> get(MultiplePrecision pr) const;
@@ -320,9 +320,9 @@ template<> class UpperBound<Dyadic> {
 template<> class Approximation<Dyadic> {
     Dyadic _a;
   public:
-    Approximation<Dyadic>(Dyadic a) : _a(a) { }
-    Approximation<Dyadic>(Approximation<FloatDP> const& x);
-    Approximation<Dyadic>(Approximation<FloatMP> const& x);
+    Approximation(Dyadic a) : _a(a) { }
+    Approximation(Approximation<FloatDP> const& x);
+    Approximation(Approximation<FloatMP> const& x);
     Dyadic raw() const { return _a; }
     Approximation<FloatDP> get(DoublePrecision pr) const;
     Approximation<FloatMP> get(MultiplePrecision pr) const;

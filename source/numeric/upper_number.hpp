@@ -80,9 +80,9 @@ template<class P> class UpperNumber
     UpperNumber() : UpperNumber(Integer(0)) { }
 
     //! \brief Construct from a UpperNumber of a stronger paradigm
-    template<StrongerThan<P> SP> UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
+    template<StrongerThan<P> SP> UpperNumber(const UpperNumber<SP>& y) : UpperNumber(y.handle()) { }
     //! \brief Construct from a type convertible to a Number.
-    template<ConvertibleTo<Number<P>> X> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
+    template<ConvertibleTo<Number<P>> X> UpperNumber(const X& x) : UpperNumber(Number<P>(x).handle()) { }
 
     template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->ref()._get(UpperTag(),pr); }
 
@@ -134,14 +134,14 @@ template<class P> class UpperNumber
 template<class P> class Positive<UpperNumber<P>> : public UpperNumber<P> {
     friend UpperNumber<P> const& unsign(Positive<UpperNumber<P>> const& y) { return y; }
   public:
-    Positive<UpperNumber<P>>() : UpperNumber<P>() { }
-    explicit Positive<UpperNumber<P>>(UpperNumber<P> const& y) : UpperNumber<P>(y) { }
+    Positive() : UpperNumber<P>() { }
+    explicit Positive(UpperNumber<P> const& y) : UpperNumber<P>(y) { }
     template<BuiltinUnsignedIntegral N>
-        Positive<UpperNumber<P>>(N n) : UpperNumber<P>(n) { }
+        Positive(N n) : UpperNumber<P>(n) { }
     template<class N> requires Constructible<ExactNumber,N>
-        Positive<UpperNumber<P>>(const Positive<N>& n) : UpperNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
+        Positive(const Positive<N>& n) : UpperNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
     template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
-        Positive<UpperNumber<P>>(const N& n) : UpperNumber<P>(ExactNumber(n)) { }
+        Positive(const N& n) : UpperNumber<P>(ExactNumber(n)) { }
     explicit operator UpperNumber<P> () const { return *this; }
 
     friend UpperNumber<P> mul(UpperNumber<P> const& y1, UpperNumber<P> const& y2);

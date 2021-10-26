@@ -38,7 +38,7 @@ template<class X> class Positive;
 template<> class Positive<Real> : public Real {
   public:
     using Real::Real;
-    Positive<Real>(Real const& r) : Real(r) { }
+    Positive(Real const& r) : Real(r) { }
 };
 
 template<class X> class Complex;

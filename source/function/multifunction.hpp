@@ -91,7 +91,7 @@ template<class P, class SIG> class MultifunctionInterface {
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    virtual ~MultifunctionInterface<P,SIG>() = default;
+    virtual ~MultifunctionInterface() = default;
     virtual LocatedSet<P,RES> _call(Argument<Number<P>> const& x) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };

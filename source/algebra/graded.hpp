@@ -91,7 +91,7 @@ template<class A> class Graded : public List<A>
     Graded(const InitializerList<A>& lst) : List<A>(lst) { }
     template<class... PRS> requires Constructible<A,ExactDouble,PRS...> Graded(const InitializerList<ExactDouble>& lst, PRS... prs)
         : List<A>() { for(auto x : lst) { this->List<A>::append(A(x,prs...)); } }
-    Graded<A>(const Graded<A>& a) : List<A>(a) { }
+    Graded(const Graded<A>& a) : List<A>(a) { }
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
     template<AssignableTo<A> X> Graded<A>& operator=(const X& x) {

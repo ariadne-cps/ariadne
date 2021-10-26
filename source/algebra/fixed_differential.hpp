@@ -57,7 +57,7 @@ struct SymmetricOuterProduct
 {
     typedef typename V1::value_type value_type;
     const V1& _v1; const V2& _v2;
-    SymmetricOuterProduct<V1,V2>(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    SymmetricOuterProduct(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
     value_type operator() (SizeType i, SizeType j) { return _v1[i]*_v2[j]+_v1[j]*_v2[i]; }
 };
 template<class V1, class V2> inline
@@ -72,7 +72,7 @@ struct OuterProduct
 {
     typedef typename V1::value_type value_type;
     const V1& _v1; const V2& _v2;
-    OuterProduct<V1,V2>(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    OuterProduct(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
     value_type operator() (SizeType i, SizeType j) { return _v1[i]*_v2[j]; }
 };
 template<class V1, class V2> inline
@@ -753,7 +753,7 @@ template<class X> class FixedDifferentialFactory {
     typedef PrecisionType<X> PR;
     PR _pr;
   public:
-    FixedDifferentialFactory<X>(PR const& pr) : _pr(pr) { }
+    FixedDifferentialFactory(PR const& pr) : _pr(pr) { }
     template<class Y> requires Constructible<X,Y,PR> X create(Y const& y) { return X(y,_pr); }
     template<class Y> FirstDifferential<X> create(FirstDifferential<Y> const&);
     template<class Y> SecondDifferential<X> create(SecondDifferential<Y> const&);

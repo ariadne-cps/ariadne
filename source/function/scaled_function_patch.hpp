@@ -551,65 +551,65 @@ template<class M> class VectorScaledFunctionPatch
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
 
     //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables.
-    VectorScaledFunctionPatch<M>();
+    VectorScaledFunctionPatch();
 
     //! \brief Construct the zero vector function over an unspecified domain.
-    explicit VectorScaledFunctionPatch<M>(SizeType result_size);
+    explicit VectorScaledFunctionPatch(SizeType result_size);
 
     //! \brief Construct from a result size and a domain.
-    VectorScaledFunctionPatch<M>(SizeType result_size, const BoxDomainType& domain, PropertiesType properties);
+    VectorScaledFunctionPatch(SizeType result_size, const BoxDomainType& domain, PropertiesType properties);
 
     //! \brief Construct a vector function all of whose components are the same.
-    VectorScaledFunctionPatch<M>(SizeType result_size, const ScaledFunctionPatch<M>& scalar_function);
+    VectorScaledFunctionPatch(SizeType result_size, const ScaledFunctionPatch<M>& scalar_function);
 
     //! \brief Construct from a domain and the expansion.
-   VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                const Vector<Expansion<MultiIndex,CoefficientType>>& expansion,
-                                PropertiesType properties);
+   VectorScaledFunctionPatch(const BoxDomainType& domain,
+                             const Vector<Expansion<MultiIndex,CoefficientType>>& expansion,
+                             PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const Vector<Expansion<MultiIndex,CoefficientType>>& expansion,
-                                 const Vector<ErrorType>& error,
-                                 PropertiesType properties);
+    VectorScaledFunctionPatch(const BoxDomainType& domain,
+                              const Vector<Expansion<MultiIndex,CoefficientType>>& expansion,
+                              const Vector<ErrorType>& error,
+                              PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
-                                const Vector<RawFloat<PR>>& error,
-                                PropertiesType properties);
+    VectorScaledFunctionPatch(const BoxDomainType& domain,
+                              const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
+                              const Vector<RawFloat<PR>>& error,
+                              PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
-                                 PropertiesType properties);
+    VectorScaledFunctionPatch(const BoxDomainType& domain,
+                              const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
+                              PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const Vector<Expansion<MultiIndex,ExactDouble>>& expansion,
-                                 PropertiesType properties);
+    VectorScaledFunctionPatch(const BoxDomainType& domain,
+                              const Vector<Expansion<MultiIndex,ExactDouble>>& expansion,
+                              PropertiesType properties);
 
     //! \brief Construct from a domain and the models.
-    explicit VectorScaledFunctionPatch<M>(const BoxDomainType& domain, const Vector< ModelType >& variables);
+    explicit VectorScaledFunctionPatch(const BoxDomainType& domain, const Vector< ModelType >& variables);
 
     //! \brief Construct from a \a domain, a \a function, and \a properties determining the accuracy.
-    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const VectorFunctionType<M>& function,
-                                 const PropertiesType& properties);
+    VectorScaledFunctionPatch(const BoxDomainType& domain,
+                              const VectorFunctionType<M>& function,
+                              const PropertiesType& properties);
 
     //! \brief Construct from a vector of scalar Taylor functions.
-    explicit VectorScaledFunctionPatch<M>(const Vector<ScaledFunctionPatch<M>>& components);
+    explicit VectorScaledFunctionPatch(const Vector<ScaledFunctionPatch<M>>& components);
 
     //! \brief Construct from a list of scalar Taylor functions.
-    explicit VectorScaledFunctionPatch<M>(const List<ScaledFunctionPatch<M>>& components);
+    explicit VectorScaledFunctionPatch(const List<ScaledFunctionPatch<M>>& components);
 
     //! \brief Construct from an initializer list of scalar Taylor functions.
-    VectorScaledFunctionPatch<M>(InitializerList<ScaledFunctionPatch<M>> components);
+    VectorScaledFunctionPatch(InitializerList<ScaledFunctionPatch<M>> components);
 
     //! \brief Construct from a vector expression.
-    template<class E> explicit VectorScaledFunctionPatch<M>(const VectorExpression<E>& ve);
+    template<class E> explicit VectorScaledFunctionPatch(const VectorExpression<E>& ve);
 
-    explicit VectorScaledFunctionPatch<M> (const VectorFunctionModelType<M>& f);
+    explicit VectorScaledFunctionPatch(const VectorFunctionModelType<M>& f);
     VectorScaledFunctionPatch<M>& operator=(const VectorFunctionModelType<M>& f);
 
     // Data access
@@ -1184,7 +1184,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
  public:
     VectorScaledFunctionPatchElementReference(VectorScaledFunctionPatch<M>& c, SizeType i) : _c(&c), _i(i) { }
     operator ScalarScaledFunctionPatch<M> () const { return this->_c->get(this->_i); }
-    VectorScaledFunctionPatchElementReference<M>(const VectorScaledFunctionPatchElementReference<M>& x) = default;
+    VectorScaledFunctionPatchElementReference(const VectorScaledFunctionPatchElementReference<M>& x) = default;
     Void operator=(const VectorScaledFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     Void operator=(const ScalarScaledFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
     ScalarScaledFunctionPatch<M> element() const { return this->_c->get(this->_i); }

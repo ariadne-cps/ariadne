@@ -50,7 +50,7 @@ template<class F> class SweeperInterface {
   protected:
     typedef typename F::PrecisionType PR;
   public:
-    virtual ~SweeperInterface<F>() = default;
+    virtual ~SweeperInterface() = default;
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_sweep(p); }

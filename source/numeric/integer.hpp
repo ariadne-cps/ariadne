@@ -182,10 +182,10 @@ template<class R, class A> R integer_cast(const A& a) {
 
 template<> class Positive<Integer> : public Integer {
   public:
-    Positive<Integer>() : Integer() { }
-    template<BuiltinUnsignedIntegral M> Positive<Integer>(M m) : Integer(m) { }
-    Positive<Integer>(int n) = delete;
-    explicit Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
+    Positive() : Integer() { }
+    template<BuiltinUnsignedIntegral M> Positive(M m) : Integer(m) { }
+    Positive(int n) = delete;
+    explicit Positive(Integer const& z) : Integer(z) { assert(z>=0); }
 };
 
 //! \brief A positive integer.

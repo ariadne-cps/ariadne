@@ -66,26 +66,26 @@ template<class F> class Error
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Error<F>(PositiveValue<F> const& x);
-    Error<F>(PositiveBounds<F> const& x);
+    Error(PositiveValue<F> const& x);
+    Error(PositiveBounds<F> const& x);
     //! Convert from a positive upper bound \a x on the value to be used to represent an error-bound.
-    Error<F>(PositiveUpperBound<F> const& x) : _e(x._u) { }
+    Error(PositiveUpperBound<F> const& x) : _e(x._u) { }
     operator PositiveUpperBound<F> const& () const { return reinterpret_cast<PositiveUpperBound<F>const&>(*this); }
     operator PositiveUpperBound<F>& () { return reinterpret_cast<PositiveUpperBound<F>&>(*this); }
   public:
-    explicit Error<F>(PR const& pr) : _e(pr) { }
+    explicit Error(PR const& pr) : _e(pr) { }
     //! Treat \a a as an upper-bound for an error.
     //! \pre Requires that \a e is positive (or zero).
     //! \todo Check error not being negative to allow for NaN as a valid input.
-    explicit Error<F>(F const& e) : _e(e) { ARIADNE_PRECONDITION_MSG(!(this->_e<0),"e="<<*this); }
+    explicit Error(F const& e) : _e(e) { ARIADNE_PRECONDITION_MSG(!(this->_e<0),"e="<<*this); }
     //! Treat the natural number \a m as an upper-bound for an error, represented with precision \a pr.
-    template<BuiltinUnsignedIntegral M> Error<F>(M m, PR pr) : _e(m,pr) { }
-    explicit Error<F>(UpperBound<F> const& x) : Error<F>(x._u) { }
+    template<BuiltinUnsignedIntegral M> Error(M m, PR pr) : _e(m,pr) { }
+    explicit Error(UpperBound<F> const& x) : Error(x._u) { }
     //! Treat \a y as an upper-bound for an error, represented with precision \a pr.
     //! \pre Requires that \a y is not definitely strictly negative.
-    explicit Error<F>(ValidatedUpperNumber const& y, PR pr) : Error<F>(UpperBound<F>(y,pr)) { }
-    explicit Error<F>(const ExactDouble& d, PR pr) : Error<F>(UpperBound<F>(d,pr)) { }
-    explicit Error<F>(const TwoExp& t, PR pr) : Error<F>(UpperBound<F>(t,pr)) { }
+    explicit Error(ValidatedUpperNumber const& y, PR pr) : Error(UpperBound<F>(y,pr)) { }
+    explicit Error(const ExactDouble& d, PR pr) : Error(UpperBound<F>(d,pr)) { }
+    explicit Error(const TwoExp& t, PR pr) : Error(UpperBound<F>(t,pr)) { }
     //! Assign from the natural number \a m, keeping the same precision.
     template<BuiltinUnsignedIntegral M> Error<F>& operator=(Nat m) {
         reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }

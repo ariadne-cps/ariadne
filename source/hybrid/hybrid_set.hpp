@@ -177,17 +177,17 @@ template<class X> class HybridPoint
     : public HybridBasicSet<Point<X>>
 {
   public:
-    HybridPoint<X>() : HybridBasicSet<Point<X>>() { }
-    HybridPoint<X>(const DiscreteLocation& q, const RealSpace& spc, const Point<X>& pt) : HybridBasicSet<Point<X>>(q,spc,pt) { }
-    HybridPoint<X>(const DiscreteLocation& q, const Map<RealVariable,X>& val)
+    HybridPoint() : HybridBasicSet<Point<X>>() { }
+    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point<X>& pt) : HybridBasicSet<Point<X>>(q,spc,pt) { }
+    HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& val)
         : HybridBasicSet<Point<X>>(q,LabelledSet<Point<X>>(VariablesPoint<X>(val))) { }
-    HybridPoint<X>(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& val);
-    HybridPoint<X>(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& val);
+    HybridPoint(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& val);
+    HybridPoint(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& val);
 
-    template<class XX> requires Convertible<XX,X> HybridPoint<X>(HybridPoint<XX> hpt)
-        : HybridPoint<X>(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set())) { }
-    template<class Y, class PR> requires Constructible<X,Y,PR> HybridPoint<X>(HybridPoint<Y> hpt, PR pr)
-        : HybridPoint<X>(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set(),pr)) { }
+    template<class XX> requires Convertible<XX,X> HybridPoint(HybridPoint<XX> hpt)
+        : HybridPoint(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set())) { }
+    template<class Y, class PR> requires Constructible<X,Y,PR> HybridPoint(HybridPoint<Y> hpt, PR pr)
+        : HybridPoint(hpt.location(),hpt.space(),Point<X>(hpt.euclidean_set(),pr)) { }
 
     Point<X>& point() { return this->euclidean_set(); }
     const Point<X>& point() const { return this->euclidean_set(); }
@@ -204,15 +204,15 @@ template<class IVL> class HybridBox
 {
     typedef typename IVL::UpperBoundType UB;
   public:
-    explicit HybridBox<IVL>(const DiscreteLocation& loc, const VariablesBox<IVL>& bx)
-        : HybridBox<IVL>(loc,bx.operator LabelledSet<Box<IVL>>()) { }
-    HybridBox<IVL>(const DiscreteLocation& loc, const List<VariableInterval<UB>>& bnds)
-        : HybridBox<IVL>(loc,_make_box(bnds)) { }
-    HybridBox<IVL>(const DiscreteLocation& loc, const InitializerList<VariableInterval<UB>>& bnds)
-        : HybridBox<IVL>(loc,List<VariableInterval<UB>>(bnds)) { }
-    HybridBox<IVL>(const DiscreteLocation& loc, const RealSpace& spc, const Box<IVL>& bx)
+    explicit HybridBox(const DiscreteLocation& loc, const VariablesBox<IVL>& bx)
+        : HybridBox(loc,bx.operator LabelledSet<Box<IVL>>()) { }
+    HybridBox(const DiscreteLocation& loc, const List<VariableInterval<UB>>& bnds)
+        : HybridBox(loc,_make_box(bnds)) { }
+    HybridBox(const DiscreteLocation& loc, const InitializerList<VariableInterval<UB>>& bnds)
+        : HybridBox(loc,List<VariableInterval<UB>>(bnds)) { }
+    HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const Box<IVL>& bx)
         : HybridBasicSet<Box<IVL>>(loc,spc,bx) { }
-    HybridBox<IVL>(const DiscreteLocation& loc, const LabelledSet<Box<IVL>>& ebx)
+    HybridBox(const DiscreteLocation& loc, const LabelledSet<Box<IVL>>& ebx)
         : HybridBasicSet<Box<IVL>>(loc,ebx.space(),ebx.euclidean_set()) { }
 
     Box<IVL> euclidean_set() const {

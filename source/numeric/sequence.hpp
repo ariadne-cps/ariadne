@@ -48,7 +48,7 @@ template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
 template<class X> class Sequence {
     std::function<X(Natural)> _fn;
   public:
-    Sequence<X>(std::function<X(Natural)> fn) : _fn(fn) { }
+    Sequence(std::function<X(Natural)> fn) : _fn(fn) { }
     X operator[](Natural const& n) const { return _fn(n); }
 };
 

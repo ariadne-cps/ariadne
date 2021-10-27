@@ -78,18 +78,18 @@ template<class F> class Value
     typedef PR PropertiesType;
   public:
     //! Construct an exact numeric value with precision \a pr.
-    explicit Value<F>(PrecisionType pr) : _v(0.0_x,pr) { }
+    explicit Value(PrecisionType pr) : _v(0.0_x,pr) { }
     //! Treat \a v as an exact numeric value.
-    explicit Value<F>(RawType const& v) : _v(v) { }
+    explicit Value(RawType const& v) : _v(v) { }
 
-    template<BuiltinIntegral N> Value<F>(N n, PR pr) : Value<F>(Integer(n),pr) { }
-    Value<F>(const ExactDouble& d, PR pr);
-    Value<F>(const TwoExp& t, PR pr);
-    Value<F>(const Integer& z, PR pr);
+    template<BuiltinIntegral N> Value(N n, PR pr) : Value(Integer(n),pr) { }
+    Value(const ExactDouble& d, PR pr);
+    Value(const TwoExp& t, PR pr);
+    Value(const Integer& z, PR pr);
     //! Construct a floating-point value with precision \a pr exactly from the dyadic number \a w.
     //! \pre Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
-    Value<F>(const Dyadic& w, PR pr);
-    Value<F>(const Value<F>& x, PR pr);
+    Value(const Dyadic& w, PR pr);
+    Value(const Value<F>& x, PR pr);
 
     template<BuiltinIntegral N> Value<F>& operator=(N n) { _v=n; return *this; }
     Value<F>& operator=(const Integer& z);
@@ -277,13 +277,13 @@ PositiveFloatValue<PR> FloatFactory<PR>::create(M const& y) { return PositiveFlo
 template<class F> class Positive<Value<F>> : public Value<F> {
     using typename Value<F>::PR;
   public:
-    Positive<Value<F>>() : Value<F>() { }
-    explicit Positive<Value<F>>(PR const& pr) : Value<F>(pr) { }
-    template<BuiltinUnsignedIntegral M> Positive<Value<F>>(M m, PR pr) : Value<F>(m,pr) { }
-    Positive<Value<F>>(TwoExp const& ex, PR pr) : Value<F>(ex,pr) { }
-    explicit Positive<Value<F>>(Dyadic const& w, PR pr) : Value<F>(w,pr) { }
-    explicit Positive<Value<F>>(F const& x) : Value<F>(x) { }
-    explicit Positive<Value<F>>(Value<F> const& x) : Value<F>(x) { }
+    Positive() : Value<F>() { }
+    explicit Positive(PR const& pr) : Value<F>(pr) { }
+    template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : Value<F>(m,pr) { }
+    Positive(TwoExp const& ex, PR pr) : Value<F>(ex,pr) { }
+    explicit Positive(Dyadic const& w, PR pr) : Value<F>(w,pr) { }
+    explicit Positive(F const& x) : Value<F>(x) { }
+    explicit Positive(Value<F> const& x) : Value<F>(x) { }
   public:
     friend PositiveBounds<F> operator+(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
         return cast_positive(static_cast<Value<F>const&>(v1)+static_cast<Value<F>const&>(v2)); }

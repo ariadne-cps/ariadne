@@ -221,13 +221,13 @@ class TaylorModel
     //!@{
     //
     //! \brief Default constructor.
-    TaylorModel<P,F>();
+    TaylorModel();
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
-    TaylorModel<P,F>(SizeType as, SweeperType swp);
+    TaylorModel(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<P,F>(const Expansion<MultiIndex,ExactDouble>& f, const ExactDouble& e, SweeperType swp);
-    TaylorModel<P,F>(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp);
-    TaylorModel<P,F>(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp);
+    TaylorModel(const Expansion<MultiIndex,ExactDouble>& f, const ExactDouble& e, SweeperType swp);
+    TaylorModel(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp);
+    TaylorModel(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<P,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.

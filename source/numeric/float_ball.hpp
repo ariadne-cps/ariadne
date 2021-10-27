@@ -76,44 +76,44 @@ template<class F, class FE> class Ball
   public:
     //! Construct a ball of radius \f$0\f$ about zero, using precision \a pr for the centre (value),
     //! and using either value \a pr for the precision of the radius (error), or the default value.
-    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0_x,pr), _e(0.0_x,_error_precision<PRE>(pr)) { }
+    explicit Ball(PrecisionType pr) : _v(0.0_x,pr), _e(0.0_x,_error_precision<PRE>(pr)) { }
     //! Construct a ball of radius \f$0\f$ about zero,
     //! using precision \a pr for the centre (value), and \a pre for the radius (error).
-    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
-    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
-    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
+    explicit Ball(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
+    explicit Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    explicit Ball(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     //! Construct a ball of radius \a e about \a v.
-    explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
+    explicit Ball(F const& v, FE const& e) : _v(v), _e(e) { }
     //! Construct a ball of radius \a error about \a value.
-    Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
-    Ball<F,FE>(Value<F> const& x, PRE pre);
+    Ball(Value<F> const& value, Error<FE> const& error);
+    Ball(Value<F> const& x, PRE pre);
     //! Construct a ball containing the bounds \a x, with error bound of precision \a pre.
-    Ball<F,FE>(Bounds<F> const& x, PRE pre);
-    Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
+    Ball(Bounds<F> const& x, PRE pre);
+    Ball(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
-    Ball<F,FE>(const ExactDouble& d, PR pr);
-        Ball<F,FE>(const TwoExp& t, PR pr);
-        Ball<F,FE>(const Integer& z, PR pr);
-        Ball<F,FE>(const Dyadic& w, PR pr);
-        Ball<F,FE>(const Decimal& d, PR pr);
-        Ball<F,FE>(const Rational& q, PR pr);
-        Ball<F,FE>(const Real& r, PR pr);
-        Ball<F,FE>(const Ball<F,FE>& x, PR pr);
-    Ball<F,FE>(const ValidatedNumber& y, PR pr);
+    Ball(const ExactDouble& d, PR pr);
+        Ball(const TwoExp& t, PR pr);
+        Ball(const Integer& z, PR pr);
+        Ball(const Dyadic& w, PR pr);
+        Ball(const Decimal& d, PR pr);
+        Ball(const Rational& q, PR pr);
+        Ball(const Real& r, PR pr);
+        Ball(const Ball<F,FE>& x, PR pr);
+    Ball(const ValidatedNumber& y, PR pr);
 
     // FIXME: Constructors for other types
-        Ball<F,FE>(const Integer& z, PR pr, PRE pre);
-        Ball<F,FE>(const Dyadic& w, PR pr, PRE pre);
-        Ball<F,FE>(const Rational& q, PR pr, PRE pre);
-        Ball<F,FE>(const Real& q, PR pr, PRE pre);
+        Ball(const Integer& z, PR pr, PRE pre);
+        Ball(const Dyadic& w, PR pr, PRE pre);
+        Ball(const Rational& q, PR pr, PRE pre);
+        Ball(const Real& q, PR pr, PRE pre);
     //! Construct a ball guaranteed to contain the generic validated number \a y,
     //! using precision \a pr for the centre (value), and \a pre for the radius (error).
-    Ball<F,FE>(const ValidatedNumber& y, PR pr, PRE pre);
+    Ball(const ValidatedNumber& y, PR pr, PRE pre);
 
     //! Construct a ball containing the bounds \a x.
     //! The precision of the error is either that of \a F, or the default value.
-    explicit Ball<F,FE>(Bounds<F> const& x);
-    Ball<F,FE>(Value<F> const& x);
+    explicit Ball(Bounds<F> const& x);
+    Ball(Value<F> const& x);
 
     //! Assign from generic validated bounds \a y, keeping the same properties.
     Ball<F,FE>& operator=(const ValidatedNumber& y) { return *this=Ball<F,FE>(y,this->precision(),this->error_precision()); }
@@ -295,11 +295,11 @@ template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
     using PR = typename Ball<F,FE>::PrecisionType;
     using PRE = typename Ball<F,FE>::ErrorPrecisionType;
   public:
-    Positive<Ball<F,FE>>() : Bounds<F>() { }
+    Positive() : Bounds<F>() { }
     template<BuiltinUnsignedIntegral M>
-        Positive<Ball<F,FE>>(M m, PRE pre) : Ball<F,FE>(m,pre) { }
-    explicit Positive<Ball<F,FE>>(PR pr, PRE pre) : Ball<F,FE>(pr,pre) { }
-    explicit Positive<Ball<F,FE>>(Ball<F,FE> const& x) : Ball<F,FE>(x) { }
+        Positive(M m, PRE pre) : Ball<F,FE>(m,pre) { }
+    explicit Positive(PR pr, PRE pre) : Ball<F,FE>(pr,pre) { }
+    explicit Positive(Ball<F,FE> const& x) : Ball<F,FE>(x) { }
 };
 
 template<class F, class FE> inline PositiveBall<F,FE> cast_positive(Ball<F,FE> const& x) {

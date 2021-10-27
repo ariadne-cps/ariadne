@@ -86,7 +86,7 @@ class VectorOfFunctionInterface
 
 template<class... ARGS> class VectorOfFunctionInterface<ApproximateTag,ARGS...> {
   public:
-    virtual ~VectorOfFunctionInterface<ApproximateTag,ARGS...>() = default;
+    virtual ~VectorOfFunctionInterface() = default;
     virtual ScalarFunctionInterface<ApproximateTag,ARGS...>* _get(SizeType i) const = 0;
 };
 
@@ -264,7 +264,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<P>& factory) {
         return factory._write(os); }
   public:
-    virtual ~FunctionFactoryInterface<P>() = default;
+    virtual ~FunctionFactoryInterface() = default;
 };
 
 } // namespace Ariadne

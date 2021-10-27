@@ -479,7 +479,7 @@ struct VectorFunctionElementReference
     typedef ScalarFunction<P,ARGS...> ElementType;
     typedef typename ElementType::NumericType NumericType;
     VectorFunction<P,ARGS...>& _vf; SizeType _i;
-    VectorFunctionElementReference<P,ARGS...>(VectorFunction<P,ARGS...>& vf, SizeType i) : _vf(vf), _i(i) { }
+    VectorFunctionElementReference(VectorFunction<P,ARGS...>& vf, SizeType i) : _vf(vf), _i(i) { }
     template<class WP> operator ScalarFunction<WP,ARGS...> () const;
     Void operator=(const ScalarFunction<P,ARGS...>& sf);
     VectorFunctionElementReference<P,ARGS...>& operator=(const VectorFunctionElementReference<P,ARGS...>& sfr);

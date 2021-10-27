@@ -67,39 +67,39 @@ template<class F> class Approximation
   public:
 
     //! <p/>
-    explicit Approximation<F>(PrecisionType pr) : _a(0.0_x,pr) { }
+    explicit Approximation(PrecisionType pr) : _a(0.0_x,pr) { }
     //! <p/>
-    explicit Approximation<F>(RawType const& a) : _a(a) { }
+    explicit Approximation(RawType const& a) : _a(a) { }
 
-        Approximation<F>(double d, PR pr) : _a(cast_exact(d),near,pr) { }
-        Approximation<F>(ApproximateDouble d, PR pr) : _a(cast_exact(d),near,pr) { }
-        Approximation<F>(ExactDouble const& d, PR pr) : _a(d,pr) { }
-        Approximation<F>(TwoExp const& t, PR pr) :_a(t,pr) { }
-        Approximation<F>(const Integer& z, PR pr) : _a(z,near,pr) { }
-        Approximation<F>(const Dyadic& w, PR pr) : _a(w,near,pr) { }
-        Approximation<F>(const Decimal& d, PR pr) : _a(d,near,pr) { }
-        Approximation<F>(const Rational& q, PR pr) : _a(q,near,pr) { }
-        Approximation<F>(const Real& r, PR pr); // : _a(r.get(pr)) { }
-        Approximation<F>(const Approximation<F>& x, PR pr) : _a(x.raw(),near,pr) { }
+        Approximation(double d, PR pr) : _a(cast_exact(d),near,pr) { }
+        Approximation(ApproximateDouble d, PR pr) : _a(cast_exact(d),near,pr) { }
+        Approximation(ExactDouble const& d, PR pr) : _a(d,pr) { }
+        Approximation(TwoExp const& t, PR pr) :_a(t,pr) { }
+        Approximation(const Integer& z, PR pr) : _a(z,near,pr) { }
+        Approximation(const Dyadic& w, PR pr) : _a(w,near,pr) { }
+        Approximation(const Decimal& d, PR pr) : _a(d,near,pr) { }
+        Approximation(const Rational& q, PR pr) : _a(q,near,pr) { }
+        Approximation(const Real& r, PR pr); // : _a(r.get(pr)) { }
+        Approximation(const Approximation<F>& x, PR pr) : _a(x.raw(),near,pr) { }
     //! <p/>
-    Approximation<F>(const ApproximateNumber& y, PR pr); // : _a(y.get(ApproximateTag(),pr)) { }
+    Approximation(const ApproximateNumber& y, PR pr); // : _a(y.get(ApproximateTag(),pr)) { }
 
     //! <p/>
     template<class FF> requires Constructible<F,FF,RND,PR>
-        Approximation<F>(const Approximation<FF>& x, PR pr) : _a(x.raw(),near,pr) { }
+        Approximation(const Approximation<FF>& x, PR pr) : _a(x.raw(),near,pr) { }
 
     //! <p/>
-    Approximation<F>(Error<F> const& x); // FIXME: Remove
+    Approximation(Error<F> const& x); // FIXME: Remove
     //! <p/>
-    Approximation<F>(Value<F> const& x);
+    Approximation(Value<F> const& x);
     //! <p/>
-    template<class FE> Approximation<F>(Ball<F,FE> const& x);
+    template<class FE> Approximation(Ball<F,FE> const& x);
     //! <p/>
-    Approximation<F>(Bounds<F> const& x);
+    Approximation(Bounds<F> const& x);
     //! <p/>
-    Approximation<F>(UpperBound<F> const& x);
+    Approximation(UpperBound<F> const& x);
     //! <p/>
-    Approximation<F>(LowerBound<F> const& x);
+    Approximation(LowerBound<F> const& x);
 
     //! <p/>
     template<BuiltinIntegral N> Approximation<F>& operator=(N n) { this->_a=n; return *this; }
@@ -268,7 +268,7 @@ template<class F> class Approximation
     RawType _a;
 };
 
-template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : Approximation<F>(x.value_raw()) { }
+template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : Approximation(x.value_raw()) { }
 
 template<class PR> Approximation(ApproximateNumber, PR) -> Approximation<RawFloatType<PR>>;
 template<class F> Approximation(F) -> Approximation<F>;
@@ -286,17 +286,17 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
 {
     using typename Approximation<F>::PR;
   public:
-    Positive<Approximation<F>>() : Approximation<F>() { }
+    Positive() : Approximation<F>() { }
     template<BuiltinUnsignedIntegral M>
-        Positive<Approximation<F>>(M m) : Approximation<F>(m) { }
-    explicit Positive<Approximation<F>>(PR const& pr) : Approximation<F>(pr) { }
-    explicit Positive<Approximation<F>>(F const& x) : Approximation<F>(x) { }
-    explicit Positive<Approximation<F>>(Approximation<F> const& x) : Approximation<F>(x) { }
-    Positive<Approximation<F>>(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
-    Positive<Approximation<F>>(PositiveLowerBound<F> const& x) : Approximation<F>(x) { }
-    Positive<Approximation<F>>(PositiveUpperBound<F> const& x) : Approximation<F>(x) { }
-    Positive<Approximation<F>>(PositiveValue<F> const& x) : Approximation<F>(x) { }
-    Positive<Approximation<F>>(Error<F> const& x) : Approximation<F>(x) { }
+        Positive(M m) : Approximation<F>(m) { }
+    explicit Positive(PR const& pr) : Approximation<F>(pr) { }
+    explicit Positive(F const& x) : Approximation<F>(x) { }
+    explicit Positive(Approximation<F> const& x) : Approximation<F>(x) { }
+    Positive(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
+    Positive(PositiveLowerBound<F> const& x) : Approximation<F>(x) { }
+    Positive(PositiveUpperBound<F> const& x) : Approximation<F>(x) { }
+    Positive(PositiveValue<F> const& x) : Approximation<F>(x) { }
+    Positive(Error<F> const& x) : Approximation<F>(x) { }
   public:
     friend PositiveApproximation<F> nul(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(nul(x.raw())); }
     friend PositiveApproximation<F> hlf(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(hlf(x.raw())); }

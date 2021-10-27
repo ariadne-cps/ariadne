@@ -66,31 +66,31 @@ template<class F> class UpperBound
     typedef PR PropertiesType;
   public:
     //! A upper bound of zero with precision \a pr.
-    explicit UpperBound<F>(PrecisionType pr) : _u(0.0_x,pr) { }
+    explicit UpperBound(PrecisionType pr) : _u(0.0_x,pr) { }
     //! A upper bound with value \a u.
-    explicit UpperBound<F>(RawType const& u) : _u(u) { }
+    explicit UpperBound(RawType const& u) : _u(u) { }
 
-    template<BuiltinIntegral N> UpperBound<F>(N n, PR pr) : UpperBound<F>(ExactDouble(n),pr) { }
-    UpperBound<F>(const ExactDouble& d, PR pr) : _u(d,pr) { }
-        UpperBound<F>(const TwoExp& t, PR pr) : _u(t,pr) { }
-        UpperBound<F>(const Integer& z, PR pr) : _u(z,up,pr) { }
-        UpperBound<F>(const Dyadic& w, PR pr) : _u(w,up,pr) { }
-        UpperBound<F>(const Decimal& d, PR pr) : _u(d,up,pr) { }
-        UpperBound<F>(const Rational& q, PR pr) : _u(q,up,pr) { }
-        UpperBound<F>(const Real& r, PR pr);
-        UpperBound<F>(const Value<F>& x, PR pr); // FIXME: Should not be necessary
-        UpperBound<F>(const Bounds<F>& x, PR pr);
-    UpperBound<F>(const UpperBound<F>& x, PR pr);
+    template<BuiltinIntegral N> UpperBound(N n, PR pr) : UpperBound(ExactDouble(n),pr) { }
+    UpperBound(const ExactDouble& d, PR pr) : _u(d,pr) { }
+        UpperBound(const TwoExp& t, PR pr) : _u(t,pr) { }
+        UpperBound(const Integer& z, PR pr) : _u(z,up,pr) { }
+        UpperBound(const Dyadic& w, PR pr) : _u(w,up,pr) { }
+        UpperBound(const Decimal& d, PR pr) : _u(d,up,pr) { }
+        UpperBound(const Rational& q, PR pr) : _u(q,up,pr) { }
+        UpperBound(const Real& r, PR pr);
+        UpperBound(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        UpperBound(const Bounds<F>& x, PR pr);
+    UpperBound(const UpperBound<F>& x, PR pr);
     //! A upper bound of type \p F from a generic upper bound \a y.
-    UpperBound<F>(const ValidatedUpperNumber& y, PR pr);
+    UpperBound(const ValidatedUpperNumber& y, PR pr);
     template<class FF> requires Constructible<F,FF,RND,PR>
-        UpperBound<F>(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
+        UpperBound(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
 
     //! Convert from upper \em and lower bounds on a number.
-    UpperBound<F>(Bounds<F> const& x);
-    template<class FE> UpperBound<F>(Ball<F,FE> const& x);
-    UpperBound<F>(Value<F> const& x);
-    UpperBound<F>(Error<F> const& x); // FIXME: Remove
+    UpperBound(Bounds<F> const& x);
+    template<class FE> UpperBound(Ball<F,FE> const& x);
+    UpperBound(Value<F> const& x);
+    UpperBound(Error<F> const& x); // FIXME: Remove
 
         UpperBound<F>& operator=(const Value<F>& x) { return *this=UpperBound<F>(x); }
     //! Assign from the upper bound \a y, keeping the same precision.
@@ -189,7 +189,7 @@ template<class F> class UpperBound
     RawType _u;
 };
 
-template<class F> template<class FE> UpperBound<F>::UpperBound(Ball<F,FE> const& x) : UpperBound<F>(x.upper_raw()) { }
+template<class F> template<class FE> UpperBound<F>::UpperBound(Ball<F,FE> const& x) : UpperBound(x.upper_raw()) { }
 
 template<class PR> UpperBound(ValidatedUpperNumber, PR) -> UpperBound<RawFloatType<PR>>;
 template<class F> UpperBound(F) -> UpperBound<F>;
@@ -203,15 +203,15 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
 {
     using typename UpperBound<F>::PR;
   public:
-    Positive<UpperBound<F>>() : UpperBound<F>() { }
-    explicit Positive<UpperBound<F>>(PR const& pr) : UpperBound<F>(pr) { }
-    explicit Positive<UpperBound<F>>(F const& x) : UpperBound<F>(x) { }
-    template<BuiltinUnsignedIntegral M> Positive<UpperBound<F>>(M m, PR pr) : UpperBound<F>(m,pr) { }
+    Positive() : UpperBound<F>() { }
+    explicit Positive(PR const& pr) : UpperBound<F>(pr) { }
+    explicit Positive(F const& x) : UpperBound<F>(x) { }
+    template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : UpperBound<F>(m,pr) { }
     template<BuiltinUnsignedIntegral M> PositiveValue<F> create(M m) const { return PositiveValue<F>(m,this->precision()); }
-    explicit Positive<UpperBound<F>>(UpperBound<F> const& x) : UpperBound<F>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
-    Positive<UpperBound<F>>(PositiveValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
-    Positive<UpperBound<F>>(PositiveValue<F> const& x) : UpperBound<F>(x) { }
-    Positive<UpperBound<F>>(PositiveBounds<F> const& x) : UpperBound<F>(x) { }
+    explicit Positive(UpperBound<F> const& x) : UpperBound<F>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
+    Positive(PositiveValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
+    Positive(PositiveValue<F> const& x) : UpperBound<F>(x) { }
+    Positive(PositiveBounds<F> const& x) : UpperBound<F>(x) { }
   public:
     friend PositiveUpperBound<F> nul(PositiveUpperBound<F> const& x) {
         return PositiveUpperBound<F>(nul(x.raw())); }

@@ -75,7 +75,7 @@ template<class T> class Handle;
 template<class T> class Writer : public Handle<WriterInterface<T>> {
   public:
     using Handle<WriterInterface<T>>::Handle;
-    Writer<T>(Handle<WriterInterface<T>> wh) : Handle<WriterInterface<T>>(wh) { }
+    Writer(Handle<WriterInterface<T> > wh) : Handle<WriterInterface<T> >(wh) { }
     inline WritableTemporary<T> operator() (T const& t) const;
 };
 

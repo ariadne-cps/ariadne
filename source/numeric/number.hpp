@@ -145,20 +145,20 @@ template<class P> class Number
     Number() : Number(Integer(0)) { }
 
     // Construct from a Number of a stronger paradigm
-    template<StrongerThan<P> SP> Number(const Number<SP>& y) : Number<P>(y.handle()) { }
+    template<StrongerThan<P> SP> Number(const Number<SP>& y) : Number(y.handle()) { }
 
     //! Construct from a builtin integer
-    template<BuiltinIntegral N> Number(const N& n) : Number<P>(Integer(n)) { }
+    template<BuiltinIntegral N> Number(const N& n) : Number(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<ConvertibleBuiltinFloatingPointToNumber<P> X> Number(const X& x) : Number<P>(Dyadic(x)) { }
+    template<ConvertibleBuiltinFloatingPointToNumber<P> X> Number(const X& x) : Number(Dyadic(x)) { }
 
     // Construct from a type which is convertible to Real.
-    template<ConvertibleViaRealToNumber<P> X> Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
+    template<ConvertibleViaRealToNumber<P> X> Number(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
     // TODO: Decide conversion properties from concrete type to Number<P>
     template<ConvertibleViaNumberToNumber<P> X>
-        explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
+        explicit Number<P>(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
     ResultFloatType<DoublePrecision> get(DoublePrecision const& prec) const { return this->ref()._get(P(),prec); }
@@ -237,13 +237,13 @@ template<class P> class Number
 template<class P> class Positive<Number<P>> : public Number<P> {
     friend Number<P> const& unsign(Positive<Number<P>> const& y) { return y; }
   public:
-    Positive<Number<P>>() : Number<P>() { }
-    explicit Positive<Number<P>>(Number<P> const& y) : Number<P>(y) { }
-    template<BuiltinUnsignedIntegral N> Positive<Number<P>>(N n) : Number<P>(n) { }
+    Positive() : Number<P>() { }
+    explicit Positive(Number<P> const& y) : Number<P>(y) { }
+    template<BuiltinUnsignedIntegral N> Positive(N n) : Number<P>(n) { }
     template<class N> requires Convertible<N,ExactNumber>
-        Positive<Number<P>>(const Positive<N>& n) : Number<P>(ExactNumber(static_cast<N const&>(n))) { }
+        Positive(const Positive<N>& n) : Number<P>(ExactNumber(static_cast<N const&>(n))) { }
     template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
-        explicit Positive<Number<P>>(const N& n) : Number<P>(ExactNumber(n)) { }
+        explicit Positive(const N& n) : Number<P>(ExactNumber(n)) { }
     explicit operator Number<P> () const { return *this; }
 
     friend Positive<Number<P>> operator+(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) {

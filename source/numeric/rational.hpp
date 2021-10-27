@@ -141,10 +141,10 @@ using RationalBounds = Bounds<Rational>; //!< Alias for rational bounds on a num
 template<> class Bounds<Rational> {
     Rational _l, _u;
   public:
-    Bounds<Rational>(Rational q) : _l(q), _u(q) { }
-    Bounds<Rational>(Rational l, Rational u) : _l(l), _u(u) { }
-    template<class X> requires Constructible<Rational,X> Bounds<Rational>(Bounds<X> const& x)
-        : Bounds<Rational>(Rational(x.lower_raw()),Rational(x.upper_raw())) { }
+    Bounds(Rational q) : _l(q), _u(q) { }
+    Bounds(Rational l, Rational u) : _l(l), _u(u) { }
+    template<class X> requires Constructible<Rational,X> Bounds(Bounds<X> const& x)
+        : Bounds(Rational(x.lower_raw()),Rational(x.upper_raw())) { }
     operator ValidatedNumber() const;
     Bounds<Rational> pm(Rational e) { return RationalBounds(_l-e,_u+e); }
     Rational lower() const { return _l; }

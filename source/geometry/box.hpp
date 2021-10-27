@@ -574,7 +574,7 @@ template<> class BoxSet<ExactIntervalType>
   public:
     typedef typename EuclideanSetTraits::DimensionType DimensionType;
     using Box<ExactIntervalType>::Box;
-    BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
+    BoxSet(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
     virtual ExactBoxSetType* clone() const { return new ExactBoxSetType(*this); }
     virtual DimensionType dimension() const final { return this->ExactBoxType::dimension(); }
@@ -598,7 +598,7 @@ template<> class BoxSet<ApproximateIntervalType>
 
   public:
     using Box<ApproximateIntervalType>::Box;
-    BoxSet<ApproximateIntervalType>(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
+    BoxSet(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
     virtual ApproximateBoxSetType* clone() const { return new ApproximateBoxSetType(*this); }
     virtual DimensionType dimension() const final { return this->ApproximateBoxType::dimension(); }
@@ -617,7 +617,7 @@ template<> class BoxSet<RealInterval>
     typedef typename EuclideanSetTraits::DimensionType DimensionType;
 
     using Box<RealInterval>::Box;
-    BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
+    BoxSet(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 
     virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->Box<RealInterval>::dimension(); }

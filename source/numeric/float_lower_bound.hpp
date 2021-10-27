@@ -66,30 +66,30 @@ template<class F> class LowerBound
     typedef PR PropertiesType;
   public:
     //! A lower bound of zero with precision \a pr.
-    explicit LowerBound<F>(PrecisionType pr) : _l(0.0_x,pr) { }
+    explicit LowerBound(PrecisionType pr) : _l(0.0_x,pr) { }
     //! A lower bound with value \a l.
-    explicit LowerBound<F>(RawType const& l) : _l(l) { }
+    explicit LowerBound(RawType const& l) : _l(l) { }
 
-    template<BuiltinIntegral N> LowerBound<F>(N n, PR pr) : LowerBound<F>(ExactDouble(n),pr) { }
-    LowerBound<F>(const ExactDouble& d, PR pr) : _l(d,pr) { }
-        LowerBound<F>(const TwoExp& t, PR pr) : _l(t,pr) { }
-        LowerBound<F>(const Integer& z, PR pr) : _l(z,down,pr) { }
-        LowerBound<F>(const Dyadic& w, PR pr) : _l(w,down,pr) { }
-        LowerBound<F>(const Decimal& d, PR pr) : _l(d,down,pr) { }
-        LowerBound<F>(const Rational& q, PR pr) : _l(q,down,pr) { }
-        LowerBound<F>(const Real& r, PR pr);
-        LowerBound<F>(const Value<F>& x, PR pr); // FIXME: Should not be necessary
-        LowerBound<F>(const Bounds<F>& x, PR pr);
-    LowerBound<F>(const LowerBound<F>& x, PR pr);
+    template<BuiltinIntegral N> LowerBound(N n, PR pr) : LowerBound(ExactDouble(n),pr) { }
+    LowerBound(const ExactDouble& d, PR pr) : _l(d,pr) { }
+        LowerBound(const TwoExp& t, PR pr) : _l(t,pr) { }
+        LowerBound(const Integer& z, PR pr) : _l(z,down,pr) { }
+        LowerBound(const Dyadic& w, PR pr) : _l(w,down,pr) { }
+        LowerBound(const Decimal& d, PR pr) : _l(d,down,pr) { }
+        LowerBound(const Rational& q, PR pr) : _l(q,down,pr) { }
+        LowerBound(const Real& r, PR pr);
+        LowerBound(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        LowerBound(const Bounds<F>& x, PR pr);
+    LowerBound(const LowerBound<F>& x, PR pr);
     //! A lower bound of type \p F from a generic lower bound \a y.
-    LowerBound<F>(const ValidatedLowerNumber& y, PR pr);
+    LowerBound(const ValidatedLowerNumber& y, PR pr);
     template<class FF> requires Constructible<F,FF,RND,PR>
-        LowerBound<F>(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
+        LowerBound(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
 
     //! Convert from lower \em and upper bounds on a number.
-    LowerBound<F>(Bounds<F> const& x);
-    template<class FE> LowerBound<F>(Ball<F,FE> const& x);
-    LowerBound<F>(Value<F> const& x);
+    LowerBound(Bounds<F> const& x);
+    template<class FE> LowerBound(Ball<F,FE> const& x);
+    LowerBound(Value<F> const& x);
 
         LowerBound<F>& operator=(const Value<F>& x) { return *this=LowerBound<F>(x); }
     //! Assign from the lower bound \a y, keeping the same properties.
@@ -193,7 +193,7 @@ template<class F> class LowerBound
     RawType _l;
 };
 
-template<class F> template<class FE> LowerBound<F>::LowerBound(Ball<F,FE> const& x) : LowerBound<F>(x.lower_raw()) { }
+template<class F> template<class FE> LowerBound<F>::LowerBound(Ball<F,FE> const& x) : LowerBound(x.lower_raw()) { }
 
 template<class PR> LowerBound(ValidatedLowerNumber, PR) -> LowerBound<RawFloatType<PR>>;
 template<class F> LowerBound(F) -> LowerBound<F>;
@@ -207,15 +207,15 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
 {
     using typename LowerBound<F>::PR;
   public:
-    Positive<LowerBound<F>>() : LowerBound<F>() { }
+    Positive() : LowerBound<F>() { }
     template<BuiltinUnsignedIntegral M>
-        Positive<LowerBound<F>>(M m, PR const& pr) : LowerBound<F>(m,pr) { }
-    explicit Positive<LowerBound<F>>(PR const& pr) : LowerBound<F>(pr) { }
-    explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
-    explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
-    Positive<LowerBound<F>>(PositiveValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
-    Positive<LowerBound<F>>(PositiveValue<F> const& x) : LowerBound<F>(x) { }
-    Positive<LowerBound<F>>(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
+        Positive(M m, PR const& pr) : LowerBound<F>(m,pr) { }
+    explicit Positive(PR const& pr) : LowerBound<F>(pr) { }
+    explicit Positive(F const& x) : LowerBound<F>(x) { }
+    explicit Positive(LowerBound<F> const& x) : LowerBound<F>(x) { }
+    Positive(PositiveValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
+    Positive(PositiveValue<F> const& x) : LowerBound<F>(x) { }
+    Positive(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
   public:
     friend PositiveLowerBound<F> nul(PositiveLowerBound<F> const& x) {
         return PositiveLowerBound<F>(nul(x.raw())); }

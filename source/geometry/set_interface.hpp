@@ -275,9 +275,6 @@ template<class T> class RegularLocatedSetInterface<EffectiveTag,T>
 };
 
 
-inline OutputStream& operator<<(OutputStream& os, const WritableInterface& w);
-
-
 
 template<class T> class BoundedSetInterface<ValidatedTag,T>;
 template<class T> class OpenSetInterface<ValidatedTag,T>;

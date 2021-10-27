@@ -74,7 +74,7 @@ template<class X> struct ValidatedRealWrapper;
 
 template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInterface, public DyadicBounds {
     typedef DyadicBounds X;
-    ValidatedRealWrapper<X>(X const& x) : X(x) { }
+    ValidatedRealWrapper(X const& x) : X(x) { }
     virtual DyadicBounds _get() const override final { return *this; }
     virtual FloatDPBounds _get(DoublePrecision pr) const override final { return FloatDPBounds(this->_get(),pr); }
     virtual FloatMPBounds _get(MultiplePrecision pr) const override final { return FloatMPBounds(this->_get(),pr); }

@@ -96,42 +96,42 @@ template<class F> class Bounds
     typedef PR PropertiesType;
   public:
     //! Construct bounds of zero with precision \a pr.
-    explicit Bounds<F>(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
+    explicit Bounds(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
     //! Construct bounds with value \a v.
-    explicit Bounds<F>(RawType const& v) : _l(v), _u(v) { }
+    explicit Bounds(RawType const& v) : _l(v), _u(v) { }
     //! Construct a lower bound of value \a l and an upper bound of value \a u.
-    explicit Bounds<F>(RawType const& l, RawType const& u) : _l(l), _u(u) { }
+    explicit Bounds(RawType const& l, RawType const& u) : _l(l), _u(u) { }
     //! Construct from a lower bound \a lower and an upper bound \a upper.
-    Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
-    Bounds<F>(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
-    Bounds<F>(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
+    Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper);
+    Bounds(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
+    Bounds(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
     //! Construct from a lower bound \a lower and an upper bound \a upper, using precsion \a pr.
-    Bounds<F>(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
-    template<BuiltinIntegral N1, BuiltinIntegral N2> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
-    Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr) : _l(dl,pr), _u(du,pr) { }
-    Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr) : _l(wl,down,pr), _u(wu,up,pr) { }
-    Bounds<F>(Decimal const& dl, Decimal const& du, PrecisionType pr) : _l(dl,down,pr), _u(du,up,pr) { }
-    Bounds<F>(Rational const& ql, Rational const& qu, PrecisionType pr) : _l(ql,down,pr), _u(qu,up,pr) { }
+    Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
+    template<BuiltinIntegral N1, BuiltinIntegral N2> Bounds(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
+    Bounds(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr) : _l(dl,pr), _u(du,pr) { }
+    Bounds(Dyadic const& wl, Dyadic const& wu, PrecisionType pr) : _l(wl,down,pr), _u(wu,up,pr) { }
+    Bounds(Decimal const& dl, Decimal const& du, PrecisionType pr) : _l(dl,down,pr), _u(du,up,pr) { }
+    Bounds(Rational const& ql, Rational const& qu, PrecisionType pr) : _l(ql,down,pr), _u(qu,up,pr) { }
 
     template<class FF> requires ConstructibleFrom<F,FF,RND,PR>
-        Bounds<F>(Bounds<FF> const& x, PR pr) : Bounds<F>(F(x.lower_raw(),downward,pr),F(x.upper_raw(),upward,pr)) { }
-    Bounds<F>(const Bounds<F>& x, PR pr) : _l(x._l,down,pr), _u(x._u,up,pr) { }
+        Bounds(Bounds<FF> const& x, PR pr) : Bounds(F(x.lower_raw(),downward,pr),F(x.upper_raw(),upward,pr)) { }
+    Bounds(const Bounds<F>& x, PR pr) : _l(x._l,down,pr), _u(x._u,up,pr) { }
 
-    template<BuiltinIntegral N> Bounds<F>(N n, PR pr) : _l(n,down,pr), _u(n,up,pr) { }
-    Bounds<F>(ExactDouble const& d, PR pr) : _l(d,pr), _u(d,pr) { }
-        Bounds<F>(TwoExp const& t, PR pr) : _l(t,pr), _u(t,pr) { }
-        Bounds<F>(const Integer& z, PR pr) : _l(z,down,pr), _u(z,up,pr) { }
-        Bounds<F>(const Dyadic& w, PR pr) : _l(w,down,pr), _u(w,up,pr) { }
-        Bounds<F>(const Decimal& d, PR pr) : _l(d,down,pr), _u(d,up,pr) { }
-        Bounds<F>(const Rational& q, PR pr) : _l(q,down,pr), _u(q,up,pr) { }
-        Bounds<F>(const Real& x, PR pr);
+    template<BuiltinIntegral N> Bounds(N n, PR pr) : _l(n,down,pr), _u(n,up,pr) { }
+    Bounds(ExactDouble const& d, PR pr) : _l(d,pr), _u(d,pr) { }
+        Bounds(TwoExp const& t, PR pr) : _l(t,pr), _u(t,pr) { }
+        Bounds(const Integer& z, PR pr) : _l(z,down,pr), _u(z,up,pr) { }
+        Bounds(const Dyadic& w, PR pr) : _l(w,down,pr), _u(w,up,pr) { }
+        Bounds(const Decimal& d, PR pr) : _l(d,down,pr), _u(d,up,pr) { }
+        Bounds(const Rational& q, PR pr) : _l(q,down,pr), _u(q,up,pr) { }
+        Bounds(const Real& x, PR pr);
     //! Construct from generic validated bounds \a y, using precsion \a pr.
-    Bounds<F>(const ValidatedNumber& y, PR pr);
+    Bounds(const ValidatedNumber& y, PR pr);
 
 
     //! Convert from a ball.
-    template<class FE> Bounds<F>(Ball<F,FE> const& x);
-    Bounds<F>(Value<F> const& x);
+    template<class FE> Bounds(Ball<F,FE> const& x);
+    Bounds(Value<F> const& x);
 
         Bounds<F>& operator=(const Value<F>& x) { return *this=Bounds<F>(x); }
     //! Assign from generic validated bounds \a y, keeping the same precision.
@@ -317,7 +317,7 @@ template<class F> class Bounds
     RawType _l, _u;
 };
 
-template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : Bounds<F>(x.lower_raw(),x.upper_raw()) { }
+template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : Bounds(x.lower_raw(),x.upper_raw()) { }
 
 template<class FE> inline Bounds<FE> make_bounds(Error<FE> const& e) { return pm(e); }
 Value<FloatDP> midpoint(Bounds<FloatDP> const& x); // DEPRECATED
@@ -346,14 +346,14 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
 {
     using typename Bounds<F>::PR;
   public:
-    Positive<Bounds<F>>() : Bounds<F>() { }
-    explicit Positive<Bounds<F>>(PR const& pr) : Bounds<F>(pr) { }
-    template<BuiltinUnsignedIntegral M> Positive<Bounds<F>>(M m, PR pr) : Bounds<F>(m,pr) { }
-    explicit Positive<Bounds<F>>(F const& x) : Bounds<F>(x) { }
-    explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
-    explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
-    Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
-    Positive<Bounds<F>>(PositiveValidatedNumber const& y, PR pr) : Bounds<F>(y,pr) { }
+    Positive() : Bounds<F>() { }
+    explicit Positive(PR const& pr) : Bounds<F>(pr) { }
+    template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : Bounds<F>(m,pr) { }
+    explicit Positive(F const& x) : Bounds<F>(x) { }
+    explicit Positive(F const& l, F const& u) : Bounds<F>(l,u) { }
+    explicit Positive(Bounds<F> const& x) : Bounds<F>(x) { }
+    Positive(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
+    Positive(PositiveValidatedNumber const& y, PR pr) : Bounds<F>(y,pr) { }
   public:
     Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
     Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }

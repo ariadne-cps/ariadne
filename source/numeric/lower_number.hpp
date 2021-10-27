@@ -80,9 +80,9 @@ template<class P> class LowerNumber
     LowerNumber() : LowerNumber(Integer(0)) { }
 
     //! \brief Construct from a LowerNumber of a stronger paradigm
-    template<StrongerThan<P> SP> LowerNumber(const LowerNumber<SP>& y) : LowerNumber<P>(y.handle()) { }
+    template<StrongerThan<P> SP> LowerNumber(const LowerNumber<SP>& y) : LowerNumber(y.handle()) { }
     //! \brief Construct from a type convertible to a Number.
-    template<ConvertibleTo<Number<P>> X> LowerNumber(const X& x) : LowerNumber<P>(Number<P>(x).handle()) { }
+    template<ConvertibleTo<Number<P>> X> LowerNumber(const X& x) : LowerNumber(Number<P>(x).handle()) { }
 
     template<class PR> FloatLowerBound<PR> get(PR pr) const { return this->ref()._get(LowerTag(),pr); }
 
@@ -141,14 +141,14 @@ template<class P> class LowerNumber
 template<class P> class Positive<LowerNumber<P>> : public LowerNumber<P> {
     friend LowerNumber<P> const& unsign(Positive<LowerNumber<P>> const& y) { return y; }
   public:
-    Positive<LowerNumber<P>>() : LowerNumber<P>() { }
-    explicit Positive<LowerNumber<P>>(LowerNumber<P> const& y) : LowerNumber<P>(y) { }
+    Positive() : LowerNumber<P>() { }
+    explicit Positive(LowerNumber<P> const& y) : LowerNumber<P>(y) { }
     template<BuiltinUnsignedIntegral N>
-        Positive<LowerNumber<P>>(N n) : LowerNumber<P>(n) { }
+        Positive(N n) : LowerNumber<P>(n) { }
     template<class N> requires Constructible<ExactNumber,N>
-        Positive<LowerNumber<P>>(const Positive<N>& n) : LowerNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
+        Positive(const Positive<N>& n) : LowerNumber<P>(ExactNumber(static_cast<N const&>(n))) { }
     template<class N> requires Constructible<ExactNumber,N> and (not BuiltinIntegral<N>)
-        Positive<LowerNumber<P>>(const N& n) : LowerNumber<P>(ExactNumber(n)) { }
+        Positive(const N& n) : LowerNumber<P>(ExactNumber(n)) { }
     explicit operator LowerNumber<P> () const { return *this; }
 
     friend LowerNumber<P> mul(LowerNumber<P> const& y1, LowerNumber<P> const& y2);

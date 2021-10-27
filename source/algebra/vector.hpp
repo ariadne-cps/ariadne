@@ -182,20 +182,22 @@ class Vector
     //! \brief Convert from an initializer list of the same type.
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
-    //! \brief Convert from an initializer list of generic type and a precision parameter.
-    template<class PR> requires Constructible<X,Real,PR>
-        Vector(InitializerList<Real> const& lst, PR pr);
+    //! \brief Construct from an initializer list of generic type and a precision parameter.
+    template<class... PRS> requires Constructible<X,Real,PRS...>
+        explicit Vector(InitializerList<Real> const& lst, PRS... prs);
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...> and (not Constructible<X,Real,PRS...>)
-        Vector(InitializerList<ExactDouble> const& lst, PRS... prs);
+        explicit Vector(InitializerList<ExactDouble> const& lst, PRS... prs);
     template<class... PRS> requires Constructible<X,Dbl,PRS...>
-        Vector(InitializerList<Dbl> const& lst, PRS... prs);
-    template<class PR> requires Constructible<X,ExactDouble,ExactDouble,PR>
-        Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr);
+        explicit Vector(InitializerList<Dbl> const& lst, PRS... prs);
+    template<class... PRS> requires Constructible<X,ExactDouble,ExactDouble,PRS...>
+        explicit Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PRS... prs);
 
-    //! \brief Convert from an array of generic type and a precision parameter.
-    template<class Y, class PR> requires Constructible<X,Y,PR> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
-    //! \brief Convert from an vector of generic type and a precision parameter.
-    template<class Y, class PR> requires Constructible<X,Y,PR> Vector(Vector<Y> const& v, PR pr) : _ary(v.array(),pr) { }
+    //! \brief Construct from an array of generic type and a precision parameter.
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+        explicit Vector(Array<Y> const& ary, PRS... prs) : _ary(ary,prs...) { }
+    //! \brief Construct from an vector of generic type and a precision parameter.
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+        explicit Vector(Vector<Y> const& v, PRS... prs) : _ary(v.array(),prs...) { }
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE> requires Convertible<typename VE::ScalarType,X>
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
@@ -758,19 +760,19 @@ Vector<X>::Vector(InitializerList<ExactDouble> const& lst, PRS... prs)
 {
 }
 
-template<class X> template<class PR> requires Constructible<X,Real,PR>
-Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
-    : _ary(Array<Real>(lst),pr)
+template<class X> template<class... PRS> requires Constructible<X,Real,PRS...>
+Vector<X>::Vector(InitializerList<Real> const& lst, PRS... prs)
+    : _ary(Array<Real>(lst),prs...)
 {
 }
 
-template<class X> template<class PR> requires Constructible<X,ExactDouble,ExactDouble,PR>
-Vector<X>::Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr)
-    : _ary(lst.size(),X(pr))
+template<class X> template<class... PRS> requires Constructible<X,ExactDouble,ExactDouble,PRS...>
+Vector<X>::Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PRS... prs)
+    : _ary(lst.size(),X(prs...))
 {
     SizeType i=0;
     for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
-        _ary[i]=X(iter->first,iter->second,pr); ++i;
+        _ary[i]=X(iter->first,iter->second,prs...); ++i;
     }
 }
 

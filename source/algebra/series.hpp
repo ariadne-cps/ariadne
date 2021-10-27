@@ -113,7 +113,7 @@ class Series
     mutable List<X> _data;
   private:
     friend class AnalyticFunction;
-    Series<X>(std::shared_ptr<const SeriesGeneratorInterface<X>> p, X const& c, std::nullptr_t dummy);
+    Series(std::shared_ptr<const SeriesGeneratorInterface<X>> p, X const& c, std::nullptr_t dummy);
     Void _compute(DegreeType n) const;
     OutputStream& _write(OutputStream& os) const;
   public:
@@ -129,7 +129,7 @@ template<class X, DegreeType D> class FiniteSeries {
   private:
     OutputStream& _write(OutputStream& os) const;
   public:
-    template<class OP> FiniteSeries<X,D>(OP op, X const& c) {
+    template<class OP> FiniteSeries(OP op, X const& c) {
         for(DegreeType d=0; d<=D; ++d) { next_series_coefficient(op,d,c,_data); } }
     const X& operator[](DegreeType n) const { return _data[n]; }
     friend OutputStream& operator<<(OutputStream& os, FiniteSeries<X,D> const& s) { return s._write(os); }

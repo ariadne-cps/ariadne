@@ -80,8 +80,8 @@ template<class X> class Covector
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         explicit Covector(SizeType n, PRS... prs) : _ary(n,X(0u,prs...)) { }
-    template<class XX, class PR> requires Constructible<X,XX,PR>
-        Covector(Covector<XX> const& u, PR pr) : _ary(u.array(),pr) { }
+    template<class XX, class... PRS> requires Constructible<X,XX,PRS...>
+        explicit Covector(Covector<XX> const& u, PRS... prs) : _ary(u.array(),prs...) { }
     explicit Covector() : _ary() { }
     explicit Covector(SizeType n) : _ary(n) { }
     explicit Covector(SizeType n, const X& x) : _ary(n,x) { }

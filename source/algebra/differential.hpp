@@ -137,7 +137,7 @@ class Differential
         explicit Differential(SizeType as, DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs);
 
     //! \brief Conversion constructor from a different numerical type.
-    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> Differential(const Differential<Y>& dy, PRS... prs);
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit Differential(const Differential<Y>& dy, PRS... prs);
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     Differential<X>& operator=(const X& c);
@@ -163,18 +163,18 @@ class Differential
     static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
     static Vector<Differential<X>> affine(DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
 
-    template<class Y, class PR> requires Constructible<X,Y,PR>
-    static Differential<X> constant(SizeType as, DegreeType deg, const Y& c, const PR& pr) {
-        return constant(as,deg,X(c,pr)); }
-    template<class Y, class PR> requires Constructible<X,Y,PR>
-    static Differential<X> variable(SizeType as, DegreeType deg, const Y& v, SizeType j, const PR& pr) {
-        return variable(as,deg,X(v,pr),j); }
-    template<class Y, class PR> requires Constructible<X,Y,PR>
-    static Vector< Differential<X> > constants(SizeType as, DegreeType deg, const Vector<Y>& c, const PR& pr) {
-        return constants(as,deg,Vector<X>(c,pr)); }
-    template<class Y, class PR> requires Constructible<X,Y,PR>
-    static Vector< Differential<X> > variables(DegreeType deg, const Vector<Y>& v, const PR& pr) {
-        return variables(deg,Vector<X>(v,pr)); }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static Differential<X> constant(SizeType as, DegreeType deg, const Y& c, const PRS&... prs) {
+        return constant(as,deg,X(c,prs...)); }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static Differential<X> variable(SizeType as, DegreeType deg, const Y& v, SizeType j, const PRS&... prs) {
+        return variable(as,deg,X(v,prs...),j); }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static Vector< Differential<X> > constants(SizeType as, DegreeType deg, const Vector<Y>& c, const PRS&... prs) {
+        return constants(as,deg,Vector<X>(c,prs...)); }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static Vector< Differential<X> > variables(DegreeType deg, const Vector<Y>& v, const PRS&... prs) {
+        return variables(deg,Vector<X>(v,prs...)); }
 
 //    static UnivariateDifferential<X> identity(DegreeType deg, const Vector<X>& v);
     static Differential<X> identity(DegreeType deg, const X& v); // FIXME: Should use UnivariateDifferentia; required for derivative of UnivariateFunction.
@@ -407,7 +407,7 @@ class Vector< Differential<X> >
 
     Vector() = delete;
     Vector(SizeType rs) = delete;
-    template<class... PRS> requires Constructible<X,Nat,PRS...> Vector(SizeType rs, SizeType as, DegreeType d, PRS... prs)
+    template<class... PRS> requires Constructible<X,Nat,PRS...> explicit Vector(SizeType rs, SizeType as, DegreeType d, PRS... prs)
         : Vector<Differential<X>>(rs,as,d,X(0u,prs...)) { }
     Vector(SizeType rs, SizeType as, DegreeType d, X const& z);
     Vector(SizeType rs, const Differential<X>& sd);
@@ -416,7 +416,7 @@ class Vector< Differential<X> >
     template<class E> Vector(const VectorExpression<E>& ve);
     template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve);
     template<class G> requires InvocableReturning<Differential<X>,G,SizeType> Vector(SizeType n, G const& g);
-    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> Vector(const Vector<Differential<Y>>& dv, PRS... prs);
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit Vector(const Vector<Differential<Y>>& dv, PRS... prs);
 
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
         Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs);

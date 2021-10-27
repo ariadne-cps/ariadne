@@ -59,10 +59,10 @@ template<class X> class UnivariateDifferential
     UnivariateDifferential() = delete;
     explicit UnivariateDifferential(DegreeType d, const NumericType& c);
     template<class... PRS> requires Constructible<X,Nat,PRS...>
-        UnivariateDifferential(DegreeType d, PRS... prs) : UnivariateDifferential(d,X(0u,prs...)) { }
+        explicit UnivariateDifferential(DegreeType d, PRS... prs) : UnivariateDifferential(d,X(0u,prs...)) { }
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
-    template<class PR> requires Constructible<X,ExactDouble,PR>
-        explicit UnivariateDifferential(DegreeType deg, InitializerList<ExactDouble> lst, PR pr);
+    template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
+        explicit UnivariateDifferential(DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs);
     UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
 
     template<class OP> UnivariateDifferential(OP op, DegreeType d, X const& c);
@@ -133,12 +133,12 @@ template<class X> inline const X& UnivariateDifferential<X>::gradient() const { 
 template<class X> inline const X& UnivariateDifferential<X>::half_hessian() const { assert(this->degree()>=2); return _ary[2]; }
 template<class X> inline const X UnivariateDifferential<X>::hessian() const { assert(this->degree()>=2); return _ary[2]*2; }
 
-template<class X> template<class PR> requires Constructible<X,ExactDouble,PR>
-UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<ExactDouble> lst, PR pr)
-    : _ary(d+1u,X(0,pr))
+template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
+UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<ExactDouble> lst, PRS... prs)
+    : _ary(d+1u,X(0,prs...))
 {
     auto iter=lst.begin();
-    for(SizeType i=0; iter!=lst.end(); ++i, ++iter) { _ary[i]=X(*iter,pr); }
+    for(SizeType i=0; iter!=lst.end(); ++i, ++iter) { _ary[i]=X(*iter,prs...); }
 }
 
 

@@ -149,8 +149,8 @@ template<class X> class Matrix
     Matrix(InitializerList<InitializerList<X>> lst);
 
     //! Construct a matrix using initializer lists.
-    template<class... PRS> requires Constructible<X,ExactDouble,PRS...> Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
-    template<class... PRS> requires Constructible<X,Dbl,PRS...> Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs);
+    template<class... PRS> requires Constructible<X,ExactDouble,PRS...> explicit Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
+    template<class... PRS> requires Constructible<X,Dbl,PRS...> explicit Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);

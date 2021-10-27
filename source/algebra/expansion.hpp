@@ -135,8 +135,8 @@ template<class I, class X> class Expansion {
         explicit Expansion(ArgumentSizeType as, PRS... prs) : Expansion(as,X(0u,prs...)) { } // DEPRECATED
     explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
-    template<class PR> requires Constructible<X,Nat,PR>
-        explicit Expansion(ArgumentSizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
+    template<class... PRS> requires Constructible<X,Nat,PRS...>
+        explicit Expansion(ArgumentSizeType as, PRS... prs, SizeType cap=DEFAULT_CAPACITY);
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
         Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
@@ -242,9 +242,9 @@ public:
 };
 
 
-template<class I, class X> template<class PR> requires Constructible<X,Nat,PR>
-Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
-    : Expansion(as,X(0u,pr),cap)
+template<class I, class X> template<class... PRS> requires Constructible<X,Nat,PRS...>
+Expansion<I,X>::Expansion(ArgumentSizeType as, PRS... prs, SizeType cap)
+    : Expansion(as,X(0u,prs...),cap)
 {
 }
 

@@ -152,7 +152,7 @@ TestVector::test_misc()
     cout << "v3=" << v3 << endl;
     Vector<FloatDPApproximation> v4=v2;
     cout << "v4=" << v4 << endl;
-    Vector<FloatDPApproximation> v5={{-4.0_x,3.0_x,1.0_x},pr};
+    Vector<FloatDPApproximation> v5({-4.0_x,3.0_x,1.0_x},pr);
     cout << "v5=" << v5 << endl;
     ARIADNE_TEST_EQUAL(v1,v5);
     cout << endl;

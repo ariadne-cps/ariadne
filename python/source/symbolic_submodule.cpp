@@ -76,7 +76,6 @@ template<> Nat __hash__<StringVariable>(const StringVariable& v) {
 
 LetIntegerVariable let(const IntegerVariable&);
 LetRealVariable let(const RealVariable&);
-DottedRealVariable dot(const RealVariable&);
 
 } // namespace Ariadne
 

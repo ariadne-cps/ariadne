@@ -42,8 +42,6 @@
 
 namespace Ariadne {
 
-Bool subset(const GridCell& theCell, const GridTreeSubpaving& theSet);
-GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo,
              BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, Nat * pPrimaryCellExtent);
 

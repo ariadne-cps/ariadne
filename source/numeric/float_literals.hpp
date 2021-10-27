@@ -33,8 +33,6 @@
 
 namespace Ariadne {
 
-ExactDouble operator"" _x(long double lx);
-
 FloatDPError operator"" _error(long double lx);
 FloatDPBall operator"" _near(long double lx);
 FloatDPUpperBound operator"" _upper(long double lx);

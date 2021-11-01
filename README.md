@@ -8,9 +8,9 @@ Ariadne is a tool for reachability analysis and model checking of hybrid systems
 
 ## Installation ##
 
-The installation instructions are presented for Ubuntu Linux systems and derivatives (using Aptitude) and macOS systems (using Homebrew). However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
+The command-line installation instructions are presented for Debian Linux systems and derivatives (using apt) and macOS systems (using Homebrew). However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
 
-Official packages are available for Ubuntu derivatives and macOS, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0). AppleClang currently does not support C++20 Concepts yet and therefore is not usable on macOS at the moment.
+Official packages are available for Ubuntu LTS (currently 20.04) and derivatives and macOS 11, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0). AppleClang currently does not support C++20 Concepts yet and therefore is not usable on macOS at the moment.
 
 ### Official packages
 
@@ -18,7 +18,7 @@ Supplied packages are published using the official Launchpad platform for Ubuntu
 
 #### Ubuntu
 
-In order to install the Aptitude package, first you need to import the ppa repository to the ppa list:
+In order to install the apt package, first you need to import the ppa repository to the ppa list:
 
 ```
 sudo add-apt-repository ppa:ariadne-cps/ariadne
@@ -30,7 +30,7 @@ Then you can install Ariadne (along with any missing dependencies):
 sudo apt-get install ariadne
 ```
 
-which will be updated with the latest release as with other Aptitude packages.
+which will be updated with the latest release as with other apt packages.
 
 #### macOS
 
@@ -42,7 +42,7 @@ brew install ariadne-cps/tap/ariadne
 
 which in one line both sets up the "tap" for Ariadne and installs the package along with any missing dependencies. The package will be upgraded with any new versions after a `brew upgrade` is issued. The package currently supports x86-64 architectures on macOS Big Sur. Other configurations trigger an automatic build, therefore you should not need to deal with sources any time.
 
-### Dependencies
+### Dependencies for installation from sources
 
 If installed from sources, the only required library dependency is MPFR. To enable the graphical output you will require either Cairo or Gnuplot in order to save into png files. Finally, the Python bindings require the Python headers (version 3 is only supported, since version 2 is discontinued). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to build the Python interface, Git must be installed even if Ariadne has been downloaded as an archive. Download of the dependency is automatic though.
 
@@ -54,7 +54,7 @@ Specific instructions for Ubuntu and macOS follow, starting from installation fr
 
 #### Ubuntu
 
-Aptitude packages: `cmake pkg-config git libmpfr-dev libcairo2-dev gnuplot` and either `clang-11` or `g++-10` for the compiler toolchain.
+apt packages: `cmake pkg-config git libmpfr-dev libcairo2-dev gnuplot` and either `clang-11` or `g++-10` for the compiler toolchain.
 
 Additional package required for the Python interface: `python3-dev`.
 
@@ -71,6 +71,17 @@ export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 ```
 
 To allow building the documentation: `brew cask install mactex-no-gui` and `brew install doxygen`.
+
+### Downloading the sources
+
+A pre-packaged source zip/tar.gz archive is always available in the [releases](https://github.com/ariadne-cps/ariadne/releases) section of Ariadne's GitHub space.
+Still, it is usually preferable to *clone* the repository using Git. To do that, you should issue
+
+```
+git clone https://github.com/ariadne-cps/ariadne 
+```
+
+which will create an *ariadne* directory under the present working directory. Let's switch into that directory. 
 
 ### Building
 
@@ -89,13 +100,13 @@ $ cmake .. -DCMAKE_BUILD_TYPE=Release
 At this point, if no error arises, you can build the C++ library and its Python bindings with:
 
 ```
-$ cmake --build . --parallel
+$ cmake --build .
 ```
 
 This build does not include the `examples`, `tutorials` and `tests` targets. You can build those by supplying targets with the following:
 
 ```
-$ cmake --build . --target <TARGET> --parallel
+$ cmake --build . --target <TARGET>
 ```
 
 or by using the `everything` target to include all code targets.
@@ -103,7 +114,7 @@ or by using the `everything` target to include all code targets.
 To build the `doc` target for documentation, explicitly use:
 
 ```
-$ cmake --build . --target doc --parallel
+$ cmake --build . --target doc
 ```
 
 You can access the built documentation from the `docs/html/index.html` file in the build directory.
@@ -114,7 +125,7 @@ You can access the built documentation from the `docs/html/index.html` file in t
 To install the library globally from built sources, you must do
 
 ```
-$ cmake --build . --target install --parallel
+$ cmake --build . --target install
 ```
 
 using `sudo` if you require administrator privileges for a Linux installation. Please note that the installation will build the whole distribution beforehand, hence it is preferable that you first build the other targets without administrator privileges, build the install target.

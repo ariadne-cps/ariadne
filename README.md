@@ -75,13 +75,14 @@ To allow building the documentation: `brew cask install mactex-no-gui` and `brew
 ### Downloading the sources
 
 A pre-packaged source zip/tar.gz archive is always available in the [releases](https://github.com/ariadne-cps/ariadne/releases) section of Ariadne's GitHub space.
-Still, it is usually preferable to *clone* the repository using Git. To do that, you should issue
+Still, it is usually preferable to *clone* the repository using Git, in order to keep the distribution updated as soon as a new release is available. 
+To do that, you shall issue
 
 ```
 git clone https://github.com/ariadne-cps/ariadne 
 ```
 
-which will create an *ariadne* directory under the present working directory. Let's switch into that directory. 
+which creates an *ariadne* directory under the present working directory. Let's switch into that directory. 
 
 ### Building
 
@@ -117,7 +118,7 @@ To build the `doc` target for documentation, explicitly use:
 $ cmake --build . --target doc
 ```
 
-You can access the built documentation from the `docs/html/index.html` file in the build directory.
+then you can access the built documentation from the `docs/html/index.html` file in the build directory.
 
 
 ### Installing globally

@@ -195,8 +195,9 @@ using PositiveDyadic = Positive<Dyadic>;
 //! \relates Dyadic
 //! \name Type synonyms
 //!@{
-using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error.
+//! \ingroup NumericModule
 using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number.
+using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error.
 using DyadicUpperBound = UpperBound<Dyadic>; //!< Alias for dyadic upper bound for a number.
 using DyadicLowerBound = LowerBound<Dyadic>; //!< Alias for dyadic lower bound for a number.
 using DyadicApproximation = Approximation<Dyadic>; //!< Alias for dyadic approximateion to a number.

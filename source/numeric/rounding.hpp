@@ -243,12 +243,12 @@ struct RoundUpward {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_UPWARD; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDU; }
 };
-//! \brief Tag class for rounding towards zero. Constant \ref toward_zero. \ingroup NumericModule
+//! \brief Tag class for rounding towards zero. %Constant \ref toward_zero. \ingroup NumericModule
 struct RoundTowardZero {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TOWARD_ZERO; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDZ; }
 };
-//! \brief Tag class for approximate rounding. Constants \ref approx. \ingroup NumericModule
+//! \brief Tag class for approximate rounding. %Constant \ref approx. \ingroup NumericModule
 struct RoundApproximately {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }

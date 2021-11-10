@@ -179,7 +179,7 @@ namespace Ariadne {
 /*!
  * \defgroup NumericModule Numeric Module
  * \ingroup CoreModules
- * \brief Numerical types, including \ref Integer, \ref Dyadic,  \ref Decimal, \ref Rational and \ref Real types,
+ * \brief Numerical types, including \ref Natural, \ref Integer, \ref Dyadic,  \ref Decimal, \ref Rational and \ref Real types,
  * generic types \ref Number "Number<P>",
  * double/multiple precision floating-point types \ref FloatDP and \ref FloatMP,
  * and correctly-rounded types \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
@@ -204,7 +204,7 @@ namespace Ariadne {
  * floating-point number classes.
  * These support rounded arithmetic and elementary functions using the \ref down
  * and \ref up tags (equivalantly, \ref downward and \ref upward).
- * Rounding to nearest is specified by the \ref near (equivalently, \ref to_nearest) tag.
+ * %Rounding to nearest is specified by the \ref near (equivalently, \ref to_nearest) tag.
  * Approximate arithmetic without control of the
  * rounding mode can be specified by the \ref approx rounding type.
  * Comparisons are performed considering these numbers as exact values, and must be decidable.
@@ -224,17 +224,20 @@ namespace Ariadne {
  * %Positive numbers can be defined using the \ref Positive "Positive<X>" template.
  * A \ref Natural is a \ref Positive<\ref Integer>.
  *
+ * \anchor supported_operations
  * The following aliases are used for arithmetical operations:
  *  <dl><dt><dd><tt>nul(x)</tt> is equivalent to <tt>0*x</tt>
  *      <dt><dd><tt>pos(x)</tt> is equivalent to <tt>+x</tt>
  *      <dt><dd><tt>neg(x)</tt> is equivalent to <tt>-x</tt>
  *      <dt><dd><tt>sqr(x)</tt> is equivalent to <tt>x^2</tt>
+ *      <dt><dd><tt>hlf(x)</tt> is equivalent to <tt>x/2</tt>
  *      <dt><dd><tt>rec(x)</tt> is equivalent to <tt>1/x</tt>
  *      <dt><dd><tt>add(x,y)</tt> is equivalent to <tt>x+y</tt>
  *      <dt><dd><tt>sub(x,y)</tt> is equivalent to <tt>x-y</tt>
  *      <dt><dd><tt>mul(x,y)</tt> is equivalent to <tt>x*y</tt>
  *      <dt><dd><tt>div(x,y)</tt> is equivalent to <tt>x/y</tt>
  *      <dt><dd><tt>pow(x,y)</tt> is equivalent to <tt>x^y</tt>
+ *      <dt><dd><tt>fma(x,y,z)</tt> is equivalent to <tt>x*y+z</tt>
  *  </dl>
  * Note that C++ does not support the power operator <tt>^</tt>. In Python, the power operator is denoted <tt>**</tt>.
  *

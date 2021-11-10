@@ -56,7 +56,7 @@ and Bounds<FloatMP> would represents multiple-precision floating-point bounds.
 Each instantiation of a C++ template yields a different class.
 Since Python does not have templates, in the Python interface,
 each instantiation has a single name derived from the template name and the class parameter.
-For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref DyadicBounds "DyadicBounds".
+For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref Dyadic::DyadicBounds "DyadicBounds".
 The Python class name is available from
 C++ (and can be found in the documentation) as a C++ <tt>typedef</tt> class alias.
 
@@ -93,10 +93,10 @@ yields an object equivalent to the original argument.
 
  - <em>C++ extended literals:</em> <br>
 The C++ <tt>operator""</tt> can be used to define extended numeric and string literals.
-For example, \ref operator""_dyadic(long long double) can be used as <tt>1.375_dyadic</tt> to
+For example, \ref operator""_dy(long long double) can be used as <tt>1.375_dy</tt> to
 be interpreted as the Dyadic number \f$11/2^3\f$. Python does not support extended literals,
 but the same result may be obtained either by a constructor, or by using the literal tag as
-a function e.g. <tt>dyadic(1.375)</tt>.
+a function e.g. <tt>dy_(1.375)</tt>.
 
 */
 

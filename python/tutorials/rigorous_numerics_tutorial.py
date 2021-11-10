@@ -61,7 +61,7 @@ if __name__=='__main__':
     print("Expression")
     x=RealVariable("x")
     y=RealVariable("y")
-    c=RealConstant("c",dy(3.75))
+    c=RealConstant("c",dy_(3.75))
     e = c * x * (1-x)
     print(x); print(c); print(e)
     x0=Rational(1,2)
@@ -91,8 +91,8 @@ if __name__=='__main__':
 
 #! [function_demonstration]
     print("Function")
-    a=Real(dy(1.875))
-    b=Real(dec(0.3))
+    a=Real(dy_(1.875))
+    b=Real(dec_(0.3))
     id=EffectiveVectorMultivariateFunction.identity(EuclideanDomain(2))
     x=id[0]
     y=id[1]

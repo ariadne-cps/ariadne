@@ -52,7 +52,7 @@ An example of the use of %Ariadne for reachability analysis of a simple hybrid s
 
 An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the file  \link tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink.
 
-Examples of the use of %Ariadne via the Python interface can be found on the \ref python_module_demonstrations_page documentation page.
+Simple demonstrations of syntax of %Ariadne's Python interface can be found on the \ref python_module_demonstrations_page documentation page. Python versions of the C++ tutorials are alse provided, and are contained in the files \link python/tutorials/hybrid_evolution_tutorial.py hybrid_evolution_tutorial.py \endlink and \link python/tutorials/rigorous_numerics_tutorial.py rigorous_numerics_tutorial.py \endlink.
 
 \section mainpage_advanced_usage Advanced Usage
 
@@ -102,7 +102,9 @@ Coding guideline are given on the \ref coding_guidelines_page documentation page
 
 \example tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp An introduction to Ariadne's facilities for rigorous numerics.
 \example tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp A simple nonlinear model of a heating system.
-\example python/tutorials/tutorial.py A tutorial on using the Python interface.
+
+\example python/tutorials/rigorous_numerics_tutorial.py A tutorial on using the Python interface.
+\example python/tutorials/hybrid_evolution_tutorial.py A tutorial on using the Python interface to analyse a system.
 
 
 */

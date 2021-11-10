@@ -40,8 +40,8 @@ def numeric_demonstration():
     # Create a dyadic; can convert from Integer
     w=Dyadic(z)
     w=Dyadic(5)
-    w=Dyadic(11,3)
-    w=11/two**3
+    w=Dyadic(11,3) # Constructs the number 11/2^3=11/8
+    w=11/two**3    # Alternative syntax for 11/2^3
     print("w:",w,type(w))
 
     # Create a decimal number; can convert from Dyadic
@@ -60,11 +60,14 @@ def numeric_demonstration():
     r=Real(q)
     print("r:",r,type(r))
 
+
     # Operations on real numbers
     # Arithmetic operators
     +r; -r; r+r; r-r; r*r; r/r
-    # Arithmetic operations
-    neg(r); sqr(r); hlf(r); rec(r); pow(r,-3)
+    # Aliases for arithmetic operators
+    pos(r); neg(r); add(r,r); sub(r,r); mul(r,r); div(r);
+    # Other arithmetic operations
+    nul(r); sqr(r); hlf(r); rec(r); pow(r,-3)
     # Algebraic and transcendental operations
     sqrt(r); exp(r); log(r); sin(r); cos(r); tan(r); atan(r)
     # Lattice operations
@@ -77,7 +80,8 @@ def numeric_demonstration():
 
     # Store a double-precision floating-point number
     d=ExactDouble(1.375)
-    d=exact(1.375)
+    d=cast_exact(1.375)
+    d=x_(1.375)
     print("d:",d,type(d))
     # Can convert an ExactDouble to a Dyadic number.
     w=Dyadic(d)

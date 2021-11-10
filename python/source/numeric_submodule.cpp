@@ -66,8 +66,11 @@ template<class T> String numeric_class_tag();
 template<> String numeric_class_tag<DoublePrecision>() { return "DP"; }
 template<> String numeric_class_tag<MultiplePrecision>() { return "MP"; }
 
-template<class T> struct PythonName { const char* get() const { return class_name<T>().c_str(); } };
-template<class T> inline const char* python_name() { return PythonName<T>().get(); }
+template<class T> struct PythonClassName { std::string get() const { return class_name<T>(); } };
+template<class T> inline std::string python_class_name() { return PythonClassName<T>().get(); }
+
+template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
+    return os << python_class_name<T>() << "(" << repr.reference() << ")"; }
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& repr) {
     return os << "Integer("<<repr.reference()<<")"; }
@@ -109,6 +112,10 @@ template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepres
     return os << class_name<FE>() << "Error("<<repr.reference().raw()<<")"; }
 
 
+
+
+const Boolean _true_ = Boolean(true);
+const Boolean _false_ = Boolean(false);
 
 template<class L> Bool _decide_(L l) { return decide(l); }
 template<class L> Bool _definitely_(L l) { return definitely(l); }
@@ -195,35 +202,31 @@ Void export_effort(pymodule& module) {
     effort_class.def("__str__", &__cstr__<Effort>);
 }
 
-template<class L> void export_effective_logical(pymodule& module, std::string name)
-{
-    typedef decltype(declval<L>().check(declval<Effort>())) CheckType;
-    OutputStream& operator<<(OutputStream& os, L l);
-
-    pybind11::class_<L> logical_class(module,name.c_str());
-    logical_class.def(init<bool>());
-    logical_class.def(init<L>());
-    logical_class.def("__str__", &__cstr__<L>);
-    logical_class.def("__repr__", &__cstr__<L>);
-    logical_class.def("check", (CheckType(L::*)(Effort)) &L::check);
-    module.def("check", [](L l, Effort eff){return check(l,eff);});
-    define_logical(module,logical_class);
-}
+template<class L, class E=Effort> concept HasCheck = requires(L l, E e) { { l.check(e) }; };
 
 template<class L> void export_logical(pymodule& module, std::string name)
 {
-    OutputStream& operator<<(OutputStream& os, L l);
     pybind11::class_<L> logical_class(module,name.c_str());
     logical_class.def(init<bool>());
     logical_class.def(init<L>());
-    logical_class.def("__str__", &__cstr__<L>);
-    logical_class.def("__repr__", &__cstr__<L>);
+    if constexpr (Constructible<L,Boolean>) { logical_class.def(init<Boolean>()); }
+    if constexpr (Constructible<L,Indeterminate>) { logical_class.def(init<Indeterminate>()); }
+    logical_class.def("__bool__", &__bool__<Boolean>);
     define_logical(module,logical_class);
+    logical_class.def("__str__", &__cstr__<L>);
+    logical_class.def("__repr__", &__repr__<L>);
+    if constexpr (HasCheck<L>) {
+        typedef decltype(declval<L>().check(declval<Effort>())) CheckType;
+        logical_class.def("check", (CheckType(L::*)(Effort)) &L::check);
+        module.def("check", [](L l, Effort eff){return check(l,eff);});
+    } else {
+        module.def("decide", &_decide_<L>);
+        module.def("possibly", &_possibly_<L>);
+        module.def("definitely", &_definitely_<L>);
+    }
 
-    module.def("decide", &_decide_<L>);
-    module.def("possibly", &_possibly_<L>);
-    module.def("definitely", &_definitely_<L>);
-
+    if constexpr (Convertible<Boolean,L>) { implicitly_convertible<Boolean,L>(); }
+    if constexpr (Convertible<Indeterminate,L>) { implicitly_convertible<Indeterminate,L>(); }
 }
 
 template<> void export_logical<Boolean>(pymodule& module, std::string name)
@@ -233,8 +236,9 @@ template<> void export_logical<Boolean>(pymodule& module, std::string name)
     pybind11::class_<L> logical_class(module,name.c_str());
     logical_class.def(init<bool>());
     logical_class.def(init<L>());
+    logical_class.def("__bool__", &__bool__<Boolean>);
     logical_class.def("__str__", &__cstr__<L>);
-    logical_class.def("__repr__", &__cstr__<L>);
+    logical_class.def("__repr__", &__repr__<L>);
     define_logical(module,logical_class);
 
 //    implicitly_convertible<LogicalType<ExactTag>,bool>();
@@ -244,16 +248,24 @@ template<> void export_logical<Boolean>(pymodule& module, std::string name)
 
 Void export_logicals(pymodule& module) {
     export_logical<Boolean>(module,"Boolean");
-    export_effective_logical<Sierpinskian>(module,"Sierpinskian");
-    export_effective_logical<NegatedSierpinskian>(module,"NegatedSierpinskian");
-    export_effective_logical<Kleenean>(module,"Kleenean");
-    export_effective_logical<LowerKleenean>(module,"LowerKleenean");
-    export_effective_logical<UpperKleenean>(module,"UpperKleenean");
+    export_logical<Sierpinskian>(module,"Sierpinskian");
+    export_logical<NegatedSierpinskian>(module,"NegatedSierpinskian");
+    export_logical<Kleenean>(module,"Kleenean");
+    export_logical<LowerKleenean>(module,"LowerKleenean");
+    export_logical<UpperKleenean>(module,"UpperKleenean");
     export_logical<ValidatedKleenean>(module,"ValidatedKleenean");
     export_logical<ValidatedUpperKleenean>(module,"ValidatedUpperKleenean");
     export_logical<ValidatedLowerKleenean>(module,"ValidatedLowerKleenean");
     export_logical<ValidatedSierpinskian>(module,"ValidatedSierpinskian");
     export_logical<ApproximateKleenean>(module,"ApproximateKleenean");
+
+    pybind11::class_<Indeterminate> indeterminate_class(module,"Indeterminate");
+    indeterminate_class.def("__str__", &__cstr__<Indeterminate>);
+
+    module.attr("true") = _true_;
+    module.attr("false") = _false_;
+    module.attr("indeterminate") = indeterminate;
+
 }
 
 
@@ -284,6 +296,8 @@ void export_builtins(pymodule& module)
     exact_double_class.def("__hash__", [](ExactDouble const& xd){std::hash<double> hasher; return hasher(xd.get_d());});
 
     module.def("exact", (ExactDouble(*)(double)) &cast_exact);
+    module.def("x_", (ExactDouble(*)(long double)) &operator"" _x);
+    module.def("pr_", (ExactDouble(*)(long double)) &operator"" _pr);
 }
 
 
@@ -301,7 +315,7 @@ void export_integer(pymodule& module)
     module.def("sqr", &_sqr_<Integer>);
     module.def("pow", &_pow_<Integer,Nat>);
 
-    module.def("z", (Integer(*)(long long int)) &operator"" _z);
+    module.def("z_", (Integer(*)(long long int)) &operator"" _z);
 
     implicitly_convertible<Int,Integer>();
 
@@ -332,7 +346,7 @@ void export_dyadic(pymodule& module)
     module.def("sqr", &_sqr_<Dyadic>);
     module.def("hlf", &_hlf_<Dyadic>);
 
-    module.def("dy", (Dyadic(*)(long double)) &operator""_dy);
+    module.def("dy_", (Dyadic(*)(long double)) &operator""_dy);
 
     implicitly_convertible<Int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
@@ -369,7 +383,7 @@ void export_decimal(pymodule& module)
     module.def("sqr", &_sqr_<Decimal>);
     module.def("hlf", &_hlf_<Decimal>);
 
-    module.def("dec", (Decimal(*)(long double)) &operator"" _dec);
+    module.def("dec_", (Decimal(*)(long double)) &operator"" _dec);
 
     implicitly_convertible<Int,Decimal>();
     implicitly_convertible<Integer,Decimal>();
@@ -397,7 +411,7 @@ void export_rational(pymodule& module)
     module.def("sqr", &_sqr_<Rational>);
     module.def("rec", &_rec_<Rational>);
 
-    module.def("q", (Rational(*)(long double)) &operator"" _q);
+    module.def("q_", (Rational(*)(long double)) &operator"" _q);
 
     implicitly_convertible<Int,Rational>();
     implicitly_convertible<Integer,Rational>();

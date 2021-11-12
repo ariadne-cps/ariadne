@@ -76,7 +76,7 @@ def test_symbolic():
 
 def test_predicates():
 
-    c001=Real(dec(0.01))
+    c001=Real(dec_(0.01))
     five=RealConstant("five",5)
     x=RealVariable("x")
     y=RealVariable("y")
@@ -117,7 +117,7 @@ def test_predicates():
 def test_variable_interval():
 
     x=RealVariable("x")
-    c = Real(dec(0.1))
+    c = Real(dec_(0.1))
 
     [(0<=x)&(x<=1)]
     [x<<c]

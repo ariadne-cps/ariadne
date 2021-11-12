@@ -34,6 +34,7 @@
 namespace Ariadne {
 
 FloatDPError operator"" _error(long double lx);
+FloatDPValue operator"" _exact(long double lx);
 FloatDPBall operator"" _near(long double lx);
 FloatDPUpperBound operator"" _upper(long double lx);
 FloatDPLowerBound operator"" _lower(long double lx);

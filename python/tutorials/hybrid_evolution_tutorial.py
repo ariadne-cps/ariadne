@@ -25,8 +25,8 @@ from pyariadne import *
 #! [get_tank]
 def get_tank():
     # Declare the system constants
-    alpha = RealConstant("alpha",dec(0.02))
-    beta = RealConstant("beta",dec(0.3))
+    alpha = RealConstant("alpha",dec_(0.02))
+    beta = RealConstant("beta",dec_(0.3))
 
     # Declare the variables for the dynamics
     aperture = RealVariable("aperture")
@@ -97,9 +97,9 @@ def get_valve():
 #! [get_controller]
 def get_controller():
     # Declare some constants
-    hmin = RealConstant("hmin",dec(5.75))
-    hmax = RealConstant("hmax",dec(7.75))
-    delta = RealConstant("delta",dec(0.02))
+    hmin = RealConstant("hmin",dec_(5.75))
+    hmax = RealConstant("hmax",dec_(7.75))
+    delta = RealConstant("delta",dec_(0.02))
 
     # Declare the shared system variables
     height = RealVariable("height")
@@ -267,7 +267,7 @@ def get_initial_set():
     # Define the initial set, by supplying the location as a list of locations for each composed automata, and
     # the continuous set as a list of variable assignments for each variable controlled on that location
     # (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec(6.9)<=height)&(height<=7)])
+    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec_(6.9)<=height)&(height<=7)])
 
     # Print the initial set on the command line
     print("initial_set =",initial_set)
@@ -280,7 +280,7 @@ def get_initial_set():
 #! [get_final_time]
 def get_final_time():
     # Define the final time: continuous time and maximum number of transitions
-    final_time = HybridTime(dec(30.0),5)
+    final_time = HybridTime(dec_(30.0),5)
     print("final_time =",final_time)
 
     return final_time

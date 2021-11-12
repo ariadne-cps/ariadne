@@ -23,6 +23,7 @@
  */
 
 #include "float_error.hpp"
+#include "float_value.hpp"
 #include "float_ball.hpp"
 #include "float_lower_bound.hpp"
 #include "float_upper_bound.hpp"
@@ -36,6 +37,12 @@ FloatError<DoublePrecision> operator"" _error(long double lx) {
     return FloatError<DoublePrecision>(FloatDP(cast_exact(x),dp));
 }
 
+
+FloatValue<DoublePrecision> operator"" _exact(long double lx) {
+    double x=lx;
+    assert(x==lx);
+    return FloatValue<DoublePrecision>(ExactDouble(x),dp);
+}
 
 FloatBall<DoublePrecision> operator"" _near(long double lx) {
     volatile double x=lx;

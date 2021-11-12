@@ -88,7 +88,7 @@ inline MultiplePrecision precision(mpfr_prec_t pr) { return MultiplePrecision(pr
 inline MultiplePrecision precision(Bits pr) { return MultiplePrecision(pr); }
 inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 
-//! \ingroup FltMPSubModule
+//! \ingroup NumericModule
 //! \brief Multiple-precision floating-point numbers.
 //! Currently defined as a wrapper around \c mpfr_t from the MPFR library.
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.

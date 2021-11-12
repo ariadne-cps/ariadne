@@ -73,6 +73,8 @@ Void __setitem2__(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 
+template<class A> bool __bool__(const A& a) { return static_cast<bool>(a); }
+
 template<class A, class RET=Return<decltype(+declval<A>())>>
 ReturnType<RET> __pos__(const A& a) { return static_cast<ReturnType<RET>>(+a); }
 
@@ -290,7 +292,7 @@ template<class... TS> struct Tag { };
 template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, pybind11::class_<A>& pyclass) {
     pyclass.def("__and__", &__and__<A,A>);
     pyclass.def("__or__", &__or__<A,A>);
-    pyclass.def("__not__", &__not__<A>);
+    pyclass.def("__invert__", &__not__<A>);
     return pyclass;
 }
 

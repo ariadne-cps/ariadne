@@ -56,7 +56,7 @@ and Bounds<FloatMP> would represents multiple-precision floating-point bounds.
 Each instantiation of a C++ template yields a different class.
 Since Python does not have templates, in the Python interface,
 each instantiation has a single name derived from the template name and the class parameter.
-For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref DyadicBounds "DyadicBounds".
+For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref Dyadic::DyadicBounds "DyadicBounds".
 The Python class name is available from
 C++ (and can be found in the documentation) as a C++ <tt>typedef</tt> class alias.
 
@@ -69,15 +69,20 @@ the C++ version. When in doubt, use an explicit constructor <tt>T(obj)</tt> to c
 type <tt>T</tt>.
 
  - <em>Operators:</em> <br>
-C++ logical, arithmetic and comparison operators
-are declared as  <tt>operator</tt>\f$\star\f$<tt>(X1,X2)</tt>. In both C++ and Python,
-the operator can be used as <tt>x1</tt> \f$\star\f$ <tt>x2</tt>. Python has its own
-system for declaring operators; e.g. multiplication is defined by a class
-method <tt>__mul__</tt>. <br>
+In both C++ and Python, unary and binary mathematical operators represented by a symbol <tt>★</tt> can be defined, and are used by <tt>★x</tt> or <tt>x1★x2</tt>.
+  e.g. the addition operator is used by <tt>x1+x2</tt>.
+In Python, operators are defined by specially-named class methods.
+  e.g. addition is defined by the <tt>__add__</tt> method.
+In C++, the operator <tt>★</tt> is defined by the function with name <tt>operator★</tt>.
+  e.g. addition is defined by <tt>operator+(X1 x1, X2 x2)</tt>.
+To find the information about a Python operator with symbol <tt>★</tt>, you should look for <tt>operator★</tt> in the C++ API docmentation.
+<br>
 Note that C++ does
 not have a 'power' operator; <tt>operator^</tt> is 'bitwise exclusive or', and
 has a lower precedence than multiplication. In Python, the power operator is
 used by <tt>x1 ** x2</tt>.
+<br>
+Since Python does not allow user-defined logical operations <tt>and</tt>, <tt>or</tt> and <tt>not</tt>, these are implemented by the 'bitwise' operators <tt>&</tt>, <tt>|</tt> and <tt>~</tt>, and are used by <tt>b1&b2</tt>, <tt>b1|b2</tt> and <tt>~b2</tt>.
 
  - <em>Printing:</em> <br>
 In C++, printing is achieved by defining <tt>OutputStream& operator<<(OutputStream& os, Class obj)</tt>.
@@ -88,10 +93,10 @@ yields an object equivalent to the original argument.
 
  - <em>C++ extended literals:</em> <br>
 The C++ <tt>operator""</tt> can be used to define extended numeric and string literals.
-For example, \ref operator""_dyadic(long long double) can be used as <tt>1.375_dyadic</tt> to
+For example, \ref operator""_dy(long long double) can be used as <tt>1.375_dy</tt> to
 be interpreted as the Dyadic number \f$11/2^3\f$. Python does not support extended literals,
 but the same result may be obtained either by a constructor, or by using the literal tag as
-a function e.g. <tt>dyadic(1.375)</tt>.
+a function e.g. <tt>dy_(1.375)</tt>.
 
 */
 

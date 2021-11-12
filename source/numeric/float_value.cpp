@@ -32,12 +32,6 @@ namespace Ariadne {
 
 const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
 
-FloatValue<DoublePrecision> operator"" _exact(long double lx) {
-    double x=lx;
-    assert(x==lx);
-    return FloatValue<DoublePrecision>(ExactDouble(x),dp);
-}
-
 template class Value<FloatDP>;
 template class Operations<Value<FloatDP>>;
 template class Value<FloatMP>;

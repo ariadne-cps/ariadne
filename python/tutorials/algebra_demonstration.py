@@ -29,14 +29,14 @@ def linear_algebra_demonstration():
     #! [Linear Algebra demonstration]
 
     # Create an interval vector
-    b=FloatDPBoundsVector([1,{2:3},{exact(3.875):exact(4.125)}],dp)
+    b=FloatDPBoundsVector([1,{2:3},{x_(3.875):x_(4.125)}],dp)
     print("b:",b)
 
     Aq=RationalMatrix([[1,2,4],[3,1,2],[0,0,1]])
     print("Aq:",Aq)
 
     # Create an interval matrix
-    A=FloatDPBoundsMatrix([[1,2,4],[3,exact(1.5),2],[0,0,1]],dp)
+    A=FloatDPBoundsMatrix([[1,2,4],[3,x_(1.5),2],[0,0,1]],dp)
     print("A:",A)
 
     # Solve the linear equation Ax=b

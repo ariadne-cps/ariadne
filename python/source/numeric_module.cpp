@@ -26,7 +26,7 @@
 
 void numeric_submodule(pybind11::module& module);
 
-PYBIND11_MODULE(numeric, module) {
+PYBIND11_MODULE(pyariadne_numeric, module) {
 
     numeric_submodule(module);
 }

@@ -28,7 +28,7 @@ void numeric_submodule(pybind11::module&);
 void linear_algebra_submodule(pybind11::module&);
 void differentiation_submodule(pybind11::module&);
 
-PYBIND11_MODULE(algebra, module) {
+PYBIND11_MODULE(pyariadne_algebra, module) {
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);

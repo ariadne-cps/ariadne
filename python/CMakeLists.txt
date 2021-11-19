@@ -42,7 +42,7 @@ if(PYTHON3_FOUND)
             $<TARGET_OBJECTS:ariadne-utility>
             $<TARGET_OBJECTS:ariadne-numeric>
             )
-    set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
+    set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "pyariadne_numeric" SUFFIX ".so")
     target_link_libraries (pyariadne-numeric PUBLIC ${MPFR_LIBRARIES} ${GMP_LIBRARIES} PRIVATE pybind11::module)
 
     add_library(pyariadne-algebra MODULE
@@ -50,7 +50,7 @@ if(PYTHON3_FOUND)
             $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
             $<TARGET_OBJECTS:pyariadne-algebra-submodule-obj>
             )
-    set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
+    set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "pyariadne_algebra" SUFFIX ".so")
     target_link_libraries (pyariadne-algebra PUBLIC ariadne PRIVATE pybind11::module)
 
     set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}"

@@ -375,7 +375,7 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
     return cmp(x1,x2)==Comparison::LESS;
 }
 
-Writer<Dyadic> Dyadic::_default_writer(new FractionWriter());
+Writer<Dyadic> Dyadic::_default_writer(new DecimalWriter());
 
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
     return os << Dyadic::_default_writer(x);
@@ -408,6 +408,22 @@ auto DecimalWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStr
     }
     return os;
 }
+
+auto ScientificWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    if(is_finite(x)) {
+        Dyadic w=x;
+        if(w<0) { os << "-"; w=-w; }
+        int e=0;
+        while (w>=2) { w=hlf(w); e=e+1; }
+        while (w<1) { w=w*2; e=e-1; }
+        os << DecimalWriter()(w);
+        os << "*2^" << e;
+    } else {
+        write_infinite(os,x);
+    }
+    return os;
+}
+
 
 auto FractionWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
     if(is_finite(x)) {

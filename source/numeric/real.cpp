@@ -58,7 +58,7 @@ Accuracy::Accuracy(Bits precision)
 }
 
 OutputStream& operator<<(OutputStream& os, Accuracy const& acc) {
-    return os << "Accuracy("<<DecimalWriter()(acc.error())<<")";
+    return os << "Accuracy("<<ScientificWriter()(acc.error())<<")";
 }
 
 Bounds<FloatDP> Bounds<Dyadic>::get(DoublePrecision pr) const { return Bounds<FloatDP>(_l,_u,pr); }

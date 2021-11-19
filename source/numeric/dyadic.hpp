@@ -170,6 +170,9 @@ class Dyadic
 class DecimalWriter : public WriterInterface<Dyadic> {
     virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
+class ScientificWriter : public WriterInterface<Dyadic> {
+    virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
+};
 class FractionWriter : public WriterInterface<Dyadic> {
     virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };

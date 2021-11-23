@@ -131,35 +131,21 @@ template<class X> pybind11::list matrix_to_python(Matrix<X> const& A) {
 
 
 template<class X> Vector<X> vector_from_python(pybind11::list const& lst) {
-    SizeType n=lst.size();
-    Vector<X> r(n);
-    for(SizeType i=0; i!=n; ++i) {
-        pybind11::object obj=lst[i];
-        X const* val = obj.cast<X*>();
-        r[i]=*val;
-    }
-    return r;
+    return Vector<X>( lst.size(), [&lst](SizeType i){return *lst[i].cast<X*>();} );
 }
 
-template<class X> Covector<X> covector_from_python(pybind11::object const& obj) {
-    pybind11::list const& lst=static_cast<pybind11::list const&>(obj);
-    SizeType n=lst.size();
-    Covector<X> r(n);
-    for(SizeType j=0; j!=n; ++j) {
-        pybind11::object elem=lst[j];
-        X const* val = elem.cast<X*>();
-        r[j]=*val;
-    }
-    return r;
+template<class X> Covector<X> covector_from_python(pybind11::list const& lst) {
+    return Covector<X>( lst.size(), [&lst](SizeType i){return *lst[i].cast<X*>();} );
 }
 
 template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
-    pybind11::object row0_obj=lst[0];
-    pybind11::list const& row0=static_cast<pybind11::list const&>(row0_obj);
+    Array<pybind11::list> rows(lst.size(),[&](SizeType i){return static_cast<pybind11::list const&>(lst[i]);});
     SizeType rs=lst.size();
-    SizeType cs=row0.size();
-    assert(rs!=0 && cs!=0);
-    Matrix<X> r(rs,cs,*row0[0].cast<X*>());
+    assert(rs!=0);
+    SizeType cs=rows[0].size();
+    assert(cs!=0);
+    return Matrix<X>(rs,cs,[&](SizeType i, SizeType j){return static_cast<X>(*rows[i][j].cast<X*>());});
+    Matrix<X> r(rs,cs,nul(*rows[0][0].cast<X*>()));
     for(SizeType i=0; i!=rs; ++i) {
         pybind11::object row_obj=lst[i];
         pybind11::list const& row=static_cast<pybind11::list const&>(row_obj);
@@ -226,7 +212,7 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
         }
     }
     vector_class.def(pybind11::init<Nat,X>());
-    vector_class.def(pybind11::init([](pybind11::list const& lst){return Vector<X>(pybind11::cast<Array<X>>(lst));}));
+    vector_class.def(pybind11::init([](pybind11::list const& lst){return vector_from_python<X>(lst);}));
 
     // Convert from a Python list and properties
     if constexpr (HasGenericType<X> and HasPrecisionType<X>) {

@@ -61,6 +61,7 @@ template<class X> class UnivariateDifferential
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         explicit UnivariateDifferential(DegreeType d, PRS... prs) : UnivariateDifferential(d,X(0u,prs...)) { }
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
+    UnivariateDifferential(Array<X> ary) : _ary(ary) { }
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
         explicit UnivariateDifferential(DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs);
     UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
@@ -78,7 +79,7 @@ template<class X> class UnivariateDifferential
     DegreeType degree() const;
     X zero_coefficient() const;
     const Array<X>& array() const;
-    Expansion<MultiIndex,X>& array();
+    Array<X>& array();
     const X& operator[](SizeType k) const;
     X& operator[](SizeType k);
 
@@ -185,6 +186,10 @@ template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
 
     template<class OP> static UnivariateDifferential<X> apply(OP op, const UnivariateDifferential<X>& dx) {
         return compose(UnivariateDifferential<X>(op,dx.degree(),dx[0]),dx); }
+
+    static UnivariateDifferential<X> apply(Pow, UnivariateDifferential<X> x, Int n) {
+        return generic_pow(x,n); }
+
 };
 
 

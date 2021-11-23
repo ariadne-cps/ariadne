@@ -50,6 +50,12 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os;
 }
 
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< UnivariateDifferential<X> >& repr) {
+    const UnivariateDifferential<X>& diff=repr.reference();
+    os << python_name<X>("UnivariateDifferential").c_str() << "(" << diff.array() << "," << diff.degree() << ")";
+    return os;
+}
+
 } // namespace Ariadne
 
 
@@ -73,10 +79,10 @@ Void export_differential(pybind11::module& module, const String& name)
         differential_class.def( pybind11::init<SizeType,DegreeType>());
     }
 
-    differential_class.def_static("constant",(D(*)(SizeType, DegreeType, const X&)) &D::constant);
-    differential_class.def_static("variable",(D(*)(SizeType as, DegreeType deg, const X& y, SizeType j)) &D::variable);
-    differential_class.def_static("constants",(Vector<D>(*)(SizeType, DegreeType, const Vector<X>&)) &D::constants);
-    differential_class.def_static("variables",(Vector<D>(*)(DegreeType, const Vector<X>&)) &D::variables);
+    differential_class.def_static("constant",(D(*)(SizeType as, DegreeType deg, const X& c)) &D::constant);
+    differential_class.def_static("variable",(D(*)(SizeType as, DegreeType deg, const X& v, SizeType j)) &D::variable);
+    differential_class.def_static("constants",(Vector<D>(*)(SizeType as, DegreeType deg, const Vector<X>& c)) &D::constants);
+    differential_class.def_static("variables",(Vector<D>(*)(DegreeType deg, const Vector<X>& v)) &D::variables);
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         differential_class.def_static("constant",(D(*)(SizeType, DegreeType, const Y&, const PR&)) &D::constant);
@@ -98,11 +104,6 @@ Void export_differential(pybind11::module& module, const String& name)
     differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
     differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
     differential_class.def("expansion", (Expansion<MultiIndex,X>const&(D::*)()const)&D::expansion);
-
-    differential_class.def_static("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
-    differential_class.def_static("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);
-    differential_class.def_static("constants",(Vector<D>(*)(SizeType, DegreeType, const Vector<X>&))&D::constants);
-    differential_class.def_static("variables",(Vector<D>(*)(DegreeType, const Vector<X>&))&D::variables);
 
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y;
@@ -157,6 +158,55 @@ export_differential_vector(pybind11::module& module, const String& name)
     //module.def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
+template<class DIFF>
+Void export_univariate_differential(pybind11::module& module, const String& name)
+{
+    typedef typename DIFF::ValueType X;
+    typedef DIFF D;
+
+    pybind11::class_<D> differential_class(module,name.c_str());
+    differential_class.def(pybind11::init<D>());
+
+    if constexpr (HasGenericType<X>) {
+        typedef typename X::PrecisionType PR;
+        differential_class.def( pybind11::init<DegreeType,PR>());
+    } else {
+        differential_class.def( pybind11::init<DegreeType>());
+    }
+
+    differential_class.def_static("constant",(D(*)(DegreeType deg, const X& v)) &D::constant);
+    differential_class.def_static("variable",(D(*)(DegreeType deg, const X& v)) &D::variable);
+    if constexpr (HasGenericType<X>) {
+        typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
+        differential_class.def_static("constant",(D(*)(DegreeType, const Y&, const PR&)) &D::constant);
+        differential_class.def_static("variable",(D(*)(DegreeType deg, const Y& y, const PR& pr)) &D::variable);
+    }
+
+    differential_class.def( pybind11::init<Array<X>>());
+    differential_class.def("__getitem__", &__getitem__<D,SizeType,X>);
+    differential_class.def("__setitem__",&__setitem__<D,SizeType,X>);
+
+    define_elementary_algebra<D,X>(module, differential_class);
+//    define_inplace_algebra<D,X>(module,differential_class);
+    differential_class.def("__str__", &__cstr__<D>);
+    differential_class.def("__repr__", &__repr__<D>);
+
+    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value);
+    differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
+    differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
+
+    differential_class.def("array", (Array<X>const&(D::*)()const)&D::array);
+
+    if constexpr (HasGenericType<X>) {
+        typedef typename X::GenericType Y;
+        define_mixed_arithmetic<D,Y>(module, differential_class);
+    }
+
+    module.def("derivative", (D(*)(const D&))&_derivative_<D>);
+    module.def("antiderivative", (D(*)(const D&))&_antiderivative_<D>);
+
+}
+
 Void differentiation_submodule(pybind11::module& module)
 {
 
@@ -169,5 +219,11 @@ Void differentiation_submodule(pybind11::module& module)
     export_differential< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("Differential"));
     export_differential_vector< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("DifferentialVector"));
     export_differential_vector< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("DifferentialVector"));
+
+    export_univariate_differential< UnivariateDifferential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("UnivariateDifferential"));
+    export_univariate_differential< UnivariateDifferential<FloatDPBounds> >(module,python_name<FloatDPBounds>("UnivariateDifferential"));
+    export_univariate_differential< UnivariateDifferential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("UnivariateDifferential"));
+    export_univariate_differential< UnivariateDifferential<FloatMPBounds> >(module,python_name<FloatMPBounds>("UnivariateDifferential"));
+
 }
 

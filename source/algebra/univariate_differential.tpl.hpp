@@ -62,6 +62,14 @@ template<class X> DegreeType UnivariateDifferential<X>::degree() const {
     return this->_ary.size()-1u;
 }
 
+template<class X> Array<X> const& UnivariateDifferential<X>::array() const {
+    return this->_ary;
+}
+
+template<class X> Array<X>& UnivariateDifferential<X>::array() {
+    return this->_ary;
+}
+
 template<class X> X const& UnivariateDifferential<X>::operator[](SizeType k) const {
     return this->_ary[k];
 }

@@ -164,46 +164,46 @@ Void export_univariate_differential(pybind11::module& module, const String& name
     typedef typename DIFF::ValueType X;
     typedef DIFF D;
 
-    pybind11::class_<D> differential_class(module,name.c_str());
-    differential_class.def(pybind11::init<D>());
+    pybind11::class_<D> univariate_differential_class(module,name.c_str());
+    univariate_differential_class.def(pybind11::init<D>());
 
     if constexpr (HasGenericType<X>) {
         typedef typename X::PrecisionType PR;
-        differential_class.def( pybind11::init<DegreeType,PR>());
+        univariate_differential_class.def( pybind11::init<DegreeType,PR>());
     } else {
-        differential_class.def( pybind11::init<DegreeType>());
+        univariate_differential_class.def( pybind11::init<DegreeType>());
     }
 
-    differential_class.def_static("constant",(D(*)(DegreeType deg, const X& v)) &D::constant);
-    differential_class.def_static("variable",(D(*)(DegreeType deg, const X& v)) &D::variable);
+    univariate_differential_class.def_static("constant",(D(*)(DegreeType, const X&)) &D::constant);
+    univariate_differential_class.def_static("variable",(D(*)(DegreeType, const X&)) &D::variable);
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
-        differential_class.def_static("constant",(D(*)(DegreeType, const Y&, const PR&)) &D::constant);
-        differential_class.def_static("variable",(D(*)(DegreeType deg, const Y& y, const PR& pr)) &D::variable);
+        univariate_differential_class.def_static("constant",(D(*)(DegreeType, const Y&, const PR&)) &D::constant);
+        univariate_differential_class.def_static("variable",(D(*)(DegreeType, const Y&, const PR&)) &D::variable);
     }
 
-    differential_class.def( pybind11::init<Array<X>>());
-    differential_class.def("__getitem__", &__getitem__<D,SizeType,X>);
-    differential_class.def("__setitem__",&__setitem__<D,SizeType,X>);
+    univariate_differential_class.def( pybind11::init<Array<X>>());
+    univariate_differential_class.def("__getitem__", &__getitem__<D,SizeType,X>);
+    univariate_differential_class.def("__setitem__",&__setitem__<D,SizeType,X>);
 
-    define_elementary_algebra<D,X>(module, differential_class);
-//    define_inplace_algebra<D,X>(module,differential_class);
-    differential_class.def("__str__", &__cstr__<D>);
-    differential_class.def("__repr__", &__repr__<D>);
+    define_elementary_algebra<D,X>(module, univariate_differential_class);
+//    define_inplace_algebra<D,X>(module,univariate_differential_class);
+    univariate_differential_class.def("__str__", &__cstr__<D>);
+    univariate_differential_class.def("__repr__", &__repr__<D>);
 
-    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value);
-    differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
-    differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
+    univariate_differential_class.def("value", (ValueType<D>(D::*)()const)&D::value);
+    univariate_differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
+    univariate_differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
 
-    differential_class.def("array", (Array<X>const&(D::*)()const)&D::array);
+    univariate_differential_class.def("array", (Array<X>const&(D::*)()const)&D::array);
 
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y;
-        define_mixed_arithmetic<D,Y>(module, differential_class);
+        define_mixed_arithmetic<D,Y>(module, univariate_differential_class);
     }
 
-    module.def("derivative", (D(*)(const D&))&_derivative_<D>);
-    module.def("antiderivative", (D(*)(const D&))&_antiderivative_<D>);
+    module.def("derivative", &_derivative_<D>);
+    module.def("antiderivative", &_antiderivative_<D>);
 
 }
 

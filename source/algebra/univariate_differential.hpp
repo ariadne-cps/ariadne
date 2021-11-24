@@ -71,6 +71,13 @@ template<class X> class UnivariateDifferential
     static SelfType constant(DegreeType d, const NumericType& c);
     static SelfType variable(DegreeType d, const NumericType& c);
 
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static SelfType constant(DegreeType deg, const Y& c, const PRS&... prs) {
+        return constant(deg,X(c,prs...)); }
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+    static SelfType variable(DegreeType deg, const Y& v, const PRS&... prs) {
+        return variable(deg,X(v,prs...)); }
+
     SelfType create_zero() const;
     SelfType create_constant(const NumericType& c) const;
     SelfType create_variable(const NumericType& c) const;

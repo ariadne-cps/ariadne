@@ -130,6 +130,8 @@ template<class X> pybind11::list matrix_to_python(Matrix<X> const& A) {
 }
 
 
+namespace { // Don't export the following functions to prevent visibility inconsistency warnings with pybind11 names
+
 template<class X> Vector<X> vector_from_python(pybind11::list const& lst) {
     return Vector<X>( lst.size(), [&lst](SizeType i){return *lst[i].cast<X*>();} );
 }
@@ -144,19 +146,10 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
     assert(rs!=0);
     SizeType cs=rows[0].size();
     assert(cs!=0);
-    return Matrix<X>(rs,cs,[&](SizeType i, SizeType j){return static_cast<X>(*rows[i][j].cast<X*>());});
-    Matrix<X> r(rs,cs,nul(*rows[0][0].cast<X*>()));
-    for(SizeType i=0; i!=rs; ++i) {
-        pybind11::object row_obj=lst[i];
-        pybind11::list const& row=static_cast<pybind11::list const&>(row_obj);
-        for(SizeType j=0; j!=cs; ++j) {
-            pybind11::object val_obj=row[j];
-            X const* val = val_obj.cast<X*>();
-            r[i][j]=*val;
-        }
-    }
-    return r;
+    return Matrix<X>(rs,cs,[&rows](SizeType i, SizeType j){return *rows[i][j].cast<X*>();});
 }
+
+} // namespace
 
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
@@ -319,6 +312,7 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
         covector_class.def(pybind11::init<Nat,PR>());
     }
     covector_class.def(pybind11::init<Nat,X>());
+    covector_class.def(pybind11::init([](pybind11::list const& lst){return covector_from_python<X>(lst);}));
     covector_class.def("size", &Covector<X>::size);
     covector_class.def("__len__", &Covector<X>::size);
     covector_class.def("__setitem__", &__setitem__<Covector<X>,Nat,X>);

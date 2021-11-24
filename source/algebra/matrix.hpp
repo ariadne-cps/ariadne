@@ -893,7 +893,8 @@ Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
 
 template<class X> template<class G> requires InvocableReturning<X,G,SizeType,SizeType>
 Matrix<X>::Matrix(SizeType m, SizeType n, G const& g)
-    : _zero(nul(g(0,0))), _rs(m), _cs(n), _ary( m*n, [n,&g](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);} )
+    : _zero(nul(g(0,0))), _rs(m), _cs(n)
+    , _ary( m*n, [&](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);} )
 {
 }
 

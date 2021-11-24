@@ -88,6 +88,8 @@ template<class X> class Covector
     explicit Covector(Array<X> ary) : _ary(std::move(ary)) { }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         static Covector<X> unit(SizeType n, SizeType j, PRS... prs) { Covector<X> r(n,prs...); r[j]=1; return r; }
+    template<class G> requires InvocableReturning<X,G,SizeType>
+        Covector(SizeType n, G const& g) : _ary(n,g) { }
     SizeType size() const { return _ary.size(); }
     Void resize(SizeType n) { _ary.resize(n); }
     const X& operator[](SizeType j) const { return _ary[j]; }

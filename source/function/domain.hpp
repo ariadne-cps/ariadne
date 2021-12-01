@@ -40,6 +40,7 @@ using BoxDomainType = Box<Interval<FloatDPValue>>;
 class RealDomain {
   public:
     typedef SizeOne DimensionType;
+    typedef IndexZero IndexType;
 
     constexpr RealDomain() { }
     constexpr RealDomain(SizeOne) { }
@@ -54,6 +55,7 @@ class EuclideanDomain {
     SizeType _dim;
   public:
     typedef SizeType DimensionType;
+    typedef SizeType IndexType;
     constexpr EuclideanDomain(SizeType dim) : _dim(dim) { }
     constexpr EuclideanDomain(SizeType dim, RealDomain) : _dim(dim) { }
     constexpr SizeType dimension() const { return this->_dim; }

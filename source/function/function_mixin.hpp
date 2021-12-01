@@ -198,6 +198,20 @@ template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F
     return _heap_move(derivative(static_cast<const F&>(*this),j)); }
 
 
+template<class F, class P, class SIG> class FunctionGetterMixin;
+
+template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealScalar(ARGS...)> {
+};
+
+template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealVector(ARGS...)>
+    : public virtual VectorOfFunctionInterface<P,ARGS...>
+{
+    virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const final {
+        return static_cast<F const&>(*this)[i].raw_pointer()->_clone(); }
+};
+
+
+
 
 
 } // namespace Ariadne

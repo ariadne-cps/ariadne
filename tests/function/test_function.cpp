@@ -112,8 +112,8 @@ Void TestFunction::test_scalar_univariate_function()
     ARIADNE_TEST_WARN("No ScalarUnivariateFunction<P>::derivative() method.");
     // df=f.derivative();
     df=derivative(f);
-    df=f.derivative(SizeOne());
-    df=derivative(f,SizeOne());
+    df=f.derivative(IndexZero());
+    df=derivative(f,IndexZero());
     dfp=f.slope(p);
     dfp=slope(f,p);
     ARIADNE_TEST_PRINT(df);
@@ -138,8 +138,8 @@ Void TestFunction::test_vector_univariate_function()
     Vector<FloatDPApproximation> dfp;
     //df=f.derivative();
     df=derivative(f);
-    df=f.derivative(SizeOne());
-    df=derivative(f,SizeOne());
+    df=f.derivative(IndexZero());
+    df=derivative(f,IndexZero());
     dfp=f.tangent(p);
     dfp=tangent(f,p);
 

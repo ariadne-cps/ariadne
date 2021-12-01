@@ -98,7 +98,7 @@ class FunctionConstructors {
 
     static ScalarUnivariateFunction<P> zero(ScalarDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
     static ScalarUnivariateFunction<P> constant(ScalarDomainType dom, NumericType c); //!< \brief %Constant scalar function \a c over domain \a dom.
-    static ScalarUnivariateFunction<P> coordinate(ScalarDomainType dom, SizeOne j); //!< \brief %Coordinate function over domain \a dom.
+    static ScalarUnivariateFunction<P> coordinate(ScalarDomainType dom, IndexZero j); //!< \brief %Coordinate function over domain \a dom.
     static ScalarUnivariateFunction<P> coordinate(ScalarDomainType dom); //!< \brief %Coordinate function over domain \a dom.
     static VectorUnivariateFunction<P> zeros(SizeType rs, ScalarDomainType dom); //!< \brief %Zero vector function over domain \a dom returning a result of size \a rs.
     static VectorUnivariateFunction<P> constant(ScalarDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
@@ -187,9 +187,10 @@ class Function
     typedef D DomainType; //!< The type of the domain.
     typedef C CodomainType; //!< The type of the codomain.
     typedef Number<P> NumericType; //!< The numeric type required to construct a constant scalar function.
-    typedef typename C::DimensionType ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
-    typedef typename D::DimensionType ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
-    typedef typename D::DimensionType ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
+    typedef ElementSizeType<DomainType> ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
+    typedef ElementSizeType<CodomainType> ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
+    typedef ElementIndexType<DomainType> ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
+    typedef ElementIndexType<CodomainType> ResultIndexType; //!< The type used to descibe an index into an element of the codomain.
 
     //! \brief The type of an argument to the function whose scalar type is \a Y.
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
@@ -369,7 +370,7 @@ differential(const MultivariateFunction<P,C>& f, const Vector<X>& x, DegreeType 
 
 template<class P, class SIG> requires Same<typename SignatureTraits<SIG>::ArgumentKind,Real> inline
 Function<P,SIG> derivative(Function<P,SIG> const& f) {
-    return f.derivative(SizeOne()); }
+    return f.derivative(IndexZero()); }
 
 template<class P, class X> Scalar<EvaluateType<P,X>>
 slope(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {

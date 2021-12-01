@@ -52,6 +52,7 @@ namespace Ariadne {
 
 //------------------------ Formula functions  -----------------------------------//
 
+
 //! A function defined by a formula
 template<class Y>
 class ScalarUnivariateFormulaFunction
@@ -67,7 +68,7 @@ class ScalarUnivariateFormulaFunction
     virtual SizeOne argument_size() const final { return SizeOne(); }
     virtual SizeOne result_size() const final { return SizeOne(); }
     template<class X> X operator() (const X& x) const { return Ariadne::evaluate(_formula,Vector<X>({x})); }
-    friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, SizeOne j) {
+    friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, IndexZero j) {
         return ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(f._formula,0)); }
     friend OutputStream& operator<<(OutputStream& os, ScalarUnivariateFormulaFunction<Y> const& f) {
         return os << f._formula; }
@@ -96,7 +97,7 @@ class VectorUnivariateFormulaFunction
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeOne argument_size() const { return SizeOne(); }
     template<class X> Vector<X> operator() (const X& x) const { return Ariadne::evaluate(this->_formulae,Vector<X>({x})); }
-    friend VectorUnivariateFormulaFunction<Y> derivative(VectorUnivariateFormulaFunction<Y> const& f, SizeOne j) {
+    friend VectorUnivariateFormulaFunction<Y> derivative(VectorUnivariateFormulaFunction<Y> const& f, IndexZero j) {
         return VectorUnivariateFormulaFunction<Y>(Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
     friend OutputStream& operator<<(OutputStream& os, VectorUnivariateFormulaFunction<Y> const& f) {
         return os << f._formulae; }
@@ -458,6 +459,7 @@ class NonResizableScalarFunction : public ScalarFunction<P,ARGS...> {
     }
 };
 
+
 template<class P, class... ARGS>
 class VectorOfScalarFunction
      : public VectorFunctionMixin<VectorOfScalarFunction<P,ARGS...>,P,ARGS...>
@@ -610,14 +612,10 @@ class EmbeddedFunction
 
 
 template<class P, class R, class T, class... AS>
-class ComposedFunction;
-
-template<class P, class T, class... AS>
-class ComposedFunction<P,RealScalar,T,AS...>
-     : public FunctionMixin<ComposedFunction<P,RealScalar,T,AS...>,P,RealScalar(AS...)>
+class ComposedFunction
+     : public FunctionMixin<ComposedFunction<P,R,T,AS...>,P,R(AS...)>
+     , public FunctionGetterMixin<ComposedFunction<P,R,T,AS...>,P,R(AS...)>
 {
-    using R=RealScalar;
-
     using D=DomainOfType<AS...>;
     using E=DomainOfType<T>;
     using C=DomainOfType<R>;
@@ -628,6 +626,7 @@ class ComposedFunction<P,RealScalar,T,AS...>
     typedef ElementSizeType<D> ArgumentSizeType;
     typedef ElementSizeType<C> ResultSizeType;
     typedef ElementIndexType<D> ArgumentIndexType;
+    typedef ElementIndexType<C> ResultIndexType;
 
     ComposedFunction(const Function<P,R(T)>& f, const Function<P,T(AS...)>& g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
@@ -635,48 +634,30 @@ class ComposedFunction<P,RealScalar,T,AS...>
     virtual CodomainType const codomain() const { return _f.codomain(); }
     virtual ArgumentSizeType argument_size() const { return _g.argument_size(); }
     virtual ResultSizeType result_size() const { return _f.result_size(); }
+    ScalarFunction<P,AS...> operator[](ResultIndexType i) const { return compose(_f[i],_g); }
 
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
         return _f.evaluate(_g.evaluate(x)); }
-    friend ComposedFunction<P,R,T,AS...> derivative(ComposedFunction<P,R,T,AS...> const& f, ArgumentIndexType j) {
-        ARIADNE_NOT_IMPLEMENTED; }
+    Function<P,R(AS...)> derivative(ArgumentIndexType j) const {
+        if constexpr (Same<P,ApproximateTag>) {
+            ARIADNE_NOT_IMPLEMENTED;
+        } else {
+            if constexpr (Same<T,RealScalar>) {
+                return compose(this->_f.derivative(IndexZero()),this->_g)*this->_g.derivative(j);
+            } else {
+                Function<P,R(AS...)> r=Function<P,R(AS...)>(this->result_size(),this->argument_size());
+                for (SizeType k=0; k!=this->_g.result_size(); ++k) {
+                    r=r+compose(this->_f.derivative(k),this->_g)*this->_g[k].derivative(j);
+                }
+                return r;
+            }
+        }
+    }
+    friend Function<P,R(AS...)> derivative(ComposedFunction<P,R,T,AS...> const& f, ArgumentIndexType j) {
+        return f.derivative(j); }
     friend OutputStream& operator<<(OutputStream& os, ComposedFunction<P,R,T,AS...> const& f) {
         return os << "ComposedFunction( f="<<f._f<<", g="<<f._g<<" )"; }
   private:
-    Function<P,R(T)> _f;
-    Function<P,T(AS...)> _g;
-};
-
-
-template<class P, class T, class... AS>
-class ComposedFunction<P,RealVector,T,AS...>
-     : public VectorFunctionMixin<ComposedFunction<P,RealVector,T,AS...>,P,AS...>
-{
-    using R=RealVector;
-
-    using D=DomainOfType<AS...>;
-    using E=DomainOfType<T>;
-    using C=DomainOfType<R>;
-  public:
-    typedef D DomainType;
-    typedef C CodomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementSizeType<C> ResultSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
-
-    ComposedFunction(const Function<P,R(T)>& f, const Function<P,T(AS...)>& g)
-        : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
-    virtual DomainType const domain() const { return _g.domain(); }
-    virtual CodomainType const codomain() const { return _f.codomain(); }
-    virtual ArgumentSizeType argument_size() const { return _g.argument_size(); }
-    virtual ResultSizeType result_size() const { return _f.result_size(); }
-    ScalarFunction<P,AS...> operator[](SizeType i) const { return compose(_f[i],_g); }
-    template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
-        return _f.evaluate(_g.evaluate(x)); }
-    friend ComposedFunction<P,R,T,AS...> derivative(ComposedFunction<P,R,T,AS...> const& f, ArgumentIndexType j) {
-        ARIADNE_NOT_IMPLEMENTED; }
-    friend OutputStream& operator<<(OutputStream& os, ComposedFunction<P,R,T,AS...> const& f) {
-        return os << "ComposedFunction( f="<<f._f<<", g="<<f._g<<" )"; }
   private:
     Function<P,R(T)> _f;
     Function<P,T(AS...)> _g;

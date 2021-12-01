@@ -182,12 +182,12 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(
     return ConstantUnivariateFunction<Y>(dom,c);
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(ScalarDomainType dom, SizeOne as) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(ScalarDomainType dom, IndexZero as) {
     return CoordinateFunction<P,Real>(dom,as);
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(ScalarDomainType dom) {
-    return coordinate(dom,SizeOne());
+    return coordinate(dom,IndexZero());
 }
 
 template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, ScalarDomainType dom) {
@@ -196,7 +196,7 @@ template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(Siz
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(ScalarDomainType dom) {
-    return coordinate(dom,SizeOne());
+    return coordinate(dom,IndexZero());
 }
 
 
@@ -645,9 +645,47 @@ EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivar
 
 
 
+//------------------------ Effective univariate function operators -------------------------------//
+
+EffectiveVectorUnivariateFunction operator+(const EffectiveVectorUnivariateFunction& f1, const EffectiveVectorUnivariateFunction& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
+    EffectiveVectorUnivariateFunction r(f1.result_size(),f1.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,f1[i]+f2[i]);
+    }
+    return r;
+}
+
+EffectiveVectorUnivariateFunction operator*(const EffectiveVectorUnivariateFunction& vf, const EffectiveScalarUnivariateFunction& sf) {
+    ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
+    EffectiveVectorUnivariateFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vf[i]*sf);
+    }
+    return r;
+}
+
+
 //------------------------ Validated function operators -------------------------------//
 
-
+ValidatedVectorMultivariateFunction operator+(ValidatedVectorMultivariateFunction const& f1, ValidatedVectorMultivariateFunction const& f2) {
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) + ValidatedVectorMultivariateFunctionModelDP(*f2p);
+    } else if(f1p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) + f2.reference();
+    } else if(f2p) {
+        return f1.reference() + ValidatedVectorMultivariateFunctionModelDP(*f2p);
+    } else {
+        VectorOfScalarMultivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarMultivariateFunction(f1.argument_size()));
+        for(SizeType i=0; i!=r.result_size(); ++i) {
+            r[i]=f1[i]+f2[i];
+        }
+        return r;
+    }
+}
 
 ValidatedVectorMultivariateFunction operator-(ValidatedVectorMultivariateFunction const& f1, ValidatedVectorMultivariateFunction const& f2) {
     auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
@@ -662,6 +700,60 @@ ValidatedVectorMultivariateFunction operator-(ValidatedVectorMultivariateFunctio
         VectorOfScalarMultivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarMultivariateFunction(f1.argument_size()));
         for(SizeType i=0; i!=r.result_size(); ++i) {
             r[i]=f1[i]-f2[i];
+        }
+        return r;
+    }
+}
+
+ValidatedVectorMultivariateFunction operator*(ValidatedScalarMultivariateFunction const& f1, ValidatedVectorMultivariateFunction const& f2) {
+    auto f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        return ValidatedScalarMultivariateFunction(*f1p) * ValidatedVectorMultivariateFunction(*f2p);
+    } else if(f1p) {
+        return ValidatedScalarMultivariateFunction(*f1p) * f2.reference();
+    } else if(f2p) {
+        return f1.reference() * ValidatedVectorMultivariateFunction(*f2p);
+    } else {
+        VectorOfScalarMultivariateFunction<ValidatedTag> r(f2.result_size(),ValidatedScalarMultivariateFunction(f2.argument_size()));
+        for(SizeType i=0; i!=r.result_size(); ++i) {
+            r[i]=f1*f2[i];
+        }
+        return r;
+    }
+}
+
+ValidatedVectorMultivariateFunction operator*(ValidatedVectorMultivariateFunction const& f1, ValidatedScalarMultivariateFunction const& f2) {
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) * ValidatedScalarMultivariateFunctionModelDP(*f2p);
+    } else if(f1p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) * f2.reference();
+    } else if(f2p) {
+        return f1.reference() * ValidatedScalarMultivariateFunctionModelDP(*f2p);
+    } else {
+        VectorOfScalarMultivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarMultivariateFunction(f1.argument_size()));
+        for(SizeType i=0; i!=r.result_size(); ++i) {
+            r[i]=f1[i]*f2;
+        }
+        return r;
+    }
+}
+
+ValidatedVectorMultivariateFunction operator/(ValidatedVectorMultivariateFunction const& f1, ValidatedScalarMultivariateFunction const& f2) {
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) / ValidatedScalarMultivariateFunctionModelDP(*f2p);
+    } else if(f1p) {
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) / f2.reference();
+    } else if(f2p) {
+        return f1.reference() / ValidatedScalarMultivariateFunctionModelDP(*f2p);
+    } else {
+        VectorOfScalarMultivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarMultivariateFunction(f1.argument_size()));
+        for(SizeType i=0; i!=r.result_size(); ++i) {
+            r[i]=f1[i]/f2;
         }
         return r;
     }
@@ -802,6 +894,27 @@ Covector<FloatDPUpperInterval> gradient_range(ValidatedScalarMultivariateFunctio
 Matrix<FloatDPUpperInterval> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
     return static_cast<Matrix<FloatDPUpperInterval>>(jacobian(f,reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
 }
+
+//------------------------ Validated univariate function operators -------------------------------//
+
+// FIXME: Also support function models
+ValidatedVectorUnivariateFunction operator+(ValidatedVectorUnivariateFunction const& f1, ValidatedVectorUnivariateFunction const& f2) {
+    VectorOfScalarUnivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarUnivariateFunction(f1.argument_size()));
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r[i]=f1[i]+f2[i];
+    }
+    return r;
+}
+
+// FIXME: Also support function models
+ValidatedVectorUnivariateFunction operator*(ValidatedVectorUnivariateFunction const& f1, ValidatedScalarUnivariateFunction const& f2) {
+    VectorOfScalarUnivariateFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarUnivariateFunction(f1.argument_size()));
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r[i]=f1[i]*f2;
+    }
+    return r;
+}
+
 
 //------------------------ Function operators -------------------------------//
 

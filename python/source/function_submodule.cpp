@@ -254,7 +254,7 @@ template<class P> Void export_scalar_univariate_function(pybind11::module& modul
         function_class.def(pybind11::init<ScalarUnivariateFunction<EffectiveTag>>());
 //        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
     }
-    function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(SizeOne)const) &ScalarUnivariateFunction<P>::derivative);
+    function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(IndexZero)const) &ScalarUnivariateFunction<P>::derivative);
     function_class.def("derivative", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&)) &derivative);
 
     export_function_evaluation(module,function_class);

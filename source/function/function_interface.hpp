@@ -44,8 +44,8 @@ template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Re
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 template<class S> using ElementKind = typename ElementTraits<S>::Kind;
-template<class S> using ElementSizeType = decltype(declval<S>().dimension());
-template<class S> using ElementIndexType = decltype(declval<S>().dimension());
+template<class S> using ElementSizeType = typename ElementTraits<S>::SizeType;
+template<class S> using ElementIndexType = typename ElementTraits<S>::IndexType;
 
 template<class... ARGS> struct DomainOfTypedef;
 template<> struct DomainOfTypedef<RealScalar> { typedef IntervalDomainType Type; };
@@ -125,6 +125,7 @@ class FunctionInterface<Void,SIG>
     typedef ElementSizeType<DomainType> ArgumentSizeType;
     typedef ElementSizeType<CodomainType> ResultSizeType;
     typedef ElementIndexType<DomainType> ArgumentIndexType;
+    typedef ElementIndexType<CodomainType> ResultIndexType;
 
     virtual ~FunctionInterface() = default;
     virtual ArgumentSizeType argument_size() const = 0;

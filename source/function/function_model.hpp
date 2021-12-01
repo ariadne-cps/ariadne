@@ -524,6 +524,12 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
         VectorFunctionModel<P,ARG,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> operator-(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
         VectorFunctionModel<P,ARG,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> operator*(const ScalarFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
+        VectorFunctionModel<P,ARG,PR,PRE> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1*f2[i]; } return r; }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> operator*(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2) {
+        VectorFunctionModel<P,ARG,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*f2; } return r; }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> operator/(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2) {
+        VectorFunctionModel<P,ARG,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]/f2; } return r; }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> operator+(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {
         VectorFunctionModel<P,ARG,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> operator-(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {

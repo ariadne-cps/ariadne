@@ -438,13 +438,25 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
     pybind11::implicitly_convertible<pybind11::list, IntervalType>();
 
+    if constexpr (Constructible<IntervalType,IntervalDomainType> and not Same<IntervalType,IntervalDomainType>) {
+        interval_class.def(pybind11::init<IntervalDomainType>());
+        if constexpr(Convertible<IntervalDomainType,IntervalType>) {
+             pybind11::implicitly_convertible<IntervalDomainType,IntervalType>();
+         }
+    }
     if constexpr (Constructible<IntervalType,DyadicInterval> and not Same<IntervalType,DyadicInterval>) {
         interval_class.def(pybind11::init<DyadicInterval>());
         interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
+        if constexpr(Convertible<DyadicInterval,IntervalType>) {
+            pybind11::implicitly_convertible<DyadicInterval,IntervalType>();
+        }
     }
     if constexpr (Constructible<IntervalType,RealInterval> and not Same<IntervalType,RealInterval>) {
         interval_class.def(pybind11::init<RealInterval>());
         interval_class.def(pybind11::init([](Real l, Real u){return IntervalType(RealInterval(l,u));}));
+        if constexpr(Convertible<RealInterval,IntervalType>) {
+            pybind11::implicitly_convertible<DyadicInterval,IntervalType>();
+        }
     }
     if constexpr (HasPrecisionType<UpperBoundType>) {
         typedef PrecisionType<UpperBoundType> PrecisionType;
@@ -525,6 +537,7 @@ Void export_intervals(pybind11::module& module) {
 
     module.def("image", (UpperIntervalType(*)(UpperIntervalType const&, ValidatedScalarUnivariateFunction const&)) &_image_);
 }
+template<class UB> using BoxWithUpperBound=Box<Interval<UB>>;
 
 template<class BX> Void export_box(pybind11::module& module, std::string name)
 {
@@ -552,11 +565,34 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     box_class.def(pybind11::init(&box_from_list<BoxType>));
     pybind11::implicitly_convertible<pybind11::list,BoxType>();
 
+    if constexpr (Constructible<BoxType,BoxDomainType> and not Same<BoxType,BoxDomainType>) {
+         box_class.def(pybind11::init<BoxDomainType>());
+         if constexpr(Convertible<BoxDomainType,BoxType>) {
+             pybind11::implicitly_convertible<BoxDomainType,BoxType>();
+         }
+    }
     if constexpr (Constructible<BoxType,DyadicBox> and not Same<BoxType,DyadicBox>) {
          box_class.def(pybind11::init<Box<Interval<Dyadic>>>());
+         if constexpr(Convertible<DyadicBox,BoxType>) {
+             pybind11::implicitly_convertible<DyadicBox,BoxType>();
+         }
     }
-    if constexpr (Constructible<IntervalType,RealInterval> and not Same<IntervalType,RealInterval>) {
+    if constexpr (Constructible<BoxType,RealBox> and not Same<BoxType,RealBox>) {
         box_class.def(pybind11::init<RealBox>());
+         if constexpr(Convertible<RealBox,BoxType>) {
+             pybind11::implicitly_convertible<DyadicBox,BoxType>();
+         }
+    }
+    if constexpr (HasPrecisionType<IntervalType>) {
+        typedef PrecisionType<IntervalType> PrecisionType;
+        if constexpr (Constructible<BoxType,RealBox,PrecisionType>) {
+            box_class.def(pybind11::init<RealBox,PrecisionType>());
+        } else if constexpr (Constructible<BoxType,DyadicBox,PrecisionType>) {
+            box_class.def(pybind11::init<DyadicBox,PrecisionType>());
+        }
+
+        typedef typename IntervalType::UpperBoundType::RawType FloatType;
+        export_conversions<BoxWithUpperBound,FloatType>(box_class);
     }
 
     if constexpr (HasEquality<BX,BX>) {
@@ -611,9 +647,11 @@ template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name
     pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init(&box_from_list<BoxType>));
     box_class.def(pybind11::init<BoxType>());
+    box_class.def(pybind11::init<BoxDomainType>());
     box_class.def("__str__",&__cstr__<BoxType>);
 
     pybind11::implicitly_convertible<pybind11::list,BoxType>();
+    pybind11::implicitly_convertible<BoxDomainType,BoxType>();
 }
 
 template<> Void export_box<RationalBox>(pybind11::module& module, std::string name)
@@ -650,6 +688,8 @@ Void export_boxes(pybind11::module& module) {
 
     module.def("widen", (FloatDPUpperBox(*)(FloatDPExactBox const&, FloatDPValue eps)) &widen);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperBox const&, ValidatedVectorMultivariateFunction const&)) &_image_);
+    module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperBox const&, ValidatedScalarMultivariateFunction const&)) &_image_);
+    module.def("image", (FloatDPUpperBox(*)(FloatDPUpperInterval const&, ValidatedVectorUnivariateFunction const&)) &_image_);
 
 
 }
@@ -660,7 +700,7 @@ Void export_zonotope(pybind11::module& module)
 {
     pybind11::class_<Zonotope,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,Drawable2dInterface>> zonotope_class(module,"Zonotope");
     zonotope_class.def(pybind11::init<Zonotope>());
-    zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>,Vector<FloatDPError>>());
+    zonotope_class.def(pybind11::init<Vector<FoatDPValue>,Matrix<FloatDPValue>,Vector<FloatDPError>>());
     zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>>());
     zonotope_class.def(pybind11::init<BasicSetType>());
     zonotope_class.def("centre",&Zonotope::centre);
@@ -774,6 +814,8 @@ Void export_constrained_image_set(pybind11::module& module)
         constrained_image_set_class(module,"ConstrainedImageSet");
     constrained_image_set_class.def(pybind11::init<ConstrainedImageSet>());
     constrained_image_set_class.def(pybind11::init<BoundedConstraintSet>());
+    constrained_image_set_class.def(pybind11::init<RealBox,EffectiveVectorMultivariateFunction>());
+    constrained_image_set_class.def(pybind11::init<RealBox,EffectiveVectorMultivariateFunction,List<EffectiveConstraint> >());
     constrained_image_set_class.def("dimension", &ConstrainedImageSet::dimension);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(SizeType)const) &ConstrainedImageSet::split);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);

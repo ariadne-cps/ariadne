@@ -152,6 +152,8 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
 } // namespace
 
 
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDP>& repr);
@@ -593,4 +595,13 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_vector<Rational>(module);
     export_covector<Rational>(module);
     export_matrix<Rational>(module);
+
+    export_vector<Decimal>(module);
+//    export_covector<Decimal>(module);
+//    export_matrix<Decimal>(module);
+
+    export_vector<Dyadic>(module);
+//    export_covector<Dyadic>(module);
+//    export_matrix<Dyadic>(module);
+
 }

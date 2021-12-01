@@ -49,6 +49,10 @@ void Decimal::canonicalize()
 }
 
 
+Decimal::Decimal() : _p(0), _q(0u)
+{
+}
+
 Decimal::Decimal(Integer p, Nat q) : _p(p), _q(q)
 {
 }

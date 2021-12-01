@@ -76,6 +76,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& 
     return os << "Integer("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr) {
     return os << "Dyadic("<<repr.reference().mantissa()<<","<<repr.reference().exponent()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr) {
+    return os << "Decimal("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {
     return os << "Rational("<<repr.reference().numerator()<<","<<repr.reference().denominator()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr) {

@@ -286,7 +286,14 @@ namespace Ariadne {
  * See the page \ref real_numbers_page for more information.
  *
  * \internal The template names are currently not used consistently
+ */
+
+/*!
+ * \defgroup ExtendedLiteralsSubModule Extended numeric literals
+ * \ingroup NumericModule
+ * \brief Extended numeric literals
  *
+ * \details In Python, the C++ operator is used as a function, e.g. \c 1.23_pr is replaced by \c pr_(1.23) .
  */
 
 /*!
@@ -475,9 +482,29 @@ namespace Ariadne {
  * \ingroup CoreModules
  * \brief Classes and functions for solving algebraic equations, differential equations and optimisation problems (including constraint feasibility problems).
  *
- * The LinearProgram class supports construction and solution of linear
- * programming problems. Tests for feasibility only are also possible. The
- * computations are performed by a BLAS/LAPACK style lpslv() routing.
+ */
+
+/*!\defgroup AlgebraicEquationSubModule Algebraic equation solvers
+ * \ingroup SolverModule
+ * \brief Classes and functions for solving nonlinear algebraic equations.
+ *
+ * \details For the mathematical theory of algebraic equations, including implicit function problems, see the \ref algebraic_equations_page Page.
+ *
+ * A \a Solver class provides functionality for solving algebraic equations, as defined in the \ref SolverInterface.
+ * %Two basic kinds of problem are considered.
+ * The first is computing roots of a function \f$f:\R^n\to\R^n\f$, which are generically isolated points.
+ * The second kind of problem is solving parametrised equations, so for a function \f$ f:\R^m\times\R^n\to\R^n \f$,
+ * we find a function \f$ h:\R^m\to\R^n \f$ such that \f$ f(x,h(x))=0 \f$ for all \f$ x \f$ in some domain \f$ D \f$.
+ *
+ * Concrete solvers include \ref IntervalNewtonSolver and \ref KrawczykSolver.
+ */
+
+/*!\defgroup DifferentialEquationSubModule Differential equation solvers
+ * \ingroup SolverModule
+ * \brief Classes and functions for solving linear and nonlinear differential equations equations.
+ *
+ * An \a Integrator class provides functionality for solving differential equations, as defined in the \ref IntegratorInterface.
+ * Concrete solvers include \ref TaylorPicardIntegrator and \ref TaylorSeriesIntegrator.
  */
 
 /*!\defgroup OptimisationSubModule Optimisation solvers
@@ -488,6 +515,7 @@ namespace Ariadne {
  * programming problems. Tests for feasibility only are also possible. The
  * computations are performed by a BLAS/LAPACK style lpslv() routing.
  */
+
 
 /*!\defgroup DynamicsModule Dynamics Module
  * \ingroup CoreModules

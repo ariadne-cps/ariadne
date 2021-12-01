@@ -299,6 +299,8 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                         --number_unrefined;
                     } else if(definitely(disjoint(ValidatedScalarMultivariateFunctionModelDP(nh[i]).range(),ix[i]))) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
+                    } else if (cast_exact(nh[i].error())>cast_exact(mag(h[i].range()))) {
+                        ARIADNE_THROW(UnknownSolutionException,"SolverBase::implicit","No convergence looking for implicit function with domain "<<h.domain()<<" and codomain "<<ix<<"; "<<nh<<" error bound is larger than range of "<<h);
                     }
                 }
             }
@@ -318,6 +320,8 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                         --number_unrefined;
                     } else if(inconsistent(nh[i],h[i])) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; "<<nh<<" is disjoint from "<<h);
+                    } else if (cast_exact(nh[i].error())>cast_exact(mag(h[i].range()))) {
+                        ARIADNE_THROW(UnknownSolutionException,"SolverBase::implicit","No convergence looking for implicit function with domain "<<h.domain()<<" and codomain "<<ix<<"; "<<nh<<" error bound is larger than range of "<<h);
                     }
                 }
             }

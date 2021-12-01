@@ -43,17 +43,17 @@ struct FlowBoundsException : public std::runtime_error {
 class FlowStepModelType;
 class FlowModelType;
 
-//! \ingroup SolverModule EvaluationModule
+//! \ingroup DifferentialEquationSubModule
 //! \brief A solution to a differential equation could not be computed within the requested tolerances.
 struct FlowTimeStepException : public std::runtime_error {
     FlowTimeStepException(const StringType& what) : std::runtime_error(what) { }
 };
 
-//! \ingroup SolverModule EvaluationModule
+//! \ingroup DifferentialEquationSubModule
 //! \brief The type to use for the size of a step of a continuous (or hybrid) system.
 typedef Dyadic StepSizeType;
 
-//! \ingroup SolverModule EvaluationModule
+//! \ingroup DifferentialEquationSubModule
 //! \brief Interface for integrating differential equations of the form \f$\dt{x}=f(x)\f$.
 class IntegratorInterface
 {

@@ -46,7 +46,7 @@ namespace Ariadne {
 
 template<class X> class Vector;
 
-/*! \ingroup Solvers
+/*!
  *  \brief %Common functionality for solving (nonlinear) equations.
  */
 class SolverBase
@@ -101,7 +101,7 @@ class SolverBase
 };
 
 
-/*! \ingroup Solvers
+/*! \ingroup AlgebraicEquationSubModule
  *  \brief ExactIntervalType Newton solver. Uses the contractor \f$[x']=x_0-Df^{-1}([x])f(x_0)\f$.
  */
 class IntervalNewtonSolver
@@ -124,7 +124,7 @@ class IntervalNewtonSolver
 };
 
 
-/*! \ingroup Solvers
+/*! \ingroup AlgebraicEquationSubModule
  *  \brief Krawczyk solver. Uses the contractor \f$[x']=x_0-Mf(x_0)+(I-MDf([x])([x]-x_0)\f$
  *  where \f$M\f$ is typically \f$Df^{-1}(x_0)\f$.
  */

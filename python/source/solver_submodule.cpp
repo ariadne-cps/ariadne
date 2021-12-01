@@ -103,6 +103,10 @@ Void export_solvers(pybind11::module& module)
 
     pybind11::class_<KrawczykSolver, SolverInterface> krawczyk_solver_class(module,"KrawczykSolver");
     krawczyk_solver_class.def(pybind11::init<ApproximateDouble,Nat>());
+
+    pybind11::class_<FactoredKrawczykSolver, SolverInterface> factored_krawczyk_solver_class(module,"FactoredKrawczykSolver");
+    factored_krawczyk_solver_class.def(pybind11::init<ApproximateDouble,Nat>());
+
 }
 
 

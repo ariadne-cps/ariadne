@@ -411,6 +411,7 @@ template<class P, class ARG, class PR, class PRE> class VectorFunctionModelEleme
     VectorFunctionModel<P,ARG,PR,PRE>* _p; SizeType _i;
   public:
     typedef typename ScalarFunctionModel<P,ARG,PR,PRE>::GenericType GenericType;
+    typedef typename ScalarFunctionModel<P,ARG,PR,PRE>::RangeType RangeType;
     operator const ScalarFunctionModel<P,ARG,PR,PRE> () const;
     VectorFunctionModelElement(VectorFunctionModel<P,ARG,PR,PRE>* p, SizeType i) : _p(p), _i(i) { }
     VectorFunctionModelElement<P,ARG,PR,PRE>& operator=(const ScalarFunctionModel<P,ARG,PR,PRE>& sf) {
@@ -422,6 +423,7 @@ template<class P, class ARG, class PR, class PRE> class VectorFunctionModelEleme
     const CanonicalErrorType<P,PRE> error() const { ScalarFunctionModel<P,ARG,PR,PRE> sf=_p->get(_i); return sf.error(); }
     Void set_error(CanonicalErrorType<P,PRE> e) const { ScalarFunctionModel<P,ARG,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
     Void set_error(Nat e) const { ScalarFunctionModel<P,ARG,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
+    const RangeType range() const { ScalarFunctionModel<P,ARG,PR,PRE> sf=_p->get(_i); return sf.range(); }
     friend Boolean refines(const ScalarFunctionModel<ValidatedTag,ARG,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,ARG,PR,PRE>& f2);
     friend Boolean inconsistent(const ScalarFunctionModel<ValidatedTag,ARG,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,ARG,PR,PRE>& f2);
     friend ScalarFunctionModel<P,ARG,PR,PRE> antiderivative(VectorFunctionModelElement<P,ARG,PR,PRE> const& f, SizeType k) {

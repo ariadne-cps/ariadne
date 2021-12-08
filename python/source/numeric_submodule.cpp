@@ -69,8 +69,26 @@ template<> String numeric_class_tag<MultiplePrecision>() { return "MP"; }
 template<class T> struct PythonClassName { std::string get() const { return class_name<T>(); } };
 template<class T> inline std::string python_class_name() { return PythonClassName<T>().get(); }
 
+template<class FLT> struct PreciseFormat {
+    FLT const& _flt;
+    friend OutputStream& operator<<(OutputStream& os, PreciseFormat<FLT> const& frmt) { return repr(os, frmt._flt); }
+};
+template<class FLT> PreciseFormat<FLT> precise_format(FLT const& flt) { return PreciseFormat<FLT>{flt}; }
+
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
     return os << python_class_name<T>() << "(" << repr.reference() << ")"; }
+
+template<class T> OutputStream& operator<=(OutputStream& os, T const& t) { return os << python_representation(t); }
+
+inline OutputStream& operator<<(OutputStream& os, const Representation<DP>& crepr) {
+    return repr(os,crepr.reference()); }
+inline OutputStream& operator<<(OutputStream& os, const Representation<MP>& crepr) {
+    return repr(os,crepr.reference()); }
+inline OutputStream& operator<<(OutputStream& os, const Representation<FloatDP>& crepr) {
+    return repr(os,crepr.reference()); }
+inline OutputStream& operator<<(OutputStream& os, const Representation<FloatMP>& crepr) {
+    return repr(os,crepr.reference()); }
+
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& repr) {
     return os << "Integer("<<repr.reference()<<")"; }
@@ -87,9 +105,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<DyadicBoun
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RationalBounds>& repr) {
     return os << "RationalBounds("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
-    return os << "FloatDP("<<repr.reference()<<")"; }
+    return os << "FloatDP("<<precise_format(repr.reference())<<",near,dp)"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatMP>& repr) {
-    return os << "FloatMP("<<repr.reference()<<")"; }
+    return os << "FloatMP("<<precise_format(repr.reference())<<",near," << repr.reference().precision() << ")"; }
 
 template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr) {
     return os << class_name<Number<P>>()<<"("<<repr.reference()<<")"; }
@@ -99,19 +117,21 @@ template<class P> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os << class_name<LowerNumber<P>>()<<"("<<repr.reference()<<")"; }
 
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& repr) {
-    return os << class_name<F>() << "Approximation("<<repr.reference().raw()<<")"; }
+    return os << class_name<F>() << "Approximation("<<precise_format(repr.reference().raw())<<","<<repr.reference().precision()<<")"; }
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<LowerBound<F>>& repr) {
-    return os << class_name<F>() << "LowerBound("<<repr.reference().raw()<<")"; }
+    return os << class_name<F>() << "LowerBound("<<precise_format(repr.reference().raw())<<","<<repr.reference().precision()<<")"; }
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperBound<F>>& repr) {
-    return os << class_name<F>() << "UpperBound("<<repr.reference().raw()<<")"; }
+    return os << class_name<F>() << "UpperBound("<<precise_format(repr.reference().raw())<<","<<repr.reference().precision()<<")"; }
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& repr) {
-    return os << class_name<F>() << "Bounds("<<repr.reference().lower().raw()<<","<<repr.reference().upper().raw()<<")"; }
+    return os << class_name<F>() << "Bounds("<<precise_format(repr.reference().lower().raw())<<","<<precise_format(repr.reference().upper().raw())
+              <<","<<repr.reference().precision()<<")"; }
 template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& repr) {
-    return os << class_name<F>() << "Ball("<<repr.reference().value_raw()<<","<<repr.reference().error_raw()<<")"; }
+    return os << class_name<F>() << "Ball("<<precise_format(repr.reference().value_raw())<<","<<precise_format(repr.reference().error_raw())
+              <<","<<repr.reference().precision()<<")"; }
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& repr) {
-    return os << class_name<F>() << "Value("<<repr.reference().raw()<<")"; }
+    return os << class_name<F>() << "Value("<<precise_format(repr.reference().raw())<<","<<repr.reference().precision()<<")"; }
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr) {
-    return os << class_name<FE>() << "Error("<<repr.reference().raw()<<")"; }
+    return os << class_name<FE>() << "Error("<<precise_format(repr.reference().raw())<<","<<repr.reference().precision()<<")"; }
 
 
 
@@ -713,7 +733,7 @@ template<> Void export_precision<DoublePrecision>(pymodule& module) {
     pybind11::class_<DoublePrecision> precision_class(module,"DoublePrecision");
     precision_class.def(init<>());
     precision_class.def("__str__", &__cstr__<DoublePrecision>);
-    precision_class.def("__repr__", &__cstr__<DoublePrecision>);
+    precision_class.def("__repr__", &__crepr__<DoublePrecision>);
     module.attr("double_precision") = double_precision;
     module.attr("dp") = dp;
 }
@@ -723,8 +743,9 @@ template<> Void export_precision<MultiplePrecision>(pymodule& module) {
     precision_class.def(init<Nat>());
     precision_class.def("bits",&MultiplePrecision::bits);
     precision_class.def("__str__", &__cstr__<MultiplePrecision>);
-    precision_class.def("__repr__", &__cstr__<MultiplePrecision>);
+    precision_class.def("__repr__", &__crepr__<MultiplePrecision>);
     module.def("multiple_precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
+    module.def("mp", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
     module.def("precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
 }
 
@@ -785,6 +806,7 @@ template<class PR> void export_raw_float(pymodule& module)
 
     define_comparisons<F>(module,raw_float_class);
 
+    module.def("Float", [](Rational const& q, RND rnd, PR pr){return F(q,rnd,pr);});
 }
 
 

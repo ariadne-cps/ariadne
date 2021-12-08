@@ -67,8 +67,10 @@ class DoublePrecision {
     friend constexpr Bool operator<=(DoublePrecision, DoublePrecision) { return true; }
     //! \brief Compare the two precisions for equality. Always \c true.
     friend constexpr Bool operator==(DoublePrecision, DoublePrecision) { return true; }
-    //! \brief <p/>
-    friend OutputStream& operator<<(OutputStream& os, DoublePrecision) { return os << "DoublePrecision()"; }
+    //! \brief Write to an output stream. <p/>
+    friend OutputStream& operator<<(OutputStream& os, DoublePrecision) { return os << "dp"; }
+    //! \brief Write a full representation to an output stream. <p/>
+    friend OutputStream& repr(OutputStream& os, DoublePrecision) { return os << "DoublePrecision()"; }
 };
 using DP = DoublePrecision;
 static const DoublePrecision double_precision = DoublePrecision();
@@ -421,6 +423,7 @@ class FloatDP {
     friend InputStream& operator>>(InputStream& is, FloatDP&);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingModeType rnd);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingModeType rnd);
+    friend OutputStream& repr(OutputStream& os, FloatDP const& x);
   private:
     // Rounded arithmetic
     friend FloatDP pow_rnd(FloatDP x, Int n);

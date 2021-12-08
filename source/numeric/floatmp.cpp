@@ -532,10 +532,18 @@ OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision figs, R
     return os << print(x,figs,rnd);
 }
 
+OutputStream& repr(OutputStream& os, FloatMP const& x) {
+    static const double log2ten = 3.3219280948873621817;
+    return os << print(x,DecimalPlaces(std::max((int)x.precision()-(int)x.exponent(),0)/log2ten+1),FloatMP::get_rounding_mode());
+}
+
 
 OutputStream& operator<<(OutputStream& os, FloatMP const& x) {
-    static const double log2ten = 3.3219280948873621817;
-    return os << print(x,DecimalPlaces(std::max((int)x.precision()-(int)x.exponent(),0)/log2ten),FloatMP::get_rounding_mode());
+    return repr(os,x);
+}
+
+OutputStream& operator<<=(OutputStream& os, FloatMP const& x) {
+    return os << "FloatMP(" << x << ",near," << x.precision() << ")";
 }
 
 InputStream& operator>>(InputStream& is, FloatMP& x) {

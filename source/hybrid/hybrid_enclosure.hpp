@@ -332,7 +332,6 @@ inline ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridExac
 inline ValidatedLowerKleenean separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s._write(os); }
-inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
 
 
 class HybridGrid;

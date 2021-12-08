@@ -866,9 +866,16 @@ OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision figs, B
     return write(os,FloatMP(x,pr_mp),figs,rnd_mp);
 }
 
+OutputStream& repr(OutputStream& os, FloatDP const& x) {
+    return write(os,x,DecimalPrecision(17),near);
+}
 
 OutputStream& operator<<(OutputStream& os, FloatDP const& x) {
-    return os << x.dbl;
+    return repr(os,x);
+}
+
+OutputStream& operator<<=(OutputStream& os, FloatDP const& x) {
+    return os << "FloatDP(" << x << ",near," << x.precision() << ")";
 }
 
 InputStream& operator>>(InputStream& is, FloatDP& x) {

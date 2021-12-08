@@ -273,7 +273,7 @@ orbit(const HybridEnclosure& initial,
 {
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space().has_location(initial.location()))
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space()[initial.location()] == initial.state_auxiliary_space())
-    
+
     auto result = std::make_shared<SynchronisedOrbit>(initial);
     WorkloadType workload([termination](std::pair<HybridEnclosure,Bool> const& enclosure_jumped, SharedPointer<ProgressIndicator> indicator){
                               indicator->update_current(enclosure_jumped.first.time_range().lower_bound().get_d());
@@ -1309,7 +1309,7 @@ _apply_evolution_step(WorkloadType::Access& workload,
 
     if(definitely(starting_set_empty)) {
         ExactBoxType reduced_domain=starting_set.continuous_set().reduced_domain();
-        ARIADNE_WARN("empty starting_set "<<representation(starting_set));
+        ARIADNE_WARN("empty starting_set "<<starting_set);
         return;
     }
 

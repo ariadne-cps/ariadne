@@ -1,0 +1,55 @@
+/***************************************************************************
+ *            python_module_tutorials.dox
+ *
+ *  Copyright  2009-21  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*!
+ * \file python_module_tutorials.dox
+ * \brief Documentation for extended tutorials of Ariadne's Python interface.
+ */
+
+namespace Ariadne {
+
+/*!
+
+\page python_module_tutorials_page Python Module Tutorials
+
+On this page, we illustrate how to use %Ariadne via the Python interface.
+
+The full code of the demonstrations are given in the following files in the \ref python/tutorials/ directory:
+
+Links are given to the main classes used in the tutorials.
+The documentation for these classes is automatically generated from comments in the C++ code.
+To help Python users unfamiliar with C++ understand this documentation, a guide on the main differences between C++ and Python can be found on the \ref python_interface_page page.
+
+
+
+\section python_introspection_tutorial The Ariadne module.
+
+First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
+\code from pyariadne import * \endcode
+To see all the classes and functions available in %Ariadne, type:
+\code print(dir(ariadne)) \endcode
+
+*/
+
+} // namespace Ariadne
+

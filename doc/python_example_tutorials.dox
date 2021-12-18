@@ -36,6 +36,8 @@ On this page, we illustrate some examples using %Ariadne via the Python interfac
 
 The full code of the demonstrations are given in the \ref python/tutorials/ directory.
 
+ - \ref python_computing_pi_page An example of the use of the \ref NumericModule to compute high-precision approximations to \f$\pi\f$.
+
 */
 
 } // namespace Ariadne

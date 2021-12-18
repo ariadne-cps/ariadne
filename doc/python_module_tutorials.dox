@@ -33,8 +33,10 @@ namespace Ariadne {
 \page python_module_tutorials_page Python Module Tutorials
 
 On this page, we illustrate how to use %Ariadne via the Python interface.
+ - A guide to functionality for solving algebraic equations is given in the \ref python_algebraic_equation_tutorial_section, including how to compute fixed-points of functions and solving parametrised equations.
 
 The full code of the demonstrations are given in the following files in the \ref python/tutorials/ directory:
+\link python/tutorials/algebraic_equation_tutorial.py algebraic_equation_tutorial.py\endlink
 
 Links are given to the main classes used in the tutorials.
 The documentation for these classes is automatically generated from comments in the C++ code.
@@ -48,6 +50,105 @@ First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of
 \code from pyariadne import * \endcode
 To see all the classes and functions available in %Ariadne, type:
 \code print(dir(ariadne)) \endcode
+
+
+
+
+
+\section python_solver_tutorial_section  Solvers
+
+\subsection python_algebraic_equation_tutorial_section Solving Algebraic Equations
+
+\dontinclude python/tutorials/algebraic_equation_tutorial.py
+
+In this tutorial, we'll look at solving some simple algebraic equations, including parametrised equations.
+
+\subsubsection python_fixed_point_tutorial_section Computing roots and fixed-points
+
+First, we will make a function and compute its fixed points
+\skipline x=
+\skipline f=
+
+To compute a fixed-point of \f$f\f$, we need to solve the equation \f$f(x)-x=0\f$.
+We define a new function \f$g\f$ given by \f$g(x)=f(x)-x\f$.
+\skipline g=
+Note that currently, %Ariadne only directly supports computing roots of multivalued functions \f$g:\R^n\to\R^n\f$, so for a univariate function, we need to define it on one-element vectors, so \f$g:\R^1\to\R^1\f$.
+
+Since \f$f(1/2)=7/24<1/2\f$ and \f$f(1)=4/3>1\f$, by the intermediate value theorem, \f$f\f$ has a fixed-point in \f$[1/2\!:\!1]\f$
+We use this as the search region.
+\skipline x_(
+\skipline pr_(
+\warning Currently, the search region is defined by an exact double-precision box.
+  This means that the bounds must be given by exact integer, double-precision or dyadic numbers.
+  To indicate that the user is aware of possible inaccuracies caused by use of the Python \c float class,
+  floating-point numbers should be wrapped in a checker function \ref x_() if the value is exact
+  or \ref pr_() if the written value can be <em>interpreted</em> as the nearest representable Python \c float.
+  See the \ref ExtendedLiteralsSubModule section for more details.
+
+Specifiy the accuracy required of the solver, and provide a maximum number of iteration steps to use to prevent infinite loops.
+\skipline tolerance=
+\skipline max_steps=
+
+In %Ariadne, algebraic equations are solved using a \c Solver class.
+A basic, but accurate and efficient solver is the \ref IntervalNewtonSolver.
+\skipline solver=
+\skipline p=
+\line fixf:
+Alternatively, we can use the related KrawczykSolver, which may be slightly more reliable, but less efficient.
+\skipline solver=
+\skipline p=
+\line fixf:
+
+
+\subsubsection python_inverse_function_tutorial_section Computing implicit and inverse functions
+
+In this section,we will make a function and compute its inverse.
+
+Declare variables and define the function \f$f(x)=x^3+x/3\f$:
+\skipline x=
+\skipline y=
+\skipline f=
+
+A function \f$h\f$ is an <em>inverse</em> of \f$f\f$ in a domain \f$D\f$ if \f$f(h(x))=x\f$ for all \f$x \in D\f$.
+To compute the inverse, define the function \f$g(x,y)=f(y)-x\f$, and solve the implicit function problem \f$g(x,h(x))=0\f$.
+\skipline x=
+\skipline g=
+
+Look for the inverse over the interval \f$[0\!:\!1]\f$.
+Since f is increasing, \f$f(0)=0\f$ and \f$f(1)=4/3>1\f$, the inverse maps \f$[0:1]\f$ into \f$[0:1]\f$.
+\skipline domain=
+\skipline codomain=
+
+Again, define the solver parameters. This time, we choose the slightly more robust KrawczykSolver for the problem.
+\skipline tolerance=
+\skipline max_steps=
+\skipline solver=KrawczykSolver
+
+Try to compute the inverse over \f$[0\!:\!1]\f$:
+\skipline try:
+\skipline invf=
+\skipline invf:
+
+Unfortunately, the interval Newton solver does not converge and yields an exception:
+\skipline except:
+\skipline print
+
+Instead, look for inverse over smaller domains whose union is \f$[0\!:\!1]\f$:
+\skipline domains=
+\skipline codomains=
+\skipline for
+\skipline     invf=
+\skipline     print("invf",i,": ",invf,sep=
+
+
+The IntervalNewtonSolver is rather more sensitive,
+but we can still compute the inverse given sufficiently tight bounds:
+\skipline newton_solver=
+\skipline domain=
+\skipline codomain=
+\skipline invf=
+\skipline invf:
+
 
 */
 

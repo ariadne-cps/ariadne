@@ -150,7 +150,7 @@ namespace Ariadne {
  */
 
 
-/*!\defgroup TopologyModule Topology Module
+/*!\defgroup TopologySubModule Topology Module
  * \ingroup CoreModules
  * \brief Topological constructs, including \ref Bounds "Bounds<Q>" and \ref Ball "Ball<Q,E>" types, and general constructions.
  * \details <em>For the mathematical theory of computable topology, see the \ref topology_page Page.</em>
@@ -159,20 +159,32 @@ namespace Ariadne {
  * The main classes are \ref Ariadne::Bounds "Bounds<Q>", with subtypes \ref LowerBound "LowerBound<Q>" and \ref UpperBound "UpperBound<Q>", and \ref Ariadne::Ball "Ball<Q,R>".
  */
 
-/*!\defgroup ParadigmSubModule Information Module
+/*!\defgroup InformationSubModule Information Module
  *   \ingroup CoreModules
- * \brief Tag classes describing the information provided by a type, such as \ref EffectiveTag and \ref ValidatedTag.
+ * \brief Tag classes describing the information provided by a type, notably \ref ExactTag, as \ref EffectiveTag, \ref ValidatedTag and \ref ApproximateTag.
  * \details <em>For the mathematical theory of computable analysis and kinds of information, see the \ref computable_analysis_page Page.</em>
  *
+ * \anchor information_section
+ *
  * In order to indicate the kind of guarantees on the approximation provided by a concrete object,
- *   every type in %Ariadne has an associated Paradigm tag.
+ *   every type in %Ariadne has an associated <em>Paradigm</em> tag, denoted by the tempate parameter \c P.
+ * The \ref ExactTag indicates that the object represents a value exactly, and with decidable equality.
+ * The \ref EffectiveTag indicates that an object allows approximations to be computed to arbitrary, known accuracy.
+ * The \ref ValidatedTag indicates that the objects provides an approximation with guarantees on the error, such as lower- and upper-bounds, or an error bound.
+ * The \ref ApproximateTag indicates that the object is an approximation with no guarantees on the accuracy.
+ *
+ * Whenever the paradigm tag <tt>P</tt> occurs as a template parameter, a type alias is given in which the type is prefixed by the tag name. For example, \ref Number "Number<ValidatedTag>" has alias \ref Number::ValidatedNumber "ValidatedNumber", and \ref Function "Function<EffectiveTag,SIG>" has alias \ref EffectiveFunction "EffectiveFunction<SIG>".
+ *
+ * \remark In a future version of %Ariadne, it may be the case that information tags are replaced by template prefixes, so \ref Number "Number<ValidatedTag>" becomes <tt>Validated<Number></tt>.
+ *
+ * \subsection builtin_type_tag_section Builtin type tag
  *
  * %Ariadne also needs to handle built-in C++ types, notably \c Bool, \c Int and \c double (floating-point) classes.
  * Since C++ internally allows unsafe and inexact conversions e.g
- *     \code Int n=1.5; // n is set to 1! \endcode
+ *     \code  Int n=1.5; // n is set to 1! \endcode
  * and
- *     \code double x=1.3; // x not exactly equal to 1.3! \endcode
- * the BuiltinTag tag is used to describe these objects.
+ *     \code  double x=1.3; // x not exactly equal to 1.3! \endcode
+ * care must be taken when using these objects. The \ref BuiltinTag tag is used to describe these objects.
  * %BuiltinTag objects should be immediately converted to %Ariadne objects in user code.
  */
 
@@ -329,21 +341,23 @@ namespace Ariadne {
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
  *
  * The main \ref Function "Function<P,SIG>" class represents continuous functions.
- * The signature \c SIG takes the form <tt>RES(ARGS...)</tt> where \c RES describes the output and <tt>ARGS...</tt> the input.
- * Hence a signature <tt>Real(Real)</tt> indicates a function \f$\R\to\R\f$,
- * whereas <tt>RealVector(RealVector,Real)</tt> would indicate a function \f$\R^n\times\R\to\R^m\f$.
- * \remark Currently, only \ref Real and \ref RealVector are supported for \c RES and \c ARGS, with \ref RealScalar a synonym for \ref Real.
+ * Since any continuous function \f$\R^n\to\R\f$ can be approximated arbitarily accurately be a polynomial function on a bounded domain, functions can compute polynomial approximations by application to a \ref TaylorModel.
  *
+ * \subsubsection function_information_section Function information tag.
  * The information tag (computational paradigm) \c P describes whether the function is exact, effective, validated or approximate.
- * (See the \ref InformationModule for more information.
+ * (See the \ref InformationModule for more information.)
  * Type aliases are provided, so \ref EffectiveFunction "EffectiveFunction<SIG>" is an alias for \ref Function "Function"<\ref EffectiveTag,SIG>.
  *
  * An effective function can be evaluated arbitrarily accurately given arbitrarily accurate approximations to the input.
- * Hence if \f$\hatR\f$ is a
+ * Hence if \f$f\f$ is a \ref EffectiveFunction, then it can be automatically converted to a \ref ValidatedFunction.
  *
- * Currently, %Ariadne assumes that
  *
- * Since any continuous function \f$\R^n\to\R\f$ can be approximated arbitarily accurately be a polynomial function on a bounded domain, functions
+ * \subsection function_signature_section Function signatures
+ *
+ * The signature \c SIG takes the form <tt>RES(ARGS...)</tt> where \c RES describes the output and <tt>ARGS...</tt> the input.
+ * Hence a signature <tt>Real(Real)</tt> indicates a function \f$\R\to\R\f$,
+ * whereas <tt>RealVector(RealVector,Real)</tt> would indicate a function \f$\R^n\times\R\to\R^m\f$.
+ * \remark Currently, only \ref Real and \ref RealVector are supported types for use in \c RES and \c ARGS, with \ref RealScalar a synonym for \ref Real.
  *
  *  \defgroup SymbolicFunctionSubModule Symbolic functions
  *  \ingroup FunctionModule

@@ -34,7 +34,7 @@ namespace Ariadne {
 \page computable_analysis_page %Foundations of Computable Analysis
 
 This page describes the information-theoretic foundations of computable analysis.
-For details on how this is implemented in %Ariadne, see the \ref ParadigmSubModule documentation.
+For details on how this is implemented in %Ariadne, see the \ref InformationSubModule documentation.
 
 For more detailed information on topological constructions, see the \ref topology_page page.
 Also see the \ref logic_page page, the \ref real_numbers_page page.

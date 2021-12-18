@@ -55,8 +55,9 @@ class InfinityException : public std::runtime_error {
 };
 
 //! \ingroup NumericModule
-//! \related FloatDP, ExactIntervalType
-//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
+//! \brief A dyadic number of the form \f$p/2^q\f$ for integers \f$p\f$, \f$q\f$; equivalently, a number with a finite binary expansion.
+//! \sa Integer, Decimal, Rational, FloatDP, FloatMP
+//! \details The number \f$1.375\f$ is an example of a dyadic number, since it is equal to \f$1.375=11/8=11/2^3=1.101_2\f$. The number \f$0.1375\f$ is not a dyadic number, since \f$0.1375=11/80=11/(2^4\times 5)=0.0010\overline{0011}_2\f$, so the denominator is not a power of \f$2\f$, and its binary expansion is recurring.
 class Dyadic
     : DeclareRingOperations<Dyadic>
     , DeclareLatticeOperations<Dyadic,Dyadic>
@@ -124,6 +125,10 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Convert a floating-point literal to Dyadic.
     friend Dyadic operator"" _dyadic(long double x);
+    //! \brief Shorthand for operator""_dyadic.
+    friend Dyadic operator"" _dy(long double x);
+    //! \brief Alternative for operator""_dyadic for use in Python interface.
+    friend Dyadic dy_(long double x);
     //! \brief Halve the number.
     friend Dyadic hlf(Dyadic const&);
     //| \brief Power of a number (m always positive). DEPRECATED

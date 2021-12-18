@@ -32,7 +32,10 @@ namespace Ariadne {
 
 \page python_module_demonstrations_page Python Module Demonstrations
 
-On this page, we explain how to use %Ariadne's internal function calculus via the Python interface. First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_numerical_demonstration and \ref python_linear_algebra_demonstration sections. A guide to the nonlinear functions available is given in \ref python_function_demonstration, including a guide to the use of polynomial Taylor calculus in \ref python_taylor_function_calculus_demonstration.
+On this page, we illustrate how to use %Ariadne via the Python interface.
+The focus is on the syntax used (which may be different from the C++ syntax) and not on how to use %Ariadne to solve problems, for which examples can be found on the \ref rigorous_numerics_tutorial_page page and the \ref python_module_tutorials page.
+
+First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_numerical_demonstration and \ref python_linear_algebra_demonstration sections. A guide to the nonlinear functions available is given in \ref python_function_demonstration, including a guide to the use of polynomial function calculus in \ref python_taylor_function_calculus_demonstration.
 A guide to working with sets and geometry is given in \ref python_geometry_demonstration.
 Solving algebraic and differential equations, and optimisation problems is handled in \ref python_solvers_demonstration.
 

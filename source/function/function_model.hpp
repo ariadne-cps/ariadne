@@ -175,7 +175,13 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,RealScalar> {
 
 //! \ingroup FunctionModule
 //! \ingroup FunctionModelSubModule
-//! \brief Generic functions on bounded domains.
+//! \brief Generic class representing approximations to functions on bounded domains.
+//!  \tparam P	The information paradigm tag, which can be either ValidatedTag, indicating that the approximation has a known (uniform) error bound, or ApproximateTag, indicating that no error bound is available. See the \ref InformationSubModule for more details.
+//!  \tparam SIG The signature, which has the standard C++ form RES(ARG), so signature Real(RealVector) indicates a function \f$f:\R^n\to\R\f$. See \ref function_signature_section for more details.
+//!  \tparam PR The precision used for numerical values within the approximation.
+//!  \tparam PRE The precision used for error bounds provided for the approximation.
+//! \paragraph function_model_template_parameter_note Note:
+//!  It is planned to change the precision paramters \c PR and \c PRE to the actual number types used.
 template<class P, class SIG, class PR, class PRE> class FunctionModel;
 
 //! \ingroup FunctionModelSubModule

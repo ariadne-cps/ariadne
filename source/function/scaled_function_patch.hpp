@@ -121,7 +121,10 @@ template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorMo
 
 
 //! \ingroup FunctionModelSubModule
-//!  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a polynomial \f$p\f$ on \f$\I^n\f$ with uniform error \f$e\f$.
+//!  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a scaled function model, such as a polynomial \f$p\f$ on \f$\I^n\f$ with uniform error \f$e\f$.
+//!  \tparam M	The class used for the function model over the box \f$[-1\!:\!+1]^n\f$.
+//!   For example, \ref TaylorModel::ValidatedTaylorModel "ValidatedTaylorModel<F>" would give a scaled representation
+//!   which is a polynomial with coefficients of type \c F, with a uniform error bound.
 //!
 //! \details Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
 //! \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
@@ -139,7 +142,7 @@ template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorMo
 //! Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
 //! for but there are a number of techniques available.
 //!
-//! \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
+//! \sa VectorScaledFunctionPatch, Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
 template<class M> class ScaledFunctionPatch
     : public ScaledFunctionPatchMixin<M>
     , public DispatchElementaryAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
@@ -515,9 +518,10 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 
 
 //! \ingroup FunctionModelSubModule
-//!  \brief A a type of function model in which a the restriction of a vector function \f$f:\R^n\rightarrow\R^m\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a vector polynomial \f$p\f$ on \f$\I^n\f$ with uniform errors \f$e\f$.
+//!  \brief A a type of function model in which a the restriction of a vector function \f$f:\R^n\rightarrow\R^m\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a vector function \f$p\f$ (such as a polynomial) on \f$\I^n\f$ with uniform errors \f$e\f$.
+//!  \tparam M	The class used for the component function models over the box \f$[-1\!:\!+1]^n\f$.
 //!
-//! \see TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP
+//! \see TaylorModel, ScaledFunctionPatch, ValidatedVectorMultivariateTaylorFunctionModelDP
 template<class M> class VectorScaledFunctionPatch
     : public VectorScaledFunctionPatchMixin<M>
 {

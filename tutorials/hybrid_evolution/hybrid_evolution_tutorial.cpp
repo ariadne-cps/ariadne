@@ -46,7 +46,7 @@ HybridAutomaton get_tank()
 
     return automaton;
 }
-//! [/get_tank]
+//! [get_tank]
 
 //! [get_valve]
 HybridAutomaton get_valve()
@@ -95,7 +95,7 @@ HybridAutomaton get_valve()
 
     return automaton;
 }
-//! [/get_valve]
+//! [get_valve]
 
 //! [get_controller]
 HybridAutomaton get_controller()
@@ -141,7 +141,7 @@ HybridAutomaton get_controller()
 
     return automaton;
 }
-//! [/get_controller]
+//! [get_controller]
 
 //! [simulate_evolution]
 Void simulate_evolution(CompositeHybridAutomaton const& system, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
@@ -168,7 +168,7 @@ Void simulate_evolution(CompositeHybridAutomaton const& system, HybridBoundedCon
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting simulation trajectory!");
 }
-//! [/simulate_evolution]
+//! [simulate_evolution]
 
 //! [create_evolver]
 GeneralHybridEvolver create_evolver(CompositeHybridAutomaton const& system)
@@ -184,7 +184,7 @@ GeneralHybridEvolver create_evolver(CompositeHybridAutomaton const& system)
 
     return evolver;
 }
-//! [/create_evolver]
+//! [create_evolver]
 
 //! [compute_evolution]
 Void compute_evolution(const GeneralHybridEvolver& evolver, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
@@ -205,7 +205,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver, HybridBoundedConstra
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     ARIADNE_LOG_PRINTLN("Done computing and plotting evolution flow tube!");
 }
-//! [/compute_evolution]
+//! [compute_evolution]
 
 //! [create_analyser]
 HybridReachabilityAnalyser create_analyser(GeneralHybridEvolver const& evolver)
@@ -221,7 +221,7 @@ HybridReachabilityAnalyser create_analyser(GeneralHybridEvolver const& evolver)
 
     return analyser;
 }
-//! [/create_analyser]
+//! [create_analyser]
 
 //! [compute_reachability]
 Void compute_reachability(HybridReachabilityAnalyser const& analyser, HybridBoundedConstraintSet const& initial_set, HybridTime const& final_time)
@@ -244,7 +244,7 @@ Void compute_reachability(HybridReachabilityAnalyser const& analyser, HybridBoun
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
     ARIADNE_LOG_PRINTLN("Done computing and plotting outer chain reach set!");
 }
-//! [/compute_reachability]
+//! [compute_reachability]
 
 //! [get_system]
 CompositeHybridAutomaton get_system()
@@ -257,7 +257,7 @@ CompositeHybridAutomaton get_system()
 
     return system;
 }
-//! [/get_system]
+//! [get_system]
 
 //! [get_initial_set]
 HybridBoundedConstraintSet get_initial_set()
@@ -279,7 +279,7 @@ HybridBoundedConstraintSet get_initial_set()
 
     return initial_set;
 }
-//! [/get_initial_set]
+//! [get_initial_set]
 
 //! [get_final_time]
 HybridTime get_final_time()
@@ -290,7 +290,7 @@ HybridTime get_final_time()
 
     return final_time;
 }
-//! [/get_final_time]
+//! [get_final_time]
 
 //! [main]
 Int main(Int argc, const char* argv[])
@@ -322,4 +322,4 @@ Int main(Int argc, const char* argv[])
     // Compute the system reachability
     compute_reachability(analyser,initial_set,final_time);
 }
-//! [/main]
+//! [main]

@@ -48,7 +48,7 @@ struct LipschitzTolerance : Attribute<ExactDouble> { using Attribute<ExactDouble
 static const Generator<LipschitzTolerance> lipschitz_tolerance = Generator<LipschitzTolerance>();
 static const LipschitzTolerance DEFAULT_LIPSCHITZ_TOLERANCE(0.5_x);
 
-//! \ingroup SolverModule EvaluationModule
+//! \ingroup DifferentialEquationSubModule
 //! \brief Interface for classes calculating the bounds of a flow.
 class BounderInterface {
   public:
@@ -94,6 +94,8 @@ class BounderBase : public BounderInterface {
     const LipschitzTolerance _lipschitz_tolerance;
 };
 
+//! \ingroup DifferentialEquationSubModule
+//! \brief Compute bounds on the flow of a differential equation using a set-based Euler method.
 class EulerBounder final : public BounderBase {
   public:
     EulerBounder(LipschitzTolerance lipschitz = DEFAULT_LIPSCHITZ_TOLERANCE);

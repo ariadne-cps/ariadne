@@ -30,6 +30,9 @@
 
 \page algebraic_equations_page Algebraic Equations
 
+This page describes methods for the rigorous numerical solution of algebraic equations.
+For details on how this is implemented in Ariadne, see the \ref AlgebraicEquationSubModule documentation
+
 Consider the system of nonlinear algebraic equations
 \f[ f(x) = 0; \quad x\in D \f]
 where \f$f:\R^n\rightarrow \R^n\f$ and \f$D\f$ is a compact box in \f$\R^n\f$.

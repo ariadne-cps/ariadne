@@ -149,21 +149,33 @@ class ExactDouble {
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };
 
-//! \ingroup NumericModule
+//! \ingroup ExtendedLiteralsSubModule
 //! \brief Indicate that a floating-point literal is the exact value of a number in double-precision.
 //! \details The input \a lx is converted first converted to a double-precision value \a x.
 //! If \a lx and \a x differ, then the decimal literal input to \a lx almost certainly does not represent a double-precision number exactly, and an assertion fails. <p/>
 //! For example, <c>0.625_x</c> yields the exact double-precision value \f$5/2^3\f$, but <c>0.6_x</c> fails, since \f$3/5\f$ is not exactly representable as a double-precision number.
 ExactDouble operator"" _x(long double lx);
 
-//! \ingroup NumericModule
+//! \ingroup ExtendedLiteralsSubModule
+//! \brief Indicate that a floating-point literal is sufficiently precise that it can safely be taken to represent the closest double-precision floating-point number.
+inline ExactDouble exact(long double lx) { return operator""_x(lx); }
+
+
+//! \ingroup ExtendedLiteralsSubModule
 //! \brief Indicate that a floating-point literal is sufficiently precise that it can safely be taken to represent the closest double-precision floating-point number.
 //! \details For example, writing <c>0.14285714285714285_pr</c> claims that the exact decimal "0.14285714285714285" should be interpreted as the closest double-precision floating-point number, which has exact value \f$0.142857142857142849212692681248881854116916656494140625\f$.
 inline ExactDouble operator"" _pr (long double lx);
 
-//! \ingroup NumericModule
-//! \brief Indicate that a floating-point literal is the exact value of a number in double-precision.
-inline ExactDouble exact(long double lx) { return operator""_x(lx); }
+
+#ifdef DOXYGRN
+//! \ingroup ExtendedLiteralsSubModule
+//! \brief Indicate that a floating-point literal is the exact value of a number in double-precision. (Python-only syntax)
+ExactDouble x_(long double lx);
+
+//! \ingroup ExtendedLiteralsSubModule
+//! \brief Indicate that a floating-point literal is sufficiently precise that it can safely be taken to represent the closest double-precision floating-point number. (Python-only syntax)
+ExactDouble pr_(long double lx);
+#endif // DOXYGEN
 
 inline ExactDouble cast_exact(double d) { return ExactDouble(d); }
 inline ExactDouble cast_exact(ApproximateDouble ax) { return ExactDouble(ax.get_d()); }

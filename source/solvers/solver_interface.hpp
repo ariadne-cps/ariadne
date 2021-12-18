@@ -76,9 +76,17 @@ class SingularJacobianException : public SolverException
 };
 
 
-//! \ingroup SolverModule EvaluationModule
+//! \ingroup AlgebraicEquationSubModule
 //! \brief %Interface for solving (nonlinear) equations.
-//! \sa SolverException
+//!
+//! \details Two main kinds of problem are considered.
+//! The problem of finding roots of a function \f$ f \f$, which are solutions to the equation \f$f(x)=0\f$, is addressed by the solve() method,
+//! The problem of finding a function \f$ h \f$ such that \f$ f(x,h(x))=0 \f$ is addressed by the implicit() method.
+//!
+//! Additionally two parameters are defined which are applicable to any implementation.
+//! The maximum_error() provides an upper bound on the size of a box containing a solution point,
+//! uniforma bounds for an implicit function.
+//! The maximum_number_of_steps() provides a timeout mechanism.
 class SolverInterface
 {
     using FLT=FloatDP;
@@ -106,14 +114,35 @@ class SolverInterface
     virtual Void set_maximum_number_of_steps(Nat max_steps) = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx.
-    virtual Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& pt) const = 0;
+    virtual Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const = 0;
     //! \brief Solve \f$f(x)=x\f$, starting in the box \a bx.
-    virtual Vector<ValidatedNumericType> fixed_point(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& pt) const = 0;
+    virtual Vector<ValidatedNumericType> fixed_point(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const = 0;
 
-    //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. Throws a SolverException if there is not a unique solution.
+    //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. Throws a SolverException if a unique solution is not found.
+    //!  \param f A function \f$\R^n\to\R^n\f$ for which the root \f$p\f$ is to be found.
+    //!  \param bx A coordinate-aligned box \f$B\f$ in \f$\R^n\f$ for which the root is to be found.
+    //! \details
+    //! A root \f$p\f$ of \f$f\f$ is <em>transverse</em> if the Jacobian derivative matrix \f$Df(p)\f$ is nonsingular.
+    //! The solution method should converge to a transverse root \f$p\f$ if the box \f$B\f$ contains \f$p\f$ in its interior, and is sufficiently small.
+    //!
+    //! The choice of box in which to search is to be determined by the user.
+    //! If the box is too big, then the solution typically fails.
+    //! The semantics of the method requires that there be a uniqure root in the box,
+    //! and many algorithms also require the Jacobian derivative matrix \f$Df(x)\f$ to be nonsingular over the entire box.
+    //! The Jacobian derivative is nonsingular over a sufficiently small neighbourhood of a transverse root.
+    //! However, choosing too small a box may also cause the algorithm to fail if the root is too close to the boundary.
+    //!
+    //! The solve_all() method is an algorithm which attempts to find all roots.
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const = 0;
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f,const Vector<ValidatedNumericType>& ipt) const = 0;
     //! \brief Solve \f$f(a,x)=0\f$ for \f$a\f$ in \f$A\f$, looking for a solution with \f$x\f$ in \f$X\f$. The result is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$.
+    //!  \param f A function \f$\R^{m+n}\to\R^n\f$.
+    //!  \param A A subset of \f$\R^m\f$ giving the required domain of the solution function \f$h\f$.
+    //!  \param X A subset of \f$\R^n\f$ giving a codomain of \f$h\f$ i.e. \f$h\f$ satisfies \f$h(a)\in X\f$ for all \f$a\in A\f$.
+    //!    \warning If the domain \a A is too large, there may not be a continuous solution over it.
+    //!      If the codomain \a X is too small, then there may not be a solution within it,
+    //!      but if it is too large, there may not be a unique solution, and some solvers may have problems
+    //!      with the first few steps of the solution.
     //! \details A <em>strong solution</em> to the problem exists if for every \f$a\in A\f$, there is a unique solution \f$x\in X\f$ to the equation \f$f(a,x)=0\f$, and this solution varies continuously in \f$a\f$. A <em>weak solution</em> is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$, if \f$f(a,x)=0\f$ for \f$x\in X\f$ then \f$h(a)=x\f$, and there exists \f$(a,x)\in A\times X\f$ such that \f$f(a,x)=0\f$.
     //! If \f$D_2f(a,x)\f$ is nonsingular for all \f$(a,x)\in A\times X\f$, then any solution is guaranteed to be unique.
     //! May throw a NoSolutionException, but \em only if there are no solutions to \f$f(a,x)=0\f$ in \f$A\times X\f$.
@@ -126,8 +155,8 @@ class SolverInterface
     //! \brief Solve \f$f(a,x)=0\f$ for x in \a X, and continue to a function \f$h\f$ solving \f$f(a,h(a))=0\f$ over \f$A\f$.
     virtual ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const Vector<ApproximateNumericType>& a, const ExactBoxType& X,  const ExactBoxType& A) const = 0;
 
-    //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
-    //! a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.
+    //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. Returns a set of bounds for which it can be <em>proved</em> that
+    //! a solution exists in within the bounds. This means that some solutions may be omitted if they are not sufficiently robust.
     //!
     virtual Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const = 0;
 };

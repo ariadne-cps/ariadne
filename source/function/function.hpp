@@ -166,7 +166,17 @@ template<class P, class... ARGS> class DispatchFunctionOperations<P,RealVector(A
     : DeclareVectorAlgebraOperators<VectorFunction<P,ARGS...>,ScalarFunction<P,ARGS...>,Vector<Number<P>>,Number<P>> { };
 
 //! \ingroup FunctionModule
-//! \brief A generic function which can be evaluated over the number type \a X,  \f$f:\R^n\rightarrow\R^m\f$.
+//! \brief A generic continuous function.
+//! \tparam P The <em>\ref information_section "information paradigm"</em> tag, which can be either ExactTag, EffectiveTag, ValidatedTag, or ApproximateTag.
+//! \tparam SIG The <em>\ref function_signature_section "signature"</em>, which has the standard C++ form \c RES(ARG), so signature \c Real(RealVector) indicates a function \f$f:\R^n\rightarrow\R\f$.
+//! \details Class representing general continuous functions .
+//! \paragraph Note: Currently, only \f$\R\f$ and \f$R^n\f$ are supported as argument and results types, denoted respectively by C++ classes \ref Real and \ref RealVector.
+//! The %Ariadne %Function class provides an interface with support for evaluation over different numeric and algebraic types using \ref Function::operator().
+//! Since any continuous function can be approximated to any given accuracy over a given domain by a polynomial,
+//! \paragraph Note: A direct method to extract a polynomial approximation will be provided in a later version of %Ariadne.
+//!
+//! Functions are assumed to be sufficiently differentiable, and a list of all derivates up to a given degree can be computed using \ref Function::differential, and the derivative function with respect to a given argument by \ref Function::derivative.
+//!
 template<class P, class SIG>
 class Function
     : public Handle<const FunctionInterface<P,SIG>>
@@ -182,7 +192,7 @@ class Function
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
   public:
     typedef FunctionInterface<P,SIG> Interface;
-    typedef P InformationTag; //!< The type of information (Effective, Validated or Approximate) provided by the function implementation.
+    typedef P InformationTag; //!< The type of information (Exact, Effective, Validated or Approximate) provided by the function implementation.
     typedef P Paradigm;
     typedef D DomainType; //!< The type of the domain.
     typedef C CodomainType; //!< The type of the codomain.

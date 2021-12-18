@@ -173,6 +173,7 @@ class BoundedIntegratorBase : public IntegratorBase {
     BounderPointer _bounder_ptr;
 };
 
+//! \ingroup DifferentialEquationSubModule
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
 class TaylorPicardIntegrator
     : public BoundedIntegratorBase
@@ -227,6 +228,7 @@ class TaylorPicardIntegrator
                const UpperBoxType& bounding_box) const;
 };
 
+//! \ingroup DifferentialEquationSubModule
 class GradedTaylorPicardIntegrator
         : public IntegratorBase
 {
@@ -274,6 +276,7 @@ private:
 
 
 
+//! \ingroup DifferentialEquationSubModule
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
     : public BoundedIntegratorBase
@@ -314,6 +317,7 @@ class TaylorSeriesIntegrator
   private:
 };
 
+//! \ingroup DifferentialEquationSubModule
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesBounderIntegrator
     : public TaylorSeriesIntegrator

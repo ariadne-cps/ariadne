@@ -637,6 +637,10 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     } else if constexpr (Same<BX,BoxApproximateRangeType>) {
         module.attr("BoxApproximateRangeType")=box_class;
     }
+
+    module.def("cast_exact",(IntervalDomainType(*)(IntervalApproximateRangeType const&)) &cast_exact_interval);
+    module.def("cast_exact",(BoxDomainType(*)(BoxApproximateRangeType const&)) &cast_exact_box);
+
 }
 
 

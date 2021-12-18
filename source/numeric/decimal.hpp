@@ -38,7 +38,7 @@
 namespace Ariadne {
 
 //! \ingroup NumericModule
-//! \related Rational, Real
+//! \sa Dyadic, Rational, Real
 //! \brief A decimal number.
 class Decimal
     : public DefineComparisonOperators<Decimal,Boolean,Boolean>
@@ -95,6 +95,12 @@ class Decimal
     friend Decimal operator"" _decimal (long double dbl);
     //! \brief Construct from a string literal.
     friend Decimal operator"" _decimal (const char* str, std::size_t);
+
+    //! \brief Shorthand for operator""_decimal.
+    friend Decimal operator"" _dec (long double dbl);
+
+    //! \brief Alternative for operator""_decimal for use in Python interface.
+    friend Decimal dec_(long double dbl);
 
     void canonicalize();
 };

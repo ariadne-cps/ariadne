@@ -36,15 +36,19 @@ namespace Ariadne {
 
 template<class X> using Scalar=X;
 template<class X> class Vector;
+template<class X> class Matrix;
 
 class Real;
 
 //! \ingroup LinearAlgebraModule
-//! \brief A scalar real number. Defined as a synomym for Real
+//! \brief A scalar real number. Defined as a synomym for Real.
 using RealScalar=Scalar<Real>;
 //! \ingroup LinearAlgebraModule
-//! \brief A vector of real numbers. Defined as a synomym for Real
+//! \brief A vector of real numbers.
 using RealVector=Vector<Real>;
+//! \ingroup LinearAlgebraModule
+//! \brief A matrix of real numbers.
+using RealMatrix=Matrix<Real>;
 
 // Domain declarations
 typedef Interval<FloatDPValue> IntervalDomainType;

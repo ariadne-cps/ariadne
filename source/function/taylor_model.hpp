@@ -155,6 +155,9 @@ template<class P, class F> class TaylorModel;
 
 //! \ingroup FunctionModelSubModule
 //! \brief A class representing polynomial approximation to a function, scaled to the unit box, with a uniform error bound.
+//!  \tparam P	The information paradigm tag, which can be either ValidatedTag, indicating that the approximation has a known (uniform) error bound, or ApproximateTag, indicating that no error bound is available. See the \ref InformationSubModule for more details.
+//!  \tparam F  The (floating-point) number type used internally for the coefficients of the polynomial, such as \ref FloatDP or \ref FloatMP.
+//!  \tparam FE  The (floating-point) number type used internally for the error bound.
 //!
 //! \see Expansion, ValidatedScalarMultivariateTaylorFunctionModelDP, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
 template<class P, class F>

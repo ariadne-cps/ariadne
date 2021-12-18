@@ -48,28 +48,26 @@ A more detailed explanation of the hybrid automaton class can be found on the \r
 
 A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref hybrid_evolution_tutorial_page  page. The example is contained in the file  \link tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp hybrid_evolution_tutorial.cpp \endlink.
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref hybrid_evolution_tutorial_page  page. The example is contained in the files  \link tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp hybrid_evolution_tutorial.cpp \endlink and \link python/tutorials/hybrid_evolution_tutorial.py hybrid_evolution_tutorial.py \endlink.
 
-An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the file  \link tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink.
+An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the files  \link tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink and \link python/tutorials/rigorous_numerics_tutorial.py rigorous_numerics_tutorial.py \endlink.
 
-Simple demonstrations of syntax of %Ariadne's Python interface can be found on the \ref python_module_demonstrations_page documentation page. Python versions of the C++ tutorials are alse provided, and are contained in the files \link python/tutorials/hybrid_evolution_tutorial.py hybrid_evolution_tutorial.py \endlink and \link python/tutorials/rigorous_numerics_tutorial.py rigorous_numerics_tutorial.py \endlink.
+Tutorials showing how to use the basic functionality of %Ariadne's Python interface can be found on the \ref python_module_tutorials_page documentation page. More advanced tutorials showing concrete examples of practical usage of %Ariadne can be found on the \ref python_example_tutorials_page page.
+
+
+\section mainpage_intermediate_usage Going further
+
+To go further using %Ariadne, you should understand the internal structure, which is best explored via the <A HREF="modules.html">Modules</A> page (also linked to at the top of this page)
+
+The supported operations in the Python interface for the various modules can be found on the \ref python_module_demonstrations_page documentation page.
+A guide on the differences between the Python interface and the documented C++ API can be found on the \ref python_interface_page page.
+
 
 \section mainpage_advanced_usage Advanced Usage
 
-
-\subsection mainpage_modules Modules
-
-The internal structure of %Ariadne can be best explored via the <A HREF="modules.html">Modules</A> page (also linked to at the top of this page).
-
-\subsection cpp_api_documentation C++ API
-
 The classes, methods, functions and associated type definitions are described in detail in the main documentation. Entities can be found either within the \ref Ariadne namespace documentation, the <A HREF="classes.html">Class Index</A> (also linked to at the top-left of this page) or through the search bar at the top-right. Probably the best way of getting a structured overview is via the <A HREF="modules.html">Modules</A> page.
 
-\subsection python_interface Python Interface
-
-A guide on the differences between the Python interface and the documented C++ API can be found on the \ref python_interface_page page.
-
-\subsection mainpage_mathematical_foundations Mathematical Foundations
+\section mainpage_mathematical_foundations Mathematical Foundations
 
 More information on the mathematical foundations of %Ariadne can be found on the following pages:
 

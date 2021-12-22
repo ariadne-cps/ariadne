@@ -294,6 +294,7 @@ Void export_logicals(pymodule& module) {
 Void export_accuracy(pymodule& module) {
     pybind11::class_<Accuracy> accuracy_class(module,"Accuracy");
     accuracy_class.def(init<Dyadic>());
+    accuracy_class.def(init([](Nat b){return Accuracy(Dyadic(1,b));}),pybind11::kw_only(), pybind11::arg("bips"));
     accuracy_class.def("error",&Accuracy::error);
     accuracy_class.def("__str__", &__cstr__<Accuracy>);
     accuracy_class.def("__repr__", &__cstr__<Accuracy>);
@@ -725,7 +726,7 @@ void export_rounding_mode(pymodule& module) {
     rounding_mode_class.def("__str__", &__cstr__<Rounding>);
     module.attr("upward") = round_upward;
     module.attr("downward") = round_downward;
-    module.attr("to_near") = round_to_nearest;
+    module.attr("to_nearest") = round_to_nearest;
     module.attr("up") = round_upward;
     module.attr("down") = round_downward;
     module.attr("near") = round_to_nearest;
@@ -745,13 +746,13 @@ template<> Void export_precision<DoublePrecision>(pymodule& module) {
 
 template<> Void export_precision<MultiplePrecision>(pymodule& module) {
     pybind11::class_<MultiplePrecision> precision_class(module,"MultiplePrecision");
-    precision_class.def(init<Nat>());
+    precision_class.def(init<Nat>(),pybind11::arg("bits"));
     precision_class.def("bits",&MultiplePrecision::bits);
     precision_class.def("__str__", &__cstr__<MultiplePrecision>);
     precision_class.def("__repr__", &__crepr__<MultiplePrecision>);
     module.def("multiple_precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
     module.def("mp", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
-    module.def("precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
+    module.def("precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision, pybind11::arg("bits"));
 }
 
 

@@ -121,6 +121,8 @@ class Rational
     friend OutputStream& operator<<(OutputStream& os, Rational const& q);
     friend InputStream& operator>>(InputStream& os, Rational& q);
     friend Rational operator"" _q(long double x);
+    //! \brief Alternative for operator""_q for use in Python interface.
+    friend Rational q_(long double x);
   public:
     double get_d() const;
     mpq_t const& get_mpq() const;

@@ -455,10 +455,15 @@ void export_real(pymodule& module)
     real_class.def("__str__", &__cstr__<Real>);
     real_class.def("__repr__", &__repr__<Real>);
 
-    real_class.def("get", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::get);
-    real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
     real_class.def("compute", (ValidatedReal(Real::*)(Effort)const) &Real::compute);
     real_class.def("compute", (ValidatedReal(Real::*)(Accuracy)const) &Real::compute);
+    real_class.def("compute_get", (DyadicBounds(Real::*)(Effort)const) &Real::compute_get);
+    real_class.def("compute_get", (FloatDPBounds(Real::*)(Effort,DoublePrecision)const) &Real::compute_get);
+    real_class.def("compute_get", (FloatMPBounds(Real::*)(Effort,MultiplePrecision)const) &Real::compute_get);
+    real_class.def("get", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::get);
+    real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
+    real_class.def("compute_using", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::compute_using);
+    real_class.def("compute_using", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::compute_using);
 
     define_elementary(module,real_class);
     define_lattice(module,real_class);

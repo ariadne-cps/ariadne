@@ -450,6 +450,8 @@ Integer round(Real const& r) {
 DyadicBounds Real::compute_get(Effort e) const { return this->_ptr->_compute(e); }
 FloatDPBounds Real::get(DoublePrecision pr) const { return this->_ptr->_compute_get(Effort(0),pr); }
 FloatMPBounds Real::get(MultiplePrecision pr) const { return this->_ptr->_compute_get(Effort(pr.bits()),pr); }
+FloatDPBounds Real::compute_using(DoublePrecision pr) const { return this->_ptr->_compute_get(Effort(0),pr); }
+FloatMPBounds Real::compute_using(MultiplePrecision pr) const { return this->_ptr->_compute_get(Effort(pr.bits()),pr); }
 
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }

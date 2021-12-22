@@ -149,6 +149,10 @@ class Real
     FloatDPBounds get(DoublePrecision pr) const;
     //! Compute a concrete approximation using the given precision.
     FloatMPBounds get(MultiplePrecision pr) const;
+    //! Compute a concrete approximation using double-precision.
+    FloatDPBounds compute_using(DoublePrecision pr) const;
+    //! Compute a concrete approximation using the given precision.
+    FloatMPBounds compute_using(MultiplePrecision pr) const;
     //!@}
 
     //! \name Standard arithmetic operators

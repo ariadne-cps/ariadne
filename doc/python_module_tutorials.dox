@@ -33,9 +33,11 @@ namespace Ariadne {
 \page python_module_tutorials_page Python Module Tutorials
 
 On this page, we illustrate how to use %Ariadne via the Python interface.
- - A guide to functionality for solving algebraic equations is given in the \ref python_algebraic_equation_tutorial_section, including how to compute fixed-points of functions and solving parametrised equations.
+ - A guide to working with numbers is given in the \ref python_numerical_tutorial_section "Numeric module" tutorial.
+ - A guide to functionality for solving algebraic equations is given in the \ref python_algebraic_equation_tutorial_section tutorial, including how to compute fixed-points of functions and solving parametrised equations.
 
 The full code of the demonstrations are given in the following files in the \ref python/tutorials/ directory:
+\link python/tutorials/numeric_tutorial.py numeric_tutorial.py\endlink,
 \link python/tutorials/algebraic_equation_tutorial.py algebraic_equation_tutorial.py\endlink
 
 Links are given to the main classes used in the tutorials.
@@ -44,18 +46,177 @@ To help Python users unfamiliar with C++ understand this documentation, a guide 
 
 
 
-\section python_introspection_tutorial The Ariadne module.
+\section python_introspection_tutorial The Ariadne module
 
-First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
+First, import the %Ariadne module. For ease-of-use, the <c>from</c> version of <c>import</c> is recommended:
 \code from pyariadne import * \endcode
 To see all the classes and functions available in %Ariadne, type:
 \code print(dir(ariadne)) \endcode
 
 
 
+\section python_numerical_tutorial_section The Numeric module
+
+\dontinclude python/tutorials/numeric_tutorial.py
+
+The full code of this tutorial is given in the file \link python/tutorials/numeric_tutorial.py \endlink.
+
+In this tutorial, we will study iterated dynamical systems of the form \f$x_{n+1}=f(x_n)\f$.
+
+We define a function which computes \a n iterates of \a f starting at \a x0:
+\skipline def compute_iterates
+\until return
 
 
-\section python_solver_tutorial_section  Solvers
+\subsection python_exact_arithmetic_subsection Exact arithmetic
+
+%Ariadne has a number of classes supporting exact arithmetical operations, namely \ref Integer, \ref Dyadic, \ref Decimal and \ref Rational.
+Further, there is a \ref Real number class which also supports elementary transcendental operations; the use of \ref Real is illustrated in \ref python_real_subsection "Effective real arithmetic" section.
+All these numeric classes support standard arithmetical operators. A full list of these operations is given in the list of \ref supported_operations_anchor "supported operations".
+Since these are easiest to understand, we will start here.
+
+Let's study the unimodal function \f$f(x)=ax(b-x)\f$ with parameters \f$a=3.625\f$ and \f$b=1\f$.
+
+Since \f$b\f$ is an integer, it can be represented by the %Ariadne Integer class.
+Like Python's <c>int</c> type (but unlike C++ <c>int</c>), %Ariadne's Integer class can hold arbitrary-sized numbers.
+\skipline b=Integer(1)
+
+The parameter \f$a\f$ is a <em>dyadic</em> number, of the form \f$p/2^q\f$ where \f$p\f$ and \f$q\f$ are integers; equivalently, a number with a terminating binary expansion, since \f$a=3.625=29/2^3=11.101_2\f$.
+We can therefore use that \ref Dyadic class to represent \f$a\f$:
+\skipline a=Dyadic
+There are alternative ways to construct a dyadic number using the builtin constant \ref two:
+\skipline a=
+\skipline a=
+Note that the following code is not valid:
+\code a=Dyadic(3.625) \endcode
+since a Python <c>float</c> value may typically represent the result of an approximate computation, and should not be used in an exact context.
+
+We can define \f$f\f$ as a basic Python function. (%Ariadne has its own builtin function classes; see the \ref FunctionModule and \ref python_function_tutorial for more details.)
+\skipline def f
+\until return
+
+Let's start the iteration at \f$x_0=0.5\f$.
+This is also a dyadic number, so we can compute using dyadic arithmetic:
+\skipline x0=
+\until compute_iterates
+Looking at the values, we see that the length of the iterates approximately doubles at each step, quickly leading to representations which are too large to efficiently work with.
+
+We can iterate the map using rational arithmetic by defining the initial point as a rational number.
+\skipline x0=Rational(
+We then compute iterates
+\skipline compute_iterates
+Here too, the length of the denominator roughly doubles every iterate.
+
+In general, the \ref Dyadic and \ref Rational class are useful for problem specification, but unsuitable for computations.
+In many cases, the result cannot be expressed exactly as a number of the same kind, and even if it can be, the length of the description typically grows rapidly through the computation.
+
+
+
+
+\subsection python_float_issue_subsection The issue with 'float's
+
+Since Python's builtin <c>float</c> class uses rounded arithmetic, such numbers may not be an exact representation of a value, leading to unsafe computation. If a Python <c>float</c> is indeed an exact value, (e.g. \f$3.625\f$ is an exact double-precision floating-point number), this must first be converted to an %Ariadne \ref ExactDouble class:
+\skipline ExactDouble
+\skipline x_(
+Numbers which are not exactly representable in double-precision should be converted to the \ref Decimal class instead.
+\skipline Decimal
+or as string literals
+\skipline Decimal
+The \ref Decimal number class is intended to allow input of human-readable decimal values, and not for computation, though it does support standard arithmetical operations.
+
+Python <c>float</c> numbers can also be converted to %Ariadne numbers by using Python equivalents \ref Dyadic::dy_ "dy_", \ref Decimal::dec_ "dec_" and \ref Rational::q_ "q_" of the C++ literals <c>_dy</c>, <c>_dec</c> and <c>_q</c>.
+\skipline =dy_(
+\skipline =dec_(
+\skipline =q_(
+Python <c>int</c> numbers can be converted to %Ariadne Integers by using the Python equivalent \ref Integer::z_ "z_" of the C++ literal <c>_z</c>.
+\skipline =z_(
+
+Hence an alternative way of defining \f$f\f$ would be as
+\skipline a=
+\skipline b=
+\skipline def f(
+\until return
+or more succinctly as
+\skipline def f(
+\until return
+
+
+\subsection python_floating_point_subsection Floating-point arithmetic
+
+Computations in %Ariadne are usually most efficiently performed using floating-point number types.
+%Ariadne supports the \ref FloatDP and \ref FloatMP types, which are respectively based on builtin IEEE double-precision floating-point numbers, and multiple-precision floating-point numbers from the MPFR library.
+
+Raw floating-point numbers only support \ref python_float_rounded_arithmetic_anchor "rounded arithmetic", so are best avoided in user code.
+Instead, they can be used in safe correctly-rounded generic types, notably \ref Bounds "Bounds<F>", \ref Ball "Ball<F,FE>", and \ref Approximation "Approximation<F>", though \ref Value "Value<F>", \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" are also available.
+
+In Python, the template parameter is appended to the class name, so \ref FloatDP::FloatDPBounds "FloatDPBounds" is the Python name for \ref Bounds "Bounds<FloatDP>", and \ref FloatMP::FloatMPBounds "FloatMPBounds" is the name for \ref Bounds "Bounds<FloatMP>".
+\note In a future version, it is planned to use square brackets for Python equivalents to C++ template classes, so C++ <c>Bounds<FloatMP></c> would translate to Python <c>%Bounds[%FloatMP]</c>.
+
+The \ref Bounds classes support outward-rounded <em>interval arithmetic</em>; see \ref intervalarithmetic for details.
+
+To construct a \ref Bounds "Bounds" object based on \ref FloatDP or \ref FloatMP, we must always provide the <em>precision</em> as one of the arguments.
+We can iterate the system using double-precision interval arithmetic by taking initial condition:
+\skipline =FloatDPBounds
+and then iterating the function
+\until compute_iterates(
+Note that the iterates are also of clas \ref FloatDP::FloatDPBounds "FloatDPBounds"; this is because binary operations between exact values such as \ref Rational, and "concrete" values based on a <c>Float</c> always return a concrete value.
+Unlike rational arithmetic, the length of the representation does not change, but the accuracy decreases through the computation.
+
+To attain more accuracy, the \ref FloatMP::FloatMPBounds "FloatMPBounds" class can be used:
+\skipline =FloatMPBounds
+\skipline compute_iterates(
+
+Guaranteed over-approximations can also be computed using the \ref Ball classes, which use an approximation of the form \f$x=x_c\pm e_x\f$.
+Here, it sometimes makes sense to use a higher precision for the centre of the ball than the radius, such as the \ref FloatMP::FloatMPDPBall "FloatMPDPBall" class:
+\skipline =FloatMPDPBall
+\skipline compute_iterates(
+
+If we only need approximate results with no guarantees on the accuracy, we can use an \ref Approximation object, such as the \ref FloatDP::FloatDPApproximation "FloatDPApproximation" class:
+\skipline =FloatDPApproximation
+\skipline compute_iterates(
+
+
+\note
+\anchor python_float_rounded_arithmetic_anchor
+To construct a raw \ref FloatDP object, one must always supply the <em>precision</em> as an argument:
+\skipline a=FloatDP
+Since all binary floating-point numbers are dyadic, only Python <c>int</c>, \ref Integer, \ref ExactDouble and \ref Dyadic are possible numerical arguments.
+A \ref Rational argument must be rounded, either \ref upward, \ref downward, or \ref to_nearest representable value, also abbreviated \ref up, \ref down and \ref near.
+Hence to compute an approximation to \f$f(x)\f$, we would need the following code:
+\skipline a=FloatDP(
+\skipline b=FloatDP(
+\skipline x=FloatDP(
+\skipline fx=
+This is obviously clunky, but even more importantly, the result is based on rounded computation, so may be inaccurate!
+For simplicity, safety, and clarity, users should use the \ref Bounds, \ref Ball and \ref Approximation class for floating-point computations.
+
+
+
+
+\subsection python_real_subsection Effective real arithmetic
+
+Although the \ref Bounds and \ref Ball classes allow for arbitrary accuracy, the precision is specified a-priori, limiting future accuracy. %Ariadne also provides a \ref Real number class which allows computation to attain a given, specified accuracy.
+
+We can compute an iterate of \f$f\f$ using real number arithmetic:
+\skipline =Real(
+\until =f(
+The result is stored as a symbolic formula, which can be computed to a given (metric) accuracy.
+\skipline y=x.compute(Accuracy(
+The result is a \ref ValidatedReal, which is an abstract class storing guaranteed bounds on a real number.
+These bounds can be extracted as dyadic numbers:
+\skipline .get(
+or using a specified precision:
+\skipline .get(double_precision
+\skipline .get(precision(
+One can also compute using an \ref Effort parameter. Increasing the effort garantees convergence, but not at a given rate.
+\skipline x.compute(Effort(
+It is aso possible to specify computation using a given precision:
+\skipline x.compute_using(
+The \ref Real number class is also the most appropriate to use in problem specifications where irrational numbers are required.
+
+
+
+\section python_solver_tutorial_section  The Solver module
 
 \subsection python_algebraic_equation_tutorial_section Solving Algebraic Equations
 

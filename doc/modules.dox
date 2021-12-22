@@ -236,22 +236,40 @@ namespace Ariadne {
  * %Positive numbers can be defined using the \ref Positive "Positive<X>" template.
  * A \ref Natural is a \ref Positive<\ref Integer>.
  *
- * \anchor supported_operations
+ * \anchor supported_operations_anchor
  * The following aliases are used for arithmetical operations:
  *  <dl><dt><dd><tt>nul(x)</tt> is equivalent to <tt>0*x</tt>
  *      <dt><dd><tt>pos(x)</tt> is equivalent to <tt>+x</tt>
  *      <dt><dd><tt>neg(x)</tt> is equivalent to <tt>-x</tt>
- *      <dt><dd><tt>sqr(x)</tt> is equivalent to <tt>x^2</tt>
+ *      <dt><dd><tt>sqr(x)</tt> is equivalent to <tt>x^2</tt>, the <em>square</em> operation
  *      <dt><dd><tt>hlf(x)</tt> is equivalent to <tt>x/2</tt>
- *      <dt><dd><tt>rec(x)</tt> is equivalent to <tt>1/x</tt>
+ *      <dt><dd><tt>rec(x)</tt> is equivalent to <tt>1/x</tt>, the <em>reciprocal</em> operation.
  *      <dt><dd><tt>add(x,y)</tt> is equivalent to <tt>x+y</tt>
  *      <dt><dd><tt>sub(x,y)</tt> is equivalent to <tt>x-y</tt>
  *      <dt><dd><tt>mul(x,y)</tt> is equivalent to <tt>x*y</tt>
  *      <dt><dd><tt>div(x,y)</tt> is equivalent to <tt>x/y</tt>
- *      <dt><dd><tt>pow(x,y)</tt> is equivalent to <tt>x^y</tt>
- *      <dt><dd><tt>fma(x,y,z)</tt> is equivalent to <tt>x*y+z</tt>
+ *      <dt><dd><tt>pow(x,n)</tt> is equivalent to <tt>x^n</tt>
+ *      <dt><dd><tt>fma(x,y,z)</tt> is equivalent to <tt>x*y+z</tt>, the <em>fused-multiply-and-add</em> operation.
  *  </dl>
  * Note that C++ does not support the power operator <tt>^</tt>. In Python, the power operator is denoted <tt>**</tt>.
+ * In %Ariadne, only integer exponents \a n are supported; for general powers
+ * use the identity \f$x^y=e^{x\log(y)}\f$ and write <code>exp(y*log(x))</code>.
+ *
+ * The following non-arithmetical elementary functions are provided:
+ *  <dl><dt><dd><tt>sqrt(x)</tt>, the square-root function \f$\sqrt{x}\f$
+ *      <dt><dd><tt>exp(x)</tt>, the natural exponent \f$e^x\f$
+ *      <dt><dd><tt>log(x)</tt>, the natural logarithm \f$\log(x)\f$ (sometimes written \f$\ln(x)\f$).
+ *      <dt><dd><tt>sin(x)</tt>, the sine function \f$\sin(x)\f$, with argument in <em>radians</em>.
+ *      <dt><dd><tt>cos(x)</tt>, the cosine function \f$\cos(x)\f$, with argument in <em>radians</em>.
+ *      <dt><dd><tt>tan(x)</tt>, the tangent function \f$\tan(x)\f$, with argument in <em>radians</em>.
+ *      <dt><dd><tt>atan(x)</tt>, the inverse tangent function \f$\arctan(x)\f$ or \f$\tan^{-1}(x)\f$, returning princial value in the open interval \f$(-\pi/2\!:\!+\pi/2)\f$
+ *  </dl>
+ *
+ * The following lattice operations are provided:
+ *  <dl><dt><dd><tt>abs(x)</tt>, the absolute-value \f$|x|\f$
+ *      <dt><dd><tt>max(x,y)</tt>, the maximum \f$\max(x,y)\f$
+ *      <dt><dd><tt>min(x,y)</tt>, the minimum \f$\min(x,y)\f$
+ *  </dl>
  *
  * We have the following operations on floating-point types
  *  - Exact arithmetic where possible:

@@ -34,10 +34,12 @@ namespace Ariadne {
 
 On this page, we illustrate how to use %Ariadne via the Python interface.
  - A guide to working with numbers is given in the \ref python_numerical_tutorial_section "Numeric module" tutorial.
+ - A guide to working with functions is given in the \ref python_function_tutorial_section "Function module" tutorial.
  - A guide to functionality for solving algebraic equations is given in the \ref python_algebraic_equation_tutorial_section tutorial, including how to compute fixed-points of functions and solving parametrised equations.
 
-The full code of the demonstrations are given in the following files in the \ref python/tutorials/ directory:
+The full code of the tutorials are given in the following files in the \ref python/tutorials/ directory:
 \link python/tutorials/numeric_tutorial.py numeric_tutorial.py\endlink,
+\link python/tutorials/function_tutorial.py function_tutorial.py\endlink,
 \link python/tutorials/algebraic_equation_tutorial.py algebraic_equation_tutorial.py\endlink
 
 Links are given to the main classes used in the tutorials.
@@ -216,6 +218,99 @@ The \ref Real number class is also the most appropriate to use in problem specif
 
 
 
+
+
+\section python_function_tutorial_section The Function module
+
+\dontinclude python/tutorials/function_tutorial.py
+
+The full code of this tutorial is given in the file \link python/tutorials/function_tutorial.py \endlink.
+
+In this tutorial, we will study iterated dynamical systems of the form \f$x_{n+1}=f(x_n)\f$ by studying the iterated maps \f$f^n\f$.
+
+\subsection python_univariate_function_subsection Univariate functions
+
+Consider the unimodal function \f$f(x)=a x (b-x)\f$.
+
+Since the function has a single argument, and returns a single result, it is a \ref ScalarUnivariateFunction.
+Since it is exactly specified and can be evaluated arbitrarily accurately, it is <c>Effective</c>.
+Hence the Python class name is \ref Function::EffectiveScalarUnivariateFunction "EffectiveScalarUnivariateFunction". (The C++ template class is \ref Function "Function<EffectiveTag,Real(Real)>".)
+
+There are two main ways of defining \f$f\f$.
+We show how to define \f$f\f$ in terms of the identity function \f$\mathrm{id}(x)=x\f$:
+\skipline id=
+\until f=
+Alternatively, we can define \f$f\f$ in terms of a variable \f$x\f$.
+Using \f$\lambda\f$-calculus syntax \f$f=\lambda{x}.ax(b-x)\f$ (in pure Python we would write <code>lambda x : a*x*(b-x)</code> ) we have:
+\skipline RealVariable("x")
+\until f=
+
+We can define iterates of the function using the \ref compose method:
+\skipline f2=
+\until f3=
+
+
+\subsection python_multivariate_function_subsection Multivariate functions
+
+Consider the <em>real Ikeda map</em> \f$f(x,y)=(1+a(x\cos(t)-y\sin(t)),a(x\sin(t)+y\cos(t))\bigr)\f$ where \f$t=b-c/(1+x^2+y^2)\f$.
+For parameter values \f$a=0.7\f$, \f$b=0.4\f$ and \f$c=6\f$, the system is chaotic.
+Since the function has a two-element vector argument, and returns a two-element vector result, it is a \ref VectorMultivariateFunction.
+
+We first define the parameters:
+\skipline a=
+\until c=
+Again, we can define the function in terms of the identity and coordinate functions:
+\skipline id=
+\until f=
+or in terms of variables:
+\skipline =RealVariable(
+\until f=
+
+Again, we can compute iterates of the function:
+\skipline f2=
+and compute partial derivatives with respect to the components:
+\skipline =derivative(
+
+We can evaluate the entire Jacobian derivative matrix at a point
+\skipline =jacobian(
+Alternatively, we can compute all derivatives up to a given degree
+\skipline =differential(
+
+
+\subsection python_function_models_subsection Function models
+
+When computing operations which <em>return</em> functions, we usually can only compute over a bounded domain, and obtain an approximation, such as by a polynomial, together with some error bound.
+A concrete approximation over a bounded domain is called a \ref FunctionModel in %Ariadne, and is a \ref ValidatedFunctionModel if an error bound is given.
+The domain of the approximation must be a bounded set, which we take to be an \ref IntervalDomainType in the case of <tt>Univariate</tt> functions, and a coordinate-aligned \ref BoxDomainType in the case of <tt>Multivariate</tt> functions.
+The floating-point types used for the precision of the coefficients and the error bound are also specified in the class signature.
+Hence a Taylor polynomial approximation with uniform error bound to a vector-valued multivariate function over a box using double-precision numbers for the coefficients and error bound is a \ref ValidatedVectorMultivariateTaylorFunctionModelDP.
+
+We first define the domain of definition of the function model:
+\skipline dom=
+\note The non-integer numbers must be prefixed with the modifier \ref Dyadic::dy_ "dy_", which indicates that the written values should be interpreted exactly as dyadic numbers. It is an error to use a non-dyadic number.
+The requirement that the bounds of the domain type must be exact dyadic numbers may be dropped in a future release of %Ariadne.
+
+To control the accuracy of the approximation, we use a \ref Sweeper class. A general-purpose sweeper is the <em>threshold sweeper</em> \ref ThresholdSweeper, which discards terms of the polynomial if they fall below a certain threshold.
+\skipline swp=
+We can then compute a polynomial approximation to the original function.
+\skipline p=
+
+The usual operations can be performed on function models, including composition
+\skipline =compose
+and evaluation
+\skipline x=
+\skipline =p(
+Here, the floating-point type used for the argument must match that used for the function model coefficients.
+
+Additionally, function models can be integrated with respect to any of their variables
+\skipline =antiderivative
+
+
+
+
+
+
+
 \section python_solver_tutorial_section  The Solver module
 
 \subsection python_algebraic_equation_tutorial_section Solving Algebraic Equations
@@ -223,6 +318,8 @@ The \ref Real number class is also the most appropriate to use in problem specif
 \dontinclude python/tutorials/algebraic_equation_tutorial.py
 
 In this tutorial, we'll look at solving some simple algebraic equations, including parametrised equations.
+
+The full code of this tutorial is given in the file \link python/tutorials/algebraic_equation_tutorial.py \endlink.
 
 \subsubsection python_fixed_point_tutorial_section Computing roots and fixed-points
 

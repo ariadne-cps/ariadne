@@ -107,6 +107,7 @@ template<class Y> struct AlgebraOperations<Formula<Y>,Y> {
 };
 
 //! \ingroup FunctionModule
+//! \ingroup SymbolicFunctionSubModule
 //! \brief A formula defining a real function.
 //!
 //! The Formula class is implemented as a directed acyclic graph, with

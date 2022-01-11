@@ -102,6 +102,7 @@ template<class X> class PolynomialConstructors<MultiIndex,X> {
 
 
 //! \ingroup FunctionModule
+//! \ingroup AlgebraicFunctionSubModule
 //! \brief A polynomial with coefficients of some type \a X.
 template<class I, class X>
 class Polynomial

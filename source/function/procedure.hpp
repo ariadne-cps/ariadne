@@ -103,6 +103,7 @@ struct ProcedureInstruction : public ProcedureInstructionVariant {
 };
 
 //! \ingroup FunctionModule
+//! \ingroup SymbolicFunctionSubModule
 //! \brief An algorithmic procedure for computing a function.
 //!
 //! A Procedure is more efficient to compute than a Formula, since common

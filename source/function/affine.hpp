@@ -131,6 +131,7 @@ decltype(auto) operator*(Y const& y, Affine<X> const& x) { return factory(x).cre
 */
 
 //! \ingroup FunctionModule
+//! \ingroup AlgebraicFunctionSubModule
 //! \brief An affine function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<class X>
 class Affine

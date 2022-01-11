@@ -386,17 +386,67 @@ namespace Ariadne {
  *
  *  \defgroup SymbolicFunctionSubModule Symbolic functions
  *  \ingroup FunctionModule
- *  \brief Functions defined by symbolic formulae, such as \ref Formula "Formula<I,Y>" and \ref Procedure "Procedure<Y>".
+ *  \brief Functions defined by symbolic formulae, such as \ref Formula "Formula<Y>" and \ref Procedure "Procedure<Y>".
+ *  \details Most functions used in practise to define systems are given in symbolic form in terms of the elementary unary and binary functions such as addition and exponentiation.
+ *  %Ariadne's symbolic function classes represent such descriptions.
+ * As well as allowing evaluation of the function, they typically also support algebraic operations such as composition and/or differentiation, and unlike the generic \ref Function classes, they allow direct access to and introspection of the representation.
+ *
+ * Symbolic functions are typically templated by parameters reflecting nullary or atomic functions, notably constant functions parametrised by the numeric type, and coordinate functions parametrised by the index type.
+ *
+ * Operations on symbolic functions typically do not perform any calculation or simplification.
+ * For example, multiplying two \ref Formula objects yields a symbolic representation of the product.
+ * This makes symbolic functions ideal for describing functions to be evaluated arbitrarily accurately.
+ *
+ *  These classes do not derive from the \ref FunctionInterface "FunctionInterface", but can be converted to \ref Function "Function" classes.
+ *
+ * There are two main ways of specifying functions by symbolic formulae.
+ * The first is to give an explicit tree or directed acyclic graph with nodes representing subformula; this is done in the \ref Formula classes.
+ * The second is to give an explicit list of instructions needed to compute the function; this is done in the \ref Procedure classes.
+ * This approach can make evaluation more efficient, as memory for the intermediate results can be allocated in a block,
+ * and also facilitates advanced operations based on backpropagation.
+ * The downside of this approach is that manipulation of the function is harder.
+ *
+ * \remark Currently, there is some redundancy between the classes \ref Formula, \ref FormulaFunction, and the \ref UnaryFunction and \ref BinaryFunction classes. In the future, these classes may be refactored.
  *
  *  \defgroup AlgebraicFunctionSubModule Algebraic functions
  *  \ingroup FunctionModule
  *  \brief Algebraic function classes such as \ref Affine "Affine<X>" and \ref Polynomial "Polynomial<I,X>".
+ *  \details Algebraic functions represent concrete subclasses of functions with an exact representation, closed under certain algebraic operations.
+ *
+ *  Template parameters typically refer to the data used, rather than the underlying mathematical concept.
+ *  For example, the \ref Polynomial class is parametrised by the type \a I used for the index of the coefficients,
+ *  and concrete type \a X used for the numerical coefficients themselves.
+ *
+ *  Algebraic operations act directly on the representation and simplify as appropriate.
+ *  For example, composing two polynomials computes the coefficients of the resulting polynomial, rather than storing a symbolic representation of the composition; for some applications this may result in long computations.
+ *  The result may be of a different type, so multiplying two \ref Affine "Affine" functions yields a \ref Polynomial function.
+ *
+ *  These classes do not derive from the \ref FunctionInterface "FunctionInterface", but can be converted to \ref Function "Function" classes.
+ *  They form ideal building blocks for \ref FunctionModelSubModule "FunctionModel" classes, which are approximations valid on some bounded domain.
+ *
+ *  \remark Currently, only scalar-valued affine and polynomial functions are supported.
+ *  In the future, we plan to support constant functions, coordinate functions, rational functions,
+ *  vector-valued functions and piecewise-defined functions.
+ *
  *
  *  \defgroup FunctionModelSubModule Function models
  *  \ingroup FunctionModule
  *  \brief Concrete \ref FunctionModel "FunctionModel<P,SIG,PR,PRE>" classes on bounded domains
  *  such as \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,FLT>",
  *  which is a \ref ScaledFunctionPatch <\ref TaylorModel "TaylorModel<P,FLT>">.
+ *  \details Most operations on functions, especially inverse operations such as solving a parametrised algebraic equation or computing the flow of a differential equations, cannot be expressed in an explicit closed symbolic form in terms of elementary functions.
+ *  To represent these functions, approximations to a given accuracy can be given in terms of concrete functions, such as polynomials, rational functions, trigonometric series, or piecewise-affine functions.
+ *  Typically these approximations are only accurate on a bounded subdomain.
+ *
+ *
+ *  %Ariadne's <em>function model</em> classes represent such approximations.
+ *  They are the workhorse behind many computations, since they provide a general-purpose approach to working with functions which
+ *  can be tuned to the characteristics of a particular problem, and typically give a good balance between accuracy and efficiency.
+ *
+ *  A typical strategy to is to first rescale the domain to a unit box; these functions are given by the \ref ScaledFunctionPatch template.
+ *
+ *  \remark Work is in progress to provide a generic \c FunctionPatch class which is not parametrised on the floating-point types used.
+ *
  */
 
 

@@ -49,7 +49,12 @@
 
 namespace Ariadne {
 
+// TODO: Move to Numeric module
+inline PositiveValidatedUpperNumber abs(PositiveValidatedUpperNumber y) { return y; }
+
 namespace {
+
+
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {
     List<ES> result;

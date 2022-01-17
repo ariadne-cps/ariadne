@@ -173,8 +173,10 @@ Void TestScalarTaylorFunction::test_create()
     FloatDPValue c2={1,pr};
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
-    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
-    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
+//    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
+//    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
+    ValidatedScalarMultivariateFunctionPatch fm1=pf1;
+    ValidatedScalarMultivariateFunctionPatch fm2=pf2;
     ValidatedScalarMultivariateFunction f2=fm2;
     ARIADNE_TEST_EQUAL(factory(pf1).create(pf2).range(),c2);
     ARIADNE_TEST_EQUAL(factory(pf1).create(fm2).range(),c2);
@@ -346,9 +348,12 @@ Void TestScalarTaylorFunction::test_generic() {
     ValidatedScalarMultivariateTaylorFunctionModelDP pf0=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c0,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
-    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
-    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
-    ValidatedScalarMultivariateFunctionModelDP fm4=pf0;
+//    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
+//    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
+//    ValidatedScalarMultivariateFunctionModelDP fm4=pf0;
+    ValidatedScalarMultivariateFunctionPatch fm1=pf1;
+    ValidatedScalarMultivariateFunctionPatch fm2=pf2;
+    ValidatedScalarMultivariateFunctionPatch fm4=pf0;
     ValidatedScalarMultivariateFunction f1=fm1;
     ValidatedScalarMultivariateFunction f2=fm2;
     ARIADNE_TEST_EQUAL((pf1+pf2).range(),c1+c2);

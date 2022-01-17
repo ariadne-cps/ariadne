@@ -50,7 +50,7 @@ private:
         evolver.configuration().maximum_step_size(step);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial, evolution_time);
+        List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial, evolution_time);
     }
 
     void run_each_approximation(String name, DifferentialInclusion const &ivf, BoxDomainType const &initial,

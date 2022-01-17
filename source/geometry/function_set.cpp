@@ -722,7 +722,6 @@ ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorMultivar
 
 Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
 {
-    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer()));
     return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(*f.raw_pointer()),dom);
 }
 

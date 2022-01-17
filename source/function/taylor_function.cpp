@@ -42,6 +42,7 @@
 
 #include "function/function.hpp"
 #include "function/function_mixin.hpp"
+#include "function/function_patch.hpp"
 #include "function/scaled_function_patch.hpp"
 
 #include "function/taylor_function.hpp"
@@ -76,12 +77,18 @@ template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
 template class ScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
-    return new TaylorFunctionFactory(Sweeper<FloatDP>());
-}
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
     return new TaylorFunctionFactory(sweeper);
+}
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
+    return make_taylor_function_factory(Sweeper<FloatDP>());
+}
+FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper) {
+    return new TaylorFunctionFactory(sweeper);
+}
+FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory() {
+    return make_taylor_function_patch_factory(Sweeper<FloatDP>());
 }
 
 } // namespace Ariadne

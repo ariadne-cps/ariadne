@@ -232,6 +232,7 @@ MultifunctionModel<P,RealVector(RealVector),PR>::operator() (Vector<ValidatedNum
 
 static_assert(AMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>,ValidatedTag,RealVector(RealVector)>);
 
+
 } // namespace Ariadne
 
 #endif

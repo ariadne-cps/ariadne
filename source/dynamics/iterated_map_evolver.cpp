@@ -56,6 +56,7 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 } // namespace
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
+FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory();
 
 
 IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
@@ -65,7 +66,7 @@ IteratedMapEvolver::IteratedMapEvolver(const SystemType& system)
 }
 
 typename IteratedMapEvolver::FunctionFactoryType const IteratedMapEvolver::function_factory() const {
-    return ValidatedFunctionModelDPFactory(make_taylor_function_factory());
+    return ValidatedFunctionPatchFactory(make_taylor_function_patch_factory());
 }
 
 typename IteratedMapEvolver::EnclosureType IteratedMapEvolver::enclosure(const ExactBoxType& box) const {

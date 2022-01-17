@@ -383,10 +383,6 @@ template<class P, class ARG, class PR, class PRE> struct AlgebraOperations<Scala
 };
 
 
-// FIXME: Should not be needed since ScalarMultivariateFunctionModel has a representation
-template<class P> inline ScalarMultivariateFunctionModel<P,DoublePrecision> embed(const ScalarMultivariateFunction<P>& f, const IntervalDomainType& d) {
-    return embed(ScalarMultivariateFunctionModel<P,DoublePrecision>(f),d); }
-
 template<class P, class ARG, class PR, class PRE> inline
 ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
     (*this)*=nul(c); (*this)+=c; return *this; }
@@ -512,9 +508,13 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
   public:
     friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
+        return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
+        return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
@@ -646,13 +646,22 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
 };
 
 // FIXME: Implement for Multiple-Precision versions
+#warning
 template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const ScalarMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
+    auto const* fmptr = dynamic_cast<typename ScalarMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
+    if(fmptr) { return unchecked_evaluate(ScalarMultivariateFunctionModelDP<P>(*fmptr),x); }
+    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionPatch<P>(*fptr),x); }
+    return evaluate(f,x);
+}
 
 template<class P> inline Vector<CanonicalNumeric64Type<P>> unchecked_evaluate(const VectorMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    auto const* fptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
+    auto const* fmptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
+    if(fmptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fmptr),x); }
+    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionPatch<P>(*fptr),x); }
+    return evaluate(f,x);
+}
 
 template<class P, class ARG, class PR, class PRE> inline ScalarFunctionModel<P,ARG,PR,PRE> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
     auto const* fptr = dynamic_cast<typename ScalarFunctionModel<P,ARG,PR,PRE>::Interface const*>(f.raw_pointer());

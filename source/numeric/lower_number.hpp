@@ -137,6 +137,8 @@ template<class P> class LowerNumber
 
 };
 
+ExactNumber cast_exact(ValidatedLowerNumber const& y);
+
 
 template<class P> class Positive<LowerNumber<P>> : public LowerNumber<P> {
     friend LowerNumber<P> const& unsign(Positive<LowerNumber<P>> const& y) { return y; }

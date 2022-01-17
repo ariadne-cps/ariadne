@@ -108,14 +108,14 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
     static ScaledFunctionPatch<M> apply(GradedElementaryOperator op, ScaledFunctionPatch<M> const& f, Int n);
 };
 
-template<class M> class ScaledFunctionPatchMixin :
-    public ScalarMultivariateFunctionPatchMixin<ScaledFunctionPatch<M>, typename M::Paradigm>
+template<class M> class ScaledFunctionPatchMixin
+    : public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
 
-template<class M> class VectorScaledFunctionPatchMixin :
-    public VectorMultivariateFunctionPatchMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm>
+template<class M> class VectorScaledFunctionPatchMixin
+    : public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
@@ -355,9 +355,7 @@ template<class M> class ScaledFunctionPatch
   private:
     friend class TaylorFunctionFactory;
     friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
-    friend class FunctionPatchMixin<ScaledFunctionPatch<M>, P, SIG>;
-#warning
-    //    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
+    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
   public:
     template<class X> X operator()(const Vector<X>& a) const;
   private:
@@ -443,7 +441,7 @@ template<class M> class ScaledFunctionPatch
 
     friend MultivariatePolynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) { return tfn.polynomial(); }
 
-#warning
+    // TODO: These should be automatically created by function Algebra
     friend ScaledFunctionPatch<M> max(const ScaledFunctionPatch<M>& f1, const ValidatedNumber& c2) {
         return max(f1,f1.create_constant(c2)); }
     friend ScaledFunctionPatch<M> min(const ScaledFunctionPatch<M>& f1, const ValidatedNumber& c2) {
@@ -743,6 +741,7 @@ template<class M> class VectorScaledFunctionPatch
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
     virtual ScalarScaledFunctionPatch<M>* _get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
+    virtual ScalarScaledFunctionPatch<M>* _concrete_get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
     virtual VectorScaledFunctionPatch<M>* _clone() const;
     virtual VectorScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
@@ -1241,7 +1240,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
 
 
 template<class M> class ScaledFunctionPatchFactoryMixin
-    : public FunctionPatchFactoryMixin<ScaledFunctionPatchFactory<M>, ValidatedTag>
+    : public FunctionModelFactoryMixin<ScaledFunctionPatchFactory<M>,ValidatedTag,typename M::PrecisionType,typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchFactoryMixin<ValidatedIntervalTaylorModel<F>>

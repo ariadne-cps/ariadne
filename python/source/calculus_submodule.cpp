@@ -309,7 +309,7 @@ Void export_scalar_function_model(pybind11::module& module)
 
     pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModelDP");
     scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateFunctionModelDP>());
-    //    scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateTaylorFunctionModelDP>());
+    scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateTaylorFunctionModelDP>());
     scalar_function_model_class.def("argument_size", &ValidatedScalarMultivariateFunctionModelDP::argument_size);
     scalar_function_model_class.def("domain", &ValidatedScalarMultivariateFunctionModelDP::domain);
     scalar_function_model_class.def("codomain", &ValidatedScalarMultivariateFunctionModelDP::codomain);
@@ -352,7 +352,7 @@ Void export_vector_function_model(pybind11::module& module)
 
     pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModelDP");
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateFunctionModelDP>());
-    //    vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
+    vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
     vector_function_model_class.def("result_size", &ValidatedVectorMultivariateFunctionModelDP::result_size);
     vector_function_model_class.def("argument_size", &ValidatedVectorMultivariateFunctionModelDP::argument_size);
     vector_function_model_class.def("domain", &ValidatedVectorMultivariateFunctionModelDP::domain);

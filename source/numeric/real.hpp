@@ -284,22 +284,16 @@ class PositiveReal : public Real
     explicit PositiveReal(Real const& r) : Real(r) { }
     PositiveBounds<Dyadic> compute_get(Effort) const;
   public:
-    PositiveReal max(PositiveReal const&, PositiveReal const&);
-    PositiveReal max(Real const&, PositiveReal const&);
-    PositiveReal max(PositiveReal const&, Real const&);
+    friend PositiveReal max(PositiveReal const& pr1, PositiveReal const& pr2);
+    friend PositiveReal max(Real const& r1, PositiveReal const& pr2);
+    friend PositiveReal max(PositiveReal const& pr1, Real const& r2);
 
-    PositiveReal min(PositiveReal const&, PositiveReal const&);
-
-    PositiveReal rec(PositiveReal const&);
-    PositiveReal add(PositiveReal const&, PositiveReal const&);
-    PositiveReal mul(PositiveReal const&, PositiveReal const&);
-    PositiveReal div(PositiveReal const&, PositiveReal const&);
-  public:
     friend PositiveReal min(PositiveReal const& pr1, PositiveReal const& pr2);
+
+    friend PositiveReal rec(PositiveReal const& pr);
     friend PositiveReal add(PositiveReal const& pr1, PositiveReal const& pr2);
     friend PositiveReal mul(PositiveReal const& pr1, PositiveReal const& pr2);
     friend PositiveReal div(PositiveReal const& pr1, PositiveReal const& pr2);
-    friend PositiveReal rec(PositiveReal const& pr);
 };
 
 PositiveReal cast_positive(Real const& x);

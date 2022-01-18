@@ -130,6 +130,8 @@ template<class P> class UpperNumber
     friend OutputStream& operator<<(OutputStream& os, UpperNumber<P> const& y) { return y.ref()._write(os); }
 };
 
+ExactNumber cast_exact(ValidatedUpperNumber const& y);
+
 
 template<class P> class Positive<UpperNumber<P>> : public UpperNumber<P> {
     friend UpperNumber<P> const& unsign(Positive<UpperNumber<P>> const& y) { return y; }

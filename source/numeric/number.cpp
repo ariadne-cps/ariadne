@@ -121,6 +121,10 @@ template<> FloatMPBounds::operator ValidatedNumber() const { return ValidatedNum
 //template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatMPBall>(*this)); }
 template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
 
+ExactNumber cast_exact(ValidatedUpperNumber const& y) { return ExactNumber(y.handle()); }
+ExactNumber cast_exact(ValidatedLowerNumber const& y) { return ExactNumber(y.handle()); }
+
+
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 
 //inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {

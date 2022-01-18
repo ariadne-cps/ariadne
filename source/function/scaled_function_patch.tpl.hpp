@@ -314,6 +314,11 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant
     return ScaledFunctionPatch<M>::constant(this->domain(),c,this->properties());
 }
 
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant(GenericNumericType const& c) const
+{
+    return this->create_constant(NumericType(c,this->precision()));
+}
+
 //FIXME: Should allow this in code file
 /*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const
@@ -1028,7 +1033,7 @@ template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::cr
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_zero(const DomainType& domain) const {
     return ScaledFunctionPatch<M>(domain,this->_properties);
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constant(const DomainType& domain, Number<P> const& value) const {
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constant(const DomainType& domain, GenericNumericType const& value) const {
     auto concrete_value=this->create(value);
     return ScaledFunctionPatch<M>::constant(domain,concrete_value,this->_properties);
 }

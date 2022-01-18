@@ -171,22 +171,22 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
     //! \brief The function related to the state space.
-    const ValidatedVectorMultivariateFunctionModelDP& state_function() const;
+    const ValidatedVectorMultivariateFunctionPatch& state_function() const;
     //! \brief The function related to time.
-    const ValidatedScalarMultivariateFunctionModelDP& time_function() const;
+    const ValidatedScalarMultivariateFunctionPatch& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ValidatedScalarMultivariateFunctionModelDP& dwell_time_function() const;
+    const ValidatedScalarMultivariateFunctionPatch& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorMultivariateFunctionModelDP auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionPatch auxiliary_function() const;
     //! \brief The function returning the values of the state and auxiliary variables as a function of the parameter domain.
-    const ValidatedVectorMultivariateFunctionModelDP state_auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionPatch state_auxiliary_function() const;
     //! \brief The function returning the values of the state, time and auxiliary variables.
-    const ValidatedVectorMultivariateFunctionModelDP state_time_auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionPatch state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
-    const ValidatedScalarMultivariateFunctionModelDP function(RealVariable var) const;
+    const ValidatedScalarMultivariateFunctionPatch function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
-    Void set_time_function(const ValidatedScalarMultivariateFunctionModelDP& omega);
+    Void set_time_function(const ValidatedScalarMultivariateFunctionPatch& omega);
 
     //! \brief A bounding box for the space.
     UpperBoxType state_bounding_box() const;
@@ -217,21 +217,21 @@ class HybridEnclosure
                      RealSpace s, const ValidatedVectorMultivariateFunction& r,
                      RealSpace v, const EffectiveVectorMultivariateFunction& a);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon)\f$ and \f$\tau'(s)=\tau(s)+\epsilon\f$
-    Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionPatch& phi, const StepSizeType& eps);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$
-    Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& eps);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$
-    Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& eps);
     //! \brief Apply the reach step \f$\xi'(s) = \phi(\xi(s),t-\tau(s))\f$ and \f$\tau'(s)=\tau(s)+t\f$ for \f$0<=t<=\epsilon(\xi(s),\tau(s))\f$
-    Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& eps);
     //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$
-    Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& eps);
     //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$
-    Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega);
+    Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& omega);
     //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$ and \f$t \leq \epsilon(s)\f$, assuming \f$\epsilon(s) \leq h\f$ throughout.
-    Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionPatch& phi, const ValidatedScalarMultivariateFunctionPatch& eps);
     //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$.
-    Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi);
+    Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionPatch& phi);
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
     //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.

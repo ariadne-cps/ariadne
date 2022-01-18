@@ -74,7 +74,7 @@ class VectorFieldEvolver
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef Pair<TimeStepType,EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
-    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
+    typedef ValidatedFunctionPatchFactory FunctionFactoryType;
   private:
     //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
     struct SynchronisedOrbit : public OrbitType {

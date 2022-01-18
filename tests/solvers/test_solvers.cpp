@@ -31,6 +31,7 @@
 
 #include "solvers/solver.hpp"
 #include "function/function.hpp"
+#include "function/function_patch.hpp"
 #include "function/taylor_function.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"
@@ -81,7 +82,7 @@ class TestSolver
         EffectiveScalarMultivariateFunction bb;
         ExactBoxType p,r;
         EffectiveVectorMultivariateFunction f;
-        ValidatedVectorMultivariateFunctionModelDP h;
+        ValidatedVectorMultivariateFunctionPatch h;
         EffectiveVectorMultivariateFunction e;
 
         // Test solution of x-a=0. This should be very easy to solve.
@@ -149,7 +150,7 @@ class TestSolver
         // Uses scalar implicit
         ExactBoxType p; ExactIntervalType r;
         EffectiveScalarMultivariateFunction e,f,s; // s is unscaling functions
-        ValidatedScalarMultivariateFunctionModelDP h;
+        ValidatedScalarMultivariateFunctionPatch h;
 
         ARIADNE_TEST_PRINT(*solver);
 
@@ -173,7 +174,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(product(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionPatch g=ValidatedScalarMultivariateTaylorFunctionModelDP(product(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -183,7 +184,10 @@ class TestSolver
             ARIADNE_TEST_THROWS(solver->implicit(g,p,r),SolverException);
             ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined scalar implicit function.");
         }
-
+        catch(const DomainException& exc) {
+            ARIADNE_TEST_THROWS(solver->implicit(g,p,r),DomainException);
+            ARIADNE_TEST_NOTIFY(solver_class_name<<" throws DomainException on partially defined scalar implicit function.");
+        }
     }
 
 };
@@ -196,7 +200,6 @@ Int main(Int argc, const char **argv) {
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();
-
     KrawczykSolver krawczyk_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     ARIADNE_TEST_PRINT(krawczyk_solver.function_factory());
     TestSolver(krawczyk_solver,"KrawczykSolver").test();

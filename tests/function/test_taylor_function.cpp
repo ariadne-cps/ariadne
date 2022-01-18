@@ -173,9 +173,19 @@ Void TestScalarTaylorFunction::test_create()
     FloatDPValue c2={1,pr};
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
+    ValidatedScalarMultivariateFunction f2=pf2;
+
+    ValidatedScalarMultivariateFunctionPatch fp1=pf1;
+    ValidatedScalarMultivariateFunctionPatch fp2=pf2;
+    ARIADNE_TEST_EQUAL(factory(pf1).create(pf2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(pf1).create(fp2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(pf1).create(f2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(fp1).create(fp2).range(),c2);
+    ARIADNE_TEST_EQUAL(factory(fp1).create(f2).range(),c2);
+
     ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
     ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
-    ValidatedScalarMultivariateFunction f2=fm2;
+    f2=fm2;
     ARIADNE_TEST_EQUAL(factory(pf1).create(pf2).range(),c2);
     ARIADNE_TEST_EQUAL(factory(pf1).create(fm2).range(),c2);
     ARIADNE_TEST_EQUAL(factory(pf1).create(f2).range(),c2);
@@ -346,15 +356,32 @@ Void TestScalarTaylorFunction::test_generic() {
     ValidatedScalarMultivariateTaylorFunctionModelDP pf0=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c0,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
+
+    ValidatedScalarMultivariateFunction f1=pf1;
+    ValidatedScalarMultivariateFunction f2=pf2;
+
+    ValidatedScalarMultivariateFunctionPatch fp1=pf1;
+    ValidatedScalarMultivariateFunctionPatch fp2=pf2;
+    ValidatedScalarMultivariateFunctionPatch fp4=pf0;
+    ARIADNE_TEST_EQUAL((pf1+pf2).range(),c1+c2);
+    //ARIADNE_TEST_EQUAL((pf1+fp2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((pf1+ f2).range(),c1+c2);
+    //ARIADNE_TEST_EQUAL((fp1+pf2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((fp1+fp2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((fp1+ f2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+pf2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+fp2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+ f2)(D.centre()),c1+c2);
+
     ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
     ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
     ValidatedScalarMultivariateFunctionModelDP fm4=pf0;
-    ValidatedScalarMultivariateFunction f1=fm1;
-    ValidatedScalarMultivariateFunction f2=fm2;
+    f1=fm1;
+    f2=fm2;
     ARIADNE_TEST_EQUAL((pf1+pf2).range(),c1+c2);
-//    ARIADNE_TEST_EQUAL((pf1+fm2).range(),c1+c2);
+    //ARIADNE_TEST_EQUAL((pf1+fm2).range(),c1+c2);
     ARIADNE_TEST_EQUAL((pf1+ f2).range(),c1+c2);
-//    ARIADNE_TEST_EQUAL((fm1+pf2).range(),c1+c2);
+    //ARIADNE_TEST_EQUAL((fm1+pf2).range(),c1+c2);
     ARIADNE_TEST_EQUAL((fm1+fm2).range(),c1+c2);
     ARIADNE_TEST_EQUAL((fm1+ f2).range(),c1+c2);
     ARIADNE_TEST_EQUAL(( f1+pf2).range(),c1+c2);

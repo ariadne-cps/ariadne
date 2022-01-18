@@ -35,6 +35,7 @@
 
 #include "solvers/solver_interface.hpp"
 #include "function/function_interface.hpp"
+#include "function/function_patch_interface.hpp"
 
 #include "io/logging.hpp"
 #include "utility/attribute.hpp"
@@ -67,9 +68,9 @@ class SolverBase
     Void set_maximum_number_of_steps(Nat max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief The class which constructs functions for the implicit function solver. */
-    const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& function_factory() const;
+    const FunctionPatchFactoryInterface<ValidatedTag>& function_factory() const;
     /*! \brief Set the class which constructs functions for the implicit function solver. */
-    Void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& factory);
+    Void set_function_factory(const FunctionPatchFactoryInterface<ValidatedTag>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
     virtual Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const;
@@ -80,11 +81,11 @@ class SolverBase
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const;
     virtual Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f,const Vector<ValidatedNumericType>& ipt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedVectorMultivariateFunctionModelDP implicit(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& par, const ExactBoxType& ix) const;
+    virtual ValidatedVectorMultivariateFunctionPatch implicit(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& par, const ExactBoxType& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedScalarMultivariateFunctionModelDP implicit(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& par, const ExactIntervalType& ix) const;
+    virtual ValidatedScalarMultivariateFunctionPatch implicit(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& par, const ExactIntervalType& ix) const;
     //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and \f$h(a)\in x\f$.
-    virtual ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const Vector<ApproximateNumericType>& a, const ExactBoxType& X, const ExactBoxType& A) const;
+    virtual ValidatedVectorMultivariateFunctionPatch continuation(const ValidatedVectorMultivariateFunction& f, const Vector<ApproximateNumericType>& a, const ExactBoxType& X, const ExactBoxType& A) const;
 
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
@@ -93,11 +94,11 @@ class SolverBase
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<ValidatedNumericType> step(const ValidatedVectorMultivariateFunction& f,const Vector<ValidatedNumericType>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
-    virtual ValidatedVectorMultivariateFunctionModelDP implicit_step(const ValidatedVectorMultivariateFunction& f,const ValidatedVectorMultivariateFunctionModelDP& p,const ValidatedVectorMultivariateFunctionModelDP& x) const = 0;
+    virtual ValidatedVectorMultivariateFunctionPatch implicit_step(const ValidatedVectorMultivariateFunction& f,const ValidatedVectorMultivariateFunctionPatch& p,const ValidatedVectorMultivariateFunctionPatch& x) const = 0;
   private:
     ExactDouble _max_error;
     Nat _max_steps;
-    std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> > _function_factory_ptr;
+    std::shared_ptr< FunctionPatchFactoryInterface<ValidatedTag> > _function_factory_ptr;
 };
 
 
@@ -118,7 +119,7 @@ class IntervalNewtonSolver
 
     using SolverBase::implicit;
   public:
-    virtual ValidatedVectorMultivariateFunctionModelDP implicit_step(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunctionModelDP& p, const ValidatedVectorMultivariateFunctionModelDP& x) const;
+    virtual ValidatedVectorMultivariateFunctionPatch implicit_step(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunctionPatch& p, const ValidatedVectorMultivariateFunctionPatch& x) const;
 
     virtual Vector<ValidatedNumericType> step(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& pt) const;
 };
@@ -141,8 +142,7 @@ class KrawczykSolver
     virtual Void _write(OutputStream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual ValidatedVectorMultivariateFunctionModelDP implicit_step(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunctionModelDP& p, const ValidatedVectorMultivariateFunctionModelDP& x) const;
-
+    virtual ValidatedVectorMultivariateFunctionPatch implicit_step(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunctionPatch& p, const ValidatedVectorMultivariateFunctionPatch& x) const;
   public:
     /*! \brief A single step of the Krawczyk contractor. */
     virtual Vector<ValidatedNumericType>

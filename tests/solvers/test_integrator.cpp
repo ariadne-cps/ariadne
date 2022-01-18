@@ -89,12 +89,12 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(f);
         ExactBoxType d={{0.0_x,1.0_x},{-0.5_x,1.5_x}};
         StepSizeType h=0.25_x;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorMultivariateFunction expected_flow={x0+2*t,y0+3*t};
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8_pr);
     }
 
     Void test_quadratic_flow() {
@@ -109,13 +109,13 @@ class TestIntegrator
         EffectiveVectorMultivariateFunction f={o,x};
         ExactBoxType d={ExactIntervalType(0.0_x,1.0_x),ExactIntervalType(-0.5_x,1.5_x)};
         StepSizeType h=0.25_x;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorMultivariateFunction expected_flow={x0+t,y0+x0*t+t*t/2};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8_pr);
     }
 
     Void test_linear() {
@@ -130,13 +130,13 @@ class TestIntegrator
         EffectiveVectorMultivariateFunction f={x,-y};
         ExactBoxType d={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
         StepSizeType h=0.25_x;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorMultivariateFunction expected_flow={x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4_pr);
     };
 
     Void test_spiral() {
@@ -152,14 +152,14 @@ class TestIntegrator
         EffectiveVectorMultivariateFunction f={-half*x-y,x-half*y};
         ExactBoxType d={ExactIntervalType(0.75_x,1.25_x),ExactIntervalType(-0.25_x,0.25_x)};
         StepSizeType h=0.25_x;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,h);
         EffectiveVectorMultivariateFunction expected_flow={exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_PRINT(flow-expected_flow);
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3_pr);
 
     };
 
@@ -175,7 +175,7 @@ class TestIntegrator
         EffectiveVectorMultivariateFunction f={x*(o-x)};
         ExactBoxType d={ExactIntervalType(0.25_x,0.5_x)};
         StepSizeType h=0.5_x;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,h);
         ValidatedVectorMultivariateTaylorFunctionModelDP taylor_flow=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(flow.reference());
         EffectiveVectorMultivariateFunction expected_flow={1/(1+(1/x0-1)*exp(-t))};
         ARIADNE_TEST_PRINT(*integrator_ptr);
@@ -209,13 +209,13 @@ class TestIntegrator
         Pair<StepSizeType,UpperBoxType> step_bounds = EulerBounder().compute(f,d,t0,ExactBoxType(0u),hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(t0,t0+h),ExactBoxType(0u),B);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(t0,t0+h),ExactBoxType(0u),B);
         EffectiveVectorMultivariateFunction expected_flow={(x+b/a*t0+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a,y+c*(t-t0)+b/2*(t*t-t0*t0),z+c*(t-t0)};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4_pr);
     };
 
     Void test_time_variant_with_parameters() {
@@ -238,7 +238,7 @@ class TestIntegrator
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
         Interval<StepSizeType> domt(t0,t0+h);
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,domx,domt,domp,B);
+        ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,domx,domt,domp,B);
         EffectiveVectorMultivariateFunction expected_flow={(x+b/a*(t0)+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a};
         //   The function below should be zero for phi=expected_flow[0]
         // EffectiveScalarMultivariateFunction phi_error=derivative(phi,1)-(a*phi+b*t+c);

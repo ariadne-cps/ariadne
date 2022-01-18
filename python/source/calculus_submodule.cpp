@@ -352,7 +352,6 @@ Void export_vector_function_model(pybind11::module& module)
 
     pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModelDP");
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateFunctionModelDP>());
-//    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarMultivariateFunctionModelDP> ary){return ValidatedVectorMultivariateFunctionModelDP(Vector<ValidatedScalarMultivariateFunctionModelDP>(ary));}));
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
     vector_function_model_class.def("result_size", &ValidatedVectorMultivariateFunctionModelDP::result_size);
     vector_function_model_class.def("argument_size", &ValidatedVectorMultivariateFunctionModelDP::argument_size);

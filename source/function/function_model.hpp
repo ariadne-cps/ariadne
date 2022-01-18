@@ -47,6 +47,8 @@
 #include "function/function_mixin.hpp"
 #include "function/function.hpp"
 
+#include "function_patch.hpp"
+
 namespace Ariadne {
 
 template<class P, class A, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,Real(A),PR,PRE>>;
@@ -244,7 +246,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     inline RangeType const range() const { return this->_ptr->range(); }
 
     inline ValueType value() const { return this->_ptr->_value(); }
-    inline ErrorType error() const { return this->_ptr->_error(); }
+    inline ErrorType error() const { return this->_ptr->_concrete_error(); }
 
     inline Void clobber() { this->pointer()->clobber(); }
 
@@ -265,12 +267,12 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
         return f._ptr->_unchecked_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
 
     friend ScalarFunctionModel<P,ARG,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        return ScalarFunctionModel<P,ARG,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+        return ScalarFunctionModel<P,ARG,PR,PRE>(f._ptr->_concrete_partial_evaluate(j,c)); }
     friend ScalarFunctionModel<P,ARG,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j, const Number<P>& c) {
         return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
 
     friend NormType norm(const ScalarFunctionModel<P,ARG,PR,PRE>& f) {
-        return f._ptr->_norm(); }
+        return f._ptr->_concrete_norm(); }
     friend ScalarFunctionModel<P,ARG,PR,PRE> derivative(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j) {
         return ScalarFunctionModel<P,ARG,PR,PRE>(f._ptr->_derivative(j)); }
     friend ScalarFunctionModel<P,ARG,PR,PRE> antiderivative(const ScalarFunctionModel<P,ARG,PR,PRE>& f, SizeType j) {
@@ -357,17 +359,18 @@ template<class P, class ARG, class PR, class PRE> struct AlgebraOperations<Scala
 
     typedef ScalarFunctionModel<P,ARG,PR,PRE> FM; typedef CanonicalNumericType<P,PR,PRE> X;
     typedef ScalarFunctionModelInterface<P,ARG,PR,PRE> FMI;
+    typedef ScalarFunctionModelAlgebraInterface<P,ARG,PR,PRE> FMAI;
 
     static FM apply(BinaryElementaryOperator op, const FM& f1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f1.reference()._apply(op,f2.reference()))); }
+         return FM(&dynamic_cast<FMI&>(*static_cast<FMAI const&>(f1.reference())._apply(op,f2.reference()))); }
     static FM apply(BinaryElementaryOperator op, const FM& f1, const X& c2) {
-        return FM(&dynamic_cast<FMI&>(*f1.reference()._apply(op,c2))); }
+         return FM(&dynamic_cast<FMI&>(*static_cast<FMAI const&>(f1.reference())._apply(op,c2))); }
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f2.reference()._rapply(op,c1))); }
+         return FM(&dynamic_cast<FMI&>(*static_cast<FMAI const&>(f2.reference())._rapply(op,c1))); }
     static FM apply(UnaryElementaryOperator op, const FM& f) {
-        return FM(&dynamic_cast<FMI&>(*f.reference()._apply(op))); }
+         return FM(&dynamic_cast<FMI&>(*static_cast<FMAI const&>(f.reference())._apply(op))); }
     static FM apply(GradedElementaryOperator op, const FM& f, Int n) {
-        return FM(&dynamic_cast<FMI&>(*f.reference()._apply(op,n))); }
+         return FM(&dynamic_cast<FMI&>(*static_cast<FMAI const&>(f.reference())._apply(op,n))); }
 
 /*
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
@@ -382,10 +385,6 @@ template<class P, class ARG, class PR, class PRE> struct AlgebraOperations<Scala
 
 };
 
-
-// FIXME: Should not be needed since ScalarMultivariateFunctionModel has a representation
-template<class P> inline ScalarMultivariateFunctionModel<P,DoublePrecision> embed(const ScalarMultivariateFunction<P>& f, const IntervalDomainType& d) {
-    return embed(ScalarMultivariateFunctionModel<P,DoublePrecision>(f),d); }
 
 template<class P, class ARG, class PR, class PRE> inline
 ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
@@ -487,19 +486,19 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     inline SizeType size() const { return this->_ptr->result_size(); }
     template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_call(v); }
     template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_call(v); }
-    inline ScalarFunctionModel<P,ARG,PR,PRE> const get(SizeType i) const { return ScalarFunctionModel<P,ARG,PR,PRE>(this->_ptr->_get(i)); }
-    inline Void set(SizeType i, ScalarFunctionModel<P,ARG,PR,PRE> const& sf) { this->pointer()->_set(i,sf); }
+    inline ScalarFunctionModel<P,ARG,PR,PRE> const get(SizeType i) const { return ScalarFunctionModel<P,ARG,PR,PRE>(this->_ptr->_concrete_get(i)); }
+    inline Void set(SizeType i, ScalarFunctionModel<P,ARG,PR,PRE> const& sf) { this->pointer()->_concrete_set(i,sf); }
     inline ScalarFunctionModel<P,ARG,PR,PRE> const operator[](SizeType i) const { return this->get(i); }
     inline VectorFunctionModelElement<P,ARG,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,ARG,PR,PRE>(this,i); }
-    inline VectorFunctionModel<P,ARG,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,ARG,PR,PRE> r=factory(*this).create_zeros(rng.size());
+    inline VectorFunctionModel<P,ARG,PR,PRE> operator[](Range rng) const { VectorFunctionModel<P,ARG,PR,PRE> r=factory(*this).create_zeros(rng.size());
         for(SizeType i=0; i!=rng.size(); ++i) { r[i]=this->operator[](rng[i]); } return r; }
     inline PrecisionType const precision() const { return this->get(0).precision(); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
-    inline Vector<ValueType> const values() const { return this->_ptr->_values(); }
-    inline Vector<ErrorType> const errors() const { return this->_ptr->_errors(); }
-    inline ErrorType const error() const { return this->_ptr->_error(); }
+    inline Vector<ValueType> const values() const { return this->_ptr->_concrete_values(); }
+    inline Vector<ErrorType> const errors() const { return this->_ptr->_concrete_errors(); }
+    inline ErrorType const error() const { return this->_ptr->_concrete_error(); }
     inline Void clobber() { this->pointer()->clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 //        Vector<Differential<NumericType>> dfx=this->_ptr->_call(Differential<NumericType>::variables(1u,x));
@@ -512,17 +511,21 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
   public:
     friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
+        return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline ScalarFunctionModel<P,ARG,PR,PRE> compose(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
+        return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> compose(const VectorFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
         return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_compose(f)); }
 
     friend inline ScalarFunctionModel<P,ARG,PR,PRE> unchecked_compose(const ScalarFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
-        return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_unchecked_compose(f)); }
+        return ScalarFunctionModel<P,ARG,PR,PRE>(g._ptr->_concrete_unchecked_compose(f)); }
     friend inline VectorFunctionModel<P,ARG,PR,PRE> unchecked_compose(const VectorFunctionModel<P,ARG,PR,PRE>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_unchecked_compose(f)); }
+        return VectorFunctionModel<P,ARG,PR,PRE>(g._ptr->_concrete_unchecked_compose(f)); }
 
     friend inline VectorFunctionModel<P,ARG,PR,PRE> operator+(const VectorFunctionModel<P,ARG,PR,PRE>& f) {
         return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_clone()); }
@@ -569,9 +572,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
 
   public:
     friend NormType norm(const VectorFunctionModel<P,ARG,PR,PRE>& f) {
-        return f._ptr->_norm(); }
+        return f._ptr->_concrete_norm(); }
     friend VectorFunctionModel<P,ARG,PR,PRE> embed(const DomainType& d1, const VectorFunctionModel<P,ARG,PR,PRE>& f, const DomainType& d2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_embed(d1,d2)); }
+        return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_concrete_embed(d1,d2)); }
     friend VectorFunctionModel<P,ARG,PR,PRE> embed(const DomainType& d, const VectorFunctionModel<P,ARG,PR,PRE>& f) {
         return embed(d,f,DomainType()); }
     friend VectorFunctionModel<P,ARG,PR,PRE> embed(const VectorFunctionModel<P,ARG,PR,PRE>& f, const BoxDomainType& d) {
@@ -592,7 +595,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
         return f._ptr->_unchecked_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
 
     friend VectorFunctionModel<P,ARG,PR,PRE> partial_evaluate(const VectorFunctionModel<P,ARG,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+        return VectorFunctionModel<P,ARG,PR,PRE>(f._ptr->_concrete_partial_evaluate(j,c)); }
     friend VectorFunctionModel<P,ARG,PR,PRE> partial_evaluate(const VectorFunctionModel<P,ARG,PR,PRE>& f, SizeType j, const Number<P>& c) {
         return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
 
@@ -606,22 +609,21 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
         VectorFunctionModelInterface<P,ARG,PR,PRE> const* fptr = dynamic_cast<VectorFunctionModelInterface<P,ARG,PR,PRE> const*>(f.raw_pointer());
         if(fptr) { return unchecked_compose(VectorFunctionModel<P,ARG,PR,PRE>(*fptr),g); } else { return compose(f,g); } }
 
-    //friend VectorFunctionModel<P,ARG,PR,PRE> join(const ScalarFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2);
     friend VectorFunctionModel<P,ARG,PR,PRE> join(const ScalarFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
         return join(VectorFunctionModel<P,ARG,PR,PRE>(1u,f1),f2); }
     friend VectorFunctionModel<P,ARG,PR,PRE> join(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2) {
-        VectorFunctionModel<P,ARG,PR,PRE> r=VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_clone()); r._ptr->_adjoin(f2); return r; }
+        VectorFunctionModel<P,ARG,PR,PRE> r=VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_clone()); r._ptr->_concrete_adjoin(f2); return r; }
     friend VectorFunctionModel<P,ARG,PR,PRE> join(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_join(f2)); }
+        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_concrete_join(*f2._ptr)); }
 
     friend VectorFunctionModel<P,ARG,PR,PRE> combine(const ScalarFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,ARG,PR,PRE>(1,f2)); };
+        return VectorFunctionModel<P,ARG,PR,PRE>(1,f1)._ptr->_concrete_combine(VectorFunctionModel<P,ARG,PR,PRE>(1,f2)); };
     friend VectorFunctionModel<P,ARG,PR,PRE> combine(const ScalarFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(1,f1)._ptr->_combine(f2); };
+        return VectorFunctionModel<P,ARG,PR,PRE>(1,f1)._ptr->_concrete_combine(f2); };
     friend VectorFunctionModel<P,ARG,PR,PRE> combine(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const ScalarFunctionModel<P,ARG,PR,PRE>& f2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_combine(VectorFunctionModel<P,ARG,PR,PRE>(1,f2))); };
+        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_concrete_combine(VectorFunctionModel<P,ARG,PR,PRE>(1,f2))); };
     friend VectorFunctionModel<P,ARG,PR,PRE> combine(const VectorFunctionModel<P,ARG,PR,PRE>& f1, const VectorFunctionModel<P,ARG,PR,PRE>& f2) {
-        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_combine(f2)); }
+        return VectorFunctionModel<P,ARG,PR,PRE>(f1._ptr->_concrete_combine(f2)); }
 
     friend inline VectorFunctionModel<ValidatedTag,ARG,PR,PRE> refinement(const VectorFunctionModel<ValidatedTag,ARG,PR,PRE>& f1, const VectorFunctionModel<ValidatedTag,ARG,PR,PRE>& f2) {
         ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"refinement(f1,f2): f1="<<f1<<", f2="<<f2<<")");
@@ -647,12 +649,20 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
 
 // FIXME: Implement for Multiple-Precision versions
 template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const ScalarMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
+    auto const* fmptr = dynamic_cast<typename ScalarMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
+    if(fmptr) { return unchecked_evaluate(ScalarMultivariateFunctionModelDP<P>(*fmptr),x); }
+    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionPatch<P>(*fptr),x); }
+    return evaluate(f,x);
+}
 
 template<class P> inline Vector<CanonicalNumeric64Type<P>> unchecked_evaluate(const VectorMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    auto const* fptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
+    auto const* fmptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
+    if(fmptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fmptr),x); }
+    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionPatch<P>(*fptr),x); }
+    return evaluate(f,x);
+}
 
 template<class P, class ARG, class PR, class PRE> inline ScalarFunctionModel<P,ARG,PR,PRE> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
     auto const* fptr = dynamic_cast<typename ScalarFunctionModel<P,ARG,PR,PRE>::Interface const*>(f.raw_pointer());
@@ -673,7 +683,13 @@ template<class P, class ARG, class PR, class PRE> VectorFunctionModelElement<P,A
 
 
 
+template<class P, class... ARGS> template<class PR, class PRE>
+FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(FunctionModel<P,RealScalar(ARGS...),PR,PRE> fm)
+    : _ptr(fm.pointer()) { }
 
+template<class P, class... ARGS> template<class PR, class PRE>
+FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(FunctionModel<P,RealVector(ARGS...),PR,PRE> fm)
+    : _ptr(fm.pointer()) { }
 
 } // namespace Ariadne
 

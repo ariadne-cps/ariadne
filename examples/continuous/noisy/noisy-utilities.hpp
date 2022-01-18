@@ -62,13 +62,13 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
 
     Stopwatch<Milliseconds> sw;
 
-    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
+    List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();
 
-    List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
+    List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionPatch const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
-    ValidatedVectorMultivariateFunctionModelType evolve_function =
-        partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper_bound());
+    ValidatedVectorMultivariateFunctionPatch evolve_function =
+        partial_evaluate(final_set,final_set.result_size(),static_cast<ExactNumber>(final_set.domain()[final_set.result_size()].upper_bound()));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     ARIADNE_LOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");

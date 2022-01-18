@@ -40,6 +40,8 @@
 #include "algebra/operations.hpp"
 #include "function/function_interface.hpp"
 #include "function/function_mixin.hpp"
+#include "function/function_patch.hpp"
+#include "function/function_patch_mixin.hpp"
 #include "function/function_model.hpp"
 #include "function/function_model_mixin.hpp"
 
@@ -106,14 +108,14 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
     static ScaledFunctionPatch<M> apply(GradedElementaryOperator op, ScaledFunctionPatch<M> const& f, Int n);
 };
 
-template<class M> class ScaledFunctionPatchMixin :
-    public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
+template<class M> class ScaledFunctionPatchMixin
+    : public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
 
-template<class M> class VectorScaledFunctionPatchMixin :
-    public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>
+template<class M> class VectorScaledFunctionPatchMixin
+    : public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
@@ -246,6 +248,7 @@ template<class M> class ScaledFunctionPatch
     ScaledFunctionPatch<M> create_zero() const;
     //! \brief Construct a zero function over the same domain with the same computational properties.
     ScaledFunctionPatch<M> create_constant(NumericType const& c) const;
+    ScaledFunctionPatch<M> create_constant(GenericNumericType const& c) const;
     //!@}
 
     //!@{
@@ -389,6 +392,10 @@ template<class M> class ScaledFunctionPatch
         Pair<ModelType,ModelType> models=split(f.model(),j); Pair<BoxDomainType,BoxDomainType> subdomains=split(f.domain(),j);
         return make_pair(ScaledFunctionPatch<M>(subdomains.first,models.first), ScaledFunctionPatch<M>(subdomains.second,models.second)); }
 
+    friend ScaledFunctionPatch<M> compose(const ScalarUnivariateFunction<P>& g, const ScaledFunctionPatch<M>& f) {
+        return ScaledFunctionPatch<M>(f.domain(),g.evaluate(f.model())); }
+    friend VectorScaledFunctionPatch<M> compose(const VectorUnivariateFunction<P>& g, const ScaledFunctionPatch<M>& f) {
+        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.model())); }
     friend ScaledFunctionPatch<M> derivative(const ScaledFunctionPatch<M>& f, SizeType k) {
         return ScaledFunctionPatch<M>(f.domain(),derivative(f.model(),k)/rad(f.domain()[k])); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k) {
@@ -433,6 +440,16 @@ template<class M> class ScaledFunctionPatch
         return distance(f1,f1.create(f2)); }
 
     friend MultivariatePolynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) { return tfn.polynomial(); }
+
+    // TODO: These should be automatically created by function Algebra
+    friend ScaledFunctionPatch<M> max(const ScaledFunctionPatch<M>& f1, const ValidatedNumber& c2) {
+        return max(f1,f1.create_constant(c2)); }
+    friend ScaledFunctionPatch<M> min(const ScaledFunctionPatch<M>& f1, const ValidatedNumber& c2) {
+        return min(f1,f1.create_constant(c2)); }
+    friend ScaledFunctionPatch<M> max(const ValidatedNumber& c1, const ScaledFunctionPatch<M>& f2) {
+        return max(f2.create_constant(c1),f2); }
+    friend ScaledFunctionPatch<M> min(const ValidatedNumber& c1, const ScaledFunctionPatch<M>& f2) {
+        ARIADNE_NOT_IMPLEMENTED; }
 
 };
 
@@ -724,6 +741,7 @@ template<class M> class VectorScaledFunctionPatch
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
     virtual ScalarScaledFunctionPatch<M>* _get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
+    virtual ScalarScaledFunctionPatch<M>* _concrete_get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
     virtual VectorScaledFunctionPatch<M>* _clone() const;
     virtual VectorScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
@@ -1222,7 +1240,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
 
 
 template<class M> class ScaledFunctionPatchFactoryMixin
-    : public FunctionModelFactoryMixin<ScaledFunctionPatchFactory<M>, ValidatedTag, typename M::PrecisionType, typename M::ErrorPrecisionType>
+    : public FunctionModelFactoryMixin<ScaledFunctionPatchFactory<M>,ValidatedTag,typename M::PrecisionType,typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchFactoryMixin<ValidatedIntervalTaylorModel<F>>
@@ -1244,6 +1262,7 @@ template<class M> class ScaledFunctionPatchFactory
     typedef PR PrecisionType;
     typedef PRE ErrorPrecisionType;
     typedef typename M::PropertiesType PropertiesType;
+    typedef typename M::GenericNumericType GenericNumericType;
     typedef typename M::NumericType NumericType;
     typedef typename M::CoefficientType CoefficientType;
     typedef BoxDomainType DomainType;
@@ -1256,9 +1275,9 @@ template<class M> class ScaledFunctionPatchFactory
     VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,ARG>& function) const;
 
     ScaledFunctionPatch<M> create_zero(const DomainType& domain) const;
-    ScaledFunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;
-    ScaledFunctionPatch<M> create_constant(const BoxDomainType& domain, const NumericType& value) const {
-        return create_constant(domain,Number<P>(value)); };
+    ScaledFunctionPatch<M> create_constant(const DomainType& domain, const GenericNumericType& value) const;
+    ScaledFunctionPatch<M> create_constant(const DomainType& domain, const NumericType& value) const {
+        return this->create_constant(domain,Number<P>(value)); };
     template<class X=CoefficientType> requires (not Same<X,NumericType>) ScaledFunctionPatch<M> create_constant(X) const;
 
     ScaledFunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;

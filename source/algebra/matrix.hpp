@@ -699,7 +699,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
-        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size(),s1*A2.zero_element());
+        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.column_size(),s1*A2.zero_element());
         for(SizeType i=0; i!=A2.row_size(); ++i) {
             for(SizeType j=0; j!=A2.column_size(); ++j) {
                 R[i][j]=s1*A2[i][j];
@@ -709,7 +709,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()*s2);
+        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()*s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]*s2;
@@ -719,7 +719,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()/s2);
+        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()/s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]/s2;

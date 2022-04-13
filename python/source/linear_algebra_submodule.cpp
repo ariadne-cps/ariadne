@@ -180,9 +180,10 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 
 // NOTE: g++ (version 5.4.1) does not accept decltype(auto) here
 template<class V> auto __norm__(const V& v) -> decltype(norm(v)) { return norm(v); }
-template<class V> auto __dot__(const V& v1, const V& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
+template<class V1, class V2> auto __dot__(const V1& v1, const V2& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
 template<class V1, class V2> auto __join__(const V1& v1, const V2& v2) -> decltype(join(v1,v2)) { return join(v1,v2); }
 template<class X> Vector<X> __sjoin__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
+template<class U1, class U2> auto __cojoin__(const U1& u1, const U2& u2) -> decltype(cojoin(u1,u2)) { return cojoin(u1,u2); }
 template<class M> auto __transpose__(const M& A) -> decltype(transpose(A)) { return transpose(A); }
 
 } // namespace Ariadne
@@ -261,8 +262,16 @@ Void define_vector(pybind11::module& module, pybind11::class_<Vector<X>>& vector
 
 
 template<class F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Value<F>>>& vector_class) {
+    using X=Value<F>;
     define_vector_constructors(module, vector_class);
     define_vector_operations(module, vector_class);
+    define_vector_arithmetic<Vector<X>,X>(module,vector_class);
+
+    vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+
+    module.def("norm",&__norm__<Vector<X>>);
+    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
 }
 
 template<class F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Bounds<F>>>& vector_class) {
@@ -271,12 +280,20 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
     module.def("norm",&__norm__<Vector<X>>);
+    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
+
+    vector_class.def("__rmul__",&__rmul__<Vector<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+
+    module.def("refinement",(Vector<X>(*)(Vector<X>const&,Vector<X>const&)) &refinement);
+    module.def("refines",(bool(*)(Vector<X>const&,Vector<X>const&)) &refines);
+    module.def("inconsistent",(bool(*)(Vector<X>const&,Vector<X>const&)) &inconsistent);
 
 //    vector_class.def(pybind11::init<Vector<ValidatedNumber>,PR>());
 //    vector_class.def(pybind11::init<Array<ValidatedNumber>,PR>());
     vector_class.def(pybind11::init<Vector<Rational>,PR>());
     vector_class.def(pybind11::init<Vector<Value<F>>>());
     pybind11::implicitly_convertible<Vector<Value<F>>,Vector<Bounds<F>>>();
+
 }
 
 template<class F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Approximation<F>>>& vector_class)
@@ -286,6 +303,7 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
     module.def("norm",&__norm__<Vector<X>>);
+    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
 
 //    vector_class.def(pybind11::init<Vector<ApproximateNumber>,PR>());
 //    vector_class.def(pybind11::init<Array<ApproximateNumber>,PR>());
@@ -293,6 +311,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     vector_class.def(pybind11::init<Vector<Bounds<F>>>());
     pybind11::implicitly_convertible<Vector<Bounds<F>>,Vector<Approximation<F>>>();
     pybind11::implicitly_convertible<Vector<Value<F>>,Vector<Approximation<F>>>();
+
+    module.def("cast_exact", (Vector<ExactType<X>>(*)(Vector<X> const&)) &cast_exact);
 }
 
 
@@ -331,8 +351,14 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
     covector_class.def(__py_div__,__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
 
+    covector_class.def("__mul__",__mul__<Covector<X>,Vector<X> , Return<ProductType<X,X>> >, pybind11::is_operator());
+
     module.def("transpose", (Covector<X>const&(*)(Vector<X>const&)) &transpose);
     module.def("transpose", (Vector<X>const&(*)(Covector<X>const&)) &transpose);
+
+    module.def("cojoin", &__cojoin__<Covector<X>,Covector<X>>);
+    module.def("cojoin", &__cojoin__<Covector<X>,Scalar<X>>);
+    module.def("cojoin", &__cojoin__<Scalar<X>,Covector<X>>);
 
     covector_class.def(pybind11::init([](pybind11::list const& lst){return Covector<X>(pybind11::cast<Array<X>>(lst));}));
 
@@ -391,6 +417,12 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def("__str__",&__cstr__<Matrix<X>>);
     matrix_class.def("__repr__",&__repr__<Matrix<X>>);
 
+    module.def("join", &__join__<Matrix<X>,Matrix<X>>);
+    module.def("join", &__join__<Matrix<X>,Covector<X>>);
+    module.def("join", &__join__<Covector<X>,Matrix<X>>);
+    module.def("cojoin", &__cojoin__<Matrix<X>,Matrix<X>>);
+    module.def("cojoin", &__cojoin__<Matrix<X>,Vector<X>>);
+    module.def("cojoin", &__cojoin__<Vector<X>,Matrix<X>>);
 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
@@ -454,6 +486,18 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
 {
     using X=Value<F>;
     define_matrix_class<X>(module,matrix_class);
+    define_matrix_arithmetic<X,X>(module,matrix_class);
+
+    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Vector<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Covector<Bounds<F>>>, pybind11::is_operator());
+
+    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Vector<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Covector<Approximation<F>>>, pybind11::is_operator());
+
 }
 
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Bounds<F>>>& matrix_class)
@@ -475,6 +519,11 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("triangular_decomposition",&triangular_decomposition<X>);
     module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
 
+    matrix_class.def("__mul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<Bounds<F>>,Vector<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Covector<Approximation<F>>>, pybind11::is_operator());
+
     pybind11::implicitly_convertible<Matrix<Value<F>>, Matrix<Bounds<F>>>();
 }
 
@@ -494,6 +543,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
 
     pybind11::implicitly_convertible<Matrix<Bounds<F>>, Matrix<Approximation<F>>>();
 
+    module.def("cast_exact", (Matrix<Value<F>>(*)(Matrix<Approximation<F>>const&)) &cast_exact);
     //    to_python<Tuple<FloatMatrix,FloatMatrix,PivotMatrix>>();
 }
 

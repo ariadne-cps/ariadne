@@ -1044,6 +1044,7 @@ template<class PR> void export_float_upper_bound(pymodule& module)
 //    float_upper_bound_class.def(self + UpperNumericType());
 //    float_upper_bound_class.def(self - LowerNumericType());
 
+    implicitly_convertible<FloatValue<PR>,FloatUpperBound<PR>>();
     implicitly_convertible<FloatBounds<PR>,FloatUpperBound<PR>>();
     implicitly_convertible<FloatError<PR>,FloatUpperBound<PR>>();
 }
@@ -1090,6 +1091,7 @@ template<class PR> void export_float_lower_bound(pymodule& module)
 //    float_lower_bound_class.def(self + LowerNumericType());
 //    float_lower_bound_class.def(self - UpperNumericType());
 
+    implicitly_convertible<FloatValue<PR>,FloatLowerBound<PR>>();
     implicitly_convertible<FloatBounds<PR>,FloatLowerBound<PR>>();
 }
 

@@ -919,6 +919,7 @@ Void Matrix<X>::set(SizeType i, SizeType j, Y const& y) {
 
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
+template<class X> Matrix<ExactType<X>> cast_exact(const Matrix<X>&);
 
 
 //! \relates Matrix \brief Construct transpose

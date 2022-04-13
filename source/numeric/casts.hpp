@@ -46,7 +46,7 @@
 
 namespace Ariadne {
 
-template<class F> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> requires Same<F,FloatDP> or Same<F,FloatMP> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
@@ -54,20 +54,6 @@ template<class F> inline Value<F> const cast_exact(Bounds<F> const& x) { return 
 template<class F, class FE> inline Value<F> const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Value<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Error<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-
-
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<F>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Approximation<F>>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<LowerBound<F>>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<UpperBound<F>>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Value<F>>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
-template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Error<F>>& t) {
-    return reinterpret_cast<const T<Value<F>>&>(t); }
 
 template<class F> inline const Positive<Value<F>> cast_exact(const Positive<Bounds<F>>& t) {
     return Positive<Value<F>>(cast_exact(static_cast<Bounds<F>const&>(t))); }

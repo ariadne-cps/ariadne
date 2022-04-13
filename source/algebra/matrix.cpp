@@ -33,13 +33,13 @@
 #include "numeric/floats.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
+#include "numeric/casts.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
 
 #include "matrix.tpl.hpp"
 
 namespace Ariadne {
-
 
 
 template<class X>
@@ -838,15 +838,15 @@ template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
 }
 
 
-template<class X> Matrix<Value<X>> cast_exact(Matrix<Approximation<X>> const& A) {
-    return reinterpret_cast<Matrix<Value<X>> const&>(A);
+template<class X> Matrix<ExactType<X>> cast_exact(const Matrix<X>& A) {
+    Matrix<ExactType<X>> R(A.row_size(),A.column_size(),cast_exact(A.zero_element()));
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            R[i][j]=cast_exact(A[i][j]);
+        }
+    }
+    return R;
 }
-
-template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix<AX> const& A) {
-    typedef decltype(cast_exact(declval<AX>())) EX;
-    return reinterpret_cast<Matrix<EX> const&>(A);
-}
-
 
 template class Matrix<RoundedFloatDP>;
 template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
@@ -879,6 +879,9 @@ template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposi
 
 template class Matrix<FloatDPValue>;
 
+
+template Matrix<ExactType<FloatDPApproximation>> cast_exact(const Matrix<FloatDPApproximation>&);
+
 template class Matrix<FloatMPApproximation>;
 template class Matrix<FloatMPBounds>;
 template class Matrix<FloatMPValue>;
@@ -901,6 +904,8 @@ template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vect
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposition(Matrix<FloatMPBounds> const&);
+
+template Matrix<FloatMPValue> cast_exact(const Matrix<FloatMPApproximation>&);
 
 template class Matrix<Real>;
 

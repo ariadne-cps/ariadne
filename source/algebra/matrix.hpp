@@ -921,6 +921,14 @@ template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
 template<class X> Matrix<ExactType<X>> cast_exact(const Matrix<X>&);
 
+//! \relates Matrix \brief Join two matrices vertically
+template<class X> Matrix<X> join(Matrix<X> const& A1, Matrix<X> const& A2);
+template<class X> Matrix<X> join(Matrix<X> const& A1, Covector<X> const& u2);
+template<class X> Matrix<X> join(Covector<X> const& u1, Matrix<X> const& A2);
+//! \relates Matrix \brief Join two matrices horizontally
+template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Matrix<X> const& A2);
+template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Vector<X> const& u2);
+template<class X> Matrix<X> cojoin(Vector<X> const& u1, Matrix<X> const& A2);
 
 //! \relates Matrix \brief Construct transpose
 template<class X> inline Transpose<Matrix<X>> transpose(const Matrix<X>& A) { return Transpose<Matrix<X>>(A); }

@@ -184,6 +184,39 @@ class ProvideCovectorOperations {
 };
 
 
+
+template<class X>
+Covector<X> cojoin(const Covector<X>& u1, const Covector<X>& u2)
+{
+    Array<X> ra(u1.size()+u2.size(),Uninitialised());
+    X* rp=ra.begin();
+    for(X const* u1p=u1.array().begin(); u1p!=u1.array().end(); ++rp, ++u1p) { new (rp) X(*u1p); }
+    for(X const* u2p=u2.array().begin(); u2p!=u2.array().end(); ++rp, ++u2p) { new (rp) X(*u2p); }
+    assert(rp==ra.end());
+    return Covector<X>(std::move(ra));
+}
+
+template<class X>
+Covector<X> cojoin(const Covector<X>& u1, const typename Covector<X>::ScalarType& s2)
+{
+    Array<X> ra(u1.size()+1u,Uninitialised());
+    X* rp=ra.begin();
+    for(X const* u1p=u1.array().begin(); u1p!=u1.array().end(); ++rp, ++u1p) { new (rp) X(*u1p); }
+    new (rp) X(s2);
+    return Covector<X>(std::move(ra));
+}
+
+template<class X>
+Covector<X> cojoin(const typename Covector<X>::ScalarType& s1, const Covector<X>& u2)
+{
+    Array<X> ra(1u+u2.size(),Uninitialised());
+    X* rp=ra.begin();
+    new (rp) X(s1); ++rp;
+    for(X const* u2p=u2.array().begin(); u2p!=u2.array().end(); ++rp, ++u2p) { new (rp) X(*u2p); }
+    return Covector<X>(std::move(ra));
+}
+
+
 } // namespace Ariadne
 
 #endif

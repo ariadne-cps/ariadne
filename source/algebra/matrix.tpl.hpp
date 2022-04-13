@@ -23,6 +23,7 @@
  */
 
 #include "algebra/vector.hpp"
+#include "algebra/covector.hpp"
 
 namespace Ariadne {
 
@@ -45,6 +46,93 @@ template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst)
         }
     }
 }
+
+template<class X> Matrix<X> join(Matrix<X> const& A1, Matrix<X> const& A2) {
+    ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
+    Matrix<X> R(A1.row_size()+A2.row_size(),A1.column_size(),A1.zero_element());
+    const SizeType m1=A1.row_size();
+    for(SizeType i=0; i!=A1.row_size(); ++i) {
+        for(SizeType j=0; j!=A1.column_size(); ++j) {
+            R[i][j]=A1[i][j];
+        }
+    }
+    for(SizeType i=0; i!=A2.row_size(); ++i) {
+        for(SizeType j=0; j!=A2.column_size(); ++j) {
+            R[m1+i][j]=A2[i][j];
+        }
+    }
+    return R;
+}
+
+template<class X> Matrix<X> join(Matrix<X> const& A1, Covector<X> const& u2) {
+    ARIADNE_PRECONDITION(A1.column_size()==u2.size());
+    Matrix<X> R(A1.row_size()+1u,A1.column_size(),A1.zero_element());
+    const SizeType m1=A1.row_size();
+    for(SizeType i=0; i!=A1.row_size(); ++i) {
+        for(SizeType j=0; j!=A1.column_size(); ++j) {
+            R[i][j]=A1[i][j];
+        }
+    }
+    for(SizeType j=0; j!=u2.size(); ++j) {
+        R[m1][j]=u2[j];
+    }
+    return R;
+}
+
+template<class X> Matrix<X> join(Covector<X> const& u1, Matrix<X> const& A2) {
+    ARIADNE_PRECONDITION(u1.size()==A2.column_size());
+    Matrix<X> R(1u+A2.row_size(),A2.column_size(),A2.zero_element());
+    for(SizeType j=0; j!=u1.size(); ++j) {
+        R[0u][j]=u1[j];
+    }
+    for(SizeType i=0; i!=A2.row_size(); ++i) {
+        for(SizeType j=0; j!=A2.column_size(); ++j) {
+            R[1u+i][j]=A2[i][j];
+        }
+    }
+    return R;
+}
+
+template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Matrix<X> const& A2) {
+    ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
+    Matrix<X> R(A1.row_size(),A1.column_size()+A2.column_size(),A1.zero_element());
+    const SizeType n1=A1.column_size();
+    for(SizeType i=0; i!=A1.row_size(); ++i) {
+        for(SizeType j=0; j!=A1.column_size(); ++j) {
+            R[i][j]=A1[i][j];
+        }
+        for(SizeType j=0; j!=A2.column_size(); ++j) {
+            R[i][n1+j]=A2[i][j];
+        }
+    }
+    return R;
+}
+
+template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Vector<X> const& v2) {
+    ARIADNE_PRECONDITION(A1.row_size()==v2.size());
+    Matrix<X> R(A1.row_size(),A1.column_size()+1u,A1.zero_element());
+    const SizeType n1=A1.column_size();
+    for(SizeType i=0; i!=A1.row_size(); ++i) {
+        for(SizeType j=0; j!=A1.column_size(); ++j) {
+            R[i][j]=A1[i][j];
+        }
+        R[i][n1]=v2[i];
+    }
+    return R;
+}
+
+template<class X> Matrix<X> cojoin(Vector<X> const& v1, Matrix<X> const& A2) {
+    ARIADNE_PRECONDITION(v1.size()==A2.row_size());
+    Matrix<X> R(A2.row_size(),1u+A2.column_size(),A2.zero_element());
+    for(SizeType i=0; i!=A2.row_size(); ++i) {
+        R[i][0]=v1[i];
+        for(SizeType j=0; j!=A2.column_size(); ++j) {
+            R[i][1u+j]=A2[i][j];
+        }
+    }
+    return R;
+}
+
 
 #ifdef ARIADNE_OMIT
 template<class X> InputStream& Matrix<X>::read(InputStream& is) {

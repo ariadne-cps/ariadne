@@ -46,9 +46,6 @@
 
 namespace Ariadne {
 
-class FloatDP;
-typedef FloatDP RawFloatDP;
-
 class Rational;
 enum class Comparison : char;
 

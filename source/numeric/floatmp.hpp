@@ -95,7 +95,7 @@ inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 //! Currently defined as a wrapper around \c mpfr_t from the MPFR library.
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
 //! \see FloatDP, Real, FloatValue, FloatBounds, FloatUpperBound, FloatLowerBound, FloatApproximation, FloatError
-class FloatMP {
+template<> class Float<MP> {
   private:
     mpfr_t _mpfr;
   public:
@@ -130,25 +130,25 @@ class FloatMP {
     static FloatMP eps(PrecisionType);
     static FloatMP min(PrecisionType);
   public:
-    ~FloatMP();
-    explicit FloatMP(NoInit const&);
-    explicit FloatMP(PrecisionType, NoInit const&);
-    explicit FloatMP(const mpfr_t, RawPtr const&);
+    ~Float();
+    explicit Float(NoInit const&);
+    explicit Float(PrecisionType, NoInit const&);
+    explicit Float(const mpfr_t, RawPtr const&);
 
   private:
-    FloatMP();
-    explicit FloatMP(double);
+    Float();
+    explicit Float(double);
   public:
-    explicit FloatMP(PrecisionType);
-    template<BuiltinIntegral N> explicit FloatMP(N n, PrecisionType pr)
-        : FloatMP(ExactDouble(n),pr) { }
-    explicit FloatMP(FloatDP const&, PrecisionType);
-    explicit FloatMP(ExactDouble const& x, PrecisionType);
-    explicit FloatMP(TwoExp const& x, PrecisionType);
-    explicit FloatMP(Dyadic const&, PrecisionType);
+    explicit Float(PrecisionType);
+    template<BuiltinIntegral N> explicit Float(N n, PrecisionType pr)
+        : Float(ExactDouble(n),pr) { }
+    explicit Float(FloatDP const&, PrecisionType);
+    explicit Float(ExactDouble const& x, PrecisionType);
+    explicit Float(TwoExp const& x, PrecisionType);
+    explicit Float(Dyadic const&, PrecisionType);
 
-    FloatMP(const FloatMP&);
-    FloatMP(FloatMP&&);
+    Float(const FloatMP&);
+    Float(FloatMP&&);
 
     template<BuiltinIntegral N> FloatMP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
@@ -156,16 +156,16 @@ class FloatMP {
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    template<BuiltinIntegral N> FloatMP(N n, RoundingModeType rnd, PrecisionType pr)
+    template<BuiltinIntegral N> Float(N n, RoundingModeType rnd, PrecisionType pr)
         : FloatMP(ExactDouble(n),rnd,pr) { }
-    FloatMP(ExactDouble, RoundingModeType, PrecisionType);
-    FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
+    Float(ExactDouble, RoundingModeType, PrecisionType);
+    Float(FloatDP const&, RoundingModeType, PrecisionType);
 
-    FloatMP(Integer const&, RoundingModeType, PrecisionType);
-    FloatMP(Dyadic const&, RoundingModeType, PrecisionType);
-    FloatMP(Decimal const&, RoundingModeType, PrecisionType);
-    FloatMP(Rational const&, RoundingModeType, PrecisionType);
-    FloatMP(FloatMP const&, RoundingModeType, PrecisionType);
+    Float(Integer const&, RoundingModeType, PrecisionType);
+    Float(Dyadic const&, RoundingModeType, PrecisionType);
+    Float(Decimal const&, RoundingModeType, PrecisionType);
+    Float(Rational const&, RoundingModeType, PrecisionType);
+    Float(FloatMP const&, RoundingModeType, PrecisionType);
     explicit operator Dyadic() const;
     explicit operator Rational() const;
 

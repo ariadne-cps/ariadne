@@ -658,29 +658,29 @@ double acos_rnd(double x) {
     return pi_rnd()/2.0+asin_rnd(-x);
 }
 
-FloatDP::FloatDP(ExactDouble const& d, PrecisionType)
+FloatDP::Float(ExactDouble const& d, PrecisionType)
     : FloatDP(d.get_d())
 {
 }
 
-FloatDP::FloatDP(TwoExp const& t, PrecisionType)
+FloatDP::Float(TwoExp const& t, PrecisionType)
     : FloatDP(std::ldexp(1.0,t.exponent()))
 {
     ARIADNE_ASSERT(Dyadic(*this)==Dyadic(t));
 }
 
-FloatDP::FloatDP(Dyadic const& w, PrecisionType)
+FloatDP::Float(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())
 {
     ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
 }
 
-FloatDP::FloatDP(Integer const& x, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Integer const& x, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(Dyadic(x),rnd,pr)
 {
 }
 
-FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(w.get_d())
 {
     if (is_finite(w)) {
@@ -698,14 +698,14 @@ FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
      }
 }
 
-FloatDP::FloatDP(Decimal const& dec, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Decimal const& dec, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(Rational(dec),rnd,pr)
 {
 }
 
 inline Rational cast_rational(double d) { return Rational(ExactDouble(d)); }
 
-FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
+FloatDP::Float(Rational const& q, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(q.get_d())
 {
     if (is_finite(q)) {
@@ -723,7 +723,7 @@ FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
     }
 }
 
-FloatDP::FloatDP(FloatDP const& x, RoundingModeType rnd, PrecisionType)
+FloatDP::Float(FloatDP const& x, RoundingModeType rnd, PrecisionType)
     : FloatDP(x)
 {
 }

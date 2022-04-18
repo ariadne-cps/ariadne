@@ -50,8 +50,9 @@ struct DecimalPrecision { Nat _figures; explicit DecimalPrecision(Nat figs) : _f
 
 template<class X> class Positive;
 
-class FloatDP;
-class FloatMP;
+template<class... PRS> class Float;
+using FloatDP=Float<DP>;
+using FloatMP=Float<MP>;
 
 using DoublePrecisionFloat = FloatDP;
 using MultiplePrecisionFloat = FloatMP;

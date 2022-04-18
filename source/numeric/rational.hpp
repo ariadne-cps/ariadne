@@ -43,7 +43,6 @@
 namespace Ariadne {
 
 class Int64;
-class FloatDP;
 
 enum class Comparison : char;
 

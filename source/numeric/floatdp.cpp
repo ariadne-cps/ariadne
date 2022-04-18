@@ -733,6 +733,19 @@ FloatDP& FloatDP::operator=(ExactDouble const& x) {
     return *this;
 }
 
+FloatDP& FloatDP::operator=(Dyadic const& w) {
+    if (is_finite(w)) {
+        this->dbl=mpf_get_d(w.get_mpf());
+        assert(*this==w);
+    } else if (is_nan(w)) {
+        *this=FloatDP::nan(this->precision());
+    } else {
+        assert(is_inf(w));
+        *this=FloatDP::inf(sgn(w),this->precision());
+    }
+    return *this;
+}
+
 FloatDP::operator Dyadic () const {
     return Dyadic(this->dbl);
 }

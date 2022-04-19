@@ -46,9 +46,6 @@ namespace Ariadne {
 
 struct NoInit { };
 
-class FloatDP;
-typedef FloatDP RawFloatDP;
-
 class Rational;
 enum class Comparison : char;
 
@@ -137,7 +134,7 @@ using RoundedFloatDP = Rounded<FloatDP>;
 //! For example, while <c>%FloatDP(3.25)</c> is represented exactly, <c>%FloatDP(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %FloatDP from a string literal may be supported.
 //! \sa FloatMP, Real, FloatDPValue, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
-class FloatDP {
+template<> class Float<DP> {
   public:
     volatile double dbl;
   public:
@@ -174,21 +171,21 @@ class FloatDP {
     static FloatDP min(DoublePrecision pr);
   private:
     //! \brief Default constructor creates an uninitialised number.
-    FloatDP() : dbl() { }
+    Float() : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
-    explicit FloatDP(double x) : dbl(x) { }
+    explicit Float(double x) : dbl(x) { }
   public:
-    explicit FloatDP(NoInit) : dbl() { }
-    explicit FloatDP(DoublePrecision) : dbl() { }
+    explicit Float(NoInit) : dbl() { }
+    explicit Float(DoublePrecision) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
-//    explicit FloatDP(ExactDouble const& x);
-//    explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
-    template<BuiltinIntegral N> FloatDP(N n, DoublePrecision) : dbl(n) { }
-    FloatDP(ExactDouble const& x, DoublePrecision);
-    FloatDP(TwoExp const& x, DoublePrecision);
-    FloatDP(Dyadic const& x, DoublePrecision);
+//    explicit Float(ExactDouble const& x);
+//    explicit Float(double x, DoublePrecision) : dbl(x) { }
+    template<BuiltinIntegral N> Float(N n, DoublePrecision) : dbl(n) { }
+    Float(ExactDouble const& x, DoublePrecision);
+    Float(TwoExp const& x, DoublePrecision);
+    Float(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
-    FloatDP(const FloatDP& x) : dbl(x.dbl) { }
+    Float(const FloatDP& x) : dbl(x.dbl) { }
     //! \brief Assignment.
     template<BuiltinIntegral N> FloatDP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
@@ -197,23 +194,23 @@ class FloatDP {
     FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 
     //! \brief Construct from another FloatDP using given rounding
-    explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from an integer using given rounding
-    template<BuiltinIntegral N> explicit FloatDP(N n, RoundingModeType rnd, PrecisionType pr)
-        : FloatDP(ExactDouble(n),rnd,pr) { }
+    template<BuiltinIntegral N> explicit Float(N n, RoundingModeType rnd, PrecisionType pr)
+        : Float(ExactDouble(n),rnd,pr) { }
     //! \brief Construct from an integer using given rounding
-    explicit FloatDP(ExactDouble x, RoundingModeType rnd, PrecisionType pr)
-        : FloatDP(x.get_d()) { }
+    explicit Float(ExactDouble x, RoundingModeType rnd, PrecisionType pr)
+        : Float(x.get_d()) { }
     //! \brief Construct from an integer number using given rounding
-    explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(Integer const&, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a dyadic number with given rounding
-    explicit FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a decimal number with given rounding
-    explicit FloatDP(Decimal const& d, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(Decimal const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a FloatMP using given rounding
-    explicit FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
-    explicit FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr);
+    explicit Float(Rational const& q, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.
     explicit operator Dyadic () const;
     //! \brief Convert to a rational number.

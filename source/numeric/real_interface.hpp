@@ -36,8 +36,9 @@ class Dyadic;
 
 class DoublePrecision;
 class MultiplePrecision;
-class FloatMP;
-class FloatDP;
+template<class... PRS> class Float;
+using FloatDP=Float<DP>;
+using FloatMP=Float<MP>;
 
 template<class F> class Bounds;
 using DyadicBounds = Bounds<Dyadic>;

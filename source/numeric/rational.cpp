@@ -55,7 +55,7 @@ class InvalidRationalLiteralException {
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
-class FloatDP { volatile double _dbl; public: double get_d() const { return _dbl; } };
+template<> class Float<DP> { volatile double _dbl; public: double get_d() const { return _dbl; } };
 template<> class Value<FloatDP> { FloatDP _v; public: FloatDP raw() const { return _v; } };
 
 

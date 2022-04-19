@@ -193,12 +193,11 @@ inline VariableInterval<Real> operator==(const Real& x, const RealVariable& v) {
 inline VariableInterval<Real> operator<=(const VariableLowerInterval<Real>& lv, const Real& u) {
     return VariableInterval<Real>(lv.lower_bound(),lv.variable(),u); }
 
-inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDPValue& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
+inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Dyadic& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
-inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
+inline VariableLowerInterval<Dyadic> operator<=(const Int& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
 
-inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
-inline VariableLowerInterval<Double> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<Double>(l,v); }
+inline VariableLowerInterval<Double> operator<=(const Double& l, const RealVariable& v) { return VariableLowerInterval<Double>(l,v); }
 
 
 //! \ingroup ExpressionSetSubModule

@@ -58,6 +58,7 @@ Real sqrt(Integer const& z);
 template<class X> using ModulusType = decltype(sqrt(add(sqr(declval<X>()),sqr(declval<X>()))));
 template<class X> using ArgumentType = decltype(atan(div(declval<X>(),declval<X>())));
 
+double atan(double);
 template<class X> inline auto atan2(X const& x, X const& y) -> decltype(atan(y/x)) {
     if (decide(x>0)) { return atan(y/x); }
     else if (decide(y>0)) { return pi/2-atan(x/y); }

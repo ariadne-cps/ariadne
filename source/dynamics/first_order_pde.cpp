@@ -140,7 +140,7 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
     PositiveUpperBound<X> error_constant = 2u*sqrt(PositiveUpperBound<X>(cndA * max_nrm * mag_ddphi));
     Nat N = log2((error_constant/tolerance).get_d())+1;
 
-    SizeType two_pow_N = pow(2,N);
+    SizeType two_pow_N = std::pow(2,N);
     PositiveValue<X> h(Dyadic(1,N),pr);
 
     auto courant_nrm = 1/(1/sup_norm(invA*B0)+1/sup_norm(invA*B1));

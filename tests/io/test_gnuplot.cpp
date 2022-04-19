@@ -72,7 +72,7 @@ class TestGnuplot
             Figure g1 = Figure(ApproximateBoxType({{0,5},{0,5}}), Projection2d(2,0,1));
             g1.draw(pt1);
             g1.write("test_gnuplot-point2d");
-            
+
         }
 
         template< class PR>
@@ -152,7 +152,7 @@ class TestGnuplot
 
             fig2.write("test_gnuplot-LabelledFigure-StringEvolution");
 
-        
+
         }//String Evolution over time
 
         template<class PR>
@@ -168,13 +168,13 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3D");
-        
+
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3D");
-         
+
         }//Gauss 3D
 
         template< class PR>
@@ -190,13 +190,13 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,1));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjXY");
-        
+
             RealVariable x("x"), y("y");
             Axes2d axes(0<=x<=dim-1,0<=y<=dim-1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjXY");
-        
+
         }
 
         template< class PR>
@@ -212,18 +212,18 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjXZ");
-        
+
             RealVariable x("x"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjXZ");
-        
+
         }
 
         template< class PR>
         void test_gauss3DProjYZ(PR pr)
-        {           
+        {
             FloatValue<PR> zb(0.0_x, pr);
 
             int dim = 20;
@@ -234,13 +234,13 @@ class TestGnuplot
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,1,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjYZ");
-        
+
             RealVariable x("y"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjYZ");
-        
+
         }
 
         template<class PR>
@@ -261,7 +261,7 @@ class TestGnuplot
             fig1.set_animated(true);
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DAnimation");
-        
+
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);

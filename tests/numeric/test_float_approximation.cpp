@@ -35,6 +35,7 @@
 #include "numeric/rational.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/float_approximation.hpp"
+#include "numeric/float_value.hpp"
 
 #include "../test.hpp"
 #include "test_floats.hpp"

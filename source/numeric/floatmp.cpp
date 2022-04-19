@@ -153,6 +153,12 @@ FloatMP& FloatMP::operator=(const ExactDouble& x) {
     return *this;
 }
 
+FloatMP& FloatMP::operator=(const Dyadic& w) {
+    mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
+    assert(*this==w);
+    return *this;
+}
+
 FloatMP& FloatMP::operator=(const FloatMP& x) {
     // TODO: Decide whether equality changes precision
     // NOTE: mpfr_set_prec clears a number, even if precision does not change
@@ -276,6 +282,10 @@ const FloatMP& FloatMP::raw() const {
     return *this;
 }
 
+FloatMP& FloatMP::raw() {
+    return *this;
+}
+
 FloatMP FloatMP::nan(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_nan(x._mpfr);
@@ -364,34 +374,15 @@ FloatMP acos(CurrentRoundingMode, FloatMP const& x) { return acos(FloatMP::get_r
 FloatMP atan(CurrentRoundingMode, FloatMP const& x) { return atan(FloatMP::get_rounding_mode(),x); }
 FloatMP FloatMP::pi(CurrentRoundingMode, MultiplePrecision pr) { return pi(FloatMP::get_rounding_mode(),pr); }
 
+// Exact operations
 FloatMP nul(FloatMP const& x) { return nul(FloatMP::get_rounding_mode(),x); }
 FloatMP hlf(FloatMP const& x) { return hlf(FloatMP::get_rounding_mode(),x); }
 FloatMP pos(FloatMP const& x) { return pos(FloatMP::get_rounding_mode(),x); }
 FloatMP neg(FloatMP const& x) { return neg(FloatMP::get_rounding_mode(),x); }
 FloatMP shft(FloatMP const& x, Int n) { return shft(FloatMP::get_rounding_mode(),x,n); }
-FloatMP sqr(FloatMP const& x) { return sqr(FloatMP::get_rounding_mode(),x); }
-FloatMP rec(FloatMP const& x) { return rec(FloatMP::get_rounding_mode(),x); }
-FloatMP add(FloatMP const& x1, FloatMP const& x2) { return add(FloatMP::get_rounding_mode(),x1,x2); }
-FloatMP sub(FloatMP const& x1, FloatMP const& x2) { return sub(FloatMP::get_rounding_mode(),x1,x2); }
-FloatMP mul(FloatMP const& x1, FloatMP const& x2) { return mul(FloatMP::get_rounding_mode(),x1,x2); }
-FloatMP div(FloatMP const& x1, FloatMP const& x2) { return div(FloatMP::get_rounding_mode(),x1,x2); }
-FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3) { return fma(FloatMP::get_rounding_mode(),x1,x2,x3); }
-FloatMP pow(FloatMP const& x, Int n) { return pow(FloatMP::get_rounding_mode(),x,n); }
-FloatMP sqrt(FloatMP const& x) { return sqrt(FloatMP::get_rounding_mode(),x); }
-FloatMP exp(FloatMP const& x) { return exp(FloatMP::get_rounding_mode(),x); }
-FloatMP log(FloatMP const& x) { return log(FloatMP::get_rounding_mode(),x); }
-FloatMP sin(FloatMP const& x) { return sin(FloatMP::get_rounding_mode(),x); }
-FloatMP cos(FloatMP const& x) { return cos(FloatMP::get_rounding_mode(),x); }
-FloatMP tan(FloatMP const& x) { return tan(FloatMP::get_rounding_mode(),x); }
-FloatMP asin(FloatMP const& x) { return asin(FloatMP::get_rounding_mode(),x); }
-FloatMP acos(FloatMP const& x) { return acos(FloatMP::get_rounding_mode(),x); }
-FloatMP atan(FloatMP const& x) { return atan(FloatMP::get_rounding_mode(),x); }
-// FIXME FloatMP FloatMP::pi(MultiplePrecision pr) { return pi(FloatMP::get_rounding_mode(),pr); }
-
 FloatMP max(FloatMP const& x1, FloatMP const& x2) { return max(FloatMP::get_rounding_mode(),x1,x2); }
 FloatMP min(FloatMP const& x1, FloatMP const& x2) { return min(FloatMP::get_rounding_mode(),x1,x2); }
-FloatMP abs(FloatMP const& x) { return abs(FloatMP::get_rounding_mode(),x); }
-FloatMP mag(FloatMP const& x) { return mag(FloatMP::get_rounding_mode(),x); }
+
 
 // Mixed operations
 FloatMP add(CurrentRoundingMode, FloatMP const& x1, FloatDP const& x2) { return add(FloatMP::get_rounding_mode(),x1,x2); }
@@ -870,16 +861,22 @@ template<> String class_name<FloatMP>() { return "FloatMP"; }
 template<class PR> PR make_default_precision();
 template<> MP make_default_precision<MP>() { return FloatMP::get_default_precision(); }
 
-} // namespace Ariadne
+Nat FloatMP::output_places=20; // 64 bits of precision
+Void FloatMP::set_output_places(Nat pl) { output_places=pl; }
 
 
 
-#include "rounded_float.hpp"
-
-namespace Ariadne {
-
-template class Rounded<FloatMP>;
+template<class X> class Rounded { public: X _flt; Rounded(Approximation<X> const&); };
 template<> String class_name<Rounded<FloatMP>>() { return "Rounded<FloatMP>"; }
 
+template<class X> class UpperBound { X _u; public: UpperBound(X const& u) : _u(u) { } X const& raw() const { return this->_u; } };
+template<class X> class LowerBound { X _l; public: LowerBound(X const& l) : _l(l) { } X const& raw() const { return this->_l; } };
+template<class X> class Approximation { X _a; public: X const& raw() const { return this->_a; } };
+
+template<class X> class Positive : public X { public: Positive(X const& x) : X(x) { } };
+Positive<FloatMP> abs(FloatMP const& x) {
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,to_nearest); return Positive<FloatMP>(r); }
+Positive<UpperBound<FloatMP>> mag(FloatMP const& x) { return Positive<UpperBound<FloatMP>>(abs(x)); }
+Positive<LowerBound<FloatMP>> mig(FloatMP const& x) { return Positive<LowerBound<FloatMP>>(abs(x)); }
 
 } // namespace Ariadne

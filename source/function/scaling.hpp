@@ -56,11 +56,11 @@ template<class F> inline Bounds<F> rad_val(Interval<Value<F>> const& ivl) {
 }
 
 inline Dyadic med(IntervalDomainType const& ivl) {
-    return hlf(add( Dyadic(ivl.lower_bound().raw()), Dyadic(ivl.upper_bound().raw()) ));
+    return hlf(add( Dyadic(ivl.lower_bound()), Dyadic(ivl.upper_bound()) ));
 }
 
 inline Dyadic rad(IntervalDomainType const& ivl) {
-    return hlf(sub( Dyadic(ivl.upper_bound().raw()), Dyadic(ivl.lower_bound().raw()) ));
+    return hlf(sub( Dyadic(ivl.upper_bound()), Dyadic(ivl.lower_bound()) ));
 }
 
 template<class T> inline

@@ -44,9 +44,8 @@ template<class F> Approximation<F> const& make_validated_approximation(Approxima
 template<class F> ValidatedApproximation<F> make_validated_approximation(Bounds<F> const& x) { return ValidatedApproximation<F>(x); }
 
 
-template<class F> Value<F> const& cast_exact(Rounded<F> const& x) { return reinterpret_cast<Value<F>const&>(x); }
-template<class F> Rounded<F> const& cast_rounded(Value<F> const& x) { return reinterpret_cast<Rounded<F>const&>(x); }
-template<class F> Rounded<F>& cast_rounded(Error<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
+template<ARawFloat F> Rounded<F> const& cast_rounded(Value<F> const& x) { return reinterpret_cast<Rounded<F>const&>(x); }
+template<ARawFloat F> Rounded<F>& cast_rounded(Error<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
 
 template<class F> inline Void acc_err(F const& ml, F const& u, F& e) {
     e=add(rounded,e,hlf(add(rounded,ml,u)));
@@ -81,16 +80,16 @@ template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, V
 template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
     Value<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(add(rounded,x1.raw(),x2.raw()));
+    Value<F> r(add(rounded,x1,x2));
     F::set_rounding_upward();
-    F u=add(rounded,x1.raw(),x2.raw());
-    F ml=sub(rounded,mx1.raw(),x2.raw());
+    F u=add(rounded,x1,x2);
+    F ml=sub(rounded,mx1,x2);
     acc_err(ml,u,e.raw());
     return r;
 }
 
 template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
-    F const& xv=x.raw();
+    F const& xv=x;
     F const& cl=c.lower_raw();
     F const& cm=c.middle_raw();
     F const& cu=c.upper_raw();
@@ -165,16 +164,16 @@ template<class F> Approximation<F> mul_no_err(Approximation<F> const& x1, Approx
 template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
     Value<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(mul(rounded,x1.raw(),x2.raw()));
+    Value<F> r(mul(rounded,x1,x2));
     F::set_rounding_upward();
-    F u=mul(rounded,x1.raw(),x2.raw());
-    F ml=mul(rounded,mx1.raw(),x2.raw());
+    F u=mul(rounded,x1,x2);
+    F ml=mul(rounded,mx1,x2);
     acc_err(ml,u,e.raw());
     return r;
 }
 
 template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
-    F const& xv=x.raw();
+    F const& xv=x;
     F const& cu=c.upper_raw();
     F const& cm=c.middle_raw();
     F const& cl=c.lower_raw();

@@ -56,20 +56,6 @@ typedef IntegralConstant<Int,1> One;
 static const Zero zero = Zero();
 static const One one = One();
 
-namespace {
-FloatDP operator+(FloatDP x1, FloatDP x2) { return add(rounded,x1,x2); }
-FloatDP operator-(FloatDP x1, FloatDP x2) { return sub(rounded,x1,x2); }
-FloatDP operator*(FloatDP x1, FloatDP x2) { return mul(rounded,x1,x2); }
-FloatDP operator/(FloatDP x1, FloatDP x2) { return div(rounded,x1,x2); }
-FloatDP operator/(FloatDP x1, Int n2) { return div(rounded,x1,FloatDP(n2,x1.precision())); }
-FloatDP& operator+=(FloatDP& x1, FloatDP x2) { return x1=add(rounded,x1,x2); }
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2) { return add(rounded,x1,x2); }
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2) { return sub(rounded,x1,x2); }
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2) { return mul(rounded,x1,x2); }
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2) { return div(rounded,x1,x2); }
-FloatMP operator/(FloatMP const& x1, Int const& n2) { return div(rounded,x1,FloatMP(n2,x1.precision())); }
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2) { return iadd(FloatMP::get_rounding_mode(),x1,x2); }
-} // namespace
 
 template<class F> F UnknownError<F>::raw() const {
     return F(0u,this->precision()); }
@@ -216,7 +202,7 @@ inline Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproxima
 
 template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
 template<class FLT> Bool is_same_as_zero(Bounds<FLT> const& xb) { return xb.lower_raw()==0 && xb.upper_raw()==0; }
-template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv.raw()==0; }
+template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv==0; }
 template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower_bound().raw()==0 && xv.upper_bound().raw()==0; }
 
 } // namespace
@@ -234,7 +220,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
     F::set_rounding_upward();
     FloatError<PR> te(e.precision());
     while(adv!=end) {
-        if(this->_discard(adv->index(),adv->coefficient().raw())) {
+        if(this->_discard(adv->index(),adv->coefficient())) {
             //te+=abs(adv->coefficient());
             te+=cast_positive(abs(adv->coefficient()));
         } else {
@@ -348,7 +334,7 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, Flo
     F::set_rounding_upward();
     FloatError<PR> te(e.precision());
     while(adv!=end) {
-        if(this->_discard(adv->coefficient().raw(),nrm.raw())) {
+        if(this->_discard(adv->coefficient(),nrm.raw())) {
             //te+=abs(adv->coefficient());
             te+=cast_positive(abs(adv->coefficient()));
         } else {
@@ -599,6 +585,11 @@ template<class F> Approximation<F> const& make_validated_approximation(Approxima
 template<class F> ValidatedApproximation<F> make_validated_approximation(Bounds<F> const& x) { return ValidatedApproximation<F>(x); }
 
 
+
+template<ARawFloat F> Rounded<F> const& cast_rounded(Value<F> const& x) { return reinterpret_cast<Rounded<F>const&>(x); }
+template<ARawFloat F> Rounded<F>& cast_rounded(Value<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
+template<ARawFloat F> Rounded<F>& cast_rounded(Error<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
+
 template<class F, class PRE> Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre) {
     Value<F> mx1=-x1;
     F::set_rounding_to_nearest();
@@ -625,28 +616,28 @@ template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, V
 
 
 template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
-    Value<F> mx1=-x1;
+    Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(x1.raw() + x2.raw());
+    Rounded<F> r(cast_rounded(x1) + cast_rounded(x2));
     F::set_rounding_upward();
-    F u=x1.raw()+x2.raw();
-    F ml=mx1.raw()-x2.raw();
-    e.raw() += (u+ml)/2;
-    return r;
+    Rounded<F> u=cast_rounded(x1)+cast_rounded(x2);
+    Rounded<F> ml=mx1-cast_rounded(x2);
+    cast_rounded(e) += hlf(u+ml);
+    return cast_exact(r);
 }
 
 template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
-    F const& xv=x.raw();
-    F const& cl=c.lower_raw();
-    F const& cm=c.middle_raw();
-    F const& cu=c.upper_raw();
-    F& re=e.raw();
+    Rounded<F> const& xv=x.raw();
+    Rounded<F> const& cl=c.lower_raw();
+    Rounded<F> const& cm=c.middle_raw();
+    Rounded<F> const& cu=c.upper_raw();
+    Rounded<F>& re=cast_rounded(e);
     F::set_rounding_to_nearest();
-    F rv=xv+cm;
+    Rounded<F> rv=xv+cm;
     F::set_rounding_upward();
-    F u=xv+cu;
-    F ml=(-xv)-cl;
-    re += (u+ml)/2;
+    Rounded<F> u=xv+cu;
+    Rounded<F> ml=(-xv)-cl;
+    re += hlf(u+ml);
     return Value<F>(rv);
 }
 
@@ -671,13 +662,13 @@ template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approxima
 }
 
 template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
-    Value<F> mx1=-x1;
+    Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(x1.raw() - x2.raw());
+    Value<F> r(cast_rounded(x1) - cast_rounded(x2));
     F::set_rounding_upward();
-    F u=x1.raw()-x2.raw();
-    F ml=mx1.raw()+x2.raw();
-    e.raw() += (u+ml)/2;
+    Rounded<F> u=cast_rounded(x1)-cast_rounded(x2);
+    Rounded<F> ml=mx1+cast_rounded(x2);
+    cast_rounded(e) += hlf(u+ml);
     return r;
 }
 
@@ -709,34 +700,34 @@ template<class F> Approximation<F> mul_no_err(Approximation<F> const& x1, Approx
 }
 
 template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
-    Value<F> mx1=-x1;
+    Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(x1.raw() * x2.raw());
+    Value<F> r(cast_rounded(x1) * cast_rounded(x2));
     F::set_rounding_upward();
-    F u=x1.raw()*x2.raw();
-    F ml=mx1.raw()*x2.raw();
-    e.raw() += (u+ml)/2;
+    Rounded<F> u=cast_rounded(x1) * cast_rounded(x2);
+    Rounded<F> ml=mx1*cast_rounded(x2);
+    cast_rounded(e) += (u+ml)/2;
     return r;
 }
 
 template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
-    F const& xv=x.raw();
-    F const& cu=c.upper_raw();
-    F const& cm=c.middle_raw();
-    F const& cl=c.lower_raw();
-    F& re=e.raw();
+    Rounded<F> const& xv=x.raw();
+    Rounded<F> const& cu=c.upper_raw();
+    Rounded<F> const& cm=c.middle_raw();
+    Rounded<F> const& cl=c.lower_raw();
+    Rounded<F>& re=cast_rounded(e);
     F::set_rounding_to_nearest();
-    F rv=xv*cm;
+    Rounded<F> rv=xv*cm;
     F::set_rounding_upward();
     if(xv>=0) {
-        F mcl=-cl;
-        F u=xv*cu;
-        F ml=xv*mcl;
+        Rounded<F> mcl=-cl;
+        Rounded<F> u=xv*cu;
+        Rounded<F> ml=xv*mcl;
         re+=hlf(u+ml);
     } else {
-        F mcu=-cu;
-        F u=xv*cl;
-        F ml=xv*mcu;
+        Rounded<F> mcu=-cu;
+        Rounded<F> u=xv*cl;
+        Rounded<F> ml=xv*mcu;
         re+=hlf(u+ml);
     }
     return Value<F>(rv);
@@ -779,13 +770,13 @@ template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Nat n2, U
 }
 
 template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
-    Value<F> mx1=-x1;
+    Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(x1.raw() / x2.raw());
+    Value<F> r(cast_rounded(x1) / cast_rounded(x2));
     F::set_rounding_upward();
-    F u=x1.raw()/x2.raw();
-    F ml=mx1.raw()/x2.raw();
-    e.raw() += (u+ml)/2;
+    Rounded<F> u=cast_rounded(x1)/cast_rounded(x2);
+    Rounded<F> ml=mx1/x2;
+    cast_rounded(e) += (u+ml)/2;
     return r;
 }
 
@@ -822,37 +813,37 @@ template<class F> Approximation<F> div_err(Approximation<F> const& x1, Nat n2, U
 
 
 template<class F> Value<F> fma_err(Value<F> const& x, Value<F> const& y, Value<F> z, Error<F>& e) {
-    F const& xv=x.raw();
-    F const& yv=y.raw();
-    F const& zv=z.raw();
-    F& re=e.raw();
+    Rounded<F> const& xv=x.raw();
+    Rounded<F> const& yv=y.raw();
+    Rounded<F>const& zv=z.raw();
+    Rounded<F>& re=cast_rounded(e);
     F::set_rounding_to_nearest();
-    F rv=xv*yv+zv;
+    Rounded<F> rv=xv*yv+zv;
     F::set_rounding_upward();
-    F myv=-yv;
-    F u=xv*yv+zv;
-    F ml=xv*myv-zv;
+    Rounded<F> myv=-yv;
+    Rounded<F> u=xv*yv+zv;
+    Rounded<F> ml=xv*myv-zv;
     re+=(u+ml)/2;
     return Value<F>(rv);
 }
 
 template<class F> Value<F> fma_err(ValidatedApproximation<F> const& c, Value<F> const& x, Value<F> y, Error<F>& e) {
-    F const& xv=x.raw();
-    F const& cu=c.upper_raw();
-    F const& cm=c.middle_raw();
-    F const& cl=c.lower_raw();
-    F const& yv=y.raw();
-    F& re=e.raw();
+    Rounded<F> const& xv=x.raw();
+    Rounded<F> const& cu=c.upper_raw();
+    Rounded<F> const& cm=c.middle_raw();
+    Rounded<F> const& cl=c.lower_raw();
+    Rounded<F> const& yv=y.raw();
+    Rounded<F>& re=cast_rounded(e);
     F::set_rounding_to_nearest();
-    F rv=xv*cm+yv;
+    Rounded<F> rv=xv*cm+yv;
     F::set_rounding_upward();
-    F u,ml;
+    Rounded<F> u,ml;
     if(xv>=0) {
-        F mcl=-cl;
+        Rounded<F> mcl=-cl;
         u=xv*cu+yv;
         ml=xv*mcl-yv;
     } else {
-        F mcu=-cu;
+        Rounded<F> mcu=-cu;
         u=xv*cl+yv;
         ml=xv*mcu-yv;
     }

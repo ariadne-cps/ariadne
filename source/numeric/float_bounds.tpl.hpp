@@ -45,7 +45,6 @@ int abslog10floor(double x);
 
 template<class F> Nat Bounds<F>::output_places=8;
 
-template<class F> Bounds<F>::Bounds(Value<F> const& x) : Bounds<F>(x.raw(),x.raw()) { }
 template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper) : Bounds<F>(lower.raw(),upper.raw()) { }
 
 template<class F> Bounds<F>::Bounds(Real const& x, PR pr) : Bounds(x.get(pr)) {}

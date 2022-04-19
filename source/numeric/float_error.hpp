@@ -134,10 +134,10 @@ template<class F> class Error
     //! <p/>
     friend Error<F> mag(Error<F> const& x) { return x; }
 
-        friend Error<F> operator+(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(add(up,x1._e,x2._v)); }
-        friend Error<F> operator+(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._v,x2._e)); }
-        friend Error<F> operator*(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(mul(up,x1._e,x2._v)); }
-        friend Error<F> operator*(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._v,x2._e)); }
+        friend Error<F> operator+(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(add(up,x1._e,x2)); }
+        friend Error<F> operator+(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1,x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(mul(up,x1._e,x2)); }
+        friend Error<F> operator*(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1,x2._e)); }
 
         friend Error<F> operator+(Error<F> const& x1, PositiveBounds<F> const& x2) { return Error<F>(add(up,x1._e,x2._u)); }
         friend Error<F> operator+(PositiveBounds<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._u,x2._e)); }
@@ -185,9 +185,9 @@ template<class F> class Error
     //! <p/>
     friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); }
     //! <p/>
-    friend UpperBound<F> operator+(Value<F> const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1._v,x2._e)); }
+    friend UpperBound<F> operator+(Value<F> const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1,x2._e)); }
     //! <p/>
-    friend LowerBound<F> operator-(Value<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1._v,x2._e)); }
+    friend LowerBound<F> operator-(Value<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1,x2._e)); }
     //! <p/>
     friend UpperBound<F> log2(Error<F> const& x) {
         return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }

@@ -54,30 +54,25 @@ template<class F> inline Value<F> const cast_exact(Bounds<F> const& x) { return 
 template<class F, class FE> inline Value<F> const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Value<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Error<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> inline Value<F> const& cast_exact(Rounded<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
 
 template<class F> inline const Positive<Value<F>> cast_exact(const Positive<Bounds<F>>& t) {
     return Positive<Value<F>>(cast_exact(static_cast<Bounds<F>const&>(t))); }
 
 inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
-inline RawFloatDP const& cast_raw(FloatDPValue const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 
 template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<RawFloatDP>& t) {
     return reinterpret_cast<const T<RawFloatDP>&>(t); }
 template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPApproximation>& t) {
     return reinterpret_cast<const T<RawFloatDP>&>(t); }
-template<template<class>class T> inline const T<RawFloatDP>& cast_raw(const T<FloatDPValue>& t) {
-    return reinterpret_cast<const T<RawFloatDP>&>(t); }
 
 inline FloatDPApproximation const& cast_approximate(RawFloatDP const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
 inline FloatDPApproximation const& cast_approximate(FloatDPApproximation const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
-inline FloatDPApproximation const& cast_approximate(FloatDPValue const& x) { return reinterpret_cast<FloatDPApproximation const&>(x); }
 
 template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<RawFloatDP>& t) {
     return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
 template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPApproximation>& t) {
-    return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
-template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPValue>& t) {
     return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
 
 inline FloatMPValue const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMPValue const&>(x); }

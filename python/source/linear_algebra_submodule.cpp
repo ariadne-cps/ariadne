@@ -221,7 +221,7 @@ Void define_vector(pybind11::module& module, pybind11::class_<Vector<X>>& vector
 }
 
 
-template<class F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Value<F>>>& vector_class) {
+template<ARawFloat F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Value<F>>>& vector_class) {
     using X=Value<F>;
     define_vector_constructors(module, vector_class);
     define_vector_operations(module, vector_class);
@@ -465,7 +465,7 @@ Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Real>>& mat
     define_matrix_class<X>(module,matrix_class);
 }
 
-template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Value<F>>>& matrix_class)
+template<ARawFloat F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Value<F>>>& matrix_class)
 {
     using X=Value<F>;
     define_matrix_class<X>(module,matrix_class);

@@ -38,12 +38,11 @@
 
 namespace Ariadne {
 
-template<class F> UpperBound<F>::UpperBound(Value<F> const& x, PR pr) : _u(x._v,downward,pr) {}
+template<class F> UpperBound<F>::UpperBound(Value<F> const& x, PR pr) : _u(x,downward,pr) {}
 template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x, PR pr) : _u(x._u,downward,pr) {}
 template<class F> UpperBound<F>::UpperBound(UpperBound<F> const& x, PR pr) : _u(x._u,upward,pr) {}
 
 template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x) : UpperBound<F>(x.upper_raw()) { }
-template<class F> UpperBound<F>::UpperBound(Value<F> const& x) : UpperBound<F>(x.raw()) { }
 template<class F> UpperBound<F>::UpperBound(Error<F> const& x) : UpperBound<F>(x.raw()) { }
 
 template<class F> UpperBound<F>::UpperBound(Real const& r, PR pr) : UpperBound(r.get(pr)) {}

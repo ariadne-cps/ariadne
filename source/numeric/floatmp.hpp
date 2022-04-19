@@ -101,7 +101,7 @@ template<> class Float<MP> {
   private:
     mpfr_t _mpfr;
   public:
-    typedef RawTag Paradigm;
+    typedef ExactTag Paradigm;
     typedef FloatMP NumericType;
     typedef mpfr_exp_t ExponentType;
     //! \brief The type representing the precision of the number.
@@ -155,6 +155,7 @@ template<> class Float<MP> {
     template<BuiltinIntegral N> FloatMP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
     FloatMP& operator=(const ExactDouble& x);
+    FloatMP& operator=(const Dyadic& x);
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
@@ -168,14 +169,23 @@ template<> class Float<MP> {
     Float(Decimal const&, RoundingModeType, PrecisionType);
     Float(Rational const&, RoundingModeType, PrecisionType);
     Float(FloatMP const&, RoundingModeType, PrecisionType);
+    explicit Float(const Rounded<FloatDP>& x, PrecisionType pr);
+    explicit Float(const Rounded<FloatMP>& x, PrecisionType pr);
+    explicit Float(const Rounded<FloatMP>& x, RoundingModeType rnd, PrecisionType pr);
     explicit operator Dyadic() const;
     explicit operator Rational() const;
+
+    operator ExactNumber () const;
+
+    Ball<FloatMP,FloatDP> pm(Error<FloatDP> const&) const;
+    Ball<FloatMP,FloatMP> pm(Error<FloatMP> const&) const;
 
     ExponentType exponent() const;
     MultiplePrecision precision() const;
     Void set_precision(MultiplePrecision);
   public:
     FloatMP const& raw() const;
+    FloatMP& raw();
     mpfr_t const& get_mpfr() const;
     mpfr_t& get_mpfr();
     double get_d() const;
@@ -200,8 +210,9 @@ template<> class Float<MP> {
     // Exact lattice operations
     friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
     friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP abs(FloatMP const& x);
-    friend FloatMP mag(FloatMP const& x);
+    friend Positive<FloatMP> abs(FloatMP const& x);
+    friend PositiveUpperBound<FloatMP> mag(FloatMP const& x);
+    friend PositiveLowerBound<FloatMP> mig(FloatMP const& x);
 
     // Exact arithmetic
     friend FloatMP nul(FloatMP const& x);
@@ -311,6 +322,7 @@ template<> class Float<MP> {
     friend FloatMP mul(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
     friend FloatMP div(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
 
+/*
     // Correctly rounded arithmetic
     friend FloatMP sqr(FloatMP const& x);
     friend FloatMP rec(FloatMP const& x);
@@ -330,7 +342,7 @@ template<> class Float<MP> {
     friend FloatMP acos(FloatMP const& x);
     friend FloatMP atan(FloatMP const& x);
     static FloatMP pi(MultiplePrecision pr);
-
+*/
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
     friend Boolean operator==(FloatMP const& x1, FloatMP const& x2);
@@ -422,6 +434,9 @@ template<> class Float<MP> {
     friend String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd);
     friend String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd);
+  public:
+    static Nat output_places;
+    static Void set_output_places(Nat pl);
 };
 
 template<class R, class A> R integer_cast(const A& a);

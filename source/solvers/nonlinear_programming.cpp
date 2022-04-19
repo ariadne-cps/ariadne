@@ -459,9 +459,10 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
+inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
+    ExactBoxType r(bx);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        bx[i]=ExactIntervalType(sub(down,bx[i].lower_bound().raw(),e),add(up,bx[i].upper_bound().raw(),e));
+        r[i]=ExactIntervalType(sub(down,bx[i].lower_bound(),e),add(up,bx[i].upper_bound(),e));
     }
     return bx;
 }
@@ -476,7 +477,7 @@ almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exa
     ExactVectorType ex=cast_exact(ax);
     if(!contains(D,ex)) { return false; }
     ApproximateVectorType gx=g(ax);
-    return probably(contains(widen(C,cast_exact(error)),gx));
+    return probably(contains(cast_exact_widen(C,cast_exact(error)),gx));
 }
 
 

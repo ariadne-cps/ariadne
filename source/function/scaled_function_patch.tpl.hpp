@@ -351,15 +351,12 @@ template<class M> Void ScaledFunctionPatch<M>::restrict(const BoxDomainType& dom
 
 
 
-inline Bool operator==(FloatDPValue x1, Int n2) { return x1.raw()==FloatDP(n2,dp); }
 inline Bool operator==(FloatDPBounds x1, Int n2) { return x1.upper_raw()==FloatDP(n2,dp) && x1.lower_raw()==FloatDP(n2,dp); }
 inline Bool operator==(FloatDPApproximation x1, Int n2) { return x1.raw()==FloatDP(n2,dp); }
 
-inline Bool operator!=(FloatDPValue x1, Int n2) { return x1.raw()!=FloatDP(n2,dp); }
 inline Bool operator!=(FloatDPBounds x1, Int n2) { return x1.upper_raw()!=FloatDP(n2,dp) || x1.lower_raw()!=FloatDP(n2,dp); }
 inline Bool operator!=(FloatDPApproximation x1, Int n2) { return x1.raw()!=FloatDP(n2,dp); }
 
-inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2,dp); }
 inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2,dp); }
 inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2,dp); }
 
@@ -640,12 +637,6 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 {
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
-                                           PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,Vector<M>(f.size(),[&](SizeType i){return M(f[i],RawFloat<PR>(0,prp.precision()),prp);}))
-{
-}
 
 
 

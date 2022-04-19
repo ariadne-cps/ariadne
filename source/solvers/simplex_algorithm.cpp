@@ -68,6 +68,7 @@ Array<SizeType> extend_p(const Array<SizeType>& p, const SizeType n);
 SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p);
 Array<SizeType> compute_p(const Array<Slackness>& tv);
 Pair<SizeType,RigorousNumericType<FloatDP>> compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s);
+static_assert(Same<RigorousNumericType<FloatDP>,Bounds<FloatDP>>);
 // end>
 
 // Add functions to remove dependencies
@@ -740,11 +741,11 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-Pair<SizeType,RigorousNumericType<Rounded<FloatDP>>>
-compute_rt(const Vector<Rounded<FloatDP>>& xl, const Vector<Rounded<FloatDP>>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<Rounded<FloatDP>>>& x, const Vector<RigorousNumericType<Rounded<FloatDP>>>& d, const SizeType s)
+Pair<SizeType,RigorousNumericType<FloatDP>>
+compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s)
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    typedef Rounded<FloatDP> X;
+    typedef FloatDP X;
     typedef RigorousNumericType<X> XX;
     typedef DP PR;
     PR pr;

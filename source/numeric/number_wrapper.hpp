@@ -126,10 +126,10 @@ inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     FloatDPValue const* x1=extract<FloatDPValue>(&y1);
     FloatDPValue const* x2=extract<FloatDPValue>(&y2);
     if(x1) {
-        if(x2) { res= cmp(ExactDouble(x1->raw().get_d()),ExactDouble(x2->raw().get_d())); }
-        else { res= cmp(ExactDouble(x1->raw().get_d()),y2._get_q()); }
+        if(x2) { res= cmp(ExactDouble(x1->get_d()),ExactDouble(x2->get_d())); }
+        else { res= cmp(ExactDouble(x1->get_d()),y2._get_q()); }
     } else {
-        if(x2) { res= cmp(y1._get_q(),ExactDouble(x2->raw().get_d())); }
+        if(x2) { res= cmp(y1._get_q(),ExactDouble(x2->get_d())); }
         else { res= cmp(y1._get_q(),y2._get_q()); }
     }
     return res;
@@ -146,6 +146,7 @@ template<class OP, class X1, class X2> NumberInterface* _concrete_apply(OP op, X
     }
 }
 */
+
 
 template<class R> NumberInterface* _make_number_wrapper(R const& r) { return new NumberWrapper<R>(r); }
 struct MakeNumberWrapper {
@@ -167,18 +168,34 @@ template<class R, class X1, class X2> inline R _concrete_apply(BinaryElementaryO
     return op.accept([&x1,x2](auto _op){return _make_number_wrapper(_op(x1,x2));});
 }
 
-// Since OP(Value<F>,Value<F>) usually returns Bounds<F>, which is Validated, while an Exact answer is expected,
-// disable binary operation on value
-// FIXME: Prefer symbolic dispatch
-template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Value<F> const& x2) {
-    String yc1=class_name<Value<F>>(); String yc2=class_name<Value<F>>();
+template<class R, class X1, class X2> inline R _concrete_apply_max_or_min(BinaryElementaryOperator op, X1 const& x1, X2 const& x2) {
+    if (op.code()==BinaryElementaryOperator(Max()).code()) { return _make_number_wrapper(max(x1,x2)); }
+    else if (op.code()==BinaryElementaryOperator(Min()).code()) { return _make_number_wrapper(min(x1,x2)); }
+    String yc1=class_name<X1>(); String yc2=class_name<X2>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
-template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Rational const& q2) {
+
+// FIXME: Prefer symbolic dispatch
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Value<F> const& x2) {
+    return _concrete_apply_max_or_min<R>(op,x1,x2);
+}
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Integer const& z2) {
+    return _concrete_apply_max_or_min<R>(op,x1,z2);
+}
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Integer const& z1, Value<F> const& x2) {
+    return _concrete_apply_max_or_min<R>(op,z1,x2);
+}
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Dyadic const& w2) {
+    return _concrete_apply_max_or_min<R>(op,x1,w2);
+}
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Dyadic const& w1, Value<F> const& x2) {
+    return _concrete_apply_max_or_min<R>(op,w1,x2);
+}
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Rational const& q2) {
     String yc1=class_name<Value<F>>(); String yc2=class_name<Rational>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<q2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
-template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op, Rational const& q1, Value<F> const& x2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Rational const& q1, Value<F> const& x2) {
     String yc1=class_name<Rational>(); String yc2=class_name<Value<F>>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<q1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
@@ -187,7 +204,9 @@ template<class R, class F> inline R _concrete_apply(BinaryElementaryOperator op,
 
 template<class R, class OP, class X1, class X2> inline R _concrete_operator_apply(OP op, X1 const& x1, X2 const& x2) {
     auto res=op(x1,x2);
-    if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
+        if constexpr (Same<decltype(res),Bool>) {
+        return new_logical_pointer_from_value(LogicalValue(res));
+    } else if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
         return new_logical_pointer_from_value(res.repr());
     } else {
         static_assert(Same<decltype(res.repr()),LogicalHandle const&>);
@@ -231,7 +250,9 @@ template<> struct DispatcherTraits<Real> { typedef AlgebraicNumberInterface Inte
 template<> struct DispatcherTraits<DyadicBounds> { typedef ValidatedAlgebraicNumberInterface Interface; };
 template<> struct DispatcherTraits<RationalBounds> { typedef ValidatedAlgebraicNumberInterface Interface; };
 
-template<class F> struct DispatcherTraits<Value<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<> struct DispatcherTraits<FloatDP> { typedef ConcreteNumberInterface<FloatDP> Interface; };
+template<> struct DispatcherTraits<FloatMP> { typedef ConcreteNumberInterface<FloatMP> Interface; };
+
 template<class F> struct DispatcherTraits<Ball<F>> { typedef ConcreteNumberInterface<F> Interface; };
 template<class F> struct DispatcherTraits<Bounds<F>> { typedef ConcreteNumberInterface<F> Interface; };
 template<class F> struct DispatcherTraits<UpperBound<F>> { typedef ConcreteNumberInterface<F> Interface; };
@@ -377,7 +398,9 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
 
     virtual LogicalInterface* _is_pos() const override {
         auto res=(_cast(*this) > 0);
-        if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
+        if constexpr (Same<decltype(res),bool>) {
+            return new_logical_pointer_from_value(LogicalValue(res));
+        } else if constexpr (Same<decltype(res.repr()),LogicalValue const&>) {
             return new_logical_pointer_from_value(res.repr());
         } else {
             static_assert(Same<decltype(res.repr()),LogicalHandle const&>);

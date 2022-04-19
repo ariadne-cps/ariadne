@@ -98,7 +98,7 @@ template<class F> class Bounds
     //! Construct bounds of zero with precision \a pr.
     explicit Bounds(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
     //! Construct bounds with value \a v.
-    explicit Bounds(RawType const& v) : _l(v), _u(v) { }
+    Bounds(RawType const& v) : _l(v), _u(v) { }
     //! Construct a lower bound of value \a l and an upper bound of value \a u.
     explicit Bounds(RawType const& l, RawType const& u) : _l(l), _u(u) { }
     //! Construct from a lower bound \a lower and an upper bound \a upper.
@@ -131,7 +131,6 @@ template<class F> class Bounds
 
     //! Convert from a ball.
     template<class FE> Bounds(Ball<F,FE> const& x);
-    Bounds(Value<F> const& x);
 
         Bounds<F>& operator=(const Value<F>& x) { return *this=Bounds<F>(x); }
     //! Assign from generic validated bounds \a y, keeping the same precision.
@@ -284,8 +283,8 @@ template<class F> class Bounds
     friend Bool same(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l==x2._l && x1._u==x2._u; }
     //! <p/>
-    friend Bool models(Bounds<F> const& x1, Value<F> const& x2) {
-        return x1._l<=x2._v && x1._u >= x2._v; }
+    friend Bool models(Bounds<F> const& x1, F const& x2) {
+        return x1._l<=x2 && x1._u >= x2; }
     //! <p/>
     friend Bool consistent(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l<=x2._u && x1._u >= x2._l; }

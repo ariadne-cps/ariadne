@@ -71,11 +71,11 @@ class Rational
     template<BuiltinIntegral N> Rational(N n);
     Rational(Int64);
     explicit Rational(FloatDP const&);
+    explicit Rational(FloatMP const&);
     Rational(const ExactDouble&);
     Rational(const Integer&);
     Rational(const Dyadic&);
     explicit Rational(const String&);
-    explicit Rational(const FloatDPValue&);
     explicit Rational(const mpq_t);
     Rational(const Rational&);
     Rational(Rational&&);
@@ -139,6 +139,17 @@ template<BuiltinIntegral N> inline Rational::Rational(N n) : Rational(Int64(n)) 
 
 OutputStream& write(OutputStream& os, mpz_t const z);
 InputStream& operator>>(InputStream& is, Rational& q1);
+
+template<> class Positive<Rational> : public Rational {
+  public:
+    Positive() : Rational() { }
+    template<BuiltinUnsignedIntegral M> Positive(M m) : Rational(m) { }
+    Positive(int n) = delete;
+    explicit Positive(Rational const& q) : Rational(q) { ARIADNE_ASSERT(q>=0); }
+};
+inline Positive<Rational> cast_positive(Rational const& q) { return Positive<Rational>(q); }
+
+using PositiveRational = Positive<Rational>;
 
 using RationalBounds = Bounds<Rational>; //!< Alias for rational bounds on a number. //!< \ingroup NumericModule
 

@@ -165,7 +165,8 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 };
 
 
-template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
+
+template<ARawFloat F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
 template<class T, class U> concept ConstructibleGivenDefaultPrecision
     = requires(T const& t, U const& u) { T(u,t.precision()); };
@@ -436,7 +437,6 @@ InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 
 class EmptyInterval { };
 class EntireInterval { };
-
 
 } // namespace Ariadne
 

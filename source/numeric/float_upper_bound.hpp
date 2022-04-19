@@ -68,7 +68,7 @@ template<class F> class UpperBound
     //! A upper bound of zero with precision \a pr.
     explicit UpperBound(PrecisionType pr) : _u(0.0_x,pr) { }
     //! A upper bound with value \a u.
-    explicit UpperBound(RawType const& u) : _u(u) { }
+    UpperBound(RawType const& u) : _u(u) { }
 
     template<BuiltinIntegral N> UpperBound(N n, PR pr) : UpperBound(ExactDouble(n),pr) { }
     UpperBound(const ExactDouble& d, PR pr) : _u(d,pr) { }
@@ -78,7 +78,7 @@ template<class F> class UpperBound
         UpperBound(const Decimal& d, PR pr) : _u(d,up,pr) { }
         UpperBound(const Rational& q, PR pr) : _u(q,up,pr) { }
         UpperBound(const Real& r, PR pr);
-        UpperBound(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        UpperBound(const Value<F>& x, PR pr);
         UpperBound(const Bounds<F>& x, PR pr);
     UpperBound(const UpperBound<F>& x, PR pr);
     //! A upper bound of type \p F from a generic upper bound \a y.
@@ -89,7 +89,6 @@ template<class F> class UpperBound
     //! Convert from upper \em and lower bounds on a number.
     UpperBound(Bounds<F> const& x);
     template<class FE> UpperBound(Ball<F,FE> const& x);
-    UpperBound(Value<F> const& x);
     UpperBound(Error<F> const& x); // FIXME: Remove
 
         UpperBound<F>& operator=(const Value<F>& x) { return *this=UpperBound<F>(x); }
@@ -179,11 +178,11 @@ template<class F> class UpperBound
         return UpperBound<F>(div(up,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
     // Needed to prevent ambiguity; useful as implementation is easier than PositiveBounds version.
     friend UpperBound<F> operator*(PositiveValue<F> const& x1, UpperBound<F> const& x2) {
-        return UpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+        return UpperBound<F>(mul(up,x1,x2.raw())); }
     friend UpperBound<F> operator*(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return UpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+        return UpperBound<F>(mul(up,x1.raw(),x2)); }
     friend UpperBound<F> operator/(UpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return UpperBound<F>(div(up,x1.raw(),x2.raw())); }
+        return UpperBound<F>(div(up,x1.raw(),x2)); }
   private: public:
     static Nat output_places;
     RawType _u;
@@ -276,13 +275,13 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveUpperBound<F>(div(up,x1.raw(),x2.lower().raw())); }
     friend PositiveUpperBound<F> operator*(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2) {
-        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+        return PositiveUpperBound<F>(mul(up,x1,x2.raw())); }
     friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+        return PositiveUpperBound<F>(mul(up,x1.raw(),x2)); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
+        return PositiveUpperBound<F>(div(up,x1.raw(),x2)); }
     friend PositiveUpperBound<F> operator/(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2) {
-        return PositiveUpperBound<F>(div(down,x1.raw(),x2.raw())); }
+        return PositiveUpperBound<F>(div(down,x1,x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, Nat m2) {
         return PositiveUpperBound<F>(div(up,x1.raw(),F(m2,x1.precision()))); }
     friend PositiveLowerBound<F> operator/(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2);

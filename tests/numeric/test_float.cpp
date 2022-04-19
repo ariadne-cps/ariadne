@@ -795,7 +795,7 @@ TestFloat<PR>::test_function()
     cout << setprecision(20);
 
     Float x(1,precision);
-    Float ra=exp(x);
+    Float ra=exp(near,x);
     Float rl=next(down,ra);
     Float ru=next(up,ra);
     ARIADNE_TEST_PRINT(rl);

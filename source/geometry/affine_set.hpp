@@ -69,9 +69,9 @@ using ValidatedAffineModelConstraintDP = ValidatedAffineModelConstraint<FloatDP>
 
 
 template<class X> AffineConstraint<X> operator<=(const SelfType<X>& l, const Affine<X>& a) {
-    return AffineConstraint<X>(l,a,+infty); }
+    X u(+infty,l.precision()); return AffineConstraint<X>(l,a,u); }
 template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const SelfType<X>& u) {
-    return AffineConstraint<X>(-infty,a,u); }
+    X l(-infty,u.precision());return AffineConstraint<X>(l,a,u); }
 template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const SelfType<X>& u) {
     ARIADNE_ASSERT(decide(ac.upper_bound()==infty));
     return AffineConstraint<X>(ac.lower_bound(),ac.function(),u); }

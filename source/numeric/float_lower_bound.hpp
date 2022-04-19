@@ -68,7 +68,7 @@ template<class F> class LowerBound
     //! A lower bound of zero with precision \a pr.
     explicit LowerBound(PrecisionType pr) : _l(0.0_x,pr) { }
     //! A lower bound with value \a l.
-    explicit LowerBound(RawType const& l) : _l(l) { }
+    LowerBound(RawType const& l) : _l(l) { }
 
     template<BuiltinIntegral N> LowerBound(N n, PR pr) : LowerBound(ExactDouble(n),pr) { }
     LowerBound(const ExactDouble& d, PR pr) : _l(d,pr) { }
@@ -78,7 +78,7 @@ template<class F> class LowerBound
         LowerBound(const Decimal& d, PR pr) : _l(d,down,pr) { }
         LowerBound(const Rational& q, PR pr) : _l(q,down,pr) { }
         LowerBound(const Real& r, PR pr);
-        LowerBound(const Value<F>& x, PR pr); // FIXME: Should not be necessary
+        LowerBound(const Value<F>& x, PR pr);
         LowerBound(const Bounds<F>& x, PR pr);
     LowerBound(const LowerBound<F>& x, PR pr);
     //! A lower bound of type \p F from a generic lower bound \a y.
@@ -89,7 +89,6 @@ template<class F> class LowerBound
     //! Convert from lower \em and upper bounds on a number.
     LowerBound(Bounds<F> const& x);
     template<class FE> LowerBound(Ball<F,FE> const& x);
-    LowerBound(Value<F> const& x);
 
         LowerBound<F>& operator=(const Value<F>& x) { return *this=LowerBound<F>(x); }
     //! Assign from the lower bound \a y, keeping the same properties.
@@ -183,11 +182,11 @@ template<class F> class LowerBound
         return LowerBound<F>(div(down,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
     // Needed to prevent ambiguity; useful as implementation is easier than PositiveBounds version.
     friend LowerBound<F> operator*(PositiveValue<F> const& x1, LowerBound<F> const& x2) {
-        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+        return LowerBound<F>(mul(down,x1,x2.raw())); }
     friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+        return LowerBound<F>(mul(down,x1.raw(),x2)); }
     friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return LowerBound<F>(div(down,x1.raw(),x2.raw())); }
+        return LowerBound<F>(div(down,x1.raw(),x2)); }
   private: public:
     static Nat output_places;
     RawType _l;
@@ -265,13 +264,13 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveLowerBound<F>(div(down,x1.raw(),x2.upper().raw())); }
     friend PositiveLowerBound<F> operator*(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2) {
-        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+        return PositiveLowerBound<F>(mul(down,x1,x2.raw())); }
     friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2)); }
     friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
+        return PositiveLowerBound<F>(div(down,x1.raw(),x2)); }
     friend PositiveLowerBound<F> operator/(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2) {
-        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
+        return PositiveLowerBound<F>(div(down,x1,x2.raw())); }
     friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, Nat m2) {
         return PositiveLowerBound<F>(div(down,x1.raw(),F(m2,x1.precision()))); }
     friend PositiveUpperBound<F> operator/(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2);

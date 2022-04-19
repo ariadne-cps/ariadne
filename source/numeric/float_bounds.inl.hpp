@@ -32,25 +32,25 @@
 namespace Ariadne {
 
 template<class F> inline auto Operations<Bounds<F>>::_add(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F> {
-    return Bounds<F>(add(down,x1._l,x2._v),add(up,x1._u,x2._v));
+    return Bounds<F>(add(down,x1._l,x2),add(up,x1._u,x2));
 }
 
 template<class F> inline auto Operations<Bounds<F>>::_add(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F> {
-    return Bounds<F>(add(down,x1._v,x2._l),add(down,x1._v,x2._u));
+    return Bounds<F>(add(down,x1,x2._l),add(down,x1,x2._u));
 }
 
 template<class F> inline auto Operations<Bounds<F>>::_sub(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F> {
-    return Bounds<F>(sub(down,x1._l,x2._v),sub(up,x1._u,x2._v));
+    return Bounds<F>(sub(down,x1._l,x2),sub(up,x1._u,x2));
 }
 
 template<class F> inline auto Operations<Bounds<F>>::_sub(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F> {
-    return Bounds<F>(sub(down,x1._v,x2._u),sub(up,x1._v,x2._l));
+    return Bounds<F>(sub(down,x1,x2._u),sub(up,x1,x2._l));
 }
 
 template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F>
 {
     const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
-    const F& x2v=x2.raw();
+    const F& x2v=x2;
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
     if(x2v>=0.0) {
@@ -63,7 +63,7 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, V
 
 template<class F> inline auto Operations<Bounds<F>>::_mul(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
 {
-    const F& x1v=x1.raw();
+    const F& x1v=x1;
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
@@ -79,7 +79,7 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, V
 {
     const F& x1l=x1.lower_raw();
     const F& x1u=x1.upper_raw();
-    const F& x2v=x2.raw();
+    const F& x2v=x2;
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
     if(x2v>0) {
@@ -96,7 +96,7 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, V
 
 template<class F> inline auto Operations<Bounds<F>>::_div(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
 {
-    const F& x1v=x1.raw();
+    const F& x1v=x1;
     const F& i2l=x2.lower_raw();
     const F& i2u=x2.upper_raw();
     PR pr(min(x1.precision(),x2.precision()));

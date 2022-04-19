@@ -33,6 +33,24 @@
 
 namespace Ariadne {
 
+template<> struct NumericTraits<FloatDP> {
+    using F=FloatDP;
+    typedef ExactNumber GenericType;
+    typedef Value<F> OppositeType;
+    typedef PositiveValue<F> PositiveType;
+    typedef Boolean LessType;
+    typedef Boolean EqualsType;
+};
+
+template<> struct NumericTraits<FloatMP> {
+    using F=FloatMP;
+    typedef ExactNumber GenericType;
+    typedef Value<F> OppositeType;
+    typedef PositiveValue<F> PositiveType;
+    typedef Boolean LessType;
+    typedef Boolean EqualsType;
+};
+
 template<class F> struct NumericTraits<Approximation<F>> {
     typedef ApproximateNumber GenericType;
     typedef PositiveApproximation<F> PositiveType;
@@ -71,14 +89,6 @@ template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
     typedef PositiveBall<F,FE> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;
-};
-
-template<class F> struct NumericTraits<Value<F>> {
-    typedef ExactNumber GenericType;
-    typedef Value<F> OppositeType;
-    typedef PositiveValue<F> PositiveType;
-    typedef Boolean LessType;
-    typedef Boolean EqualsType;
 };
 
 template<class F> struct NumericTraits<Error<F>> {

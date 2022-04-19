@@ -607,11 +607,6 @@ template<class M> class VectorScaledFunctionPatch
 
     //! \brief Construct from a domain, and expansion and errors.
     VectorScaledFunctionPatch(const BoxDomainType& domain,
-                              const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
-                              PropertiesType properties);
-
-    //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch(const BoxDomainType& domain,
                               const Vector<Expansion<MultiIndex,ExactDouble>>& expansion,
                               PropertiesType properties);
 

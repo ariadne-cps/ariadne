@@ -58,6 +58,7 @@ class TestNumbers
 {
   public:
     Void test();
+    Void test_dyadic_behaviour();
     Void test_float_value_behaviour();
     Void test_operations();
     Void test_misc();
@@ -66,19 +67,94 @@ class TestNumbers
 Void TestNumbers::test()
 {
     ARIADNE_TEST_CALL(test_operations());
+    ARIADNE_TEST_CALL(test_dyadic_behaviour());
     ARIADNE_TEST_CALL(test_float_value_behaviour());
     ARIADNE_TEST_CALL(test_misc());
 }
 
 Void
+TestNumbers::test_dyadic_behaviour()
+{
+    ExactNumber y(Dyadic(1));
+    try {
+        ExactNumber r = y+y;
+        ARIADNE_TEST_NOTIFY("Binary addition on Dyadic within ExactNumber yields "<<r.class_name());
+        r = y/y;
+        ARIADNE_TEST_NOTIFY("Binary division on Dyadic within ExactNumber yields "<<r.class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary operations on Dyadic give error:\n    "<<e.what());
+    }
+}
+
+Void
 TestNumbers::test_float_value_behaviour()
 {
-    ExactNumber y(FloatDPValue(0,dp));
+    ExactNumber n(Int(1));
+    ExactNumber z(Integer(1));
+    ExactNumber w(Dyadic(1));
+    ExactNumber q(Rational(1));
+    ExactNumber y(FloatDPValue(1,dp));
+    ExactNumber r;
     try {
-        y = y+y;
-        ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> within ExactNumber yield "<<y.class_name());
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> within ExactNumber yields "<<(y+y).class_name());
     } catch (const DispatchException& e) {
-        ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> give error:\n    "<<e.what());
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary division on Float<DP> within ExactNumber yields "<<(y/y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary division on Float<DP> within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary maximum on Float<DP> within ExactNumber yields "<<max(y,y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary maximum on Float<DP> within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Int within ExactNumber yields "<<(y+n).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Int within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Integer within ExactNumber yields "<<(y+z).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Integer within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Dyadic within ExactNumber yields "<<(y+w).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Dyadic within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Rational within ExactNumber yields "<<(y+q).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> and Rational within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Dyadic and Float<DP> within ExactNumber yields "<<(w+y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Dyadic and Float<DP> within ExactNumber gives error:\n    "<<e.what());
+    } 
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Rational and Float<DP> within ExactNumber yields "<<(q+y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Rational and Float<DP> within ExactNumber gives error:\n    "<<e.what());
+    } 
+    y=ExactNumber(FloatMPValue(1,MP(64)));
+    try {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<MP> within ExactNumber yields "<<(y+y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary addition on Float<MP> within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary division on Float<MP> within ExactNumber yields "<<(y/y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary division on Float<MP> within ExactNumber gives error:\n    "<<e.what());
+    }
+    try {
+        ARIADNE_TEST_NOTIFY("Binary maximum on Float<MP> within ExactNumber yields "<<max(y,y).class_name());
+    } catch (const DispatchException& e) {
+        ARIADNE_TEST_NOTIFY("Binary maximum on Float<MP> within ExactNumber gives error:\n    "<<e.what());
     }
 }
 
@@ -105,7 +181,6 @@ TestNumbers::test_operations()
     ARIADNE_TEST_FAIL(add(yv,yv));
     ARIADNE_TEST_PRINT(add(yb,yb));
     ARIADNE_TEST_PRINT(add(yb,yv));
-//    ARIADNE_TEST_PRINT(add(b,z));
     ARIADNE_TEST_PRINT(add(b,yb));
     ARIADNE_TEST_PRINT(add(yb,yn));
 
@@ -115,17 +190,18 @@ TestNumbers::test_operations()
     ARIADNE_TEST_PRINT(max(en,ev).class_name());
     ARIADNE_TEST_PRINT(max(en,ev));
 
-    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_FAIL(add(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
     ARIADNE_TEST_FAIL(add(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
 
     ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
-    ARIADNE_TEST_FAIL(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
     ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
 
     ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
 
-    max(1,FloatDPValue(3,dp));
-//    max(1u,FloatDPError(3u));
+    ARIADNE_TEST_PRINT(max(ExactNumber(Dyadic(1)),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(Dyadic(2))));
+
 }
 
 
@@ -253,7 +329,7 @@ TestNumber<Y>::test_class()
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
 
     ARIADNE_TEST_EQUAL(yz.class_name(),"Integer");
-    ARIADNE_TEST_EQUAL(yv.class_name(),"FloatDPValue");
+    ARIADNE_TEST_EQUAL(yv.class_name(),"FloatDP");
     ARIADNE_TEST_EQUAL(yb.class_name(),"FloatDPBounds");
 }
 
@@ -307,6 +383,29 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_ASSERT(possibly(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
     ARIADNE_TEST_ASSERT(not definitely(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
 
+    ARIADNE_TEST_CONSTRUCT(Dyadic,w1,(1.25_x));
+    ARIADNE_TEST_CONSTRUCT(Dyadic,w2,(0.875_x));
+    ARIADNE_TEST_CONSTRUCT(FloatDP,d1,(w1,dp));
+    ARIADNE_TEST_CONSTRUCT(FloatDP,d2,(w2,dp));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,yw1,(w1));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,yw2,(w2));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,yd1,(d1));
+    ARIADNE_TEST_CONSTRUCT(ExactNumber,yd2,(d2));
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,yw1,yd1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator!=,yw1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator> ,yw1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator< ,yw2,yd1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator>=,yw1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<=,yw2,yd1);
+    
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,yd1,yd1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator!=,yd1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator> ,yd1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator< ,yd2,yd1);
+    ARIADNE_TEST_BINARY_PREDICATE(operator>=,yd1,yd2);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<=,yd2,yd1);
+    
 }
 
 template<> Void

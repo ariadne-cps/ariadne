@@ -160,7 +160,7 @@ ExactNumericType Grid::subdivision_coordinate(DimensionType d, IntegerType n) co
 Int Grid::subdivision_index(DimensionType d, const ExactNumericType& x) const
 {
     FloatDP half(0.5_x,dp);
-    Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     FloatDP sc=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],n));
     if(sc == x.raw()) {
         return n;

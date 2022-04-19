@@ -54,7 +54,10 @@ s/ValidatedLowerTag/LowerTag/g
 s/ValidatedUpperTag/UpperTag/g
 
 s/Float\(\w\w*\)<Precision\(\w\w\)>/Float\2\1/g
+s/Float<DoublePrecision>/FloatDP/g
+s/Float<MultiplePrecision>/FloatMP/g
 #s/FloatValue<Precision64>/Float64Value/g
+
 
 s/VariablesBox<Interval<Float\(\w\w\)Value>>/ExactFloat\1VariablesBox/g
 s/VariablesBox<Interval<\(\w\w*\)>>/\1VariablesBox/g

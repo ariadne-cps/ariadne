@@ -62,7 +62,7 @@ UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector&
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res(0u,double_precision);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        if(definitely(bx[i].lower_bound()>bx[i].upper_bound())) { return cast_positive(-infty); }
+        if(definitely(bx[i].lower_bound()>bx[i].upper_bound())) { return PositiveFloatDPUpperBound(cast_positive(-infty),double_precision); }
         res+=bx[i].width();
     }
     return res/bx.size();
@@ -229,8 +229,8 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     UpperBoxType bbox = apply(f,domain);
 
     FloatDP domwdth = average_width(domain).raw();
-    FloatDP bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
-    FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
+    FloatDP bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
+    FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths());
 
     ARIADNE_LOG_PRINTLN_AT(1,"splt="<<splt<<" dpth="<<cell.depth()<<" max_dpth="<<max_dpth);
     ARIADNE_LOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box());

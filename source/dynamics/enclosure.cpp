@@ -87,9 +87,9 @@ template<class T> inline StringType str(const T& t) { StringStream ss; ss<<t; re
 using ValidatedConstraintModelDP = Constraint<ValidatedScalarMultivariateFunctionPatch,FloatDPBounds>;
 
 inline ValidatedConstraintModelDP operator>=(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& l) {
-    return ValidatedConstraintModel(l,f,infty); }
+    return ValidatedConstraintModel(l,f,FloatDP::inf(dp)); }
 inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& u) {
-    return ValidatedConstraintModel(-infty,f,u); }
+    return ValidatedConstraintModel(-FloatDP::inf(dp),f,u); }
 inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
@@ -523,7 +523,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionPa
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
-    FloatDP h=phi.domain()[phi.result_size()].upper_bound().raw();
+    FloatDP h=phi.domain()[phi.result_size()].upper_bound();
     ExactBoxType parameter_domain=this->parameter_domain();
     ExactIntervalType time_domain=ExactIntervalType(FloatDP(0,dp),h);
     ValidatedScalarMultivariateFunctionPatch time_function=this->configuration().function_factory().create_coordinate({time_domain},0u);
@@ -791,8 +791,8 @@ Void Enclosure::reduce() const
     contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     for(SizeType i=0; i!=this->number_of_parameters(); ++i) {
-        FloatDP l=this->_reduced_domain[i].lower_bound().raw();
-        FloatDP u=this->_reduced_domain[i].upper_bound().raw();
+        FloatDP l=this->_reduced_domain[i].lower_bound();
+        FloatDP u=this->_reduced_domain[i].upper_bound();
         if(is_nan(l) || is_nan(u)) {
             ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
             _reduced_domain[i]=_domain[i];

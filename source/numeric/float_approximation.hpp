@@ -69,7 +69,7 @@ template<class F> class Approximation
     //! <p/>
     explicit Approximation(PrecisionType pr) : _a(0.0_x,pr) { }
     //! <p/>
-    explicit Approximation(RawType const& a) : _a(a) { }
+    Approximation(RawType const& a) : _a(a) { }
 
         Approximation(double d, PR pr) : _a(cast_exact(d),near,pr) { }
         Approximation(ApproximateDouble d, PR pr) : _a(cast_exact(d),near,pr) { }
@@ -90,8 +90,6 @@ template<class F> class Approximation
 
     //! <p/>
     Approximation(Error<F> const& x); // FIXME: Remove
-    //! <p/>
-    Approximation(Value<F> const& x);
     //! <p/>
     template<class FE> Approximation(Ball<F,FE> const& x);
     //! <p/>

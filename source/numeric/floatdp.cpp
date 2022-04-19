@@ -911,6 +911,9 @@ InputStream& operator>>(InputStream& is, FloatDP& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
+Nat FloatDP::output_places=16;
+Void FloatDP::set_output_places(Nat pl) { output_places=pl; }
+
 template<class PR> PR make_default_precision();
 template<> DP make_default_precision<DP>() { return dp; }
 
@@ -925,19 +928,21 @@ template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<FloatDP>() { return "FloatDP"; }
 
-} // namespace Ariadne
-
-
-#include "rounded_float.hpp"
-
-namespace Ariadne {
-
+template<class X> class Rounded;
+template<> class Rounded<FloatDP> { public: double dbl; Rounded(Approximation<FloatDP> const&); };
 template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
 
-template<class X> class Value { X _v; public: X const& raw() const { return this->_v; } };
+
+template<class X> class UpperBound { X _u; public: UpperBound(X const& u) : _u(u) { } X const& raw() const { return this->_u; } };
+template<class X> class LowerBound { X _l; public: LowerBound(X const& l) : _l(l) { } X const& raw() const { return this->_l; } };
 template<class X> class Approximation { X _a; public: X const& raw() const { return this->_a; } };
 
-Rounded<FloatDP>::Rounded(Value<FloatDP> const& x) : Rounded(x.raw()) { }
-Rounded<FloatDP>::Rounded(Approximation<FloatDP> const& x) : Rounded(x.raw()) { }
+Rounded<FloatDP>::Rounded(Approximation<FloatDP> const& x) : dbl(x.raw().dbl) { }
+
+template<class X> class Positive : public X { public: Positive(X const& x) : X(x) { } };
+Positive<FloatDP> abs(FloatDP x) { return Positive<FloatDP>(FloatDP(std::fabs(x.dbl))); }
+Positive<UpperBound<FloatDP>> mag(FloatDP x) { return Positive<UpperBound<FloatDP>>(abs(x)); }
+Positive<LowerBound<FloatDP>> mig(FloatDP x) { return Positive<LowerBound<FloatDP>>(abs(x)); }
+
 
 } // namespace Ariadne

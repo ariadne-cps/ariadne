@@ -93,8 +93,8 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl)
 Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl) {
     FloatDPBall const& dlb=ivl.lower_bound();
     FloatDPBall const& dub=ivl.upper_bound();
-    FloatDPValue dl(FloatDP(Float32(dlb.value().raw(),near)));
-    FloatDPValue du(FloatDP(Float32(dub.value().raw(),near)));
+    FloatDPValue dl(FloatDP(Float32(dlb.value(),near)));
+    FloatDPValue du(FloatDP(Float32(dub.value(),near)));
     FloatDPError e=cast_positive(max(mag(dlb.value()-dl)+dlb.error(),mag(dlb.value()-dl)+dlb.error()));
     return make_pair(make_interval(dl,du),e);
 }
@@ -269,8 +269,8 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
     LinearProgram<FloatDPValue> lp;
     this->construct_linear_program(lp);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        lp.l[i]=FloatDPValue(sub(down,wbx[i].lower_bound().raw(),this->_space_models[i].error().raw()));
-        lp.u[i]=FloatDPValue(add(up,wbx[i].upper_bound().raw(),this->_space_models[i].error().raw()));
+        lp.l[i]=FloatDPValue(sub(down,wbx[i].lower_bound(),this->_space_models[i].error().raw()));
+        lp.u[i]=FloatDPValue(add(up,wbx[i].upper_bound(),this->_space_models[i].error().raw()));
     }
     ValidatedKleenean feasible=indeterminate;
     try {
@@ -323,8 +323,8 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     for(SizeType i=0; i!=cell.dimension(); ++i) {
         //lp.l[i]=bx[i].lower_bound();
         //lp.u[i]=bx[i].upper_bound();
-        lp.l[i]=FloatDPValue(sub(down,bx[i].lower_bound().raw(),errors[i].raw()));
-        lp.u[i]=FloatDPValue(add(up,bx[i].upper_bound().raw(),errors[i].raw()));
+        lp.l[i]=FloatDPValue(sub(down,bx[i].lower_bound(),errors[i].raw()));
+        lp.u[i]=FloatDPValue(add(up,bx[i].upper_bound(),errors[i].raw()));
     }
 
     Int cell_depth=cell.depth();

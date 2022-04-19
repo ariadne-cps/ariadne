@@ -39,6 +39,10 @@
 #include "integer.hpp"
 #include "dyadic.hpp"
 
+#include "floatdp.hpp"
+#include "floatmp.hpp"
+#include "float_bounds.hpp"
+
 namespace Ariadne {
 
 struct DefaultTag;
@@ -46,225 +50,23 @@ struct DefaultTag;
 static_assert(not GenericNumber<FloatValue<DoublePrecision>>);
 static_assert(not GenericNumber<FloatValue<MultiplePrecision>>);
 
-extern const FloatDPValue infty;
 
-//! \ingroup NumericModule
-//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-//! \sa Dyadic, Real, FloatDP, FloatMP, Ball, Bounds, Approximation.
-template<class F> class Value
-    : public DefineFieldOperators<Value<F>,Bounds<F>>
-    , public DefineComparisonOperators<Value<F>,LessTrait<Value<F>>,EqualsTrait<Value<F>>>
-    , public DefineConcreteGenericOperators<Value<F>>
-    , DefineMixedComparisonOperators<Value<F>,ExactNumber,Boolean>
-    , DefineMixedComparisonOperators<Value<F>,Rational,Boolean>
-    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
-{
-  protected:
-    typedef ExactTag P; typedef typename F::PrecisionType PR;
-  public:
-    //! <p/>
-    typedef ExactTag Paradigm;
-    //! <p/>
-    typedef Value<F> NumericType;
-    //! <p/>
-    typedef ExactNumber GenericType;
-    //! <p/>
-    typedef F RawType;
-    //! <p/>
-    typedef PR PrecisionType;
-    //! <p/>
-    typedef PR PropertiesType;
-  public:
-    //! Construct an exact numeric value with precision \a pr.
-    explicit Value(PrecisionType pr) : _v(0.0_x,pr) { }
-    //! Treat \a v as an exact numeric value.
-    explicit Value(RawType const& v) : _v(v) { }
+template<class F> struct IsARawFloat { static const bool value = false; };
+template<> struct IsARawFloat<FloatDP> { static const bool value = true; };
+template<> struct IsARawFloat<FloatMP> { static const bool value = true; };
 
-    template<BuiltinIntegral N> Value(N n, PR pr) : Value(Integer(n),pr) { }
-    Value(const ExactDouble& d, PR pr);
-    Value(const TwoExp& t, PR pr);
-    Value(const Integer& z, PR pr);
-    //! Construct a floating-point value with precision \a pr exactly from the dyadic number \a w.
-    //! \pre Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
-    Value(const Dyadic& w, PR pr);
-    //! Construct a floating-point value with precision \a pr exactly from the decimal number \a d.
-    //! \pre Requires that \a d can be exactly represented by a value of type \p F with precision \a pr.
-    explicit Value(const Decimal& d, PR pr);
-    Value(const Value<F>& x, PR pr);
+template<class F> concept ARawFloat = IsARawFloat<F>::value;
 
-    template<BuiltinIntegral N> Value<F>& operator=(N n) { _v=n; return *this; }
-    Value<F>& operator=(const Integer& z);
-    Value<F>& operator=(const TwoExp& t);
-    //! Assign from a dyadic number \a w, keeping the same precision.
-    //! \pre Requires that \a w can be exactly represented by a value of type \p F with the current precision.
-    Value<F>& operator=(const Dyadic& w);
+template<ARawFloat F> Bounds<F> operator+(F const& x1, F const& x2);
+template<ARawFloat F> Bounds<F> operator-(F const& x1, F const& x2);
+template<ARawFloat F> Bounds<F> operator*(F const& x1, F const& x2);
+template<ARawFloat F> Bounds<F> operator/(F const& x1, F const& x2);
 
-    //! Convert to a generic exact number.
-    operator ExactNumber () const;
-    //! Convert to a dyadic number.
-    explicit operator Dyadic () const;
-    explicit operator Rational () const;
+template<ARawFloat F> Integer cast_integer(Value<F> const& x) {
+    Dyadic w(x); Integer z=round(w); ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer"); return z;
+}
 
-    Ball<F> create(ValidatedNumber const&) const;
-
-    //! The precision of the floating-point type used.
-    PrecisionType precision() const { return _v.precision(); }
-    //! The compuational properties needed to create the bounds; equivalent to the precision.
-    PropertiesType properties() const { return _v.precision(); }
-    //! Downcast to generic validated bounds.
-    GenericType generic() const { return this->operator GenericType(); }
-    //! Create a value with the value at its centre, and error bound \a e.
-    template<class FE> Ball<F,FE> pm(Error<FE> const& e) const;
-    //! The raw data used to represent the value.
-    RawType const& raw() const { return _v; }
-    //! A mutable reference to the raw data used to represent the value.
-    RawType& raw() { return _v; }
-    //! Approximate by a builtin double-precision value. DEPRECATED
-    double get_d() const { return _v.get_d(); }
-  public:
-    friend Bool is_nan(Value<F> const& x) {
-        return is_nan(x._v); }
-
-    friend Value<F> max(Value<F> const& x1,  Value<F> const& x2) {
-        return Value<F>(max(x1._v,x2._v)); }
-    friend Value<F> min(Value<F> const& x1,  Value<F> const& x2) {
-        return Value<F>(min(x1._v,x2._v)); }
-    friend Value<F> abs(Value<F> const& x) {
-        return Value<F>(abs(x._v)); }
-    friend PositiveLowerBound<F> mig(Value<F> const& x) {
-        return PositiveLowerBound<F>(abs(x._v)); }
-    friend PositiveUpperBound<F> mag(Value<F> const& x) {
-        return PositiveUpperBound<F>(abs(x._v)); }
-
-    friend Value<F> nul(Value<F> const& x) {
-        return Value<F>(nul(x._v)); }
-    friend Value<F> pos(Value<F> const& x) {
-        return Value<F>(pos(x._v)); }
-    friend Value<F> neg(Value<F> const& x) {
-        return Value<F>(neg(x._v)); }
-    friend Value<F> hlf(Value<F> const& x) {
-        return Value<F>(hlf(x._v)); }
-    friend Bounds<F> sqr(Value<F> const& x) {
-        return Bounds<F>(mul(down,x._v,x._v),mul(up,x._v,x._v)); }
-    friend Bounds<F> rec(Value<F> const& x) {
-        return Bounds<F>(rec(down,x._v),rec(up,x._v)); }
-    friend Bounds<F> add(Value<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(add(down,x1._v,x2._v),add(up,x1._v,x2._v)); }
-    friend Bounds<F> sub(Value<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(sub(down,x1._v,x2._v),sub(up,x1._v,x2._v)); }
-    friend Bounds<F> mul(Value<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(mul(down,x1._v,x2._v),mul(up,x1._v,x2._v)); }
-    friend Bounds<F> div(Value<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(div(down,x1._v,x2._v),div(up,x1._v,x2._v)); }
-
-    template<class PRE> friend Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-        typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_add(x1,x2,pre); }
-    template<class PRE> friend Ball<F,RawFloatType<PRE>> sub(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-        typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_sub(x1,x2,pre); }
-    template<class PRE> friend Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-        typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_mul(x1,x2,pre); }
-    template<class PRE> friend Ball<F,RawFloatType<PRE>> div(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-        typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_div(x1,x2,pre); }
-
-    template<class FE> friend Value<F> add(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
-    template<class FE> friend Value<F> sub(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
-    template<class FE> friend Value<F> mul(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
-    template<class FE> friend Value<F> div(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
-
-    friend Value<F> mul(Value<F> const& x, TwoExp const& y) {
-        Value<F> yv(y,x.precision()); return Value<F>(mul(near,x.raw(),yv.raw())); }
-    friend Value<F> div(Value<F> const& x, TwoExp const& y) {
-        Value<F> yv(y,x.precision()); return Value<F>(div(near,x.raw(),yv.raw())); }
-
-    friend Bounds<F> pow(Value<F> const& x, Nat m) {
-        return pow(Bounds<F>(x),m); }
-    friend Bounds<F> pow(Value<F> const& x, Int n) {
-        return pow(Bounds<F>(x),n); }
-
-    friend Bounds<F> med(Value<F> const& x1, Value<F> const& x2) {
-        return add(hlf(x1),hlf(x2)); }
-    friend Bounds<F> rad(Value<F> const& x1, Value<F> const& x2) {
-        return sub(hlf(x2),hlf(x1)); }
-
-    friend Bounds<F> sqrt(Value<F> const& x) {
-        return Bounds<F>(sqrt(down,x._v),sqrt(up,x._v)); }
-    friend Bounds<F> exp(Value<F> const& x) {
-        return Bounds<F>(exp(down,x._v),exp(up,x._v)); }
-    friend Bounds<F> log(Value<F> const& x) {
-        return Bounds<F>(log(down,x._v),log(up,x._v)); }
-    friend Bounds<F> sin(Value<F> const& x) {
-        return sin(Bounds<F>(x)); }
-    friend Bounds<F> cos(Value<F> const& x) {
-        return cos(Bounds<F>(x)); }
-    friend Bounds<F> tan(Value<F> const& x) {
-        return tan(Bounds<F>(x)); }
-    friend Bounds<F> asin(Value<F> const& x) {
-        return asin(Bounds<F>(x)); }
-    friend Bounds<F> acos(Value<F> const& x) {
-        return acos(Bounds<F>(x)); }
-    friend Bounds<F> atan(Value<F> const& x) {
-        return Bounds<F>(atan(down,x._v),atan(up,x._v)); }
-
-    friend Boolean eq(Value<F> const& x1, Value<F> const& x2) {
-        return x1._v == x2._v; }
-    friend Boolean lt(Value<F> const& x1, Value<F> const& x2) {
-        return x1._v <  x2._v; }
-
-    //! <p/>
-    friend Bool same(Value<F> const& x1, Value<F> const& x2) {
-        return x1._v==x2._v; }
-
-    //! <p/>
-    friend OutputStream& operator<<(OutputStream& os, Value<F> const& x) {
-        return write(os,x.raw(),DecimalPrecision{Value<F>::output_places},to_nearest); }
-    //! <p/>
-    friend InputStream& operator>>(InputStream& is, Value<F>& x) {
-        auto v = nul(x._v); is >> v; ARIADNE_ASSERT(not is.fail()); x._v=v; return is;}
-
-    friend Integer cast_integer(Value<F> const& x) {
-        Dyadic w(x); Integer z=round(w); ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer"); return z; }
-  public:
-    friend Value<F> max(Value<F> const& x1, Dyadic const& w2) {
-        return max(x1,Value<F>(w2,x1.precision())); }
-    friend Value<F> max(Dyadic const& w1, Value<F> const& x2) {
-        return max(Value<F>(w1,x2.precision()),x2); }
-    friend Value<F> min(Value<F> const& x1, Dyadic const& w2) {
-        return min(x1,Value<F>(w2,x1.precision())); }
-    friend Value<F> min(Dyadic const& w1, Value<F> const& x2) {
-        return min(Value<F>(w1,x2.precision()),x2); }
-  public:
-    friend Value<F> operator*(TwoExp const&, Value<F> const&);
-    friend Value<F> operator*(Value<F> const&, TwoExp const&);
-    friend Value<F> operator/(Value<F> const&, TwoExp const&);
-    friend Value<F>& operator*=(Value<F>&, TwoExp const&);
-    friend Value<F>& operator/=(Value<F>&, TwoExp const&);
-  public:
-    friend Comparison cmp(Value<F> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
-    friend Comparison cmp(Value<F> const& x1, Dyadic const& w2) { return cmp(x1.raw(),w2); }
-    friend Comparison cmp(Value<F> const& x1, Integer const& z2) { return cmp(x1.raw(),z2); }
-  public:
-    static Nat output_places;
-    //! Set the number of decimal places used for the output. DEPRECATED
-    static Void set_output_places(Nat p) { output_places=p; }
-  private: public:
-    RawType _v;
-  private:
-    friend Value<F> shft(Value<F> const& x, Int n) {
-        return Value<F>(shft(x.raw(),n)); }
-    friend Value<F> operator*(TwoExp const& y, Value<F> const& x) {
-        return Value<F>(mul(near,F(y,x.precision()),x.raw())); }
-    friend Value<F> operator*(Value<F> const& x, TwoExp const& y) {
-        return Value<F>(mul(near,x.raw(),F(y,x.precision()))); }
-    friend Value<F> operator/(Value<F> const& x, TwoExp const& y) {
-        return Value<F>(div(near,x.raw(),F(y,x.precision()))); }
-    friend Value<F>& operator*=(Value<F>& x, TwoExp const& y) { return x=x*y; }
-    friend Value<F>& operator/=(Value<F>& x, TwoExp const& y) { return x=x/y; }
-};
-
-template<class PR> Value(Dyadic, PR) -> Value<RawFloatType<PR>>;
-template<class F> Value(F) -> Value<F>;
-
-template<class F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
+template<ARawFloat F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(ExactDouble const& y) { return FloatValue<PR>(y,_pr); }
@@ -275,25 +77,24 @@ FloatValue<PR> FloatFactory<PR>::create(N const& y) { return FloatValue<PR>(y,_p
 template<class PR> template<BuiltinUnsignedIntegral M> inline
 PositiveFloatValue<PR> FloatFactory<PR>::create(M const& y) { return PositiveFloatValue<PR>(y,_pr); }
 
-template<class F> class Positive<Value<F>> : public Value<F> {
-    using typename Value<F>::PR;
+template<ARawFloat F> class Positive<Value<F>> : public F {
+    using PR = typename Value<F>::PrecisionType;
   public:
     Positive() : Value<F>() { }
     explicit Positive(PR const& pr) : Value<F>(pr) { }
     template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : Value<F>(m,pr) { }
     Positive(TwoExp const& ex, PR pr) : Value<F>(ex,pr) { }
     explicit Positive(Dyadic const& w, PR pr) : Value<F>(w,pr) { }
-    explicit Positive(F const& x) : Value<F>(x) { }
     explicit Positive(Value<F> const& x) : Value<F>(x) { }
   public:
-    friend PositiveBounds<F> operator+(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+    friend Positive<Bounds<F>> operator+(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
         return cast_positive(static_cast<Value<F>const&>(v1)+static_cast<Value<F>const&>(v2)); }
-    friend PositiveBounds<F> operator*(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+    friend Positive<Bounds<F>> operator*(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
         return cast_positive(static_cast<Value<F>const&>(v1)*static_cast<Value<F>const&>(v2)); }
 
-    friend Positive<Value<F>> nul(Positive<Value<F>> const& x) { return PositiveValue<F>(nul(x._v)); }
-    friend Positive<Value<F>> pos(Positive<Value<F>> const& x) { return PositiveValue<F>(pos(x._v)); }
-    friend Positive<Value<F>> hlf(Positive<Value<F>> const& x) { return PositiveValue<F>(hlf(x._v)); }
+    friend Positive<Value<F>> nul(Positive<Value<F>> const& x) { return PositiveValue<F>(nul(static_cast<F const&>(x))); }
+    friend Positive<Value<F>> pos(Positive<Value<F>> const& x) { return PositiveValue<F>(pos(static_cast<F const&>(x))); }
+    friend Positive<Value<F>> hlf(Positive<Value<F>> const& x) { return PositiveValue<F>(hlf(static_cast<F const&>(x))); }
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
         return pow(Positive<Bounds<F>>(x),m); }
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Int n) {
@@ -301,14 +102,550 @@ template<class F> class Positive<Value<F>> : public Value<F> {
 };
 
 template<class F> inline PositiveValue<F> cast_positive(Value<F> const& x) {
-    return PositiveValue<F>(x); }
+    return PositiveValue<F>(x);
+}
+template<class F> inline Positive<F> cast_positive(Positive<F> const& x) {
+    return x;
+}
+template<class F> inline F const& cast_unsigned(Positive<F> const& x) {
+    return static_cast<F const&>(x);
+}
 
-static_assert(Same<decltype(declval<FloatDPValue>() < declval<Rational>()),Boolean>);
 
-extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatDP>::output_places;
-extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatMP>::output_places;
+template<ARawFloat F> Positive<Bounds<F>> operator+(Positive<F> const& x1, Positive<F> const& x2) {
+    return cast_positive(cast_unsigned(x1)+cast_unsigned(x2)); }
+template<ARawFloat F> Positive<Bounds<F>> operator*(Positive<F> const& x1, Positive<F> const& x2) {
+    return cast_positive(cast_unsigned(x1)*cast_unsigned(x2)); }
+template<ARawFloat F> Positive<Bounds<F>> operator/(Positive<F> const& x1, Positive<F> const& x2) {
+    return cast_positive(cast_unsigned(x1)/cast_unsigned(x2)); }
+template<ARawFloat F> Positive<F> max(Positive<F> const& x1, Positive<F> const& x2) {
+    return cast_positive(max(cast_unsigned(x1),cast_unsigned(x2))); }
+template<ARawFloat F> Positive<F> max(Positive<F> const& x1, F const& x2) {
+    return cast_positive(max(cast_unsigned(x1),x2)); }
+template<ARawFloat F> Positive<F> max(F const& x1, Positive<F> const& x2) {
+    return cast_positive(max(x1,cast_unsigned(x2))); }
+template<ARawFloat F> Positive<F> min(Positive<F> const& x1, Positive<F> const& x2) {
+    return cast_positive(min(cast_unsigned(x1),cast_unsigned(x2))); }
 
+inline Bounds<FloatDP> add(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return add(Bounds<FloatDP>(x1),Bounds<FloatDP>(x2)); }
+inline Bounds<FloatDP> sub(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return sub(Bounds<FloatDP>(x1),Bounds<FloatDP>(x2)); }
+inline Bounds<FloatDP> mul(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return mul(Bounds<FloatDP>(x1),Bounds<FloatDP>(x2)); }
+inline Bounds<FloatDP> div(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return div(Bounds<FloatDP>(x1),Bounds<FloatDP>(x2)); }
+inline Bounds<FloatDP> pow(Value<FloatDP> const& x, Int n) { return pow(Bounds<FloatDP>(x),n); }
+inline Bounds<FloatDP> sqr(Value<FloatDP> const& x) { return sqr(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> rec(Value<FloatDP> const& x) { return rec(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> sqrt(Value<FloatDP> const& x) { return sqrt(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> exp(Value<FloatDP> const& x) { return exp(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> log(Value<FloatDP> const& x) { return log(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> sin(Value<FloatDP> const& x) { return sin(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> cos(Value<FloatDP> const& x) { return cos(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> tan(Value<FloatDP> const& x) { return tan(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> asin(Value<FloatDP> const& x) { return asin(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> acos(Value<FloatDP> const& x) { return acos(Bounds<FloatDP>(x)); }
+inline Bounds<FloatDP> atan(Value<FloatDP> const& x) { return atan(Bounds<FloatDP>(x)); }
+
+inline Boolean eq(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return x1.dbl == x2.dbl; }
+inline Boolean lt(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return x1.dbl <  x2.dbl; }
+
+inline Bounds<FloatDP> operator+(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return add(x1,x2); }
+inline Bounds<FloatDP> operator-(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return sub(x1,x2); }
+inline Bounds<FloatDP> operator*(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return mul(x1,x2); }
+inline Bounds<FloatDP> operator/(Value<FloatDP> const& x1, Value<FloatDP> const& x2) { return div(x1,x2); }
+
+Bounds<FloatMP> add(Value<FloatMP> const& x1, Value<FloatMP> const& x2);
+Bounds<FloatMP> sub(Value<FloatMP> const& x1, Value<FloatMP> const& x2);
+Bounds<FloatMP> mul(Value<FloatMP> const& x1, Value<FloatMP> const& x2);
+Bounds<FloatMP> div(Value<FloatMP> const& x1, Value<FloatMP> const& x2);
+inline Bounds<FloatMP> pow(Value<FloatMP> const& x, Int n) { return pow(Bounds<FloatMP>(x),n); }
+inline Bounds<FloatMP> sqr(Value<FloatMP> const& x) { return sqr(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> rec(Value<FloatMP> const& x) { return rec(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> sqrt(Value<FloatMP> const& x) { return sqrt(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> exp(Value<FloatMP> const& x) { return exp(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> log(Value<FloatMP> const& x) { return log(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> sin(Value<FloatMP> const& x) { return sin(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> cos(Value<FloatMP> const& x) { return cos(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> tan(Value<FloatMP> const& x) { return tan(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> asin(Value<FloatMP> const& x) { return asin(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> acos(Value<FloatMP> const& x) { return acos(Bounds<FloatMP>(x)); }
+inline Bounds<FloatMP> atan(Value<FloatMP> const& x) { return atan(Bounds<FloatMP>(x)); }
+
+inline Boolean eq(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return x1 == x2; }
+inline Boolean lt(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return x1 <  x2; }
+
+inline Bounds<FloatMP> operator+(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return add(x1,x2); }
+inline Bounds<FloatMP> operator-(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return sub(x1,x2); }
+inline Bounds<FloatMP> operator*(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return mul(x1,x2); }
+inline Bounds<FloatMP> operator/(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return div(x1,x2); }
+
+
+
+inline Bounds<FloatDP> add(Int const& n1, Value<FloatDP> const& x2) { return add(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Bounds<FloatDP> sub(Int const& n1, Value<FloatDP> const& x2) { return sub(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Bounds<FloatDP> mul(Int const& n1, Value<FloatDP> const& x2) { return mul(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Bounds<FloatDP> div(Int const& n1, Value<FloatDP> const& x2) { return div(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Bounds<FloatDP> add(Value<FloatDP> const& x1, Int const& n2) { return add(x1,Value<FloatDP>(n2,x1.precision())); }
+inline Bounds<FloatDP> sub(Value<FloatDP> const& x1, Int const& n2) { return sub(x1,Value<FloatDP>(n2,x1.precision())); }
+inline Bounds<FloatDP> mul(Value<FloatDP> const& x1, Int const& n2) { return mul(x1,Value<FloatDP>(n2,x1.precision())); }
+inline Bounds<FloatDP> div(Value<FloatDP> const& x1, Int const& n2) { return div(x1,Value<FloatDP>(n2,x1.precision())); }
+
+inline Value<FloatDP> max(Int const& n1, Value<FloatDP> const& x2) { return max(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Value<FloatDP> min(Int const& n1, Value<FloatDP> const& x2) { return min(Value<FloatDP>(n1,x2.precision()),x2); }
+inline Value<FloatDP> max(Value<FloatDP> const& x1, Int const& n2) { return max(x1,Value<FloatDP>(n2,x1.precision())); }
+inline Value<FloatDP> min(Value<FloatDP> const& x1, Int const& n2) { return min(x1,Value<FloatDP>(n2,x1.precision())); }
+
+inline Bounds<FloatDP> operator+(Value<FloatDP> x1, Int n2) { return add(x1,n2); }
+inline Bounds<FloatDP> operator-(Value<FloatDP> x1, Int n2) { return sub(x1,n2); }
+inline Bounds<FloatDP> operator*(Value<FloatDP> x1, Int n2) { return mul(x1,n2); }
+inline Bounds<FloatDP> operator/(Value<FloatDP> x1, Int n2) { return div(x1,n2); }
+inline Bounds<FloatDP> operator+(Int n1, Value<FloatDP> x2) { return add(n1,x2); }
+inline Bounds<FloatDP> operator-(Int n1, Value<FloatDP> x2) { return sub(n1,x2); }
+inline Bounds<FloatDP> operator*(Int n1, Value<FloatDP> x2) { return mul(n1,x2); }
+inline Bounds<FloatDP> operator/(Int n1, Value<FloatDP> x2) { return div(n1,x2); }
+
+inline Boolean operator==(Value<FloatDP> x1, Int n2) { return x1==Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator!=(Value<FloatDP> x1, Int n2) { return x1!=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator> (Value<FloatDP> x1, Int n2) { return x1> Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator< (Value<FloatDP> x1, Int n2) { return x1< Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator>=(Value<FloatDP> x1, Int n2) { return x1>=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator<=(Value<FloatDP> x1, Int n2) { return x1<=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator==(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())==x2; }
+inline Boolean operator!=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())!=x2; }
+inline Boolean operator> (Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())> x2; }
+inline Boolean operator< (Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())< x2; }
+inline Boolean operator>=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())>=x2; }
+inline Boolean operator<=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())<=x2; }
+
+inline Boolean operator==(Value<FloatDP> x1, Nat m2) { return x1==Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator!=(Value<FloatDP> x1, Nat m2) { return x1!=Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator> (Value<FloatDP> x1, Nat m2) { return x1> Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator< (Value<FloatDP> x1, Nat m2) { return x1< Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator>=(Value<FloatDP> x1, Nat m2) { return x1>=Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator<=(Value<FloatDP> x1, Nat m2) { return x1<=Value<FloatDP>(m2,x1.precision()); }
+inline Boolean operator==(Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())==x2; }
+inline Boolean operator!=(Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())!=x2; }
+inline Boolean operator> (Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())> x2; }
+inline Boolean operator< (Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())< x2; }
+inline Boolean operator>=(Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())>=x2; }
+inline Boolean operator<=(Nat m1, Value<FloatDP> x2) { return Value<FloatDP>(m1,x2.precision())<=x2; }
+
+/* Comparisons with Dbl already present
+inline Boolean operator==(Value<FloatDP> x1, Int n2) { return x1==Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator!=(Value<FloatDP> x1, Int n2) { return x1!=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator< (Value<FloatDP> x1, Int n2) { return x1< Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator> (Value<FloatDP> x1, Int n2) { return x1> Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator<=(Value<FloatDP> x1, Int n2) { return x1<=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator>=(Value<FloatDP> x1, Int n2) { return x1>=Value<FloatDP>(n2,x1.precision()); }
+inline Boolean operator==(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())==x2; }
+inline Boolean operator!=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())!=x2; }
+inline Boolean operator< (Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())< x2; }
+inline Boolean operator> (Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())> x2; }
+inline Boolean operator<=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())<=x2; }
+inline Boolean operator>=(Int n1, Value<FloatDP> x2) { return Value<FloatDP>(n1,x2.precision())>=x2; }
+*/
+
+inline Bounds<FloatDP> operator+(Value<FloatDP> x1, ExactDouble d2) { return add(x1,Value<FloatDP>(d2,x1.precision())); }
+inline Bounds<FloatDP> operator-(Value<FloatDP> x1, ExactDouble d2) { return sub(x1,Value<FloatDP>(d2,x1.precision())); }
+inline Bounds<FloatDP> operator*(Value<FloatDP> x1, ExactDouble d2) { return mul(x1,Value<FloatDP>(d2,x1.precision())); }
+inline Bounds<FloatDP> operator/(Value<FloatDP> x1, ExactDouble d2) { return div(x1,Value<FloatDP>(d2,x1.precision())); }
+
+inline Bounds<FloatMP> add(Int const& n1, Value<FloatMP> const& x2) { return add(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Bounds<FloatMP> sub(Int const& n1, Value<FloatMP> const& x2) { return sub(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Bounds<FloatMP> mul(Int const& n1, Value<FloatMP> const& x2) { return mul(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Bounds<FloatMP> div(Int const& n1, Value<FloatMP> const& x2) { return div(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Bounds<FloatMP> add(Value<FloatMP> const& x1, Int const& n2) { return add(x1,Value<FloatMP>(n2,x1.precision())); }
+inline Bounds<FloatMP> sub(Value<FloatMP> const& x1, Int const& n2) { return sub(x1,Value<FloatMP>(n2,x1.precision())); }
+inline Bounds<FloatMP> mul(Value<FloatMP> const& x1, Int const& n2) { return mul(x1,Value<FloatMP>(n2,x1.precision())); }
+inline Bounds<FloatMP> div(Value<FloatMP> const& x1, Int const& n2) { return div(x1,Value<FloatMP>(n2,x1.precision())); }
+
+inline Value<FloatMP> max(Int const& n1, Value<FloatMP> const& x2) { return max(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Value<FloatMP> min(Int const& n1, Value<FloatMP> const& x2) { return min(Value<FloatMP>(n1,x2.precision()),x2); }
+inline Value<FloatMP> max(Value<FloatMP> const& x1, Int const& n2) { return max(x1,Value<FloatMP>(n2,x1.precision())); }
+inline Value<FloatMP> min(Value<FloatMP> const& x1, Int const& n2) { return min(x1,Value<FloatMP>(n2,x1.precision())); }
+
+inline Bounds<FloatMP> operator+(Value<FloatMP> x1, Int n2) { return add(x1,n2); }
+inline Bounds<FloatMP> operator-(Value<FloatMP> x1, Int n2) { return sub(x1,n2); }
+inline Bounds<FloatMP> operator*(Value<FloatMP> x1, Int n2) { return mul(x1,n2); }
+inline Bounds<FloatMP> operator/(Value<FloatMP> x1, Int n2) { return div(x1,n2); }
+inline Bounds<FloatMP> operator+(Int n1, Value<FloatMP> x2) { return add(n1,x2); }
+inline Bounds<FloatMP> operator-(Int n1, Value<FloatMP> x2) { return sub(n1,x2); }
+inline Bounds<FloatMP> operator*(Int n1, Value<FloatMP> x2) { return mul(n1,x2); }
+inline Bounds<FloatMP> operator/(Int n1, Value<FloatMP> x2) { return div(n1,x2); }
+
+/* Comparisons with Dbl already present
+inline Boolean operator==(Value<FloatMP> x1, Int n2) { return x1==Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator!=(Value<FloatMP> x1, Int n2) { return x1!=Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator< (Value<FloatMP> x1, Int n2) { return x1< Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator> (Value<FloatMP> x1, Int n2) { return x1> Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator<=(Value<FloatMP> x1, Int n2) { return x1<=Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator>=(Value<FloatMP> x1, Int n2) { return x1>=Value<FloatMP>(n2,x1.precision()); }
+inline Boolean operator==(Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())==x2; }
+inline Boolean operator!=(Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())!=x2; }
+inline Boolean operator< (Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())< x2; }
+inline Boolean operator> (Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())> x2; }
+inline Boolean operator<=(Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())<=x2; }
+inline Boolean operator>=(Int n1, Value<FloatMP> x2) { return Value<FloatMP>(n1,x2.precision())>=x2; }
+*/
+
+inline Bounds<FloatMP> operator+(Value<FloatMP> x1, ExactDouble d2) { return add(x1,Value<FloatMP>(d2,x1.precision())); }
+inline Bounds<FloatMP> operator-(Value<FloatMP> x1, ExactDouble d2) { return sub(x1,Value<FloatMP>(d2,x1.precision())); }
+inline Bounds<FloatMP> operator*(Value<FloatMP> x1, ExactDouble d2) { return mul(x1,Value<FloatMP>(d2,x1.precision())); }
+inline Bounds<FloatMP> operator/(Value<FloatMP> x1, ExactDouble d2) { return div(x1,Value<FloatMP>(d2,x1.precision())); }
+
+
+/*
+template<ARawFloat F> Bounds<F> operator+(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> operator-(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> operator*(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> operator/(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> operator+(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> operator-(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> operator*(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> operator/(Value<F> const& x1, Int const& n2);
+
+template<ARawFloat F> Bounds<F> add(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> sub(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> mul(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> div(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> max(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> min(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Bounds<F> add(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> sub(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> mul(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> div(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> max(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Bounds<F> min(Value<F> const& x1, Int const& n2);
+
+template<ARawFloat F> Boolean operator==(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator!=(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator< (Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator> (Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator<=(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator>=(Int const& n1, Value<F> const& x2);
+template<ARawFloat F> Boolean operator==(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Boolean operator!=(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Boolean operator< (Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Boolean operator> (Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Boolean operator<=(Value<F> const& x1, Int const& n2);
+template<ARawFloat F> Boolean operator>=(Value<F> const& x1, Int const& n2);
+*/
+
+class Integer;
+template<ARawFloat F> inline Bounds<F> add(Integer const& z1, Value<F> const& x2) { return add(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> sub(Integer const& z1, Value<F> const& x2) { return sub(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> mul(Integer const& z1, Value<F> const& x2) { return mul(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> div(Integer const& z1, Value<F> const& x2) { return div(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> add(Value<F> const& x1, Integer const& z2) { return add(x1,Value<F>(z2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> sub(Value<F> const& x1, Integer const& z2) { return sub(x1,Value<F>(z2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> mul(Value<F> const& x1, Integer const& z2) { return mul(x1,Value<F>(z2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> div(Value<F> const& x1, Integer const& z2) { return div(x1,Value<F>(z2,x1.precision())); }
+
+template<ARawFloat F> inline Value<F> max(Integer const& z1, Value<F> const& x2) { return max(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Value<F> min(Integer const& z1, Value<F> const& x2) { return min(Value<F>(z1,x2.precision()),x2); }
+template<ARawFloat F> inline Value<F> max(Value<F> const& x1, Integer const& z2) { return max(x1,Value<F>(z2,x1.precision())); }
+template<ARawFloat F> inline Value<F> min(Value<F> const& x1, Integer const& z2) { return min(x1,Value<F>(z2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> operator+(Value<F> x1, Integer z2) { return add(x1,z2); }
+template<ARawFloat F> inline Bounds<F> operator-(Value<F> x1, Integer z2) { return sub(x1,z2); }
+template<ARawFloat F> inline Bounds<F> operator*(Value<F> x1, Integer z2) { return mul(x1,z2); }
+template<ARawFloat F> inline Bounds<F> operator/(Value<F> x1, Integer z2) { return div(x1,z2); }
+template<ARawFloat F> inline Bounds<F> operator+(Integer z1, Value<F> x2) { return add(z1,x2); }
+template<ARawFloat F> inline Bounds<F> operator-(Integer z1, Value<F> x2) { return sub(z1,x2); }
+template<ARawFloat F> inline Bounds<F> operator*(Integer z1, Value<F> x2) { return mul(z1,x2); }
+template<ARawFloat F> inline Bounds<F> operator/(Integer z1, Value<F> x2) { return div(z1,x2); }
+
+template<ARawFloat F> inline Boolean operator==(Value<F> x1, Integer z2) { return Dyadic(x1)==z2; }
+template<ARawFloat F> inline Boolean operator!=(Value<F> x1, Integer z2) { return Dyadic(x1)!=z2; }
+template<ARawFloat F> inline Boolean operator< (Value<F> x1, Integer z2) { return Dyadic(x1)< z2; }
+template<ARawFloat F> inline Boolean operator> (Value<F> x1, Integer z2) { return Dyadic(x1)> z2; }
+template<ARawFloat F> inline Boolean operator<=(Value<F> x1, Integer z2) { return Dyadic(x1)<=z2; }
+template<ARawFloat F> inline Boolean operator>=(Value<F> x1, Integer z2) { return Dyadic(x1)>=z2; }
+template<ARawFloat F> inline Boolean operator==(Integer z1, Value<F> x2) { return z1==Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator!=(Integer z1, Value<F> x2) { return z1!=Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator< (Integer z1, Value<F> x2) { return z1< Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator> (Integer z1, Value<F> x2) { return z1> Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator<=(Integer z1, Value<F> x2) { return z1<=Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator>=(Integer z1, Value<F> x2) { return z1>=Dyadic(x2); }
+
+class Dyadic;
+template<ARawFloat F> inline Bounds<F> add(Dyadic const& w1, Value<F> const& x2) { return add(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> sub(Dyadic const& w1, Value<F> const& x2) { return sub(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> mul(Dyadic const& w1, Value<F> const& x2) { return mul(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> div(Dyadic const& w1, Value<F> const& x2) { return div(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> add(Value<F> const& x1, Dyadic const& w2) { return add(x1,Value<F>(w2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> sub(Value<F> const& x1, Dyadic const& w2) { return sub(x1,Value<F>(w2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> mul(Value<F> const& x1, Dyadic const& w2) { return mul(x1,Value<F>(w2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> div(Value<F> const& x1, Dyadic const& w2) { return div(x1,Value<F>(w2,x1.precision())); }
+
+template<ARawFloat F> inline Value<F> max(Dyadic const& w1, Value<F> const& x2) { return max(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Value<F> min(Dyadic const& w1, Value<F> const& x2) { return min(Value<F>(w1,x2.precision()),x2); }
+template<ARawFloat F> inline Value<F> max(Value<F> const& x1, Dyadic const& w2) { return max(x1,Value<F>(w2,x1.precision())); }
+template<ARawFloat F> inline Value<F> min(Value<F> const& x1, Dyadic const& w2) { return min(x1,Value<F>(w2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> operator+(Value<F> x1, Dyadic w2) { return add(x1,w2); }
+template<ARawFloat F> inline Bounds<F> operator-(Value<F> x1, Dyadic w2) { return sub(x1,w2); }
+template<ARawFloat F> inline Bounds<F> operator*(Value<F> x1, Dyadic w2) { return mul(x1,w2); }
+template<ARawFloat F> inline Bounds<F> operator/(Value<F> x1, Dyadic w2) { return div(x1,w2); }
+template<ARawFloat F> inline Bounds<F> operator+(Dyadic w1, Value<F> x2) { return add(w1,x2); }
+template<ARawFloat F> inline Bounds<F> operator-(Dyadic w1, Value<F> x2) { return sub(w1,x2); }
+template<ARawFloat F> inline Bounds<F> operator*(Dyadic w1, Value<F> x2) { return mul(w1,x2); }
+template<ARawFloat F> inline Bounds<F> operator/(Dyadic w1, Value<F> x2) { return div(w1,x2); }
+
+template<ARawFloat F> inline Boolean operator==(Value<F> x1, Dyadic w2) { return Dyadic(x1)==w2; }
+template<ARawFloat F> inline Boolean operator!=(Value<F> x1, Dyadic w2) { return Dyadic(x1)!=w2; }
+template<ARawFloat F> inline Boolean operator< (Value<F> x1, Dyadic w2) { return Dyadic(x1)< w2; }
+template<ARawFloat F> inline Boolean operator> (Value<F> x1, Dyadic w2) { return Dyadic(x1)> w2; }
+template<ARawFloat F> inline Boolean operator<=(Value<F> x1, Dyadic w2) { return Dyadic(x1)<=w2; }
+template<ARawFloat F> inline Boolean operator>=(Value<F> x1, Dyadic w2) { return Dyadic(x1)>=w2; }
+template<ARawFloat F> inline Boolean operator==(Dyadic w1, Value<F> x2) { return w1==Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator!=(Dyadic w1, Value<F> x2) { return w1!=Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator< (Dyadic w1, Value<F> x2) { return w1< Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator> (Dyadic w1, Value<F> x2) { return w1> Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator<=(Dyadic w1, Value<F> x2) { return w1<=Dyadic(x2); }
+template<ARawFloat F> inline Boolean operator>=(Dyadic w1, Value<F> x2) { return w1>=Dyadic(x2); }
+
+class Rational;
+template<ARawFloat F> inline Bounds<F> add(Rational const& q1, Value<F> const& x2) { return add(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> sub(Rational const& q1, Value<F> const& x2) { return sub(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> mul(Rational const& q1, Value<F> const& x2) { return mul(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> div(Rational const& q1, Value<F> const& x2) { return div(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> add(Value<F> const& x1, Rational const& q2) { return add(x1,Bounds<F>(q2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> sub(Value<F> const& x1, Rational const& q2) { return sub(x1,Bounds<F>(q2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> mul(Value<F> const& x1, Rational const& q2) { return mul(x1,Bounds<F>(q2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> div(Value<F> const& x1, Rational const& q2) { return div(x1,Bounds<F>(q2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> max(Rational const& q1, Value<F> const& x2) { return max(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> min(Rational const& q1, Value<F> const& x2) { return min(Bounds<F>(q1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> max(Value<F> const& x1, Rational const& q2) { return max(x1,Bounds<F>(q2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> min(Value<F> const& x1, Rational const& q2) { return min(x1,Bounds<F>(q2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> operator+(Value<F> x1, Rational q2) { return add(x1,q2); }
+template<ARawFloat F> inline Bounds<F> operator-(Value<F> x1, Rational q2) { return sub(x1,q2); }
+template<ARawFloat F> inline Bounds<F> operator*(Value<F> x1, Rational q2) { return mul(x1,q2); }
+template<ARawFloat F> inline Bounds<F> operator/(Value<F> x1, Rational q2) { return div(x1,q2); }
+template<ARawFloat F> inline Bounds<F> operator+(Rational q1, Value<F> x2) { return add(q1,x2); }
+template<ARawFloat F> inline Bounds<F> operator-(Rational q1, Value<F> x2) { return sub(q1,x2); }
+template<ARawFloat F> inline Bounds<F> operator*(Rational q1, Value<F> x2) { return mul(q1,x2); }
+template<ARawFloat F> inline Bounds<F> operator/(Rational q1, Value<F> x2) { return div(q1,x2); }
+
+template<ARawFloat F> ValidatedKleenean operator==(Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())==x2; }
+template<ARawFloat F> ValidatedKleenean operator!=(Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())!=x2; }
+template<ARawFloat F> ValidatedKleenean operator< (Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())< x2; }
+template<ARawFloat F> ValidatedKleenean operator> (Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())> x2; }
+template<ARawFloat F> ValidatedKleenean operator<=(Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())<=x2; }
+template<ARawFloat F> ValidatedKleenean operator>=(Rational const& q1, Value<F> const& x2) { return Bounds<F>(q1,x2.precision())>=x2; }
+template<ARawFloat F> ValidatedKleenean operator==(Value<F> const& x1, Rational const& q2) { return x1==Bounds<F>(q2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator!=(Value<F> const& x1, Rational const& q2) { return x1!=Bounds<F>(q2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator< (Value<F> const& x1, Rational const& q2) { return x1< Bounds<F>(q2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator> (Value<F> const& x1, Rational const& q2) { return x1> Bounds<F>(q2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator<=(Value<F> const& x1, Rational const& q2) { return x1<=Bounds<F>(q2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator>=(Value<F> const& x1, Rational const& q2) { return x1>=Bounds<F>(q2,x1.precision()); }
+
+class Real;
+template<ARawFloat F> inline Bounds<F> add(Real const& r1, Value<F> const& x2) { return add(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> sub(Real const& r1, Value<F> const& x2) { return sub(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> mul(Real const& r1, Value<F> const& x2) { return mul(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> div(Real const& r1, Value<F> const& x2) { return div(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> add(Value<F> const& x1, Real const& r2) { return add(x1,Bounds<F>(r2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> sub(Value<F> const& x1, Real const& r2) { return sub(x1,Bounds<F>(r2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> mul(Value<F> const& x1, Real const& r2) { return mul(x1,Bounds<F>(r2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> div(Value<F> const& x1, Real const& r2) { return div(x1,Bounds<F>(r2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> max(Real const& r1, Value<F> const& x2) { return max(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> min(Real const& r1, Value<F> const& x2) { return min(Bounds<F>(r1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> max(Value<F> const& x1, Real const& r2) { return max(x1,Bounds<F>(r2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> min(Value<F> const& x1, Real const& r2) { return min(x1,Bounds<F>(r2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> operator+(Value<F> x1, Real r2) { return add(x1,r2); }
+template<ARawFloat F> inline Bounds<F> operator-(Value<F> x1, Real r2) { return sub(x1,r2); }
+template<ARawFloat F> inline Bounds<F> operator*(Value<F> x1, Real r2) { return mul(x1,r2); }
+template<ARawFloat F> inline Bounds<F> operator/(Value<F> x1, Real r2) { return div(x1,r2); }
+template<ARawFloat F> inline Bounds<F> operator+(Real r1, Value<F> x2) { return add(r1,x2); }
+template<ARawFloat F> inline Bounds<F> operator-(Real r1, Value<F> x2) { return sub(r1,x2); }
+template<ARawFloat F> inline Bounds<F> operator*(Real r1, Value<F> x2) { return mul(r1,x2); }
+template<ARawFloat F> inline Bounds<F> operator/(Real r1, Value<F> x2) { return div(r1,x2); }
+
+template<ARawFloat F> ValidatedKleenean operator==(Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())==x2; }
+template<ARawFloat F> ValidatedKleenean operator!=(Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())!=x2; }
+template<ARawFloat F> ValidatedKleenean operator< (Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())< x2; }
+template<ARawFloat F> ValidatedKleenean operator> (Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())> x2; }
+template<ARawFloat F> ValidatedKleenean operator<=(Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())<=x2; }
+template<ARawFloat F> ValidatedKleenean operator>=(Real const& r1, Value<F> const& x2) { return Bounds<F>(r1,x2.precision())>=x2; }
+template<ARawFloat F> ValidatedKleenean operator==(Value<F> const& x1, Real const& r2) { return x1==Bounds<F>(r2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator!=(Value<F> const& x1, Real const& r2) { return x1!=Bounds<F>(r2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator< (Value<F> const& x1, Real const& r2) { return x1< Bounds<F>(r2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator> (Value<F> const& x1, Real const& r2) { return x1> Bounds<F>(r2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator<=(Value<F> const& x1, Real const& r2) { return x1<=Bounds<F>(r2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator>=(Value<F> const& x1, Real const& r2) { return x1>=Bounds<F>(r2,x1.precision()); }
+
+using ValidatedNumber = Number<ValidatedTag>;
+template<ARawFloat F> inline Bounds<F> add(ValidatedNumber const& y1, Value<F> const& x2) { return add(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> sub(ValidatedNumber const& y1, Value<F> const& x2) { return sub(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> mul(ValidatedNumber const& y1, Value<F> const& x2) { return mul(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> div(ValidatedNumber const& y1, Value<F> const& x2) { return div(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> add(Value<F> const& x1, ValidatedNumber const& y2) { return add(x1,Bounds<F>(y2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> sub(Value<F> const& x1, ValidatedNumber const& y2) { return sub(x1,Bounds<F>(y2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> mul(Value<F> const& x1, ValidatedNumber const& y2) { return mul(x1,Bounds<F>(y2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> div(Value<F> const& x1, ValidatedNumber const& y2) { return div(x1,Bounds<F>(y2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> max(ValidatedNumber const& y1, Value<F> const& x2) { return max(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> min(ValidatedNumber const& y1, Value<F> const& x2) { return min(Bounds<F>(y1,x2.precision()),x2); }
+template<ARawFloat F> inline Bounds<F> max(Value<F> const& x1, ValidatedNumber const& y2) { return max(x1,Bounds<F>(y2,x1.precision())); }
+template<ARawFloat F> inline Bounds<F> min(Value<F> const& x1, ValidatedNumber const& y2) { return min(x1,Bounds<F>(y2,x1.precision())); }
+
+template<ARawFloat F> inline Bounds<F> operator+(Value<F> x1, ValidatedNumber y2) { return add(x1,y2); }
+template<ARawFloat F> inline Bounds<F> operator-(Value<F> x1, ValidatedNumber y2) { return sub(x1,y2); }
+template<ARawFloat F> inline Bounds<F> operator*(Value<F> x1, ValidatedNumber y2) { return mul(x1,y2); }
+template<ARawFloat F> inline Bounds<F> operator/(Value<F> x1, ValidatedNumber y2) { return div(x1,y2); }
+template<ARawFloat F> inline Bounds<F> operator+(ValidatedNumber y1, Value<F> x2) { return add(y1,x2); }
+template<ARawFloat F> inline Bounds<F> operator-(ValidatedNumber y1, Value<F> x2) { return sub(y1,x2); }
+template<ARawFloat F> inline Bounds<F> operator*(ValidatedNumber y1, Value<F> x2) { return mul(y1,x2); }
+template<ARawFloat F> inline Bounds<F> operator/(ValidatedNumber y1, Value<F> x2) { return div(y1,x2); }
+
+template<ARawFloat F> ValidatedKleenean operator==(ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())==x2; }
+template<ARawFloat F> ValidatedKleenean operator!=(ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())!=x2; }
+template<ARawFloat F> ValidatedKleenean operator< (ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())< x2; }
+template<ARawFloat F> ValidatedKleenean operator> (ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())> x2; }
+template<ARawFloat F> ValidatedKleenean operator<=(ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())<=x2; }
+template<ARawFloat F> ValidatedKleenean operator>=(ValidatedNumber const& y1, Value<F> const& x2) { return Bounds<F>(y1,x2.precision())>=x2; }
+template<ARawFloat F> ValidatedKleenean operator==(Value<F> const& x1, ValidatedNumber const& y2) { return x1==Bounds<F>(y2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator!=(Value<F> const& x1, ValidatedNumber const& y2) { return x1!=Bounds<F>(y2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator< (Value<F> const& x1, ValidatedNumber const& y2) { return x1< Bounds<F>(y2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator> (Value<F> const& x1, ValidatedNumber const& y2) { return x1> Bounds<F>(y2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator<=(Value<F> const& x1, ValidatedNumber const& y2) { return x1<=Bounds<F>(y2,x1.precision()); }
+template<ARawFloat F> ValidatedKleenean operator>=(Value<F> const& x1, ValidatedNumber const& y2) { return x1>=Bounds<F>(y2,x1.precision()); }
+
+
+
+template<ARawFloat F> Bounds<F> add(Bounds<F> const& x1, Value<F> const& x2) {
+    return Bounds<F>(add(down,x1.lower_raw(),x2),add(up,x1.upper_raw(),x2)); }
+template<ARawFloat F> Bounds<F> sub(Bounds<F> const& x1, Value<F> const& x2) {
+    return Bounds<F>(sub(down,x1.lower_raw(),x2),sub(up,x1.upper_raw(),x2)); }
+template<ARawFloat F> Bounds<F> mul(Bounds<F> const& x1, Value<F> const& x2) {
+    return mul(x1,Bounds<F>(x2)); }
+template<ARawFloat F> Bounds<F> div(Bounds<F> const& x1, Value<F> const& x2) {
+    return div(x1,Bounds<F>(x2)); }
+template<ARawFloat F> Bounds<F> add(Value<F> const& x1, Bounds<F> const& x2) {
+    return Bounds<F>(add(down,x1,x2.lower_raw()),add(up,x1,x2.upper_raw())); }
+template<ARawFloat F> Bounds<F> sub(Value<F> const& x1, Bounds<F> const& x2) {
+    return Bounds<F>(sub(down,x1,x2.upper_raw()),sub(up,x1,x2.lower_raw())); }
+template<ARawFloat F> Bounds<F> mul(Value<F> const& x1, Bounds<F> const& x2) {
+    return mul(Bounds<F>(x1),x2); }
+template<ARawFloat F> Bounds<F> div(Value<F> const& x1, Bounds<F> const& x2) {
+    return div(Bounds<F>(x1),x2); }
+
+template<ARawFloat F> Bounds<F> max(Bounds<F> const& x1, Value<F> const& x2) {
+    return Bounds<F>(max(down,x1.lower_raw(),x2),max(up,x1.upper_raw(),x2)); }
+template<ARawFloat F> Bounds<F> min(Bounds<F> const& x1, Value<F> const& x2) {
+    return Bounds<F>(min(down,x1.lower_raw(),x2),min(up,x1.upper_raw(),x2)); }
+template<ARawFloat F> Bounds<F> max(Value<F> const& x1, Bounds<F> const& x2) {
+    return Bounds<F>(max(down,x1,x2.lower_raw()),max(up,x1,x2.upper_raw())); }
+template<ARawFloat F> Bounds<F> min(Value<F> const& x1, Bounds<F> const& x2) {
+    return Bounds<F>(min(down,x1,x2.lower_raw()),min(up,x1,x2.upper_raw())); }
+
+template<ARawFloat F> Bounds<F> operator+(Bounds<F> const& x1, Value<F> const& x2) { return add(x1,x2); }
+template<ARawFloat F> Bounds<F> operator-(Bounds<F> const& x1, Value<F> const& x2) { return sub(x1,x2); }
+template<ARawFloat F> Bounds<F> operator*(Bounds<F> const& x1, Value<F> const& x2) { return mul(x1,x2); }
+template<ARawFloat F> Bounds<F> operator/(Bounds<F> const& x1, Value<F> const& x2) { return div(x1,x2); }
+template<ARawFloat F> Bounds<F> operator+(Value<F> const& x1, Bounds<F> const& x2) { return add(x1,x2); }
+template<ARawFloat F> Bounds<F> operator-(Value<F> const& x1, Bounds<F> const& x2) { return sub(x1,x2); }
+template<ARawFloat F> Bounds<F> operator*(Value<F> const& x1, Bounds<F> const& x2) { return mul(x1,x2); }
+template<ARawFloat F> Bounds<F> operator/(Value<F> const& x1, Bounds<F> const& x2) { return div(x1,x2); }
+
+template<ARawFloat F> ValidatedKleenean operator==(Bounds<F> const& x1, Value<F> const& x2) { return x1==Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator!=(Bounds<F> const& x1, Value<F> const& x2) { return x1!=Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator< (Bounds<F> const& x1, Value<F> const& x2) { return x1< Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator> (Bounds<F> const& x1, Value<F> const& x2) { return x1> Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator<=(Bounds<F> const& x1, Value<F> const& x2) { return x1<=Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator>=(Bounds<F> const& x1, Value<F> const& x2) { return x1>=Bounds<F>(x2); }
+template<ARawFloat F> ValidatedKleenean operator==(Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)==x2; }
+template<ARawFloat F> ValidatedKleenean operator!=(Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)!=x2; }
+template<ARawFloat F> ValidatedKleenean operator< (Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)< x2; }
+template<ARawFloat F> ValidatedKleenean operator> (Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)> x2; }
+template<ARawFloat F> ValidatedKleenean operator<=(Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)<=x2; }
+template<ARawFloat F> ValidatedKleenean operator>=(Value<F> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)>=x2; }
+
+
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> add(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return add(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> sub(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return sub(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> mul(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return mul(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> div(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return div(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> add(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return add(Ball<F,FE>(x1,x2.error_precision()),x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> sub(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return sub(Ball<F,FE>(x1,x2.error_precision()),x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> mul(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return mul(Ball<F,FE>(x1,x2.error_precision()),x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> div(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return div(Ball<F,FE>(x1,x2.error_precision()),x2); }
+
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> max(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return max(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> min(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return min(x1,Ball<F,FE>(x2,x1.error_precision())); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> max(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return max(Ball<F,FE>(x1,x2.error_precision()),x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> min(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return min(Ball<F,FE>(x1,x2.error_precision()),x2); }
+
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator+(Ball<F,FE> const& x1, Value<F> const& x2) { return add(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator-(Ball<F,FE> const& x1, Value<F> const& x2) { return sub(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator*(Ball<F,FE> const& x1, Value<F> const& x2) { return mul(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator/(Ball<F,FE> const& x1, Value<F> const& x2) { return div(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator+(Value<F> const& x1, Ball<F,FE> const& x2) { return add(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator-(Value<F> const& x1, Ball<F,FE> const& x2) { return sub(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator*(Value<F> const& x1, Ball<F,FE> const& x2) { return mul(x1,x2); }
+template<ARawFloat F, ARawFloat FE> Ball<F,FE> operator/(Value<F> const& x1, Ball<F,FE> const& x2) { return div(x1,x2); }
+
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator==(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1==Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator!=(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1!=Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator< (Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1< Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator> (Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1> Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator<=(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1<=Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator>=(Ball<F,FE> const& x1, Value<F> const& x2) {
+    return x1>=Ball<F,FE>(x2,x1.error_precision()); }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator==(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())==x2; }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator!=(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())!=x2; }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator< (Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())< x2; }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator> (Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())> x2; }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator<=(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())<=x2; }
+template<ARawFloat F, ARawFloat FE> ValidatedKleenean operator>=(Value<F> const& x1, Ball<F,FE> const& x2) {
+    return Ball<F,FE>(x1,x2.error_precision())>=x2; }
+
+
+template<ARawFloat F, class PRE> Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_add(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,RawFloatType<PRE>> sub(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_sub(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_mul(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,RawFloatType<PRE>> div(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    typedef RawFloat<PRE> FE; return Operations<Ball<F,FE>>::_div(x1,x2,pre); }
+
+template<ARawFloat F> Value<F> operator/(Value<F> const& v1, TwoExp const& e2) { return shft(v1,-e2.exponent()); }
+template<ARawFloat F> Value<F>& operator/=(Value<F>& v1, TwoExp const& e2) { return v1=v1/e2; }
+
+
+template<ARawFloat F> Error<F> operator+(Positive<Value<F>> const& v1, Error<F> const& e2);
+
+template<ARawFloat F> Bool same(Value<F> const& v1, Value<F> const& v2);
+template<ARawFloat F> Positive<F> cast_exact(Positive<UpperBound<F>> const&);
+template<ARawFloat F> Positive<F> cast_exact(Positive<Approximation<F>> const&);
 
 }
+
 
 #endif

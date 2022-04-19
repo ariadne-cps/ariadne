@@ -45,8 +45,8 @@ BoxDomainType input_bounds_to_domain(RealVariablesBox const& inputs) {
 }
 
 Pair<CoordinateFormulaPair,ExactIntervalType> centered_coordinate_transformation(Nat const& i, ExactIntervalType const& bounds) {
-    if (same(bounds.lower_bound(),-bounds.upper_bound())) return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)},bounds);
-    else return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)+EffectiveFormula::constant(EffectiveNumber(bounds.midpoint()))},ExactIntervalType(cast_exact(bounds.lower_bound()-bounds.midpoint()),cast_exact(bounds.upper_bound()-bounds.midpoint())));
+    if (same(bounds.lower_bound(),-bounds.upper_bound())) { return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)},bounds); }
+    else { return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)+EffectiveFormula::constant(EffectiveNumber(bounds.midpoint()))},ExactIntervalType(cast_exact(bounds.lower_bound()-bounds.midpoint()),cast_exact(bounds.upper_bound()-bounds.midpoint()))); }
 }
 
 

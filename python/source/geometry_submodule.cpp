@@ -637,7 +637,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
             box_class.def(pybind11::init<DyadicBox,PrecisionType>());
         }
 
-        typedef typename IntervalType::UpperBoundType::RawType FloatType;
+        typedef typename IntervalType::UpperBoundType FloatType;
         export_conversions<BoxWithUpperBound,FloatType>(box_class);
     }
 

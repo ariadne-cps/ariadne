@@ -82,15 +82,17 @@ RawFloatMP cast_raw_float(MultiplePrecision);
 template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
 #endif
 
+template<class F> class Rounded;
+
 
 template<class F> class Approximation;
 template<class F> class LowerBound;
 template<class F> class UpperBound;
 template<class F> class Bounds;
 template<class F, class FE=F> class Ball;
-template<class F> class Value;
-
 template<class F> class Error;
+template<class F> using Value = F;
+
 
 //! \relates Positive
 //! \name Type shorthands for positive user classes.
@@ -169,8 +171,6 @@ using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>; //!< <p/>
 using FloatMPDPBall = FloatBall<MultiplePrecision,DoublePrecision>; //!< <p/>
 //!@}
 
-void foo();
-
 //! \relates FloatMP
 //! \name Type synonyms for FloatMP based numbers.
 //!@{
@@ -200,7 +200,6 @@ template<class F> struct IsFloat<LowerBound<F>> : IsFloat<F> { };
 template<class F> struct IsFloat<UpperBound<F>> : IsFloat<F> { };
 template<class F> struct IsFloat<Bounds<F>> : IsFloat<F> { };
 template<class F, class FE> struct IsFloat<Ball<F,FE>> : IsFloat<F> { };
-template<class F> struct IsFloat<Value<F>> : IsFloat<F> { };
 template<class F> struct IsFloat<Error<F>> : IsFloat<F> { };
 template<> struct IsFloat<Dbl> : False { };
 
@@ -213,7 +212,6 @@ template<> struct IsNumber<FloatMP> : True { };
 template<class F> struct IsNumber<Approximation<F>> : IsNumber<F> { };
 template<class F> struct IsNumber<Bounds<F>> : IsNumber<F> { };
 template<class F, class FE> struct IsNumber<Ball<F,FE>> : IsNumber<F> { };
-template<class F> struct IsNumber<Value<F>> : IsNumber<F> { };
 
 template<class T> struct NumericTraits;
 

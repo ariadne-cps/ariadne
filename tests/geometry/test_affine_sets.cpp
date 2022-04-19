@@ -42,10 +42,9 @@ static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
-inline decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { return af <= FloatDPValue(w,dp); }
-inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1,dp)/x2; }
+
 template<class X> AffineConstraint<X> operator<=(const Dyadic& l, const Affine<X>& a) {
-    return AffineConstraint<X>({l,a.value().precision()},a,+infty); }
+    return AffineConstraint<X>({l,a.value().precision()},a,{+infty,a.value().precision()}); }
 template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const Dyadic& u) {
     return AffineConstraint<X>(-infty,a,u); }
 template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const Dyadic& u) {

@@ -140,7 +140,7 @@ template<> class Float<DP> {
   public:
     volatile double dbl;
   public:
-    typedef RawTag Paradigm;
+    typedef ExactTag Paradigm;
     typedef FloatDP NumericType;
     //! \brief The type representing the precision of the number.
     typedef DoublePrecision PrecisionType;
@@ -188,10 +188,12 @@ template<> class Float<DP> {
     Float(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     Float(const FloatDP& x) : dbl(x.dbl) { }
+    Float(const FloatDP& x, DoublePrecision) : dbl(x.dbl) { }
     //! \brief Assignment.
     template<BuiltinIntegral N> FloatDP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
     FloatDP& operator=(const ExactDouble& x);
+    FloatDP& operator=(const Dyadic& w);
     //! \brief Copy assignment.
     FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 
@@ -213,12 +215,19 @@ template<> class Float<DP> {
     explicit Float(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
     explicit Float(Rational const& q, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct an exact number from a rounded number DEPRECATED
+    explicit Float(const Rounded<FloatDP>& x, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.
     explicit operator Dyadic () const;
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
+
+    operator ExactNumber () const;
+
+    Ball<FloatDP> pm(Error<FloatDP> const&) const;
   public:
     FloatDP const& raw() const { return *this; }
+    FloatDP& raw() { return *this; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->dbl; }
     //! \brief The exact value as a decimal string.
@@ -242,9 +251,9 @@ template<> class Float<DP> {
     // Exact lattice operations
     friend FloatDP max(FloatDP x1, FloatDP x2) { return FloatDP(std::max(x1.dbl,x2.dbl)); }
     friend FloatDP min(FloatDP x1, FloatDP x2) { return FloatDP(std::min(x1.dbl,x2.dbl)); }
-    friend FloatDP abs(FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
-    friend FloatDP mag(FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
-    friend FloatDP mig(FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
+    friend Positive<FloatDP> abs(FloatDP x); // { return FloatDP(std::fabs(x.dbl)); }
+    friend PositiveUpperBound<FloatDP> mag(FloatDP x); // { return FloatDP(std::fabs(x.dbl)); }
+    friend PositiveLowerBound<FloatDP> mig(FloatDP x); //  { return FloatDP(std::fabs(x.dbl)); }
 
     // Exact arithmetic
     friend FloatDP nul(FloatDP x) { return FloatDP(+0.0); }
@@ -291,6 +300,7 @@ template<> class Float<DP> {
     friend FloatDP atan(CurrentRoundingMode, FloatDP x) { return FloatDP(atan_rnd(x.dbl)); }
     static FloatDP pi(CurrentRoundingMode, PrecisionType pr) { return FloatDP(pi_rnd()); }
 
+/*
     // Correctly rounded arithmetic
     friend FloatDP sqr(FloatDP x) { return FloatDP(sqr_rnd(x.dbl)); }
     friend FloatDP rec(FloatDP x) { return FloatDP(rec_rnd(x.dbl)); }
@@ -310,7 +320,7 @@ template<> class Float<DP> {
     friend FloatDP acos(FloatDP x) { return FloatDP(acos_rnd(x.dbl)); }
     friend FloatDP atan(FloatDP x) { return FloatDP(atan_rnd(x.dbl)); }
     static FloatDP pi(PrecisionType pr) { return FloatDP(pi_rnd()); }
-
+*/
   private:
     template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
@@ -450,6 +460,9 @@ template<> class Float<DP> {
     friend FloatDP mul_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t*y.dbl; return FloatDP(-t); }
     friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return FloatDP(-t); }
     friend FloatDP pow_opp(FloatDP x, int n);
+  public:
+    static Nat output_places;
+    static Void set_output_places(Nat pl);
   private:
     friend class Rounded<FloatDP>;
 };

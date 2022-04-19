@@ -136,7 +136,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
 
 
 template<class F> PositiveUpperBound<F> norm(Covector<Value<F>> const& g) {
-    auto r=mag(g.zero_element());
+    PositiveUpperBound<F> r=mag(g.zero_element());
     for (SizeType i=0; i!=g.size(); ++i) {
         r += mag(g[i]);
     }
@@ -234,11 +234,11 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
     F::set_rounding_upward();
     F e(affine_model.error().precision());
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
-        e = add(rounded,e,max(sub(rounded,affine.gradient(j).upper().raw(),affine_model.gradient(j).raw()),
-                              sub(rounded,affine_model.gradient(j).raw(),affine.gradient(j).lower().raw())));
+        e = add(rounded,e,max(sub(rounded,affine.gradient(j).upper().raw(),affine_model.gradient(j)),
+                              sub(rounded,affine_model.gradient(j),affine.gradient(j).lower().raw())));
     }
-    e = add(rounded,e,max(sub(rounded,affine.value().upper().raw(),affine_model.value().raw()),
-                          sub(rounded,affine_model.value().raw(),affine.value().lower().raw())));
+    e = add(rounded,e,max(sub(rounded,affine.value().upper().raw(),affine_model.value()),
+                          sub(rounded,affine_model.value(),affine.value().lower().raw())));
     affine_model.set_error(ErrorType(e));
     F::set_rounding_to_nearest();
 }

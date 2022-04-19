@@ -56,7 +56,6 @@ class InvalidRationalLiteralException {
 
 // Shortened version of raw float classes sufficient for comparison operator
 template<> class Float<DP> { volatile double _dbl; public: double get_d() const { return _dbl; } };
-template<> class Value<FloatDP> { FloatDP _v; public: FloatDP raw() const { return _v; } };
 
 
 
@@ -183,7 +182,8 @@ Rational::Rational(ExactDouble const& x) {
 Rational::Rational(FloatDP const& x) : Rational(ExactDouble(x.get_d())) {
 }
 
-Rational::Rational(FloatDPValue const& x) : Rational(reinterpret_cast<FloatDP const&>(x)) {
+template<> class Float<MP> { mpf_t _mpf; public: operator Dyadic() const; };
+Rational::Rational(FloatMP const& x) : Rational(x.operator Dyadic()) {
 }
 
 Rational::Rational(const String& str) {

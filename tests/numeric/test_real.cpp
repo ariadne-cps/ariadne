@@ -257,7 +257,7 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_PRINT(pi_met_mp.error());
     ARIADNE_TEST_PRINT(abs(sub(up,pi_met_mp.value_raw(),pi_near)));
     ARIADNE_TEST_ASSERT(pi_met_mp.error() <= error);
-    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
+    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value(),pi_near) <= error.raw());
 
     Dyadic eps(1,1024u);
     ARIADNE_TEST_CONSTRUCT(Real,sin_pi,(sin(pi_)));

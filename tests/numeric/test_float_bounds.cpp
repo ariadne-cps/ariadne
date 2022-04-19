@@ -391,13 +391,13 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
     // Tests for exact operations
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).lower().raw(),-0.25_x);
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).upper().raw(),0.5_x);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).value().raw(),0.125_x);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).value(),0.125_x);
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).error().raw(),0.375)
 
     // Tests for inexact operations
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).lower().raw(),div(down,-one_,three_));
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).upper().raw(),div(up,two_,three_));
-    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).value().raw(),hlf(add(up,div(down,-one_,three_),div(up,two_,three_))))
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).value(),hlf(add(up,div(down,-one_,three_),div(up,two_,three_))))
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).error().raw(),hlf(sub(up,div(up,two_,three_),div(down,-one_,three_))));
 }
 

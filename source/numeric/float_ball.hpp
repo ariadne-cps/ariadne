@@ -80,13 +80,12 @@ template<class F, class FE> class Ball
     //! Construct a ball of radius \f$0\f$ about zero,
     //! using precision \a pr for the centre (value), and \a pre for the radius (error).
     explicit Ball(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
-    explicit Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
     explicit Ball(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     //! Construct a ball of radius \a e about \a v.
     explicit Ball(F const& v, FE const& e) : _v(v), _e(e) { }
-    //! Construct a ball of radius \a error about \a value.
-    Ball(Value<F> const& value, Error<FE> const& error);
-    Ball(Value<F> const& x, PRE pre);
+    //! Construct a ball of radius \a error about \a v.
+    Ball(F const& v, Error<FE> const& error);
     //! Construct a ball containing the bounds \a x, with error bound of precision \a pre.
     Ball(Bounds<F> const& x, PRE pre);
     Ball(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
@@ -115,7 +114,6 @@ template<class F, class FE> class Ball
     //! Construct a ball containing the bounds \a x.
     //! The precision of the error is either that of \a F, or the default value.
     explicit Ball(Bounds<F> const& x);
-    Ball(Value<F> const& x);
 
     //! Assign from generic validated bounds \a y, keeping the same properties.
     Ball<F,FE>& operator=(const ValidatedNumber& y) { return *this=Ball<F,FE>(y,this->precision(),this->error_precision()); }
@@ -395,33 +393,33 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     }
 
     static Ball<F,FE> _add(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=add(near,x._v,y._v);
-        auto ru=add(up,x._v,y._v);
-        auto rl=add(down,x._v,y._v);
+        auto rv=add(near,x,y);
+        auto ru=add(up,x,y);
+        auto rl=add(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
     static Ball<F,FE> _sub(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=sub(near,x._v,y._v);
-        auto ru=sub(up,x._v,y._v);
-        auto rl=sub(down,x._v,y._v);
+        auto rv=sub(near,x,y);
+        auto ru=sub(up,x,y);
+        auto rl=sub(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
     static Ball<F,FE> _mul(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=mul(near,x._v,y._v);
-        auto ru=mul(up,x._v,y._v);
-        auto rl=mul(down,x._v,y._v);
+        auto rv=mul(near,x,y);
+        auto ru=mul(up,x,y);
+        auto rl=mul(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
     static Ball<F,FE> _div(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=div(near,x._v,y._v);
-        auto ru=div(up,x._v,y._v);
-        auto rl=div(down,x._v,y._v);
+        auto rv=div(near,x,y);
+        auto ru=div(up,x,y);
+        auto rl=div(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
@@ -507,7 +505,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     }
 
     static Bool _models(Ball<F,FE> const& x1, Value<F> const& x2) {
-        return (x1._v>=x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v)) <= x1._e;
+        return (x1._v>=x2 ? sub(up,x1._v,x2) : sub(up,x2,x1._v)) <= x1._e;
     }
 
     static Bool _consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {

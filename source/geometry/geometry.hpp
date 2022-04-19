@@ -53,7 +53,7 @@ SizeType irmax(const ExactBoxType& bx) {
 }
 
 inline FloatDPValue mid(FloatDPValue l, FloatDPValue u) {
-    return FloatDPValue(med(approx,l.raw(),u.raw()));
+    return FloatDPValue(med(approx,l,u));
 }
 
 inline

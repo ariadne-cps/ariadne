@@ -96,11 +96,11 @@ class TestPdes
                         ARIADNE_TEST_ASSERT(abs(data[{x1, time}]) <= (stringModel.amp+tollerance));
                         return;
                     }
-                    
+
                 }
-                
+
             }
-            
+
 
         }//String Evolution over time
 
@@ -146,9 +146,9 @@ class TestPdes
                         ARIADNE_TEST_ASSERT(abs(data[{x1, time}]) <= (stringModel.amp+tollerance));
                         return;
                     }
-                    
+
                 }
-                
+
             }
 
         }//String Evolution over time
@@ -182,8 +182,8 @@ class TestPdes
                             ARIADNE_TEST_ASSERT(abs(data[{x1, x2, time}]) <= tollerance);
                             return;
                         }
-                    }                        
-                }                
+                    }
+                }
             }
 
         }
@@ -250,15 +250,15 @@ class TestPdes
                                 return;
                             }
                         }
-                        
-                        
+
+
                     }
-                    
+
                 }
-                
+
             }
 
-            
+
         }
 };
 

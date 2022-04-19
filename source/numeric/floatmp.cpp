@@ -803,22 +803,22 @@ FloatMP div(FloatMP::RoundingModeType rnd, FloatDP const& x1, FloatMP const& x2)
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1.get_d(),x2._mpfr,rnd); return r;
 }
 
-Bool operator==(FloatMP const& x1, FloatMP const& x2) {
+Boolean operator==(FloatMP const& x1, FloatMP const& x2) {
     return mpfr_equal_p(x1._mpfr,x2._mpfr);
 }
-Bool operator!=(FloatMP const& x1, FloatMP const& x2) {
+Boolean operator!=(FloatMP const& x1, FloatMP const& x2) {
     return not mpfr_equal_p(x1._mpfr,x2._mpfr);
 }
-Bool operator<=(FloatMP const& x1, FloatMP const& x2) {
+Boolean operator<=(FloatMP const& x1, FloatMP const& x2) {
     return mpfr_lessequal_p(x1._mpfr,x2._mpfr);
 }
-Bool operator>=(FloatMP const& x1, FloatMP const& x2) {
+Boolean operator>=(FloatMP const& x1, FloatMP const& x2) {
     return mpfr_greaterequal_p(x1._mpfr,x2._mpfr);
 }
-Bool operator< (FloatMP const& x1, FloatMP const& x2) {
+Boolean operator< (FloatMP const& x1, FloatMP const& x2) {
     return mpfr_less_p(x1._mpfr,x2._mpfr);
 }
-Bool operator> (FloatMP const& x1, FloatMP const& x2) {
+Boolean operator> (FloatMP const& x1, FloatMP const& x2) {
     return mpfr_greater_p(x1._mpfr,x2._mpfr);
 }
 

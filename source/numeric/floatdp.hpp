@@ -371,57 +371,57 @@ template<> class Float<DP> {
     friend FloatDP atan(RoundApprox, FloatDP x) { return FloatDP(std::atan(x.dbl)); }
 
     friend Comparison cmp(FloatDP x1, FloatDP x2);
-    friend Bool operator==(FloatDP x1, FloatDP x2) { return x1.dbl == x2.dbl; }
-    friend Bool operator!=(FloatDP x1, FloatDP x2) { return x1.dbl != x2.dbl; }
-    friend Bool operator<=(FloatDP x1, FloatDP x2) { return x1.dbl <= x2.dbl; }
-    friend Bool operator>=(FloatDP x1, FloatDP x2) { return x1.dbl >= x2.dbl; }
-    friend Bool operator< (FloatDP x1, FloatDP x2) { return x1.dbl <  x2.dbl; }
-    friend Bool operator> (FloatDP x1, FloatDP x2) { return x1.dbl >  x2.dbl; }
+    friend Boolean operator==(FloatDP x1, FloatDP x2) { return x1.dbl == x2.dbl; }
+    friend Boolean operator!=(FloatDP x1, FloatDP x2) { return x1.dbl != x2.dbl; }
+    friend Boolean operator<=(FloatDP x1, FloatDP x2) { return x1.dbl <= x2.dbl; }
+    friend Boolean operator>=(FloatDP x1, FloatDP x2) { return x1.dbl >= x2.dbl; }
+    friend Boolean operator< (FloatDP x1, FloatDP x2) { return x1.dbl <  x2.dbl; }
+    friend Boolean operator> (FloatDP x1, FloatDP x2) { return x1.dbl >  x2.dbl; }
 
     friend Comparison cmp(FloatDP x1, Dbl x2);
-    friend Bool operator==(FloatDP x1, Dbl x2) { return x1.dbl == x2; }
-    friend Bool operator!=(FloatDP x1, Dbl x2) { return x1.dbl != x2; }
-    friend Bool operator<=(FloatDP x1, Dbl x2) { return x1.dbl <= x2; }
-    friend Bool operator>=(FloatDP x1, Dbl x2) { return x1.dbl >= x2; }
-    friend Bool operator< (FloatDP x1, Dbl x2) { return x1.dbl <  x2; }
-    friend Bool operator> (FloatDP x1, Dbl x2) { return x1.dbl >  x2; }
+    friend Boolean operator==(FloatDP x1, Dbl x2) { return x1.dbl == x2; }
+    friend Boolean operator!=(FloatDP x1, Dbl x2) { return x1.dbl != x2; }
+    friend Boolean operator<=(FloatDP x1, Dbl x2) { return x1.dbl <= x2; }
+    friend Boolean operator>=(FloatDP x1, Dbl x2) { return x1.dbl >= x2; }
+    friend Boolean operator< (FloatDP x1, Dbl x2) { return x1.dbl <  x2; }
+    friend Boolean operator> (FloatDP x1, Dbl x2) { return x1.dbl >  x2; }
     friend Comparison cmp(Dbl x1, FloatDP x2);
-    friend Bool operator==(Dbl x1, FloatDP x2) { return x1 == x2.dbl; }
-    friend Bool operator!=(Dbl x1, FloatDP x2) { return x1 != x2.dbl; }
-    friend Bool operator<=(Dbl x1, FloatDP x2) { return x1 <= x2.dbl; }
-    friend Bool operator>=(Dbl x1, FloatDP x2) { return x1 >= x2.dbl; }
-    friend Bool operator< (Dbl x1, FloatDP x2) { return x1 <  x2.dbl; }
-    friend Bool operator> (Dbl x1, FloatDP x2) { return x1 >  x2.dbl; }
+    friend Boolean operator==(Dbl x1, FloatDP x2) { return x1 == x2.dbl; }
+    friend Boolean operator!=(Dbl x1, FloatDP x2) { return x1 != x2.dbl; }
+    friend Boolean operator<=(Dbl x1, FloatDP x2) { return x1 <= x2.dbl; }
+    friend Boolean operator>=(Dbl x1, FloatDP x2) { return x1 >= x2.dbl; }
+    friend Boolean operator< (Dbl x1, FloatDP x2) { return x1 <  x2.dbl; }
+    friend Boolean operator> (Dbl x1, FloatDP x2) { return x1 >  x2.dbl; }
 
     friend Comparison cmp(FloatDP x1, ExactDouble x2);
-    friend Bool operator==(FloatDP x1, ExactDouble x2) { return x1.dbl == x2.get_d(); }
-    friend Bool operator!=(FloatDP x1, ExactDouble x2) { return x1.dbl != x2.get_d(); }
-    friend Bool operator<=(FloatDP x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); }
-    friend Bool operator>=(FloatDP x1, ExactDouble x2) { return x1.dbl >= x2.get_d(); }
-    friend Bool operator< (FloatDP x1, ExactDouble x2) { return x1.dbl <  x2.get_d(); }
-    friend Bool operator> (FloatDP x1, ExactDouble x2) { return x1.dbl >  x2.get_d(); }
+    friend Boolean operator==(FloatDP x1, ExactDouble x2) { return x1.dbl == x2.get_d(); }
+    friend Boolean operator!=(FloatDP x1, ExactDouble x2) { return x1.dbl != x2.get_d(); }
+    friend Boolean operator<=(FloatDP x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); }
+    friend Boolean operator>=(FloatDP x1, ExactDouble x2) { return x1.dbl >= x2.get_d(); }
+    friend Boolean operator< (FloatDP x1, ExactDouble x2) { return x1.dbl <  x2.get_d(); }
+    friend Boolean operator> (FloatDP x1, ExactDouble x2) { return x1.dbl >  x2.get_d(); }
     friend Comparison cmp(ExactDouble x1, FloatDP x2);
-    friend Bool operator==(ExactDouble x1, FloatDP x2) { return x1.get_d() == x2.dbl; }
-    friend Bool operator!=(ExactDouble x1, FloatDP x2) { return x1.get_d() != x2.dbl; }
-    friend Bool operator<=(ExactDouble x1, FloatDP x2) { return x1.get_d() <= x2.dbl; }
-    friend Bool operator>=(ExactDouble x1, FloatDP x2) { return x1.get_d() >= x2.dbl; }
-    friend Bool operator< (ExactDouble x1, FloatDP x2) { return x1.get_d() <  x2.dbl; }
-    friend Bool operator> (ExactDouble x1, FloatDP x2) { return x1.get_d() >  x2.dbl; }
+    friend Boolean operator==(ExactDouble x1, FloatDP x2) { return x1.get_d() == x2.dbl; }
+    friend Boolean operator!=(ExactDouble x1, FloatDP x2) { return x1.get_d() != x2.dbl; }
+    friend Boolean operator<=(ExactDouble x1, FloatDP x2) { return x1.get_d() <= x2.dbl; }
+    friend Boolean operator>=(ExactDouble x1, FloatDP x2) { return x1.get_d() >= x2.dbl; }
+    friend Boolean operator< (ExactDouble x1, FloatDP x2) { return x1.get_d() <  x2.dbl; }
+    friend Boolean operator> (ExactDouble x1, FloatDP x2) { return x1.get_d() >  x2.dbl; }
 
     friend Comparison cmp(FloatDP x1, Rational const& x2);
-    friend Bool operator==(FloatDP x1, Rational const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Bool operator!=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Bool operator<=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Bool operator>=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Bool operator< (FloatDP x1, Rational const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Bool operator> (FloatDP x1, Rational const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    friend Boolean operator==(FloatDP x1, Rational const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Boolean operator!=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Boolean operator<=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Boolean operator>=(FloatDP x1, Rational const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Boolean operator< (FloatDP x1, Rational const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Boolean operator> (FloatDP x1, Rational const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
     friend Comparison cmp(Rational const& x1, FloatDP x2);
-    friend Bool operator==(Rational const& x1, FloatDP x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Bool operator!=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Bool operator<=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Bool operator>=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Bool operator< (Rational const& x1, FloatDP x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Bool operator> (Rational const& x1, FloatDP x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    friend Boolean operator==(Rational const& x1, FloatDP x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Boolean operator!=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Boolean operator<=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Boolean operator>=(Rational const& x1, FloatDP x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Boolean operator< (Rational const& x1, FloatDP x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Boolean operator> (Rational const& x1, FloatDP x2) { return cmp(x1,x2)> Comparison::EQUAL; }
 
     friend OutputStream& operator<<(OutputStream& os, FloatDP const&);
     friend InputStream& operator>>(InputStream& is, FloatDP&);

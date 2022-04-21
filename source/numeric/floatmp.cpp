@@ -716,22 +716,44 @@ Comparison cmp(FloatMP const& x1, FloatMP const& x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
-Comparison cmp(FloatMP const& x1, Dbl x2) {
-    auto c=mpfr_cmp_d(x1._mpfr,x2);
+template<> Comparison cmp(FloatMP const& x1, Nat n2) {
+    auto c=mpfr_cmp_ui(x1._mpfr,n2);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
-Comparison cmp(Dbl x1, FloatMP const& x2) {
-    auto c=mpfr_cmp_d(x2._mpfr,x1);
+template<> Comparison cmp(Nat n1, FloatMP const& x2) {
+    auto c=mpfr_cmp_ui(x2._mpfr,n1);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
+}
+
+template<> Comparison cmp(FloatMP const& x1, Int n2) {
+    auto c=mpfr_cmp_si(x1._mpfr,n2);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+template<> Comparison cmp(Int n1, FloatMP const& x2) {
+    auto c=mpfr_cmp_si(x2._mpfr,n1);
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
+}
+
+Comparison cmp(FloatMP const& x1, ExactDouble x2) {
+    auto c=mpfr_cmp_d(x1._mpfr,x2.get_d());
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+}
+
+Comparison cmp(ExactDouble x1, FloatMP const& x2) {
+    auto c=mpfr_cmp_d(x2._mpfr,x1.get_d());
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
 }
 
 Comparison cmp(FloatMP const& x1, FloatDP const& x2) {
-    return cmp(x1,x2.get_d());
+    auto c=mpfr_cmp_d(x1._mpfr,x2.get_d());
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
 Comparison cmp(FloatDP const& x1, FloatMP const& x2) {
-    return cmp(x1.get_d(),x2);
+    auto c=mpfr_cmp_d(x2._mpfr,x1.get_d());
+    return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
 }
 
 Comparison cmp(FloatMP const& x1, Rational const& q2) {

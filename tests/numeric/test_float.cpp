@@ -340,7 +340,7 @@ TestFloat<PR>::test_conversion_from_to()
 {
     // Convert from dyadic
     Float f1(Dyadic(5,2u),precision);
-    ARIADNE_TEST_EQUAL(f1,1.25);
+    ARIADNE_TEST_EQUAL(f1,1.25_x);
 
     // Convert from self
     Float f2(f1,downward,precision);
@@ -482,12 +482,12 @@ TestFloat<PR>::test_comparison()
     ARIADNE_TEST_ASSERT(i1>=f2); ARIADNE_TEST_ASSERT(!(i1< f2));
 
     // Test comparison with a double
-    double x2=1.0;
+    ExactDouble x2=1.0_x;
     ARIADNE_TEST_ASSERT(!(f1==x2)); ARIADNE_TEST_ASSERT(f1!=x2);
     ARIADNE_TEST_ASSERT(!(f1<=x2)); ARIADNE_TEST_ASSERT(f1> x2);
     ARIADNE_TEST_ASSERT(f1>=x2); ARIADNE_TEST_ASSERT(!(f1< x2));
 
-    double x1=1.0;
+    ExactDouble x1=1.0_x;
     ARIADNE_TEST_ASSERT(!(x1==f2)); ARIADNE_TEST_ASSERT(x1!=f2);
     ARIADNE_TEST_ASSERT(!(x1<=f2)); ARIADNE_TEST_ASSERT(x1> f2);
     ARIADNE_TEST_ASSERT(x1>=f2); ARIADNE_TEST_ASSERT(!(x1< f2));
@@ -648,23 +648,23 @@ TestFloat<PR>::test_arithmetic()
     // Absolute value (this should always remain exact)
     f4=abs(f1);
     cout << "abs(" << f1 << ") = " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f4==1.25);
+    ARIADNE_TEST_ASSERT(f4==1.25_x);
     f5=abs(f3);
     cout << "abs(" << f3 << ") = " << f5 << endl;
-    ARIADNE_TEST_ASSERT(f5==3.25);
+    ARIADNE_TEST_ASSERT(f5==3.25_x);
 
     // Median (this should remain exact here)
     f3=med(near,f1,f2);
     cout << f1 << " <= med(" << f1 << "," << f2 << ")=" << f3 << " <= " << f2 << endl;
     ARIADNE_TEST_ASSERT(f1<=f3); ARIADNE_TEST_ASSERT(f3<=f2);
-    ARIADNE_TEST_ASSERT(f3==1.75);
+    ARIADNE_TEST_ASSERT(f3==1.75_x);
 
     // Negation (this should always remain exact)
     f3=neg(f1);
     cout << "neg(" << f1 << ") = " << f3 << endl;
     f3=-f1;
     cout << "- " << f1 << " = " << f3 << endl;
-    ARIADNE_TEST_ASSERT(f3==-1.25);
+    ARIADNE_TEST_ASSERT(f3==-1.25_x);
 
     // Rounding
     f3=next(down,f1);
@@ -676,10 +676,10 @@ TestFloat<PR>::test_arithmetic()
     f3=add(down,f1,f2);
     f4=add(up,f1,f2);
     cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f3<=3.5); ARIADNE_TEST_ASSERT(f4>=3.5);
+    ARIADNE_TEST_ASSERT(f3<=3.5_x); ARIADNE_TEST_ASSERT(f4>=3.5_x);
     // Addition
-    ARIADNE_TEST_COMPARE(add(up,one,hlf(eps)),>,1.0);
-    ARIADNE_TEST_COMPARE(add(down,one,eps),>,1.0);
+    ARIADNE_TEST_COMPARE(add(up,one,hlf(eps)),>,1.0_x);
+    ARIADNE_TEST_COMPARE(add(down,one,eps),>,1.0_x);
     if(add(down,one,hlf(eps)) != one) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
         ARIADNE_TEST_COMPARE(add(down,one,shft(eps,-11)),>,one);
@@ -701,7 +701,7 @@ TestFloat<PR>::test_arithmetic()
     f3=mul(down,f1,f2);
     f4=mul(up,f1,f2);
     cout << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f3<=2.8125); ARIADNE_TEST_ASSERT(f4>=2.8125);
+    ARIADNE_TEST_ASSERT(f3<=2.8125_x); ARIADNE_TEST_ASSERT(f4>=2.8125_x);
 
     // Division (not exact; should catch errors here)
     f3=div(down,f1,f2);
@@ -738,7 +738,7 @@ TestFloat<PR>::test_arithmetic()
     f3=pow(down,f1,3);
     f4=pow(up,f1,3);
     cout << f3 << " <= pow(" << f1 << ",3) <= " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f3<=1.953125); ARIADNE_TEST_ASSERT(f4>=1.953125);
+    ARIADNE_TEST_ASSERT(f3<=1.953125_x); ARIADNE_TEST_ASSERT(f4>=1.953125_x);
 
     f3=pow(down,f1,-2);
     f4=pow(up,f1,-2);
@@ -778,7 +778,7 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(med(near,Float(2,precision),Float(3,precision)),==,2.5_x);
     ARIADNE_TEST_COMPARE(rad(up,Float(2,precision),Float(3,precision)),>=,0.5_x);
     if constexpr (Same<Float,FloatDP>) {
-        ARIADNE_TEST_COMPARE(rad(up,Float(2,precision),Float(3,precision)),<=,0.5000000000000002);
+        ARIADNE_TEST_COMPARE(rad(up,Float(2,precision),Float(3,precision)),<=,0.5000000000000002_pr);
     }
 
     // The following line should not compile
@@ -801,8 +801,8 @@ TestFloat<PR>::test_function()
     ARIADNE_TEST_PRINT(rl);
     ARIADNE_TEST_PRINT(ru);
     ARIADNE_TEST_ASSERT(rl<ru);
-    ARIADNE_TEST_ASSERT(2.71<rl);
-    ARIADNE_TEST_ASSERT(ru<2.72);
+    ARIADNE_TEST_ASSERT(2.71_dec<rl);
+    ARIADNE_TEST_ASSERT(ru<2.72_dec);
 
 
     //The following don't work as rounded operators not exported.

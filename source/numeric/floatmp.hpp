@@ -352,21 +352,37 @@ template<> class Float<MP> {
     friend Boolean operator< (FloatMP const& x1, FloatMP const& x2);
     friend Boolean operator> (FloatMP const& x1, FloatMP const& x2);
 
-    friend Comparison cmp(FloatMP const& x1, Dbl x2);
-    friend Boolean operator==(FloatMP const& x1, Dbl x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(FloatMP const& x1, Dbl x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(FloatMP const& x1, Dbl x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(FloatMP const& x1, Dbl x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (FloatMP const& x1, Dbl x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (FloatMP const& x1, Dbl x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Comparison cmp(FloatMP const& x1, N n2);
+    template<BuiltinIntegral N> friend Boolean operator==(FloatMP const& x1, N n2) { return cmp(x1,n2)==Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator!=(FloatMP const& x1, N n2) { return cmp(x1,n2)!=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator<=(FloatMP const& x1, N n2) { return cmp(x1,n2)<=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator>=(FloatMP const& x1, N n2) { return cmp(x1,n2)>=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator< (FloatMP const& x1, N n2) { return cmp(x1,n2)< Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator> (FloatMP const& x1, N n2) { return cmp(x1,n2)> Comparison::EQUAL; }
 
-    friend Comparison cmp(Dbl x1, FloatMP const& x2);
-    friend Boolean operator==(Dbl x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(Dbl x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(Dbl x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(Dbl x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (Dbl x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (Dbl x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Comparison cmp(N n1, FloatMP const& x2);
+    template<BuiltinIntegral N> friend Boolean operator==(N n1, FloatMP const& x2) { return cmp(n1,x2)==Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator!=(N n1, FloatMP const& x2) { return cmp(n1,x2)!=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator<=(N n1, FloatMP const& x2) { return cmp(n1,x2)<=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator>=(N n1, FloatMP const& x2) { return cmp(n1,x2)>=Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator< (N n1, FloatMP const& x2) { return cmp(n1,x2)< Comparison::EQUAL; }
+    template<BuiltinIntegral N> friend Boolean operator> (N n1, FloatMP const& x2) { return cmp(n1,x2)> Comparison::EQUAL; }
+
+    friend Comparison cmp(FloatMP const& x1, ExactDouble x2);
+    friend Boolean operator==(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Boolean operator!=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Boolean operator<=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Boolean operator>=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Boolean operator< (FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Boolean operator> (FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)> Comparison::EQUAL; }
+
+    friend Comparison cmp(ExactDouble x1, FloatMP const& x2);
+    friend Boolean operator==(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
+    friend Boolean operator!=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
+    friend Boolean operator<=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
+    friend Boolean operator>=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
+    friend Boolean operator< (ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
+    friend Boolean operator> (ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
 
     friend Comparison cmp(FloatMP const& x1, Rational const& x2);
     friend Boolean operator==(FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }

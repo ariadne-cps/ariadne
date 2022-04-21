@@ -53,7 +53,7 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, V
     const F& x2v=x2;
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
-    if(x2v>=0.0) {
+    if(x2v>=0.0_x) {
         rl=mul(down,x1l,x2v); ru=mul(up,x1u,x2v);
     } else {
         rl=mul(down,x1u,x2v); ru=mul(up,x1l,x2v);
@@ -67,7 +67,7 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Value<F> const& x1, Bo
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
-    if(x1v>=0.0) {
+    if(x1v>=0.0_x) {
         rl=mul(down,x1v,x2l); ru=mul(up,x1v,x2u);
     } else {
         rl=mul(down,x1v,x2u); ru=mul(up,x1v,x2l);

@@ -476,7 +476,7 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
         os << MultivariatePolynomial<FloatApproximation<PR>>(fp.polynomial());
     }
 
-    if(fp.error().raw()>0.0) { os << "+/-" << fp.error(); }
+    if(fp.error().raw()>0.0_x) { os << "+/-" << fp.error(); }
 
     os << "}";
     return os;

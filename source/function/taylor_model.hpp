@@ -357,7 +357,7 @@ class TaylorModel
     Void set_gradient(SizeType j,const Dyadic& c) {
         this->set_gradient(j,CoefficientType(c,this->precision())); }
      //! \brief Set the error of the expansion.
-    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0); this->_error=ne; }
+    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0_x); this->_error=ne; }
     Void set_error(Nat m) { this->_error=m; }
 
     //! \brief The coefficient of the term in $x^a$.

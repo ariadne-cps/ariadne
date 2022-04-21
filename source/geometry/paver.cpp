@@ -157,9 +157,9 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     static const Nat MAXIMUM_DEPTH = 16;
 
     // The basic approximation error when plotting with accuracy=0
-    static const double BASIC_ERROR = 0.0625;
+    static const ExactDouble BASIC_ERROR = 0.0625_pr;
 
-    const double max_error=BASIC_ERROR/(1<<fineness);
+    const ExactDouble max_error=BASIC_ERROR/TwoExp(static_cast<Int>(fineness));
 
     ARIADNE_DEBUG_ASSERT(function.domain()==set.constraint_function().domain());
     ValidatedVectorMultivariateFunction fg=join(function,set.constraint_function());

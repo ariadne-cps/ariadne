@@ -94,10 +94,10 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
 
     F rl(prec),ru(prec);
     if(y.lower_raw()<=-pi_val.lower_raw()) {
-        if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
+        if(y.upper_raw()<=0.0_x) { rl=-one; ru=cos(up,y.upper_raw()); }
         else { rl=-one; ru=+one; }
-    } else if(y.lower_raw()<=0.0) {
-        if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
+    } else if(y.lower_raw()<=0.0_x) {
+        if(y.upper_raw()<=0.0_x) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
         else if(y.upper_raw()<=pi_val.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
         else { rl=-one; ru=+one; }
     } else if(y.lower_raw()<=pi_val.upper_raw()) {

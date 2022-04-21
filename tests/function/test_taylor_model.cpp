@@ -617,7 +617,7 @@ template<class F> Void TestTaylorModel<F>::test_compose()
         auto y=id;
         y[1]=(y[1]+1)/2;
 
-        ARIADNE_TEST_COMPARE(compose(x,y).error().raw(),<=,1e-8);
+        ARIADNE_TEST_COMPARE(compose(x,y).error().raw(),<=,1e-8_pr);
     }
 }
 

@@ -162,7 +162,7 @@ Void TestScalarTaylorFunction::test_constructors()
     ARIADNE_ASSERT_EQUAL(tv1.domain(),Box<ExactIntervalType>({{-1,+1},{-1,+1}}));
     ARIADNE_ASSERT_EQUAL(tv1.argument_size(),2);
     ARIADNE_ASSERT_EQUAL(tv1.number_of_nonzeros(),10);
-    ARIADNE_ASSERT_EQUAL(tv1.value().raw(),1.);
+    ARIADNE_ASSERT_EQUAL(tv1.value().raw(),1.0_x);
     ARIADNE_ASSERT_EQUAL(tv1.error().raw(),0.25_x);
 }
 

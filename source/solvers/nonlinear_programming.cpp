@@ -819,7 +819,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     this->setup_feasibility(D,g,C,v);
     FloatDPApproximationVector oldx=x;
 
-    static const float MU_MIN = 1e-12;
+    static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=MAXIMUM_STEPS; ++i) {
@@ -868,7 +868,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
     this->setup_feasibility(D,g,R,v);
 
-    static const float MU_MIN = 1e-12;
+    static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {

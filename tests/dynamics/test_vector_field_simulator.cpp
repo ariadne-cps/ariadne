@@ -77,7 +77,7 @@ class TestVectorFieldEvolver
 
         auto final_pt_xy = project(orbit.curve().end()->second,Projection2d(3,0,1));
         auto initial_pt_xy = Point<FloatDPApproximation>(initial_set.euclidean_set(vanderpol.state_space()).bounding_box().midpoint(),dp);
-        ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02);
+        ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02_dec);
 
         auto orbit2 = simulator.orbit(RealVariablesBox({x==-1.5_dec,y==1}),time);
         auto final_pt_xy_2 = project(orbit2.curve().end()->second,Projection2d(3,0,1));

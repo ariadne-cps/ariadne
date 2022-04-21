@@ -2015,10 +2015,10 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const 
                 r.expansion().append(a,rve);
             } else {
                 auto rve=refinement( xv.pm(xe), yv.pm(ye) );
-                if(rve.error().raw()<0.0) {
+                if(rve.error().raw()<0.0_x) {
                     ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
                 }
-                if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
+                if(rve.value()!=0.0_x) { r.expansion().append(a,rve.value()); }
                 max_error=max(max_error,rve.error());
             }
         }

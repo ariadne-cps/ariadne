@@ -88,7 +88,7 @@ template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, cons
 template<ANormedAlgebra A> A _compose1(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=18;
-    static const double TRUNCATION_ERROR=1e-8;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
     FloatDPValue c=tm.value();
     FloatDPBounds r=tm.range();

@@ -388,25 +388,28 @@ template<> class Float<DP> {
     friend Boolean operator< (FloatDP x1, FloatDP x2) { return x1.dbl <  x2.dbl; }
     friend Boolean operator> (FloatDP x1, FloatDP x2) { return x1.dbl >  x2.dbl; }
 
-    friend Comparison cmp(FloatDP x1, Dbl x2);
-    friend Boolean operator==(FloatDP x1, Dbl x2) { return x1.dbl == x2; }
-    friend Boolean operator!=(FloatDP x1, Dbl x2) { return x1.dbl != x2; }
-    friend Boolean operator<=(FloatDP x1, Dbl x2) { return x1.dbl <= x2; }
-    friend Boolean operator>=(FloatDP x1, Dbl x2) { return x1.dbl >= x2; }
-    friend Boolean operator< (FloatDP x1, Dbl x2) { return x1.dbl <  x2; }
-    friend Boolean operator> (FloatDP x1, Dbl x2) { return x1.dbl >  x2; }
-    friend Comparison cmp(Dbl x1, FloatDP x2);
-    friend Boolean operator==(Dbl x1, FloatDP x2) { return x1 == x2.dbl; }
-    friend Boolean operator!=(Dbl x1, FloatDP x2) { return x1 != x2.dbl; }
-    friend Boolean operator<=(Dbl x1, FloatDP x2) { return x1 <= x2.dbl; }
-    friend Boolean operator>=(Dbl x1, FloatDP x2) { return x1 >= x2.dbl; }
-    friend Boolean operator< (Dbl x1, FloatDP x2) { return x1 <  x2.dbl; }
-    friend Boolean operator> (Dbl x1, FloatDP x2) { return x1 >  x2.dbl; }
+    template<BuiltinIntegral N> friend Comparison cmp(FloatDP const& x1, N n2) {
+        return x1.dbl==n2 ? Comparison::EQUAL : (x1.dbl>n2?Comparison::GREATER:Comparison::LESS); }
+    template<BuiltinIntegral N> friend Boolean operator==(FloatDP const& x1, N n2) { return x1.dbl==n2; }
+    template<BuiltinIntegral N> friend Boolean operator!=(FloatDP const& x1, N n2) { return x1.dbl!=n2; }
+    template<BuiltinIntegral N> friend Boolean operator<=(FloatDP const& x1, N n2) { return x1.dbl<=n2; }
+    template<BuiltinIntegral N> friend Boolean operator>=(FloatDP const& x1, N n2) { return x1.dbl>=n2; }
+    template<BuiltinIntegral N> friend Boolean operator< (FloatDP const& x1, N n2) { return x1.dbl< n2; }
+    template<BuiltinIntegral N> friend Boolean operator> (FloatDP const& x1, N n2) { return x1.dbl> n2; }
+
+    template<BuiltinIntegral N> friend Comparison cmp(N n1, FloatDP const& x2) {
+        return n1==x2.dbl ? Comparison::EQUAL : (n1>x2.dbl?Comparison::GREATER:Comparison::LESS); }
+    template<BuiltinIntegral N> friend Boolean operator==(N n1, FloatDP const& x2) { return n1==x2.dbl; }
+    template<BuiltinIntegral N> friend Boolean operator!=(N n1, FloatDP const& x2) { return n1!=x2.dbl; }
+    template<BuiltinIntegral N> friend Boolean operator<=(N n1, FloatDP const& x2) { return n1<=x2.dbl; }
+    template<BuiltinIntegral N> friend Boolean operator>=(N n1, FloatDP const& x2) { return n1>=x2.dbl; }
+    template<BuiltinIntegral N> friend Boolean operator< (N n1, FloatDP const& x2) { return n1< x2.dbl; }
+    template<BuiltinIntegral N> friend Boolean operator> (N n1, FloatDP const& x2) { return n1> x2.dbl; }
 
     friend Comparison cmp(FloatDP x1, ExactDouble x2);
     friend Boolean operator==(FloatDP x1, ExactDouble x2) { return x1.dbl == x2.get_d(); }
     friend Boolean operator!=(FloatDP x1, ExactDouble x2) { return x1.dbl != x2.get_d(); }
-    friend Boolean operator<=(FloatDP x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); }
+    friend Boolean operator<=(FloatDP x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); } 
     friend Boolean operator>=(FloatDP x1, ExactDouble x2) { return x1.dbl >= x2.get_d(); }
     friend Boolean operator< (FloatDP x1, ExactDouble x2) { return x1.dbl <  x2.get_d(); }
     friend Boolean operator> (FloatDP x1, ExactDouble x2) { return x1.dbl >  x2.get_d(); }

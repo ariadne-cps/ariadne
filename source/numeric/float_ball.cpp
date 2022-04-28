@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "float_ball.hpp"
 #include "float_ball.tpl.hpp"
 
@@ -116,6 +115,5 @@ template<> OutputStream& Operations<FloatBall<DoublePrecision>>::_write(OutputSt
     MultiplePrecision prec(64);
     return os << FloatBall<MultiplePrecision>(FloatMP(x.value_raw(),prec),FloatMP(x.error_raw(),prec));
 }
-
 
 } // namespace Ariadne

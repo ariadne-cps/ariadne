@@ -658,6 +658,10 @@ double acos_rnd(double x) {
     return pi_rnd()/2.0+asin_rnd(-x);
 }
 
+
+
+static_assert(not GenericNumber<FloatDP>);
+
 FloatDP::Float(ExactDouble const& d, PrecisionType)
     : FloatDP(d.get_d())
 {
@@ -833,6 +837,13 @@ FloatDP FloatDP::inf(Sign sgn, PrecisionType pr) {
 FloatDP FloatDP::inf(PrecisionType pr) { return FloatDP::inf(Sign::POSITIVE,pr); }
 FloatDP FloatDP::nan(PrecisionType pr) { return FloatDP::inf(Sign::ZERO,pr); }
 
+Integer cast_integer(FloatDP x) {
+    Dyadic w(x); 
+    Integer z=round(w); 
+    ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer");
+    return z;
+}
+
 template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return static_cast<Nat>(x.dbl); }
 template<> Int integer_cast<Int,FloatDP>(FloatDP const& x) { return static_cast<Int>(x.dbl); }
@@ -943,6 +954,5 @@ template<class X> class Positive : public X { public: Positive(X const& x) : X(x
 Positive<FloatDP> abs(FloatDP x) { return Positive<FloatDP>(FloatDP(std::fabs(x.dbl))); }
 Positive<UpperBound<FloatDP>> mag(FloatDP x) { return Positive<UpperBound<FloatDP>>(abs(x)); }
 Positive<LowerBound<FloatDP>> mig(FloatDP x) { return Positive<LowerBound<FloatDP>>(abs(x)); }
-
 
 } // namespace Ariadne

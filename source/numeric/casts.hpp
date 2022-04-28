@@ -46,18 +46,23 @@
 
 namespace Ariadne {
 
-template<class F> requires Same<F,FloatDP> or Same<F,FloatMP> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const cast_exact(Bounds<F> const& x) { return cast_exact(Approximation<F>(x)); }
-template<class F, class FE> inline Value<F> const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(Value<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(Error<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
-template<class F> inline Value<F> const& cast_exact(Rounded<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }
+template<class F> requires Same<F,FloatDP> or Same<F,FloatMP> inline F const& cast_exact(F const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const cast_exact(Bounds<F> const& x) { return cast_exact(Approximation<F>(x)); }
+template<class F, class FE> inline F const& cast_exact(Ball<F,FE> const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const& cast_exact(Error<F> const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> inline F const& cast_exact(Rounded<F> const& x) { return reinterpret_cast<F const&>(x); }
 
-template<class F> inline const Positive<Value<F>> cast_exact(const Positive<Bounds<F>>& t) {
-    return Positive<Value<F>>(cast_exact(static_cast<Bounds<F>const&>(t))); }
+template<class F> inline const Positive<F> cast_exact(const Positive<Bounds<F>>& t) {
+    return Positive<F>(cast_exact(static_cast<Bounds<F>const&>(t))); }
+template<class F> inline const Positive<F> cast_exact(Positive<UpperBound<F>> const& x) {
+    return cast_positive(cast_exact(cast_unsigned(x))); }
+template<class F> inline const Positive<F> cast_exact(Positive<LowerBound<F>> const& x) {
+    return cast_positive(cast_exact(cast_unsigned(x))); }
+template<class F> inline const Positive<F> cast_exact(Positive<Approximation<F>> const& x) {
+    return cast_positive(cast_exact(cast_unsigned(x))); }
 
 inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }

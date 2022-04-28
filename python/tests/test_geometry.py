@@ -28,12 +28,12 @@ BoxDomainType = FloatDPExactBox
 BoxRangeType = FloatDPUpperBox
 
 def test_generics():
-    assert(Interval[FloatDPValue]==FloatDPExactInterval)
+    assert(Interval[FloatDP]==FloatDPExactInterval)
     assert(Interval[FloatDPUpperBound]==FloatDPUpperInterval)
     assert(Interval[FloatDPLowerBound]==FloatDPLowerInterval)
     assert(Interval[FloatDPApproximation]==FloatDPApproximateInterval)
 
-    assert(Box[FloatDPValue]==FloatDPExactBox)
+    assert(Box[FloatDP]==FloatDPExactBox)
     assert(Box[FloatDPUpperBound]==FloatDPUpperBox)
     assert(Box[FloatDPLowerBound]==FloatDPLowerBox)
     assert(Box[FloatDPApproximation]==FloatDPApproximateBox)
@@ -49,7 +49,7 @@ def test_interval():
     wivl=DyadicInterval(-w,w)
     rivl=RealInterval(wivl)
 
-    x=FloatDPValue(0,dp)
+    x=FloatDP(0,dp)
     u=FloatDPUpperBound(0,dp)
     l=FloatDPLowerBound(0,dp)
     a=FloatDPApproximation(0,dp)
@@ -101,7 +101,7 @@ def test_box():
     wbx=DyadicBox([[-w,w],[-w,w]])
     rbx=RealBox(wbx)
 
-    x=FloatDPValue(0,dp)
+    x=FloatDP(0,dp)
     u=FloatDPUpperBound(0,dp)
     l=FloatDPLowerBound(0,dp)
     a=FloatDPApproximation(0,dp)
@@ -120,7 +120,7 @@ def test_box():
     xbx=FloatDPExactBox(wbx)
     ubx=FloatDPUpperBox(rbx)
 
-    xpt=FloatDPValuePoint([x,x])
+    xpt=FloatDPPoint([x,x])
     xivl=FloatDPExactInterval(-x,x)
 
     xbx.dimension()

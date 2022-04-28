@@ -94,6 +94,8 @@ template<> class FiniteOperations<Dyadic> {
 
 static const mp_bitcnt_t maximum_precision = 65535;
 
+const Dyadic infty = Dyadic::inf();
+
 Dyadic::~Dyadic() {
     mpf_clear(_mpf);
 }

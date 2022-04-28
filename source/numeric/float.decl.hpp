@@ -60,6 +60,11 @@ using MultiplePrecisionFloat = FloatMP;
 using RawFloatDP = FloatDP;
 using RawFloatMP = FloatMP;
 
+template<class F> struct IsARawFloat { static const bool value = false; };
+template<> struct IsARawFloat<FloatDP> { static const bool value = true; };
+template<> struct IsARawFloat<FloatMP> { static const bool value = true; };
+template<class F> concept ARawFloat = IsARawFloat<F>::value;
+
 #ifdef DOXYGEN
 //! \ingroup NumericModule
 //! \name Type extraction
@@ -71,15 +76,8 @@ template<class PR> typedef RawFloatType;
 template<class PR> typedef RawFloat;
 //!@}
 #else
-template<class PR> struct RawFloatTypedef;
-template<> struct RawFloatTypedef<DoublePrecision> { typedef FloatDP Type; };
-template<> struct RawFloatTypedef<MultiplePrecision> { typedef FloatMP Type; };
-template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
-template<class PR> using RawFloatType = typename RawFloatTypedef<PR>::Type;
-
-RawFloatDP cast_raw_float(DoublePrecision);
-RawFloatMP cast_raw_float(MultiplePrecision);
-template<class PR> using RawFloat = decltype(cast_raw_float(declval<PR>()));
+template<class PR> using RawFloatType = Float<PR>;
+template<class PR> using RawFloat = Float<PR>;
 #endif
 
 template<class F> class Rounded;

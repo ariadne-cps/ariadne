@@ -31,12 +31,12 @@
 
 #include "utility/macros.hpp"
 
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
 #include "float_operations.hpp"
 #include "float_traits.hpp"
-
 #include "float_factory.hpp"
 
 namespace Ariadne {
@@ -246,12 +246,12 @@ template<class F> class Bounds
     friend Bounds<F> atan(Bounds<F> const& x) {
         return Bounds<F>(atan(down,x._l),atan(up,x._u)); }
 
-    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Equality comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; }
         else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; }
         else { return indeterminate; } }
-    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict less-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()< x2.lower_raw()) { return true; }
         else if(x1.lower_raw()>=x2.upper_raw()) { return false; }
@@ -308,6 +308,107 @@ template<class F> class Bounds
     friend OutputStream& operator<<(OutputStream& os, Bounds<F> const& x) { return Operations<Bounds<F>>::_write(os,x); }
     //! <p/>
     friend InputStream& operator>>(InputStream& is, Bounds<F>& x) { return Operations<Bounds<F>>::_read(is,x); }
+  public:
+    // Value operations returning Bounds
+    friend Bounds<F> operator+(F const& x1, F const& x2) { return add(x1,x2); }
+    friend Bounds<F> operator-(F const& x1, F const& x2) { return sub(x1,x2); }
+    friend Bounds<F> operator*(F const& x1, F const& x2) { return mul(x1,x2); }
+    friend Bounds<F> operator/(F const& x1, F const& x2) { return div(x1,x2); }
+    friend Bounds<F> add(F const& x1, F const& x2) { return Bounds<F>{add(down,x1,x2),add(up,x1,x2)}; }
+    friend Bounds<F> sub(F const& x1, F const& x2) { return Bounds<F>{sub(down,x1,x2),sub(up,x1,x2)}; }
+    friend Bounds<F> mul(F const& x1, F const& x2) { return Bounds<F>{mul(down,x1,x2),mul(up,x1,x2)}; }
+    friend Bounds<F> div(F const& x1, F const& x2) { return Bounds<F>{div(down,x1,x2),div(up,x1,x2)}; }
+    friend Bounds<F> pow(F const& x, Nat m) { return Bounds<F>{pow(down,x,m),pow(up,x,m)}; }
+    friend Bounds<F> pow(F const& x, Int n) { return Bounds<F>{pow(down,x,n),pow(up,x,n)}; }
+    friend Bounds<F> sqr(F const& x) { return Bounds<F>{sqr(down,x),sqr(up,x)}; }
+    friend Bounds<F> rec(F const& x) { return Bounds<F>{rec(down,x),rec(up,x)}; }
+    friend Bounds<F> sqrt(F const& x) { return Bounds<F>{sqrt(down,x),sqrt(up,x)}; }
+    friend Bounds<F> exp(F const& x) { return Bounds<F>{exp(down,x),exp(up,x)}; }
+    friend Bounds<F> log(F const& x) { return Bounds<F>{log(down,x),log(up,x)}; }
+    friend Bounds<F> sin(F const& x) { return Bounds<F>{sin(down,x),sin(up,x)}; }
+    friend Bounds<F> cos(F const& x) { return Bounds<F>{cos(down,x),cos(up,x)}; }
+    friend Bounds<F> tan(F const& x) { return Bounds<F>{tan(down,x),tan(up,x)}; }
+    friend Bounds<F> asin(F const& x) { return Bounds<F>{asin(down,x),asin(up,x)}; }
+    friend Bounds<F> acos(F const& x) { return Bounds<F>{acos(down,x),acos(up,x)}; }
+    friend Bounds<F> atan(F const& x) { return Bounds<F>{atan(down,x),atan(up,x)}; }
+  public:
+    // Mixed Bounds-value operations
+    friend Bounds<F> add(Bounds<F> const& x1, F const& x2) {
+        return Bounds<F>(add(down,x1._l,x2),add(up,x1._u,x2)); }
+    friend Bounds<F> sub(Bounds<F> const& x1, F const& x2) {
+        return Bounds<F>(sub(down,x1._l,x2),sub(up,x1._u,x2)); }
+    friend Bounds<F> mul(Bounds<F> const& x1, F const& x2) {
+        return mul(x1,Bounds<F>(x2)); }
+    friend Bounds<F> div(Bounds<F> const& x1, F const& x2) {
+        return div(x1,Bounds<F>(x2)); }
+    friend Bounds<F> add(F const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(add(down,x1,x2._l),add(up,x1,x2._u)); }
+    friend Bounds<F> sub(F const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(sub(down,x1,x2._u),sub(up,x1,x2._l)); }
+    friend Bounds<F> mul(F const& x1, Bounds<F> const& x2) {
+        return mul(Bounds<F>(x1),x2); }
+    friend Bounds<F> div(F const& x1, Bounds<F> const& x2) {
+        return div(Bounds<F>(x1),x2); }
+
+    friend Bounds<F> max(Bounds<F> const& x1, F const& x2) {
+        return Bounds<F>(max(down,x1._l,x2),max(up,x1._u,x2)); }
+    friend Bounds<F> min(Bounds<F> const& x1, F const& x2) {
+        return Bounds<F>(min(down,x1._l,x2),min(up,x1._u,x2)); }
+    friend Bounds<F> max(F const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(max(down,x1,x2._l),max(up,x1,x2._u)); }
+    friend Bounds<F> min(F const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(min(down,x1,x2._l),min(up,x1,x2._u)); }
+
+    friend Bounds<F> operator+(Bounds<F> const& x1, F const& x2) { return add(x1,x2); }
+    friend Bounds<F> operator-(Bounds<F> const& x1, F const& x2) { return sub(x1,x2); }
+    friend Bounds<F> operator*(Bounds<F> const& x1, F const& x2) { return mul(x1,x2); }
+    friend Bounds<F> operator/(Bounds<F> const& x1, F const& x2) { return div(x1,x2); }
+    friend Bounds<F> operator+(F const& x1, Bounds<F> const& x2) { return add(x1,x2); }
+    friend Bounds<F> operator-(F const& x1, Bounds<F> const& x2) { return sub(x1,x2); }
+    friend Bounds<F> operator*(F const& x1, Bounds<F> const& x2) { return mul(x1,x2); }
+    friend Bounds<F> operator/(F const& x1, Bounds<F> const& x2) { return div(x1,x2); }
+
+    friend ValidatedKleenean operator==(Bounds<F> const& x1, F const& x2) { return x1==Bounds<F>(x2); }
+    friend ValidatedKleenean operator!=(Bounds<F> const& x1, F const& x2) { return x1!=Bounds<F>(x2); }
+    friend ValidatedKleenean operator< (Bounds<F> const& x1, F const& x2) { return x1< Bounds<F>(x2); }
+    friend ValidatedKleenean operator> (Bounds<F> const& x1, F const& x2) { return x1> Bounds<F>(x2); }
+    friend ValidatedKleenean operator<=(Bounds<F> const& x1, F const& x2) { return x1<=Bounds<F>(x2); }
+    friend ValidatedKleenean operator>=(Bounds<F> const& x1, F const& x2) { return x1>=Bounds<F>(x2); }
+    friend ValidatedKleenean operator==(F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)==x2; }
+    friend ValidatedKleenean operator!=(F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)!=x2; }
+    friend ValidatedKleenean operator< (F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)< x2; }
+    friend ValidatedKleenean operator> (F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)> x2; }
+    friend ValidatedKleenean operator<=(F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)<=x2; }
+    friend ValidatedKleenean operator>=(F const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)>=x2; }
+
+/*
+  public:
+    // Mixed Bounds-ValidatedNumber operations
+    template<AValidatedNumber Y> friend Bounds<F> operator+(Bounds<F> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator+(x1,F(y2,x1.precision())); }
+        else { return operator+(x1,Bounds<F>(y2,x1.precision())); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator-(Bounds<F> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator-(x1,F(y2,x1.precision())); }
+        else { return operator-(x1,Bounds<F>(y2,x1.precision())); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator*(Bounds<F> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator*(x1,F(y2,x1.precision())); }
+        else { return operator*(x1,Bounds<F>(y2,x1.precision())); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator/(Bounds<F> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator/(x1,F(y2,x1.precision())); }
+        else { return operator/(x1,Bounds<F>(y2,x1.precision())); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator+(Y const& y1, Bounds<F> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator+(F(y1,x2.precision()),x2); }
+        else { return operator+(Bounds<F>(y1,x2.precision()),x2); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator-(Y const& y1, Bounds<F> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator-(F(y1,x2.precision()),x2); }
+        else { return operator-(Bounds<F>(y1,x2.precision()),x2); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator*(Y const& y1, Bounds<F> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator*(F(y1,x2.precision()),x2); }
+        else { return operator*(Bounds<F>(y1,x2.precision()),x2); } }
+    template<AValidatedNumber Y> friend Bounds<F> operator/(Y const& y1, Bounds<F> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator/(F(y1,x2.precision()),x2); }
+        else { return operator/(Bounds<F>(y1,x2.precision()),x2); } }
+*/
   public:
     static Nat output_places;
     //! %Set the number of output places used to display the number. DEPRECATED
@@ -504,7 +605,6 @@ template<class F> inline auto Operations<Bounds<F>>::_fma(Bounds<F> const& x1, B
 {
     return add(mul(x1,x2),x3);
 }
-
 
 }
 

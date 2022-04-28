@@ -60,10 +60,11 @@ using NumberHandle = Handle<NumberInterface>;
 
 
 // Define declared Approximation operations
-Approximation<FloatDP> pow(Approximation<FloatDP> const& x, Integer const& n) {
-    return Approximation<FloatDP>(pow(approx,x._a,n.get_si())); }
-Approximation<FloatMP> pow(Approximation<FloatMP> const& x, Integer const& n) {
-    return Approximation<FloatMP>(pow(approx,x._a,n.get_si())); }
+// FIXME: Remove this, or consistently add pow(..., Integer) operations
+Approximation<FloatDP> pow(Approximation<FloatDP> const& x, Integer const& z) {
+    Int n=z.get_si(); ARIADNE_ASSERT(n==z); return Approximation<FloatDP>(pow(approx,x._a,n)); }
+Approximation<FloatMP> pow(Approximation<FloatMP> const& x, Integer const& z) {
+    Int n=z.get_si(); ARIADNE_ASSERT(n==z); return Approximation<FloatMP>(pow(approx,x._a,n)); }
 
 
 

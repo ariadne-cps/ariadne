@@ -45,6 +45,7 @@ template<> struct PythonTemplateName<Bounds> { static std::string get() { return
 template<> struct PythonTemplateName<Ball> { static std::string get() { return "Ball"; } };
 template<> struct PythonTemplateName<Value> { static std::string get() { return "Value"; } };
 template<> struct PythonTemplateName<Error> { static std::string get() { return "Error"; } };
+template<> struct PythonTemplateName<Rounded> { static std::string get() { return "Rounded"; } };
 
 template<class T> struct PythonClassName { static std::string get() { return class_name<T>(); } };
 

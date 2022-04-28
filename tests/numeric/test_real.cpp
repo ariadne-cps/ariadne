@@ -182,13 +182,14 @@ void TestReal::test_transcendental() {
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0_dy);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0_dy);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0_dy);
+
     ARIADNE_TEST_WITHIN(sqrt(x),sqrt(ax),eps);
     ARIADNE_TEST_WITHIN(exp(x),exp(ax),8*eps);
     ARIADNE_TEST_WITHIN(log(x),log(ax),eps);
-    ARIADNE_TEST_WITHIN(sin(x),sin(ax),eps);
-    ARIADNE_TEST_WITHIN(cos(x),cos(ax),eps);
-    ARIADNE_TEST_WITHIN(tan(x),tan(ax),eps);
-    //ARIADNE_TEST_WITHIN(atan(x),atan(ax),eps);
+    ARIADNE_TEST_WITHIN(sin(x),sin(ax),2*eps);
+    ARIADNE_TEST_WITHIN(cos(x),cos(ax),2*eps);
+    ARIADNE_TEST_WITHIN(tan(x),tan(ax),3*eps);
+    ARIADNE_TEST_WITHIN(atan(x),atan(ax),eps);
 }
 
 void TestReal::test_comparison() {

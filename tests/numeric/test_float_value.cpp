@@ -44,6 +44,7 @@
 #include "numeric/float_bounds.hpp"
 #include "numeric/float_lower_bound.hpp"
 #include "numeric/float_upper_bound.hpp"
+#include "numeric/float_error.hpp"
 
 #include "../test.hpp"
 #include "test_floats.hpp"
@@ -264,7 +265,7 @@ TestFloatValue<PR>::test_predicates()
 Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
-
+    
     TestFloatValue<DoublePrecision>(dp).test();
     TestFloatValue<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 

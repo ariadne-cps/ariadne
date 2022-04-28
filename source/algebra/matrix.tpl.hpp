@@ -433,7 +433,7 @@ template<class X> Matrix<ArithmeticType<X>> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDPValue>& A);
+template<> Matrix<FloatDPBounds> inverse<FloatDP>(const Matrix<FloatDP>& A);
 template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBounds>& A);
 
 

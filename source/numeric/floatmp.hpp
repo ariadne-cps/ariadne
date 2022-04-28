@@ -36,6 +36,7 @@
 #include "bits.hpp"
 #include "rounding.hpp"
 #include "sign.hpp"
+#include "numeric/float_operations.hpp"
 #include <mpfr.h>
 
 namespace Ariadne {
@@ -97,13 +98,17 @@ inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 //! Currently defined as a wrapper around \c mpfr_t from the MPFR library.
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
 //! \see FloatDP, Real, FloatValue, FloatBounds, FloatUpperBound, FloatLowerBound, FloatApproximation, FloatError
-template<> class Float<MP> {
+template<> class Float<MP>
+    : public DeclareRoundedOperations<Float<MP>>
+{
   private:
     mpfr_t _mpfr;
   public:
     typedef ExactTag Paradigm;
     typedef FloatMP NumericType;
     typedef mpfr_exp_t ExponentType;
+    //! \brief The abstract number class providing the same kind of information.
+    typedef ExactNumber GenericType;
     //! \brief The type representing the precision of the number.
     typedef MultiplePrecision PrecisionType;
     //! \brief The type representing the rounding modes available for arithmetic.
@@ -170,7 +175,7 @@ template<> class Float<MP> {
     Float(Rational const&, RoundingModeType, PrecisionType);
     Float(FloatMP const&, RoundingModeType, PrecisionType);
     explicit Float(const Rounded<FloatDP>& x, PrecisionType pr);
-    explicit Float(const Rounded<FloatMP>& x, PrecisionType pr);
+    explicit Float(const Rounded<FloatMP>& x, PrecisionType pr) : Float(reinterpret_cast<FloatMP const&>(x),to_nearest,pr) { }
     explicit Float(const Rounded<FloatMP>& x, RoundingModeType rnd, PrecisionType pr);
     explicit operator Dyadic() const;
     explicit operator Rational() const;
@@ -207,23 +212,6 @@ template<> class Float<MP> {
     friend FloatMP ceil(FloatMP const& x);
     friend FloatMP round(FloatMP const& x);
   public:
-    // Exact lattice operations
-    friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
-    friend Positive<FloatMP> abs(FloatMP const& x);
-    friend PositiveUpperBound<FloatMP> mag(FloatMP const& x);
-    friend PositiveLowerBound<FloatMP> mig(FloatMP const& x);
-
-    // Exact arithmetic
-    friend FloatMP nul(FloatMP const& x);
-    friend FloatMP pos(FloatMP const& x);
-    friend FloatMP neg(FloatMP const& x);
-    friend FloatMP hlf(FloatMP const& x);
-    friend FloatMP shft(FloatMP const& x, Int n);
-
-    // Exact arithmetic operators
-    friend FloatMP operator+(FloatMP const& x);
-    friend FloatMP operator-(FloatMP const& x);
 
     // Explcitly rounded lattice operations
     friend FloatMP max(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
@@ -248,6 +236,7 @@ template<> class Float<MP> {
     friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP fma(RoundingModeType rnd, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3); // x1*x2+x3
+    friend FloatMP pow(RoundingModeType rnd, FloatMP const& x, Nat m);
     friend FloatMP pow(RoundingModeType rnd, FloatMP const& x, Int n);
     friend FloatMP sqr(RoundingModeType rnd, FloatMP const& x);
     friend FloatMP rec(RoundingModeType rnd, FloatMP const& x);
@@ -266,14 +255,14 @@ template<> class Float<MP> {
     friend FloatMP rad(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(sub(rnd,x2,x1)); }
 
     // Mixed operations
-    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP add(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP sub(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP mul(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP div(RoundingModeType rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP mul(RoundingModeType rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP div(RoundingModeType rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP add(RoundingModeType rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP sub(RoundingModeType rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP mul(RoundingModeType rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP div(RoundingModeType rnd, ExactDouble x1, FloatMP const& x2);
 
     friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
     friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, FloatDP const& x2);
@@ -292,6 +281,7 @@ template<> class Float<MP> {
     friend FloatMP mul(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP div(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
     friend FloatMP fma(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend FloatMP pow(CurrentRoundingMode, FloatMP const& x, Nat m);
     friend FloatMP pow(CurrentRoundingMode, FloatMP const& x, Int n);
     friend FloatMP sqrt(CurrentRoundingMode, FloatMP const& x);
     friend FloatMP exp(CurrentRoundingMode, FloatMP const& x);
@@ -313,120 +303,108 @@ template<> class Float<MP> {
     friend FloatMP mul(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
     friend FloatMP div(CurrentRoundingMode rnd, FloatDP const& x1, FloatMP const& x2);
 
-    friend FloatMP add(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP sub(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP mul(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP div(CurrentRoundingMode rnd, FloatMP const& x1, Dbl x2);
-    friend FloatMP add(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP sub(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP mul(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
-    friend FloatMP div(CurrentRoundingMode rnd, Dbl x1, FloatMP const& x2);
+    friend FloatMP add(CurrentRoundingMode rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP div(CurrentRoundingMode rnd, FloatMP const& x1, ExactDouble x2);
+    friend FloatMP add(CurrentRoundingMode rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP sub(CurrentRoundingMode rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP mul(CurrentRoundingMode rnd, ExactDouble x1, FloatMP const& x2);
+    friend FloatMP div(CurrentRoundingMode rnd, ExactDouble x1, FloatMP const& x2);
 
-/*
-    // Correctly rounded arithmetic
-    friend FloatMP sqr(FloatMP const& x);
-    friend FloatMP rec(FloatMP const& x);
-    friend FloatMP add(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP sub(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP mul(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP div(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
-    friend FloatMP pow(FloatMP const& x, Int n);
-    friend FloatMP sqrt(FloatMP const& x);
-    friend FloatMP exp(FloatMP const& x);
-    friend FloatMP log(FloatMP const& x);
-    friend FloatMP sin(FloatMP const& x);
-    friend FloatMP cos(FloatMP const& x);
-    friend FloatMP tan(FloatMP const& x);
-    friend FloatMP asin(FloatMP const& x);
-    friend FloatMP acos(FloatMP const& x);
-    friend FloatMP atan(FloatMP const& x);
-    static FloatMP pi(MultiplePrecision pr);
-*/
+  public:
+    // User float operations
+    friend FloatMP operator+(FloatMP const& x);
+    friend FloatMP operator-(FloatMP const& x);
+    friend Bounds<FloatMP> operator+(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> operator-(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> operator*(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> operator/(FloatMP const& x1, FloatMP const& x2);
+
+    // Exact arithmetic
+    friend FloatMP nul(FloatMP const& x);
+    friend FloatMP pos(FloatMP const& x);
+    friend FloatMP neg(FloatMP const& x);
+    friend FloatMP hlf(FloatMP const& x);
+    friend FloatMP shft(FloatMP const& x, Int n);
+
+    // Rounded arithmetic
+    friend Bounds<FloatMP> sqr(FloatMP const& x);
+    friend Bounds<FloatMP> rec(FloatMP const& x);
+    friend Bounds<FloatMP> add(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> sub(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> mul(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> div(FloatMP const& x1, FloatMP const& x2);
+    friend Bounds<FloatMP> fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend Bounds<FloatMP> pow(FloatMP const& x, Nat m);
+    friend Bounds<FloatMP> pow(FloatMP const& x, Int n);
+    friend Bounds<FloatMP> sqrt(FloatMP const& x);
+    friend Bounds<FloatMP> exp(FloatMP const& x);
+    friend Bounds<FloatMP> log(FloatMP const& x);
+    friend Bounds<FloatMP> sin(FloatMP const& x);
+    friend Bounds<FloatMP> cos(FloatMP const& x);
+    friend Bounds<FloatMP> tan(FloatMP const& x);
+    friend Bounds<FloatMP> asin(FloatMP const& x);
+    friend Bounds<FloatMP> acos(FloatMP const& x);
+    friend Bounds<FloatMP> atan(FloatMP const& x);
+
+    // Exact lattice operations
+    friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
+    friend Positive<FloatMP> abs(FloatMP const& x);
+    friend PositiveUpperBound<FloatMP> mag(FloatMP const& x);
+    friend PositiveLowerBound<FloatMP> mig(FloatMP const& x);
+  public:
+    friend FloatMP mul(FloatMP const& x1, TwoExp e2) { return shft(x1,e2.exponent()); }
+    friend FloatMP div(FloatMP const& x1, TwoExp e2) { return shft(x1,-e2.exponent()); }
+    friend FloatMP operator*(TwoExp e1, FloatMP const& x2) { return shft(x2,e1.exponent()); }
+    friend FloatMP operator*(FloatMP const& x1, TwoExp e2) { return shft(x1,e2.exponent()); }
+    friend FloatMP operator/(FloatMP const& x1, TwoExp e2) { return shft(x1,-e2.exponent()); }
+    friend FloatMP& operator*=(FloatMP& v1, TwoExp e2) { return v1=v1*e2; }
+    friend FloatMP& operator/=(FloatMP& v1, TwoExp e2) { return v1=v1/e2; }
+
+  private:
+    template<class OP, class X1, class X2> static Boolean _cmp(OP op, X1 const& x1, X2 const& x2) { return op(cmp(x1,x2),Comparison::EQUAL); }
+  public:
+    // Comparison operations
+    friend Boolean eq(FloatMP const& x1, FloatMP const& x2) { return x1 == x2; }
+    friend Boolean lt(FloatMP const& x1, FloatMP const& x2) { return x1 <  x2; }
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
+    template<BuiltinIntegral N> friend Comparison cmp(FloatMP const& x1, N n2);
+    template<BuiltinIntegral N> friend Comparison cmp(N n1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, Nat m2);
+    friend Comparison cmp(Nat m1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, Int n2);
+    friend Comparison cmp(Int n1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, ExactDouble x2);
+    friend Comparison cmp(ExactDouble x1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, Rational const& x2);
+    friend Comparison cmp(Rational const& x1, FloatMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, FloatDP const& x2);
+    friend Comparison cmp(FloatDP const& x1, FloatMP const& x2);
+
     friend Boolean operator==(FloatMP const& x1, FloatMP const& x2);
     friend Boolean operator!=(FloatMP const& x1, FloatMP const& x2);
-    friend Boolean operator<=(FloatMP const& x1, FloatMP const& x2);
-    friend Boolean operator>=(FloatMP const& x1, FloatMP const& x2);
     friend Boolean operator< (FloatMP const& x1, FloatMP const& x2);
     friend Boolean operator> (FloatMP const& x1, FloatMP const& x2);
-
-    template<BuiltinIntegral N> friend Comparison cmp(FloatMP const& x1, N n2);
-    template<BuiltinIntegral N> friend Boolean operator==(FloatMP const& x1, N n2) { return cmp(x1,n2)==Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator!=(FloatMP const& x1, N n2) { return cmp(x1,n2)!=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator<=(FloatMP const& x1, N n2) { return cmp(x1,n2)<=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator>=(FloatMP const& x1, N n2) { return cmp(x1,n2)>=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator< (FloatMP const& x1, N n2) { return cmp(x1,n2)< Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator> (FloatMP const& x1, N n2) { return cmp(x1,n2)> Comparison::EQUAL; }
-
-    template<BuiltinIntegral N> friend Comparison cmp(N n1, FloatMP const& x2);
-    template<BuiltinIntegral N> friend Boolean operator==(N n1, FloatMP const& x2) { return cmp(n1,x2)==Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator!=(N n1, FloatMP const& x2) { return cmp(n1,x2)!=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator<=(N n1, FloatMP const& x2) { return cmp(n1,x2)<=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator>=(N n1, FloatMP const& x2) { return cmp(n1,x2)>=Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator< (N n1, FloatMP const& x2) { return cmp(n1,x2)< Comparison::EQUAL; }
-    template<BuiltinIntegral N> friend Boolean operator> (N n1, FloatMP const& x2) { return cmp(n1,x2)> Comparison::EQUAL; }
-
-    friend Comparison cmp(FloatMP const& x1, ExactDouble x2);
-    friend Boolean operator==(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (FloatMP const& x1, ExactDouble x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-
-    friend Comparison cmp(ExactDouble x1, FloatMP const& x2);
-    friend Boolean operator==(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (ExactDouble x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-
-    friend Comparison cmp(FloatMP const& x1, Rational const& x2);
-    friend Boolean operator==(FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (FloatMP const& x1, Rational const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-    friend Comparison cmp(Rational const& x1, FloatMP const& x2);
-    friend Boolean operator==(Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (Rational const& x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-
-    friend Comparison cmp(FloatMP const& x1, FloatDP const& x2);
-    friend Boolean operator==(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (FloatMP const& x1, FloatDP const&  x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-    friend Comparison cmp(FloatDP const& x1, FloatMP const& x2);
-    friend Boolean operator==(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
-    friend Boolean operator!=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)!=Comparison::EQUAL; }
-    friend Boolean operator<=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)<=Comparison::EQUAL; }
-    friend Boolean operator>=(FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)>=Comparison::EQUAL; }
-    friend Boolean operator< (FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)< Comparison::EQUAL; }
-    friend Boolean operator> (FloatDP const& x1, FloatMP const& x2) { return cmp(x1,x2)> Comparison::EQUAL; }
-
+    friend Boolean operator<=(FloatMP const& x1, FloatMP const& x2);
+    friend Boolean operator>=(FloatMP const& x1, FloatMP const& x2);
+  public:
+    friend Bool same(FloatMP const& x1, FloatMP const& x2) { return x1 == x2; }
+  public:
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
   private:
-
     // Mixed operations
-    friend FloatMP add(FloatMP const& x1, Dbl x2);
-    friend FloatMP sub(FloatMP const& x1, Dbl x2);
-    friend FloatMP mul(FloatMP const& x1, Dbl x2);
-    friend FloatMP div(FloatMP const& x1, Dbl x2);
-    friend FloatMP add(Dbl x1, FloatMP const& x2);
-    friend FloatMP sub(Dbl x1, FloatMP const& x2);
-    friend FloatMP mul(Dbl x1, FloatMP const& x2);
-    friend FloatMP div(Dbl x1, FloatMP const& x2);
+    friend Bounds<FloatMP> add(FloatMP const& x1, ExactDouble x2);
+    friend Bounds<FloatMP> sub(FloatMP const& x1, ExactDouble x2);
+    friend Bounds<FloatMP> mul(FloatMP const& x1, ExactDouble x2);
+    friend Bounds<FloatMP> div(FloatMP const& x1, ExactDouble x2);
+    friend Bounds<FloatMP> add(ExactDouble x1, FloatMP const& x2);
+    friend Bounds<FloatMP> sub(ExactDouble x1, FloatMP const& x2);
+    friend Bounds<FloatMP> mul(ExactDouble x1, FloatMP const& x2);
+    friend Bounds<FloatMP> div(ExactDouble x1, FloatMP const& x2);
 
     // Correctly rounded operations
     friend FloatMP sqr_rnd(FloatMP const& x);
@@ -442,7 +420,10 @@ template<> class Float<MP> {
     friend FloatMP cos_rnd(FloatMP const& x);
     friend FloatMP tan_rnd(FloatMP const& x);
     friend FloatMP atan_rnd(FloatMP const& x);
-
+  public:
+    // Rounding to integer
+    friend Integer cast_integer(FloatMP const& x);
+  public:
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
     friend OutputStream& repr(OutputStream& os, FloatMP const& x);

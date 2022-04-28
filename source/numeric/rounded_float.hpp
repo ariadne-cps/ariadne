@@ -98,7 +98,7 @@ template<> class Rounded<FloatDP>
     template<class Y> requires Constructible<FloatType,Y,RoundingModeType,PrecisionType> and (not BuiltinIntegral<Y>)
         Rounded<FloatType> operator=(Y const& y) { return (*this)=FloatType(y,FloatType::get_rounding_mode(),this->precision()); }
 
-    Rounded(Approximation<FloatDP> const& x);
+    Rounded(Approximation<FloatDP> const& x) : Rounded(reinterpret_cast<FloatDP const&>(x)) { }
     operator Approximation<FloatDP> () const;
 
     double data() const { return this->_flt.dbl; }
@@ -236,7 +236,7 @@ template<class FLT> class Rounded
     explicit operator FloatType() const { return FloatType(this->_flt); }
     FloatType raw() const { return FloatType(this->_flt); }
 
-    Rounded(Approximation<FloatType> const& x);
+    Rounded(Approximation<FloatType> const& x) : Rounded(reinterpret_cast<FloatType const&>(x)) { }
     operator Approximation<FloatType> () const;
 
     // Non-finiteness tests

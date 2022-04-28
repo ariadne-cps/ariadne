@@ -147,10 +147,6 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     return os;
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatValue<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
-}
-
 template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatApproximation<PR>> >& exp_repr) {
     return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }

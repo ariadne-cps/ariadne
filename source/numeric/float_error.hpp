@@ -40,6 +40,7 @@
 
 #include "float_traits.hpp"
 #include "float_operations.hpp"
+#include "float_factory.hpp"
 
 #include "float_upper_bound.hpp"
 
@@ -151,9 +152,11 @@ template<class F> class Error
 
         friend Error<F> operator/(Error<F> const& x1, PositiveLowerBound<F> const& x2) { return Error<F>(div(up,x1._e,x2._l)); }
 
-        friend Error<F> operator+(Error<F> const& x1, Nat m) { return Error<F>(add(up,x1._e,F(m,up,x1.precision()))); }
-        friend Error<F> operator*(Error<F> const& x1, Nat m) { return Error<F>(mul(up,x1._e,F(m,up,x1.precision()))); }
-        friend Error<F> operator/(Error<F> const& x1, Nat m) { return Error<F>(div(up,x1._e,F(m,down,x1.precision()))); }
+        friend Error<F> operator+(Error<F> const& x1, Nat m2) { return Error<F>(add(up,x1._e,F(m2,up,x1.precision()))); }
+        friend Error<F> operator+(Nat m1, Error<F> const& x2) { return Error<F>(add(up,F(m1,up,x2.precision()),x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, Nat m2) { return Error<F>(mul(up,x1._e,F(m2,up,x1.precision()))); }
+        friend Error<F> operator*(Nat m1, Error<F> const& x2) { return Error<F>(mul(up,F(m1,up,x2.precision()),x2._e)); }
+        friend Error<F> operator/(Error<F> const& x1, Nat m2) { return Error<F>(div(up,x1._e,F(m2,down,x1.precision()))); }
 
         friend Approximation<F> operator-(Error<F> const& x1, Error<F> const& x2) { return Approximation<F>(sub(up,x1._e,x2._e)); }
         friend LowerBound<F> operator-(PositiveBounds<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1._l,x2._e)); }

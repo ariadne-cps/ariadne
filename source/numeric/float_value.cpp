@@ -30,34 +30,12 @@
 
 namespace Ariadne {
 
-const Dyadic infty = Dyadic::inf();
-
-template<> Bool same(FloatDP const& x1, FloatDP const& x2) { return x1==x2; }
-template<> Bool same(FloatMP const& x1, FloatMP const& x2) { return x1==x2; }
-
-inline FloatDP const& cast_exact(UpperBound<FloatDP> const& x) { return reinterpret_cast<FloatDP const&>(x); }
-inline FloatMP const& cast_exact(UpperBound<FloatMP> const& x) { return reinterpret_cast<FloatMP const&>(x); }
-inline FloatDP const& cast_exact(Approximation<FloatDP> const& x) { return reinterpret_cast<FloatDP const&>(x); }
-inline FloatMP const& cast_exact(Approximation<FloatMP> const& x) { return reinterpret_cast<FloatMP const&>(x); }
-
-inline UpperBound<FloatDP> const& cast_unsigned(Positive<UpperBound<FloatDP>> const& x) { return reinterpret_cast<UpperBound<FloatDP> const&>(x); }
-inline UpperBound<FloatMP> const& cast_unsigned(Positive<UpperBound<FloatMP>> const& x) { return reinterpret_cast<UpperBound<FloatMP> const&>(x); }
-inline Approximation<FloatDP> const& cast_unsigned(Positive<Approximation<FloatDP>> const& x) { return reinterpret_cast<Approximation<FloatDP> const&>(x); }
-inline Approximation<FloatMP> const& cast_unsigned(Positive<Approximation<FloatMP>> const& x) { return reinterpret_cast<Approximation<FloatMP> const&>(x); }
-
-template<> Positive<FloatDP> cast_exact(Positive<UpperBound<FloatDP>> const& x) {
-    return cast_positive(cast_exact(cast_unsigned(x))); }
-template<> Positive<FloatMP> cast_exact(Positive<UpperBound<FloatMP>> const& x) {
-    return cast_positive(cast_exact(cast_unsigned(x))); }
-
-template<> Positive<FloatDP> cast_exact(Positive<Approximation<FloatDP>> const& x) {
-    return cast_positive(cast_exact(cast_unsigned(x))); }
-template<> Positive<FloatMP> cast_exact(Positive<Approximation<FloatMP>> const& x) {
-    return cast_positive(cast_exact(cast_unsigned(x))); }
-
-Bounds<FloatMP> add(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return add(Bounds<FloatMP>(x1),Bounds<FloatMP>(x2)); }
-Bounds<FloatMP> sub(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return sub(Bounds<FloatMP>(x1),Bounds<FloatMP>(x2)); }
-Bounds<FloatMP> mul(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return mul(Bounds<FloatMP>(x1),Bounds<FloatMP>(x2)); }
-Bounds<FloatMP> div(Value<FloatMP> const& x1, Value<FloatMP> const& x2) { return div(Bounds<FloatMP>(x1),Bounds<FloatMP>(x2)); }
+#warning float_operations.hpp@100: Remove out-of-line mixed ValidatedNumber - Float operations
+#warning float_bounds.hpp@385: Provide mixed Bounds-ValidatedNumber operations
+#warning float_ball.hpp@231: Provide mixed Ball-ValidatedNumber operations
+#warning floatdp.hpp@445: Comparison operators for FloatDP
+#warning float?p.hpp: Use a better approach to providing comparison operators
+#warning Move concepts from number.decl.hpp
+#warning FloatDP-FloatMP comparison declarations in floatmp.hpp
 
 } // namespace Ariadne

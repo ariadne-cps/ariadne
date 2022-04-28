@@ -719,7 +719,7 @@ template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> 
     F::set_rounding_to_nearest();
     Rounded<F> rv=xv*cm;
     F::set_rounding_upward();
-    if(xv>=0) {
+    if(cast_exact(xv)>=0) {
         Rounded<F> mcl=-cl;
         Rounded<F> u=xv*cu;
         Rounded<F> ml=xv*mcl;

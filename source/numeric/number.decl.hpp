@@ -85,6 +85,8 @@ class Real;
 template<class F> class Bounds;
 template<> class Bounds<Dyadic>;
 using DyadicBounds = Bounds<Dyadic>;
+template<> class Bounds<Decimal>;
+using DecimalBounds = Bounds<Decimal>;
 
 template<class F> class Approximation;
 template<> class Approximation<Dyadic>;

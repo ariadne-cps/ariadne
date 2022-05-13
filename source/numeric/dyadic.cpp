@@ -457,7 +457,11 @@ Dyadic make_dyadic(unsigned long long int n) {
 }
 
 template<> String class_name<Dyadic>() { return "Dyadic"; }
+template<> String class_name<DyadicBounds>() { return "DyadicBounds"; }
 
+
+DyadicBounds pow(DyadicBounds const& w, Nat m) {
+    DyadicBounds y = (m%2==0) ? abs(w) : w;  return DyadicBounds(pow(y._l,m),pow(y._u,m)); }
 
 Dyadic hlf(Integer const& n) {
     return hlf(Dyadic(n));
@@ -468,5 +472,6 @@ inline RoundExact opposite(RoundExact) { return RoundExact(); }
 template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
 
 template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
+template<class RNDUP, class Y> auto _div(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
 
 } // namespace Ariadne

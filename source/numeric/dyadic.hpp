@@ -219,6 +219,7 @@ using PositiveDyadicBounds = Positive<Bounds<Dyadic>>; //!< <p/>
 template<> class Bounds<Dyadic> {
     Dyadic _l, _u;
   public:
+    typedef ValidatedTag Paradigm;
     Bounds(Dyadic w) : _l(w), _u(w) { }
     template<ConvertibleTo<Dyadic> X> Bounds(X const& x)
         : Bounds(Dyadic(x)) { }
@@ -235,14 +236,32 @@ template<> class Bounds<Dyadic> {
     Bounds<FloatMP> get(MultiplePrecision pr) const;
     friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(+w._l,w._u); }
     friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(-w._u,-w._l); }
-    friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l+w2._l,w1._u+w2._u); }
-    friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l-w2._u,w1._u-w2._l); }
+    friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        return Bounds<Dyadic>(w1._l+w2._l,w1._u+w2._u); }
+    friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        return Bounds<Dyadic>(w1._l-w2._u,w1._u-w2._l); }
     friend Bounds<Dyadic> operator*(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2);
+    friend Bounds<Rational> operator/(Bounds<Rational> const& w1, Bounds<Rational> const& w2);
+    friend Bounds<Dyadic> add(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        return Bounds<Dyadic>(w1._l+w2._l,w1._u+w2._u); }
+    friend Bounds<Dyadic> sub(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        return Bounds<Dyadic>(w1._l-w2._u,w1._u-w2._l); }
+    friend Bounds<Dyadic> mul(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2);
+    friend Bounds<Rational> div(Bounds<Rational> const& w1, Bounds<Rational> const& w2);
+    friend Bounds<Dyadic> pow(Bounds<Dyadic> const& w, Nat m);
+    friend Bounds<Dyadic> pow(Bounds<Dyadic> const& w, Int m); // DEPRECATED m always positive
+    friend Bounds<Dyadic> nul(Bounds<Dyadic> const& w) {
+        return Bounds<Dyadic>(nul(w._l),nul(w._u)); }
+    friend Bounds<Dyadic> pos(Bounds<Dyadic> const& w) {
+        return Bounds<Dyadic>(pos(w._l),pos(w._u)); }
+    friend Bounds<Dyadic> neg(Bounds<Dyadic> const& w) {
+        return Bounds<Dyadic>(neg(w._l),neg(w._u)); }
     friend Bounds<Dyadic> sqr(Bounds<Dyadic> const& w) {
-        if(w._l>0) { return Bounds<Dyadic>(mul(w._l,w._l),mul(w._u,w._u)); }
-        else if(w._u<0) { return Bounds<Dyadic>(mul(w._u,w._u),mul(w._l,w._l)); }
-        else { return Bounds<Dyadic>(nul(w._l),max(mul(w._l,w._l),mul(w._u,w._u))); } }
+        if(w._l>0) { return Bounds<Dyadic>(sqr(w._l),sqr(w._u)); }
+        else if(w._u<0) { return Bounds<Dyadic>(sqr(w._u),sqr(w._l)); }
+        else { return Bounds<Dyadic>(nul(w._l),max(sqr(w._l),sqr(w._u))); } }
     friend Bounds<Dyadic> hlf(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(hlf(w._l),hlf(w._u)); }
+    friend Bounds<Rational> rec(Bounds<Rational> const& w);
     friend Bounds<Dyadic> abs(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
     friend Bounds<Dyadic> max(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(max(w1._l,w2._l),max(w1._u,w2._u)); }
     friend Bounds<Dyadic> min(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(min(w1._l,w2._l),min(w1._u,w2._u)); }

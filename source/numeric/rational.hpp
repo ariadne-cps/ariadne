@@ -142,6 +142,7 @@ using RationalBounds = Bounds<Rational>; //!< Alias for rational bounds on a num
 template<> class Bounds<Rational> {
     Rational _l, _u;
   public:
+    typedef ValidatedTag Paradigm;
     Bounds(Rational q) : _l(q), _u(q) { }
     Bounds(Rational l, Rational u) : _l(l), _u(u) { }
     template<class X> requires Constructible<Rational,X> Bounds(Bounds<X> const& x)
@@ -152,24 +153,38 @@ template<> class Bounds<Rational> {
     Rational upper() const { return _u; }
     Rational lower_raw() const { return _l; }
     Rational upper_raw() const { return _u; }
-    friend Bounds<Rational> operator+(RationalBounds const& q) { return RationalBounds(+q._l,+q._u); }
-    friend Bounds<Rational> operator-(RationalBounds const& q) { return RationalBounds(-q._u,-q._l); }
-    friend Bounds<Rational> operator+(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l+q2._l,q1._u+q2._u); }
-    friend Bounds<Rational> operator-(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l-q2._u,q1._u-q2._l); }
-    friend Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2);
-    friend Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2);
-    friend Bounds<Rational> sqr(RationalBounds const& q);
-    friend Bounds<Rational> rec(RationalBounds const& q);
-    friend RationalBounds abs(RationalBounds const& q) { return RationalBounds(max(min(q._l,-q._u),0),max(-q._l,q._u)); }
-    friend Bounds<Rational> max(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(max(q1._l,q2._l),max(q1._u,q2._u)); }
-    friend Bounds<Rational> min(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(min(q1._l,q2._l),min(q1._u,q2._u)); }
-    friend ValidatedKleenean operator<(RationalBounds const& q1, RationalBounds const& q2) {
-        if (q1._u<q2._l) { return true; } else if (q1._l >= q2._u) { return false; } else { return indeterminate; } }
+    friend RationalBounds operator+(RationalBounds const& q) { return RationalBounds(+q._l,+q._u); }
+    friend RationalBounds operator-(RationalBounds const& q) { return RationalBounds(-q._u,-q._l); }
+    friend RationalBounds operator+(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l+q2._l,q1._u+q2._u); }
+    friend RationalBounds operator-(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l-q2._u,q1._u-q2._l); }
+    friend RationalBounds operator*(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds operator/(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds add(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds sub(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds mul(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds div(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds pow(RationalBounds const& q, Nat m);
+    friend RationalBounds pow(RationalBounds const& q, Int n);
+    friend RationalBounds nul(RationalBounds const& q);
+    friend RationalBounds pos(RationalBounds const& q);
+    friend RationalBounds neg(RationalBounds const& q);
+    friend RationalBounds hlf(RationalBounds const& q);
+    friend RationalBounds sqr(RationalBounds const& q);
+    friend RationalBounds rec(RationalBounds const& q);
+    friend RationalBounds abs(RationalBounds const& q);
+    friend RationalBounds max(RationalBounds const& q1, RationalBounds const& q2);
+    friend RationalBounds min(RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator==(RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator!=(RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator<=(RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator>=(RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator< (RationalBounds const& q1, RationalBounds const& q2);
+    friend ValidatedKleenean operator> (RationalBounds const& q1, RationalBounds const& q2);
+
     friend Boolean refines(RationalBounds const& q1, RationalBounds const& q2) { return q1._l>=q2._l and q1._u<=q2._u; }
     friend RationalBounds refinement(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(max(q1._l,q2._l),min(q1._u,q2._u)); }
     friend OutputStream& operator<<(OutputStream& os, RationalBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
 };
-
 
 } // namespace Ariadne
 

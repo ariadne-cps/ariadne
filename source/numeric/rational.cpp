@@ -615,21 +615,72 @@ template<class RNDUP, class Y> Bounds<Y> _rec(RNDUP up, Bounds<Y> const& y) {
     }
 }
 
-Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2) {
+RationalBounds operator*(RationalBounds const& q1, RationalBounds const& q2) {
     return _mul(RoundExact(),q1,q2); }
-Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2) {
+RationalBounds operator/(RationalBounds const& q1, RationalBounds const& q2) {
     return _div(RoundExact(),q1,q2); }
-Bounds<Rational> sqr(RationalBounds const& q) {
+
+
+RationalBounds nul(RationalBounds const& q) {
+    return RationalBounds(nul(q._l),nul(q._u)); }
+RationalBounds pos(RationalBounds const& q) {
+    return RationalBounds(pos(q._l),pos(q._u)); }
+RationalBounds neg(RationalBounds const& q) {
+    return RationalBounds(neg(q._u),neg(q._l)); }
+RationalBounds hlf(RationalBounds const& q) {
+    return RationalBounds(hlf(q._u),hlf(q._l)); }
+RationalBounds sqr(RationalBounds const& q) {
     return _sqr(RoundExact(),q); }
-Bounds<Rational> rec(RationalBounds const& q) {
+RationalBounds rec(RationalBounds const& q) {
     return _rec(RoundExact(),q); }
 
+RationalBounds add(RationalBounds const& q1, RationalBounds const& q2) {
+    return RationalBounds(q1._l+q2._l,q1._u+q2._u); }
+RationalBounds sub(RationalBounds const& q1, RationalBounds const& q2) {
+    return RationalBounds(q1._l-q2._u,q1._u-q2._l); }
+RationalBounds mul(RationalBounds const& q1, RationalBounds const& q2) {
+    return _mul(RoundExact(),q1,q2); }
+RationalBounds div(RationalBounds const& q1, RationalBounds const& q2) {
+    return _div(RoundExact(),q1,q2); }
+RationalBounds pow(RationalBounds const& q, Nat m) {
+    RationalBounds r = (m%2==0) ? abs(q) : q;  Int n=static_cast<Int>(m); return RationalBounds(pow(q._l,n),pow(q._u,n)); }
+RationalBounds pow(RationalBounds const& q, Int n) {
+    if(n<0) { return pow(rec(q),Nat(-n)); } else return pow(q,Nat(n));}
+
+RationalBounds abs(RationalBounds const& q) {
+    return RationalBounds(max(min(q._l,-q._u),0),max(-q._l,q._u)); }
+RationalBounds max(RationalBounds const& q1, RationalBounds const& q2) {
+    return RationalBounds(max(q1._l,q2._l),max(q1._u,q2._u)); }
+RationalBounds min(RationalBounds const& q1, RationalBounds const& q2) {
+    return RationalBounds(min(q1._l,q2._l),min(q1._u,q2._u)); }
+
+ValidatedKleenean operator==(RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._l >= q2._u && q1._u <= q2._l) { return true; } else if (q1._l > q2._u || q1._u < q2._l) { return false; } else { return indeterminate; } }
+ValidatedKleenean operator!=(RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._l > q2._u || q1._u < q2._l) { return true; } else if (q1._l >= q2._u && q1._u <= q2._l) { return false; } else { return indeterminate; } }
+ValidatedKleenean operator<=(RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._u <= q2._l) { return true; } else if (q1._l > q2._u) { return false; } else { return indeterminate; } }
+ValidatedKleenean operator>=(RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._l >= q2._u) { return true; } else if (q1._u < q2._l) { return false; } else { return indeterminate; } }
+ValidatedKleenean operator< (RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._u < q2._l) { return true; } else if (q1._l >= q2._u) { return false; } else { return indeterminate; } }
+ValidatedKleenean operator> (RationalBounds const& q1, RationalBounds const& q2) {
+    if (q1._l > q2._u) { return true; } else if (q1._u <= q2._l) { return false; } else { return indeterminate; } }
+
 template<> String class_name<Rational>() { return "Rational"; }
+template<> String class_name<RationalBounds>() { return "RationalBounds"; }
 
 
 // TODO: Move to dyadic.cpp
-Bounds<Dyadic> operator*(DyadicBounds const& w1, DyadicBounds const& w2) {
+DyadicBounds operator*(DyadicBounds const& w1, DyadicBounds const& w2) {
     return _mul(RoundExact(),w1,w2); }
+
+DyadicBounds mul(DyadicBounds const& w1, DyadicBounds const& w2) {
+    return _mul(RoundExact(),w1,w2); }
+
+    DyadicBounds pow(DyadicBounds const& w, Int n) {
+    assert(n>=0);
+    return pow(w,static_cast<Nat>(n)); }
 
 
 } // namespace Ariadne

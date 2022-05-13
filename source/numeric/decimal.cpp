@@ -263,6 +263,7 @@ Decimal::Decimal(String const& str)
 }
 
 template<> String class_name<Decimal>() { return "Decimal"; }
+template<> String class_name<DecimalBounds>() { return "DecimalBounds"; }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer p=abs(d._p);

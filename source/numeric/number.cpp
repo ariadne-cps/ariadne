@@ -35,6 +35,7 @@
 #include "upper_number.hpp"
 #include "logical.hpp"
 #include "integer.hpp"
+#include "decimal.hpp"
 #include "dyadic.hpp"
 #include "rational.hpp"
 #include "real.hpp"
@@ -93,7 +94,9 @@ template class NumberWrapper<FloatDPBounds>;
 template class NumberWrapper<FloatDPBall>;
 template class NumberWrapper<FloatDPValue>;
 
-DyadicBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBounds>(FloatDPBounds(*this,dp))); }
+DyadicBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<DyadicBounds>(*this)); }
+DecimalBounds::operator ValidatedNumber() const { return RationalBounds(*this).operator ValidatedNumber(); }
+RationalBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<RationalBounds>(*this)); }
 
 template<> FloatDPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatDPApproximation>(*this)); }
 //template<> FloatDPLowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<FloatDPLowerBound>(*this)); }

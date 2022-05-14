@@ -117,6 +117,7 @@ class Integer
     template<BuiltinUnsignedIntegral M> Integer(M m);
     template<BuiltinSignedIntegral N> Integer(N n);
     explicit Integer(const mpz_t);
+    explicit Integer(String const&);
     Integer(const Integer&);
     Integer(Integer&&);
     Integer& operator=(const Integer&);
@@ -173,6 +174,7 @@ class Integer
 template<BuiltinUnsignedIntegral M> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
 template<BuiltinSignedIntegral N> inline Integer::Integer(N n) : Integer(Int64(n)) { }
 Integer operator"" _z(unsigned long long int n);
+Integer operator"" _z(const char* str, std::size_t);
 
 template<BuiltinIntegral N> inline N Integer::get() const {
     N n=static_cast<N>(this->get_si()); ARIADNE_ASSERT(Integer(n)==*this); return n; }

@@ -192,18 +192,23 @@ Integer::Integer(Nat64 m) {
     }
 }
 
-Integer::Integer(Int64 larg) {
+Integer::Integer(Int64 n) {
     mpz_init(_mpz);
-    if(larg.get_si()<0) {
-        *this = -Integer(Nat64(-larg.get_si()));
+    if(n.get_si()<0) {
+        *this = -Integer(Nat64(-n.get_si()));
     } else {
-        *this = Integer(Nat64(larg.get_si()));
+        *this = Integer(Nat64(n.get_si()));
     }
 }
 
 Integer::Integer(const mpz_t z) {
     mpz_init(_mpz);
     mpz_set(_mpz,z);
+}
+
+Integer::Integer(String const& str) {
+    mpz_init(_mpz);
+    mpz_set_str(_mpz,str.c_str(),10u);
 }
 
 Integer::Integer(const Integer& z) {
@@ -411,6 +416,10 @@ Integer make_integer(unsigned long long int n) {
 
 Integer operator"" _z(unsigned long long int n) {
     return Integer(Nat64(n));
+}
+
+Integer operator"" _z(const char* str, std::size_t) {
+    return Integer(String(str));
 }
 
 

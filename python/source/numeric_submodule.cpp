@@ -338,7 +338,7 @@ void export_integer(pymodule& module)
     module.def("sqr", &_sqr_<Integer>);
     module.def("pow", &_pow_<Integer,Nat>);
 
-    module.def("z_", (Integer(*)(long long int)) &operator"" _z);
+    module.def("z_", (Integer(*)(unsigned long long int)) &operator"" _z);
 
     implicitly_convertible<Int,Integer>();
 

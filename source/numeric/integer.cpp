@@ -391,13 +391,17 @@ Boolean lt(Integer const& z1, Integer const& z2) {
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
-OutputStream& operator<<(OutputStream& os, Integer const& z) {
+String Integer::literal() const {
     static const int OUTPUT_BUFFER_SIZE=4096;
     char str[OUTPUT_BUFFER_SIZE];
     str[OUTPUT_BUFFER_SIZE-1]='\0';
-    mpz_get_str (str, 10, z._mpz);
+    mpz_get_str (str, 10, this->_mpz);
     ARIADNE_ASSERT(str[OUTPUT_BUFFER_SIZE-1]=='\0');
-    return os << str;
+    return str;
+}
+
+OutputStream& operator<<(OutputStream& os, Integer const& z) {
+    return os << z.literal();
 }
 
 Integer make_integer(unsigned long long int n) {

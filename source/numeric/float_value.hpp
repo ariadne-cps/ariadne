@@ -87,6 +87,9 @@ template<class F> class Value
     //! Construct a floating-point value with precision \a pr exactly from the dyadic number \a w.
     //! \pre Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
     Value(const Dyadic& w, PR pr);
+    //! Construct a floating-point value with precision \a pr exactly from the decimal number \a d.
+    //! \pre Requires that \a d can be exactly represented by a value of type \p F with precision \a pr.
+    explicit Value(const Decimal& d, PR pr);
     Value(const Value<F>& x, PR pr);
 
     template<BuiltinIntegral N> Value<F>& operator=(N n) { _v=n; return *this; }

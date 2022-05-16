@@ -224,6 +224,7 @@ Decimal::Decimal(String const& str)
 {
     // Parse string to ensure correctness
     Bool found_decimal_point=false;
+    Nat trailing_zeros=0u;
     const char* c_ptr=str.c_str();
     const char& ch=*c_ptr;
 
@@ -241,8 +242,7 @@ Decimal::Decimal(String const& str)
         if(c=='.') {
             if(found_decimal_point) {
                 ARIADNE_THROW(std::runtime_error,"Decimal(String)","real literal \""<<str<<"\" has more than one decimal point.");
-            }
-            else {
+            } else {
                 found_decimal_point=true;
             }
         } else if(c<'0' || c>'9') {
@@ -250,10 +250,23 @@ Decimal::Decimal(String const& str)
         } else {
             Int d=(c-'0');
             assert(0<=d && d<=9);
-            this->_p *= 10;
-            this->_p += d;
+
             if(found_decimal_point) {
-                ++this->_q;
+                if(d==0) {
+                    ++trailing_zeros;
+                } else {
+                    if(trailing_zeros!=0) {
+                        this->_p *= pow(Integer(10),trailing_zeros);
+                        this->_q += trailing_zeros;
+                        trailing_zeros = 0;
+                    }
+                    this->_p *= 10;
+                    this->_p += d;
+                    ++this->_q;
+                }
+            } else {
+                this->_p *= 10;
+                this->_p += d;
             }
         }
         ++c_ptr;
@@ -262,6 +275,12 @@ Decimal::Decimal(String const& str)
 
 }
 
+String Decimal::literal() const {
+    StringStream ss;
+    ss << *this;
+    return ss.str();
+}
+    
 template<> String class_name<Decimal>() { return "Decimal"; }
 template<> String class_name<DecimalBounds>() { return "DecimalBounds"; }
 
@@ -272,9 +291,12 @@ OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer r = p-n*q;
     if(d._p<0) { os << '-'; }
     os << n << ".";
-    // Pad zeros after point
-    while(r*ten<q) { q=quot(q,ten); os << "0"; }
-    return os << r;
+    if (r!=0) {
+        // Pad zeros after point
+        while(r*ten<q) { q=quot(q,ten); os << "0"; }
+        os << r;
+    }
+    return os;
 }
 
 Decimal::operator Rational() const {

@@ -177,6 +177,11 @@ template<> class Float<MP> {
     mpfr_t const& get_mpfr() const;
     mpfr_t& get_mpfr();
     double get_d() const;
+    //! \brief The exact value as a decimal string.
+    String literal() const;
+    //! \brief An approximate value as a decimal string, rounded by \a rnd.
+    //! The exact value is guaranteed to be the nearest value to the value's precision.
+    String literal(RoundingModeType rnd) const;
   public:
     friend Bool is_nan(FloatMP const& x);
     friend Bool is_inf(FloatMP const& x);
@@ -411,6 +416,7 @@ template<> class Float<MP> {
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
     friend OutputStream& repr(OutputStream& os, FloatMP const& x);
+    friend OutputStream& repr(OutputStream& os, FloatMP const& x, RoundingModeMP rnd);
     friend String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd);
     friend String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd);
     friend String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd);

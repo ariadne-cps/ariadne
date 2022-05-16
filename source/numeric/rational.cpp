@@ -186,10 +186,13 @@ Rational::Rational(FloatDP const& x) : Rational(ExactDouble(x.get_d())) {
 Rational::Rational(FloatDPValue const& x) : Rational(reinterpret_cast<FloatDP const&>(x)) {
 }
 
-Rational::Rational(const String& s) {
+Rational::Rational(const String& str) {
     Int base=10;
     mpq_init(_mpq);
-    mpq_set_str(_mpq,s.c_str(),base);
+    int fail = mpq_set_str(_mpq,str.c_str(),base);
+    if (fail!=0) {
+        ARIADNE_THROW(std::runtime_error,"Rational(string)","String \""<<str<<"\" does not have a valid rational number format.");
+    }
     mpq_canonicalize(_mpq);
 }
 

@@ -105,6 +105,8 @@ class Dyadic
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
     //! by comparing the input with it's single-precision approximation.
     explicit Dyadic(double x);
+    //! \brief Construct from a string representation.
+    explicit Dyadic(String const&);
     //! \brief Convert to a generic number.
     operator ExactNumber () const;
     //! \brief A representation of ±∞ or NaN.
@@ -118,9 +120,11 @@ class Dyadic
     Integer mantissa() const;
     //! \brief The (negative) integer \a -q such that \a x=p/2<sup>q</sup>
     Int exponent() const;
-    //! \brief A double-precision approximateion.
+    //! \brief A double-precision approximation.
     double get_d() const;
     mpf_t const& get_mpf() const;
+    //! \brief A string literal, comprising the exact value in decimal format.
+    String literal() const;
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend Dyadic operator"" _bin(long double x);
     //! \brief Convert a floating-point literal to Dyadic.

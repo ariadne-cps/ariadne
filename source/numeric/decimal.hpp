@@ -63,6 +63,8 @@ class Decimal
     operator Rational () const;
     //! \brief Convert to an generic number.
     operator ExactNumber () const;
+    //! \brief A string literal
+    String literal() const;
     //! \brief Unary plus of a decimal value.
     friend Decimal operator+(Decimal const& d);
     //! \brief Negation of a decimal value.

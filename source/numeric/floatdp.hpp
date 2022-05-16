@@ -218,7 +218,12 @@ template<> class Float<DP> {
   public:
     FloatDP const& raw() const { return *this; }
     //! \brief An approximation by a built-in double-precision floating-point number.
-    double get_d() const { return this->dbl; }
+    double get_d() const { return this->dbl; }    
+    //! \brief The exact value as a decimal string.
+    String literal() const;
+    //! \brief An approximate value as a decimal string, rounded by \a rnd.
+    //! The exact value is guaranteed to be the nearest value to the value's precision.
+    String literal(RoundingModeType rnd) const;
   public:
     friend Bool is_nan(FloatDP x) { return std::isnan(x.dbl); }
     friend Bool is_inf(FloatDP x) { return std::isinf(x.dbl); }
@@ -421,6 +426,7 @@ template<> class Float<DP> {
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingModeType rnd);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingModeType rnd);
     friend OutputStream& repr(OutputStream& os, FloatDP const& x);
+    friend OutputStream& repr(OutputStream& os, FloatDP const& x, RoundingModeType rnd);
   private:
     // Rounded arithmetic
     friend FloatDP pow_rnd(FloatDP x, Int n);

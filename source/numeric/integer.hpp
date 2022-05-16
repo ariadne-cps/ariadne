@@ -123,7 +123,8 @@ class Integer
     Integer& operator=(const Integer&);
     Integer& operator=(Integer&&);
     operator ExactNumber () const;
-
+    String literal() const;
+    
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);
     friend Integer& operator--(Integer& z);

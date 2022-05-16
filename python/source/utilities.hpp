@@ -257,6 +257,15 @@ template<class T> PythonRepresentation<T> python_representation(const T& t) {
 template<class T> std::string __repr__(const T& t) {
     std::stringstream ss; ss << python_representation(t); return ss.str();}
 
+template<class T> struct PythonLiteral {
+    const T* pointer;
+    PythonLiteral(const T& t) : pointer(&t) { }
+    const T& reference() const { return *pointer; }
+};
+template<class T> PythonLiteral<T> python_literal(const T& t) {
+    return PythonLiteral<T>(t); }
+
+
 } // namespace Ariadnelist
 
 

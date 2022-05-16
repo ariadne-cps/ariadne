@@ -35,6 +35,7 @@ ValidatedCovector=FloatDPBoundsCovector
 ApproximateMatrix=FloatDPApproximationMatrix
 ValidatedMatrix=FloatDPBoundsMatrix
 
+
 n=2
 d=2.125
 pr=Precision()
@@ -45,12 +46,19 @@ xb=ValidatedScalar(exact(2.00),exact(2.25),pr)
 def test_vector():
     va=ApproximateVector(2,pr)
     va=ApproximateVector(va)
-    va=ApproximateVector([1.125,2.125],pr)
-    va=ApproximateVector([1.125,xa],pr)
+    va=ApproximateVector([exact(1.0),"1.1",1.2,xa],pr)
+    va=ApproximateVector(2,pr)
     vb=ValidatedVector(2,pr)
     vb=ValidatedVector([exact(1.125),exact(2.125)],pr)
     vb=ValidatedVector([{2:3},{3:4}],pr)
-    vb=ValidatedVector(vb)
+    vb=ValidatedVector([{"1.875":"2.125"},{"0.875":"1.125"}],pr)
+    vb=ValidatedVector([{exact(1.875):exact(2.125)},{exact(0.875):exact(1.125)}],pr)
+    vb=ValidatedVector([{exact(1.875):exact(2.125)},{"1.875":"2.125"},{2:3},exact(1.125),"2.1",xb],pr)
+    vb=ValidatedVector(2,pr)
+
+    print(repr(vb))
+    print(eval(repr(vb)))
+    assert(repr(eval(repr(vb)))==repr(vb))
 
     (+va,-va,va+va,va-va,xa*va,va*xa,va/xa)
     (+vb,-vb,vb+vb,vb-vb,xb*vb,vb*xb,vb/xb)
@@ -70,7 +78,14 @@ def test_covector():
     ua=ApproximateCovector([1.125,xa],pr)
     ua=ApproximateCovector([1.125,2.125],pr)
     ub=ValidatedCovector([exact(1.125),xb],pr)
+    ub=ValidatedCovector([{"1.875":"2.125"},{"0.875":"1.125"}],pr)
+    ub=ValidatedCovector([{exact(1.875):exact(2.125)},{exact(0.875):exact(1.125)}],pr)
     ub=ValidatedCovector([1,2],pr)
+
+    print(repr(ua))
+   # assert(same(eval(repr(ua)),ua))
+    print(repr(ub))
+   # assert(same(eval(repr(ub)),ub))
 
     (+ua,-ua,ua+ua,ua-ua,xa*ua,ua*xa,ua/xa)
     (+ub,-ub,ub+ub,ub-ub,xb*ub,ub*xb,ub/xb)
@@ -93,6 +108,7 @@ def test_matrix():
     Aa=ApproximateMatrix([[xa,1],[1.0,one]],pr)
     Aa=ApproximateMatrix([[2.125,1],[1.0,1]],pr)
     Aa=ApproximateMatrix(Aa)
+    Ab=ValidatedMatrix([[{"1.875":"2.125"},{"0.875":"1.125"}],[{"0.875":"1.125"},{"0.875":"1.125"}]],pr)
     Ab=ValidatedMatrix([[{exact(1.875):exact(2.125)},{exact(0.875):exact(1.125)}],[{exact(0.875):exact(1.125)},{exact(0.875):exact(1.125)}]],pr)
 
     (+Aa,-Aa,Aa+Aa,Aa-Aa,Aa*Aa,xa*Aa,Aa*xa,Aa/xa,Aa*va,ua*Aa)

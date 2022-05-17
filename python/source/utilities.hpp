@@ -401,6 +401,8 @@ pybind11::class_<X>& define_inplace_arithmetic(pybind11::module& module, pybind1
 
 
 template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    module.def("nul", &_nul_<X>);
+    module.def("pos", &_pos_<X>);
     module.def("neg", &_neg_<X>);
     module.def("sqr", &_sqr_<X>);
     module.def("hlf", &_hlf_<X>);

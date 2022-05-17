@@ -27,6 +27,7 @@
 
 #include "utilities.hpp"
 #include "numeric_submodule.hpp"
+#include "linear_algebra_submodule.hpp"
 
 #include "utility/typedefs.hpp"
 #include "utility/array.hpp"
@@ -39,11 +40,21 @@
 #include "algebra/fixed_univariate_differential.hpp"
 #include "algebra/expansion.inl.hpp"
 
+#include "algebra/matrix.tpl.hpp"
+
 using namespace Ariadne;
 
 namespace Ariadne {
 
+template<> String class_name<Differential<FloatDPApproximation>>() { return "FloatDPApproximationDifferential"; }
+template<> String class_name<Differential<FloatMPApproximation>>() { return "FloatMPApproximationDifferential"; }
+template<> String class_name<Differential<FloatDPBounds>>() { return "FloatDPBoundsDifferential"; }
+template<> String class_name<Differential<FloatMPBounds>>() { return "FloatMPBoundsDifferential"; }
+
+template<class X> decltype(auto) mig(Differential<X> const& dx) { return mig(dx.value()); }
+
 template<class X> struct PythonClassName<Vector<X>> { static std::string get() { return python_template_class_name<X>("Vector"); } };
+template<class X> struct PythonClassName<Matrix<X>> { static std::string get() { return python_template_class_name<X>("Matrix"); } };
 template<class X> struct PythonClassName<Differential<X>> { static std::string get() { return python_template_class_name<X>("Differential"); } };
 template<class X> struct PythonClassName<UnivariateDifferential<X>> { static std::string get() { return python_template_class_name<X>("UnivariateDifferential"); } };
 
@@ -133,6 +144,7 @@ export_differential_vector(pybind11::module& module, const String& name=python_c
     pybind11::class_<DV> differential_vector_class(module,name.c_str());
     differential_vector_class.def(pybind11::init<DV>());
     differential_vector_class.def(pybind11::init<Vector<D>>());
+    differential_vector_class.def(pybind11::init<Nat,D>());
     if constexpr (HasPrecisionType<X>) {
         typedef typename X::PrecisionType PR;
         differential_vector_class.def(pybind11::init<Nat,Nat,Nat,PR>());
@@ -165,6 +177,64 @@ export_differential_vector(pybind11::module& module, const String& name=python_c
 
     return differential_vector_class;
 }
+
+
+// Need explicit wrappers here since transpose(Matrix) returns an expression template
+namespace Ariadne {
+template<class X> decltype(auto) operator>(Differential<X> const& dx1, X const& x2) { return dx1.value()>x2; }
+template<class X> decltype(auto) operator>(Differential<X> const& dx1, Differential<X> const& dx2) { return dx1.value()>dx2.value(); }
+template<class M> M inverse_(M const& A) { return inverse(A); }
+template<class M> M transpose_(M const& A) { return transpose(A); }
+} // namespace Ariadne
+
+template<class DIFF>
+Void
+export_differential_matrix(pybind11::module& module, const String& name=python_class_name<Matrix<DIFF>>())
+{
+    typedef typename DIFF::ValueType X;
+    typedef DIFF D;
+    typedef Matrix<X> M;
+    typedef Matrix<D> DM;
+
+    pybind11::class_<DM> differential_matrix_class(module,name.c_str());
+    differential_matrix_class.def(pybind11::init<DM>());
+    differential_matrix_class.def(pybind11::init<Matrix<D>>());
+    differential_matrix_class.def(pybind11::init<SizeType,SizeType,D>());
+    if constexpr (HasPrecisionType<X>) {
+        typedef typename X::PrecisionType PR;
+        differential_matrix_class.def(pybind11::init([](SizeType rs, SizeType cs,  SizeType as, DegreeType deg, PR pr){return Matrix<D>::zero(rs,cs,D(as,deg,pr));}));
+    } else {
+        differential_matrix_class.def(pybind11::init([](SizeType rs, SizeType cs,  SizeType as, DegreeType deg){return Matrix<D>::zero(rs,cs,D(as,deg));}));
+    }
+    differential_matrix_class.def("constant",[](SizeType as, DegreeType deg, Matrix<X>const& A){ Matrix<D> dA(A.row_size(),A.column_size(), D(as,deg,A.zero_element()));
+        for(SizeType i=0; i!=A.row_size(); ++i) { for(SizeType j=0; j!=A.column_size(); ++j) { dA[i][j]=A[i][j]; } } return dA; });
+    differential_matrix_class.def("__getitem__",&__mgetitem__<D>);
+    differential_matrix_class.def("__setitem__",&__msetitem__<D>);
+//    differential_matrix_class.def("__setitem__",&__msetitem__<DM>);
+
+    //define_matrix_algebra_arithmetic(module, differential_matrix_class);
+    differential_matrix_class.def("__pos__",&__pos__<DM>);
+    differential_matrix_class.def("__sub__",&__sub__<DM,DM>);
+    differential_matrix_class.def("__mul__",&__mul__<DM,DM>);
+    module.def("inverse",&inverse_<DM>);
+    module.def("transpose",&transpose_<DM>);
+
+    differential_matrix_class.def("__add__",&__add__<DM,M>);
+    differential_matrix_class.def("__sub__",&__sub__<DM,M>);
+    differential_matrix_class.def("__mul__",&__mul__<DM,M>);
+    differential_matrix_class.def("__radd__",&__radd__<DM,M>);
+    differential_matrix_class.def("__rsub__",&__rsub__<DM,M>);
+    differential_matrix_class.def("__rmul__",&__rmul__<DM,M>);
+
+    differential_matrix_class.def("row_size", &DM::row_size);
+    differential_matrix_class.def("column_size", &DM::column_size);
+    differential_matrix_class.def("argument_size", [](DM const& dm){return dm.zero_element().argument_size();});
+    differential_matrix_class.def("degree", [](DM const& dm){return dm.zero_element().degree();});
+    differential_matrix_class.def("__str__",&__cstr__<DM>);
+    //differential_matrix_class.def("__repr__",&__repr__<DM>);
+
+}
+
 
 template<class DIFF>
 pybind11::class_<DIFF> export_univariate_differential(pybind11::module& module, const String& name=python_class_name<DIFF>())
@@ -245,5 +315,9 @@ Void differentiation_submodule(pybind11::module& module)
     vector_template.instantiate<FloatMPApproximationDifferential>();
     vector_template.instantiate<FloatDPBoundsDifferential>();
     vector_template.instantiate<FloatMPBoundsDifferential>();
+
+
+    export_differential_matrix< Differential<FloatDPBounds> >(module);
+    export_differential_matrix< Differential<FloatMPBounds> >(module);
 }
 

@@ -75,7 +75,7 @@ def calculus_demonstration():
     print("swp:",swp)
 
     # Create the scalar Taylor model representing a constant function with given value on the domain dom
-    tc=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(dom,dec(4.2),swp)
+    tc=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(dom,dec_(4.2),swp)
     print("tc:",tc,"\n")
 
     # Create the scalar Taylor model representing the function x1 on the domain dom

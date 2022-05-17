@@ -36,6 +36,7 @@
 #include "numeric/logical.hpp"
 #include "numeric/twoexp.hpp"
 #include "numeric/builtin.hpp"
+#include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/extended.hpp"
 
@@ -145,6 +146,22 @@ Dyadic::Dyadic(TwoExp const& w) : Dyadic(1u) {
     const int q=w.exponent();
     if(q>=0) { mpf_mul_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(q)); }
     else { mpf_div_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(-q)); }
+}
+
+Dyadic::Dyadic(String const& str)
+{
+    mpf_t _mpf_tmp;
+    mpf_init2(_mpf_tmp,str.size());
+    int fail = mpf_set_str(_mpf_tmp,str.c_str(),10);
+    if (fail!=0) {
+        ARIADNE_THROW(std::runtime_error,"Dyadic(string)","String \""<<str<<"\" does not have a valid dyadic number format.");
+    }
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set(_mpf,_mpf_tmp);
+
+    if (Decimal(*this)!=Decimal(str)) {
+        ARIADNE_THROW(std::runtime_error,"Dyadic(string)","String \""<<str<<"\" does not represent an exact dyadic number.");
+    }
 }
 
 Dyadic::Dyadic(const Dyadic& x) {
@@ -381,6 +398,13 @@ OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
     return os << Dyadic::_default_writer(x);
 }
 
+String Dyadic::literal() const {
+    DecimalWriter writer;
+    StringStream ss;
+    ss << writer(*this);
+    return ss.str();
+}
+
 template<class X> inline OutputStream& write_infinite(OutputStream& os, X const& x) {
     if(is_nan(x)) {
         os << "NaN";
@@ -457,7 +481,11 @@ Dyadic make_dyadic(unsigned long long int n) {
 }
 
 template<> String class_name<Dyadic>() { return "Dyadic"; }
+template<> String class_name<DyadicBounds>() { return "DyadicBounds"; }
 
+
+DyadicBounds pow(DyadicBounds const& w, Nat m) {
+    DyadicBounds y = (m%2==0) ? abs(w) : w;  return DyadicBounds(pow(y._l,m),pow(y._u,m)); }
 
 Dyadic hlf(Integer const& n) {
     return hlf(Dyadic(n));
@@ -468,5 +496,6 @@ inline RoundExact opposite(RoundExact) { return RoundExact(); }
 template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
 
 template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
+template<class RNDUP, class Y> auto _div(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
 
 } // namespace Ariadne

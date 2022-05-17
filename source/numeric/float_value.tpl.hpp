@@ -31,6 +31,7 @@
 #include "float_ball.hpp"
 
 #include "builtin.hpp"
+#include "decimal.hpp"
 
 namespace Ariadne {
 
@@ -59,6 +60,12 @@ template<class F> Value<F>::Value(Dyadic const& w, PR pr)
     : _v(w,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w || is_nan(w),"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
+}
+
+template<class F> Value<F>::Value(Decimal const& d, PR pr)
+    : _v(d,near,pr)
+{
+    ARIADNE_ASSERT_MSG(Decimal(Dyadic(this->_v))==d,"Decimal number "<<d<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 }
 
 template<class F> Value<F>::Value(Value<F> const& x, PR pr)

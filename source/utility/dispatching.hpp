@@ -81,9 +81,10 @@ template<class R, class OP, class YS> struct OperableInterface
     : public LeftOperableInterface<R,OP,YS,YS> { };
 
 
-
+/*
+template<class R, class OP, class X> inline R _concrete_apply(OP op, X const& x);
 template<class R, class OP, class X1, class X2> inline R _concrete_apply(OP op, X1 const& x1, X2 const& x2);
-
+*/
 
 template<class X, class I, class R, class OP, class YS, class BYS=YS> struct RightOperableMixin;
 template<class X, class I, class R, class OP, class BYS> struct RightOperableMixin<X,I,R,OP,Aware<>,BYS>
@@ -135,12 +136,22 @@ template<class R, class X, class OP, class I> inline R _rapply(X const& self, OP
 
 
 
+template<class X, class RI, class OP, class I> struct UnaryOperationMixin : public virtual I {
+    static X const& _cast(UnaryOperationMixin<X,RI,OP,I> const& self) { return static_cast<MixinType<X,I> const&>(self); }
+    template<class R> static RI* _make_wrapper(R&& r) { return new WrapperType<R,I>(r); }
+    virtual RI* _apply(OP op) const final { return _concrete_apply<RI*>(op,_cast(*this)); }
+};
 
+/*
 template<class X, class RI, class OP, class I> struct UnaryOperationMixin : public virtual I {
     static X const& _cast(UnaryOperationMixin<X,RI,OP,I> const& self) { return static_cast<MixinType<X,I> const&>(self); }
     template<class R> static RI* _make_wrapper(R&& r) { return new WrapperType<R,I>(r); }
     virtual RI* _apply(OP op) const final { return _make_wrapper(op(_cast(*this))); }
+    //virtual RI* _apply(OP op) const final { return _concrete_unary_apply<RI*,OP,X>(op,_cast(*this)); }
+    //virtual RI* _apply(OP op) const final { X const& x=_cast(*this); return op.accept([&x](auto _op){return _make_wrapper(_op(x));}); }
+    //virtual RI* _apply(OP op) const final { X const& x=_cast(*this); return op.accept([&x](auto _op){return _make_wrapper(_op(x));}); }
 };
+*/
 
 template<class X, class RI, class OP, class I> struct BinaryOperationMixin : public virtual I {
     static X const& _cast(BinaryOperationMixin<X,RI,OP,I> const& self) { return static_cast<MixinType<X,I> const&>(self); }

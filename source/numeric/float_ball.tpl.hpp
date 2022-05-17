@@ -82,6 +82,9 @@ template<class F, class FE> Ball<F,FE>::Ball(Integer const& z, PR pr, PRE pre) :
 template<class F, class FE> Ball<F,FE>::Ball(Dyadic const& w, PR pr, PRE pre) : _v(F(w,near,pr)), _e(abs(Dyadic(_v)-w),up,pre) {}
 template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre) : _v(F(q,near,pr)), _e(abs(Rational(_v)-q),up,pre) {}
 
+template<class F, class FE> Ball<F,FE>::Ball(Decimal const& dv, Decimal const& de, PrecisionType pr)
+    : _v(dv,near,pr), _e(de,up,_error_precision<PRE>(pr)) { }
+
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr) : Ball(r.get(pr)) {}
 template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr) : Ball(y.get(pr,_error_precision<PRE>(pr))) {}
 template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre) : Ball(r.get(pr),pre) {}

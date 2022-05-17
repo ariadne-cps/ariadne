@@ -524,6 +524,22 @@ String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     return print(x._mpfr,fdgts,rnd);
 }
 
+String FloatMP::literal() const {
+    static const double log2ten = 3.3219280948873621816;
+    StringStream ss;
+    DecimalPlaces plcs(std::max((int)this->precision()-(int)this->exponent(),0)/log2ten+1);
+    ss << print(*this,plcs,FloatMP::get_rounding_mode());
+    return ss.str();
+}
+
+String FloatMP::literal(RoundingModeMP rnd) const {
+    StringStream ss;
+    static const double log2ten = 3.3219280948873621816;
+    DecimalPrecision dgts(this->precision()/log2ten+3);
+    write(ss, *this, dgts, rnd);
+    return ss.str();
+}
+
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     return os << print(x,plcs,rnd);
 }
@@ -535,6 +551,11 @@ OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision figs, R
 OutputStream& repr(OutputStream& os, FloatMP const& x) {
     static const double log2ten = 3.3219280948873621817;
     return os << print(x,DecimalPlaces(std::max((int)x.precision()-(int)x.exponent(),0)/log2ten+1),FloatMP::get_rounding_mode());
+}
+OutputStream& repr(OutputStream& os, FloatMP const& x, RoundingModeMP rnd) {
+    static const double log2ten = 3.3219280948873621817;
+    DecimalPrecision dgts(x.precision()/log2ten+3);
+    return write(os, x, dgts, rnd);
 }
 
 

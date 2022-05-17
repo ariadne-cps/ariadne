@@ -130,14 +130,18 @@ template<class X> pybind11::list matrix_to_python(Matrix<X> const& A) {
 }
 
 
+template<class X> X bounds_from_dict(pybind11::dict dct);
+
+
 namespace { // Don't export the following functions to prevent visibility inconsistency warnings with pybind11 names
 
+
 template<class X> Vector<X> vector_from_python(pybind11::list const& lst) {
-    return Vector<X>( lst.size(), [&lst](SizeType i){return *lst[i].cast<X*>();} );
+    return Vector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
 }
 
 template<class X> Covector<X> covector_from_python(pybind11::list const& lst) {
-    return Covector<X>( lst.size(), [&lst](SizeType i){return *lst[i].cast<X*>();} );
+    return Covector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
 }
 
 template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
@@ -146,37 +150,57 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
     assert(rs!=0);
     SizeType cs=rows[0].size();
     assert(cs!=0);
-    return Matrix<X>(rs,cs,[&rows](SizeType i, SizeType j){return *rows[i][j].cast<X*>();});
+    return Matrix<X>(rs,cs,[&rows](SizeType i, SizeType j){return from_python_object_or_literal<X>(rows[i][j]);});
 }
 
 } // namespace
 
-
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDP>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatMP>& repr);
-
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& x);
-template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& x);
-
-//template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
-//    return os <<repr.reference(); }
-
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Vector<X>>& repr) {
     Vector<X> const& v=repr.reference();
-    os <<"["; for(Nat i=0; i!=v.size(); ++i) { if(i!=0) { os <<","; } os <<python_representation(v[i]); } os <<"]"; return os;
+    os <<class_name<X>()<<"Vector"<<"([";
+    for(SizeType i=0; i!=v.size(); ++i) {
+        if(i!=0) { os <<","; }
+        if constexpr (HasPrecisionType<X>) { os << python_literal(v[i]); }
+        else { os <<python_representation(v[i]); }
+    }
+    os <<"]";
+    if constexpr (HasPrecisionType<X>) { os << "," << v.zero_element().precision(); }
+    os <<")";
+    return os;
+}
+
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Covector<X>>& repr) {
+    Covector<X> const& u=repr.reference();
+    os <<class_name<X>()<<"Covector"<<"([";
+    for(SizeType i=0; i!=u.size(); ++i) {
+        if(i!=0) { os <<","; }
+        if constexpr (HasPrecisionType<X>) { os << python_literal(u[i]); }
+        else { os <<python_representation(u[i]); }
+    }
+    os <<"]";
+    if constexpr (HasPrecisionType<X>) { os << "," << u.zero_element().precision(); }
+    os <<")";
+    return os;
 }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Matrix<X>>& repr) {
     Matrix<X> const& A=repr.reference();
-    os <<"["; for(Nat i=0; i!=A.row_size(); ++i) { if(i!=0) { os <<","; } os <<"["; for(Nat j=0; j!=A.column_size(); ++j) {
-        if(j!=0) { os <<","; } os <<python_representation(A[i][j]); } os <<"]"; } os <<"]"; return os;
+    os << class_name<X>() << "Matrix([";
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        if(i!=0) { os <<","; } os <<"[";
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            if(j!=0) { os <<","; }
+        if constexpr (HasPrecisionType<X>) { os << python_literal(A[i][j]); }
+        else { os <<python_representation(A[i][j]); }
+        }
+        os << "]";
+    }
+    os << "]";
+    if constexpr (HasPrecisionType<X>) { os << "," << A.zero_element().precision(); }
+    os << ")";
+    return os;
 }
+
 
 // NOTE: g++ (version 5.4.1) does not accept decltype(auto) here
 template<class V> auto __norm__(const V& v) -> decltype(norm(v)) { return norm(v); }
@@ -215,7 +239,7 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(Constructible<Vector<X>,Vector<Y>,PR>) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
-        } else if (Constructible<Vector<X>,Vector<Dyadic>,PR>) {
+        } else if constexpr(Constructible<Vector<X>,Vector<Dyadic>,PR>) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Dyadic>(lst),pr);}));
         }
     }
@@ -340,6 +364,7 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def("__setitem__", &__setitem__<Covector<X>,Nat,X>);
     covector_class.def("__getitem__", &__getitem__<Covector<X>,Nat>);
     covector_class.def("__str__",&__cstr__<Covector<X>>);
+    covector_class.def("__repr__",&__repr__<Covector<X>>);
 
     covector_class.def("__pos__",__pos__<Covector<X> , Return<Covector<X>> >, pybind11::is_operator());
     covector_class.def("__neg__",__neg__<Covector<X> , Return<Covector<NegationType<X>>> >, pybind11::is_operator());
@@ -363,11 +388,12 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def(pybind11::init([](pybind11::list const& lst){return Covector<X>(pybind11::cast<Array<X>>(lst));}));
 
     // Convert from a Python list and properties
-    if constexpr (HasGenericType<X>) {
+    if constexpr (HasGenericType<X> and HasPrecisionType<X>) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(Constructible<Covector<X>,Covector<Y>,PR>) {
-            covector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){
-                return Covector<X>(Covector<Y>(pybind11::cast<Array<Y>>(lst)),pr);}));
+            covector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Covector<X>(covector_from_python<Y>(lst),pr);}));
+        } else if constexpr(Constructible<Covector<X>,Covector<Dyadic>,PR>) {
+            covector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Covector<X>(covector_from_python<Dyadic>(lst),pr);}));
         }
     }
 }
@@ -427,11 +453,12 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
 
-
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(Constructible<Matrix<X>,Matrix<Y>,PR>) {
             matrix_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Matrix<X>(matrix_from_python<Y>(lst),pr);}));
+        } else if constexpr(Constructible<Matrix<X>,Matrix<Dyadic>,PR>) {
+            matrix_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Matrix<X>(matrix_from_python<Dyadic>(lst),pr);}));
         }
     }
 

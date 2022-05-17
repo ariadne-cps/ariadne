@@ -90,6 +90,18 @@ Approximation<FloatMP> tan(Approximation<FloatMP> const& x);
 Approximation<FloatMP> asin(Approximation<FloatMP> const& x);
 Approximation<FloatMP> acos(Approximation<FloatMP> const& x);
 
+// Declare fallbacks for use by Dyadic/RationalBounds
+template<class B> concept AlgebraicBounds = SameAs<B,DyadicBounds> || SameAs<B,DecimalBounds> || SameAs<B,RationalBounds>;
+template<AlgebraicBounds B> B sqrt(B const&) { std::abort(); }
+template<AlgebraicBounds B> B exp(B const&) { std::abort(); }
+template<AlgebraicBounds B> B log(B const&) { std::abort(); }
+template<AlgebraicBounds B> B sin(B const&) { std::abort(); }
+template<AlgebraicBounds B> B cos(B const&) { std::abort(); }
+template<AlgebraicBounds B> B tan(B const&) { std::abort(); }
+template<AlgebraicBounds B> B asin(B const&) { std::abort(); }
+template<AlgebraicBounds B> B acos(B const&) { std::abort(); }
+template<AlgebraicBounds B> B atan(B const&) { std::abort(); }
+template<AlgebraicBounds B> ValidatedKleenean operator>(B const& y1, Int n2) { return y1 > B(n2); }
 
 class NumberInterface;
 template<class X> class NumberMixin;
@@ -140,6 +152,16 @@ struct MakeNumberWrapper {
     template<class R> NumberInterface* operator() (R const& r) const { return new NumberWrapper<R>(r); }
 };
 
+template<class X> inline X make_unsigned(X x) { return x; }
+template<class X> inline X make_unsigned(Positive<X> px) { return std::move(px); }
+inline Real make_unsigned(PositiveReal px) { return std::move(px); }
+inline Integer make_unsigned(Natural px) { return std::move(px); }
+
+template<class R, class X> inline R _concrete_apply(UnaryElementaryOperator op, X const& x) {
+    static_assert(Same<R,NumberInterface*>);
+    return op.accept([&x](auto _op){return _make_number_wrapper(make_unsigned(_op(x)));});
+}
+
 template<class R, class X1, class X2> inline R _concrete_apply(BinaryElementaryOperator op, X1 const& x1, X2 const& x2) {
     static_assert(Same<R,NumberInterface*>);
     return op.accept([&x1,x2](auto _op){return _make_number_wrapper(_op(x1,x2));});
@@ -181,11 +203,16 @@ template<class R, class X1, class X2> inline R _concrete_apply(BinaryComparisonO
 
 
 class AlgebraicNumberInterface;
+class ValidatedAlgebraicNumberInterface;
 template<class F> class ConcreteNumberInterface;
 template<class F, class FE> class ConcreteBallInterface;
 
 template<> struct Managed<AlgebraicNumberInterface> {
     typedef Aware<Integer,Dyadic,Rational,Real> Types;
+    //FIXME: typedef Aware<ExactDouble,Integer,Dyadic,Rational,Real> Types;
+};
+template<> struct Managed<ValidatedAlgebraicNumberInterface> {
+    typedef Aware<DyadicBounds,RationalBounds> Types;
     //FIXME: typedef Aware<ExactDouble,Integer,Dyadic,Rational,Real> Types;
 };
 template<class F> struct Managed<ConcreteNumberInterface<F>> {
@@ -201,6 +228,9 @@ template<> struct DispatcherTraits<Dyadic> { typedef AlgebraicNumberInterface In
 template<> struct DispatcherTraits<Rational> { typedef AlgebraicNumberInterface Interface; };
 template<> struct DispatcherTraits<Real> { typedef AlgebraicNumberInterface Interface; };
 
+template<> struct DispatcherTraits<DyadicBounds> { typedef ValidatedAlgebraicNumberInterface Interface; };
+template<> struct DispatcherTraits<RationalBounds> { typedef ValidatedAlgebraicNumberInterface Interface; };
+
 template<class F> struct DispatcherTraits<Value<F>> { typedef ConcreteNumberInterface<F> Interface; };
 template<class F> struct DispatcherTraits<Ball<F>> { typedef ConcreteNumberInterface<F> Interface; };
 template<class F> struct DispatcherTraits<Bounds<F>> { typedef ConcreteNumberInterface<F> Interface; };
@@ -213,6 +243,11 @@ template<class F, class FE> struct DispatcherTraits<Ball<F,FE>> { typedef Concre
 
 class AlgebraicNumberInterface
     : public virtual SelfOperableInterface<NumberInterface*,BinaryElementaryOperator,ManagedTypes<AlgebraicNumberInterface>>
+{
+};
+
+class ValidatedAlgebraicNumberInterface
+    : public virtual SelfOperableInterface<NumberInterface*,BinaryElementaryOperator,ManagedTypes<ValidatedAlgebraicNumberInterface>>
 {
 };
 
@@ -238,6 +273,11 @@ template<class Y> class ElementaryBinaryNumberDispatcherMixin<Y,AlgebraicNumberI
 {
 };
 
+template<class Y> class ElementaryBinaryNumberDispatcherMixin<Y,ValidatedAlgebraicNumberInterface>
+    : public SelfOperableMixin<Y,NumberInterface,NumberInterface*,BinaryElementaryOperator,ManagedTypes<ValidatedAlgebraicNumberInterface>>
+{
+};
+
 template<class Y, class F> class ElementaryBinaryNumberDispatcherMixin<Y,ConcreteNumberInterface<F>>
     : public SelfOperableMixin<Y,NumberInterface,NumberInterface*,BinaryElementaryOperator,ManagedTypes<ConcreteNumberInterface<F>>>
     , public OperableMixin<Y,NumberInterface,NumberInterface*,BinaryElementaryOperator,ManagedTypes<AlgebraicNumberInterface>>
@@ -256,6 +296,11 @@ template<class X, class DI=DispatcherInterface<X>> class ComparisonBinaryNumberD
 
 template<class Y> class ComparisonBinaryNumberDispatcherMixin<Y,AlgebraicNumberInterface>
     : public SelfOperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<AlgebraicNumberInterface>>
+{
+};
+
+template<class Y> class ComparisonBinaryNumberDispatcherMixin<Y,ValidatedAlgebraicNumberInterface>
+    : public SelfOperableMixin<Y,NumberInterface,LogicalInterface*,BinaryComparisonOperator,ManagedTypes<ValidatedAlgebraicNumberInterface>>
 {
 };
 

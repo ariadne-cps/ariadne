@@ -91,6 +91,8 @@ template<class F, class FE> class Ball
     Ball(Bounds<F> const& x, PRE pre);
     Ball(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
+    Ball(Decimal const& dv, Decimal const& de, PrecisionType pr);
+
     Ball(const ExactDouble& d, PR pr);
         Ball(const TwoExp& t, PR pr);
         Ball(const Integer& z, PR pr);

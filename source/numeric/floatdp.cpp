@@ -854,6 +854,18 @@ MPFRRoundingModeType to_mpfr_rounding_mode(BuiltinRoundingModeType rnd) {
                : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
 }
 
+String FloatDP::literal() const {
+    StringStream ss;
+    write(ss,*this,DecimalPrecision(53),near);
+    return ss.str();
+}
+
+String FloatDP::literal(RoundingModeType rnd) const {
+    StringStream ss;
+    write(ss,*this,DecimalPrecision(18),rnd);
+    return ss.str();
+}
+
 OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces plcs, BuiltinRoundingModeType rnd) {
     MultiplePrecision pr_mp(53);
     MPFRRoundingModeType rnd_mp=to_mpfr_rounding_mode(rnd);
@@ -868,6 +880,10 @@ OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision figs, B
 
 OutputStream& repr(OutputStream& os, FloatDP const& x) {
     return write(os,x,DecimalPrecision(17),near);
+}
+OutputStream& repr(OutputStream& os, FloatDP const& x, BuiltinRoundingModeType rnd) {
+    static const DecimalPrecision dgts(18);
+    return write(os,x,dgts,rnd);
 }
 
 OutputStream& operator<<(OutputStream& os, FloatDP const& x) {

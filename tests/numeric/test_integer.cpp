@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/logical.hpp"
+#include "utility/string.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -97,6 +98,8 @@ void TestInteger::test_constructors() {
     int n=-2147483647;
     long int ln=n;
     long long int lln=n;
+    String sn="-2147483647";
+    String sz="314159265358979323846264";
 
     ARIADNE_TEST_ASSERT((not Constructible<Integer,float>));
     ARIADNE_TEST_ASSERT((not Constructible<Integer,double>));
@@ -113,6 +116,10 @@ void TestInteger::test_constructors() {
     ARIADNE_TEST_EQUALS(zln.get_si(),n);
     ARIADNE_TEST_CONSTRUCT(Integer,zlln,(lln));
     ARIADNE_TEST_EQUALS(zlln.get_si(),n);
+    ARIADNE_TEST_CONSTRUCT(Integer,zsn,(sn));
+    ARIADNE_TEST_EQUALS(zsn.get_si(),n);
+    ARIADNE_TEST_CONSTRUCT(Integer,zsz,(sz));
+    ARIADNE_TEST_EQUALS(zsz,Integer(314159265358)*Integer(1000000000000)+Integer(979323846264));
 
     ARIADNE_TEST_CONSTRUCT(Integer,z1,(0));
     ARIADNE_TEST_EQUALS(z1.get_si(),0);

@@ -64,8 +64,8 @@ def numeric_demonstration():
     # Operations on real numbers
     # Arithmetic operators
     +r; -r; r+r; r-r; r*r; r/r
-    # Aliases for arithmetic operators
-    pos(r); neg(r); add(r,r); sub(r,r); mul(r,r); div(r);
+    # Aliases for arithmetic operators (currently not fully supported)
+    pos(r); neg(r); # add(r,r); sub(r,r); mul(r,r); div(r,r);
     # Other arithmetic operations
     nul(r); sqr(r); hlf(r); rec(r); pow(r,-3)
     # Algebraic and transcendental operations

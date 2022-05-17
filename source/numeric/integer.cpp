@@ -192,18 +192,23 @@ Integer::Integer(Nat64 m) {
     }
 }
 
-Integer::Integer(Int64 larg) {
+Integer::Integer(Int64 n) {
     mpz_init(_mpz);
-    if(larg.get_si()<0) {
-        *this = -Integer(Nat64(-larg.get_si()));
+    if(n.get_si()<0) {
+        *this = -Integer(Nat64(-n.get_si()));
     } else {
-        *this = Integer(Nat64(larg.get_si()));
+        *this = Integer(Nat64(n.get_si()));
     }
 }
 
 Integer::Integer(const mpz_t z) {
     mpz_init(_mpz);
     mpz_set(_mpz,z);
+}
+
+Integer::Integer(String const& str) {
+    mpz_init(_mpz);
+    mpz_set_str(_mpz,str.c_str(),10u);
 }
 
 Integer::Integer(const Integer& z) {
@@ -386,13 +391,17 @@ Boolean lt(Integer const& z1, Integer const& z2) {
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
-OutputStream& operator<<(OutputStream& os, Integer const& z) {
+String Integer::literal() const {
     static const int OUTPUT_BUFFER_SIZE=4096;
     char str[OUTPUT_BUFFER_SIZE];
     str[OUTPUT_BUFFER_SIZE-1]='\0';
-    mpz_get_str (str, 10, z._mpz);
+    mpz_get_str (str, 10, this->_mpz);
     ARIADNE_ASSERT(str[OUTPUT_BUFFER_SIZE-1]=='\0');
-    return os << str;
+    return str;
+}
+
+OutputStream& operator<<(OutputStream& os, Integer const& z) {
+    return os << z.literal();
 }
 
 Integer make_integer(unsigned long long int n) {
@@ -411,6 +420,10 @@ Integer make_integer(unsigned long long int n) {
 
 Integer operator"" _z(unsigned long long int n) {
     return Integer(Nat64(n));
+}
+
+Integer operator"" _z(const char* str, std::size_t) {
+    return Integer(String(str));
 }
 
 

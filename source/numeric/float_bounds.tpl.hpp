@@ -140,7 +140,7 @@ template<class F> auto Operations<Bounds<F>>::_cast_integer(Bounds<F> const& x) 
     return z;
 }
 
-    template<class F> auto Operations<Bounds<F>>::_write(OutputStream& os, Bounds<F> const& x) -> OutputStream& {
+template<class F> auto Operations<Bounds<F>>::_write(OutputStream& os, Bounds<F> const& x) -> OutputStream& {
     // Display using a number of fractional places so that the larger number in absolute value is displayed to the given precision.
     F amax=max(-x._l,x._u);
     if(amax==0) { return os << "{0.:0.}"; }

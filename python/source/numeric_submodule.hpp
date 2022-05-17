@@ -32,24 +32,46 @@
 
 namespace Ariadne {
 
-template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr) {
-    return os << class_name<Number<P>>()<<"("<<repr.reference()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDP>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatMP>& repr);
 
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& repr) {
-    return os << class_name<F>() << "Approximation("<<repr.reference().raw()<<")"; }
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<LowerBound<F>>& repr) {
-    return os << class_name<F>() << "LowerBound("<<repr.reference().raw()<<")"; }
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperBound<F>>& repr) {
-    return os << class_name<F>() << "UpperBound("<<repr.reference().raw()<<")"; }
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& repr) {
-    return os << class_name<F>() << "Bounds("<<repr.reference().lower().raw()<<","<<repr.reference().upper().raw()<<")"; }
-template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& repr) {
-    return os << class_name<F>() << "Ball("<<repr.reference().value_raw()<<","<<repr.reference().error_raw()<<")"; }
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& repr) {
-    return os << class_name<F>() << "Value("<<repr.reference().raw()<<")"; }
-template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr) {
-    return os << class_name<FE>() << "Error("<<repr.reference().raw()<<")"; }
+template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr);
 
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<LowerBound<F>>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperBound<F>>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& x);
+template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr);
+
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatDP>& x);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatMP>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Approximation<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<LowerBound<F>>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<UpperBound<F>>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Bounds<F>>& x);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Ball<F,FE>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Value<F>>& x);
+template<class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Error<FE>>& repr);
+
+
+template<class X> X from_python_object_or_literal(pybind11::handle h) {
+    if constexpr (Constructible<X,std::string>) {
+        try { return X(pybind11::cast<std::string>(h)); } 
+        catch(...) { } 
+    }
+    return pybind11::cast<X>(h);
 }
+template<> ValidatedNumber from_python_object_or_literal<ValidatedNumber>(pybind11::handle h);
+template<> ValidatedUpperNumber from_python_object_or_literal<ValidatedUpperNumber>(pybind11::handle h);
+template<> ValidatedLowerNumber from_python_object_or_literal<ValidatedLowerNumber>(pybind11::handle h);
+template<> ApproximateNumber from_python_object_or_literal<ApproximateNumber>(pybind11::handle h);
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_PYTHON_NUMERIC_SUBMODULE_HPP */

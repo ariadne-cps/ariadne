@@ -63,6 +63,8 @@ class Decimal
     operator Rational () const;
     //! \brief Convert to an generic number.
     operator ExactNumber () const;
+    //! \brief A string literal
+    String literal() const;
     //! \brief Unary plus of a decimal value.
     friend Decimal operator+(Decimal const& d);
     //! \brief Negation of a decimal value.
@@ -110,6 +112,23 @@ Decimal operator"" _dec (const char* str, std::size_t);
 Decimal operator"" _decimal (unsigned long long int n);
 Decimal operator"" _decimal (long double dbl);
 Decimal operator"" _decimal (const char* str, std::size_t);
+
+template<> class Bounds<Decimal> {
+    Decimal _l, _u;
+  public:
+    Bounds(Decimal w) : _l(w), _u(w) { }
+    template<ConvertibleTo<Decimal> X> Bounds(X const& x)
+        : Bounds(Decimal(x)) { }
+    Bounds(Decimal l, Decimal u) : _l(l), _u(u) { }
+    template<class X> requires Constructible<Decimal,X> Bounds(Bounds<X> const& x)
+        : Bounds(Decimal(x.lower_raw()),Decimal(x.upper_raw())) { }
+    operator ValidatedNumber() const;
+    Decimal lower() const { return _l; }
+    Decimal upper() const { return _u; }
+    Decimal lower_raw() const { return _l; }
+    Decimal upper_raw() const { return _u; }
+    friend OutputStream& operator<<(OutputStream& os, Bounds<Decimal> y) { return os << "[" << y._l << ":" << y._u << "]"; }
+};
 
 
 } // namespace Ariadne

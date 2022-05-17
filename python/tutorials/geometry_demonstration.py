@@ -55,7 +55,7 @@ def geometry_demonstration():
     print("bcs:",bcs,type(bcs))
 
     # Compute the image of a bounded contraint set under a continuous function
-    h=EffectiveVectorMultivariateFunction([dec(1.5)-x*x-y/3,y])
+    h=EffectiveVectorMultivariateFunction([dec_(1.5)-x*x-y/3,y])
     cis = image(bcs,h)
     print("cis:",cis,type(cis))
 

@@ -197,9 +197,12 @@ template<class... AS> auto _solve_(AS... as) -> decltype(solve(as...)) { return 
 
 template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
+template<class... AS> auto _norm_(AS... as) -> decltype(norm(as...)) { return norm(as...); }
 template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }
 template<class... AS> auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
+template<class... AS> auto _cojoin_(AS... as) -> decltype(cojoin(as...)) { return cojoin(as...); }
 template<class... AS> auto _combine_(AS... as) -> decltype(combine(as...)) { return combine(as...); }
+template<class... AS> auto _transpose_(AS... as) -> decltype(transpose(as...)) { return transpose(as...); }
 
 template<class... AS> auto _midpoint_(AS... as) -> decltype(midpoint(as...)) { return midpoint(as...); }
 template<class... AS> auto _embed_(AS... as) -> decltype(embed(as...)) { return embed(as...); }

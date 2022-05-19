@@ -61,6 +61,8 @@ template<class X> struct QRMatrix;
 
 class SingularMatrixException { };
 
+template<class X> using UniformMatrixNormType = decltype(abs(declval<X>())+abs(declval<X>()));
+
 
 class DeclareMatrixOperations {
     template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A);
@@ -82,7 +84,7 @@ class DeclareMatrixOperations {
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2);
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Vector<X2> const& v2);
 
-    template<class X> friend decltype(abs(declval<X>()+declval<X>())) norm(Matrix<X> const& A);
+    template<class X> friend UniformMatrixNormType<X> norm(Matrix<X> const& A);
 
     template<class X1, class X2> friend decltype(declval<X1>()==declval<X2>()) operator==(Matrix<X1> const& A1, Matrix<X2> const& A2);
 };
@@ -848,9 +850,9 @@ struct ProvideMatrixOperations {
         return r;
     }
 
-    template<class X> friend decltype(abs(declval<X>()+declval<X>())) norm(Matrix<X> const& A) {
-        typedef decltype(abs(declval<X>()+declval<X>())) R;
-        R r=abs(A.zero_element());
+    template<class X> friend UniformMatrixNormType<X> norm(Matrix<X> const& A) {
+        typedef UniformMatrixNormType<X> R;
+        UniformMatrixNormType<X> r=abs(A.zero_element());
         for(SizeType i=0; i!=A.row_size(); ++i) {
             R s=abs(A.zero_element());
             for(SizeType j=0; j!=A.column_size(); ++j) {

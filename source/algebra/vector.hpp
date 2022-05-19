@@ -79,6 +79,9 @@ template<class M, class X> concept AMatrixExpressionOver = AMatrixExpression<M> 
 template<class X> concept HasCreateZero = requires(X const& x) { x.create_zero(); };
 template<class X> concept HasNul = requires(X x) { nul(x); };
 
+template<class X> using SupremumNormType = decltype(max(abs(declval<X>()),abs(declval<X>())));
+template<class X> using EuclideanNormType = decltype(sqrt(sqr(declval<X>())+sqr(declval<X>())));
+
 
 template<class X> X create_zero(const X& x) {
     if constexpr (HasCreateZero<X>) { return x.create_zero(); }

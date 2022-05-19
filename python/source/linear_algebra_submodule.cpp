@@ -25,6 +25,7 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 #include "numeric_submodule.hpp"
+#include "linear_algebra_submodule.hpp"
 
 #include "config.hpp"
 
@@ -40,73 +41,12 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<class X>
-X __vgetitem__(const Vector<X>& v, Nat i)
-{
-    if(i<0) { i+=static_cast<Nat>(v.size()); }
-    ARIADNE_ASSERT_MSG(0<=i && Nat(i)<v.size(),"v="<<v<<" i="<<i);
-    return v[static_cast<Nat>(i)];
-}
 
+// Define transpose operation which evaluates expression template
+template<class X> Matrix<X> transpose(Matrix<X> const& A) { return MatrixTranspose<Matrix<X>>(A); }
 
-template<class X>
-Vector<X> __vgetslice__(const Vector<X>& v, Nat start, Nat stop)
-{
-    if(start<0) { start+=static_cast<Nat>(v.size()); }
-    if(stop<0) { stop+=static_cast<Nat>(v.size()); }
-    ARIADNE_ASSERT(0<=start && start<=stop && Nat(stop)<=v.size());
-    return project(v,range(static_cast<Nat>(start),static_cast<Nat>(stop)));
-}
-
-
-template<class X>
-Void __vsetitem__(Vector<X>& v, Nat i, const X& x)
-{
-    if(i<0) { i+=static_cast<Nat>(v.size()); }
-    ARIADNE_ASSERT(0<=i && Nat(i)<v.size());
-    v[static_cast<Nat>(i)]=x;
-}
-
-
-template<class X>
-X __cvgetitem__(const Covector<X>& u, Nat i)
-{
-    if(i<0) { i+=static_cast<Nat>(u.size()); }
-    ARIADNE_ASSERT_MSG(0<=i && Nat(i)<u.size(),"v="<<u<<" i="<<i);
-    return u[static_cast<Nat>(i)];
-}
-
-template<class X>
-Void __cvsetitem__(Covector<X>& u, Nat i, const X& x)
-{
-    if(i<0) { i+=static_cast<Nat>(u.size()); }
-    ARIADNE_ASSERT(0<=i && Nat(i)<u.size());
-    u[static_cast<Nat>(i)]=x;
-}
-
-template<class X>
-X __mgetitem__(const Matrix<X>& A, const std::tuple<Nat,Nat>& ind)
-{
-    Nat i=std::get<0>(ind);
-    Nat j=std::get<1>(ind);
-    return A[i][j];
-}
-
-template<class X>
-Void __msetitem__(Matrix<X>& A, const std::tuple<Nat,Nat>& ind, const X& x)
-{
-    Nat i=std::get<0>(ind);
-    Nat j=std::get<1>(ind);
-    A[i][j]=x;
-}
-
-
-template<class X> using UniformNormType = decltype(abs(declval<X>()+declval<X>()));
-template<class X> using SupremumNormType = decltype(max(abs(declval<X>()),abs(declval<X>())));
-template<class X> using EuclideanNormType = decltype(sqrt(sqr(declval<X>())+sqr(declval<X>())));
-
-template<class X> Matrix<X> transpose(const Matrix<X>& A) { return MatrixTranspose<Matrix<X>>(A); }
-template<class X> UniformNormType<X> norm(const Matrix<X>& A);
+// Join two scalars to make a vector
+template<class X> Vector<X> _sjoin_(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
 
 
 template<class X> pybind11::list vector_to_python(Vector<X> const& v) {
@@ -129,12 +69,7 @@ template<class X> pybind11::list matrix_to_python(Matrix<X> const& A) {
     return res;
 }
 
-
-template<class X> X bounds_from_dict(pybind11::dict dct);
-
-
 namespace { // Don't export the following functions to prevent visibility inconsistency warnings with pybind11 names
-
 
 template<class X> Vector<X> vector_from_python(pybind11::list const& lst) {
     return Vector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
@@ -201,15 +136,6 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os;
 }
 
-
-// NOTE: g++ (version 5.4.1) does not accept decltype(auto) here
-template<class V> auto __norm__(const V& v) -> decltype(norm(v)) { return norm(v); }
-template<class V1, class V2> auto __dot__(const V1& v1, const V2& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
-template<class V1, class V2> auto __join__(const V1& v1, const V2& v2) -> decltype(join(v1,v2)) { return join(v1,v2); }
-template<class X> Vector<X> __sjoin__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
-template<class U1, class U2> auto __cojoin__(const U1& u1, const U2& u2) -> decltype(cojoin(u1,u2)) { return cojoin(u1,u2); }
-template<class M> auto __transpose__(const M& A) -> decltype(transpose(A)) { return transpose(A); }
-
 } // namespace Ariadne
 
 
@@ -275,9 +201,9 @@ Void define_vector(pybind11::module& module, pybind11::class_<Vector<X>>& vector
     define_vector_constructors(module,vector_class);
     define_vector_concept(module,vector_class);
 
-//    module.def("join", &__join__<Vector<X>,Vector<X>>);
-//    module.def("join", &__join__<Vector<X>,X>);
-//    module.def("join", &__join__<X,Vector<X>>);
+//    module.def("join", &_join_<Vector<X>,Vector<X>>);
+//    module.def("join", &_join_<Vector<X>,X>);
+//    module.def("join", &_join_<X,Vector<X>>);
 //    module.def("join", &__sjoin__<X>);
 
 //    vector_class.def(pybind11::init(&vector_from_python<X>));
@@ -294,8 +220,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
     vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
 
-    module.def("norm",&__norm__<Vector<X>>);
-    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
+    module.def("norm",&_norm_<Vector<X>>);
+    module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 }
 
 template<class F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Bounds<F>>>& vector_class) {
@@ -303,8 +229,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     using PR=PrecisionType<X>;
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
-    module.def("norm",&__norm__<Vector<X>>);
-    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
+    module.def("norm",&_norm_<Vector<X>>);
+    module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 
     vector_class.def("__rmul__",&__rmul__<Vector<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
 
@@ -326,8 +252,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     using PR=PrecisionType<X>;
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
-    module.def("norm",&__norm__<Vector<X>>);
-    module.def("dot",&__dot__<Vector<X>,Vector<X>>);
+    module.def("norm",&_norm_<Vector<X>>);
+    module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 
 //    vector_class.def(pybind11::init<Vector<ApproximateNumber>,PR>());
 //    vector_class.def(pybind11::init<Array<ApproximateNumber>,PR>());
@@ -381,9 +307,9 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     module.def("transpose", (Covector<X>const&(*)(Vector<X>const&)) &transpose);
     module.def("transpose", (Vector<X>const&(*)(Covector<X>const&)) &transpose);
 
-    module.def("cojoin", &__cojoin__<Covector<X>,Covector<X>>);
-    module.def("cojoin", &__cojoin__<Covector<X>,Scalar<X>>);
-    module.def("cojoin", &__cojoin__<Scalar<X>,Covector<X>>);
+    module.def("cojoin", &_cojoin_<Covector<X>,Covector<X>>);
+    module.def("cojoin", &_cojoin_<Covector<X>,Scalar<X>>);
+    module.def("cojoin", &_cojoin_<Scalar<X>,Covector<X>>);
 
     covector_class.def(pybind11::init([](pybind11::list const& lst){return Covector<X>(pybind11::cast<Array<X>>(lst));}));
 
@@ -443,12 +369,12 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def("__str__",&__cstr__<Matrix<X>>);
     matrix_class.def("__repr__",&__repr__<Matrix<X>>);
 
-    module.def("join", &__join__<Matrix<X>,Matrix<X>>);
-    module.def("join", &__join__<Matrix<X>,Covector<X>>);
-    module.def("join", &__join__<Covector<X>,Matrix<X>>);
-    module.def("cojoin", &__cojoin__<Matrix<X>,Matrix<X>>);
-    module.def("cojoin", &__cojoin__<Matrix<X>,Vector<X>>);
-    module.def("cojoin", &__cojoin__<Vector<X>,Matrix<X>>);
+    module.def("join", &_join_<Matrix<X>,Matrix<X>>);
+    module.def("join", &_join_<Matrix<X>,Covector<X>>);
+    module.def("join", &_join_<Covector<X>,Matrix<X>>);
+    module.def("cojoin", &_cojoin_<Matrix<X>,Matrix<X>>);
+    module.def("cojoin", &_cojoin_<Matrix<X>,Vector<X>>);
+    module.def("cojoin", &_cojoin_<Vector<X>,Matrix<X>>);
 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
@@ -493,7 +419,7 @@ Void define_matrix_arithmetic(pybind11::module& module, pybind11::class_<Matrix<
 template<class X>
 Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
 {
-    module.def("norm",(UniformNormType<X>(*)(const Matrix<X>&)) &norm);
+    module.def("norm", &_norm_<Matrix<X>>);
     module.def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
     module.def("inverse",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&)) &inverse);
@@ -544,7 +470,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("lu_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &lu_solve);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
-    module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
+    module.def("orthogonal_decomposition", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &orthogonal_decomposition<X>);
 
     matrix_class.def("__mul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
     matrix_class.def("__mul__",&__mul__<Matrix<Bounds<F>>,Vector<Approximation<F>>>, pybind11::is_operator());
@@ -565,7 +491,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     define_matrix_operations<X>(module,matrix_class);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
-    module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
+    module.def("orthogonal_decomposition", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &orthogonal_decomposition<X>);
     module.def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms<X>);
 
     pybind11::implicitly_convertible<Matrix<Bounds<F>>, Matrix<Approximation<F>>>();

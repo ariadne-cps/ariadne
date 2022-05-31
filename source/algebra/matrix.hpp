@@ -59,7 +59,10 @@ class PivotMatrix;
 template<class X> struct PLUMatrix;
 template<class X> struct QRMatrix;
 
-class SingularMatrixException { };
+class SingularMatrixException : public std::runtime_error {
+  public:
+    using std::runtime_error::runtime_error;
+};
 
 template<class X> using UniformMatrixNormType = decltype(abs(declval<X>())+abs(declval<X>()));
 

@@ -228,16 +228,19 @@ lu_inverse(const Matrix<X>& M)
     Array<SizeType> p(m);
     for(SizeType k=0; k!=m; ++k) { p[k]=k; }
 
-
     for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
-        SizeType iamax=k;
-        X amax(M.zero_element());
+        SizeType iamax=m;
+        auto amax=mig(M.zero_element());
         for(SizeType i=k; i!=m; ++i) {
-            if(decide(abs(A[i][k])>amax)) {
+            if(decide(mig(A[i][k])>amax)) {
                 iamax=i;
-                amax=abs(A[i][k]);
+                amax=mig(A[i][k]);
             }
+        }
+
+        if(iamax==m) {
+            ARIADNE_THROW(SingularMatrixException,"lu_inverse(Matrix<"<<class_name<X>()<<"> M)","M="<<M);
         }
 
         // Set pivot row
@@ -801,6 +804,8 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 template<class X> Tuple< Matrix<X>, Matrix<X>, PivotMatrix >
 orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 {
+    std::cerr<<"orthogonal_decomposition(Matrix<X>,Bool)\n";
+
     X zero=A.zero_element();
     X one=zero+1;
 
@@ -941,6 +946,7 @@ template<class X>
 Tuple< Matrix<X>, Matrix<X> >
 gram_schmidt_orthogonalisation(const Matrix<X>& A)
 {
+    std::cerr<<"orthogonal_decomposition(Matrix<X>)\n";
     SizeType m=A.row_size();
     SizeType n=A.column_size();
     X z=A.zero_element();

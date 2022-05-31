@@ -53,7 +53,7 @@ template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBoun
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
-        throw SingularMatrixException();
+        ARIADNE_THROW(SingularMatrixException,"inverse(Matrix<"<<class_name<FloatDPBounds>()<<"> A)","A="<<A);
     }
 }
 

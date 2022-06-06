@@ -908,6 +908,8 @@ template<> String class_name<double>() { return "double"; }
 template<> String class_name<ApproximateDouble>() { return "ApproximateDouble"; }
 template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 
+
+template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<FloatDP>() { return "FloatDP"; }
 
 } // namespace Ariadne

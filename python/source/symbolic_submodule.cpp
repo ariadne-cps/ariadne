@@ -24,6 +24,7 @@
 
 #include "pybind11.hpp"
 #include "utilities.hpp"
+#include "numeric_submodule.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -43,17 +44,28 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<> struct PythonTemplateName<Constant> { static std::string get() { return "Constant"; } };
+template<> struct PythonTemplateName<Variable> { static std::string get() { return "Variable"; } };
+template<> struct PythonTemplateName<Expression> { static std::string get() { return "Expression"; } };
+template<> struct PythonTemplateName<Valuation> { static std::string get() { return "Valuation"; } };
+
+template<> struct PythonClassName<Expression<Boolean>> { static std::string get() { return "DiscretePredicate"; } };
+template<> struct PythonClassName<Expression<Kleenean>> { static std::string get() { return "ContinuousPredicate"; } };
+
+template<> struct PythonClassName<String> { static std::string get() { return "String"; } };
+template<> struct PythonClassName<Valuation<Real>> { static std::string get() { return python_class_name<Real>()+python_template_name<Valuation>(); } };
+
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Constant<T>>& repr) {
     Constant<T> const& cnst=repr.reference();
-    return os << class_name<T>() << "Constant(\"" << cnst.name() << "," << cnst.value() << "\")";
+    return os << python_class_name<Constant<T>>() << "(\"" << cnst.name() << "," << cnst.value() << "\")";
 }
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Variable<T>>& repr) {
     Variable<T> const& var=repr.reference();
-    return os << class_name<T>() << "Variable(\"" << var.name() << "\")";
+    return os << python_class_name<Variable<T>>() << "(\"" << var.name() << "\")";
 }
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Expression<T>>& repr) {
     Expression<T> const& expr=repr.reference();
-    return os << class_name<T>() << "Expression(" << expr << ")";
+    return os << python_class_name<Expression<T>>() << "(" << expr << ")";
 }
 
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Map<Variable<Y>,Expression<Y>>& a) {
@@ -83,7 +95,7 @@ LetRealVariable let(const RealVariable&);
 
 Void export_constants(pybind11::module& module)
 {
-    pybind11::class_<RealConstant,pybind11::bases<Real>> real_constant_class(module,"RealConstant");
+    pybind11::class_<RealConstant,pybind11::bases<Real>> real_constant_class(module,python_class_name<RealConstant>().c_str());
     real_constant_class.def(pybind11::init<Identifier,Real>());
     real_constant_class.def("name", [](RealConstant const& c){return c.name();});
     real_constant_class.def("value", &RealConstant::value);
@@ -94,13 +106,17 @@ Void export_constants(pybind11::module& module)
     string_class.def(pybind11::init<const char*>());
     pybind11::implicitly_convertible<const char*,String>();
 
-    pybind11::class_<StringConstant,pybind11::bases<String>> string_constant_class(module,"StringConstant");
+    pybind11::class_<StringConstant,pybind11::bases<String>> string_constant_class(module,python_class_name<StringConstant>().c_str());
     string_constant_class.def(pybind11::init<String>());
 //    string_constant_class.def(pybind11::init<Identifier,String>());
     string_constant_class.def("name", &StringConstant::name);
     string_constant_class.def("value", &StringConstant::value);
     string_constant_class.def("__str__", &__cstr__<StringConstant>);
     string_constant_class.def("__repr__", &__repr__<StringConstant>);
+
+    template_<Constant> constant_template(module);
+    constant_template.instantiate<String>();
+    constant_template.instantiate<Real>();
 }
 
 pybind11::class_<RealVariable> export_variables(pybind11::module& module)
@@ -111,7 +127,7 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     identifier_class.def("__repr__", &__cstr__<Identifier>);
     pybind11::implicitly_convertible<StringType,Identifier>();
 
-    pybind11::class_<StringVariable> string_variable_class(module,"StringVariable");
+    pybind11::class_<StringVariable> string_variable_class(module,python_class_name<StringVariable>().c_str());
     string_variable_class.def(pybind11::init<StringType>());
     string_variable_class.def("name", &StringVariable::name);
     string_variable_class.def("__str__", &__cstr__<StringVariable>);
@@ -126,7 +142,7 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     module.def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
 
 
-    pybind11::class_<IntegerVariable> integer_variable_class(module,"IntegerVariable");
+    pybind11::class_<IntegerVariable> integer_variable_class(module,python_class_name<IntegerVariable>().c_str());
     integer_variable_class.def(pybind11::init<StringType>());
     integer_variable_class.def("__str__", &__cstr__<IntegerVariable>);
     integer_variable_class.def("__repr__", &__repr__<IntegerVariable>);
@@ -156,7 +172,7 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     integer_next_variable_class.def("__str__", &__cstr__<PrimedIntegerVariable>);
     module.def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
 
-    pybind11::class_<RealVariable> real_variable_class(module,"RealVariable");
+    pybind11::class_<RealVariable> real_variable_class(module,python_class_name<RealVariable>().c_str());
     real_variable_class.def(pybind11::init<StringType>());
     real_variable_class.def("__str__", &__cstr__<RealVariable>);
     real_variable_class.def("__repr__", &__repr__<RealVariable>);
@@ -238,6 +254,13 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     pybind11::class_<PrimedIntegerAssignment> primed_integer_assignment_class(module,"PrimedIntegerAssignment");
     primed_integer_assignment_class.def("__str__",&__cstr__<PrimedIntegerAssignment>);
 
+    template_<Variable> variable_template(module);
+    variable_template.instantiate<Integer>();
+    variable_template.instantiate<String>();
+    variable_template.instantiate<Real>();
+    variable_template.instantiate<Boolean>();
+    variable_template.instantiate<Kleenean>();
+
     return real_variable_class;
 }
 
@@ -254,6 +277,9 @@ Void export_valuations(pybind11::module& module)
     real_valuation_class.def("__getitem__", &RealValuation::get);
     real_valuation_class.def("__setitem__", &RealValuation::set);
     real_valuation_class.def("__repr__", &__cstr__<RealValuation>);
+
+    template_<Valuation> valuation_template(module);
+    valuation_template.instantiate<Real>();
 }
 
 Void export_expressions(pybind11::module& module)
@@ -398,6 +424,13 @@ Void export_expressions(pybind11::module& module)
     pybind11::implicitly_convertible<Rational,RealExpression>();
     pybind11::implicitly_convertible<Real,RealExpression>();
     pybind11::implicitly_convertible<RealVariable,RealExpression>();
+
+    template_<Expression> expression_template(module);
+    expression_template.instantiate<Integer>();
+    expression_template.instantiate<String>();
+    expression_template.instantiate<Real>();
+    expression_template.instantiate<Boolean>();
+    expression_template.instantiate<Kleenean>();
 }
 
 

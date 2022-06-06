@@ -47,6 +47,36 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInter
     ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<FloatDPBounds>(FloatDPBounds(ivl.lower_bound(),ivl.upper_bound()));
 }
 
+template<> struct PythonTemplateName<Point> { static std::string get() { return "Point"; } };
+template<> struct PythonTemplateName<Interval> { static std::string get() { return "Interval"; } };
+template<> struct PythonTemplateName<Box> { static std::string get() { return "Box"; } };
+
+template<class X> struct PythonClassName<Point<X>> {
+    std::string get() const { return python_template_class_name<X>("Point"); } };
+template<class X> struct PythonClassName<Interval<X>> {
+    std::string get() const { return python_template_class_name<X>("Interval"); } };
+template<class X> struct PythonClassName<Box<X>> {
+    std::string get() const { return python_template_class_name<X>("Box"); } };
+
+template<> struct PythonClassName<Interval<FloatDPValue>> {
+    std::string get() const { return "FloatDPExactInterval"; } };
+template<> struct PythonClassName<Interval<FloatDPUpperBound>> {
+    std::string get() const { return "FloatDPUpperInterval"; } };
+template<> struct PythonClassName<Interval<FloatDPLowerBound>> {
+    std::string get() const { return "FloatDPLowerInterval"; } };
+template<> struct PythonClassName<Interval<FloatDPApproximation>> {
+    std::string get() const { return "FloatDPApproximateInterval"; } };
+
+template<class UB> struct PythonClassName<Box<Interval<UB>>> {
+    std::string get() const { return python_class_name<UB>()+"Box"; } };
+template<> struct PythonClassName<Box<Interval<FloatDPValue>>> {
+    std::string get() const { return "FloatDPExactBox"; } };
+template<> struct PythonClassName<Box<Interval<FloatDPUpperBound>>> {
+    std::string get() const { return "FloatDPUpperBox"; } };
+template<> struct PythonClassName<Box<Interval<FloatDPLowerBound>>> {
+    std::string get() const { return "FloatDPLowerBox"; } };
+template<> struct PythonClassName<Box<Interval<FloatDPApproximation>>> {
+    std::string get() const { return "FloatDPApproximateBox"; } };
 
 class DrawableWrapper
   : public pybind11::wrapper< Drawable2dInterface >
@@ -363,7 +393,7 @@ template<class PT> PT point_from_python(pybind11::list pylst) {
     return PT(Vector<X>(ary));
 }
 
-template<class PT> Void export_point(pybind11::module& module, std::string name)
+template<class PT> Void export_point(pybind11::module& module, std::string name=python_class_name<PT>())
 {
     typedef typename PT::ValueType X;
     pybind11::class_<PT, Drawable2dInterface> point_class(module,name.c_str());
@@ -381,10 +411,16 @@ template<class PT> Void export_point(pybind11::module& module, std::string name)
 }
 
 Void export_points(pybind11::module& module) {
-    export_point<RealPoint>(module,"RealPoint");
-    export_point<FloatDPValuePoint>(module,"FloatDPValuePoint");
-    export_point<FloatDPBoundsPoint>(module,"FloatDPBoundsPoint");
-    export_point<FloatDPApproximationPoint>(module,"FloatDPApproximationPoint");
+    export_point<RealPoint>(module);
+    export_point<FloatDPValuePoint>(module);
+    export_point<FloatDPBoundsPoint>(module);
+    export_point<FloatDPApproximationPoint>(module);
+
+    template_<Point> point_template(module);
+    point_template.instantiate<Real>();
+    point_template.instantiate<FloatDPValue>();
+    point_template.instantiate<FloatDPBounds>();
+    point_template.instantiate<FloatDPApproximation>();
 }
 
 template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
@@ -419,7 +455,7 @@ template<template<class>class T,class F> Void export_conversions(pybind11::class
 
 
 
-template<class IVL> Void export_interval(pybind11::module& module, std::string name) {
+template<class IVL> Void export_interval(pybind11::module& module, std::string name=python_class_name<IVL>()) {
     typedef IVL IntervalType;
     typedef typename IntervalType::LowerBoundType LowerBoundType;
     typedef typename IntervalType::UpperBoundType UpperBoundType;
@@ -506,23 +542,24 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     } else if constexpr (Same<IVL,IntervalApproximateRangeType>) {
         module.attr("IntervalApproximateRangeType")=interval_class;
     }
+
 }
 
 Void export_intervals(pybind11::module& module) {
 //    export_interval<ExactIntervalType>(module,"ExactIntervalType");
 //    export_interval<UpperIntervalType>(module,"UpperIntervalType");
 //    export_interval<ApproximateIntervalType>(module,"ApproximateIntervalType");
-    export_interval<DyadicInterval>(module,"DyadicInterval");
-    export_interval<RationalInterval>(module,"RationalInterval");
-    export_interval<RealInterval>(module,"RealInterval");
+    export_interval<DyadicInterval>(module);
+    export_interval<RationalInterval>(module);
+    export_interval<RealInterval>(module);
     pybind11::implicitly_convertible<DyadicInterval,RationalInterval>();
     pybind11::implicitly_convertible<DyadicInterval,RealInterval>();
     pybind11::implicitly_convertible<RationalInterval,RealInterval>();
 
-    export_interval<FloatDPExactInterval>(module,"FloatDPExactInterval");
-    export_interval<FloatDPLowerInterval>(module,"FloatDPLowerInterval");
-    export_interval<FloatDPUpperInterval>(module,"FloatDPUpperInterval");
-    export_interval<FloatDPApproximateInterval>(module,"FloatDPApproximateInterval");
+    export_interval<FloatDPExactInterval>(module);
+    export_interval<FloatDPLowerInterval>(module);
+    export_interval<FloatDPUpperInterval>(module);
+    export_interval<FloatDPApproximateInterval>(module);
 
     pybind11::implicitly_convertible<FloatDPExactInterval,FloatDPUpperInterval>();
     pybind11::implicitly_convertible<FloatDPExactInterval,FloatDPLowerInterval>();
@@ -536,10 +573,19 @@ Void export_intervals(pybind11::module& module) {
     module.def("cast_singleton", (FloatMPBounds(*)(Interval<FloatMPUpperBound> const&)) &cast_singleton);
 
     module.def("image", (UpperIntervalType(*)(UpperIntervalType const&, ValidatedScalarUnivariateFunction const&)) &_image_);
+
+    template_<Interval> interval_template(module);
+    interval_template.instantiate<Dyadic>();
+    interval_template.instantiate<Rational>();
+    interval_template.instantiate<Real>();
+    interval_template.instantiate<FloatDPValue>();
+    interval_template.instantiate<FloatDPUpperBound>();
+    interval_template.instantiate<FloatDPLowerBound>();
+    interval_template.instantiate<FloatDPApproximation>();
 }
 template<class UB> using BoxWithUpperBound=Box<Interval<UB>>;
 
-template<class BX> Void export_box(pybind11::module& module, std::string name)
+template<class BX> Void export_box(pybind11::module& module, std::string name=python_class_name<BX>())
 {
     using IVL=typename BX::IntervalType;
 
@@ -671,18 +717,18 @@ template<> Void export_box<RationalBox>(pybind11::module& module, std::string na
 }
 
 Void export_boxes(pybind11::module& module) {
-    export_box<RealBox>(module,"RealBox");
-    export_box<RationalBox>(module,"RationalBox");
-    export_box<DyadicBox>(module,"DyadicBox");
+    export_box<RealBox>(module);
+    export_box<RationalBox>(module);
+    export_box<DyadicBox>(module);
 //    export_box<ExactBoxType>(module,"ExactBoxType");
 //    export_box<UpperBoxType>(module,"UpperBoxType");
 //    export_box<ApproximateBoxType>(module,"ApproximateBoxType");
 
-    export_box<FloatDPExactBox>(module,"FloatDPExactBox");
-    export_box<FloatDPUpperBox>(module,"FloatDPUpperBox");
-    export_box<FloatDPLowerBox>(module,"FloatDPLowerBox");
-    export_box<FloatDPApproximateBox>(module,"FloatDPApproximateBox");
-//    export_box<FloatMPUpperBox>(module,"FloatMPUpperBox");
+    export_box<FloatDPExactBox>(module);
+    export_box<FloatDPUpperBox>(module);
+    export_box<FloatDPLowerBox>(module);
+    export_box<FloatDPApproximateBox>(module);
+//    export_box<FloatMPUpperBox>(module);
 
     pybind11::implicitly_convertible<FloatDPExactBox,FloatDPUpperBox>();
     pybind11::implicitly_convertible<FloatDPExactBox,FloatDPLowerBox>();
@@ -695,6 +741,15 @@ Void export_boxes(pybind11::module& module) {
     module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperBox const&, ValidatedScalarMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperInterval const&, ValidatedVectorUnivariateFunction const&)) &_image_);
 
+    template_<Box> box_template(module);
+    // TODO: Change templates so that
+    box_template.as_instantiate<DyadicBox,Dyadic>();
+    box_template.as_instantiate<RationalBox,Rational>();
+    box_template.as_instantiate<RealBox,Real>();
+    box_template.as_instantiate<FloatDPExactBox,FloatDPValue>();
+    box_template.as_instantiate<FloatDPUpperBox,FloatDPUpperBound>();
+    box_template.as_instantiate<FloatDPLowerBox,FloatDPLowerBound>();
+    box_template.as_instantiate<FloatDPApproximateBox,FloatDPApproximation>();
 
 }
 

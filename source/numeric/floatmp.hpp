@@ -83,6 +83,8 @@ class MultiplePrecision {
     //! \brief Write a full representation to an output stream.
     friend OutputStream& repr(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
+//! \brief Shorthand for MultiplePrecision.
+//! \relates MultiplePrecision
 using MP = MultiplePrecision;
 inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
 inline MultiplePrecision multiple_precision(Bits pr) { return MultiplePrecision(pr); }

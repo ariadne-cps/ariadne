@@ -69,6 +69,8 @@ class DoublePrecision {
     //! \brief Write a full representation to an output stream. <p/>
     friend OutputStream& repr(OutputStream& os, DoublePrecision) { return os << "DoublePrecision()"; }
 };
+//! \brief Shorthand for DoublePrecision.
+//! \relates DoublePrecision
 using DP = DoublePrecision;
 static const DoublePrecision double_precision = DoublePrecision();
 static const DoublePrecision dp = DP();
@@ -218,7 +220,7 @@ template<> class Float<DP> {
   public:
     FloatDP const& raw() const { return *this; }
     //! \brief An approximation by a built-in double-precision floating-point number.
-    double get_d() const { return this->dbl; }    
+    double get_d() const { return this->dbl; }
     //! \brief The exact value as a decimal string.
     String literal() const;
     //! \brief An approximate value as a decimal string, rounded by \a rnd.

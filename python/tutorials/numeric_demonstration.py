@@ -35,31 +35,31 @@ def numeric_demonstration():
 
     # Create an integer
     z=Integer(5)
-    print("z:",z,type(z))
+    print("Integer(5):",z)
 
     # Create a dyadic; can convert from Integer
     w=Dyadic(z)
     w=Dyadic(5)
     w=Dyadic(11,3) # Constructs the number 11/2^3=11/8
     w=11/two**3    # Alternative syntax for 11/2^3
-    print("w:",w,type(w))
+    print("Dyadic(11,3):",w)
 
     # Create a decimal number; can convert from Dyadic
     g=Decimal(w)
     g=Decimal(9.81)
     g=Decimal("9.81")
-    print("g:",g,type(g))
+    print("Decimal(9.81):",g,type(g))
 
     # Create a rational; can convert from Dyadic, Decimal
     q=Rational(w);
     q=Rational(5);
     q=Rational(11,8);
-    print("q:",q,type(q))
+    print("Rational(11,8):",q,type(q))
 
     # Create a real number
     r=Real(q)
-    print("r:",r,type(r))
-
+    print("Real(4*atan(1)):",r)
+    print()
 
     # Operations on real numbers
     # Arithmetic operators
@@ -82,9 +82,13 @@ def numeric_demonstration():
     d=ExactDouble(1.375)
     d=cast_exact(1.375)
     d=x_(1.375)
-    print("d:",d,type(d))
+    print("ExactDouble(1.375):",d)
+    print("cast_exact(1.375):",d)
+    print("x_(1.375):",d)
     # Can convert an ExactDouble to a Dyadic number.
     w=Dyadic(d)
+    print("Dyadic(ExactDouble(1.375))",w)
+    print()
 
     # Define shorthands for defining Ariadne values from input
     def dec(x): return Decimal(x)
@@ -99,12 +103,20 @@ def numeric_demonstration():
 
     # Create a raw double-precision number
     xdp=FloatDP(exact(1.75),dp)
+    # Create a raw double-precision number using generic Float type
+    xdp=Float[DP](exact(1.75),dp)
     # Create a raw multiple-precision number
     xmp=FloatMP(exact(1.75),mp)
+    xmp=Float[MP](exact(1.75),mp)
 
     # Create double-precision bounds for a value
     xdpb=FloatDPBounds(Decimal(1.2),dp) # Creates the interval [1.19999999999999996:1.20000000000000018]
     print("FloatDPBounds(1.2):",xdpb)
+    # Create double-precision bounds for a value using generic Bounds type
+    xdpb=Bounds[FloatDP](Decimal(1.2),dp) # Creates the interval [1.19999999999999996:1.20000000000000018]
+    print("Bounds[FloatDP](1.2):",xdpb)
+    xdpb=Bounds[Float[DP]](Decimal(1.2),dp) # Creates the interval [1.19999999999999996:1.20000000000000018]
+    print("Bounds[Float[DP]](1.2):",xdpb)
 
     # Create double-precision bounds for a range of values
     xdpb=FloatDPBounds(Rational(11,10),Rational(14,10),dp) # Creates the interval [1.09999999999999987:1.40000000000000013]
@@ -125,6 +137,11 @@ def numeric_demonstration():
     # Create a double-precision approximation
     xdpa=FloatDPApproximation(1.23,dp)
     print("FloatDPApproximation(1.23,dp):",xdpa)
+    # Create a double-precision approximation using generic Approximation type
+    xdpa=Approximation[FloatDP](1.23,dp)
+    print("Approximation[FloatDP](1.23,dp):",xdpa)
+    xdpa=Approximation[Float[DP]](1.23,dp)
+    print("Approximation[Float[DP]](1.23,dp):",xdpa)
 
     xmpa=FloatMPApproximation(1.23,mp)
     print("FloatMPApproximation(1.23,dp):",xmpa)

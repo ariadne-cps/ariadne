@@ -88,14 +88,14 @@ def function_tutorial():
     f2=compose(f,f)
     df0dx1=derivative(f[0],1)
 
-    x=FloatDPApproximationVector([0.1,0.2],dp)
+    x=Vector[Approximation[FloatDP]]([0.1,0.2],dp)
     fx=f(x)
     print("f(x):",fx)
     fx=evaluate(f,x)
     print("evaluate(f,x):",fx)
 
     mp=precision(128)
-    x=FloatMPBoundsVector([dec_(0.1),dec_(0.2)],mp)
+    x=Vector[Bounds[FloatMP]]([dec_(0.1),dec_(0.2)],mp)
     fx=f(x)
     print("f(x):",fx)
     fx=evaluate(f,x)
@@ -111,13 +111,13 @@ def function_tutorial():
     #! [Function model]
 
     dom=BoxDomainType([[x_(-0.25),x_(0.25)],[0,x_(0.5)]])
-    swp=ThresholdSweeperDP(dp,1e-3)
-    p=ValidatedVectorMultivariateTaylorFunctionModelDP(dom,f,swp)
+    swp=ThresholdSweeper[FloatDP](dp,1e-3)
+    p=ValidatedVectorMultivariateTaylorFunctionModel(dom,f,swp)
     print("p:",p)
 
     fp=compose(f,p)
     print("compose(f,p):",fp)
-    x=FloatDPBoundsVector([dec_(0.1),dec_(0.2)],dp)
+    x=Vector[Bounds[FloatDP]]([dec_(0.1),dec_(0.2)],dp)
     px=p(x)
     print("p(x):",p)
     #px=evaluate(p,x)

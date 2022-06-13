@@ -48,7 +48,7 @@ if __name__=='__main__':
     print(xmp.error()); print(xmp-xmp); print(xmp-xmp+1)
     ymp=r.compute(Effort(128))
     print("ymp=",ymp,type(ymp))
-    zmp=FloatMPBall(r.compute(Accuracy(128)).get(precision(128)))
+    zmp=Ball[FloatMP](r.compute(Accuracy(128)).get(precision(128)))
     print("zmp=",zmp,type(zmp))
     print(zmp.error()); print(zmp-zmp); print(zmp-zmp+1)
 
@@ -59,14 +59,14 @@ if __name__=='__main__':
 
 #! [expression_demonstration]
     print("Expression")
-    x=RealVariable("x")
-    y=RealVariable("y")
-    c=RealConstant("c",dy_(3.75))
+    x=Variable[Real]("x")
+    y=Variable[Real]("y")
+    c=Constant[Real]("c",dy_(3.75))
     e = c * x * (1-x)
     print(x); print(c); print(e)
     x0=Rational(1,2)
     y0=Rational(-2,3)
-    v=RealValuation({x:x0,y:y0})
+    v=Valuation[Real]({x:x0,y:y0})
     print(v)
     x1=evaluate(e,v)
     print("x1:",x1,"=",x1.get(double_precision))

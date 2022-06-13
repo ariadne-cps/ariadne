@@ -30,13 +30,16 @@ def geometry_demonstration():
 
     # Create intervals with different endpoint types
     ivlq = RationalInterval(Rational(4,7),Rational(3,5))
+    ivlq = Interval[Rational](Rational(4,7),Rational(3,5))
     print("ivlq:",ivlq,type(ivlq))
     ivlu = FloatDPUpperInterval({exact(1.5):exact(2.5)})
+    ivlu = Interval[FloatDPUpperBound]({exact(1.5):exact(2.5)})
     print("ivlu:",ivlu,type(ivlu))
 
     # Create a box from a list of intervals
     # Interval literals can be given as [l,u] or (for int/float values) as {l:u}
     bx = RealBox([ [Rational(4,7),Rational(3,5)] , {exact(1.5):exact(2.5)} ])
+    bx = Box[Real]([ [Rational(4,7),Rational(3,5)] , {exact(1.5):exact(2.5)} ])
     print("bx",bx,type(bx))
 
     # Test geometric predicates
@@ -49,7 +52,7 @@ def geometry_demonstration():
     cs = ConstraintSet([sqr(x)+2*sqr(y)<=1,3*x+2*y>=1])
     print("cs:",cs)
 
-    bx = RealBox([[-1,+1],[-1,+1]])
+    bx = Box[Real]([[-1,+1],[-1,+1]])
     # Compute the intersection of a contraint set with a box, obtaining a bounded set
     bcs = intersection(bx,cs)
     print("bcs:",bcs,type(bcs))

@@ -68,6 +68,7 @@ def compute_pi():
     pr=precision(128)
     pr=multiple_precision(128)
     pr=MultiplePrecision(128)
+    pr=MP(128)
     x=v.get(pr)
     print("x:",x,type(x))
     print("repr(x):",repr(x),type(x))
@@ -77,7 +78,7 @@ def compute_pi():
 
     print()
 
-    three=FloatMPBounds(3,precision(128))
+    three=Bounds[FloatMP](3,precision(128))
     x=6*atan(1/sqrt(three))
     print("x:",x,type(x))
 

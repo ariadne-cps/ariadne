@@ -54,11 +54,18 @@ describes bounds on a quantity, where the lower and upper bounds are objects of 
 Thus Bounds<Dyadic> represents dyadic bounds on a real number,
 and Bounds<FloatMP> would represents multiple-precision floating-point bounds.
 Each instantiation of a C++ template yields a different class.
+<br/>
 Since Python does not have templates, in the Python interface,
-each instantiation has a single name derived from the template name and the class parameter.
+each instantiation is a separate class.
+The class name is derived from the template name and the class parameter.
 For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref Dyadic::DyadicBounds "DyadicBounds".
-The Python class name is available from
-C++ (and can be found in the documentation) as a C++ <tt>typedef</tt> class alias.
+The Python class name is available from C++ (and can be found in the documentation) as a C++ <tt>typedef</tt> class alias.
+<br/>
+For some C++ templates, the C++ class <tt>T\<X> </tt> is avalable in Python as <tt>T[X]</tt>.
+For example, the C++ template class \ref Float "Float<DP>", with Python class name \ref FloatDP,
+is also available in Python as <tt>Float[DP]</tt>,
+and the C++ template class \ref Bounds "Bounds<Float<DP>>" with python class name \ref FloatDPBounds,
+is also available in Python as <tt>Bounds[Float[DP]]</tt> or <tt>Bounds[FloatDP]</tt>.
 
  - <em>Conversion:</em> <br>
 Conversions from a class <tt>F</tt> to a class <tt>T</tt> are defined by a constructor

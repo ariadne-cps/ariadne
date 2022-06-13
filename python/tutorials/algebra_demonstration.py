@@ -28,15 +28,30 @@ from pyariadne import *
 def linear_algebra_demonstration():
     #! [Linear Algebra demonstration]
 
+    # Create a rational vector
+    bq=RationalVector([1,q_(2.4),Rational(31,8)])
+    # Create a rational vector using Vector generic
+    bq=Vector[Rational]([1,q_(2.4),Rational(31,8)])
+    print("bq:",bq)
+    # Create a rational matrix
+    Aq=RationalMatrix([[1,2,4],[3,q_(1.5),2],[0,0,1]])
+    Aq=Matrix[Rational]([[1,2,4],[3,q_(1.5),2],[0,-1,1]])
+    print("Aq:",Aq)
+    # Solve the linear equation Ax=b
+    xq=solve(Aq,bq)
+    print("Aq\\bq:",xq)
+
+
+
     # Create an interval vector
-    b=FloatDPBoundsVector([1,{2:3},{x_(3.875):x_(4.125)}],dp)
+    b=FloatDPBoundsVector([1,"2.5",{x_(3.75):x_(4.0)}],dp)
+    b=Vector[FloatDPBounds]([1,"2.4",{x_(3.75):x_(4.0)}],dp)
+    b=Vector[Bounds[FloatDP]]([1,"2.4",{x_(3.75):x_(4.0)}],dp)
+    b=Vector[Bounds[Float[DP]]]([1,"2.4",{x_(3.75):x_(4.0)}],dp)
     print("b:",b)
 
-    Aq=RationalMatrix([[1,2,4],[3,1,2],[0,0,1]])
-    print("Aq:",Aq)
-
     # Create an interval matrix
-    A=FloatDPBoundsMatrix([[1,2,4],[3,x_(1.5),2],[0,0,1]],dp)
+    A=FloatDPBoundsMatrix([[1,2,4],[3,x_(1.5),2],[0,-1,1]],dp)
     print("A:",A)
 
     # Solve the linear equation Ax=b

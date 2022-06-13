@@ -23,6 +23,27 @@
 
 from pyariadne import *
 
+def test_generics():
+    assert(DP==DoublePrecision)
+    assert(MP==MultiplePrecision)
+    assert(Float[DP]==FloatDP)
+    assert(Float[MP]==FloatMP)
+    assert(Value[FloatDP]==FloatDPValue)
+    assert(Value[FloatMP]==FloatMPValue)
+    assert(Ball[FloatDP]==FloatDPBall)
+    assert(Ball[FloatMP]==FloatMPBall)
+    assert(Bounds[FloatDP]==FloatDPBounds)
+    assert(Bounds[FloatMP]==FloatMPBounds)
+    assert(UpperBound[FloatDP]==FloatDPUpperBound)
+    assert(UpperBound[FloatMP]==FloatMPUpperBound)
+    assert(LowerBound[FloatDP]==FloatDPLowerBound)
+    assert(LowerBound[FloatMP]==FloatMPLowerBound)
+    assert(Approximation[FloatDP]==FloatDPApproximation)
+    assert(Approximation[FloatMP]==FloatMPApproximation)
+    assert(Ball[FloatDP,FloatDP]==FloatDPBall)
+    assert(Ball[FloatMP,FloatDP]==FloatMPDPBall)
+    assert(Ball[FloatMP,FloatMP]==FloatMPBall)
+
 def test_regression():
     # New regression tests
     dp = DoublePrecision()
@@ -299,10 +320,3 @@ def test_concrete():
     check_arithmetic(mx,mx,r=mx)
     check_arithmetic(mx,n,r=mx)
     check_arithmetic(mx,w,r=mx)
-
-
-def test():
-    test_algebraic()
-    test_rounded()
-    test_concrete()
-

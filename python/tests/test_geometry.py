@@ -27,6 +27,17 @@ IntervalRangeType = FloatDPUpperInterval
 BoxDomainType = FloatDPExactBox
 BoxRangeType = FloatDPUpperBox
 
+def test_generics():
+    assert(Interval[FloatDPValue]==FloatDPExactInterval)
+    assert(Interval[FloatDPUpperBound]==FloatDPUpperInterval)
+    assert(Interval[FloatDPLowerBound]==FloatDPLowerInterval)
+    assert(Interval[FloatDPApproximation]==FloatDPApproximateInterval)
+
+    assert(Box[FloatDPValue]==FloatDPExactBox)
+    assert(Box[FloatDPUpperBound]==FloatDPUpperBox)
+    assert(Box[FloatDPLowerBound]==FloatDPLowerBox)
+    assert(Box[FloatDPApproximation]==FloatDPApproximateBox)
+
 def test_interval():
 
     dp = DoublePrecision()

@@ -482,6 +482,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("lu_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &lu_solve);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
+    module.def("gram_schmidt_orthogonalisation", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &gram_schmidt_orthogonalisation<X>);
     module.def("orthogonal_decomposition", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &orthogonal_decomposition<X>);
 
     matrix_class.def("__mul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
@@ -503,6 +504,8 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     define_matrix_operations<X>(module,matrix_class);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
+    //module.def("householder_orthogonalisation", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &householder_orthogonalisation<X>);
+    module.def("gram_schmidt_orthogonalisation", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &gram_schmidt_orthogonalisation<X>);
     module.def("orthogonal_decomposition", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &orthogonal_decomposition<X>);
     module.def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms<X>);
 

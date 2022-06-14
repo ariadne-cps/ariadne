@@ -53,7 +53,7 @@ template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBoun
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
-        throw SingularMatrixException();
+        ARIADNE_THROW(SingularMatrixException,"inverse(Matrix<"<<class_name<FloatDPBounds>()<<"> A)","A="<<A);
     }
 }
 
@@ -67,19 +67,20 @@ template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
 template Vector<RoundedFloatDP> solve(const Matrix<RoundedFloatDP>&, const Vector<RoundedFloatDP>&);
 template Void normalise_rows(Matrix<RoundedFloatDP>&);
 
+
 template class Matrix<FloatDPApproximation>;
 template Matrix<FloatDPApproximation> inverse(const Matrix<FloatDPApproximation>&);
 template Matrix<FloatDPApproximation> solve(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
 template Vector<FloatDPApproximation> solve(const Matrix<FloatDPApproximation>&, const Vector<FloatDPApproximation>&);
-//template Matrix<FloatDPApproximation> lu_solve(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
-//template Matrix<FloatDPApproximation> lu_inverse(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);
 template Tuple<PivotMatrix,Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> triangular_decomposition(Matrix<FloatDPApproximation> const&);
-template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>,PivotMatrix> orthogonal_decomposition(Matrix<FloatDPApproximation> const&, Bool);
 template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> orthogonal_decomposition(Matrix<FloatDPApproximation> const&);
-
+template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>> gram_schmidt_orthogonalisation(Matrix<FloatDPApproximation> const&);
+template Tuple<Matrix<FloatDPApproximation>,Matrix<FloatDPApproximation>,PivotMatrix> orthogonal_decomposition(Matrix<FloatDPApproximation> const&, Bool);
 template Vector<FloatDPApproximation> row_norms(Matrix<FloatDPApproximation> const&);
+template Matrix<FloatDPApproximation> operator*(PivotMatrix, Matrix<FloatDPApproximation>);
 
 template class Matrix<FloatDPBounds>;
+// template Matrix<FloatDPBounds> inverse(const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> lu_inverse(const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> gs_inverse(const Matrix<FloatDPBounds>&);
 template Matrix<FloatDPBounds> lu_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
@@ -90,36 +91,42 @@ template Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Matr
 template Matrix<MidpointType<FloatDPBounds>> midpoint(Matrix<FloatDPBounds> const&);
 template Tuple<PivotMatrix,Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> triangular_decomposition(Matrix<FloatDPBounds> const&);
 template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposition(Matrix<FloatDPBounds> const&);
+template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> gram_schmidt_orthogonalisation(Matrix<FloatDPBounds> const&);
+template Matrix<FloatDPBounds> operator*(PivotMatrix, Matrix<FloatDPBounds>);
 
 template class Matrix<FloatDPValue>;
-
-
 template Matrix<ExactType<FloatDPApproximation>> cast_exact(const Matrix<FloatDPApproximation>&);
 
+
 template class Matrix<FloatMPApproximation>;
-template class Matrix<FloatMPBounds>;
-template class Matrix<FloatMPValue>;
-
 template Matrix<FloatMPApproximation> inverse(const Matrix<FloatMPApproximation>&);
-template Vector<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
 template Matrix<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Matrix<FloatMPApproximation>&);
-template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
+template Vector<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
+template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
 template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> orthogonal_decomposition(Matrix<FloatMPApproximation> const&);
+template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> gram_schmidt_orthogonalisation(Matrix<FloatMPApproximation> const&);
+template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>,PivotMatrix> orthogonal_decomposition(Matrix<FloatMPApproximation> const&, Bool);
 template Vector<FloatMPApproximation> row_norms(Matrix<FloatMPApproximation> const&);
+template Matrix<FloatMPApproximation> operator*(PivotMatrix, Matrix<FloatMPApproximation>);
 
+template class Matrix<FloatMPBounds>;
 template Matrix<FloatMPBounds> inverse(const Matrix<FloatMPBounds>&);
-template Vector<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
-template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_inverse(const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
-template Vector<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
+template Vector<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
+template Vector<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
-template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
+template Matrix<MidpointType<FloatMPBounds>> midpoint(Matrix<FloatMPBounds> const&);
+template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposition(Matrix<FloatMPBounds> const&);
+template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> gram_schmidt_orthogonalisation(Matrix<FloatMPBounds> const&);
+template Matrix<FloatMPBounds> operator*(PivotMatrix, Matrix<FloatMPBounds>);
 
-template Matrix<FloatMPValue> cast_exact(const Matrix<FloatMPApproximation>&);
+template class Matrix<FloatMPValue>;
+template Matrix<ExactType<FloatMPApproximation>> cast_exact(const Matrix<FloatMPApproximation>&);
+
 
 template class Matrix<Real>;
 

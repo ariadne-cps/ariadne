@@ -228,16 +228,19 @@ lu_inverse(const Matrix<X>& M)
     Array<SizeType> p(m);
     for(SizeType k=0; k!=m; ++k) { p[k]=k; }
 
-
     for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
-        SizeType iamax=k;
-        X amax(M.zero_element());
+        SizeType iamax=m;
+        auto amax=mig(M.zero_element());
         for(SizeType i=k; i!=m; ++i) {
-            if(decide(abs(A[i][k])>amax)) {
+            if(decide(mig(A[i][k])>amax)) {
                 iamax=i;
-                amax=abs(A[i][k]);
+                amax=mig(A[i][k]);
             }
+        }
+
+        if(iamax==m) {
+            ARIADNE_THROW(SingularMatrixException,"lu_inverse(Matrix<"<<class_name<X>()<<"> M)","M="<<M);
         }
 
         // Set pivot row
@@ -472,7 +475,7 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
     // PivotMatrix rows of B
     for(SizeType k=0; k!=n; ++k) {
-        SizeType i=P[k];
+        SizeType i=P.pivot(k);
         for(SizeType j=0; j!=m; ++j) {
             X tmp=R[i][j];
             R[i][k]=R[k][j];
@@ -507,6 +510,18 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
 }
 
+
+template<class X> Matrix<X> operator*(PivotMatrix P, Matrix<X> A) {
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        SizeType const& k=P.pivot(i);
+        if (k!=i) {
+            for (SizeType j=0; j!=A.column_size(); ++j) {
+                std::swap(A[i][j],A[k][j]);
+            }
+        }
+    }
+    return A;
+}
 
 // Compute the vector of row norms (sums of absolute values) of A
 template<class X>
@@ -573,8 +588,7 @@ triangular_decomposition(const Matrix<X>& A)
 
     // Array of row pivots. The value P[i] gives the row
     // swapped with the ith row in the ith stage.
-    PivotMatrix P(m);
-    for(SizeType k=0; k!=m; ++k) { P[k]=k; }
+    PivotMatrix P=PivotMatrix::identity(m);
 
     for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
@@ -589,7 +603,7 @@ triangular_decomposition(const Matrix<X>& A)
 
         // Set pivot row
         SizeType l=iamax;
-        P[k]=l;
+        P.pivot(k)=l;
 
         // Swap rows of L and U
         for(SizeType j=0; j!=k; ++j) {
@@ -636,7 +650,7 @@ triangular_factor(const Matrix<X>& A)
     const SizeType n=A.column_size();
 
     Matrix<X> R=A;
-    PivotMatrix P(n); for(SizeType i=0; i!=n; ++i) { P[i]=i; }
+    PivotMatrix P=PivotMatrix::identity(n);
 
     // Array of column norm squares
     Array<X> cns(n);
@@ -672,7 +686,7 @@ triangular_factor(const Matrix<X>& A)
             }
 
             // Set pivot element to pivot column
-            P[k]=l;
+            P.pivot(k)=l;
         }
 
         // Compute |a| where a is the working column
@@ -755,7 +769,7 @@ triangular_multiplier(const Matrix<X>& A)
     }
 
     for(SizeType k=m-1; k!=SizeType(-1); --k) {
-        SizeType p=P[k];
+        SizeType p=P.pivot(k);
         for(SizeType i=0; i!=m; ++i) {
             X tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
         }
@@ -790,6 +804,8 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 template<class X> Tuple< Matrix<X>, Matrix<X>, PivotMatrix >
 orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 {
+    std::cerr<<"orthogonal_decomposition(Matrix<X>,Bool)\n";
+
     X zero=A.zero_element();
     X one=zero+1;
 
@@ -834,7 +850,7 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
             }
 
             // Set pivot column in result
-            P[k]=l;
+            P.pivot(k)=l;
         }
 
         // Compute |a| where a is the working column
@@ -902,6 +918,55 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
     return std::make_tuple(Q,R,P);
 }
 
+namespace {
+// TODO: Move these operations to VectorExpression
+template<class X> inline decltype(auto) operator*(X const& s, MatrixColumn<Matrix<X>> v) {
+    return s*Vector<X>(v); }
+template<class X> inline decltype(auto) operator*(MatrixColumn<Matrix<X>> v, X const& s) {
+    return Vector<X>(v)*s; }
+template<class X> inline decltype(auto) operator/(MatrixColumn<Matrix<X>> v, X const& s) {
+    return Vector<X>(v)/s; }
+template<class X> inline MatrixColumn<Matrix<X>> operator+=(MatrixColumn<Matrix<X>> c, Vector<X> const& v) {
+    for(SizeType i=0; i!=c.size(); ++i) { c[i]+=v[i]; } return c; }
+template<class X> inline MatrixColumn<Matrix<X>> operator-=(MatrixColumn<Matrix<X>> c, Vector<X> const& v) {
+    for(SizeType i=0; i!=c.size(); ++i) { c[i]-=v[i]; } return c; }
+template<class X> inline MatrixColumn<Matrix<X>> operator*=(MatrixColumn<Matrix<X>> c, X const& s) {
+    for(SizeType i=0; i!=c.size(); ++i) { c[i]*=s; } return c; }
+template<class X> inline MatrixColumn<Matrix<X>> operator/=(MatrixColumn<Matrix<X>> c, X const& s) {
+    for(SizeType i=0; i!=c.size(); ++i) { c[i]/=s; } return c; }
+template<class X> inline decltype(auto) dot(MatrixColumn<Matrix<X>> v1, MatrixColumn<Matrix<X>> v2) {
+    return dot(Vector<X>(v1),Vector<X>(v2)); }
+template<class X> inline decltype(auto) two_norm(MatrixColumn<Matrix<X>> v) {
+    return two_norm(Vector<X>(v)); }
+template<class X> MatrixColumn<Matrix<X>> column(Matrix<X>& A, SizeType j) {
+    return MatrixColumn<Matrix<X>>(A,j); }
+} // namespace
+
+template<class X>
+Tuple< Matrix<X>, Matrix<X> >
+gram_schmidt_orthogonalisation(const Matrix<X>& A)
+{
+    std::cerr<<"orthogonal_decomposition(Matrix<X>)\n";
+    SizeType m=A.row_size();
+    SizeType n=A.column_size();
+    X z=A.zero_element();
+    Matrix<X> O(m,m,z);
+    Matrix<X> R(m,n,z);
+    Matrix<X> T(A);
+
+    for(SizeType i=0; i!=m; ++i) {
+        for (SizeType j=0; j!=i; ++j) {
+            R[j][i]=dot(column(O,j),column(T,i));
+            column(T,i)-=R[j][i]*column(O,j);
+        }
+        R[i][i]=two_norm(column(T,i));
+        column(T,i)/=R[i][i];
+
+        column(O,i)=column(T,i);
+    }
+    return std::make_tuple(O,R);
+}
+
 template<class X>
 Tuple< Matrix<X>, Matrix<X> >
 orthogonal_decomposition(const Matrix<X>& A)
@@ -909,8 +974,9 @@ orthogonal_decomposition(const Matrix<X>& A)
     SizeType m=A.row_size();
     SizeType n=A.column_size();
     X z=A.zero_element();
-    Matrix<X> O(m,m,z);
-    Matrix<X> R(A);
+
+    Matrix<X> O=A;
+    Matrix<X> R=Matrix<X>::identity(n,z);
 
     Array<X> p(n,z);
 
@@ -921,56 +987,67 @@ orthogonal_decomposition(const Matrix<X>& A)
         X max_column_norm=z;
         for(SizeType j=c; j!=n; ++j) {
             X column_norm=z;
-            for(SizeType i=c; i!=m; ++i) {
-                column_norm+=abs(R[i][j]);
+            for(SizeType i=0; i!=m; ++i) {
+                column_norm+=abs(O[i][j]);
             }
             if(decide(column_norm>max_column_norm)) {
                 pivot_column=j;
                 max_column_norm=column_norm;
             }
         }
-        SizeType j=pivot_column;
+        SizeType pc=pivot_column;
+        pc=c;
 
-        // Swap first column and pivot column
+        // Swap first column and pivot column of O, and similarly with R
         // FIXME: We do not keep track of column pivoting here.
-        for(SizeType i=c; i!=m; ++i) {
-            std::swap(R[i][j],R[i][c]);
+        for(SizeType i=0; i!=m; ++i) {
+            std::swap(O[i][pc],O[i][c]);
+        }
+        for(SizeType j=0; j!=n; ++j) {
+            std::swap(R[pc][j],R[c][j]);
         }
 
         // Compute inner product of pivot column with remaining columns
         X pivot_norm_square=z;
-        for(SizeType i=c; i!=m; ++i) {
-            pivot_norm_square += R[i][c]*R[i][c];
+        for(SizeType i=0; i!=m; ++i) {
+            pivot_norm_square += sqr(O[i][c]);
         }
 
         X inner_product_sum=z;
         for(SizeType k=c; k!=n; ++k) {
             X inner_product=z;
-            for(SizeType i=c; i!=m; ++i) {
-                inner_product += R[i][c]*R[i][k];
+            for(SizeType i=0; i!=m; ++i) {
+                inner_product += O[i][c]*O[i][k];
             }
-            p[k]=inner_product / pivot_norm_square;
-            inner_product_sum += inner_product;
+            p[k]=inner_product;
+            inner_product_sum += abs(inner_product);
         }
 
-        X scale_factor = inner_product_sum / pivot_norm_square;
-        for(SizeType i=c; i!=m; ++i) {
-            O[i][c]=scale_factor * R[i][c];
+        for(SizeType i=c; i!=n; ++i) {
+            R[c][i] = p[i]/inner_product_sum;
         }
 
         for(SizeType k=c+1; k!=n; ++k) {
-            for(SizeType i=c; i!=m; ++i) {
-                R[i][k] -= R[c][k] * p[k];
+            for(SizeType i=0; i!=m; ++i) {
+                O[i][k] -= O[i][c] * (R[c][k]/R[c][c]);
             }
         }
-        for(SizeType i=c; i!=m; ++i) {
-            R[i][c] /= pivot_norm_square;
+        for(SizeType i=0; i!=m; ++i) {
+            O[i][c] /= R[c][c];
         }
 
     }
 
-    return make_tuple(O,R);
+    if (m<n) {
+        Matrix<X> rO=O[range(0,m)][range(0,m)];
+        O=std::move(rO);
+        Matrix<X> rR=R[range(0,m)][range(0,n)];
+        R=std::move(rR);
+    }
+
+    return std::make_tuple(O,R);
 }
+
 
 
 template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {

@@ -295,6 +295,14 @@ Rational abs(Rational const& q) {
     Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
 }
 
+Rational mag(Rational const& q) {
+    Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
+}
+
+Rational mig(Rational const& q) {
+    Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
+}
+
 Rational nul(Rational const& q) {
     return Rational(0);
 }

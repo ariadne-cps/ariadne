@@ -187,10 +187,14 @@ validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
     Vector<VX> e = b-A*x;
 
-    Matrix<VX> S=A*transpose(A);
-    Vector<VX> d =  transpose(A) * solve(S,e);
+    Matrix<VX> S = A*transpose(A);
 
-    x += d;
+    try {
+        Vector<VX> d = transpose(A) * solve(S,e);
+        x += d;
+    } catch (SingularMatrixException const& err) {
+        return indeterminate;
+    }
 
     ARIADNE_LOG_PRINTLN("[x] = "<<x);
     ValidatedKleenean result=true;
@@ -426,7 +430,11 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
     // dx = D (AT dy - ryz)
     // (A D AT) dy = rx + A D ryz
 
-    dy = solve(S, Vector<AX>( rx + A * (D * ryz) ) );
+    try {
+        dy = solve(S, Vector<AX>( rx + A * (D * ryz) ) );
+    } catch(SingularMatrixException const& err) {
+        return LinearProgramStatus::DEGENERATE_FEASIBILITY;
+    }
 
 //    std::cerr<<"dy="<<dy<<", is_nan(dy)="<<is_nan(dy)<<"\n";
     if(is_nan(dy)) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }

@@ -108,6 +108,9 @@ class Rational
     friend Integer round(Rational const&);
     friend Integer ceil(Rational const&);
 
+    friend Rational mag(Rational const& q);
+    friend Rational mig(Rational const& q);
+
     friend Bool is_nan(Rational const& q);
     friend Bool is_inf(Rational const& q);
     friend Bool is_finite(Rational const& q);

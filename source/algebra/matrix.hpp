@@ -59,7 +59,10 @@ class PivotMatrix;
 template<class X> struct PLUMatrix;
 template<class X> struct QRMatrix;
 
-class SingularMatrixException { };
+class SingularMatrixException : public std::runtime_error {
+  public:
+    using std::runtime_error::runtime_error;
+};
 
 template<class X> using UniformMatrixNormType = decltype(abs(declval<X>())+abs(declval<X>()));
 
@@ -256,9 +259,10 @@ class PivotMatrix {
   public:
     PivotMatrix(SizeType n=0u) : _ary(n) {
         for(SizeType i=0; i!=n; ++i) { _ary[i]=i; } }
+    static PivotMatrix identity(SizeType n) { return PivotMatrix(n); }
     SizeType size() const { return _ary.size(); }
-    SizeType const& operator[](SizeType i) const { return _ary[i]; }
-    SizeType& operator[](SizeType i) { return _ary[i]; }
+    SizeType const& pivot(SizeType i) const { return _ary[i]; }
+    SizeType& pivot(SizeType i) { return _ary[i]; }
     template<class X> operator Matrix<X> () const;
 };
 OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv);
@@ -329,6 +333,11 @@ template<class M> struct MatrixColumn
     auto operator[](SizeType i) -> decltype(_A.at(i,_j)) { return _A.at(i,_j); }
     operator Vector<ScalarType> () const {
         Vector<ScalarType> r(size(),zero_element()); for(SizeType i=0; i!=size(); ++i) { r[i]=_A.at(i,_j); } return r; }
+    template<class VE> MatrixColumn<M> operator=(VectorExpression<VE> const& ve) {
+        for(SizeType i=0; i!=size(); ++i) { (*this)[i]=ve()[i]; } return *this; }
+    MatrixColumn(MatrixColumn<M> const&) = default;
+    MatrixColumn<M> operator=(MatrixColumn<M> const& mc) {
+        return *this = static_cast<VectorExpression<MatrixColumn<M>>const&>(mc); }
 };
 template<class M> struct IsVectorExpression<MatrixColumn<M>> : True { };
 
@@ -965,6 +974,9 @@ template<class X> Void gs_step(Matrix<X> const& A, Vector<X> const& b, Vector<X>
 // Compute an LU decomposition
 template<class X> Tuple< PivotMatrix, Matrix<X>, Matrix<X> > triangular_decomposition(const Matrix<X>& A);
 // Compute an QR decomposition
+template<class X> Tuple< Matrix<X>, Matrix<X> > gram_schmidt_orthogonalisation(const Matrix<X>& A);
+//! \brief Compute matrices O and R such that A=OR, O has orthogonal columns, R is such that the absolute values of the elements in each row sums to a value at most 1.
+//! If A is m×n with m≤n, then O is m×m and R is m×n, while if m≥n, then O is m×n and R is n×n
 template<class X> Tuple< Matrix<X>, Matrix<X> > orthogonal_decomposition(const Matrix<X>& A);
 
 template<class X> using RowNormType = decltype(abs(declval<X>())+abs(declval<X>()));

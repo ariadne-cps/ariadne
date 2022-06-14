@@ -51,6 +51,7 @@ class TestMatrix {
   private:
     Void test_concept();
     Void test_project();
+    Void test_factorisations();
     Void test_misc();
 };
 
@@ -121,6 +122,53 @@ TestMatrix::test_project()
 
 
 Void
+TestMatrix::test_factorisations()
+{
+    // Set all diagonal elements to 0.
+    auto set_diagonal_to_zero = [](FloatApproximationMatrix A){ for (SizeType i=0; i!=min(A.row_size(),A.column_size()); ++i) { A[i][i]=0; } return A; };
+
+    {
+        // LU test_factorisation
+        auto A = FloatApproximationMatrix({{1.0_x,2.0_x,3.0_x},{4.0_x,5.0_x,6.0_x},{7.0_x,8.0_x,10.0_x}},pr);
+        auto PLU = triangular_decomposition(A); auto P=std::get<0>(PLU); auto L=std::get<1>(PLU); auto U=std::get<2>(PLU);
+        ARIADNE_TEST_COMPARE(norm(L*U-P*A),<,1e-12);
+    }
+
+    {
+        // QR decomposition
+        auto I = FloatApproximationMatrix::identity(3,dp);
+        auto A = FloatApproximationMatrix({{1.0_x,2.0_x,3.0_x},{4.0_x,5.0_x,6.0_x},{7.0_x,8.0_x,10.0_x}},pr);
+        auto QR = gram_schmidt_orthogonalisation(A); auto Q=std::get<0>(QR); auto R=std::get<1>(QR);
+        ARIADNE_TEST_COMPARE(norm(Q*R-A),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(transpose(Q)*Q-I),<,1e-12);
+    }
+
+    {
+        // Orthogonal decomposition
+        auto A1 = FloatApproximationMatrix({{1,7,4},{4,-2,5},{-5,-5,-3}},pr);
+        auto OR1 = orthogonal_decomposition(A1); auto O1=std::get<0>(OR1); auto R1=std::get<1>(OR1);
+        ARIADNE_TEST_COMPARE(norm(O1*R1-A1),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(set_diagonal_to_zero(transpose(O1)*O1)),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(R1),<=,1.0+1e-12);
+
+        auto A2 = FloatApproximationMatrix({{9,-5,6},{-7,-1,-1},{8,-5,5},{-5,5,2}},pr);
+        auto OR2 = orthogonal_decomposition(A2); auto O2=std::get<0>(OR2); auto R2=std::get<1>(OR2);
+        ARIADNE_TEST_EQUALS(A2.column_size(),O2.column_size());
+        ARIADNE_TEST_COMPARE(norm(O2*R2-A2),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(set_diagonal_to_zero(transpose(O2)*O2)),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(R2),<=,1.0+1e-12);
+
+        auto A3 = FloatApproximationMatrix({{-2,-7,1,5},{-6,-5,-7,7},{3,2,0,8}},dp);
+        auto OR3 = orthogonal_decomposition(A3); auto O3=std::get<0>(OR3); auto R3=std::get<1>(OR3);
+        ARIADNE_TEST_EQUALS(A3.row_size(),O3.column_size());
+        ARIADNE_TEST_COMPARE(norm(O3*R3-A3),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(set_diagonal_to_zero(transpose(O3)*O3)),<,1e-12);
+        ARIADNE_TEST_COMPARE(norm(R3),<=,1.0+1e-12);
+    }
+
+}
+
+Void
 TestMatrix::test_misc()
 {
     Array<FloatDPApproximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
@@ -169,7 +217,9 @@ TestMatrix::test_misc()
     ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr))*FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr),FloatApproximationMatrix({{1.0_x,3.0_x},{2.0_x,4.0_x}},pr)*FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr));
     ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)*transpose(FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr)),FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)*FloatApproximationMatrix({{5.0_x,8.0_x},{7.0_x,6.0_x}},pr));
     ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.0_x,2.0_x,3.0_x},{4.0_x,5.0_x,6.0_x}},pr))*FloatDPApproximationVector({5.0_x,7.0_x},pr),FloatApproximationMatrix({{1.0_x,4.0_x},{2.0_x,5.0_x},{3.0_x,6.0_x}},pr)*FloatDPApproximationVector({5.0_x,7.0_x},pr));
+
 }
+
 
 Int main() {
     TestMatrix().test();

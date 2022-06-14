@@ -41,6 +41,16 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<> struct PythonTemplateName<Vector> { static std::string get() { return "Vector"; } };
+template<> struct PythonTemplateName<Covector> { static std::string get() { return "Covector"; } };
+template<> struct PythonTemplateName<Matrix> { static std::string get() { return "Matrix"; } };
+template<> struct PythonTemplateName<DiagonalMatrix> { static std::string get() { return "DiagonalMatrix"; } };
+
+template<class X> struct PythonClassName<Vector<X>> { static std::string get() { return python_template_class_name<X>("Vector"); } };
+template<class X> struct PythonClassName<Covector<X>> { static std::string get() { return python_template_class_name<X>("Covector"); } };
+template<class X> struct PythonClassName<Matrix<X>> { static std::string get() { return python_template_class_name<X>("Matrix"); } };
+template<class X> struct PythonClassName<DiagonalMatrix<X>> { static std::string get() { return python_template_class_name<X>("DiagonalMatrix"); } };
+
 
 // Define transpose operation which evaluates expression template
 template<class X> Matrix<X> transpose(Matrix<X> const& A) { return MatrixTranspose<Matrix<X>>(A); }
@@ -266,10 +276,11 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
 }
 
 
-template<class X> Void export_vector(pybind11::module& module)
+template<class X> pybind11::class_<Vector<X>> export_vector(pybind11::module& module)
 {
-    pybind11::class_<Vector<X>> vector_class(module,(class_name<X>()+"Vector").c_str());
+    pybind11::class_<Vector<X>> vector_class(module,python_class_name<Vector<X>>().c_str());
     define_vector(module, vector_class);
+    return vector_class;
 }
 
 
@@ -335,11 +346,12 @@ Void define_covector_conversions(pybind11::module& module, pybind11::class_<Cove
 }
 
 template<class X>
-Void export_covector(pybind11::module& module)
+pybind11::class_<Covector<X>> export_covector(pybind11::module& module)
 {
-    pybind11::class_<Covector<X>> covector_class(module,python_name<X>("Covector").c_str());
+    pybind11::class_<Covector<X>> covector_class(module,python_class_name<Covector<X>>().c_str());
     define_covector(module,covector_class);
     define_covector_conversions(module,covector_class);
+    return covector_class;
 }
 
 
@@ -510,15 +522,16 @@ template<class X> Void define_matrix(pybind11::module& module, pybind11::class_<
 }
 
 
-template<class X> Void export_matrix(pybind11::module& module)
+template<class X> pybind11::class_<Matrix<X>> export_matrix(pybind11::module& module)
 {
-    pybind11::class_<Matrix<X>> matrix_class(module,python_name<X>("Matrix").c_str());
+    pybind11::class_<Matrix<X>> matrix_class(module,python_class_name<Matrix<X>>().c_str());
     define_matrix(module,matrix_class);
+    return matrix_class;
 }
 
-template<class X> Void export_diagonal_matrix(pybind11::module& module)
+template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pybind11::module& module)
 {
-    pybind11::class_<DiagonalMatrix<X>> diagonal_matrix_class(module,python_name<X>("DiagonalMatrix").c_str());
+    pybind11::class_<DiagonalMatrix<X>> diagonal_matrix_class(module,python_class_name<DiagonalMatrix<X>>().c_str());
     if constexpr (Constructible<X,Nat>) {
         diagonal_matrix_class.def(pybind11::init<SizeType>());
     }
@@ -545,9 +558,12 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
 
         module.def("inverse", &_inverse_<DiagonalMatrix<X>>);
     }
+
+    return diagonal_matrix_class;
 }
 
-Void export_pivot_matrix(pybind11::module& module)
+
+pybind11::class_<PivotMatrix> export_pivot_matrix(pybind11::module& module)
 {
 
 //    pybind11::implicitly_convertible<PivotMatrix, Matrix<FloatDPValue>>();
@@ -555,6 +571,7 @@ Void export_pivot_matrix(pybind11::module& module)
     pybind11::class_<PivotMatrix> pivot_matrix_class(module,"PivotMatrix");
     pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
     pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
+    return pivot_matrix_class;
 }
 
 
@@ -569,10 +586,14 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_vector<FloatMPBall>(module);
     export_vector<FloatMPValue>(module);
 
+    export_vector<FloatMPDPBall>(module);
+
     export_covector<FloatDPApproximation>(module);
     export_covector<FloatDPBounds>(module);
+    export_covector<FloatDPValue>(module);
     export_covector<FloatMPApproximation>(module);
     export_covector<FloatMPBounds>(module);
+    export_covector<FloatMPValue>(module);
 
     export_matrix<FloatDPApproximation>(module);
     export_matrix<FloatDPBounds>(module);
@@ -589,7 +610,7 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_diagonal_matrix<FloatDPValue>(module);
     export_diagonal_matrix<FloatMPApproximation>(module);
     export_diagonal_matrix<FloatMPBounds>(module);
-//    export_diagonal_matrix<FloatMPValue>(module);
+    export_diagonal_matrix<FloatMPValue>(module);
 
     export_vector<Real>(module);
     export_covector<Real>(module);
@@ -604,7 +625,52 @@ Void linear_algebra_submodule(pybind11::module& module) {
 //    export_matrix<Decimal>(module);
 
     export_vector<Dyadic>(module);
-//    export_covector<Dyadic>(module);
+    export_covector<Dyadic>(module);
 //    export_matrix<Dyadic>(module);
+
+
+    template_<Vector> vector_template(module,python_template_name<Vector>().c_str());
+    vector_template.instantiate<FloatDPApproximation>();
+    vector_template.instantiate<FloatMPApproximation>();
+    vector_template.instantiate<FloatDPBounds>();
+    vector_template.instantiate<FloatMPBounds>();
+    vector_template.instantiate<FloatDPBall>();
+    vector_template.instantiate<FloatMPBall>();
+    vector_template.instantiate<FloatMPDPBall>();
+    vector_template.instantiate<FloatDPValue>();
+    vector_template.instantiate<FloatMPValue>();
+    vector_template.instantiate<Dyadic>();
+    vector_template.instantiate<Decimal>();
+    vector_template.instantiate<Rational>();
+    vector_template.instantiate<Real>();
+
+    template_<Covector> covector_template(module,python_template_name<Covector>().c_str());
+    covector_template.instantiate<FloatDPApproximation>();
+    covector_template.instantiate<FloatMPApproximation>();
+    covector_template.instantiate<FloatDPBounds>();
+    covector_template.instantiate<FloatMPBounds>();
+    covector_template.instantiate<FloatDPValue>();
+    covector_template.instantiate<FloatMPValue>();
+    covector_template.instantiate<Dyadic>();
+    covector_template.instantiate<Rational>();
+    covector_template.instantiate<Real>();
+
+    template_<Matrix> matrix_template(module,python_template_name<Matrix>().c_str());
+    matrix_template.instantiate<FloatDPApproximation>();
+    matrix_template.instantiate<FloatMPApproximation>();
+    matrix_template.instantiate<FloatDPBounds>();
+    matrix_template.instantiate<FloatMPBounds>();
+    matrix_template.instantiate<FloatDPValue>();
+    matrix_template.instantiate<FloatMPValue>();
+    matrix_template.instantiate<Rational>();
+    matrix_template.instantiate<Real>();
+
+    template_<DiagonalMatrix> diagonal_matrix_template(module,python_template_name<DiagonalMatrix>().c_str());
+    diagonal_matrix_template.instantiate<FloatDPApproximation>();
+    diagonal_matrix_template.instantiate<FloatMPApproximation>();
+    diagonal_matrix_template.instantiate<FloatDPBounds>();
+    diagonal_matrix_template.instantiate<FloatMPBounds>();
+    diagonal_matrix_template.instantiate<FloatDPValue>();
+    diagonal_matrix_template.instantiate<FloatMPValue>();
 
 }

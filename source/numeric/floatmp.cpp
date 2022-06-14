@@ -864,6 +864,7 @@ FloatDP::Float(FloatMP const& d, RoundingModeType rnd, PrecisionType pr) : Float
 
 }
 
+template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
 template<> String class_name<FloatMP>() { return "FloatMP"; }
 
 template<class PR> PR make_default_precision();

@@ -95,21 +95,22 @@ def numeric_tutorial():
 
     print("Computing iterates using double-precision bounds")
     x0=FloatDPBounds(q_(1/2),double_precision)
+    x0=Bounds[FloatDP](q_(1/2),double_precision)
     xs=compute_iterates(f,x0,16)
     print_iterates(xs)
 
     print("Computing iterates using multiple-precision bounds")
-    x0=FloatMPBounds(q_(1/2),precision(bits=192))
+    x0=Bounds[FloatMP](q_(1/2),precision(bits=192))
     xs=compute_iterates(f,x0,16)
     print_iterates(xs)
 
     print("Computing iterates using multiple-precision ball with double-precision error")
-    x0=FloatMPDPBall(q_(1/2),precision(bits=192))
+    x0=Ball[FloatMP,FloatDP](q_(1/2),precision(bits=192))
     xs=compute_iterates(f,x0,16)
     print_iterates(xs)
 
     print("Computing iterates using double-precision approximate arithmetic")
-    x0=FloatDPApproximation(0.5,double_precision)
+    x0=Approximation[FloatDP](0.5,double_precision)
     xs=compute_iterates(f,x0,16)
     print_iterates(xs)
 

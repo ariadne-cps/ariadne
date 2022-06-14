@@ -32,6 +32,32 @@
 
 namespace Ariadne {
 
+template<class T> std::string numeric_class_tag();
+template<> inline std::string numeric_class_tag<DoublePrecision>() { return "DP"; }
+template<> inline std::string numeric_class_tag<MultiplePrecision>() { return "MP"; }
+
+
+template<> struct PythonTemplateName<Float> { };
+template<> struct PythonTemplateName<Approximation> { static std::string get() { return "Approximation"; } };
+template<> struct PythonTemplateName<LowerBound> { static std::string get() { return "LowerBound"; } };
+template<> struct PythonTemplateName<UpperBound> { static std::string get() { return "UpperBound"; } };
+template<> struct PythonTemplateName<Bounds> { static std::string get() { return "Bounds"; } };
+template<> struct PythonTemplateName<Ball> { static std::string get() { return "Ball"; } };
+template<> struct PythonTemplateName<Value> { static std::string get() { return "Value"; } };
+template<> struct PythonTemplateName<Error> { static std::string get() { return "Error"; } };
+
+template<class T> struct PythonClassName { static std::string get() { return class_name<T>(); } };
+
+template<> struct PythonClassName<FloatDP> { static std::string get() { return "FloatDP"; } };
+template<> struct PythonClassName<FloatMP> { static std::string get() { return "FloatMP"; } };
+
+template<template<class>class T, class X> struct PythonClassName<T<X>> {
+    static std::string get() { return python_class_name<X>()+python_template_name<T>(); }
+};
+
+template<class F,class FE> struct PythonClassName<Ball<F,FE>> { static std::string get() { typedef typename FE::PrecisionType PRE; return python_class_name<F>()+numeric_class_tag<PRE>()+"Ball"; } };
+template<class F> struct PythonClassName<Ball<F>> { static std::string get() { return python_class_name<F>()+"Ball"; } };
+
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
@@ -62,8 +88,8 @@ template<class FE> OutputStream& operator<<(OutputStream& os, const PythonLitera
 
 template<class X> X from_python_object_or_literal(pybind11::handle h) {
     if constexpr (Constructible<X,std::string>) {
-        try { return X(pybind11::cast<std::string>(h)); } 
-        catch(...) { } 
+        try { return X(pybind11::cast<std::string>(h)); }
+        catch(...) { }
     }
     return pybind11::cast<X>(h);
 }

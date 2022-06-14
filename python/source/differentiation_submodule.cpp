@@ -26,6 +26,7 @@
 #include <pybind11/stl.h>
 
 #include "utilities.hpp"
+#include "numeric_submodule.hpp"
 
 #include "utility/typedefs.hpp"
 #include "utility/array.hpp"
@@ -42,17 +43,21 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class X> struct PythonClassName<Vector<X>> { static std::string get() { return python_template_class_name<X>("Vector"); } };
+template<class X> struct PythonClassName<Differential<X>> { static std::string get() { return python_template_class_name<X>("Differential"); } };
+template<class X> struct PythonClassName<UnivariateDifferential<X>> { static std::string get() { return python_template_class_name<X>("UnivariateDifferential"); } };
+
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Expansion<MultiIndex,X>>& repr);
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Differential<X> >& repr) {
     const Differential<X>& diff=repr.reference();
-    os << python_name<X>("Differential").c_str() << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
+    os << python_class_name<Differential<X>>().c_str() << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
     return os;
 }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< UnivariateDifferential<X> >& repr) {
     const UnivariateDifferential<X>& diff=repr.reference();
-    os << python_name<X>("UnivariateDifferential").c_str() << "(" << diff.array() << "," << diff.degree() << ")";
+    os << python_class_name<UnivariateDifferential<X>>().c_str() << "(" << diff.array() << "," << diff.degree() << ")";
     return os;
 }
 
@@ -64,7 +69,7 @@ template<class D> using GradientType = decltype(declval<D>().gradient());
 template<class D> using HessianType = decltype(declval<D>().hessian());
 
 template<class DIFF>
-Void export_differential(pybind11::module& module, const String& name)
+pybind11::class_<DIFF> export_differential(pybind11::module& module, const String& name=python_class_name<DIFF>())
 {
     typedef typename DIFF::ValueType X;
     typedef DIFF D;
@@ -113,11 +118,12 @@ Void export_differential(pybind11::module& module, const String& name)
     module.def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
     module.def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
+    return differential_class;
 }
 
 template<class DIFF>
-Void
-export_differential_vector(pybind11::module& module, const String& name)
+pybind11::class_<Vector<DIFF>>
+export_differential_vector(pybind11::module& module, const String& name=python_class_name<Vector<DIFF>>())
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
@@ -156,10 +162,12 @@ export_differential_vector(pybind11::module& module, const String& name)
 
     //NOTE: Not in C++ interface
     //module.def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
+
+    return differential_vector_class;
 }
 
 template<class DIFF>
-Void export_univariate_differential(pybind11::module& module, const String& name)
+pybind11::class_<DIFF> export_univariate_differential(pybind11::module& module, const String& name=python_class_name<DIFF>())
 {
     typedef typename DIFF::ValueType X;
     typedef DIFF D;
@@ -205,25 +213,37 @@ Void export_univariate_differential(pybind11::module& module, const String& name
     module.def("derivative", &_derivative_<D>);
     module.def("antiderivative", &_antiderivative_<D>);
 
+    return univariate_differential_class;
 }
+
 
 Void differentiation_submodule(pybind11::module& module)
 {
+    export_differential< Differential<FloatDPApproximation> >(module);
+    export_differential< Differential<FloatDPBounds> >(module);
+    export_differential_vector< Differential<FloatDPApproximation> >(module);
+    export_differential_vector< Differential<FloatDPBounds> >(module);
 
-    export_differential< Differential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("Differential"));
-    export_differential< Differential<FloatDPBounds> >(module,python_name<FloatDPBounds>("Differential"));
-    export_differential_vector< Differential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("DifferentialVector"));
-    export_differential_vector< Differential<FloatDPBounds> >(module,python_name<FloatDPBounds>("DifferentialVector"));
+    export_differential< Differential<FloatMPApproximation> >(module);
+    export_differential< Differential<FloatMPBounds> >(module);
+    export_differential_vector< Differential<FloatMPApproximation> >(module);
+    export_differential_vector< Differential<FloatMPBounds> >(module);
 
-    export_differential< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("Differential"));
-    export_differential< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("Differential"));
-    export_differential_vector< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("DifferentialVector"));
-    export_differential_vector< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("DifferentialVector"));
+    export_univariate_differential< UnivariateDifferential<FloatDPApproximation> >(module);
+    export_univariate_differential< UnivariateDifferential<FloatDPBounds> >(module);
+    export_univariate_differential< UnivariateDifferential<FloatMPApproximation> >(module);
+    export_univariate_differential< UnivariateDifferential<FloatMPBounds> >(module);
 
-    export_univariate_differential< UnivariateDifferential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("UnivariateDifferential"));
-    export_univariate_differential< UnivariateDifferential<FloatDPBounds> >(module,python_name<FloatDPBounds>("UnivariateDifferential"));
-    export_univariate_differential< UnivariateDifferential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("UnivariateDifferential"));
-    export_univariate_differential< UnivariateDifferential<FloatMPBounds> >(module,python_name<FloatMPBounds>("UnivariateDifferential"));
+    template_<Differential> differential_template(module,"Differential");
+    differential_template.instantiate<FloatDPApproximation>();
+    differential_template.instantiate<FloatMPApproximation>();
+    differential_template.instantiate<FloatDPBounds>();
+    differential_template.instantiate<FloatMPBounds>();
 
+    template_<Vector> vector_template(module,"Vector");
+    vector_template.instantiate<FloatDPApproximationDifferential>();
+    vector_template.instantiate<FloatMPApproximationDifferential>();
+    vector_template.instantiate<FloatDPBoundsDifferential>();
+    vector_template.instantiate<FloatMPBoundsDifferential>();
 }
 

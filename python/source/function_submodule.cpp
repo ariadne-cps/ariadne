@@ -25,6 +25,7 @@
 #include "pybind11.hpp"
 
 #include "utilities.hpp"
+#include "numeric_submodule.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -56,8 +57,15 @@
 
 namespace Ariadne {
 
+template<> struct PythonTemplateName<MultivariatePolynomial> { static std::string get() { return "MultivariatePolynomial"; } };
+template<> struct PythonTemplateName<Procedure> { static std::string get() { return "Procedure"; } };
 
+template<class X> struct PythonClassName<MultivariatePolynomial<X>> { static std::string get() { return python_template_class_name<X>("MultivariatePolynomial"); } };
 
+template struct PythonClassName<MultivariatePolynomial<FloatDPApproximation>>;
+template struct PythonClassName<MultivariatePolynomial<FloatMPApproximation>>;
+template struct PythonClassName<MultivariatePolynomial<FloatDPBounds>>;
+template struct PythonClassName<MultivariatePolynomial<FloatMPBounds>>;
 
 MultiIndex multi_index_from_python(pybind11::tuple pytup) {
     MultiIndex res(static_cast<SizeType>(len(pytup)));
@@ -193,16 +201,16 @@ Void export_multi_index(pybind11::module& module)
 
 
 template<class X>
-Void export_polynomial(pybind11::module& module)
+pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module& module)
 {
-    pybind11::class_< MultivariateMonomial<X> > monomial_class(module,python_name<X>("MultivariateMonomial").c_str());
+    pybind11::class_< MultivariateMonomial<X> > monomial_class(module,python_template_class_name<X>("MultivariateMonomial").c_str());
     monomial_class.def(pybind11::init<MultiIndex,X>());
     monomial_class.def("index", (MultiIndex const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::index);
     monomial_class.def("coefficient", (X const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::coefficient);
     monomial_class.def("__str__", &__cstr__<MultivariateMonomial<X>>);
 
 
-    pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_name<X>("MultivariatePolynomial").c_str());
+    pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_template_class_name<X>("MultivariatePolynomial").c_str());
     polynomial_class.def(pybind11::init< MultivariatePolynomial<X> >());
     polynomial_class.def_static("constant", (MultivariatePolynomial<X>(*)(SizeType,X const&)) &MultivariatePolynomial<X>::constant);
 
@@ -225,13 +233,23 @@ Void export_polynomial(pybind11::module& module)
     define_algebra(module,polynomial_class);
     polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
 
-    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("MultivariatePolynomialVector")).c_str());
+    export_vector<MultivariatePolynomial<X>>(module, (python_template_class_name<X>("MultivariatePolynomialVector")).c_str());
+
+    return polynomial_class;
 }
 
 Void export_polynomials(pybind11::module& module)
 {
     export_polynomial<FloatDPBounds>(module);
     export_polynomial<FloatDPApproximation>(module);
+    export_polynomial<FloatMPBounds>(module);
+    export_polynomial<FloatMPApproximation>(module);
+
+    template_<MultivariatePolynomial> multivariate_polynomial_template(module);
+    multivariate_polynomial_template.instantiate<FloatDPBounds>();
+    multivariate_polynomial_template.instantiate<FloatDPApproximation>();
+    multivariate_polynomial_template.instantiate<FloatMPBounds>();
+    multivariate_polynomial_template.instantiate<FloatMPApproximation>();
 }
 
 Void export_domains(pybind11::module& module)
@@ -427,14 +445,31 @@ template<class P> Void export_vector_function(pybind11::module& module)
     module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
 }
 
-template<class Y, class X> Void export_procedure(pybind11::module& module) {
+template<class Y, class X> Void define_procedure_evaluation(pybind11::module& module) {
+    module.def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
+    module.def("gradient", (Covector<X>(*)(Procedure<Y> const&, Vector<X> const&)) &gradient);
+    module.def("hessian", (X(*)(Procedure<Y> const&, Vector<X> const&, Vector<X> const&)) &hessian);
+}
+
+template<class Y> pybind11::class_<Procedure<Y>> export_procedure(pybind11::module& module) {
     typedef Paradigm<Y> P;
     pybind11::class_<Procedure<Y>> procedure_class(module,(class_name<P>()+"Procedure").c_str());
     procedure_class.def("__str__", &__cstr__<Procedure<Y>>);
     module.def("make_procedure", (Procedure<Y>(*)(ScalarMultivariateFunction<P> const&)) &make_procedure);
-    module.def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
-    module.def("gradient", (Covector<X>(*)(Procedure<Y> const&, Vector<X> const&)) &gradient);
-    module.def("hessian", (X(*)(Procedure<Y> const&, Vector<X> const&, Vector<X> const&)) &hessian);
+    if constexpr (Same<Y,ApproximateNumber>) {
+        define_procedure_evaluation<Y,FloatDPApproximation>(module);
+        //define_procedure_evaluation<Y,FloatMPApproximation>(module);
+    }
+    if constexpr (Same<Y,ValidatedNumber>) {
+        define_procedure_evaluation<Y,FloatDPBounds>(module);
+        //define_procedure_evaluation<Y,FloatMPBounds>(module);
+    }
+    return procedure_class;
+}
+
+Void export_procedures(pybind11::module& module) {
+    export_procedure<ApproximateNumber>(module);
+    export_procedure<ValidatedNumber>(module);
 }
 
 Void export_scalar_functions(pybind11::module& module) {
@@ -472,7 +507,6 @@ Void function_submodule(pybind11::module& module) {
     export_scalar_functions(module);
     export_vector_functions(module);
 
-    export_procedure<ApproximateNumber, FloatDPApproximation>(module);
-    export_procedure<ValidatedNumber, FloatDPBounds>(module);
+    export_procedures(module);
 }
 

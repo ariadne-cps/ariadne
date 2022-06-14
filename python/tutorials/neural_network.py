@@ -36,15 +36,15 @@ def create_neural_network():
     sigma=rec(1+exp(-y))
 
     #! Create activation function using an argument variable
-    y=RealVariable("y")
+    y=Variable[Real]("y")
     sigma=make_function(y,rec(1+exp(-y)))
     print(sigma)
 
-    DecimalVector([dec_(1.2),3])
+    Vector[Decimal]([dec_(1.2),3])
     #! Create the first layer
-    A0=RealMatrix([[dec_(0.884),dec_(-1.097)],[dec_(1.586),dec_(0.380)],[dec_(-0.005),dec_(0.677)]])
-    b0=RealVector([dec_(-0.127),dec_(2.747),dec_(0.378)])
-        # b0=DecimalVector([-0.127,2.747,0.378]) # Proposed future construtor
+    A0=Matrix[Real]([[dec_(0.884),dec_(-1.097)],[dec_(1.586),dec_(0.380)],[dec_(-0.005),dec_(0.677)]])
+    b0=Vector[Real]([dec_(-0.127),dec_(2.747),dec_(0.378)])
+        # b0=Vector[Decimal]([-0.127,2.747,0.378]) # Proposed future construtor
     print(A0,b0)
     x0=EffectiveVectorMultivariateFunction.identity(2)
     f0=EffectiveVectorMultivariateFunction([compose(sigma,A0[0,0]*x0[0]+A0[0,1]*x0[1]+b0[0]),
@@ -75,7 +75,7 @@ def approximate_function(f):
     model_f=ValidatedScalarMultivariateTaylorFunctionModelDP(dom,f,swp)
     print("model_f:",model_f)
 
-    x=FloatDPBoundsVector([dy_(0.4375),dy_(0.6875)],dp)
+    x=Vector[FloatDPBounds]([dy_(0.4375),dy_(0.6875)],dp)
     print("f(x):",f(x))
     print("model_f(x):",model_f(x))
 
@@ -85,7 +85,7 @@ def approximate_function(f):
 def compute_derivatives(f):
 
     #! Define a point x at which to compute the derivatives of f
-    x=FloatDPBoundsVector([dy_(0.4375),dy_(0.6875)],dp)
+    x=Vector[FloatDPBounds]([dy_(0.4375),dy_(0.6875)],dp)
     #! Specify the degree of the highest derivative required
     deg=3
 

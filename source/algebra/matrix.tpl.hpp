@@ -804,8 +804,6 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 template<class X> Tuple< Matrix<X>, Matrix<X>, PivotMatrix >
 orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 {
-    std::cerr<<"orthogonal_decomposition(Matrix<X>,Bool)\n";
-
     X zero=A.zero_element();
     X one=zero+1;
 

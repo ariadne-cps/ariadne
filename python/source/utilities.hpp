@@ -283,6 +283,8 @@ template<class... AS> auto _solve_(AS... as) -> decltype(solve(as...)) { return 
 template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
 template<class... AS> auto _norm_(AS... as) -> decltype(norm(as...)) { return norm(as...); }
+template<class... AS> auto _sup_norm_(AS... as) -> decltype(sup_norm(as...)) { return sup_norm(as...); }
+template<class... AS> auto _two_norm_(AS... as) -> decltype(two_norm(as...)) { return two_norm(as...); }
 template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }
 template<class... AS> auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
 template<class... AS> auto _cojoin_(AS... as) -> decltype(cojoin(as...)) { return cojoin(as...); }

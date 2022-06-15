@@ -231,6 +231,7 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
 
     module.def("norm",&_norm_<Vector<X>>);
+    module.def("sup_norm",&_sup_norm_<Vector<X>>);
     module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 }
 
@@ -240,6 +241,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
     module.def("norm",&_norm_<Vector<X>>);
+    module.def("sup_norm",&_sup_norm_<Vector<X>>);
+    module.def("two_norm",&_two_norm_<Vector<X>>);
     module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 
     vector_class.def("__rmul__",&__rmul__<Vector<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
@@ -263,6 +266,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
     module.def("norm",&_norm_<Vector<X>>);
+    module.def("sup_norm",&_sup_norm_<Vector<X>>);
+    module.def("two_norm",&_two_norm_<Vector<X>>);
     module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 
 //    vector_class.def(pybind11::init<Vector<ApproximateNumber>,PR>());

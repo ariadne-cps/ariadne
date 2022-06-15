@@ -245,7 +245,9 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     module.def("two_norm",&_two_norm_<Vector<X>>);
     module.def("dot",&_dot_<Vector<X>,Vector<X>>);
 
-    vector_class.def("__rmul__",&__rmul__<Vector<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    vector_class.def("__mul__",&__mul__<Vector<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    vector_class.def("__rmul__",&__rmul__<Vector<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    vector_class.def(__py_div__,&__div__<Vector<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
 
     module.def("refinement",(Vector<X>(*)(Vector<X>const&,Vector<X>const&)) &refinement);
     module.def("refines",(bool(*)(Vector<X>const&,Vector<X>const&)) &refines);
@@ -265,6 +267,9 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     using PR=PrecisionType<X>;
     define_vector_constructors(module, vector_class);
     define_vector_concept(module, vector_class);
+    vector_class.def("__mul__",&__mul__<Vector<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
+    vector_class.def("__rmul__",&__rmul__<Vector<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
+    vector_class.def(__py_div__,&__div__<Vector<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
     module.def("norm",&_norm_<Vector<X>>);
     module.def("sup_norm",&_sup_norm_<Vector<X>>);
     module.def("two_norm",&_two_norm_<Vector<X>>);
@@ -314,9 +319,16 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def("__radd__",__radd__<Covector<X>,Covector<X> , Return<Covector<SumType<X,X>>> >, pybind11::is_operator());
     covector_class.def("__sub__",__sub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >, pybind11::is_operator());
     covector_class.def("__rsub__",__rsub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<ProductType<X,X>>> >, pybind11::is_operator());
     covector_class.def("__rmul__",__rmul__<Covector<X>,X , Return<Covector<ProductType<X,X>>> >, pybind11::is_operator());
-    covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
     covector_class.def(__py_div__,__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
+
+    if constexpr (HasGenericType<X>) {
+        typedef GenericType<X> Y;
+        covector_class.def("__mul__",__mul__<Covector<X>,Y , Return<Covector<ProductType<X,Y>>> >, pybind11::is_operator());
+        covector_class.def("__rmul__",__rmul__<Covector<X>,Y , Return<Covector<ProductType<X,Y>>> >, pybind11::is_operator());
+        covector_class.def(__py_div__,__div__<Covector<X>,Y , Return<Covector<QuotientType<X,Y>>> >, pybind11::is_operator());
+    }
 
     covector_class.def("__mul__",__mul__<Covector<X>,Vector<X> , Return<ProductType<X,X>> >, pybind11::is_operator());
 
@@ -468,6 +480,9 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
     matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Covector<Approximation<F>>>, pybind11::is_operator());
 
+    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def(__py_div__,&__div__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
 }
 
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Bounds<F>>>& matrix_class)
@@ -490,6 +505,10 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("gram_schmidt_orthogonalisation", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &gram_schmidt_orthogonalisation<X>);
     module.def("orthogonal_decomposition", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &orthogonal_decomposition<X>);
 
+    matrix_class.def("__mul__",&__mul__<Matrix<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def(__py_div__,&__div__<Matrix<Bounds<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+
     matrix_class.def("__mul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
     matrix_class.def("__mul__",&__mul__<Matrix<Bounds<F>>,Vector<Approximation<F>>>, pybind11::is_operator());
     matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
@@ -507,6 +526,10 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     define_matrix_conversion<FloatBounds<PR>,FloatApproximation<PR>>(module,matrix_class);
     define_matrix_arithmetic<X,X>(module,matrix_class);
     define_matrix_operations<X>(module,matrix_class);
+
+    matrix_class.def("__mul__",&__mul__<Matrix<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
+    matrix_class.def(__py_div__,&__div__<Matrix<Approximation<F>>,Scalar<ApproximateNumber>>, pybind11::is_operator());
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
     //module.def("householder_orthogonalisation", (Tuple<Matrix<X>,Matrix<X>>(*)(Matrix<X>const&)) &householder_orthogonalisation<X>);

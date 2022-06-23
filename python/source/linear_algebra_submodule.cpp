@@ -451,11 +451,12 @@ Void define_matrix_operations(pybind11::module& module, pybind11::class_<Matrix<
     module.def("norm", &_norm_<Matrix<X>>);
     module.def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
-    module.def("inverse",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&)) &inverse);
-    module.def("solve",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&,const Matrix<X>&)) &solve<X>);
-    module.def("solve",(Vector<ArithmeticType<X>>(*)(const Matrix<X>&,const Vector<X>&)) &solve<X>);
+    if constexpr (Same<QuotientType<X>,ArithmeticType<X>>) {
+        module.def("inverse",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&)) &inverse);
+        module.def("solve",(Matrix<ArithmeticType<X>>(*)(const Matrix<X>&,const Matrix<X>&)) &solve<X>);
+        module.def("solve",(Vector<ArithmeticType<X>>(*)(const Matrix<X>&,const Vector<X>&)) &solve<X>);
+    }
 }
-
 
 
 Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Real>>& matrix_class)
@@ -653,7 +654,7 @@ Void linear_algebra_submodule(pybind11::module& module) {
 
     export_vector<Decimal>(module);
 //    export_covector<Decimal>(module);
-//    export_matrix<Decimal>(module);
+    export_matrix<Decimal>(module);
 
     export_vector<Dyadic>(module);
     export_covector<Dyadic>(module);
@@ -693,6 +694,7 @@ Void linear_algebra_submodule(pybind11::module& module) {
     matrix_template.instantiate<FloatMPBounds>();
     matrix_template.instantiate<FloatDPValue>();
     matrix_template.instantiate<FloatMPValue>();
+    matrix_template.instantiate<Decimal>();
     matrix_template.instantiate<Rational>();
     matrix_template.instantiate<Real>();
 

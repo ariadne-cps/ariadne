@@ -53,6 +53,8 @@ class Decimal
     //! \brief Construct the number p/10^q.
     explicit Decimal(Integer p, Nat q);
     explicit Decimal(Integer p, Int q) = delete;
+    //! \brief Construct from a builtin integral type.
+    template<BuiltinIntegral N> Decimal(N n);
     //! \brief Construct from a double-precision floating-point number representation.
     explicit Decimal(double d);
     //! \brief Construct from a string representation.
@@ -77,7 +79,11 @@ class Decimal
     friend Decimal operator*(Decimal const& d1, Decimal const& d2);
     //! \brief Division of two decimal values yields a rational.
     friend Rational operator/(Decimal const& d1, Decimal const& d2);
+    //! \brief Inplace addition of two decimal values.
+    friend Decimal& operator+=(Decimal& d1, Decimal const& d2);
     //! \brief Squared value of a decimal.
+    friend Decimal nul(Decimal const& d);
+    //! \brief Zeroed value of a decimal.
     friend Decimal sqr(Decimal const& d);
     //! \brief Half the value of a decimal.
     friend Decimal hlf(Decimal const& d);
@@ -112,6 +118,8 @@ Decimal operator"" _dec (const char* str, std::size_t);
 Decimal operator"" _decimal (unsigned long long int n);
 Decimal operator"" _decimal (long double dbl);
 Decimal operator"" _decimal (const char* str, std::size_t);
+
+template<BuiltinIntegral N> inline Decimal::Decimal(N n) : Decimal(n,0u) { }
 
 template<> class Bounds<Decimal> {
     Decimal _l, _u;

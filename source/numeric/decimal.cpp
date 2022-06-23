@@ -130,6 +130,16 @@ Decimal operator*(Decimal const& d1, Decimal const& d2)
     return Decimal(d1._p*d2._p,d1._q+d2._q);
 }
 
+Decimal& operator+=(Decimal& d1, Decimal const& d2)
+{
+    return d1=d1+d2;
+}
+
+Decimal nul(Decimal const& d)
+{
+    return Decimal(0,0u);
+}
+
 Decimal sqr(Decimal const& d)
 {
     return Decimal(sqr(d._p),2u*d._q);
@@ -280,7 +290,7 @@ String Decimal::literal() const {
     ss << *this;
     return ss.str();
 }
-    
+
 template<> String class_name<Decimal>() { return "Decimal"; }
 template<> String class_name<DecimalBounds>() { return "DecimalBounds"; }
 

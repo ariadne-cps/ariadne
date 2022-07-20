@@ -240,7 +240,7 @@ template<class F> class Bounds
     friend Bounds<F> cos(Bounds<F> const& x) {
         return Operations<Bounds<F>>::_cos(x); }
     friend Bounds<F> tan(Bounds<F> const& x) {
-        return mul(sin(x),rec(cos(x))); }
+        return Operations<Bounds<F>>::_tan(x); }
     friend Bounds<F> asin(Bounds<F> const& x) {
         return Bounds<F>(asin(down,x.lower_raw()),asin(up,x.upper_raw())); }
     friend Bounds<F> acos(Bounds<F> const& x) {
@@ -512,6 +512,7 @@ template<class F> class Operations<Bounds<F>> {
     static Bounds<F> _pi(PR pr);
     static Bounds<F> _sin(Bounds<F> const& x);
     static Bounds<F> _cos(Bounds<F> const& x);
+    static Bounds<F> _tan(Bounds<F> const& x);
 
     static Bounds<F> _trunc(Bounds<F> const& x);
     static Bounds<F> _trunc(Bounds<F> const& x, Nat n);

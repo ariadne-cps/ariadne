@@ -111,6 +111,20 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
     return Bounds<F>(rl,ru);
 }
 
+template<class F> auto Operations<Bounds<F>>::_tan(Bounds<F> const& x) -> Bounds<F> {
+    ARIADNE_ASSERT(x.lower_raw()<=x.upper_raw());
+    PR prec=x.precision();
+    const Bounds<F> pi_bnds=_pi(prec);
+    const F pi_val=pi_bnds.value_raw();
+    typename F::RoundingModeType rnd = F::get_rounding_mode();
+    F n(round(div(near,x.value_raw(),pi_val)));
+    F::set_rounding_mode(rnd);
+    Bounds<F> y=x-n*pi_bnds;
+    assert(y.lower_raw()>=-hlf(pi_val));
+    assert(y.upper_raw()<=+hlf(pi_val));
+    return Bounds<F>(tan(down,y._l),tan(up,y._u));
+}
+
 template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x) -> Bounds<F> {
     typename F::RoundingModeType rm=F::get_rounding_mode();
     const double& xl=x.lower_raw().get_d();

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            SUTR21.cpp
+ *            CVDP22.cpp
  *
- *  Copyright  2021  Luca Geretti
+ *  Copyright  2022  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "SUTR21.hpp"
+#include "CVDP22.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    SUTR21();
+    CVDP22();
 }

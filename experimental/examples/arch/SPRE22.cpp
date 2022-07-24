@@ -1,7 +1,7 @@
 /***************************************************************************
- *            CVDP20.cpp
+ *            SPRE22.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2022  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CVDP20.hpp"
+#include "SPRE22.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    CVDP20();
+    SPRE22();
 }

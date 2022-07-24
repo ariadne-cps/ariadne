@@ -1,7 +1,7 @@
 /***************************************************************************
- *            SPRE20.hpp
+ *            SPRE22.hpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2022  Luca Geretti
  *
  ****************************************************************************/
 
@@ -69,8 +69,8 @@ decltype(auto) make_space_rendezvous_problem() {
     HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,vx==0,vy==0});
 
     HybridConstraintSet safe_set;
-    safe_set.adjoin(spacecraft|rendezvous,{y>=x*tan(Ariadne::pi/6u),-y>=x*tan(Ariadne::pi/6u),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
-    safe_set.adjoin(spacecraft|aborting,{x<=-0.2_dec,x>=0.2_dec,y<=-0.2_dec,y>=0.2_dec});
+    safe_set.adjoin(spacecraft|rendezvous,{y>=x*tan(Ariadne::pi/4.5_dec),-y>=x*tan(Ariadne::pi/4.5_dec),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
+    safe_set.adjoin(spacecraft|aborting,{x<=-2,x>=2,y<=-2,y>=2});
 
     auto rc_dyn = sqrt(sqr(r+x)+sqr(y));
     auto t_dyn = 1;
@@ -100,9 +100,9 @@ decltype(auto) make_space_rendezvous_problem() {
     return make_problem(initial_set,space_rendezvous,safe_set);
 }
 
-void SPRE20()
+void SPRE22()
 {
-    ArchBenchmark benchmark("SPRE20");
+    ArchBenchmark benchmark("SPRE22");
     auto instance = benchmark.create_instance();
     instance.write();
 

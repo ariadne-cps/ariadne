@@ -1,7 +1,7 @@
 /***************************************************************************
  *            arch_suite.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2022  Luca Geretti
  *
  ****************************************************************************/
 
@@ -23,17 +23,17 @@
  */
 
 #include "ROBE21.hpp"
-#include "CVDP20.hpp"
+#include "CVDP22.hpp"
 #include "LALO20.hpp"
 #include "LOVO21.hpp"
-#include "SPRE20.hpp"
+#include "SPRE22.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
     ROBE21();
-    CVDP20();
+    CVDP22();
     LALO20();
     LOVO21();
-    SPRE20();
+    SPRE22();
 }

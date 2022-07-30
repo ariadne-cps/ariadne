@@ -29,6 +29,11 @@ using namespace Ariadne;
 void CVDP22()
 {
     ArchBenchmark benchmark("CVDP22");
+    auto instance = benchmark.create_instance();
+    instance.write();
+
+    // Results can't be obtained in a reasonable time yet for this benchmark.
+    return;
 
     RealVariable x1("x1"), y1("y1"), x2("x2"), y2("y2"), b("b");
 
@@ -43,11 +48,11 @@ void CVDP22()
     TaylorPicardIntegrator integrator(max_err);
 
     VectorFieldEvolver evolver(dynamics, integrator);
-    evolver.configuration().set_maximum_enclosure_radius(0.08);
+    evolver.configuration().set_maximum_enclosure_radius(0.06);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-5);
 
-    RealVariablesBox initial_set({1.25_dec<=x1<=1.55_dec,2.35_dec<=y1<=2.45_dec,1.25_dec<=x2<=1.55_dec,2.35_dec<=y2<=2.45_dec, 1.0_dec<=b<=1.0_dec});
+    RealVariablesBox initial_set({1.25_dec<=x1<=1.55_dec,2.35_dec<=y1<=2.45_dec,1.25_dec<=x2<=1.55_dec,2.35_dec<=y2<=2.45_dec, 70.0_dec<=b<=70.0_dec});
 
     Real evolution_time(7);
 
@@ -74,12 +79,11 @@ void CVDP22()
     if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
     ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
-    auto instance = benchmark.create_instance("mu1");
     if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
     instance.write();
 
     fig << fill_colour(orange);
-    fig.draw(orbit.reach());
+    fig.draw(orbit);
 
     ARIADNE_LOG_PRINTLN("Plotting...");
     fig.write(benchmark.name().c_str());

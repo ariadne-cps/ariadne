@@ -76,7 +76,7 @@ void LOVO21()
     auto initial_enclosure = HybridEnclosure(initial_set,RealSpace({x,y}),config);
 
     ARIADNE_LOG_PRINTLN("Computing evolution... ")
-    auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
+    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER))
 
     ARIADNE_LOG_PRINTLN("Checking properties... ")
 

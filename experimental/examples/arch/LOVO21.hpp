@@ -75,8 +75,13 @@ void LOVO21()
     config.set_reconditioning_num_blocks(5);
     auto initial_enclosure = HybridEnclosure(initial_set,RealSpace({x,y}),config);
 
+<<<<<<< HEAD
     CONCLOG_PRINTLN("Computing evolution... ")
     auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
+=======
+    ARIADNE_LOG_PRINTLN("Computing evolution... ")
+    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER))
+>>>>>>> 6f24f925d (Set up the ARCH 2022 benchmark files)
 
     CONCLOG_PRINTLN("Checking properties... ")
 

@@ -65,8 +65,6 @@ template<class X> inline auto atan2(X const& x, X const& y) -> decltype(atan(y/x
     else { ARIADNE_THROW(std::runtime_error,"atan2(x,y)","x="<<x<<" and y="<<y<<" could both be zero."); }
 }
 
-template<> inline double atan2(double const& x, double const& y) { return std::atan2(x,y); }
-
 class DefineComplexOperations {
     template<class X1, class X2> friend Complex<SumType<X1,X2>>  add(Complex<X1> const& z1, Complex<X2> const& z2) {
         return Complex<SumType<X1,X2>> (z1._re+z2._re,z1._im+z2._im); } //!< \brief Sum \a z1+z2.
@@ -127,6 +125,8 @@ class DefineComplexOperations {
 
     //!@}
 
+    template<class X> friend Complex<X> nul(Complex<X> const& z) {
+        return Complex<X> (nul(z._re),nul(z._im)); } //!< Zero value \a 0.
     template<class X> friend Complex<X> pos(Complex<X> const& z) {
         return Complex<X> (pos(z._re),pos(z._im)); } //!< Identity \a +z.
     template<class X> friend Complex<NegationType<X>> neg(Complex<X> const& z) {
@@ -179,6 +179,8 @@ template<class X> class Complex
         Complex(Y const& x, Y const& y, PRS... prs) : _re(x,prs...), _im(y,prs...) { }
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
         Complex(Complex<Y> const& z, PRS... prs) : _re(z.real_part(),prs...), _im(z.imaginary_part(),prs...) { }
+    template<class Y> requires Assignable<X,Y>
+        Complex<X>& operator=(Y const& c) { _re=c; _im=0; return *this; }
     //!@}
 
     //!@{
@@ -236,7 +238,8 @@ template<class X> class Complex
     //!@{
     //! \name Special complex number functions
     friend ModulusType<X> abs(Complex<X> const& z) { return z.modulus(); }
-    friend decltype(auto) mag(Complex<X> const& z) { return cast_positive(sqrt(add(sqr(mag(z._re)),sqr(mag(z._im))))); } //!< Absolute value \a |r|.
+    friend decltype(auto) mag(Complex<X> const& z) { return cast_positive(sqrt(add(sqr(mag(z._re)),sqr(mag(z._im))))); } //!< Maximum possible absolute value \a |r|.
+    friend decltype(auto) mig(Complex<X> const& z) { return cast_positive(sqrt(add(sqr(mig(z._re)),sqr(mig(z._im))))); } //!< Minimum possible absolute value \a |r|.
     friend ArgumentType<X> arg(Complex<X> const& z) { return z.argument(); }
     friend Complex<X> conj(Complex<X> const& z) { return Complex<X>(z._re,-z._im); }
     //!@}

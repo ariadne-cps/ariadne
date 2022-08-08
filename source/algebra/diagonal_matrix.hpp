@@ -69,6 +69,21 @@ struct DiagonalMatrixOperations {
         return A1;
     }
 
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(X const& s1, DiagonalMatrix<X> A2) {
+        for(SizeType i=0; i!=A2.size(); ++i) { const_cast<X&>(A2.at(i,i))*=s1; }
+        return A2;
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, X const& s2) {
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=s2; }
+        return A1;
+    }
+
+    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, X const& s2) {
+        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=s2; }
+        return A1;
+    }
+
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
         ARIADNE_PRECONDITION(A1.size()==A2.size());
@@ -91,6 +106,27 @@ struct DiagonalMatrixOperations {
     template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
+        return A;
+    }
+
+    template<class X> friend Matrix<X> operator+(DiagonalMatrix<X> const& D, Matrix<X> A) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
+        return A;
+    }
+
+    template<class X> friend Matrix<X> operator-(Matrix<X> A, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)-=D.at(i,i); }
+        return A;
+    }
+
+    template<class X> friend Matrix<X> operator-(DiagonalMatrix<X> const& D, Matrix<X> A) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        for(SizeType i=0; i!=A.row_size(); ++i) { 
+            for(SizeType j=0; j!=A.column_size(); ++j) { A.at(i,j)=-A.at(i,j); }
+            A.at(i,i)+=D.at(i,i); 
+        }
         return A;
     }
 

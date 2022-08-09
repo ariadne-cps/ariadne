@@ -39,7 +39,6 @@
 
 #include "numeric/float_lower_bound.hpp"
 #include "numeric/float_upper_bound.hpp"
-#include "numeric/float_value.hpp"
 #include "numeric/float_error.hpp"
 
 #include "../test.hpp"

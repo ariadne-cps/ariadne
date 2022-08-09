@@ -17,7 +17,6 @@ add_library(${LIBRARY_NAME} OBJECT
     float_upper_bound.cpp
     float_bounds.cpp
     float_ball.cpp
-    float_value.cpp
     float_error.cpp
     float_literals.cpp
 )

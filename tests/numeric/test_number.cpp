@@ -30,7 +30,6 @@
 #include "numeric/lower_number.hpp"
 
 #include "numeric/floatdp.hpp"
-#include "numeric/float_value.hpp"
 #include "numeric/float_ball.hpp"
 #include "numeric/float_bounds.hpp"
 #include "numeric/float_upper_bound.hpp"

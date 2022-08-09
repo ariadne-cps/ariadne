@@ -28,7 +28,6 @@
 
 #include "float_error.hpp"
 
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 
 #include "upper_number.hpp"

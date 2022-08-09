@@ -25,7 +25,6 @@
 #include "float_ball.hpp"
 #include "float_ball.tpl.hpp"
 
-#include "float_value.hpp"
 #include "float_bounds.tpl.hpp" //< FIXME: Needed for log10floor
 
 namespace Ariadne {

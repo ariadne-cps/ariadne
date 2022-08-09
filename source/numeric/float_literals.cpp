@@ -23,7 +23,6 @@
  */
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_ball.hpp"
 #include "float_lower_bound.hpp"
 #include "float_upper_bound.hpp"

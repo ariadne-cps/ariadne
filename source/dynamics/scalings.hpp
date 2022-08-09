@@ -35,8 +35,7 @@
 #include "utility/container.hpp"
 #include "utility/stlio.hpp"
 
-#include "numeric/floatdp.hpp"
-#include "numeric/float_value.hpp"
+#include "numeric/builtin.hpp"
 #include "geometry/grid.hpp"
 #include "symbolic/variable.hpp"
 

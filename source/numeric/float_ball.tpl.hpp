@@ -36,7 +36,6 @@
 #include "rational.hpp"
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 
 #include "number_wrapper.hpp"

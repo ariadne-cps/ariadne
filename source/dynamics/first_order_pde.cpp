@@ -23,8 +23,9 @@
 
 #include "first_order_pde.hpp"
 
+#include "numeric/floatdp.hpp"
+#include "numeric/floatmp.hpp"
 #include "numeric/float_bounds.hpp"
-#include "numeric/float_value.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"

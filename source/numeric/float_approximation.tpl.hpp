@@ -29,7 +29,6 @@
 #include "float_approximation.hpp"
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 #include "float_upper_bound.hpp"
 #include "float_lower_bound.hpp"

@@ -45,7 +45,6 @@
 #include "number_interface.hpp"
 #include "number_wrapper.hpp"
 
-#include "float_value.hpp"
 #include "float_ball.hpp"
 #include "float_bounds.hpp"
 #include "float_upper_bound.hpp"

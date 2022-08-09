@@ -27,7 +27,6 @@
 #define ARIADNE_FLOAT_BOUNDS_INL_HPP
 
 #include "float_bounds.hpp"
-#include "float_value.hpp"
 
 namespace Ariadne {
 

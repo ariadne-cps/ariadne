@@ -29,8 +29,10 @@
 #include "algebra/tensor.hpp"
 #include "numeric/float.decl.hpp"
 #include "algebra/algebra.hpp"
+
+#include "numeric/floatdp.hpp"
+#include "numeric/floatmp.hpp"
 #include "numeric/float_bounds.hpp"
-#include "numeric/float_value.hpp"
 
 namespace Ariadne {
 

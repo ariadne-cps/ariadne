@@ -95,7 +95,7 @@ TestScalarTaylorFunction::TestScalarTaylorFunction(Sweeper<FloatDP> sweeper)
 
 Void TestScalarTaylorFunction::test()
 {
-    FloatDPValue::set_output_places(18);
+    FloatDP::set_output_places(18);
     FloatDPError::set_output_places(18);
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_create());
@@ -115,10 +115,10 @@ Void TestScalarTaylorFunction::test()
 Void TestScalarTaylorFunction::test_concept()
 {
     SizeType k=0;
-    const FloatDPValue w={0,pr};
+    const FloatDP w={0,pr};
     const FloatDPBounds x(pr);
     const ValidatedNumber y;
-    const Vector<FloatDPValue> vw;
+    const Vector<FloatDP> vw;
     const Vector<FloatDPBounds> vx;
     const Vector<ValidatedNumber> vy;
     ValidatedScalarMultivariateTaylorFunctionModelDP  stf;
@@ -169,8 +169,8 @@ Void TestScalarTaylorFunction::test_constructors()
 Void TestScalarTaylorFunction::test_create()
 {
     ExactBoxType D={{-0.5_x,0.5_x},{-1.0_x,2.0_x}};
-    FloatDPValue c1={1,pr};
-    FloatDPValue c2={1,pr};
+    FloatDP c1={1,pr};
+    FloatDP c2={1,pr};
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
     ValidatedScalarMultivariateFunction f2=pf2;
@@ -330,7 +330,7 @@ Void TestScalarTaylorFunction::test_conversion() {
 
     // Test conversion between ordinary functions and Taylor functions.
     ExactBoxType D={{-0.5_x,0.5_x},{-1.0_x,2.0_x}};
-    Vector<FloatDPValue> pt({-0.25_x,0.25_x},pr);
+    Vector<FloatDP> pt({-0.25_x,0.25_x},pr);
     Vector<FloatDPBounds> ipt(pt);
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     ARIADNE_TEST_PRINT(x);
@@ -350,9 +350,9 @@ Void TestScalarTaylorFunction::test_conversion() {
 
 Void TestScalarTaylorFunction::test_generic() {
     ExactBoxType D={{-0.5_x,0.5_x},{-1.0_x,2.0_x}};
-    FloatDPValue c0={0,pr};
-    FloatDPValue c1={0,pr};
-    FloatDPValue c2={0,pr};
+    FloatDP c0={0,pr};
+    FloatDP c1={0,pr};
+    FloatDP c2={0,pr};
     ValidatedScalarMultivariateTaylorFunctionModelDP pf0=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c0,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
@@ -390,7 +390,7 @@ Void TestScalarTaylorFunction::test_generic() {
 }
 
 /*
-ValidatedVectorMultivariateTaylorFunctionModelDP henon(const ValidatedVectorMultivariateTaylorFunctionModelDP& x, const Vector<FloatDPValue>& p)
+ValidatedVectorMultivariateTaylorFunctionModelDP henon(const ValidatedVectorMultivariateTaylorFunctionModelDP& x, const Vector<FloatDP>& p)
 {
     ValidatedVectorMultivariateTaylorFunctionModelDP r(2,2,x.degree()); henon(r,x,p); return r;
 }
@@ -438,8 +438,8 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-template<class I, class F> Expansion<I,Value<F>>const& cast_exact(Expansion<I,F> const& e) {
-    return reinterpret_cast<Expansion<I,Value<F>>const&>(e); }
+template<class I, class F> Expansion<I,F>const& cast_exact(Expansion<I,F> const& e) {
+    return reinterpret_cast<Expansion<I,F>const&>(e); }
 
 Void TestVectorTaylorFunction::test_constructors()
 {
@@ -488,7 +488,7 @@ Void TestVectorTaylorFunction::test_restrict()
     Vector<RawFloatDP> suberror2({0.125000000000000028_pr},pr);
     ValidatedVectorMultivariateTaylorFunctionModelDP function2(domain2,expansion2*unit0,error2,swp);
     ValidatedVectorMultivariateTaylorFunctionModelDP restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
-    FloatDPValue::set_output_places(18);
+    FloatDP::set_output_places(18);
     FloatDPError::set_output_places(18);
 
     ARIADNE_TEST_SAME(restriction(function2,subdomain2),restricted_function2);
@@ -508,8 +508,8 @@ Void TestVectorTaylorFunction::test_jacobian()
     //Vector<FloatDPApproximation> point2={0.5_x,0.25_x};
     Vector<FloatDPBounds> point1=Vector<FloatDPBounds>({0.0_x,0.0_x},pr);
     Vector<FloatDPBounds> point2=Vector<FloatDPBounds>({0.0_x,0.25_x},pr);
-    //Vector<FloatDPValue> point1=Vector<FloatDPValue>({0.0_x,0.0_x},pr);
-    //Vector<FloatDPValue> point2=Vector<FloatDPValue>({0.5_x,0.25_x},pr);
+    //Vector<FloatDP> point1=Vector<FloatDP>({0.0_x,0.0_x},pr);
+    //Vector<FloatDP> point2=Vector<FloatDP>({0.5_x,0.25_x},pr);
     ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
     ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
     ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));

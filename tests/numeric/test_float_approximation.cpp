@@ -87,7 +87,7 @@ TestFloatApproximation<PR>::test_concept()
     FloatApproximationType(Integer(0),pr); FloatApproximationType(Dyadic(0),pr); FloatApproximationType(Rational(0),pr);
 
     rx=FloatApproximationType(RawFloat<PR>(pr));
-    rx=FloatApproximationType(FloatValue<PR>(pr)); FloatApproximationType(FloatBall<PR,PRE>(pr,pre)); FloatApproximationType(FloatBounds<PR>(pr));
+    rx=FloatApproximationType(Float<PR>(pr)); FloatApproximationType(FloatBall<PR,PRE>(pr,pre)); FloatApproximationType(FloatBounds<PR>(pr));
     rx=FloatApproximationType(FloatUpperBound<PR>(pr)); rx=FloatApproximationType(FloatLowerBound<PR>(pr));
     rx=FloatApproximationType(FloatApproximation<PR>(pr));
 

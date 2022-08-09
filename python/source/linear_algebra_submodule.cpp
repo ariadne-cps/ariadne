@@ -221,14 +221,14 @@ Void define_vector(pybind11::module& module, pybind11::class_<Vector<X>>& vector
 }
 
 
-template<ARawFloat F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<Value<F>>>& vector_class) {
-    using X=Value<F>;
+template<ARawFloat F> Void define_vector(pybind11::module& module, pybind11::class_<Vector<F>>& vector_class) {
+    using X=F;
     define_vector_constructors(module, vector_class);
     define_vector_operations(module, vector_class);
     define_vector_arithmetic<Vector<X>,X>(module,vector_class);
 
-    vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
-    vector_class.def("__rmul__",&__rmul__<Vector<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    vector_class.def("__rmul__",&__rmul__<Vector<F>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    vector_class.def("__rmul__",&__rmul__<Vector<F>,Scalar<Approximation<F>>>, pybind11::is_operator());
 
     module.def("norm",&_norm_<Vector<X>>);
     module.def("sup_norm",&_sup_norm_<Vector<X>>);
@@ -256,8 +256,8 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
 //    vector_class.def(pybind11::init<Vector<ValidatedNumber>,PR>());
 //    vector_class.def(pybind11::init<Array<ValidatedNumber>,PR>());
     vector_class.def(pybind11::init<Vector<Rational>,PR>());
-    vector_class.def(pybind11::init<Vector<Value<F>>>());
-    pybind11::implicitly_convertible<Vector<Value<F>>,Vector<Bounds<F>>>();
+    vector_class.def(pybind11::init<Vector<F>>());
+    pybind11::implicitly_convertible<Vector<F>,Vector<Bounds<F>>>();
 
 }
 
@@ -280,7 +280,7 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     vector_class.def(pybind11::init<Vector<Rational>,PR>());
     vector_class.def(pybind11::init<Vector<Bounds<F>>>());
     pybind11::implicitly_convertible<Vector<Bounds<F>>,Vector<Approximation<F>>>();
-    pybind11::implicitly_convertible<Vector<Value<F>>,Vector<Approximation<F>>>();
+    pybind11::implicitly_convertible<Vector<F>,Vector<Approximation<F>>>();
 
     module.def("cast_exact", (Vector<ExactType<X>>(*)(Vector<X> const&)) &cast_exact);
 }
@@ -465,25 +465,25 @@ Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Real>>& mat
     define_matrix_class<X>(module,matrix_class);
 }
 
-template<ARawFloat F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Value<F>>>& matrix_class)
+template<ARawFloat F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<F>>& matrix_class)
 {
-    using X=Value<F>;
+    using X=F;
     define_matrix_class<X>(module,matrix_class);
     define_matrix_arithmetic<X,X>(module,matrix_class);
 
-    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
-    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Vector<Bounds<F>>>, pybind11::is_operator());
-    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<Bounds<F>>>, pybind11::is_operator());
-    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Covector<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<F>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<F>,Vector<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<F>,Scalar<Bounds<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<F>,Covector<Bounds<F>>>, pybind11::is_operator());
 
-    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
-    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Vector<Approximation<F>>>, pybind11::is_operator());
-    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
-    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Covector<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<F>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<F>,Vector<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<F>,Scalar<Approximation<F>>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<F>,Covector<Approximation<F>>>, pybind11::is_operator());
 
-    matrix_class.def("__mul__",&__mul__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
-    matrix_class.def("__rmul__",&__rmul__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
-    matrix_class.def(__py_div__,&__div__<Matrix<Value<F>>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def("__mul__",&__mul__<Matrix<F>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def("__rmul__",&__rmul__<Matrix<F>,Scalar<ValidatedNumber>>, pybind11::is_operator());
+    matrix_class.def(__py_div__,&__div__<Matrix<F>,Scalar<ValidatedNumber>>, pybind11::is_operator());
 }
 
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Bounds<F>>>& matrix_class)
@@ -492,7 +492,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     using PR=PrecisionType<X>;
     define_matrix_class<X>(module,matrix_class);
     matrix_class.def(pybind11::init<Matrix<Rational>, PR>());
-    define_matrix_conversion<FloatValue<PR>,FloatBounds<PR>>(module,matrix_class);
+    define_matrix_conversion<Float<PR>,FloatBounds<PR>>(module,matrix_class);
     define_matrix_arithmetic<X,X>(module,matrix_class);
     define_matrix_operations<X>(module,matrix_class);
     module.def("gs_inverse", (Matrix<X>(*)(const Matrix<X>&)) &gs_inverse);
@@ -515,7 +515,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Scalar<Approximation<F>>>, pybind11::is_operator());
     matrix_class.def("__rmul__",&__rmul__<Matrix<Bounds<F>>,Covector<Approximation<F>>>, pybind11::is_operator());
 
-    pybind11::implicitly_convertible<Matrix<Value<F>>, Matrix<Bounds<F>>>();
+    pybind11::implicitly_convertible<Matrix<F>, Matrix<Bounds<F>>>();
 }
 
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Approximation<F>>>& matrix_class)
@@ -540,7 +540,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
 
     pybind11::implicitly_convertible<Matrix<Bounds<F>>, Matrix<Approximation<F>>>();
 
-    module.def("cast_exact", (Matrix<Value<F>>(*)(Matrix<Approximation<F>>const&)) &cast_exact);
+    module.def("cast_exact", (Matrix<F>(*)(Matrix<Approximation<F>>const&)) &cast_exact);
     //    to_python<Tuple<FloatMatrix,FloatMatrix,PivotMatrix>>();
 }
 
@@ -598,7 +598,7 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
 pybind11::class_<PivotMatrix> export_pivot_matrix(pybind11::module& module)
 {
 
-//    pybind11::implicitly_convertible<PivotMatrix, Matrix<FloatDPValue>>();
+//    pybind11::implicitly_convertible<PivotMatrix, Matrix<FloatDP>>();
 
     pybind11::class_<PivotMatrix> pivot_matrix_class(module,"PivotMatrix");
     pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
@@ -611,38 +611,38 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_vector<FloatDPApproximation>(module);
     export_vector<FloatDPBounds>(module);
     export_vector<FloatDPBall>(module);
-    export_vector<FloatDPValue>(module);
+    export_vector<FloatDP>(module);
 
     export_vector<FloatMPApproximation>(module);
     export_vector<FloatMPBounds>(module);
     export_vector<FloatMPBall>(module);
-    export_vector<FloatMPValue>(module);
+    export_vector<FloatMP>(module);
 
     export_vector<FloatMPDPBall>(module);
 
     export_covector<FloatDPApproximation>(module);
     export_covector<FloatDPBounds>(module);
-    export_covector<FloatDPValue>(module);
+    export_covector<FloatDP>(module);
     export_covector<FloatMPApproximation>(module);
     export_covector<FloatMPBounds>(module);
-    export_covector<FloatMPValue>(module);
+    export_covector<FloatMP>(module);
 
     export_matrix<FloatDPApproximation>(module);
     export_matrix<FloatDPBounds>(module);
-    export_matrix<FloatDPValue>(module);
+    export_matrix<FloatDP>(module);
 
     export_matrix<FloatMPApproximation>(module);
     export_matrix<FloatMPBounds>(module);
-    export_matrix<FloatMPValue>(module);
+    export_matrix<FloatMP>(module);
 
     export_pivot_matrix(module);
 
     export_diagonal_matrix<FloatDPApproximation>(module);
     export_diagonal_matrix<FloatDPBounds>(module);
-    export_diagonal_matrix<FloatDPValue>(module);
+    export_diagonal_matrix<FloatDP>(module);
     export_diagonal_matrix<FloatMPApproximation>(module);
     export_diagonal_matrix<FloatMPBounds>(module);
-    export_diagonal_matrix<FloatMPValue>(module);
+    export_diagonal_matrix<FloatMP>(module);
 
     export_vector<Real>(module);
     export_covector<Real>(module);
@@ -669,8 +669,8 @@ Void linear_algebra_submodule(pybind11::module& module) {
     vector_template.instantiate<FloatDPBall>();
     vector_template.instantiate<FloatMPBall>();
     vector_template.instantiate<FloatMPDPBall>();
-    vector_template.instantiate<FloatDPValue>();
-    vector_template.instantiate<FloatMPValue>();
+    vector_template.instantiate<FloatDP>();
+    vector_template.instantiate<FloatMP>();
     vector_template.instantiate<Dyadic>();
     vector_template.instantiate<Decimal>();
     vector_template.instantiate<Rational>();
@@ -681,8 +681,8 @@ Void linear_algebra_submodule(pybind11::module& module) {
     covector_template.instantiate<FloatMPApproximation>();
     covector_template.instantiate<FloatDPBounds>();
     covector_template.instantiate<FloatMPBounds>();
-    covector_template.instantiate<FloatDPValue>();
-    covector_template.instantiate<FloatMPValue>();
+    covector_template.instantiate<FloatDP>();
+    covector_template.instantiate<FloatMP>();
     covector_template.instantiate<Dyadic>();
     covector_template.instantiate<Rational>();
     covector_template.instantiate<Real>();
@@ -692,8 +692,8 @@ Void linear_algebra_submodule(pybind11::module& module) {
     matrix_template.instantiate<FloatMPApproximation>();
     matrix_template.instantiate<FloatDPBounds>();
     matrix_template.instantiate<FloatMPBounds>();
-    matrix_template.instantiate<FloatDPValue>();
-    matrix_template.instantiate<FloatMPValue>();
+    matrix_template.instantiate<FloatDP>();
+    matrix_template.instantiate<FloatMP>();
     matrix_template.instantiate<Decimal>();
     matrix_template.instantiate<Rational>();
     matrix_template.instantiate<Real>();
@@ -703,7 +703,7 @@ Void linear_algebra_submodule(pybind11::module& module) {
     diagonal_matrix_template.instantiate<FloatMPApproximation>();
     diagonal_matrix_template.instantiate<FloatDPBounds>();
     diagonal_matrix_template.instantiate<FloatMPBounds>();
-    diagonal_matrix_template.instantiate<FloatDPValue>();
-    diagonal_matrix_template.instantiate<FloatMPValue>();
+    diagonal_matrix_template.instantiate<FloatDP>();
+    diagonal_matrix_template.instantiate<FloatMP>();
 
 }

@@ -59,8 +59,8 @@ inline TimeStepType lower_bound(TimeStepType const& t) {
 inline TimeStepType lower_bound(Real const& t) {
     return TimeStepType(FloatDPLowerBound(t,DoublePrecision()).raw()); }
 
-inline Vector<FloatDPValue> const& cast_exact(Vector<ErrorType> const& v) {
-    return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
+inline Vector<FloatDP> const& cast_exact(Vector<ErrorType> const& v) {
+    return reinterpret_cast<Vector<FloatDP>const&>(v); }
 
 Void add_errors(ValidatedVectorMultivariateFunctionPatch& phi, Vector<ErrorType> const& e);
 
@@ -89,11 +89,11 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
 }
 
 // Compute (x*e^x/2-e^x+x/2+1)/x^3, which is a positive monotone function.
-template<class F> PositiveBounds<F> psi0(Value<F> const& x) {
+template<class F> PositiveBounds<F> psi0(F const& x) {
     return PositiveBounds<F>((x*exp(x)/2u-exp(x)+x/2u+1u)/pow(x,3u));
 }
 // Compute (x*e^x-e^x-x^2/2+1)/x^3, which is a positive monotone function.
-template<class F> PositiveBounds<F> psi1(Value<F> const& x) {
+template<class F> PositiveBounds<F> psi1(F const& x) {
     return PositiveBounds<F>(((x-1)*exp(x)+(1u-sqr(x)/2u))/pow(x,3u));
 }
 
@@ -168,7 +168,7 @@ inline std::ostream& operator << (std::ostream& os, const ErrorConstants& n) {
     return os;
 }
 
-ErrorConstants compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+ErrorConstants compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDP const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
     virtual Void write(OutputStream& os) const = 0;
@@ -281,7 +281,7 @@ public:
 
 template<class A> class ApproximationErrorProcessorInterface {
 public:
-    virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const = 0;
+    virtual Vector<ErrorType> process(PositiveFloatDP const& h, UpperBoxType const& B) const = 0;
 };
 
 template<class A, class R>
@@ -289,12 +289,12 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
   public:
     ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs)
         : _f(f), _inputs(inputs) { }
-    virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
+    virtual Vector<ErrorType> process(PositiveFloatDP const& h, UpperBoxType const& B) const override;
   private:
     EffectiveVectorMultivariateFunction const& _f;
     BoxDomainType const& _inputs;
   private:
-    Vector<ErrorType> process(ErrorConstants const& n, PositiveFloatDPValue const& h) const;
+    Vector<ErrorType> process(ErrorConstants const& n, PositiveFloatDP const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };
@@ -357,7 +357,7 @@ class InclusionIntegrator : public InclusionIntegratorInterface {
 
     virtual ~InclusionIntegrator() = default;
   private:
-    Vector<ErrorType> compute_errors(StepSizeType const& h, UpperBoxType const& B) const { return _processor->process(PositiveFloatDPValue(h,DoublePrecision()),B); };
+    Vector<ErrorType> compute_errors(StepSizeType const& h, UpperBoxType const& B) const { return _processor->process(PositiveFloatDP(h,DoublePrecision()),B); };
     BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
     ValidatedVectorMultivariateFunctionPatch build_reach_function(ValidatedVectorMultivariateFunctionPatch const& evolve_function, ValidatedVectorMultivariateFunctionPatch const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
     ValidatedVectorMultivariateFunctionPatch build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionPatch const& evolve_function, ValidatedVectorMultivariateFunctionPatch const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;

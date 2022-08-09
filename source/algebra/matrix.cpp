@@ -45,7 +45,7 @@ OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
     return os << "PivotMatrix(" << static_cast< Matrix<Int> >(pv) << ")";
 }
 
-template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDPValue>& A) {
+template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDP>& A) {
     return lu_inverse(Matrix<FloatDPBounds>(A));
 }
 
@@ -94,7 +94,7 @@ template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposi
 template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> gram_schmidt_orthogonalisation(Matrix<FloatDPBounds> const&);
 template Matrix<FloatDPBounds> operator*(PivotMatrix, Matrix<FloatDPBounds>);
 
-template class Matrix<FloatDPValue>;
+template class Matrix<FloatDP>;
 template Matrix<ExactType<FloatDPApproximation>> cast_exact(const Matrix<FloatDPApproximation>&);
 
 
@@ -124,7 +124,7 @@ template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposi
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> gram_schmidt_orthogonalisation(Matrix<FloatMPBounds> const&);
 template Matrix<FloatMPBounds> operator*(PivotMatrix, Matrix<FloatMPBounds>);
 
-template class Matrix<FloatMPValue>;
+template class Matrix<FloatMP>;
 template Matrix<ExactType<FloatMPApproximation>> cast_exact(const Matrix<FloatMPApproximation>&);
 
 

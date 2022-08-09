@@ -116,7 +116,7 @@ void calculus_demonstration() {
 
     // Define some constants
     auto n=int(3);
-    auto c=FloatDPValue(0.75_x,dp);
+    auto c=FloatDP(0.75_x,dp);
     auto b=FloatDPBounds(0.625_x,0.875_x,dp);
 
     // Arithmetic on Taylor models

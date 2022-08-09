@@ -53,11 +53,11 @@ template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;
 
-template<> Void Polynomial<MultiIndex,FloatDPValue>::cleanup() { }
+template<> Void Polynomial<MultiIndex,FloatDP>::cleanup() { }
 
-template Expansion<MultiIndex,FloatDPValue>& MultivariatePolynomial<FloatDPValue>::expansion();
-template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&) const;
-template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&, Array<String> const&) const;
+template Expansion<MultiIndex,FloatDP>& MultivariatePolynomial<FloatDP>::expansion();
+template OutputStream& Polynomial<MultiIndex,FloatDP>::_write(OutputStream&) const;
+template OutputStream& Polynomial<MultiIndex,FloatDP>::_write(OutputStream&, Array<String> const&) const;
 
 
 template class Polynomial<MultiIndex,FloatMPApproximation>;

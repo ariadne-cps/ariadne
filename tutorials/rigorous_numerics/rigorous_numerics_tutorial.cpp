@@ -99,7 +99,7 @@ int main(int argc, const char* argv[]) {
         auto id=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
         auto x=id[0]; auto y=id[1];
         auto h = EffectiveVectorMultivariateFunction{a-x*x-b*y,x};
-        Vector<FloatDPValue> v({0.5_x,1.0_x},double_precision);
+        Vector<FloatDP> v({0.5_x,1.0_x},double_precision);
         print(v);
         print(h(v))
         print(evaluate(h,v));

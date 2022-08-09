@@ -575,9 +575,9 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-inline Matrix<FloatDPValue> cast_exact(Matrix<FloatDPBounds> vA) {
+inline Matrix<FloatDP> cast_exact(Matrix<FloatDPBounds> vA) {
     Matrix<FloatDPApproximation> aA=vA;
-    return reinterpret_cast<Matrix<FloatDPValue>&>(aA);
+    return reinterpret_cast<Matrix<FloatDP>&>(aA);
 }
 
 ValidatedAffineConstrainedImageSet
@@ -585,9 +585,9 @@ ConstrainedImageSet::affine_approximation() const
 {
     DoublePrecision prec;
     const Box<ExactIntervalType> D=approximation(this->domain());
-    Vector<FloatDPValue> m=midpoint(D);
-    Matrix<FloatDPValue> G=cast_exact(jacobian(this->_function,m));
-    Vector<FloatDPValue> h=cast_exact(this->_function.evaluate(m)-G*m);
+    Vector<FloatDP> m=midpoint(D);
+    Matrix<FloatDP> G=cast_exact(jacobian(this->_function,m));
+    Vector<FloatDP> h=cast_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
@@ -1173,7 +1173,7 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5_x,dp);
+    ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDP(0.5_x,dp);
     new_function.clobber();
     for(SizeType i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];

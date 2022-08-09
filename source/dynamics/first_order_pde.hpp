@@ -38,7 +38,7 @@
 namespace Ariadne {
 
 //! \brief Compute the value of the multiaffine interpolation of the data \a us at the point \a x.
-template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Bounds<X>>> const& us, Vector<Value<X>> const& x);
+template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Bounds<X>>> const& us, Vector<X> const& x);
 
 //! \brief The first-order partial differential equation
 //! \f$ A u_{,t} + \sum_{j=1}^{n} B_j u_{,x_j} = f(u). \f$
@@ -53,8 +53,8 @@ struct FirstOrderPDE {
 //! \brief The solution of a first-order partial differential equation.
 //! \relates FirstOrderPDE
 template<class PR> struct FirstOrderPDESolution {
-    FloatValue<PR> h; //!< <p/>
-    FloatValue<PR> tau; //!< <p/>
+    Float<PR> h; //!< <p/>
+    Float<PR> tau; //!< <p/>
     Tensor<3,Vector<FloatBounds<PR>>> uts; //!< <p/>
     FloatUpperBound<PR> error; //!< <p/>
 };

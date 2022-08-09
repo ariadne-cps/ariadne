@@ -93,7 +93,7 @@ inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunction
 inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
-Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl);
+Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl);
 
 namespace {
 
@@ -501,7 +501,7 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorMultivariateFunctionPatch p
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    FloatDPValue h=phi.domain()[phi.result_size()].upper_bound();
+    FloatDP h=phi.domain()[phi.result_size()].upper_bound();
     ValidatedScalarMultivariateFunctionPatch elps=this->configuration().function_factory().create_constant(this->domain(),h);
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
@@ -717,7 +717,7 @@ FloatDPError Enclosure::radius() const {
     return cast_positive(this->bounding_box().radius());
 }
 
-FloatDPValuePoint Enclosure::centre() const {
+FloatDPPoint Enclosure::centre() const {
     return cast_exact(this->bounding_box().centre());
 }
 
@@ -1022,7 +1022,7 @@ uniform_error_recondition()
 
         ExactBoxType error_domains(large_error_indices.size());
         for(SizeType i=0; i!=large_error_indices.size(); ++i) {
-            FloatDPValue error=cast_exact(this->_state_function.get(large_error_indices[i]).error().get(double_precision));
+            FloatDP error=cast_exact(this->_state_function.get(large_error_indices[i]).error().get(double_precision));
             error_domains[i]=ExactIntervalType(-error,+error);
         }
         error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
@@ -1036,7 +1036,7 @@ uniform_error_recondition()
         }
 
         for(SizeType i=0; i!=large_error_indices.size(); ++i) {
-            FloatDPValue error=cast_exact(this->_state_function.get(large_error_indices[i]).error().get(double_precision));
+            FloatDP error=cast_exact(this->_state_function.get(large_error_indices[i]).error().get(double_precision));
             if (possibly(error > MAXIMUM_ERROR)) {
                 this->_state_function[large_error_indices[i]].clobber();
                 this->_state_function[large_error_indices[i]] = this->_state_function.get(large_error_indices[i]) + this->configuration().function_factory().create_coordinate(this->_domain,k)*FloatDPBounds(+error);
@@ -1081,7 +1081,7 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
-        r.expansion().append(ra,FloatDPValue(dp));
+        r.expansion().append(ra,FloatDP(dp));
         ra[number_of_kept_variables+index_of_error]=0;
         error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
@@ -1090,7 +1090,7 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         UniformConstReference<MultiIndex> xa=iter->index();
-        UniformConstReference<FloatDPValue> xv=iter->coefficient();
+        UniformConstReference<FloatDP> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1142,14 +1142,14 @@ Enclosure::kuhn_recondition()
             }
         }
     }
-    Array< Pair<FloatDPValue,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDPValue(dp),0u));
+    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDP(dp),0u));
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(FloatDPValue(0.0_x,dp),SizeType(j));
+        column_max_dependencies[j] = make_pair(FloatDP(0.0_x,dp),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=max(column_max_dependencies[j].first,cast_exact(dependencies[i][j]));
         }
     }
-    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<FloatDPValue,SizeType> >());
+    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<FloatDP,SizeType> >());
 
     Array<SizeType> kept_parameters(number_of_kept_parameters);
     Array<SizeType> discarded_parameters(number_of_discarded_parameters);

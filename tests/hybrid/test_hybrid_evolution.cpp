@@ -113,7 +113,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
     }
 
-    FloatDPValue exl(0.12_pr,dp), exu(+0.13_pr,dp), evl(-0.04_pr,dp), evu(+0.04_pr,dp); // Expected bounds
+    FloatDP exl(0.12_pr,dp), exu(+0.13_pr,dp), evl(-0.04_pr,dp), evu(+0.04_pr,dp); // Expected bounds
     HybridExactBox expected_orbit_final_bounding_box=HybridExactBox(q,{x.in(exl,exu),v.in(evl,evu)});
     ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final,expected_orbit_final_bounding_box);
 

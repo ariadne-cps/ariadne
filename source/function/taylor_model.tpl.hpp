@@ -185,10 +185,10 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-inline Interval<FloatDPValue> convert_interval(Interval<FloatDPValue> const& ivl, DoublePrecision pr) {
+inline Interval<FloatDP> convert_interval(Interval<FloatDP> const& ivl, DoublePrecision pr) {
     return ivl; }
-inline Interval<FloatMPValue> convert_interval(Interval<FloatDPValue> const& ivl, MultiplePrecision pr) {
-    return Interval<FloatMPValue>(FloatMP(ivl.lower_bound().raw(),pr),FloatMP(ivl.upper_bound().raw(),pr)); }
+inline Interval<FloatMP> convert_interval(Interval<FloatDP> const& ivl, MultiplePrecision pr) {
+    return Interval<FloatMP>(FloatMP(ivl.lower_bound().raw(),pr),FloatMP(ivl.upper_bound().raw(),pr)); }
 
 inline Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) {
     return ivl; }
@@ -202,7 +202,7 @@ inline Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproxima
 
 template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
 template<class FLT> Bool is_same_as_zero(Bounds<FLT> const& xb) { return xb.lower_raw()==0 && xb.upper_raw()==0; }
-template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv==0; }
+template<class FLT> Bool is_same_as_zero(FLT const& xv) { return xv==0; }
 template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower_bound().raw()==0 && xv.upper_bound().raw()==0; }
 
 } // namespace
@@ -210,11 +210,11 @@ template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return 
 
 
 template<class F>
-Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const
 {
-    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator end=p.end();
-    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator adv=p.begin();
-    typename Expansion<MultiIndex,FloatValue<PR>>::Iterator curr=p.begin();
+    typename Expansion<MultiIndex,Float<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,Float<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,Float<PR>>::Iterator curr=p.begin();
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
@@ -322,11 +322,11 @@ template<class I, class X> decltype(auto) radius(Expansion<I,X> const& p) {
 
 
 template<class F>
-Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const
 {
-    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator end=p.end();
-    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator adv=p.begin();
-    typename Expansion<MultiIndex,FloatValue<PR>>::Iterator curr=p.begin();
+    typename Expansion<MultiIndex,Float<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,Float<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,Float<PR>>::Iterator curr=p.begin();
 
     FloatError<PR> nrm=radius(p)+e;
 
@@ -432,10 +432,10 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>
 
 template<class F> F create_default() {
     if constexpr (Same<F,FloatDP>) { return FloatDP(dp); }
-    else if constexpr (Same<F,FloatDPValue>) { return FloatDPValue(dp); }
+    else if constexpr (Same<F,FloatDP>) { return FloatDP(dp); }
     else if constexpr (Same<F,FloatDPError>) { return FloatDPError(dp); }
     else if constexpr (Same<F,FloatMP>) { return FloatMP(FloatMP::get_default_precision()); }
-    else if constexpr (Same<F,FloatMPValue>) { return FloatMPValue(FloatMP::get_default_precision()); }
+    else if constexpr (Same<F,FloatMP>) { return FloatMP(FloatMP::get_default_precision()); }
     else if constexpr (Same<F,FloatMPError>) { return FloatMPError(FloatMP::get_default_precision()); }
     else if constexpr (Same<F,Interval<FloatDPUpperBound>>) { return FloatDPUpperInterval(0,0); }
     else { abort(); }
@@ -544,7 +544,7 @@ template<class F> UpperInterval<F> set_err(UpperInterval<F> const& x, Error<F>& 
     return x;
 }
 
-template<class F> Value<F> set_err(Bounds<F> const& x, Error<F>& e) {
+template<class F> F set_err(Bounds<F> const& x, Error<F>& e) {
      e+=x.error(); return x.value();
 }
 
@@ -586,12 +586,12 @@ template<class F> ValidatedApproximation<F> make_validated_approximation(Bounds<
 
 
 
-template<ARawFloat F> Rounded<F> const& cast_rounded(Value<F> const& x) { return reinterpret_cast<Rounded<F>const&>(x); }
-template<ARawFloat F> Rounded<F>& cast_rounded(Value<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
+template<ARawFloat F> Rounded<F> const& cast_rounded(F const& x) { return reinterpret_cast<Rounded<F>const&>(x); }
+template<ARawFloat F> Rounded<F>& cast_rounded(F& x) { return reinterpret_cast<Rounded<F>&>(x); }
 template<ARawFloat F> Rounded<F>& cast_rounded(Error<F>& x) { return reinterpret_cast<Rounded<F>&>(x); }
 
-template<class F, class PRE> Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-    Value<F> mx1=-x1;
+template<class F, class PRE> Ball<F,RawFloatType<PRE>> add(F const& x1, F const& x2, PRE pre) {
+    F mx1=-x1;
     F::set_rounding_to_nearest();
     F r(x1.raw() + x2.raw());
     F::set_rounding_upward();
@@ -601,8 +601,8 @@ template<class F, class PRE> Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, V
     e += max(u-r,ml+r);
     return Ball(r,e);
 }
-template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, Value<F> const& x2, PRE pre) {
-    Value<F> mx1=-x1;
+template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(F const& x1, F const& x2, PRE pre) {
+    F mx1=-x1;
     F::set_rounding_to_nearest();
     F r(x1.raw() * x2.raw());
     F::set_rounding_upward();
@@ -615,7 +615,7 @@ template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, V
 
 
 
-template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+template<class F> F add_err(F const& x1, F const& x2, Error<F>& e) {
     Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
     Rounded<F> r(cast_rounded(x1) + cast_rounded(x2));
@@ -626,7 +626,7 @@ template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error
     return cast_exact(r);
 }
 
-template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+template<class F> F add_err(F const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
     Rounded<F> const& xv=x.raw();
     Rounded<F> const& cl=c.lower_raw();
     Rounded<F> const& cm=c.middle_raw();
@@ -638,10 +638,10 @@ template<class F> Value<F> add_err(Value<F> const& x, ValidatedApproximation<F> 
     Rounded<F> u=xv+cu;
     Rounded<F> ml=(-xv)-cl;
     re += hlf(u+ml);
-    return Value<F>(rv);
+    return F(rv);
 }
 
-template<class F> Value<F> add_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+template<class F> F add_err(F const& x, Bounds<F> const& c, Error<F>& e) {
     return add_err(x,ValidatedApproximation<F>(c),e);
 }
 
@@ -661,10 +661,10 @@ template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approxima
     return add(x1,x2);
 }
 
-template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+template<class F> F sub_err(F const& x1, F const& x2, Error<F>& e) {
     Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(cast_rounded(x1) - cast_rounded(x2));
+    F r(cast_rounded(x1) - cast_rounded(x2));
     F::set_rounding_upward();
     Rounded<F> u=cast_rounded(x1)-cast_rounded(x2);
     Rounded<F> ml=mx1+cast_rounded(x2);
@@ -688,9 +688,9 @@ template<class F> Approximation<F> sub_err(Approximation<F> const& x1, Approxima
     return sub(x1,x2);
 }
 
-template<class F> Value<F> mul_no_err(Value<F> const& x1, Value<F> const& x2) {
+template<class F> F mul_no_err(F const& x1, F const& x2) {
     F::set_rounding_to_nearest();
-    Value<F> r(x1.raw() * x2.raw());
+    F r(x1.raw() * x2.raw());
     F::set_rounding_upward();
     return r;
 }
@@ -699,10 +699,10 @@ template<class F> Approximation<F> mul_no_err(Approximation<F> const& x1, Approx
     return x1*x2;
 }
 
-template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+template<class F> F mul_err(F const& x1, F const& x2, Error<F>& e) {
     Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(cast_rounded(x1) * cast_rounded(x2));
+    F r(cast_rounded(x1) * cast_rounded(x2));
     F::set_rounding_upward();
     Rounded<F> u=cast_rounded(x1) * cast_rounded(x2);
     Rounded<F> ml=mx1*cast_rounded(x2);
@@ -710,7 +710,7 @@ template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error
     return r;
 }
 
-template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
+template<class F> F mul_err(F const& x, ValidatedApproximation<F> const& c, Error<F>& e) {
     Rounded<F> const& xv=x.raw();
     Rounded<F> const& cu=c.upper_raw();
     Rounded<F> const& cm=c.middle_raw();
@@ -730,15 +730,15 @@ template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> 
         Rounded<F> ml=xv*mcu;
         re+=hlf(u+ml);
     }
-    return Value<F>(rv);
+    return F(rv);
 }
 
-template<class F> Value<F> mul_err(Value<F> const& x, Bounds<F> const& c, Error<F>& e) {
+template<class F> F mul_err(F const& x, Bounds<F> const& c, Error<F>& e) {
     return mul_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class F> Value<F> mul_err(Value<F> const& x1, Nat n2, Error<F>& e) {
-    return mul_err(x1,Value<F>(n2,x1.precision()),e);
+template<class F> F mul_err(F const& x1, Nat n2, Error<F>& e) {
+    return mul_err(x1,F(n2,x1.precision()),e);
 }
 
 template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
@@ -769,10 +769,10 @@ template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Nat n2, U
     return mul_err(x1,Approximation<F>(n2,x1.precision()),e);
 }
 
-template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
+template<class F> F div_err(F const& x1, F const& x2, Error<F>& e) {
     Rounded<F> mx1=-x1;
     F::set_rounding_to_nearest();
-    Value<F> r(cast_rounded(x1) / cast_rounded(x2));
+    F r(cast_rounded(x1) / cast_rounded(x2));
     F::set_rounding_upward();
     Rounded<F> u=cast_rounded(x1)/cast_rounded(x2);
     Rounded<F> ml=mx1/x2;
@@ -780,8 +780,8 @@ template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error
     return r;
 }
 
-template<class F> Value<F> div_err(Value<F> const& x1, Nat n2, Error<F>& e) {
-    return div_err(x1,Value<F>(n2,x1.precision()),e);
+template<class F> F div_err(F const& x1, Nat n2, Error<F>& e) {
+    return div_err(x1,F(n2,x1.precision()),e);
 }
 
 template<class F> Bounds<F> div_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
@@ -812,7 +812,7 @@ template<class F> Approximation<F> div_err(Approximation<F> const& x1, Nat n2, U
 
 
 
-template<class F> Value<F> fma_err(Value<F> const& x, Value<F> const& y, Value<F> z, Error<F>& e) {
+template<class F> F fma_err(F const& x, F const& y, F z, Error<F>& e) {
     Rounded<F> const& xv=x.raw();
     Rounded<F> const& yv=y.raw();
     Rounded<F>const& zv=z.raw();
@@ -824,10 +824,10 @@ template<class F> Value<F> fma_err(Value<F> const& x, Value<F> const& y, Value<F
     Rounded<F> u=xv*yv+zv;
     Rounded<F> ml=xv*myv-zv;
     re+=(u+ml)/2;
-    return Value<F>(rv);
+    return F(rv);
 }
 
-template<class F> Value<F> fma_err(ValidatedApproximation<F> const& c, Value<F> const& x, Value<F> y, Error<F>& e) {
+template<class F> F fma_err(ValidatedApproximation<F> const& c, F const& x, F y, Error<F>& e) {
     Rounded<F> const& xv=x.raw();
     Rounded<F> const& cu=c.upper_raw();
     Rounded<F> const& cm=c.middle_raw();
@@ -848,10 +848,10 @@ template<class F> Value<F> fma_err(ValidatedApproximation<F> const& c, Value<F> 
         ml=xv*mcu-yv;
     }
     re+=(u+ml)/2;
-    return Value<F>(rv);
+    return F(rv);
 }
 
-template<class F> Value<F> fma_err(Bounds<F> const& c, Value<F> const& x, Value<F> y, Error<F>& e) {
+template<class F> F fma_err(Bounds<F> const& c, F const& x, F y, Error<F>& e) {
     return fma_err(ValidatedApproximation<F>(c),x,y,e);
 }
 
@@ -1888,11 +1888,11 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_split(const Taylo
 
 // Banach algebra operations
 
-template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator/(TaylorModel<ValidatedTag,UpperInterval<F>> const& x1, Value<F> const& x2) {
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator/(TaylorModel<ValidatedTag,UpperInterval<F>> const& x1, F const& x2) {
     return x1/UpperInterval<F>(x2); }
-template<class F> TaylorModel<ValidatedTag,UpperInterval<F>>& operator/=(TaylorModel<ValidatedTag,UpperInterval<F>>& x1, Value<F> const& x2) {
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>>& operator/=(TaylorModel<ValidatedTag,UpperInterval<F>>& x1, F const& x2) {
     return x1/=UpperInterval<F>(x2); }
-template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator-(TaylorModel<ValidatedTag,UpperInterval<F>> x1, Value<F> const& x2) {
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator-(TaylorModel<ValidatedTag,UpperInterval<F>> x1, F const& x2) {
     return x1-UpperInterval<F>(x2); }
 
 
@@ -2131,7 +2131,7 @@ jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<Bounds<F>>& 
 }
 
 // Compute the Jacobian at the origin
-template<class P, class F> Matrix<Value<F>>
+template<class P, class F> Matrix<F>
 jacobian_value(const Vector<TaylorModel<P,F>>& f) {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     SizeType rs=f.size();
@@ -2147,7 +2147,7 @@ jacobian_value(const Vector<TaylorModel<P,F>>& f) {
 }
 
 // Compute the Jacobian at the origin with respect to the variables args.
-template<class P, class F> Matrix<Value<F>>
+template<class P, class F> Matrix<F>
 jacobian_value(const Vector<TaylorModel<P,F>>& f, const Array<SizeType>& p) {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     const SizeType rs=f.size();
@@ -2220,7 +2220,7 @@ template<class F> TaylorModel<ValidatedTag,F> value_coefficients(TaylorModel<Val
     auto& e=r.error();
 
     for (auto term : tm.expansion()) {
-        Value<F> c=set_err(term.coefficient(),e);
+        F c=set_err(term.coefficient(),e);
         r.expansion().append(term.index(), c);
     }
     e+=tm.error();
@@ -2232,7 +2232,7 @@ template<class F> TaylorModel<ValidatedTag,Bounds<F>> exact_coefficients(TaylorM
     auto& e=r.error();
 
     for (auto term : tm.expansion()) {
-        Value<F> c=set_err(term.coefficient(),e);
+        F c=set_err(term.coefficient(),e);
         r.expansion().append(term.index(), c);
     }
     e+=tm.error();

@@ -45,8 +45,6 @@ namespace Ariadne {
 typedef void Void;
 typedef std::ostream OutputStream;
 
-typedef Value<FloatDP> FloatDPValue;
-
 //! \ingroup DynamicsModule
 //! \brief A class which defines the state space grid to use given the continuous state variables \a spc.
 class Scalings {

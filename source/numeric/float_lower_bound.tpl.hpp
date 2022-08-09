@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-template<class F> LowerBound<F>::LowerBound(Value<F> const& x, PR pr) : _l(x,downward,pr) {}
+template<class F> LowerBound<F>::LowerBound(F const& x, PR pr) : _l(x,downward,pr) {}
 template<class F> LowerBound<F>::LowerBound(Bounds<F> const& x, PR pr) : _l(x._l,downward,pr) {}
 template<class F> LowerBound<F>::LowerBound(LowerBound<F> const& x, PR pr) : _l(x._l,downward,pr) {}
 

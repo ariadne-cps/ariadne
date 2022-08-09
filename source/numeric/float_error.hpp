@@ -48,7 +48,7 @@ namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
-//! \sa FloatDP, FloatMP, Value, UpperBound.
+//! \sa FloatDP, FloatMP, Float, UpperBound.
 template<class F> class Error
     : public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
     , public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
@@ -67,7 +67,7 @@ template<class F> class Error
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Error(PositiveValue<F> const& x);
+    Error(Positive<F> const& x);
     Error(PositiveBounds<F> const& x);
     //! Convert from a positive upper bound \a x on the value to be used to represent an error-bound.
     Error(PositiveUpperBound<F> const& x) : _e(x._u) { }
@@ -135,10 +135,10 @@ template<class F> class Error
     //! <p/>
     friend Error<F> mag(Error<F> const& x) { return x; }
 
-        friend Error<F> operator+(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(add(up,x1._e,x2)); }
-        friend Error<F> operator+(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1,x2._e)); }
-        friend Error<F> operator*(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(mul(up,x1._e,x2)); }
-        friend Error<F> operator*(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1,x2._e)); }
+        friend Error<F> operator+(Error<F> const& x1, Positive<F> const& x2) { return Error<F>(add(up,x1._e,x2)); }
+        friend Error<F> operator+(Positive<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1,x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, Positive<F> const& x2) { return Error<F>(mul(up,x1._e,x2)); }
+        friend Error<F> operator*(Positive<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1,x2._e)); }
 
         friend Error<F> operator+(Error<F> const& x1, PositiveBounds<F> const& x2) { return Error<F>(add(up,x1._e,x2._u)); }
         friend Error<F> operator+(PositiveBounds<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._u,x2._e)); }
@@ -175,12 +175,12 @@ template<class F> class Error
     friend Error<F>& operator+=(Error<F>& x1, Error<F> const& x2) { return x1=x1+x2; }
         friend Error<F>& operator+=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1+x2; }
         friend Error<F>& operator+=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1+x2; }
-        friend Error<F>& operator+=(Error<F>& x1, PositiveValue<F> const& x2) { return x1=x1+x2; }
+        friend Error<F>& operator+=(Error<F>& x1, Positive<F> const& x2) { return x1=x1+x2; }
     //! <p/>
     friend Error<F>& operator*=(Error<F>& x1, Error<F> const& x2) { return x1=x1*x2; }
         friend Error<F>& operator*=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1*x2; }
         friend Error<F>& operator*=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1*x2; }
-        friend Error<F>& operator*=(Error<F>& x1, PositiveValue<F> const& x2) { return x1=x1*x2; }
+        friend Error<F>& operator*=(Error<F>& x1, Positive<F> const& x2) { return x1=x1*x2; }
 
   public:
     //! <p/>
@@ -188,9 +188,9 @@ template<class F> class Error
     //! <p/>
     friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); }
     //! <p/>
-    friend UpperBound<F> operator+(Value<F> const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1,x2._e)); }
+    friend UpperBound<F> operator+(F const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1,x2._e)); }
     //! <p/>
-    friend LowerBound<F> operator-(Value<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1,x2._e)); }
+    friend LowerBound<F> operator-(F const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1,x2._e)); }
     //! <p/>
     friend UpperBound<F> log2(Error<F> const& x) {
         return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }

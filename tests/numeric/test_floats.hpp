@@ -51,7 +51,7 @@ template<class F> Bool models(Ball<F> x, Rational q) { return x.error_raw() >= a
 
 template<class F, class FE> Bool models(Ball<F,FE> x, Rational y) {
     return abs(Dyadic(x.value())-y) <= Dyadic(x.error_raw()); }
-template<class F, class FE> Bool models(Ball<F,FE> x, Value<F> v) {
+template<class F, class FE> Bool models(Ball<F,FE> x, F v) {
     return abs(Dyadic(x.value())-Dyadic(v)) <= Dyadic(x.error_raw()); }
 
 

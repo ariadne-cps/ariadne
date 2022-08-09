@@ -143,7 +143,7 @@ using RoundedFloatDP = Rounded<FloatDP>;
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%FloatDP(3.25)</c> is represented exactly, <c>%FloatDP(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %FloatDP from a string literal may be supported.
-//! \sa FloatMP, Real, FloatDPValue, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
+//! \sa FloatMP, Real, FloatDP, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
 template<> class Float<DP>
     : public DeclareRoundedOperations<Float<DP>>
 {

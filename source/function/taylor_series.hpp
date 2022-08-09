@@ -48,29 +48,29 @@ template<class X> class TaylorSeries;
 
 template<> class TaylorSeries<FloatDPBounds> {
     IntervalDomainType _domain;
-    Array<FloatDPValue> _expansion;
+    Array<FloatDP> _expansion;
     FloatDPError _error;
   public:
-    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u,FloatDPValue(dp)), _error(0u,dp) { }
+    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u,FloatDP(dp)), _error(0u,dp) { }
 
-    TaylorSeries(const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree,
+    TaylorSeries(const IntervalDomainType& domain, const FloatDP& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
-    template<class OP> TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree);
+    template<class OP> TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDP& centre, DegreeType degree);
 
     DegreeType degree() const { return _expansion.size()-1u; }
-    FloatDPValue const& operator[](DegreeType i) const { return _expansion[i]; }
-    Array<FloatDPValue> expansion() const { return _expansion; }
+    FloatDP const& operator[](DegreeType i) const { return _expansion[i]; }
+    Array<FloatDP> expansion() const { return _expansion; }
     FloatDPError error() const { return _error; }
-    Void sweep(FloatDPValue threshold);
+    Void sweep(FloatDP threshold);
 
     friend OutputStream& operator<<(OutputStream&, TaylorSeries<FloatDPBounds> const&);
 };
 
 
 template<class OP> inline
-TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)
-    : _domain(domain), _expansion(degree+1u,FloatDPValue(dp)), _error(0u,dp)
+TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDP& centre, DegreeType degree)
+    : _domain(domain), _expansion(degree+1u,FloatDP(dp)), _error(0u,dp)
 {
     Series<FloatDPBounds> centre_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(centre));
     Series<FloatDPBounds> range_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(cast_singleton(domain)));
@@ -85,7 +85,7 @@ TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomai
 
 
 inline
-Void TaylorSeries<FloatDPBounds>::sweep(FloatDPValue threshold) {
+Void TaylorSeries<FloatDPBounds>::sweep(FloatDP threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
         if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);

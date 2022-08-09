@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-template<SameAs<RawFloatDP> X1, SameAs<FloatDPValue> X2>
+template<SameAs<RawFloatDP> X1, SameAs<FloatDP> X2>
     bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
 
 // Threshold for matrix diagonal elements below which it may be considered singular
@@ -1522,7 +1522,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 template class SimplexSolver<RoundedFloatDP>;
 template class SimplexSolver<FloatDPApproximation>;
-template class SimplexSolver<FloatDPValue>;
+template class SimplexSolver<FloatDP>;
 template class SimplexSolver<Rational>;
 
 

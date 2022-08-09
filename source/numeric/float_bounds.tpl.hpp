@@ -59,8 +59,8 @@ template<class F> LowerBound<F> const Bounds<F>::lower() const {
     return LowerBound<F>(lower_raw()); }
 template<class F> UpperBound<F> const Bounds<F>::upper() const {
     return UpperBound<F>(upper_raw()); }
-template<class F> const Value<F> Bounds<F>::value() const {
-    return Value<F>(med(near,this->_l,this->_u)); }
+template<class F> const F Bounds<F>::value() const {
+    return F(med(near,this->_l,this->_u)); }
 template<class F> const Error<F> Bounds<F>::error() const {
     RawFloat<PR> _v=med(near,this->_l,this->_u); return Error<F>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
 
@@ -86,7 +86,7 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
     const Bounds<F> two_pi_val=2*pi_val;
     if(x.error().raw()>two_pi_val.lower().raw()) { return Bounds<F>(-one,+one); }
 
-    Value<F> n(round(div(near,x.value_raw(),(two_pi_val.value_raw()))));
+    F n(round(div(near,x.value_raw(),(two_pi_val.value_raw()))));
     Bounds<F> y=x-2*(n*pi_val);
 
     ARIADNE_ASSERT(y.lower_raw()<=pi_val.upper_raw());

@@ -135,7 +135,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
 
 
 
-template<class F> PositiveUpperBound<F> norm(Covector<Value<F>> const& g) {
+template<class F> PositiveUpperBound<F> norm(Covector<F> const& g) {
     PositiveUpperBound<F> r=mag(g.zero_element());
     for (SizeType i=0; i!=g.size(); ++i) {
         r += mag(g[i]);
@@ -274,8 +274,8 @@ template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const B
     return affine_model(tf.model());
 }
 
-inline decltype(auto) operator<(FloatMPApproximation x,const FloatDPValue y) { return x<FloatMPApproximation(y.get_d(),x.precision()); }
-inline decltype(auto) operator<(FloatMPValue x,const FloatDPValue y) { return x<FloatMPValue(Dyadic(y.get_d()),x.precision()); }
+inline decltype(auto) operator<(FloatMPApproximation x,const FloatDP y) { return x<FloatMPApproximation(y.get_d(),x.precision()); }
+inline decltype(auto) operator<(FloatMP x,const FloatDP y) { return x<FloatMP(Dyadic(y.get_d()),x.precision()); }
 
 // FIXME: Clean up construction of interval with precision PrecisionType<F>
 template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
@@ -301,9 +301,9 @@ template<class F> Vector<AffineModel<ApproximateTag,F>> AffineModel<ApproximateT
 template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
     AffineModel<ValidatedTag,F> r(n,pr);
-    FloatValue<PR> l(Dyadic(codom.lower_bound()),pr);
-    FloatValue<PR> u(Dyadic(codom.upper_bound()),pr);
-    Interval<FloatValue<PR>> ivl(l,u);
+    Float<PR> l(Dyadic(codom.lower_bound()),pr);
+    Float<PR> u(Dyadic(codom.upper_bound()),pr);
+    Interval<Float<PR>> ivl(l,u);
     r.set_gradient(j,1);
     r*=ivl.radius();
     r+=ivl.midpoint();

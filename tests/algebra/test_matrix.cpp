@@ -67,13 +67,13 @@ TestMatrix::test_concept()
 {
     FloatDPApproximation fx(1,dp);
     FloatDPBounds ix(1,dp);
-    FloatDPValue ex(1,dp);
+    FloatDP ex(1,dp);
     Vector<FloatDPApproximation> fv;
     Vector<FloatDPBounds> iv;
-    Vector<FloatDPValue> ev;
+    Vector<FloatDP> ev;
     Matrix<FloatDPApproximation> fA(0,0,dp);
     Matrix<FloatDPBounds> iA(0,0,dp);
-    Matrix<FloatDPValue> eA(0,0,dp);
+    Matrix<FloatDP> eA(0,0,dp);
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
     fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;

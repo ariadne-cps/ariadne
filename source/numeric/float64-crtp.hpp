@@ -53,11 +53,11 @@ class FloatDPUpperBound;
 class ValidFloatDP;
 class FloatDPBounds;
 class FloatDPError;
-class FloatDPValue;
+class FloatDP;
 
 class Rational;
 
-FloatDPValue operator"" _x(long double);
+FloatDP operator"" _x(long double);
 FloatDPError operator"" _e(long double);
 FloatDPLowerBound operator"" _l(long double);
 FloatDPUpperBound operator"" _u(long double);
@@ -131,12 +131,12 @@ inline Bool operator>=(FloatDP x1, FloatDP x2) { return (x2<=x1); }
 inline Bool operator< (FloatDP x1, FloatDP x2) { return !(x2<=x1); }
 inline Bool operator> (FloatDP x1, FloatDP x2) { return !(x1<=x2); }
 
-/************ FloatDPValue ***************************************************/
+/************ FloatDP ***************************************************/
 
-extern const FloatDPValue inf;
+extern const FloatDP inf;
 
-class FloatDPValue
-    : public NumberObject<FloatDPValue>
+class FloatDP
+    : public NumberObject<FloatDP>
 {
     friend class FloatDPBounds;
     friend class FloatDPApproximation;
@@ -146,12 +146,12 @@ class FloatDPValue
     static Void set_output_places(Int);
   public:
     typedef ExactTag Paradigm;
-    FloatDPValue();
-    template<BuiltinIntegral N> FloatDPValue(N);
-    FloatDPValue(Nat);
-    FloatDPValue(Int);
-    explicit FloatDPValue(double);
-    explicit FloatDPValue(FloatDP);
+    FloatDP();
+    template<BuiltinIntegral N> FloatDP(N);
+    FloatDP(Nat);
+    FloatDP(Int);
+    explicit FloatDP(double);
+    explicit FloatDP(FloatDP);
     operator FloatDPBounds () const;
     operator ValidFloatDP () const;
     operator FloatDPLowerBound () const;
@@ -159,24 +159,24 @@ class FloatDPValue
     operator FloatDPApproximation () const;
     FloatDP get_flt() const;
     double get_d() const;
-    friend FloatDPValue operator+(FloatDPValue);
-    friend FloatDPValue operator-(FloatDPValue);
-    friend FloatDPBounds operator+(FloatDPValue x1, FloatDPValue x2);
-    friend FloatDPBounds operator-(FloatDPValue x1, FloatDPValue x2);
-    friend FloatDPBounds operator*(FloatDPValue x1, FloatDPValue x2);
-    friend FloatDPBounds operator/(FloatDPValue x1, FloatDPValue x2);
-    friend OutputStream& operator<<(OutputStream& os, FloatDPValue const&);
+    friend FloatDP operator+(FloatDP);
+    friend FloatDP operator-(FloatDP);
+    friend FloatDPBounds operator+(FloatDP x1, FloatDP x2);
+    friend FloatDPBounds operator-(FloatDP x1, FloatDP x2);
+    friend FloatDPBounds operator*(FloatDP x1, FloatDP x2);
+    friend FloatDPBounds operator/(FloatDP x1, FloatDP x2);
+    friend OutputStream& operator<<(OutputStream& os, FloatDP const&);
   private:
-    FloatDPValue(long long int n, std::nullptr_t);
+    FloatDP(long long int n, std::nullptr_t);
 };
-Boolean operator==(FloatDPValue x1, FloatDPValue x2);
-Boolean operator!=(FloatDPValue x1, FloatDPValue x2);
-Boolean operator<=(FloatDPValue x1, FloatDPValue x2);
-Boolean operator>=(FloatDPValue x1, FloatDPValue x2);
-Boolean operator< (FloatDPValue x1, FloatDPValue x2);
-Boolean operator> (FloatDPValue x1, FloatDPValue x2);
-FloatDPValue min(FloatDPValue x1, FloatDPValue x2);
-FloatDPValue max(FloatDPValue x1, FloatDPValue x2);
+Boolean operator==(FloatDP x1, FloatDP x2);
+Boolean operator!=(FloatDP x1, FloatDP x2);
+Boolean operator<=(FloatDP x1, FloatDP x2);
+Boolean operator>=(FloatDP x1, FloatDP x2);
+Boolean operator< (FloatDP x1, FloatDP x2);
+Boolean operator> (FloatDP x1, FloatDP x2);
+FloatDP min(FloatDP x1, FloatDP x2);
+FloatDP max(FloatDP x1, FloatDP x2);
 
 class FloatDPError : public NumberObject<FloatDPUpperBound> {
     volatile double e;
@@ -198,7 +198,7 @@ class FloatDPError : public NumberObject<FloatDPUpperBound> {
     friend FloatDPError operator+(FloatDPError,FloatDPError);
     friend FloatDPError operator*(FloatDPError,FloatDPError);
     friend FloatDPError pow(FloatDPError,Nat);
-    friend FloatDPUpperBound operator/(FloatDPError x1, FloatDPValue x2);
+    friend FloatDPUpperBound operator/(FloatDPError x1, FloatDP x2);
     friend OutputStream& operator<<(OutputStream& os, FloatDPError const&);
     friend Fuzzy operator==(FloatDPError, FloatDP);
 };
@@ -218,9 +218,9 @@ class ValidFloatDP : public NumberObject<ValidFloatDP> {
     template<BuiltinIntegral N> ValidFloatDP(N n);
     explicit ValidFloatDP(double);
     explicit ValidFloatDP(double,double);
-    ValidFloatDP(FloatDPValue, FloatDPError);
+    ValidFloatDP(FloatDP, FloatDPError);
     operator FloatDPApproximation () const;
-    FloatDPValue value() const;
+    FloatDP value() const;
     FloatDPError error() const;
     FloatDPUpperBound upper() const;
     FloatDPLowerBound lower() const;
@@ -386,7 +386,7 @@ class TwoExp {
   public:
     TwoExp(Int n) : _n(n) { }
     double get_d() const { if(_n>=0) { return 1<<_n; } else { return 1.0/(1<<(-_n)); } }
-    operator FloatDPValue () const { return FloatDPValue(this->get_d()); }
+    operator FloatDP () const { return FloatDP(this->get_d()); }
     operator FloatDPError () const { return FloatDPError(this->get_d()); }
     operator ValidFloatDP () const { return ValidFloatDP(this->get_d()); }
     operator FloatDPBounds () const { return FloatDPBounds(this->get_d()); }
@@ -394,7 +394,7 @@ class TwoExp {
 inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
 
-FloatDPValue cast_exact(const FloatDP&);
+FloatDP cast_exact(const FloatDP&);
 FloatDPError make_error(const FloatDP&);
 ValidFloatDP make_valid(const FloatDP&);
 FloatDP cast_raw(const FloatDPApproximation&);

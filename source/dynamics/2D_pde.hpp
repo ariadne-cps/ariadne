@@ -12,19 +12,19 @@ namespace Ariadne
                                     damping(0, pr),
                                     x0(0, pr)
             {}
-            FloatValue<PR> length;     //Length
-            FloatValue<PR> damping;    //damping
-            FloatValue<PR> x0;
+            Float<PR> length;     //Length
+            Float<PR> damping;    //damping
+            Float<PR> x0;
     }; 
 
 
 
     // Set initial condition
     template<class PR>
-    Tensor<2, FloatValue<PR>> set_ic_2d(Parameter2D<PR>firstDim, Parameter2D<PR>secondDim, SizeType Nx, SizeType Ny, Array<FloatValue<PR>> spacePointX, Array<FloatValue<PR>> spacePointY, PR pr)
+    Tensor<2, Float<PR>> set_ic_2d(Parameter2D<PR>firstDim, Parameter2D<PR>secondDim, SizeType Nx, SizeType Ny, Array<Float<PR>> spacePointX, Array<Float<PR>> spacePointY, PR pr)
     {
-        FloatValue<PR> zb(0, pr);
-        Tensor<2, FloatValue<PR>> u({Nx, Ny}, zb);
+        Float<PR> zb(0, pr);
+        Tensor<2, Float<PR>> u({Nx, Ny}, zb);
         for (SizeType i = 0; i < Nx; i++)
         {
             for (SizeType j = 0; j < Ny; j++)
@@ -36,9 +36,9 @@ namespace Ariadne
     }
 
     template<class PR>
-    Array<FloatValue<PR>> linspace2d(FloatValue<PR> L, SizeType n, PR pr)
+    Array<Float<PR>> linspace2d(Float<PR> L, SizeType n, PR pr)
     {
-        Array<FloatValue<PR>> linspaced(n,FloatValue<PR>(0, pr));
+        Array<Float<PR>> linspaced(n,Float<PR>(0, pr));
         if (n == 0)
             return linspaced;
         if (n == 1)
@@ -46,7 +46,7 @@ namespace Ariadne
             linspaced[0] = L;
             return linspaced;
         }
-        FloatValue<PR> delta = (L/n).value();
+        Float<PR> delta = (L/n).value();
         for (SizeType i = 0; i < (n - 1); i++)
         {
             linspaced[i] = ((0 + delta*i)).value();
@@ -58,7 +58,7 @@ namespace Ariadne
 
     // Solving the one dimensional pde
     template<class PR>
-    Tensor<3, FloatValue<PR>> pde_2d_solver(Parameter2D<PR>& firstDim, Parameter2D<PR>& secondDim, SizeType Nx, SizeType Ny, PR pr)
+    Tensor<3, Float<PR>> pde_2d_solver(Parameter2D<PR>& firstDim, Parameter2D<PR>& secondDim, SizeType Nx, SizeType Ny, PR pr)
     {
         auto spaceX = linspace2d(firstDim.length, Nx, pr);    //Mesh point x
         auto spaceY = linspace2d(secondDim.length, Ny, pr);   //Mesh point y
@@ -66,24 +66,24 @@ namespace Ariadne
         auto dx = (spaceX[1] - spaceX[0]).value();
         auto dy = (spaceY[1] - spaceY[0]).value();
 
-        FloatValue<PR> c(cast_exact(ApproximateDouble(5.0)), pr);
-        FloatValue<PR> T(cast_exact(ApproximateDouble(2.0)), pr);
+        Float<PR> c(cast_exact(ApproximateDouble(5.0)), pr);
+        Float<PR> T(cast_exact(ApproximateDouble(2.0)), pr);
 
-        FloatValue<PR> zb(0, pr);
+        Float<PR> zb(0, pr);
 
-        FloatValue<PR> dt(cast_exact(ApproximateDouble(0.09)), pr);
+        Float<PR> dt(cast_exact(ApproximateDouble(0.09)), pr);
         
-        FloatValue<PR> Nt = round(T/dt).value();
+        Float<PR> Nt = round(T/dt).value();
         SizeType Ntime = Nt.get_d();
         auto time = linspace2d(T, Ntime, pr);                   //Mesh point t
 
-        FloatValue<PR> Cx = (c*dt/dx).value();                       //Courant Numbers
-        FloatValue<PR> Cy = (c*dt/dy).value();
-        FloatValue<PR> Cx2 = pow(Cx, 2).value();
-        FloatValue<PR> Cy2 = pow(Cy, 2).value();
+        Float<PR> Cx = (c*dt/dx).value();                       //Courant Numbers
+        Float<PR> Cy = (c*dt/dy).value();
+        Float<PR> Cx2 = pow(Cx, 2).value();
+        Float<PR> Cy2 = pow(Cy, 2).value();
 
-        Tensor<2, FloatValue<PR>> u({Nx, Ny}, zb);
-        Tensor<3, FloatValue<PR>> uts({Nx, Ny, Ntime}, zb);
+        Tensor<2, Float<PR>> u({Nx, Ny}, zb);
+        Tensor<3, Float<PR>> uts({Nx, Ny, Ntime}, zb);
 
         u = set_ic_2d(firstDim, secondDim, Nx, Ny, spaceX, spaceY, pr);
         for (SizeType x = 0; x < Nx; x++)
@@ -123,7 +123,7 @@ namespace Ariadne
     }
 
     template<class PR>
-    Tensor<3, FloatValue<PR>>gaussian_function(Tensor<3, FloatValue<PR>>&tensor, int sizeX, int sizeY, PR pr)
+    Tensor<3, Float<PR>>gaussian_function(Tensor<3, Float<PR>>&tensor, int sizeX, int sizeY, PR pr)
     {
         for (SizeType step = 0; step < 1; step++)
         {
@@ -131,7 +131,7 @@ namespace Ariadne
             {
                 for (SizeType y = 0; y < tensor.size(1); y++)
                 {
-                    tensor[{x, y, step}] = (exp(-pow(FloatValue<PR>(int(x)-sizeX/2, pr), 2).value()/16 - pow(FloatValue<PR>(int(y)-sizeY/2, pr), 2).value()/16).value());};
+                    tensor[{x, y, step}] = (exp(-pow(Float<PR>(int(x)-sizeX/2, pr), 2).value()/16 - pow(Float<PR>(int(y)-sizeY/2, pr), 2).value()/16).value());};
                 }   
             }
         return tensor;

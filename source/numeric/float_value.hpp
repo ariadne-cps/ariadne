@@ -51,10 +51,10 @@ namespace Ariadne {
 template<ARawFloat F> class Positive<F> : public F {
     using PR = typename F::PrecisionType;
   public:
-    Positive() : Value<F>() { }
-    explicit Positive(PR const& pr) : Value<F>(pr) { }
-    template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : Value<F>(m,pr) { }
-    Positive(TwoExp const& ex, PR pr) : Value<F>(ex,pr) { }
+    Positive() : F() { }
+    explicit Positive(PR const& pr) : F(pr) { }
+    template<BuiltinUnsignedIntegral M> Positive(M m, PR pr) : F(m,pr) { }
+    Positive(TwoExp const& ex, PR pr) : F(ex,pr) { }
     explicit Positive(Dyadic const& w, PR pr) : F(w,pr) { }
     explicit Positive(F const& x) : F(x) { }
   public:

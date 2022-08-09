@@ -39,7 +39,7 @@ template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, 
 
 template<> Void Tensor<2ul, Ariadne::Vector<Ariadne::Bounds<Ariadne::FloatDP>>>::draw(Ariadne::CanvasInterface&, Ariadne::Variables3d const&) const { }
 
-template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+template <> Void Tensor<2, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
         //2D Drawing
         for(SizeType frame=0; frame!=_ns[1]; ++frame){
             SizeType index = _index({0, frame});
@@ -52,9 +52,9 @@ template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
         }
     }
 
-template<> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
+template<> Void Tensor<2, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
 
-template<> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+template<> Void Tensor<2, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
     //2D Drawing
     for(SizeType frame=0; frame!=_ns[1]; ++frame){
         SizeType index = _index({0, frame});
@@ -67,8 +67,8 @@ template<> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasIn
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+template <> Void Tensor<2, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Projection3d& p) const { }
+template <> Void Tensor<3, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
     ARIADNE_ASSERT(p.argument_size() == this->dimension());
     if(p.x_coordinate() == 0 && p.y_coordinate() == 1){
         canvas.set_heat_map(true);
@@ -164,7 +164,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     
  }
 
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
+template <> Void Tensor<3, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
     for(SizeType frame=0; frame!=_ns[2]; ++frame){
     SizeType index = _index({0, 0, frame});
     canvas.move_to(0.0, _a[index].get_d());
@@ -182,7 +182,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
 }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
+template <> Void Tensor<3, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Projection2d& p) const {
     ARIADNE_ASSERT(p.argument_size() == this->dimension());
     if(p.x_coordinate() == 0 && p.y_coordinate() == 1){
         canvas.set_heat_map(true);
@@ -276,7 +276,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
     }
  }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
+template <> Void Tensor<3, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Projection3d& p) const {
     for(SizeType frame=0; frame!=_ns[2]; ++frame){
     SizeType index = _index({0, 0, frame});
     canvas.move_to(0.0, _a[index].get_d());
@@ -297,7 +297,7 @@ template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
 template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Variables2d& p) const { }
 template <SizeType N, class X> Void Tensor<N, X>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
 
-template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+template <> Void Tensor<2, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
     for(SizeType frame=0; frame!=_ns[1]; ++frame){
         SizeType index = _index({0, frame});
         canvas.move_to(0.0, _a[index].get_d());
@@ -309,8 +309,8 @@ template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
-template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+template <> Void Tensor<2, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
+template <> Void Tensor<2, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
     for(SizeType frame=0; frame!=_ns[1]; ++frame){
         SizeType index = _index({0, frame});
         canvas.move_to(0.0, _a[index].get_d());
@@ -322,8 +322,8 @@ template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasI
     }
 }
 
-template <> Void Tensor<2, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+template <> Void Tensor<2, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Variables3d& p) const { }
+template <> Void Tensor<3, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
     if(p.x() == RealVariable("x") && p.y() == RealVariable("y")){
         canvas.set_heat_map(true);
         for(SizeType frame=0; frame!=_ns[2]; ++frame){
@@ -416,7 +416,7 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
  }
 
-template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
+template <> Void Tensor<3, Float<DoublePrecision>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
     for(SizeType frame=0; frame!=_ns[2]; ++frame){
     SizeType index = _index({0, 0, frame});
     canvas.move_to(0.0, _a[index].get_d());
@@ -434,10 +434,10 @@ template <> Void Tensor<3, Value<RawFloatType<DoublePrecision>>>::draw(CanvasInt
     }
 }
 
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
+template <> Void Tensor<3, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Variables2d& p) const {
 
  }
-template <> Void Tensor<3, Value<RawFloatType<MultiplePrecision>>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
+template <> Void Tensor<3, Float<MultiplePrecision>>::draw(CanvasInterface& canvas, const Variables3d& p) const {
     for(SizeType frame=0; frame!=_ns[2]; ++frame){
     SizeType index = _index({0, 0, frame});
     canvas.move_to(0.0, _a[index].get_d());

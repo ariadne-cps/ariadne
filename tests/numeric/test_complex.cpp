@@ -213,7 +213,7 @@ int main() {
     typedef FloatDPApproximation XA;
     Complex<XA> x(4,3,dp);
 
-    FloatDPValue one(1,dp);
+    FloatDP one(1,dp);
 //    TestComplex<Real>().test();
 //    TestComplex<FloatDPApproximation>(one).test();
     TestComplex<FloatDPBounds>(one).test();

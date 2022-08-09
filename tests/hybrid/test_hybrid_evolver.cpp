@@ -669,7 +669,7 @@ TestHybridEvolver::test_affine_hysteresis() const
     // with an affine flow in each, and affine guards and resets.
     // This should be very easy to analyse numerically, and is there to test
     // switching logic
-    FloatDPValue::set_output_places(2);
+    FloatDP::set_output_places(2);
 
     StringVariable loc("");
     DiscreteLocation upwards(loc|"upwards");

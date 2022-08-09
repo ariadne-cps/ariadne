@@ -58,8 +58,8 @@ template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, cons
 {
     //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    FloatDPValue& vref=const_cast<FloatDPValue&>(tv.value());
-    FloatDPValue vtmp=vref;
+    FloatDP& vref=const_cast<FloatDP&>(tv.value());
+    FloatDP vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts[ts.degree()];
@@ -90,7 +90,7 @@ template<ANormedAlgebra A> A _compose1(const AnalyticFunction& fn, const A& tm, 
     static const Nat DEGREE=18;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -122,7 +122,7 @@ template<ANormedAlgebra A> A _compose2(const AnalyticFunction& fn, const A& tm, 
     static const Nat DEGREE=20;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -148,7 +148,7 @@ template<ANormedAlgebra A> A _compose2(const AnalyticFunction& fn, const A& tm, 
     return res;
 }
 
-template<class F> Error<F> error_bound(Bounds<F> const& b, Value<F> const& c) {
+template<class F> Error<F> error_bound(Bounds<F> const& b, F const& c) {
     return Error<F>(max(b.upper()-c,c-b.lower()));
 }
 
@@ -165,7 +165,7 @@ template<ANormedAlgebra A> A _compose3(const AnalyticFunction& fn, const A& tm, 
     static const Nat DEGREE=20;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);

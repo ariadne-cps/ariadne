@@ -252,7 +252,7 @@ void TestReal::test_accuracy() {
     Effort effort{256};
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi_.compute(effort)));
     Accuracy accuracy{256_bits};
-    FloatMPValue error(accuracy.error(),mp);
+    FloatMP error(accuracy.error(),mp);
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi_.compute(accuracy)));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
     ARIADNE_TEST_PRINT(pi_met_mp.error());

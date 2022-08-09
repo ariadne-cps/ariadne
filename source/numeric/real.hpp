@@ -119,7 +119,7 @@ class Real
     Real(Decimal const& d); //!< Construct from a decimal number, given by its decimal expansion.
     Real(Rational const& q); //!< Construct from a rational number.
 
-    explicit Real(FloatDPValue x); //!< DEPRECATED
+    explicit Real(FloatDP x); //!< DEPRECATED
     explicit Real(EffectiveNumber r); //!< DEPRECATED
 
     operator EffectiveNumber() const; //!< Convert to an effective number for computations.

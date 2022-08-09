@@ -31,23 +31,23 @@
 
 namespace Ariadne {
 
-template<class F> inline auto Operations<Bounds<F>>::_add(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F> {
+template<class F> inline auto Operations<Bounds<F>>::_add(Bounds<F> const& x1, F const& x2) -> Bounds<F> {
     return Bounds<F>(add(down,x1._l,x2),add(up,x1._u,x2));
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_add(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F> {
+template<class F> inline auto Operations<Bounds<F>>::_add(F const& x1, Bounds<F> const& x2) -> Bounds<F> {
     return Bounds<F>(add(down,x1,x2._l),add(down,x1,x2._u));
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_sub(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F> {
+template<class F> inline auto Operations<Bounds<F>>::_sub(Bounds<F> const& x1, F const& x2) -> Bounds<F> {
     return Bounds<F>(sub(down,x1._l,x2),sub(up,x1._u,x2));
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_sub(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F> {
+template<class F> inline auto Operations<Bounds<F>>::_sub(F const& x1, Bounds<F> const& x2) -> Bounds<F> {
     return Bounds<F>(sub(down,x1,x2._u),sub(up,x1,x2._l));
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F>
+template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, F const& x2) -> Bounds<F>
 {
     const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
     const F& x2v=x2;
@@ -61,7 +61,7 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, V
     return Bounds<F>(rl,ru);
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_mul(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
+template<class F> inline auto Operations<Bounds<F>>::_mul(F const& x1, Bounds<F> const& x2) -> Bounds<F>
 {
     const F& x1v=x1;
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
@@ -75,7 +75,7 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Value<F> const& x1, Bo
     return Bounds<F>(rl,ru);
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, Value<F> const& x2) -> Bounds<F>
+template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, F const& x2) -> Bounds<F>
 {
     const F& x1l=x1.lower_raw();
     const F& x1u=x1.upper_raw();
@@ -87,14 +87,14 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, V
     } else if(x2v<0) {
         rl=div(down,x1u,x2v); ru=div(up,x1l,x2v);
     } else {
-        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, FloatValue x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, Float x2)","x1="<<x1<<", x2="<<x2);
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     }
     return Bounds<F>(rl,ru);
 }
 
-template<class F> inline auto Operations<Bounds<F>>::_div(Value<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
+template<class F> inline auto Operations<Bounds<F>>::_div(F const& x1, Bounds<F> const& x2) -> Bounds<F>
 {
     const F& x1v=x1;
     const F& i2l=x2.lower_raw();
@@ -102,7 +102,7 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Value<F> const& x1, Bo
     PR pr(min(x1.precision(),x2.precision()));
     F rl(pr), ru(pr);
     if(i2l<=0 && i2u>=0) {
-        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatValue const& x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(Float const& x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     } else if(x1v>=0) {

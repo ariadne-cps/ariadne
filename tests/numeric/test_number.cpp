@@ -93,7 +93,7 @@ TestNumbers::test_float_value_behaviour()
     ExactNumber z(Integer(1));
     ExactNumber w(Dyadic(1));
     ExactNumber q(Rational(1));
-    ExactNumber y(FloatDPValue(1,dp));
+    ExactNumber y(FloatDP(1,dp));
     ExactNumber r;
     try {
         ARIADNE_TEST_NOTIFY("Binary addition on Float<DP> within ExactNumber yields "<<(y+y).class_name());
@@ -140,7 +140,7 @@ TestNumbers::test_float_value_behaviour()
     } catch (const DispatchException& e) {
         ARIADNE_TEST_NOTIFY("Binary addition on Rational and Float<DP> within ExactNumber gives error:\n    "<<e.what());
     } 
-    y=ExactNumber(FloatMPValue(1,MP(64)));
+    y=ExactNumber(FloatMP(1,MP(64)));
     try {
         ARIADNE_TEST_NOTIFY("Binary addition on Float<MP> within ExactNumber yields "<<(y+y).class_name());
     } catch (const DispatchException& e) {
@@ -161,7 +161,7 @@ TestNumbers::test_float_value_behaviour()
 Void
 TestNumbers::test_operations()
 {
-    Nat m=1u; Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
+    Nat m=1u; Int n=1; Integer z=1; FloatDP v(3,dp); FloatDPBounds b(3,dp);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
     ValidatedErrorNumber en=m; ValidatedErrorNumber ev=v;
 
@@ -169,8 +169,8 @@ TestNumbers::test_operations()
     Dyadic w3(3);
     Rational q2(2);
     Rational q3(3);
-    FloatDPValue x2(2,dp);
-    FloatDPValue x3(3,dp);
+    FloatDP x2(2,dp);
+    FloatDP x3(3,dp);
     ExactNumber y2(x2);
     ExactNumber y3(x3);
 
@@ -190,17 +190,17 @@ TestNumbers::test_operations()
     ARIADNE_TEST_PRINT(max(en,ev).class_name());
     ARIADNE_TEST_PRINT(max(en,ev));
 
-    ARIADNE_TEST_FAIL(add(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
-    ARIADNE_TEST_FAIL(add(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_FAIL(add(ExactNumber(1),ExactNumber(FloatDP(2,dp))));
+    ARIADNE_TEST_FAIL(add(ExactNumber(FloatDP(1,dp)),ExactNumber(FloatDP(2,dp))));
 
     ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
-    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDP(1,dp)),ExactNumber(FloatDP(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDP(2,dp))));
 
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDP(2,dp))));
 
-    ARIADNE_TEST_PRINT(max(ExactNumber(Dyadic(1)),ExactNumber(FloatDPValue(2,dp))));
-    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(Dyadic(2))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(Dyadic(1)),ExactNumber(FloatDP(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDP(1,dp)),ExactNumber(Dyadic(2))));
 
 }
 
@@ -325,7 +325,7 @@ TestNumber<Y>::test_get()
 template<class Y> Void
 TestNumber<Y>::test_class()
 {
-    Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
+    Int n=1; Integer z=1; FloatDP v(3,dp); FloatDPBounds b(3,dp);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
 
     ARIADNE_TEST_EQUAL(yz.class_name(),"Integer");

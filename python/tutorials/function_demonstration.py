@@ -111,7 +111,7 @@ def calculus_demonstration():
 
     # Define some constants
     n=int(3)
-    c=FloatDPValue(exact(0.75),dp)
+    c=FloatDP(exact(0.75),dp)
     b=FloatDPBounds(exact(0.625),exact(0.875),dp);
 
     # Arithmetic on Taylor models

@@ -123,8 +123,8 @@ inline OutputStream& operator<<(OutputStream& os, NumberInterface const& y) { re
 // FIXME: Should test for other potential infinities
 inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     Comparison res;
-    FloatDPValue const* x1=extract<FloatDPValue>(&y1);
-    FloatDPValue const* x2=extract<FloatDPValue>(&y2);
+    FloatDP const* x1=extract<FloatDP>(&y1);
+    FloatDP const* x2=extract<FloatDP>(&y2);
     if(x1) {
         if(x2) { res= cmp(ExactDouble(x1->get_d()),ExactDouble(x2->get_d())); }
         else { res= cmp(ExactDouble(x1->get_d()),y2._get_q()); }
@@ -176,27 +176,27 @@ template<class R, class X1, class X2> inline R _concrete_apply_max_or_min(Binary
 }
 
 // FIXME: Prefer symbolic dispatch
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Value<F> const& x2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, F const& x2) {
     return _concrete_apply_max_or_min<R>(op,x1,x2);
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Integer const& z2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Integer const& z2) {
     return _concrete_apply_max_or_min<R>(op,x1,z2);
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Integer const& z1, Value<F> const& x2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Integer const& z1, F const& x2) {
     return _concrete_apply_max_or_min<R>(op,z1,x2);
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Dyadic const& w2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Dyadic const& w2) {
     return _concrete_apply_max_or_min<R>(op,x1,w2);
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Dyadic const& w1, Value<F> const& x2) {
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Dyadic const& w1, F const& x2) {
     return _concrete_apply_max_or_min<R>(op,w1,x2);
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Value<F> const& x1, Rational const& q2) {
-    String yc1=class_name<Value<F>>(); String yc2=class_name<Rational>();
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Rational const& q2) {
+    String yc1=class_name<F>(); String yc2=class_name<Rational>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<q2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
-template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Rational const& q1, Value<F> const& x2) {
-    String yc1=class_name<Rational>(); String yc2=class_name<Value<F>>();
+template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Rational const& q1, F const& x2) {
+    String yc1=class_name<Rational>(); String yc2=class_name<F>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<q1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
 
@@ -235,7 +235,7 @@ template<> struct Managed<ValidatedAlgebraicNumberInterface> {
     //FIXME: typedef Aware<ExactDouble,Integer,Dyadic,Rational,Real> Types;
 };
 template<class F> struct Managed<ConcreteNumberInterface<F>> {
-    typedef Aware<Value<F>,Ball<F>,Bounds<F>,UpperBound<F>,LowerBound<F>,Approximation<F>> Types;
+    typedef Aware<F,Ball<F>,Bounds<F>,UpperBound<F>,LowerBound<F>,Approximation<F>> Types;
 };
 template<class F, class FE> struct Managed<ConcreteBallInterface<F,FE>> {
     typedef Aware<Ball<F,FE>> Types;

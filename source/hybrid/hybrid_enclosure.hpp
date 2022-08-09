@@ -316,9 +316,9 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDPValue step);
+    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDP step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDPValue step, ValidatedScalarMultivariateFunction elps);
+    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDP step, ValidatedScalarMultivariateFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     Void _apply_flow_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     Void _check() const; // Check that set is well-formed.

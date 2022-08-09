@@ -31,8 +31,8 @@
 
 namespace Ariadne {
 
-Value<FloatDP> midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
-Value<FloatMP> midpoint(Bounds<FloatMP> const& x) { return x.value(); } // DEPRECATED
+FloatDP midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
+FloatMP midpoint(Bounds<FloatMP> const& x) { return x.value(); } // DEPRECATED
 
 template<> auto Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x) -> OutputStream&;
 template<> auto Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x) -> OutputStream&;

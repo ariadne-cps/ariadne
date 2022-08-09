@@ -82,7 +82,7 @@ struct InfeasibleLinearProgram : std::runtime_error {
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
 {
-    typedef FloatDPValue X;
+    typedef FloatDP X;
     typedef RigorousNumericType<X> VX;
     typedef ApproximateNumericType<X> AX;
   public:

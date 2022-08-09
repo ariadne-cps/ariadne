@@ -398,7 +398,7 @@ auto IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
     ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
-    Vector<FloatDPValue> m(cast_exact(x));
+    Vector<FloatDP> m(cast_exact(x));
     ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> w=f.evaluate(im);
@@ -422,7 +422,7 @@ auto KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size(),x.zero_element());
     ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
     ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
-    Vector<FloatDPValue> m(cast_exact(x));
+    Vector<FloatDP> m(cast_exact(x));
     ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -449,7 +449,7 @@ auto FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size(),x.zero_element());
     ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
     ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
-    Vector<FloatDPValue> m(cast_exact(x));
+    Vector<FloatDP> m(cast_exact(x));
     ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
@@ -520,10 +520,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
 
     ValidatedVectorMultivariateFunctionPatch dh(n,z);
     if(n==1) {
-        if(possibly(contains(rngJ[0][0],FloatDPValue(0.0_x,dp)))) {
+        if(possibly(contains(rngJ[0][0],FloatDP(0.0_x,dp)))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(possibly(contains(J[0][0].range(),FloatDPValue(0.0_x,dp)))) {
+        if(possibly(contains(J[0][0].range(),FloatDP(0.0_x,dp)))) {
             dh[0]=fidmh[0]/cast_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];

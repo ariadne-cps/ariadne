@@ -82,7 +82,7 @@ class TestEnclosure
         ARIADNE_TEST_PRINT(configuration);
         ARIADNE_TEST_PRINT(encl);
         ARIADNE_TEST_EQUALS(encl.dimension(),2);
-        ARIADNE_TEST_EQUALS(encl.centre(),FloatDPValuePoint({FloatDPValue(1.0_x,DoublePrecision()),FloatDPValue(2.0_x,DoublePrecision())}));
+        ARIADNE_TEST_EQUALS(encl.centre(),FloatDPPoint({FloatDP(1.0_x,DoublePrecision()),FloatDP(2.0_x,DoublePrecision())}));
         ARIADNE_TEST_EQUALS(encl.radius().raw(),FloatDP(1.0_x,DoublePrecision()));
         ARIADNE_TEST_ASSERT(dom.inside(encl.codomain()));
     }

@@ -68,7 +68,7 @@ UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction c
     return apply(f,bx); }
 
 template class Box<Interval<Real>>;
-template class Box<Interval<FloatDPValue>>;
+template class Box<Interval<FloatDP>>;
 template class Box<Interval<FloatDPUpperBound>>;
 template class Box<Interval<FloatDPLowerBound>>;
 template class Box<Interval<FloatDPApproximation>>;

@@ -80,8 +80,8 @@ template<template<class>class T> inline const T<FloatDPApproximation>& cast_appr
 template<template<class>class T> inline const T<FloatDPApproximation>& cast_approximate(const T<FloatDPApproximation>& t) {
     return reinterpret_cast<const T<FloatDPApproximation>&>(t); }
 
-inline FloatMPValue const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
-inline FloatMPValue const& cast_exact(FloatMPApproximation const& x) { return reinterpret_cast<FloatMPValue const&>(x); }
+inline FloatMP const& cast_exact(RawFloatMP const& x) { return reinterpret_cast<FloatMP const&>(x); }
+inline FloatMP const& cast_exact(FloatMPApproximation const& x) { return reinterpret_cast<FloatMP const&>(x); }
 
 
 } // namespace Ariadne

@@ -115,7 +115,7 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
     MultiIndex ra(r.argument_size());
     for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
         UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformConstReference<Value<F>> xc=xiter->coefficient();
+        UniformConstReference<F> xc=xiter->coefficient();
         for(SizeType i=0; i!=r.argument_size(); ++i) {
             ra[i]=xa[prj.index(i)];
         }

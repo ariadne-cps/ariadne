@@ -81,8 +81,8 @@ template<class F> Void gnuplot(String filename, ValidatedScalarTaylorFunctionMod
     auto pr=tf.properties().precision();
     IntervalDomainType dom=tf.domain()[0];
     Nat m=100;
-    Value<F> ax(Dyadic(dom.lower_bound()),pr);
-    Value<F> bx(Dyadic(dom.upper_bound()),pr);
+    F ax(Dyadic(dom.lower_bound()),pr);
+    F bx(Dyadic(dom.upper_bound()),pr);
     Vector<Bounds<F>> x(1u,pr);
     for(SizeType i=0; i<=m; ++i) {
         x[0] = ((m-i)*ax+i*bx)/m;
@@ -125,8 +125,8 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     ThresholdSweeper<F> swp(pr,eps);
 
     // Define left and right endpoints of interval, and representative test point
-    Vector<Value<F>> a({0.0_x},pr);
-    Vector<Value<F>> b({1.0_x},pr);
+    Vector<F> a({0.0_x},pr);
+    Vector<F> b({1.0_x},pr);
     auto xv=(a+2*b)/3;
 
     // Define domain of problem, and zero and coordinate functions.

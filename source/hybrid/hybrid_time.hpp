@@ -68,7 +68,7 @@ class HybridTime
     //! \brief Create the hybrid time moment with continuous-time \a t and discrete-time steps \a n.
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(FloatDPValue t, Integer n)
+    HybridTime(FloatDP t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(ExactDouble t, Int n)
       : _continuous_time(t), _discrete_time(n) { }

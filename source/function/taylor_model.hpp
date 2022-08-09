@@ -111,7 +111,7 @@ template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>>
 template<class F> struct ModelNumericTraits<ValidatedTag,F>
     : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
 {
-    typedef Value<F> CoefficientType;
+    typedef F CoefficientType;
 };
 template<class F> struct ModelNumericTraits<ApproximateTag,F>
     : public FunctionModelTraits<ApproximateTag,PrecisionType<F>>
@@ -681,8 +681,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
 
 template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y);
 template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y, Array<SizeType>& p);
-template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<F> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<F> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 

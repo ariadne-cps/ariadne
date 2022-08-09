@@ -70,7 +70,7 @@ typedef Differential<FloatDPApproximation> FloatDPApproximationDifferential;
 typedef Vector<FloatDPBounds> FloatDPBoundsVector;
 typedef Matrix<FloatDPBounds> FloatDPBoundsMatrix;
 typedef Differential<FloatDPBounds> FloatDPBoundsDifferential;
-typedef Vector<FloatDPValue> ExactFloatDPVectorType;
+typedef Vector<FloatDP> ExactFloatDPVectorType;
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
@@ -168,8 +168,8 @@ Vector<X> esqr(const Vector<X>& z) {
 
 inline
 ExactIntervalType eivl(const RawFloatDPVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(FloatDPValue(x[0]));
-    for(SizeType i=1; i!=x.size(); ++i) { r=hull(r,FloatDPValue(x[i])); } return r;
+    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(FloatDP(x[0]));
+    for(SizeType i=1; i!=x.size(); ++i) { r=hull(r,FloatDP(x[i])); } return r;
 }
 
 Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const& A1, Matrix<ApproximateNumericType> const& A2, Matrix<ApproximateNumericType> const& A3) {
@@ -468,8 +468,8 @@ inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
 }
 
 
-const FloatDPValue OptimiserBase::zero = FloatDPValue(0,dp);
-const FloatDPValue OptimiserBase::one = FloatDPValue(1,dp);
+const FloatDP OptimiserBase::zero = FloatDP(0,dp);
+const FloatDP OptimiserBase::one = FloatDP(1,dp);
 
 Bool OptimiserBase::
 almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ApproximateVectorType ax, FloatDPApproximation error) const

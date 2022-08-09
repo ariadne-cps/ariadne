@@ -50,8 +50,8 @@ namespace Ariadne {
 
 namespace {
 
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
-    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+Box<Interval<FloatMP>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
+    Box<Interval<FloatMP>> r(bx.dimension(),Interval<FloatMP>(FloatMP(pr),FloatMP(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
     return r;
 }
@@ -67,8 +67,8 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
-    const FloatDPValue& l=ivl.lower_bound();
-    const FloatDPValue& u=ivl.upper_bound();
+    const FloatDP& l=ivl.lower_bound();
+    const FloatDP& u=ivl.upper_bound();
     FloatDPBall c{hlf(l+u)};
     FloatDPBall r{hlf(u-l)};
     FloatDPError e=c.error()+r.error();
@@ -427,7 +427,7 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBoun
     return unchecked_evaluate(f,x);
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> ArithmeticType<CoefficientType,FloatBounds<PR>>
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<Float<PR>>& x) const -> ArithmeticType<CoefficientType,FloatBounds<PR>>
 {
     return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
@@ -543,7 +543,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     FloatError<PR> truncatation_error = truncated_function.error();
     truncated_function.clobber();
     MultivariatePolynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
-    MultivariatePolynomial<FloatValue<PR>> polynomial_function = midpoint(validated_polynomial_function);
+    MultivariatePolynomial<Float<PR>> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();

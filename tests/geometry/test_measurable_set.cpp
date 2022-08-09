@@ -72,8 +72,8 @@ Void TestMeasurableSet::test_scalar_set()
         ARIADNE_TEST_EQUALS(intersection(ivls1,ivls2).measure(),1.5_dy);
         ARIADNE_TEST_EQUALS(join(ivls1,ivls2).measure(),2.5_dy);
 
-        ARIADNE_TEST_CONSTRUCT(UnionOfIntervals<FloatDPValue>,ivls1dp,({{1.0_dy,2.0_dy},{1.5_dy,2.5_dy},{0.0_dy,0.5_dy}},double_precision));
-        ARIADNE_TEST_CONSTRUCT(UnionOfIntervals<FloatMPValue>,ivls1mp,({{1.0_dy,2.0_dy},{1.5_dy,2.5_dy},{0.0_dy,0.5_dy}},precision(128)));
+        ARIADNE_TEST_CONSTRUCT(UnionOfIntervals<FloatDP>,ivls1dp,({{1.0_dy,2.0_dy},{1.5_dy,2.5_dy},{0.0_dy,0.5_dy}},double_precision));
+        ARIADNE_TEST_CONSTRUCT(UnionOfIntervals<FloatMP>,ivls1mp,({{1.0_dy,2.0_dy},{1.5_dy,2.5_dy},{0.0_dy,0.5_dy}},precision(128)));
     }
 
     {

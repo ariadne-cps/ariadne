@@ -54,7 +54,7 @@ class CurveInterface
 {
   public:
     typedef Dyadic GenericParameterType;
-    typedef FloatDPValue ParameterType;
+    typedef FloatDP ParameterType;
     typedef Point<FloatDPApproximation> PointType;
     typedef Vector<FloatDPApproximation> TangentVectorType;
   public:

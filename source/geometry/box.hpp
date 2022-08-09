@@ -526,7 +526,7 @@ inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, ValidatedUpperNumber con
     return widen(bx,FloatDPUpperBound(eps,dp));
 }
 
-inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {
+inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDP eps) {
     return widen(reinterpret_cast<const FloatDPUpperBox&>(bx),FloatDPUpperBound(eps));
 }
 

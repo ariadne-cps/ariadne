@@ -58,8 +58,8 @@ struct DefaultTag;
 //! To obtain a best estimate of the value, use \c x.value(), which has an error at most \a x.error().
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
-//! To test if the bounds contain a number , use \c models(Bounds<F>,Value<F>), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
-//! \sa Real, FloatDP, FloatMP, Value, Ball, UpperBound, LowerBound, Approximation.
+//! To test if the bounds contain a number , use \c models(Bounds<F>,F), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
+//! \sa Real, FloatDP, FloatMP, Float, Ball, UpperBound, LowerBound, Approximation.
 //!
 //! \par Python interface
 //!
@@ -132,7 +132,7 @@ template<class F> class Bounds
     //! Convert from a ball.
     template<class FE> Bounds(Ball<F,FE> const& x);
 
-        Bounds<F>& operator=(const Value<F>& x) { return *this=Bounds<F>(x); }
+        Bounds<F>& operator=(const F& x) { return *this=Bounds<F>(x); }
     //! Assign from generic validated bounds \a y, keeping the same precision.
     Bounds<F>& operator=(const ValidatedNumber& y) { return *this=Bounds<F>(y,this->precision()); }
     template<BuiltinIntegral N> Bounds<F>& operator=(N n) { return *this=ValidatedNumber(n); }
@@ -148,11 +148,11 @@ template<class F> class Bounds
     //! The upper bound.
     UpperBound<F> const upper() const;
     //! An approximation to the actual value.
-    Value<F> const value() const;
+    F const value() const;
     //! Bounds on the approximation given by value().
     Error<F> const error() const;
 
-    friend Value<F> value(Bounds<F> const& x) { return x.value(); }
+    friend F value(Bounds<F> const& x) { return x.value(); }
     friend Error<F> error(Bounds<F> const& x) { return x.error(); }
 
     RawType const& lower_raw() const { return _l; }
@@ -175,7 +175,7 @@ template<class F> class Bounds
     // DEPRECATED
     explicit operator RawType () const { return value_raw(); }
     friend Approximation<F> round(Approximation<F> const& x);
-    friend Value<F> midpoint(Bounds<F> const& x);
+    friend F midpoint(Bounds<F> const& x);
   public:
     friend Bool is_nan(Bounds<F> const& x) {
         return is_nan(x._l) || is_nan(x._u); }
@@ -420,7 +420,7 @@ template<class F> class Bounds
 template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : Bounds(x.lower_raw(),x.upper_raw()) { }
 
 template<class FE> inline Bounds<FE> make_bounds(Error<FE> const& e) { return pm(e); }
-Value<FloatDP> midpoint(Bounds<FloatDP> const& x); // DEPRECATED
+FloatDP midpoint(Bounds<FloatDP> const& x); // DEPRECATED
 
 
 template<class PR> Bounds(ValidatedNumber, PR) -> Bounds<RawFloatType<PR>>;
@@ -455,7 +455,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     Positive(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
     Positive(PositiveValidatedNumber const& y, PR pr) : Bounds<F>(y,pr) { }
   public:
-    Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
+    Positive<F> value() const { return cast_positive(this->Bounds<F>::value()); }
     Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }
     Positive<UpperBound<F>> upper() const { return cast_positive(this->Bounds<F>::upper()); }
   public:
@@ -517,14 +517,14 @@ template<class F> class Operations<Bounds<F>> {
     static Integer _cast_integer(Bounds<F> const& x);
 
     // Mixed Bounded - Exact operations
-    static Bounds<F> _add(Bounds<F> const& x1, Value<F> const& x2);
-    static Bounds<F> _add(Value<F> const& x1, Bounds<F> const& x2);
-    static Bounds<F> _sub(Bounds<F> const& x1, Value<F> const& x2);
-    static Bounds<F> _sub(Value<F> const& x1, Bounds<F> const& x2);
-    static Bounds<F> _mul(Bounds<F> const& x1, Value<F> const& x2);
-    static Bounds<F> _mul(Value<F> const& x1, Bounds<F> const& x2);
-    static Bounds<F> _div(Bounds<F> const& x1, Value<F> const& x2);
-    static Bounds<F> _div(Value<F> const& x1, Bounds<F> const& x2);
+    static Bounds<F> _add(Bounds<F> const& x1, F const& x2);
+    static Bounds<F> _add(F const& x1, Bounds<F> const& x2);
+    static Bounds<F> _sub(Bounds<F> const& x1, F const& x2);
+    static Bounds<F> _sub(F const& x1, Bounds<F> const& x2);
+    static Bounds<F> _mul(Bounds<F> const& x1, F const& x2);
+    static Bounds<F> _mul(F const& x1, Bounds<F> const& x2);
+    static Bounds<F> _div(Bounds<F> const& x1, F const& x2);
+    static Bounds<F> _div(F const& x1, Bounds<F> const& x2);
 
     static OutputStream& _write(OutputStream& os, const Bounds<F>& x);
     static InputStream& _read(InputStream& is, Bounds<F>& x);

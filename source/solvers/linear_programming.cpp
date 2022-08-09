@@ -155,8 +155,8 @@ template<class X, class XX> XX compute_mu(const Vector<X>& xl, const Vector<X>& 
 
 
 inline FloatDPBounds mul_val(FloatDP x1, FloatDP x2) { return FloatDPBounds(mul(down,x1,x2),mul(up,x1,x2)); }
-inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDP> const& v) { return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
-inline Matrix<FloatDPValue> const& cast_exact(Matrix<FloatDP> const& A) { return reinterpret_cast<Matrix<FloatDPValue>const&>(A); }
+inline Vector<FloatDP> const& cast_exact(Vector<FloatDP> const& v) { return reinterpret_cast<Vector<FloatDP>const&>(v); }
+inline Matrix<FloatDP> const& cast_exact(Matrix<FloatDP> const& A) { return reinterpret_cast<Matrix<FloatDP>const&>(A); }
 
 OutputStream& operator<<(OutputStream& os, LinearProgramStatus lps) {
     switch (lps) {

@@ -193,7 +193,7 @@ inline VariableInterval<Real> operator==(const Real& x, const RealVariable& v) {
 inline VariableInterval<Real> operator<=(const VariableLowerInterval<Real>& lv, const Real& u) {
     return VariableInterval<Real>(lv.lower_bound(),lv.variable(),u); }
 
-inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
+inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Dyadic& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Int& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
 

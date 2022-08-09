@@ -232,7 +232,7 @@ Array<Double> Grid::upper_index(const ExactBoxType& bx) const
 
 ExactPointType Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<FloatDPValue> res(a.size(),dp);
+    Vector<FloatDP> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -241,7 +241,7 @@ ExactPointType Grid::point(const Array<IntegerType>& a) const
 
 ExactPointType Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<FloatDPValue> res(a.size(),dp);
+    Vector<FloatDP> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }

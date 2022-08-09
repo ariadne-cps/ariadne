@@ -66,7 +66,7 @@ template<> inline double numeric_cast(const FloatDPApproximation& a) { return a.
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const FloatDP& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline FloatDP numeric_cast(const FloatDPValue& a) { return a; }
+template<> inline FloatDP numeric_cast(const FloatDP& a) { return a; }
 
 template<> inline Real numeric_cast(const FloatDP& a) { return Real(ExactDouble(a.get_d())); }
 template<> inline Real numeric_cast(const FloatDPBounds& a) { return numeric_cast<Real>(FloatDPApproximation(a).raw()); }

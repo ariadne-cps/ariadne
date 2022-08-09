@@ -48,7 +48,7 @@ template<class PRE, class PR> requires (not DefaultConstructible<PRE>) and Const
 
 //! \ingroup NumericModule
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
-//! \sa Real, FloatDP, FloatMP, Error, Value, Bounds, Approximation.
+//! \sa Real, FloatDP, FloatMP, Error, Float, Bounds, Approximation.
 template<class F, class FE> class Ball
     : public DefineConcreteGenericOperators<Ball<F,FE>>
     , public DefineFieldOperators<Ball<F,FE>>
@@ -130,11 +130,11 @@ template<class F, class FE> class Ball
     //! An upper bound.
     UpperBound<F> const upper() const;
     //! The centre value of the ball.
-    Value<F> const value() const;
+    F const value() const;
     //! The radius of the ball, giving a bound on the error of \ref value().
     Error<FE> const error() const;
 
-    friend Value<F> value(Ball<F,FE> const& x) { return x.value(); }
+    friend F value(Ball<F,FE> const& x) { return x.value(); }
     friend Error<FE> error(Ball<F,FE> const& x) { return x.error(); }
 
     RawType const lower_raw() const { return sub(down,_v,_e); }
@@ -314,7 +314,7 @@ public:
     friend Bool same(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._v==x2._v && x1._e==x2._e; }
     //! <p/>
-    friend Bool models(Ball<F,FE> const& x1, Value<F> const& x2) {
+    friend Bool models(Ball<F,FE> const& x1, F const& x2) {
         return x1._l<=x2._v && x1._u >= x2._v; }
     //! <p/>
     friend Bool consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
@@ -468,7 +468,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return x*rec(y);
     }
 
-    static Ball<F,FE> _add(Value<F> const& x, Value<F> const& y, PRE pre) {
+    static Ball<F,FE> _add(F const& x, F const& y, PRE pre) {
         auto rv=add(near,x,y);
         auto ru=add(up,x,y);
         auto rl=add(down,x,y);
@@ -476,7 +476,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _sub(Value<F> const& x, Value<F> const& y, PRE pre) {
+    static Ball<F,FE> _sub(F const& x, F const& y, PRE pre) {
         auto rv=sub(near,x,y);
         auto ru=sub(up,x,y);
         auto rl=sub(down,x,y);
@@ -484,7 +484,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _mul(Value<F> const& x, Value<F> const& y, PRE pre) {
+    static Ball<F,FE> _mul(F const& x, F const& y, PRE pre) {
         auto rv=mul(near,x,y);
         auto ru=mul(up,x,y);
         auto rl=mul(down,x,y);
@@ -492,7 +492,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _div(Value<F> const& x, Value<F> const& y, PRE pre) {
+    static Ball<F,FE> _div(F const& x, F const& y, PRE pre) {
         auto rv=div(near,x,y);
         auto ru=div(up,x,y);
         auto rl=div(down,x,y);
@@ -580,7 +580,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return x1._v==x2._v && x1._e==x2._e;
     }
 
-    static Bool _models(Ball<F,FE> const& x1, Value<F> const& x2) {
+    static Bool _models(Ball<F,FE> const& x1, F const& x2) {
         return (x1._v>=x2 ? sub(up,x1._v,x2) : sub(up,x2,x1._v)) <= x1._e;
     }
 

@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-template<class F> UpperBound<F>::UpperBound(Value<F> const& x, PR pr) : _u(x,downward,pr) {}
+template<class F> UpperBound<F>::UpperBound(F const& x, PR pr) : _u(x,downward,pr) {}
 template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x, PR pr) : _u(x._u,downward,pr) {}
 template<class F> UpperBound<F>::UpperBound(UpperBound<F> const& x, PR pr) : _u(x._u,upward,pr) {}
 

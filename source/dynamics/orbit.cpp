@@ -45,7 +45,7 @@ template<class F> Orbit<ExactPoint<F>>::Orbit(const ExactPoint<F>& pt)
 { }
 
 template<class F> Void
-Orbit<ExactPoint<F>>::insert(Value<F> t, const ExactPoint<F>& pt)
+Orbit<ExactPoint<F>>::insert(F t, const ExactPoint<F>& pt)
 {
     this->_curve->insert(t,pt);
 }

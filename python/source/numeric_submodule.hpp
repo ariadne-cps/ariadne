@@ -43,7 +43,6 @@ template<> struct PythonTemplateName<LowerBound> { static std::string get() { re
 template<> struct PythonTemplateName<UpperBound> { static std::string get() { return "UpperBound"; } };
 template<> struct PythonTemplateName<Bounds> { static std::string get() { return "Bounds"; } };
 template<> struct PythonTemplateName<Ball> { static std::string get() { return "Ball"; } };
-template<> struct PythonTemplateName<Value> { static std::string get() { return "Value"; } };
 template<> struct PythonTemplateName<Error> { static std::string get() { return "Error"; } };
 template<> struct PythonTemplateName<Rounded> { static std::string get() { return "Rounded"; } };
 
@@ -73,7 +72,7 @@ template<class F> OutputStream& operator<<(OutputStream& os, const PythonReprese
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperBound<F>>& repr);
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
 template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<F>& x);
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr);
 
 OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatDP>& x);
@@ -83,7 +82,7 @@ template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<UpperBound<F>>& repr);
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Bounds<F>>& x);
 template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Ball<F,FE>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Value<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<F>& x);
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Error<FE>>& repr);
 
 

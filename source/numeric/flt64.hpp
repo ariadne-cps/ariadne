@@ -75,7 +75,7 @@ template<BuiltinIntegral Z> Z integer_cast(Flt64);
 //! \brief Wrapper class for double-precision floating-point numbers.
 //! \details
 //! The main purpose of this class is as a base implementation for the \em safe floating-point number types
-//! FloatDPApproximation, FloatDPLowerBound, FloatDPUpperBound,FloatDPBounds, FloatDPBall, FloatDPError and FloatDPValue.
+//! FloatDPApproximation, FloatDPLowerBound, FloatDPUpperBound,FloatDPBounds, FloatDPBall, FloatDPError and FloatDP.
 //! These classes
 //!
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
@@ -92,7 +92,7 @@ template<BuiltinIntegral Z> Z integer_cast(Flt64);
 //!
 //! When testing, it is often useful to perform comparisons with \c %Flt64 or \c double values.
 //! Although care must be taken, since compiler rounding may change the truth of certain comparisons.
-//! comparisons with \c double are performed as if the value were \c FloatDPValue.
+//! comparisons with \c double are performed as if the value were \c FloatDP.
 
 
 class Flt64 {

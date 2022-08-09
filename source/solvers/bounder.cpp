@@ -54,10 +54,10 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariat
 
 Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const {
     ARIADNE_LOG_SCOPE_CREATE;
-    const PositiveFloatDPValue BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
-    const PositiveFloatDPValue NO_WIDENING=cast_positive(1.0_exact);
-    const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
-    const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
+    const PositiveFloatDP BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
+    const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
+    const PositiveFloatDP INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
+    const PositiveFloatDP INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const StepSizeType MINIMUM_STEP_SIZE(1,20u);
     const CounterType EXPANSION_STEPS=4;
     const CounterType REFINEMENT_STEPS=4;
@@ -117,11 +117,11 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
 }
 
 UpperBoxType EulerBounder::_refinement(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B) const {
-    const PositiveFloatDPValue NO_WIDENING=cast_positive(1.0_exact);
+    const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
     return _formula(f,D,T,A,B, NO_WIDENING,NO_WIDENING);
 }
 
-UpperBoxType EulerBounder::_formula(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B, PositiveFloatDPValue INITIAL_BOX_WIDENING, PositiveFloatDPValue VECTOR_WIDENING) const {
+UpperBoxType EulerBounder::_formula(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B, PositiveFloatDP INITIAL_BOX_WIDENING, PositiveFloatDP VECTOR_WIDENING) const {
     UpperIntervalType const& rT=reinterpret_cast<UpperIntervalType const&>(T);
     UpperBoxType const& rA=reinterpret_cast<UpperBoxType const&>(A);
     UpperIntervalType const rH=rT-T.lower_bound();

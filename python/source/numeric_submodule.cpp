@@ -72,8 +72,6 @@ OutputStream& operator<<(OutputStream& os, PythonLiteral<FloatDP> const& lit) {
     return os << "\"" << lit.reference().literal() << "\""; }
 OutputStream& operator<<(OutputStream& os, PythonLiteral<FloatMP> const& lit) {
     return os << "\"" << lit.reference().literal() << "\""; }
-template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Value<F>> const& lit) {
-    return os << "\"" << lit.reference().raw().literal() << "\""; }
 template<class F, class FE> OutputStream& operator<<(OutputStream& os, PythonLiteral<Ball<F,FE>> const& lit) {
     return os << "\"" << lit.reference().value().raw().literal(near) << "\",\"" << lit.reference().error().raw().literal(down) << "\""; }
 template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Bounds<F>> const& lit) {
@@ -147,6 +145,9 @@ template<class F, class FE> OutputStream& operator<<(OutputStream& os, const Pyt
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr) {
     return os << class_name<FE>() << "Error("<<python_literal(repr.reference())<<","<<repr.reference().precision()<<")"; }
 
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatDP>&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatMP>&);
+
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Approximation<FloatDP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Approximation<FloatMP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<LowerBound<FloatDP>>&);
@@ -158,8 +159,6 @@ template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Boun
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Ball<FloatDP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Ball<FloatMP,FloatDP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Ball<FloatMP>>&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Value<FloatDP>>&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Value<FloatMP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Error<FloatDP>>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Error<FloatMP>>&);
 
@@ -407,8 +406,8 @@ void export_dyadic(pymodule& module)
     dyadic_class.def(init<Integer>());
     dyadic_class.def(init<TwoExp>());
     dyadic_class.def(init<Dyadic>());
-    dyadic_class.def(init<FloatDPValue>());
-    dyadic_class.def(init<FloatMPValue>());
+    dyadic_class.def(init<FloatDP>());
+    dyadic_class.def(init<FloatMP>());
     dyadic_class.def(init<String>());
     dyadic_class.def("__str__", &__cstr__<Dyadic>);
     dyadic_class.def("__repr__", &__repr__<Dyadic>);
@@ -704,8 +703,8 @@ void export_numbers(pymodule& module)
 
 
     // TODO: These exports should be with FloatXxx
-    exact_number_class.def(init<FloatDPValue>());
-    exact_number_class.def(init<FloatMPValue>());
+    exact_number_class.def(init<FloatDP>());
+    exact_number_class.def(init<FloatMP>());
     validated_number_class.def(init<FloatDPBall>());
     validated_number_class.def(init<FloatMPDPBall>());
     validated_number_class.def(init<FloatMPBall>());
@@ -1042,12 +1041,12 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     pybind11::class_<FloatBall<PR,PRE>> float_ball_class(module,python_class_name<FloatBall<PR,PRE>>().c_str());
     float_ball_class.def(init<PR,PRE>());
     float_ball_class.def(init<RawFloat<PR>,RawFloat<PRE>>());
-    float_ball_class.def(init<FloatValue<PR>,FloatError<PRE>>());
+    float_ball_class.def(init<Float<PR>,FloatError<PRE>>());
     float_ball_class.def(init<Real,PR>());
 
     float_ball_class.def(init<ExactDouble,PR>());
     float_ball_class.def(init<ValidatedNumber,PR>());
-    float_ball_class.def(init<FloatValue<PR>>());
+    float_ball_class.def(init<Float<PR>>());
     float_ball_class.def(init<FloatBall<PR,PRE>>());
     float_ball_class.def(init<FloatBounds<PR>>());
 
@@ -1100,7 +1099,7 @@ template<class PR> void export_float_bounds(pymodule& module)
     float_bounds_class.def(init<ExactDouble,PR>());
     float_bounds_class.def(init<ExactDouble,ExactDouble,PR>());
     float_bounds_class.def(init<ValidatedNumber,PR>());
-    float_bounds_class.def(init<FloatValue<PR>>());
+    float_bounds_class.def(init<Float<PR>>());
     float_bounds_class.def(init<FloatBall<PR>>());
     float_bounds_class.def(init<FloatBounds<PR>>());
 
@@ -1149,7 +1148,7 @@ template<class PR> void export_float_bounds(pymodule& module)
     module.def("refines", &_refines_<FloatBounds<PR>,FloatBounds<PR>>);
     module.def("inconsistent", &_inconsistent_<FloatBounds<PR>,FloatBounds<PR>>);
 
-    implicitly_convertible<FloatValue<PR>,FloatBounds<PR>>();
+    implicitly_convertible<Float<PR>,FloatBounds<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
 
     float_bounds_class.def_static("set_output_places",&FloatBounds<PR>::set_output_places);
@@ -1165,7 +1164,7 @@ template<class PR> void export_float_upper_bound(pymodule& module)
     float_upper_bound_class.def(init<ValidatedUpperNumber,PR>());
 
     float_upper_bound_class.def(init<ExactDouble,PR>());
-    float_upper_bound_class.def(init<FloatValue<PR>>());
+    float_upper_bound_class.def(init<Float<PR>>());
     float_upper_bound_class.def(init<FloatBall<PR>>());
     float_upper_bound_class.def(init<FloatBounds<PR>>());
     float_upper_bound_class.def(init<FloatUpperBound<PR>>());
@@ -1201,7 +1200,7 @@ template<class PR> void export_float_upper_bound(pymodule& module)
 //    float_upper_bound_class.def(self + UpperNumericType());
 //    float_upper_bound_class.def(self - LowerNumericType());
 
-    implicitly_convertible<FloatValue<PR>,FloatUpperBound<PR>>();
+    implicitly_convertible<Float<PR>,FloatUpperBound<PR>>();
     implicitly_convertible<FloatBounds<PR>,FloatUpperBound<PR>>();
     implicitly_convertible<FloatError<PR>,FloatUpperBound<PR>>();
 }
@@ -1215,7 +1214,7 @@ template<class PR> void export_float_lower_bound(pymodule& module)
     float_lower_bound_class.def(init<ExactDouble,PR>());
     float_lower_bound_class.def(init<ValidatedLowerNumber,PR>());
 
-    float_lower_bound_class.def(init<FloatValue<PR>>());
+    float_lower_bound_class.def(init<Float<PR>>());
     float_lower_bound_class.def(init<FloatBall<PR>>());
     float_lower_bound_class.def(init<FloatBounds<PR>>());
     float_lower_bound_class.def(init<FloatLowerBound<PR>>());
@@ -1252,7 +1251,7 @@ template<class PR> void export_float_lower_bound(pymodule& module)
 //    float_lower_bound_class.def(self + LowerNumericType());
 //    float_lower_bound_class.def(self - UpperNumericType());
 
-    implicitly_convertible<FloatValue<PR>,FloatLowerBound<PR>>();
+    implicitly_convertible<Float<PR>,FloatLowerBound<PR>>();
     implicitly_convertible<FloatBounds<PR>,FloatLowerBound<PR>>();
 }
 
@@ -1268,7 +1267,7 @@ template<class PR> void export_float_approximation(pymodule& module)
     float_approximation_class.def(init<Real,PR>());
     float_approximation_class.def(init<ApproximateNumber,PR>());
 
-    float_approximation_class.def(init<FloatValue<PR>>());
+    float_approximation_class.def(init<Float<PR>>());
     float_approximation_class.def(init<FloatBall<PR>>());
     float_approximation_class.def(init<FloatBounds<PR>>());
     float_approximation_class.def(init<FloatLowerBound<PR>>());
@@ -1296,14 +1295,14 @@ template<class PR> void export_float_approximation(pymodule& module)
 
     //NOTE: Conversion to FloatMP needs precision, so disallow conversion to FloatDP as well
     //implicitly_convertible<double,FloatApproximation<PR>>();
-    implicitly_convertible<FloatValue<PR>,FloatApproximation<PR>>();
+    implicitly_convertible<Float<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatBounds<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatUpperBound<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatLowerBound<PR>,FloatApproximation<PR>>();
 
-    module.def("cast_exact",(FloatValue<PR>const&(*)(FloatApproximation<PR> const&)) &cast_exact);
-    module.def("cast_exact",(FloatValue<PR>const&(*)(RawFloat<PR> const&)) &cast_exact);
+    module.def("cast_exact",(Float<PR>const&(*)(FloatApproximation<PR> const&)) &cast_exact);
+    module.def("cast_exact",(Float<PR>const&(*)(RawFloat<PR> const&)) &cast_exact);
 }
 
 
@@ -1355,11 +1354,11 @@ template<class PR> Void export_user_floats(pymodule& module) {
 
 template<class PR> Void export_float_to_number_conversions(pymodule& module) {
     if constexpr(ALLOW_CONCRETE_TO_GENERIC_NUMBER_CONVERSIONS) {
-        implicitly_convertible<FloatValue<PR>,ExactNumber>();
-        implicitly_convertible<FloatValue<PR>,ValidatedNumber>();
-        implicitly_convertible<FloatValue<PR>,ValidatedUpperNumber>();
-        implicitly_convertible<FloatValue<PR>,ValidatedLowerNumber>();
-        implicitly_convertible<FloatValue<PR>,ApproximateNumber>();
+        implicitly_convertible<Float<PR>,ExactNumber>();
+        implicitly_convertible<Float<PR>,ValidatedNumber>();
+        implicitly_convertible<Float<PR>,ValidatedUpperNumber>();
+        implicitly_convertible<Float<PR>,ValidatedLowerNumber>();
+        implicitly_convertible<Float<PR>,ApproximateNumber>();
         implicitly_convertible<FloatBall<PR>,ValidatedNumber>();
         implicitly_convertible<FloatBall<PR>,ApproximateNumber>();
         implicitly_convertible<FloatBounds<PR>,ValidatedNumber>();
@@ -1459,8 +1458,8 @@ Void export_complex_numbers(pymodule& module) {
 
 /*
 namespace Ariadne {
-template OutputStream& operator<<(OutputStream&, PythonRepresentation<Value<FloatDP>> const&);
-template OutputStream& operator<<(OutputStream&, PythonRepresentation<Value<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<FloatDP> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<FloatMP> const&);
 template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatDP>> const&);
 template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatMP,FloatDP>> const&);
 template OutputStream& operator<<(OutputStream&, PythonRepresentation<Ball<FloatMP>> const&);

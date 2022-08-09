@@ -97,7 +97,7 @@ inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 //! \brief Multiple-precision floating-point numbers.
 //! Currently defined as a wrapper around \c mpfr_t from the MPFR library.
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
-//! \see FloatDP, Real, FloatValue, FloatBounds, FloatUpperBound, FloatLowerBound, FloatApproximation, FloatError
+//! \see FloatDP, Real, Float, FloatBounds, FloatUpperBound, FloatLowerBound, FloatApproximation, FloatError
 template<> class Float<MP>
     : public DeclareRoundedOperations<Float<MP>>
 {

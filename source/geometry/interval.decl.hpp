@@ -41,14 +41,14 @@ template<class IVL> concept AnInterval = IsInterval<IVL>::value;
 //!@{
 //! \relates Interval
 //! \name Type shorthands
-template<class F> using ExactInterval = Interval<Value<F>>; //!< <p/>
+template<class F> using ExactInterval = Interval<F>; //!< <p/>
 template<class F> using BallInterval = Interval<Ball<F>>; //!< <p/>
 template<class F> using BoundsInterval = Interval<Bounds<F>>; //!< <p/>
 template<class F> using UpperInterval = Interval<UpperBound<F>>; //!< <p/>
 template<class F> using LowerInterval = Interval<LowerBound<F>>; //!< <p/>
 template<class F> using ApproximateInterval = Interval<Approximation<F>>; //!< <p/>
 
-template<class PR> using FloatExactInterval = Interval<FloatValue<PR>>; //!< <p/>
+template<class PR> using FloatExactInterval = Interval<Float<PR>>; //!< <p/>
 template<class PR> using FloatBallInterval = Interval<FloatBall<PR>>; //!< <p/>
 template<class PR> using FloatBoundsInterval = Interval<FloatBounds<PR>>; //!< <p/>
 template<class PR> using FloatUpperInterval = Interval<FloatUpperBound<PR>>; //!< <p/>

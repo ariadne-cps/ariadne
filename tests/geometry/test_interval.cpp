@@ -75,7 +75,7 @@ TestIntervalType::test_concept()
     Int n=1;
     Nat m=1;
     ExactDouble d=1;
-    FloatDPValue x={1,pr};
+    FloatDP x={1,pr};
     FloatDP a(pr),b(pr);
     ExactIntervalType xivl;
     UpperIntervalType uivl;

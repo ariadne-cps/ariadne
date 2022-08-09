@@ -80,7 +80,7 @@ class TestCurve {
         CurveType curve(pt);
         ARIADNE_TEST_EQUALS(curve.dimension(),2);
         ARIADNE_TEST_EQUALS(curve.size(),1);
-        curve.insert(FloatDPValue(1.0_x,dp),pt);
+        curve.insert(FloatDP(1.0_x,dp),pt);
         ARIADNE_TEST_EQUALS(curve.size(),2);
     }
 };

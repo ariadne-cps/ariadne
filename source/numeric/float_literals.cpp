@@ -38,10 +38,10 @@ FloatError<DoublePrecision> operator"" _error(long double lx) {
 }
 
 
-FloatValue<DoublePrecision> operator"" _exact(long double lx) {
+Float<DoublePrecision> operator"" _exact(long double lx) {
     double x=lx;
     assert(x==lx);
-    return FloatValue<DoublePrecision>(ExactDouble(x),dp);
+    return Float<DoublePrecision>(ExactDouble(x),dp);
 }
 
 FloatBall<DoublePrecision> operator"" _near(long double lx) {

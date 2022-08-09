@@ -39,7 +39,6 @@
 #include "numeric/float_upper_bound.hpp"
 #include "numeric/float_lower_bound.hpp"
 #include "numeric/float_bounds.hpp"
-#include "numeric/float_value.hpp"
 #include "numeric/float_error.hpp"
 
 #include "numeric/complex.hpp"
@@ -213,7 +212,7 @@ int main() {
     typedef FloatDPApproximation XA;
     Complex<XA> x(4,3,dp);
 
-    FloatDPValue one(1,dp);
+    FloatDP one(1,dp);
 //    TestComplex<Real>().test();
 //    TestComplex<FloatDPApproximation>(one).test();
     TestComplex<FloatDPBounds>(one).test();

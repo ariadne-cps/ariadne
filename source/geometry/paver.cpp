@@ -52,7 +52,7 @@ inline Pair<SizeType,FloatDP> lipschitz_index_and_error(const ValidatedVectorMul
 
 namespace {
 
-UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector& z) {
+UpperIntervalType emulrng(const FloatDPVector& x, const FloatDPVector& z) {
     UpperIntervalType r=make_interval(mul(x[0],z[0]));
     for(SizeType i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
     return r;
@@ -62,13 +62,13 @@ UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector&
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res(0u,double_precision);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        if(definitely(bx[i].lower_bound()>bx[i].upper_bound())) { return cast_positive(-infty); }
+        if(definitely(bx[i].lower_bound()>bx[i].upper_bound())) { return PositiveFloatDPUpperBound(cast_positive(-infty),double_precision); }
         res+=bx[i].width();
     }
     return res/bx.size();
 }
 
-PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
+PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDP>& sf) {
     PositiveFloatDPUpperBound res(0u,double_precision);
     for(SizeType i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
@@ -76,7 +76,7 @@ PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vec
     return res;
 }
 
-PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
+PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDP>& sf) {
     PositiveFloatDPUpperBound res(0u,double_precision);
     for(SizeType i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
@@ -86,7 +86,7 @@ PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vec
 
 
 FloatDP average_scaled_width(const UpperBoxType& bx, const Vector<FloatDP>& sf) {
-    return average_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDPValue>const&>(sf)).raw();
+    return average_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDP>const&>(sf)).raw();
 }
 
 } // namespace
@@ -100,15 +100,15 @@ OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os
 
 Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const
 {
-    Vector<FloatDPValue> max_errors(paving.dimension(),dp);
+    Vector<FloatDP> max_errors(paving.dimension(),dp);
     for(SizeType i=0; i!=max_errors.size(); ++i) {
-        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(fineness));
+        max_errors[i]=shft(static_cast<FloatDP>(paving.grid().lengths()[i]),-static_cast<int>(fineness));
     }
 
     this->adjoin_outer_approximation_recursion(paving,set,fineness,max_errors);
 }
 
-Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDPValue>& max_errors) const
+Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDP>& max_errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const ExactDouble RELATIVE_SMALLNESS=0.5_x;
@@ -157,9 +157,9 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     static const Nat MAXIMUM_DEPTH = 16;
 
     // The basic approximation error when plotting with accuracy=0
-    static const double BASIC_ERROR = 0.0625;
+    static const ExactDouble BASIC_ERROR = 0.0625_pr;
 
-    const double max_error=BASIC_ERROR/(1<<fineness);
+    const ExactDouble max_error=BASIC_ERROR/TwoExp(static_cast<Int>(fineness));
 
     ARIADNE_DEBUG_ASSERT(function.domain()==set.constraint_function().domain());
     ValidatedVectorMultivariateFunction fg=join(function,set.constraint_function());
@@ -224,13 +224,13 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     const SizeType ng=g.result_size();
 
     const ExactBoxType& cell_box=cell.box();
-    const Vector<PositiveFloatDPValue> scalings=Vector<PositiveFloatDPValue>(paving.grid().lengths());
+    const Vector<PositiveFloatDP> scalings=Vector<PositiveFloatDP>(paving.grid().lengths());
 
     UpperBoxType bbox = apply(f,domain);
 
     FloatDP domwdth = average_width(domain).raw();
-    FloatDP bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
-    FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
+    FloatDP bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
+    FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths());
 
     ARIADNE_LOG_PRINTLN_AT(1,"splt="<<splt<<" dpth="<<cell.depth()<<" max_dpth="<<max_dpth);
     ARIADNE_LOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box());
@@ -335,10 +335,10 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG_SCOPE_CREATE;
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const FloatDPValue XSIGMA { 0.125_x,dp };
-    static const FloatDPValue TERR { ExactDouble(-1.0/((1<<e)*1024.0)),dp };
-    static const FloatDPValue XZMIN { ExactDouble(1.0/(1<<16)),dp };
-    static const FloatDPValue zero { 0,dp };
+    static const FloatDP XSIGMA { 0.125_x,dp };
+    static const FloatDP TERR { ExactDouble(-1.0/((1<<e)*1024.0)),dp };
+    static const FloatDP XZMIN { ExactDouble(1.0/(1<<16)),dp };
+    static const FloatDP zero { 0,dp };
     static const ExactDouble inf(Ariadne::inf.get_d());
     DoublePrecision pr;
 
@@ -353,8 +353,8 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
     ARIADNE_LOG_PRINTLN_AT(1,"x0="<<x<<", y0="<<y);
 
-    FloatDPValuePoint z(x.size(),dp);
-    FloatDPValue t(dp);
+    FloatDPPoint z(x.size(),dp);
+    FloatDP t(dp);
     FloatDPApproximation one(1.0_x,dp);
 
     Vector<FloatDPApproximation>& ax=reinterpret_cast<Vector<FloatDPApproximation>&>(x);
@@ -495,8 +495,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const FloatDPValue XSIGMA = {TwoExp(-3),pr};
-    static const FloatDPValue  TERR = {TwoExp(-10),pr};
+    static const FloatDP XSIGMA = {TwoExp(-3),pr};
+    static const FloatDP  TERR = {TwoExp(-10),pr};
     static const ExactDouble inf(Ariadne::inf.get_d());
 
     const SizeType m=fg.argument_size();
@@ -506,8 +506,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
 
-    FloatDPValue t{pr};
-    FloatDPValuePoint z(x.size(),dp);
+    FloatDP t{pr};
+    FloatDPPoint z(x.size(),dp);
 
     FloatDPApproximationVector& ax=reinterpret_cast<FloatDPApproximationVector&>(x);
     FloatDPApproximationVector& ay=reinterpret_cast<FloatDPApproximationVector&>(y);
@@ -606,9 +606,9 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     ExactBoxType r=cast_exact_box(widen(apply(g,d),1));
     ExactBoxType rc=intersection(r,c);
 
-    Point<FloatDPValue> y=midpoint(d);
+    Point<FloatDP> y=midpoint(d);
     const SizeType l=(d.size()+f.result_size()+g.result_size())*2;
-    Point<FloatDPValue> x(l,FloatDPValue(dp)); for(SizeType k=0; k!=l; ++k) { x[k]=FloatDPValue(ExactDouble(1.0/l),dp); }
+    Point<FloatDP> x(l,FloatDP(dp)); for(SizeType k=0; k!=l; ++k) { x[k]=FloatDP(ExactDouble(1.0/l),dp); }
 
     Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }

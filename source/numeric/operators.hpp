@@ -195,6 +195,8 @@ struct Unequal : ComparisonObject<Unequal> {
     static constexpr OperatorCode code() { return OperatorCode::NEQ; } static constexpr OperatorKind kind() { return OperatorKind::COMPARISON; }
 };
 
+using Eq=Equal; using Ne=Unequal; using Lt=Less; using Gt=Gtr; using Le=Leq; using Ge=Geq;
+
 struct XOrOp : OperatorObject<XOrOp> {
     template<class A1, class A2> auto operator()(A1&& a1, A2&& a2) const -> decltype(a1 xor a2) { return a1 xor a2; }
     static constexpr OperatorCode code() { return OperatorCode::XOR; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }

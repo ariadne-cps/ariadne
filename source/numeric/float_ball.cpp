@@ -22,11 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "float_ball.hpp"
 #include "float_ball.tpl.hpp"
 
-#include "float_value.hpp"
 #include "float_bounds.tpl.hpp" //< FIXME: Needed for log10floor
 
 namespace Ariadne {
@@ -47,9 +45,10 @@ template<> String class_name<Ball<FloatDP>>() { return "FloatDPBall"; }
 template<> String class_name<Ball<FloatMP,FloatDP>>() { return "FloatMDPBall"; }
 template<> String class_name<Ball<FloatMP>>() { return "FloatMPBall"; }
 
-template Ball<FloatDP,FloatDP> Value<FloatDP>::pm(Error<FloatDP> const&) const;
-template Ball<FloatMP,FloatDP> Value<FloatMP>::pm(Error<FloatDP> const&) const;
-template Ball<FloatMP,FloatMP> Value<FloatMP>::pm(Error<FloatMP> const&) const;
+Ball<FloatDP> FloatDP::pm(Error<FloatDP> const& e) const { return Ball<FloatDP>(*this,e); }
+Ball<FloatMP> FloatMP::pm(Error<FloatMP> const& e) const { return Ball<FloatMP>(*this,e); }
+Ball<FloatMP,FloatDP> FloatMP::pm(Error<FloatDP> const& e) const { return Ball<FloatMP,FloatDP>(*this,e); }
+
 
 template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(OutputStream& os, FloatBall<MultiplePrecision> const& x) {
     // Write based on number of correct digits
@@ -63,7 +62,7 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     Nat errplc = static_cast<Nat>(FloatError<MultiplePrecision>::output_places);
     Nat log10err = static_cast<Nat>(abslog10floor(edbl));
     Nat dgtserr = errplc-(log10err+1);
-    Nat dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
+    Nat dgtsval = (x.value()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().exponent())/log2ten);
     Nat dgts = std::max(std::min(dgtsval,dgtserr),errplc);
     if(edbl==0.0) { dgts = dgtsval; }
 
@@ -115,6 +114,5 @@ template<> OutputStream& Operations<FloatBall<DoublePrecision>>::_write(OutputSt
     MultiplePrecision prec(64);
     return os << FloatBall<MultiplePrecision>(FloatMP(x.value_raw(),prec),FloatMP(x.error_raw(),prec));
 }
-
 
 } // namespace Ariadne

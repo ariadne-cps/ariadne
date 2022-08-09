@@ -180,19 +180,19 @@ template<class X> EqualityType<X> Differential<X>::operator==(const Differential
             result = result && (self_iter->coefficient()==other_iter->coefficient());
             ++self_iter; ++other_iter;
         } else if (less(self_iter->index(), other_iter->index())) {
-            result = result && (self_iter->coefficient()==0);
+            result = result && static_cast<EqualityType<X>>(self_iter->coefficient()==0);
             ++self_iter;
         } else { // (self_iter->index() > other_iter->index())
-            result = result && (other_iter->coefficient()==0);
+            result = result && static_cast<EqualityType<X>>(other_iter->coefficient()==0);
             ++other_iter;
         }
     }
     while(self_iter!=self.end()) {
-        result = result && (self_iter->coefficient()==0);
+        result = result && static_cast<EqualityType<X>>(self_iter->coefficient()==0);
         ++self_iter;
     }
     while(other_iter!=other.end()) {
-        result = result && (other_iter->coefficient()==0);
+        result = result && static_cast<EqualityType<X>>(other_iter->coefficient()==0);
         ++other_iter;
     }
     return result;

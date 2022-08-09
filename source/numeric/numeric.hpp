@@ -61,16 +61,14 @@ template<> inline Int numeric_cast(const FloatMP& a) { return Int(a.get_d()); }
 template<> inline double numeric_cast(const FloatDP& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Dyadic& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline double numeric_cast(const FloatDPValue& a) { return a.get_d(); }
 template<> inline double numeric_cast(const FloatDPBounds& a) { return a.get_d(); }
 template<> inline double numeric_cast(const FloatDPApproximation& a) { return a.get_d(); }
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const FloatDP& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline FloatDP numeric_cast(const FloatDPValue& a) { return a.raw(); }
+template<> inline FloatDP numeric_cast(const FloatDP& a) { return a; }
 
 template<> inline Real numeric_cast(const FloatDP& a) { return Real(ExactDouble(a.get_d())); }
-template<> inline Real numeric_cast(const FloatDPValue& a) { return numeric_cast<Real>(a.raw()); }
 template<> inline Real numeric_cast(const FloatDPBounds& a) { return numeric_cast<Real>(FloatDPApproximation(a).raw()); }
 
 template<> inline FloatDPBall numeric_cast(const Real& a) { return FloatDPBall(a,dp); }

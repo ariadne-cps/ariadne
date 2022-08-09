@@ -52,15 +52,15 @@ namespace Ariadne {
 inline PositiveValidatedUpperNumber abs(PositiveValidatedUpperNumber y) { return y; }
 inline PositiveValidatedUpperNumber mag(PositiveValidatedUpperNumber y) { return y; }
 
-static const FloatDPValue zero={0,dp};
+static const FloatDP zero={0,dp};
 
-inline auto operator+(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n,dp)+x) { return FloatDPValue(n,dp)+x; }
-inline auto operator-(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n,dp)-x) { return FloatDPValue(n,dp)-x; }
-inline auto operator/(FloatDPValue x, Nat n) -> decltype(x/FloatDPValue(n,dp)) { return x/FloatDPValue(n,dp); }
+inline auto operator+(Int n, FloatDPBounds x) -> decltype(FloatDP(n,dp)+x) { return FloatDP(n,dp)+x; }
+inline auto operator-(Int n, FloatDPBounds x) -> decltype(FloatDP(n,dp)-x) { return FloatDP(n,dp)-x; }
+inline auto operator/(FloatDP x, Nat n) -> decltype(x/FloatDP(n,dp)) { return x/FloatDP(n,dp); }
 
-template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> FloatUpperBound<PR> {
+template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloat<PR> x2) -> FloatUpperBound<PR> {
     return FloatUpperBound<PR>(mul(up,x1._u,x2._v)); }
-template<class PR> inline auto operator*(PositiveFloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> PositiveFloatUpperBound<PR> {
+template<class PR> inline auto operator*(PositiveFloatUpperBound<PR> x1, PositiveFloat<PR> x2) -> PositiveFloatUpperBound<PR> {
     return PositiveFloatUpperBound<PR>(mul(up,x1._u,x2._v)); }
 
 inline auto operator> (FloatDPLowerBound x, Real r) -> decltype(x> declval<FloatDPBounds>()) { return x> FloatDPBounds(r,dp); }
@@ -71,7 +71,7 @@ inline auto operator<=(FloatDPUpperBound x, Real r) -> decltype(x<=declval<Float
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
-typedef Vector<FloatDPValue> ExactFloatVector;
+typedef Vector<FloatDP> ExactFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
 Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& transitions);
@@ -1093,7 +1093,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 switch(semantics) {
                     case Semantics::UPPER:
                         for(Nat i=0; i!=n; ++i) {
-                            FloatDPBounds alpha=FloatDPValue(i+1,dp)/n;
+                            FloatDPBounds alpha=FloatDP(i+1,dp)/n;
                             ValidatedScalarMultivariateFunctionPatch intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state_function, alpha*elapsed_time_function) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= zero);
@@ -1627,7 +1627,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG_SCOPE_CREATE;
 
     const SizeType n = flow.result_size();
-    const FloatDPValue step_size=flow.domain()[flow.domain().size()-1].upper_bound();
+    const FloatDP step_size=flow.domain()[flow.domain().size()-1].upper_bound();
     const FloatDPBounds final_time_bounds(final_time,dp);
 
     TimingData result;
@@ -1691,7 +1691,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This knowledge is required to be given combinarially, since
         // specifying the final time as a constant Function is not
         // exact if the final_time parameter is not exactly representable as
-        // a FloatDPValue
+        // a FloatDP
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
         temporal_evolution_time=final_time_bounds-time_identity;
@@ -1703,7 +1703,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // This method ensures that points do not pass the final time after the transition.
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        PositiveFloatDPValue sf={1u,dp};
+        PositiveFloatDP sf={1u,dp};
         while(possibly(remaining_time_range.upper_bound()*sf>step_size)) { sf = hlf(sf); }
         temporal_evolution_time= FloatDPBounds(sf)*(final_time_bounds-time_identity);
     } else { // remaining_time_range.lower_bound()>step_size)
@@ -1717,7 +1717,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
 
 
-    ValidatedScalarMultivariateFunctionPatch spacial_evolution_time=this->function_factory().create_constant(state_domain,FloatDPValue(step_size));
+    ValidatedScalarMultivariateFunctionPatch spacial_evolution_time=this->function_factory().create_constant(state_domain,FloatDP(step_size));
 
     // Select one of GUARD_CREEP or TIME_CREEP
     static const Bool GUARD_CREEP=true;
@@ -1880,7 +1880,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
                 FloatDPBounds alpha_val=(1+flow.step_size()*cast_exact(guard_derivative_range.lower_bound())/cast_exact(guard_range.lower_bound()));
-                FloatDPValue alpha=cast_exact(alpha_val);
+                FloatDP alpha=cast_exact(alpha_val);
                 ARIADNE_ASSERT(alpha_val.value()==alpha);
                 ARIADNE_LOG_PRINTLN_AT(1,"step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha);
                 if(alpha>0 && alpha<=1) {
@@ -1948,9 +1948,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2
             // Taking omega(s)=a tau(s) + b, we obtain
             //   a=1-h/2(tmax-tmin);  b=h(tmax-tmin/2)/(tmax-tmin) = (2tmax-tmin)a
-            FloatDPValue h={result.step_size,dp};
-            FloatDPValue tmin=cast_exact(starting_time_range.lower_bound());
-            FloatDPValue tmax=cast_exact(starting_time_range.upper_bound());
+            FloatDP h={result.step_size,dp};
+            FloatDP tmin=cast_exact(starting_time_range.lower_bound());
+            FloatDP tmax=cast_exact(starting_time_range.upper_bound());
             FloatDPBounds a=1-(hlf(h)/(tmax-tmin));
             FloatDPBounds b=h*(tmax-hlf(tmin))/(tmax-tmin);
             result.parameter_dependent_finishing_time=a*starting_time_function+b;

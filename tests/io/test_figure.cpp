@@ -191,9 +191,9 @@ class TestGraphics {
 
         plot("test_graphics_set",Projection2d(2,0,1),bbx1,{{orange,s1}});
 
-        InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0_x,dp)));
+        InterpolatedCurve cv(0,Point<FloatDP>(2,FloatDP(0.0_x,dp)));
         for(Int i=1; i<=10; ++i) {
-            Point<FloatDPValue> pt(2,dp); pt[0]=FloatDPValue(cast_exact(i/10.),dp); pt[1]=FloatDPValue(cast_exact(i*i/100.),dp);
+            Point<FloatDP> pt(2,dp); pt[0]=FloatDP(cast_exact(i/10.),dp); pt[1]=FloatDP(cast_exact(i*i/100.),dp);
             cv.insert(i,pt);
         }
         g.set_bounding_box(cv.bounding_box());

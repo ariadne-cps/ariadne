@@ -29,15 +29,15 @@ namespace Ariadne {
 
 static const uint GEOMETRY_OUTPUT_PLACES = 4;
 
-template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl) {
-    auto places = FloatDPValue::output_places;
-    FloatDPValue::output_places=GEOMETRY_OUTPUT_PLACES;
+template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDP> const& ivl) {
+    auto places = FloatDP::output_places;
+    FloatDP::output_places=GEOMETRY_OUTPUT_PLACES;
     os << "{" << ivl.lower_bound() << ":" << ivl.upper_bound() << "}";
-    FloatDPValue::output_places=places;
+    FloatDP::output_places=places;
     return os;
 }
 
-Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
+Interval<FloatDP> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(upward);
     volatile float min=std::numeric_limits<float>::min();
@@ -50,12 +50,12 @@ Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     if(neg_rl<neg_l) { neg_rl=neg_rl+min; }
     if(ru<u) { ru=ru+min; }
     volatile float rl=-neg_l;
-    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
+    Interval<FloatDP> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
 
-Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl) {
+Interval<FloatDP> approximate_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(to_nearest);
     volatile float eps=std::numeric_limits<float>::epsilon();
@@ -64,13 +64,13 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
     volatile float rl=l;
     volatile float ru=u;
     if(rl==ru) { rl=rl-(rl*eps); ru=ru+(ru*eps); }
-    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
+    Interval<FloatDP> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
 
 InputStream&
-operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
+operator>>(InputStream& is, Interval<FloatDP>& ivl)
 {
     FloatDP l(dp),u(dp);
     char cl,cm,cr;
@@ -79,7 +79,7 @@ operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    ivl.set_bounds(FloatDPValue(l),FloatDPValue(u));
+    ivl.set_bounds(FloatDP(l),FloatDP(u));
     return is;
 }
 
@@ -254,8 +254,8 @@ ApproximateKleenean eq(FloatMPApproximateInterval const& ivl1, FloatMPApproximat
 
 template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }
-template<> String class_name<Interval<FloatDPValue>>() { return "FloatDPValueInterval"; }
-template<> String class_name<Interval<FloatMPValue>>() { return "FloatDPValueInterval"; }
+template<> String class_name<Interval<FloatDP>>() { return "FloatDPInterval"; }
+template<> String class_name<Interval<FloatMP>>() { return "FloatDPInterval"; }
 template<> String class_name<Interval<Real>>() { return "RealInterval"; }
 
 } // namespace Ariadne

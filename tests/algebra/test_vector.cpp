@@ -61,10 +61,10 @@ TestVector::test_concept()
 {
     FloatDPApproximation ax(1,dp);
     FloatDPBounds ix(1,dp);
-    FloatDPValue ex(1,dp);
+    FloatDP ex(1,dp);
     Vector<FloatDPApproximation> av;
     Vector<FloatDPBounds> iv;
-    Vector<FloatDPValue> ev;
+    Vector<FloatDP> ev;
 
     iv=Vector<FloatDPBounds>(ev);
 
@@ -99,7 +99,7 @@ TestVector::test_constructors()
 
     ARIADNE_TEST_CONSTRUCT( Vector<FloatDPApproximation>, va, ({3.25,-0.75,0.0,1.375},dp) );
     ARIADNE_TEST_CONSTRUCT( Vector<FloatDPBounds>, vb, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
-    ARIADNE_TEST_CONSTRUCT( Vector<FloatDPValue>, vx, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
+    ARIADNE_TEST_CONSTRUCT( Vector<FloatDP>, vx, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
 }
 
 
@@ -214,8 +214,8 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<FloatDPValue> ev1(reinterpret_cast<Vector<FloatDPValue>const&>(v1));
-    FloatDPValue ex(reinterpret_cast<FloatDPValue const&>(x));
+    Vector<FloatDP> ev1(reinterpret_cast<Vector<FloatDP>const&>(v1));
+    FloatDP ex(reinterpret_cast<FloatDP const&>(x));
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;

@@ -69,9 +69,9 @@ using ValidatedAffineModelConstraintDP = ValidatedAffineModelConstraint<FloatDP>
 
 
 template<class X> AffineConstraint<X> operator<=(const SelfType<X>& l, const Affine<X>& a) {
-    return AffineConstraint<X>(l,a,+infty); }
+    X u(+infty,l.precision()); return AffineConstraint<X>(l,a,u); }
 template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const SelfType<X>& u) {
-    return AffineConstraint<X>(-infty,a,u); }
+    X l(-infty,u.precision());return AffineConstraint<X>(l,a,u); }
 template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const SelfType<X>& u) {
     ARIADNE_ASSERT(decide(ac.upper_bound()==infty));
     return AffineConstraint<X>(ac.lower_bound(),ac.function(),u); }
@@ -106,7 +106,7 @@ class ValidatedAffineConstrainedImageSet
     //!\brief The set \f$\{ y \mid y\in D\}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D);
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDP>& G, const Vector<FloatDP>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<Affine<FloatDPBounds>>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
@@ -151,10 +151,10 @@ class ValidatedAffineConstrainedImageSet
     virtual OutputStream& _write(OutputStream& os) const;
 
   private:
-    Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
-    Void construct_linear_program(LinearProgram<FloatDPValue,FloatDPBounds>& lp) const;
-    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDPValue,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
-    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDPValue,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
+    Void construct(const ExactBoxType& D, const Matrix<FloatDP>& G, const Vector<FloatDP>& c);
+    Void construct_linear_program(LinearProgram<FloatDP,FloatDPBounds>& lp) const;
+    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
+    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP,FloatDPBounds>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness);
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {

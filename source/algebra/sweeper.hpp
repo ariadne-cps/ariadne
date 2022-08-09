@@ -51,7 +51,7 @@ template<class F> class SweeperInterface {
     typedef typename F::PrecisionType PR;
   public:
     virtual ~SweeperInterface() = default;
-    inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
+    inline Void sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_sweep(p); }
     inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
@@ -59,7 +59,7 @@ template<class F> class SweeperInterface {
   private:
     virtual SweeperInterface* _clone() const = 0;
     virtual PR _precision() const = 0;
-    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const = 0;
@@ -92,7 +92,7 @@ template<class F> class Sweeper
     //! \brief The precision to which terms should be built.
     inline PrecisionType precision() const { return this->_ptr->_precision(); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
-    inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
+    inline Void sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
     inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
@@ -106,7 +106,7 @@ template<class F> class SweeperBase
     : public virtual SweeperInterface<F>
 {
     typedef typename F::PrecisionType PR;
-    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
@@ -146,7 +146,7 @@ template<class F> class RelativeSweeperBase
     : public virtual SweeperInterface<F>
 {
     typedef typename F::PrecisionType PR;
-    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
@@ -223,7 +223,7 @@ template<class F> class TrivialSweeper : public SweeperMixin<TrivialSweeper<F>,F
     inline PR precision() const { return _coefficient_precision; }
     inline Bool discard(const MultiIndex& a, const F& x) const { return false; }
   private:
-    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const final { }
+    virtual Void _sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& e) const final { }
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const final { }
     virtual Void _write(OutputStream& os) const { os << "TrivialSweeper"; }
 };

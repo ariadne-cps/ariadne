@@ -28,8 +28,6 @@
 #ifndef ARIADNE_TENSOR_HPP
 #define ARIADNE_TENSOR_HPP
 
-#include "numeric/float_value.hpp"
-
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "diagonal_matrix.hpp"

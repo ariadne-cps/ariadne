@@ -262,7 +262,7 @@ class Enclosure
     //! \brief A bounding box for the set.
     UpperBoxType bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
-    Point<FloatDPValue> centre() const;
+    Point<FloatDP> centre() const;
     //! \brief An over-approximation to the radius of the set.
     FloatDPError radius() const;
     //! \brief Returns \c true if the set is definitely bounded.

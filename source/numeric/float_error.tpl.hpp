@@ -28,7 +28,6 @@
 
 #include "float_error.hpp"
 
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 
 #include "upper_number.hpp"
@@ -40,8 +39,8 @@ template<class F> Nat Error<F>::output_places = 3;
 template<class F> Error<F>::Error(PositiveBounds<F> const& x)
     : _e(x._u) { }
 
-template<class F> Error<F>::Error(Positive<Value<F>> const& x)
-    : _e(x._v) { }
+template<class F> Error<F>::Error(Positive<F> const& x)
+    : _e(cast_unsigned(x)) { }
 
 template<class F> Error<F>& Error<F>::operator=(ValidatedErrorNumber y) {
     return *this=cast_positive(y.get(this->precision()));

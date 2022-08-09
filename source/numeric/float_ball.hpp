@@ -31,11 +31,15 @@
 
 #include "utility/macros.hpp"
 
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "positive.hpp"
+
 #include "float_operations.hpp"
 #include "float_traits.hpp"
+#include "float_factory.hpp"
 
 namespace Ariadne {
 
@@ -46,13 +50,12 @@ template<class PRE, class PR> requires (not DefaultConstructible<PRE>) and Const
 
 //! \ingroup NumericModule
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
-//! \sa Real, FloatDP, FloatMP, Error, Value, Bounds, Approximation.
+//! \sa Real, FloatDP, FloatMP, Error, Float, Bounds, Approximation.
 template<class F, class FE> class Ball
     : public DefineConcreteGenericOperators<Ball<F,FE>>
     , public DefineFieldOperators<Ball<F,FE>>
     , public DefineComparisonOperators<Ball<F,FE>,LessTrait<Ball<F,FE>>,EqualsTrait<Ball<F,FE>>>
     , public ProvideConvertedFieldOperations<Bounds<F>,Ball<F,FE>>
-    , public ProvideConvertedFieldOperations<Ball<F,FE>,Value<F>>
 {
     typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
     static_assert(Constructible<PR,PRE> or DefaultConstructible<PRE>);
@@ -80,13 +83,12 @@ template<class F, class FE> class Ball
     //! Construct a ball of radius \f$0\f$ about zero,
     //! using precision \a pr for the centre (value), and \a pre for the radius (error).
     explicit Ball(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
-    explicit Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
     explicit Ball(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     //! Construct a ball of radius \a e about \a v.
     explicit Ball(F const& v, FE const& e) : _v(v), _e(e) { }
-    //! Construct a ball of radius \a error about \a value.
-    Ball(Value<F> const& value, Error<FE> const& error);
-    Ball(Value<F> const& x, PRE pre);
+    //! Construct a ball of radius \a error about \a v.
+    Ball(F const& v, Error<FE> const& error);
     //! Construct a ball containing the bounds \a x, with error bound of precision \a pre.
     Ball(Bounds<F> const& x, PRE pre);
     Ball(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
@@ -115,7 +117,6 @@ template<class F, class FE> class Ball
     //! Construct a ball containing the bounds \a x.
     //! The precision of the error is either that of \a F, or the default value.
     explicit Ball(Bounds<F> const& x);
-    Ball(Value<F> const& x);
 
     //! Assign from generic validated bounds \a y, keeping the same properties.
     Ball<F,FE>& operator=(const ValidatedNumber& y) { return *this=Ball<F,FE>(y,this->precision(),this->error_precision()); }
@@ -131,11 +132,11 @@ template<class F, class FE> class Ball
     //! An upper bound.
     UpperBound<F> const upper() const;
     //! The centre value of the ball.
-    Value<F> const value() const;
+    F const value() const;
     //! The radius of the ball, giving a bound on the error of \ref value().
     Error<FE> const error() const;
 
-    friend Value<F> value(Ball<F,FE> const& x) { return x.value(); }
+    friend F value(Ball<F,FE> const& x) { return x.value(); }
     friend Error<FE> error(Ball<F,FE> const& x) { return x.error(); }
 
     RawType const lower_raw() const { return sub(down,_v,_e); }
@@ -220,14 +221,79 @@ template<class F, class FE> class Ball
     friend Ball<F,FE> atan(Ball<F,FE> const& x) {
         return Ball<F,FE>(atan(Bounds<F>(x)),x.error_precision()); }
 
-    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Equality comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_eq(x1,x2); }
-    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict less-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_lt(x1,x2); }
 
+/*
+public:
+    // Mixed Ball-ValidatedNumber operations
+    template<AValidatedNumber Y> friend Ball<F,FE> operator+(Ball<F,FE> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator+(x1,F(y2,x1.precision())); }
+        else { return operator+(x1,Ball<F,FE>(y2,x1.precision(),x1.error_precision())); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator-(Ball<F,FE> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator-(x1,F(y2,x1.precision())); }
+        else { return operator-(x1,Ball<F,FE>(y2,x1.precision(),x1.error_precision())); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator*(Ball<F,FE> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator*(x1,F(y2,x1.precision())); }
+        else { return operator*(x1,Ball<F,FE>(y2,x1.precision(),x1.error_precision())); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator/(Ball<F,FE> const& x1, Y const& y2) {
+        if constexpr (AnExactDyadic<Y>) { return operator/(x1,F(y2,x1.precision())); }
+        else { return operator/(x1,Ball<F,FE>(y2,x1.precision(),x1.error_precision())); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator+(Y const& y1, Ball<F,FE> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator+(F(y1,x2.precision()),x2); }
+        else { return operator+(Ball<F,FE>(y1,x2.precision(),x2.error_precision()),x2); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator-(Y const& y1, Ball<F,FE> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator-(F(y1,x2.precision()),x2); }
+        else { return operator-(Ball<F,FE>(y1,x2.precision(),x2.error_precision()),x2); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator*(Y const& y1, Ball<F,FE> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator*(F(y1,x2.precision()),x2); }
+        else { return operator*(Ball<F,FE>(y1,x2.precision(),x2.error_precision()),x2); } }
+    template<AValidatedNumber Y> friend Ball<F,FE> operator/(Y const& y1, Ball<F,FE> const& x2) {
+        if constexpr (AnExactDyadic<Y>) { return operator/(F(y1,x2.precision()),x2); }
+        else { return operator/(Ball<F,FE>(y1,x2.precision(),x2.error_precision()),x2); } }
+*/
+  public:
+    friend Ball<F,FE> add(Ball<F,FE> const& x1, F const& x2) { return add(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> sub(Ball<F,FE> const& x1, F const& x2) { return sub(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> mul(Ball<F,FE> const& x1, F const& x2) { return mul(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> div(Ball<F,FE> const& x1, F const& x2) { return div(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> add(F const& x1, Ball<F,FE> const& x2) { return add(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> sub(F const& x1, Ball<F,FE> const& x2) { return sub(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> mul(F const& x1, Ball<F,FE> const& x2) { return mul(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> div(F const& x1, Ball<F,FE> const& x2) { return div(Ball<F,FE>(x1,x2.error_precision()),x2); }
 
+    friend Ball<F,FE> max(Ball<F,FE> const& x1, F const& x2) { return max(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> min(Ball<F,FE> const& x1, F const& x2) { return min(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> max(F const& x1, Ball<F,FE> const& x2) { return max(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> min(F const& x1, Ball<F,FE> const& x2) { return min(Ball<F,FE>(x1,x2.error_precision()),x2); }
+
+    friend Ball<F,FE> operator+(Ball<F,FE> const& x1, F const& x2) { return operator+(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> operator-(Ball<F,FE> const& x1, F const& x2) { return operator-(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> operator*(Ball<F,FE> const& x1, F const& x2) { return operator*(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> operator/(Ball<F,FE> const& x1, F const& x2) { return operator/(x1,Ball<F,FE>(x2,x1.error_precision())); }
+    friend Ball<F,FE> operator+(F const& x1, Ball<F,FE> const& x2) { return operator+(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> operator-(F const& x1, Ball<F,FE> const& x2) { return operator-(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> operator*(F const& x1, Ball<F,FE> const& x2) { return operator*(Ball<F,FE>(x1,x2.error_precision()),x2); }
+    friend Ball<F,FE> operator/(F const& x1, Ball<F,FE> const& x2) { return operator/(Ball<F,FE>(x1,x2.error_precision()),x2); }
+
+    friend ValidatedKleenean operator==(Ball<F,FE> const& x1, F const& x2) { return x1==Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator!=(Ball<F,FE> const& x1, F const& x2) { return x1!=Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator< (Ball<F,FE> const& x1, F const& x2) { return x1< Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator> (Ball<F,FE> const& x1, F const& x2) { return x1> Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator<=(Ball<F,FE> const& x1, F const& x2) { return x1<=Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator>=(Ball<F,FE> const& x1, F const& x2) { return x1>=Ball<F,FE>(x2,x1.error_precision()); }
+    friend ValidatedKleenean operator==(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())==x2; }
+    friend ValidatedKleenean operator!=(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())!=x2; }
+    friend ValidatedKleenean operator< (F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())< x2; }
+    friend ValidatedKleenean operator> (F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())> x2; }
+    friend ValidatedKleenean operator<=(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())<=x2; }
+    friend ValidatedKleenean operator>=(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())>=x2; }
+
+  public:
     friend Ball<F,FE> round(Ball<F,FE> const& x) {
         return Ball<F,FE>(round(x.lower_raw()),round(x.upper_raw())); }
     friend Ball<F,FE> widen(Ball<F,FE> const& x) {
@@ -250,7 +316,7 @@ template<class F, class FE> class Ball
     friend Bool same(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._v==x2._v && x1._e==x2._e; }
     //! <p/>
-    friend Bool models(Ball<F,FE> const& x1, Value<F> const& x2) {
+    friend Bool models(Ball<F,FE> const& x1, F const& x2) {
         return x1._l<=x2._v && x1._u >= x2._v; }
     //! <p/>
     friend Bool consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
@@ -279,6 +345,16 @@ template<class F, class FE> class Ball
 template<class PR> Ball(ValidatedNumber, PR) -> Ball<RawFloatType<PR>>;
 template<class PR, class PRE> Ball(ValidatedNumber, PR, PRE) -> Ball<RawFloatType<PR>,RawFloatType<PRE>>;
 template<class F, class FE> Ball(F,FE) -> Ball<F,FE>;
+
+// Mixed Ball-value operations
+template<ARawFloat F, class PRE> Ball<F,Float<PRE>> add(F const& x1, F const& x2, PRE pre) {
+    typedef Float<PRE> FE; return Operations<Ball<F,FE>>::_add(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,Float<PRE>> sub(F const& x1, F const& x2, PRE pre) {
+    typedef Float<PRE> FE; return Operations<Ball<F,FE>>::_sub(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,Float<PRE>> mul(F const& x1, F const& x2, PRE pre) {
+    typedef Float<PRE> FE; return Operations<Ball<F,FE>>::_mul(x1,x2,pre); }
+template<ARawFloat F, class PRE> Ball<F,Float<PRE>> div(F const& x1, F const& x2, PRE pre) {
+    typedef Float<PRE> FE; return Operations<Ball<F,FE>>::_div(x1,x2,pre); }
 
 template<class F, class FE> inline FloatBallFactory<PrecisionType<F>,PrecisionType<FE>> factory(Ball<F,FE> const& flt) {
     return FloatBallFactory<PrecisionType<F>,PrecisionType<FE>>(flt.precision(),flt.error_precision()); }
@@ -394,34 +470,34 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return x*rec(y);
     }
 
-    static Ball<F,FE> _add(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=add(near,x._v,y._v);
-        auto ru=add(up,x._v,y._v);
-        auto rl=add(down,x._v,y._v);
+    static Ball<F,FE> _add(F const& x, F const& y, PRE pre) {
+        auto rv=add(near,x,y);
+        auto ru=add(up,x,y);
+        auto rl=add(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _sub(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=sub(near,x._v,y._v);
-        auto ru=sub(up,x._v,y._v);
-        auto rl=sub(down,x._v,y._v);
+    static Ball<F,FE> _sub(F const& x, F const& y, PRE pre) {
+        auto rv=sub(near,x,y);
+        auto ru=sub(up,x,y);
+        auto rl=sub(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _mul(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=mul(near,x._v,y._v);
-        auto ru=mul(up,x._v,y._v);
-        auto rl=mul(down,x._v,y._v);
+    static Ball<F,FE> _mul(F const& x, F const& y, PRE pre) {
+        auto rv=mul(near,x,y);
+        auto ru=mul(up,x,y);
+        auto rl=mul(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
 
-    static Ball<F,FE> _div(Value<F> const& x, Value<F> const& y, PRE pre) {
-        auto rv=div(near,x._v,y._v);
-        auto ru=div(up,x._v,y._v);
-        auto rl=div(down,x._v,y._v);
+    static Ball<F,FE> _div(F const& x, F const& y, PRE pre) {
+        auto rv=div(near,x,y);
+        auto ru=div(up,x,y);
+        auto rl=div(down,x,y);
         auto re=FE(hlf(sub(up,ru,rl)),up,pre);
         return Ball<F,FE>(rv,re);
     }
@@ -506,8 +582,8 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
         return x1._v==x2._v && x1._e==x2._e;
     }
 
-    static Bool _models(Ball<F,FE> const& x1, Value<F> const& x2) {
-        return (x1._v>=x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v)) <= x1._e;
+    static Bool _models(Ball<F,FE> const& x1, F const& x2) {
+        return (x1._v>=x2 ? sub(up,x1._v,x2) : sub(up,x2,x1._v)) <= x1._e;
     }
 
     static Bool _consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {

@@ -263,7 +263,7 @@ Real::Real(Dyadic const& w) : Real(std::make_shared<RealWrapper<Cnst,Dyadic>>(w)
 Real::Real(Decimal const& d) : Real(std::make_shared<RealWrapper<Cnst,Decimal>>(d)) { }
 Real::Real(Rational const& q) : Real(std::make_shared<RealWrapper<Cnst,Rational>>(q)) { }
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealWrapper<Cnst,EffectiveNumber>>(q)) { }
-Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDPValue)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
+Real::Real(FloatDP x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDP)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }

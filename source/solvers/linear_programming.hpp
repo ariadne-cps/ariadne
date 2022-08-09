@@ -42,11 +42,13 @@ template<class X> class Matrix;
 template<class X> class Affine;
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<class F> struct RigorousNumericsTraits<Value<F>> { typedef Bounds<F> Type; };
+template<> struct RigorousNumericsTraits<FloatDP> { typedef Bounds<FloatDP> Type; };
+template<> struct RigorousNumericsTraits<FloatMP> { typedef Bounds<FloatMP> Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 template<class X> struct ApproximateNumericsTraits { typedef X Type; };
-template<class F> struct ApproximateNumericsTraits<Value<F>> { typedef Approximation<F> Type; };
+template<> struct ApproximateNumericsTraits<FloatDP> { typedef Approximation<FloatDP> Type; };
+template<> struct ApproximateNumericsTraits<FloatMP> { typedef Approximation<FloatMP> Type; };
 template<class X> using ApproximateNumericType = typename ApproximateNumericsTraits<X>::Type;
 
 
@@ -80,7 +82,7 @@ struct InfeasibleLinearProgram : std::runtime_error {
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
 {
-    typedef FloatDPValue X;
+    typedef FloatDP X;
     typedef RigorousNumericType<X> VX;
     typedef ApproximateNumericType<X> AX;
   public:

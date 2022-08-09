@@ -380,7 +380,7 @@ template<class X> Matrix<Bounds<X>> gs_solve_bounds(const Matrix<Bounds<X>>& A, 
     // Precondition A and B
     Matrix<Approximation<X>> mA(A);
 
-    Matrix<Value<X>> J=cast_exact(inverse(mA));
+    Matrix<X> J=cast_exact(inverse(mA));
     Matrix<Bounds<X>> JA=J*A;
     Matrix<Bounds<X>> JB=J*B;
 
@@ -433,7 +433,7 @@ template<class X> Matrix<ArithmeticType<X>> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDPValue>& A);
+template<> Matrix<FloatDPBounds> inverse<FloatDP>(const Matrix<FloatDP>& A);
 template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBounds>& A);
 
 

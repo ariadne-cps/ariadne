@@ -44,8 +44,8 @@
 
 namespace Ariadne {
 
-template<class F> inline const Point<Value<F>>& cast_exact(const Point<Approximation<F>>& t) {
-    return reinterpret_cast<const Point<Value<F>>&>(t); }
+template<class F> inline const Point<F>& cast_exact(const Point<Approximation<F>>& t) {
+    return reinterpret_cast<const Point<F>&>(t); }
 
 
 
@@ -129,7 +129,7 @@ InterpolatedCurve::insert(const Dyadic& s, const PointType& pt) {
 Void
 InterpolatedCurve::insert(const RawFloatDP& s, const Vector<RawFloatDP>& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
-    this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<FloatDPValue>const&>(pt)));
+    this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<FloatDP>const&>(pt)));
 }
 
 UpperBoxType

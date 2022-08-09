@@ -58,8 +58,8 @@ template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, cons
 {
     //std::cerr<<"_compose(TaylorSeries,A,ErrorTag)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    FloatDPValue& vref=const_cast<FloatDPValue&>(tv.value());
-    FloatDPValue vtmp=vref;
+    FloatDP& vref=const_cast<FloatDP&>(tv.value());
+    FloatDP vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts[ts.degree()];
@@ -88,9 +88,9 @@ template<ANormedAlgebra A> A compose(const TaylorSeries<FloatDPBounds>& ts, cons
 template<ANormedAlgebra A> A _compose1(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=18;
-    static const double TRUNCATION_ERROR=1e-8;
+    static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -122,7 +122,7 @@ template<ANormedAlgebra A> A _compose2(const AnalyticFunction& fn, const A& tm, 
     static const Nat DEGREE=20;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -148,7 +148,7 @@ template<ANormedAlgebra A> A _compose2(const AnalyticFunction& fn, const A& tm, 
     return res;
 }
 
-template<class F> Error<F> error_bound(Bounds<F> const& b, Value<F> const& c) {
+template<class F> Error<F> error_bound(Bounds<F> const& b, F const& c) {
     return Error<F>(max(b.upper()-c,c-b.lower()));
 }
 
@@ -165,7 +165,7 @@ template<ANormedAlgebra A> A _compose3(const AnalyticFunction& fn, const A& tm, 
     static const Nat DEGREE=20;
     static const ExactDouble TRUNCATION_ERROR=1e-8_pr;
     Nat d=DEGREE;
-    FloatDPValue c=tm.value();
+    FloatDP c=tm.value();
     FloatDPBounds r=tm.range();
     Series<FloatDPBounds> centre_series=fn.series(FloatDPBounds(c));
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -226,15 +226,15 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     auto pr=avg.precision();
 
     if(avg<=rad) {
-        ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
+        ARIADNE_THROW(DomainException,"sqrt(A x)","x="<<x);
     }
 
-    auto eps=mag(rad/avg);
+    auto eps=mag(rad)/abs(avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>(Sqrt(),X(1,pr));
     Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);
-
+    
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
     ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
 
@@ -261,7 +261,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad);
     }
 
-    auto eps=mag(rad/avg);
+    auto eps=mag(rad)/abs(avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     // Compute the degree and truncation error
@@ -293,7 +293,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
         ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
     }
 
-    auto eps=mag(rad/avg);
+    auto eps=mag(rad)/abs(avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);

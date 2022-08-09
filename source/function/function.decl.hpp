@@ -51,8 +51,8 @@ using RealVector=Vector<Real>;
 using RealMatrix=Matrix<Real>;
 
 // Domain declarations
-typedef Interval<FloatDPValue> IntervalDomainType;
-typedef Box<Interval<FloatDPValue>> BoxDomainType;
+typedef Interval<FloatDP> IntervalDomainType;
+typedef Box<Interval<FloatDP>> BoxDomainType;
 
 typedef Interval<FloatDPUpperBound> IntervalRangeType;
 typedef Box<Interval<FloatDPUpperBound>> BoxRangeType;
@@ -199,7 +199,7 @@ template<class F> class UnknownError;
 
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
     typedef RawFloat<PR> F; typedef RawFloat<PRE> FE;
-    typedef Value<F> ValueType; typedef Error<FE> ErrorType;
+    typedef F ValueType; typedef Error<FE> ErrorType;
     typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
     typedef Bounds<F> NumericType; typedef ValidatedNumber GenericNumericType;
     typedef F RawFloatType;

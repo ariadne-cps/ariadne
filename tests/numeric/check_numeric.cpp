@@ -308,7 +308,7 @@ ARIADNE_CLASS_NAME(FloatDPUpperBound);
 ARIADNE_CLASS_NAME(FloatDPBounds);
 ARIADNE_CLASS_NAME(FloatDPBall);
 ARIADNE_CLASS_NAME(FloatDPError);
-ARIADNE_CLASS_NAME(FloatDPValue);
+ARIADNE_CLASS_NAME(FloatDP);
 
 ARIADNE_CLASS_NAME(FloatMPApproximation);
 ARIADNE_CLASS_NAME(FloatMPLowerBound);
@@ -316,7 +316,7 @@ ARIADNE_CLASS_NAME(FloatMPUpperBound);
 ARIADNE_CLASS_NAME(FloatMPBounds);
 ARIADNE_CLASS_NAME(FloatMPBall);
 ARIADNE_CLASS_NAME(FloatMPError);
-ARIADNE_CLASS_NAME(FloatMPValue);
+ARIADNE_CLASS_NAME(FloatMP);
 
 #undef ARIADNE_CLASS_NAME
 
@@ -324,7 +324,7 @@ typedef bool B; typedef uint Nat; typedef int Int; typedef double Dbl;
 typedef Integer  Z ; typedef Rational  Q ; typedef Real  R ;
 typedef Number<ExactTag> ExN; typedef Number<EffectiveTag> EfN; typedef Number<ValidatedTag> VaN;
 typedef Number<ValidatedUpperTag> UpN; typedef Number<ValidatedLowerTag> LoN; typedef Number<ApproximateTag> ApN;
-typedef FloatDPValue ExF; typedef FloatDPBall MeF; typedef FloatDPBounds BoF;
+typedef FloatDP ExF; typedef FloatDPBall MeF; typedef FloatDPBounds BoF;
 typedef FloatDPUpperBound UpF; typedef FloatDPLowerBound LoF; typedef FloatDPApproximation ApF;
 typedef LogicalType<ExactTag> ExL; typedef LogicalType<EffectiveTag> EfL; typedef LogicalType<ValidatedTag> VaL;
 typedef LogicalType<UpperTag> UpL; typedef LogicalType<LowerTag> LoL; typedef LogicalType<ApproximateTag> ApL;
@@ -343,7 +343,7 @@ class CheckNumeric
   public:
     void check();
   private:
-    typedef SafeSumType<FloatDPValue,FloatDPValue> ExactFloatArithmeticType;
+    typedef SafeSumType<FloatDP,FloatDP> ExactFloatArithmeticType;
 
     void notifications();
     void check_conversions();
@@ -360,7 +360,7 @@ class CheckNumeric
     typedef Tags<Nat,Int,Dbl> BuiltinTypes;
     typedef Tags<Integer,Rational,Real> UserTypes;
     typedef Tags<Number<ExactTag>,Number<EffectiveTag>,Number<ValidatedTag>,Number<ValidatedUpperTag>,Number<ValidatedLowerTag>,Number<ApproximateTag>> GenericTypes;
-    typedef Tags<FloatDPValue,FloatDPBall,FloatDPBounds,FloatDPUpperBound,FloatDPLowerBound,FloatDPApproximation> FloatDPTypes;
+    typedef Tags<FloatDP,FloatDPBall,FloatDPBounds,FloatDPUpperBound,FloatDPLowerBound,FloatDPApproximation> FloatDPTypes;
 
     typedef decltype(cat(declval<BuiltinTypes>(),declval<UserTypes>(),declval<GenericTypes>(),declval<FloatDPTypes>())) NumericTypes;
 
@@ -430,26 +430,26 @@ String to_str(bool b) { return b?"true":"false"; }
 
 void CheckNumeric::notifications()
 {
-    // Operations on FloatDPValue: display what is being used.
+    // Operations on FloatDP: display what is being used.
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumericType: ")+to_str(Convertible<double,ApproximateNumericType>));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> FloatDPApproximation: ")+to_str(Convertible<double,FloatDPApproximation>));
-    ARIADNE_TEST_NOTIFY(String("Conversion double -> FloatDPValue: ")+to_str(Convertible<double,FloatDPValue>));
+    ARIADNE_TEST_NOTIFY(String("Conversion double -> FloatDP: ")+to_str(Convertible<double,FloatDP>));
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumericType: ")+to_str(Constructible<ExactNumericType,double>));
-    ARIADNE_TEST_NOTIFY(String("Construction double -> FloatDPValue: ")+to_str(Constructible<FloatDPValue,double>));
-    ARIADNE_TEST_NOTIFY(String("Conversion int -> FloatDPValue: ")+to_str(Convertible<int,FloatDPValue>));
-    ARIADNE_TEST_NOTIFY(String("Construction Integer -> FloatDPValue: ")+to_str(Constructible<FloatDPValue,Integer>)+"");
+    ARIADNE_TEST_NOTIFY(String("Construction double -> FloatDP: ")+to_str(Constructible<FloatDP,double>));
+    ARIADNE_TEST_NOTIFY(String("Conversion int -> FloatDP: ")+to_str(Convertible<int,FloatDP>));
+    ARIADNE_TEST_NOTIFY(String("Construction Integer -> FloatDP: ")+to_str(Constructible<FloatDP,Integer>)+"");
 
     ARIADNE_TEST_NOTIFY((String("UpperNumericType * UpperNumericType -> ")+class_name<SafeProductType<UpperNumericType,UpperNumericType>>()+"\n"));
 
-    ARIADNE_TEST_NOTIFY((String("FloatDPValue + FloatDPValue -> ")+class_name<SafeSumType<FloatDPValue,FloatDPValue>>()));
+    ARIADNE_TEST_NOTIFY((String("FloatDP + FloatDP -> ")+class_name<SafeSumType<FloatDP,FloatDP>>()));
     ARIADNE_TEST_NOTIFY((String("FloatDPBall + FloatDPBounds -> ")+class_name<SafeSumType<FloatDPBall,FloatDPBounds>>()));
-    ARIADNE_TEST_NOTIFY((String("FloatDPValue + ValidatedNumericType -> ")+class_name<SafeSumType<FloatDPValue,ValidatedNumericType>>()));
+    ARIADNE_TEST_NOTIFY((String("FloatDP + ValidatedNumericType -> ")+class_name<SafeSumType<FloatDP,ValidatedNumericType>>()));
     ARIADNE_TEST_NOTIFY((String("FloatDPUpperBound * FloatDPUpperBound -> ")+class_name<SafeProductType<FloatDPUpperBound,FloatDPUpperBound>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<SafeSumType<Integer,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactNumericType + double -> ")+class_name<SafeSumType<ExactNumericType,double>>()));
     ARIADNE_TEST_NOTIFY((String("ApproximateNumericType + double -> ")+class_name<SafeSumType<ApproximateNumericType,double>>()));
-    ARIADNE_TEST_NOTIFY((String("FloatDPValue + double -> ")+class_name<SafeSumType<FloatDPValue,double>>()+"\n"));
+    ARIADNE_TEST_NOTIFY((String("FloatDP + double -> ")+class_name<SafeSumType<FloatDP,double>>()+"\n"));
 
     ARIADNE_TEST_NOTIFY((String("Rational == double -> ")+class_name<SafeEqualsType<Rational,double>>()));
     ARIADNE_TEST_NOTIFY((String("Rational < double -> ")+class_name<SafeLessType<Rational,double>>()+"\n"));

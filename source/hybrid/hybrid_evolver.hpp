@@ -52,7 +52,7 @@
 
 namespace Ariadne {
 
-typedef Map< DiscreteLocation, Vector<FloatDPValue> > HybridExactFloatVector;
+typedef Map< DiscreteLocation, Vector<FloatDP> > HybridExactFloatVector;
 typedef Dyadic StepSizeType;
 
 class IntegratorInterface;

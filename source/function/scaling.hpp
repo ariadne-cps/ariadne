@@ -39,28 +39,28 @@ struct UnscalingException : std::runtime_error {
     inline UnscalingException(String msg, IntervalDomainType dom) : std::runtime_error(msg+to_str(dom)), domain(dom) { }
 };
 
-template<class F> inline Approximation<F> med_apprx(Interval<Value<F>> const& ivl) {
+template<class F> inline Approximation<F> med_apprx(Interval<F> const& ivl) {
     return Approximation<F>(hlf(add(approx,ivl.lower_bound().raw(),ivl.upper_bound().raw())));
 }
 
-template<class F> inline Approximation<F> rad_apprx(Interval<Value<F>> const& ivl) {
+template<class F> inline Approximation<F> rad_apprx(Interval<F> const& ivl) {
     return Approximation<F>(hlf(sub(approx,ivl.upper_bound().raw(),ivl.lower_bound().raw())));
 }
 
-template<class F> inline Bounds<F> med_val(Interval<Value<F>> const& ivl) {
+template<class F> inline Bounds<F> med_val(Interval<F> const& ivl) {
     return hlf(ivl.lower_bound()+ivl.upper_bound());
 }
 
-template<class F> inline Bounds<F> rad_val(Interval<Value<F>> const& ivl) {
+template<class F> inline Bounds<F> rad_val(Interval<F> const& ivl) {
     return hlf(ivl.upper_bound()-ivl.lower_bound());
 }
 
 inline Dyadic med(IntervalDomainType const& ivl) {
-    return hlf(add( Dyadic(ivl.lower_bound().raw()), Dyadic(ivl.upper_bound().raw()) ));
+    return hlf(add( Dyadic(ivl.lower_bound()), Dyadic(ivl.upper_bound()) ));
 }
 
 inline Dyadic rad(IntervalDomainType const& ivl) {
-    return hlf(sub( Dyadic(ivl.upper_bound().raw()), Dyadic(ivl.lower_bound().raw()) ));
+    return hlf(sub( Dyadic(ivl.upper_bound()), Dyadic(ivl.lower_bound()) ));
 }
 
 template<class T> inline

@@ -53,11 +53,11 @@ template<class PR> class FloatFactory {
     FloatBounds<PR> create(Rational const& y);
     FloatBounds<PR> create(Dyadic const& y);
     FloatBounds<PR> create(Integer const& y);
-    FloatValue<PR> create(ExactDouble const& y);
-    FloatValue<PR> create(Dyadic const& y, ExactTag);
-    FloatValue<PR> create(Integer const& y, ExactTag);
-    template<BuiltinSignedIntegral N> FloatValue<PR> create(N const& y);
-    template<BuiltinUnsignedIntegral M> PositiveFloatValue<PR> create(M const& y);
+    Float<PR> create(ExactDouble const& y);
+    Float<PR> create(Dyadic const& y, ExactTag);
+    Float<PR> create(Integer const& y, ExactTag);
+    template<BuiltinSignedIntegral N> Float<PR> create(N const& y);
+    template<BuiltinUnsignedIntegral M> PositiveFloat<PR> create(M const& y);
     template<BuiltinFloatingPoint D> FloatApproximation<PR> create(D const& y);
     PositiveFloatApproximation<PR> create(PositiveApproximateNumber const& y);
     PositiveFloatLowerBound<PR> create(PositiveValidatedLowerNumber const& y);
@@ -89,7 +89,18 @@ template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> co
 template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> const& flt);
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Bounds<F> const& flt);
 template<class F, class FE> inline FloatBallFactory<PrecisionType<F>,PrecisionType<FE>> factory(Ball<F,FE> const& flt);
-template<class F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt);
+template<class F> requires Same<F,FloatDP> or Same<F,FloatMP> inline FloatFactory<PrecisionType<F>> factory(F const& flt);
+
+template<ARawFloat F> inline FloatFactory<PrecisionType<F>> factory(F const& flt) {
+    return FloatFactory<PrecisionType<F>>(flt.precision()); }
+template<class PR> inline Float<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return Float<PR>(y,_pr); }
+template<class PR> inline Float<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return Float<PR>(y,_pr); }
+template<class PR> inline Float<PR> FloatFactory<PR>::create(ExactDouble const& y) { return Float<PR>(y,_pr); }
+
+template<class PR> template<BuiltinSignedIntegral N> inline
+Float<PR> FloatFactory<PR>::create(N const& y) { return Float<PR>(y,_pr); }
+template<class PR> template<BuiltinUnsignedIntegral M> inline
+Positive<Float<PR>> FloatFactory<PR>::create(M const& y) { return Positive<Float<PR>>(y,_pr); }
 
 /*
 template<class F> inline FloatFactory<PR> factory(Approximation<F> const& flt) { return FloatFactory<PR>(flt.precision()); }
@@ -97,7 +108,7 @@ template<class F> inline FloatFactory<PR> factory(LowerBound<F> const& flt) { re
 template<class F> inline FloatFactory<PR> factory(UpperBound<F> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class F> inline FloatFactory<PR> factory(Bounds<F> const& flt) { return FloatFactory<PR>(flt.precision()); }
 template<class F, class FE> inline FloatFactory<PR> factory(FloatBall<PR,PRE> const& flt) { return FloatFactory<PR>(flt.precision()); }
-template<class F> inline FloatFactory<PR> factory(Value<F> const& flt) { return FloatFactory<PR>(flt.precision()); }
+template<class F> inline FloatFactory<PR> factory(F const& flt) { return FloatFactory<PR>(flt.precision()); }
 
 template<class F> inline Approximation<F> FloatFactory<PR>::(Number<ApproximateTag> const& y) { return Approximation<F>(y,_pr); }
 template<class F> inline LowerBound<F> FloatFactory<PR>::(Number<ValidatedLowerTag> const& y) { return LowerBound<F>(y,_pr); }
@@ -111,11 +122,11 @@ template<class F> inline Bounds<F> FloatFactory<PR>::(Rational const& y) { retur
 template<class F> inline Bounds<F> FloatFactory<PR>::(Dyadic const& y) { return Bounds<F>(y,_pr); }
 template<class F> inline Bounds<F> FloatFactory<PR>::(Integer const& y) { return Bounds<F>(y,_pr); }
 
-template<class F> inline Value<F> FloatFactory<PR>::(Dyadic const& y, ExactTag) { return Value<F>(y,_pr); }
-template<class F> inline Value<F> FloatFactory<PR>::(Integer const& y, ExactTag) { return Value<F>(y,_pr); }
+template<class F> inline F FloatFactory<PR>::(Dyadic const& y, ExactTag) { return F(y,_pr); }
+template<class F> inline F FloatFactory<PR>::(Integer const& y, ExactTag) { return F(y,_pr); }
 
-template<class F> inline template<IsBuiltinSignedIntegral N> Value<F> FloatFactory<PR>::(N const& y) { return Value<F>(y,_pr); }
-template<class F> inline template<IsBuiltinUnsignedIntegral M> PositiveValue<F> FloatFactory<PR>::(M const& y) { return PositiveValue<F>(y,_pr); }
+template<class F> inline template<IsBuiltinSignedIntegral N> F FloatFactory<PR>::(N const& y) { return F(y,_pr); }
+template<class F> inline template<IsBuiltinUnsignedIntegral M> Positive<F> FloatFactory<PR>::(M const& y) { return Positive<F>(y,_pr); }
 template<class F> inline template<IsBuiltinFloatingPoint D> Approximation<F> FloatFactory<PR>::(D const& y) { return Approximation<F>(F(y,_pr)); }
 */
 

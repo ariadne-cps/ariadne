@@ -273,28 +273,29 @@ template<class I, class X> const X& Expansion<I,X>::get(const I& a) const {
 template<class I, class X, class CMP> EqualityType<X,X> SortedExpansion<I,X,CMP>::operator==(const SortedExpansion<I,X,CMP>& other) const {
     SortedExpansion<I,X,CMP> const& e1=*this; SortedExpansion<I,X,CMP> const& e2=other; CMP less;
     if(e1.argument_size()!=e2.argument_size()) { return false; }
-    EqualityType<X,X> r=true;
+    typedef EqualityType<X,X> L;
+    L r=true;
     auto iter1 = e1.begin(); auto iter2 = e2.begin();
     while (iter1!=e1.end() && iter2!=e2.end()) {
         if (iter1->index()==iter2->index()) {
             r = r && (iter1->coefficient()==iter2->coefficient());
             ++iter1; ++iter2;
         } else if (less(*iter1,*iter2)) {
-            r = r && (iter1->coefficient()==0);
+            r = r && static_cast<L>(iter1->coefficient()==0);
             ++iter1;
         } else if (less(*iter2,*iter1)) {
-            r = r && (0==iter2->coefficient());
+            r = r && static_cast<L>(0==iter2->coefficient());
             ++iter2;
         } else {
-             r = r && (iter1->coefficient()==0) && (0==iter2->coefficient());
+             r = r && static_cast<L>(iter1->coefficient()==0) && static_cast<L>(0==iter2->coefficient());
         }
     }
     while (iter1!=e1.end()) {
-        r = r && (iter1->coefficient()==0);
+        r = r && static_cast<L>(iter1->coefficient()==0);
         ++iter1;
     }
     while (iter2!=e2.end()) {
-        r = r && (0==iter2->coefficient());
+        r = r && static_cast<L>(0==iter2->coefficient());
         ++iter2;
     }
     return r;

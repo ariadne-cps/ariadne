@@ -41,20 +41,18 @@ namespace Ariadne {
     template class Expansion<MultiIndex,ExactDouble>;
     template class Expansion<MultiIndex,Dyadic>;
 
-    template class Expansion<MultiIndex,FloatDP>;
     template class Expansion<MultiIndex,RoundedFloatDP>;
-    template class Expansion<MultiIndex,FloatDPValue>;
+    template class Expansion<MultiIndex,FloatDP>;
     template class Expansion<MultiIndex,FloatDPBounds>;
     template class Expansion<MultiIndex,FloatDPApproximation>;
 
-    template class SortedExpansion<MultiIndex,FloatDP,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,RoundedFloatDP,GradedIndexLess>;
+    template class SortedExpansion<MultiIndex,FloatDP,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPApproximation,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPBounds,GradedIndexLess>;
 
-    template class SortedExpansion<MultiIndex,FloatDP,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,RoundedFloatDP,ReverseLexicographicIndexLess>;
-    template class SortedExpansion<MultiIndex,FloatDPValue,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<MultiIndex,FloatDP,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPApproximation,ReverseLexicographicIndexLess>;
 
@@ -63,9 +61,8 @@ namespace Ariadne {
     template class SortedExpansion<MultiIndex,FloatDPUpperInterval,ReverseLexicographicIndexLess>;
 
 
-    template class Expansion<MultiIndex,FloatMP>;
     template class Expansion<MultiIndex,RoundedFloatMP>;
-    template class Expansion<MultiIndex,FloatMPValue>;
+    template class Expansion<MultiIndex,FloatMP>;
     template class Expansion<MultiIndex,FloatMPBounds>;
     template class Expansion<MultiIndex,FloatMPApproximation>;
 
@@ -74,7 +71,6 @@ namespace Ariadne {
     template class SortedExpansion<MultiIndex,FloatMPBounds,GradedIndexLess>;
 
     template class SortedExpansion<MultiIndex,FloatMP,ReverseLexicographicIndexLess>;
-    template class SortedExpansion<MultiIndex,FloatMPValue,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatMPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatMPApproximation,ReverseLexicographicIndexLess>;
 

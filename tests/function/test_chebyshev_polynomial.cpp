@@ -75,7 +75,7 @@ template<class X> TestChebyshevPolynomial<X>::TestChebyshevPolynomial(PrecisionT
 
 template<class X> Void TestChebyshevPolynomial<X>::test()
 {
-    FloatValue<PR>::set_output_places(18);
+    Float<PR>::set_output_places(18);
     FloatBounds<PR>::set_output_places(18);
     FloatApproximation<PR>::set_output_places(8);
 

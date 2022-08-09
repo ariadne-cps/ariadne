@@ -80,7 +80,7 @@ template<class F> struct AlgebraTraits<Approximation<F>> {
 };
 
 template<class F> struct AlgebraTraits<Bounds<F>> {
-    typedef Value<F> ValueType;
+    typedef F ValueType;
     typedef Error<F> ErrorType;
     typedef Interval<UpperBound<F>> RangeType;
     typedef FloatDPError NormType;
@@ -88,7 +88,7 @@ template<class F> struct AlgebraTraits<Bounds<F>> {
 };
 
 template<> struct AlgebraTraits<Real> {
-    typedef FloatDPValue ValueType;
+    typedef FloatDP ValueType;
     typedef Interval<FloatDPUpperBound> RangeType;
     typedef FloatDPError NormType;
     typedef Real NumericType;

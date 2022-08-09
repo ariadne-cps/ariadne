@@ -43,18 +43,6 @@ using namespace Ariadne;
 using namespace std;
 
 namespace Ariadne {
-template<SameAs<Rational> Q> Bool operator==(FloatDP const& x, Q const& q) { return Rational(x)==q; }
-template<SameAs<Rational> Q> Bool operator!=(FloatDP const& x, Q const& q) { return Rational(x)!=q; }
-template<SameAs<Rational> Q> Bool operator<=(FloatDP const& x, Q const& q) { return Rational(x)<=q; }
-template<SameAs<Rational> Q> Bool operator>=(FloatDP const& x, Q const& q) { return Rational(x)>=q; }
-template<SameAs<Rational> Q> Bool operator< (FloatDP const& x, Q const& q) { return Rational(x)< q; }
-template<SameAs<Rational> Q> Bool operator> (FloatDP const& x, Q const& q) { return Rational(x)> q; }
-template<SameAs<Rational> Q> Bool operator==(FloatMP const& x, Q const& q) { return Rational(x)==q; }
-template<SameAs<Rational> Q> Bool operator!=(FloatMP const& x, Q const& q) { return Rational(x)!=q; }
-template<SameAs<Rational> Q> Bool operator<=(FloatMP const& x, Q const& q) { return Rational(x)<=q; }
-template<SameAs<Rational> Q> Bool operator>=(FloatMP const& x, Q const& q) { return Rational(x)>=q; }
-template<SameAs<Rational> Q> Bool operator< (FloatMP const& x, Q const& q) { return Rational(x)< q; }
-template<SameAs<Rational> Q> Bool operator> (FloatMP const& x, Q const& q) { return Rational(x)> q; }
 
 template<class F> Bool models(LowerBound<F> x, Rational q) { return x.raw() <= q; }
 template<class F> Bool models(UpperBound<F> x, Rational q) { return x.raw() >= q; }
@@ -63,7 +51,7 @@ template<class F> Bool models(Ball<F> x, Rational q) { return x.error_raw() >= a
 
 template<class F, class FE> Bool models(Ball<F,FE> x, Rational y) {
     return abs(Dyadic(x.value())-y) <= Dyadic(x.error_raw()); }
-template<class F, class FE> Bool models(Ball<F,FE> x, Value<F> v) {
+template<class F, class FE> Bool models(Ball<F,FE> x, F v) {
     return abs(Dyadic(x.value())-Dyadic(v)) <= Dyadic(x.error_raw()); }
 
 

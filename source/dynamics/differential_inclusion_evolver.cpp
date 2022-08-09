@@ -368,7 +368,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
 
         for (auto ac : p) {
             UniformConstReference<MultiIndex> a=ac.index();
-            UniformReference<FloatDPValue> c=ac.coefficient();
+            UniformReference<FloatDP> c=ac.coefficient();
             for (auto j : range(m)) {
                 if (a[j]!=0) {
                     C[j][i] += mag(c);

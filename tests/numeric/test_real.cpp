@@ -182,13 +182,14 @@ void TestReal::test_transcendental() {
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0_dy);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0_dy);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0_dy);
+
     ARIADNE_TEST_WITHIN(sqrt(x),sqrt(ax),eps);
     ARIADNE_TEST_WITHIN(exp(x),exp(ax),8*eps);
     ARIADNE_TEST_WITHIN(log(x),log(ax),eps);
-    ARIADNE_TEST_WITHIN(sin(x),sin(ax),eps);
-    ARIADNE_TEST_WITHIN(cos(x),cos(ax),eps);
-    ARIADNE_TEST_WITHIN(tan(x),tan(ax),eps);
-    //ARIADNE_TEST_WITHIN(atan(x),atan(ax),eps);
+    ARIADNE_TEST_WITHIN(sin(x),sin(ax),2*eps);
+    ARIADNE_TEST_WITHIN(cos(x),cos(ax),2*eps);
+    ARIADNE_TEST_WITHIN(tan(x),tan(ax),3*eps);
+    ARIADNE_TEST_WITHIN(atan(x),atan(ax),eps);
 }
 
 void TestReal::test_comparison() {
@@ -251,13 +252,13 @@ void TestReal::test_accuracy() {
     Effort effort{256};
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi_.compute(effort)));
     Accuracy accuracy{256_bits};
-    FloatMPValue error(accuracy.error(),mp);
+    FloatMP error(accuracy.error(),mp);
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi_.compute(accuracy)));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
     ARIADNE_TEST_PRINT(pi_met_mp.error());
     ARIADNE_TEST_PRINT(abs(sub(up,pi_met_mp.value_raw(),pi_near)));
     ARIADNE_TEST_ASSERT(pi_met_mp.error() <= error);
-    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
+    ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value(),pi_near) <= error.raw());
 
     Dyadic eps(1,1024u);
     ARIADNE_TEST_CONSTRUCT(Real,sin_pi,(sin(pi_)));

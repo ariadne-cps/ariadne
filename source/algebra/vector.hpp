@@ -789,8 +789,8 @@ Vector<X>::Vector(InitializerList<Dbl> const& lst, PRS... prs)
 
 #include "numeric/float.decl.hpp"
 namespace Ariadne {
-inline Vector<FloatDPValue>const& cast_exact(Vector<FloatDPApproximation>const& v) {
-    return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
+inline Vector<FloatDP>const& cast_exact(Vector<FloatDPApproximation>const& v) {
+    return reinterpret_cast<Vector<FloatDP>const&>(v); }
 } // namespace Ariadne
 
 #endif

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_rounding.cpp
+ *            test_rounding_mode.cpp
  *
- *  Copyright  2008-20  Copyright  2008-20uca Geretti
+ *  Copyright  2008-20  Pieter Collins, Luca Geretti
  *
  ****************************************************************************/
 
@@ -33,14 +33,14 @@ namespace Ariadne { }
 
 using namespace Ariadne;
 
-class TestRounding
+class TestRoundingMode
 {
   public:
-    TestRounding() { }
+    TestRoundingMode() { }
     void test() const;
 };
 
-void TestRounding::test() const {
+void TestRoundingMode::test() const {
     #if defined ARIADNE_C99_ROUNDING
         std::cout << "Using standard fenv.hpp C header file for setting the rounding mode." << std::endl;
     #elif defined ARIADNE_BOOST_ROUNDING
@@ -65,7 +65,7 @@ void TestRounding::test() const {
 
 
 int main() {
-   TestRounding().test();
+   TestRoundingMode().test();
    return ARIADNE_TEST_FAILURES;
 }
 

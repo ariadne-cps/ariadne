@@ -101,8 +101,8 @@ ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLa
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower_bound().raw() ) );
-        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper_bound().raw() ) );
+        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower_bound() ) );
+        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper_bound() ) );
         theTmpBoxType[current_dimension].set_bounds(cast_exact(lower),cast_exact(upper));
     }
 
@@ -224,7 +224,7 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        FloatDP middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint().raw();
+        FloatDP middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint();
         if( theWord[i] ){
             //Choose the right half
             theResultLatticeBoxType[current_dimension].set_lower_bound( cast_exact(middlePointInCurrDim) );
@@ -272,7 +272,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theExtent, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Box<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theExtent, theWord );
-    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper_bound().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
+    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper_bound(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -411,10 +411,10 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theExtent,
     for( DimensionType dim = 0; dim < theGrid.dimension(); dim++){
         ExactIntervalType openCellBoxInLatticeDimIntervalType;
         ExactIntervalType baseCellBoxInLatticeDimIntervalType = baseCellBoxInLattice[dim];
-        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower_bound().raw();
-        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
-                             sub( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
-                                        baseCellBoxInLatticeDimIntervalType.lower_bound().raw() ) );
+        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower_bound();
+        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper_bound(),
+                             sub( near, baseCellBoxInLatticeDimIntervalType.upper_bound(),
+                                        baseCellBoxInLatticeDimIntervalType.lower_bound() ) );
         openCellBoxInLatticeDimIntervalType.set_bounds(cast_exact(lower),cast_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimIntervalType;
@@ -1212,7 +1212,7 @@ Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
         //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper_bound().raw(), theRootCellBoxType[i].lower_bound().raw() ) , theMaxCellWidth );
+        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper_bound(), theRootCellBoxType[i].lower_bound() ) , theMaxCellWidth );
 
         //Compute the max number of subdivisions and the dimension where to do them
         if( num_subdiv >= max_num_subdiv_dim ){

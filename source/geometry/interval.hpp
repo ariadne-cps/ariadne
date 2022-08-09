@@ -57,10 +57,10 @@ template<class F> struct CentreTrait<LowerBound<F>> { typedef Approximation<F> T
 template<class P> struct CentreTrait<UpperNumber<P>> { typedef ApproximateNumber Type; };
 
 template<class U> struct MidpointTrait { typedef decltype(max(-declval<U>(),declval<U>())) Type; };
-template<class F> struct MidpointTrait<UpperBound<F>> { typedef Value<F> Type; };
-template<class F> struct MidpointTrait<LowerBound<F>> { typedef Value<F> Type; };
-template<class F> struct MidpointTrait<Bounds<F>> { typedef Value<F> Type; };
-template<class F> struct MidpointTrait<Ball<F>> { typedef Value<F> Type; };
+template<class F> struct MidpointTrait<UpperBound<F>> { typedef F Type; };
+template<class F> struct MidpointTrait<LowerBound<F>> { typedef F Type; };
+template<class F> struct MidpointTrait<Bounds<F>> { typedef F Type; };
+template<class F> struct MidpointTrait<Ball<F>> { typedef F Type; };
 template<class P> struct MidpointTrait<UpperNumber<P>> { typedef ExactNumber Type; };
 
 template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
@@ -115,9 +115,9 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
 
     PrecisionType precision() const;
 
-    friend UpperInterval<F> operator+(UpperInterval<F> const& ivl1, Value<F> const& x2) {
+    friend UpperInterval<F> operator+(UpperInterval<F> const& ivl1, F const& x2) {
         return make_interval(cast_singleton(ivl1)+x2); }
-    friend UpperInterval<F> operator+(Value<F> const& x1, UpperInterval<F> const& ivl2) {
+    friend UpperInterval<F> operator+(F const& x1, UpperInterval<F> const& ivl2) {
         return make_interval(x1+cast_singleton(ivl2)); }
 
     friend ApproximateInterval<F> operator+(UpperInterval<F> const& ivl1, Approximation<F> const& x2) {
@@ -125,9 +125,9 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     friend ApproximateInterval<F> operator+(Approximation<F> const& x1, UpperInterval<F> const& ivl2) {
         return x1+ApproximateInterval<F>(ivl2); }
 
-    friend UpperInterval<F> operator*(UpperInterval<F> const& ivl1, Value<F> const& x2) {
+    friend UpperInterval<F> operator*(UpperInterval<F> const& ivl1, F const& x2) {
         return make_interval(cast_singleton(ivl1)*x2); }
-    friend UpperInterval<F> operator*(Value<F> const& x1, UpperInterval<F> const& ivl2) {
+    friend UpperInterval<F> operator*(F const& x1, UpperInterval<F> const& ivl2) {
         return make_interval(x1*cast_singleton(ivl2)); }
 
     friend ApproximateInterval<F> operator*(UpperInterval<F> const& ivl1, Approximation<F> const& x2) {
@@ -165,7 +165,8 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 };
 
 
-template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
+
+template<ARawFloat F> struct DeclareIntervalArithmeticOperations<F> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
 template<class T, class U> concept ConstructibleGivenDefaultPrecision
     = requires(T const& t, U const& u) { T(u,t.precision()); };
@@ -387,12 +388,12 @@ template<class U> inline auto operator!=(Interval<U> const& ivl1, Interval<U> co
 
 
 //! \related FloatDPApproximationInterval \related FloatDPExactInterval \brief Allows the over-approximating interval \a ivl to be treated as exact.
-Interval<FloatDPValue> cast_exact(Interval<FloatDPApproximation> const& ivl);
-Interval<FloatMPValue> cast_exact(Interval<FloatMPApproximation> const& ivl);
-Interval<FloatDPValue> cast_exact(Interval<FloatDPUpperBound> const& ivl);
-Interval<FloatMPValue> cast_exact(Interval<FloatMPUpperBound> const& ivl);
-Interval<FloatDPValue> cast_exact_interval(Interval<FloatDPApproximation> const& ivl);
-Interval<FloatMPValue> cast_exact_interval(Interval<FloatMPApproximation> const& ivl);
+Interval<FloatDP> cast_exact(Interval<FloatDPApproximation> const& ivl);
+Interval<FloatMP> cast_exact(Interval<FloatMPApproximation> const& ivl);
+Interval<FloatDP> cast_exact(Interval<FloatDPUpperBound> const& ivl);
+Interval<FloatMP> cast_exact(Interval<FloatMPUpperBound> const& ivl);
+Interval<FloatDP> cast_exact_interval(Interval<FloatDPApproximation> const& ivl);
+Interval<FloatMP> cast_exact_interval(Interval<FloatMPApproximation> const& ivl);
 
 //! \related FloatDPUpperInterval \brief Computes a common refinement of \a ivl1 and \a ivl2 ivl.e. the intersection.
 template<class F> Interval<UpperBound<F>> refinement(Interval<UpperBound<F>> const& ivl1, Interval<UpperBound<SelfType<F>>> const& ivl2);
@@ -412,31 +413,30 @@ template<class UB, class PR> FloatBounds<PR> cast_singleton(Interval<UB> const& 
     return FloatBounds<PR>(ivl.lower_bound(),ivl.upper_bound(),pr); }
 
 //! \related FloatDPUpperInterval \brief An interval containing the given interval in its interior.
-template<class F> Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl);
+template<class F> Interval<UpperBound<F>> widen(Interval<F> const& ivl);
 template<class F> Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl);
 template<class F> Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl, UpperBound<F> e);
 template<class F> Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl, ValidatedUpperNumber e);
-template<class F> Interval<Value<F>> widen_domain(Interval<UpperBound<F>> const& ivl);
+template<class F> Interval<F> widen_domain(Interval<UpperBound<F>> const& ivl);
 //! \related LowerInterval<F> \brief An interval contained in the interior of the given interval.
-template<class F> Interval<LowerBound<F>> narrow(Interval<Value<F>> const& ivl);
+template<class F> Interval<LowerBound<F>> narrow(Interval<F> const& ivl);
 template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl);
 template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl, UpperBound<F> e);
 template<class F> Interval<UpperBound<F>> narrow(Interval<LowerBound<F>> const& ivl, ValidatedUpperNumber e);
 
-Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl);
-Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
+Interval<FloatDP> widen_domain(Interval<FloatDPUpperBound> const& ivl);
+Interval<FloatDP> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
 
-inline Interval<FloatDPValue> to_time_bounds(Dyadic const& tl, Dyadic const& tu) {
-    return Interval<FloatDPValue>(FloatDPLowerBound(tl,DoublePrecision()).raw(),FloatDPLowerBound(tu,DoublePrecision()).raw()); }
-inline Interval<FloatDPValue> to_time_bounds(Interval<Dyadic> const& ivl) {
+inline Interval<FloatDP> to_time_bounds(Dyadic const& tl, Dyadic const& tu) {
+    return Interval<FloatDP>(FloatDPLowerBound(tl,DoublePrecision()).raw(),FloatDPLowerBound(tu,DoublePrecision()).raw()); }
+inline Interval<FloatDP> to_time_bounds(Interval<Dyadic> const& ivl) {
     return to_time_bounds(ivl.lower_bound(),ivl.upper_bound()); }
 
 //! \related Interval \brief Read from an input stream.
-InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
+InputStream& operator>>(InputStream&, Interval<FloatDP>&);
 
 class EmptyInterval { };
 class EntireInterval { };
-
 
 } // namespace Ariadne
 

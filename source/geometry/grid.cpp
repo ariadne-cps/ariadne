@@ -160,7 +160,7 @@ ExactNumericType Grid::subdivision_coordinate(DimensionType d, IntegerType n) co
 Int Grid::subdivision_index(DimensionType d, const ExactNumericType& x) const
 {
     FloatDP half(0.5_x,dp);
-    Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     FloatDP sc=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],n));
     if(sc == x.raw()) {
         return n;
@@ -232,7 +232,7 @@ Array<Double> Grid::upper_index(const ExactBoxType& bx) const
 
 ExactPointType Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<FloatDPValue> res(a.size(),dp);
+    Vector<FloatDP> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -241,7 +241,7 @@ ExactPointType Grid::point(const Array<IntegerType>& a) const
 
 ExactPointType Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<FloatDPValue> res(a.size(),dp);
+    Vector<FloatDP> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }

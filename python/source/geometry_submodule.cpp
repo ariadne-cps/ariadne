@@ -58,7 +58,7 @@ template<class X> struct PythonClassName<Interval<X>> {
 template<class X> struct PythonClassName<Box<X>> {
     std::string get() const { return python_template_class_name<X>("Box"); } };
 
-template<> struct PythonClassName<Interval<FloatDPValue>> {
+template<> struct PythonClassName<Interval<FloatDP>> {
     std::string get() const { return "FloatDPExactInterval"; } };
 template<> struct PythonClassName<Interval<FloatDPUpperBound>> {
     std::string get() const { return "FloatDPUpperInterval"; } };
@@ -69,7 +69,7 @@ template<> struct PythonClassName<Interval<FloatDPApproximation>> {
 
 template<class UB> struct PythonClassName<Box<Interval<UB>>> {
     std::string get() const { return python_class_name<UB>()+"Box"; } };
-template<> struct PythonClassName<Box<Interval<FloatDPValue>>> {
+template<> struct PythonClassName<Box<Interval<FloatDP>>> {
     std::string get() const { return "FloatDPExactBox"; } };
 template<> struct PythonClassName<Box<Interval<FloatDPUpperBound>>> {
     std::string get() const { return "FloatDPUpperBox"; } };
@@ -412,13 +412,13 @@ template<class PT> Void export_point(pybind11::module& module, std::string name=
 
 Void export_points(pybind11::module& module) {
     export_point<RealPoint>(module);
-    export_point<FloatDPValuePoint>(module);
+    export_point<FloatDPPoint>(module);
     export_point<FloatDPBoundsPoint>(module);
     export_point<FloatDPApproximationPoint>(module);
 
     template_<Point> point_template(module);
     point_template.instantiate<Real>();
-    point_template.instantiate<FloatDPValue>();
+    point_template.instantiate<FloatDP>();
     point_template.instantiate<FloatDPBounds>();
     point_template.instantiate<FloatDPApproximation>();
 }
@@ -434,23 +434,23 @@ template<> Void export_interval_arithmetic(pybind11::module& module, pybind11::c
 }
 
 template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Approximation<F>>>& cls) {
-    cls.def(pybind11::init<T<Value<F>>>());
+    cls.def(pybind11::init<T<F>>());
     cls.def(pybind11::init<T<Bounds<F>>>());
     cls.def(pybind11::init<T<UpperBound<F>>>());
     cls.def(pybind11::init<T<LowerBound<F>>>());
 }
 template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<LowerBound<F>>>& cls) {
-    cls.def(pybind11::init<T<Value<F>>>());
+    cls.def(pybind11::init<T<F>>());
     cls.def(pybind11::init<T<Bounds<F>>>());
 }
 template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<UpperBound<F>>>& cls) {
-    cls.def(pybind11::init<T<Value<F>>>());
+    cls.def(pybind11::init<T<F>>());
     cls.def(pybind11::init<T<Bounds<F>>>());
 }
 template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Bounds<F>>>& cls) {
-    cls.def(pybind11::init<T<Value<F>>>());
+    cls.def(pybind11::init<T<F>>());
 }
-template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<Value<F>>>& cls) {
+template<template<class>class T,class F> Void export_conversions(pybind11::class_<T<F>>& cls) {
 }
 
 
@@ -578,7 +578,7 @@ Void export_intervals(pybind11::module& module) {
     interval_template.instantiate<Dyadic>();
     interval_template.instantiate<Rational>();
     interval_template.instantiate<Real>();
-    interval_template.instantiate<FloatDPValue>();
+    interval_template.instantiate<FloatDP>();
     interval_template.instantiate<FloatDPUpperBound>();
     interval_template.instantiate<FloatDPLowerBound>();
     interval_template.instantiate<FloatDPApproximation>();
@@ -637,7 +637,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
             box_class.def(pybind11::init<DyadicBox,PrecisionType>());
         }
 
-        typedef typename IntervalType::UpperBoundType::RawType FloatType;
+        typedef typename IntervalType::UpperBoundType FloatType;
         export_conversions<BoxWithUpperBound,FloatType>(box_class);
     }
 
@@ -736,7 +736,7 @@ Void export_boxes(pybind11::module& module) {
     pybind11::implicitly_convertible<FloatDPUpperBox,FloatDPApproximateBox>();
     pybind11::implicitly_convertible<FloatDPLowerBox,FloatDPApproximateBox>();
 
-    module.def("widen", (FloatDPUpperBox(*)(FloatDPExactBox const&, FloatDPValue eps)) &widen);
+    module.def("widen", (FloatDPUpperBox(*)(FloatDPExactBox const&, FloatDP eps)) &widen);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperBox const&, ValidatedVectorMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperBox const&, ValidatedScalarMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperInterval const&, ValidatedVectorUnivariateFunction const&)) &_image_);
@@ -746,7 +746,7 @@ Void export_boxes(pybind11::module& module) {
     box_template.as_instantiate<DyadicBox,Dyadic>();
     box_template.as_instantiate<RationalBox,Rational>();
     box_template.as_instantiate<RealBox,Real>();
-    box_template.as_instantiate<FloatDPExactBox,FloatDPValue>();
+    box_template.as_instantiate<FloatDPExactBox,FloatDP>();
     box_template.as_instantiate<FloatDPUpperBox,FloatDPUpperBound>();
     box_template.as_instantiate<FloatDPLowerBox,FloatDPLowerBound>();
     box_template.as_instantiate<FloatDPApproximateBox,FloatDPApproximation>();
@@ -759,8 +759,8 @@ Void export_zonotope(pybind11::module& module)
 {
     pybind11::class_<Zonotope,pybind11::bases<CompactSetInterface<T>,OpenSetInterface<T>,Drawable2dInterface>> zonotope_class(module,"Zonotope");
     zonotope_class.def(pybind11::init<Zonotope>());
-    zonotope_class.def(pybind11::init<Vector<FoatDPValue>,Matrix<FloatDPValue>,Vector<FloatDPError>>());
-    zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>>());
+    zonotope_class.def(pybind11::init<Vector<FloatDP>,Matrix<FloatDP>,Vector<FloatDPError>>());
+    zonotope_class.def(pybind11::init<Vector<FloatDP>,Matrix<FloatDP>>());
     zonotope_class.def(pybind11::init<BasicSetType>());
     zonotope_class.def("centre",&Zonotope::centre);
     zonotope_class.def("generators",&Zonotope::generators);
@@ -798,8 +798,8 @@ Void export_curve(pybind11::module& module)
 {
     pybind11::class_<InterpolatedCurve, Drawable2dInterface> interpolated_curve_class(module,"InterpolatedCurve");
     interpolated_curve_class.def(pybind11::init<InterpolatedCurve>());
-    interpolated_curve_class.def(pybind11::init<FloatDPValue,FloatDPValuePoint>());
-    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDPValue&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
+    interpolated_curve_class.def(pybind11::init<FloatDP,FloatDPPoint>());
+    interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDP&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__", [](InterpolatedCurve const& c){return pybind11::make_iterator(c.begin(),c.end());});
     interpolated_curve_class.def("__str__", &__cstr__<InterpolatedCurve>);
 
@@ -815,7 +815,7 @@ Void export_affine_set(pybind11::module& module)
     affine_set_class.def(pybind11::init<ValidatedAffineConstrainedImageSet>());
     affine_set_class.def(pybind11::init<RealBox>());
     affine_set_class.def(pybind11::init<ExactBoxType>());
-    affine_set_class.def(pybind11::init<Vector<ExactIntervalType>, Matrix<FloatDPValue>, Vector<FloatDPValue> >());
+    affine_set_class.def(pybind11::init<Vector<ExactIntervalType>, Matrix<FloatDP>, Vector<FloatDP> >());
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<FloatDPBounds>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
     affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);

@@ -97,7 +97,7 @@ if __name__=='__main__':
     x=id[0]
     y=id[1]
     h=EffectiveVectorMultivariateFunction([a-x*x-b*y,x])
-    v=FloatDPValueVector([exact(0.5),exact(1.0)],double_precision)
+    v=FloatDPVector([exact(0.5),exact(1.0)],double_precision)
     print(v)
     print(h(v))
     print(evaluate(h,v))

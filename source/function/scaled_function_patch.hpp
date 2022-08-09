@@ -311,7 +311,7 @@ template<class M> class ScaledFunctionPatch
     RangeType const range() const { return this->_model.range(); }
     //! \brief Evaluate the function at the point \a x.
     ArithmeticType<CoefficientType,FloatBounds<PR>> operator()(const Vector<FloatBounds<PR>>& x) const;
-    ArithmeticType<CoefficientType,FloatBounds<PR>> operator()(const Vector<FloatValue<PR>>& x) const;
+    ArithmeticType<CoefficientType,FloatBounds<PR>> operator()(const Vector<Float<PR>>& x) const;
     ArithmeticType<CoefficientType,FloatApproximation<PR>> operator()(const Vector<FloatApproximation<PR>>& x) const;
     ValidatedNumber operator()(const Vector<ValidatedNumber>& x) const;
 
@@ -571,7 +571,7 @@ template<class M> class VectorScaledFunctionPatch
 
     typedef FloatApproximation<PR> ApproximateNumericType;
     typedef FloatBounds<PR> ValidatedNumericType;
-    typedef FloatValue<PR> ExactNumericType;
+    typedef Float<PR> ExactNumericType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
@@ -603,11 +603,6 @@ template<class M> class VectorScaledFunctionPatch
     VectorScaledFunctionPatch(const BoxDomainType& domain,
                               const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
                               const Vector<RawFloat<PR>>& error,
-                              PropertiesType properties);
-
-    //! \brief Construct from a domain, and expansion and errors.
-    VectorScaledFunctionPatch(const BoxDomainType& domain,
-                              const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
                               PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.

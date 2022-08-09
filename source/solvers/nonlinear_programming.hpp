@@ -59,7 +59,7 @@ class OptimiserInterface {
     using FLT=FloatDP;
   public:
     typedef Bounds<FLT> ValidatedNumericType;
-    typedef Vector<Value<FLT>> ExactVectorType;
+    typedef Vector<FLT> ExactVectorType;
     typedef Vector<Bounds<FLT>> ValidatedVectorType;
     typedef Vector<Approximation<FLT>> ApproximateVectorType;
   public:
@@ -84,7 +84,7 @@ class OptimiserInterface {
                                        FloatDPApproximationVector x, FloatDPApproximation eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                   FloatDPValueVector x) const = 0;
+                                   FloatDPVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                                       ExactVectorType x) const = 0;
@@ -108,8 +108,8 @@ class OptimiserBase
     : public OptimiserInterface
 {
   protected:
-    static const FloatDPValue zero;
-    static const FloatDPValue one;
+    static const FloatDP zero;
+    static const FloatDP one;
   public:
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const;
@@ -266,7 +266,7 @@ class IntervalOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
-    Void feasibility_step(const FloatDPValueVector& xl, const FloatDPValueVector& xu, const ValidatedVectorMultivariateFunction& h,
+    Void feasibility_step(const FloatDPVector& xl, const FloatDPVector& xu, const ValidatedVectorMultivariateFunction& h,
                           FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& zl, FloatDPBoundsVector zu, FloatDPBounds& mu) const;
 };
 

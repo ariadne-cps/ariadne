@@ -156,6 +156,9 @@ TestDirectedFloats<PR>::test_conversions()
 
     ARIADNE_TEST_EQUALS(cast_integer(FloatUpperBound<PR>(Dyadic(5,2u),precision)),Integer(2));
     ARIADNE_TEST_EQUALS(cast_integer(FloatLowerBound<PR>(Dyadic(11,2u),precision)),Integer(2));
+    
+    // Test that FloatError can be constructed from NaN
+    ARIADNE_TEST_EXECUTE(FloatError<PR>(Float<PR>::nan(precision)));
 }
 
 template<class PR> Void

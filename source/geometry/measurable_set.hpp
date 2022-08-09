@@ -167,7 +167,7 @@ template<class S, class E> class LowerMeasurableSetModel {
 
 namespace Ariadne {
 template class LowerMeasurableSetModel<UnionOfIntervals<Dyadic>,Dyadic>;
-template class LowerMeasurableSetModel<UnionOfIntervals<Value<FloatDP>>,Error<FloatDP>>;
+template class LowerMeasurableSetModel<UnionOfIntervals<FloatDP>,Error<FloatDP>>;
 } // namespace Ariadne
 
 #endif

@@ -36,10 +36,10 @@ namespace Ariadne {
 
 //! \ingroup FunctionModule
 //! \brief The type used as a bounded domain for a univariate function.
-using IntervalDomainType = Interval<FloatDPValue>;
+using IntervalDomainType = Interval<FloatDP>;
 //! \ingroup FunctionModule
 //! \brief The type used as a bounded domain for a multivariate function.
-using BoxDomainType = Box<Interval<FloatDPValue>>;
+using BoxDomainType = Box<Interval<FloatDP>>;
 
 //! \ingroup FunctionModule \brief The domain of an entire univariate function.
 class RealDomain {

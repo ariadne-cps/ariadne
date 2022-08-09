@@ -27,7 +27,7 @@ print(dir(FloatDPBoundsVector))
 Precision=DoublePrecision
 ApproximateScalar=FloatDPApproximation
 ValidatedScalar=FloatDPBounds
-ExactScalar=FloatDPValue
+ExactScalar=FloatDP
 ApproximateVector=FloatDPApproximationVector
 ValidatedVector=FloatDPBoundsVector
 ApproximateCovector=FloatDPApproximationCovector
@@ -48,8 +48,8 @@ def test_generics():
     assert(Vector[Decimal]==DecimalVector)
     assert(Vector[Rational]==RationalVector)
     assert(Vector[Real]==RealVector)
-    assert(Vector[FloatDPValue]==FloatDPValueVector)
-    assert(Vector[FloatMPValue]==FloatMPValueVector)
+    assert(Vector[FloatDP]==FloatDPVector)
+    assert(Vector[FloatMP]==FloatMPVector)
     assert(Vector[FloatDPBall]==FloatDPBallVector)
     assert(Vector[FloatMPDPBall]==FloatMPDPBallVector)
     assert(Vector[FloatMPBall]==FloatMPBallVector)
@@ -61,8 +61,8 @@ def test_generics():
     assert(Covector[Dyadic]==DyadicCovector)
     assert(Covector[Rational]==RationalCovector)
     assert(Covector[Real]==RealCovector)
-    assert(Covector[FloatDPValue]==FloatDPValueCovector)
-    assert(Covector[FloatMPValue]==FloatMPValueCovector)
+    assert(Covector[FloatDP]==FloatDPCovector)
+    assert(Covector[FloatMP]==FloatMPCovector)
     assert(Covector[FloatDPBounds]==FloatDPBoundsCovector)
     assert(Covector[FloatMPBounds]==FloatMPBoundsCovector)
     assert(Covector[FloatDPApproximation]==FloatDPApproximationCovector)
@@ -70,8 +70,8 @@ def test_generics():
 
     assert(Matrix[Rational]==RationalMatrix)
     assert(Matrix[Real]==RealMatrix)
-    assert(Matrix[FloatDPValue]==FloatDPValueMatrix)
-    assert(Matrix[FloatMPValue]==FloatMPValueMatrix)
+    assert(Matrix[FloatDP]==FloatDPMatrix)
+    assert(Matrix[FloatMP]==FloatMPMatrix)
     assert(Matrix[FloatDPBounds]==FloatDPBoundsMatrix)
     assert(Matrix[FloatMPBounds]==FloatMPBoundsMatrix)
     assert(Matrix[FloatDPApproximation]==FloatDPApproximationMatrix)

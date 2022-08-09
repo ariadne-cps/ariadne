@@ -111,7 +111,7 @@ template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>>
 template<class F> struct ModelNumericTraits<ValidatedTag,F>
     : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
 {
-    typedef Value<F> CoefficientType;
+    typedef F CoefficientType;
 };
 template<class F> struct ModelNumericTraits<ApproximateTag,F>
     : public FunctionModelTraits<ApproximateTag,PrecisionType<F>>
@@ -357,7 +357,7 @@ class TaylorModel
     Void set_gradient(SizeType j,const Dyadic& c) {
         this->set_gradient(j,CoefficientType(c,this->precision())); }
      //! \brief Set the error of the expansion.
-    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0); this->_error=ne; }
+    Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0_x); this->_error=ne; }
     Void set_error(Nat m) { this->_error=m; }
 
     //! \brief The coefficient of the term in $x^a$.
@@ -681,8 +681,8 @@ template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector
 
 template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y);
 template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y, Array<SizeType>& p);
-template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<F> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<F> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 

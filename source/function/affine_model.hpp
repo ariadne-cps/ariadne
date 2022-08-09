@@ -134,7 +134,7 @@ class AffineModel<ValidatedTag,F>
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
-    typedef FloatValue<PR> CoefficientType;
+    typedef Float<PR> CoefficientType;
     typedef FloatError<PR> ErrorType;
     typedef FloatBounds<PR> NumericType;
     typedef AffineModel<ValidatedTag,F> AffineModelType;

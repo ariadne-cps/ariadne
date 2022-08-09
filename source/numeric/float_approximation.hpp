@@ -33,8 +33,11 @@
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "positive.hpp"
+
 #include "float_traits.hpp"
 #include "float_operations.hpp"
+#include "float_factory.hpp"
 
 namespace Ariadne {
 
@@ -43,7 +46,7 @@ namespace Ariadne {
 //! \details
 //! The \c Approximation<F> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
-//! \sa Real, NaiveReal, FloatDP, FloatMP, Value, Ball, Bounds.
+//! \sa Real, NaiveReal, FloatDP, FloatMP, Float, Ball, Bounds.
 template<class F> class Approximation
     : public DefineFieldOperators<Approximation<F>>
     , public DefineConcreteGenericOperators<Approximation<F>>
@@ -69,7 +72,7 @@ template<class F> class Approximation
     //! <p/>
     explicit Approximation(PrecisionType pr) : _a(0.0_x,pr) { }
     //! <p/>
-    explicit Approximation(RawType const& a) : _a(a) { }
+    Approximation(RawType const& a) : _a(a) { }
 
         Approximation(double d, PR pr) : _a(cast_exact(d),near,pr) { }
         Approximation(ApproximateDouble d, PR pr) : _a(cast_exact(d),near,pr) { }
@@ -91,8 +94,6 @@ template<class F> class Approximation
     //! <p/>
     Approximation(Error<F> const& x); // FIXME: Remove
     //! <p/>
-    Approximation(Value<F> const& x);
-    //! <p/>
     template<class FE> Approximation(Ball<F,FE> const& x);
     //! <p/>
     Approximation(Bounds<F> const& x);
@@ -108,7 +109,7 @@ template<class F> class Approximation
         Approximation<F>& operator=(const LowerBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const UpperBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const Bounds<F>& x) { return *this=Approximation<F>(x); }
-        Approximation<F>& operator=(const Value<F>& x) { return *this=Approximation<F>(x); }
+        Approximation<F>& operator=(const F& x) { return *this=Approximation<F>(x); }
     //! <p/>
     Approximation<F>& operator=(const ApproximateNumber& y) { return *this=Approximation<F>(y,this->precision()); }
     //! <p/>
@@ -295,7 +296,7 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
     Positive(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
     Positive(PositiveLowerBound<F> const& x) : Approximation<F>(x) { }
     Positive(PositiveUpperBound<F> const& x) : Approximation<F>(x) { }
-    Positive(PositiveValue<F> const& x) : Approximation<F>(x) { }
+    Positive(Positive<F> const& x) : Approximation<F>(x) { }
     Positive(Error<F> const& x) : Approximation<F>(x) { }
   public:
     friend PositiveApproximation<F> nul(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(nul(x.raw())); }

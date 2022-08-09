@@ -70,7 +70,7 @@ typedef Differential<FloatDPApproximation> FloatDPApproximationDifferential;
 typedef Vector<FloatDPBounds> FloatDPBoundsVector;
 typedef Matrix<FloatDPBounds> FloatDPBoundsMatrix;
 typedef Differential<FloatDPBounds> FloatDPBoundsDifferential;
-typedef Vector<FloatDPValue> ExactFloatDPVectorType;
+typedef Vector<FloatDP> ExactFloatDPVectorType;
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
@@ -168,8 +168,8 @@ Vector<X> esqr(const Vector<X>& z) {
 
 inline
 ExactIntervalType eivl(const RawFloatDPVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(FloatDPValue(x[0]));
-    for(SizeType i=1; i!=x.size(); ++i) { r=hull(r,FloatDPValue(x[i])); } return r;
+    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(FloatDP(x[0]));
+    for(SizeType i=1; i!=x.size(); ++i) { r=hull(r,FloatDP(x[i])); } return r;
 }
 
 Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const& A1, Matrix<ApproximateNumericType> const& A2, Matrix<ApproximateNumericType> const& A3) {
@@ -459,16 +459,17 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
+inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
+    ExactBoxType r(bx);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        bx[i]=ExactIntervalType(sub(down,bx[i].lower_bound().raw(),e),add(up,bx[i].upper_bound().raw(),e));
+        r[i]=ExactIntervalType(sub(down,bx[i].lower_bound(),e),add(up,bx[i].upper_bound(),e));
     }
     return bx;
 }
 
 
-const FloatDPValue OptimiserBase::zero = FloatDPValue(0,dp);
-const FloatDPValue OptimiserBase::one = FloatDPValue(1,dp);
+const FloatDP OptimiserBase::zero = FloatDP(0,dp);
+const FloatDP OptimiserBase::one = FloatDP(1,dp);
 
 Bool OptimiserBase::
 almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ApproximateVectorType ax, FloatDPApproximation error) const
@@ -476,7 +477,7 @@ almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exa
     ExactVectorType ex=cast_exact(ax);
     if(!contains(D,ex)) { return false; }
     ApproximateVectorType gx=g(ax);
-    return probably(contains(widen(C,cast_exact(error)),gx));
+    return probably(contains(cast_exact_widen(C,cast_exact(error)),gx));
 }
 
 
@@ -818,7 +819,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     this->setup_feasibility(D,g,C,v);
     FloatDPApproximationVector oldx=x;
 
-    static const float MU_MIN = 1e-12;
+    static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=MAXIMUM_STEPS; ++i) {
@@ -867,7 +868,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
     this->setup_feasibility(D,g,R,v);
 
-    static const float MU_MIN = 1e-12;
+    static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {

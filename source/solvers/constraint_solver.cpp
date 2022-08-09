@@ -52,7 +52,7 @@ template<class X> inline Approximation<X> affine(Approximation<X> l, Approximati
 }
 
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
-typedef Vector<FloatDPValue> ExactFloatVector;
+typedef Vector<FloatDP> ExactFloatVector;
 
 Bool has_nan(const ExactBoxType& domain);
 
@@ -165,7 +165,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         // Probably disjoint, so try to prove this
         UpperBoxType subdomain=domain;
 
-        Vector<FloatDPValue> x_exact=cast_exact(x);
+        Vector<FloatDP> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
@@ -350,7 +350,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
     ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
-    FloatDPValue splitpoint(dp);
+    FloatDP splitpoint(dp);
     UpperIntervalType lower=domain[variable];
     UpperIntervalType upper=domain[variable];
     Box<UpperIntervalType> slice=domain;
@@ -359,7 +359,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     static const Int MAX_STEPS=3;
     const FloatDP threshold = div(near, lower.width().raw(), FloatDP(pow(two,MAX_STEPS),dp));
     do {
-        FloatDPUpperBound ub(dp); FloatDPUpperInterval ivl(-ub,+ub); FloatDPValue val(dp); ub=val;
+        FloatDPUpperBound ub(dp); FloatDPUpperInterval ivl(-ub,+ub); FloatDP val(dp); ub=val;
 
         // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>threshold) {

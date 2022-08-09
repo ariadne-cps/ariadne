@@ -57,7 +57,7 @@ class SubdivisionPaver : public PaverInterface
 {
   public:
     Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
-    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDPValue>& max_errors) const;
+    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDP>& max_errors) const;
     OutputStream& _write(OutputStream& os) const;
 };
 

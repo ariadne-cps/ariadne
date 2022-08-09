@@ -59,7 +59,7 @@ using HybridSet = HybridBoundedConstraintSet;
 
 template<class X> class HybridPoint;
 using HybridRealPoint = HybridPoint<Real>;
-using HybridExactPoint = HybridPoint<FloatDPValue>;
+using HybridExactPoint = HybridPoint<FloatDP>;
 using HybridApproximatePoint = HybridPoint<FloatDPApproximation>;
 
 template<class IVL> class HybridBox;

@@ -38,7 +38,6 @@
 #include "numeric/float_ball.hpp"
 
 #include "numeric/float_error.hpp"
-#include "numeric/float_value.hpp"
 #include "numeric/float_bounds.hpp"
 
 #include "../test.hpp"

@@ -35,8 +35,7 @@
 #include "utility/container.hpp"
 #include "utility/stlio.hpp"
 
-#include "numeric/floatdp.hpp"
-#include "numeric/float_value.hpp"
+#include "numeric/builtin.hpp"
 #include "geometry/grid.hpp"
 #include "symbolic/variable.hpp"
 
@@ -44,8 +43,6 @@ namespace Ariadne {
 
 typedef void Void;
 typedef std::ostream OutputStream;
-
-typedef Value<FloatDP> FloatDPValue;
 
 //! \ingroup DynamicsModule
 //! \brief A class which defines the state space grid to use given the continuous state variables \a spc.

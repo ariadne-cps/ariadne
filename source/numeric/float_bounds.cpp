@@ -31,8 +31,8 @@
 
 namespace Ariadne {
 
-Value<FloatDP> midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
-Value<FloatMP> midpoint(Bounds<FloatMP> const& x) { return x.value(); } // DEPRECATED
+FloatDP midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
+FloatMP midpoint(Bounds<FloatMP> const& x) { return x.value(); } // DEPRECATED
 
 template<> auto Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x) -> OutputStream&;
 template<> auto Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x) -> OutputStream&;
@@ -53,7 +53,7 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     using std::max; using std::min;
     FloatMP const& l=x.lower_raw();
     FloatMP const& u=x.upper_raw();
-    if(l==0 && u==0.0) { return os << "0.0[:]"; }
+    if(l==0.0_x && u==0.0_x) { return os << "0.0[:]"; }
 
     int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
     //int bndplc=FloatBounds<MultiplePrecision>::output_places;

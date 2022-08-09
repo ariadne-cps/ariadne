@@ -49,6 +49,7 @@ namespace Ariadne {
 
 class ExactDouble;
 class Dyadic;
+extern const Dyadic infty;
 
 class InfinityException : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -198,7 +199,7 @@ template<> class Positive<Dyadic> : public Dyadic {
     Positive() : Dyadic() { }
     template<BuiltinUnsignedIntegral M> Positive(M m) : Dyadic(m) { }
     Positive(int n) = delete;
-    explicit Positive(Dyadic const& z) : Dyadic(z) { ARIADNE_ASSERT(z>=0); }
+    explicit Positive(Dyadic const& w) : Dyadic(w) { ARIADNE_ASSERT(w>=0); }
 };
 inline Positive<Dyadic> cast_positive(Dyadic const& w) { return Positive<Dyadic>(w); }
 

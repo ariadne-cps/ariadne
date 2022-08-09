@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-typedef Vector<FloatDPValue> ExactFloatVector;
+typedef Vector<FloatDP> ExactFloatVector;
 class HybridGridTreePaving;
 
 //! \ingroup HybridModule

@@ -41,7 +41,6 @@
 #include "float_upper_bound.hpp"
 #include "float_bounds.hpp"
 #include "float_ball.hpp"
-#include "float_value.hpp"
 #include "float_error.hpp"
 
 #include "float_bounds.inl.hpp"

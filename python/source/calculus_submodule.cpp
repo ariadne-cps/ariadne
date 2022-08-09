@@ -136,15 +136,13 @@ template<class X, class CMP> OutputStream& operator<<(OutputStream& os, const Py
     return os << python_representation(static_cast<const Expansion<MultiIndex,X>&>(repr.reference()));
 }
 
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,RawFloatDP> >&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPApproximation> >&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPBounds> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPValue> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDP> >&);
 
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,RawFloatMP> >&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPApproximation> >&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPBounds> >&);
-template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPValue> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMP> >&);
 
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
@@ -245,7 +243,7 @@ template<class FLT> Void export_sweepers(pybind11::module& module)
 }
 
 
-Expansion<MultiIndex,FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
+Expansion<MultiIndex,FloatDP>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
 Expansion<MultiIndex,FloatDPApproximation>const& get_expansion(ApproximateTaylorModelDP const& tm) { return tm.expansion(); }
 
 
@@ -261,9 +259,9 @@ template<class FLT> Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def(pybind11::init<ValidatedTaylorModel<FLT>>());
     taylor_model_class.def(pybind11::init< SizeType,Sweeper<FLT> >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModel<FLT>&))&keys);
-    taylor_model_class.def("value", (const FloatDPValue(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::value);
+    taylor_model_class.def("value", (const FloatDP(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::value);
     taylor_model_class.def("error", (const FloatDPError&(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::error);
-    taylor_model_class.def("expansion", (const Expansion<MultiIndex,Value<FLT>>&(*)(ValidatedTaylorModel<FLT> const&)) &get_expansion);
+    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FLT>&(*)(ValidatedTaylorModel<FLT> const&)) &get_expansion);
     taylor_model_class.def("set_error", (Void(ValidatedTaylorModel<FLT>::*)(const FloatDPError&)) &ValidatedTaylorModel<FLT>::set_error);
     taylor_model_class.def("argument_size", &ValidatedTaylorModel<FLT>::argument_size);
     taylor_model_class.def("domain", &ValidatedTaylorModel<FLT>::domain);
@@ -271,8 +269,8 @@ template<class FLT> Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def("set_sweeper", &ValidatedTaylorModel<FLT>::set_sweeper);
     taylor_model_class.def("sweeper", &ValidatedTaylorModel<FLT>::sweeper);
     taylor_model_class.def("sweep", (ValidatedTaylorModel<FLT>&(ValidatedTaylorModel<FLT>::*)()) &ValidatedTaylorModel<FLT>::sweep, pybind11::return_value_policy::reference);
-    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel<FLT>,MultiIndex,Value<FLT>>);
-    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel<FLT>,MultiIndex,Value<FLT>>);
+    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel<FLT>,MultiIndex,FLT>);
+    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel<FLT>,MultiIndex,FLT>);
 
     define_elementary_algebra(module,taylor_model_class);
     define_inplace_algebra(module,taylor_model_class);
@@ -453,7 +451,7 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def(pybind11::init<ExactBoxType,ValidatedTaylorModel<FLT>>());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType,Sweeper<FLT> >());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType, const EffectiveScalarMultivariateFunction&,Sweeper<FLT> >());
-    scalar_taylor_function_class.def(pybind11::init< ExactBoxType, Expansion<MultiIndex,Value<FLT>>, Error<FLT>, Sweeper<FLT> >());
+    scalar_taylor_function_class.def(pybind11::init< ExactBoxType, Expansion<MultiIndex,FLT>, Error<FLT>, Sweeper<FLT> >());
     scalar_taylor_function_class.def("error", (const Error<FLT>(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const) &ValidatedScalarMultivariateTaylorFunctionModel<FLT>::error);
     scalar_taylor_function_class.def("set_error", (Void(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)(const Error<FLT>&)) &ValidatedScalarMultivariateTaylorFunctionModel<FLT>::set_error);
     scalar_taylor_function_class.def("argument_size", &F::argument_size);
@@ -463,8 +461,8 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModel<FLT>&(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::model);
     scalar_taylor_function_class.def("polynomial", (MultivariatePolynomial<NumericType>(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::number_of_nonzeros);
-    scalar_taylor_function_class.def("__getitem__", &__getitem__<ValidatedScalarMultivariateTaylorFunctionModel<FLT>,MultiIndex,Value<FLT>>);
-    scalar_taylor_function_class.def("__setitem__",&__setitem__<ValidatedScalarMultivariateTaylorFunctionModel<FLT>,MultiIndex,Value<FLT>>);
+    scalar_taylor_function_class.def("__getitem__", &__getitem__<ValidatedScalarMultivariateTaylorFunctionModel<FLT>,MultiIndex,FLT>);
+    scalar_taylor_function_class.def("__setitem__",&__setitem__<ValidatedScalarMultivariateTaylorFunctionModel<FLT>,MultiIndex,FLT>);
 
     define_elementary_algebra(module,scalar_taylor_function_class);
     define_inplace_algebra(module,scalar_taylor_function_class);
@@ -476,7 +474,7 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("__str__", &__cstr__<F>);
     scalar_taylor_function_class.def("__repr__", &__crepr__<F>);
 
-    scalar_taylor_function_class.def("value", (const Value<FLT>(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const) &ValidatedScalarMultivariateTaylorFunctionModel<FLT>::value);
+    scalar_taylor_function_class.def("value", (const FLT(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const) &ValidatedScalarMultivariateTaylorFunctionModel<FLT>::value);
     scalar_taylor_function_class.def("clobber", (Void(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()) &ValidatedScalarMultivariateTaylorFunctionModel<FLT>::clobber);
     scalar_taylor_function_class.def("set_properties",&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::set_properties);
     scalar_taylor_function_class.def("properties",&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::properties);
@@ -540,7 +538,7 @@ template<class FLT> Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def( pybind11::init([](Array<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> ary){return ValidatedVectorMultivariateTaylorFunctionModel<FLT>(Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>>(ary));}));
     vector_taylor_function_class.def( pybind11::init< SizeType, ExactBoxType, Sweeper<FLT> >());
     vector_taylor_function_class.def( pybind11::init< ExactBoxType,const EffectiveVectorMultivariateFunction&,Sweeper<FLT> >());
-    vector_taylor_function_class.def(pybind11::init< ExactBoxType, Vector< Expansion<MultiIndex,Value<FLT>> >, Vector<Error<FLT>>, Sweeper<FLT> >());
+    vector_taylor_function_class.def(pybind11::init< ExactBoxType, Vector< Expansion<MultiIndex,FLT> >, Vector<Error<FLT>>, Sweeper<FLT> >());
     vector_taylor_function_class.def( pybind11::init< Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> >());
     vector_taylor_function_class.def("_len_", &ValidatedVectorMultivariateTaylorFunctionModel<FLT>::result_size);
     vector_taylor_function_class.def("result_size", &ValidatedVectorMultivariateTaylorFunctionModel<FLT>::result_size);

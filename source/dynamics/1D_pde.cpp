@@ -4,9 +4,9 @@
 namespace Ariadne{
 
     template<class X>
-    Array<FloatValue<X>> linspace1d(FloatValue<X> L, SizeType n)
+    Array<Float<X>> linspace1d(Float<X> L, SizeType n)
     {
-        Array<FloatValue<X>> linspaced(n, FloatValue<X>(0.0));
+        Array<Float<X>> linspaced(n, Float<X>(0.0));
         if (n == 0)
             return linspaced;
         if (n == 1)
@@ -14,7 +14,7 @@ namespace Ariadne{
             linspaced[0] = L;
             return linspaced;
         }
-        FloatValue<X> delta = (L/(n - 1));
+        Float<X> delta = (L/(n - 1));
         for (SizeType i = 0; i < (n - 1); i++)
         {
             linspaced[i] = (0 + delta*i);
@@ -26,7 +26,7 @@ namespace Ariadne{
 
     // Set initial condition
     template<class X>
-    Tensor<2, FloatValue<X>> set_ic(Tensor<2, FloatValue<X>>& uts,/* std::function<FloatValue<X>(FloatValue<X>)> &phi0, */SizeType Nx, Array<FloatValue<X>> spacePoint, Parameter1D<X>& stringModel, bool isTriangular)
+    Tensor<2, Float<X>> set_ic(Tensor<2, Float<X>>& uts,/* std::function<Float<X>(Float<X>)> &phi0, */SizeType Nx, Array<Float<X>> spacePoint, Parameter1D<X>& stringModel, bool isTriangular)
     {
         if (!isTriangular)
         {
@@ -49,32 +49,32 @@ namespace Ariadne{
 
     //Solving one dimensional pde
     template<class PR>
-    Tensor<2, FloatValue<PR>> pde_1d_solver(/*std::function<FloatValue<PR>(FloatValue<PR>)>& phi0, std::function<FloatValue<PR>(FloatValue<PR>, FloatValue<PR>)>& source, */Parameter1D<PR>& stringParameter, SizeType Nx)
+    Tensor<2, Float<PR>> pde_1d_solver(/*std::function<Float<PR>(Float<PR>)>& phi0, std::function<Float<PR>(Float<PR>, Float<PR>)>& source, */Parameter1D<PR>& stringParameter, SizeType Nx)
     {
-        FloatValue<PR> c = sqrt((stringParameter.tension/(stringParameter.mass/stringParameter.length)));
-        //FloatDPValue c = sqrt((stringParameter.tension/(stringParameter.mass/stringParameter.length))).value();
+        Float<PR> c = sqrt((stringParameter.tension/(stringParameter.mass/stringParameter.length)));
+        //FloatDP c = sqrt((stringParameter.tension/(stringParameter.mass/stringParameter.length))).value();
 
-        FloatValue<PR> T = 0.060;
-        FloatValue<PR> zb = 0;
+        Float<PR> T = 0.060;
+        Float<PR> zb = 0;
 
-        FloatValue<PR> C2 = pow(stringParameter.CourantNumber, 2);
-        //FloatDPValue C2 = pow(stringParameter.CourantNumber, 2).value();
+        Float<PR> C2 = pow(stringParameter.CourantNumber, 2);
+        //FloatDP C2 = pow(stringParameter.CourantNumber, 2).value();
 
-        Array<FloatValue<PR>> space = linspace1d(stringParameter.length, Nx);
-        //Array<FloatDPValue> space = linspace1D(stringParameter.length, Nx);
+        Array<Float<PR>> space = linspace1d(stringParameter.length, Nx);
+        //Array<FloatDP> space = linspace1D(stringParameter.length, Nx);
 
-        FloatValue<PR> dx = (space[1] - space[0]);
-        //FloatDPValue dx = (space[1] - space[0]).value();
-        FloatValue<PR> dt = (stringParameter.CourantNumber*dx/c);
-        //FloatDPValue dt = (stringParameter.CourantNumber*dx/c).value();
-        //FFloatDPValue Nt = round(T/dt).value();
-        FloatValue<PR> Nt = round(T/dt);
-        //FloatDPValue Nt = round(T/dt).value();
+        Float<PR> dx = (space[1] - space[0]);
+        //FloatDP dx = (space[1] - space[0]).value();
+        Float<PR> dt = (stringParameter.CourantNumber*dx/c);
+        //FloatDP dt = (stringParameter.CourantNumber*dx/c).value();
+        //FFloatDP Nt = round(T/dt).value();
+        Float<PR> Nt = round(T/dt);
+        //FloatDP Nt = round(T/dt).value();
         SizeType Ntime = Nt.get_d();
 
-        Array<FloatValue<PR>> time = linspace1d(T, Ntime);
+        Array<Float<PR>> time = linspace1d(T, Ntime);
 
-        Tensor<2, FloatValue<PR>> uts({Nx, Ntime}, zb);
+        Tensor<2, Float<PR>> uts({Nx, Ntime}, zb);
 
         uts = set_ic(uts, /*phi0, */Nx, space);
 

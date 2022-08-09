@@ -50,8 +50,8 @@ namespace Ariadne {
 
 namespace {
 
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
-    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+Box<Interval<FloatMP>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
+    Box<Interval<FloatMP>> r(bx.dimension(),Interval<FloatMP>(FloatMP(pr),FloatMP(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
     return r;
 }
@@ -67,8 +67,8 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
-    const FloatDPValue& l=ivl.lower_bound();
-    const FloatDPValue& u=ivl.upper_bound();
+    const FloatDP& l=ivl.lower_bound();
+    const FloatDP& u=ivl.upper_bound();
     FloatDPBall c{hlf(l+u)};
     FloatDPBall r{hlf(u-l)};
     FloatDPError e=c.error()+r.error();
@@ -145,10 +145,6 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     os << ")";
     os.precision(precision); os.flags(flags);
     return os;
-}
-
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatValue<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }
 
 template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatApproximation<PR>> >& exp_repr) {
@@ -351,15 +347,12 @@ template<class M> Void ScaledFunctionPatch<M>::restrict(const BoxDomainType& dom
 
 
 
-inline Bool operator==(FloatDPValue x1, Int n2) { return x1.raw()==FloatDP(n2,dp); }
 inline Bool operator==(FloatDPBounds x1, Int n2) { return x1.upper_raw()==FloatDP(n2,dp) && x1.lower_raw()==FloatDP(n2,dp); }
 inline Bool operator==(FloatDPApproximation x1, Int n2) { return x1.raw()==FloatDP(n2,dp); }
 
-inline Bool operator!=(FloatDPValue x1, Int n2) { return x1.raw()!=FloatDP(n2,dp); }
 inline Bool operator!=(FloatDPBounds x1, Int n2) { return x1.upper_raw()!=FloatDP(n2,dp) || x1.lower_raw()!=FloatDP(n2,dp); }
 inline Bool operator!=(FloatDPApproximation x1, Int n2) { return x1.raw()!=FloatDP(n2,dp); }
 
-inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2,dp); }
 inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2,dp); }
 inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2,dp); }
 
@@ -434,7 +427,7 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBoun
     return unchecked_evaluate(f,x);
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> ArithmeticType<CoefficientType,FloatBounds<PR>>
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<Float<PR>>& x) const -> ArithmeticType<CoefficientType,FloatBounds<PR>>
 {
     return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
@@ -479,7 +472,7 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
         os << MultivariatePolynomial<FloatApproximation<PR>>(fp.polynomial());
     }
 
-    if(fp.error().raw()>0.0) { os << "+/-" << fp.error(); }
+    if(fp.error().raw()>0.0_x) { os << "+/-" << fp.error(); }
 
     os << "}";
     return os;
@@ -550,7 +543,7 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     FloatError<PR> truncatation_error = truncated_function.error();
     truncated_function.clobber();
     MultivariatePolynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
-    MultivariatePolynomial<FloatValue<PR>> polynomial_function = midpoint(validated_polynomial_function);
+    MultivariatePolynomial<Float<PR>> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -640,12 +633,6 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 {
 }
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
-                                           PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,Vector<M>(f.size(),[&](SizeType i){return M(f[i],RawFloat<PR>(0,prp.precision()),prp);}))
-{
-}
 
 
 

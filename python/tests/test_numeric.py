@@ -28,8 +28,6 @@ def test_generics():
     assert(MP==MultiplePrecision)
     assert(Float[DP]==FloatDP)
     assert(Float[MP]==FloatMP)
-    assert(Value[FloatDP]==FloatDPValue)
-    assert(Value[FloatMP]==FloatMPValue)
     assert(Ball[FloatDP]==FloatDPBall)
     assert(Ball[FloatMP]==FloatMPBall)
     assert(Bounds[FloatDP]==FloatDPBounds)
@@ -51,10 +49,8 @@ def test_regression():
     # Questions: Should the following conversions from double be allowed?
     ExactDouble(1.3) # Can we construct ExactDouble when input probably not exact?
     Dyadic(exact(1.375))
-    FloatDP(1.375,dp)
-    FloatMP(1.375,mp)
-    #FloatDPValue(1.375,dp)
-    #FloatMPValue(1.375,mp)
+    FloatDP("1.375",dp)
+    FloatMP("1.375",mp)
 
     z=Integer(1)
     w=Dyadic(1)
@@ -243,6 +239,8 @@ def check_rounded(x):
 
 def test_rounded():
     w=Dyadic(3,1); q=Rational(1,3);
+    dp=DoublePrecision(); RoundedFloatDP(w,dp); RoundedFloatDP(q,dp); 
+    mp=MultiplePrecision(128); RoundedFloatMP(w,mp); RoundedFloatMP(q,mp); 
     dp=DoublePrecision(); FloatDP(w,dp); FloatDP(q,up,dp); FloatDP.eps(dp);
     mp=MultiplePrecision(128); FloatMP(w,mp); FloatMP(q,up,mp); FloatMP.eps(mp);
     check_rounded(FloatDP(w,dp))
@@ -278,7 +276,7 @@ def test_concrete():
     ux=FloatDPUpperBound(xd,dp)
     bx=FloatDPBounds(xd,dp)
     mx=FloatDPBall(xd,dp)
-    vx=FloatDPValue(xd,dp)
+    vx=FloatDP(xd,dp)
 
     check_elementary(vx,r=bx,xr=vx)
     check_elementary(mx,r=mx)

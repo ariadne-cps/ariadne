@@ -115,16 +115,16 @@ template<class PR> class FloatBounds;
 template<class PR> class FloatUpperBound;
 template<class PR> class FloatLowerBound;
 
-template<class PR> class FloatValue
+template<class PR> class Float
     : public ProvideRingOperations<FloatBounds<PR>>
 {
     Float<PR> _v;
     friend class FloatBounds<PR>;
   public:
-    FloatValue(double x, PR pr) : _v(x,pr) { }
+    Float(double x, PR pr) : _v(x,pr) { }
     Float<PR> raw() const { return _v; }
     PR precision() const { return _v.precision(); }
-    friend OutputStream& operator<<(OutputStream& os, FloatValue<PR> const& x) { return os << 'V' << x.raw(); }
+    friend OutputStream& operator<<(OutputStream& os, Float<PR> const& x) { return os << 'V' << x.raw(); }
 };
 
 template<class PR> class FloatBounds
@@ -138,7 +138,7 @@ template<class PR> class FloatBounds
     explicit FloatBounds(double x, PR pr) : FloatBounds(x,x,pr) { }
     explicit FloatBounds(double xl, double xu, PR pr) : _l(xl,pr), _u(xu,pr) { }
     explicit FloatBounds(Float<PR> l, Float<PR> u) : _l(l), _u(u) { }
-    FloatBounds(FloatValue<PR> const& x) : _l(x._v), _u(x._v) { }
+    FloatBounds(Float<PR> const& x) : _l(x._v), _u(x._v) { }
     PR precision() const { return max(_l.precision(),_u.precision()); }
     Float<PR> upper_raw() const { return _u; }
     Float<PR> lower_raw() const { return _l; }
@@ -152,7 +152,7 @@ template<class PR> class FloatUpperBound
   public:
     explicit FloatUpperBound(double d, PR pr) : _u(d,pr) { }
     explicit FloatUpperBound(Float<PR> const& u) : _u(u) { }
-    FloatUpperBound(FloatValue<PR> const& x) : FloatUpperBound(x.raw()) { }
+    FloatUpperBound(Float<PR> const& x) : FloatUpperBound(x.raw()) { }
     FloatUpperBound(FloatBounds<PR> const& x) : FloatUpperBound(x._u) { }
     Float<PR> raw() const { return _u; }
     PR precision() const { return _u.precision(); }
@@ -224,9 +224,9 @@ template<class PR> class FloatFactory {
     FloatApproximation<PR> create(Number<ApproximateTag> y) { return FloatApproximation<PR>(y.get_d(),this->_pr); }
     FloatBounds<PR> create(Number<ValidatedTag> y) { return FloatBounds<PR>(y.get_d(),this->_pr); }
     FloatError<PR> create(unsigned int m) { return FloatError<PR>(m,this->_pr); }
-    FloatValue<PR> create(int n) { return FloatValue<PR>(n,this->_pr); }
+    Float<PR> create(int n) { return Float<PR>(n,this->_pr); }
 };
-template<class PR> FloatFactory<PR> factory(FloatValue<PR> const& x) { return FloatFactory<PR>(x.precision()); }
+template<class PR> FloatFactory<PR> factory(Float<PR> const& x) { return FloatFactory<PR>(x.precision()); }
 template<class PR> FloatFactory<PR> factory(FloatBounds<PR> const& x) { return FloatFactory<PR>(x.precision()); }
 template<class PR> FloatFactory<PR> factory(FloatUpperBound<PR> const& x) { return FloatFactory<PR>(x.precision()); }
 template<class PR> FloatFactory<PR> factory(FloatApproximation<PR> const& x) { return FloatFactory<PR>(x.precision()); }

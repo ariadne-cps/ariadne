@@ -74,9 +74,9 @@ inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }
 
-inline FloatDPBounds operator*(Integer n1,  const FloatDPValue& x2) {
+inline FloatDPBounds operator*(Integer n1,  const FloatDP& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
-    FloatDPValue x1((Int)n1.get_si(),dp);
+    FloatDP x1((Int)n1.get_si(),dp);
     return x1*x2;
 }
 

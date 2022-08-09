@@ -36,7 +36,6 @@
 #include "rational.hpp"
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 
 #include "number_wrapper.hpp"
@@ -53,13 +52,8 @@ template<class FE, class FLT, class PRE> inline FE _make_error(FLT const& x, PRE
 } // namespace
 
 
-template<class F, class FE> Ball<F,FE>::Ball(Value<F> const& v, Error<FE> const& e)
-    : _v(v.raw()), _e(e.raw()) { }
-
-template<class F, class FE> Ball<F,FE>::Ball(Value<F> const& x)
-    : _v(x.raw()), _e(_make_error<FE>(nul(x).raw())) { }
-template<class F, class FE> Ball<F,FE>::Ball(Value<F> const& x, PRE pre)
-    : _v(x.raw()) , _e(pre) { }
+template<class F, class FE> Ball<F,FE>::Ball(F const& v, Error<FE> const& e)
+    : _v(v), _e(e.raw()) { }
 
 template<class F, class FE> Ball<F,FE>::Ball(Bounds<F> const& x)
     : _v(x.value_raw()), _e(_make_error<FE>(x.error_raw())) { }
@@ -94,11 +88,8 @@ template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const { retur
 template<class F, class FE> LowerBound<F> const Ball<F,FE>::lower() const { return LowerBound<F>(sub(down,this->_v,this->_e)); }
 template<class F, class FE> UpperBound<F> const Ball<F,FE>::upper() const { return UpperBound<F>(add(up,this->_v,this->_e)); }
 
-template<class F, class FE> Value<F> const Ball<F,FE>::value() const { return Value<F>(this->_v); }
+template<class F, class FE> F const Ball<F,FE>::value() const { return F(this->_v); }
 template<class F, class FE> Error<FE> const Ball<F,FE>::error() const { return Error<FE>(this->_e); }
-
-template<class F> template<class FE> inline Ball<F,FE> Value<F>::pm(Error<FE> const& e) const {
-    return Ball<F,FE>(*this,e); }
 
 
 template<class F, class FE> Integer Operations<Ball<F,FE>>::_cast_integer(Ball<F,FE> const& x) {

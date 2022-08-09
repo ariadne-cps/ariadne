@@ -63,8 +63,8 @@ template<class X> struct FeasibilityState {
 class ConstraintSolverInterface {
     using FLT=FloatDP;
   public:
-    typedef Point<Value<FLT>> ExactPointType;
-    typedef Value<FLT> ExactNumericType;
+    typedef Point<FLT> ExactPointType;
+    typedef FLT ExactNumericType;
     typedef Bounds<FLT> ValidatedNumericType;
     typedef Approximation<FLT> ApproximateNumericType;
   public:
@@ -111,7 +111,7 @@ class ConstraintSolver
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
     Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& codomain,
-                         Vector<FloatDPValue> centre, Vector<FloatDPValue> multpliers) const;
+                         Vector<FloatDP> centre, Vector<FloatDP> multpliers) const;
     Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& codomain,
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.

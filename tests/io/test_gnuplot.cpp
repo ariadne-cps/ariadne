@@ -66,19 +66,19 @@ class TestGnuplot
         void test_point(PR pr)
         {
             //2d point
-            Point<FloatValue<PR>> pt1(2, pr);
-            pt1[0]=FloatValue<PR>(cast_exact(2.),pr);
-            pt1[1]=FloatValue<PR>(cast_exact(4.),pr);
+            Point<Float<PR>> pt1(2, pr);
+            pt1[0]=Float<PR>(cast_exact(2.),pr);
+            pt1[1]=Float<PR>(cast_exact(4.),pr);
             Figure g1 = Figure(ApproximateBoxType({{0,5},{0,5}}), Projection2d(2,0,1));
             g1.draw(pt1);
             g1.write("test_gnuplot-point2d");
-            
+
         }
 
         template< class PR>
         void test_box(PR pr)
         {
-            Box<Interval<FloatValue<PR>>> box({{1,4},{2,3}});
+            Box<Interval<Float<PR>>> box({{1,4},{2,3}});
             Figure g1 = Figure(ApproximateBoxType({{0,5},{1,4}}), Projection2d(2,0,1));
             g1.draw(box);
             g1.write("test_gnuplot-box");
@@ -87,9 +87,9 @@ class TestGnuplot
         template<class PR>
         void test_interpolateCurve(PR pr)
         {
-            InterpolatedCurve cv(0,Point<FloatValue<PR>>(2,FloatValue<PR>(0.0_x,pr)));
+            InterpolatedCurve cv(0,Point<Float<PR>>(2,Float<PR>(0.0_x,pr)));
             for(Int i=1; i<=10; ++i) {
-                Point<FloatValue<PR>> pt(2,pr); pt[0]=FloatValue<PR>(cast_exact(i/10.),pr); pt[1]=FloatValue<PR>(cast_exact(i*i/100.),pr);
+                Point<Float<PR>> pt(2,pr); pt[0]=Float<PR>(cast_exact(i/10.),pr); pt[1]=Float<PR>(cast_exact(i*i/100.),pr);
                 cv.insert(i,pt);
             }
             Figure g(ApproximateBoxType({{-1,+1},{-1,+1}}),Projection2d(2,0,1));
@@ -112,12 +112,12 @@ class TestGnuplot
             stringModel.tension = 100000;
             stringModel.mass = 1;
 
-            FloatValue<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
+            Float<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
 
             stringModel.x0 = (0.85_q*stringModel.length).value();  // Point of max amplitube - Triangular IC
-            FloatValue<PR> wavelength = (stringModel.length*2).value();
+            Float<PR> wavelength = (stringModel.length*2).value();
 
-            FloatValue<PR> frequency = (c/wavelength).value(); // Frequency
+            Float<PR> frequency = (c/wavelength).value(); // Frequency
 
             stringModel.amp = cast_exact(ApproximateDouble(0.8));
             stringModel.damping = 100;
@@ -127,7 +127,7 @@ class TestGnuplot
             stringModel.k = ((2*pi)/wavelength).value();
             stringModel.omega = (2*pi*frequency).value();
 
-            Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx, pr);
+            Tensor<2, Float<PR>> data = pde_1d_solver(stringModel, Nx, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1},{-1,1}}), Projection2d(2,0,1));
             fig1.set_line_colour(0.0,0.0,0.0);
@@ -152,95 +152,95 @@ class TestGnuplot
 
             fig2.write("test_gnuplot-LabelledFigure-StringEvolution");
 
-        
+
         }//String Evolution over time
 
         template<class PR>
         void test_gauss3D(PR pr)
         {
-            FloatValue<PR> zb(0.0_x, pr);
+            Float<PR> zb(0.0_x, pr);
 
             int dim = 20;
-            Tensor<3, FloatValue<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
+            Tensor<3, Float<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
 
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,dim-1},{0,dim-1},{0,1}}), Projection3d(3,0,1,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3D");
-        
+
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=dim-1,0<=y<=dim-1,0<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3D");
-         
+
         }//Gauss 3D
 
         template< class PR>
         void test_gauss3DProjXY(PR pr)
         {
-            FloatValue<PR> zb(0.0_x, pr);
+            Float<PR> zb(0.0_x, pr);
 
             int dim = 20;
-            Tensor<3, FloatValue<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
+            Tensor<3, Float<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
 
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,1));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjXY");
-        
+
             RealVariable x("x"), y("y");
             Axes2d axes(0<=x<=dim-1,0<=y<=dim-1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjXY");
-        
+
         }
 
         template< class PR>
         void test_gauss3DProjXZ(PR pr)
         {
-            FloatValue<PR> zb(0.0_x, pr);
+            Float<PR> zb(0.0_x, pr);
 
             int dim = 20;
-            Tensor<3, FloatValue<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
+            Tensor<3, Float<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
 
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,0,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjXZ");
-        
+
             RealVariable x("x"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjXZ");
-        
+
         }
 
         template< class PR>
         void test_gauss3DProjYZ(PR pr)
-        {           
-            FloatValue<PR> zb(0.0_x, pr);
+        {
+            Float<PR> zb(0.0_x, pr);
 
             int dim = 20;
-            Tensor<3, FloatValue<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
+            Tensor<3, Float<PR>> data({SizeType(dim), SizeType(dim), 1}, zb);
 
             data = gaussian_function(data, dim, dim, pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0, dim-1},{0, dim-1}, {0,1}}), Projection2d(3,1,2));
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DProjYZ");
-        
+
             RealVariable x("y"), y("z");
             Axes2d axes(0<=x<=dim-1,0<=y<=1);
             LabelledFigure fig2=LabelledFigure(axes);
             fig2.draw(data);
             fig2.write("test_gnuplot-LabelledFigure-Gauss3DProjYZ");
-        
+
         }
 
         template<class PR>
@@ -255,13 +255,13 @@ class TestGnuplot
             firstDim.x0 = 5;
             secondDim.x0 = 5;
 
-            Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
+            Tensor<3, Float<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
             Figure fig1 = Figure(ApproximateBoxType({{0,Nx-1}, {0,Ny-1}, {-1,1}}), Projection3d(3, 0, 1, 2));
             fig1.set_animated(true);
             fig1.draw(data);
             fig1.write("test_gnuplot-Gauss3DAnimation");
-        
+
             RealVariable x("x"), y("y"), z("z");
             Axes3d axes(0<=x<=Nx-1,0<=y<=Ny-1,-1<=z<=1);
             LabelledFigure fig2=LabelledFigure(axes);

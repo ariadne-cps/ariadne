@@ -66,11 +66,11 @@ class TestPdes
             stringModel.tension = 10000;
             stringModel.mass = cast_exact(ApproximateDouble(0.9));
 
-            FloatValue<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
+            Float<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
 
-            FloatValue<PR> wavelength = (stringModel.length*2).value();
+            Float<PR> wavelength = (stringModel.length*2).value();
 
-            FloatValue<PR> frequency = (c/wavelength).value(); // Frequency
+            Float<PR> frequency = (c/wavelength).value(); // Frequency
 
             stringModel.amp = cast_exact(ApproximateDouble(0.8));
             stringModel.damping = 100;
@@ -82,9 +82,9 @@ class TestPdes
 
             stringModel.is_triangular = false;
 
-            Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx, pr);
+            Tensor<2, Float<PR>> data = pde_1d_solver(stringModel, Nx, pr);
 
-            FloatValue<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
+            Float<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
 
             //Check values
             for (SizeType time = 0; time < data.size(1); time++)
@@ -96,11 +96,11 @@ class TestPdes
                         ARIADNE_TEST_ASSERT(abs(data[{x1, time}]) <= (stringModel.amp+tollerance));
                         return;
                     }
-                    
+
                 }
-                
+
             }
-            
+
 
         }//String Evolution over time
 
@@ -115,12 +115,12 @@ class TestPdes
             stringModel.tension = 10000;
             stringModel.mass = cast_exact(ApproximateDouble(0.9));
 
-            FloatValue<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
+            Float<PR> c = sqrt((stringModel.tension/(stringModel.mass/stringModel.length))).value();
 
             stringModel.x0 = (0.85_q*stringModel.length).value();  // Point of max amplitube - Triangular IC
-            FloatValue<PR> wavelength = (stringModel.length*2).value();
+            Float<PR> wavelength = (stringModel.length*2).value();
 
-            FloatValue<PR> frequency = (c/wavelength).value(); // Frequency
+            Float<PR> frequency = (c/wavelength).value(); // Frequency
 
             stringModel.amp = cast_exact(ApproximateDouble(0.8));
             stringModel.damping = 100;
@@ -132,9 +132,9 @@ class TestPdes
 
             stringModel.is_triangular = true;
 
-            FloatValue<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
+            Float<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
 
-            Tensor<2, FloatValue<PR>> data = pde_1d_solver(stringModel, Nx, pr);
+            Tensor<2, Float<PR>> data = pde_1d_solver(stringModel, Nx, pr);
 
             //Check values
             for (SizeType time = 0; time < data.size(1); time++)
@@ -146,9 +146,9 @@ class TestPdes
                         ARIADNE_TEST_ASSERT(abs(data[{x1, time}]) <= (stringModel.amp+tollerance));
                         return;
                     }
-                    
+
                 }
-                
+
             }
 
         }//String Evolution over time
@@ -166,9 +166,9 @@ class TestPdes
             firstDim.x0 = 15;
             secondDim.x0 = 15;
 
-            FloatValue<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
+            Float<PR> tollerance(cast_exact(ApproximateDouble(1.2)),pr);
 
-            Tensor<3, FloatValue<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
+            Tensor<3, Float<PR>> data = pde_2d_solver(firstDim, secondDim, SizeType(Nx), SizeType(Ny), pr);
 
             //Check values
             for (SizeType time = 0; time < data.size(1); time++)
@@ -182,8 +182,8 @@ class TestPdes
                             ARIADNE_TEST_ASSERT(abs(data[{x1, x2, time}]) <= tollerance);
                             return;
                         }
-                    }                        
-                }                
+                    }
+                }
             }
 
         }
@@ -250,15 +250,15 @@ class TestPdes
                                 return;
                             }
                         }
-                        
-                        
+
+
                     }
-                    
+
                 }
-                
+
             }
 
-            
+
         }
 };
 

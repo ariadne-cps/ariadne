@@ -213,9 +213,9 @@ class FunctionInterface<ValidatedTag,SIG>
 
     virtual Result<ScalarMultivariateFunction<ValidatedTag>> _call(const Argument< ScalarMultivariateFunction<ValidatedTag> >& x) const = 0;
 
-    inline Result<FloatDPBounds> _call(const Argument<FloatDPValue>& x) const {
+    inline Result<FloatDPBounds> _call(const Argument<FloatDP>& x) const {
         return this->_call(Argument<FloatDPBounds>(x)); }
-    inline Result<FloatMPBounds> _call(const Argument<FloatMPValue>& x) const {
+    inline Result<FloatMPBounds> _call(const Argument<FloatMP>& x) const {
         return this->_call(Argument<FloatMPBounds>(x)); }
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;

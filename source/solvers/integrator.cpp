@@ -73,7 +73,7 @@ OutputStream& operator<<(OutputStream& os, FlowModelType const& fm) {
     os << "[ "; for(SizeType i=0; i!=fm.size(); ++i) { if (i!=0u) { os << ",\n"; } os << "  " << fm[i]; } os << " ]"; return os ;
 }
 
-static const FloatDPValue zero=FloatDPValue(0,dp);
+static const FloatDP zero=FloatDP(0,dp);
 
 inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<UpperIntervalType> const& ex) {
     return Vector<UpperIntervalType>(bx) + ex;
@@ -595,7 +595,7 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
 
     for(SizeType i=0; i!=rs; ++i) {
         ValidatedTaylorModelDP& model=tf.model(i);
-        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
+        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
         FloatDPError& error=model.error();
         error=0u;
         expansion.reserve(dfs[i].expansion().number_of_nonzeros());
@@ -604,7 +604,7 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
         while(iter!=dfs[i].end()) {
             MultiIndex const a=iter->index();
             FloatDPBounds coef=iter->coefficient();
-            FloatDPValue x=coef.value();
+            FloatDP x=coef.value();
             error+=coef.error();
             expansion.append(a,x);
             ++iter;
@@ -752,14 +752,14 @@ graded_series_flow_step(const ValidatedVectorMultivariateFunction& f,
 }
 
 
-// FIXME: Should not be necessary, as should be able to construct FloatBounds<DP> from (FloatValue<DP>,DP)
+// FIXME: Should not be necessary, as should be able to construct FloatBounds<DP> from (Float<DP>,DP)
 FloatBounds<DoublePrecision> cast_singleton(ExactIntervalType const& ivl, DoublePrecision pr) {
     return FloatBounds<DoublePrecision>(ivl.lower_bound(),ivl.upper_bound()); }
 
 
 namespace {
 // Compute the midpoint of x, and add the error to e
-template<class F, class FE> Value<F> med(Bounds<F> const& x, Error<FE>& e) {
+template<class F, class FE> F med(Bounds<F> const& x, Error<FE>& e) {
     e+=x.error(); return x.value(); }
 } // namespace
 
@@ -793,7 +793,7 @@ make_taylor_function_model(ExactBoxType domain, Vector<Differential<Bounds<FLT>>
         Differential<FloatBounds<PR>> const& dr = scaled_derivative_ranges[i];
         ValidatedTaylorModel<FLT>& model=tf.model(i);
 
-        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
+        Expansion<MultiIndex,FloatDP>& expansion=model.expansion();
         FloatError<PR>& error=model.error();
         error=0u;
         expansion.reserve(centre_derivatives[i].expansion().number_of_nonzeros());

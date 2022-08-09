@@ -54,10 +54,10 @@ class Grid {
   public:
     typedef double DyadicType;
     typedef Int IntegerType;
-    typedef Value<FLT> ExactNumericType;
+    typedef FLT ExactNumericType;
     typedef UpperBound<FLT> UpperNumericType;
     typedef LowerBound<FLT> LowerNumericType;
-    typedef Point<Value<FLT>> ExactPointType;
+    typedef Point<FLT> ExactPointType;
   private:
     // Structure containing actual data values
     struct Data;
@@ -112,20 +112,20 @@ class Grid {
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
-    Value<FloatDP> coordinate(DimensionType d, DyadicType x) const;
-    Value<FloatDP> subdivision_coordinate(DimensionType d, DyadicType x) const;
-    Value<FloatDP> subdivision_coordinate(DimensionType d, IntegerType n) const;
+    FloatDP coordinate(DimensionType d, DyadicType x) const;
+    FloatDP subdivision_coordinate(DimensionType d, DyadicType x) const;
+    FloatDP subdivision_coordinate(DimensionType d, IntegerType n) const;
 
-    Int subdivision_index(DimensionType d, const Value<FloatDP>& x) const;
+    Int subdivision_index(DimensionType d, const FloatDP& x) const;
     Int subdivision_lower_index(DimensionType d, const LowerBound<FloatDP>& x) const;
     Int subdivision_upper_index(DimensionType d, const UpperBound<FloatDP>& x) const;
 
-    Array<DyadicType> index(const Point<FloatDPValue>& pt) const;
+    Array<DyadicType> index(const Point<FloatDP>& pt) const;
     Array<DyadicType> lower_index(const ExactBoxType& bx) const;
     Array<DyadicType> upper_index(const ExactBoxType& bx) const;
 
-    Point<FloatDPValue> point(const Array<IntegerType>& a) const;
-    Point<FloatDPValue> point(const Array<DyadicType>& a) const;
+    Point<FloatDP> point(const Array<IntegerType>& a) const;
+    Point<FloatDP> point(const Array<DyadicType>& a) const;
     ExactBoxType box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
     ExactBoxType box(const GridCell& cell) const;
   private:

@@ -29,7 +29,6 @@
 #include "float_bounds.hpp"
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_ball.hpp"
 #include "float_upper_bound.hpp"
 #include "float_lower_bound.hpp"
@@ -45,7 +44,6 @@ int abslog10floor(double x);
 
 template<class F> Nat Bounds<F>::output_places=8;
 
-template<class F> Bounds<F>::Bounds(Value<F> const& x) : Bounds<F>(x.raw(),x.raw()) { }
 template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper) : Bounds<F>(lower.raw(),upper.raw()) { }
 
 template<class F> Bounds<F>::Bounds(Real const& x, PR pr) : Bounds(x.get(pr)) {}
@@ -60,8 +58,8 @@ template<class F> LowerBound<F> const Bounds<F>::lower() const {
     return LowerBound<F>(lower_raw()); }
 template<class F> UpperBound<F> const Bounds<F>::upper() const {
     return UpperBound<F>(upper_raw()); }
-template<class F> const Value<F> Bounds<F>::value() const {
-    return Value<F>(med(near,this->_l,this->_u)); }
+template<class F> const F Bounds<F>::value() const {
+    return F(med(near,this->_l,this->_u)); }
 template<class F> const Error<F> Bounds<F>::error() const {
     RawFloat<PR> _v=med(near,this->_l,this->_u); return Error<F>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
 
@@ -87,7 +85,7 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
     const Bounds<F> two_pi_val=2*pi_val;
     if(x.error().raw()>two_pi_val.lower().raw()) { return Bounds<F>(-one,+one); }
 
-    Value<F> n(round(div(near,x.value_raw(),(two_pi_val.value_raw()))));
+    F n(round(div(near,x.value_raw(),(two_pi_val.value_raw()))));
     Bounds<F> y=x-2*(n*pi_val);
 
     ARIADNE_ASSERT(y.lower_raw()<=pi_val.upper_raw());
@@ -95,10 +93,10 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
 
     F rl(prec),ru(prec);
     if(y.lower_raw()<=-pi_val.lower_raw()) {
-        if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
+        if(y.upper_raw()<=0.0_x) { rl=-one; ru=cos(up,y.upper_raw()); }
         else { rl=-one; ru=+one; }
-    } else if(y.lower_raw()<=0.0) {
-        if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
+    } else if(y.lower_raw()<=0.0_x) {
+        if(y.upper_raw()<=0.0_x) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
         else if(y.upper_raw()<=pi_val.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
         else { rl=-one; ru=+one; }
     } else if(y.lower_raw()<=pi_val.upper_raw()) {
@@ -111,6 +109,20 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
 
     F::set_rounding_mode(rnd);
     return Bounds<F>(rl,ru);
+}
+
+template<class F> auto Operations<Bounds<F>>::_tan(Bounds<F> const& x) -> Bounds<F> {
+    ARIADNE_ASSERT(x.lower_raw()<=x.upper_raw());
+    PR prec=x.precision();
+    const Bounds<F> pi_bnds=_pi(prec);
+    const F pi_val=pi_bnds.value_raw();
+    typename F::RoundingModeType rnd = F::get_rounding_mode();
+    F n(round(div(near,x.value_raw(),pi_val)));
+    F::set_rounding_mode(rnd);
+    Bounds<F> y=x-n*pi_bnds;
+    assert(y.lower_raw()>=-hlf(pi_val));
+    assert(y.upper_raw()<=+hlf(pi_val));
+    return Bounds<F>(tan(down,y._l),tan(up,y._u));
 }
 
 template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x) -> Bounds<F> {

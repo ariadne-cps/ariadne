@@ -23,8 +23,9 @@
 
 #include "first_order_pde.hpp"
 
+#include "numeric/floatdp.hpp"
+#include "numeric/floatmp.hpp"
 #include "numeric/float_bounds.hpp"
-#include "numeric/float_value.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
@@ -82,11 +83,11 @@ template<class X0> decltype(auto) maxs(X0 const& x0) { return x0; }
 
 
 
-template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Bounds<X>>> const& us, Vector<Value<X>> const& x) {
+template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Bounds<X>>> const& us, Vector<X> const& x) {
     assert(x.size()==2);
     SizeType two_pow_N = us.sizes()[0]-1;
-    Value<X> const& x0=x[0];
-    Value<X> const& x1=x[1];
+    X const& x0=x[0];
+    X const& x1=x[1];
     SizeType i0 = floor(Dyadic(x0)*two_pow_N).get_si(); if(i0==us.size(0)-1) { --i0; }
     SizeType i1 = floor(Dyadic(x1)*two_pow_N).get_si(); if(i1==us.size(1)-1) { --i1; }
     Bounds<X> a0=x0*two_pow_N-i0;
@@ -108,7 +109,7 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
     Rational tolerance = 1/3_q;
     Dyadic tmax=Integer(1)/(two^2);
 
-    Tensor<3,Value<X>> T({2,3,4},Value<X>(pr));
+    Tensor<3,X> T({2,3,4},X(pr));
 
     DimensionType n = rA.row_size(); // Number of unknown functions u
     DimensionType m = rBs.size(); // Number of state variables x
@@ -140,12 +141,12 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
     PositiveUpperBound<X> error_constant = 2u*sqrt(PositiveUpperBound<X>(cndA * max_nrm * mag_ddphi));
     Nat N = log2((error_constant/tolerance).get_d())+1;
 
-    SizeType two_pow_N = pow(2,N);
-    PositiveValue<X> h(Dyadic(1,N),pr);
+    SizeType two_pow_N = std::pow(2,N);
+    Positive<X> h(Dyadic(1,N),pr);
 
     auto courant_nrm = 1/(1/sup_norm(invA*B0)+1/sup_norm(invA*B1));
     Nat L = log2(courant_nrm.get_d())+1;
-    PositiveValue<X> tau(Dyadic(1,N+L),pr);
+    Positive<X> tau(Dyadic(1,N+L),pr);
 
     Nat steps=(tmax*pow(Natural(2u),N+L)).get_d();
 
@@ -153,13 +154,13 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
 
 
     // Generate array of x values (0,1,...,2^N)/2^N
-    Array<Value<X>> xs(two_pow_N+1, [N,pr](SizeType i){return Value<X>(Dyadic(i,N),pr);});
+    Array<X> xs(two_pow_N+1, [N,pr](SizeType i){return X(Dyadic(i,N),pr);});
     // Generate array of x values (1,3,...,2*2^N-1)/2^(N+1)
-    Array<Value<X>> hxs(two_pow_N, [N,pr](SizeType i){return Value<X>(Dyadic(2*i+1,N+1),pr);});
+    Array<X> hxs(two_pow_N, [N,pr](SizeType i){return X(Dyadic(2*i+1,N+1),pr);});
 
     Bounds<X> zb(0,pr);
     Vector<Bounds<X>> zbn(n,zb);
-    Vector<Value<X>> x(m,pr);
+    Vector<X> x(m,pr);
 
     // FIXME: Relax size of rTs
     assert(rTs.size()==2);

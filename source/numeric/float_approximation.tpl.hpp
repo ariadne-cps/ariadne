@@ -29,7 +29,6 @@
 #include "float_approximation.hpp"
 
 #include "float_error.hpp"
-#include "float_value.hpp"
 #include "float_bounds.hpp"
 #include "float_upper_bound.hpp"
 #include "float_lower_bound.hpp"
@@ -43,7 +42,6 @@ template<class F> Nat Approximation<F>::output_places = 4;
 template<class F> Approximation<F>::Approximation(LowerBound<F> const& x) : Approximation<F>(x.raw()) { }
 template<class F> Approximation<F>::Approximation(UpperBound<F> const& x) : Approximation<F>(x.raw()) { }
 template<class F> Approximation<F>::Approximation(Bounds<F> const& x) : Approximation<F>(x.value_raw()) { }
-template<class F> Approximation<F>::Approximation(Value<F> const& x) : Approximation<F>(x.raw()) { }
 template<class F> Approximation<F>::Approximation(Error<F> const& x) : Approximation<F>(x.raw()) { }
 
 template<class F> Approximation<F>::Approximation(Real const& r, PR pr) : Approximation<F>(r.get(pr)) {}

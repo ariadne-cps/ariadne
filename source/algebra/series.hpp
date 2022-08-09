@@ -166,7 +166,7 @@ template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { re
 class AnalyticFunction {
     typedef FloatDPApproximation ApproximateNumericType; // [[deprecated]]
     typedef FloatDPBounds ValidatedNumericType; // [[deprecated]]
-    typedef FloatDPValue ExactNumericType; // [[deprecated]]
+    typedef FloatDP ExactNumericType; // [[deprecated]]
   private:
     UnaryTranscendentalOperator _op;
     std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumericType>> _asg_ptr;

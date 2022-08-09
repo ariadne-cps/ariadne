@@ -5,14 +5,14 @@ set(UNIT_TESTS
     test_rational
     test_real
     test_number
-    test_rounding
+    test_rounding_mode
     test_float
+    test_float_rounding
     test_rounded_float
     test_float_approximation
     test_float_lower_upper_bound
     test_float_bounds
     test_float_ball
-    test_float_value
     test_complex
 )
 

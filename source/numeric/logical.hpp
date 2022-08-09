@@ -504,8 +504,8 @@ class ValidatedKleenean : public Logical<ValidatedKleenean,LogicalValue> {
     explicit ValidatedKleenean(LogicalValue lv) : Base(lv) { }
     ValidatedKleenean(bool b) : ValidatedKleenean(Boolean(b)) { }
     ValidatedKleenean(Boolean b) : ValidatedKleenean(static_cast<LogicalValue>(b)) { }
-//    ValidatedKleenean(ValidatedSierpinskian s) : ValidatedKleenean(static_cast<LogicalValue>(s)) { }
-//    ValidatedKleenean(ValidatedNegatedSierpinskian ns) : ValidatedKleenean(static_cast<LogicalValue>(ns)) { }
+    explicit ValidatedKleenean(ValidatedSierpinskian s) : ValidatedKleenean(static_cast<LogicalValue>(s)) { }
+    explicit ValidatedKleenean(ValidatedNegatedSierpinskian ns) : ValidatedKleenean(static_cast<LogicalValue>(ns)) { }
     ValidatedKleenean(Kleenean k, Effort e) : ValidatedKleenean(k.check(e)) { }
     friend ValidatedKleenean check(Kleenean const& k, Effort e) { return k.check(e); }
 };

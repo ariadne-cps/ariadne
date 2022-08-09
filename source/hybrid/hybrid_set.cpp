@@ -89,7 +89,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
     Real time=ht.continuous_time();
-    FloatDPValue flt_time=cast_exact(time.get(dp));
+    FloatDP flt_time=cast_exact(time.get(dp));
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
     } else {

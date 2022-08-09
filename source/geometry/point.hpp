@@ -55,11 +55,11 @@ template<class T> class Variable;
 using RealVariable = Variable<Real>;
 template<class V,class E> class Assignment;
 
-template<class F> using ExactPoint = Point<Value<F>>;
+template<class F> using ExactPoint = Point<F>;
 template<class F> using ValidatedPoint = Point<Bounds<F>>;
 template<class F> using ApproximatePoint = Point<Approximation<F>>;
 
-using FloatDPValuePoint = Point<FloatDPValue>;
+using FloatDPPoint = Point<FloatDP>;
 using FloatDPBoundsPoint = Point<FloatDPBounds>;
 using FloatDPApproximationPoint = Point<FloatDPApproximation>;
 

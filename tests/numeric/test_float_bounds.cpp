@@ -39,7 +39,6 @@
 
 #include "numeric/float_lower_bound.hpp"
 #include "numeric/float_upper_bound.hpp"
-#include "numeric/float_value.hpp"
 #include "numeric/float_error.hpp"
 
 #include "../test.hpp"
@@ -329,8 +328,8 @@ TestFloatBounds<DoublePrecision>::test_constructors()
 
     // Constructor from rational bounds
     FloatBoundsType xd4(2.1_q,3.2_q,pr);
-    ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
-    ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
+    ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1_pr);
+    ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2_pr);
 
     // Approximate constructor from a single value
     FloatBoundsType xd5(Rational(1,3),pr);
@@ -391,13 +390,13 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
     // Tests for exact operations
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).lower().raw(),-0.25_x);
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).upper().raw(),0.5_x);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).value().raw(),0.125_x);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).error().raw(),0.375)
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).value(),0.125_x);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).error().raw(),0.375_x)
 
     // Tests for inexact operations
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).lower().raw(),div(down,-one_,three_));
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).upper().raw(),div(up,two_,three_));
-    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).value().raw(),hlf(add(up,div(down,-one_,three_),div(up,two_,three_))))
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).value(),hlf(add(up,div(down,-one_,three_),div(up,two_,three_))))
     ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).error().raw(),hlf(sub(up,div(up,two_,three_),div(down,-one_,three_))));
 }
 
@@ -497,10 +496,10 @@ template<class PR> Void TestFloatBounds<PR>::test_monotone_functions()
         FloatBoundsType e(2.7182818284590451_pr,2.7182818284590455_pr,pr);
         FloatBoundsType loge=log(e);
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(loge.lower_raw(),<,1.0);
-        ARIADNE_TEST_COMPARE(loge.lower_raw(),>,0.9999999999998);
-        ARIADNE_TEST_COMPARE(loge.upper_raw(),>,1.0);
-        ARIADNE_TEST_COMPARE(loge.upper_raw(),<,1.000000000002);
+        ARIADNE_TEST_COMPARE(loge.lower_raw(),<,1.0_x);
+        ARIADNE_TEST_COMPARE(loge.lower_raw(),>,0.9999999999998_pr);
+        ARIADNE_TEST_COMPARE(loge.upper_raw(),>,1.0_x);
+        ARIADNE_TEST_COMPARE(loge.upper_raw(),<,1.000000000002_pr);
     }
 
 }
@@ -539,10 +538,10 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         FloatBoundsType x(1.5707963267948966_pr,1.5707963267948968_pr,pr);
         FloatBoundsType cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(cosx.lower_raw(),<,0.0);
-        ARIADNE_TEST_COMPARE(cosx.lower_raw(),>,-1e-14);
-        ARIADNE_TEST_COMPARE(cosx.upper_raw(),>,0.0);
-        ARIADNE_TEST_COMPARE(cosx.upper_raw(),<,+1e-14);
+        ARIADNE_TEST_COMPARE(cosx.lower_raw(),<,0.0_x);
+        ARIADNE_TEST_COMPARE(cosx.lower_raw(),>,-1e-14_pr);
+        ARIADNE_TEST_COMPARE(cosx.upper_raw(),>,0.0_x);
+        ARIADNE_TEST_COMPARE(cosx.upper_raw(),<,+1e-14_pr);
         ARIADNE_TEST_ASSERT(cosx.lower_raw()<cosx.upper_raw());
     }
 

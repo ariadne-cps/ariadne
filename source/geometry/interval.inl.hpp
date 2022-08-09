@@ -25,9 +25,9 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class F> inline Value<F> make_split_point(Approximation<F> const& am) { return reinterpret_cast<Value<F>const&>(am); }
-template<class F> inline Value<F> make_split_point(Bounds<F> const& bm) { return bm.value(); }
-template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return bm.value(); }
+template<class F> inline F make_split_point(Approximation<F> const& am) { return reinterpret_cast<F const&>(am); }
+template<class F> inline F make_split_point(Bounds<F> const& bm) { return bm.value(); }
+template<class F> inline F make_split_point(Ball<F> const& bm) { return bm.value(); }
 
 template<class U, class Y> inline U create_u(Y const& y) { assert(false); }
 
@@ -65,7 +65,7 @@ template<class U> inline OutputStream& operator<<(OutputStream& os, Interval<U> 
     return os << "{" << ivl.lower_bound() << ":" << ivl.upper_bound() << "}";
 }
 
-template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> const& ivl);
+template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDP> const& ivl);
 
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower_bound()) { return ivl.lower_bound(); }
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper_bound()) { return ivl.upper_bound(); }
@@ -183,28 +183,28 @@ template<class F> inline Interval<UpperBound<F>> widen(Interval<UpperBound<F>> c
     return Interval<UpperBound<F>>(ivl.lower_bound()-e,ivl.upper_bound()+e); }
 template<class F> inline Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl) {
     return widen(ivl,UpperBound<F>(F::min(ivl.upper_bound().precision()))); }
-template<class F> inline Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl) {
+template<class F> inline Interval<UpperBound<F>> widen(Interval<F> const& ivl) {
     return widen(Interval<UpperBound<F>>(ivl),UpperBound<F>(F::min(ivl.upper_bound().precision()))); }
 
 template<class F> inline Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl, UpperBound<F> e) {
     return Interval<LowerBound<F>>(ivl.lower_bound()+e,ivl.upper_bound()-e); }
 template<class F> inline Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl) {
     return narrow(ivl,UpperBound<F>(F::min(ivl.upper_bound().precision()))); }
-template<class F> inline Interval<LowerBound<F>> narrow(Interval<Value<F>> const& ivl) {
+template<class F> inline Interval<LowerBound<F>> narrow(Interval<F> const& ivl) {
     return narrow(Interval<LowerBound<F>>(ivl),UpperBound<F>(F::min(ivl.upper_bound().precision()))); }
 
-inline Interval<FloatValue<DP>> cast_exact(Interval<FloatApproximation<DP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
-inline Interval<FloatValue<MP>> cast_exact(Interval<FloatApproximation<MP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
-inline Interval<FloatValue<DP>> cast_exact(Interval<FloatUpperBound<DP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
-inline Interval<FloatValue<MP>> cast_exact(Interval<FloatUpperBound<MP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
-inline Interval<FloatValue<DP>> cast_exact_interval(Interval<FloatApproximation<DP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<DP>> const&>(ivl); }
-inline Interval<FloatValue<MP>> cast_exact_interval(Interval<FloatApproximation<MP>> const& ivl) {
-    return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
+inline Interval<Float<DP>> cast_exact(Interval<FloatApproximation<DP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<DP>> const&>(ivl); }
+inline Interval<Float<MP>> cast_exact(Interval<FloatApproximation<MP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<MP>> const&>(ivl); }
+inline Interval<Float<DP>> cast_exact(Interval<FloatUpperBound<DP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<DP>> const&>(ivl); }
+inline Interval<Float<MP>> cast_exact(Interval<FloatUpperBound<MP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<MP>> const&>(ivl); }
+inline Interval<Float<DP>> cast_exact_interval(Interval<FloatApproximation<DP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<DP>> const&>(ivl); }
+inline Interval<Float<MP>> cast_exact_interval(Interval<FloatApproximation<MP>> const& ivl) {
+    return reinterpret_cast<Interval<Float<MP>> const&>(ivl); }
 
 inline FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
 inline FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }

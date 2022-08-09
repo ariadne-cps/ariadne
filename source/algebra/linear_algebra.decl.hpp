@@ -52,13 +52,13 @@ using RawFloatDPVector = Vector<RawFloatDP>; //!< <p/>
 using FloatDPApproximationVector = Vector<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsVector = Vector<FloatDPBounds>; //!< <p/>
 using FloatDPBallVector = Vector<FloatDPBall>; //!< <p/>
-using FloatDPValueVector = Vector<FloatDPValue>; //!< <p/>
+using FloatDPVector = Vector<FloatDP>; //!< <p/>
 using FloatMPVector = Vector<FloatMP>; //!< <p/>
 using RawFloatMPVector = Vector<RawFloatMP>; //!< <p/>
 using FloatMPApproximationVector = Vector<FloatMPApproximation>; //!< <p/>
 using FloatMPBoundsVector = Vector<FloatMPBounds>; //!< <p/>
 using FloatMPBallVector = Vector<FloatMPBall>; //!< <p/>
-using FloatMPValueVector = Vector<FloatMPValue>; //!< <p/>
+using FloatMPVector = Vector<FloatMP>; //!< <p/>
 using FloatMPDPBallVector = Vector<FloatMPDPBall>; //!< <p/>
 template<class F> using ApproximationVector = Vector<Approximation<F>>; //!< <p/>
 //!@}
@@ -75,13 +75,13 @@ using RawFloatDPCovector = Covector<RawFloatDP>; //!< <p/>
 using FloatDPApproximationCovector = Covector<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsCovector = Covector<FloatDPBounds>; //!< <p/>
 using FloatDPBallCovector = Covector<FloatDPBall>; //!< <p/>
-using FloatDPValueCovector = Covector<FloatDPValue>; //!< <p/>
+using FloatDPCovector = Covector<FloatDP>; //!< <p/>
 using FloatMPCovector = Covector<FloatMP>; //!< <p/>
 using RawFloatMPCovector = Covector<RawFloatMP>; //!< <p/>
 using FloatMPApproximationCovector = Covector<FloatMPApproximation>; //!< <p/>
 using FloatMPBoundsCovector = Covector<FloatMPBounds>; //!< <p/>
 using FloatMPBallCovector = Covector<FloatMPBall>; //!< <p/>
-using FloatMPValueCovector = Covector<FloatMPValue>; //!< <p/>
+using FloatMPCovector = Covector<FloatMP>; //!< <p/>
 using FloatMPDPBallCovector = Covector<FloatMPDPBall>; //!< <p/>
 //!@}
 
@@ -97,11 +97,11 @@ using RawFloatDPMatrix = Matrix<RawFloatDP>; //!< <p/>
 using FloatDPApproximationMatrix = Matrix<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsMatrix = Matrix<FloatDPBounds>; //!< <p/>
 using FloatDPBallMatrix = Matrix<FloatDPBall>; //!< <p/>
-using FloatDPValueMatrix = Matrix<FloatDPValue>; //!< <p/>
+using FloatDPMatrix = Matrix<FloatDP>; //!< <p/>
 using FloatMPApproximationMatrix = Matrix<FloatMPApproximation>; //!< <p/>
 using FloatMPBoundsMatrix = Matrix<FloatMPBounds>; //!< <p/>
 using FloatMPBallMatrix = Matrix<FloatMPBall>; //!< <p/>
-using FloatMPValueMatrix = Matrix<FloatMPValue>; //!< <p/>
+using FloatMPMatrix = Matrix<FloatMP>; //!< <p/>
 using FloatMPDPBallMatrix = Matrix<FloatMPDPBall>; //!< <p/>
 //!@}
 
@@ -112,11 +112,11 @@ using FloatMPDPBallMatrix = Matrix<FloatMPDPBall>; //!< <p/>
 using FloatDPApproximationDiagonalMatrix = DiagonalMatrix<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsDiagonalMatrix = DiagonalMatrix<FloatDPBounds>; //!< <p/>
 using FloatDPBallDiagonalMatrix = DiagonalMatrix<FloatDPBall>; //!< <p/>
-using FloatDPValueDiagonalMatrix = DiagonalMatrix<FloatDPValue>; //!< <p/>
+using FloatDPDiagonalMatrix = DiagonalMatrix<FloatDP>; //!< <p/>
 using FloatMPApproximationDiagonalMatrix = DiagonalMatrix<FloatMPApproximation>; //!< <p/>
 using FloatMPBoundsDiagonalMatrix = DiagonalMatrix<FloatMPBounds>; //!< <p/>
 using FloatMPBallDiagonalMatrix = DiagonalMatrix<FloatMPBall>; //!< <p/>
-using FloatMPValueDiagonalMatrix = DiagonalMatrix<FloatMPValue>; //!< <p/>
+using FloatMPDiagonalMatrix = DiagonalMatrix<FloatMP>; //!< <p/>
 using FloatMPDPBallDiagonalMatrix = DiagonalMatrix<FloatMPDPBall>; //!< <p/>
 //!@}
 

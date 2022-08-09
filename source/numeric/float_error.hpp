@@ -37,6 +37,7 @@
 #include "float.decl.hpp"
 
 #include "builtin.hpp"
+#include "positive.hpp"
 
 #include "float_traits.hpp"
 #include "float_operations.hpp"

@@ -94,6 +94,7 @@ template<class F> class Error
     //! Assign from the generic error bound \a y, keeping the same precision.
     Error<F>& operator=(ValidatedErrorNumber y);
     operator ValidatedErrorNumber() const;
+    friend Bounds<F> pm(Error<F> const& x) { return Bounds<F>(-x._e,+x._e); } //!< <p/>
   public:
     //! Downcast to a generic error bound.
     ValidatedErrorNumber generic() const;
@@ -106,35 +107,46 @@ template<class F> class Error
     //! A mutable reference to the raw data used to represent the error bound.
     F& raw() { return _e; }
   public:
-    friend Error<F> operator+(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); }
-    friend Error<F> operator*(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); }
+    //!@{
+    //! \name Arithmetic operators
+    friend Error<F> operator+(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); } //!< <p/>
+    friend Error<F> operator*(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); } //!< <p/>
+    friend Error<F>& operator+=(Error<F>& x1, Error<F> const& x2) { return x1=x1+x2; } //!< <p/>
+    friend Error<F>& operator*=(Error<F>& x1, Error<F> const& x2) { return x1=x1*x2; } //!< <p/>
 
-    //! <p/>
-    friend Error<F> nul(Error<F> const& x) { return Error<F>(0u,x.precision()); }
-    //! <p/>
-    friend UpperBound<F> pos(Error<F> const& x) { return UpperBound<F>(pos(x._e)); }
-    //! <p/>
-    friend LowerBound<F> neg(Error<F> const& x) { return LowerBound<F>(neg(x._e)); }
-    //! <p/>
-    friend Error<F> add(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); }
-    //! <p/>
-    friend Error<F> mul(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); }
-    //! <p/>
-    friend Error<F> sqr(Error<F> const& x) { return Error<F>(sqr(up,x._e)); }
-    //! <p/>
-    friend Error<F> pow(Error<F> const& x, Nat m) { return Error<F>(pow(up,x._e,static_cast<Int>(m))); }
-    //! <p/>
-    friend Error<F> exp(Error<F> const& x) { return Error<F>(exp(up,x._e)); }
-    //! <p/>
-    friend UpperBound<F> log(Error<F> const& x) { return UpperBound<F>(log(up,x._e)); }
-    //! <p/>
-    friend Error<F> max(Error<F> const& x1, Error<F> const& x2) { return Error<F>(max(x1._e,x2._e)); }
-    //! <p/>
-    friend Error<F> min(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
-    //! <p/>
-    friend Error<F> abs(Error<F> const& x) { return x; }
-    //! <p/>
-    friend Error<F> mag(Error<F> const& x) { return x; }
+    friend UpperBound<F> operator+(Error<F> const& x) { return UpperBound<F>(+x._e); } //!< <p/>
+    friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); } //!< <p/>
+    friend UpperBound<F> operator+(F const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1,x2._e)); } //!< <p/>
+    friend LowerBound<F> operator-(F const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1,x2._e)); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Monotone arithmetic operations
+    friend Error<F> nul(Error<F> const& x) { return Error<F>(0u,x.precision()); } //!< <p/>
+    friend UpperBound<F> pos(Error<F> const& x) { return UpperBound<F>(pos(x._e)); } //!< <p/>
+    friend LowerBound<F> neg(Error<F> const& x) { return LowerBound<F>(neg(x._e)); } //!< <p/>
+    friend Error<F> add(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); } //!< <p/>
+    friend Error<F> mul(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); } //!< <p/>
+    friend Error<F> sqr(Error<F> const& x) { return Error<F>(sqr(up,x._e)); } //!< <p/>
+    friend Error<F> pow(Error<F> const& x, Nat m) { return Error<F>(pow(up,x._e,static_cast<Int>(m))); } //!< <p/>
+    friend Error<F> fma(Error<F> const& x1, Error<F> const& x2, Error<F> const& x3) { return Error<F>(fma(up,x1._e,x2._e,x3._e)); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Monotone algebraic and transcendental operations
+    friend Error<F> sqrt(Error<F> const& x) { return Error<F>(sqrt(up,x._e)); } //!< <p/>
+    friend Error<F> exp(Error<F> const& x) { return Error<F>(exp(up,x._e)); } //!< <p/>
+    friend UpperBound<F> log(Error<F> const& x) { return UpperBound<F>(log(up,x._e)); } //!< <p/>
+    friend UpperBound<F> log2(Error<F> const& x) { return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Lattice operations
+    friend Error<F> max(Error<F> const& x1, Error<F> const& x2) { return Error<F>(max(x1._e,x2._e)); } //!< <p/>
+    friend Error<F> min(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); } //!< <p/>
+    friend Error<F> abs(Error<F> const& x) { return x; } //!< <p/>
+    friend Error<F> mag(Error<F> const& x) { return x; } //!< <p/>
+    //!@}
 
         friend Error<F> operator+(Error<F> const& x1, Positive<F> const& x2) { return Error<F>(add(up,x1._e,x2)); }
         friend Error<F> operator+(Positive<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1,x2._e)); }
@@ -165,56 +177,41 @@ template<class F> class Error
         friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2);
 
     /*
-    friend PositiveUpperBound<F> operator+(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-    friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-    friend PositiveUpperBound<F> add(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-    friend PositiveUpperBound<F> mul(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-    friend PositiveUpperBound<F> max(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-    friend PositiveUpperBound<F> min(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
-*/
-    //! <p/>
-    friend Error<F>& operator+=(Error<F>& x1, Error<F> const& x2) { return x1=x1+x2; }
+        friend PositiveUpperBound<F> operator+(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+        friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+        friend PositiveUpperBound<F> add(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+        friend PositiveUpperBound<F> mul(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+        friend PositiveUpperBound<F> max(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+        friend PositiveUpperBound<F> min(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    */
         friend Error<F>& operator+=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1+x2; }
         friend Error<F>& operator+=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1+x2; }
         friend Error<F>& operator+=(Error<F>& x1, Positive<F> const& x2) { return x1=x1+x2; }
-    //! <p/>
-    friend Error<F>& operator*=(Error<F>& x1, Error<F> const& x2) { return x1=x1*x2; }
+
         friend Error<F>& operator*=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1*x2; }
         friend Error<F>& operator*=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1*x2; }
         friend Error<F>& operator*=(Error<F>& x1, Positive<F> const& x2) { return x1=x1*x2; }
 
   public:
-    //! <p/>
-    friend UpperBound<F> operator+(Error<F> const& x) { return UpperBound<F>(+x._e); }
-    //! <p/>
-    friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); }
-    //! <p/>
-    friend UpperBound<F> operator+(F const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1,x2._e)); }
-    //! <p/>
-    friend LowerBound<F> operator-(F const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1,x2._e)); }
-    //! <p/>
-    friend UpperBound<F> log2(Error<F> const& x) {
-        return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }
-
-    //! <p/>
-    friend Bounds<F> pm(Error<F> const& x) { return Bounds<F>(-x._e,+x._e); }
-
-    //! <p/>
+    //!@{
+    //! \name Validated information tests and operations
     friend Bool same(Error<F> const& x1, Error<F> const& x2) { return x1._e==x2._e; }
     friend Bool same(Error<F> const& x1, Dyadic const& x2) { return x1._e==x2; }
     //! <p/>
     friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }
     //! <p/>
     friend Error<F> refinement(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
+    //!@}
   public:
     friend Error<F>const& cast_positive(Error<F> const& x) { return x; }
   public:
-    //! <p/>
+    //!@{
+    //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) {
-        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
-    //! <p/>
+        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); } //!< Write to an output stream.
     friend InputStream& operator>>(InputStream& is, Error<F>& x) {
-        UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is; }
+        UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is; } //!< Read from an input stream.
+    //!@}
   public:
     static Nat output_places;
     //! Set the number of decimal places used for the output. DEPRECATED

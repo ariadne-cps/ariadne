@@ -118,57 +118,113 @@ template<class F> class UpperBound
     //! Over-approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return _u.get_d(); }
   public:
-    friend Bool is_nan(UpperBound<F> const& x) {
-        return is_nan(x._u); }
+    //!@{
+    //! \name Arithmetic operators
+    friend UpperBound<F> operator+(UpperBound<F> const& x); //!< <p/>
+    friend UpperBound<F> operator-(LowerBound<F> const& x); //!< <p/>
+    friend LowerBound<F> operator-(UpperBound<F> const& x); //!< <p/>
+    friend UpperBound<F> operator+(UpperBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F>& operator+=(UpperBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F>& operator-=(UpperBound<F>& x1, LowerBound<F> const& x2); //!< <p/>
+    friend LowerBound<F>& operator-=(LowerBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
 
-    friend UpperBound<F> max(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return UpperBound<F>(max(x1._u,x2._u)); }
-    friend UpperBound<F> min(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return UpperBound<F>(min(x1._u,x2._u)); }
-    friend Approximation<F> abs(UpperBound<F> const& x) {
-        return abs(Approximation<F>(x)); }
+    friend Positive<UpperBound<F>> operator*(Positive<UpperBound<F>> const& x1, Positive<UpperBound<F>> const& x2); //!< <p/>
+    friend Positive<UpperBound<F>> operator/(Positive<UpperBound<F>> const& x1, Positive<LowerBound<F>> const& x2); //!< <p/>
+    friend Positive<LowerBound<F>> operator/(Positive<LowerBound<F>> const& x1, Positive<UpperBound<F>> const& x2); //!< <p/>
+    friend Positive<UpperBound<F>>& operator+=(Positive<UpperBound<F>> & x1, Positive<UpperBound<F>> const& x2); //!< <p/>
+    friend Positive<UpperBound<F>>& operator*=(Positive<UpperBound<F>> & x1, Positive<UpperBound<F>> const& x2); //!< <p/>
+    friend Positive<UpperBound<F>>& operator/=(Positive<UpperBound<F>> & x1, Positive<LowerBound<F>> const& x2); //!< <p/>
+    friend Positive<LowerBound<F>>& operator/=(Positive<LowerBound<F>> & x1, Positive<UpperBound<F>> const& x2); //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Comparison operators
+    friend ValidatedLowerKleenean operator<=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator>=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator< (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator> (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator<=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator>=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator< (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator> (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Monotone arithmetic operations
     friend UpperBound<F> nul(UpperBound<F> const& x) {
-        return UpperBound<F>(nul(x._u)); }
+        return UpperBound<F>(nul(x._u)); } //!< <p/>
     friend UpperBound<F> pos(UpperBound<F> const& x) {
-        return UpperBound<F>(pos(x._u)); }
+        return UpperBound<F>(pos(x._u)); } //!< <p/>
     friend LowerBound<F> neg(UpperBound<F> const& x) {
-        return LowerBound<F>(neg(x._u)); }
+        return LowerBound<F>(neg(x._u)); } //!< <p/>
     friend UpperBound<F> hlf(UpperBound<F> const& x) {
-        return UpperBound<F>(hlf(x._u)); }
+        return UpperBound<F>(hlf(x._u)); } //!< <p/>
 
     friend UpperBound<F> add(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return UpperBound<F>(add(up,x1._u,x2._u)); }
+        return UpperBound<F>(add(up,x1._u,x2._u)); } //!< <p/>
     friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2) {
-        return UpperBound<F>(sub(up,x1._u,x2._l)); }
+        return UpperBound<F>(sub(up,x1._u,x2._l)); } //!< <p/>
+    //!@}
 
-    friend PositiveUpperBound<F> sqrt(PositiveUpperBound<F> const& x);
-    friend PositiveUpperBound<F> exp(UpperBound<F> const& x);
-    friend UpperBound<F> log(PositiveUpperBound<F> const& x);
-    friend UpperBound<F> atan(UpperBound<F> const& x);
-    friend PositiveUpperBound<F> atan(PositiveUpperBound<F> const& x);
+    //!@{
+    //! \name Monotone algebraic and transcendental operations
+    friend Positive<UpperBound<F>> sqrt(Positive<UpperBound<F>> const& x); //!< <p/>
+    friend Positive<UpperBound<F>> exp(UpperBound<F> const& x); //!< <p/>
+    friend UpperBound<F> log(Positive<UpperBound<F>> const& x); //!< <p/>
+    friend UpperBound<F> atan(UpperBound<F> const& x); //!< <p/>
+    friend Positive<UpperBound<F>> atan(Positive<UpperBound<F>> const& x); //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Lattice operations
+    friend UpperBound<F> max(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(max(x1._u,x2._u)); } //!< <p/>
+    friend UpperBound<F> min(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(min(x1._u,x2._u)); } //!< <p/>
+    friend Approximation<F> abs(UpperBound<F> const& x) {
+        return abs(Approximation<F>(x)); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
     friend ValidatedNegatedSierpinskian eq(UpperBound<F> const& x1, LowerBound<F> const& x2) {
-        if(x1._u<x2._l) { return false; }
-        else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); } }
+        if(x1._u<x2._l) { return false; } //!< <p/>
+        else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); } } //!< <p/>
     friend ValidatedLowerKleenean lt(UpperBound<F> const& x1, LowerBound<F> const& x2) {
-        if(x1._u< x2._l) { return true; }
-        else { return ValidatedLowerKleenean(LogicalValue::UNLIKELY); } }
+        if(x1._u< x2._l) { return true; } //!< <p/>
+        else { return ValidatedLowerKleenean(LogicalValue::UNLIKELY); } } //!< <p/>
+    //!@}
 
-    friend Bool same(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return x1._u==x2._u; }
-    friend Bool refines(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return x1._u <= x2._u; }
-    friend UpperBound<F> refinement(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-        return UpperBound<F>(min(x1._u,x2._u)); }
-
+    //!@{
+    //! \name Rounding operations
     friend Integer cast_integer(UpperBound<F> const& x) {
-        return ceil(static_cast<Dyadic>(x._u)); }
+        return ceil(static_cast<Dyadic>(x._u)); } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Special value tests
+    friend Bool is_nan(UpperBound<F> const& x) {
+        return is_nan(x._u); } //!< <p/>
+    //!@{
+
+    //! \name Validated information tests and operations
+    friend Bool same(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return x1._u==x2._u; } //!< <p/>
+    friend Bool refines(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return x1._u <= x2._u; } //!< <p/>
+    friend UpperBound<F> refinement(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(min(x1._u,x2._u)); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
-        return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},upward); }
+        return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},upward); } //!< Write to an output stream.
     friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        ARIADNE_NOT_IMPLEMENTED; } //!< Read from an input stream.
+    //!@}
   public:
     friend LowerBound<F> neg(UpperBound<F> const& x);
     friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2);
@@ -267,8 +323,12 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
         return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveLowerBound<F> const& x2) {
         return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
-    friend PositiveUpperBound<F> operator*=(PositiveUpperBound<F>& x1, PositiveUpperBound<F> const& x2) {
+    friend PositiveUpperBound<F>& operator+=(PositiveUpperBound<F>& x1, PositiveUpperBound<F> const& x2) {
+        return x1=x1+x2; }
+    friend PositiveUpperBound<F>& operator*=(PositiveUpperBound<F>& x1, PositiveUpperBound<F> const& x2) {
         return x1=x1*x2; }
+    friend PositiveUpperBound<F>& operator/=(PositiveUpperBound<F>& x1, PositiveLowerBound<F> const& x2) {
+        return x1=x1/x2; }
   public:
     // Needed to prevent ambiguity
     friend PositiveUpperBound<F> operator*(PositiveBounds<F> const& x1, PositiveUpperBound<F> const& x2) {

@@ -261,14 +261,14 @@ static const CurrentRoundingMode rounded = CurrentRoundingMode();
 class Rounding {
     BuiltinRoundingModeType _rbp; MPFRRoundingModeType _rmp;
   public:
-    Rounding(BuiltinRoundingModeType rbp, MPFRRoundingModeType rmp) : _rbp(rbp), _rmp(rmp) { } //!< .
-    Rounding(RoundDownward) : Rounding(ROUND_DOWNWARD,MPFR_RNDD) { } //!< .
-    Rounding(RoundToNearest) : Rounding(ROUND_TO_NEAREST,MPFR_RNDN) { } //!< .
-    Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { } //!< .
-    operator BuiltinRoundingModeType() const { return _rbp; } //!< .
-    operator MPFRRoundingModeType() const { return _rmp; } //!< .
+    Rounding(BuiltinRoundingModeType rbp, MPFRRoundingModeType rmp) : _rbp(rbp), _rmp(rmp) { } //!< <p/>
+    Rounding(RoundDownward) : Rounding(ROUND_DOWNWARD,MPFR_RNDD) { } //!< <p/>
+    Rounding(RoundToNearest) : Rounding(ROUND_TO_NEAREST,MPFR_RNDN) { } //!< <p/>
+    Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { } //!< <p/>
+    operator BuiltinRoundingModeType() const { return _rbp; } //!< <p/>
+    operator MPFRRoundingModeType() const { return _rmp; } //!< <p/>
     friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
-        return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); } //!< .
+        return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); } //!< <p/>
 };
 
 

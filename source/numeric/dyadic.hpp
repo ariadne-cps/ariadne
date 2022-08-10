@@ -57,14 +57,9 @@ class InfinityException : public std::runtime_error {
 
 //! \ingroup NumericModule
 //! \brief A dyadic number of the form \f$p/2^q\f$ for integers \f$p\f$, \f$q\f$; equivalently, a number with a finite binary expansion.
-//! \sa Integer, Decimal, Rational, FloatDP, FloatMP
+//! \sa Integer, Decimal, Rational, Float<DP>, Float<MP>
 //! \details The number \f$1.375\f$ is an example of a dyadic number, since it is equal to \f$1.375=11/8=11/2^3=1.101_2\f$. The number \f$0.1375\f$ is not a dyadic number, since \f$0.1375=11/80=11/(2^4\times 5)=0.0010\overline{0011}_2\f$, so the denominator is not a power of \f$2\f$, and its binary expansion is recurring.
 class Dyadic
-    : DeclareRingOperations<Dyadic>
-    , DeclareLatticeOperations<Dyadic,Dyadic>
-    , DeclareComparisonOperations<Dyadic,Boolean,Boolean>
-    , DefineRingOperators<Dyadic>
-    , DefineComparisonOperators<Dyadic,Boolean,Boolean>
 {
     static Writer<Dyadic> _default_writer;
   public:
@@ -134,47 +129,97 @@ class Dyadic
     friend Dyadic operator"" _dy(long double x);
     //! \brief Alternative for operator""_dyadic for use in Python interface.
     friend Dyadic dy_(long double x);
-    //! \brief Halve the number.
-    friend Dyadic hlf(Dyadic const&);
-    //| \brief Power of a number (m always positive). DEPRECATED
-    friend Dyadic pow(Dyadic const& x, Int m);
-    //| \brief Power of a number (m always positive).
-    friend Dyadic pow(Dyadic const& x, Nat m);
 
-    friend Rational rec(Rational const&); //!< <p/>
-    friend Rational div(Rational const&, Rational const&); //!< <p/>
-    friend Rational operator/(Rational const&, Rational const&); //!< <p/>
+    //!@{
+    //! \name Arithmetic operators
+    friend Dyadic operator+(Dyadic const& w) { return pos(w); } //!< <p/>
+    friend Dyadic operator-(Dyadic const& w) { return neg(w); } //!< <p/>
+    friend Dyadic operator+(Dyadic const& w1, Dyadic const& w2) { return add(w1,w2); } //!< <p/>
+    friend Dyadic operator-(Dyadic const& w1, Dyadic const& w2) { return sub(w1,w2); } //!< <p/>
+    friend Dyadic operator*(Dyadic const& w1, Dyadic const& w2) { return mul(w1,w2); } //!< <p/>
+    friend Dyadic& operator+=(Dyadic& w1, Dyadic const& w2) { return w1=add(w1,w2); } //!< <p/>
+    friend Dyadic& operator-=(Dyadic& w1, Dyadic const& w2) { return w1=sub(w1,w2); } //!< <p/>
+    friend Dyadic& operator*=(Dyadic& w1, Dyadic const& w2) { return w1=mul(w1,w2); } //!< <p/>
+    friend Rational operator/(Rational const&, Rational const&);
+    //!@}
 
-    friend Real sqrt(Real const&); //!< <p/>
-    friend Real exp(Real const&); //!< <p/>
-    friend Real log(Real const&); //!< <p/>
-    friend Real sin(Real const&); //!< <p/>
-    friend Real cos(Real const&); //!< <p/>
-    friend Real tan(Real const&); //!< <p/>
-    friend Real asin(Real const&); //!< <p/>
-    friend Real acos(Real const&); //!< <p/>
-    friend Real atan(Real const&); //!< <p/>
+    //!@{
+    //! \name Comparison operators
+    friend Boolean operator==(Dyadic const& w1, Dyadic const& w2) { return eq(w1,w2); } //!< <p/>
+    friend Boolean operator!=(Dyadic const& w1, Dyadic const& w2) { return !eq(w1,w2); } //!< <p/>
+    friend Boolean operator<=(Dyadic const& w1, Dyadic const& w2) { return !lt(w2,w1); } //!< <p/>
+    friend Boolean operator>=(Dyadic const& w1, Dyadic const& w2) { return !lt(w1,w2); } //!< <p/>
+    friend Boolean operator< (Dyadic const& w1, Dyadic const& w2) { return lt(w1,w2); } //!< <p/>
+    friend Boolean operator> (Dyadic const& w1, Dyadic const& w2) { return lt(w2,w1); } //!< <p/>
+    //!@}
 
-    //! \brief The sign of the number.
-    friend Sign sgn(Dyadic const&);
-    //! \brief Round down to the nearest lower integer.
-    friend Integer floor(Dyadic const&);
-    //! \brief Round to the nearest integer. Rounding of halves is implementation-dependent.
-    friend Integer round(Dyadic const&);
-    //! \brief Round up to the nearest higher integer.
-    friend Integer ceil(Dyadic const&);
+    //!@{
+    //! \name Arithmetic operations
+    friend Dyadic nul(Dyadic const& w); //!< Zero \a 0.
+    friend Dyadic pos(Dyadic const& w); //!< %Positive \a +w.
+    friend Dyadic neg(Dyadic const& w); //!< Negative \a -w.
+    friend Positive<Dyadic> sqr(Dyadic const& w); //!< Square \a w<sup>2</sup>.
+    friend Dyadic hlf(Dyadic const& w); //!< Half \a w/2.
 
-    //! \brief Tests whether the value is NaN (not-a-number).
-    friend Bool is_nan(Dyadic const& w);
-    //! \brief Tests whether the value is ±∞.
-    friend Bool is_inf(Dyadic const& w);
-    //! \brief Tests whether the value is finite.
-    friend Bool is_finite(Dyadic const& w);
-    //! \brief Tests whether the value is zero.
-    friend Bool is_zero(Dyadic const& w);
+    friend Dyadic add(Dyadic const& w1, Dyadic const& w2); //!< Add \a w1+w2.
+    friend Dyadic sub(Dyadic const& w1, Dyadic const& w2); //!< Subtract \a w1-w2.
+    friend Dyadic mul(Dyadic const& w1, Dyadic const& w2); //!< Multiply \a w1×w2.
+    friend Dyadic pow(Dyadic const& w, Nat m); //!< Power \a w<sup>m</sup> where \a  m is positive.
+    friend Rational pow(Dyadic const& w, Int n); //!< Power \a w<sup>n</sup>.
+    friend Dyadic fma(Dyadic const& w1, Dyadic const& w2, Dyadic const& w3); //!< Fused multiply-and-add \a w1×w2+w3.
 
-    //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
+    friend Rational rec(Rational const&);
+    friend Rational div(Rational const&, Rational const&);
+    //!@}
+
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real asin(Real const&);
+    friend Real acos(Real const&);
+    friend Real atan(Real const&);
+
+    //!@{
+    //! \name Lattice operations
+    friend Positive<Dyadic> abs(Dyadic const& w); //!< Absolute value \a |w|.
+    friend Dyadic min(Dyadic const& w1, Dyadic const& w2); //!< Minimum \a w1∧w2.
+//    friend Positive<Dyadic> min(Positive<Dyadic> const& w1, Positive<Dyadic> const& w2);
+    friend Dyadic max(Dyadic const& w1, Dyadic const& w2); //!< Maximum \a w1∨w2.
+//    friend Positive<Dyadic> max(Dyadic const& w1, Positive<Dyadic> const& w2);
+//    friend Positive<Dyadic> max(Positive<Dyadic> const& w1, Dyadic const& w2);
+//    friend Positive<Dyadic> max(Positive<Dyadic> const& w1, Positive<Dyadic> const& w2);
+    //!@}
+
+    //!@{
+    //! \name Rounding operations
+    friend Integer floor(Dyadic const& w); //!< Round down to the nearest lower integer.
+    friend Integer round(Dyadic const& w); //!< Round to the nearest integer. %Rounding of halves is implementation-dependent.
+    friend Integer ceil(Dyadic const& w); //!< Round up to the nearest higher integer.
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend Sign sgn(Dyadic const& w); //!< The sign of \a w.
+    friend Comparison cmp(Dyadic const& w1, Dyadic const& w2); //!< Compares which of \a w1 and \a w2 is larger.
+    friend Boolean eq(Dyadic const& w1, Dyadic const& w2); //!< Tests if \a w1 is equal to \a w2.
+    friend Boolean lt(Dyadic const& w1, Dyadic const& w2); //!< Tests if \a w1 is less than \a w2.
+    //!@}
+
+    //!@{
+    //! \name Special value tests
+    friend Bool is_nan(Dyadic const& w); //!< Tests whether \a w is NaN (not-a-number).
+    friend Bool is_inf(Dyadic const& w); //!< Tests whether \a w is ±∞.
+    friend Bool is_finite(Dyadic const& w); //!< Tests whether \a w is finite.
+    friend Bool is_zero(Dyadic const& w); //!< Tests whether \a w is zero.
+    //!@}
+
+    //!@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Dyadic const& w); //!< Write to an output stream.
+    //!@}
 };
 
 class DecimalWriter : public WriterInterface<Dyadic> {

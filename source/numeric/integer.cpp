@@ -253,7 +253,6 @@ Integer& operator--(Integer& z) {
     return z;
 }
 
-/*
 Integer& operator+=(Integer& z1, Integer const& z2) {
     mpz_add(z1._mpz,z1._mpz,z2._mpz);
     return z1;
@@ -268,7 +267,6 @@ Integer& operator*=(Integer& z1, Integer const& z2) {
     mpz_mul(z1._mpz,z1._mpz,z2._mpz);
     return z1;
 }
-*/
 
 Integer nul(Integer const& z) {
     Integer r;

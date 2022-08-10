@@ -80,7 +80,8 @@ class RealInterface;
 //! and outputs the result as floating-point bounds with 96 bits of precision:
 //! \snippet tutorials/numeric_usage.cpp Real_usage
 //!
-//! \sa LowerReal, UpperReal, NaiveReal
+//! \sa LowerReal, UpperReal, NaiveReal, ValidatedReal,
+//! Rational, Decimal, Dyadic, Integer
 class Real
     : public Handle<const RealInterface>
     , public DeclareRealOperations<Real,PositiveReal>
@@ -169,17 +170,30 @@ class Real
     friend Real& operator/=(Real& r1, Real const& r2); //!< Inplace divides.
     //!@}
 
+    //! \name Standard comparison operators.
+    //!@{
+    friend NegatedSierpinskian operator==(Real const& r1, Real const& r2); //!< Equality is undecidable and may only robustly be falsified.
+    friend Sierpinskian operator!=(Real const& r1, Real const& r2); //!< Inequality is undecidable and may only robustly be verified.
+    friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
+    friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
+    friend Kleenean operator< (Real const& r1, Real const& r2); //!< Comparison .
+    friend Kleenean operator> (Real const& r1, Real const& r2); //!< Comparison .
+
+    friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
+    //!@}
+
     //! \name Named arithmetical functions
     //!@{
+    friend Real nul(Real const& r); //!< Zero \a 0.
     friend Real pos(Real const& r); //!< Identity \a +r.
     friend Real neg(Real const& r); //!< Negative \a -r.
     friend Real hlf(Real const& r); //!< Half \a r÷2.
     friend Real sqr(Real const& r); //!< Square \a r<sup>2</sup>.
     friend Real rec(Real const& r); //!< Reciprocal \a 1/r.
-    friend Real add(Real const& r1, Real const& r2); //!< \brief Sum \a r1+r2.
-    friend Real sub(Real const& r1, Real const& r2); //!< \brief Difference \a r1-r2.
-    friend Real mul(Real const& r1, Real const& r2); //!< \brief Product \a r1×r2.
-    friend Real div(Real const& r1, Real const& r2); //!< \brief Quotient \a r1÷r2.
+    friend Real add(Real const& r1, Real const& r2); //!< \brief Add \a r1+r2.
+    friend Real sub(Real const& r1, Real const& r2); //!< \brief Subtract \a r1-r2.
+    friend Real mul(Real const& r1, Real const& r2); //!< \brief Multiply \a r1×r2.
+    friend Real div(Real const& r1, Real const& r2); //!< \brief Divide \a r1÷r2.
     friend Real fma(Real const& r1, Real const& r2, Real const& r3); //!< \brief Fused multiply-and-add \a r1×r2+r3.
     friend Real pow(Real const& r, Int n); //!< \brief Power \a r<sup>n</sup>.
     //!@}
@@ -188,7 +202,7 @@ class Real
     //!@{
     friend Real sqrt(Real const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
     friend Real exp(Real const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
-    friend Real log(Real const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
+    friend Real log(Real const& r); //!< The natural logarithm of \a r, log<em><sub>e</sub> r</em> or ln <em>r</em>. Requires \a r ≥ 0.
     friend Real sin(Real const& r); //!< The sine of \a r.
     friend Real cos(Real const& r); //!< The cosine of \a r.
     friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r).
@@ -199,9 +213,9 @@ class Real
 
     //! \name Lattice operations
     //!@{
-    friend PositiveReal abs(Real const&); //!< Absolute value \a |r|.
-    friend Real min(Real const& r1, Real const& r2); //!< The mimimum of \a r1 and \a r2.
-    friend Real max(Real const& r1, Real const& r2); //!< The maximum of \a r1 and \a r2.
+    friend PositiveReal abs(Real const& r); //!< Absolute value \a |r|.
+    friend Real min(Real const& r1, Real const& r2); //!< Mimimum \a r1∧r2.
+    friend Real max(Real const& r1, Real const& r2); //!< Maximum \a r1∨r2.
     //!@}
 
     //! \name Operations based on the metric structure.
@@ -213,17 +227,14 @@ class Real
     friend FloatDPError mag(Real const&, DoublePrecision);
     //!@}
 
-    //! \name Comparison operations and operators.
+    //! \name Comparison operations.
     //!@{
+    friend NegatedSierpinskian eq(Real const& r1, Real const& r2); //!< Returns \c false if \a r1!=r2 and \c indeterminate if \a r1==r2.
+    friend Kleenean lt(Real const& r1, Real const& r2); //!< Returns \c true if \a r1<r2, \c false if \a r1\>r2, and \c indetermiate if \a r1==r2.
     friend Kleenean leq(Real const& r1, Real const& r2); //!< Returns \c true if \a r1<r2, \c false if \a r1\>r2, and \c indetermiate if \a r1==r2.
-    friend NegatedSierpinskian operator==(Real const& r1, Real const& r2); //!< Equality is undecidable and may only robustly be falsified.
-    friend Sierpinskian operator!=(Real const& r1, Real const& r2); //!< Inequality is undecidable and may only robustly be verified.
-    friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
-    friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
 
     friend Kleenean sgn(Real const& r); //!< Returns \c true if \a r>0, \c false if \a r<0, and \c indeterminate if \a r==0.
-    ValidatedKleenean check_sgn(Real r, Effort eff);
-    friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
+    friend ValidatedKleenean check_sgn(Real r, Effort eff); //!< Equivalent to \c sgn(r).check(eff).
     friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.
 
     friend Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);

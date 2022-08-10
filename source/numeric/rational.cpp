@@ -284,16 +284,31 @@ Rational operator/(Rational& q1, Rational const& q2) {
 }
 
 
+namespace { Rational const& unsign(PositiveRational const& q) { return q; } }
+
 Rational max(Rational const& q1, Rational const& q2) {
     Rational r; ExtendedOperations<Rational>::max(r,q1,q2); return r;
+}
+
+PositiveRational max(Rational const& q1, PositiveRational const& q2) {
+    return cast_positive(max(q1,unsign(q2)));
+}
+PositiveRational max(PositiveRational const& q1, Rational const& q2) {
+    return cast_positive(max(unsign(q1),q2));
+}
+PositiveRational max(PositiveRational const& q1, PositiveRational const& q2) {
+    return cast_positive(max(unsign(q1),unsign(q2)));
 }
 
 Rational min(Rational const& q1, Rational const& q2) {
     Rational r; ExtendedOperations<Rational>::min(r,q1,q2); return r;
 }
+PositiveRational min(PositiveRational const& q1, PositiveRational const& q2) {
+    return cast_positive(min(unsign(q1),unsign(q2)));
+}
 
-Rational abs(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
+Positive<Rational> abs(Rational const& q) {
+    Positive<Rational> r; ExtendedOperations<Rational>::abs(r,q); return r;
 }
 
 Rational mag(Rational const& q) {
@@ -316,8 +331,8 @@ Rational neg(Rational const& q) {
     Rational r; ExtendedOperations<Rational>::neg(r,q); return r;
 }
 
-Rational sqr(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::sqr(r,q); return r;
+Positive<Rational> sqr(Rational const& q) {
+    Positive<Rational> r; ExtendedOperations<Rational>::sqr(r,q); return r;
 }
 
 Rational hlf(Rational const& q) {
@@ -659,6 +674,7 @@ RationalBounds pow(RationalBounds const& q, Nat m) {
 RationalBounds pow(RationalBounds const& q, Int n) {
     if(n<0) { return pow(rec(q),Nat(-n)); } else return pow(q,Nat(n));}
 
+static_assert(not Convertible<Int,PositiveRational>);
 RationalBounds abs(RationalBounds const& q) {
     return RationalBounds(max(min(q._l,-q._u),0),max(-q._l,q._u)); }
 RationalBounds max(RationalBounds const& q1, RationalBounds const& q2) {

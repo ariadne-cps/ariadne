@@ -38,10 +38,9 @@
 namespace Ariadne {
 
 //! \ingroup NumericModule
-//! \sa Dyadic, Rational, Real
 //! \brief A decimal number.
+//! \sa Integer, Dyadic, Rational, Real
 class Decimal
-    : public DefineComparisonOperators<Decimal,Boolean,Boolean>
 {
   public:
     static const Integer _ten;
@@ -67,34 +66,47 @@ class Decimal
     operator ExactNumber () const;
     //! \brief A string literal
     String literal() const;
-    //! \brief Unary plus of a decimal value.
-    friend Decimal operator+(Decimal const& d);
-    //! \brief Negation of a decimal value.
-    friend Decimal operator-(Decimal const& d);
-    //! \brief Addition of two decimal values.
-    friend Decimal operator+(Decimal const& d1, Decimal const& d2);
-    //! \brief Subtraction of two decimal values.
-    friend Decimal operator-(Decimal const& d1, Decimal const& d2);
-    //! \brief Multiplication of two decimal values.
-    friend Decimal operator*(Decimal const& d1, Decimal const& d2);
-    //! \brief Division of two decimal values yields a rational.
-    friend Rational operator/(Decimal const& d1, Decimal const& d2);
-    //! \brief Inplace addition of two decimal values.
-    friend Decimal& operator+=(Decimal& d1, Decimal const& d2);
-    //! \brief Squared value of a decimal.
-    friend Decimal nul(Decimal const& d);
-    //! \brief Zeroed value of a decimal.
-    friend Decimal sqr(Decimal const& d);
-    //! \brief Half the value of a decimal.
-    friend Decimal hlf(Decimal const& d);
-    //! \brief Absolute value of a decimal.
-    friend Decimal abs(Decimal const& d);
-    //! \brief Maximum of two decimal values.
-    friend Decimal max(Decimal const& d1, Decimal const& d2);
-    //! \brief Minimum of two decimal values.
-    friend Decimal min(Decimal const& d1, Decimal const& d2);
-    //! \brief Comparison of two decimal values.
-    friend Comparison cmp(Decimal const& d1, Decimal const& d2);
+
+    //! \name Arithmetic operators
+    //!@{
+    friend Decimal operator+(Decimal const& d); //!< Unary plus \a +d.
+    friend Decimal operator-(Decimal const& d); //!< Unary minus \a -d.
+    friend Decimal operator+(Decimal const& d1, Decimal const& d2); //!< Plus \a d1+d2.
+    friend Decimal operator-(Decimal const& d1, Decimal const& d2); //!< Minus \a d1-d2.
+    friend Decimal operator*(Decimal const& d1, Decimal const& d2); //!< Times \a d1*d2.
+    friend Rational operator/(Decimal const& d1, Decimal const& d2); //!< Divides \a d1/d2, yielding a rational.
+    friend Decimal& operator+=(Decimal& d1, Decimal const& d2); //!< Inplace plus \a d1:=d1+d2.
+    //!@}
+
+    //!@{
+    //! \name Comparison operators
+    friend Boolean operator==(Decimal const& d1, Decimal const& d2) { return cmp(d1,d2)==Comparison::EQUAL; } //!< <p/>
+    friend Boolean operator!=(Decimal const& d1, Decimal const& d2) { return cmp(d1,d2)!=Comparison::EQUAL; } //!< <p/>
+    friend Boolean operator<=(Decimal const& d1, Decimal const& d2) { return cmp(d2,d1)!=Comparison::GREATER; } //!< <p/>
+    friend Boolean operator>=(Decimal const& d1, Decimal const& d2) { return cmp(d1,d2)!=Comparison::LESS; } //!< <p/>
+    friend Boolean operator< (Decimal const& d1, Decimal const& d2) { return cmp(d1,d2)==Comparison::LESS; } //!< <p/>
+    friend Boolean operator> (Decimal const& d1, Decimal const& d2) { return cmp(d2,d1)==Comparison::GREATER; } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Arithmetic operations
+    friend Decimal nul(Decimal const& d); //!< Zero \a 0.
+    friend Decimal sqr(Decimal const& d); //!< Square \a d<sup>2</sup>.
+    friend Decimal hlf(Decimal const& d); //!< Half \a d/2.
+    //!@}
+
+    //!@{
+    //! \name Lattice operations
+    friend Decimal abs(Decimal const& d); //!< Absolute value \a |d|.
+    friend Decimal min(Decimal const& d1, Decimal const& d2); //!< Minimum \a d1∧d2.
+    friend Decimal max(Decimal const& d1, Decimal const& d2); //!< Maximum \a d1∨d2.
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend Comparison cmp(Decimal const& d1, Decimal const& d2); //!< Comparison of two decimal values.
+    //!@}
+
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
     //! \brief Construct from an integer literal.

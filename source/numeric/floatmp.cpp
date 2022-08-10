@@ -732,7 +732,7 @@ Comparison cmp(Nat n1, FloatMP const& x2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::LESS:Comparison::GREATER);
 }
 
-// FIXME: Returns EQUAL if x1 is NaN 
+// FIXME: Returns EQUAL if x1 is NaN
 Comparison cmp(FloatMP const& x1, Int n2) {
     auto c=mpfr_cmp_si(x1._mpfr,n2);
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
@@ -866,8 +866,9 @@ FloatMP mul_opp(FloatMP const& x, FloatMP const& y);
 FloatMP div_opp(FloatMP const& x, FloatMP const& y);
 
 Integer cast_integer(FloatMP const& x) {
-    Dyadic w(x); 
-    Integer z=round(w); 
+    // Alternatively use mpfr_get_z
+    Dyadic w(x);
+    Integer z=round(w);
     ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer");
     return z;
 }

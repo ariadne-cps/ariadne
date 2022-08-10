@@ -26,8 +26,6 @@
  *  \brief
  */
 
-
-
 #ifndef ARIADNE_INTERVAL_HPP
 #define ARIADNE_INTERVAL_HPP
 
@@ -304,6 +302,16 @@ template<class U> class Interval
     auto is_singleton() const -> decltype(declval<L>() == declval<U>());
     //! Test if the interval is bounded.
     auto is_bounded() const -> decltype(declval<U>()<declval<L>());
+  public:
+#ifdef DOXYGEN
+    //!@{ \name Interval arithmeric
+    //!   \brief Only defined for intervals \c U=UpperBound<F> or \c U=Approximation<F> .
+    friend Interval<U> operator*(Interval<U> ivl); //!< Unary operators \a +,-
+    friend Interval<U> operator*(Interval<U> ivl1, Interval<U> ivl2); //!< Binary arithmetic operators \a +,-,*,/
+    friend Interval<U>& operator*=(Interval<U>& ivl1, Interval<U> ivl2); //!< Inplace binary arithmetic operators \a +=,-=,*=,/=
+    friend decltype(auto) operator<=>(Interval<U> ivl1, Interval<U> ivl2); //!< Rich comparison operators \a ==,!=,<=,>=,<,>
+    //!@}
+#endif
   public:
     L _l; U _u;
 };

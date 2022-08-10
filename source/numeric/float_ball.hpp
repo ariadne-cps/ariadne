@@ -158,75 +158,109 @@ template<class F, class FE> class Ball
     Ball<F,FE> pm(Error<FE> const& e) const;
     friend Approximation<F> round(Approximation<F> const& x);
   public:
-    friend Bool is_nan(Ball<F,FE> const& x) {
-        return is_nan(x._v) || is_nan(x._e); }
+    //!@{
+    //! \name Arithmetic operators
+    friend Ball<F,FE> operator+(Ball<F,FE> const& x); //!< <p/>
+    friend Ball<F,FE> operator-(Ball<F,FE> const& x); //!< <p/>
+    friend Ball<F,FE> operator+(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE> operator-(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE> operator*(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE> operator/(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE>& operator+=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE>& operator-=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE>& operator*=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE>& operator/=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
+    //!@}
 
-    friend Ball<F,FE> max(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_max(x1,x2); }
-    friend Ball<F,FE> min(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_min(x1,x2); }
-    friend Ball<F,FE> abs(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_abs(x); }
-    friend PositiveLowerBound<F> mig(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_mig(x); }
-    friend PositiveUpperBound<F> mag(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_mag(x); }
+    //!@{
+    //! \name Comparison operators
+    friend ValidatedKleenean operator==(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator!=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator<=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator>=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator< (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator> (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Arithmetic operations
     friend Ball<F,FE> nul(Ball<F,FE> const& x) {
-        return Ball<F,FE>(nul(x._v),nul(x._e)); }
+        return Ball<F,FE>(nul(x._v),nul(x._e)); } //!< <p/>
     friend Ball<F,FE> pos(Ball<F,FE> const& x) {
-        return Ball<F,FE>(pos(x._v),x._e); }
+        return Ball<F,FE>(pos(x._v),x._e); } //!< <p/>
     friend Ball<F,FE> neg(Ball<F,FE> const& x) {
-        return Ball<F,FE>(neg(x._v),x._e); }
+        return Ball<F,FE>(neg(x._v),x._e); } //!< <p/>
     friend Ball<F,FE> hlf(Ball<F,FE> const& x) {
-        return Ball<F,FE>(hlf(x._v),hlf(x._e)); }
+        return Ball<F,FE>(hlf(x._v),hlf(x._e)); } //!< <p/>
     friend Ball<F,FE> sqr(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_sqr(x); }
+        return Operations<Ball<F,FE>>::_sqr(x); } //!< <p/>
     friend Ball<F,FE> rec(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_rec(x); }
-
-    friend Ball<F,FE> operator+(Ball<F,FE> const& x1, Ball<F,FE> const& x2);
+        return Operations<Ball<F,FE>>::_rec(x); } //!< <p/>
 
     friend Ball<F,FE> add(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_add(x1,x2); }
+        return Operations<Ball<F,FE>>::_add(x1,x2); } //!< <p/>
     friend Ball<F,FE> sub(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_sub(x1,x2); }
+        return Operations<Ball<F,FE>>::_sub(x1,x2); } //!< <p/>
     friend Ball<F,FE> mul(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_mul(x1,x2); }
+        return Operations<Ball<F,FE>>::_mul(x1,x2); } //!< <p/>
     friend Ball<F,FE> div(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_div(x1,x2); }
+        return Operations<Ball<F,FE>>::_div(x1,x2); } //!< <p/>
     friend Ball<F,FE> fma(Ball<F,FE> const& x1, Ball<F,FE> const& x2, Ball<F,FE> const& x3) {
-        return Operations<Ball<F,FE>>::_fma(x1,x2,x3); }
+        return Operations<Ball<F,FE>>::_fma(x1,x2,x3); } //!< <p/>
     friend Ball<F,FE> pow(Ball<F,FE> const& x, Int n) {
-        return Operations<Ball<F,FE>>::_pow(x,n); }
+        return Operations<Ball<F,FE>>::_pow(x,n); } //!< <p/>
     friend Ball<F,FE> pow(Ball<F,FE> const& x, Nat m) {
-        return Operations<Ball<F,FE>>::_pow(x,m); }
+        return Operations<Ball<F,FE>>::_pow(x,m); } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Algebraic and transcendental operations
     friend Ball<F,FE> sqrt(Ball<F,FE> const& x) {
-        return Ball<F,FE>(sqrt(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(sqrt(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> exp(Ball<F,FE> const& x) {
-        return Ball<F,FE>(exp(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(exp(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> log(Ball<F,FE> const& x) {
-        return Ball<F,FE>(log(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(log(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> sin(Ball<F,FE> const& x) {
-        return Ball<F,FE>(sin(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(sin(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> cos(Ball<F,FE> const& x) {
-        return Ball<F,FE>(cos(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(cos(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> tan(Ball<F,FE> const& x) {
-        return Ball<F,FE>(tan(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(tan(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> asin(Ball<F,FE> const& x) {
-        return Ball<F,FE>(asin(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(asin(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> acos(Ball<F,FE> const& x) {
-        return Ball<F,FE>(acos(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(acos(Bounds<F>(x)),x.error_precision()); } //!< <p/>
     friend Ball<F,FE> atan(Ball<F,FE> const& x) {
-        return Ball<F,FE>(atan(Bounds<F>(x)),x.error_precision()); }
+        return Ball<F,FE>(atan(Bounds<F>(x)),x.error_precision()); } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Lattice operations
+    friend Ball<F,FE> abs(Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_abs(x); } //!< <p/>
+    friend Ball<F,FE> max(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
+        return Operations<Ball<F,FE>>::_max(x1,x2); } //!< <p/>
+    friend Ball<F,FE> min(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
+        return Operations<Ball<F,FE>>::_min(x1,x2); } //!< <p/>
+    friend PositiveLowerBound<F> mig(Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_mig(x); } //!< <p/>
+    friend PositiveUpperBound<F> mag(Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_mag(x); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend ValidatedKleenean sgn(Ball<F,FE> const& x) {
+        if (x._v>x._e) { return true; } else if (x._v<-x._e) { return false; } else { return indeterminate; } } //!< <p/>
     //! \brief Equality comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_eq(x1,x2); }
+        return Operations<Ball<F,FE>>::_eq(x1,x2); } //!< <p/>
     //! \brief Strict less-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return Operations<Ball<F,FE>>::_lt(x1,x2); }
+        return Operations<Ball<F,FE>>::_lt(x1,x2); } //!< <p/>
+    //!@}
+
 
 /*
 public:
@@ -294,50 +328,76 @@ public:
     friend ValidatedKleenean operator>=(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())>=x2; }
 
   public:
+    //!@{
+    //! \name Rounding operations
+
+    //! Round lower and upper bounds to nearest integer values.
     friend Ball<F,FE> round(Ball<F,FE> const& x) {
         return Ball<F,FE>(round(x.lower_raw()),round(x.upper_raw())); }
+    //! Round outward by 1 ulp. i.e. increase the error.
     friend Ball<F,FE> widen(Ball<F,FE> const& x) {
         const F m=std::numeric_limits<float>::min(); return Ball<F,FE>(sub(down,x._l,m),add(up,x._u,m)); }
+    //! Round inward by 1 ulp. i.e. decrease the error.
     friend Ball<F,FE> narrow(Ball<F,FE> const& x) {
         const F m=std::numeric_limits<float>::min(); return Ball<F,FE>(add(up,x._l,m),add(down,x._u,m)); }
+    //! Truncate to lower precision.
     friend Ball<F,FE> trunc(Ball<F,FE> const& x) {
         return Operations<Ball<F,FE>>::_trunc(x); }
+    //! Truncate to lower precision.
     friend Ball<F,FE> trunc(Ball<F,FE> const& x, Nat n) {
         return Operations<Ball<F,FE>>::_trunc(x,n); }
+    //! Round to the nearest integer to the midpoint.
+    friend Integer cast_integer(Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_cast_integer(x); }
+    //!@}
 
+    //!@{
+    //! \name Special value tests
+
+    //! Tests whether \a x is NaN (not-a-number).
+    friend Bool is_nan(Ball<F,FE> const& x) {
+        return is_nan(x._v) || is_nan(x._e); }
+    //! Tests whether \a x is a model of zero.
     friend auto is_zero(Ball<F,FE> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
         else if(x.lower_raw()==0.0 && x.upper_raw()==0.0) { return true; }
         else { return indeterminate; } }
+    //! Tests whether \a x is a model of a positive number.
     friend auto is_positive(Ball<F,FE> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>=0.0) { return true; } else if(x.upper_raw()<0.0) { return false; } else { return indeterminate; } }
+    //!@}
 
-    //! <p/>
+
+    //!@{
+    //! \name Validated information tests and operations
+
+    //! Tests is \a x1 and \a x2 have the same representation i.e. the same centre value and error bound.
     friend Bool same(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._v==x2._v && x1._e==x2._e; }
-    //! <p/>
+        //! Tests is \a x1 is a valid approximation for \a x2 i.e. if \a x2 is within the error of the centre value of \a x1.
     friend Bool models(Ball<F,FE> const& x1, F const& x2) {
         return x1._l<=x2._v && x1._u >= x2._v; }
-    //! <p/>
+    //! Tests is \a x1 and \a x2 are consistent with being a model of the same value i.e. they intersect.
     friend Bool consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l<=x2._u && x1._u >= x2._l; }
-    //! <p/>
+    //! Tests is \a x1 and \a x2 are inconsistent with being a model of the same value i.e. they are disjoint.
     friend Bool inconsistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l>x2._u || x1._u < x2._l; }
-    //! <p/>
+    //! Tests is \a x1 is a tighter representation than \a x2.
     friend Bool refines(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return x1._l>=x2._l && x1._u <= x2._u; }
-    //! <p/>
+    //! The common refinement of \a x1 and \x2. Requires \a x1 and \a x2 to be consistent.
     friend Ball<F,FE> refinement(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Ball<F,FE>(refinement(Bounds<F>(x1),Bounds<F>(x2)),x1.error_precision()); }
+    //!@}
 
-    friend Integer cast_integer(Ball<F,FE> const& x) {
-        return Operations<Ball<F,FE>>::_cast_integer(x); }
-
-    //! <p/>
-    friend OutputStream& operator<<(OutputStream& os, Ball<F,FE> const& x) { return Operations<Ball<F,FE>>::_write(os,x); }
-    //! <p/>
-    friend InputStream& operator>>(InputStream& is, Ball<F,FE>& x) { return Operations<Ball<F,FE>>::_read(is,x); }
+    //!@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_write(os,x); } //!< Write to an output stream.
+    friend InputStream& operator>>(InputStream& is, Ball<F,FE>& x) {
+        return Operations<Ball<F,FE>>::_read(is,x); } //!< Read from an input stream.
+    //!@}
   private: public:
     F _v; FE _e;
 };

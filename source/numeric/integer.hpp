@@ -100,68 +100,109 @@ template<> struct IsNumber<Integer> : True { };
 
 //! \ingroup NumericModule
 //! \brief Arbitrarily-sized integers.
+//! \sa Natural, Dyadic, Decimal, Rational, Real
 class Integer
-    : DeclareRingOperations<Integer,Integer,Natural>
-    , DeclareLatticeOperations<Integer,Natural>
-    , DeclareComparisonOperations<Integer,Boolean,Boolean>
-    , DefineRingOperators<Integer>
-    , DefineComparisonOperators<Integer,Boolean,Boolean>
 {
   public:
     mpz_t _mpz;
   public:
-    typedef ExactTag Paradigm;
+    typedef ExactTag Paradigm; //!< <p/>
   public:
-    ~Integer();
-    Integer();
-    template<BuiltinUnsignedIntegral M> Integer(M m);
-    template<BuiltinSignedIntegral N> Integer(N n);
-    explicit Integer(const mpz_t);
-    explicit Integer(String const&);
-    Integer(const Integer&);
-    Integer(Integer&&);
-    Integer& operator=(const Integer&);
-    Integer& operator=(Integer&&);
-    operator ExactNumber () const;
-    String literal() const;
-    
-    friend Rational operator/(Integer const& z1, Integer const& z2);
-    friend Integer& operator++(Integer& z);
-    friend Integer& operator--(Integer& z);
-    friend Integer& operator+=(Integer& z1, Integer const& z2);
-    friend Integer& operator*=(Integer& z1, Integer const& z2);
+    ~Integer(); //!< Destructor
+    Integer(); //!< Default constructor yielding \c 0
+    template<BuiltinUnsignedIntegral M> Integer(M m); //!< Convert from a builtin unsigned (positive) integral type
+    template<BuiltinSignedIntegral N> Integer(N n); //!< Convert from a builtin signed (positive or negative) integral type
+    explicit Integer(const mpz_t); //!< Construct from a raw GMP integer
+    explicit Integer(String const&); //!< Construct from a string literal
+    Integer(const Integer&); //!< Copy constructor
+    Integer(Integer&&); //!< Move constructor
+    Integer& operator=(const Integer&); //!< %Assignment
+    Integer& operator=(Integer&&); //!< Move assignment
+    operator ExactNumber () const; //!< Convert to a generic exact number
+    String literal() const; //!< A string literal
 
-    friend Int log2floor(Natural const& n);
+    friend Integer operator"" _z(unsigned long long int n); //!< An integer literal
 
-    friend Dyadic hlf(Integer const& z);
-    friend Rational rec(Integer const& z);
-    friend Rational div(Integer const& z1, Integer const& z2);
-    friend Rational pow(Integer const& z, Int n);
-    friend Integer quot(Integer const& z1, Integer const& z2);
-    friend Integer rem(Integer const& z1, Integer const& z2);
-    friend Integer operator%(Integer const& z1, Integer const& z2);
+    //!@{
+    //! \name Arithmetic operators
+    friend Integer& operator++(Integer& z); //!< <p/>
+    friend Integer& operator--(Integer& z); //!< <p/>
+    friend Integer operator+(Integer const& z) { return pos(z); } //!< <p/>
+    friend Integer operator-(Integer const& z) { return neg(z); } //!< <p/>
+    friend Integer operator+(Integer const& z1, Integer const& z2) { return add(z1,z2); } //!< <p/>
+    friend Integer operator-(Integer const& z1, Integer const& z2) { return sub(z1,z2); } //!< <p/>
+    friend Integer operator*(Integer const& z1, Integer const& z2) { return mul(z1,z2); } //!< <p/>
+    friend Rational operator/(Integer const& z1, Integer const& z2); //!< <p/>
+    friend Integer operator%(Integer const& z1, Integer const& z2); //!< <p/>
+    friend Integer& operator+=(Integer& z1, Integer const& z2); //!< <p/>
+    friend Integer& operator-=(Integer& z1, Integer const& z2); //!< <p/>
+    friend Integer& operator*=(Integer& z1, Integer const& z2); //!< <p/>
+    //!@}
 
-    friend Bool is_nan(Integer const& z);
-    friend Bool is_inf(Integer const& z);
-    friend Bool is_finite(Integer const& z);
-    friend Bool is_zero(Integer const& z);
+    //!@{
+    //! \name Comparison operators
+    friend Boolean operator==(Integer const& z1, Integer const& z2) { return eq(z1,z2); } //!< <p/>
+    friend Boolean operator!=(Integer const& z1, Integer const& z2) { return !eq(z1,z2); } //!< <p/>
+    friend Boolean operator<=(Integer const& z1, Integer const& z2) { return !lt(z2,z1); } //!< <p/>
+    friend Boolean operator>=(Integer const& z1, Integer const& z2) { return !lt(z1,z2); } //!< <p/>
+    friend Boolean operator< (Integer const& z1, Integer const& z2) { return lt(z1,z2); } //!< <p/>
+    friend Boolean operator> (Integer const& z1, Integer const& z2) { return lt(z2,z1); } //!< <p/>
+    //!@}
 
-    friend Sign sgn(Integer const& z);
-    friend Comparison cmp(Integer const& z1, Integer const& z2);
+    //!@{
+    //! \name Arithmetic operations
+    friend Int log2floor(Natural const& n); //!< \f$\lfloor\log_{2}n\rfloor\f$. Returns \c -1 if \a n is \c 0.
 
-    friend OutputStream& operator<<(OutputStream& os, Integer const& z);
-    friend Integer operator"" _z(unsigned long long int n);
-/*
-    // Comparisons with arbitary ints go through Int64
-    template<BuiltinIntegral N> friend inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
-    template<BuiltinIntegral N> friend inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
-    template<BuiltinIntegral N> friend inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
-    template<BuiltinIntegral N> friend inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
-    template<BuiltinIntegral N> friend inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
-    template<BuiltinIntegral N> friend inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
-*/
+    friend Integer nul(Integer const& z); //!< Zero \a 0.
+    friend Integer pos(Integer const& z); //!< Identity \a +z.
+    friend Integer neg(Integer const& z); //!< Negative \a -z.
+    friend Natural sqr(Integer const& z); //!< Square \a z<sup>2</sup>.
+    friend Dyadic hlf(Integer const& z); //!< Half \a z÷2.
+    friend Dyadic shft(Integer const& z, Int n); //!< Bit-shift \a z×2<sup>n</sup>.
+    friend Rational rec(Integer const& z); //!< Reciprocal \a 1/z.
+
+    friend Integer add(Integer const& z1, Integer const& z2); //!< \brief Sum \a z1+z2.
+    friend Integer sub(Integer const& z1, Integer const& z2); //!< \brief Difference \a z1-z2.
+    friend Integer mul(Integer const& z1, Integer const& z2); //!< \brief Product \a z1×z2.
+    friend Rational div(Integer const& z1, Integer const& z2); //!< \brief Quotient \a z1÷z2.
+    friend Integer fma(Integer const& z1, Integer const& z2, Integer const& z3); //!< \brief Fused multiply-and-add \a z1×z2+z3.
+    friend Integer pow(Integer const& z, Nat m); //!< \brief Power \a z<sup>m</sup>.
+    friend Rational pow(Integer const& z, Int n); //!< \brief Power \a z<sup>n</sup>.
+
+    friend Integer quot(Integer const& z1, Integer const& z2); //!< <p/>
+    friend Integer rem(Integer const& z1, Integer const& z2); //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Lattice operations
+    friend Natural abs(Integer const& z); //!< Absolute value \a |z|.
+    friend Integer min(Integer const& z1, Integer const& z2); //!< Minimum \a z1∧z2.
+    friend Integer max(Integer const& z1, Integer const& z2); //!< Maximum \a z1∨z2.
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend Sign sgn(Integer const& z); //!< The sign of \a z.
+    friend Comparison cmp(Integer const& w1, Integer const& w2); //!< Compares which of \a w1 and \a w2 is larger.
+    friend Boolean eq(Integer const& w1, Integer const& w2); //!< Tests if \a w1 is equal to \a w2.
+    friend Boolean lt(Integer const& w1, Integer const& w2); //!< Tests if \a w1 is less than \a w2.
+    //!@}
+
+    //!@{
+    //! \name Special value tests
+    friend Bool is_nan(Integer const& z); //!< Tests whether \a z is NaN (not-a-number).
+    friend Bool is_inf(Integer const& z); //!< Tests whether \a z is ±∞.
+    friend Bool is_finite(Integer const& z); //!< Tests whether \a z is finite.
+    friend Bool is_zero(Integer const& z); //!< Tests whether \a z is zero.
+    //!@}
+
+    //!@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Integer const& z); //!< <p/>
+    //!@}
+
   public:
-    template<BuiltinIntegral N> N get() const;
+    template<BuiltinIntegral N> N get() const; //!< Convert to a builtin integral value of type \a N. Throws a \c std::runtime_error if the value does not fit in type \a N.
     long int get_si() const;
     mpz_t const& get_mpz() const;
   private:

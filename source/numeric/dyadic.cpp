@@ -336,8 +336,8 @@ Dyadic neg(Dyadic const& x) {
     Dyadic r; ExtendedOperations<Dyadic>::neg(r,x); return r;
 }
 
-Dyadic sqr(Dyadic const& x) {
-    return x*x;
+Positive<Dyadic> sqr(Dyadic const& x) {
+    return cast_positive(x*x);
 }
 
 Dyadic add(Dyadic const& x1, Dyadic const& x2) {
@@ -357,18 +357,24 @@ Dyadic hlf(Dyadic const& x) {
 }
 
 
+/*
 Dyadic pow(Dyadic const& x, Int n) {
     assert(n >= 0);
     return pow(x,static_cast<Nat>(n));
 }
+*/
 
 Dyadic pow(Dyadic const& x, Nat m) {
     Dyadic r; ExtendedOperations<Dyadic>::pow(r,x,m); return r;
 }
 
+Rational pow(Dyadic const& x, Int n) {
+    return n>=0 ? pow(x,Nat(n)) : rec(pow(x,Nat(-n)));
+}
 
-Dyadic abs(Dyadic const& x) {
-    Dyadic r; ExtendedOperations<Dyadic>::abs(r,x); return r;
+
+Positive<Dyadic> abs(Dyadic const& x) {
+    Positive<Dyadic> r; ExtendedOperations<Dyadic>::abs(r,x); return r;
 }
 
 Dyadic min(Dyadic const& x1,Dyadic const& x2) {

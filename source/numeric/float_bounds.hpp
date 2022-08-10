@@ -179,126 +179,180 @@ template<class F> class Bounds
     friend Approximation<F> round(Approximation<F> const& x);
     friend F midpoint(Bounds<F> const& x);
   public:
-    friend Bool is_nan(Bounds<F> const& x) {
-        return is_nan(x._l) || is_nan(x._u); }
+    //!@{
+    //! \name Arithmetic operators
+    friend Bounds<F> operator+(Bounds<F> const& x); //!< <p/>
+    friend Bounds<F> operator-(Bounds<F> const& x); //!< <p/>
+    friend Bounds<F> operator+(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F> operator-(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F> operator*(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F> operator/(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F>& operator+=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F>& operator-=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F>& operator*=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F>& operator/=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
+    //!@}
 
-    friend Bounds<F> max(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(max(x1.lower_raw(),x2.lower_raw()),max(x1.upper_raw(),x2.upper_raw())); }
-    friend Bounds<F> min(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(min(x1.lower_raw(),x2.lower_raw()),min(x1.upper_raw(),x2.upper_raw())); }
-    friend Bounds<F> abs(Bounds<F> const& x) {
-        if(x.lower_raw()>=0) { return Bounds<F>(x.lower_raw(),x.upper_raw());}
-        else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
-        else { return Bounds<F>(F(0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
-    friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
-        return PositiveLowerBound<F>(max(F(0,x.precision()),max(x._l,neg(x._u)))); }
-    friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
-        return PositiveUpperBound<F>(max(neg(x._l),x._u)); }
-    friend ValidatedKleenean sgn(Bounds<F> const& x) {
-        if (x._l>0) { return true; } else if (x._u<0) { return false; } else { return indeterminate; } }
+    //!@{
+    //! \name Comparison operators
+    friend ValidatedKleenean operator==(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator!=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator<=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator>=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator< (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator> (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Arithmetic operations
     friend Bounds<F> nul(Bounds<F> const& x) {
-        return Bounds<F>(nul(x._l),nul(x._u)); }
+        return Bounds<F>(nul(x._l),nul(x._u)); } //!< <p/>
     friend Bounds<F> pos(Bounds<F> const& x) {
-        return Bounds<F>(pos(x._l),pos(x._u)); }
+        return Bounds<F>(pos(x._l),pos(x._u)); } //!< <p/>
     friend Bounds<F> neg(Bounds<F> const& x) {
-        return Bounds<F>(neg(x._u),neg(x._l)); }
+        return Bounds<F>(neg(x._u),neg(x._l)); } //!< <p/>
     friend Bounds<F> hlf(Bounds<F> const& x) {
-        return Bounds<F>(hlf(x._l),hlf(x._u)); }
+        return Bounds<F>(hlf(x._l),hlf(x._u)); } //!< <p/>
     friend Bounds<F> sqr(Bounds<F> const& x) {
-        if(x._l>0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
-        else if(x._u<0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); }
-        else { return Bounds<F>(nul(x._l),max(mul(up,x._l,x._l),mul(up,x._u,x._u))); } }
+        if(x._l>0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); } //!< <p/>
+        else if(x._u<0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); } //!< <p/>
+        else { return Bounds<F>(nul(x._l),max(mul(up,x._l,x._l),mul(up,x._u,x._u))); } } //!< <p/>
     friend Bounds<F> rec(Bounds<F> const& x) {
-        if(x._l>0 || x._u<0) {  return Bounds<F>(rec(down,x._u),rec(up,x._l)); }
-    //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
-        else { F inf_=F::inf(x.precision()); return Bounds<F>(-inf_,+inf_); } }
+        if(x._l>0 || x._u<0) {  return Bounds<F>(rec(down,x._u),rec(up,x._l)); } //!< <p/>
+    //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x); //!< <p/>
+        else { F inf_=F::inf(x.precision()); return Bounds<F>(-inf_,+inf_); } } //!< <p/>
 
     friend Bounds<F> add(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(add(down,x1._l,x2._l),add(up,x1._u,x2._u)); }
+        return Bounds<F>(add(down,x1._l,x2._l),add(up,x1._u,x2._u)); } //!< <p/>
     friend Bounds<F> sub(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(sub(down,x1._l,x2._u),sub(up,x1._u,x2._l)); }
+        return Bounds<F>(sub(down,x1._l,x2._u),sub(up,x1._u,x2._l)); } //!< <p/>
     friend Bounds<F> mul(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Operations<Bounds<F>>::_mul(x1,x2); }
+        return Operations<Bounds<F>>::_mul(x1,x2); } //!< <p/>
     friend Bounds<F> div(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Operations<Bounds<F>>::_div(x1,x2); }
+        return Operations<Bounds<F>>::_div(x1,x2); } //!< <p/>
     friend Bounds<F> fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> const& x3) {
-        return Operations<Bounds<F>>::_fma(x1,x2,x3); }
+        return Operations<Bounds<F>>::_fma(x1,x2,x3); } //!< <p/>
     friend Bounds<F> pow(Bounds<F> const& x, Int n) {
-        if(n<0) { return pow(rec(x),Nat(-n)); } else return pow(x,Nat(n));}
+        if(n<0) { return pow(rec(x),Nat(-n)); } else return pow(x,Nat(n));} //!< <p/>
     friend Bounds<F> pow(Bounds<F> const& x, Nat m) {
-        Bounds<F> y = (m%2==0) ? abs(x) : x;  Int n=static_cast<Int>(m); return Bounds<F>(pow(down,y._l,n),pow(up,y._u,n)); }
+        Bounds<F> y = (m%2==0) ? abs(x) : x;  Int n=static_cast<Int>(m); return Bounds<F>(pow(down,y._l,n),pow(up,y._u,n)); } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Algebraic and transcendental operations
     friend Bounds<F> sqrt(Bounds<F> const& x) {
-        return Bounds<F>(sqrt(down,x.lower_raw()),sqrt(up,x.upper_raw())); }
+        return Bounds<F>(sqrt(down,x.lower_raw()),sqrt(up,x.upper_raw())); } //!< <p/>
     friend Bounds<F> exp(Bounds<F> const& x) {
-        return Bounds<F>(exp(down,x.lower_raw()),exp(up,x.upper_raw())); }
+        return Bounds<F>(exp(down,x.lower_raw()),exp(up,x.upper_raw())); } //!< <p/>
     friend Bounds<F> log(Bounds<F> const& x) {
-        return Bounds<F>(log(down,x.lower_raw()),log(up,x.upper_raw())); }
+        return Bounds<F>(log(down,x.lower_raw()),log(up,x.upper_raw())); } //!< <p/>
     friend Bounds<F> sin(Bounds<F> const& x) {
-        return Operations<Bounds<F>>::_sin(x); }
+        return Operations<Bounds<F>>::_sin(x); } //!< <p/>
     friend Bounds<F> cos(Bounds<F> const& x) {
-        return Operations<Bounds<F>>::_cos(x); }
+        return Operations<Bounds<F>>::_cos(x); } //!< <p/>
     friend Bounds<F> tan(Bounds<F> const& x) {
-        return Operations<Bounds<F>>::_tan(x); }
+        return Operations<Bounds<F>>::_tan(x); } //!< <p/>
     friend Bounds<F> asin(Bounds<F> const& x) {
-        return Bounds<F>(asin(down,x.lower_raw()),asin(up,x.upper_raw())); }
+        return Bounds<F>(asin(down,x.lower_raw()),asin(up,x.upper_raw())); } //!< <p/>
     friend Bounds<F> acos(Bounds<F> const& x) {
-        return Bounds<F>(acos(down,x.upper_raw()),acos(up,x.lower_raw())); }
+        return Bounds<F>(acos(down,x.upper_raw()),acos(up,x.lower_raw())); } //!< <p/>
     friend Bounds<F> atan(Bounds<F> const& x) {
-        return Bounds<F>(atan(down,x._l),atan(up,x._u)); }
+        return Bounds<F>(atan(down,x._l),atan(up,x._u)); } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Lattice operations
+    friend Bounds<F> abs(Bounds<F> const& x) {
+        if(x.lower_raw()>=0) { return Bounds<F>(x.lower_raw(),x.upper_raw());} //!< <p/>
+        else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); } //!< <p/>
+        else { return Bounds<F>(F(0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } } //!< <p/>
+    friend Bounds<F> max(Bounds<F> const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(max(x1.lower_raw(),x2.lower_raw()),max(x1.upper_raw(),x2.upper_raw())); } //!< <p/>
+    friend Bounds<F> min(Bounds<F> const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(min(x1.lower_raw(),x2.lower_raw()),min(x1.upper_raw(),x2.upper_raw())); } //!< <p/>
+    friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
+        return PositiveLowerBound<F>(max(F(0,x.precision()),max(x._l,neg(x._u)))); } //!< <p/>
+    friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
+        return PositiveUpperBound<F>(max(neg(x._l),x._u)); } //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend ValidatedKleenean sgn(Bounds<F> const& x) {
+        if (x._l>0) { return true; } else if (x._u<0) { return false; } else { return indeterminate; } } //!< <p/>
     //! \brief Equality comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Bounds<F> const& x1, Bounds<F> const& x2) {
-        if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; }
-        else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; }
-        else { return indeterminate; } }
+        if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; } //!< <p/>
+        else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; } //!< <p/>
+        else { return indeterminate; } } //!< <p/>
     //! \brief Strict less-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Bounds<F> const& x1, Bounds<F> const& x2) {
-        if(x1.upper_raw()< x2.lower_raw()) { return true; }
-        else if(x1.lower_raw()>=x2.upper_raw()) { return false; }
-        else { return indeterminate; } }
+        if(x1.upper_raw()< x2.lower_raw()) { return true; } //!< <p/>
+        else if(x1.lower_raw()>=x2.upper_raw()) { return false; } //!< <p/>
+        else { return indeterminate; } } //!< <p/>
+    //!@}
 
+    //!@{
+    //! \name Rounding operations
 
+    //! Round bounds to nearest integer values.
     friend Bounds<F> round(Bounds<F> const& x) {
         return Bounds<F>(round(x.lower_raw()),round(x.upper_raw())); }
+    //! Round outward by 1 ulp.
     friend Bounds<F> widen(Bounds<F> const& x) {
         const F m=std::numeric_limits<float>::min(); return Bounds<F>(sub(down,x._l,m),add(up,x._u,m)); }
+    //! Round inward by 1 ulp.
     friend Bounds<F> narrow(Bounds<F> const& x) {
         const F m=std::numeric_limits<float>::min(); return Bounds<F>(add(up,x._l,m),add(down,x._u,m)); }
+    //! Truncate to lower precision.
     friend Bounds<F> trunc(Bounds<F> const& x) {
         return Operations<Bounds<F>>::_trunc(x); }
+    //! Truncate to lower precision.
     friend Bounds<F> trunc(Bounds<F> const& x, Nat n) {
         return Operations<Bounds<F>>::_trunc(x,n); }
-
+    //! Round to the nearest integer to the midpoint.
     friend Integer cast_integer(Bounds<F> const& x) {
         return Operations<Bounds<F>>::_cast_integer(x); }
+    //@}
 
+    //!@{
+    //! \name Special value tests
+
+    //! Tests whether \a x is NaN (not-a-number).
+    friend Bool is_nan(Bounds<F> const& x) {
+        return is_nan(x._l) || is_nan(x._u); }
+    //! Tests whether \a x is a model of zero.
     friend auto is_zero(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
         else if(x.lower_raw()==0.0 && x.upper_raw()==0.0) { return true; }
         else { return indeterminate; } }
+    //! Tests whether \a x is a model of a positive number. Returns \c true if the lower bound is positive, \c false if the upper bound is strictly negative, and \c indeterminate otherwise.
     friend auto is_positive(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
-        if(x.lower_raw()>=0.0) { return true; } else if(x.upper_raw()<0.0) { return false; } else { return indeterminate; } }
+        if(x.lower_raw()>=0.0) { return true; } else if(x.upper_raw()<0.0) { return false; } else { return indeterminate; } } //!< <p/>
+    //!@}
 
-    //! <p/>
+    //!@{
+    //! \name Validated information tests and operations
+
+    //! Tests is \a x1 and \a x2 have the same representation i.e. the same lower and upper bounds.
     friend Bool same(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l==x2._l && x1._u==x2._u; }
-    //! <p/>
+    //! Tests is \a x1 is a valid approximation for \a x2 i.e. if \a x2 is within the lower and upper bounds of \a x1.
     friend Bool models(Bounds<F> const& x1, F const& x2) {
         return x1._l<=x2 && x1._u >= x2; }
-    //! <p/>
+    //! Tests is \a x1 and \a x2 are consistent with being a model of the same value i.e. they intersect.
     friend Bool consistent(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l<=x2._u && x1._u >= x2._l; }
-    //! <p/>
+    //! Tests is \a x1 and \a x2 are inconsistent with being a model of the same value i.e. they are disjoint.
     friend Bool inconsistent(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l>x2._u || x1._u < x2._l; }
-    //! <p/>
+    //! Tests is \a x1 is a tighter representation than \a x2.
     friend Bool refines(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l>=x2._l && x1._u <= x2._u; }
-    //! <p/>
+    //! The common refinement of \a x1 and \x2. Requires \a x1 and \a x2 to be consistent.
     friend Bounds<F> refinement(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(max(x1._l,x2._l),min(x1._u,x2._u)); }
+    //!@}
 
         // FIXME: Added functionality
         friend Bool same(Bounds<F> const& x, Bounds<Dyadic> const& w);
@@ -306,10 +360,13 @@ template<class F> class Bounds
         friend Bool models(Bounds<F> const& x, Dyadic const& w) { return x._l<=w && w<=x._u; }
         friend Bounds<F> round(Bounds<F> const&);
 
-    //! <p/>
-    friend OutputStream& operator<<(OutputStream& os, Bounds<F> const& x) { return Operations<Bounds<F>>::_write(os,x); }
-    //! <p/>
-    friend InputStream& operator>>(InputStream& is, Bounds<F>& x) { return Operations<Bounds<F>>::_read(is,x); }
+    //!@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Bounds<F> const& x) {
+        return Operations<Bounds<F>>::_write(os,x); } //!< Write to an output stream.
+    friend InputStream& operator>>(InputStream& is, Bounds<F>& x) {
+        return Operations<Bounds<F>>::_read(is,x); } //!< Read from an input stream.
+    //!@}
   public:
     // Value operations returning Bounds
     friend Bounds<F> operator+(F const& x1, F const& x2) { return add(x1,x2); }

@@ -51,13 +51,8 @@ enum class Comparison : char;
 
 //! \ingroup NumericModule
 //! \brief %Rational numbers.
+//! \sa Integer, Dyadic, Decimal, Real
 class Rational
-    : DeclareFieldOperations<Rational>
-    , DeclareLatticeOperations<Rational,Rational>
-    , DeclareComparisonOperations<Rational,Boolean,Boolean>
-    , DefineFieldOperators<Rational>
-    , DefineComparisonOperators<Rational,Boolean,Boolean>
-    , DeclareTranscendentalOperations<Real>
 {
   public:
     mpq_t _mpq;
@@ -91,7 +86,48 @@ class Rational
     Integer get_den() const;
     Integer numerator() const;
     Natural denominator() const;
+
+    //! \name Arithmetic operators
+    //!@{
+    friend Rational operator+(Rational const& q) { return pos(q); }
+    friend Rational operator-(Rational const& q) { return neg(q); }
+    friend Rational operator+(Rational const& q1, Rational const& q2) { return add(q1,q2); }
+    friend Rational operator-(Rational const& q1, Rational const& q2) { return sub(q1,q2); }
+    friend Rational operator*(Rational const& q1, Rational const& q2) { return mul(q1,q2); }
+    friend Rational operator/(Rational const& q1, Rational const& q2) { return div(q1,q2); }
+    friend Rational& operator+=(Rational& q1, Rational const& q2) { return q1=add(q1,q2); }
+    friend Rational& operator-=(Rational& q1, Rational const& q2) { return q1=sub(q1,q2); }
+    friend Rational& operator*=(Rational& q1, Rational const& q2) { return q1=mul(q1,q2); }
+    friend Rational& operator/=(Rational& q1, Rational const& q2) { return q1=div(q1,q2); }
+    //@}
+
     friend Rational operator/(Integer const& z1, Integer const& z2);
+
+    //! \name Comparison operators
+    //!@{
+    friend Boolean operator==(Rational const& q1, Rational const& q2) { return eq(q1,q2); }
+    friend Boolean operator!=(Rational const& q1, Rational const& q2) { return !eq(q1,q2); }
+    friend Boolean operator<=(Rational const& q1, Rational const& q2) { return !lt(q2,q1); }
+    friend Boolean operator>=(Rational const& q1, Rational const& q2) { return !lt(q1,q2); }
+    friend Boolean operator< (Rational const& q1, Rational const& q2) { return lt(q1,q2); }
+    friend Boolean operator> (Rational const& q1, Rational const& q2) { return lt(q2,q1); }
+    //@}
+
+    //! \name Named arithmetical functions
+    //!@{
+    friend Rational nul(Rational const& q); //!< Zero \a 0.
+    friend Rational pos(Rational const& q); //!< Identity \a +q.
+    friend Rational neg(Rational const& q); //!< Negative \a -q.
+    friend Rational hlf(Rational const& q); //!< Half \a q÷2.
+    friend Positive<Rational> sqr(Rational const& q); //!< Square \a q<sup>2</sup>.
+    friend Rational rec(Rational const& q); //!< Reciprocal \a 1/q.
+    friend Rational add(Rational const& q1, Rational const& q2); //!< \brief Add \a q1+q2.
+    friend Rational sub(Rational const& q1, Rational const& q2); //!< \brief Subtract \a q1-q2.
+    friend Rational mul(Rational const& q1, Rational const& q2); //!< \brief Multiply \a q1×q2.
+    friend Rational div(Rational const& q1, Rational const& q2); //!< \brief Divide \a q1÷q2.
+    friend Rational fma(Rational const& q1, Rational const& q2, Rational const& q3); //!< \brief Fused multiply-and-add \a q1×q2+q3.
+    friend Rational pow(Rational const& q, Int n); //!< \brief Power \a q<sup>n</sup>.
+    //!@}
 
     friend Real sqrt(Real const&);
     friend Real exp(Real const&);
@@ -103,28 +139,54 @@ class Rational
     friend Real acos(Real const&);
     friend Real atan(Real const&);
 
-    friend Sign sgn(Rational const& q);
-    friend Integer floor(Rational const&);
-    friend Integer round(Rational const&);
-    friend Integer ceil(Rational const&);
+    //! \name Lattice operations
+    //!@{
+    friend Positive<Rational> abs(Rational const& q); //!< Absolute value \a |q|.
+    friend Rational min(Rational const& q1, Rational const& q2); //!< Minimum \a q1∧q2.
+    friend Positive<Rational> min(Positive<Rational> const& q1, Positive<Rational> const& q2);
+    friend Rational max(Rational const& q1, Rational const& q2); //!< Maximum \a q1∨q2.
+    friend Positive<Rational> max(Rational const& q1, Positive<Rational> const& q2);
+    friend Positive<Rational> max(Positive<Rational> const& q1, Rational const& q2);
+    friend Positive<Rational> max(Positive<Rational> const& q1, Positive<Rational> const& q2);
 
     friend Rational mag(Rational const& q);
     friend Rational mig(Rational const& q);
+    //!@}
 
-    friend Bool is_nan(Rational const& q);
-    friend Bool is_inf(Rational const& q);
-    friend Bool is_finite(Rational const& q);
-    friend Bool is_zero(Rational const& q);
+    //!@{
+    //! \name Rounding operations
+    friend Integer floor(Rational const& q); //!< Round \a q down to the nearest lower integer.
+    friend Integer round(Rational const& q); //!< Round \a q to the nearest integer. %Rounding of halves is implementation-dependent.
+    friend Integer ceil(Rational const& q); //!< Round \a q up to the nearest higher integer.
+    //!@}
 
-    friend Comparison cmp(Rational const& q1, Rational const& q2);
+    //!@{
+    //! \name Comparison operations
+    friend Sign sgn(Rational const& q); //!< The sign of \a q.
+    friend Comparison cmp(Rational const& q1, Rational const& q2); //!< Compares which of \a q1 and \a q2 is larger.
+    friend Boolean eq(Rational const& q1, Rational const& q2); //!< Tests if \a q1 is equal to \a q2.
+    friend Boolean lt(Rational const& q1, Rational const& q2); //!< Tests if \a q1 is less than \a q2.
+    //!@}
+
+    //!@{
+    //! \name Special value tests
+    friend Bool is_nan(Rational const& q); //!< Tests whether \a q is NaN (not-a-number).
+    friend Bool is_inf(Rational const& q); //!< Tests whether \a q is ±∞.
+    friend Bool is_finite(Rational const& q); //!< Tests whether \a q is finite.
+    friend Bool is_zero(Rational const& q); //!< Tests whether \a q is zero.
+    //!@}
+
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
     friend Comparison cmp(ExactDouble const& d1, Rational const& q2);
 
-    friend OutputStream& operator<<(OutputStream& os, Rational const& q);
-    friend InputStream& operator>>(InputStream& os, Rational& q);
+    //!@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, Rational const& q); //!< Write to an output stream.
+    friend InputStream& operator>>(InputStream& os, Rational& q); //!< Read from an input stream.
     friend Rational operator"" _q(long double x);
     //! \brief Alternative for operator""_q for use in Python interface.
     friend Rational q_(long double x);
+    //!@}
   public:
     double get_d() const;
     mpq_t const& get_mpq() const;
@@ -144,7 +206,6 @@ template<> class Positive<Rational> : public Rational {
   public:
     Positive() : Rational() { }
     template<BuiltinUnsignedIntegral M> Positive(M m) : Rational(m) { }
-    Positive(int n) = delete;
     explicit Positive(Rational const& q) : Rational(q) { ARIADNE_ASSERT(q>=0); }
 };
 inline Positive<Rational> cast_positive(Rational const& q) { return Positive<Rational>(q); }

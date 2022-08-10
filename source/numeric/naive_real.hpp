@@ -198,6 +198,8 @@ class PositiveNaiveReal : public NaiveReal
     PositiveNaiveReal add(PositiveNaiveReal const&, PositiveNaiveReal const&);
     PositiveNaiveReal mul(PositiveNaiveReal const&, PositiveNaiveReal const&);
     PositiveNaiveReal div(PositiveNaiveReal const&, PositiveNaiveReal const&);
+    PositiveNaiveReal sqrt(PositiveNaiveReal const&);
+    PositiveNaiveReal atan(PositiveNaiveReal const&);
   public:
     friend PositiveNaiveReal min(PositiveNaiveReal const& pr1, PositiveNaiveReal const& pr2);
     friend PositiveNaiveReal add(PositiveNaiveReal const& pr1, PositiveNaiveReal const& pr2);

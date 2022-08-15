@@ -937,8 +937,9 @@ template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<Flo
         ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely an element of tf.domain()="<<f.domain());
     }
     Vector<FloatBounds<PR>> sx=Ariadne::unscale(x,f._domain);
+    Vector<M> const& models=f._models;
+    return Ariadne::evaluate(models,sx);
 #warning
-    return x;
     //return Ariadne::evaluate(f._models,sx);
 }
 

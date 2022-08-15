@@ -111,6 +111,11 @@ template<class M> M apply_function_to_models(ScalarMultivariateFunction<typename
 template<class P, class F> TaylorModel<P,F> apply_function_to_models(ScalarMultivariateFunction<P> const& f, Vector<TaylorModel<P,F>> const& vm) {
     return f.evaluate(vm); }
 
+template<class M> Vector<M> apply_function_to_models(VectorMultivariateFunction<typename M::Paradigm> const& f, Vector<M> const& vm) {
+    return M::apply(f,vm); }
+template<class P, class F> Vector<TaylorModel<P,F>> apply_function_to_models(VectorMultivariateFunction<P> const& f, Vector<TaylorModel<P,F>> const& vm) {
+    return f.evaluate(vm); }
+
 
 template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
     typedef typename M::NumericType NumericType;

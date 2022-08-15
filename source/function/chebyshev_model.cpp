@@ -24,10 +24,15 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 
+
 #include "function/chebyshev_model.hpp"
 #include "function/chebyshev_model.tpl.hpp"
 
 #include "function/scaled_function_patch.hpp"
+
+#warning This include should not go here
+#include "function/unit_domain_function_model_archetype.hpp"
+
 #include "function/scaled_function_patch.tpl.hpp"
 
 namespace Ariadne {
@@ -35,9 +40,27 @@ namespace Ariadne {
 template class MultivariateChebyshevModel<FloatDPApproximation>;
 template class MultivariateChebyshevModel<FloatMPApproximation>;
 
+#warning
+/*
 template class ScaledFunctionPatch<MultivariateChebyshevModel<FloatDPApproximation>>;
 template class VectorScaledFunctionPatch<MultivariateChebyshevModel<FloatDPApproximation>>;
 template class ScaledFunctionPatch<MultivariateChebyshevModel<FloatMPApproximation>>;
 template class VectorScaledFunctionPatch<MultivariateChebyshevModel<FloatMPApproximation>>;
+*/
 
 } // namespace Ariadne
+
+
+#warning Checking instantiation of ModelArchetype should not be in chebyshev_model.cpp
+
+/*
+#include "function/unit_domain_function_model_archetype.hpp"
+
+namespace Ariadne {
+
+template class ScaledFunctionPatch<ModelArchetype>;
+template class VectorScaledFunctionPatch<ModelArchetype>;
+
+} // namespace Ariadne
+
+*/

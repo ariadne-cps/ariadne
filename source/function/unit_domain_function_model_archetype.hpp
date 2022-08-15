@@ -21,13 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef ARIADNE_UNIT_DOMAIN_FUNCTION_MODEL_ARCHETYPE_HPP
+#define ARIADNE_UNIT_DOMAIN_FUNCTION_MODEL_ARCHETYPE_HPP
+
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
-
-#include "function/scaled_function_patch.hpp"
-#include "function/scaled_function_patch.tpl.hpp"
-
-    #include "algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -217,12 +215,6 @@ template<Same<ModelArchetype> M, Same<Dyadic> N> M operator-(M,N);
 template<Same<ModelArchetype> M, Same<Dyadic> N> M operator/(M,N);
 template<Same<ModelArchetype> M, Same<Int> N> M operator*(M,N);
 
-template class ScaledFunctionPatch<ModelArchetype>;
-template class VectorScaledFunctionPatch<ModelArchetype>;
-
-template class ScaledFunctionPatch<MultivariateChebyshevModel<FloatDPApproximation>>;
-template class VectorScaledFunctionPatch<MultivariateChebyshevModel<FloatDPApproximation>>;
-template class ScaledFunctionPatch<MultivariateChebyshevModel<FloatMPApproximation>>;
-template class VectorScaledFunctionPatch<MultivariateChebyshevModel<FloatMPApproximation>>;
-
 } // namespace Ariadne
+
+#endif /* ARIADNE_UNIT_DOMAIN_FUNCTION_MODEL_ARCHETYPE_HPP */

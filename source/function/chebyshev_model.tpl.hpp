@@ -56,6 +56,52 @@ inline Interval<FloatDP> convert_interval(Interval<FloatDP> const& ivl, DoublePr
 inline Interval<FloatMP> convert_interval(Interval<FloatDP> const& ivl, MultiplePrecision pr) {
     return Interval<FloatMP>(FloatMP(ivl.lower_bound().raw(),pr),FloatMP(ivl.upper_bound().raw(),pr)); }
 
+#warning Class should not be instantiated
+template<> auto Error<Approximation<FloatDP>>::operator=(Positive<ValidatedUpperNumber> y) -> Error<Approximation<FloatDP>>& {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<> auto Error<Approximation<FloatMP>>::operator=(Positive<ValidatedUpperNumber> y) -> Error<Approximation<FloatMP>>& {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::_factory() const -> FunctionModelFactoryInterface<P,PR,PRE>* {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::_create() const -> FunctionModelInterface<P,SIG,PR,PRE>* {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::result_size() const -> SizeOne {
+    return SizeOne();
+}
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::domain() const -> DomainType const {
+    return DomainType(this->_cp.argument_size());
+}
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::codomain() const -> CodomainType const {
+    return cast_exact(IntervalRangeType(this->range()));
+}
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::clobber() -> Void {
+    this->_e=0u;
+}
+
+template<class X, class XE> auto
+MultivariateChebyshevModel<X,XE>::range() const -> RangeType const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
 } //namespace Ariadne
 
 

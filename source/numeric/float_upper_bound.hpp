@@ -129,7 +129,7 @@ template<class F> class UpperBound
         return abs(Approximation<F>(x)); }
 
     friend UpperBound<F> nul(UpperBound<F> const& x) {
-        return UpperBound<F>(pos(x._u)); }
+        return UpperBound<F>(nul(x._u)); }
     friend UpperBound<F> pos(UpperBound<F> const& x) {
         return UpperBound<F>(pos(x._u)); }
     friend LowerBound<F> neg(UpperBound<F> const& x) {

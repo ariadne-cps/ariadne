@@ -69,6 +69,15 @@ template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
 template class ScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 
+template auto ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FloatDP>>::
+_call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>;
+template auto ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FloatMP>>::
+_call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>;
+
+template auto VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FloatDP>>::
+_call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>;
+template auto VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FloatMP>>::
+_call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>;
 
 } // namespace Ariadne
 

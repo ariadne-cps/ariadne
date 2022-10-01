@@ -53,7 +53,6 @@ class TestMultifunction
   public:
     Void test();
   private:
-    Void test_concept();
     Void test_evaluate();
     Void test_taylor_concept();
     Void test_taylor_evaluate();
@@ -68,10 +67,6 @@ Void TestMultifunction::test()
     ARIADNE_TEST_CALL(test_taylor_evaluate());
     ARIADNE_TEST_CALL(test_function_set());
     ARIADNE_TEST_CALL(test_inclusion_solutions());
-}
-
-Void TestMultifunction::test_concept()
-{
 }
 
 Void TestMultifunction::test_evaluate()

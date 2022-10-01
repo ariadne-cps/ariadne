@@ -732,8 +732,7 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
         phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
-        SizeType nnnz=0; for(SizeType i=0; i!=phi.size(); ++i) { nnnz+=phi.model(i).number_of_nonzeros(); }
-        ARIADNE_LOG_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error());
+        ARIADNE_LOG_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" err="<<phi.error());
     }
     ARIADNE_LOG_PRINTLN("phi="<<phi);
     return static_cast<ValidatedVectorMultivariateFunctionPatch>(phi);

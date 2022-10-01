@@ -99,7 +99,7 @@ TestRounded<FLT>::test()
 template<class FLT> Void
 TestRounded<FLT>::test_concept()
 {
-    Bool b=true;
+    Bool b=true; if (not b) return; // To avoid compiler warning
     Int n=1;
     Nat m=1;
     double d=1;

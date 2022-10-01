@@ -48,7 +48,6 @@ class DiscreteLocation
     DiscreteLocation(StringVariable var, String val) : DiscreteLocation({var|val}) { }
     DiscreteLocation(Pair<StringVariable,String> svarstr) : StringValuation({svarstr}) { }
     DiscreteLocation(const StringValuation& val) : StringValuation(val) { }
-    DiscreteLocation(const DiscreteLocation&) = default;
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
     DiscreteLocation(const Map<StringVariable,String>& sm) : StringValuation(sm) { }
     DiscreteLocation(const InitializerList<Pair<StringVariable,String>>& salst) : StringValuation(salst) { }

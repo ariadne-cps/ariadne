@@ -113,7 +113,6 @@ template<class T> class Variable
     //! \brief Construct a variable with name \a name.
     explicit Variable(const Identifier& name) : UntypedVariable(name,variable_type<T>()) { }
     Variable<T> const& base() const { return *this; }
-    inline Variable<T>& operator=(const Variable<T>& v) = default;
     inline Assignment<Variable<T>,T> operator=(const T& c) const;
     template<class XL, class XU> inline VariableInterval<XU> in(const XL& l, const XU& u);
     template<class XU> inline VariableInterval<XU> in(const Interval<XU>& ivl);
@@ -148,7 +147,6 @@ template<class T> class Variables : public List<Variable<T>> {
     //! so that the \a i<sup>th</sup> variable is <tt>x</tt><i>i</i>.
     Variables(Identifier name, SizeType n) : List<Variable<T>>() {
         this->reserve(n); for(SizeType i=0; i!=n; ++i) { this->append(Variable<T>(name+to_str(i))); } }
-    Variables<T>& operator=(Variables<T> const&) = default;
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
     //! \brief The Construct \a n variables with name \a name.
     Variable<T> const& operator[] (SizeType i) const { return this->List<Variable<T>>::operator[](i); }

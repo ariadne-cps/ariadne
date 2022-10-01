@@ -40,7 +40,6 @@ class String : public std::string {
     using std::string::string;
     String(std::string const& str) : std::string(str) { };
     String() = default;
-    String(String const&) = default;
 };
 
 inline const char* c_str(const String& str) {

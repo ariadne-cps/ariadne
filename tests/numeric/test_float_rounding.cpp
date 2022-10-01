@@ -113,7 +113,7 @@ TestFloatRounding<PR>::test()
 template<class PR> Void
 TestFloatRounding<PR>::test_concept()
 {
-    Bool b=true;
+    Bool b=true; if (not b) return; // To avoid compiler warning
     Int n=1;
     Nat m=1;
     double d=1;

@@ -185,7 +185,7 @@ template<class F> Void TestExpansion<F>::test_iterator_concept()
     ExpansionValueType cval=*citer;
     ExpansionConstReference cref=*citer;
 
-    Bool res;
+    Bool res; if (res) return; // To avoid compiler warning
 
     ++iter; --iter;
     ++citer; --citer;

@@ -10,6 +10,13 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
+### 2.5
+
+*Date: *
+
+- [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
+- [#678](https://github.com/ariadne-cps/ariadne/issues/678) (F) Address warnings using AppleClang, which is now usable on C++20 Concepts code
+
 ### 2.4.1
 
 *Date: 07/08/2021*

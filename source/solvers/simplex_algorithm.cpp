@@ -35,7 +35,7 @@
 #include "solvers/linear_programming.hpp"
 
 #include "utility/macros.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

@@ -34,7 +34,7 @@
 #include <string>
 
 #include "utility/declarations.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

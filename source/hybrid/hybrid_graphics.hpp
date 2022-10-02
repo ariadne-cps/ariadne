@@ -37,7 +37,7 @@
 #include "symbolic/variable.hpp"
 #include "io/graphics_interface.hpp"
 #include "io/figure.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "symbolic/expression_set.hpp"
 #include "hybrid/discrete_location.hpp"

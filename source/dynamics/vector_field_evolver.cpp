@@ -38,7 +38,7 @@
 
 #include "solvers/integrator.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "dynamics/vector_field.hpp"
 #include "dynamics/vector_field_evolver.hpp"

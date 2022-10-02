@@ -115,6 +115,16 @@ else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
 endif()
 
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+    execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+    message(STATUS "Created symbolic links directory for submodules")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/conclog/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
+    message(STATUS "Created symbolic link to ConcLog submodule")
+endif()
+
 find_package(Threads)
 if(NOT Threads_FOUND)
     message(FATAL_ERROR "Unable to find Threads library")
@@ -154,7 +164,7 @@ add_custom_target(tests)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules)
+include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
 
 add_subdirectory(submodules)
 
@@ -216,4 +226,4 @@ endif()
 
 install(TARGETS ariadne conclog DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY submodules/conclog/include DESTINATION include/conclog FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")

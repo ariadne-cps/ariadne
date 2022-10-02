@@ -35,7 +35,7 @@
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "io/figure.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "../test.hpp"
 

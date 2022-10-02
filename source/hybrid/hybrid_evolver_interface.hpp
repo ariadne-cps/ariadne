@@ -37,7 +37,7 @@
 
 #include "hybrid/discrete_event.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

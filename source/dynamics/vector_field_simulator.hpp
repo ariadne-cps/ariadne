@@ -29,7 +29,7 @@
 #ifndef ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 #define ARIADNE_VECTOR_FIELD_SIMULATOR_HPP
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/floatdp.hpp"
 #include "geometry/point.hpp"

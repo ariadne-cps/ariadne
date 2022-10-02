@@ -23,7 +23,7 @@
  */
 
 #include "io/command_line_interface.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "concurrency/task_manager.hpp"
 #include "../test.hpp"
 

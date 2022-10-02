@@ -36,7 +36,7 @@
 #include "symbolic/expression_set.hpp"
 #include "io/geometry2d.hpp"
 #include "io/figure.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "io/progress_indicator.hpp"
 #include "io/graphics_manager.hpp"
 

@@ -44,7 +44,7 @@
 
 #include "solvers/runge_kutta_integrator.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_orbit.hpp"

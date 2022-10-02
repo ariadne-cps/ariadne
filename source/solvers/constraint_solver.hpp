@@ -29,7 +29,7 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/container.hpp"
 
 #include "utility/declarations.hpp"

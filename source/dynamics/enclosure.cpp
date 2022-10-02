@@ -68,7 +68,7 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "function/functional.hpp"
 

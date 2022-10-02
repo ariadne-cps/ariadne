@@ -37,7 +37,7 @@
 #include "function/function_interface.hpp"
 #include "function/function_patch_interface.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/attribute.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"

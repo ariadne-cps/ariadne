@@ -30,7 +30,7 @@
 #include "gnuplot.hpp"
 #include "cairo.hpp"
 #include "null_graphics.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "command_line_interface.hpp"
 
 using namespace ConcLog;

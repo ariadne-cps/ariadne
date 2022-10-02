@@ -42,7 +42,7 @@
 #include "io/figure.hpp"
 #include "io/drawer.hpp"
 #include "io/graphics_manager.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "../test.hpp"
 

@@ -12,6 +12,7 @@ obj/
 .idea
 
 source/config.hpp
+submodules/.symbolic
 
 .pytest_cache
 __pycache__

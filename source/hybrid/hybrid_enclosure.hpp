@@ -34,7 +34,7 @@
 #include <list>
 #include <iostream>
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/declarations.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"

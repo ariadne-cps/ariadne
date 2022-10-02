@@ -31,7 +31,7 @@
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
 #include "io/figure.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 #include "../test.hpp"
 

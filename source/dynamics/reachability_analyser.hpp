@@ -40,7 +40,7 @@
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser_interface.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

@@ -25,7 +25,7 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "io/command_line_interface.hpp"
 
 using namespace ConcLog;

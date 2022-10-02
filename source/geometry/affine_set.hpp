@@ -35,7 +35,7 @@
 #include <iostream>
 
 #include "utility/declarations.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/container.hpp"
 #include "io/graphics_interface.hpp"
 #include "function/affine.hpp"

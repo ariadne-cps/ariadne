@@ -30,7 +30,7 @@
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

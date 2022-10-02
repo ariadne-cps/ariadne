@@ -34,7 +34,7 @@
 #include "algebra/algebra.hpp"
 #include "function/domain.hpp"
 #include "function/function_model.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "integrator_interface.hpp"
 
 using namespace ConcLog;

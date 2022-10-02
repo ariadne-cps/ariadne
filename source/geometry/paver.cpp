@@ -28,7 +28,7 @@
 #include "geometry/paver.hpp"
 
 #include "utility/macros.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "function/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"

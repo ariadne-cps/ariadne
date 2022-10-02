@@ -45,7 +45,7 @@
 
 #include "concurrency/workload.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

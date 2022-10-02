@@ -31,7 +31,7 @@
 
 #include "utility/declarations.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 

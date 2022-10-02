@@ -48,7 +48,7 @@
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

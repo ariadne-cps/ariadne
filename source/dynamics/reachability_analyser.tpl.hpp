@@ -51,7 +51,7 @@
 
 #include "dynamics/reachability_analyser.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "io/figure.hpp"
 #include "io/progress_indicator.hpp"
 #include "solvers/linear_programming.hpp"

@@ -37,7 +37,7 @@
 #include "io/geometry2d.hpp"
 #include "io/figure.hpp"
 #include "io/gnuplot.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 
 using namespace ConcLog;
 

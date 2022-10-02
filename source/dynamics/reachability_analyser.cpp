@@ -57,7 +57,7 @@
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "io/figure.hpp"
 #include "solvers/linear_programming.hpp"
 

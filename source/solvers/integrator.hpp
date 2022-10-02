@@ -40,7 +40,7 @@
 #include "utility/declarations.hpp"
 #include "utility/attribute.hpp"
 #include "numeric/dyadic.hpp"
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "utility/pointer.hpp"
 #include "function/affine.hpp"
 #include "algebra/sweeper.hpp"

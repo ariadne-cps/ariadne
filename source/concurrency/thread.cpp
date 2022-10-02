@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "thread.hpp"
 
 using namespace ConcLog;

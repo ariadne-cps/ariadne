@@ -62,7 +62,7 @@
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "io/figure.hpp"
 #include "solvers/linear_programming.hpp"
 

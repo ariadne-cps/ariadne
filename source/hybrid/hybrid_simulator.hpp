@@ -29,7 +29,7 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_HPP
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
-#include "conclog/include/logging.hpp"
+#include "conclog/logging.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
 

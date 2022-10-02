@@ -24,7 +24,7 @@
 
 #include <ariadne.hpp>
 
-#define print(expr) { ARIADNE_LOG_PRINTLN(#expr << ": " << (expr)) }
+#define print(expr) { CONCLOG_PRINTLN(#expr << ": " << (expr)) }
 
 using namespace Ariadne;
 
@@ -36,9 +36,9 @@ int main(int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
     
     //! [numeric_demonstration]
-    ARIADNE_LOG_PRINTLN("Numeric");
+    CONCLOG_PRINTLN("Numeric");
     {
-        ARIADNE_LOG_SCOPE_CREATE;
+        CONCLOG_SCOPE_CREATE;
         auto r = 6 * atan(1/sqrt(Real(3)));
         print(r);
         FloatDPBounds xdp=r.get(double_precision);
@@ -56,9 +56,9 @@ int main(int argc, const char* argv[]) {
 
 
     //! [expression_demonstration]
-    ARIADNE_LOG_PRINTLN("Expression");
+    CONCLOG_PRINTLN("Expression");
     {
-        ARIADNE_LOG_SCOPE_CREATE;
+        CONCLOG_SCOPE_CREATE;
         RealVariable x("x");RealVariable y("y");
         RealConstant c("c",3.75_dy);
         RealExpression e = c * x * (1-x);
@@ -72,9 +72,9 @@ int main(int argc, const char* argv[]) {
     //! [expression_demonstration]
 
     //! [linear_algebra_demonstration]
-    ARIADNE_LOG_PRINTLN("Linear Algebra");
+    CONCLOG_PRINTLN("Linear Algebra");
     {
-        ARIADNE_LOG_SCOPE_CREATE;
+        CONCLOG_SCOPE_CREATE;
         Matrix<FloatMPApproximation> A({{4,1,0},{1,4,1},{0,1,4}},precision(128_bits));
         Vector<FloatMPApproximation> v({2.0,3,5},precision(128_bits));
         print(inverse(A));
@@ -92,9 +92,9 @@ int main(int argc, const char* argv[]) {
     //! [linear_algebra_demonstration]
 
     //! [function_demonstration]
-    ARIADNE_LOG_PRINTLN("Function");
+    CONCLOG_PRINTLN("Function");
     {
-        ARIADNE_LOG_SCOPE_CREATE;
+        CONCLOG_SCOPE_CREATE;
         Real a(1.875_dy), b(0.3_dec);
         auto id=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
         auto x=id[0]; auto y=id[1];
@@ -118,9 +118,9 @@ int main(int argc, const char* argv[]) {
     //! [function_demonstration]
 
     //! [geometry_demonstration]
-    ARIADNE_LOG_PRINTLN("Geometry");
+    CONCLOG_PRINTLN("Geometry");
     {
-        ARIADNE_LOG_SCOPE_CREATE;
+        CONCLOG_SCOPE_CREATE;
         auto x=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),0);
         auto y=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),1);
         auto g = sqr(x)+4*sqr(y);

@@ -47,7 +47,7 @@ void ariadne_main()
     ball.new_update(freefall,bounce,freefall,{next(x)=x,next(v)=-a*v});
     /// Finished building the automaton
 
-    ARIADNE_LOG_PRINTLN("Ball = " << ball)
+    CONCLOG_PRINTLN("Ball = " << ball)
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
@@ -56,15 +56,15 @@ void ariadne_main()
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(2.0);
     evolver.configuration().set_maximum_step_size(1.0/32);
-    ARIADNE_LOG_PRINTLN_VAR(evolver.configuration())
+    CONCLOG_PRINTLN_VAR(evolver.configuration())
 
     Real e =0.0625_dec;
     HybridSet initial_set(freefall,{2-e<=x<=2+e,-e<=v<=e});
     HybridTime evolution_time(1.5_dec,4);
 
-    ARIADNE_LOG_PRINTLN("Computing evolution... ")
+    CONCLOG_PRINTLN("Computing evolution... ")
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
-    ARIADNE_LOG_PRINTLN("done.")
+    CONCLOG_PRINTLN("done.")
 
     plot("bouncingball-xv",Axes2d(-0.1<=x<=2.1, -10.1<=v<=10.1), orbit);
     plot("bouncingball-tx",Axes2d(0.0<=TimeVariable()<=1.5,-0.1<=x<=2.1), orbit);

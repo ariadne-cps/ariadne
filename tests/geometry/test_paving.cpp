@@ -31,9 +31,11 @@
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
 #include "io/figure.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "../test.hpp"
+
+using namespace ConcLog;
 
 using namespace Ariadne;
 using namespace std;

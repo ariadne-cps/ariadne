@@ -25,8 +25,8 @@
 //! \file numeric/logical.hpp
 //! \brief Logical classes
 
-#ifndef ARIADNE_LOGICAL_HPP
-#define ARIADNE_LOGICAL_HPP
+#ifndef CONCLOGICAL_HPP
+#define CONCLOGICAL_HPP
 
 #include "utility/stdlib.hpp"
 #include "utility/typedefs.hpp"

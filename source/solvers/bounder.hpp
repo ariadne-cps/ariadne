@@ -34,8 +34,10 @@
 #include "algebra/algebra.hpp"
 #include "function/domain.hpp"
 #include "function/function_model.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "integrator_interface.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

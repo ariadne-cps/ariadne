@@ -28,7 +28,7 @@
 #include "geometry/paver.hpp"
 
 #include "utility/macros.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "function/polynomial.hpp"
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
@@ -41,6 +41,8 @@
 #include "geometry/grid_paving.hpp"
 #include "geometry/affine_set.hpp"
 #include "algebra/algebra.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -217,7 +219,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
         PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& f,
         const ValidatedVectorMultivariateFunction& g, const ExactBoxType& codomain, const GridCell& cell, Int max_dpth, SizeType splt, const List<ValidatedProcedure>& procedures)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     const SizeType m=domain.size();
     const SizeType nf=f.result_size();
@@ -232,13 +234,13 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     FloatDP bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
     FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths());
 
-    ARIADNE_LOG_PRINTLN_AT(1,"splt="<<splt<<" dpth="<<cell.depth()<<" max_dpth="<<max_dpth);
-    ARIADNE_LOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box());
+    CONCLOG_PRINTLN_AT(1,"splt="<<splt<<" dpth="<<cell.depth()<<" max_dpth="<<max_dpth);
+    CONCLOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box());
 
     ConstraintSolver constraint_solver;
 
     if(paving.superset(cell)) {
-        ARIADNE_LOG_PRINTLN("Cell is already a subset of paving");
+        CONCLOG_PRINTLN("Cell is already a subset of paving");
         return;
     }
 
@@ -256,47 +258,47 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     for(SizeType i=0; i!=nf; ++i) {
         for(SizeType j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
-            if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
+            if(definitely(new_domain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
     }
     for(SizeType i=0; i!=ng; ++i) {
         for(SizeType j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
-            if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
+            if(definitely(new_domain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
     }
     newdomwdth=average_width(new_domain);
-    ARIADNE_LOG_PRINTLN_AT(1,"domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce");
+    CONCLOG_PRINTLN_AT(1,"domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce");
 
     // Hull reduction steps
     do {
         olddomwdth=newdomwdth;
         for(SizeType i=0; i!=nf; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
-            if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce"); return; }
+            if(definitely(new_domain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using hull reduce"); return; }
             //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
         }
         for(SizeType i=0; i!=ng; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
-            if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce"); return; }
+            if(definitely(new_domain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using hull reduce"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
         }
         newdomwdth=average_width(new_domain);
-        ARIADNE_LOG_PRINTLN_AT(2,"domwdth="<<newdomwdth<<" dom="<<new_domain);
+        CONCLOG_PRINTLN_AT(2,"domwdth="<<newdomwdth<<" dom="<<new_domain);
     } while( !definitely(new_domain.is_empty()) && strictly_smaller_by_factor(newdomwdth , olddomwdth, ACCEPTABLE_REDUCTION_FACTOR) );
 
-    ARIADNE_LOG_PRINTLN_AT(1,"new_domain="<<new_domain);
+    CONCLOG_PRINTLN_AT(1,"new_domain="<<new_domain);
 
 
     domwdth = average_scaled_width(new_domain,RawFloatDPVector(new_domain.size(),FloatDP(1.0_x,dp)));
     bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
     if(definitely(bbox.disjoint(cell_box)) || definitely(codomain.disjoint(apply(g,new_domain)))) {
-        ARIADNE_LOG_PRINTLN("Proved disjointness using image of new domain");
+        CONCLOG_PRINTLN("Proved disjointness using image of new domain");
         return;
     }
 
-    ARIADNE_LOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<new_domain<<" bbox="<<bbox<<" cell="<<cell.box());
+    CONCLOG_PRINTLN_AT(1,"domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<new_domain<<" bbox="<<bbox<<" cell="<<cell.box());
 
     // Decide whether to split cell or split domain by comparing size of
     // bounding box with the cell and splitting the larger.
@@ -309,15 +311,15 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
     if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
         Pair<SizeType,FloatDP> lipsch = lipschitz_index_and_error(f,new_domain);
-        ARIADNE_LOG_PRINTLN("Splitting domain on coordinate "<<lipsch.first);
+        CONCLOG_PRINTLN("Splitting domain on coordinate "<<lipsch.first);
         Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
     } else if(cell.depth()>=max_dpth) {
-        ARIADNE_LOG_PRINTLN("Adjoining cell "<<cell_box);
+        CONCLOG_PRINTLN("Adjoining cell "<<cell_box);
         paving.adjoin(cell);
     } else {
-        ARIADNE_LOG_PRINTLN("Splitting cell "<<cell_box);
+        CONCLOG_PRINTLN("Splitting cell "<<cell_box);
         Pair<GridCell,GridCell> sb = cell.split();
         procedure_constraint_adjoin_outer_approximation_recursion(paving,cast_exact_box(new_domain),f,g,codomain,sb.first, max_dpth, splt, procedures);
         procedure_constraint_adjoin_outer_approximation_recursion(paving,cast_exact_box(new_domain),f,g,codomain,sb.second, max_dpth, splt, procedures);
@@ -332,7 +334,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f,
     const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c, const GridCell& b, ExactPointType x, ExactPointType y, Nat e)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const FloatDP XSIGMA { 0.125_x,dp };
@@ -350,8 +352,8 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     const SizeType m=fg.argument_size();
     const SizeType n=fg.result_size();
-    ARIADNE_LOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
-    ARIADNE_LOG_PRINTLN_AT(1,"x0="<<x<<", y0="<<y);
+    CONCLOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
+    CONCLOG_PRINTLN_AT(1,"x0="<<x<<", y0="<<y);
 
     FloatDPPoint z(x.size(),dp);
     FloatDP t(dp);
@@ -363,24 +365,24 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     FloatDPApproximation at=reinterpret_cast<FloatDPApproximation&>(t);
 
     if(r.superset(b)) {
-        ARIADNE_LOG_PRINTLN("Cell already in set");
+        CONCLOG_PRINTLN("Cell already in set");
         return;
     }
 
     ExactBoxType bx=product(static_cast<const ExactBoxType&>(b.box()),static_cast<const ExactBoxType&>(c));
 
-    ARIADNE_LOG_PRINTLN_AT(1,"fg(d)="<<apply(fg,d)<<", bx="<<bx);
+    CONCLOG_PRINTLN_AT(1,"fg(d)="<<apply(fg,d)<<", bx="<<bx);
     if(definitely(disjoint(apply(fg,d),bx))) {
-        ARIADNE_LOG_PRINTLN("Proved disjointness using direct evaluation");
+        CONCLOG_PRINTLN("Proved disjointness using direct evaluation");
         return;
     }
 
 
     // Relax x away from boundary
     optimiser.compute_tz(d,fg,bx,ay,at,az);
-    ARIADNE_LOG_PRINTLN_AT(1,"z0="<<az<<", t0="<<at);
+    CONCLOG_PRINTLN_AT(1,"z0="<<az<<", t0="<<at);
     for(SizeType i=0; i!=12; ++i) {
-        ARIADNE_LOG_PRINTLN_AT(2,"t="<<at);
+        CONCLOG_PRINTLN_AT(2,"t="<<at);
         //optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
         try {
             optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
@@ -392,12 +394,12 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
             ARIADNE_FAIL_MSG(""<<err.what());
             break;
         }
-        ARIADNE_LOG_PRINTLN_AT(2,"x="<<ax<<", y="<<ay<<", z="<<az);
-        ARIADNE_LOG_PRINTLN_AT(2,"x.z="<<emulrng(x,z));
+        CONCLOG_PRINTLN_AT(2,"x="<<ax<<", y="<<ay<<", z="<<az);
+        CONCLOG_PRINTLN_AT(2,"x.z="<<emulrng(x,z));
         if(t>0) { break; }
         if(definitely(emulrng(x,z).upper_bound()<XZMIN)) { break; }
     }
-    ARIADNE_LOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+    CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
     if(!(t<inf)) {
         ARIADNE_WARN("feasibility failed");
@@ -433,35 +435,35 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         }
         txg = FloatDPBounds(cnst) + txg;
 
-        ARIADNE_LOG_PRINTLN_AT(1,"txg="<<txg);
+        CONCLOG_PRINTLN_AT(1,"txg="<<txg);
 
         ValidatedConstraint constraint=(txg>=0);
 
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
-            ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce");
+            CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return;
         }
 
         for(SizeType i=0; i!=m; ++i) {
             solver.box_reduce(nd,txg,ExactIntervalType(0,inf),i);
-            ARIADNE_LOG_PRINTLN_AT(2,"dom="<<nd);
-            if(definitely(nd.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
+            CONCLOG_PRINTLN_AT(2,"dom="<<nd);
+            if(definitely(nd.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
 
         solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
-            ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce");
+            CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return;
         }
     }
 
     if(decide(t<=0.0_exact) && decide(UpperBoxType(apply(f,d)).radius()>b.box().radius()) ) {
-        ARIADNE_LOG_PRINTLN("Splitting domain");
+        CONCLOG_PRINTLN("Splitting domain");
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
         ax = FloatDPApproximation(1-XSIGMA)*ax + Vector<FloatDPApproximation>(ax.size(),XSIGMA/x.size());
         ay=midpoint(sd.first);
@@ -472,14 +474,14 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     }
 
     if(t>0.0_exact) {
-        ARIADNE_LOG_PRINTLN_AT(1,"Intersection point: parameter="<<y);
+        CONCLOG_PRINTLN_AT(1,"Intersection point: parameter="<<y);
     }
 
     if(b.depth()>=Int(e*b.dimension())) {
-        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining cell "<<b.box());
+        CONCLOG_PRINTLN_AT(1,"Adjoining cell "<<b.box());
         r.adjoin(b);
     } else {
-        ARIADNE_LOG_PRINTLN_AT(1,"Splitting cell; t="<<t);
+        CONCLOG_PRINTLN_AT(1,"Splitting cell; t="<<t);
         Pair<GridCell,GridCell> sb = b.split();
         hotstarted_constraint_adjoin_outer_approximation_recursion(r,d,f,g,c,sb.first,x,y,e);
         hotstarted_constraint_adjoin_outer_approximation_recursion(r,d,f,g,c,sb.second,x,y,e);
@@ -489,7 +491,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPointType& x, ExactPointType& y, Nat e)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     auto properties = fg.properties();
     auto pr = properties.precision();
 
@@ -501,7 +503,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
     const SizeType m=fg.argument_size();
     const SizeType n=fg.result_size();
-    ARIADNE_LOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
+    CONCLOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
 
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
@@ -522,11 +524,11 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
     optimiser.compute_tz(d,fg,bx,ay,at,az);
     for(SizeType i=0; i!=12; ++i) {
-        ARIADNE_LOG_PRINTLN_AT(2,"t="<<t);
+        CONCLOG_PRINTLN_AT(2,"t="<<t);
         optimiser.linearised_feasibility_step(d,fg,bx,ax,ay,az,at);
         if(t>0) { break; }
     }
-    ARIADNE_LOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+    CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
     if(t<TERR) {
         // Probably disjoint, so try to prove this
@@ -546,26 +548,26 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         }
         xg = (cnst) + xg;
 
-        ARIADNE_LOG_PRINTLN_AT(1,"xg="<<xg);
+        CONCLOG_PRINTLN_AT(1,"xg="<<xg);
 
 
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         solver.hull_reduce(nd,xg,ExactIntervalType(0,inf));
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
-            ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce");
+            CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return;
         }
 
         for(SizeType i=0; i!=m; ++i) {
             solver.box_reduce(nd,xg,ExactIntervalType(0,inf),i);
-            ARIADNE_LOG_PRINTLN_AT(2,"dom="<<nd);
-            if(definitely(nd.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
+            CONCLOG_PRINTLN_AT(2,"dom="<<nd);
+            if(definitely(nd.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
+        CONCLOG_PRINTLN_AT(1,"dom="<<nd);
 
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
-        ARIADNE_LOG_PRINTLN("Splitting domain");
+        CONCLOG_PRINTLN("Splitting domain");
         Pair<ExactBoxType,ExactBoxType> sd=split(d);
         ExactPointType nx = cast_exact((1-XSIGMA)*ax + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
         ExactPointType ny = midpoint(sd.first);
@@ -576,10 +578,10 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     }
 
     if(b.depth()>=Int(e*b.dimension())) {
-        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining cell "<<b.box());
+        CONCLOG_PRINTLN_AT(1,"Adjoining cell "<<b.box());
         r.adjoin(b);
     } else {
-        ARIADNE_LOG_PRINTLN_AT(1,"Splitting cell; t="<<t);
+        CONCLOG_PRINTLN_AT(1,"Splitting cell; t="<<t);
         Pair<GridCell,GridCell> sb = b.split();
         ExactPointType sx = cast_exact((1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
         ExactPointType sy = y;

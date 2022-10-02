@@ -72,7 +72,7 @@ void ariadne_main()
     clock.new_transition( midnight, next(C)=0, C>=1, EventKind::URGENT );
 
     CompositeHybridAutomaton heating_system({clock,heater});
-    ARIADNE_LOG_PRINTLN_VAR(heating_system);
+    CONCLOG_PRINTLN_VAR(heating_system);
 
     // Create the analyser classes
 
@@ -89,7 +89,7 @@ void ariadne_main()
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
     evolver.configuration().set_maximum_step_size(7.0/16);
-    ARIADNE_LOG_PRINTLN_VAR(evolver.configuration());
+    CONCLOG_PRINTLN_VAR(evolver.configuration());
 
     evolver.configuration().set_enable_reconditioning(true);
     evolver.configuration().set_enable_subdivisions(true);
@@ -110,43 +110,43 @@ void ariadne_main()
     Dyadic r=exp2(-10); Dyadic Ti=16.25_dy;
     Real Tinitmin(Ti+r); Real Tinitmax(Ti+3*r); Real Cinitmin(0+r); Real Cinitmax(0+3*r); // Tinit=16.0;
     HybridSet initial_set(heating|off, {Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax} );
-    ARIADNE_LOG_PRINTLN_VAR(initial_set);
+    CONCLOG_PRINTLN_VAR(initial_set);
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
-    ARIADNE_LOG_PRINTLN_VAR(initial_enclosure);
+    CONCLOG_PRINTLN_VAR(initial_enclosure);
 
     HybridTime evolution_time(2.75_x,127);
-    ARIADNE_LOG_PRINTLN_VAR(evolution_time);
+    CONCLOG_PRINTLN_VAR(evolution_time);
 
-    ARIADNE_LOG_PRINTLN_VAR("Computing orbit using series integrator...");
+    CONCLOG_PRINTLN_VAR("Computing orbit using series integrator...");
     evolver.set_integrator(series_integrator);
     Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 
-    ARIADNE_LOG_PRINTLN("Computed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.");
+    CONCLOG_PRINTLN("Computed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.");
 
     Real tmax=evolution_time.continuous_time();
     Real dTmin=Tmin.value(); Real dTmax=Tmax.value();
     HybridRealBox guard(heating|off,{Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax});
     HybridRealBox midnight_guard(heating|off,{dTmin<=T<=dTmax,0<=C<=1,1<=t<=2});
-    ARIADNE_LOG_PRINTLN("Plotting time trace of orbit... ");
+    CONCLOG_PRINTLN("Plotting time trace of orbit... ");
     plot("heating-orbit-time.png",Axes2d(0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 
 
     HybridTerminationCriterion evolution_termination(2.75_bin,127,Set<DiscreteEvent>{midnight});
-    ARIADNE_LOG_PRINTLN_VAR(evolution_termination);
+    CONCLOG_PRINTLN_VAR(evolution_termination);
 
-    ARIADNE_LOG_PRINTLN("Computing event-terminated orbit using series integrator...");
+    CONCLOG_PRINTLN("Computing event-terminated orbit using series integrator...");
     evolver.set_integrator(series_integrator);
     series_orbit = evolver.orbit(initial_enclosure,evolution_termination,Semantics::UPPER);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 
-    ARIADNE_LOG_PRINTLN("Computed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.");
+    CONCLOG_PRINTLN("Computed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.");
 
-    ARIADNE_LOG_PRINTLN("Plotting time trace of orbit... ");
+    CONCLOG_PRINTLN("Plotting time trace of orbit... ");
     plot("heating-orbit-termination.png",Axes2d(0.0<=t<=1.25,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 
     HybridReachabilityAnalyser analyser(evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
@@ -154,12 +154,12 @@ void ariadne_main()
     analyser.configuration().set_scaling(T,8.0);
     analyser.configuration().set_scaling(C,1.0);
     analyser.configuration().set_maximum_grid_fineness(5);
-    ARIADNE_LOG_PRINTLN_VAR(analyser.configuration());
+    CONCLOG_PRINTLN_VAR(analyser.configuration());
 
-    ARIADNE_LOG_PRINTLN("Computing chain-reachable set...");
+    CONCLOG_PRINTLN("Computing chain-reachable set...");
     HybridStorage chain_reach_set = analyser.outer_chain_reach(initial_set);
-    ARIADNE_LOG_PRINTLN("done.");
-    ARIADNE_LOG_PRINTLN("Plotting chain-reachable set...");
+    CONCLOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("Plotting chain-reachable set...");
     HybridStorage chain_reach_set_off=chain_reach_set;
     chain_reach_set_off[heating|on].clear();
     HybridStorage chain_reach_set_on=chain_reach_set;
@@ -167,5 +167,5 @@ void ariadne_main()
     plot("heating-chainreach.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off, chain_reach_on_colour, chain_reach_set_on);
     plot("heating-chainreach-off.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off);
     plot("heating-chainreach-on.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_on_colour, chain_reach_set_on);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 }

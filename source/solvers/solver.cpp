@@ -30,7 +30,7 @@
 
 #include "solvers/solver.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/differential.hpp"
@@ -45,6 +45,8 @@
 
 #include "algebra/evaluate.hpp"
 #include "algebra/evaluate.tpl.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -156,8 +158,8 @@ auto SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
                            const ExactBoxType& bx) const
     -> Set< Vector<ValidatedNumericType> >
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("f="<<f<<", ix="<<bx);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("f="<<f<<", ix="<<bx);
 
     // Create result set
     Set< Vector<ValidatedNumericType> > r;
@@ -241,7 +243,7 @@ auto SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
                       const ExactBoxType& bx) const
     -> Vector<ValidatedNumericType>
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     const ExactDouble e=this->maximum_error();
     CounterType n=this->maximum_number_of_steps();
@@ -250,7 +252,7 @@ auto SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
     Bool has_solution=false;
     while(n>0) {
         nr=this->step(f,r);
-        ARIADNE_LOG_PRINTLN_AT(1,"nr="<<nr);
+        CONCLOG_PRINTLN_AT(1,"nr="<<nr);
 
         if(!has_solution && refines(nr,r)) {
             has_solution=true;
@@ -294,8 +296,8 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                           const ExactBoxType& ix) const
     -> ValidatedVectorMultivariateFunctionPatch
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN_AT(1,"f="<<f);
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
@@ -312,16 +314,16 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
     Array<Bool> is_refinement(n,false);
 
     while(steps_remaining>0) {
-        ARIADNE_LOG_PRINTLN_AT(1,"step="<<this->maximum_number_of_steps()-steps_remaining);
+        CONCLOG_PRINTLN_AT(1,"step="<<this->maximum_number_of_steps()-steps_remaining);
         nh=this->implicit_step(f,id,h);
         fnh=compose(f,join(id,nh));
-        ARIADNE_LOG_PRINTLN_AT(2,"nh="<<nh);
-        ARIADNE_LOG_PRINTLN_AT(2,"fnh="<<fnh);
+        CONCLOG_PRINTLN_AT(2,"nh="<<nh);
+        CONCLOG_PRINTLN_AT(2,"fnh="<<fnh);
 
         if(ALLOW_PARTIAL_FUNCTION) {
             for(SizeType i=0; i!=n; ++i) {
                 if(!is_refinement[i]) {
-                    ARIADNE_LOG_PRINTLN_AT(3,"refines(nh["<<i<<"],x["<<i<<"])="<<refines(nh[i],h[i]));
+                    CONCLOG_PRINTLN_AT(3,"refines(nh["<<i<<"],x["<<i<<"])="<<refines(nh[i],h[i]));
                     if(refines(nh[i],h[i])) {
                         is_refinement[i]=true;
                         --number_unrefined;
@@ -334,10 +336,10 @@ auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                 }
             }
 
-            ARIADNE_LOG_PRINTLN_AT(2,"is_refinement="<<is_refinement);
-            ARIADNE_LOG_PRINTLN_AT(2,"nh.range()="<<nh.range());
-            ARIADNE_LOG_PRINTLN_AT(2,"sup_error(nh)="<<sup_error(nh));
-            ARIADNE_LOG_PRINTLN_AT(2,"sup_error(fnh)="<<sup_error(fnh));
+            CONCLOG_PRINTLN_AT(2,"is_refinement="<<is_refinement);
+            CONCLOG_PRINTLN_AT(2,"nh.range()="<<nh.range());
+            CONCLOG_PRINTLN_AT(2,"sup_error(nh)="<<sup_error(nh));
+            CONCLOG_PRINTLN_AT(2,"sup_error(fnh)="<<sup_error(fnh));
 
             h=nh;
 
@@ -373,8 +375,8 @@ SolverBase::implicit(const ValidatedScalarMultivariateFunction& f,
                      const ExactBoxType& ip,
                      const ExactIntervalType& ix) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN_AT(1,"f="<<f);
     ValidatedVectorMultivariateFunctionPatch res=this->implicit(ValidatedVectorMultivariateFunction(List<ValidatedScalarMultivariateFunction>(1u,f)),ip,ExactBoxType(1u,ix));
     return res[0];
 }
@@ -395,22 +397,22 @@ auto IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
                                         const Vector<ValidatedNumericType>& x) const
     -> Vector<ValidatedNumericType>
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
-    ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("Testing for root in "<<x);
+    CONCLOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
     Vector<FloatDP> m(cast_exact(x));
-    ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
+    CONCLOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> w=f.evaluate(im);
-    ARIADNE_LOG_PRINTLN_AT(1,"f(m)="<<w);
+    CONCLOG_PRINTLN_AT(1,"f(m)="<<w);
     Matrix<ValidatedNumericType> A=f.jacobian(x);
-    ARIADNE_LOG_PRINTLN_AT(1,"Df(r)="<<A);
+    CONCLOG_PRINTLN_AT(1,"Df(r)="<<A);
     Matrix<ValidatedNumericType> Ainv=inverse(A);
-    ARIADNE_LOG_PRINTLN_AT(1,"inverse(Df(r))="<<Ainv);
+    CONCLOG_PRINTLN_AT(1,"inverse(Df(r))="<<Ainv);
     Vector<ValidatedNumericType> dx=Ainv*w;
-    ARIADNE_LOG_PRINTLN_AT(1,"dx="<<dx);
+    CONCLOG_PRINTLN_AT(1,"dx="<<dx);
     Vector<ValidatedNumericType> nx= m - dx;
-    ARIADNE_LOG_PRINTLN_AT(1,"nx="<<nx);
+    CONCLOG_PRINTLN_AT(1,"nx="<<nx);
     return nx;
 }
 
@@ -418,25 +420,25 @@ auto KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
                           const Vector<ValidatedNumericType>& x) const
     -> Vector<ValidatedNumericType>
 {
-    ARIADNE_LOG_SCOPE_CREATE
+    CONCLOG_SCOPE_CREATE
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size(),x.zero_element());
-    ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
-    ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
+    CONCLOG_PRINTLN("Testing for root in "<<x);
+    CONCLOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
     Vector<FloatDP> m(cast_exact(x));
-    ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
+    CONCLOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
-    ARIADNE_LOG_PRINTLN_AT(1,"f(m)="<<fm);
+    CONCLOG_PRINTLN_AT(1,"f(m)="<<fm);
     Matrix<ValidatedNumericType> J=f.jacobian(x);
-    ARIADNE_LOG_PRINTLN_AT(1,"Df(r)="<<J);
+    CONCLOG_PRINTLN_AT(1,"Df(r)="<<J);
     Matrix<ValidatedNumericType> M=inverse(midpoint(J));
-    ARIADNE_LOG_PRINTLN_AT(1,"inverse(Df(m))="<<M);
+    CONCLOG_PRINTLN_AT(1,"inverse(Df(m))="<<M);
     Vector<ValidatedNumericType> dx=M*fm-(I-M*J)*(x-m);
-    ARIADNE_LOG_PRINTLN_AT(1,"dx="<<dx);
+    CONCLOG_PRINTLN_AT(1,"dx="<<dx);
     Vector<ValidatedNumericType> nx= m - dx;
-    ARIADNE_LOG_PRINTLN_AT(1,"nx="<<nx);
+    CONCLOG_PRINTLN_AT(1,"nx="<<nx);
     Vector<ValidatedNumericType> nr(nx);
-    ARIADNE_LOG_PRINTLN_AT(1,"nr="<<nr);
+    CONCLOG_PRINTLN_AT(1,"nr="<<nr);
     return nr;
 }
 
@@ -445,26 +447,26 @@ auto FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
                                   const Vector<ValidatedNumericType>& x) const
     -> Vector<ValidatedNumericType>
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size(),x.zero_element());
-    ARIADNE_LOG_PRINTLN("Testing for root in "<<x);
-    ARIADNE_LOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
+    CONCLOG_PRINTLN("Testing for root in "<<x);
+    CONCLOG_PRINTLN_AT(1,"e="<<sup_error(x)<<", x="<<x);
     Vector<FloatDP> m(cast_exact(x));
-    ARIADNE_LOG_PRINTLN_AT(1,"m="<<m);
+    CONCLOG_PRINTLN_AT(1,"m="<<m);
     Vector<ValidatedNumericType> im(m);
     Vector<ValidatedNumericType> fm=f.evaluate(im);
-    ARIADNE_LOG_PRINTLN_AT(1,"f(m)="<<fm);
+    CONCLOG_PRINTLN_AT(1,"f(m)="<<fm);
     Matrix<ValidatedNumericType> J=f.jacobian(x);
-    ARIADNE_LOG_PRINTLN_AT(1,"Df(r)="<<J);
+    CONCLOG_PRINTLN_AT(1,"Df(r)="<<J);
     Matrix<ValidatedNumericType> mJ(midpoint(J));
     Matrix<ValidatedNumericType> M=inverse(mJ);
-    ARIADNE_LOG_PRINTLN_AT(1,"inverse(Df(m))="<<M);
+    CONCLOG_PRINTLN_AT(1,"inverse(Df(m))="<<M);
     Vector<ValidatedNumericType> dx=M*(fm+(J-mJ)*(x-m));
-    ARIADNE_LOG_PRINTLN_AT(1,"dx="<<dx);
+    CONCLOG_PRINTLN_AT(1,"dx="<<dx);
     Vector<ValidatedNumericType> nx= m - dx;
-    ARIADNE_LOG_PRINTLN_AT(1,"nx="<<nx);
+    CONCLOG_PRINTLN_AT(1,"nx="<<nx);
     Vector<ValidatedNumericType> nr(nx);
-    ARIADNE_LOG_PRINTLN_AT(1,"nr="<<nr);
+    CONCLOG_PRINTLN_AT(1,"nr="<<nr);
     return nr;
 }
 
@@ -474,16 +476,16 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
                                     const ValidatedVectorMultivariateFunctionPatch& id,
                                     const ValidatedVectorMultivariateFunctionPatch& h) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     const SizeType m=id.result_size();
     const SizeType n=h.result_size();
     DP pr;
 
-    ARIADNE_LOG_PRINTLN("f="<<f);
-    ARIADNE_LOG_PRINTLN("h="<<h);
+    CONCLOG_PRINTLN("f="<<f);
+    CONCLOG_PRINTLN("h="<<h);
     ValidatedVectorMultivariateFunctionPatch mh=h;
     mh.clobber();
-    ARIADNE_LOG_PRINTLN("midpoint(h)="<<mh);
+    CONCLOG_PRINTLN("midpoint(h)="<<mh);
 
     ValidatedScalarMultivariateFunction zero_function(f.domain());
     Matrix<ValidatedScalarMultivariateFunction> D2f(n,n,zero_function);
@@ -492,7 +494,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
             D2f[i][j]=f[i].derivative(m+j);
         }
     }
-    ARIADNE_LOG_PRINTLN("D2f="<<D2f);
+    CONCLOG_PRINTLN("D2f="<<D2f);
 
     ValidatedNumericType zero(0,pr);
     ValidatedScalarMultivariateFunctionPatch z=h[0]*zero;
@@ -504,7 +506,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
             J[i][j]=compose(D2f[i][j],idh);
         }
     }
-    ARIADNE_LOG_PRINTLN("J="<<J);
+    CONCLOG_PRINTLN("J="<<J);
 
     Matrix<UpperIntervalType> rngJ(n,n,pr);
     for(SizeType i=0; i!=n; ++i) {
@@ -513,10 +515,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }
-    ARIADNE_LOG_PRINTLN("rngJ="<<rngJ);
+    CONCLOG_PRINTLN("rngJ="<<rngJ);
 
     ValidatedVectorMultivariateFunctionPatch fidmh=compose(f,join(id,mh));
-    ARIADNE_LOG_PRINTLN_AT(1,"compose(f,join(id,midpoint(h)))="<<fidmh);
+    CONCLOG_PRINTLN_AT(1,"compose(f,join(id,midpoint(h)))="<<fidmh);
 
     ValidatedVectorMultivariateFunctionPatch dh(n,z);
     if(n==1) {
@@ -531,10 +533,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f
     } else {
         dh=Ariadne::linear_solve(cast_singleton(rngJ),fidmh);
     }
-    ARIADNE_LOG_PRINTLN("dh="<<dh);
+    CONCLOG_PRINTLN("dh="<<dh);
 
     ValidatedVectorMultivariateFunctionPatch nh=mh-dh;
-    ARIADNE_LOG_PRINTLN("nh="<<nh);
+    CONCLOG_PRINTLN("nh="<<nh);
     return nh;
 }
 
@@ -544,37 +546,37 @@ KrawczykSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
                               const ValidatedVectorMultivariateFunctionPatch& p,
                               const ValidatedVectorMultivariateFunctionPatch& x) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     const SizeType np=p.size();
     const SizeType nx=x.size();
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(nx,dp);
-    ARIADNE_LOG_PRINTLN("Contracting x="<<x);
-    ARIADNE_LOG_PRINTLN("p="<<p);
-    ARIADNE_LOG_PRINTLN("f="<<f);
+    CONCLOG_PRINTLN("Contracting x="<<x);
+    CONCLOG_PRINTLN("p="<<p);
+    CONCLOG_PRINTLN("f="<<f);
     ValidatedVectorMultivariateFunctionPatch mx(x);
     for(SizeType i=0; i!=mx.size(); ++i) { mx[i].clobber(); }
-    ARIADNE_LOG_PRINTLN("mx="<<mx);
+    CONCLOG_PRINTLN("mx="<<mx);
     Vector<FloatDPError> ex(nx,dp);
     for(SizeType i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumericType> eix=make_bounds(ex);
-    ARIADNE_LOG_PRINTLN("ex="<<ex);
+    CONCLOG_PRINTLN("ex="<<ex);
     ValidatedVectorMultivariateFunctionPatch fm=compose(f,join(p,mx));
-    ARIADNE_LOG_PRINTLN_AT(1,"f(p,mx)="<<fm);
+    CONCLOG_PRINTLN_AT(1,"f(p,mx)="<<fm);
     Vector<ValidatedNumericType> rp(np,dp);
     for(SizeType i=0; i!=np; ++i) { rp[i]=cast_singleton(p[i].range()); }
     Vector<ValidatedNumericType> rx(nx,dp);
     for(SizeType i=0; i!=nx; ++i) { rx[i]=cast_singleton(x[i].range()); }
     Matrix<ValidatedNumericType> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
-    ARIADNE_LOG_PRINTLN("D2f(r)=J="<<J);
+    CONCLOG_PRINTLN("D2f(r)=J="<<J);
     Matrix<ValidatedNumericType> M=inverse(midpoint(J));
-    ARIADNE_LOG_PRINTLN("inverse(D2f(m))=M="<<M);
-    ARIADNE_LOG_PRINTLN("M*f(p,mx)="<<M*fm);
-    ARIADNE_LOG_PRINTLN("(I-M*J)="<<(I-M*J));
-    ARIADNE_LOG_PRINTLN("(I-M*J) * (ex*ValidatedNumericType(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix);
+    CONCLOG_PRINTLN("inverse(D2f(m))=M="<<M);
+    CONCLOG_PRINTLN("M*f(p,mx)="<<M*fm);
+    CONCLOG_PRINTLN("(I-M*J)="<<(I-M*J));
+    CONCLOG_PRINTLN("(I-M*J) * (ex*ValidatedNumericType(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix);
     ValidatedVectorMultivariateFunctionPatch dx= M*fm - (I-M*J) * eix;
-    ARIADNE_LOG_PRINTLN("dx="<<dx);
+    CONCLOG_PRINTLN("dx="<<dx);
     ValidatedVectorMultivariateFunctionPatch nwx= mx - dx;
-    ARIADNE_LOG_PRINTLN("nwx="<<nwx);
+    CONCLOG_PRINTLN("nwx="<<nwx);
     return nwx;
 }
 

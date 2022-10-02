@@ -29,11 +29,13 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

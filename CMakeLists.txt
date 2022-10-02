@@ -154,7 +154,9 @@ add_custom_target(tests)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
-include_directories(${PROJECT_SOURCE_DIR}/source)
+include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules)
+
+add_subdirectory(submodules)
 
 add_subdirectory(source)
 add_subdirectory(python)
@@ -197,9 +199,9 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
     target_link_libraries(ariadne coverage_config)

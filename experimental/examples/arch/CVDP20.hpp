@@ -34,10 +34,10 @@ void CVDP20()
 
     LabelledFigure fig(Axes2d(-2.5<=x1<=2.5,-4.05<=y1<=4.05));
 
-    ARIADNE_LOG_PRINTLN("Coupled van der Pol Oscillator system:")
+    CONCLOG_PRINTLN("Coupled van der Pol Oscillator system:")
 
     {
-        ARIADNE_LOG_PRINTLN("Running for mu=1...");
+        CONCLOG_PRINTLN("Running for mu=1...");
 
         RealConstant mu("mu",1.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
@@ -56,26 +56,26 @@ void CVDP20()
 
         Stopwatch<Milliseconds> sw;
 
-        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        CONCLOG_PRINTLN_AT(1,"Computing orbit...");
+        CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
-        ARIADNE_LOG_PRINTLN_AT(1,"Checking properties...");
+        CONCLOG_PRINTLN_AT(1,"Checking properties...");
 
         SizeType ce=0;
         for (auto set : orbit.reach()) {
             auto bbox = set.bounding_box();
             if (possibly(bbox[y1] >= 2.75_dec)) {
-                ARIADNE_LOG_PRINTLN_AT(2,"set with y1=" << bbox[y1] << " is outside the specification.");
+                CONCLOG_PRINTLN_AT(2,"set with y1=" << bbox[y1] << " is outside the specification.");
                 ++ce;
             }
             if (possibly(bbox[y2] >= 2.75_dec)) {
-                ARIADNE_LOG_PRINTLN_AT(2,"set with y2=" << bbox[y2] << " is outside the specification.");
+                CONCLOG_PRINTLN_AT(2,"set with y2=" << bbox[y2] << " is outside the specification.");
                 ++ce;
             }
         }
         sw.click();
-        if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+        if (ce>0) CONCLOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
+        CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu1");
         if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
@@ -86,7 +86,7 @@ void CVDP20()
     }
 
     {
-        ARIADNE_LOG_PRINTLN("Running for mu=2...");
+        CONCLOG_PRINTLN("Running for mu=2...");
 
         RealConstant mu("mu",2.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
@@ -105,26 +105,26 @@ void CVDP20()
 
         Stopwatch<Milliseconds> sw;
 
-        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit...");
-        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+        CONCLOG_PRINTLN_AT(1,"Computing orbit...");
+        CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
-        ARIADNE_LOG_PRINTLN_AT(1,"Checking properties...");
+        CONCLOG_PRINTLN_AT(1,"Checking properties...");
 
         SizeType ce=0;
         for (auto set : orbit.reach()) {
             auto bbox = set.bounding_box();
             if (possibly(bbox[y1] >= 4.05_dec)) {
-                ARIADNE_LOG_PRINTLN_AT(2,"set with y1=" << bbox[y1] << " is outside the specification.");
+                CONCLOG_PRINTLN_AT(2,"set with y1=" << bbox[y1] << " is outside the specification.");
                 ++ce;
             }
             if (possibly(bbox[y2] >= 4.05_dec)) {
-                ARIADNE_LOG_PRINTLN_AT(2,"set with y2=" << bbox[y2] << " is outside the specification.");
+                CONCLOG_PRINTLN_AT(2,"set with y2=" << bbox[y2] << " is outside the specification.");
                 ++ce;
             }
         }
         sw.click();
-        if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
-        ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+        if (ce>0) CONCLOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
+        CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("mu2");
         if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed_seconds());
@@ -134,7 +134,7 @@ void CVDP20()
         fig.draw(orbit.reach());
     }
 
-    ARIADNE_LOG_PRINTLN("Plotting...");
+    CONCLOG_PRINTLN("Plotting...");
     fig.write(benchmark.name().c_str());
-    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
+    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

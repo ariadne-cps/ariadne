@@ -28,8 +28,8 @@
 
 
 
-#ifndef ARIADNE_LOGICAL_DECL_HPP
-#define ARIADNE_LOGICAL_DECL_HPP
+#ifndef CONCLOGICAL_DECL_HPP
+#define CONCLOGICAL_DECL_HPP
 
 #include "numeric/paradigm.hpp"
 

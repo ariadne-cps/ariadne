@@ -35,7 +35,9 @@
 #include "io/geometry2d.hpp"
 #include "io/figure.hpp"
 #include "io/cairo.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

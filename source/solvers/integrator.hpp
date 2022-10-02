@@ -40,12 +40,14 @@
 #include "utility/declarations.hpp"
 #include "utility/attribute.hpp"
 #include "numeric/dyadic.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "utility/pointer.hpp"
 #include "function/affine.hpp"
 #include "algebra/sweeper.hpp"
 
 #include "function/function_patch.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

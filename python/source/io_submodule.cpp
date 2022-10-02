@@ -25,8 +25,10 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "io/command_line_interface.hpp"
+
+using namespace ConcLog;
 
 using namespace Ariadne;
 

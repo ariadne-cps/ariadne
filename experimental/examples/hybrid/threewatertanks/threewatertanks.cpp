@@ -76,7 +76,7 @@ Int main(Int argc, const char* argv[])
                                                      valve1_automaton,valve2_automaton,valve3_automaton,
                                                      controller1_automaton,controller2_automaton,controller3_automaton});
 
-    ARIADNE_LOG_PRINTLN(threewatertanks_system);
+    CONCLOG_PRINTLN(threewatertanks_system);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(threewatertanks_system);
@@ -88,13 +88,13 @@ Int main(Int argc, const char* argv[])
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    ARIADNE_LOG_PRINTLN("Computing evolution... ");
+    CONCLOG_PRINTLN("Computing evolution... ");
     HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},
                           {height1==7,height2==7,height3==7});
     HybridTime evolution_time(35.0_x,15);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
-    ARIADNE_LOG_PRINTLN("Plotting trajectory... ");
+    CONCLOG_PRINTLN("Plotting trajectory... ");
     Axes2d time_height1_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height1<=9.1);
     plot("watertank-t-height1",time_height1_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d time_height2_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height2<=9.1);

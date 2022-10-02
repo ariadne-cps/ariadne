@@ -35,7 +35,9 @@
 #include "solvers/linear_programming.hpp"
 
 #include "utility/macros.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -179,7 +181,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p
     Array<SizeType> p_B(p.begin(),p.begin()+m);
 
     Matrix<XX> Z=B*A_B;
-    ARIADNE_LOG_PRINTLN_AT(1,"p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z);
+    CONCLOG_PRINTLN_AT(1,"p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z);
     for(SizeType i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(decide(norm(Z)<MAXIMUM_ERROR), "A="<<A<<"\np="<<p<<"\nB="<<B<<"\nZ=B*A_B-I="<<Z<<"\nnorm(Z)="<<norm(Z));
 }
@@ -203,7 +205,7 @@ Void
 SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                     const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<XX>& B, const Vector<XX>& x) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
@@ -218,13 +220,13 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
     Array<SizeType> p_B(p.begin(),p.begin()+m);
 
     Matrix<XX> I=B*A_B;
-    ARIADNE_LOG_PRINTLN("p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I);
+    CONCLOG_PRINTLN("p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I);
     Matrix<XX> Z=I;
     for(SizeType i=0; i!=m; ++i) { Z[i][i]-=1; }
     ARIADNE_ASSERT_MSG(decide(norm(Z)*10000<=1),"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I);
 
     Vector<XX> Ax=A*x;
-    ARIADNE_LOG_PRINTLN("A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax);
+    CONCLOG_PRINTLN("A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax);
 
     for(SizeType k=m; k!=n; ++k) {
         SizeType j=p[k];
@@ -506,7 +508,7 @@ template<class X,class XX>
 Pair<Vector<XX>,Vector<XX> >
 compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<XX>& B)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
@@ -520,7 +522,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
         else if(vt[j]==Slackness::UPPER) { x[j]=xu[j]; }
         else { x[j]=0; }
     }
-    ARIADNE_LOG_PRINTLN("x_N="<<x);
+    CONCLOG_PRINTLN("x_N="<<x);
 
     // Compute w=b-A_N x_N
     for(SizeType i=0; i!=m; ++i) {
@@ -530,7 +532,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
             w[i]-=A[i][j]*x[j];
         }
     }
-    ARIADNE_LOG_PRINTLN("w="<<w);
+    CONCLOG_PRINTLN("w="<<w);
 
     // Compute x_B=B w
     for(SizeType k=0; k!=m; ++k) {
@@ -541,7 +543,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Ve
         }
     }
 
-    ARIADNE_LOG_PRINTLN("x="<<x);
+    CONCLOG_PRINTLN("x="<<x);
 
     Vector<X> Axmb=A*x-b;
     ARIADNE_ASSERT(decide(norm(Axmb)<0.00001));
@@ -701,7 +703,7 @@ template<class X, class XX>
 Pair<SizeType,XX>
 compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<XX>& x, const Vector<XX>& d, const SizeType s)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -712,9 +714,9 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     XX t=xu[p[s]]-xl[p[s]];
     if(decide(t<inf)) { r=s; }
     XX tk=x.zero_element();
-    ARIADNE_LOG_PRINTLN("xl="<<xl<<" x="<<x<<" xu="<<xu);
-    ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p<<" d="<<d);
-    ARIADNE_LOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t);
+    CONCLOG_PRINTLN("xl="<<xl<<" x="<<x<<" xu="<<xu);
+    CONCLOG_PRINTLN("vt="<<vt<<" p="<<p<<" d="<<d);
+    CONCLOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t);
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if( decide(d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=xl[j] && xl[j] != -inf) ) {
@@ -728,7 +730,7 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
         } else {
             tk=inf;
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t);
+        CONCLOG_PRINTLN_AT(1,"k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t);
     }
     t*=ds;
 
@@ -744,7 +746,7 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
 Pair<SizeType,RigorousNumericType<FloatDP>>
 compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s)
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     typedef FloatDP X;
     typedef RigorousNumericType<X> XX;
     typedef DP PR;
@@ -759,9 +761,9 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
     XX t=XX(xu[p[s]])-XX(xl[p[s]]);
     if(definitely(t<inf)) { r=s; }
     XX tk=XX(0,pr);
-    ARIADNE_LOG_PRINTLN("xl="<<xl<<" x="<<x<<" xu="<<xu);
-    ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p<<" d="<<d);
-    ARIADNE_LOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t);
+    CONCLOG_PRINTLN("xl="<<xl<<" x="<<x<<" xu="<<xu);
+    CONCLOG_PRINTLN("vt="<<vt<<" p="<<p<<" d="<<d);
+    CONCLOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t);
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if( definitely(d[k]*ds<0) && definitely(x[j]>=xl[j]) && xl[j] != -inf) {
@@ -775,7 +777,7 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
         } else {
             tk=XX(inf,pr);
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t);
+        CONCLOG_PRINTLN_AT(1,"k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t);
     }
     t*=ds;
 
@@ -880,7 +882,7 @@ SizeType lpenter(const Matrix<X>& A, const Vector<X>& c, const Array<Slackness>&
     Vector<XX> z=compute_z(A,c,p,y);
 
     SizeType s=compute_s(m,vt,p,z);
-    ARIADNE_LOG_PRINTLN_AT(1,"vt="<<vt<<" y="<<y<<" z="<<z<<" s="<<s<<" p[s]="<<p[s]);
+    CONCLOG_PRINTLN_AT(1,"vt="<<vt<<" y="<<y<<" z="<<z<<" s="<<s<<" p[s]="<<p[s]);
     return s;
 }
 
@@ -889,9 +891,9 @@ template<class X>
 ValidatedKleenean
 SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu);
-    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("xl="<<xl<<" xu="<<xu);
+    CONCLOG_PRINTLN("A="<<A<<" b="<<b);
 
     Array<SizeType> p(A.column_size());
     Array<Slackness> vt(A.column_size());
@@ -911,15 +913,15 @@ Bool
 SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                              Array<Slackness>& vt, Array<SizeType>& p) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
-    ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p);
+    CONCLOG_PRINTLN("vt="<<vt<<" p="<<p);
     Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG_PRINTLN("B="<<B);
+    CONCLOG_PRINTLN("B="<<B);
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    ARIADNE_LOG_PRINTLN("x="<<x);
+    CONCLOG_PRINTLN("x="<<x);
 
     ValidatedKleenean feasible=true;
 
@@ -931,14 +933,14 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
         if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-inf; feasible=indeterminate; }
         if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+inf; feasible=indeterminate; }
     }
-    ARIADNE_LOG_PRINTLN("c="<<c);
+    CONCLOG_PRINTLN("c="<<c);
     if(definitely(feasible)) { return true; }
 
     const Vector<XX> y=compute_y(c,p,B);
-    ARIADNE_LOG_PRINTLN("y="<<y);
+    CONCLOG_PRINTLN("y="<<y);
 
     const Vector<XX> z=compute_z(A,c,p,y);
-    ARIADNE_LOG_PRINTLN("z="<<z);
+    CONCLOG_PRINTLN("z="<<z);
 
     SizeType s = n;
     feasible=false;
@@ -947,15 +949,15 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
         if(vt[j]==Slackness::LOWER) { if(possibly(z[j]<=0)) { feasible=indeterminate; if(definitely(z[j]<0)) { s=k; break; } } }
         if(vt[j]==Slackness::UPPER) { if(possibly(z[j]>=0)) { feasible=indeterminate; if(definitely(z[j]>0)) { s=k; break; } } }
     }
-    ARIADNE_LOG_PRINTLN("s="<<s);
+    CONCLOG_PRINTLN("s="<<s);
     if(definitely(!feasible)) { return true; }
     if(s==n) {
-        ARIADNE_LOG_PRINTLN("Cannot find variable to exit basis; no improvement can be made");
+        CONCLOG_PRINTLN("Cannot find variable to exit basis; no improvement can be made");
         return true;
     }
 
     Vector<XX> d=compute_d(A,p,B,s);
-    ARIADNE_LOG_PRINTLN("d="<<d);
+    CONCLOG_PRINTLN("d="<<d);
 
     // Compute distance t along d in which to move,
     // and the variable p[r] to leave the basis
@@ -964,11 +966,11 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     SizeType r; XX t=x.zero_element();
     make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
-        ARIADNE_LOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
+        CONCLOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
         return true;
     }
 
-    ARIADNE_LOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t);
+    CONCLOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t);
 
     if(r==s) {
         // Update variable type
@@ -1004,7 +1006,7 @@ SizeType
 SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                          Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, SizeType s) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
@@ -1022,17 +1024,17 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     SizeType r; XX t=x.zero_element();
     make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
-        ARIADNE_LOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
+        CONCLOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
         return r;
     }
 
-    ARIADNE_LOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t);
+    CONCLOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" r="<<r<<" p[r]="<<p[r]<<" d="<<d<<" t="<<t);
 
     if(r==s) {
         Slackness nvts=(vt[p[s]]==Slackness::LOWER ? Slackness::UPPER : Slackness::LOWER);
-        ARIADNE_LOG_PRINTLN("Changing non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] from type "<<vt[p[s]]<<" to type "<<nvts);
+        CONCLOG_PRINTLN("Changing non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] from type "<<vt[p[s]]<<" to type "<<nvts);
     } else {
-        ARIADNE_LOG_PRINTLN("Swapping non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] with basic variable x["<<p[r]<<"]=x[p["<<r<<"]]");
+        CONCLOG_PRINTLN("Swapping non-basic variable x["<<p[s]<<"]=x[p["<<s<<"]] with basic variable x["<<p[r]<<"]=x[p["<<r<<"]]");
     }
 
     if(r==s) {
@@ -1085,10 +1087,10 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
         }
     }
 
-    ARIADNE_LOG_PRINTLN_AT(1,"vt="<<vt);
-    ARIADNE_LOG_PRINTLN_AT(1,"p="<<p);
-    ARIADNE_LOG_PRINTLN_AT(1,"B="<<B);
-    ARIADNE_LOG_PRINTLN_AT(1,"x="<<x);
+    CONCLOG_PRINTLN_AT(1,"vt="<<vt);
+    CONCLOG_PRINTLN_AT(1,"p="<<p);
+    CONCLOG_PRINTLN_AT(1,"B="<<B);
+    CONCLOG_PRINTLN_AT(1,"x="<<x);
 
     this->consistency_check(xl,xu,A,b, vt,p,B,x);
 
@@ -1100,16 +1102,16 @@ Bool
 SimplexSolver<X>::lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                          Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("c="<<c);
-    ARIADNE_LOG_PRINTLN("xl="<<xl);
-    ARIADNE_LOG_PRINTLN("xu="<<xu);
-    ARIADNE_LOG_PRINTLN("A="<<A);
-    ARIADNE_LOG_PRINTLN("b="<<b);
-    ARIADNE_LOG_PRINTLN("vt="<<vt);
-    ARIADNE_LOG_PRINTLN("p="<<p);
-    ARIADNE_LOG_PRINTLN("B="<<B);
-    ARIADNE_LOG_PRINTLN("x="<<x);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("c="<<c);
+    CONCLOG_PRINTLN("xl="<<xl);
+    CONCLOG_PRINTLN("xu="<<xu);
+    CONCLOG_PRINTLN("A="<<A);
+    CONCLOG_PRINTLN("b="<<b);
+    CONCLOG_PRINTLN("vt="<<vt);
+    CONCLOG_PRINTLN("p="<<p);
+    CONCLOG_PRINTLN("B="<<B);
+    CONCLOG_PRINTLN("x="<<x);
 
     const SizeType n=A.column_size();
     SizeType s=lpenter(A,c,vt,p,B);
@@ -1139,15 +1141,15 @@ ValidatedKleenean
 SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                             Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("xl="<<xl);
-    ARIADNE_LOG_PRINTLN("xu="<<xu);
-    ARIADNE_LOG_PRINTLN("A="<<A);
-    ARIADNE_LOG_PRINTLN("b="<<b);
-    ARIADNE_LOG_PRINTLN("vt="<<vt);
-    ARIADNE_LOG_PRINTLN("p="<<p);
-    ARIADNE_LOG_PRINTLN("B="<<B);
-    ARIADNE_LOG_PRINTLN("x="<<x);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("xl="<<xl);
+    CONCLOG_PRINTLN("xu="<<xu);
+    CONCLOG_PRINTLN("A="<<A);
+    CONCLOG_PRINTLN("b="<<b);
+    CONCLOG_PRINTLN("vt="<<vt);
+    CONCLOG_PRINTLN("p="<<p);
+    CONCLOG_PRINTLN("B="<<B);
+    CONCLOG_PRINTLN("x="<<x);
 
     static const ExactDouble RESIDUAL_TOLERANCE=0.0001_pr;
 
@@ -1169,23 +1171,23 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         else if(decide(x[j]>xu[j])) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
         else { cc[j]=0; }
     }
-    ARIADNE_LOG_PRINTLN("cc="<<cc);
+    CONCLOG_PRINTLN("cc="<<cc);
 
     static const Int MAX_STEPS=1024;
     Int steps=0;
     while(infeasible) {
 
         Bool done=lpstep(cc,ll,uu,A,b, vt,p,B,x);
-        ARIADNE_LOG_PRINTLN_AT(1,"Done changing basis");
-        ARIADNE_LOG_PRINTLN_AT(1,"p="<<p<<" B="<<B);
-        ARIADNE_LOG_PRINTLN_AT(1,"vt="<<vt<<" x="<<x);
+        CONCLOG_PRINTLN_AT(1,"Done changing basis");
+        CONCLOG_PRINTLN_AT(1,"p="<<p<<" B="<<B);
+        CONCLOG_PRINTLN_AT(1,"vt="<<vt<<" x="<<x);
 
         if(done) {
-            ARIADNE_LOG_PRINTLN_AT(1,"Cannot put infeasible variables into basis.");
+            CONCLOG_PRINTLN_AT(1,"Cannot put infeasible variables into basis.");
             Vector<XX> y=compute_y(cc,p,B);
             Vector<XX> ATy=transpose(A)*y;
             XX yb=dot(y,b);
-            ARIADNE_LOG_PRINTLN("Certificate of infeasibility: y="<<y<<", ATy="<<ATy<<", yb="<<yb);
+            CONCLOG_PRINTLN("Certificate of infeasibility: y="<<y<<", ATy="<<ATy<<", yb="<<yb);
             return false;
         }
 
@@ -1197,7 +1199,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
             else if(decide(x[j]>xu[j]-ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
             else { cc[j]=0; ll[j]=xl[j]; uu[j]=xu[j]; }
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"vt="<<vt<<" x="<<x<<" cc="<<cc);
+        CONCLOG_PRINTLN_AT(1,"vt="<<vt<<" x="<<x<<" cc="<<cc);
 
         ++steps;
         if(steps>=MAX_STEPS) {
@@ -1208,7 +1210,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         }
     }
 
-    ARIADNE_LOG_PRINTLN("Checking solution...");
+    CONCLOG_PRINTLN("Checking solution...");
 
     // Check solution
     for(SizeType i=0; i!=n; ++i) {
@@ -1222,7 +1224,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
                            "Ax="<<Ax<<", i="<<i<<", Ax[i]="<<Ax[i]<<", b[i]="<<b[i]<<", RESIDUAL_TOLERANCE="<<RESIDUAL_TOLERANCE);
     }
 
-    ARIADNE_LOG_PRINTLN("Feasible point x="<<x<<"; xl="<<xl<<", xu="<<xu<<", Ax="<<(A*x)<<", b="<<b);
+    CONCLOG_PRINTLN("Feasible point x="<<x<<"; xl="<<xl<<", xu="<<xu<<", Ax="<<(A*x)<<", b="<<b);
 
     return true;
 }
@@ -1234,11 +1236,11 @@ template<class X>
 ValidatedKleenean
 SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("xl="<<xl);
-    ARIADNE_LOG_PRINTLN("xu="<<xu);
-    ARIADNE_LOG_PRINTLN("A="<<A);
-    ARIADNE_LOG_PRINTLN("b="<<b);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("xl="<<xl);
+    CONCLOG_PRINTLN("xu="<<xu);
+    CONCLOG_PRINTLN("A="<<A);
+    CONCLOG_PRINTLN("b="<<b);
     ARIADNE_ASSERT(b.size()==A.row_size());
     ARIADNE_ASSERT(xl.size()==A.column_size());
     ARIADNE_ASSERT(xu.size()==A.column_size());
@@ -1251,7 +1253,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
 
     Array<Slackness> vt=compute_vt(xl,xu,p,m);
 
-    ARIADNE_LOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
+    CONCLOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
 
@@ -1267,10 +1269,10 @@ ValidatedKleenean
 SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                       Array<Slackness>& vt) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b);
-    ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu);
-    ARIADNE_LOG_PRINTLN("vt="<<vt);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("A="<<A<<" b="<<b);
+    CONCLOG_PRINTLN("xl="<<xl<<" xu="<<xu);
+    CONCLOG_PRINTLN("vt="<<vt);
     ARIADNE_ASSERT(b.size()==A.row_size());
     ARIADNE_ASSERT(xl.size()==A.column_size());
     ARIADNE_ASSERT(xu.size()==A.column_size());
@@ -1280,7 +1282,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     Array<SizeType> p = Ariadne::compute_p(vt);
     Matrix<XX> B = Ariadne::compute_B<X>(A,p);
 
-    ARIADNE_LOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
+    CONCLOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     Vector<XX> y(m,x.zero_element());
@@ -1295,9 +1297,9 @@ ValidatedKleenean
 SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                       Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, Vector<XX>& y) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu);
-    ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu);
+    CONCLOG_PRINTLN("vt="<<vt<<" p="<<p);
 
     const SizeType m=A.row_size();
     //const SizeType n=A.column_size();
@@ -1316,11 +1318,11 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
 
     ValidatedKleenean fs = this->_feasible(xl,xu,A,b,vt,p,B,x);
 
-    ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p<<" fs="<<fs);
+    CONCLOG_PRINTLN("vt="<<vt<<" p="<<p<<" fs="<<fs);
     Vector<X> c=Ariadne::compute_c(xl,xu,p,x,m);
     y=Ariadne::compute_y(c,p,B);
     Vector<XX> z=Ariadne::compute_z(A,c,p,y);
-    ARIADNE_LOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
+    CONCLOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
 
     ValidatedKleenean vfs = this->verify_feasibility(xl,xu,A,b,vt);
     if(is_determinate(vfs) && definitely(vfs!=fs)) {
@@ -1341,8 +1343,8 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
 template<class X> ValidatedKleenean
 SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b, const Array<Slackness>& vt) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt);
     const Array<SizeType> p=compute_p(vt);
 
     const SizeType m=A.row_size();
@@ -1363,31 +1365,31 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
         const Vector<X> c=compute_c(m,xl,xu,p,x);
         const Vector<XX> y=compute_y(c,p,B);
         const Vector<XX> z=compute_z(A,c,p,y);
-        ARIADNE_LOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
+        CONCLOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
     }
 
     const Matrix<XX> B=compute_B(A,p);
-    ARIADNE_LOG_PRINTLN("B="<<B<<"; B*A="<<((B*Matrix<XX>(A))));
+    CONCLOG_PRINTLN("B="<<B<<"; B*A="<<((B*Matrix<XX>(A))));
 
     const Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    ARIADNE_LOG_PRINTLN("x="<<x<<"; A*x="<<(Matrix<XX>(A)*x));
+    CONCLOG_PRINTLN("x="<<x<<"; A*x="<<(Matrix<XX>(A)*x));
 
     const Vector<X> c=compute_c(m,xl,xu,p,x);
-    ARIADNE_LOG_PRINTLN("c="<<c);
+    CONCLOG_PRINTLN("c="<<c);
 
     const Vector<XX> y=compute_y(c,p,B);
-    ARIADNE_LOG_PRINTLN("y="<<y);
+    CONCLOG_PRINTLN("y="<<y);
 
     const Vector<XX> z=compute_z(A,c,p,y);
-    ARIADNE_LOG_PRINTLN("z="<<z);
+    CONCLOG_PRINTLN("z="<<z);
 
-    ARIADNE_LOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
+    CONCLOG_PRINTLN("x="<<x<<" c="<<c<<" y="<<y<<" z="<<z);
 
     ValidatedKleenean fs=true;
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(possibly(x[j]<=xl[j]) || possibly(x[j]>=xu[j])) {
-            ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" j="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]);
+            CONCLOG_PRINTLN_AT(1,"k="<<k<<" j="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]);
             fs=indeterminate;
             if(definitely(x[j]<xl[j]) || definitely(x[j]>xu[j])) {
                 fs=false;
@@ -1477,7 +1479,7 @@ Vector<RigorousNumericType<X>>
 SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                       Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
@@ -1497,10 +1499,10 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
     this->consistency_check(A,p,B);
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
-    ARIADNE_LOG_PRINTLN("Initial A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x);
+    CONCLOG_PRINTLN("Initial A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x);
 
     this->_feasible(xl,xu,A,b, vt,p,B,x);
-    ARIADNE_LOG_PRINTLN("Feasible A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x);
+    CONCLOG_PRINTLN("Feasible A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x);
 
     Bool done=false;
     const Int MAX_STEPS=1024;
@@ -1510,7 +1512,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
         ++steps;
         ARIADNE_ASSERT_MSG(steps<MAX_STEPS,"Maximum number of steps reached for linear programming problem.");
     }
-    ARIADNE_LOG_PRINTLN("Optimal A="<<A<<" b="<<b<<" c="<<c<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" cx="<<dot(x,x));
+    CONCLOG_PRINTLN("Optimal A="<<A<<" b="<<b<<" c="<<c<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" cx="<<dot(x,x));
 
     return x;
 }

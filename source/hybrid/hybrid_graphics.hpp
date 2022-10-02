@@ -37,11 +37,13 @@
 #include "symbolic/variable.hpp"
 #include "io/graphics_interface.hpp"
 #include "io/figure.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "symbolic/expression_set.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/hybrid_graphics_interface.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -118,7 +120,7 @@ inline Void draw(HybridFigure& g, const Colour& fc1, const SET& set1, CSETS cons
 
 template<class... CSETS>
 Void plot(const char* filename, const Axes2d& axes, CSETS const&... csets) {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     HybridFigure g;  g.set_axes(axes); draw(g,csets...); g.write(filename); }
 
 } // namespace Ariadne

@@ -115,7 +115,7 @@ void SPRE20()
     auto system = problem.system;
     HybridConstraintSet safe_set = problem.safe_set;
 
-    ARIADNE_LOG_PRINTLN("Space Rendezvous system:");
+    CONCLOG_PRINTLN("Space Rendezvous system:");
 
     DiscreteLocation initial_location = initial_set.location();
     RealSpace initial_space = system.state_space()[initial_location];
@@ -133,7 +133,7 @@ void SPRE20()
 
     Stopwatch<Milliseconds> sw;
 
-    ARIADNE_LOG_PRINTLN("Computing orbit...");
+    CONCLOG_PRINTLN("Computing orbit...");
     HybridTime evolution_time(200,3);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
@@ -142,29 +142,29 @@ void SPRE20()
     StringConstant rendezvous("rendezvous");
     StringConstant aborting("aborting");
 
-    ARIADNE_LOG_PRINTLN("Checking properties...");
+    CONCLOG_PRINTLN("Checking properties...");
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
         auto reach_box = HybridExactBox(reach.location(),reach.state_space(),cast_exact_box(reach.bounding_box().euclidean_set()));
         if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach_box)))) {
-            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
+            CONCLOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
             ++num_ce;
         }
         if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach_box)))) {
-            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
+            CONCLOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach_box << ", unsafe");
             ++num_ce;
         }
     }
-    if (num_ce>0) ARIADNE_LOG_PRINTLN("Number of counterexamples: " << num_ce);
+    if (num_ce>0) CONCLOG_PRINTLN("Number of counterexamples: " << num_ce);
 
     sw.click();
-    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
-    ARIADNE_LOG_PRINTLN("Plotting...");
+    CONCLOG_PRINTLN("Plotting...");
     plot("SPRE20",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
-    ARIADNE_LOG_PRINTLN("File SPRE20.png written.");
+    CONCLOG_PRINTLN("File SPRE20.png written.");
 }
 
 } // namespace Ariadne

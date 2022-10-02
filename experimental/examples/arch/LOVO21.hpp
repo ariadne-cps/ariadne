@@ -29,7 +29,7 @@ void LOVO21()
 {
     ArchBenchmark benchmark("LOVO21");
 
-    ARIADNE_LOG_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
+    CONCLOG_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
 
     RealVariable x("x");
     RealVariable y("y");
@@ -75,10 +75,10 @@ void LOVO21()
     config.set_reconditioning_num_blocks(5);
     auto initial_enclosure = HybridEnclosure(initial_set,RealSpace({x,y}),config);
 
-    ARIADNE_LOG_PRINTLN("Computing evolution... ")
+    CONCLOG_PRINTLN("Computing evolution... ")
     auto orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
 
-    ARIADNE_LOG_PRINTLN("Checking properties... ")
+    CONCLOG_PRINTLN("Checking properties... ")
 
     ListSet<HybridEnclosure> actual_final;
 
@@ -94,17 +94,17 @@ void LOVO21()
         }
     }
 
-    ARIADNE_LOG_RUN_AT(2,auto final_bounds = actual_final.bounding_box())
+    CONCLOG_RUN_AT(2,auto final_bounds = actual_final.bounding_box())
 
     sw.click();
 
     if (has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
-        ARIADNE_LOG_PRINTLN("All final sets have either 2 or 4 transitions.")
-    } else { ARIADNE_LOG_PRINTLN("Final set with a different number of transitions have been found!") }
+        CONCLOG_PRINTLN("All final sets have either 2 or 4 transitions.")
+    } else { CONCLOG_PRINTLN("Final set with a different number of transitions have been found!") }
 
-    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
-    ARIADNE_LOG_PRINTLN("# of final sets: " << actual_final.size())
-    ARIADNE_LOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width())
+    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
+    CONCLOG_PRINTLN("# of final sets: " << actual_final.size())
+    CONCLOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width())
 
     auto instance = benchmark.create_instance();
     if (has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
@@ -122,9 +122,9 @@ void LOVO21()
     simulator.configuration().set_step_size(0.1);
     HybridRealPoint circle_initial(rotate,{t=0});
     HybridTime circle_time(2*pi,1);
-    ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time))
+    CONCLOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle_initial,circle_time))
 
-    ARIADNE_LOG_PRINTLN("Drawing figure... ")
+    CONCLOG_PRINTLN("Drawing figure... ")
     plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), orange, orbit, black, circle_orbit);
-    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.")
+    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.")
 }

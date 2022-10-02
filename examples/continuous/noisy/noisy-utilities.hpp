@@ -55,7 +55,7 @@ template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
 void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
     evolver.configuration().approximations(approximations);
     evolver.configuration().maximum_step_size(step);
@@ -71,10 +71,10 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
         partial_evaluate(final_set,final_set.result_size(),static_cast<ExactNumber>(final_set.domain()[final_set.result_size()].upper_bound()));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
-    ARIADNE_LOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
+    CONCLOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed_seconds() << " s");
 
     if (draw) {
-        ARIADNE_LOG_PRINTLN("Plotting...");
+        CONCLOG_PRINTLN("Plotting...");
         auto n = ivf.dimension();
         Box<FloatDPUpperInterval> graphics_box(n);
         for (auto set: reach_sets) {
@@ -95,7 +95,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
                 fig.write((name+num_char).c_str());
             }
         }
-        ARIADNE_LOG_PRINTLN("Done.");
+        CONCLOG_PRINTLN("Done.");
     }
 }
 
@@ -103,7 +103,7 @@ void run_each_approximation(String name, DifferentialInclusion const& ivf, BoxDo
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
-        ARIADNE_LOG_PRINTLN(appro);
+        CONCLOG_PRINTLN(appro);
         run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,draw);
     }
 }

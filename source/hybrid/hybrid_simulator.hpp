@@ -29,9 +29,11 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_HPP
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

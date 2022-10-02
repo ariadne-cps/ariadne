@@ -68,7 +68,7 @@
 
 #include "io/figure.hpp"
 #include "io/graphics_manager.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "function/functional.hpp"
 
@@ -79,6 +79,8 @@
 #include "algebra/expansion.inl.hpp"
 
 #include "concurrency/workload.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

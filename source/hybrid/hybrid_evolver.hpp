@@ -48,7 +48,9 @@
 #include "hybrid/hybrid_automaton_interface.hpp"
 #include "hybrid/hybrid_evolver_interface.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

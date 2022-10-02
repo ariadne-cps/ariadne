@@ -30,13 +30,13 @@ void ariadne_main()
     Real a=Decimal(1.3), b=Decimal(0.3);
     RealVariable x("x"), y("y");
     IteratedMap henon({next(x)=a-x*x+b*y,next(y)=x});
-    ARIADNE_LOG_PRINTLN_VAR(henon);
+    CONCLOG_PRINTLN_VAR(henon);
 
     // Compute a fixed point
     IntervalNewtonSolver solver(maximum_error=1e-2, maximum_number_of_steps=16);
     ExactBoxType search_box({{0,1},{0,1}});
     Point<FloatDPBounds> fixed_point = Point(solver.fixed_point(henon.update_function(),search_box));
-    ARIADNE_LOG_PRINTLN_VAR(fixed_point);
+    CONCLOG_PRINTLN_VAR(fixed_point);
     LabelledSet<Point<FloatDPBounds>> labelled_fixed_point(henon.state_space(),fixed_point);
 
     // Set up the evaluators

@@ -35,12 +35,14 @@
 #include <iostream>
 
 #include "utility/declarations.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "utility/container.hpp"
 #include "io/graphics_interface.hpp"
 #include "function/affine.hpp"
 #include "function/affine_model.hpp"
 #include "function/constraint.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

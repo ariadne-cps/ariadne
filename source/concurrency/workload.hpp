@@ -92,7 +92,9 @@ class WorkloadBase : public WorkloadInterface<E,AS...> {
 
     Void _concurrent_task_wrapper(CompletelyBoundFunctionType const& task, CompletelyBoundFunctionType const& progress_acknowledge) {
         _advancement.add_to_processing();
-        Logger::instance().set_level(_logger_level);
+        if (_logger_level > Logger::instance().current_level()) Logger::instance().increase_level(_logger_level-Logger::instance().current_level());
+        else Logger::instance().decrease_level(Logger::instance().current_level()-_logger_level);
+        //Logger::instance().set_level(_logger_level);
         if (not Logger::instance().is_muted_at(0)) { progress_acknowledge(); _print_hold(); }
         try {
             task();

@@ -62,11 +62,13 @@
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "io/figure.hpp"
 #include "solvers/linear_programming.hpp"
 
 #include "hybrid/hybrid_graphics.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

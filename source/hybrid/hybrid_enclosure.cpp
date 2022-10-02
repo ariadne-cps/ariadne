@@ -655,7 +655,7 @@ ListSet<HybridEnclosure>::draw(CanvasInterface& cnvs, const Set<DiscreteLocation
 VariablesUpperBoxType
 ListSet<HybridEnclosure>::bounding_box() const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     auto iter=this->begin();
     auto box = iter->state_auxiliary_set().euclidean_set().bounding_box();
     RealSpace space = join(iter->state_space(),iter->auxiliary_space());

@@ -36,9 +36,11 @@
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "dynamics/iterated_map.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

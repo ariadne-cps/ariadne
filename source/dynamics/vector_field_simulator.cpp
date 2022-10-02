@@ -93,7 +93,7 @@ auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const Termination
 auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
     -> OrbitType
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     VectorField::TimeType t;
     Dyadic h(cast_exact(configuration().step_size()));
@@ -114,7 +114,7 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
 
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
+        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
 
         Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
 

@@ -22,8 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "buffered_thread.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

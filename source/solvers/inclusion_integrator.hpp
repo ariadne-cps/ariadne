@@ -39,8 +39,10 @@
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
 #include "symbolic/expression_set.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "solvers/integrator_interface.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

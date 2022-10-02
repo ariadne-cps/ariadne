@@ -101,23 +101,23 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
                                 const ExactBoxType& codomain) const
     -> Pair<ValidatedKleenean,ExactPointType>
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
     static const ExactDouble XSIGMA=0.125_x;
     static const ExactDouble TERR=-1.0_x*pow(two,-10);
     static const ExactDouble _inf ( Ariadne::inf.get_d() );
 
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("function="<<function);
-    ARIADNE_LOG_PRINTLN("codomain="<<codomain);
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("function="<<function);
+    CONCLOG_PRINTLN("codomain="<<codomain);
     ARIADNE_ASSERT(codomain.dimension()>0);
 
     // Make codomain bounded
     UpperBoxType bounds=codomain;
     UpperBoxType image=apply(function,domain);
-    ARIADNE_LOG_PRINTLN_AT(1,"image="<<image);
+    CONCLOG_PRINTLN_AT(1,"image="<<image);
     for(SizeType i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
-            ARIADNE_LOG_PRINTLN("Proved disjointness using direct evaluation");
+            CONCLOG_PRINTLN("Proved disjointness using direct evaluation");
             return make_pair(false,ExactPointType(0u,dp));
         } else {
             bounds[i]=intersection(codomain[i],image[i]);
@@ -145,21 +145,21 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     NonlinearInteriorPointOptimiser optimiser;
     optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);
+    CONCLOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);
 
     static const CounterType NUMBER_OF_STEPS=12u;
 
     // TODO: Don't use fixed number of steps
     for(CounterType i=0; i!=NUMBER_OF_STEPS; ++i) {
-        ARIADNE_LOG_PRINTLN_AT(2,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+        CONCLOG_PRINTLN_AT(2,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(decide(t>=TERR)) {
-            ARIADNE_LOG_PRINTLN("t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+            CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
             if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
-            else { ARIADNE_LOG_PRINTLN("f(y)="<<fn(cast_exact(y))); return make_pair(indeterminate,cast_exact(point)); }
+            else { CONCLOG_PRINTLN("f(y)="<<fn(cast_exact(y))); return make_pair(indeterminate,cast_exact(point)); }
         }
     }
-    ARIADNE_LOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+    CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
     if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this
@@ -180,25 +180,25 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         }
         txg = cnst + txg;
 
-        ARIADNE_LOG_PRINTLN_AT(1,"txg="<<txg);
+        CONCLOG_PRINTLN_AT(1,"txg="<<txg);
 
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<subdomain);
+        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
         this->hull_reduce(subdomain,txg,ExactIntervalType(0,_inf));
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<subdomain);
+        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
         if(definitely(subdomain.is_empty())) {
-            ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce");
+            CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return make_pair(false,ExactPointType());
         }
 
         for(SizeType i=0; i!=m; ++i) {
             this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
-            ARIADNE_LOG_PRINTLN_AT(2,"dom="<<subdomain);
-            if(definitely(subdomain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return make_pair(false,ExactPointType()); }
+            CONCLOG_PRINTLN_AT(2,"dom="<<subdomain);
+            if(definitely(subdomain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return make_pair(false,ExactPointType()); }
         }
-        ARIADNE_LOG_PRINTLN_AT(1,"dom="<<subdomain);
+        CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
 
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
-        ARIADNE_LOG_PRINTLN("Splitting domain");
+        CONCLOG_PRINTLN("Splitting domain");
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
         FloatDPApproximation xsigma(XSIGMA,dp);
         Vector<FloatDPApproximation> nx = (1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
@@ -299,10 +299,10 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
 
 Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedProcedure& procedure, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("procedure="<<procedure);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("procedure="<<procedure);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
     return definitely(domain.is_empty());
@@ -310,10 +310,10 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedProcedur
 
 Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const Vector<ValidatedProcedure>& procedure, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("procedure="<<procedure);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("procedure="<<procedure);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
     return definitely(domain.is_empty());
@@ -321,10 +321,10 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const Vector<ValidatedP
 
 Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("function="<<function);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("function="<<function);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     Procedure<ValidatedNumber> procedure(function);
     return this->hull_reduce(domain,procedure,bounds);
@@ -332,10 +332,10 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarMu
 
 Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("function="<<function);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("function="<<function);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     Vector< Procedure<ValidatedNumber> > procedure(function);
     return this->hull_reduce(domain,procedure,bounds);
@@ -343,10 +343,10 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMu
 
 Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("function="<<function);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("function="<<function);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
@@ -426,10 +426,10 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
 
 Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
-    ARIADNE_LOG_PRINTLN("domain="<<domain);
-    ARIADNE_LOG_PRINTLN("function="<<function);
-    ARIADNE_LOG_PRINTLN("bounds="<<bounds);
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("domain="<<domain);
+    CONCLOG_PRINTLN("function="<<function);
+    CONCLOG_PRINTLN("bounds="<<bounds);
 
     if(definitely(domain[variable].lower_bound() >= domain[variable].upper_bound())) { return false; }
 
@@ -495,15 +495,15 @@ Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, c
 
 ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c, const ExactPointType& y) const
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     for(SizeType i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower_bound() || y[i]>d[i].upper_bound()) { return false; }
     }
 
     Vector<FloatDPBounds> fy=f(Vector<FloatDPBounds>(y));
-    ARIADNE_LOG_PRINTLN("d="<<d<<" f="<<f<<", c="<<c);
-    ARIADNE_LOG_PRINTLN("y="<<y<<", f(y)="<<fy);
+    CONCLOG_PRINTLN("d="<<d<<" f="<<f<<", c="<<c);
+    CONCLOG_PRINTLN("y="<<y<<", f(y)="<<fy);
     ValidatedKleenean result=true;
     for(SizeType j=0; j!=fy.size(); ++j) {
         if(fy[j].lower().raw()>c[j].upper_bound().raw() || fy[j].upper().raw()<c[j].lower_bound().raw()) { return false; }

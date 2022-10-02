@@ -23,9 +23,11 @@
  */
 
 #include "io/command_line_interface.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "concurrency/task_manager.hpp"
 #include "../test.hpp"
+
+using namespace ConcLog;
 
 using namespace Ariadne;
 

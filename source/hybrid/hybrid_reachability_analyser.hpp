@@ -43,8 +43,9 @@
 #include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_storage.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
+using namespace ConcLog;
 
 namespace Ariadne {
 

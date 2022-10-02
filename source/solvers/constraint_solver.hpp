@@ -29,13 +29,15 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "utility/container.hpp"
 
 #include "utility/declarations.hpp"
 #include "utility/tribool.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

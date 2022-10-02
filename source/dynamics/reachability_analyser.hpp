@@ -40,8 +40,9 @@
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser_interface.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
+using namespace ConcLog;
 
 namespace Ariadne {
 

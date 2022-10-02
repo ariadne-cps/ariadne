@@ -41,10 +41,12 @@
 #include "hybrid/discrete_event.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/expression.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "hybrid/hybrid_automaton.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

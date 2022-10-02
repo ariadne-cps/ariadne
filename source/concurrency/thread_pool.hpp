@@ -32,8 +32,10 @@
 #include <queue>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 #include "thread.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

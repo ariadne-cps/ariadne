@@ -44,13 +44,14 @@
 
 #include "solvers/runge_kutta_integrator.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
 
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automaton_interface.hpp"
 
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -128,7 +129,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
-    ARIADNE_LOG_SCOPE_CREATE;
+    CONCLOG_SCOPE_CREATE;
 
     HybridAutomatonInterface const& system=*_sys_ptr;
 
@@ -155,7 +156,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG_PRINTLN_AT(1,
+        CONCLOG_PRINTLN_AT(1,
                 "t=" << std::setw(4) << std::left << t.continuous_time().compute_get(Effort(0u),double_precision)
                 << " #e=" << std::left << t.discrete_time()
                 << " p=" << point
@@ -164,7 +165,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
                 << std::setprecision(old_precision));
 
         if (not _satisfies_invariants(location, point)) {
-            ARIADNE_LOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
+            CONCLOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
             break;
         }
 
@@ -189,7 +190,7 @@ auto HybridSimulator::orbit(const HybridApproximatePointType& init_pt,
             next_point=reset(point);
             event_trace.push_back(event);
 
-            ARIADNE_LOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
+            CONCLOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
 
             dynamic=system.dynamic_function(location);
             guards=_guard_functions(location);

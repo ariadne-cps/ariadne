@@ -34,7 +34,9 @@
 #include <string>
 
 #include "utility/declarations.hpp"
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 template<class T> class Set;

@@ -146,7 +146,7 @@ void ariadne_main()
 
     /// Finished building the automaton
 
-    ARIADNE_LOG_PRINTLN_VAR(rectifier);
+    CONCLOG_PRINTLN_VAR(rectifier);
 
     /// Compute the system evolution
 
@@ -157,30 +157,30 @@ void ariadne_main()
     evolver.configuration().set_maximum_enclosure_radius(MAX_ENCL_RADIUS);
     evolver.configuration().set_maximum_step_size(MAX_STEP_SIZE);
     evolver.configuration().set_enable_subdivisions(ENABLE_SUBDIV);
-    ARIADNE_LOG_PRINTLN_VAR(evolver.configuration());
+    CONCLOG_PRINTLN_VAR(evolver.configuration());
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
-    ARIADNE_LOG_PRINTLN("Computing evolution...");
+    CONCLOG_PRINTLN("Computing evolution...");
 
     RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*parameters[0]});
     HybridSet initial_set(offoff,initial_box);
 
-    ARIADNE_LOG_PRINTLN(initial_set);
+    CONCLOG_PRINTLN(initial_set);
 
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
-    ARIADNE_LOG_PRINTLN("Computing orbit... ");
+    CONCLOG_PRINTLN("Computing orbit... ");
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    ARIADNE_LOG_PRINTLN("done.");
+    CONCLOG_PRINTLN("done.");
 
-    ARIADNE_LOG_PRINTLN_VAR(orbit.final().size());
+    CONCLOG_PRINTLN_VAR(orbit.final().size());
 
     Axes2d graphic_axes(0.0<=t<=1.0/parameters[1].get_d(),-parameters[0]<=vi<=parameters[0]);
     Axes2d graphic_axes2(-parameters[0]<=t<=parameters[0],2<=vi<=parameters[0]);
 
-    ARIADNE_LOG_PRINTLN("Plotting results...");
+    CONCLOG_PRINTLN("Plotting results...");
 
     plot("rectifier_orbit_t_vin", graphic_axes, Colour(0.0,0.5,1.0), orbit);
     plot("rectifier_orbit_t_vout", graphic_axes, Colour(0.0,0.5,1.0), orbit);

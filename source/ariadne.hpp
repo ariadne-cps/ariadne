@@ -82,4 +82,6 @@ namespace Ariadne {
 #include "io/command_line_interface.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 
+#include "conclog/include/logging.hpp"
+
 #endif

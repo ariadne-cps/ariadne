@@ -41,7 +41,9 @@
 #include "solvers/configuration_interface.hpp"
 #include "dynamics/evolver_interface.hpp"
 
-#include "io/logging.hpp"
+#include "conclog/include/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 

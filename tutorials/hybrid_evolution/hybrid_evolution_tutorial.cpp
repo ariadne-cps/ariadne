@@ -155,18 +155,18 @@ Void simulate_evolution(CompositeHybridAutomaton const& system, HybridBoundedCon
     HybridSimulator simulator(system);
     simulator.configuration().set_step_size(0.01);
 
-    ARIADNE_LOG_PRINTLN_VAR(simulator.configuration());
+    CONCLOG_PRINTLN_VAR(simulator.configuration());
 
     // Compute a simulation trajectory
-    ARIADNE_LOG_PRINTLN("Computing simulation trajectory...");
+    CONCLOG_PRINTLN("Computing simulation trajectory...");
     auto orbit = simulator.orbit(initial_set,final_time);
 
     // Plot the simulation trajectory using three different projections
-    ARIADNE_LOG_PRINTLN("Plotting simulation trajectory...");
+    CONCLOG_PRINTLN("Plotting simulation trajectory...");
     plot("simulation_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
     plot("simulation_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    ARIADNE_LOG_PRINTLN("Done computing and plotting simulation trajectory!");
+    CONCLOG_PRINTLN("Done computing and plotting simulation trajectory!");
 }
 //! [simulate_evolution]
 
@@ -180,7 +180,7 @@ GeneralHybridEvolver create_evolver(CompositeHybridAutomaton const& system)
     evolver.configuration().set_maximum_enclosure_radius(3.0);
     evolver.configuration().set_maximum_step_size(0.25);
 
-    ARIADNE_LOG_PRINTLN_VAR(evolver.configuration());
+    CONCLOG_PRINTLN_VAR(evolver.configuration());
 
     return evolver;
 }
@@ -195,15 +195,15 @@ Void compute_evolution(const GeneralHybridEvolver& evolver, HybridBoundedConstra
     TimeVariable time;
 
     // Compute the orbit using upper semantics
-    ARIADNE_LOG_PRINTLN("Computing evolution flow tube...");
+    CONCLOG_PRINTLN("Computing evolution flow tube...");
     auto orbit = evolver.orbit(initial_set,final_time,Semantics::UPPER);
 
     // Plot the flow tube using three different projections
-    ARIADNE_LOG_PRINTLN("Plotting evolution flow tube...");
+    CONCLOG_PRINTLN("Plotting evolution flow tube...");
     plot("finite_evolution_t-height",Axes2d(0<=time<=30,5<=height<=9),orbit);
     plot("finite_evolution_t-aperture",Axes2d(0<=time<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    ARIADNE_LOG_PRINTLN("Done computing and plotting evolution flow tube!");
+    CONCLOG_PRINTLN("Done computing and plotting evolution flow tube!");
 }
 //! [compute_evolution]
 
@@ -217,7 +217,7 @@ HybridReachabilityAnalyser create_analyser(GeneralHybridEvolver const& evolver)
     analyser.configuration().set_maximum_grid_fineness(6);
     analyser.configuration().set_lock_to_grid_time(5);
 
-    ARIADNE_LOG_PRINTLN_VAR(analyser.configuration());
+    CONCLOG_PRINTLN_VAR(analyser.configuration());
 
     return analyser;
 }
@@ -231,18 +231,18 @@ Void compute_reachability(HybridReachabilityAnalyser const& analyser, HybridBoun
     RealVariable height("height");
 
     // Compute over-approximation to infinite-time reachable set using upper semantics.
-    ARIADNE_LOG_PRINTLN("Computing upper reach set...");
+    CONCLOG_PRINTLN("Computing upper reach set...");
     auto upper_reach = analyser.upper_reach(initial_set,final_time);
-    ARIADNE_LOG_PRINTLN("Plotting upper reach set...");
+    CONCLOG_PRINTLN("Plotting upper reach set...");
     plot("upper_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),upper_reach);
-    ARIADNE_LOG_PRINTLN("Done computing and plotting upper reach set!");
+    CONCLOG_PRINTLN("Done computing and plotting upper reach set!");
 
     // Compute over-approximation to infinite-time reachable set using upper semantics.
-    ARIADNE_LOG_PRINTLN("Computing outer chain reach set...");
+    CONCLOG_PRINTLN("Computing outer chain reach set...");
     auto outer_chain_reach = analyser.outer_chain_reach(initial_set);
-    ARIADNE_LOG_PRINTLN("Plotting outer chain reach set...");
+    CONCLOG_PRINTLN("Plotting outer chain reach set...");
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
-    ARIADNE_LOG_PRINTLN("Done computing and plotting outer chain reach set!");
+    CONCLOG_PRINTLN("Done computing and plotting outer chain reach set!");
 }
 //! [compute_reachability]
 
@@ -253,7 +253,7 @@ CompositeHybridAutomaton get_system()
     CompositeHybridAutomaton system("watertank",{get_tank(),get_valve(),get_controller()});
 
     // Print the system description on the command line
-    ARIADNE_LOG_PRINTLN_VAR(system);
+    CONCLOG_PRINTLN_VAR(system);
 
     return system;
 }
@@ -275,7 +275,7 @@ HybridBoundedConstraintSet get_initial_set()
     HybridBoundedConstraintSet initial_set({valve|opened,controller|rising},{6.9_dec<=height<=7});
 
     // Print the initial set on the command line
-    ARIADNE_LOG_PRINTLN_VAR(initial_set);
+    CONCLOG_PRINTLN_VAR(initial_set);
 
     return initial_set;
 }
@@ -286,7 +286,7 @@ HybridTime get_final_time()
 {
     // Define the final time: continuous time and maximum number of transitions
     HybridTime final_time(30.0_dec,5);
-    ARIADNE_LOG_PRINTLN_VAR(final_time);
+    CONCLOG_PRINTLN_VAR(final_time);
 
     return final_time;
 }

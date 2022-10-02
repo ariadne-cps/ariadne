@@ -30,7 +30,7 @@ void SUTR21() {
 
     ArchBenchmark benchmark("SUTR21");
 
-    ARIADNE_LOG_PRINTLN("SUTRA benchmark (SUTR21):");
+    CONCLOG_PRINTLN("SUTRA benchmark (SUTR21):");
 
     RealVariable SA("SA"), SI("SI"), A("A"), I("I"), RI("RI"), RA("RA"), D("D"), AplusI("A+I");
     RealConstant beta("beta",0.25_dec);
@@ -64,18 +64,18 @@ void SUTR21() {
 
     Stopwatch<Milliseconds> sw;
 
-    ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
-    ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
+    CONCLOG_PRINTLN_AT(2,"Computing orbit...");
+    CONCLOG_RUN_AT(2, auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
 
     sw.click();
-    ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
+    CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 /*
-    ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
+    CONCLOG_PRINTLN_AT(2,"Checking properties...");
     Nat ce = 0;
     for (auto set : orbit.reach()) {
         auto bb = set.bounding_box();
         if (possibly(bb[x4] >= 4.5_dec)) {
-            ARIADNE_LOG_PRINTLN_AT(3,"Set with value " << bb[x4] << " does not respect the specification.");
+            CONCLOG_PRINTLN_AT(3,"Set with value " << bb[x4] << " does not respect the specification.");
             ++ce;
         }
     }
@@ -83,16 +83,16 @@ void SUTR21() {
     auto x4_width = orbit.final().bounding_box()[x4].width();
 
     sw.click();
-    if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
-    ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
-    ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
+    if (ce>0) CONCLOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+    CONCLOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+    CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.");
 
     auto instance = benchmark.create_instance("W001");
     if (ce==0)
         instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(x4_width.get_d());
     instance.write();
 */
-    ARIADNE_LOG_PRINTLN("Plotting...");
+    CONCLOG_PRINTLN("Plotting...");
     {
         LabelledFigure fig(Axes2d({0<=TimeVariable()<=evolution_time,0<=SA<=1}));
         fig.draw(orbit);
@@ -150,5 +150,5 @@ void SUTR21() {
         fig.write(ss.str().c_str());
     }
 
-    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
+    CONCLOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

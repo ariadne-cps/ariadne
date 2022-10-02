@@ -214,5 +214,6 @@ if(CAIRO_FOUND)
     target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
 endif()
 
-install(TARGETS ariadne DESTINATION lib)
+install(TARGETS ariadne conclog DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/conclog/include DESTINATION include/conclog FILES_MATCHING PATTERN "*.hpp")

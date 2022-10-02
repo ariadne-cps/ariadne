@@ -20,4 +20,4 @@ include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
 add_executable(rigorous_numerics_tutorial rigorous_numerics_tutorial.cpp)
 
 # Instruct to link against the ariadne library
-target_link_libraries(rigorous_numerics_tutorial ${ARIADNE_LIBRARIES})
+target_link_libraries(rigorous_numerics_tutorial ${ARIADNE_LIBRARIES} ${CONCLOG_LIBRARY})

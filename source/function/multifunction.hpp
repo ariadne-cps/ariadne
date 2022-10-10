@@ -44,7 +44,7 @@
 #include "algebra/differential.hpp"
 
 #include "function/function.hpp"
-#include "function/function_model.hpp"
+//#include "function/function_model.hpp"
 
 #include "geometry/set.hpp"
 #include "geometry/interval.hpp"

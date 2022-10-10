@@ -441,6 +441,13 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<Validated
     }
 }
 
+template<class M> ScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_unchecked_compose(const ScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
+    return ScaledFunctionPatch<M>(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_unchecked_compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
+    return VectorScaledFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
+}
 
 
 /*

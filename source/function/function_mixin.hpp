@@ -194,11 +194,17 @@ template<class P, class SIG> inline FunctionInterface<P,SIG>* _heap_move(Functio
     return f.raw_pointer()->_clone(); }
 
 template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    if constexpr (BaseOf<FunctionInterface<ApproximateTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    else { assert(false); std::abort(); } }
 template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F,ValidatedTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    if constexpr (BaseOf<FunctionInterface<ValidatedTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    else { assert(false); std::abort(); } }
 template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    if constexpr (BaseOf<FunctionInterface<EffectiveTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+    else { assert(false); std::abort(); } }
 
 
 template<class F, class P, class SIG> class FunctionGetterMixin;

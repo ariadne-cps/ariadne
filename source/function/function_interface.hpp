@@ -60,6 +60,7 @@ template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
     typedef typename DomainTraits<RES>::template RangeType<DoublePrecision> BoundedRangeType;
 
     typedef ElementSizeType<DomainType> ArgumentSizeType;
+    typedef ElementIndexType<DomainType> ArgumentIndexType;
     typedef ElementSizeType<CodomainType> ResultSizeType;
 
     template<class X> using Argument = ElementType<DomainType,X>;

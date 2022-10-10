@@ -23,8 +23,11 @@
 
 #include "multifunction.hpp"
 
+#include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
 #include "function/taylor_function.hpp"
+#include "function/function.hpp"
+#include "function/function_model.hpp"
 
 namespace Ariadne {
 

@@ -47,38 +47,24 @@ template<class S> using ElementKind = typename ElementTraits<S>::Kind;
 template<class S> using ElementSizeType = typename ElementTraits<S>::SizeType;
 template<class S> using ElementIndexType = typename ElementTraits<S>::IndexType;
 
-template<class... ARGS> struct DomainOfTypedef;
-template<> struct DomainOfTypedef<RealScalar> { typedef IntervalDomainType Type; };
-template<> struct DomainOfTypedef<RealVector> { typedef BoxDomainType Type; };
-template<class... ARGS> using DomainOfType = typename DomainOfTypedef<ARGS...>::Type;
-
+template<class... R> struct DomainTraits;
 
 template<class SIG> struct SignatureTraits;
-template<> struct SignatureTraits<Real(Real)> {
-    typedef Real ResultKind; typedef Real ArgumentKind;
-    typedef RealDomain DomainType; typedef RealDomain CodomainType;
-    typedef IntervalDomainType BoundedDomainType; typedef IntervalDomainType BoundedCodomainType;
-    typedef IntervalRangeType BoundedRangeType;
-};
-template<> struct SignatureTraits<Real(RealVector)> {
-    typedef Real ResultKind; typedef RealVector ArgumentKind;
-    typedef EuclideanDomain DomainType; typedef RealDomain CodomainType;
-    typedef BoxDomainType BoundedDomainType; typedef IntervalDomainType BoundedCodomainType;
-    typedef IntervalRangeType BoundedRangeType;
-};
-template<> struct SignatureTraits<RealVector(Real)> {
-    typedef RealVector ResultKind; typedef Real ArgumentKind;
-    typedef RealDomain DomainType; typedef EuclideanDomain CodomainType;
-    typedef IntervalDomainType BoundedDomainType; typedef BoxDomainType BoundedCodomainType;
-    typedef BoxRangeType BoundedRangeType;
-};
-template<> struct SignatureTraits<RealVector(RealVector)> {
-    typedef RealVector ResultKind; typedef RealVector ArgumentKind;
-    typedef EuclideanDomain DomainType; typedef EuclideanDomain CodomainType;
-    typedef BoxDomainType BoundedDomainType; typedef BoxDomainType BoundedCodomainType;
-    typedef BoxRangeType BoundedRangeType;
-};
+template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
+    typedef ARG ArgumentKind;
+    typedef RES ResultKind;
+    typedef typename DomainTraits<ARG>::EntireDomainType DomainType;
+    typedef typename DomainTraits<RES>::EntireDomainType CodomainType;
+    typedef typename DomainTraits<ARG>::BoundedDomainType BoundedDomainType;
+    typedef typename DomainTraits<RES>::BoundedDomainType BoundedCodomainType;
+    typedef typename DomainTraits<RES>::template RangeType<DoublePrecision> BoundedRangeType;
 
+    typedef ElementSizeType<DomainType> ArgumentSizeType;
+    typedef ElementSizeType<CodomainType> ResultSizeType;
+
+    template<class X> using Argument = ElementType<DomainType,X>;
+    template<class X> using Result = ElementType<CodomainType,X>;
+};
 
 template<class P, class SIG> class FunctionInterface;
 

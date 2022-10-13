@@ -484,7 +484,7 @@ template<class P, class... ARGS>
 struct VectorFunctionElementReference
     : DispatchFunctionOperations<P,Real(ARGS...)>
 {
-    typedef DomainOfType<ARGS...> DomainType;
+    typedef EntireDomainType<ARGS...> DomainType;
     template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
     typedef VectorFunctionElementReference<P,ARGS...> SelfType;
     typedef ScalarFunction<P,ARGS...> ElementType;

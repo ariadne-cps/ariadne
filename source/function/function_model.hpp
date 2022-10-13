@@ -113,7 +113,7 @@ FunctionModelFactoryInterface<P,PR,PRE>::create_identity(IntervalDomainType cons
     return ScalarFunctionModel<P,VARG,PR,PRE>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
 template<class FCTRY, class ARG> class FunctionModelCreator {
-    typedef DomainOfType<ARG> D;
+    typedef BoundedDomainType<ARG> D;
     typedef typename FCTRY::Paradigm P;
     typedef typename FCTRY::PrecisionType PR;
     typedef typename FCTRY::ErrorPrecisionType PRE;
@@ -197,7 +197,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     using RES=RealScalar; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     static_assert(Same<D,IntervalDomainType> or Same<D,BoxDomainType>,"");
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
@@ -445,7 +445,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     static_assert(Same<PRE,DoublePrecision> or Same<PRE,MultiplePrecision>,"");
     using RES=RealVector; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
   public:

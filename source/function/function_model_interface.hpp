@@ -52,7 +52,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInte
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
     typedef RealScalar RES; typedef RES SIG(ARG);
-    typedef DomainOfType<ARG> D; typedef DomainOfType<RES> C;
+    typedef BoundedDomainType<ARG> D; typedef BoundedDomainType<RES> C;
     typedef RawFloat<PR> F;
   public:
     typedef D DomainType;
@@ -93,7 +93,7 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface
     using RES=typename SignatureTraits<SIG>::ResultKind; using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     static_assert(Same<RES,RealScalar> or Same<RES,RealVector>,"");
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     static_assert(Same<D,IntervalDomainType> or Same<D,BoxDomainType>,"");
     static_assert(Same<C,IntervalDomainType> or Same<C,BoxDomainType>,"");
 

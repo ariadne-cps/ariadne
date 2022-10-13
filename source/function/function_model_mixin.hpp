@@ -63,7 +63,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
     using RES = RealScalar; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
     typedef FunctionPatchInterface<P,SIG> GenericInterface;
@@ -164,7 +164,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     , public VectorFunctionMixin<FM,P,ARG>
 {
     using RES = RealVector; using SIG=RES(ARG);
-    using C = DomainOfType<RES>; using D = DomainOfType<ARG>;
+    using C = BoundedDomainType<RES>; using D = BoundedDomainType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
     typedef FunctionPatchInterface<P,SIG> GenericInterface;

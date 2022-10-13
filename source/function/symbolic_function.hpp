@@ -616,9 +616,9 @@ class ComposedFunction
      : public FunctionMixin<ComposedFunction<P,R,T,AS...>,P,R(AS...)>
      , public FunctionGetterMixin<ComposedFunction<P,R,T,AS...>,P,R(AS...)>
 {
-    using D=DomainOfType<AS...>;
-    using E=DomainOfType<T>;
-    using C=DomainOfType<R>;
+    using D=EntireDomainType<AS...>;
+    using E=EntireDomainType<T>;
+    using C=EntireDomainType<R>;
 
   public:
     typedef D DomainType;

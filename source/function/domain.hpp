@@ -126,9 +126,13 @@ struct VectorTraits {
     template<class PR> using RangeType = Box<Interval<FloatUpperBound<PR>>>;
 };
 
-template<class R> struct DomainTraits;
+template<class... R> struct DomainTraits;
 template<> struct DomainTraits<RealScalar> : ScalarTraits { };
 template<> struct DomainTraits<RealVector> : VectorTraits { };
+
+template<class... ARGS> using EntireDomainType = typename DomainTraits<ARGS...>::EntireDomainType;
+template<class... ARGS> using BoundedDomainType = typename DomainTraits<ARGS...>::BoundedDomainType;
+
 
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;

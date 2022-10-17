@@ -56,6 +56,10 @@ class FunctionWrapper
     template<class T> Result<T> operator() (Argument<T> const& x) const { return this->_f(x); }
 };
 
+template<class P, class SIG> template<class F> requires (not IsFunctionClass<F,SIG>) and AFunction<F,P,SIG>
+Function<P,SIG>::Function(F const& f)
+    : Handle<const Interface>(make_function_wrapper<F,P>(f)) { }
+
 } // namespace Ariadne
 
 #endif // ARIADNE_FUNCTION_WRAPPER_HPP

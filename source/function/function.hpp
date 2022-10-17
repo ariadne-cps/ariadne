@@ -42,6 +42,7 @@
 #include "utility/metaprogramming.hpp"
 
 #include "function/function_interface.hpp"
+#include "function/function_concepts.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
@@ -254,16 +255,24 @@ class Function
     //! \name Conversions and assignment.
     //!@{
     //
+    //! \brief Copy constructor.
+    Function(const Function<P,SIG>& f) = default;
     //! \brief Convert from a function class specifying more information.
     template<StrongerThan<P> PP>
     Function(const Function<PP,SIG>& f)
         : Handle<const Interface>(std::dynamic_pointer_cast< const Interface >(f.managed_pointer())) { }
+    //! \brief Copy assignment
+    Function<P,SIG>& operator=(const Function<P,SIG>& f) = default;
     //! \brief Assign from a function class specifying more information.
     template<StrongerThan<P> PP>
         Function<P,SIG>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
     //! \brief Set equal to the constant value \a c.
     Function<P,SIG>& operator=(const Result<NumericType>& c) {
         return (*this)=this->create_constant(c); }
+
+    //! \brief Construct from a class satisfying the function concept.
+    // FIXME: Avoid IsFunctionClass requirement, which is needed do prevent AFunction concept checking conformance before argument classes are defined.
+    template<class F> requires (not IsFunctionClass<F,SIG>) and AFunction<F,P,SIG> Function(F const& f);
     //!@}
 
     //! \name Query domain and codomain.

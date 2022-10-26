@@ -166,16 +166,16 @@ template<class UB> class VariableUpperInterval
 typedef VariableLowerInterval<Real> RealVariableLowerInterval;
 typedef VariableUpperInterval<Real> RealVariableUpperInterval;
 
-template<class X> using PosType = decltype(+declval<X>());
-template<class X> using NegType = decltype(-declval<X>());
+template<class X> using UnaryPlusType = decltype(+declval<X>());
+template<class X> using UnaryMinusType = decltype(-declval<X>());
 
-template<class UB> inline VariableInterval<UB> operator<=(const VariableLowerInterval<UB>& lv, const PosType<UB>& u) {
+template<class UB> inline VariableInterval<UB> operator<=(const VariableLowerInterval<UB>& lv, const UnaryPlusType<UB>& u) {
     return VariableInterval<UB>(lv.lower_bound(),lv.variable(),u); }
-template<class UB> inline VariableInterval<UB> operator>=(const PosType<UB>& u, const VariableLowerInterval<UB>& lv) {
+template<class UB> inline VariableInterval<UB> operator>=(const UnaryPlusType<UB>& u, const VariableLowerInterval<UB>& lv) {
     return VariableInterval<UB>(lv.lower_bound(),lv.variable(),u); }
-template<class UB> inline VariableInterval<UB> operator<=(const NegType<UB>& l, const VariableUpperInterval<UB>& vu) {
+template<class UB> inline VariableInterval<UB> operator<=(const UnaryMinusType<UB>& l, const VariableUpperInterval<UB>& vu) {
     return VariableInterval<UB>(l,vu.variable(),vu.upper_bound()); }
-template<class UB> inline VariableInterval<UB> operator>=(const VariableUpperInterval<UB>& vu, const NegType<UB>& l) {
+template<class UB> inline VariableInterval<UB> operator>=(const VariableUpperInterval<UB>& vu, const UnaryMinusType<UB>& l) {
     return VariableInterval<UB>(l,vu.variable(),vu.upper_bound()); }
 
 inline VariableLowerInterval<Real> operator<=(const Real& l, const RealVariable& v) {

@@ -35,6 +35,8 @@
 #include "utility/string.hpp"
 #include "numeric/logical.hpp"
 
+#include "numeric/concepts.hpp"
+
 #include <limits>
 
 namespace Ariadne {
@@ -442,6 +444,9 @@ Int log2floor(Natural const& z) {
 OutputStream& operator<<(OutputStream& os, Sign s) {
     return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
 }
+
+static_assert(Ring<Integer>);
+static_assert(OrderedLattice<Integer>);
 
 
 } // namespace Ariadne

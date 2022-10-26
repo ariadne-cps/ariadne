@@ -40,7 +40,8 @@
 #include "dyadic.hpp"
 #include "sign.hpp"
 #include "extended.hpp"
-#include <limits>
+
+#include "concepts.hpp"
 
 #include <limits>
 #include <iostream>
@@ -693,5 +694,7 @@ DyadicBounds mul(DyadicBounds const& w1, DyadicBounds const& w2) {
     assert(n>=0);
     return pow(w,static_cast<Nat>(n)); }
 
+static_assert(Field<Rational>);
+static_assert(Lattice<Rational>);
 
 } // namespace Ariadne

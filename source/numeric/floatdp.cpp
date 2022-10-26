@@ -43,6 +43,7 @@
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
+#include "numeric/concepts.hpp"
 
 namespace Ariadne {
 
@@ -954,5 +955,8 @@ template<class X> class Positive : public X { public: Positive(X const& x) : X(x
 Positive<FloatDP> abs(FloatDP x) { return Positive<FloatDP>(FloatDP(std::fabs(x.dbl))); }
 Positive<UpperBound<FloatDP>> mag(FloatDP x) { return Positive<UpperBound<FloatDP>>(abs(x)); }
 Positive<LowerBound<FloatDP>> mig(FloatDP x) { return Positive<LowerBound<FloatDP>>(abs(x)); }
+
+static_assert(RoundedTranscendentalField<FloatDP>);
+static_assert(OrderedLattice<FloatDP>);
 
 } // namespace Ariadne

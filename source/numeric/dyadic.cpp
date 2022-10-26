@@ -40,6 +40,8 @@
 #include "numeric/rational.hpp"
 #include "numeric/extended.hpp"
 
+#include "numeric/concepts.hpp"
+
 #include <limits>
 
 namespace Ariadne {
@@ -499,5 +501,9 @@ template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1,
 
 template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
 template<class RNDUP, class Y> auto _div(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
+
+
+static_assert(DyadicRing<Dyadic>);
+static_assert(OrderedLattice<Dyadic>);
 
 } // namespace Ariadne

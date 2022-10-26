@@ -46,6 +46,8 @@
 #include "accuracy.hpp"
 #include "number_wrapper.hpp"
 
+#include "concepts.hpp"
+
 namespace Ariadne {
 
 OutputStream& operator<<(OutputStream& os, Bits const& bits) {
@@ -653,5 +655,8 @@ FloatMPUpperBound ValidatedUpperReal::get(MultiplePrecision pr) const { return F
 OutputStream& operator<<(OutputStream& os, ValidatedUpperReal const& ur) { return ur._ptr->_write(os); }
 
 ApproximateDouble::ApproximateDouble(Real const& r) : _d(FloatDPApproximation(r,dp).raw().get_d()) { }
+
+static_assert(TranscendentalField<Real>);
+static_assert(OrderedLattice<Real>);
 
 } // namespace Ariadne

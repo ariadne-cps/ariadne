@@ -29,6 +29,8 @@
 #include "floatdp.hpp"
 #include "floatmp.hpp"
 
+#include "concepts.hpp"
+
 namespace Ariadne {
 
 FloatDP midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
@@ -94,5 +96,13 @@ template<> OutputStream& Operations<FloatBounds<DoublePrecision>>::_write(Output
     return os << FloatBounds<MultiplePrecision>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
 }
 
+static_assert(TranscendentalField<Bounds<FloatDP>>);
+static_assert(TranscendentalField<Bounds<FloatMP>>);
+
+static_assert(OrderedLattice<Bounds<FloatDP>>);
+static_assert(OrderedLattice<Bounds<FloatMP>>);
+
+static_assert(WidenTranscendentalField<FloatDP>);
+static_assert(WidenTranscendentalField<FloatMP>);
 
 } // namespace Ariadne

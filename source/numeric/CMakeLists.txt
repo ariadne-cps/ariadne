@@ -19,6 +19,8 @@ add_library(${LIBRARY_NAME} OBJECT
     float_ball.cpp
     float_error.cpp
     float_literals.cpp
+
+    concepts.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

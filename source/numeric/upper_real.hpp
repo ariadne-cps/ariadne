@@ -93,7 +93,6 @@ class ValidatedRealInterface;
 //! \sa Real, LowerReal, NaiveReal
 class UpperReal
     : public Handle<const UpperRealInterface>
-    , public DirectedAbelian<UpperReal,LowerReal>
 {
   public:
     typedef EffectiveTag Paradigm;
@@ -180,8 +179,8 @@ class UpperReal
 };
 
 //! \ingroup UserNumericTypeSubModule
-//! \brief Computable lower real numbers defined by conversion to concrete floats.
-class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUpperReal,PositiveLowerReal>
+//! \brief Computable upper real numbers defined by conversion to concrete floats.
+class PositiveUpperReal : public UpperReal
 {
   public:
     PositiveUpperReal(PositiveReal r) : UpperReal(r) { }

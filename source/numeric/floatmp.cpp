@@ -36,6 +36,8 @@
 #include "decimal.hpp"
 #include "rational.hpp"
 
+#include "concepts.hpp"
+
 namespace Ariadne {
 
 // Rule for combining mixed precision
@@ -912,5 +914,8 @@ Positive<FloatMP> abs(FloatMP const& x) {
     FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,to_nearest); return Positive<FloatMP>(r); }
 Positive<UpperBound<FloatMP>> mag(FloatMP const& x) { return Positive<UpperBound<FloatMP>>(abs(x)); }
 Positive<LowerBound<FloatMP>> mig(FloatMP const& x) { return Positive<LowerBound<FloatMP>>(abs(x)); }
+
+static_assert(RoundedTranscendentalField<FloatMP>);
+static_assert(OrderedLattice<FloatMP>);
 
 } // namespace Ariadne

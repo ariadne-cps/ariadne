@@ -43,6 +43,9 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
+#include "numeric/concepts.hpp"
+#include "numeric/archetypes.hpp"
+
 #include "../test.hpp"
 #include "utility.hpp"
 #include "check_numeric.hpp"
@@ -51,6 +54,11 @@ using namespace std;
 using namespace Ariadne;
 
 namespace Ariadne {
+
+template class Bounds<RoundedArchetype>;
+template class LowerBound<RoundedArchetype>;
+template class UpperBound<RoundedArchetype>;
+template class Approximation<RoundedArchetype>;
 
 using std::declval;
 template<class T> String class_name();

@@ -173,12 +173,6 @@ using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< Alias for valida
 
 /************ Concepts *********************************************************/
 
-enum class Comparison : char;
-template<class X1, class X2> concept Comparible = requires(X1 x1, X2 x2) {
-    { cmp(x1,x2) } -> Same<Comparison>;
-    { cmp(x2,x1) } -> Same<Comparison>;
-};
-
 template<class Y> concept AnExactDyadic = Convertible<Y,Dyadic>;
 template<class Y> concept AnExactRational = AnExactDyadic<Y> or Convertible<Y,Rational>;
 template<class Y> concept AnExactNumber = AnExactRational<Y> or Same<Y,ExactNumber>;

@@ -1,15 +1,17 @@
 set(LIBRARY_NAME ariadne-numeric)
 
 add_library(${LIBRARY_NAME} OBJECT
-    dyadic.cpp
     logical.cpp
     operators.cpp
+    int.cpp
+    double.cpp
     integer.cpp
-    rational.cpp
+    dyadic.cpp
     decimal.cpp
-    number.cpp
+    rational.cpp
     real.cpp
     complex.cpp
+    number.cpp
     floatdp.cpp
     floatmp.cpp
     float_approximation.cpp

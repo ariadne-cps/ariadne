@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric/floatdp.hpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-22  Pieter Collins
  *
  ****************************************************************************/
 
@@ -39,6 +39,7 @@
 #include "numeric/rounding.hpp"
 #include "numeric/sign.hpp"
 #include "numeric/builtin.hpp"
+#include "numeric/double.hpp"
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
 #include "numeric/float_operations.hpp"
@@ -83,45 +84,6 @@ using DP = DoublePrecision;
 static const DoublePrecision double_precision = DoublePrecision();
 static const DoublePrecision dp = DP();
 
-// Correctly rounded functions
-double nul_rnd(double x);
-double pos_rnd(double x);
-double neg_rnd(double x);
-double hlf_rnd(double x);
-double sqr_rnd(double x);
-double rec_rnd(double x);
-double add_rnd(double x1, double x2);
-double sub_rnd(double x1, double x2);
-double mul_rnd(double x1, double x2);
-double div_rnd(double x1, double x2);
-double fma_rnd(double x1, double x2, double x3);
-double pow_rnd(double x, Nat n);
-double pow_rnd(double x, int n);
-double sqrt_rnd(double x);
-double exp_rnd(double x);
-double log_rnd(double x);
-double sin_rnd(double x);
-double cos_rnd(double x);
-double tan_rnd(double x);
-double asin_rnd(double x);
-double acos_rnd(double x);
-double atan_rnd(double x);
-double neg_rec_rnd(double x);
-double atan_rnd_series(double x);
-double pi_rnd();
-
-double abs_rnd(double x);
-double max_rnd(double x1, double x2);
-double min_rnd(double x1, double x2);
-
-double texp(double x);
-
-double pi_opp();
-double add_opp(double x, double y);
-double sub_opp(double x, double y);
-double mul_opp(double x, double y);
-double div_opp(double x, double y);
-double neg_rec_opp(double x);
 
 template<class FLT> class Rounded;
 using RoundedFloatDP = Rounded<FloatDP>;

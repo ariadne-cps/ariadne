@@ -107,6 +107,7 @@ class FunctionMixin<F,ApproximateTag,SIG>
   public:
     virtual FunctionInterface<ApproximateTag,SIG>* _clone() const override;
     virtual FunctionInterface<ApproximateTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<ApproximateNumber> _call(const Argument<ApproximateNumber>& x) const override;
     virtual Result<FloatDPApproximation> _call(const Argument<FloatDPApproximation>& x) const override;
     virtual Result<FloatMPApproximation> _call(const Argument<FloatMPApproximation>& x) const override;
     virtual Result<Differential<FloatDPApproximation>> _call(const Argument<Differential<FloatDPApproximation>>& x) const override;
@@ -131,6 +132,7 @@ class FunctionMixin<F,ValidatedTag,SIG>
     using FunctionMixin<F,ApproximateTag,SIG>::_call;
     virtual FunctionInterface<ValidatedTag,SIG>* _clone() const override;
     virtual FunctionInterface<ValidatedTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<ValidatedNumber> _call(const Argument<ValidatedNumber>& x) const override;
     virtual Result<FloatDPBounds> _call(const Argument<FloatDPBounds>& x) const override;
     virtual Result<FloatMPBounds> _call(const Argument<FloatMPBounds>& x) const override;
     virtual Result<Differential<FloatDPBounds>> _call(const Argument<Differential<FloatDPBounds>>& x) const override;
@@ -160,6 +162,7 @@ class FunctionMixin<F,EffectiveTag,SIG>
     using FunctionMixin<F,ValidatedTag,SIG>::_call;
     virtual FunctionInterface<EffectiveTag,SIG>* _clone() const override;
     virtual FunctionInterface<EffectiveTag,SIG>* _derivative(ElementIndexType<D> i) const override;
+    virtual Result<EffectiveNumber> _call(const Argument<EffectiveNumber>& x) const override;
     virtual Result<Real> _call(const Argument<Real>& x) const override;
     virtual Result<ElementaryAlgebra<Real>> _call(const Argument<ElementaryAlgebra<Real>>& x) const override;
     virtual Result<Formula<Real>> _call(const Argument<Formula<Real>>& x) const override;

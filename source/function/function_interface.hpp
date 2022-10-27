@@ -169,6 +169,7 @@ class FunctionInterface<ApproximateTag,SIG>
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
+    virtual Result<ApproximateNumber> _call(const Argument<ApproximateNumber>& x) const = 0;
     virtual Result<FloatDPApproximation> _call(const Argument<FloatDPApproximation>& x) const = 0;
     virtual Result<FloatMPApproximation> _call(const Argument<FloatMPApproximation>& x) const = 0;
     virtual Result<Differential<FloatDPApproximation>> _call(const Argument< Differential<FloatDPApproximation> >& x) const = 0;
@@ -199,6 +200,7 @@ class FunctionInterface<ValidatedTag,SIG>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     using FunctionInterface<AP,SIG>::_call;
+    virtual Result<ValidatedNumber> _call(const Argument<ValidatedNumber>& x) const = 0;
     virtual Result<FloatDPBounds> _call(const Argument<FloatDPBounds>& x) const = 0;
     virtual Result<FloatMPBounds> _call(const Argument<FloatMPBounds>& x) const = 0;
     virtual Result<Differential<FloatDPBounds>> _call(const Argument< Differential<FloatDPBounds> >& x) const = 0;
@@ -239,6 +241,7 @@ class FunctionInterface<EffectiveTag,SIG>
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
     using FunctionInterface<WP,SIG>::_call;
+    virtual Result<EffectiveNumber> _call(const Argument<EffectiveNumber>& x) const = 0;
     virtual Result<Real> _call(const Argument<Real>& x) const = 0;
     virtual Result<ElementaryAlgebra<Real>> _call(const Argument<ElementaryAlgebra<Real>>& x) const = 0;
     virtual Result<Formula<Real>> _call(const Argument<Formula<Real>>& x) const = 0;

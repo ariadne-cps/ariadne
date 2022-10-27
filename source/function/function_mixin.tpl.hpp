@@ -54,6 +54,9 @@ FunctionMixin<F,Void,D,IntervalDomainType>::_base_call(const ElementType<D,X>& x
 */
 
 template<class F,class SIG> auto
+FunctionMixin<F,ApproximateTag,SIG>::_call(const Argument<ApproximateNumber>& x) const -> Result<ApproximateNumber> {
+    return this->_base_call(x); }
+template<class F,class SIG> auto
 FunctionMixin<F,ApproximateTag,SIG>::_call(const Argument<FloatDPApproximation>& x) const -> Result<FloatDPApproximation> {
     return this->_base_call(x); }
 template<class F,class SIG> auto
@@ -78,6 +81,9 @@ template<class F,class SIG> auto
 FunctionMixin<F,ApproximateTag,SIG>::_call(const Argument<Formula<ApproximateNumber>>& x) const -> Result<Formula<ApproximateNumber>> {
     return this->_base_call(x); }
 
+template<class F,class SIG> auto
+FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<ValidatedNumber>& x) const -> Result<ValidatedNumber> {
+    return this->_base_call(x); }
 template<class F,class SIG> auto
 FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<FloatDPBounds>& x) const -> Result<FloatDPBounds> {
     return this->_base_call(x); }
@@ -113,6 +119,9 @@ template<class F,class SIG> auto
 FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<ValidatedScalarMultivariateFunction>& x) const -> Result<ValidatedScalarMultivariateFunction> {
     return this->_base_call(x); }
 
+template<class F,class SIG> auto
+FunctionMixin<F,EffectiveTag,SIG>::_call(const Argument<EffectiveNumber>& x) const -> Result<EffectiveNumber> {
+    return this->_base_call(x); }
 template<class F,class SIG> auto
 FunctionMixin<F,EffectiveTag,SIG>::_call(const Argument<Real>& x) const -> Result<Real> {
     return this->_base_call(x); }

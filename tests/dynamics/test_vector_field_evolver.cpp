@@ -87,13 +87,15 @@ public:
         VectorField vanderpol({dot(x) = v, dot(v) = mu * (1 - x * x) * v - x});
         ARIADNE_TEST_PRINT(vanderpol);
 
-        // Define the initial set
-        RealExpressionBoundedConstraintSet initial_set({1.01_dec <= x <= 1.02_dec, 0.51_dec <= v <= 0.52_dec});
-
         VectorFieldEvolver evolver(vanderpol, integrator);
         evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
         evolver.configuration().set_maximum_step_size(step_size);
         ARIADNE_TEST_PRINT(evolver.configuration());
+
+        // Define the initial set
+        RealExpressionBoundedConstraintSet initial_set({1.01_dec <= x <= 1.02_dec, 0.51_dec <= v <= 0.52_dec});
+            initial_set=RealExpressionBoundedConstraintSet({1.01_dec <= x <= 1.02_dec, 0.5_dec <= v <= 0.5_dec});
+            time=0.25_dec;
 
         Semantics semantics = Semantics::LOWER;
 
@@ -105,6 +107,13 @@ public:
         fig << line_style(true) << fill_colour(cyan) << orbit.reach();
         fig << fill_colour(magenta) << orbit.intermediate();
         fig << fill_colour(red) << orbit.final();
+
+        // Define the initial set
+        RealExpressionBoundedConstraintSet initial_point({1.0_dec <= x <= 1.0_dec, 0.5_dec <= v <= 0.5_dec});
+            initial_point=RealExpressionBoundedConstraintSet({1.01_dec <= x <= 1.02_dec, 0.5_dec <= v <= 0.5_dec});
+            time=0.25_dec;
+        Orbit<EnclosureType> orbit = evolver.orbit(initial_set, time, semantics);
+
         fig.write("test_vector_field_evolver-vdp");
     }
 
@@ -115,8 +124,10 @@ public:
 
         // Set up the evolution parameters and grid
         Real time(0.5_dec);
-        ExactDouble step_size(0.01_pr);
+        ExactDouble maximum_step_size(0.015625_pr);
+        ExactDouble minimum_step_size(0.00097656_pr);
         ExactDouble enclosure_radius(0.25_x);
+
 
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
@@ -127,14 +138,16 @@ public:
         VectorField fail_vf({dot(x)=1,dot(y)=y*y*100});
         VectorFieldEvolver evolver(fail_vf, integrator);
         evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
-        evolver.configuration().set_maximum_step_size(step_size);
+        evolver.configuration().set_maximum_step_size(maximum_step_size);
+//        evolver.configuration().set_minimum_step_size(minimum_step_size);
 
         RealVariablesBox initial_box({x==0,y==1});
 
         time = 1.5_dec;
 
         // Compute the reachable sets
-        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time, Semantics::UPPER));
+        evolver.orbit(initial_box, time, Semantics::UPPER);
+//        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time, Semantics::UPPER));
     }
 
     Void test_subdivide_initially() const {

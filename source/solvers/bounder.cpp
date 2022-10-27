@@ -28,7 +28,8 @@
 
 namespace Ariadne {
 
-BounderBase::BounderBase(LipschitzTolerance lipschitz) : _lipschitz_tolerance(lipschitz) { }
+BounderBase::BounderBase(LipschitzTolerance lipschitz, MinimumStepSize minimum_step)
+    : _lipschitz_tolerance(lipschitz), _minimum_step_size(minimum_step) { }
 
 Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const {
     return this->compute(f,D,BoxDomainType(0u),hsug);
@@ -38,7 +39,7 @@ Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariate
     return this->compute(f,D,t,BoxDomainType(0u),hsug);
 }
 
-EulerBounder::EulerBounder(LipschitzTolerance lipschitz) : BounderBase(lipschitz) { }
+EulerBounder::EulerBounder(LipschitzTolerance lipschitz, MinimumStepSize minimum_step) : BounderBase(lipschitz,minimum_step) { }
 
 Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const {
     ARIADNE_PRECONDITION(f.result_size()==D.dimension());
@@ -99,8 +100,8 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
             hprev=h;
             h=StepSizeType(hnew.get_d());
-            if (h < MINIMUM_STEP_SIZE)
-                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << ") allowed, bounding could not be found.");
+            if (h < this->_minimum_step_size.value())
+                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << this->_minimum_step_size.value() << ") allowed, bounding could not be found.");
             T = to_time_bounds(t,t+h);
         }
     }

@@ -47,6 +47,9 @@ class BoundingNotFoundException : public std::runtime_error {
 struct LipschitzTolerance : Attribute<ExactDouble> { using Attribute<ExactDouble>::Attribute; };
 static const Generator<LipschitzTolerance> lipschitz_tolerance = Generator<LipschitzTolerance>();
 static const LipschitzTolerance DEFAULT_LIPSCHITZ_TOLERANCE(0.5_x);
+struct MinimumStepSize : Attribute<ExactDouble> { using Attribute<ExactDouble>::Attribute; };
+static const Generator<MinimumStepSize> minimum_step_size = Generator<MinimumStepSize>();
+static const MinimumStepSize DEFAULT_MINIMUM_STEP_SIZE(0.00000095367431640625_x);
 
 //! \ingroup DifferentialEquationSubModule
 //! \brief Interface for classes calculating the bounds of a flow.
@@ -85,20 +88,21 @@ class BounderInterface {
 
 class BounderBase : public BounderInterface {
   public:
-    BounderBase(LipschitzTolerance lipschitz);
+    BounderBase(LipschitzTolerance lipschitz, MinimumStepSize minimum_step);
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
   protected:
     const LipschitzTolerance _lipschitz_tolerance;
+    const MinimumStepSize _minimum_step_size;
 };
 
 //! \ingroup DifferentialEquationSubModule
 //! \brief Compute bounds on the flow of a differential equation using a set-based Euler method.
 class EulerBounder final : public BounderBase {
   public:
-    EulerBounder(LipschitzTolerance lipschitz = DEFAULT_LIPSCHITZ_TOLERANCE);
+    EulerBounder(LipschitzTolerance lipschitz = DEFAULT_LIPSCHITZ_TOLERANCE, MinimumStepSize = DEFAULT_MINIMUM_STEP_SIZE);
     using BounderBase::compute;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override;

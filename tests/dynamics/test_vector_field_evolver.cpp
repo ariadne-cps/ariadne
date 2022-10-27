@@ -48,6 +48,9 @@
 using namespace Ariadne;
 using namespace std;
 
+template<class IVL1, class IVL2> decltype(auto) subset(LabelledBox<IVL1> bx1, LabelledBox<IVL2> bx2) {
+    return subset(bx1.euclidean_set(),bx2.euclidean_set()); }
+
 class TestVectorFieldEvolver {
 public:
     Void test() const {
@@ -87,32 +90,35 @@ public:
         VectorField vanderpol({dot(x) = v, dot(v) = mu * (1 - x * x) * v - x});
         ARIADNE_TEST_PRINT(vanderpol);
 
+        Semantics semantics = Semantics::LOWER;
+
         VectorFieldEvolver evolver(vanderpol, integrator);
         evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
         evolver.configuration().set_maximum_step_size(step_size);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        // Define the initial set
-        RealExpressionBoundedConstraintSet initial_set({1.01_dec <= x <= 1.02_dec, 0.51_dec <= v <= 0.52_dec});
-            initial_set=RealExpressionBoundedConstraintSet({1.01_dec <= x <= 1.02_dec, 0.5_dec <= v <= 0.5_dec});
-            time=0.25_dec;
-
-        Semantics semantics = Semantics::LOWER;
-
-        // Compute the reachable sets
-        Orbit<EnclosureType> orbit = evolver.orbit(initial_set, time, semantics);
-        ARIADNE_TEST_PRINT(orbit);
-
-        LabelledFigure fig(Axes2d(-1.0 <= x <= +21, -1.125 <= v <= +1.125));
-        fig << line_style(true) << fill_colour(cyan) << orbit.reach();
-        fig << fill_colour(magenta) << orbit.intermediate();
-        fig << fill_colour(red) << orbit.final();
+        LabelledFigure fig(Axes2d(-2.25 <= x <= +2.25, -2.25 <= v <= +2.25));
 
         // Define the initial set
+        RealExpressionBoundedConstraintSet initial_set({0.95_dec <= x <= 1.05_dec, 0.45_dec <= v <= 0.55_dec});
+        Orbit<EnclosureType> flow_tube = evolver.orbit(initial_set, time, semantics);
+        ARIADNE_TEST_PRINT(flow_tube);
+
+        LabelledBox<RealInterval> expected_final_flow_tube_bounding_box({x,v},{{-0.26_dec,-0.07_dec},{-1.57_dec,-1.43_dec}});
+        ARIADNE_TEST_ASSERT(subset(flow_tube.final().bounding_box(),expected_final_flow_tube_bounding_box));
+
+        fig << line_style(true) << fill_colour(cyan) << flow_tube.reach();
+        fig << fill_colour(magenta) << flow_tube.intermediate();
+        fig << fill_colour(red) << flow_tube.final();
+
+        // Define the initial point
         RealExpressionBoundedConstraintSet initial_point({1.0_dec <= x <= 1.0_dec, 0.5_dec <= v <= 0.5_dec});
-            initial_point=RealExpressionBoundedConstraintSet({1.01_dec <= x <= 1.02_dec, 0.5_dec <= v <= 0.5_dec});
-            time=0.25_dec;
-        Orbit<EnclosureType> orbit = evolver.orbit(initial_set, time, semantics);
+        Orbit<EnclosureType> trajectory = evolver.orbit(initial_point, time, semantics);
+
+        LabelledBox<RealInterval> expected_final_trajectory_bounding_box({x,v},{{-0.16_dec,-0.15_dec},{-1.49_dec,-1.48_dec}});
+        ARIADNE_TEST_ASSERT(subset(flow_tube.final().bounding_box(),expected_final_flow_tube_bounding_box));
+
+        fig << line_style(true) << fill_colour(blue) << trajectory.reach();
 
         fig.write("test_vector_field_evolver-vdp");
     }
@@ -125,7 +131,6 @@ public:
         // Set up the evolution parameters and grid
         Real time(0.5_dec);
         ExactDouble maximum_step_size(0.015625_pr);
-        ExactDouble minimum_step_size(0.00097656_pr);
         ExactDouble enclosure_radius(0.25_x);
 
 
@@ -145,9 +150,8 @@ public:
 
         time = 1.5_dec;
 
-        // Compute the reachable sets
-        evolver.orbit(initial_box, time, Semantics::UPPER);
-//        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time, Semantics::UPPER));
+        // Compute the reachable sets; expect failure as required step size becomes too small
+        ARIADNE_TEST_FAIL(evolver.orbit(initial_box, time, Semantics::UPPER));
     }
 
     Void test_subdivide_initially() const {

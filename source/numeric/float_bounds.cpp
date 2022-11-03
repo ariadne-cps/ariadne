@@ -49,23 +49,23 @@ template<> String class_name<Bounds<FloatMP>>() { return "FloatMPBounds"; }
 
 Int abslog10floor(FloatMP const&);
 
-template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x)
+namespace {
+
+OutputStream& write_bounds_with_error_places(OutputStream& os, const FloatMP& l, const FloatMP& u, Nat errplc)
 {
     static const double log2ten = 3.3219280948873621817;
     using std::max; using std::min;
-    FloatMP const& l=x.lower_raw();
-    FloatMP const& u=x.upper_raw();
     if(l==0.0_x && u==0.0_x) { return os << "0.0[:]"; }
 
-    int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
-    //int bndplc=FloatBounds<MultiplePrecision>::output_places;
-    int precplc=x.precision()/log2ten;
-    int log10wdth=abslog10floor(sub(up,u,l));
-    int log10mag=abslog10floor(max(neg(l),u));
-    int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
+    int precplc=min(l.precision(),u.precision())/log2ten;
+    FloatMP wdth=sub(up,u,l);
+    FloatMP mag=max(neg(l),u);
+    int log10wdth=max(abslog10floor(wdth),std::numeric_limits<int>::min()+static_cast<int>(errplc));
+    int log10mag=abslog10floor(mag);
+    int dgtswdth=static_cast<int>(errplc)-(log10wdth+1); // Digits appropriate given width of interval
     //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects
-    Nat dgts=static_cast<Nat>(max(min(dgtswdth,dgtsprec),1));
+    uint dgts=static_cast<uint>(max(min(dgtswdth,dgtsprec),1));
     DecimalPlaces plcs{dgts};
 
     String lstr=print(l,plcs,MPFR_RNDD);
@@ -89,11 +89,17 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     return os << ocstr;
 }
 
+} //namespace
+
+template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x)
+{
+    return write_bounds_with_error_places(os,x.lower_raw(),x.upper_raw(),FloatError<MultiplePrecision>::output_places);
+}
 
 template<> OutputStream& Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x)
 {
-    MultiplePrecision prec(64);
-    return os << FloatBounds<MultiplePrecision>(FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec));
+    MultiplePrecision prec(53);
+    return write_bounds_with_error_places(os,FloatMP(x.lower_raw(),prec),FloatMP(x.upper_raw(),prec),FloatError<DoublePrecision>::output_places);
 }
 
 static_assert(TranscendentalField<Bounds<FloatDP>>);

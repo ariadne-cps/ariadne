@@ -70,7 +70,7 @@ For Cairo support, you may need to set up a permanent variable for the path of p
 export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 ```
 
-To allow building the documentation: `brew cask install mactex-no-gui` and `brew install doxygen`.
+To allow building the documentation: `brew install --cask mactex-no-gui` and `brew install doxygen`.
 
 ### Downloading the sources
 

@@ -44,20 +44,21 @@ Automatic differentiation (AD) is an approach to computing derivatives which (us
 Consider quantities \f$u\f$, \f$v\f$, \f$y\f$ which depend on independent quantities \f$x_1,\ldots,x_n\f$.
 If we know the values of \f$u\f$ and \f$v\f$, and their partial derivatives with respect to the \f$x_i\f$, and if \f$y=u\times v\f$, then we can compute the value of \f$y\f$ and its partial derivatives:
 \f[ \begin{gathered} y=u\times v, \qquad \frac{\partial{y}}{\partial{x_i}} = \frac{\partial{u}}{\partial{x_i}} \times  v + u \times \frac{\partial{v}}{\partial{x_i}} \\ \frac{\partial^2{y}}{\partial{x_i}\partial{x_j}} = \frac{\partial{u}}{\partial{x_i}\partial{x_j}} \times v + \frac{\partial{u}}{\partial{x_i}}\times\frac{\partial{v}}{\partial{x_j}} + \frac{\partial{u}}{\partial{x_j}}\times\frac{\partial{v}}{\partial{x_i}} + u \times \frac{\partial^2{v}}{\partial{x_i}\partial{x_j}}  \end{gathered} \f]
-More generally, for a multi-index \f$\alpha=(\alpha_1,\alpha_n,\ldots,\alpha_n)\in\N^n\f$ with \f$|\alpha|=\sum_{i=1}^{n}\alpha_i\f$, we define the notation
+More generally, for a multi-index \f$\alpha=(\alpha_1,\alpha_n,\ldots,\alpha_n)\in\N^n\f$ with \f$|\alpha|=\sum_{i=1}^{n}\alpha_i\f$, we define \f$\alpha! = \prod_{i=1}^{n}\alpha_i!\f$ and the notation
 \f[ \frac{\partial^{|\alpha|}{y}}{\partial{x}^\alpha} = \frac{\partial^{|\alpha|}{y}}{\partial{x_1^{\alpha_1}}\partial{x_2^{\alpha_2}}\cdots\partial{x_n^{\alpha_n}}} . \f]
 Then we can write
-\f[ \frac{\partial^{|\alpha|}{(u\times v)}}{\partial{x}^\alpha} = \sum_{\beta+\gamma=\alpha}\frac{\partial^{|\beta|}{u}}{\partial{x}^{\beta}} \times \frac{\partial^{|\gamma|}v}{\partial{x}^{\gamma}} . \f]
+\f[ \frac{\partial^{|\alpha|}{(u\times v)}}{\partial{x}^\alpha} = \sum_{\beta+\gamma=\alpha} \frac{\alpha!}{\beta!\,\gamma!} \frac{\partial^{|\beta|}{u}}{\partial{x}^{\beta}} \times \frac{\partial^{|\gamma|}v}{\partial{x}^{\gamma}} . \f]
 The formulae for addition and subtraction are straightforward:
 \f[ \frac{\partial^{|\alpha|}{(u+v)}}{\partial{x}^\alpha} = \frac{\partial^{|\alpha|}{u}}{\partial{x}^\alpha} + \frac{\partial^{|\alpha|}{v}}{\partial{x}^\alpha}; \qquad \frac{\partial^{|\alpha|}{(u-v)}}{\partial{x}^\alpha} = \frac{\partial^{|\alpha|}{u}}{\partial{x}^\alpha} - \frac{\partial^{|\alpha|}{v}}{\partial{x}^\alpha} . \f]
 The formula for division is more complicated. Further, efficient computations of the partial derivatives of \f$y=u\div v\f$:
-\f[ \frac{\partial^{|\alpha|}{(u\div v)}}{\partial{x}^\alpha} = \biggl( \frac{\partial^{|\alpha|}{u}}{\partial{x}^\alpha}-\sum_{\beta+\gamma=\alpha\\\ \ \ \gamma\neq\alpha} \frac{\partial^{|\beta|}{v}}{\partial{x}^{\beta}} \times \frac{\partial^{|\gamma|}y}{\partial{x}^{\gamma}}\biggr)\div v . \f]
+\f[ \frac{\partial^{|\alpha|}{(u\div v)}}{\partial{x}^\alpha} = \biggl( \frac{\partial^{|\alpha|}{u}}{\partial{x}^\alpha}-\sum_{\beta+\gamma=\alpha\\\ \ \ \gamma\neq\alpha} \frac{\alpha!}{\beta!\,\gamma!} \frac{\partial^{|\beta|}{v}}{\partial{x}^{\beta}} \times \frac{\partial^{|\gamma|}y}{\partial{x}^{\gamma}}\biggr)\div v . \f]
 If \f$y=f(u)\f$ for some smooth function \f$f:\R\to\R\f$, then
-\f[ y=f(u); \qquad \frac{\partial{y}}{\partial{x_i}} = f'(u) \frac{\partial{u}}{\partial{x_i}} ; \qquad \frac{\partial^2{y}}{\partial{x_i}\partial{x_j}} = f''(u) \frac{\partial^2{u}}{\partial{x_i}\partial{x_j}}+f'(u)\frac{\partial{u}}{\partial{x_i}}\frac{\partial{u}}{\partial{x_j}} . \f]
+\f[ y=f(u); \qquad \frac{\partial{y}}{\partial{x_i}} = f'(u) \frac{\partial{u}}{\partial{x_i}} ; \qquad \frac{\partial^2{y}}{\partial{x_i}\partial{x_j}} = f''(u) \frac{\partial{u}}{\partial{x_i}}\frac{\partial{u}}{\partial{x_j}} + f'(u) \frac{\partial^2{u}}{\partial{x_i}\partial{x_j}} . \f]
 A general formula for higher-order derivatives is:
-\f[ \frac{\partial^{|\alpha|}{f(u)}}{\partial{x}^\alpha} = \sum_{\beta+\gamma=\alpha\\\ \ \ |\beta|\geq0} \frac{\partial^{|\beta|}{u}}{\partial{x}^\beta} \frac{\partial^{|\gamma|}f'(u)}{\partial{x}^\gamma} . \qquad \qquad \text{CHECK THIS FORMULA} \f]
+\f[ \frac{\partial^{|\alpha|}{f(u)}}{\partial{x}^\alpha} = \sum_{\beta+\gamma=\alpha\\\ \ \ \beta\neq0} \frac{\alpha!}{\beta!\,\gamma!} \frac{\partial^{|\beta|}{u}}{\partial{x}^\beta} \frac{\partial^{|\gamma|}f'(u)}{\partial{x}^\gamma} .  \f]
 This can be efficiently computed recursively.
-A similar approach works for functions \f$f:\R^n\to\R\f$ are also available.
+A similar approach works for functions \f$f:\R^n\to\R\f$.
+An explicit form is <em>Faà di Bruno's formula</em>.
 
 Automatic differentiation is especially useful in programming languages support for polymorphism, since the same code used for evaluating the function can be applied to a data type storing the value of \f$y\f$ and its partial derivatives.
 

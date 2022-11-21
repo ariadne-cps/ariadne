@@ -32,7 +32,7 @@
 
 #include <iosfwd>
 
-#if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
+#if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 || defined __arm__ || defined __aarch64__ )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
         #define ARIADNE_SSE_ROUNDING
     #elif __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
@@ -85,7 +85,7 @@ enum class RoundingMode : rounding_mode_t {
 
 namespace Ariadne {
 
-typedef unsigned short rounding_mode_t;
+typedef int rounding_mode_t;
 
 const rounding_mode_t ROUND_TO_NEAREST  = FE_TONEAREST;
 const rounding_mode_t ROUND_DOWNWARD    = FE_DOWNWARD;

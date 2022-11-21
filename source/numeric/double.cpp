@@ -49,8 +49,6 @@ namespace Ariadne {
 
 /************  Publicly-accessible rounding-mode changing *******************/
 
-typedef unsigned short rounding_mode_t;
-
 Void set_default_builtin_rounding() { set_builtin_rounding_upward(); }
 
 static const double _pi_up=3.1415926535897936;

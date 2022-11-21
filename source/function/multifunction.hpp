@@ -280,7 +280,7 @@ template<class P, class SIG, template<class,class>class SET> class FunctionSetIn
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    virtual ~FunctionSetInterface<P,SIG,SET>() = default;
+    virtual ~FunctionSetInterface() = default;
     virtual SET<P,RES> _call(Argument<Number<P>> const& x) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };

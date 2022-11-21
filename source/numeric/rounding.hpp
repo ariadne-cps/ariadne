@@ -171,7 +171,7 @@ inline void set_builtin_rounding_upward() { }
 inline void set_builtin_rounding_toward_zero() { }
 
 inline void set_builtin_rounding_mode(rounding_mode_t rnd) { }
-inline rounding_mode_t get_builtin_rounding_mode() { return 0 }
+inline rounding_mode_t get_builtin_rounding_mode() { return ROUND_TO_NEAREST; }
 
 } // namespace Ariadne
 

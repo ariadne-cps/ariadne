@@ -29,6 +29,7 @@
 #define ARIADNE_CHEBYSHEV_POLYNOMIAL_HPP
 
 #include <map>
+#include <functional>
 
 #include "utility/macros.hpp"
 #include "utility/typedefs.hpp"

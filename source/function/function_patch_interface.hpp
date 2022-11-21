@@ -144,7 +144,7 @@ template<class P> class FunctionPatchFactoryInterface
   public:
     typedef IntervalDomainType ScalarDomainType;
     typedef BoxDomainType VectorDomainType;
-    virtual ~FunctionPatchFactoryInterface<P>() = default;
+    virtual ~FunctionPatchFactoryInterface() = default;
     virtual FunctionPatchFactoryInterface<P>* clone() const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, FunctionPatchFactoryInterface<P> const& factory) { factory._write(os); return os; }

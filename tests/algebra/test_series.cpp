@@ -35,12 +35,13 @@ template<class F> decltype(auto) operator==(Rounded<F> const& x, Rational const&
 //template<class Iter> container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
 template<class X> List(InitializerList<X>) -> List<X>;
 
-template<class T1, class T2> Bool operator==(List<T1> const& lst1, List<T2> const& lst2) {
+template<class T1, class T2> EqualsType<T1,T2> operator==(List<T1> const& lst1, List<T2> const& lst2) {
     if(lst1.size()!=lst2.size()) { return false; }
+    EqualsType<T1,T2> r=true;
     for(SizeType i=0; i!=lst1.size(); ++i) {
-        if(!(lst1[i]==lst2[i])) { return false; }
+        r = r && (lst1[i]==lst2[i]);
     }
-    return true;
+    return r;
 }
 
 template<class T> Bool same(List<T> const& lst1, List<T> const& lst2) {

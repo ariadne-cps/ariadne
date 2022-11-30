@@ -353,7 +353,7 @@ TestRounded<FLT>::test_arithmetic()
     const RoundedFloatType pi_near=RoundedFloatType::pi(precision);
     const RoundedFloatType four   =RoundedFloatType(4,precision);
     RoundedFloatType::set_rounding_upward();
-    if( pi_near * 4.0_x != mul(pi_near,four) ) {
+    if( cast_exact(pi_near * 4.0_x) != cast_exact(mul(pi_near,four)) ) {
         if(not full_precision_warning) {
             full_precision_warning=true;
             ARIADNE_TEST_WARN("Mixed RoundedFloatType/BuiltinTag operations may not use full precision.");
@@ -417,7 +417,7 @@ TestRounded<FLT>::test_arithmetic()
     ARIADNE_TEST_COMPARE(add(one,eps/2),>,1.0_x);
     ARIADNE_TEST_EXECUTE(RoundedFloatType::set_rounding_downward());
     ARIADNE_TEST_COMPARE(add(one,eps/2),>=,1.0_x);
-    if(add(one,eps/2) != 1.0_x) {
+    if(cast_exact(add(one,eps/2)) != 1.0_x) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-pr in registers than memory.");
         ARIADNE_TEST_COMPARE(add(one,eps/(1<<11)),>,1.0_x);
     }

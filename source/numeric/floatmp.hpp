@@ -178,9 +178,6 @@ template<> class Float<MP>
     Float(Decimal const&, RoundingModeType, PrecisionType); //!< <p/>
     Float(Rational const&, RoundingModeType, PrecisionType); //!< <p/>
     Float(FloatMP const&, RoundingModeType, PrecisionType); //!< <p/>
-    explicit Float(const Rounded<FloatDP>& x, PrecisionType pr); //!< <p/>
-    explicit Float(const Rounded<FloatMP>& x, PrecisionType pr) : Float(reinterpret_cast<FloatMP const&>(x),to_nearest,pr) { } //!< <p/>
-    explicit Float(const Rounded<FloatMP>& x, RoundingModeType rnd, PrecisionType pr); //!< <p/>
     explicit operator Dyadic() const; //!< <p/>
     explicit operator Rational() const; //!< <p/>
 

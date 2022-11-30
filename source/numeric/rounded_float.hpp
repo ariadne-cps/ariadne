@@ -226,6 +226,7 @@ template<class FLT> class Rounded
 
     explicit Rounded(PrecisionType pr) : _flt(pr) { }
     Rounded(FloatType x) : _flt(x) { }
+    Rounded(Rounded<FloatType> x, PrecisionType) : _flt(x._flt) { }
 
     template<class Y> requires Constructible<FloatType,Y,RoundingModeType,PrecisionType>
         Rounded(Y const& y, PrecisionType pr) : Rounded(FloatType(y,FloatType::get_rounding_mode(),pr)) { }

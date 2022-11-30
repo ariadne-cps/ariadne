@@ -191,8 +191,6 @@ template<> class Float<DP>
     explicit Float(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
     explicit Float(Rational const& q, RoundingModeType rnd, PrecisionType pr);
-    //! \brief Construct an exact number from a rounded number DEPRECATED
-    explicit Float(const Rounded<FloatDP>& x, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.
     explicit operator Dyadic () const;
     //! \brief Convert to a rational number.

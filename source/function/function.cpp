@@ -125,12 +125,26 @@ template<class P, class... ARGS> struct MakeVectorMultivariateFunction<P,Real(AR
     ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
         ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
 };
-template<class P, class... ARGS> struct MakeVectorMultivariateFunction<P,RealVector(ARGS...)> {
-    VectorFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
-#warning
-//        return VectorFunction<P,ARGS...>(std::make_shared<VectorOfScalarFunction<P,ARGS...>>(lsf)); }
-        return VectorFunction<P,ARGS...>(VectorOfScalarFunction<P,ARGS...>(lsf)); }
+template<class P> struct MakeVectorMultivariateFunction<P,RealVector(Real)> {
+    VectorUnivariateFunction<P> create(Vector<ScalarUnivariateFunction<P>> const& lsf) {
+        ARIADNE_FAIL_MSG("Cannot construct multivariate function from list."); }
 };
+template<class P> struct MakeVectorMultivariateFunction<P,RealVector(RealVector)> {
+    VectorMultivariateFunction<P> create(Vector<ScalarMultivariateFunction<P>> const& lsf) {
+        if constexpr (Same<P,ValidatedTag>) {
+            if (lsf.size()==1) {
+                auto fmptr = dynamic_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const*>(lsf[0].raw_pointer());
+                if (fmptr) {
+                    auto fm = ValidatedScalarMultivariateFunctionModelDP(*fmptr);
+                    auto vfm = ValidatedVectorMultivariateFunctionModelDP(List<ValidatedScalarMultivariateFunctionModelDP>(1u,fm));
+                    return VectorMultivariateFunction<P>(vfm);
+                }
+            }
+        }
+        return VectorMultivariateFunction<P>(VectorOfScalarFunction<P,RealVector>(lsf));
+    }
+};
+
 
 template<class P, class SIG, class... ARGS> inline decltype(auto) make_vector_function(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
     return MakeVectorMultivariateFunction<P,SIG>().create(lsf);

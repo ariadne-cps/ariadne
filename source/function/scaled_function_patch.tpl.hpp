@@ -486,9 +486,9 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
 }
 
 template<class M> OutputStream& ScaledFunctionPatch<M>::_write(OutputStream& os) const {
-    os << "FunctionPatch(dom=" << this->domain() << ")";
+    os << "ScaledFunctionPatch(dom=" << this->domain() << ", f=";
     write_polynomial(os,*this);
-    return os;
+    return os << ")";
 }
 
 template<class M> OutputStream& ScaledFunctionPatch<M>::repr(OutputStream& os) const

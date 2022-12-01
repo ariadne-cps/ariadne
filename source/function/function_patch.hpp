@@ -219,7 +219,21 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
         return fp1-factory(fp1).create(f2); }
     friend ScalarFunctionPatch<P,ARGS...> operator-(ScalarFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
         return factory(fp2).create(f1)-fp2; }
+    friend ScalarFunctionPatch<P,ARGS...> operator*(ScalarFunctionPatch<P,ARGS...> const& fp1, ScalarFunction<P,ARGS...> const& f2) {
+        return fp1*factory(fp1).create(f2); }
+    friend ScalarFunctionPatch<P,ARGS...> operator*(ScalarFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
+        return factory(fp2).create(f1)*fp2; }
+    friend ScalarFunctionPatch<P,ARGS...> operator/(ScalarFunctionPatch<P,ARGS...> const& fp1, ScalarFunction<P,ARGS...> const& f2) {
+        return fp1/factory(fp1).create(f2); }
+    friend ScalarFunctionPatch<P,ARGS...> operator/(ScalarFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
+        return factory(fp2).create(f1)/fp2; }
 
+    friend VectorFunctionPatch<P,ARGS...> operator*(ScalarFunctionPatch<P,ARGS...> const& fp1, VectorFunction<P,ARGS...> const& f2) {
+        return fp1*factory(fp1).create(f2); }
+    friend VectorFunctionPatch<P,ARGS...> operator*(VectorFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
+        return factory(fp2).create(f1)*fp2; }
+    friend VectorFunctionPatch<P,ARGS...> operator/(VectorFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
+        return factory(fp2).create(f1)/fp2; }
   public:
     friend Number<P> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_evaluate(x); }
@@ -400,16 +414,17 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
     friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
-        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
+        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
     friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
     friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
-        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
+        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
     friend inline ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
-        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_unchecked_compose(f)); }
+//        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_unchecked_compose(f)); }
+        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
     friend inline VectorFunctionPatch<P,ARGS...> unchecked_compose(const VectorFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
-        return VectorFunctionPatch<P,ARGS...>(g._ptr->_unchecked_compose(f)); }
+        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
     friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f) {
         return VectorFunctionPatch<P,ARGS...>(f._ptr->_clone()); }

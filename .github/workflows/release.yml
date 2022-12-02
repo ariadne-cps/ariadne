@@ -19,18 +19,18 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 11.0 GCC 10 [Release]",
+            name: "macOS 11.0 GCC 12 [Release]",
             os: macos-11.0,
-            cxx: "g++-10"
+            cxx: "g++-12"
           }
           - {
             name: "Ubuntu 20.04 Clang 11 [Release]",
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "clang++-11"
           }
           - {
             name: "Ubuntu 20.04 GCC 10 [Release]",
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "g++-10"
           }
 
@@ -52,13 +52,13 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr cairo gnuplot
+        brew install ninja gcc@12 python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-11 g++-10 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-11 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

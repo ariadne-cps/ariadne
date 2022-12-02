@@ -19,9 +19,9 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 12.0 GCC 10 [Release]",
-            os: macos-12.0,
-            cxx: "g++-10"
+            name: "macOS 11.0 Clang 11 [Release]",
+            os: macos-11.0,
+            cxx: "clang++"
           }
           - {
             name: "Ubuntu 20.04 Clang 11 [Release]",

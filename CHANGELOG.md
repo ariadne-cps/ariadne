@@ -16,6 +16,8 @@ Legenda for the issue kind:
 
 - [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
 - [#678](https://github.com/ariadne-cps/ariadne/issues/678) (F) Address warnings using AppleClang, which is now usable on C++20 Concepts code
+- [#685](https://github.com/ariadne-cps/ariadne/issues/685) (A) Support ARM by making it properly fall into C99 rounding
+- [#688](https://github.com/ariadne-cps/ariadne/issues/688) (C) Modify atan to avoid using long double, to support ARM architecture
 
 ### 2.4.1
 

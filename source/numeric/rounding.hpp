@@ -121,7 +121,6 @@ inline void set_builtin_rounding_downward() { asm volatile ("fldcw %0" : : "m" (
 inline void set_builtin_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UPWARD) ); }
 inline void set_builtin_rounding_toward_zero() { asm volatile ("fldcw %0" : : "m" (ROUND_TOWARD_ZERO) ); }
 
-inline void set_builtin_rounding_mode(rounding_mode_t& rnd) { asm volatile ("fstcw %0" : "=m" (rnd) ); }
 inline rounding_mode_t get_builtin_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
 
 } // namespace Ariadne

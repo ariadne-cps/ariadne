@@ -19,9 +19,9 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 11.0 Clang 11 [Release]",
+            name: "macOS 11.0 GCC 12 [Release]",
             os: macos-11.0,
-            cxx: "clang++"
+            cxx: "g++-12"
           }
           - {
             name: "Ubuntu 20.04 Clang 11 [Release]",
@@ -65,7 +65,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja" -DWERROR=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
 
     - name: Build Library and Bindings
       working-directory: ${{runner.workspace}}/build

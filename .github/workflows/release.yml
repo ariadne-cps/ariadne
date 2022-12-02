@@ -24,14 +24,14 @@ jobs:
             cxx: "g++-12"
           }
           - {
-            name: "Ubuntu 20.04 Clang 11 [Release]",
+            name: "Ubuntu 22.04 Clang 11 [Release]",
             os: ubuntu-22.04,
             cxx: "clang++-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10 [Release]",
+            name: "Ubuntu 22.04 GCC 12 [Release]",
             os: ubuntu-22.04,
-            cxx: "g++-10"
+            cxx: "g++-12"
           }
 
     steps:

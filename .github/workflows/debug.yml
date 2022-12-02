@@ -19,13 +19,13 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 11.0 GCC 10 [Debug]",
+            name: "macOS 11.0 GCC 12 [Debug]",
             os: macos-11.0,
-            cxx: "g++-10"
+            cxx: "g++-12"
           }
           - {
-            name: "Ubuntu 20.04 Clang 11 [Debug]",
-            os: ubuntu-20.04,
+            name: "Ubuntu 22.04 Clang 11 [Debug]",
+            os: ubuntu-22.04,
             cxx: "clang++-11"
           }
 
@@ -47,7 +47,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr cairo gnuplot
+        brew install ninja gcc@12 python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
         sudo easy_install pip
         sudo pip3 install --upgrade pip

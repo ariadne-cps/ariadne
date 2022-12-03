@@ -30,6 +30,7 @@
 #define ARIADNE_COMMAND_LINE_INTERFACE_HPP
 
 #include <queue>
+#include <functional>
 #include "utility/macros.hpp"
 #include "utility/handle.hpp"
 #include "utility/container.hpp"

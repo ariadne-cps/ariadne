@@ -166,7 +166,6 @@ void TestDyadic::test_infinity() {
     mpf_t mpf; static_assert(std::is_signed<decltype(mpf[0]._mp_exp)>::value,"");
 
     mp_exp_t mp_exp_t_min = std::numeric_limits<mp_exp_t>::min();
-    assert(-mp_exp_t_min == mp_exp_t_min);
     ARIADNE_TEST_PRINT(mp_exp_t_min);
     Dyadic z(0);
     assert(z._mpf[0]._mp_size==0 && z._mpf[0]._mp_exp==0);

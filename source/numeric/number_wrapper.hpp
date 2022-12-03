@@ -153,9 +153,27 @@ struct MakeNumberWrapper {
 };
 
 template<class X> inline X make_unsigned(X x) { return x; }
-template<class X> inline X make_unsigned(Positive<X> px) { return std::move(px); }
-inline Real make_unsigned(PositiveReal px) { return std::move(px); }
-inline Integer make_unsigned(Natural px) { return std::move(px); }
+template<class X> inline X make_unsigned(Positive<X> px) {
+  #ifndef __clang__
+    return px;
+  #else
+    return std::move(px);
+  #endif
+}
+inline Real make_unsigned(PositiveReal px) {
+  #ifndef __clang__
+    return px;
+  #else
+    return std::move(px);
+  #endif
+}
+inline Integer make_unsigned(Natural px) {
+  #ifndef __clang__
+    return px;
+  #else
+    return std::move(px);
+  #endif
+}
 
 template<class R, class X> inline R _concrete_apply(UnaryElementaryOperator op, X const& x) {
     static_assert(Same<R,NumberInterface*>);

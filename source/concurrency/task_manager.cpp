@@ -30,6 +30,10 @@ namespace Ariadne {
 
 TaskManager::TaskManager() : _maximum_concurrency(std::thread::hardware_concurrency()), _concurrency(0), _pool(0) {}
 
+bool TaskManager::has_threads_registered() const {
+    return _concurrency;
+}
+
 SizeType TaskManager::maximum_concurrency() const {
     return _maximum_concurrency;
 }

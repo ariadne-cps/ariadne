@@ -32,23 +32,33 @@
 #include <algorithm>
 #include "utility/container.hpp"
 #include "utility/pointer.hpp"
+#include "conclog/logging.hpp"
+#include "conclog/thread_registry_interface.hpp"
 #include "concurrency/thread_pool.hpp"
 
 namespace Ariadne {
 
 //! \brief Manages tasks based on concurrency availability.
-class TaskManager {
+class TaskManager : public ThreadRegistryInterface {
   private:
     TaskManager();
   public:
     TaskManager(TaskManager const&) = delete;
     void operator=(TaskManager const&) = delete;
 
+    virtual ~TaskManager() = default;
+
     //! \brief The singleton instance of this class
     static TaskManager& instance() {
+        auto& logger = Logger::instance();
         static TaskManager instance;
+        if (not logger.has_thread_registry_attached())
+            logger.attach_thread_registry(&instance);
         return instance;
     }
+
+    //! \brief Whether threads have already been registered
+    bool has_threads_registered() const override;
 
     //! \brief Get the maximum concurrency allowed by this machine
     SizeType maximum_concurrency() const;

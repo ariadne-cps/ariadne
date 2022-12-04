@@ -30,17 +30,20 @@ using namespace ConcLog;
 namespace Ariadne {
 
 Thread::Thread(VoidFunction task, String name)
-        : _name(name), _got_id_future(_got_id_promise.get_future()), _exception(nullptr)
+        : _name(name), _got_id_future(_got_id_promise.get_future()), _registered_thread_future(_registered_thread_promise.get_future()),
+          _exception(nullptr)
 {
     _thread = std::thread([=,this]() {
         _id = std::this_thread::get_id();
         _got_id_promise.set_value();
+        _registered_thread_future.get();
         try { task(); }
         catch(...) { _exception = std::current_exception(); }
     });
     _got_id_future.get();
     if (_name == String()) _name = to_string(_id);
     Logger::instance().register_thread(this->id(),this->name());
+    _registered_thread_promise.set_value();
 }
 
 ThreadId Thread::id() const {

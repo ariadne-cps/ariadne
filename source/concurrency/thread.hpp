@@ -71,6 +71,8 @@ class Thread {
     std::thread _thread;
     Promise<Void> _got_id_promise;
     Future<Void> _got_id_future;
+    Promise<Void> _registered_thread_promise;
+    Future<Void> _registered_thread_future;
     ExceptionPtr _exception;
 };
 

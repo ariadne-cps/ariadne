@@ -487,7 +487,7 @@ String print(const mpfr_t x, int fdgts, mpfr_rnd_t rnd) {
     // fdgts is the number of places allocated for the fractional part
     char fmt[16];
     std::strcpy(fmt,"%.");
-    std::sprintf(fmt+2, "%d", fdgts);
+    std::snprintf(fmt+2, 14, "%d", fdgts);
     std::strcat(fmt,"R*f");
     static const uint buf_size=1024;
     char cstr[buf_size];

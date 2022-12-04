@@ -124,18 +124,18 @@ void GnuplotCanvas::stroke() {
         if (this->lc.red < 9) { *gnuplot << "0" << this->lc.red;}
         else if (this->lc.red > 255){ *gnuplot << "FF";}
         else{   
-            sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.red)); 
+            snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.red));
             *gnuplot << hex_string;
             }
         if (this->lc.green < 9) { *gnuplot << "0" << this->lc.green;}
         else if (this->lc.green > 255){ *gnuplot << "FF";}
         else{
-            sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.green)); 
+            snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.green));
             *gnuplot << hex_string;
             }
         if (this->lc.blue < 9) { *gnuplot << "0" << this->lc.blue;}
         else if (this->lc.blue > 255){ *gnuplot << "FF";}
-        else{sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.blue)); 
+        else{snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.blue));
             *gnuplot <<hex_string;
             }
         *gnuplot << "\"\n";
@@ -200,18 +200,18 @@ void GnuplotCanvas::fill()
             if (this->fc.red < 9) { *gnuplot << "0" << this->fc.red;}
             else if (this->fc.red > 255){ *gnuplot << "FF";}
             else{   
-                sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->fc.red)); 
+                snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->fc.red));
                 *gnuplot << hex_string;
                 }
             if (this->fc.green < 9) { *gnuplot << "0" << this->fc.green;}
             else if (this->fc.green > 255){ *gnuplot << "FF";}
             else{
-                sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->fc.green)); 
+                snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->fc.green));
                 *gnuplot << hex_string;
                 }
             if (this->fc.blue < 9) { *gnuplot << "0" << this->fc.blue;}
             else if (this->fc.blue > 255){ *gnuplot << "FF";}
-            else{sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->fc.blue)); 
+            else{snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->fc.blue));
                 *gnuplot <<hex_string;
                 }
             *gnuplot << "\" ";
@@ -222,18 +222,18 @@ void GnuplotCanvas::fill()
                 if (this->lc.red < 9) { *gnuplot << "0" << this->lc.red;}
                 else if (this->lc.red > 255){ *gnuplot << "FF";}
                 else{   
-                    sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.red)); 
+                    snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.red));
                     *gnuplot << hex_string;
                     }
                 if (this->lc.green < 9) { *gnuplot << "0" << this->lc.green;}
                 else if (this->lc.green > 255){ *gnuplot << "FF";}
                 else{
-                    sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.green)); 
+                    snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.green));
                     *gnuplot << hex_string;
                     }
                 if (this->lc.blue < 9) { *gnuplot << "0" << this->lc.blue;}
                 else if (this->lc.blue > 255){ *gnuplot << "FF";}
-                else{sprintf(hex_string, "%X", std::make_unsigned<int>::type(this->lc.blue)); 
+                else{snprintf(hex_string, 20, "%X", std::make_unsigned<int>::type(this->lc.blue));
                     *gnuplot <<hex_string;
                     }
                 *gnuplot << "\"\n";

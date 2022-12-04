@@ -63,6 +63,16 @@ class TaskManager {
     //! \brief Set the concurrency to the maximum allowed by this machine
     void set_maximum_concurrency();
 
+    //! \brief Set the Logger scheduler to the immediate one
+    //! \details Fails if the concurrency is not zero
+    void set_logging_immediate_scheduler() const;
+    //! \brief Set the Logger scheduler to the blocking one
+    //! \details Fails if the concurrency is not zero
+    void set_logging_blocking_scheduler() const;
+    //! \brief Set the Logger scheduler to the nonblocking one
+    //! \details Fails if the concurrency is not zero
+    void set_logging_nonblocking_scheduler() const;
+
     //! \brief Enqueue a task for execution, returning the future handler
     //! \details The is no limits on the number of tasks to enqueue. If concurrency is zero,
     //! then the task is executed sequentially with no threads involved

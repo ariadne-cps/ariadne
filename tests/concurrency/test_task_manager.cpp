@@ -64,13 +64,13 @@ class TestWorkloadAdvancement {
 
     void test_change_concurrency_and_log_scheduler() {
         ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(1))
-        ARIADNE_TEST_FAIL(Logger::instance().use_immediate_scheduler())
-        ARIADNE_TEST_FAIL(Logger::instance().use_blocking_scheduler())
-        ARIADNE_TEST_FAIL(Logger::instance().use_nonblocking_scheduler())
+        ARIADNE_TEST_FAIL(TaskManager::instance().set_logging_immediate_scheduler())
+        ARIADNE_TEST_FAIL(TaskManager::instance().set_logging_blocking_scheduler())
+        ARIADNE_TEST_FAIL(TaskManager::instance().set_logging_nonblocking_scheduler())
         ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(0))
-        ARIADNE_TEST_EXECUTE(Logger::instance().use_immediate_scheduler())
-        ARIADNE_TEST_EXECUTE(Logger::instance().use_nonblocking_scheduler())
-        ARIADNE_TEST_EXECUTE(Logger::instance().use_blocking_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_logging_immediate_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_logging_blocking_scheduler())
+        ARIADNE_TEST_EXECUTE(TaskManager::instance().set_logging_nonblocking_scheduler())
         ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(1))
         ARIADNE_TEST_EXECUTE(TaskManager::instance().set_concurrency(0))
     }

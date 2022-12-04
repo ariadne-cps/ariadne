@@ -23,11 +23,22 @@
  */
 
 #include "concurrency/thread_pool.hpp"
+#include "conclog/logging.hpp"
+#include "conclog/thread_registry_interface.hpp"
 #include "../test.hpp"
 
 using namespace Ariadne;
 
 using namespace std::chrono_literals;
+
+class ThreadRegistry : public ConcLog::ThreadRegistryInterface {
+public:
+    ThreadRegistry() : _threads_registered(0) { }
+    bool has_threads_registered() const override { return _threads_registered > 0; }
+    void set_threads_registered(unsigned int threads_registered) { _threads_registered = threads_registered; }
+private:
+    unsigned int _threads_registered;
+};
 
 class TestSmartThreadPool {
   public:
@@ -214,6 +225,8 @@ class TestSmartThreadPool {
 };
 
 Int main() {
+    ThreadRegistry registry;
+    ConcLog::Logger::instance().attach_thread_registry(&registry);
     TestSmartThreadPool().test();
     return ARIADNE_TEST_FAILURES;
 }

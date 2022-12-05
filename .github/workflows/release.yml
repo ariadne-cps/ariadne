@@ -105,14 +105,13 @@ jobs:
     - name: Check Python Rigorous Numerics Tutorial
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
-        export LD_LIBRARY_PATH=/usr/local/lib
+        export DYLD_LIBRARY_PATH=/usr/local/lib
         export PYTHONPATH=/usr/local/lib/python3.11/site-packages/:/usr/local/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/
         python3 rigorous_numerics_tutorial.py
 
     - name: Check Python Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
-        export LD_LIBRARY_PATH=/usr/local/lib
         export DYLD_LIBRARY_PATH=/usr/local/lib
         export PYTHONPATH=/usr/local/lib/python3.11/site-packages/:/usr/local/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/
         python3 hybrid_evolution_tutorial.py

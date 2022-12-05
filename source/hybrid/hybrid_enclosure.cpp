@@ -52,9 +52,11 @@
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_expression_set.hpp"
 
-#include "concurrency/workload.hpp"
+#include "betterthreads/workload.hpp"
 
 namespace Ariadne {
+
+using BetterThreads::StaticWorkload;
 
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);

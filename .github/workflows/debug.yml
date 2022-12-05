@@ -19,8 +19,13 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 11.0 GCC 10 [Debug]",
-            os: macos-11.0,
+            name: "macOS 12 AppleClang 14 [Release]",
+            os: macos-12,
+            cxx: "clang++"
+          }
+          - {
+            name: "macOS 11 GCC 10 [Debug]",
+            os: macos-11,
             cxx: "g++-10"
           }
           - {

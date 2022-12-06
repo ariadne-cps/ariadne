@@ -53,16 +53,6 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
-add_library(coverage_config INTERFACE)
-if(COVERAGE)
-    message(STATUS "Enabled coverage reporting")
-    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-        target_link_options(coverage_config INTERFACE --coverage)
-    else()
-        target_link_libraries(coverage_config INTERFACE --coverage)
-    endif()
-endif()
 
 enable_testing()
 include(CTest)
@@ -224,9 +214,8 @@ target_link_libraries(ariadne-kernel dl conclog betterthreads ${GMP_LIBRARIES} $
 target_link_libraries(ariadne-core dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
-    target_link_libraries(ariadne coverage_config)
-    target_link_libraries(ariadne-kernel coverage_config)
-    target_link_libraries(ariadne-core coverage_config)
+    include(CodeCoverage)
+    append_coverage_compiler_flags()
 endif()
 
 if(CAIRO_FOUND)

@@ -30,13 +30,13 @@ jobs:
             cxx: "g++-10"
           }
           - {
-            name: "Ubuntu 20.04 Clang 11 [Release]",
-            os: ubuntu-20.04,
+            name: "Ubuntu 22.04 Clang 11 [Release]",
+            os: ubuntu-22.04,
             cxx: "clang++-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10 [Release]",
-            os: ubuntu-20.04,
+            name: "Ubuntu 22.04 GCC 10 [Release]",
+            os: ubuntu-22.04,
             cxx: "g++-10"
           }
 

@@ -78,11 +78,13 @@
 
 #include "algebra/expansion.inl.hpp"
 
-#include "concurrency/workload.hpp"
+#include "betterthreads/workload.hpp"
 
 using namespace ConcLog;
 
 namespace Ariadne {
+
+using BetterThreads::StaticWorkload;
 
 template<class T> inline StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 

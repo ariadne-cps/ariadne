@@ -24,12 +24,14 @@
 
 #include "io/command_line_interface.hpp"
 #include "conclog/logging.hpp"
-#include "concurrency/task_manager.hpp"
+#include "betterthreads/task_manager.hpp"
 #include "../test.hpp"
 
 using namespace ConcLog;
 
 using namespace Ariadne;
+
+using BetterThreads::TaskManager;
 
 class TestCommandLineInterface {
   public:

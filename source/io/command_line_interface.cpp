@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "concurrency/task_manager.hpp"
+#include "betterthreads/task_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"
@@ -36,6 +36,8 @@
 using namespace ConcLog;
 
 namespace Ariadne {
+
+using BetterThreads::TaskManager;
 
 ArgumentStream::ArgumentStream(List<String> const& args) {
     ARIADNE_PRECONDITION(args.size() > 0)

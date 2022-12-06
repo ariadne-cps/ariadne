@@ -31,9 +31,12 @@
 
 #include "graphics_interface.hpp"
 #include "geometry2d.hpp"
-#include "concurrency/concurrency_typedefs.hpp"
+#include "betterthreads/typedefs.hpp"
 
 namespace Ariadne {
+
+using Mutex = std::mutex;
+template<class T> using LockGuard = std::lock_guard<T>;
 
 //! \brief Base for canvas classes
 class CanvasBase : public CanvasInterface {

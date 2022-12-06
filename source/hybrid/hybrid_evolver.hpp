@@ -37,7 +37,7 @@
 
 #include "utility/tuple.hpp"
 
-#include "concurrency/workload.hpp"
+#include "betterthreads/workload.hpp"
 
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
@@ -56,6 +56,10 @@ namespace Ariadne {
 
 typedef Map< DiscreteLocation, Vector<FloatDP> > HybridExactFloatVector;
 typedef Dyadic StepSizeType;
+
+using Mutex = std::mutex;
+template<class T> using LockGuard = std::lock_guard<T>;
+using BetterThreads::DynamicWorkload;
 
 class IntegratorInterface;
 class SolverInterface;

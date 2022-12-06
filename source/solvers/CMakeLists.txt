@@ -17,5 +17,6 @@ foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})
 endforeach()
 
 if(COVERAGE)
-    target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)
+    include(CodeCoverage)
+    append_coverage_compiler_flags()
 endif()

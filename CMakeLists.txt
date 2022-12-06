@@ -53,16 +53,6 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 option(COVERAGE "Enable coverage reporting" OFF)
-add_library(coverage_config INTERFACE)
-if(COVERAGE)
-    message(STATUS "Enabled coverage reporting")
-    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-        target_link_options(coverage_config INTERFACE --coverage)
-    else()
-        target_link_libraries(coverage_config INTERFACE --coverage)
-    endif()
-endif()
 
 enable_testing()
 include(CTest)
@@ -94,22 +84,29 @@ find_package(Git)
 if(GIT_FOUND)
     if (NOT EXISTS ${PROJECT_SOURCE_DIR}/.git) # Manages the case when an archive is used
         execute_process(COMMAND git init WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/python/pybind11 OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/pybind/pybind11 python/pybind11 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/python/pybind11/CMakeLists.txt)
+        message(ERROR "pybind11 download failure")
+    else()
+        message(STATUS "pybind11 submodule found")
+    endif()
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/conclog/CMakeLists.txt)
         message(ERROR "ConcLog download failure")
     else()
         message(STATUS "ConcLog submodule found")
     endif()
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/python/pybind11/CMakeLists.txt)
-        message(ERROR "pybind11 download failure")
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/betterthreads/CMakeLists.txt)
+        message(ERROR "BetterThreads download failure")
     else()
-        message(STATUS "pybind11 submodule found")
+        message(STATUS "BetterThreads submodule found")
     endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
@@ -123,6 +120,11 @@ endif()
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
     execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/conclog/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
     message(STATUS "Created symbolic link to ConcLog submodule")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/betterthreads/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+    message(STATUS "Created symbolic link to BetterThreads submodule")
 endif()
 
 find_package(Threads)
@@ -189,7 +191,6 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
@@ -201,7 +202,6 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
-    $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
@@ -209,14 +209,13 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-target_link_libraries(ariadne dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core dl conclog ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
-    target_link_libraries(ariadne coverage_config)
-    target_link_libraries(ariadne-kernel coverage_config)
-    target_link_libraries(ariadne-core coverage_config)
+    include(CodeCoverage)
+    append_coverage_compiler_flags()
 endif()
 
 if(CAIRO_FOUND)
@@ -224,6 +223,7 @@ if(CAIRO_FOUND)
     target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
 endif()
 
-install(TARGETS ariadne conclog DESTINATION lib)
+install(TARGETS ariadne conclog betterthreads DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")

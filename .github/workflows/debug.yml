@@ -33,6 +33,11 @@ jobs:
             os: ubuntu-20.04,
             cxx: "clang++-11"
           }
+          - {
+            name: "Ubuntu 20.04 GCC 10 [Debug]",
+            os: ubuntu-20.04,
+            cxx: "g++-10"
+          }
 
     steps:
     - uses: actions/checkout@v3

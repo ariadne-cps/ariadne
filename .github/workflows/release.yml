@@ -92,6 +92,7 @@ jobs:
     - name: Check C++ Rigorous Numerics Tutorial
       working-directory: ${{runner.workspace}}/tutorials/rigorous_numerics
       run: |
+        export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
         ./rigorous_numerics_tutorial
@@ -99,6 +100,7 @@ jobs:
     - name: Check C++ Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/hybrid_evolution
       run: |
+        export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
         cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
         ./hybrid_evolution_tutorial

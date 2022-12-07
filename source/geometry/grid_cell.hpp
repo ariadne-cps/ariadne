@@ -70,9 +70,9 @@ class GridOpenCell;
 
 typedef Box<ExactIntervalType> LatticeBoxType;
 
-enum class BinaryTreeDirection : char { LEFT=-1, UP=0, RIGHT=+1 };
-enum class BinaryChild : char { LEFT=-1, RIGHT=+1 };
-enum class TernaryChild : char { LEFT=-1, MIDDLE=0, RIGHT=+1 };
+enum class BinaryTreeDirection : ComparableEnumerationType { LEFT=-1, UP=0, RIGHT=+1 };
+enum class BinaryChild : ComparableEnumerationType { LEFT=-1, RIGHT=+1 };
+enum class TernaryChild : ComparableEnumerationType { LEFT=-1, MIDDLE=0, RIGHT=+1 };
 
 //! \brief An abstract cell of a grid paving. This class is the base of the GridCell - a regular cell on the Grid
 //! and the GridOpenCell - an open cell on a Grid. Here we only store common data and operations

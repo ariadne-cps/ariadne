@@ -70,7 +70,7 @@ namespace Detail {
 
     //! \ingroup LogicalTypes
     //! \brief An enumeration containing the possible values of a logical variable.
-    enum class LogicalValue : char {
+    enum class LogicalValue : ComparableEnumerationType {
         FALSE=-2, //!< Definitely not true.
         UNLIKELY=-1, //!< Considered unlikely to be true.
         INDETERMINATE= 0, //!< Truth is unknown, possibly undecidable.
@@ -85,7 +85,7 @@ namespace Detail {
     inline Bool is_determinate(LogicalValue lv) { return lv==LogicalValue::TRUE or lv==LogicalValue::FALSE; }
     inline Bool is_indeterminate(LogicalValue lv) { return lv==LogicalValue::INDETERMINATE or lv==LogicalValue::UNLIKELY or lv==LogicalValue::LIKELY; }
     LogicalValue operator==(LogicalValue lv1, LogicalValue lv2);
-    inline LogicalValue operator!(LogicalValue lv) { return static_cast<LogicalValue>(-static_cast<char>(lv)); }
+    inline LogicalValue operator!(LogicalValue lv) { return static_cast<LogicalValue>(-static_cast<ComparableEnumerationType>(lv)); }
     inline LogicalValue operator&&(LogicalValue lv1, LogicalValue lv2) { return std::min(lv1,lv2); }
     inline LogicalValue operator||(LogicalValue lv1, LogicalValue lv2) { return std::max(lv1,lv2); }
     inline LogicalValue operator^(LogicalValue lv1, LogicalValue lv2) { return not (lv1==lv2); }

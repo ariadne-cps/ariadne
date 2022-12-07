@@ -117,6 +117,11 @@ typedef std::uint16_t DegreeType;
 //! The type used for the dimension of a geometric object.
 typedef SizeType DimensionType;
 
+#if (defined __arm || defined __aarch64__) && !defined(__clang__)
+typedef short ComparableEnumerationType;
+#else
+typedef char ComparableEnumerationType;
+#endif
 
 
 } // namespace Ariadne

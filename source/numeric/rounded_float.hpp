@@ -47,7 +47,7 @@
 namespace Ariadne {
 
 class Rational;
-enum class Comparison : char;
+enum class Comparison : ComparableEnumerationType;
 
 //! \ingroup NumericModule
 //! \brief The precision of a FloatDP object. Since this is fixed, the class is only a tag; all objects are equal.

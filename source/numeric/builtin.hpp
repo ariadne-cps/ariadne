@@ -45,7 +45,7 @@
 namespace Ariadne {
 
 struct ExactTag;
-enum class Comparison : char;
+enum class Comparison : ComparableEnumerationType;
 
 template<class D> struct HasGetD {
     template<class DD, class=decltype(std::declval<DD>().get_d())> static std::true_type test(int);

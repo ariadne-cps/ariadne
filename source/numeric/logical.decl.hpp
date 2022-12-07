@@ -103,7 +103,14 @@ template<class P> using InequalityLogicalType = ApartnessType<P>;
 
 
 namespace Detail {
-enum class LogicalValue : char;
+
+#if (defined __arm || defined __aarch64__) && !defined(__clang__)
+typedef short ComparableEnumerationType;
+#else
+typedef char ComparableEnumerationType;
+#endif    
+
+enum class LogicalValue : ComparableEnumerationType;
 }
 using Detail::LogicalValue;
 

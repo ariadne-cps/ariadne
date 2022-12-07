@@ -44,7 +44,7 @@ namespace Ariadne {
 
 class Int64;
 
-enum class Comparison : char;
+enum class Comparison : ComparableEnumerationType;
 
 
 /************ Rational *******************************************************/

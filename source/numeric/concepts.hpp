@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-enum class Comparison : char;
+enum class Comparison : ComparableEnumerationType;
 
 template<class L> concept IsLogical = Constructible<L,Bool> and requires(L l) {
     { not (not l) } -> ConvertibleTo<L>;

@@ -60,8 +60,8 @@ template<class X> using TranscendentalType = decltype(sin(declval<X>()));
 
 class Operator {
   public:
-    enum class Code : char;
-    enum class Kind : char;
+    enum class Code : ComparableEnumerationType;
+    enum class Kind : ComparableEnumerationType;
     friend Kind get_kind(Code);
   private:
     Code _code;
@@ -81,7 +81,7 @@ using OperatorKind=Operator::Kind;
 
 
 
-enum class Operator::Kind : char {
+enum class Operator::Kind : ComparableEnumerationType {
     VARIABLE,
     COORDINATE,
     NULLARY,
@@ -94,7 +94,7 @@ enum class Operator::Kind : char {
     COMPARISON
 };
 
-enum class Operator::Code : char {
+enum class Operator::Code : ComparableEnumerationType {
     CNST,  // A constant value
     VAR,   // A named variable
     IND,   // A numbered index

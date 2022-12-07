@@ -49,7 +49,7 @@ namespace Ariadne {
 struct NoInit { };
 
 class Rational;
-enum class Comparison : char;
+enum class Comparison : ComparableEnumerationType;
 
 // FIXME: Returns EQUAL if either argument is NaN
 template<class X1, class X2> Comparison _generic_cmp(X1 x1, X2 x2) {

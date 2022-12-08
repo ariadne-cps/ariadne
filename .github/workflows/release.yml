@@ -21,23 +21,38 @@ jobs:
           - {
             name: "macOS 12 AppleClang 14 [Release]",
             os: macos-12,
-            cxx: "clang++",
+            cxx-cmd: "clang++",
             pyld: "DY"
           }
           - {
             name: "macOS 11 GCC 11 [Release]",
             os: macos-11,
-            cxx: "g++-11"
+            cxx-pkg: "gcc@11",
+            cxx-cmd: "g++-11"
+          }
+          - {
+            name: "Ubuntu 22.04 Clang 11 [Release]",
+            os: ubuntu-22.04,
+            cxx-pkg: "clang-11",
+            cxx-cmd: "clang++-11"
           }
           - {
             name: "Ubuntu 22.04 Clang 14 [Release]",
             os: ubuntu-22.04,
-            cxx: "clang++-14"
+            cxx-pkg: "clang-14",
+            cxx-cmd: "clang++-14"
+          }
+          - {
+            name: "Ubuntu 22.04 GCC 10 [Release]",
+            os: ubuntu-22.04,
+            cxx-pkg: "g++-10",
+            cxx-cmd: "g++-10"
           }
           - {
             name: "Ubuntu 22.04 GCC 11 [Release]",
             os: ubuntu-22.04,
-            cxx: "g++-11"
+            cxx-pkg: "g++-11",
+            cxx-cmd: "g++-11"
           }
 
     steps:
@@ -58,20 +73,20 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@11 python3 mpfr cairo gnuplot
+        brew install ninja ${{matrix.config.cxx-pkg}} python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-14 g++-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config ${{matrix.config.cxx-pkg}} libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja" -DWERROR=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx-cmd}} -G "Ninja" -DWERROR=ON
 
     - name: Build Library and Bindings
       working-directory: ${{runner.workspace}}/build
@@ -93,7 +108,7 @@ jobs:
       working-directory: ${{runner.workspace}}/tutorials/rigorous_numerics
       run: |
         export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
-        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
+        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx-cmd}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
         ./rigorous_numerics_tutorial
 
@@ -101,7 +116,7 @@ jobs:
       working-directory: ${{runner.workspace}}/tutorials/hybrid_evolution
       run: |
         export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
-        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -G "Ninja"
+        cmake . -DCMAKE_CXX_COMPILER=${{matrix.config.cxx-cmd}} -G "Ninja"
         cmake --build . --parallel $($NPROC)
         ./hybrid_evolution_tutorial
 

@@ -30,9 +30,9 @@ jobs:
             cxx: "g++-11"
           }
           - {
-            name: "Ubuntu 22.04 Clang 12 [Release]",
+            name: "Ubuntu 22.04 Clang 13 [Release]",
             os: ubuntu-22.04,
-            cxx: "clang++-12"
+            cxx: "clang++-13"
           }
           - {
             name: "Ubuntu 22.04 GCC 11 [Release]",
@@ -64,7 +64,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-12 g++-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-13 g++-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

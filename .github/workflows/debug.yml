@@ -24,9 +24,9 @@ jobs:
             cxx: "clang++"
           }
           - {
-            name: "macOS 11 GCC 10 [Debug]",
+            name: "macOS 11 GCC 11 [Debug]",
             os: macos-11,
-            cxx: "g++-10"
+            cxx: "g++-11"
           }
           - {
             name: "Ubuntu 22.04 Clang 11 [Debug]",
@@ -34,9 +34,9 @@ jobs:
             cxx: "clang++-11"
           }
           - {
-            name: "Ubuntu 22.04 GCC 10 [Debug]",
+            name: "Ubuntu 22.04 GCC 11 [Debug]",
             os: ubuntu-22.04,
-            cxx: "g++-10"
+            cxx: "g++-11"
           }
 
     steps:
@@ -57,7 +57,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@10 python3 mpfr cairo gnuplot
+        brew install ninja gcc@11 python3 mpfr cairo gnuplot
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
         sudo easy_install pip
         sudo pip3 install --upgrade pip
@@ -66,7 +66,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-11 g++-11 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
         sudo pip3 install pytest
 
     - name: Create Build Environment

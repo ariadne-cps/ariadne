@@ -552,9 +552,8 @@ Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>&
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c) {
     auto tcf = std::dynamic_pointer_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP>(c.function().managed_pointer());
     if(tcf != nullptr) {
-        auto ecf = tcf->error();
-        const_cast<ScaledFunctionPatch<ValidatedTaylorModelDP>&>(*tcf).clobber();
         auto pcf = MultivariatePolynomial<FloatDPApproximation>(tcf->polynomial());
+        auto ecf = tcf->error();
         return os << c.lower_bound() << "<=" << pcf << "+/-" << ecf << "<=" << c.upper_bound();
     }
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();

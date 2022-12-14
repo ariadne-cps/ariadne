@@ -151,13 +151,13 @@ Void export_plot(pybind11::module& module)
 Void export_backend(pybind11::module& module) {
     pybind11::class_<GraphicsBackend> backend_class(module,"GraphicsBackend");
 
-    #ifdef HAVE_CAIRO_H
+    #ifdef HAVE_GNUPLOT_H
         pybind11::class_<GnuplotGraphicsBackend> gnuplot_backend_class(module,"GnuplotGraphicsBackend");
         gnuplot_backend_class.def(pybind11::init<>());
         pybind11::implicitly_convertible<GnuplotGraphicsBackend,GraphicsBackend>();
         backend_class.def(pybind11::init<GnuplotGraphicsBackend>());
     #endif
-    #ifdef HAVE_GNUPLOT_H
+    #ifdef HAVE_CAIRO_H
         pybind11::class_<CairoGraphicsBackend> cairo_backend_class(module,"CairoGraphicsBackend");
         cairo_backend_class.def(pybind11::init<>());
         pybind11::implicitly_convertible<CairoGraphicsBackend,GraphicsBackend>();

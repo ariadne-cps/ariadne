@@ -51,10 +51,7 @@ namespace Ariadne {
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 //! \sa FloatDP, FloatMP, Float, UpperBound.
 template<class F> class Error
-    : public DefineDirectedFloatOperations<UpperBound<F>,LowerBound<F>>
-
-    , public DeclarePositiveDirectedNumericOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
-    , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveUpperBound<F>,PositiveLowerBound<F>,Nat,Nat>
+    : public DefineConcreteGenericOperators<UpperBound<F>>
 {
     using PR=typename F::PrecisionType;
   private: public:
@@ -121,6 +118,7 @@ template<class F> class Error
     friend Error<F> nul(Error<F> const& x) { return Error<F>(0u,x.precision()); } //!< <p/>
     friend UpperBound<F> pos(Error<F> const& x) { return UpperBound<F>(pos(x._e)); } //!< <p/>
     friend LowerBound<F> neg(Error<F> const& x) { return LowerBound<F>(neg(x._e)); } //!< <p/>
+    friend PositiveLowerBound<F> rec(Error<F> const& x) { return PositiveLowerBound<F>(rec(down,x._e)); } //!< <p/>
     friend Error<F> add(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); } //!< <p/>
     friend Error<F> mul(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); } //!< <p/>
     friend Error<F> sqr(Error<F> const& x) { return Error<F>(sqr(up,x._e)); } //!< <p/>
@@ -172,6 +170,7 @@ template<class F> class Error
         friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2);
         friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2);
 
+
     /*
         friend PositiveUpperBound<F> operator+(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
         friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
@@ -188,6 +187,34 @@ template<class F> class Error
         friend Error<F>& operator*=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1*x2; }
         friend Error<F>& operator*=(Error<F>& x1, Positive<F> const& x2) { return x1=x1*x2; }
 
+    //!@{
+    //! \name Arithmetic operators
+    friend LowerBound<F> operator-(UpperBound<F> const& x); //!< <p/>
+    friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend UpperBound<F> operator+(UpperBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F>& operator+=(UpperBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
+    friend UpperBound<F>& operator-=(UpperBound<F>& x1, LowerBound<F> const& x2); //!< <p/>
+    friend LowerBound<F>& operator-=(LowerBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Comparison operations
+    friend ValidatedNegatedSierpinskian operator==(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedSierpinskian operator!=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedNegatedSierpinskian operator==(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedSierpinskian operator!=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+
+    friend ValidatedLowerKleenean operator<=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator>=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator< (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator> (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator<=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator>=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator< (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator> (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    //!@}
   public:
     //!@{
     //! \name Validated information tests and operations

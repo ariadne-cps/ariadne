@@ -75,12 +75,15 @@ class ExactDouble;
 
 class TwoExp;
 
+
+class Natural;
+class Integer;
 class Dyadic;
 class Decimal;
-
-class Integer;
 class Rational;
 class Real;
+
+template<class X> class Positive;
 
 template<class F> class Bounds;
 template<> class Bounds<Dyadic>;

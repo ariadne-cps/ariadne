@@ -45,8 +45,7 @@ namespace Ariadne {
 //! \brief Floating-point upper bounds for real numbers.
 //! \sa UpperReal, FloatDP, FloatMP, Bounds, LowerBound.
 template<class F> class UpperBound
-    : public DefineDirectedFloatOperations<UpperBound<F>,LowerBound<F>>
-    , public DefineFloatOperations<Approximation<F>>
+    : public DefineConcreteGenericOperators<UpperBound<F>>
 {
   protected:
     typedef UpperTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -113,18 +112,18 @@ template<class F> class UpperBound
     RawType& raw() { return _u; }
     //! Over-approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return _u.get_d(); }
+
   public:
-#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
-    friend UpperBound<F> operator+(UpperBound<F> const& x); //!< <p/>
-    friend UpperBound<F> operator-(LowerBound<F> const& x); //!< <p/>
+    friend UpperBound<F> operator+(UpperBound<F> const& x) { return pos(x); } //!< <p/>
+    friend UpperBound<F> operator-(LowerBound<F> const& x) { return neg(x); } //!< <p/>
     friend LowerBound<F> operator-(UpperBound<F> const& x); //!< <p/>
-    friend UpperBound<F> operator+(UpperBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
-    friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend UpperBound<F> operator+(UpperBound<F> const& x1, UpperBound<F> const& x2) { return add(x1,x2); } //!< <p/>
+    friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2) { return sub(x1,x2); } //!< <p/>
     friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
-    friend UpperBound<F>& operator+=(UpperBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
-    friend UpperBound<F>& operator-=(UpperBound<F>& x1, LowerBound<F> const& x2); //!< <p/>
+    friend UpperBound<F>& operator+=(UpperBound<F>& x1, UpperBound<F> const& x2) { return x1=add(x1,x2); } //!< <p/>
+    friend UpperBound<F>& operator-=(UpperBound<F>& x1, LowerBound<F> const& x2) { return x2=sub(x1,x2); } //!< <p/>
     friend LowerBound<F>& operator-=(LowerBound<F>& x1, UpperBound<F> const& x2); //!< <p/>
 
     friend Positive<UpperBound<F>> operator*(Positive<UpperBound<F>> const& x1, Positive<UpperBound<F>> const& x2); //!< <p/>
@@ -138,25 +137,52 @@ template<class F> class UpperBound
 
     //!@{
     //! \name Comparison operators
+    friend ValidatedNegatedSierpinskian operator==(UpperBound<F> const& x1, LowerBound<F> const& x2) { return eq(x1,x2); } //!< <p/>
+    friend ValidatedSierpinskian operator!=(UpperBound<F> const& x1, LowerBound<F> const& x2) { return not eq(x1,x2); } //!< <p/>
+    friend ValidatedNegatedSierpinskian operator==(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedSierpinskian operator!=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+
     friend ValidatedLowerKleenean operator<=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
-    friend ValidatedUpperKleenean operator>=(UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
-    friend ValidatedLowerKleenean operator< (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator>=(UpperBound<F> const& x1, LowerBound<F> const& x2) { return not lt(x1,x2); } //!< <p/>
+    friend ValidatedLowerKleenean operator< (UpperBound<F> const& x1, LowerBound<F> const& x2) { return lt(x1,x2); } //!< <p/>
     friend ValidatedUpperKleenean operator> (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
-    friend ValidatedUpperKleenean operator<=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedUpperKleenean operator<=(LowerBound<F> const& x1, UpperBound<F> const& x2) { return not lt(x2,x1); } //!< <p/>
     friend ValidatedLowerKleenean operator>=(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
     friend ValidatedUpperKleenean operator< (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
-    friend ValidatedLowerKleenean operator> (LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
+    friend ValidatedLowerKleenean operator> (LowerBound<F> const& x1, UpperBound<F> const& x2) { return lt(x2,x1); } //!< <p/>
     //!@}
-#endif // DOXYGEN
 
+    //!@{
+    //! \name Fallback approximate arithmetic operators
+    friend Approximation<F> operator+(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> operator-(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> operator*(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> operator/(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F>& operator+=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F>& operator-=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F>& operator*=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F>& operator/=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
+    //!@}
+
+    //!@{
+    //! \name Fallback approximate comparison operators
+    friend ApproximateKleenean operator==(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator!=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator<=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator>=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator< (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator> (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    //!@}
+  public:
     //!@{
     //! \name Monotone arithmetic operations
     friend UpperBound<F> nul(UpperBound<F> const& x) {
         return UpperBound<F>(nul(x._u)); } //!< <p/>
     friend UpperBound<F> pos(UpperBound<F> const& x) {
         return UpperBound<F>(pos(x._u)); } //!< <p/>
-    friend LowerBound<F> neg(UpperBound<F> const& x) {
-        return LowerBound<F>(neg(x._u)); } //!< <p/>
+    friend UpperBound<F> neg(LowerBound<F> const& x) {
+        return UpperBound<F>(neg(x._l)); } //!< <p/>
+    friend LowerBound<F> neg(UpperBound<F> const& x); //!< <p/>
     friend UpperBound<F> hlf(UpperBound<F> const& x) {
         return UpperBound<F>(hlf(x._u)); } //!< <p/>
 
@@ -164,6 +190,7 @@ template<class F> class UpperBound
         return UpperBound<F>(add(up,x1._u,x2._u)); } //!< <p/>
     friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2) {
         return UpperBound<F>(sub(up,x1._u,x2._l)); } //!< <p/>
+    friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2); //!< <p/>
     //!@}
 
     //!@{
@@ -223,6 +250,26 @@ template<class F> class UpperBound
     friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
         ARIADNE_NOT_IMPLEMENTED; } //!< Read from an input stream.
     //!@}
+
+    //!@{
+    //! \name Fallback approximate operations
+    friend Approximation<F> add(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> sub(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> mul(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> div(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> fma(Approximation<F> const& x1, Approximation<F> const& x2, Approximation<F> const& x3); //!< <p/>
+    friend Approximation<F> pow(Approximation<F> const& x, Int n); //!< <p/>
+
+    friend Approximation<F> sqrt(Approximation<F> const& x); //!< <p/>
+    friend Approximation<F> log(Approximation<F> const& x); //!< <p/>
+    friend Approximation<F> sin(Approximation<F> const& x); //!< <p/>
+    friend Approximation<F> cos(Approximation<F> const& x); //!< <p/>
+    friend Approximation<F> tan(Approximation<F> const& x); //!< <p/>
+
+    friend Approximation<F> max(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> min(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    //!@}
+
   public:
     friend LowerBound<F> neg(UpperBound<F> const& x);
     friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2);

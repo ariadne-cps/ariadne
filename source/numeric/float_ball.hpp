@@ -52,8 +52,7 @@ template<class PRE, class PR> requires (not DefaultConstructible<PRE>) and Const
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
 //! \sa Real, FloatDP, FloatMP, Error, Float, Bounds, Approximation.
 template<class F, class FE> class Ball
-    : public DefineFloatOperations<Ball<F,FE>>
-    , public ProvideConvertedFieldOperations<Bounds<F>,Ball<F,FE>>
+    : public DefineConcreteGenericOperators<Ball<F,FE>>
 {
     typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
     static_assert(Constructible<PR,PRE> or DefaultConstructible<PRE>);
@@ -156,31 +155,29 @@ template<class F, class FE> class Ball
     Ball<F,FE> pm(Error<FE> const& e) const;
     friend Approximation<F> round(Approximation<F> const& x);
   public:
-#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
-    friend Ball<F,FE> operator+(Ball<F,FE> const& x); //!< <p/>
-    friend Ball<F,FE> operator-(Ball<F,FE> const& x); //!< <p/>
-    friend Ball<F,FE> operator+(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE> operator-(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE> operator*(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE> operator/(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE>& operator+=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE>& operator-=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE>& operator*=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend Ball<F,FE>& operator/=(Ball<F,FE>& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend Ball<F,FE> operator+(Ball<F,FE> const& x) { return pos(x); } //!< <p/>
+    friend Ball<F,FE> operator-(Ball<F,FE> const& x) { return neg(x); } //!< <p/>
+    friend Ball<F,FE> operator+(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return add(x1,x2); } //!< <p/>
+    friend Ball<F,FE> operator-(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return sub(x1,x2); } //!< <p/>
+    friend Ball<F,FE> operator*(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return mul(x1,x2); } //!< <p/>
+    friend Ball<F,FE> operator/(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return div(x1,x2); } //!< <p/>
+    friend Ball<F,FE>& operator+=(Ball<F,FE>& x1, Ball<F,FE> const& x2) { return x1 = add(x1,x2); } //!< <p/>
+    friend Ball<F,FE>& operator-=(Ball<F,FE>& x1, Ball<F,FE> const& x2) { return x1 = sub(x1,x2); } //!< <p/>
+    friend Ball<F,FE>& operator*=(Ball<F,FE>& x1, Ball<F,FE> const& x2) { return x1 = mul(x1,x2); } //!< <p/>
+    friend Ball<F,FE>& operator/=(Ball<F,FE>& x1, Ball<F,FE> const& x2) { return x1 = div(x1,x2); } //!< <p/>
     //!@}
 
     //!@{
     //! \name Comparison operators
-    friend ValidatedKleenean operator==(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend ValidatedKleenean operator!=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend ValidatedKleenean operator<=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend ValidatedKleenean operator>=(Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend ValidatedKleenean operator< (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
-    friend ValidatedKleenean operator> (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
+    friend ValidatedKleenean operator==(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return eq(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator!=(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return not eq(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator<=(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return not lt(x2,x1); } //!< <p/>
+    friend ValidatedKleenean operator>=(Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return not lt(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator< (Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return lt(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator> (Ball<F,FE> const& x1, Ball<F,FE> const& x2) { return lt(x2,x1); } //!< <p/>
     //!@}
-#endif // DOXYGEN
 
     //!@{
     //! \name Arithmetic operations
@@ -328,6 +325,43 @@ public:
     friend ValidatedKleenean operator>=(F const& x1, Ball<F,FE> const& x2) { return Ball<F,FE>(x1,x2.error_precision())>=x2; }
 
   public:
+    friend Bounds<F> add(Ball<F,FE> const& x1, Bounds<F> const& x2) { return add(Bounds<F>(x1),x2); }
+    friend Bounds<F> sub(Ball<F,FE> const& x1, Bounds<F> const& x2) { return sub(Bounds<F>(x1),x2); }
+    friend Bounds<F> mul(Ball<F,FE> const& x1, Bounds<F> const& x2) { return mul(Bounds<F>(x1),x2); }
+    friend Bounds<F> div(Ball<F,FE> const& x1, Bounds<F> const& x2) { return div(Bounds<F>(x1),x2); }
+    friend Bounds<F> add(Bounds<F> const& x1, Ball<F,FE> const& x2) { return add(x1,Bounds<F>(x2)); }
+    friend Bounds<F> sub(Bounds<F> const& x1, Ball<F,FE> const& x2) { return sub(x1,Bounds<F>(x2)); }
+    friend Bounds<F> mul(Bounds<F> const& x1, Ball<F,FE> const& x2) { return mul(x1,Bounds<F>(x2)); }
+    friend Bounds<F> div(Bounds<F> const& x1, Ball<F,FE> const& x2) { return div(x1,Bounds<F>(x2)); }
+
+    friend Bounds<F> max(Ball<F,FE> const& x1, Bounds<F> const& x2) { return max(Bounds<F>(x1),x2); }
+    friend Bounds<F> min(Ball<F,FE> const& x1, Bounds<F> const& x2) { return min(Bounds<F>(x1),x2); }
+    friend Bounds<F> max(Bounds<F> const& x1, Ball<F,FE> const& x2) { return max(x1,Bounds<F>(x2)); }
+    friend Bounds<F> min(Bounds<F> const& x1, Ball<F,FE> const& x2) { return min(x1,Bounds<F>(x2)); }
+
+    friend Bounds<F> operator+(Ball<F,FE> const& x1, Bounds<F> const& x2) { return operator+(Bounds<F>(x1),x2); }
+    friend Bounds<F> operator-(Ball<F,FE> const& x1, Bounds<F> const& x2) { return operator-(Bounds<F>(x1),x2); }
+    friend Bounds<F> operator*(Ball<F,FE> const& x1, Bounds<F> const& x2) { return operator*(Bounds<F>(x1),x2); }
+    friend Bounds<F> operator/(Ball<F,FE> const& x1, Bounds<F> const& x2) { return operator/(Bounds<F>(x1),x2); }
+    friend Bounds<F> operator+(Bounds<F> const& x1, Ball<F,FE> const& x2) { return operator+(x1,Bounds<F>(x2)); }
+    friend Bounds<F> operator-(Bounds<F> const& x1, Ball<F,FE> const& x2) { return operator-(x1,Bounds<F>(x2)); }
+    friend Bounds<F> operator*(Bounds<F> const& x1, Ball<F,FE> const& x2) { return operator*(x1,Bounds<F>(x2)); }
+    friend Bounds<F> operator/(Bounds<F> const& x1, Ball<F,FE> const& x2) { return operator/(x1,Bounds<F>(x2)); }
+
+    friend ValidatedKleenean operator==(Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)==x2; }
+    friend ValidatedKleenean operator!=(Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)!=x2; }
+    friend ValidatedKleenean operator< (Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)< x2; }
+    friend ValidatedKleenean operator> (Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)> x2; }
+    friend ValidatedKleenean operator<=(Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)<=x2; }
+    friend ValidatedKleenean operator>=(Ball<F,FE> const& x1, Bounds<F> const& x2) { return Bounds<F>(x1)>=x2; }
+    friend ValidatedKleenean operator==(Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1==Bounds<F>(x2); }
+    friend ValidatedKleenean operator!=(Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1!=Bounds<F>(x2); }
+    friend ValidatedKleenean operator< (Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1< Bounds<F>(x2); }
+    friend ValidatedKleenean operator> (Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1> Bounds<F>(x2); }
+    friend ValidatedKleenean operator<=(Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1<=Bounds<F>(x2); }
+    friend ValidatedKleenean operator>=(Bounds<F> const& x1, Ball<F,FE> const& x2) { return x1>=Bounds<F>(x2); }
+
+  public:
     //!@{
     //! \name Rounding operations
 
@@ -429,7 +463,8 @@ template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>:
 template<class PR, class PRE> inline PositiveFloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(PositiveValidatedNumber const& y) { return PositiveFloatBall<PR,PRE>(y,this->_pr,this->_pre); }
 
 
-template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
+template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE>
+{
     using PR = typename Ball<F,FE>::PrecisionType;
     using PRE = typename Ball<F,FE>::ErrorPrecisionType;
   public:

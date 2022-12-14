@@ -48,7 +48,7 @@ namespace Ariadne {
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, NaiveReal, FloatDP, FloatMP, Float, Ball, Bounds.
 template<class F> class Approximation
-    : public DefineFloatOperations<Approximation<F>>
+    : public DefineConcreteGenericOperators<Approximation<F>>
 {
   protected:
     typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -132,33 +132,33 @@ template<class F> class Approximation
     RawType& raw() { return this->_a; }
     //! <p/> DEPRECATED
     double get_d() const { return this->_a.get_d(); }
+
   public:
-#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
-    friend Approximation<F> operator+(Approximation<F> const& x); //!< <p/>
-    friend Approximation<F> operator-(Approximation<F> const& x); //!< <p/>
-    friend Approximation<F> operator+(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F> operator-(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F> operator*(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F> operator/(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F>& operator+=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F>& operator-=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F>& operator*=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
-    friend Approximation<F>& operator/=(Approximation<F>& x1, Approximation<F> const& x2); //!< <p/>
+    friend Approximation<F> operator+(Approximation<F> const& x) { return pos(x); } //!< <p/>
+    friend Approximation<F> operator-(Approximation<F> const& x) { return neg(x); } //!< <p/>
+    friend Approximation<F> operator+(Approximation<F> const& x1, Approximation<F> const& x2) { return add(x1,x2); } //!< <p/>
+    friend Approximation<F> operator-(Approximation<F> const& x1, Approximation<F> const& x2) { return sub(x1,x2); } //!< <p/>
+    friend Approximation<F> operator*(Approximation<F> const& x1, Approximation<F> const& x2) { return mul(x1,x2); } //!< <p/>
+    friend Approximation<F> operator/(Approximation<F> const& x1, Approximation<F> const& x2) { return div(x1,x2); } //!< <p/>
+    friend Approximation<F>& operator+=(Approximation<F>& x1, Approximation<F> const& x2) { return x1 = add(x1,x2); } //!< <p/>
+    friend Approximation<F>& operator-=(Approximation<F>& x1, Approximation<F> const& x2) { return x1 = sub(x1,x2); } //!< <p/>
+    friend Approximation<F>& operator*=(Approximation<F>& x1, Approximation<F> const& x2) { return x1 = mul(x1,x2); } //!< <p/>
+    friend Approximation<F>& operator/=(Approximation<F>& x1, Approximation<F> const& x2) { return x1 = div(x1,x2); } //!< <p/>
     //!@}
 
     //!@{
     //! \name Comparison operators
-    friend ApproximateKleenean operator==(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend ApproximateKleenean operator!=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend ApproximateKleenean operator<=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend ApproximateKleenean operator>=(Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend ApproximateKleenean operator< (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
-    friend ApproximateKleenean operator> (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
+    friend ApproximateKleenean operator==(Approximation<F> const& x1, Approximation<F> const& x2) { return eq(x1,x2); } //!< <p/>
+    friend ApproximateKleenean operator!=(Approximation<F> const& x1, Approximation<F> const& x2) { return not eq(x1,x2); } //!< <p/>
+    friend ApproximateKleenean operator<=(Approximation<F> const& x1, Approximation<F> const& x2) { return not lt(x2,x1); } //!< <p/>
+    friend ApproximateKleenean operator>=(Approximation<F> const& x1, Approximation<F> const& x2) { return not lt(x1,x2); } //!< <p/>
+    friend ApproximateKleenean operator< (Approximation<F> const& x1, Approximation<F> const& x2) { return lt(x1,x2); } //!< <p/>
+    friend ApproximateKleenean operator> (Approximation<F> const& x1, Approximation<F> const& x2) { return lt(x2,x1); } //!< <p/>
     //!@}
-#endif // DOXYGEN
 
+  public:
     //!@{
     //! \name Arithmetic operations
     friend Approximation<F> nul(Approximation<F> const& x) {
@@ -290,8 +290,6 @@ template<class PR> template<BuiltinFloatingPoint D> inline
     FloatApproximation<PR> FloatFactory<PR>::create(D const& y) { return FloatApproximation<PR>(y,_pr); }
 
 template<class F> class Positive<Approximation<F>> : public Approximation<F>
-    , public DeclarePositiveFloatOperations<PositiveApproximation<F>>
-    , public DefineSemiFieldOperators<PositiveApproximation<F>>
     , public DefineConcreteGenericOperators<PositiveApproximation<F>>
 {
     using typename Approximation<F>::PR;
@@ -308,6 +306,12 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
     Positive(Positive<F> const& x) : Approximation<F>(x) { }
     Positive(Error<F> const& x) : Approximation<F>(x) { }
   public:
+    friend PositiveApproximation<F> operator+(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) { return add(x1,x2); }
+    friend PositiveApproximation<F> operator*(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) { return mul(x1,x2); }
+    friend PositiveApproximation<F> operator/(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) { return div(x1,x2); }
+    friend PositiveApproximation<F>& operator+(PositiveApproximation<F>& x1, PositiveApproximation<F> const& x2) { return x1=add(x1,x2); }
+    friend PositiveApproximation<F>& operator*(PositiveApproximation<F>& x1, PositiveApproximation<F> const& x2) { return x1=mul(x1,x2); }
+    friend PositiveApproximation<F>& operator/(PositiveApproximation<F>& x1, PositiveApproximation<F> const& x2) { return x1=div(x1,x2); }
     friend PositiveApproximation<F> nul(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(nul(x.raw())); }
     friend PositiveApproximation<F> hlf(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(hlf(x.raw())); }
     friend PositiveApproximation<F> sqr(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqr(near,x.raw())); }

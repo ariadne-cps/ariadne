@@ -77,7 +77,7 @@ struct DefaultTag;
 //!   FloatDPBounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class F> class Bounds
-    : public DefineFloatOperations<Bounds<F>>
+    : public DefineConcreteGenericOperators<Bounds<F>>
 {
   protected:
     typedef ValidatedTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -177,31 +177,29 @@ template<class F> class Bounds
     friend Approximation<F> round(Approximation<F> const& x);
     friend F midpoint(Bounds<F> const& x);
   public:
-#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
-    friend Bounds<F> operator+(Bounds<F> const& x); //!< <p/>
-    friend Bounds<F> operator-(Bounds<F> const& x); //!< <p/>
-    friend Bounds<F> operator+(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F> operator-(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F> operator*(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F> operator/(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F>& operator+=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F>& operator-=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F>& operator*=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
-    friend Bounds<F>& operator/=(Bounds<F>& x1, Bounds<F> const& x2); //!< <p/>
+    friend Bounds<F> operator+(Bounds<F> const& x) { return pos(x); } //!< <p/>
+    friend Bounds<F> operator-(Bounds<F> const& x) { return neg(x); } //!< <p/>
+    friend Bounds<F> operator+(Bounds<F> const& x1, Bounds<F> const& x2) { return add(x1,x2); } //!< <p/>
+    friend Bounds<F> operator-(Bounds<F> const& x1, Bounds<F> const& x2) { return sub(x1,x2); } //!< <p/>
+    friend Bounds<F> operator*(Bounds<F> const& x1, Bounds<F> const& x2) { return mul(x1,x2); } //!< <p/>
+    friend Bounds<F> operator/(Bounds<F> const& x1, Bounds<F> const& x2) { return div(x1,x2); } //!< <p/>
+    friend Bounds<F>& operator+=(Bounds<F>& x1, Bounds<F> const& x2) { return x1 = add(x1,x2); } //!< <p/>
+    friend Bounds<F>& operator-=(Bounds<F>& x1, Bounds<F> const& x2) { return x1 = sub(x1,x2); } //!< <p/>
+    friend Bounds<F>& operator*=(Bounds<F>& x1, Bounds<F> const& x2) { return x1 = mul(x1,x2); } //!< <p/>
+    friend Bounds<F>& operator/=(Bounds<F>& x1, Bounds<F> const& x2) { return x1 = div(x1,x2); } //!< <p/>
     //!@}
 
     //!@{
     //! \name Comparison operators
-    friend ValidatedKleenean operator==(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend ValidatedKleenean operator!=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend ValidatedKleenean operator<=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend ValidatedKleenean operator>=(Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend ValidatedKleenean operator< (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
-    friend ValidatedKleenean operator> (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
+    friend ValidatedKleenean operator==(Bounds<F> const& x1, Bounds<F> const& x2) { return eq(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator!=(Bounds<F> const& x1, Bounds<F> const& x2) { return not eq(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator<=(Bounds<F> const& x1, Bounds<F> const& x2) { return not lt(x2,x1); } //!< <p/>
+    friend ValidatedKleenean operator>=(Bounds<F> const& x1, Bounds<F> const& x2) { return not lt(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator< (Bounds<F> const& x1, Bounds<F> const& x2) { return lt(x1,x2); } //!< <p/>
+    friend ValidatedKleenean operator> (Bounds<F> const& x1, Bounds<F> const& x2) { return lt(x2,x1); } //!< <p/>
     //!@}
-#endif // DOXYGEN
 
     //!@{
     //! \name Arithmetic operations
@@ -501,7 +499,6 @@ template<class PR> inline PositiveFloatBounds<PR> FloatFactory<PR>::create(Posit
 
 
 template<class F> class Positive<Bounds<F>> : public Bounds<F>
-    , public DeclarePositiveFloatOperations<PositiveBounds<F>>
 {
     using typename Bounds<F>::PR;
   public:
@@ -518,6 +515,18 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }
     Positive<UpperBound<F>> upper() const { return cast_positive(this->Bounds<F>::upper()); }
   public:
+    friend PositiveBounds<F> operator+(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {
+        return add(x1,x2); }
+    friend PositiveBounds<F> operator*(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {
+        return mul(x1,x2); }
+    friend PositiveBounds<F> operator/(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {
+        return div(x1,x2); }
+    friend PositiveBounds<F>& operator+(PositiveBounds<F>& x1, PositiveBounds<F> const& x2) {
+        return x1=add(x1,x2); }
+    friend PositiveBounds<F>& operator*(PositiveBounds<F>& x1, PositiveBounds<F> const& x2) {
+        return x1=mul(x1,x2); }
+    friend PositiveBounds<F>& operator/(PositiveBounds<F>& x1, PositiveBounds<F> const& x2) {
+        return x1=div(x1,x2); }
     friend PositiveBounds<F> nul(PositiveBounds<F> const& x) {
         return PositiveBounds<F>(nul(x._l),nul(x._u)); }
     friend PositiveBounds<F> hlf(PositiveBounds<F> const& x) {

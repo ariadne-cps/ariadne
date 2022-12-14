@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "builtin.hpp"
 #include "float_error.hpp"
 #include "float_error.tpl.hpp"

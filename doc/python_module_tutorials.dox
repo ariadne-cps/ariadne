@@ -165,16 +165,16 @@ Note that the iterates are also of clas \ref FloatDP::FloatDPBounds "FloatDPBoun
 Unlike rational arithmetic, the length of the representation does not change, but the accuracy decreases through the computation.
 
 To attain more accuracy, the \ref FloatMP::FloatMPBounds "FloatMPBounds" class can be used:
-\skipline =FloatMPBounds
+\skipline FloatMP
 \skipline compute_iterates(
 
 Guaranteed over-approximations can also be computed using the \ref Ball classes, which use an approximation of the form \f$x=x_c\pm e_x\f$.
 Here, it sometimes makes sense to use a higher precision for the centre of the ball than the radius, such as the \ref FloatMP::FloatMPDPBall "FloatMPDPBall" class:
-\skipline =FloatMPDPBall
+\skipline =Ball
 \skipline compute_iterates(
 
 If we only need approximate results with no guarantees on the accuracy, we can use an \ref Approximation object, such as the \ref FloatDP::FloatDPApproximation "FloatDPApproximation" class:
-\skipline =FloatDPApproximation
+\skipline =Approximation
 \skipline compute_iterates(
 
 

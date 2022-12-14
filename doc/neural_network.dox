@@ -54,7 +54,7 @@ As a slightly more efficient alternative to \f$1/x\f$, we can use %Ariadne's bui
 \skipline sigma=
 Alternatively, we can define \f$\sigma\f$ in terms of a variable \f$y\f$.
 Using \f$\lambda\f$-calculus syntax \f$\sigma=\lambda{y}.1/(1+e^{y})\f$ (in pure Python we would write <code>lambda y : 1/(1+exp(-y))</code> ) we have:
-\skipline RealVariable("y")
+\skipline Variable
 \skipline sigma=
 
 We next create the functions representing the layers.

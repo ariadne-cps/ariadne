@@ -453,8 +453,6 @@ template<class M> class ScaledFunctionPatch
 template<class M> template<class X> X ScaledFunctionPatch<M>::operator()(const Vector<X>& a) const {
     if constexpr (CanCall<X,M,Vector<X>>) {
         return this->_model(unscale(a,this->_domain));
-    } else if constexpr (CanCall<X,ScaledFunctionPatch<M>,Vector<X>>) {
-        return this->operator()(a);
     } else {
         ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>),
                            "evaluate(ScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": "

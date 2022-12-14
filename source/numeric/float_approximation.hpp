@@ -48,7 +48,6 @@ namespace Ariadne {
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, NaiveReal, FloatDP, FloatMP, Float, Ball, Bounds.
 template<class F> class Approximation
-    : public DefineConcreteGenericOperators<Approximation<F>>
 {
   protected:
     typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -290,7 +289,6 @@ template<class PR> template<BuiltinFloatingPoint D> inline
     FloatApproximation<PR> FloatFactory<PR>::create(D const& y) { return FloatApproximation<PR>(y,_pr); }
 
 template<class F> class Positive<Approximation<F>> : public Approximation<F>
-    , public DefineConcreteGenericOperators<PositiveApproximation<F>>
 {
     using typename Approximation<F>::PR;
   public:

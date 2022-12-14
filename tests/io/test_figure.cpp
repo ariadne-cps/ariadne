@@ -151,7 +151,7 @@ class TestGraphics {
         ConstraintSet cs1(rf,RealBox(1u,RealInterval(-1,0)));
 
         {
-            ExactDouble h=10000;
+            ExactDouble h=10000.0_x;
             Figure g(ExactBoxType{{-1.0_x,+1.0_x},{-h,+h}},Projection2d(2,0,1));
             g.set_fill_colour(0.5,1.0,1.0);
             g.set_line_width(10);

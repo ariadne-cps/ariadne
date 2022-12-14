@@ -116,19 +116,7 @@ template<class PX> struct DispatchPositiveFloatOperations
 };
 
 
-template<class Y1, class Y2> concept HaveCmp = requires(Y1 y1, Y2 y2) {
-    { cmp(y1,y2) } -> SameAs<Comparison>;
-};
-template<class OP, class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean _cmp(OP op, Y1 const& y1, Y2 const& y2) {
-    return op(cmp(y1,y2),Comparison::EQUAL); }
-
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator==(Y1 const& y1, Y2 const& y2) { return _cmp(Eq(),y1,y2); }
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator!=(Y1 const& y1, Y2 const& y2) { return _cmp(Ne(),y1,y2); }
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator< (Y1 const& y1, Y2 const& y2) { return _cmp(Lt(),y1,y2); }
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator> (Y1 const& y1, Y2 const& y2) { return _cmp(Gt(),y1,y2); }
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator<=(Y1 const& y1, Y2 const& y2) { return _cmp(Le(),y1,y2); }
-template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator>=(Y1 const& y1, Y2 const& y2) { return _cmp(Ge(),y1,y2); }
-
+/*
 // Mixed Float-ValidatedNumber comparisons
 template<ARawFloat F, ANonExactValidatedNumber Y> ValidatedKleenean operator==(Y const& y1, F const& x2) { return Bounds<F>(y1,x2.precision())==x2; }
 template<ARawFloat F, ANonExactValidatedNumber Y> ValidatedKleenean operator!=(Y const& y1, F const& x2) { return Bounds<F>(y1,x2.precision())!=x2; }
@@ -206,7 +194,7 @@ template<ARawFloat F, AValidatedNumber Y> decltype(auto) max(Y const& y1, F cons
 template<ARawFloat F, AValidatedNumber Y> decltype(auto) min(Y const& y1, F const& x2) {
     if constexpr (AnExactDyadic<Y>) { return min(F(y1,x2.precision()),x2); }
     else { return min(Bounds<F>(y1,x2.precision()),x2); } }
-
+*/
 
 
 template<class X> class Bounds;

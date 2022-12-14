@@ -176,9 +176,6 @@ class Rational
     friend Bool is_zero(Rational const& q); //!< Tests whether \a q is zero.
     //!@}
 
-    friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
-    friend Comparison cmp(ExactDouble const& d1, Rational const& q2);
-
     //!@{
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, Rational const& q); //!< Write to an output stream.

@@ -52,7 +52,6 @@ template<class PRE, class PR> requires (not DefaultConstructible<PRE>) and Const
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
 //! \sa Real, FloatDP, FloatMP, Error, Float, Bounds, Approximation.
 template<class F, class FE> class Ball
-    : public DefineConcreteGenericOperators<Ball<F,FE>>
 {
     typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
     static_assert(Constructible<PR,PRE> or DefaultConstructible<PRE>);

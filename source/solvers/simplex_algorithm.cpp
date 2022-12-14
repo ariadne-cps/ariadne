@@ -1162,7 +1162,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
     // It seems that using this threshold does not work...
     //static const X ROBUST_FEASIBILITY_THRESHOLD = X(std::numeric_limits<double>::epsilon()) * 0;
-    static const ExactDouble ROBUST_FEASIBILITY_THRESHOLD = 0;
+    static const ExactDouble ROBUST_FEASIBILITY_THRESHOLD = 0.0_x;
 
     Bool infeasible=false;
     for(SizeType j=0; j!=n; ++j) {

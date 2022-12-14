@@ -45,7 +45,6 @@ namespace Ariadne {
 //! \brief Floating-point upper bounds for real numbers.
 //! \sa UpperReal, FloatDP, FloatMP, Bounds, LowerBound.
 template<class F> class UpperBound
-    : public DefineConcreteGenericOperators<UpperBound<F>>
 {
   protected:
     typedef UpperTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -302,7 +301,6 @@ template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Validated
 template<class PR> inline PositiveFloatUpperBound<PR> FloatFactory<PR>::create(PositiveValidatedUpperNumber const& y) { return PositiveFloatUpperBound<PR>(y,_pr); }
 
 template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
-    , DefineConcreteGenericOperators<PositiveUpperBound<F>>
 {
     using typename UpperBound<F>::PR;
   public:

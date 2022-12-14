@@ -343,6 +343,8 @@ template<class FLT> class Rounded
 
 template<class FLT> const CurrentRoundingMode Rounded<FLT>::_rnd=CurrentRoundingMode();
 
+template<class PR> FloatFactory<PR> factory(Rounded<Float<PR>> const& x) { return FloatFactory<PR>(x.precision()); }
+
 } // namespace Ariadne
 
 #endif

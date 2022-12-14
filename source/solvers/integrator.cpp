@@ -707,7 +707,7 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension() || f.argument_size()==domx.dimension()+1u+doma.dimension());
 
-    static const ExactDouble TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
+    static const ExactDouble TRY_SPACIAL_ORDER_INCREASE_FACTOR=4.0_x;
 
     DegreeType so=init_so;
     DegreeType to=init_to;

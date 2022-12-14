@@ -45,7 +45,6 @@ namespace Ariadne {
 //! \brief Floating-point lower bounds for real numbers.
 //! \sa LowerReal, FloatDP, FloatMP, Bounds, UpperBound.
 template<class F> class LowerBound
-    : public DefineConcreteGenericOperators<LowerBound<F>>
 {
   protected:
     typedef LowerTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -301,7 +300,6 @@ template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Validated
 template<class PR> inline PositiveFloatLowerBound<PR> FloatFactory<PR>::create(PositiveValidatedLowerNumber const& y) { return PositiveFloatLowerBound<PR>(y,_pr); }
 
 template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
-    , DefineConcreteGenericOperators<PositiveLowerBound<F>>
 {
     using typename LowerBound<F>::PR;
   public:

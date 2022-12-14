@@ -77,7 +77,6 @@ struct DefaultTag;
 //!   FloatDPBounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class F> class Bounds
-    : public DefineConcreteGenericOperators<Bounds<F>>
 {
   protected:
     typedef ValidatedTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;

@@ -51,7 +51,6 @@ namespace Ariadne {
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 //! \sa FloatDP, FloatMP, Float, UpperBound.
 template<class F> class Error
-    : public DefineConcreteGenericOperators<UpperBound<F>>
 {
     using PR=typename F::PrecisionType;
   private: public:
@@ -243,6 +242,8 @@ template<class F> class Error
 
 template<class PR> Error(ValidatedUpperNumber, PR) -> Error<RawFloatType<PR>>;
 template<class F> Error(F) -> Error<F>;
+
+template<class F> inline FloatFactory<PrecisionType<F>> factory(Error<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;

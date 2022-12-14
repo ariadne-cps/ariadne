@@ -1159,6 +1159,145 @@ template<class X, class NX, class LT, class EQ> struct DispatchDirectedCompariso
 };
 
 
+template<class... PRS> class Float;
+template<class F, class FE> class Ball;
+template<class F> class Bounds;
+template<class F> class UpperBound;
+template<class F> class LowerBound;
+template<class F> class Approximation;
+template<class F> class Error;
+template<class F> class Rounded;
+
+template<class X> struct IsConcreteNumber : False { };
+template<class PR> struct IsConcreteNumber<Float<PR>> : True { };
+template<class PR> struct IsConcreteNumber<Rounded<Float<PR>>> : True { };
+template<class PR,class PRE> struct IsConcreteNumber<Ball<Float<PR>,Float<PRE>>> : True { };
+template<class PR> struct IsConcreteNumber<Bounds<Float<PR>>> : True { };
+template<class PR> struct IsConcreteNumber<UpperBound<Float<PR>>> : True { };
+template<class PR> struct IsConcreteNumber<LowerBound<Float<PR>>> : True { };
+template<class PR> struct IsConcreteNumber<Approximation<Float<PR>>> : True { };
+template<class PR> struct IsConcreteNumber<Error<Float<PR>>> : True { };
+template<class X> struct IsConcreteNumber<Positive<X>> : IsConcreteNumber<X> { };
+
+template<class X> concept AConcreteNumber = IsConcreteNumber<X>::value;
+
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) add(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) sub(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) mul(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) div(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) add(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) sub(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) mul(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) div(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) max(X const& x, Y const& y) {
+    if constexpr (Convertible<Y,Dyadic>) { return max(x,factory(x).create(y,ExactTag())); } else { return max(x,factory(x).create(y)); } }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) min(X const& x, Y const& y) {
+    if constexpr (Convertible<Y,Dyadic>) { return min(x,factory(x).create(y,ExactTag())); } else { return min(x,factory(x).create(y)); } }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) max(Y const& y, X const& x) {
+    if constexpr (Convertible<Y,Dyadic>) { return max(factory(x).create(y,ExactTag()),x); } else { return max(factory(x).create(y),x); } }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) min(Y const& y, X const& x) {
+    if constexpr (Convertible<Y,Dyadic>) { return min(factory(x).create(y,ExactTag()),x); } else { return min(factory(x).create(y),x); } }
+
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
+
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
+
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator+=(X& x, Y const& y) { return x+=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator-=(X& x, Y const& y) { return x-=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator*=(X& x, Y const& y) { return x*=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> inline decltype(auto) operator/=(X& x, Y const& y) { return x/=factory(x).create(y); }
+
+template<class Y1, class Y2> concept HaveCmp = requires(Y1 y1, Y2 y2) {
+    { cmp(y1,y2) } -> SameAs<Comparison>;
+};
+
+/*
+template<class OP, class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean _cmp(OP op, Y1 const& y1, Y2 const& y2) {
+    return op(cmp(y1,y2),Comparison::EQUAL); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator==(Y1 const& y1, Y2 const& y2) { return _cmp(Eq(),y1,y2); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator!=(Y1 const& y1, Y2 const& y2) { return _cmp(Ne(),y1,y2); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator< (Y1 const& y1, Y2 const& y2) { return _cmp(Lt(),y1,y2); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator> (Y1 const& y1, Y2 const& y2) { return _cmp(Gt(),y1,y2); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator<=(Y1 const& y1, Y2 const& y2) { return _cmp(Le(),y1,y2); }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator>=(Y1 const& y1, Y2 const& y2) { return _cmp(Ge(),y1,y2); }
+*/
+
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator==(Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)==Comparison::EQUAL; }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator!=(Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)!=Comparison::EQUAL; }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator< (Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)< Comparison::EQUAL; }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator> (Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)> Comparison::EQUAL; }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator<=(Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)<=Comparison::EQUAL; }
+template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator>=(Y1 const& y1, Y2 const& y2) { return cmp(y1,y2)>=Comparison::EQUAL; }
+
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator==(X const& x, Y const& y) {
+    return x==factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator!=(X const& x, Y const& y) {
+    return x!=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator<=(X const& x, Y const& y) {
+     return x<=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator>=(X const& x, Y const& y) {
+     return x>=factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator< (X const& x, Y const& y) {
+     return x< factory(x).create(y); }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator> (X const& x, Y const& y) {
+     return x> factory(x).create(y); }
+
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator==(Y const& y, X const& x) {
+     return factory(x).create(y)==x; }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator!=(Y const& y, X const& x) {
+     return factory(x).create(y)!=x; }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator<=(Y const& y, X const& x) {
+     return factory(x).create(y)<=x; }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator>=(Y const& y, X const& x) {
+     return factory(x).create(y)>=x; }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator< (Y const& y, X const& x) {
+     return factory(x).create(y)< x; }
+template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline decltype(auto) operator> (Y const& y, X const& x) {
+     return factory(x).create(y)> x; }
+
+/*
+template<class X> struct DefineConcreteGenericArithmeticOperators
+    : DefineConcreteGenericArithmeticOperations<X>
+{
+    template<GenericNumber Y> friend decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator-(X const& x, Y const& y) { return x-factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator*(X const& x, Y const& y) { return x*factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator/(X const& x, Y const& y) { return x/factory(x).create(y); }
+
+    template<GenericNumber Y> friend decltype(auto) operator+(Y const& y, X const& x) { return factory(x).create(y)+x; }
+    template<GenericNumber Y> friend decltype(auto) operator-(Y const& y, X const& x) { return factory(x).create(y)-x; }
+    template<GenericNumber Y> friend decltype(auto) operator*(Y const& y, X const& x) { return factory(x).create(y)*x; }
+    template<GenericNumber Y> friend decltype(auto) operator/(Y const& y, X const& x) { return factory(x).create(y)/x; }
+
+    template<GenericNumber Y> friend decltype(auto) operator+=(X& x, Y const& y) { return x+=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator-=(X& x, Y const& y) { return x-=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator*=(X& x, Y const& y) { return x*=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator/=(X& x, Y const& y) { return x/=factory(x).create(y); }
+};
+
+template<class X> struct DefineConcreteGenericComparisonOperators {
+    template<GenericNumber Y> friend decltype(auto) operator==(X const& x, Y const& y) { return x==factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator!=(X const& x, Y const& y) { return x!=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator<=(X const& x, Y const& y) { return x<=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator>=(X const& x, Y const& y) { return x>=factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator< (X const& x, Y const& y) { return x< factory(x).create(y); }
+    template<GenericNumber Y> friend decltype(auto) operator> (X const& x, Y const& y) { return x> factory(x).create(y); }
+
+    template<GenericNumber Y> friend decltype(auto) operator==(Y const& y, X const& x) { return factory(x).create(y)==x; }
+    template<GenericNumber Y> friend decltype(auto) operator!=(Y const& y, X const& x) { return factory(x).create(y)!=x; }
+    template<GenericNumber Y> friend decltype(auto) operator<=(Y const& y, X const& x) { return factory(x).create(y)<=x; }
+    template<GenericNumber Y> friend decltype(auto) operator>=(Y const& y, X const& x) { return factory(x).create(y)>=x; }
+    template<GenericNumber Y> friend decltype(auto) operator< (Y const& y, X const& x) { return factory(x).create(y)< x; }
+    template<GenericNumber Y> friend decltype(auto) operator> (Y const& y, X const& x) { return factory(x).create(y)> x; }
+};
+*/
 
 } // namespace Ariadne
 

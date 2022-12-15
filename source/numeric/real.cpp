@@ -267,6 +267,16 @@ Real::Real(Rational const& q) : Real(std::make_shared<RealWrapper<Cnst,Rational>
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealWrapper<Cnst,EffectiveNumber>>(q)) { }
 Real::Real(FloatDP x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDP)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
+Real operator+(Real const& r) { return pos(r); }
+Real operator-(Real const& r) { return neg(r); }
+Real operator+(Real const& r1, Real const& r2) { return add(r1,r2); }
+Real operator-(Real const& r1, Real const& r2) { return sub(r1,r2); }
+Real operator*(Real const& r1, Real const& r2) { return mul(r1,r2); }
+Real operator/(Real const& r1, Real const& r2) { return div(r1,r2); }
+Real& operator+=(Real& r1, Real const& r2) { return r1=add(r1,r2); }
+Real& operator-=(Real& r1, Real const& r2) { return r1=sub(r1,r2); }
+Real& operator*=(Real& r1, Real const& r2) { return r1=mul(r1,r2); }
+Real& operator/=(Real& r1, Real const& r2) { return r1=div(r1,r2); }
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
 Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }

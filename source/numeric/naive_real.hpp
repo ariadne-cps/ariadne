@@ -65,11 +65,6 @@ using NaiveRealInterface = RealInterface;
 //! \sa Real, LowerReal, UpperReal
 class NaiveReal
     : public Handle<const NaiveRealInterface>
-    , public DeclareRealOperations<NaiveReal,PositiveNaiveReal>
-    , public DeclareAnalyticFieldOperations<NaiveReal>
-    , public DeclareLatticeOperations<NaiveReal,PositiveNaiveReal>
-    , public DeclareComparisonOperations<NaiveReal,ApproximateKleenean>
-    , public DefineFieldOperators<NaiveReal>
 {
   public:
     typedef NaiveRealInterface Interface;

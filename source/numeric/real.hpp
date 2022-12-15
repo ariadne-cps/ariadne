@@ -84,11 +84,6 @@ class RealInterface;
 //! Rational, Decimal, Dyadic, Integer
 class Real
     : public Handle<const RealInterface>
-    , public DeclareRealOperations<Real,PositiveReal>
-    , public DeclareAnalyticFieldOperations<Real>
-    , public DeclareLatticeOperations<Real,PositiveReal>
-    , public DeclareComparisonOperations<Real,Kleenean,NegatedSierpinskian>
-    , public DefineFieldOperators<Real>
 {
   public:
     typedef RealInterface Interface;

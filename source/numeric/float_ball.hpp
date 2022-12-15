@@ -479,9 +479,9 @@ template<class F, class FE> inline PositiveBall<F,FE> cast_positive(Ball<F,FE> c
 
 
 
-template<class F, class FE> struct Operations<Ball<F,FE>> {
+template<class F, class FE> class Operations<Ball<F,FE>> {
     typedef typename FE::PrecisionType PRE;
-
+  public:
     static FE _make_error(F const& e) {
         static_assert(SameAs<F,FE> or DefaultConstructible<PRE>);
         if constexpr (SameAs<F,FE>) { return e; }

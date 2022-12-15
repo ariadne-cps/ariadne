@@ -50,7 +50,7 @@ template<class F> auto Error<F>::generic() const -> ValidatedErrorNumber {
     return this->operator ValidatedErrorNumber();
 }
 
-template<class F> struct Operations<Error<F>> {
+template<class F> class Operations<Error<F>> {
     static OutputStream& _write(OutputStream& os, Error<F> const& x) {
         return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward);
     }

@@ -36,9 +36,7 @@ LowerBound<FloatDP> LowerBound<Dyadic>::get(DoublePrecision pr) const { return L
 LowerBound<FloatMP> LowerBound<Dyadic>::get(MultiplePrecision pr) const { return LowerBound<FloatMP>(FloatMP(this->raw(),down,pr)); }
 
 template class LowerBound<FloatDP>;
-template class Operations<LowerBound<FloatDP>>;
 template class LowerBound<FloatMP>;
-template class Operations<LowerBound<FloatMP>>;
 
 template<> String class_name<LowerBound<FloatDP>>() { return "FloatDPLowerBound"; }
 template<> String class_name<LowerBound<FloatMP>>() { return "FloatMPLowerBound"; }

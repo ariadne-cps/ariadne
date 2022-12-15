@@ -36,9 +36,7 @@ UpperBound<FloatDP> UpperBound<Dyadic>::get(DoublePrecision pr) const { return U
 UpperBound<FloatMP> UpperBound<Dyadic>::get(MultiplePrecision pr) const { return UpperBound<FloatMP>(FloatMP(this->raw(),up,pr)); }
 
 template class UpperBound<FloatDP>;
-template class Operations<UpperBound<FloatDP>>;
 template class UpperBound<FloatMP>;
-template class Operations<UpperBound<FloatMP>>;
 
 template<> String class_name<UpperBound<FloatDP>>() { return "FloatDPUpperBound"; }
 template<> String class_name<UpperBound<FloatMP>>() { return "FloatMPUpperBound"; }

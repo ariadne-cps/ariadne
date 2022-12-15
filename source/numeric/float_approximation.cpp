@@ -1,3 +1,5 @@
+#warning float_operations DeclareRealOperations etc.
+
 /***************************************************************************
  *            numeric/float_approximation.cpp
  *
@@ -31,9 +33,7 @@
 namespace Ariadne {
 
 template class Approximation<FloatDP>;
-template class Operations<Approximation<FloatDP>>;
 template class Approximation<FloatMP>;
-template class Operations<Approximation<FloatMP>>;
 
 template<> String class_name<Approximation<FloatDP>>() { return "FloatDPApproximation"; }
 template<> String class_name<Approximation<FloatMP>>() { return "FloatMPApproximation"; }

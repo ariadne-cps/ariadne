@@ -390,6 +390,12 @@ Comparison cmp(Dyadic const& x1, Dyadic const& x2) {
     return ExtendedOperations<Dyadic>::cmp(x1,x2);
 }
 
+Comparison cmp(Dyadic const& x1, Int const& n2) {
+    return ExtendedOperations<Dyadic>::cmp(x1,n2);
+}
+
+Comparison cmp(Integer const& z1, Int const& n2);
+
 Sign sgn(Dyadic const& x) {
     return ExtensionOperations<Dyadic>::sgn(x);
 }

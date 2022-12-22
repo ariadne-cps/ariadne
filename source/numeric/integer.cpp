@@ -259,6 +259,10 @@ Comparison cmp(Integer const& z1, Integer const& z2) {
     return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
 }
 
+Comparison cmp(Integer const& z1, Int const& n2) {
+    return Comparison(mpz_cmp_si(z1._mpz,n2));
+}
+
 Boolean eq(Integer const& z1, Integer const& z2) {
     return mpz_cmp(z1._mpz,z2._mpz)==0;
 }

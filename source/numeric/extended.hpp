@@ -136,6 +136,16 @@ template<class X> class ExtendedOperations {
         }
     }
 
+    static Comparison cmp(X const& x1, Int const& n2) {
+        if(is_finite(x1)) {
+            return Finite::cmp(x1,n2);
+        } else if(is_nan(x1)) {
+            return Comparison::INCOMPARABLE;
+        } else {
+            return (int)sgn(x1) > 0 ? Comparison::GREATER : Comparison::LESS;
+        }
+    }
+
     static OutputStream& write(OutputStream& os, X const& x) {
         if(is_finite(x)) { return os << x; }
         else if(is_nan(x)) { return os << "nan"; }

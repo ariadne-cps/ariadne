@@ -462,6 +462,14 @@ Comparison cmp(ExactDouble const& x1, Rational const& q2) {
     return Comparison(-(int)cmp(q2,x1));
 }
 
+Comparison cmp(Rational const& q1, Int const& n2) {
+    return Comparison(mpq_cmp_si(q1._mpq,n2,1));
+}
+
+Comparison cmp(Int const& n1, Rational const& q2) {
+    return Comparison(-(int)cmp(q2,n1));
+}
+
 Rational operator"" _q(unsigned long long int n) {
     return Rational(operator""_z(n));
 }

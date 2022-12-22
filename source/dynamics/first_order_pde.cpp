@@ -154,7 +154,7 @@ first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction co
 
 
     // Generate array of x values (0,1,...,2^N)/2^N
-    Array<X> xs(two_pow_N+1, [N,pr](SizeType i){return X(Dyadic(i,N),pr);});
+    //Array<X> xs(two_pow_N+1, [N,pr](SizeType i){return X(Dyadic(i,N),pr);});
     // Generate array of x values (1,3,...,2*2^N-1)/2^(N+1)
     Array<X> hxs(two_pow_N, [N,pr](SizeType i){return X(Dyadic(2*i+1,N+1),pr);});
 

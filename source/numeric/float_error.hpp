@@ -51,11 +51,7 @@ namespace Ariadne {
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 //! \sa FloatDP, FloatMP, Float, UpperBound.
 template<class F> class Error
-    : public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
-    , public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
-    , public DefineDirectedComparisonOperators<UpperBound<F>,LowerBound<F>,LessTrait<UpperBound<F>>,EqualsTrait<UpperBound<F>>>
-    , public DefineDirectedComparisonOperators<LowerBound<F>,UpperBound<F>,LessTrait<LowerBound<F>>,EqualsTrait<LowerBound<F>>>
-    , public DefineConcreteGenericOperators<UpperBound<F>>
+    : public DefineDirectedFloatOperations<UpperBound<F>,LowerBound<F>>
 
     , public DeclarePositiveDirectedNumericOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
     , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveUpperBound<F>,PositiveLowerBound<F>,Nat,Nat>

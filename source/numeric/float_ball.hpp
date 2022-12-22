@@ -52,9 +52,7 @@ template<class PRE, class PR> requires (not DefaultConstructible<PRE>) and Const
 //! \brief Floating point approximations to a real number with guaranteed error bounds.
 //! \sa Real, FloatDP, FloatMP, Error, Float, Bounds, Approximation.
 template<class F, class FE> class Ball
-    : public DefineConcreteGenericOperators<Ball<F,FE>>
-    , public DefineFieldOperators<Ball<F,FE>>
-    , public DefineComparisonOperators<Ball<F,FE>,LessTrait<Ball<F,FE>>,EqualsTrait<Ball<F,FE>>>
+    : public DefineFloatOperations<Ball<F,FE>>
     , public ProvideConvertedFieldOperations<Bounds<F>,Ball<F,FE>>
 {
     typedef ValidatedTag P; typedef typename F::PrecisionType PR; typedef typename FE::PrecisionType PRE;
@@ -158,6 +156,7 @@ template<class F, class FE> class Ball
     Ball<F,FE> pm(Error<FE> const& e) const;
     friend Approximation<F> round(Approximation<F> const& x);
   public:
+#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
     friend Ball<F,FE> operator+(Ball<F,FE> const& x); //!< <p/>
@@ -181,6 +180,7 @@ template<class F, class FE> class Ball
     friend ValidatedKleenean operator< (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
     friend ValidatedKleenean operator> (Ball<F,FE> const& x1, Ball<F,FE> const& x2); //!< <p/>
     //!@}
+#endif // DOXYGEN
 
     //!@{
     //! \name Arithmetic operations

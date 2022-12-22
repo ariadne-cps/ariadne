@@ -48,9 +48,7 @@ namespace Ariadne {
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, NaiveReal, FloatDP, FloatMP, Float, Ball, Bounds.
 template<class F> class Approximation
-    : public DefineFieldOperators<Approximation<F>>
-    , public DefineConcreteGenericOperators<Approximation<F>>
-    , public DefineComparisonOperators<Approximation<F>,LessTrait<Approximation<F>>,EqualsTrait<Approximation<F>>>
+    : public DefineFloatOperations<Approximation<F>>
 {
   protected:
     typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -135,6 +133,7 @@ template<class F> class Approximation
     //! <p/> DEPRECATED
     double get_d() const { return this->_a.get_d(); }
   public:
+#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
     friend Approximation<F> operator+(Approximation<F> const& x); //!< <p/>
@@ -158,6 +157,7 @@ template<class F> class Approximation
     friend ApproximateKleenean operator< (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
     friend ApproximateKleenean operator> (Approximation<F> const& x1, Approximation<F> const& x2); //!< <p/>
     //!@}
+#endif // DOXYGEN
 
     //!@{
     //! \name Arithmetic operations

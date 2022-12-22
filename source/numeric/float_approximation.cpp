@@ -22,7 +22,6 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "float_approximation.hpp"
 #include "float_approximation.tpl.hpp"
 

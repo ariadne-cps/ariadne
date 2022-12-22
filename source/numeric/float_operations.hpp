@@ -42,7 +42,6 @@ namespace Ariadne {
 template<class X, class R=X> struct DeclareFloatOperations
     : DeclareRealOperations<X,R>
     , DeclareComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
-    , DeclareMixedFieldOperators<X,GenericTrait<X>,R>
 {
     friend OutputStream& operator<<(OutputStream&, X const&);
     friend InputStream& operator>>(InputStream&, X&);
@@ -63,6 +62,23 @@ template<class PX, class QPX=OppositeTrait<PX>> struct DeclarePositiveDirectedFl
 
 template<class PX> struct DeclarePositiveFloatOperations
     : DeclarePositiveDirectedFloatOperations<PX,PX>
+{
+};
+
+template<class X, class R=X> struct DefineFloatOperations
+    : public DefineFieldOperators<X,R>
+    , public DefineComparisonOperators<X,LessTrait<X>,EqualsTrait<X>>
+    , public DefineConcreteGenericOperators<X>
+    , public DeclareFloatOperations<X>
+{
+};
+
+template<class X, class NX> struct DefineDirectedFloatOperations
+    : public DefineDirectedGroupOperators<X,NX>
+    , public DefineDirectedGroupOperators<NX,X>
+    , public DefineDirectedComparisonOperators<X,NX,LessTrait<X>,EqualsTrait<X>>
+    , public DefineDirectedComparisonOperators<NX,X,LessTrait<NX>,EqualsTrait<NX>>
+    , public DefineConcreteGenericOperators<X>
 {
 };
 
@@ -101,11 +117,11 @@ template<class PX> struct DispatchPositiveFloatOperations
 
 
 template<class Y1, class Y2> concept HaveCmp = requires(Y1 y1, Y2 y2) {
-    { cmp(y1,y2) } -> SameAs<Comparison>; 
+    { cmp(y1,y2) } -> SameAs<Comparison>;
 };
 template<class OP, class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean _cmp(OP op, Y1 const& y1, Y2 const& y2) {
     return op(cmp(y1,y2),Comparison::EQUAL); }
-    
+
 template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator==(Y1 const& y1, Y2 const& y2) { return _cmp(Eq(),y1,y2); }
 template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator!=(Y1 const& y1, Y2 const& y2) { return _cmp(Ne(),y1,y2); }
 template<class Y1, class Y2> requires HaveCmp<Y1,Y2> Boolean operator< (Y1 const& y1, Y2 const& y2) { return _cmp(Lt(),y1,y2); }
@@ -191,8 +207,8 @@ template<ARawFloat F, AValidatedNumber Y> decltype(auto) min(Y const& y1, F cons
     if constexpr (AnExactDyadic<Y>) { return min(F(y1,x2.precision()),x2); }
     else { return min(Bounds<F>(y1,x2.precision()),x2); } }
 
-    
-    
+
+
 template<class X> class Bounds;
 
 template<class FLT> class DeclareRoundedOperations {

@@ -45,12 +45,8 @@ namespace Ariadne {
 //! \brief Floating-point lower bounds for real numbers.
 //! \sa LowerReal, FloatDP, FloatMP, Bounds, UpperBound.
 template<class F> class LowerBound
-    : public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
-    , public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
-    , public DefineDirectedComparisonOperators<LowerBound<F>,UpperBound<F>,LessTrait<LowerBound<F>>,EqualsTrait<LowerBound<F>>>
-    , public DefineDirectedComparisonOperators<UpperBound<F>,LowerBound<F>,LessTrait<UpperBound<F>>,EqualsTrait<UpperBound<F>>>
-    , public DefineConcreteGenericOperators<LowerBound<F>>
-    , public DeclareFloatOperations<Approximation<F>>
+    : public DefineDirectedFloatOperations<LowerBound<F>,UpperBound<F>>
+    , public DefineFloatOperations<Approximation<F>>
 {
   protected:
     typedef LowerTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -116,7 +112,8 @@ template<class F> class LowerBound
     RawType& raw() { return _l; }
     //! Under-approximate by a builtin double-precision value. DEPRECATED \deprecated
     double get_d() const { return _l.get_d(); }
-  public: // To be removed
+  public:
+#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
     friend LowerBound<F> operator+(LowerBound<F> const& x); //!< <p/>
@@ -150,6 +147,7 @@ template<class F> class LowerBound
     friend ValidatedLowerKleenean operator< (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
     friend ValidatedUpperKleenean operator> (UpperBound<F> const& x1, LowerBound<F> const& x2); //!< <p/>
     //!@}
+#endif // DOXYGEN
 
     //!@{
     //! \name Monotone arithmetic operations

@@ -77,9 +77,7 @@ struct DefaultTag;
 //!   FloatDPBounds([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
 template<class F> class Bounds
-    : public DefineConcreteGenericOperators<Bounds<F>>
-    , public DefineFieldOperators<Bounds<F>>
-    , public DefineComparisonOperators<Bounds<F>,LessTrait<Bounds<F>>,EqualsTrait<Bounds<F>>>
+    : public DefineFloatOperations<Bounds<F>>
 {
   protected:
     typedef ValidatedTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
@@ -179,6 +177,7 @@ template<class F> class Bounds
     friend Approximation<F> round(Approximation<F> const& x);
     friend F midpoint(Bounds<F> const& x);
   public:
+#ifdef DOXYGEN
     //!@{
     //! \name Arithmetic operators
     friend Bounds<F> operator+(Bounds<F> const& x); //!< <p/>
@@ -202,6 +201,7 @@ template<class F> class Bounds
     friend ValidatedKleenean operator< (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
     friend ValidatedKleenean operator> (Bounds<F> const& x1, Bounds<F> const& x2); //!< <p/>
     //!@}
+#endif // DOXYGEN
 
     //!@{
     //! \name Arithmetic operations

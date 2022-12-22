@@ -40,6 +40,7 @@
 #include "numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
+#include "interval_arithmetic.hpp"
 
 namespace Ariadne {
 
@@ -94,6 +95,7 @@ template<class F> class IntervalFactory<Approximation<F>> {
 template<class F> using UpperIntervalFactory = IntervalFactory<UpperBound<F>>;
 template<class F> using ApproximateIntervalFactory = IntervalFactory<Approximation<F>>;
 
+/*
 template<class U> struct DeclareIntervalArithmeticOperations { };
 template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     : DeclareNumericOperations<UpperInterval<F>>
@@ -166,6 +168,8 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 
 template<ARawFloat F> struct DeclareIntervalArithmeticOperations<F> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
+*/
+
 template<class T, class U> concept ConstructibleGivenDefaultPrecision
     = requires(T const& t, U const& u) { T(u,t.precision()); };
 
@@ -174,7 +178,7 @@ template<class T, class U> concept ConstructibleGivenDefaultPrecision
 //! \details
 //! Not intended for use in basic interval arithmetic; represents a \em geometric rather than a \em numerical object.
 template<class U> class Interval
-    : public DeclareIntervalArithmeticOperations<U>
+    : public DefineIntervalArithmeticOperations<U>
 {
     typedef typename U::Paradigm P;
     typedef decltype(-declval<U>()) L;
@@ -315,11 +319,6 @@ template<class U> class Interval
   public:
     L _l; U _u;
 };
-
-template<class F> auto DeclareIntervalArithmeticOperations<UpperBound<F>>::precision() const -> PrecisionType {
-    Interval<UpperBound<F>>const& ivl=static_cast<Interval<UpperBound<F>>const&>(*this);
-    return min(ivl.lower_bound().precision(),ivl.upper_bound().precision());
-}
 
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);

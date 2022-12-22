@@ -1446,7 +1446,9 @@ Pair<LabelledEnclosure,LabelledEnclosure> LabelledEnclosure::split() const {
 }
 
 LabelledEnclosure product(const LabelledEnclosure& set1, const ExactIntervalType& ivl2) {
-    return product(set1,LabelledExactIntervalType(RealVariable(Identifier("x")+to_str(set1.dimension())),ivl2));
+    std::stringstream strstr;
+    strstr << "x" << to_str(set1.dimension());
+    return product(set1,LabelledExactIntervalType(RealVariable(strstr.str())  ,ivl2));
 }
 
 LabelledEnclosure product(const LabelledEnclosure& set1, const LabelledExactIntervalType& ivl2) {

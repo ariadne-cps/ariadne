@@ -26,6 +26,8 @@
  *  \brief Arithmetic declarations
  */
 
+#define ARIADNE_ARITHMETIC_HPP
+
 #ifndef ARIADNE_ARITHMETIC_HPP
 #define ARIADNE_ARITHMETIC_HPP
 

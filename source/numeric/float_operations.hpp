@@ -35,9 +35,17 @@
 #include "float.decl.hpp"
 #include "arithmetic.hpp"
 
+#include "sign.hpp"
 #include "operators.hpp"
+#include "logical.hpp"
 
 namespace Ariadne {
+
+template<class X> X generic_pow(X const& x, Nat m) {
+    X r=x; r*=0; r+=1; X p=x; while(m!=0) { if(m%2==1) { r=r*p; } p=p*p; m=m/2; } return r; }
+template<class X> X generic_pow(const X& x, Int n) {
+    return n>=0 ? generic_pow(x,Nat(n)) : rec(generic_pow(x,Nat(-n))); }
+
 
 template<class... PRS> class Float;
 template<class F, class FE> class Ball;
@@ -143,6 +151,62 @@ template<AConcreteNumber X, GenericNumber Y> requires (not HaveCmp<X,Y>) inline 
      return factory(x).create(y)> x; }
 
 
+template<class X, class R=X> struct DeclareRealOperations { };
+template<class X, class LT, class EQ> struct DeclareComparisonOperations { };
+template<class X, class Y, class R> struct DeclareMixedFieldOperators { };
+template<class X, class NX> struct DeclareDirectedNumericOperations { };
+template<class X, class NX, class Y, class NY> struct DeclareMixedDirectedGroupOperators { };
+template<class PX, class QPX> struct DeclarePositiveDirectedNumericOperations { };
+template<class X, class R=X> struct DispatchNumericOperations { };
+template<class X, class NX, class R=X> struct DispatchDirectedNumericOperations { };
+template<class PX, class QPX> struct DispatchPositiveDirectedNumericOperations { };
+template<class X, class LT, class EQ> struct DispatchComparisonOperations { };
+template<class X, class NX, class LT, class EQ> struct DispatchDirectedComparisonOperations { };
+template<class X, class R=X> struct DefineFieldOperators { };
+template<class X, class NX> class DefineDirectedGroupOperators { };
+template<class X, class LT, class EQ=LT> struct DefineComparisonOperators { };
+template<class X, class NX, class LT, class EQ> struct DefineDirectedComparisonOperators { };
+template<class X> struct DefineConcreteGenericOperators { };
+
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericElementaryOperations { };
+
+
+
+
+
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericFieldOperators { };
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericFieldOperations { };
+
+template<class X> struct ProvideConcreteGenericFieldOperators<X,Void> {
+    template<GenericNumber Y> friend decltype(auto) operator+(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator-(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator*(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator/(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator+(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) operator-(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) operator*(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) operator/(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) operator+=(X& x, Y const& y) { return x=add(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator-=(X& x, Y const& y) { return x=sub(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator*=(X& x, Y const& y) { return x=mul(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
+};
+template<class X> struct ProvideConcreteGenericFieldOperations<X,Void> : ProvideConcreteGenericFieldOperators<X,Void> {
+    template<GenericNumber Y> friend decltype(auto) add(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) sub(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) mul(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) div(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+    template<GenericNumber Y> friend decltype(auto) add(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) sub(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) mul(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    template<GenericNumber Y> friend decltype(auto) div(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+};
+
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericArithmeticOperators : ProvideConcreteGenericFieldOperators<X,Y,R> { };
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericArithmeticOperations : ProvideConcreteGenericFieldOperations<X,Y,R> { };
+
+
+template<class X> class Operations;
 
 template<class X, class R=X> struct DeclareFloatOperations
     : DeclareRealOperations<X,R>

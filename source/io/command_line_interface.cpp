@@ -39,6 +39,7 @@ namespace Ariadne {
 
 using BetterThreads::TaskManager;
 
+
 ArgumentStream::ArgumentStream(List<String> const& args) {
     ARIADNE_PRECONDITION(args.size() > 0)
     for (auto arg : args) _args.push(arg);
@@ -128,8 +129,9 @@ String ArgumentParserBase::help_description(SizeType num_chars_to_separate_instr
 Bool ArgumentParserBase::is_consumable(const ArgumentStream &stream) const {
     auto arg = stream.peek();
     if (has_short_id()) {
-        String short_argument = "-"+short_id();
-        if (arg == short_argument) return true;
+        std::stringstream short_argument;
+        short_argument << "-" << short_id();
+        if (arg == short_argument.str()) return true;
     }
     String long_argument = "--"+long_id();
     return (arg == long_argument);

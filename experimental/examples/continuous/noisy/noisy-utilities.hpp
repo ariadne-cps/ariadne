@@ -91,7 +91,7 @@ void run_single(String name, DifferentialInclusion const& ivf, BoxDomainType con
                 for (auto set : reverse(reach_sets)) { fig.draw(set); }
                 fig.draw(evolve_set);
                 char num_char[64] = "";
-                if (n > 2) sprintf(num_char,"[%lu,%lu]",i,j);
+                if (n > 2) snprintf(num_char,64,"[%lu,%lu]",i,j);
                 CONCLOG_RUN_MUTED(fig.write((name+num_char).c_str()));
             }
         }

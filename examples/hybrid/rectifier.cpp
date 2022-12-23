@@ -72,8 +72,8 @@ void ariadne_main()
     DiscreteLocation onon(rectifier|"onon");
 
     /// Create the discrete events
-    DiscreteEvent resettime(1);
-    DiscreteEvent jump1(2), jump2(3), jump3(4);
+    DiscreteEvent resettime("reset_time");
+    DiscreteEvent jump1("jump1"), jump2("jump2"), jump3("jump3");
 
     /// Create the resets
 

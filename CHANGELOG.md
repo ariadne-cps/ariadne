@@ -16,6 +16,7 @@ Legenda for the issue kind:
 
 - [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
 - [#685](https://github.com/ariadne-cps/ariadne/issues/685) (A) Support ARM by making it properly fall into C99 rounding
+- [#686](https://github.com/ariadne-cps/ariadne/issues/686) (A) Support GCC 12 on all platforms
 - [#681](https://github.com/ariadne-cps/ariadne/issues/681) (C) Refactor the logger as a ConcLog logger submodule 
 - [#688](https://github.com/ariadne-cps/ariadne/issues/688) (C) Modify atan to avoid using long double, to support ARM architecture
 - [#702](https://github.com/ariadne-cps/ariadne/issues/702) (C) Refactor the concurrency modules as a BetterThreads concurrency submodule

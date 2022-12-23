@@ -138,8 +138,11 @@ DifferentialInclusion::DifferentialInclusion(EffectiveVectorMultivariateFunction
         ARIADNE_THROW(NotFormulaFunctionException,"DifferentialInclusion of EffectiveVectorMultivariateFunction","The function must be constructed from a Formula at the moment.");
 
     List<Identifier> variable_names;
-    for (auto i : range(0,function.result_size()))
-        variable_names.append(Identifier("x"+std::to_string(i)));
+    for (auto i : range(0,function.result_size())) {
+        std::stringstream strstr;
+        strstr << "x" << std::to_string(i);
+        variable_names.append(strstr.str());
+    }
     _variable_names = variable_names;
 
     _transform_and_assign(function,inputs);

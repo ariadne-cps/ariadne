@@ -36,7 +36,6 @@ namespace Ariadne {
 class DiscreteEvent {
   public:
     DiscreteEvent() : _id("e?") { }
-    DiscreteEvent(Int n) : _id(StringType("e"+to_str(n))) { if(n<0) { _id=StringType("i"+to_str(-n)); } }
     DiscreteEvent(const StringType& s) : _id(s) { }
     StringType name() const { return this->_id; }
     Bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }

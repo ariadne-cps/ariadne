@@ -48,14 +48,14 @@ template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
 template<class X> class Sequence {
     std::function<X(Natural)> _fn;
   public:
-    Sequence(std::function<X(Natural)> fn) : _fn(fn) { }
+    Sequence(std::function<X(Natural)> const& fn) : _fn(fn) { }
     X operator[](Natural const& n) const { return _fn(n); }
 };
 
 //! \brief A convergent sequence in \f$X\f$, with no further information about the convergence rate
 template<class X> class ConvergentSequence : public Sequence<X> {
   public:
-    ConvergentSequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
+    ConvergentSequence(std::function<X(Natural)> const& fn) : Sequence<X>(fn) { }
     ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
 
@@ -81,7 +81,7 @@ template<class X> class DecreasingSequence : public Sequence<X> {
 //! \brief A fast-converging Cauchy sequence in a metric space (X,d), satisfying \f$ d(x_m,x_n) \leq 2^{-min(m,n)}\f$.
 template<class X> class FastCauchySequence : public Sequence<X> {
   public:
-    FastCauchySequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
+    FastCauchySequence(std::function<X(Natural)> const& fn) : Sequence<X>(fn) { }
     FastCauchySequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
     friend CompletionType<X> limit(FastCauchySequence<X> const&);
 };

@@ -169,8 +169,8 @@ TestHybridAutomaton::test_multiple_guard()
     HybridAutomaton system;
     DiscreteLocation q1(1);
     DiscreteLocation q2(2);
-    DiscreteEvent e1(1);
-    DiscreteEvent e2(2);
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
     RealVariable x("x");
     RealVariable y("y");
     Dyadic c(0.125);
@@ -188,8 +188,8 @@ TestHybridAutomaton::test_multiple_transition()
     HybridAutomaton system;
     DiscreteLocation q1(1);
     DiscreteLocation q2(2);
-    DiscreteEvent e1(1);
-    DiscreteEvent e2(2);
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
     RealVariable x("x");
     ARIADNE_TEST_EXECUTE( system.new_mode( q1,(dot(x)=1) ) );
     ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=2) ) );
@@ -204,11 +204,11 @@ TestHybridAutomaton::test_overspecified_reset()
 {
     HybridAutomaton system;
     DiscreteLocation q1(1);
-    DiscreteEvent e1(1);
-    DiscreteEvent e2(2);
-    DiscreteEvent e3(3);
-    DiscreteEvent e4(4);
-    DiscreteEvent e5(5);
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
+    DiscreteEvent e3("e3");
+    DiscreteEvent e4("e4");
+    DiscreteEvent e5("e5");
     RealVariable x("x");
     RealVariable y("y");
     RealVariable z("z");

@@ -51,8 +51,8 @@ class TestHybridSimulator
     {
         const DiscreteLocation location1(1);
         const DiscreteLocation location2(2);
-        const DiscreteEvent event3(3);
-        const DiscreteEvent event4(4);
+        const DiscreteEvent event3("e3");
+        const DiscreteEvent event4("e4");
         const RealVariable x("x");
         const RealVariable y("y");
         const RealVariable z("z");
@@ -78,8 +78,8 @@ class TestHybridSimulator
 
         const DiscreteLocation location1(1);
         const DiscreteLocation location2(2);
-        const DiscreteEvent event3(3);
-        const DiscreteEvent event4(4);
+        const DiscreteEvent event3("e3");
+        const DiscreteEvent event4("e4");
         const RealVariable x("x");
         const RealVariable y("y");
 
@@ -111,7 +111,7 @@ class TestHybridSimulator
     }
 };
 
-Int main()
+int main()
 {
     TestHybridSimulator().test();
     return ARIADNE_TEST_FAILURES;

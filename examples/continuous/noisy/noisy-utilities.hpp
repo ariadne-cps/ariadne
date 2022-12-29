@@ -73,7 +73,7 @@ void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox 
                                       graphics_box[yi].lower_bound().get_d(),y,graphics_box[yi].upper_bound().get_d()));
             fig.draw(orbit);
             char num_char[64] = "";
-            if (n > 2) sprintf(num_char,"[%s,%s]",x.name().c_str(),y.name().c_str());
+            if (n > 2) snprintf(num_char,64,"[%s,%s]",x.name().c_str(),y.name().c_str());
             fig.write((name+num_char).c_str());
         }
     }

@@ -317,6 +317,7 @@ class InclusionIntegratorInterface {
     virtual List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
     virtual ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorInterface& approximator) { approximator.write(os); return os; }
+    virtual ~InclusionIntegratorInterface() = default;
 };
 
 
@@ -357,6 +358,7 @@ class InclusionIntegratorImpl : public InclusionIntegratorInterface {
 class InclusionIntegrator : public Handle<const InclusionIntegratorInterface> {
   public:
     using Handle<const InclusionIntegratorInterface>::Handle;
+    virtual ~InclusionIntegrator() = default;
     template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
 
     friend Bool operator==(const InclusionIntegrator& lhs, const InclusionIntegrator& rhs) {

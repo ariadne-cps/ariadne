@@ -287,7 +287,6 @@ auto HybridSimulator::orbit(const HybridBoundedConstraintSet& initial_set, const
     RealSpace spc = this->_sys_ptr->continuous_state_space(first_location);
     Box<UpperIntervalType> box = initial_set.bounding_box().euclidean_set(first_location);
     HybridUpperBox Hbox = HybridUpperBox(first_location, spc, box);
-    std::cout << "Box: " << Hbox << std::endl;
     return orbit(Hbox, first_location, this->_sys_ptr->state_space(), termination);
 }
 /*
@@ -308,12 +307,10 @@ auto HybridSimulator::orbit(HybridUpperBox const& initial_box, DiscreteLocation 
 {
     auto lengths = initial_box.euclidean_set(space[loc]).widths();
     Nat box_width_null = 0;
-    std::cout << "Lengths: " << lengths << std::endl;
     for(SizeType i=0; i<lengths.size(); i++){
         if(lengths[i].get_d() > 0) { continue; }
         box_width_null++;
     }
-    std::cout << "width null number: " << box_width_null << std::endl;
     if(box_width_null == lengths.size()) 
     {
         auto midpoint = initial_box.euclidean_set(space[loc]).midpoint();
@@ -354,8 +351,6 @@ auto HybridSimulator::orbit(const HybridApproximateListPointType& init_list,
     Vector<RealSpace> continuous_state_auxiliary_space(init_list.size(), RealSpace());
     Vector<EffectiveVectorMultivariateFunction> auxiliary_function(init_list.size(), EffectiveVectorMultivariateFunction());
     Vector<DiscreteLocation> location(init_list.size(), DiscreteLocation());
-
-    std::cout << "List size: " << init_list.size() << std::endl;
 
     for(SizeType i=0; i<init_list.size(); i++)
     {

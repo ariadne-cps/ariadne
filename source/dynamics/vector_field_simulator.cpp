@@ -1,7 +1,7 @@
 /***************************************************************************
  *            dynamics/vector_field_simulator.cpp
  *
- *  Copyright  2008-21  Luca Geretti
+ *  Copyright  2008-21  Luca Geretti, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -49,7 +49,8 @@
 
 namespace Ariadne {
 
-template class Orbit<Point<FloatDPApproximation>>;
+template class Orbit<LabelledPoint<Approximation<FloatDP>>>;
+template class Orbit<Vector<LabelledPoint<Approximation<FloatDP>>>>;
 
 template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
@@ -62,6 +63,74 @@ template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& sp
     return LabelledPoint<X>(saspc,sapt);
 }
 
+template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<Point<X>>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    for (SizeType i=0; i<spt.size(); i++){
+        Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
+        Point<X> apt = evaluate(auxiliary_function,spt.at(i));
+        for(SizeType j=0; j!=sapt.size(); ++j) {
+            RealVariable var = saspc.variable(j);
+            sapt[j]= sspc.contains(var) ? spt.at(i)[sspc[var]] : apt[aspc[var]];
+        }
+        LabelledPoint<X> point(saspc, sapt);
+        pointLst.at(i) = point;
+    }
+
+    return pointLst;
+}
+
+template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<LabelledPoint<X>>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    for (SizeType i=0; i<spt.size(); i++){
+        Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
+        Point<X> apt = evaluate(auxiliary_function,spt.at(i));
+        for(SizeType j=0; j!=sapt.size(); ++j) {
+            RealVariable var = saspc.variable(j);
+            sapt[j]= sspc.contains(var) ? spt.at(i)[sspc[var]] : apt[aspc[var]];
+        }
+        LabelledPoint<X> point(saspc, sapt);
+        pointLst.at(i) = point;
+    }
+
+    return pointLst;
+}
+
+GridTreePaving create_grid(UpperBoxType box){
+    Point<FloatDP> tmpPointCenter = Point(box.centre());
+    Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
+    Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
+    for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
+        origin[i] = tmpPointCenter[i];
+        lengths[i] = box.widths().at(i).raw();
+    }
+    Grid grid(origin, lengths);
+    GridTreePaving gridPaving(grid);
+
+    return gridPaving;
+}
+
+Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& grid, RealSpace spc, DiscretizationType _dtype, Nat mince_dim){
+
+    if(_dtype == DiscretizationType::Mince){
+        grid.mince(mince_dim);
+    }else{ grid.recombine(); }
+
+    GridTreePaving::ConstIterator iter = grid.begin();
+    Vector<LabelledPoint<FloatDPApproximation>> approxPointList(grid.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
+    SizeType k(0);
+    for( ; iter!=grid.end(); ++iter){
+        UpperBoxType cell = iter->box();
+        auto midpoint = cell.midpoint();
+        LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
+        approxPointList.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
+        k++;
+    }
+
+    return approxPointList;
+}
+
 VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(system.clone()), _configuration(new VectorFieldSimulatorConfiguration())
 { }
 
@@ -69,29 +138,53 @@ inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& 
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
 auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_set, const TerminationType& termination) const
--> OrbitType
+-> OrbitListType
 {
     auto spc = _system->state_space();
-    auto midpoint = init_set.euclidean_set(spc).bounding_box().midpoint();
-    return orbit(ApproximatePointType(spc,midpoint),termination);
+    UpperBoxType box = init_set.euclidean_set(spc).bounding_box();
+    return orbit(box, termination);
+
 }
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
--> OrbitType
-{
+-> OrbitListType
+{  
     auto spc = _system->state_space();
-    auto midpoint = init_bx.euclidean_set(spc).midpoint();
-    return orbit(RealPointType(spc,midpoint),termination);
+    auto box = init_bx.euclidean_set(spc);
+    UpperBoxType ubox(box);
+    return orbit(ubox, termination);
+
 }
 
-auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
-    -> OrbitType
+auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
+-> OrbitListType
 {
-    return orbit(ApproximatePointType(init_pt,dp),termination);
+    auto lengths = initial_box.widths();
+    std::cout << "Lengths: " << lengths << std::endl;
+    Nat box_width_null = 0;
+    for(SizeType i=0; i<lengths.size(); i++){
+        if(lengths[i].get_d() > 0) { continue; }
+        box_width_null++;
+    }
+    if(box_width_null == lengths.size()) 
+    {
+        auto midpoint = initial_box.midpoint();
+        ApproximateListPointType pointList(1, LabelledPoint(_system->state_space(), Point<FloatDPApproximation>(midpoint, dp)));
+        return orbit(pointList, termination);
+    }
+    else if (box_width_null > 0)
+    {
+        FloatDPUpperBound eps(0.0001_q,dp);
+        initial_box = widen(initial_box, eps);
+    }
+    GridTreePaving gridPaving = create_grid(initial_box);
+    gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_sub_div());
+    ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(), _configuration->d_type(), _configuration->mince_dimension());
+    return orbit(pointList, termination);
 }
 
-auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> OrbitType
+auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_list, const TerminationType& termination) const
+    -> OrbitListType
 {
     CONCLOG_SCOPE_CREATE;
 
@@ -106,29 +199,29 @@ auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const Term
     auto auxiliary_space = _system->auxiliary_space();
     auto state_auxiliary_space = _system->state_auxiliary_space();
 
-    RungeKutta4Integrator integrator(configuration().step_size().get_d());
+    ApproximateListPointType pointLst = initial_list;
 
-    ApproximatePointType point=init_pt;
+    OrbitListType orbitList(make_state_auxiliary_point(pointLst, state_space, auxiliary_space, state_auxiliary_space, auxiliary_function));
+    for (SizeType i=0; i<initial_list.size(); i++){
+        t = 0;
+        while(possibly(t<tmax)) {
+            RungeKutta4Integrator integrator(configuration().step_size().get_d());
+            Int old_precision = std::clog.precision();
+            CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << pointLst.at(i) << std::setprecision(old_precision));
 
-    OrbitType orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+            Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function, pointLst.at(i), configuration().step_size());
+            pointLst.at(i) = ApproximatePointType(state_space, state_pt);
+            t += h;
 
-    while(possibly(t<tmax)) {
-        Int old_precision = std::clog.precision();
-        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
-
-        Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
-
-        point = ApproximatePointType(state_space,state_pt);
-        t += h;
-
-        orbit.insert(t.get(dp).value(),make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+            orbitList.insert(t.get(DoublePrecision()).value(), make_state_auxiliary_point(pointLst.at(i), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), i);
+        }
     }
 
-    return orbit;
+    return orbitList;
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-    _step_size(0.125_x, dp) {
+    _step_size(0.125_x, dp), _mince_dimension(0), _num_sub_div(0), _discretization_type(DiscretizationType::Mince) {
 }
 
 OutputStream&
@@ -136,7 +229,10 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
 {
     os << "VectorFieldSimulatorConfiguration("
        << "\n  step_size=" << step_size()
-       << "\n)";
+       << "\n  discretization type=" << d_type()
+       << "\n  mince dimension=" << mince_dimension()
+       << "\n  number of sub-division=" << num_sub_div()
+       << ")\n";
     return os;
 }
 

@@ -84,6 +84,21 @@ class Orbit<HybridApproximatePoint>
     SharedPointer<List<HybridInterpolatedCurve> > _curves_ptr;
 };
 
+template<>
+class Orbit<Vector<HybridApproximatePoint>>
+  : public HybridDrawableInterface
+{
+  public:
+    Orbit(const Vector<HybridApproximatePoint>& vhpt);
+    Void insert(HybridTime ht, const HybridApproximatePoint& hpt, SizeType setNumber);
+    SizeType size(Nat setNumber);
+    const InterpolatedCurve& curve(Nat setNumber, Nat step);
+    const List<HybridInterpolatedCurve>& curves(Nat setNumber) { return this->_curves_ptr->at(setNumber); }
+    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
+  private:
+    Vector<List<HybridInterpolatedCurve> >  *_curves_ptr;
+};
+
 Orbit<HybridApproximatePoint> extend_auxiliary(Orbit<HybridApproximatePoint> const& horb, HybridAutomatonInterface const& ha);
 
 template<>

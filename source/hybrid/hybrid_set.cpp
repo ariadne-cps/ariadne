@@ -110,6 +110,59 @@ Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<Disc
     }
 }
 
+Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint>& vhpt)
+{
+    this->_curves_ptr = new Vector(vhpt.size(), List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(0).location(),vhpt.at(0).space(),InterpolatedCurve(0,vhpt.at(0).point()))));
+    for(SizeType i=1; i<vhpt.size(); i++)
+    {
+        this->_curves_ptr->at(i) = List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(vhpt.at(i).location(),vhpt.at(i).space(),InterpolatedCurve(0,vhpt.at(i).point())));
+    }
+}
+
+SizeType 
+Orbit<Vector<HybridApproximatePoint>>::size(Nat setNumber)
+{
+    return this->_curves_ptr->at(setNumber).size();
+}
+
+Void 
+Orbit<Vector<HybridApproximatePoint>>::insert(HybridTime ht, const HybridApproximatePoint& hpt, SizeType setNumber)
+{
+    ARIADNE_ASSERT(ht.discrete_time()<=this->size(setNumber));
+    Real time=ht.continuous_time();
+    FloatDP flt_time=cast_exact(time.get(dp));
+    if(this->size(setNumber)==ht.discrete_time()) {
+        this->_curves_ptr->at(setNumber).push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
+    } else {
+        this->_curves_ptr->at(setNumber)[static_cast<unsigned int>(ht.discrete_time().get_si())].euclidean_set().insert(flt_time,hpt.point());
+    }
+}
+
+const InterpolatedCurve&
+Orbit<Vector<HybridApproximatePoint>>::curve(Nat setNumber, Nat step)
+{
+    return this->_curves_ptr->at(setNumber)[step].euclidean_set();
+}
+
+Void
+Orbit<Vector<HybridApproximatePoint>>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
+    const Orbit<Vector<HybridApproximatePoint>>& orbit=*this;
+    for(SizeType i=0; i<orbit._curves_ptr->size(); i++)
+    { 
+        for(SizeType j=0; j!=orbit._curves_ptr->at(i).size(); ++j) {
+            HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i).at(j);
+            if(locations.empty() || locations.contains(hcurve.location())) {
+                RealSpace const& space=hcurve.space();
+                if(valid_axis_variables(space,axes)) {
+                    hcurve.euclidean_set().draw(canvas,projection(space,axes));
+                }
+            }
+        }
+    }
+}
+
+
+
 template<>
 OutputStream&
 operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid/hybrid_simulator.hpp
  *
- *  Copyright  2009-20  Pieter Collins
+ *  Copyright  2009-20  Luca Geretti, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -32,10 +32,26 @@
 #include "conclog/logging.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "hybrid/hybrid_set.decl.hpp"
+#include "hybrid/hybrid_paving.hpp"
+
 
 using namespace ConcLog;
 
 namespace Ariadne {
+
+enum class DiscretizationHybridType
+{
+  HMince,
+  HRecombine
+};
+
+OutputStream& operator<<(OutputStream& os, const DiscretizationHybridType& dtype) {
+
+    if(dtype == DiscretizationHybridType::HMince){ os << "Mince"; }
+    else{ os << "Recombine"; }
+    
+    return os;
+}
 
 class HybridTerminationCriterion;
 class HybridAutomatonInterface;
@@ -52,12 +68,15 @@ class HybridSimulator
 {
   public:
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
+    typedef Vector<HybridApproximatePointType> HybridApproximateListPointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
+    typedef Vector<ApproximatePointType> ApproximatePointListType;
     typedef HybridSimulatorConfiguration ConfigurationType;
     typedef HybridAutomatonInterface SystemType;
     typedef HybridApproximatePointType EnclosureType;
     typedef Orbit<HybridApproximatePointType> OrbitType;
     typedef HybridTerminationCriterion TerminationType;
+    typedef Orbit<HybridApproximateListPointType> OrbitListType;
   private:
     SharedPointer<SystemType> _sys_ptr;
     SharedPointer<ConfigurationType> _configuration;
@@ -78,7 +97,11 @@ class HybridSimulator
     Orbit<HybridApproximatePointType> orbit(const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
     Orbit<HybridApproximatePointType> orbit(const HybridRealPoint& initial_point, const TerminationType& termination) const;
     //! \brief Currently simulates from the midpoint of the set in the first location only.
-    Orbit<HybridApproximatePointType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination) const;
+    //Orbit<HybridApproximatePointType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination) const;
+
+    OrbitListType orbit(const HybridApproximateListPointType& initial_list, const TerminationType& termination) const;  //TO DO
+    OrbitListType orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination) const;       //TO DO
+    OrbitListType orbit(const HybridUpperBox& initial_box, DiscreteLocation loc, HybridSpace spc, TerminationType const& termination) const;
 
   private:
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> _guard_functions(const DiscreteLocation& location) const;
@@ -97,11 +120,18 @@ private:
     //! \brief The step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
     FloatDPApproximation _step_size;
+    Nat _fineness;
+    DiscretizationHybridType _discretization_type;
 
 public:
 
     const FloatDPApproximation& step_size() const { return _step_size; }
     Void set_step_size(ApproximateDouble value) { _step_size = FloatDPApproximation(value,double_precision); }
+    const Nat& fineness() const { return _fineness; }
+    Void set_fineness(Nat value) { _fineness = value; } 
+    Void set_d_type(DiscretizationHybridType type) { _discretization_type = type; }
+    DiscretizationHybridType const& d_type() const { return _discretization_type; }
+
 
     virtual OutputStream& _write(OutputStream& os) const;
 };

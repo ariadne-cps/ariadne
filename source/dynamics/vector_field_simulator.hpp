@@ -1,7 +1,7 @@
 /***************************************************************************
  *            dynamics/vector_field_simulator.hpp
  *
- *  Copyright  2009-21  Luca Geretti
+ *  Copyright  2009-21  Luca Geretti, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -35,10 +35,25 @@
 #include "geometry/point.hpp"
 #include "solvers/configuration_interface.hpp"
 #include "dynamics/vector_field.hpp"
+#include "dynamics/orbit.hpp"
 
 using namespace ConcLog;
 
 namespace Ariadne {
+
+enum class DiscretizationType
+{
+  Mince,
+  Recombine
+};
+
+OutputStream& operator<<(OutputStream& os, const DiscretizationType& dtype) {
+
+    if(dtype == DiscretizationType::Mince){ os << "Mince"; }
+    else{ os << "Recombine"; }
+    
+    return os;
+}
 
 class VectorField;
 class VectorFieldSimulatorConfiguration;
@@ -53,12 +68,15 @@ class VectorFieldSimulator
 {
   public:
     typedef LabelledPoint<FloatDPApproximation> ApproximatePointType;
+    typedef Vector<ApproximatePointType> ApproximateListPointType;
     typedef LabelledPoint<Real> RealPointType;
+    typedef Vector<RealPointType> RealListPointType;
     typedef RealVariablesBox RealBoxType;
     typedef Real TerminationType;
     typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
     typedef Orbit<ApproximatePointType> OrbitType;
+    typedef Orbit<ApproximateListPointType> OrbitListType;
 
   public:
 
@@ -74,13 +92,12 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    OrbitType orbit(ApproximatePointType const& initial_point, TerminationType const& termination) const;
-    OrbitType orbit(RealPointType const& initial_point, TerminationType const& termination) const;
-    OrbitType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
-    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
+    OrbitListType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
+    OrbitListType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
+    OrbitListType orbit(ApproximateListPointType const& initial_list, TerminationType const& termination) const;
+    OrbitListType orbit(UpperBoxType& initial_box, TerminationType const& termination) const;
 
   private:
-
     SharedPointer<SystemType> _system;
     SharedPointer<ConfigurationType> _configuration;
 };
@@ -99,11 +116,24 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
 
     //! \brief The fixed integration step size to use.
     FloatDPApproximation _step_size;
+    Nat _mince_dimension;
+    Nat _num_sub_div;
+    DiscretizationType _discretization_type;
 
   public:
 
     Void set_step_size(double h) { _step_size=h; }
     FloatDPApproximation const& step_size() const { return _step_size; }
+
+
+    Void set_d_type(DiscretizationType type) { _discretization_type = type; }
+    DiscretizationType const& d_type() const { return _discretization_type; }
+
+    Void set_num_sub_div(Nat num_sub_div) { _num_sub_div = num_sub_div; }
+    Nat const& num_sub_div() const { return _num_sub_div; }
+
+    Void set_mince_dimension(Nat mince_dim) { _mince_dimension = mince_dim; }
+    Nat const& mince_dimension() const { return _mince_dimension; }
 
     virtual OutputStream& _write(OutputStream& os) const;
 

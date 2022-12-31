@@ -34,6 +34,8 @@
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_simulator.hpp"
+#include "hybrid/hybrid_graphics.hpp"
+#include "io/command_line_interface.hpp"
 #include "io/figure.hpp"
 #include "conclog/logging.hpp"
 
@@ -75,6 +77,7 @@ class TestHybridSimulator
     Void test_run() const {
         typedef HybridSimulator::ApproximatePointType ApproximatePointType;
         typedef HybridSimulator::HybridApproximatePointType HybridApproximatePointType;
+        typedef HybridSimulator::HybridApproximateListPointType HybridApproximateListPointType;
 
         const DiscreteLocation location1(1);
         const DiscreteLocation location2(2);
@@ -99,15 +102,36 @@ class TestHybridSimulator
         cout << "initial_point=" << initial_point << endl;
         ApproximatePointType approximate_initial_point = ApproximatePointType(initial_point,dp);
         HybridApproximatePointType initial_hybrid_point(location1,space,approximate_initial_point);
-        HybridTime simulation_time(2.25_x,3);
+        HybridApproximateListPointType hybrid_point_list(1, initial_hybrid_point);
+        HybridApproximatePointType hybrid_point(location1,space,approximate_initial_point);
+        HybridTime simulation_time(5.25_x,3);
 
         // Compute the reachable sets
-        cout << "Computing orbit... "<<std::flush;
-        auto orbit1=simulator.orbit(initial_hybrid_point,simulation_time);
+        cout << "Computing orbit... "<<std::endl;
+//        auto orbit1=simulator.orbit(hybrid_point_list,simulation_time);
         auto orbit2=simulator.orbit(HybridBoundedConstraintSet(location1,{x==0,y==0.5_dec}),simulation_time);
+//        auto orbit3=simulator.orbit(hybrid_point,simulation_time);
+
         cout << "done"<<std::endl;
 
-        ARIADNE_TEST_EQUALS(orbit1.curve(0).size(),orbit2.curve(0).size());
+        HybridFigure hfig;
+        hfig.set_locations({location1});
+        hfig.set_bounds(x,-1.5,1.5);
+        hfig.set_bounds(y,-1.5,1.5);
+        hfig.set_variables(x,y);
+/*
+        hfig << fill_colour(red) << fill_opacity(1.0) << line_colour(black) << line_width(1.0) << orbit1;
+        hfig.write("orbit_single_point_list");
+*/
+        hfig.clear();
+        hfig << fill_colour(green) << fill_opacity(0.1) << line_colour(red) << line_width(1.0) << orbit2;
+        hfig.write("orbit_bounded_constraint_set");
+/*
+        hfig.clear();
+        hfig << fill_colour(green) << fill_opacity(0.1) << line_colour(red) << line_width(4.0) << orbit3;
+        hfig.write("orbit_single_point");
+*/
+        //ARIADNE_TEST_EQUALS(orbit1.curve(0).size(),orbit2.curve(0).size()); MODIFICARE PRIMA L'INTERFACCIA HYBRID SIMULATOR   
     }
 };
 

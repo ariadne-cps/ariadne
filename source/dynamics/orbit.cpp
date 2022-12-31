@@ -50,19 +50,34 @@ Orbit<ExactPoint<F>>::insert(F t, const ExactPoint<F>& pt)
     this->_curve->insert(t,pt);
 }
 
+template<class F> Orbit<Vector<Point<Approximation<F>>>>::Orbit(Vector<Point<Approximation<F>>> const& ptLst)
+{
+    this->curveLst = new Vector(ptLst.size(), InterpolatedCurve(ptLst.at(0)));
+    for (SizeType i=0; i<ptLst.size(); i++){
+       this->_curveLst->at(i) = InterpolatedCurve(ptLst.at(i));
+    }
+}
 
-struct Orbit<Storage>::Data {
-    Data(const Grid& grid, const EffectiveVectorMultivariateFunction& auxiliary_mapping)
-        : initial(grid,auxiliary_mapping), reach(initial), intermediate(initial), final(initial) { }
-    Storage initial;
-    Storage reach;
-    Storage intermediate;
-    Storage final;
-};
+
+template<class F> Void Orbit<Vector<Point<Approximation<F>>>>::insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber)
+{
+    this->_curveLst->at(curveNumber)->insert(t,pt);
+}
+
+template<class F> const Vector<InterpolatedCurve>& Orbit<Vector<Point<Approximation<F>>>>::curve()
+{
+    Vector<InterpolatedCurve> *curveV;
+    curveV = new Vector<InterpolatedCurve>(this->_curveLst->size(), InterpolatedCurve());
+    for (SizeType i=0; i<this->_curveLst->size(); i++){
+        curveV->at(i) = this->_curveLst->at(i);
+    }
+
+    return *curveV;
+}
 
 Orbit<Storage>::
 Orbit(const Storage& initial_set)
-    : _data(new Data(initial_set.grid(),initial_set.auxiliary_mapping()))
+    : _data(new Orbit<Storage>::Data(initial_set.grid(),initial_set.auxiliary_mapping()))
 {
     this->_data->initial=initial_set;
 }

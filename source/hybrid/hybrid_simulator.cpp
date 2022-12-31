@@ -115,13 +115,11 @@ Vector<HybridPoint<FloatDPApproximation>> create_hybrid_point_list(GridTreePavin
     }else{ grid.recombine(); }
 
     GridTreePaving::ConstIterator iter = grid.begin();
-    Vector<HybridPoint<FloatDPApproximation>> approxPointList(grid.size(), HybridPoint<FloatDPApproximation>(loc,spc,Point<FloatDPApproximation>()));
+    Vector<HybridPoint<FloatDPApproximation>> approxPointList(grid.size(), HybridPoint<FloatDPApproximation>(loc,spc,HybridUpperBox(loc, spc, iter->box()).euclidean_set().midpoint()));
     SizeType k(0);
     for( ; iter!=grid.end(); ++iter){
-        auto ExactCell = iter->box();
-        UpperBoxType UpperCell = ExactCell;
-        HybridUpperBox Hcell = HybridUpperBox(loc, spc, UpperCell);
-        auto midpoint = Hcell.euclidean_set().midpoint();
+        auto hucell = HybridUpperBox(loc, spc, iter->box());
+        auto midpoint = hucell.euclidean_set().midpoint();
         HybridPoint<FloatDPApproximation> pt(loc,spc,midpoint);
         approxPointList.at(k) = pt;
         k++;

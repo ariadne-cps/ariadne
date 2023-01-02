@@ -37,6 +37,8 @@
 #include "dynamics/vector_field.hpp"
 #include "dynamics/orbit.hpp"
 
+#include "betterthreads/workload.hpp"
+
 using namespace ConcLog;
 
 namespace Ariadne {
@@ -75,9 +77,19 @@ class VectorFieldSimulator
     typedef Real TerminationType;
     typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
-    typedef Orbit<ApproximatePointType> OrbitType;
     typedef Orbit<ApproximateListPointType> OrbitListType;
 
+    //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
+    /*struct SynchronisedOrbit : public OrbitListType {
+          SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
+          Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
+          Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
+          Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
+          SizeType reach_size() { LockGuard<Mutex> lock(_mux); return OrbitType::reach().size(); }
+        private:
+          Mutex _mux;
+    };*/
+    //typedef StaticWorkload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.
@@ -97,6 +109,9 @@ class VectorFieldSimulator
     OrbitListType orbit(ApproximateListPointType const& initial_list, TerminationType const& termination) const;
     OrbitListType orbit(UpperBoxType& initial_box, TerminationType const& termination) const;
 
+  private:
+
+    void _simulate_from_point(OrbitListType& orbit, SizeType const& curve_number, VectorFieldSimulatorConfiguration const& configuration, ApproximatePointType const& initial, TerminationType const& termination) const;
   private:
     SharedPointer<SystemType> _system;
     SharedPointer<ConfigurationType> _configuration;

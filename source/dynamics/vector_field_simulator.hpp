@@ -43,15 +43,15 @@ using namespace ConcLog;
 
 namespace Ariadne {
 
-enum class DiscretizationType
+enum class DiscretisationType
 {
   Mince,
   Recombine
 };
 
-OutputStream& operator<<(OutputStream& os, const DiscretizationType& dtype) {
+OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
-    if(dtype == DiscretizationType::Mince){ os << "Mince"; }
+    if(dtype == DiscretisationType::Mince){ os << "Mince"; }
     else{ os << "Recombine"; }
     
     return os;
@@ -132,20 +132,19 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     //! \brief The fixed integration step size to use.
     FloatDPApproximation _step_size;
     Nat _mince_dimension;
-    Nat _num_sub_div;
-    DiscretizationType _discretization_type;
+    Nat _num_subdivisions;
+    DiscretisationType _discretisation_type;
 
   public:
 
     Void set_step_size(double h) { _step_size=h; }
     FloatDPApproximation const& step_size() const { return _step_size; }
 
+    Void set_d_type(DiscretisationType type) { _discretisation_type = type; }
+    DiscretisationType const& discretisation_type() const { return _discretisation_type; }
 
-    Void set_d_type(DiscretizationType type) { _discretization_type = type; }
-    DiscretizationType const& d_type() const { return _discretization_type; }
-
-    Void set_num_sub_div(Nat num_sub_div) { _num_sub_div = num_sub_div; }
-    Nat const& num_sub_div() const { return _num_sub_div; }
+    Void set_num_sub_div(Nat num_sub_div) { _num_subdivisions = num_sub_div; }
+    Nat const& num_subdivisions() const { return _num_subdivisions; }
 
     Void set_mince_dimension(Nat mince_dim) { _mince_dimension = mince_dim; }
     Nat const& mince_dimension() const { return _mince_dimension; }

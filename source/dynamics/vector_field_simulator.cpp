@@ -111,9 +111,9 @@ GridTreePaving create_grid(UpperBoxType box){
     return gridPaving;
 }
 
-Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& grid, RealSpace spc, DiscretizationType _dtype, Nat mince_dim){
+Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& grid, RealSpace spc, DiscretisationType _dtype, Nat mince_dim){
 
-    if(_dtype == DiscretizationType::Mince){
+    if(_dtype == DiscretisationType::Mince){
         grid.mince(mince_dim);
     }else{ grid.recombine(); }
 
@@ -177,8 +177,9 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
         initial_box = widen(initial_box, eps);
     }
     GridTreePaving gridPaving = create_grid(initial_box);
-    gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_sub_div());
-    ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(), _configuration->d_type(), _configuration->mince_dimension());
+    gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
+    ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
+                                                           _configuration->discretisation_type(), _configuration->mince_dimension());
     return orbit(pointList, termination);
 }
 
@@ -225,7 +226,7 @@ void VectorFieldSimulator::_simulate_from_point(OrbitListType& orbit, SizeType c
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-    _step_size(0.125_x, dp), _mince_dimension(0), _num_sub_div(0), _discretization_type(DiscretizationType::Mince) {
+        _step_size(0.125_x, dp), _mince_dimension(0), _num_subdivisions(0), _discretisation_type(DiscretisationType::Mince) {
 }
 
 OutputStream&
@@ -233,9 +234,9 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
 {
     os << "VectorFieldSimulatorConfiguration("
        << "\n  step_size=" << step_size()
-       << "\n  discretization type=" << d_type()
-       << "\n  mince dimension=" << mince_dimension()
-       << "\n  number of sub-division=" << num_sub_div()
+       << "\n  discretisation_type=" << discretisation_type()
+       << "\n  mince_dimension=" << mince_dimension()
+       << "\n  num_subdivisions=" << num_subdivisions()
        << ")\n";
     return os;
 }

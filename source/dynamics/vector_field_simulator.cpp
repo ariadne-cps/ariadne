@@ -194,17 +194,25 @@ auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points,
     auto auxiliary_space = _system->auxiliary_space();
     auto state_auxiliary_space = _system->state_auxiliary_space();
 
-    OrbitListType orbit(make_state_auxiliary_point(initial_points, state_space, auxiliary_space, state_auxiliary_space, auxiliary_function));
+    auto result = std::make_shared<SynchronisedOrbit>(make_state_auxiliary_point(initial_points, state_space, auxiliary_space, state_auxiliary_space, auxiliary_function));
+
     for (SizeType i=0; i<initial_points.size(); i++){
-        _simulate_from_point(orbit, i, configuration(), initial_points.at(i), termination);
+        _simulate_from_point(make_pair(i, initial_points.at(i)), termination, result);
     }
 
-    return orbit;
+    //WorkloadType workload(std::bind_front(&VectorFieldSimulator::_simulate_from_point,this),termination,result);
+    //workload.process();
+
+    return std::move(*result);
 }
 
-void VectorFieldSimulator::_simulate_from_point(OrbitListType& orbit, SizeType const& curve_number, VectorFieldSimulatorConfiguration const& configuration, ApproximatePointType const& initial, TerminationType const& termination) const {
+void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointType> const& indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const {
+
+    auto const& curve_number = indexed_initial.first;
+    auto const& initial = indexed_initial.second;
+
     VectorField::TimeType t(0);
-    Dyadic h(cast_exact(configuration.step_size()));
+    Dyadic h(cast_exact(_configuration->step_size()));
     VectorField::TimeType tmax(termination);
     auto const& dynamic_function = _system->dynamic_function();
     auto const& auxiliary_function = _system->auxiliary_function();
@@ -213,15 +221,15 @@ void VectorFieldSimulator::_simulate_from_point(OrbitListType& orbit, SizeType c
     auto const auxiliary_space = _system->auxiliary_space();
     auto const state_auxiliary_space = _system->state_auxiliary_space();
 
-    RungeKutta4Integrator integrator(configuration.step_size().get_d());
+    RungeKutta4Integrator integrator(_configuration->step_size().get_d());
     Point<FloatDPApproximation> state_pt = initial;
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
         CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << state_pt << std::setprecision(old_precision));
-        state_pt = integrator.step(dynamic_function, state_pt, configuration.step_size());
+        state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
 
         t += h;
-        orbit.insert(t.get(DoublePrecision()).value(), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
+        orbit->insert(t.get(DoublePrecision()).value(), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
     }
 }
 

@@ -40,6 +40,7 @@
 #include "betterthreads/workload.hpp"
 
 using namespace ConcLog;
+using namespace BetterThreads;
 
 namespace Ariadne {
 
@@ -80,16 +81,14 @@ class VectorFieldSimulator
     typedef Orbit<ApproximateListPointType> OrbitListType;
 
     //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
-    /*struct SynchronisedOrbit : public OrbitListType {
-          SynchronisedOrbit(const EnclosureType& initial) : OrbitType(initial) { }
-          Void adjoin_reach(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_reach(set); }
-          Void adjoin_intermediate(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_intermediate(set); }
-          Void adjoin_final(const EnclosureType& set) override { LockGuard<Mutex> lock(_mux); OrbitType::adjoin_final(set); }
-          SizeType reach_size() { LockGuard<Mutex> lock(_mux); return OrbitType::reach().size(); }
-        private:
-          Mutex _mux;
-    };*/
-    //typedef StaticWorkload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
+    struct SynchronisedOrbit : public OrbitListType {
+        SynchronisedOrbit(ApproximateListPointType const& initial_points) : OrbitListType(initial_points) { }
+        void insert(FloatDP const& t, ApproximatePointType const& pt, SizeType const& curve_number) {
+            LockGuard<Mutex> lock(_mux); OrbitListType::insert(t,pt,curve_number); }
+      private:
+        Mutex _mux;
+    };
+    typedef StaticWorkload<Pair<SizeType,ApproximatePointType> const&, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.
@@ -111,7 +110,7 @@ class VectorFieldSimulator
 
   private:
 
-    void _simulate_from_point(OrbitListType& orbit, SizeType const& curve_number, VectorFieldSimulatorConfiguration const& configuration, ApproximatePointType const& initial, TerminationType const& termination) const;
+    void _simulate_from_point(Pair<SizeType,ApproximatePointType> const& indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const;
   private:
     SharedPointer<SystemType> _system;
     SharedPointer<ConfigurationType> _configuration;

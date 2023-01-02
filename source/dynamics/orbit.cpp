@@ -47,32 +47,20 @@ template<class F> Orbit<ExactPoint<F>>::Orbit(const ExactPoint<F>& pt)
 template<class F> Void
 Orbit<ExactPoint<F>>::insert(F t, const ExactPoint<F>& pt)
 {
-    this->_curve->insert(t,pt);
+    _curve->insert(t,pt);
 }
 
 template<class F> Orbit<Vector<Point<Approximation<F>>>>::Orbit(Vector<Point<Approximation<F>>> const& ptLst)
+    : _curves(new Vector(ptLst.size(), InterpolatedCurve(ptLst.at(0))))
 {
-    this->curveLst = new Vector(ptLst.size(), InterpolatedCurve(ptLst.at(0)));
-    for (SizeType i=0; i<ptLst.size(); i++){
-       this->_curveLst->at(i) = InterpolatedCurve(ptLst.at(i));
-    }
+    for (SizeType i=0; i<ptLst.size(); i++)
+        _curves->at(i) = InterpolatedCurve(ptLst.at(i));
 }
 
 
 template<class F> Void Orbit<Vector<Point<Approximation<F>>>>::insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber)
 {
-    this->_curveLst->at(curveNumber)->insert(t,pt);
-}
-
-template<class F> const Vector<InterpolatedCurve>& Orbit<Vector<Point<Approximation<F>>>>::curve()
-{
-    Vector<InterpolatedCurve> *curveV;
-    curveV = new Vector<InterpolatedCurve>(this->_curveLst->size(), InterpolatedCurve());
-    for (SizeType i=0; i<this->_curveLst->size(); i++){
-        curveV->at(i) = this->_curveLst->at(i);
-    }
-
-    return *curveV;
+    _curves->at(curveNumber).insert(t,pt);
 }
 
 Orbit<Storage>::

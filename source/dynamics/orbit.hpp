@@ -81,7 +81,7 @@ class Orbit<Point<F>>
     Void insert(F t, const Point<F>& pt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
-    std::shared_ptr< InterpolatedCurve > _curve;
+    std::shared_ptr<InterpolatedCurve> _curve;
 };
 
 template<class F>
@@ -92,7 +92,7 @@ public:
     Void insert(F t, const Point<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
     const InterpolatedCurve& curve() const { return *this->_curve; }
 private:
-    std::shared_ptr< InterpolatedCurve > _curve;
+    std::shared_ptr<InterpolatedCurve> _curve;
 };
 
 
@@ -102,10 +102,10 @@ class Orbit<Vector<Point<Approximation<F>>>>
   public:
     Orbit(const Vector<Point<Approximation<F>>>& ptLst);
     Void insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber);
-    const Vector<InterpolatedCurve>& curve();
-    const InterpolatedCurve& curve(SizeType i) { return *(this->_curveLst->at(i)); }
+    const Vector<InterpolatedCurve>& curves() { return *_curves; }
+    const InterpolatedCurve& curve(SizeType i) { return _curves->at(i); }
   private:
-    Vector<std::shared_ptr<InterpolatedCurve> > *_curveLst;
+    std::shared_ptr<Vector<InterpolatedCurve>> _curves;
 };
 
 template<class F>
@@ -115,11 +115,11 @@ class Orbit<LabelledPoint<Approximation<F>>>
   public:
     Orbit(const LabelledPoint<Approximation<F>>& pt) : _curve(new LabelledInterpolatedCurve(pt)) { }
     Void insert(F t, const LabelledPoint<Approximation<F>>& pt) { this->_curve->insert(t,pt); }
-    const LabelledInterpolatedCurve& curve() const { return *this->_curve; }
+    const LabelledInterpolatedCurve& curves() const { return *this->_curve; }
     virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { _curve->draw(canvas,axes); }
     virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<LabelledPoint<Approximation<F>>>(*this); }
   private:
-    std::shared_ptr< LabelledInterpolatedCurve > _curve;
+    std::shared_ptr<LabelledInterpolatedCurve> _curve;
 };
 
 template<class F>
@@ -127,29 +127,22 @@ class Orbit<Vector<LabelledPoint<Approximation<F>>>>
     : public LabelledDrawable2dInterface
 {
   public:
-    Orbit(const Vector<LabelledPoint<Approximation<F>>>& ptLst) {
-      this->_curveLst = new Vector(ptLst.size(), LabelledInterpolatedCurve(ptLst.at(0)));
-      for (SizeType i=1; i<ptLst.size(); i++){
-        this->_curveLst->at(i) = LabelledInterpolatedCurve(ptLst.at(i));
-        }
-      }
+    Orbit(const Vector<LabelledPoint<Approximation<F>>>& ptLst)
+        : _curves(new Vector(ptLst.size(), LabelledInterpolatedCurve(ptLst.at(0)))) {
+        for (SizeType i=1; i<ptLst.size(); i++)
+            _curves->at(i) = LabelledInterpolatedCurve(ptLst.at(i));
+    }
     Void insert(F t, const LabelledPoint<Approximation<F>>& pt, SizeType curveNumber){
-          this->_curveLst->at(curveNumber).insert(static_cast<const RawFloatDP>(t), pt);
+        _curves->at(curveNumber).insert(static_cast<const RawFloatDP>(t), pt);
     }
-    const Vector<LabelledInterpolatedCurve>& curve() {
-      Vector<LabelledInterpolatedCurve> *curveV;
-      curveV = new Vector<LabelledInterpolatedCurve>(this->_curveLst->size(), LabelledInterpolatedCurve(this->_curveLst->at(0)));
-      for (SizeType i=0; i<this->_curveLst->size(); i++){
-        curveV->at(i) = this->_curveLst->at(i);
-      }
-      
-      return *curveV;
+    const Vector<LabelledInterpolatedCurve>& curves() {
+      return *_curves;
     }
-    const LabelledInterpolatedCurve& curve(SizeType i) { return this->_curveLst->at(i); }
-    virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { for (SizeType i=0; i<this->_curveLst->size(); i++){ this->_curveLst->at(i).draw(canvas, axes); } }
+    const LabelledInterpolatedCurve& curve(SizeType i) { return _curves->at(i); }
+    virtual Void draw(CanvasInterface& canvas, const Variables2d& axes) const override { for (SizeType i=0; i<_curves->size(); i++){ _curves->at(i).draw(canvas, axes); } }
     virtual LabelledDrawable2dInterface* clone() const override { return new Orbit<Vector<LabelledPoint<Approximation<F>>>>(*this); }
   private:
-    Vector<LabelledInterpolatedCurve> *_curveLst;
+    std::shared_ptr<Vector<LabelledInterpolatedCurve>> _curves;
 };
 
 template<>

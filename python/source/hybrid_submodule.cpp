@@ -519,8 +519,8 @@ Void export_hybrid_figure(pybind11::module& module) {
 }
 
 Void export_hybrid_plots(pybind11::module& module) {
-    module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitType const&))&plot);
-    module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitListType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitListType const&))&plot);
 
     module.def("plot", (Void(*)(const char*,Axes2d const&,GeneralHybridEvolver::OrbitType const&))&plot);
     module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,GeneralHybridEvolver::OrbitType const&))&plot);

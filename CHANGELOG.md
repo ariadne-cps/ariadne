@@ -12,9 +12,8 @@ Legenda for the issue kind:
 
 ### 2.5
 
-*Date: *
-
 - [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
+- [#569](https://github.com/ariadne-cps/ariadne/issues/569) (A) Adding multiple points simulator
 - [#685](https://github.com/ariadne-cps/ariadne/issues/685) (A) Support ARM by making it properly fall into C99 rounding
 - [#686](https://github.com/ariadne-cps/ariadne/issues/686) (A) Support GCC 12 on all platforms
 - [#681](https://github.com/ariadne-cps/ariadne/issues/681) (C) Refactor the logger as a ConcLog logger submodule 

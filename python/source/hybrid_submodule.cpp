@@ -381,11 +381,14 @@ template<> Void export_simulator<HybridSimulator>(pybind11::module& module, cons
     typedef HybridSimulator::TerminationType TerminationType;
     typedef HybridSimulator::HybridApproximatePointType HybridApproximatePointType;
     typedef HybridSimulator::OrbitType OrbitType;
+    //typedef HybridSimulator::OrbitListType OrbitListType;
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
     pybind11::class_<HybridSimulator::OrbitType,pybind11::bases<HybridDrawableInterface>> hybrid_simulator_orbit_class(module,"HybridApproximatePointOrbit");
     hybrid_simulator_orbit_class.def("__repr__",&__cstr__<OrbitType>);
+    pybind11::class_<HybridSimulator::OrbitListType,pybind11::bases<HybridDrawableInterface>> hybrid_simulator_list_orbit_class(module,"HybridApproximatePointListOrbit");
+    //hybrid_simulator_list_orbit_class.def("__repr__",&__cstr__<OrbitListType>);
 
     pybind11::class_<HybridSimulator> hybrid_simulator_class(module,name);
     hybrid_simulator_class.def(pybind11::init<HybridSimulator::SystemType const&>());
@@ -516,8 +519,8 @@ Void export_hybrid_figure(pybind11::module& module) {
 }
 
 Void export_hybrid_plots(pybind11::module& module) {
-    module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitType const&))&plot);
-    module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitListType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitListType const&))&plot);
 
     module.def("plot", (Void(*)(const char*,Axes2d const&,GeneralHybridEvolver::OrbitType const&))&plot);
     module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,GeneralHybridEvolver::OrbitType const&))&plot);

@@ -84,28 +84,30 @@ template<class SIM> Void export_simulator(pybind11::module& module, const char* 
 template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module, const char* name)
 {
     typedef VectorFieldSimulator::TerminationType TerminationType;
-    typedef VectorFieldSimulator::ApproximatePointType ApproximatePointType;
-    typedef VectorFieldSimulator::RealPointType RealPointType;
+    typedef VectorFieldSimulator::ApproximateListPointType ApproximateListPointType;
     typedef VectorFieldSimulator::OrbitType OrbitType;
+    typedef VectorFieldSimulator::RealBoxType RealBoxType;
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
     pybind11::class_<LabelledInterpolatedCurve,pybind11::bases<LabelledDrawable2dInterface>> labelled_interpolated_curve_class(module,"LabelledInterpolatedCurve");
 
     pybind11::class_<OrbitType,pybind11::bases<LabelledDrawable2dInterface>> simulator_orbit_class(module,"ApproximatePointOrbit");
-    simulator_orbit_class.def("curve", &OrbitType::curve);
+    simulator_orbit_class.def("curves", &OrbitType::curves);
 
     pybind11::class_<VectorFieldSimulator> simulator_class(module,name);
     simulator_class.def(pybind11::init<VectorFieldSimulator::SystemType const&>());
     simulator_class.def("configuration",pybind11::overload_cast<>(&VectorFieldSimulator::configuration),reference_internal);
-    simulator_class.def("orbit", (OrbitType(VectorFieldSimulator::*)(const ApproximatePointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
-    simulator_class.def("orbit", pybind11::overload_cast<ApproximatePointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
-    simulator_class.def("orbit", pybind11::overload_cast<RealPointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
+    simulator_class.def("orbit", (OrbitType(VectorFieldSimulator::*)(const ApproximateListPointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
+    simulator_class.def("orbit", pybind11::overload_cast<ApproximateListPointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
     simulator_class.def("orbit", pybind11::overload_cast<RealExpressionBoundedConstraintSet const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
+    simulator_class.def("orbit", pybind11::overload_cast<RealBoxType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
 
     typedef typename VectorFieldSimulator::ConfigurationType ConfigurationType;
     pybind11::class_<ConfigurationType> simulator_configuration_class(module,"VectorFieldSimulatorConfiguration");
     simulator_configuration_class.def("set_step_size", &ConfigurationType::set_step_size);
+    simulator_configuration_class.def("set_discretisation_type", &ConfigurationType::set_discretisation_type);
+    simulator_configuration_class.def("set_num_subdivisions", &ConfigurationType::set_num_subdivisions);
     simulator_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
 }
 

@@ -47,22 +47,25 @@ template<class F> Orbit<ExactPoint<F>>::Orbit(const ExactPoint<F>& pt)
 template<class F> Void
 Orbit<ExactPoint<F>>::insert(F t, const ExactPoint<F>& pt)
 {
-    this->_curve->insert(t,pt);
+    _curve->insert(t,pt);
+}
+
+template<class F> Orbit<Vector<Point<Approximation<F>>>>::Orbit(Vector<Point<Approximation<F>>> const& ptLst)
+    : _curves(new Vector(ptLst.size(), InterpolatedCurve(ptLst.at(0))))
+{
+    for (SizeType i=0; i<ptLst.size(); i++)
+        _curves->at(i) = InterpolatedCurve(ptLst.at(i));
 }
 
 
-struct Orbit<Storage>::Data {
-    Data(const Grid& grid, const EffectiveVectorMultivariateFunction& auxiliary_mapping)
-        : initial(grid,auxiliary_mapping), reach(initial), intermediate(initial), final(initial) { }
-    Storage initial;
-    Storage reach;
-    Storage intermediate;
-    Storage final;
-};
+template<class F> Void Orbit<Vector<Point<Approximation<F>>>>::insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber)
+{
+    _curves->at(curveNumber).insert(t,pt);
+}
 
 Orbit<Storage>::
 Orbit(const Storage& initial_set)
-    : _data(new Data(initial_set.grid(),initial_set.auxiliary_mapping()))
+    : _data(new Orbit<Storage>::Data(initial_set.grid(),initial_set.auxiliary_mapping()))
 {
     this->_data->initial=initial_set;
 }

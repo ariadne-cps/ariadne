@@ -1,7 +1,7 @@
 /***************************************************************************
  *            dynamics/vector_field_simulator.cpp
  *
- *  Copyright  2008-21  Luca Geretti
+ *  Copyright  2008-21  Luca Geretti, Mirko Albanese
  *
  ****************************************************************************/
 
@@ -49,7 +49,8 @@
 
 namespace Ariadne {
 
-template class Orbit<Point<FloatDPApproximation>>;
+template class Orbit<LabelledPoint<Approximation<FloatDP>>>;
+template class Orbit<Vector<LabelledPoint<Approximation<FloatDP>>>>;
 
 template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
@@ -62,6 +63,73 @@ template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& sp
     return LabelledPoint<X>(saspc,sapt);
 }
 
+template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<Point<X>>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    for (SizeType i=0; i<spt.size(); i++){
+        Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
+        Point<X> apt = evaluate(auxiliary_function,spt.at(i));
+        for(SizeType j=0; j!=sapt.size(); ++j) {
+            RealVariable var = saspc.variable(j);
+            sapt[j]= sspc.contains(var) ? spt.at(i)[sspc[var]] : apt[aspc[var]];
+        }
+        LabelledPoint<X> point(saspc, sapt);
+        pointLst.at(i) = point;
+    }
+
+    return pointLst;
+}
+
+template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<LabelledPoint<X>>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    for (SizeType i=0; i<spt.size(); i++){
+        Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
+        Point<X> apt = evaluate(auxiliary_function,spt.at(i));
+        for(SizeType j=0; j!=sapt.size(); ++j) {
+            RealVariable var = saspc.variable(j);
+            sapt[j]= sspc.contains(var) ? spt.at(i)[sspc[var]] : apt[aspc[var]];
+        }
+        LabelledPoint<X> point(saspc, sapt);
+        pointLst.at(i) = point;
+    }
+
+    return pointLst;
+}
+
+GridTreePaving create_paving(UpperBoxType box) {
+    Point<FloatDP> tmpPointCenter = Point(box.centre());
+    Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
+    Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
+    for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
+        origin[i] = tmpPointCenter[i];
+        lengths[i] = box.widths().at(i).raw();
+    }
+    Grid grid(origin, lengths);
+    GridTreePaving gridPaving(grid);
+
+    return gridPaving;
+}
+
+Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
+
+    if(discretisation_type == DiscretisationType::Mince) paving.mince(mince_dimension);
+    else paving.recombine();
+
+    GridTreePaving::ConstIterator iter = paving.begin();
+    Vector<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
+    SizeType k(0);
+    for( ; iter != paving.end(); ++iter){
+        UpperBoxType cell = iter->box();
+        auto midpoint = cell.midpoint();
+        LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
+        result.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
+        k++;
+    }
+
+    return result;
+}
+
 VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(system.clone()), _configuration(new VectorFieldSimulatorConfiguration())
 { }
 
@@ -72,63 +140,99 @@ auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_
 -> OrbitType
 {
     auto spc = _system->state_space();
-    auto midpoint = init_set.euclidean_set(spc).bounding_box().midpoint();
-    return orbit(ApproximatePointType(spc,midpoint),termination);
+    UpperBoxType box = init_set.euclidean_set(spc).bounding_box();
+    return orbit(box, termination);
+
 }
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
 -> OrbitType
-{
+{  
     auto spc = _system->state_space();
-    auto midpoint = init_bx.euclidean_set(spc).midpoint();
-    return orbit(RealPointType(spc,midpoint),termination);
+    auto box = init_bx.euclidean_set(spc);
+    UpperBoxType ubox(box);
+    return orbit(ubox, termination);
+
 }
 
-auto VectorFieldSimulator::orbit(const RealPointType& init_pt, const TerminationType& termination) const
-    -> OrbitType
+auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
+-> OrbitType
 {
-    return orbit(ApproximatePointType(init_pt,dp),termination);
+    auto lengths = initial_box.widths();
+    Nat box_width_null = 0;
+    for(SizeType i=0; i<lengths.size(); i++){
+        if(lengths[i].get_d() > 0) { continue; }
+        box_width_null++;
+    }
+    if(box_width_null == lengths.size()) 
+    {
+        auto midpoint = initial_box.midpoint();
+        ApproximateListPointType pointList(1, LabelledPoint(_system->state_space(), Point<FloatDPApproximation>(midpoint, dp)));
+        return orbit(pointList, termination);
+    }
+    else if (box_width_null > 0)
+    {
+        FloatDPUpperBound eps(0.0001_q,dp);
+        initial_box = widen(initial_box, eps);
+    }
+    GridTreePaving gridPaving = create_paving(initial_box);
+    gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
+    ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
+                                                           _configuration->discretisation_type(), _configuration->num_subdivisions());
+    return orbit(pointList, termination);
 }
 
-auto VectorFieldSimulator::orbit(const ApproximatePointType& init_pt, const TerminationType& termination) const
-    -> OrbitType
-{
+auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const -> OrbitType {
     CONCLOG_SCOPE_CREATE;
 
-    VectorField::TimeType t;
-    Dyadic h(cast_exact(configuration().step_size()));
-    VectorField::TimeType tmax(termination);
+    CONCLOG_PRINTLN("Simulating from " << initial_points.size() << " initial points")
 
-    auto const& dynamic_function =_system->function();
     auto const& auxiliary_function = _system->auxiliary_function();
 
     auto state_space=_system->state_space();
     auto auxiliary_space = _system->auxiliary_space();
     auto state_auxiliary_space = _system->state_auxiliary_space();
 
-    RungeKutta4Integrator integrator(configuration().step_size().get_d());
+    auto result = std::make_shared<SynchronisedOrbit>(make_state_auxiliary_point(initial_points, state_space, auxiliary_space, state_auxiliary_space, auxiliary_function));
 
-    ApproximatePointType point=init_pt;
+    WorkloadType workload(std::bind_front(&VectorFieldSimulator::_simulate_from_point,this),termination,result);
+    for (SizeType i=0; i<initial_points.size(); i++)
+        workload.append({i,initial_points.at(i)});
+    workload.process();
 
-    OrbitType orbit(make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+    return std::move(*result);
+}
 
+void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointType> indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const {
+    CONCLOG_SCOPE_CREATE
+
+    auto const& curve_number = indexed_initial.first;
+    auto const& initial = indexed_initial.second;
+
+    VectorField::TimeType t(0);
+    Dyadic h(cast_exact(_configuration->step_size()));
+    VectorField::TimeType tmax(termination);
+    auto const& dynamic_function = _system->dynamic_function();
+    auto const& auxiliary_function = _system->auxiliary_function();
+
+    auto const state_space=_system->state_space();
+    auto const auxiliary_space = _system->auxiliary_space();
+    auto const state_auxiliary_space = _system->state_auxiliary_space();
+
+    RungeKutta4Integrator integrator(_configuration->step_size().get_d());
+    Point<FloatDPApproximation> state_pt = initial;
     while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
-        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << point << std::setprecision(old_precision));
+        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << state_pt << std::setprecision(old_precision));
+        state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
 
-        Point<FloatDPApproximation> state_pt = integrator.step(dynamic_function,point,configuration().step_size());
-
-        point = ApproximatePointType(state_space,state_pt);
         t += h;
-
-        orbit.insert(t.get(dp).value(),make_state_auxiliary_point(point,state_space,auxiliary_space,state_auxiliary_space,auxiliary_function));
+        orbit->insert(t.get(DoublePrecision()).value(), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
     }
-
-    return orbit;
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-    _step_size(0.125_x, dp) {
+        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine) {
 }
 
 OutputStream&
@@ -136,7 +240,9 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
 {
     os << "VectorFieldSimulatorConfiguration("
        << "\n  step_size=" << step_size()
-       << "\n)";
+       << "\n  discretisation_type=" << discretisation_type()
+       << "\n  num_subdivisions=" << num_subdivisions()
+       << ")\n";
     return os;
 }
 

@@ -40,7 +40,6 @@
 #include "betterthreads/workload.hpp"
 
 using namespace ConcLog;
-using namespace BetterThreads;
 
 namespace Ariadne {
 
@@ -84,11 +83,11 @@ class VectorFieldSimulator
     struct SynchronisedOrbit : public OrbitType {
         SynchronisedOrbit(ApproximateListPointType const& initial_points) : OrbitType(initial_points) { }
         void insert(FloatDP const& t, ApproximatePointType const& pt, SizeType const& curve_number) {
-            LockGuard<Mutex> lock(_mux); OrbitType::insert(t,pt,curve_number); }
+            BetterThreads::LockGuard<BetterThreads::Mutex> lock(_mux); OrbitType::insert(t,pt,curve_number); }
       private:
-        Mutex _mux;
+        BetterThreads::Mutex _mux;
     };
-    typedef StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef BetterThreads::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.

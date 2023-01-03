@@ -78,13 +78,13 @@ class VectorFieldSimulator
     typedef Real TerminationType;
     typedef VectorField SystemType;
     typedef VectorFieldSimulatorConfiguration ConfigurationType;
-    typedef Orbit<ApproximateListPointType> OrbitListType;
+    typedef Orbit<ApproximateListPointType> OrbitType;
 
     //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
-    struct SynchronisedOrbit : public OrbitListType {
-        SynchronisedOrbit(ApproximateListPointType const& initial_points) : OrbitListType(initial_points) { }
+    struct SynchronisedOrbit : public OrbitType {
+        SynchronisedOrbit(ApproximateListPointType const& initial_points) : OrbitType(initial_points) { }
         void insert(FloatDP const& t, ApproximatePointType const& pt, SizeType const& curve_number) {
-            LockGuard<Mutex> lock(_mux); OrbitListType::insert(t,pt,curve_number); }
+            LockGuard<Mutex> lock(_mux); OrbitType::insert(t,pt,curve_number); }
       private:
         Mutex _mux;
     };
@@ -103,10 +103,10 @@ class VectorFieldSimulator
     //!@{
     //! \name Simulation using points.
     //! \brief Compute an approximation to the orbit set.
-    OrbitListType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
-    OrbitListType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
-    OrbitListType orbit(ApproximateListPointType const& initial_list, TerminationType const& termination) const;
-    OrbitListType orbit(UpperBoxType& initial_box, TerminationType const& termination) const;
+    OrbitType orbit(RealBoxType const& initial_box, TerminationType const& termination) const;
+    OrbitType orbit(RealExpressionBoundedConstraintSet const& initial_set, TerminationType const& termination) const;
+    OrbitType orbit(ApproximateListPointType const& initial_list, TerminationType const& termination) const;
+    OrbitType orbit(UpperBoxType& initial_box, TerminationType const& termination) const;
 
   private:
 
@@ -130,7 +130,6 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
 
     //! \brief The fixed integration step size to use.
     FloatDPApproximation _step_size;
-    Nat _mince_dimension;
     Nat _num_subdivisions;
     DiscretisationType _discretisation_type;
 
@@ -144,9 +143,6 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
 
     Void set_num_subdivisions(Nat num_subdivisions) { _num_subdivisions = num_subdivisions; }
     Nat const& num_subdivisions() const { return _num_subdivisions; }
-
-    Void set_mince_dimension(Nat mince_dimension) { _mince_dimension = mince_dimension; }
-    Nat const& mince_dimension() const { return _mince_dimension; }
 
     virtual OutputStream& _write(OutputStream& os) const;
 

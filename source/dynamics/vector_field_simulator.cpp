@@ -97,7 +97,7 @@ template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vect
     return pointLst;
 }
 
-GridTreePaving create_grid(UpperBoxType box){
+GridTreePaving create_paving(UpperBoxType box) {
     Point<FloatDP> tmpPointCenter = Point(box.centre());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
@@ -111,24 +111,23 @@ GridTreePaving create_grid(UpperBoxType box){
     return gridPaving;
 }
 
-Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& grid, RealSpace spc, DiscretisationType _dtype, Nat mince_dim){
+Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
 
-    if(_dtype == DiscretisationType::Mince){
-        grid.mince(mince_dim);
-    }else{ grid.recombine(); }
+    if(discretisation_type == DiscretisationType::Mince) paving.mince(mince_dimension);
+    else paving.recombine();
 
-    GridTreePaving::ConstIterator iter = grid.begin();
-    Vector<LabelledPoint<FloatDPApproximation>> approxPointList(grid.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
+    GridTreePaving::ConstIterator iter = paving.begin();
+    Vector<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
     SizeType k(0);
-    for( ; iter!=grid.end(); ++iter){
+    for( ; iter != paving.end(); ++iter){
         UpperBoxType cell = iter->box();
         auto midpoint = cell.midpoint();
         LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
-        approxPointList.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
+        result.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
         k++;
     }
 
-    return approxPointList;
+    return result;
 }
 
 VectorFieldSimulator::VectorFieldSimulator(SystemType const& system) : _system(system.clone()), _configuration(new VectorFieldSimulatorConfiguration())
@@ -138,7 +137,7 @@ inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& 
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
 auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_set, const TerminationType& termination) const
--> OrbitListType
+-> OrbitType
 {
     auto spc = _system->state_space();
     UpperBoxType box = init_set.euclidean_set(spc).bounding_box();
@@ -147,7 +146,7 @@ auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_
 }
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
--> OrbitListType
+-> OrbitType
 {  
     auto spc = _system->state_space();
     auto box = init_bx.euclidean_set(spc);
@@ -157,7 +156,7 @@ auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationTy
 }
 
 auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
--> OrbitListType
+-> OrbitType
 {
     auto lengths = initial_box.widths();
     Nat box_width_null = 0;
@@ -176,14 +175,14 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
         FloatDPUpperBound eps(0.0001_q,dp);
         initial_box = widen(initial_box, eps);
     }
-    GridTreePaving gridPaving = create_grid(initial_box);
+    GridTreePaving gridPaving = create_paving(initial_box);
     gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
     ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
-                                                           _configuration->discretisation_type(), _configuration->mince_dimension());
+                                                           _configuration->discretisation_type(), _configuration->num_subdivisions());
     return orbit(pointList, termination);
 }
 
-auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const -> OrbitListType {
+auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const -> OrbitType {
     CONCLOG_SCOPE_CREATE;
 
     CONCLOG_PRINTLN("Simulating from " << initial_points.size() << " initial points")
@@ -233,7 +232,7 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-        _step_size(0.125_x, dp), _mince_dimension(0), _num_subdivisions(0), _discretisation_type(DiscretisationType::Mince) {
+        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine) {
 }
 
 OutputStream&
@@ -242,7 +241,6 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
     os << "VectorFieldSimulatorConfiguration("
        << "\n  step_size=" << step_size()
        << "\n  discretisation_type=" << discretisation_type()
-       << "\n  mince_dimension=" << mince_dimension()
        << "\n  num_subdivisions=" << num_subdivisions()
        << ")\n";
     return os;

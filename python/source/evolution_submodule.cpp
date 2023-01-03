@@ -86,7 +86,6 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     typedef VectorFieldSimulator::TerminationType TerminationType;
     typedef VectorFieldSimulator::ApproximateListPointType ApproximateListPointType;
     typedef VectorFieldSimulator::OrbitType OrbitType;
-    typedef VectorFieldSimulator::OrbitListType OrbitListType;
     typedef VectorFieldSimulator::RealBoxType RealBoxType;
 
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
@@ -99,7 +98,7 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     pybind11::class_<VectorFieldSimulator> simulator_class(module,name);
     simulator_class.def(pybind11::init<VectorFieldSimulator::SystemType const&>());
     simulator_class.def("configuration",pybind11::overload_cast<>(&VectorFieldSimulator::configuration),reference_internal);
-    simulator_class.def("orbit", (OrbitListType(VectorFieldSimulator::*)(const ApproximateListPointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
+    simulator_class.def("orbit", (OrbitType(VectorFieldSimulator::*)(const ApproximateListPointType&, const TerminationType&)const) &VectorFieldSimulator::orbit);
     simulator_class.def("orbit", pybind11::overload_cast<ApproximateListPointType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
     simulator_class.def("orbit", pybind11::overload_cast<RealExpressionBoundedConstraintSet const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
     simulator_class.def("orbit", pybind11::overload_cast<RealBoxType const&,TerminationType const&>(&VectorFieldSimulator::orbit,pybind11::const_));
@@ -109,7 +108,6 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     simulator_configuration_class.def("set_step_size", &ConfigurationType::set_step_size);
     simulator_configuration_class.def("set_discretisation_type", &ConfigurationType::set_discretisation_type);
     simulator_configuration_class.def("set_num_subdivisions", &ConfigurationType::set_num_subdivisions);
-    simulator_configuration_class.def("set_mince_dimension", &ConfigurationType::set_mince_dimension);
     simulator_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
 }
 

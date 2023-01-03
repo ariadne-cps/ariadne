@@ -183,10 +183,10 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
     return orbit(pointList, termination);
 }
 
-auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const
-    -> OrbitListType
-{
+auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points, const TerminationType& termination) const -> OrbitListType {
     CONCLOG_SCOPE_CREATE;
+
+    CONCLOG_PRINTLN("Simulating from " << initial_points.size() << " initial points")
 
     auto const& auxiliary_function = _system->auxiliary_function();
 
@@ -196,17 +196,16 @@ auto VectorFieldSimulator::orbit(const ApproximateListPointType& initial_points,
 
     auto result = std::make_shared<SynchronisedOrbit>(make_state_auxiliary_point(initial_points, state_space, auxiliary_space, state_auxiliary_space, auxiliary_function));
 
-    for (SizeType i=0; i<initial_points.size(); i++){
-        _simulate_from_point(make_pair(i, initial_points.at(i)), termination, result);
-    }
-
-    //WorkloadType workload(std::bind_front(&VectorFieldSimulator::_simulate_from_point,this),termination,result);
-    //workload.process();
+    WorkloadType workload(std::bind_front(&VectorFieldSimulator::_simulate_from_point,this),termination,result);
+    for (SizeType i=0; i<initial_points.size(); i++)
+        workload.append({i,initial_points.at(i)});
+    workload.process();
 
     return std::move(*result);
 }
 
-void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointType> const& indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const {
+void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointType> indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const {
+    CONCLOG_SCOPE_CREATE
 
     auto const& curve_number = indexed_initial.first;
     auto const& initial = indexed_initial.second;

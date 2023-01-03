@@ -71,7 +71,7 @@ class TestVectorFieldSimulator
 
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
-        simulator.configuration().set_num_sub_div(1);
+        simulator.configuration().set_num_subdivisions(1);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 
@@ -111,7 +111,7 @@ class TestVectorFieldSimulator
 
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
-        simulator.configuration().set_num_sub_div(0);
+        simulator.configuration().set_num_subdivisions(0);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 

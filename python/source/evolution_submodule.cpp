@@ -107,8 +107,8 @@ template<> Void export_simulator<VectorFieldSimulator>(pybind11::module& module,
     typedef typename VectorFieldSimulator::ConfigurationType ConfigurationType;
     pybind11::class_<ConfigurationType> simulator_configuration_class(module,"VectorFieldSimulatorConfiguration");
     simulator_configuration_class.def("set_step_size", &ConfigurationType::set_step_size);
-    simulator_configuration_class.def("set_d_type", &ConfigurationType::set_d_type);
-    simulator_configuration_class.def("set_num_sub_div", &ConfigurationType::set_num_sub_div);
+    simulator_configuration_class.def("set_discretisation_type", &ConfigurationType::set_discretisation_type);
+    simulator_configuration_class.def("set_num_subdivisions", &ConfigurationType::set_num_subdivisions);
     simulator_configuration_class.def("set_mince_dimension", &ConfigurationType::set_mince_dimension);
     simulator_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
 }

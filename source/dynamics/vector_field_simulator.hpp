@@ -88,7 +88,7 @@ class VectorFieldSimulator
       private:
         Mutex _mux;
     };
-    typedef StaticWorkload<Pair<SizeType,ApproximatePointType> const&, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
+    typedef StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
     //! \brief Default constructor.
@@ -110,7 +110,7 @@ class VectorFieldSimulator
 
   private:
 
-    void _simulate_from_point(Pair<SizeType,ApproximatePointType> const& indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const;
+    void _simulate_from_point(Pair<SizeType,ApproximatePointType> indexed_initial, TerminationType const& termination, SharedPointer<SynchronisedOrbit> orbit) const;
   private:
     SharedPointer<SystemType> _system;
     SharedPointer<ConfigurationType> _configuration;
@@ -139,13 +139,13 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     Void set_step_size(double h) { _step_size=h; }
     FloatDPApproximation const& step_size() const { return _step_size; }
 
-    Void set_d_type(DiscretisationType type) { _discretisation_type = type; }
+    Void set_discretisation_type(DiscretisationType discretisation_type) { _discretisation_type = discretisation_type; }
     DiscretisationType const& discretisation_type() const { return _discretisation_type; }
 
-    Void set_num_sub_div(Nat num_sub_div) { _num_subdivisions = num_sub_div; }
+    Void set_num_subdivisions(Nat num_subdivisions) { _num_subdivisions = num_subdivisions; }
     Nat const& num_subdivisions() const { return _num_subdivisions; }
 
-    Void set_mince_dimension(Nat mince_dim) { _mince_dimension = mince_dim; }
+    Void set_mince_dimension(Nat mince_dimension) { _mince_dimension = mince_dimension; }
     Nat const& mince_dimension() const { return _mince_dimension; }
 
     virtual OutputStream& _write(OutputStream& os) const;

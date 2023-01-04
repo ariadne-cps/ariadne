@@ -31,15 +31,9 @@ typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Rea
 typedef Real ContinuousTimeType;
 
 void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
-void run_each_approximation(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
 
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
-
-
-template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& list) {
-    List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
-}
 
 inline ApproximateDouble score(ListSet<LabelledEnclosure> const& bbx) {
     return 1.0/std::pow(volume(bbx.bounding_box().euclidean_set()).get_d(),1.0/bbx.bounding_box().dimension());
@@ -80,14 +74,6 @@ void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox 
     CONCLOG_PRINTLN("Done.")
 }
 
-void run_each_approximation(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
-    for (auto appro: approximations) {
-        List<InputApproximation> singleapproximation = {appro};
-        CONCLOG_PRINTLN(appro);
-        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner);
-    }
-}
-
 void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
               const RealVariablesBox& initial, Real evolution_time, double step) {
 
@@ -115,7 +101,6 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
     run_single(name,ivf,initial,evolution_time,step,approximations,sweeper,integrator,reconditioner);
-    //run_each_approximation(name,ivf,initial,evolution_time,step,approximations,sweeper,integrator,reconditioner);
 }
 
 void run_noisy_system(SystemType system) {

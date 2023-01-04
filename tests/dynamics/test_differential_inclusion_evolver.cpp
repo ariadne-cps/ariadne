@@ -43,9 +43,9 @@ using namespace Ariadne;
 class TestDifferentialInclusionEvolver {
 
     void run_single_test(String name, DifferentialInclusion const &ivf, RealVariablesBox const &initial, Real evolution_time,
-                         ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper,
+                         ExactDouble step, List<InputApproximation> approximations,
                         IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
-        auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
+        auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
         evolver.configuration().set_approximations(approximations);
         evolver.configuration().set_maximum_step_size(step);
         ARIADNE_TEST_PRINT(evolver.configuration());
@@ -55,12 +55,10 @@ class TestDifferentialInclusionEvolver {
 
     void run_each_approximation(String name, DifferentialInclusion const &ivf, RealVariablesBox const &initial,
                                 Real evolution_time, ExactDouble step, List<InputApproximation> approximations,
-                                SweeperDP sweeper, IntegratorInterface const &integrator,
-                                Reconditioner const &reconditioner, bool draw) const {
+                                IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
-            run_single_test(name, ivf, initial, evolution_time, step, singleapproximation, sweeper, integrator,
-                            reconditioner, draw);
+            run_single_test(name, ivf, initial, evolution_time, step, singleapproximation, integrator, reconditioner, draw);
         }
     }
 
@@ -87,8 +85,7 @@ class TestDifferentialInclusionEvolver {
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
-        run_each_approximation(name, ivf, initial, evolution_time, step, approximations, sweeper,
-                               integrator, reconditioner, false);
+        run_each_approximation(name, ivf, initial, evolution_time, step, approximations, integrator, reconditioner, false);
     }
 
 public:
@@ -174,8 +171,7 @@ public:
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
-        run_each_approximation("recondition", ivf, initial, evolution_time, step, {AffineApproximation()}, sweeper,
-                               integrator, reconditioner, false);
+        run_each_approximation("recondition", ivf, initial, evolution_time, step, {AffineApproximation()}, integrator, reconditioner, false);
     }
 
     void test() const {

@@ -30,7 +30,7 @@ namespace Ariadne {
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 typedef Real ContinuousTimeType;
 
-void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner);
+void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step, List<InputApproximation> approximations, Reconditioner const& reconditioner);
 
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, ContinuousTimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
@@ -39,9 +39,9 @@ inline ApproximateDouble score(ListSet<LabelledEnclosure> const& bbx) {
     return 1.0/std::pow(volume(bbx.bounding_box().euclidean_set()).get_d(),1.0/bbx.bounding_box().dimension());
 }
 
-void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
+void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     CONCLOG_SCOPE_CREATE;
-    auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
+    auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
     evolver.configuration().set_approximations(approximations);
     evolver.configuration().set_maximum_step_size(step);
 
@@ -100,7 +100,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
-    run_single(name,ivf,initial,evolution_time,step,approximations,sweeper,integrator,reconditioner);
+    run_single(name,ivf,initial,evolution_time,step,approximations,integrator,reconditioner);
 }
 
 void run_noisy_system(SystemType system) {

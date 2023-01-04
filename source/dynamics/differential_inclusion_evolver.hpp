@@ -130,12 +130,11 @@ class DifferentialInclusionEvolver {
     typedef Orbit<EnclosureType> OrbitType;
   protected:
     SystemType _system;
-    SweeperDP _sweeper;
     SharedPointer<IntegratorInterface> _integrator;
     Reconditioner _reconditioner;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
+    DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
 
     //!@{
     //! \name Configuration for the class.

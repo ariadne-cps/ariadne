@@ -166,9 +166,8 @@ inline Map<InclusionIntegrator,ApproximateDouble> convert_to_percentages(Map<Inc
     return result;
 }
 
-DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
+DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
     : _system(system)
-    , _sweeper(sweeper)
     , _integrator(integrator.clone())
     , _reconditioner(reconditioner)
     , _configuration(new ConfigurationType())

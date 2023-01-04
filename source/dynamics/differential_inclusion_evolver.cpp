@@ -200,11 +200,13 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
     EulerBounder bounder;
 
-    EnclosureConfiguration config(std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+    auto const& function_factory = static_cast<IntegratorBase const&>(*this->_integrator).function_factory();
+
+    EnclosureConfiguration config(function_factory);
 
     EnclosureType evolve(initial,_system.state_space(),config);
     CONCLOG_PRINTLN_VAR_AT(1,evolve)
-    ValidatedVectorMultivariateFunctionPatch evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial_box,this->_sweeper);
+    ValidatedVectorMultivariateFunctionPatch evolve_function = function_factory.create_identity(initial_box);
 
     TimeStepType t;
 
@@ -274,11 +276,11 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
         CONCLOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
 
-        auto time_ivl_function = ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(reach_function.domain(),reach_function.result_size(),this->_sweeper);
+        auto time_ivl_function = function_factory.create_coordinate(reach_function.domain(),reach_function.result_size());
         EnclosureType reach_enclosure(Enclosure(reach_function.domain(),reach_function,time_ivl_function,List<ValidatedConstraint>(),config),_system.state_space());
         result.adjoin_reach(reach_enclosure);
 
-        auto time_function = ValidatedScalarMultivariateTaylorFunctionModelDP::constant(evolve_function.domain(),new_t,this->_sweeper);
+        auto time_function = function_factory.create_constant(evolve_function.domain(),new_t);
         evolve = EnclosureType(Enclosure(evolve_function.domain(), evolve_function, time_function, List<ValidatedConstraint>(), config), _system.state_space());
         result.adjoin_intermediate(evolve);
 

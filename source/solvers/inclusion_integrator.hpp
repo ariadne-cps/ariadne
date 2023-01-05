@@ -173,6 +173,8 @@ inline std::ostream& operator << (std::ostream& os, const ErrorConstants& n) {
 ErrorConstants compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDP const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
+    //! \brief Whether the reached set is rigorous or another approximation must be used
+    virtual bool is_reach_rigorous() const = 0;
     virtual Void write(OutputStream& os) const = 0;
     virtual InputApproximationInterface* clone() const = 0;
     virtual ~InputApproximationInterface() = default;
@@ -182,26 +184,31 @@ struct InputApproximationInterface {
 inline std::ostream& operator << (std::ostream& os, const InputApproximationInterface& a) { a.write(os); return os; }
 
 struct ZeroApproximation : public InputApproximationInterface {
+    virtual bool is_reach_rigorous() const override { return true; }
     virtual Void write(OutputStream& os) const override { os << "ZERO"; }
     virtual Nat index() const override { return 0; }
     virtual ZeroApproximation* clone() const override { return new ZeroApproximation(*this); }
 };
 struct ConstantApproximation : public InputApproximationInterface {
+    virtual bool is_reach_rigorous() const override { return true; }
     virtual Void write(OutputStream& os) const override { os << "CONSTANT"; }
     virtual Nat index() const override { return 1; }
     virtual ConstantApproximation* clone() const override { return new ConstantApproximation(*this); }
 };
 struct AffineApproximation : public InputApproximationInterface {
+    virtual bool is_reach_rigorous() const override { return false; }
     virtual Void write(OutputStream& os) const override { os << "AFFINE"; }
     virtual Nat index() const override { return 2; }
     virtual AffineApproximation* clone() const override { return new AffineApproximation(*this); }
 };
 struct SinusoidalApproximation : public InputApproximationInterface {
+    virtual bool is_reach_rigorous() const override { return false; }
     virtual Void write(OutputStream& os) const override { os << "SINUSOIDAL"; }
     virtual Nat index() const override { return 3; }
     virtual SinusoidalApproximation* clone() const override { return new SinusoidalApproximation(*this); }
 };
 struct PiecewiseApproximation : public InputApproximationInterface {
+    virtual bool is_reach_rigorous() const override { return false; }
     virtual Void write(OutputStream& os) const override { os << "PIECEWISE"; }
     virtual Nat index() const override { return 4; }
     virtual PiecewiseApproximation* clone() const override { return new PiecewiseApproximation(*this); }
@@ -210,7 +217,7 @@ struct PiecewiseApproximation : public InputApproximationInterface {
 class InputApproximation : public Handle<const InputApproximationInterface> {
   public:
     using Handle<const InputApproximationInterface>::Handle;
-
+    bool is_reach_rigorous() const { return this->_ptr->is_reach_rigorous(); }
     template<class A> Bool handles(A const& a) const { return instance_of<A>(&*this->_ptr); }
 };
 
@@ -314,6 +321,7 @@ class InclusionIntegratorInterface {
     virtual Bool operator<(const InclusionIntegratorInterface& rhs) const = 0;
     virtual Nat index() const = 0;
     virtual Nat num_params_per_input() const = 0;
+    virtual bool is_reach_rigorous() const = 0;
     virtual List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& D, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
     virtual ValidatedVectorMultivariateFunctionPatch evolve(ValidatedVectorMultivariateFunctionPatch const& reach_function, TimeStepType const& t) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegratorInterface& approximator) { approximator.write(os); return os; }
@@ -344,6 +352,8 @@ class InclusionIntegratorImpl : public InclusionIntegratorInterface {
 
     virtual Nat index() const override { return A().index(); }
 
+    virtual bool is_reach_rigorous() const override { return A().is_reach_rigorous(); }
+
     virtual Nat num_params_per_input() const override { return _num_params_per_input; }
 
     virtual ~InclusionIntegratorImpl() = default;
@@ -366,7 +376,9 @@ class InclusionIntegrator : public Handle<const InclusionIntegratorInterface> {
     friend Bool operator<(const InclusionIntegrator& lhs, const InclusionIntegrator& rhs) {
         return lhs._ptr->operator<(*rhs._ptr); }
 
-    virtual Nat num_params_per_input() const { return _ptr->num_params_per_input(); }
+    bool is_reach_rigorous() const { return _ptr->is_reach_rigorous(); }
+    Nat index() const { return _ptr->index(); }
+    Nat num_params_per_input() const { return _ptr->num_params_per_input(); }
 
     friend std::ostream& operator<<(std::ostream& os, const InclusionIntegrator& approximator) { os << *approximator._ptr; return os; }
 

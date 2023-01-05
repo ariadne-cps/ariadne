@@ -84,8 +84,17 @@ class InclusionEvolverState {
         : _step(0u)
     {
         InclusionIntegratorFactory factory(integrator);
+        bool has_reach_rigorous_approximations = false;
         for (auto appro : approximations) {
+            if (appro.is_reach_rigorous()) has_reach_rigorous_approximations = true;
             InclusionIntegrator approximator = factory.create(ivf.function(), ivf.inputs(), appro);
+            _schedule.push_back(ScheduledApproximator(0u,approximator));
+            _approximator_global_optima_count[approximator] = 0;
+            _approximator_local_optima_count[approximator] = 0;
+            _approximator_check_delay[approximator] = 0;
+        }
+        if (not has_reach_rigorous_approximations) {
+            InclusionIntegrator approximator = factory.create(ivf.function(), ivf.inputs(), ConstantApproximation());
             _schedule.push_back(ScheduledApproximator(0u,approximator));
             _approximator_global_optima_count[approximator] = 0;
             _approximator_local_optima_count[approximator] = 0;
@@ -105,9 +114,17 @@ class InclusionEvolverState {
     }
 
     Void update_with_best(InclusionIntegrator const& best) {
+        Nat max_reach_rigorous_index = 0;
+        for (auto appro : approximators_to_use()) {
+            if (appro.is_reach_rigorous()) max_reach_rigorous_index = std::max(max_reach_rigorous_index,appro.index());
+        }
         for (auto appro : approximators_to_use()) {
             if (best == appro) _reset_check_delay(appro);
-            else _increase_check_delay(appro);
+            else {
+                if (not best.is_reach_rigorous() and appro.index() == max_reach_rigorous_index)
+                    _reset_check_delay(appro);
+                else _increase_check_delay(appro);
+            }
 
             Nat offset = 1u<<_approximator_check_delay[appro];
             _schedule.push_back(ScheduledApproximator(_step+offset,appro));
@@ -219,7 +236,6 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
         CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
 
-        CONCLOG_PRINTLN_AT(1,"step#="<<state.step()<<", t="<<t<<", hsug="<<hsug);
         CONCLOG_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
 
         auto approximators_to_use = state.approximators_to_use();
@@ -242,12 +258,14 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         TimeStepType new_t = lower_bound(t+h);
 
         ValidatedVectorMultivariateFunctionPatch reach_function;
-        List<ValidatedVectorMultivariateFunctionPatch> best_reach_functions;
+        ValidatedVectorMultivariateFunctionPatch best_reach_function;
         ValidatedVectorMultivariateFunctionPatch best_evolve_function;
         InclusionIntegrator best = approximators_to_use.at(0);
         FloatDPApproximation best_volume(inf,dp);
+        ValidatedVectorMultivariateFunctionPatch best_reach_rigorous_function;
+        FloatDPApproximation best_reach_rigorous_volume(inf,dp);
 
-        for (auto approximator : approximators_to_use) {
+        for (auto const& approximator : approximators_to_use) {
             CONCLOG_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
 
             CONCLOG_RUN_AT(2,auto current_reach=approximator.reach(domx,evolve_function,B,t,h));
@@ -257,19 +275,29 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
             if (decide(current_volume < best_volume)) {
                 best = approximator;
                 CONCLOG_PRINTLN_AT(3,"best approximator: " << best);
-                best_reach_functions = current_reach;
+                if (best.is_reach_rigorous()) {
+                    best_reach_function = current_reach.at(0);
+                }
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
             }
+
+            if (approximator.is_reach_rigorous() and decide(current_volume < best_reach_rigorous_volume)) {
+                best_reach_rigorous_function = current_reach.at(0);
+                best_reach_rigorous_volume = current_volume;
+            }
         }
 
+        if (not best.is_reach_rigorous())
+            best_reach_function = best_reach_rigorous_function;
+
         if (approximators_to_use.size() > 1)
-            CONCLOG_PRINTLN_AT(2,"chosen approximator: " << best);
+            CONCLOG_PRINTLN_AT(2,"chosen approximator: " << best << (best.is_reach_rigorous() ? "" : " (reach taken from other approximator)"));
 
         state.update_with_best(best);
 
         evolve_function = best_evolve_function;
-        reach_function = best_reach_functions.at(0);
+        reach_function = best_reach_function;
 
         CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 

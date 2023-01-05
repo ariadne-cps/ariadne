@@ -20,6 +20,7 @@ Legenda for the issue kind:
 - [#688](https://github.com/ariadne-cps/ariadne/issues/688) (C) Modify atan to avoid using long double, to support ARM architecture
 - [#702](https://github.com/ariadne-cps/ariadne/issues/702) (C) Refactor the concurrency modules as a BetterThreads concurrency submodule
 - [#698](https://github.com/ariadne-cps/ariadne/issues/698) (C) Use snprintf instead of the deprecated sprintf
+- [#198](https://github.com/ariadne-cps/ariadne/issues/198) (C,F) Modify differential inclusion code to conform to other evolvers, fix reach set returned to be rigorous
 - [#678](https://github.com/ariadne-cps/ariadne/issues/678) (F) Address warnings using AppleClang, which is now usable on C++20 Concepts code
 
 ### 2.4.1

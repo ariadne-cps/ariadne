@@ -67,11 +67,10 @@ using SweeperDP = Sweeper<FloatDP>;
 
 using TimeStepType = Dyadic;
 
-BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges);
-
 FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
 class InclusionEvolverState;
+template<class T> class Orbit;
 
 class ReconditionerInterface {
   public:
@@ -106,24 +105,19 @@ public:
     virtual Void update_from(InclusionEvolverState const& state) override;
 };
 
-class ReconditionerHandle {
-private:
-    SharedPointer<ReconditionerInterface> _impl;
+class Reconditioner : public Handle<ReconditionerInterface> {
 public:
-    ReconditionerHandle(ReconditionerInterface const& other) : _impl(other.clone()) { }
-    ReconditionerHandle(ReconditionerHandle const& other) : _impl(other._impl) { }
+    using Handle<ReconditionerInterface>::Handle;
 
-    ReconditionerHandle& operator=(ReconditionerHandle const& other) { _impl = other._impl; return *this; }
+    Bool must_reduce_parameters(InclusionEvolverState const& state) const { return _ptr->must_reduce_parameters(state); }
+    Bool must_incorporate_errors(InclusionEvolverState const& state) const { return _ptr->must_incorporate_errors(state); }
 
-    Bool must_reduce_parameters(InclusionEvolverState const& state) const { return _impl->must_reduce_parameters(state); }
-    Bool must_incorporate_errors(InclusionEvolverState const& state) const { return _impl->must_incorporate_errors(state); }
+    Void reduce_parameters(ValidatedVectorMultivariateFunctionPatch& phi) const { _ptr->reduce_parameters(phi); }
+    ValidatedVectorMultivariateFunctionPatch incorporate_errors(ValidatedVectorMultivariateFunctionPatch const& Phi) const { return _ptr->incorporate_errors(Phi); }
 
-    Void reduce_parameters(ValidatedVectorMultivariateFunctionPatch& phi) const { _impl->reduce_parameters(phi); }
-    ValidatedVectorMultivariateFunctionPatch incorporate_errors(ValidatedVectorMultivariateFunctionPatch const& Phi) const { return _impl->incorporate_errors(Phi); }
+    Void update_from(InclusionEvolverState const& state) {_ptr->update_from(state); }
 
-    Void update_from(InclusionEvolverState const& state) {_impl->update_from(state); }
-
-    virtual ~ReconditionerHandle() = default;
+    virtual ~Reconditioner() = default;
 };
 
 class DifferentialInclusionEvolverConfiguration;
@@ -132,14 +126,15 @@ class DifferentialInclusionEvolver {
   public:
     typedef DifferentialInclusionEvolverConfiguration ConfigurationType;
     typedef DifferentialInclusion SystemType;
+    typedef SystemType::EnclosureType EnclosureType;
+    typedef Orbit<EnclosureType> OrbitType;
   protected:
     SystemType _system;
-    SweeperDP _sweeper;
     SharedPointer<IntegratorInterface> _integrator;
-    ReconditionerHandle _reconditioner;
+    Reconditioner _reconditioner;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner);
+    DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
 
     //!@{
     //! \name Configuration for the class.
@@ -148,7 +143,7 @@ class DifferentialInclusionEvolver {
     const ConfigurationType& configuration() const { return *this->_configuration; }
 
   public:
-    List<ValidatedVectorMultivariateFunctionPatch> reach(BoxDomainType const& initial, Real const& T);
+    OrbitType orbit(RealVariablesBox const& initial, Real const& T);
   private:
     Void _recondition_and_update(ValidatedVectorMultivariateFunctionPatch& function, InclusionEvolverState& state);
 };
@@ -185,16 +180,16 @@ class DifferentialInclusionEvolverConfiguration : public ConfigurationInterface
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const Bool& enable_parameter_reduction() const { return _enable_parameter_reduction; }
-    Void enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }
+    Void set_enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }
 
     List<InputApproximation> const& approximations() const { return _approximations; }
-    Void approximations(List<InputApproximation> const& value) { assert(value.size()>0); _approximations = value; }
+    Void set_approximations(List<InputApproximation> const& value) { assert(value.size() > 0); _approximations = value; }
 
   public:
 

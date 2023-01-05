@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ross-mcdonald.cpp
+ *            michelson.hpp
  *
  *  Copyright  2008-21 Luca Geretti
  *
@@ -22,13 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ross-mcdonald.hpp"
-#include "noisy-utilities.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
-int main(int argc, const char* argv[])
+
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> MI()
 {
-    if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
-    run_noisy_system(RM());
+    RealVariable x("x"), y("y"), z("z"), c("c");
+    DottedRealAssignments dynamics={dot(x)=y,
+                                    dot(y)=z,
+                                    dot(z)=c-y-sqr(x)/2};
+
+    Real ei=0.0_dec;
+    RealVariablesBox inputs={1-ei<=c<=1+ei};
+
+    Real es=0.0_dec;
+    RealVariablesBox initial={{0-es<=x<=0+es},{0.5_dec-es<=y<=0.5_dec+es},{0-es<=z<=0+es}};
+
+    Real evolution_time=9.5_dec;
+    double step=1.0/64;
+
+    return make_tuple("MI",dynamics,inputs,initial,evolution_time,step);
 }

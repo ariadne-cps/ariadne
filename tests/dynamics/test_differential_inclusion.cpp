@@ -42,17 +42,6 @@ using namespace Ariadne;
 class TestDifferentialInclusion {
   public:
 
-    Void test_not_formula_function() {
-        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(3,0);
-        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(3,1);
-
-        EffectiveVectorMultivariateFunction dynamics({x,y});
-
-        BoxDomainType inputs(1,{1,2});
-
-        ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), NotFormulaFunctionException);
-    }
-
     Void test_missing_input() {
         RealVariable x("x"), y("y"), z("z"), u("u");
         DottedRealAssignments dynamics={dot(x)=y+u,dot(y)=-x+z};
@@ -67,17 +56,6 @@ class TestDifferentialInclusion {
         RealVariableIntervals inputs={-4/100_q<=u<=4/100_q};
 
         ARIADNE_TEST_THROWS(DifferentialInclusion(dynamics, inputs), UnusedInputException);
-    }
-
-    Void test_mismatching_coordinates() {
-        RealVariable x("x"), y("y");
-        DottedRealAssignments dynamics={dot(x)=-y,dot(y)=x};
-
-        EffectiveVectorMultivariateFunction function = make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics)));
-
-        BoxDomainType inputs(1,{1,2});
-
-        ARIADNE_TEST_THROWS(DifferentialInclusion(function, inputs), FunctionArgumentsMismatchException);
     }
 
     Void test_dynamics_transformation() {
@@ -166,10 +144,8 @@ class TestDifferentialInclusion {
     }
 
     Void test() {
-        ARIADNE_TEST_CALL(test_not_formula_function());
         ARIADNE_TEST_CALL(test_missing_input());
         ARIADNE_TEST_CALL(test_unused_input());
-        ARIADNE_TEST_CALL(test_mismatching_coordinates());
         ARIADNE_TEST_CALL(test_dynamics_transformation());
         ARIADNE_TEST_CALL(test_nonaffine_field());
         ARIADNE_TEST_CALL(test_nonadditive_field());

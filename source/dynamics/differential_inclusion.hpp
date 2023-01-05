@@ -47,12 +47,7 @@ class UnusedInputException : public std::runtime_error {
     UnusedInputException(const String& str) : std::runtime_error(str) { }
 };
 
-class FunctionArgumentsMismatchException : public std::runtime_error {
-  public:
-    FunctionArgumentsMismatchException(const String& str) : std::runtime_error(str) { }
-};
-
-class Enclosure;
+class LabelledEnclosure;
 class InclusionVectorFieldEvolver;
 
 //! \brief A differential inclusion in Euclidean space.
@@ -67,12 +62,10 @@ class DifferentialInclusion
     typedef EuclideanSpace StateSpaceType;
     //! \brief The generic type used to compute the system evolution.
     typedef InclusionVectorFieldEvolver EvolverType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
   public:
     //! \brief Construct from expressions with dotted \a dynamics and a given range for the \a inputs.
     DifferentialInclusion(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);
-    //! \brief Construct from a \a function for the dynamics and a given range for the \a inputs.
-    DifferentialInclusion(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
     virtual ~DifferentialInclusion() = default;
     virtual DifferentialInclusion* clone() const { return new DifferentialInclusion(*this); }
 

@@ -23,6 +23,7 @@
  */
 
 #include "dynamics/differential_inclusion_evolver.hpp"
+#include "dynamics/orbit.hpp"
 #include "algebra/sweeper.hpp"
 #include "solvers/integrator.hpp"
 #include "geometry/box.hpp"
@@ -40,27 +41,24 @@
 using namespace Ariadne;
 
 class TestDifferentialInclusionEvolver {
-private:
-    void run_single_test(String name, DifferentialInclusion const &ivf, BoxDomainType const &initial, Real evolution_time,
-                         ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper,
-                        IntegratorInterface const &integrator, ReconditionerHandle const &reconditioner, bool draw) const {
 
-        auto evolver = DifferentialInclusionEvolver(ivf, sweeper, integrator, reconditioner);
-        evolver.configuration().approximations(approximations);
-        evolver.configuration().maximum_step_size(step);
+    void run_single_test(String name, DifferentialInclusion const &ivf, RealVariablesBox const &initial, Real evolution_time,
+                         ExactDouble step, List<InputApproximation> approximations,
+                        IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
+        auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
+        evolver.configuration().set_approximations(approximations);
+        evolver.configuration().set_maximum_step_size(step);
         ARIADNE_TEST_PRINT(evolver.configuration());
 
-        List<ValidatedVectorMultivariateFunctionPatch> flow_functions = evolver.reach(initial, evolution_time);
+        evolver.orbit(initial, evolution_time);
     }
 
-    void run_each_approximation(String name, DifferentialInclusion const &ivf, BoxDomainType const &initial,
+    void run_each_approximation(String name, DifferentialInclusion const &ivf, RealVariablesBox const &initial,
                                 Real evolution_time, ExactDouble step, List<InputApproximation> approximations,
-                                SweeperDP sweeper, IntegratorInterface const &integrator,
-                                ReconditionerHandle const &reconditioner, bool draw) const {
+                                IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
-            run_single_test(name, ivf, initial, evolution_time, step, singleapproximation, sweeper, integrator,
-                            reconditioner, draw);
+            run_single_test(name, ivf, initial, evolution_time, step, singleapproximation, integrator, reconditioner, draw);
         }
     }
 
@@ -87,8 +85,7 @@ private:
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
-        run_each_approximation(name, ivf, initial_ranges_to_box(initial), evolution_time, step, approximations, sweeper,
-                               integrator, reconditioner, false);
+        run_each_approximation(name, ivf, initial, evolution_time, step, approximations, integrator, reconditioner, false);
     }
 
 public:
@@ -174,8 +171,7 @@ public:
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
 
-        run_each_approximation("recondition", ivf, initial_ranges_to_box(initial), evolution_time, step, {AffineApproximation()}, sweeper,
-                               integrator, reconditioner, false);
+        run_each_approximation("recondition", ivf, initial, evolution_time, step, {AffineApproximation()}, integrator, reconditioner, false);
     }
 
     void test() const {

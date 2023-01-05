@@ -24,36 +24,29 @@
 
 #include "function/function_patch.hpp"
 #include "function/taylor_function.hpp"
+#include "function/constraint.hpp"
 #include "solvers/integrator.hpp"
 #include "solvers/bounder.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "io/progress_indicator.hpp"
+
 #include "differential_inclusion_evolver.hpp"
+#include "enclosure.hpp"
+#include "orbit.hpp"
 
 namespace Ariadne {
 
-inline ValidatedVectorMultivariateTaylorFunctionModelDP compose(ValidatedVectorMultivariateFunctionPatch const& g,
-                                                                ValidatedVectorMultivariateTaylorFunctionModelDP const& f)
-{
+inline ValidatedVectorMultivariateTaylorFunctionModelDP compose(ValidatedVectorMultivariateFunctionPatch const& g, ValidatedVectorMultivariateTaylorFunctionModelDP const& f) {
     return compose(cast_unrestricted(g),f);
 }
 
-template<class M> inline VectorScaledFunctionPatch<M> compose(const ValidatedVectorMultivariateFunctionPatch& g, const VectorScaledFunctionPatch<M>& f) {
+template<class M> inline VectorScaledFunctionPatch<M> compose(ValidatedVectorMultivariateFunctionPatch const& g, VectorScaledFunctionPatch<M> const& f) {
     return compose(cast_unrestricted(g),f);
 }
 
 inline FloatDPUpperInterval operator*(PositiveValidatedUpperNumber x, FloatDPUpperInterval ivl) {
     return cast_exact(x.get(double_precision)*ivl); }
 
-/*
-FloatDP volume(Vector<IntervalValidatedRangeType> const& box) {
-    FloatDP result = 1.0;
-    for (auto i: range(box.size())) {
-        result *= box[i].width().raw();
-    }
-    return result;
-}
-*/
 BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
@@ -66,9 +59,9 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
 struct ScheduledApproximator
 {
     Nat step;
-    InclusionIntegratorHandle approximator;
+    InclusionIntegrator approximator;
 
-    ScheduledApproximator(Nat s, InclusionIntegratorHandle a) : step(s), approximator(a) {}
+    ScheduledApproximator(Nat s, InclusionIntegrator a) : step(s), approximator(a) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
@@ -83,16 +76,25 @@ class InclusionEvolverState {
   private:
     Nat _step;
     List<ScheduledApproximator> _schedule;
-    Map<InclusionIntegratorHandle,Nat> _approximator_check_delay;
-    Map<InclusionIntegratorHandle,Nat> _approximator_global_optima_count;
-    Map<InclusionIntegratorHandle,Nat> _approximator_local_optima_count;
+    Map<InclusionIntegrator,Nat> _approximator_check_delay;
+    Map<InclusionIntegrator,Nat> _approximator_global_optima_count;
+    Map<InclusionIntegrator,Nat> _approximator_local_optima_count;
   public:
     InclusionEvolverState(DifferentialInclusion const& ivf, List<InputApproximation> const& approximations, IntegratorInterface const& integrator)
         : _step(0u)
     {
         InclusionIntegratorFactory factory(integrator);
+        bool has_reach_rigorous_approximations = false;
         for (auto appro : approximations) {
-            InclusionIntegratorHandle approximator = factory.create(ivf.function(),ivf.inputs(),appro);
+            if (appro.is_reach_rigorous()) has_reach_rigorous_approximations = true;
+            InclusionIntegrator approximator = factory.create(ivf.function(), ivf.inputs(), appro);
+            _schedule.push_back(ScheduledApproximator(0u,approximator));
+            _approximator_global_optima_count[approximator] = 0;
+            _approximator_local_optima_count[approximator] = 0;
+            _approximator_check_delay[approximator] = 0;
+        }
+        if (not has_reach_rigorous_approximations) {
+            InclusionIntegrator approximator = factory.create(ivf.function(), ivf.inputs(), ConstantApproximation());
             _schedule.push_back(ScheduledApproximator(0u,approximator));
             _approximator_global_optima_count[approximator] = 0;
             _approximator_local_optima_count[approximator] = 0;
@@ -102,19 +104,27 @@ class InclusionEvolverState {
 
     Nat step() const { return _step; }
     List<ScheduledApproximator> const& schedule() const { return _schedule; }
-    Map<InclusionIntegratorHandle,Nat> const& check_delay() const { return _approximator_check_delay; }
-    Map<InclusionIntegratorHandle,Nat> const& global_optima_count() const { return _approximator_global_optima_count; }
-    Map<InclusionIntegratorHandle,Nat> const& local_optima_count() const { return _approximator_local_optima_count; }
+    Map<InclusionIntegrator,Nat> const& check_delay() const { return _approximator_check_delay; }
+    Map<InclusionIntegrator,Nat> const& global_optima_count() const { return _approximator_global_optima_count; }
+    Map<InclusionIntegrator,Nat> const& local_optima_count() const { return _approximator_local_optima_count; }
 
     Void reset_local_optima_count() {
         for (auto entry : _approximator_local_optima_count)
             _approximator_local_optima_count[entry.first] = 0;
     }
 
-    Void update_with_best(InclusionIntegratorHandle const& best) {
+    Void update_with_best(InclusionIntegrator const& best) {
+        Nat max_reach_rigorous_index = 0;
+        for (auto appro : approximators_to_use()) {
+            if (appro.is_reach_rigorous()) max_reach_rigorous_index = std::max(max_reach_rigorous_index,appro.index());
+        }
         for (auto appro : approximators_to_use()) {
             if (best == appro) _reset_check_delay(appro);
-            else _increase_check_delay(appro);
+            else {
+                if (not best.is_reach_rigorous() and appro.index() == max_reach_rigorous_index)
+                    _reset_check_delay(appro);
+                else _increase_check_delay(appro);
+            }
 
             Nat offset = 1u<<_approximator_check_delay[appro];
             _schedule.push_back(ScheduledApproximator(_step+offset,appro));
@@ -124,12 +134,8 @@ class InclusionEvolverState {
         _increase_optima_count(best);
     }
 
-    Void append_to_schedule(Nat const& step, InclusionIntegratorHandle const& approximator) {
-        _schedule.push_back(ScheduledApproximator(step,approximator));
-    }
-
-    List<InclusionIntegratorHandle> approximators_to_use() const {
-        List<InclusionIntegratorHandle> result;
+    List<InclusionIntegrator> approximators_to_use() const {
+        List<InclusionIntegrator> result;
         for (auto i = _schedule.size(); i > 0; --i) {
             auto entry = _schedule[i-1];
             if (entry.step == _step) {
@@ -154,22 +160,22 @@ class InclusionEvolverState {
     }
 
   private:
-    Void _reset_check_delay(InclusionIntegratorHandle const& approximator) { _approximator_check_delay[approximator] = 0; }
-    Void _increase_check_delay(InclusionIntegratorHandle const& approximator) { _approximator_check_delay[approximator]++; }
-    Void _increase_optima_count(InclusionIntegratorHandle const& approximator) {
+    Void _reset_check_delay(InclusionIntegrator const& approximator) { _approximator_check_delay[approximator] = 0; }
+    Void _increase_check_delay(InclusionIntegrator const& approximator) { _approximator_check_delay[approximator]++; }
+    Void _increase_optima_count(InclusionIntegrator const& approximator) {
         _approximator_global_optima_count[approximator]++;
         _approximator_local_optima_count[approximator]++;
     }
 };
 
-inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
+inline Map<InclusionIntegrator,ApproximateDouble> convert_to_percentages(Map<InclusionIntegrator,Nat> const& approximation_global_frequencies) {
 
     Nat total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InclusionIntegratorHandle,ApproximateDouble> result;
+    Map<InclusionIntegrator,ApproximateDouble> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1.0/total_steps*entry.second;
     }
@@ -177,14 +183,13 @@ inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(M
     return result;
 }
 
-DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner)
+DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
     : _system(system)
-    , _sweeper(sweeper)
     , _integrator(integrator.clone())
     , _reconditioner(reconditioner)
     , _configuration(new ConfigurationType())
 {
-    assert(system.inputs().size() > 0);
+    ARIADNE_PRECONDITION(system.inputs().size() > 0);
     CONCLOG_SCOPE_CREATE;
 }
 
@@ -200,22 +205,30 @@ Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultiv
     }
 }
 
-List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
+auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real const& tmax) -> OrbitType {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"System: "<<_system);
     CONCLOG_PRINTLN_AT(1,"Initial: "<<initial);
+
+    auto initial_box = initial_ranges_to_box(initial);
 
     StepSizeType hsug(_configuration->maximum_step_size());
 
     EulerBounder bounder;
 
-    ValidatedVectorMultivariateFunctionPatch evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(initial,this->_sweeper);
+    auto const& function_factory = static_cast<IntegratorBase const&>(*this->_integrator).function_factory();
+
+    EnclosureConfiguration config(function_factory);
+
+    EnclosureType evolve(initial,_system.state_space(),config);
+    CONCLOG_PRINTLN_VAR_AT(1,evolve)
+    ValidatedVectorMultivariateFunctionPatch evolve_function = function_factory.create_identity(initial_box);
 
     TimeStepType t;
 
     InclusionEvolverState state(_system,_configuration->approximations(),*_integrator);
 
-    List<ValidatedVectorMultivariateFunctionPatch> result;
+    OrbitType result(evolve);
 
     ProgressIndicator indicator(tmax.get_d());
 
@@ -223,12 +236,16 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
         CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
 
-        CONCLOG_PRINTLN_AT(1,"step#="<<state.step()<<", t="<<t<<", hsug="<<hsug);
         CONCLOG_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
 
         auto approximators_to_use = state.approximators_to_use();
 
-        CONCLOG_PRINTLN_AT(2,"approximators to use="<<approximators_to_use);
+        CONCLOG_PRINTLN_AT(1,"#s="<<std::setw(4)<<result.reach().size()
+                                 <<" t="<<std::setw(7)<<t.get_d()
+                                 <<" p="<<std::setw(4)<<evolve_function.argument_size()
+                                 <<" r="<<std::setw(7)<<evolve_function.range().radius()
+                                 <<" c="<<evolve_function.range().centre()
+                                 <<" a="<<approximators_to_use)
 
         auto domx = cast_exact_box(evolve_function.range());
 
@@ -240,13 +257,15 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
 
         TimeStepType new_t = lower_bound(t+h);
 
-        List<ValidatedVectorMultivariateFunctionPatch> reach_functions;
-        List<ValidatedVectorMultivariateFunctionPatch> best_reach_functions;
+        ValidatedVectorMultivariateFunctionPatch reach_function;
+        ValidatedVectorMultivariateFunctionPatch best_reach_function;
         ValidatedVectorMultivariateFunctionPatch best_evolve_function;
-        InclusionIntegratorHandle best = approximators_to_use.at(0);
+        InclusionIntegrator best = approximators_to_use.at(0);
         FloatDPApproximation best_volume(inf,dp);
+        ValidatedVectorMultivariateFunctionPatch best_reach_rigorous_function;
+        FloatDPApproximation best_reach_rigorous_volume(inf,dp);
 
-        for (auto approximator : approximators_to_use) {
+        for (auto const& approximator : approximators_to_use) {
             CONCLOG_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
 
             CONCLOG_RUN_AT(2,auto current_reach=approximator.reach(domx,evolve_function,B,t,h));
@@ -256,34 +275,50 @@ List<ValidatedVectorMultivariateFunctionPatch> DifferentialInclusionEvolver::rea
             if (decide(current_volume < best_volume)) {
                 best = approximator;
                 CONCLOG_PRINTLN_AT(3,"best approximator: " << best);
-                best_reach_functions = current_reach;
+                if (best.is_reach_rigorous()) {
+                    best_reach_function = current_reach.at(0);
+                }
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
             }
+
+            if (approximator.is_reach_rigorous() and decide(current_volume < best_reach_rigorous_volume)) {
+                best_reach_rigorous_function = current_reach.at(0);
+                best_reach_rigorous_volume = current_volume;
+            }
         }
 
+        if (not best.is_reach_rigorous())
+            best_reach_function = best_reach_rigorous_function;
+
         if (approximators_to_use.size() > 1)
-            CONCLOG_PRINTLN_AT(2,"chosen approximator: " << best);
+            CONCLOG_PRINTLN_AT(2,"chosen approximator: " << best << (best.is_reach_rigorous() ? "" : " (reach taken from other approximator)"));
 
         state.update_with_best(best);
 
-        reach_functions = best_reach_functions;
         evolve_function = best_evolve_function;
+        reach_function = best_reach_function;
 
         CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 
-        result.concatenate(reach_functions);
-
         CONCLOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
+
+        auto time_ivl_function = function_factory.create_coordinate(reach_function.domain(),reach_function.result_size());
+        EnclosureType reach_enclosure(Enclosure(reach_function.domain(),reach_function,time_ivl_function,List<ValidatedConstraint>(),config),_system.state_space());
+        result.adjoin_reach(reach_enclosure);
+
+        auto time_function = function_factory.create_constant(evolve_function.domain(),new_t);
+        evolve = EnclosureType(Enclosure(evolve_function.domain(), evolve_function, time_function, List<ValidatedConstraint>(), config), _system.state_space());
+        result.adjoin_intermediate(evolve);
 
         state.next_step();
         t=new_t;
         indicator.update_current(t.get_d());
-
         CONCLOG_PRINTLN_AT(2,"updated schedule: " << state.schedule());
     }
 
     CONCLOG_PRINTLN_AT(1,"approximation % ="<<convert_to_percentages(state.global_optima_count()));
+    result.adjoin_final(evolve);
 
     return result;
 }
@@ -351,7 +386,6 @@ ValidatedVectorMultivariateFunctionPatch LohnerReconditioner::incorporate_errors
 Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionPatch& f) const {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("f="<<f);
-
     auto m=f.argument_size();
     auto n=f.result_size();
 
@@ -378,7 +412,6 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
     }
 
     CONCLOG_PRINTLN_AT(1,"C"<<C);
-
     Array<IndexedFloatDPError> Ce(m);
     for (auto j : range(m)) {
         Ce[j].index = j;
@@ -432,21 +465,19 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionP
     f=compose(f,projection);
 }
 
-
 DifferentialInclusionEvolverConfiguration::DifferentialInclusionEvolverConfiguration()
 {
-    this->maximum_step_size(1.0_x);
-    this->maximum_enclosure_radius(100.0_x);
-    enable_parameter_reduction(true);
-    approximations({ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()});
+    this->set_maximum_step_size(1.0_x);
+    this->set_maximum_enclosure_radius(100.0_x);
+    set_enable_parameter_reduction(true);
+    set_approximations({ZeroApproximation(), ConstantApproximation(), AffineApproximation(), SinusoidalApproximation(), PiecewiseApproximation()});
 }
-
 
 OutputStream&
 DifferentialInclusionEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "DifferentialInclusionEvolverConfiguration"
-       << ",\n  maximum_step_size=" << maximum_step_size()
+    os << "DifferentialInclusionEvolverConfiguration("
+       << "\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_parameter_reduction=" << enable_parameter_reduction()
        << ",\n  approximations=" << approximations()

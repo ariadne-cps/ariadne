@@ -182,6 +182,8 @@ add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
+    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
+    $<TARGET_OBJECTS:CONCLOG_SRC>
     source/geometry/interval.cpp
 )
 
@@ -194,6 +196,8 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
+    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
+    $<TARGET_OBJECTS:CONCLOG_SRC>
 )
 
 add_library(ariadne SHARED
@@ -207,11 +211,13 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:BETTERTHREADS_SRC>
+    $<TARGET_OBJECTS:CONCLOG_SRC>
 )
 
-target_link_libraries(ariadne dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-core dl conclog betterthreads ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
     include(CodeCoverage)
@@ -223,7 +229,7 @@ if(CAIRO_FOUND)
     target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
 endif()
 
-install(TARGETS ariadne conclog betterthreads DESTINATION lib)
+install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")

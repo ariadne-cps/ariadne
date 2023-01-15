@@ -247,7 +247,7 @@ class ConstantFunction
     ConstantFunction(DomainType dom, const Y& c) : _domain(dom), _value(c) { }
     operator Y() const { return _value; }
 
-    const DomainType domain() const { return _domain; }
+    DomainType domain() const { return _domain; }
     ArgumentSizeType argument_size() const { return _domain.dimension(); }
     SizeOne result_size() const { return SizeOne(); }
 
@@ -290,7 +290,7 @@ class CoordinateFunction
     CoordinateFunction(DomainType dom, ArgumentIndexType i) : _domain(dom), _index(i) { }
     ArgumentIndexType index() const { return _index; }
 
-    const DomainType domain() const { return _domain; }
+    DomainType domain() const { return _domain; }
     ArgumentSizeType argument_size() const { return _domain.dimension(); }
     SizeOne result_size() const { return SizeOne(); }
 
@@ -322,7 +322,7 @@ class UnaryFunction
 
     UnaryFunction(const UnaryElementaryOperator& op, const ScalarFunction<P,ARGS...>& arg)
         : _op(op), _arg(arg) { }
-    const DomainType domain() const { return this->_arg.domain(); }
+    DomainType domain() const { return this->_arg.domain(); }
     ArgumentSizeType argument_size() const { return this->_arg.argument_size(); }
     SizeOne result_size() const { return SizeOne(); }
 
@@ -367,7 +367,7 @@ class BinaryFunction
         : BinaryFunction(BinaryElementaryOperator(op.code()),arg1,arg2) { }
     BinaryFunction(BinaryElementaryOperator op, const ScalarFunction<P,ARGS...>& arg1, const ScalarFunction<P,ARGS...>& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
-    const DomainType domain() const {
+    DomainType domain() const {
         return intersection(this->_arg1.domain(),this->_arg2.domain()); }
     ArgumentSizeType argument_size() const {
         return this->_arg1.argument_size(); }
@@ -410,7 +410,7 @@ class GradedFunction
     typedef ElementSizeType<D> ArgumentSizeType;
     GradedFunction(GradedElementaryOperator op, const ScalarFunction<P,ARGS...>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }
-    const DomainType domain() const {
+    DomainType domain() const {
         return this->_arg1.domain(); }
     ArgumentSizeType argument_size() const {
         return this->_arg1.argument_size(); }
@@ -480,7 +480,7 @@ class VectorOfScalarFunction
         return _vec.size(); }
     ArgumentSizeType argument_size() const {
         return _dom.dimension(); }
-    DomainType const domain() const {
+    DomainType domain() const {
         return _dom; }
 
     const ScalarFunction<P,ARGS...> operator[](SizeType i) const {
@@ -571,7 +571,7 @@ class EmbeddedFunction
         : _dom1((as1)), _f2(f2), _dom3(as3) { ARIADNE_NOT_IMPLEMENTED; }
     EmbeddedFunction(D1 dom1, const Function<P,RES(ARG2)>& f2, D3 dom3)
         : _dom1(dom1), _f2(f2), _dom3(dom3) { }
-    DomainType const domain() const { return product(_dom1,_f2.domain(),_dom3); }
+    DomainType domain() const { return product(_dom1,_f2.domain(),_dom3); }
     CodomainType const codomain() const { return _f2.codomain(); }
     ArgumentSizeType argument_size() const { return _dom1.dimension()+_f2.argument_size()+_dom3.dimension(); }
     ResultSizeType result_size() const { return _f2.result_size(); }
@@ -607,7 +607,7 @@ class ComposedFunction
 
     ComposedFunction(const Function<P,R(T)>& f, const Function<P,T(AS...)>& g)
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
-    DomainType const domain() const { return _g.domain(); }
+    DomainType domain() const { return _g.domain(); }
     CodomainType const codomain() const { return _f.codomain(); }
     ArgumentSizeType argument_size() const { return _g.argument_size(); }
     ResultSizeType result_size() const { return _f.result_size(); }
@@ -662,7 +662,7 @@ class JoinedFunction
     ScalarFunction<P,ARG> operator[](SizeType i) const {
         return (i<_f1.result_size()) ? _f1[i] : _f2[i-_f1.result_size()]; }
 
-    DomainType const domain() const { return intersection(_f1.domain(),_f2.domain()); }
+    DomainType domain() const { return intersection(_f1.domain(),_f2.domain()); }
     CodomainType const codomain() const { return product(_f1.codomain(),_f2.codomain()); }
     SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
     ArgumentSizeType argument_size() const { return _f1.argument_size(); }

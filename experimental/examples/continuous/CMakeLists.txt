@@ -1,7 +1,5 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
-    laub-loomis-nonoise
-	lotka-volterra-nonoise
-	higgins-selkov-nonoise
+    laub-loomis
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_CONTINUOUS})

@@ -3,7 +3,6 @@ set(EXAMPLES_NOISY
     clock
 	vanderpol-noisy
 	fitzhugh-nagumo
-	laub-loomis
 	vinograd
 	sphere
 	order7

@@ -50,6 +50,7 @@ class SingularMatrixException;
 class NonSymmetricMatrixException { };
 
 
+
 //! \ingroup LinearAlgebraSubModule
 //! \brief Symmetric matrices over some type \a X.
 template<class X> class SymmetricMatrix
@@ -127,9 +128,14 @@ template<class X> class SymmetricMatrix
     X zero_element() const;
   public:
     template<class T> friend OutputStream& operator<<(OutputStream& os, SymmetricMatrix<T>const& A);
-    friend SymmetricMatrix<X> outer(Matrix<X> const& A);
-    friend SymmetricMatrix<X> ATXpXA(Matrix<X> const&, SymmetricMatrix<X> const&);
-    friend SymmetricMatrix<X> operator+(SymmetricMatrix<X> const&, SymmetricMatrix<X> const&);
+    template<class T> friend SymmetricMatrix<T> operator+(SymmetricMatrix<T> const&, SymmetricMatrix<T> const&);
+    template<class T> friend SymmetricMatrix<T> operator-(SymmetricMatrix<T> const&, SymmetricMatrix<T> const&);
+    template<class T> friend SymmetricMatrix<T> operator*(T const&, SymmetricMatrix<T> const&);
+    template<class T> friend SymmetricMatrix<T> operator*(SymmetricMatrix<T> const&, T const&);
+    template<class T> friend SymmetricMatrix<T> operator/(SymmetricMatrix<T> const&, T const&);
+    template<class T> friend SymmetricMatrix<T> symmetrize(Matrix<T> const& A);
+    template<class T> friend SymmetricMatrix<T> outer(Matrix<T> const& A);
+    template<class T> friend SymmetricMatrix<T> AxTpTA(Matrix<T> const&, SymmetricMatrix<T> const&);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
     OutputStream& _write(OutputStream& os) const;
@@ -137,7 +143,7 @@ template<class X> class SymmetricMatrix
     friend Vector<X>& to_vector(SymmetricMatrix<X>& S) { return reinterpret_cast<Vector<X>&>(S._ary); }
     friend Vector<X> const& to_vector(SymmetricMatrix<X> const& S) { return reinterpret_cast<Vector<X>const&>(S._ary); }
   private:
-    SizeType _fast_position(SizeType i, SizeType j) const { assert(i<j); return i*(this->column_size()-i)/2+j; }
+    SizeType _fast_position(SizeType i, SizeType j) const { assert(i<=j); return i*(2*this->size()-i-1)/2+j; }
     SizeType _position(SizeType i, SizeType j) const { if(i<=j) { return this->_fast_position(i,j); } else { return this->_fast_position(j,i); } }
 };
 
@@ -263,9 +269,46 @@ template<class X> OutputStream& SymmetricMatrix<X>::_write(OutputStream& os) con
 template<class X> SymmetricMatrix<X> operator+(SymmetricMatrix<X> const& S1, SymmetricMatrix<X> const& S2) {
     assert(S1.size()==S2.size());
     const SizeType n=S1.size();
-    SymmetricMatrix<X> R(n);
-    for(SizeType i=0; i!=n*(n-1)/2; ++i) {
+    SymmetricMatrix<X> R(n,S1.zero_element()+S2.zero_element());
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=S1._ary[i]+S2._ary[i];
+    }
+    return R;
+}
+
+template<class X> SymmetricMatrix<X> operator-(SymmetricMatrix<X> const& S1, SymmetricMatrix<X> const& S2) {
+    assert(S1.size()==S2.size());
+    const SizeType n=S1.size();
+    SymmetricMatrix<X> R(n,S1.zero_element()-S2.zero_element());
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        R._ary[i]=S1._ary[i]-S2._ary[i];
+    }
+    return R;
+}
+
+template<class X> SymmetricMatrix<X> operator*(X const& x1, SymmetricMatrix<X> const& S2) {
+    const SizeType n=S2.size();
+    SymmetricMatrix<X> R(n,x1*S2.zero_element());
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        R._ary[i]=x1*S2._ary[i];
+    }
+    return R;
+}
+
+template<class X> SymmetricMatrix<X> operator*(SymmetricMatrix<X> const& S1, X const& x2) {
+    const SizeType n=S1.size();
+    SymmetricMatrix<X> R(n,S1.zero_element()*x2);
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        R._ary[i]=S1._ary[i]*x2;
+    }
+    return R;
+}
+
+template<class X> SymmetricMatrix<X> operator/(SymmetricMatrix<X> const& S1, X const& x2) {
+    const SizeType n=S1.size();
+    SymmetricMatrix<X> R(n,S1.zero_element()/x2);
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        R._ary[i]=S1._ary[i]/x2;
     }
     return R;
 }
@@ -273,7 +316,7 @@ template<class X> SymmetricMatrix<X> operator+(SymmetricMatrix<X> const& S1, Sym
 template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    SymmetricMatrix<X> S(n);
+    SymmetricMatrix<X> S(n,A.zero_element());
     for(SizeType i=0; i!=n; ++i) {
         for(SizeType j=i; j!=n; ++j) {
             X& Sij=S.at(i,j);
@@ -289,7 +332,7 @@ template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
 template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    SymmetricMatrix<X> S(n);
+    SymmetricMatrix<X> S(n,A.zero_element());
     for(SizeType i=0; i!=n; ++i) {
         for(SizeType j=i; j!=n; ++j) {
             X& Sij=S.at(i,j);
@@ -302,8 +345,18 @@ template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
     return S;
 }
 
-
-
+template<class X> SymmetricMatrix<X> symmetrize(Matrix<X> const& A) {
+    assert(A.row_size()==A.column_size());
+    const SizeType n=A.row_size();
+    SymmetricMatrix S(n,A.zero_element());
+    for(SizeType i=0; i!=n; ++i) {
+        S.at(i,i)=A[i][i];
+        for(SizeType j=i+1; j!=n; ++j) {
+            S.at(i,j)=hlf(A[i][j]+A[j][i]);
+        }
+    }
+    return S;
+}
 
 
 } // namespace Ariadne

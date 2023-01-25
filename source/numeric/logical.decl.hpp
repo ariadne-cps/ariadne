@@ -104,7 +104,7 @@ template<class P> using InequalityLogicalType = ApartnessType<P>;
 
 namespace Detail {
 
-#if (defined __arm || defined __aarch64__) && !defined(__clang__)
+#if (defined __arm || defined __aarch64__)
 typedef short ComparableEnumerationType;
 #else
 typedef char ComparableEnumerationType;

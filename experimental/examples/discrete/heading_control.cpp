@@ -34,37 +34,37 @@ void ariadne_main()
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
     CONCLOG_PRINTLN_VAR(heading);
 
-    // Set up the evaluators
-    IteratedMapEvolver evolver(heading);
-
-    Real d = 0.5_dec;
-    // Set-up initial set and time for evolution
-    RealExpressionBoundedConstraintSet initial_set={0.0_dec<=x<=0.5_dec,0.0_dec<=y<=0.5_dec,0.0_dec<=theta<=0.3926_dec,-d<=Kx<=d,-d<=Ky<=d,-d<=Kt<=d,-d<=b<=d};
-
-    // Set up the evolution parameters and grid
-    Integer evolve_time(1);
-
     Stopwatch<Milliseconds> sw;
     CONCLOG_PRINTLN("Computing evolution...");
-    SizeType num_iterations = 552*160;
 
     auto function = heading.function();
-    List<UpperBoxType> boxes;
 
     typedef BinaryWord SWord;
     typedef BinaryWord CWord;
     typedef GridTreePaving SPaving;
     typedef GridTreePaving CPaving;
 
-    FloatDP eps(0.00390625_x,DoublePrecision());
+    FloatDP eps(1e-10_x,DoublePrecision());
+
     Grid sgrid({0.5,0.5,2*pi/8});
     ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
+    sdomain_paving.mince(0);
+    auto num_state_cells = sdomain_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_state_cells)
 
-    ExactBoxType graphics_box({{-5,10},{-5,10},{0,7}});
-    Figure fig(graphics_box,0,1);
-    fig << sdomain_paving;
+    Grid cgrid({1,1,1,1});
+    ExactBoxType cdomain({{-2+eps,2-eps},{-2+eps,2-eps},{-1+eps,1-eps},{-2+eps,3-eps}});
+    CPaving cdomain_paving(cgrid);
+    cdomain_paving.adjoin_outer_approximation(cdomain,0);
+    cdomain_paving.mince(0);
+    auto num_controller_cells = cdomain_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_controller_cells)
+
+    ExactBoxType graphics_box({{-1,6},{-1,6},{-1,8}});
+    Figure fig(graphics_box,0,2);
+    fig << fill_colour(white) << sdomain_paving;
     fig.write("sdomain_paving");
 
     SPaving targets_paving;
@@ -72,12 +72,20 @@ void ariadne_main()
     Map<SWord,Map<CWord,SPaving>> forward_graph;
     Map<SWord,Map<CWord,SPaving>> backward_graph;
 
-    auto initial_box =initial_set.euclidean_set(heading.state_space()).bounding_box();
-    for (SizeType i=0; i<num_iterations; ++i) {
-        boxes.push_back(apply(function,initial_box));
+    for (auto const& state_cell : sdomain_paving) {
+        auto const& state_word = state_cell.word();
+        Map<CWord,SPaving> targets;
+        for (auto const& controller_cell : cdomain_paving) {
+            auto const& controller_word = controller_cell.word();
+            auto combined = product(state_cell.box(),controller_cell.box());
+            SPaving target_cells(sgrid);
+            target_cells.adjoin_outer_approximation(project(apply(function, combined),Range(0,3)),0);
+            targets.insert(make_pair(controller_word,target_cells));
+        }
+        forward_graph.insert(make_pair(state_word,targets));
     }
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Using Function representation of the map: " << sw.elapsed_seconds()/num_iterations << " seconds on average.");
+    CONCLOG_PRINTLN_AT(1,"Time cost of processing one cell: " << sw.elapsed_seconds()/num_state_cells/num_controller_cells << " seconds on average.");
 
 /*
     LabelledFigure fig(Axes2d(0<=x<=20,0<=y<=20));

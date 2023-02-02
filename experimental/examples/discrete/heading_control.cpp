@@ -51,11 +51,35 @@ void ariadne_main()
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
     sdomain_paving.mince(0);
-    auto num_state_cells = sdomain_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_state_cells)
+    auto num_state_domain_cells = sdomain_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_state_domain_cells)
 
-    Grid cgrid({1,1,1,1});
-    ExactBoxType cdomain({{-2+eps,2-eps},{-2+eps,2-eps},{-1+eps,1-eps},{-2+eps,3-eps}});
+    SPaving obstacle_paving(sgrid);
+    ExactBoxType obstacle1({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
+    ExactBoxType obstacle2({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
+    ExactBoxType obstacle3({{2.5_x+eps,5-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
+    ExactBoxType obstacle4({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
+    obstacle_paving.adjoin_outer_approximation(obstacle1,0);
+    obstacle_paving.adjoin_outer_approximation(obstacle2,0);
+    obstacle_paving.adjoin_outer_approximation(obstacle3,0);
+    obstacle_paving.adjoin_outer_approximation(obstacle4,0);
+    auto num_obstacle_cells = obstacle_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_obstacle_cells)
+
+    SPaving goal_paving(sgrid);
+    ExactBoxType goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
+    goal_paving.adjoin_outer_approximation(goal,0);
+    auto num_goal_cells = goal_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_goal_cells)
+
+    SPaving scandidate_paving = sdomain_paving;
+    scandidate_paving.remove(obstacle_paving);
+    scandidate_paving.remove(goal_paving);
+    auto num_state_candidate_cells = scandidate_paving.size();
+    CONCLOG_PRINTLN_VAR_AT(1,num_state_candidate_cells)
+
+    Grid cgrid({0,0,0,0.5_x},{1,1,1,1});
+    ExactBoxType cdomain({{-2+eps,2-eps},{-2+eps,2-eps},{-1+eps,1-eps},{-2.5_x+eps,2.5_x-eps}});
     CPaving cdomain_paving(cgrid);
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
@@ -63,16 +87,16 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,num_controller_cells)
 
     ExactBoxType graphics_box({{-1,6},{-1,6},{-1,8}});
-    Figure fig(graphics_box,0,2);
-    fig << fill_colour(white) << sdomain_paving;
-    fig.write("sdomain_paving");
+    Figure fig(graphics_box,0,1);
+    fig << fill_colour(white) << sdomain_paving << fill_colour(green) << goal_paving << fill_colour(blue) << obstacle_paving;
+    fig.write("heading_control");
 
     SPaving targets_paving;
     SPaving obstacles_paving;
     Map<SWord,Map<CWord,SPaving>> forward_graph;
     Map<SWord,Map<CWord,SPaving>> backward_graph;
 
-    for (auto const& state_cell : sdomain_paving) {
+    for (auto const& state_cell : scandidate_paving) {
         auto const& state_word = state_cell.word();
         Map<CWord,SPaving> targets;
         for (auto const& controller_cell : cdomain_paving) {
@@ -85,10 +109,5 @@ void ariadne_main()
         forward_graph.insert(make_pair(state_word,targets));
     }
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of processing one cell: " << sw.elapsed_seconds()/num_state_cells/num_controller_cells << " seconds on average.");
-
-/*
-    LabelledFigure fig(Axes2d(0<=x<=20,0<=y<=20));
-    fig << orbit;
-    fig.write("heading_control");*/
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing post graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/num_state_candidate_cells/num_controller_cells << ")")
 }

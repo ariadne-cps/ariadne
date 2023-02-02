@@ -50,6 +50,28 @@ void ariadne_main()
 
     auto function = heading.function();
     List<UpperBoxType> boxes;
+
+    typedef BinaryWord SWord;
+    typedef BinaryWord CWord;
+    typedef GridTreePaving SPaving;
+    typedef GridTreePaving CPaving;
+
+    FloatDP eps(0.00390625_x,DoublePrecision());
+    Grid sgrid({0.5,0.5,2*pi/8});
+    ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
+    SPaving sdomain_paving(sgrid);
+    sdomain_paving.adjoin_outer_approximation(sdomain,0);
+
+    ExactBoxType graphics_box({{-5,10},{-5,10},{0,7}});
+    Figure fig(graphics_box,0,1);
+    fig << sdomain_paving;
+    fig.write("sdomain_paving");
+
+    SPaving targets_paving;
+    SPaving obstacles_paving;
+    Map<SWord,Map<CWord,SPaving>> forward_graph;
+    Map<SWord,Map<CWord,SPaving>> backward_graph;
+
     auto initial_box =initial_set.euclidean_set(heading.state_space()).bounding_box();
     for (SizeType i=0; i<num_iterations; ++i) {
         boxes.push_back(apply(function,initial_box));

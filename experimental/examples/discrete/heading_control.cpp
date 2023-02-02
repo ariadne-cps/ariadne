@@ -28,7 +28,7 @@
 void ariadne_main()
 {
     Real deltat=0.1_dec;
-    Real v=0.5_dec;
+    Real v=3.3_dec;
     RealVariable x("x"), y("y"), theta("theta"), Kx("Kx"), Ky("Ky"), Kt("Kt"), b("b");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)=theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
@@ -39,8 +39,8 @@ void ariadne_main()
 
     auto function = heading.function();
 
-    typedef BinaryWord SWord;
-    typedef BinaryWord CWord;
+    typedef GridCell SCell;
+    typedef GridCell CCell;
     typedef GridTreePaving SPaving;
     typedef GridTreePaving CPaving;
 
@@ -78,8 +78,8 @@ void ariadne_main()
     auto num_state_candidate_cells = scandidate_paving.size();
     CONCLOG_PRINTLN_VAR_AT(1,num_state_candidate_cells)
 
-    Grid cgrid({0,0,0,0.5_x},{1,1,1,1});
-    ExactBoxType cdomain({{-2+eps,2-eps},{-2+eps,2-eps},{-1+eps,1-eps},{-2.5_x+eps,2.5_x-eps}});
+    Grid cgrid({0,0,0,0.25_x},{0.5_x,0.5_x,0.5_x,0.5_x});
+    ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-0.5_x+eps,0.5_x-eps},{-1.25_x+eps,1.25_x-eps}});
     CPaving cdomain_paving(cgrid);
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
@@ -93,21 +93,51 @@ void ariadne_main()
 
     SPaving targets_paving;
     SPaving obstacles_paving;
-    Map<SWord,Map<CWord,SPaving>> forward_graph;
-    Map<SWord,Map<CWord,SPaving>> backward_graph;
+    Map<SCell,Map<CCell,SPaving>> forward_graph;
+    Map<SCell,Map<CCell,SPaving>> backward_graph;
 
     for (auto const& state_cell : scandidate_paving) {
-        auto const& state_word = state_cell.word();
-        Map<CWord,SPaving> targets;
+        Map<CCell,SPaving> targets;
         for (auto const& controller_cell : cdomain_paving) {
-            auto const& controller_word = controller_cell.word();
             auto combined = product(state_cell.box(),controller_cell.box());
             SPaving target_cells(sgrid);
             target_cells.adjoin_outer_approximation(project(apply(function, combined),Range(0,3)),0);
-            targets.insert(make_pair(controller_word,target_cells));
+            target_cells.mince(0);
+            target_cells.restrict(sdomain_paving);
+            targets.insert(make_pair(controller_cell,target_cells));
+            for (auto const& tc : target_cells) {
+                    auto tref = backward_graph.find(tc);
+                    if (tref == backward_graph.end()) {
+                        backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
+                        tref = backward_graph.find(tc);
+                    }
+                    auto sref = tref->second.find(controller_cell);
+                    if (sref == tref->second.end()) {
+                        tref->second.insert(make_pair(controller_cell,SPaving(sgrid)));
+                        sref = tref->second.find(controller_cell);
+                    }
+                    sref->second.adjoin(state_cell);
+            }
         }
-        forward_graph.insert(make_pair(state_word,targets));
+        forward_graph.insert(make_pair(state_cell,targets));
     }
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing post graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/num_state_candidate_cells/num_controller_cells << ")")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/num_state_candidate_cells/num_controller_cells << ")")
+
+    SizeType forward_transitions_size = 0;
+    for (auto const& src : forward_graph) {
+        for (auto const& ctrl : src.second) {
+            forward_transitions_size += ctrl.second.size();
+        }
+    }
+    CONCLOG_PRINTLN_AT(1,"Forward graph transitions: " << forward_transitions_size)
+
+    SizeType backward_transitions_size = 0;
+    for (auto const& tgt : backward_graph) {
+        for (auto const& ctrl : tgt.second) {
+            backward_transitions_size += ctrl.second.size();
+        }
+    }
+    CONCLOG_PRINTLN_AT(1,"Backward graph transitions: " << backward_transitions_size)
+    CONCLOG_PRINTLN_AT(1,"Backward cells: " << backward_graph.size())
 }

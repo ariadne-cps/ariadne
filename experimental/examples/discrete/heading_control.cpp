@@ -25,6 +25,48 @@
 #include "ariadne_main.hpp"
 #include "utility/stopwatch.hpp"
 
+typedef GridCell SCell;
+typedef GridCell CCell;
+typedef GridTreePaving SPaving;
+typedef GridTreePaving CPaving;
+
+typedef Map<SCell,Map<CCell,SPaving>> DirectedGraph;
+
+std::string to_identifier(BinaryWord const& w, std::map<int,int>& hashed) {
+    int expanded_id = 0;
+    for (SizeType i=0; i<w.size(); ++i) expanded_id += (2<<i)*w.at(i);
+
+    auto ref = hashed.find(expanded_id);
+    int result = hashed.size();
+    if (ref != hashed.end()) result = ref->second;
+    else hashed.insert(make_pair(expanded_id,hashed.size()));
+
+    return std::to_string(result);
+}
+
+void print_directed_graph(DirectedGraph const& g) {
+
+    std::stringstream sstr;
+    sstr << "{";
+
+    std::map<int,int> hashed_space, hashed_controller;
+
+    for (auto const& src : g) {
+        sstr << to_identifier(src.first.word(),hashed_space) << ":[";
+        for (auto const& ctrl : src.second) {
+            sstr << to_identifier(ctrl.first.word(),hashed_controller) << "->(";
+            for (auto const& tgt : ctrl.second) {
+                sstr << to_identifier(tgt.word(),hashed_space) << ",";
+            }
+            sstr << "),";
+        }
+        sstr << "],";
+    }
+    sstr << "}";
+
+    CONCLOG_PRINTLN_AT(1,sstr.str())
+}
+
 void ariadne_main()
 {
     Real deltat=0.1_dec;
@@ -33,19 +75,15 @@ void ariadne_main()
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)=theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
 
-    auto function = heading.function().zeros(3,7);
+    auto dynamics = heading.function().zeros(3,7);
     for (SizeType i=0; i<3; ++i)
-        function[i] = heading.function().get(i);
-    CONCLOG_PRINTLN_VAR(function);
-
-    typedef GridCell SCell;
-    typedef GridCell CCell;
-    typedef GridTreePaving SPaving;
-    typedef GridTreePaving CPaving;
+        dynamics[i] = heading.function().get(i);
+    CONCLOG_PRINTLN_VAR(dynamics);
 
     FloatDP eps(1e-10_x,DoublePrecision());
 
     Grid sgrid({0.5,0.5,2*pi/8});
+    //Grid sgrid({1,1,2*pi});
     ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
@@ -78,6 +116,7 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,num_state_candidate_cells)
 
     Grid cgrid({0,0,0,0.25_x},{0.5_x,0.5_x,0.5_x,0.5_x});
+    //Grid cgrid({0,0,0,0.25_x},{2,2,1,2});
     ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-0.5_x+eps,0.5_x-eps},{-1.25_x+eps,1.25_x-eps}});
     CPaving cdomain_paving(cgrid);
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
@@ -92,8 +131,8 @@ void ariadne_main()
 
     SPaving targets_paving;
     SPaving obstacles_paving;
-    Map<SCell,Map<CCell,SPaving>> forward_graph;
-    Map<SCell,Map<CCell,SPaving>> backward_graph;
+    DirectedGraph forward_graph;
+    DirectedGraph backward_graph;
 
     Stopwatch<Milliseconds> sw;
 
@@ -102,7 +141,7 @@ void ariadne_main()
         for (auto const& controller_cell : cdomain_paving) {
             auto combined = product(state_cell.box(),controller_cell.box());
             SPaving target_cells(sgrid);
-            target_cells.adjoin_outer_approximation(apply(function, combined),0);
+            target_cells.adjoin_outer_approximation(apply(dynamics, combined),0);
             target_cells.mince(0);
             target_cells.restrict(sdomain_paving);
             targets.insert(make_pair(controller_cell,target_cells));
@@ -131,7 +170,7 @@ void ariadne_main()
             forward_transitions_size += ctrl.second.size();
         }
     }
-    CONCLOG_PRINTLN_AT(1,"Forward graph transitions: " << forward_transitions_size)
+    CONCLOG_PRINTLN_AT(1,"Graph transitions: " << forward_transitions_size)
 
     SizeType backward_transitions_size = 0;
     for (auto const& tgt : backward_graph) {
@@ -139,6 +178,9 @@ void ariadne_main()
             backward_transitions_size += ctrl.second.size();
         }
     }
-    CONCLOG_PRINTLN_AT(1,"Backward graph transitions: " << backward_transitions_size)
-    CONCLOG_PRINTLN_AT(1,"Backward cells: " << backward_graph.size())
+    CONCLOG_PRINTLN_AT(1,"Backward starting cells: " << backward_graph.size())
+
+    ARIADNE_ASSERT_EQUAL(forward_transitions_size,backward_transitions_size)
+
+    print_directed_graph(forward_graph);
 }

@@ -32,12 +32,11 @@ void ariadne_main()
     RealVariable x("x"), y("y"), theta("theta"), Kx("Kx"), Ky("Ky"), Kt("Kt"), b("b");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)=theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
-    CONCLOG_PRINTLN_VAR(heading);
 
-    Stopwatch<Milliseconds> sw;
-    CONCLOG_PRINTLN("Computing evolution...");
-
-    auto function = heading.function();
+    auto function = heading.function().zeros(3,7);
+    for (SizeType i=0; i<3; ++i)
+        function[i] = heading.function().get(i);
+    CONCLOG_PRINTLN_VAR(function);
 
     typedef GridCell SCell;
     typedef GridCell CCell;
@@ -96,27 +95,29 @@ void ariadne_main()
     Map<SCell,Map<CCell,SPaving>> forward_graph;
     Map<SCell,Map<CCell,SPaving>> backward_graph;
 
+    Stopwatch<Milliseconds> sw;
+
     for (auto const& state_cell : scandidate_paving) {
         Map<CCell,SPaving> targets;
         for (auto const& controller_cell : cdomain_paving) {
             auto combined = product(state_cell.box(),controller_cell.box());
             SPaving target_cells(sgrid);
-            target_cells.adjoin_outer_approximation(project(apply(function, combined),Range(0,3)),0);
+            target_cells.adjoin_outer_approximation(apply(function, combined),0);
             target_cells.mince(0);
             target_cells.restrict(sdomain_paving);
             targets.insert(make_pair(controller_cell,target_cells));
             for (auto const& tc : target_cells) {
-                    auto tref = backward_graph.find(tc);
-                    if (tref == backward_graph.end()) {
-                        backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
-                        tref = backward_graph.find(tc);
-                    }
-                    auto sref = tref->second.find(controller_cell);
-                    if (sref == tref->second.end()) {
-                        tref->second.insert(make_pair(controller_cell,SPaving(sgrid)));
-                        sref = tref->second.find(controller_cell);
-                    }
-                    sref->second.adjoin(state_cell);
+                auto tref = backward_graph.find(tc);
+                if (tref == backward_graph.end()) {
+                    backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
+                    tref = backward_graph.find(tc);
+                }
+                auto sref = tref->second.find(controller_cell);
+                if (sref == tref->second.end()) {
+                    tref->second.insert(make_pair(controller_cell,SPaving(sgrid)));
+                    sref = tref->second.find(controller_cell);
+                }
+                sref->second.adjoin(state_cell);
             }
         }
         forward_graph.insert(make_pair(state_cell,targets));

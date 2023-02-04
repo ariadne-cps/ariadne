@@ -44,12 +44,10 @@ std::string to_identifier(BinaryWord const& w, std::map<int,int>& hashed) {
     return std::to_string(result);
 }
 
-void print_directed_graph(DirectedGraph const& g) {
+void print_directed_graph(DirectedGraph const& g, std::map<int,int>& hashed_space, std::map<int,int>& hashed_controller) {
 
     std::stringstream sstr;
-    sstr << "{";
-
-    std::map<int,int> hashed_space, hashed_controller;
+    sstr << "{\n";
 
     for (auto const& src : g) {
         sstr << to_identifier(src.first.word(),hashed_space) << ":[";
@@ -58,9 +56,11 @@ void print_directed_graph(DirectedGraph const& g) {
             for (auto const& tgt : ctrl.second) {
                 sstr << to_identifier(tgt.word(),hashed_space) << ",";
             }
+            sstr.seekp(-1, std::ios_base::end);
             sstr << "),";
         }
-        sstr << "],";
+        sstr.seekp(-1, std::ios_base::end);
+        sstr << "]\n";
     }
     sstr << "}";
 
@@ -72,7 +72,7 @@ void ariadne_main()
     Real deltat=0.1_dec;
     Real v=3.3_dec;
     RealVariable x("x"), y("y"), theta("theta"), Kx("Kx"), Ky("Ky"), Kt("Kt"), b("b");
-    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)=theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
+    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
 
     auto dynamics = heading.function().zeros(3,7);
@@ -83,7 +83,6 @@ void ariadne_main()
     FloatDP eps(1e-10_x,DoublePrecision());
 
     Grid sgrid({0.5,0.5,2*pi/8});
-    //Grid sgrid({1,1,2*pi});
     ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
@@ -93,12 +92,12 @@ void ariadne_main()
 
     SPaving obstacle_paving(sgrid);
     ExactBoxType obstacle1({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
-    ExactBoxType obstacle2({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
-    ExactBoxType obstacle3({{2.5_x+eps,5-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
-    ExactBoxType obstacle4({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
     obstacle_paving.adjoin_outer_approximation(obstacle1,0);
+    ExactBoxType obstacle2({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
     obstacle_paving.adjoin_outer_approximation(obstacle2,0);
+    ExactBoxType obstacle3({{2.5_x+eps,5-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
     obstacle_paving.adjoin_outer_approximation(obstacle3,0);
+    ExactBoxType obstacle4({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
     obstacle_paving.adjoin_outer_approximation(obstacle4,0);
     auto num_obstacle_cells = obstacle_paving.size();
     CONCLOG_PRINTLN_VAR_AT(1,num_obstacle_cells)
@@ -115,9 +114,8 @@ void ariadne_main()
     auto num_state_candidate_cells = scandidate_paving.size();
     CONCLOG_PRINTLN_VAR_AT(1,num_state_candidate_cells)
 
-    Grid cgrid({0,0,0,0.25_x},{0.5_x,0.5_x,0.5_x,0.5_x});
-    //Grid cgrid({0,0,0,0.25_x},{2,2,1,2});
-    ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-0.5_x+eps,0.5_x-eps},{-1.25_x+eps,1.25_x-eps}});
+    Grid cgrid({0,0,0,0},{1.0_x,1.0_x,1.0_x,1.0_x});
+    ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-1+eps,1-eps},{-10+eps,10-eps}});
     CPaving cdomain_paving(cgrid);
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
@@ -144,7 +142,8 @@ void ariadne_main()
             target_cells.adjoin_outer_approximation(apply(dynamics, combined),0);
             target_cells.mince(0);
             target_cells.restrict(sdomain_paving);
-            targets.insert(make_pair(controller_cell,target_cells));
+            if (not target_cells.is_empty())
+                targets.insert(make_pair(controller_cell,target_cells));
             for (auto const& tc : target_cells) {
                 auto tref = backward_graph.find(tc);
                 if (tref == backward_graph.end()) {
@@ -182,5 +181,64 @@ void ariadne_main()
 
     ARIADNE_ASSERT_EQUAL(forward_transitions_size,backward_transitions_size)
 
-    print_directed_graph(forward_graph);
+    /*
+    std::map<int,int> hashed_space, hashed_controller;
+
+    CONCLOG_PRINTLN_AT(1,"Initial forward graph:")
+    print_directed_graph(forward_graph,hashed_space,hashed_controller);
+
+    CONCLOG_PRINTLN_AT(1,"Backward graph:")
+    print_directed_graph(backward_graph,hashed_space,hashed_controller);
+
+    {
+    std::stringstream ss;
+    for (auto const& g : goal_paving) ss << to_identifier(g.word(),hashed_space) << " ";
+    CONCLOG_PRINTLN_AT(1,"Goal: " << ss.str())
+    }
+    {
+    std::stringstream ss;
+    for (auto const& o : obstacle_paving) ss << to_identifier(o.word(),hashed_space) << " ";
+    CONCLOG_PRINTLN_AT(1,"Obstacle: " << ss.str())
+    }
+    */
+
+    sw.restart();
+
+    std::deque<SCell> unsafe;
+    for (auto const& c : obstacle_paving) unsafe.push_back(c);
+
+    while(not unsafe.empty()) {
+        auto const& u = unsafe.front();
+        //CONCLOG_PRINTLN_AT(1,"Checking unsafe cell " << to_identifier(u.word(),hashed_space))
+        auto const& bref = backward_graph.find(u);
+        if (bref != backward_graph.end()) {
+            for (auto const& trans : bref->second) {
+                //CONCLOG_PRINTLN_AT(2,"Going to prune sources having control " << to_identifier(trans.first.word(),hashed_controller))
+                for (auto const& src : trans.second) {
+                    auto const& fref = forward_graph.find(src);
+                    //CONCLOG_PRINTLN_AT(3,"Checking source " << to_identifier(src.word(),hashed_space))
+                    if (fref != forward_graph.end()) {
+                        fref->second.erase(trans.first);
+                        //CONCLOG_PRINTLN_AT(3,"Erased control from source")
+                        if (fref->second.empty()) {
+                            //CONCLOG_PRINTLN_AT(3,"Cell is now empty, removing it")
+                            unsafe.push_back(src);
+                            forward_graph.erase(src);
+                        }
+                    } else {
+                        //CONCLOG_PRINTLN_AT(3,"Source cell is not present in the forward graph, skipping")
+                    }
+                }
+            }
+        }
+        unsafe.pop_front();
+    }
+
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
+
+    CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << forward_graph.size())
+
+    //CONCLOG_PRINTLN_AT(1,"Safe forward graph:")
+    //print_directed_graph(forward_graph,hashed_space,hashed_controller);
 }

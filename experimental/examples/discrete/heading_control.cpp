@@ -82,7 +82,7 @@ void ariadne_main()
 
     FloatDP eps(1e-10_x,DoublePrecision());
 
-    Grid sgrid({0.5,0.5,2*pi/8});
+    Grid sgrid({0,0,eps.get_d()/2},{0.5,0.5,2*pi/8});
     ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);

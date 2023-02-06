@@ -209,24 +209,17 @@ void ariadne_main()
 
     while(not unsafe.empty()) {
         auto const& u = unsafe.front();
-        //CONCLOG_PRINTLN_AT(1,"Checking unsafe cell " << to_identifier(u.word(),hashed_space))
         auto const& bref = backward_graph.find(u);
         if (bref != backward_graph.end()) {
             for (auto const& trans : bref->second) {
-                //CONCLOG_PRINTLN_AT(2,"Going to prune sources having control " << to_identifier(trans.first.word(),hashed_controller))
                 for (auto const& src : trans.second) {
                     auto const& fref = forward_graph.find(src);
-                    //CONCLOG_PRINTLN_AT(3,"Checking source " << to_identifier(src.word(),hashed_space))
                     if (fref != forward_graph.end()) {
                         fref->second.erase(trans.first);
-                        //CONCLOG_PRINTLN_AT(3,"Erased control from source")
                         if (fref->second.empty()) {
-                            //CONCLOG_PRINTLN_AT(3,"Cell is now empty, removing it")
                             unsafe.push_back(src);
                             forward_graph.erase(src);
                         }
-                    } else {
-                        //CONCLOG_PRINTLN_AT(3,"Source cell is not present in the forward graph, skipping")
                     }
                 }
             }

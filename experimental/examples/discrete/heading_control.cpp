@@ -124,7 +124,7 @@ void ariadne_main()
 
     ExactBoxType graphics_box({{-1,6},{-1,6},{-1,8}});
     Figure fig(graphics_box,0,1);
-    fig << fill_colour(white) << sdomain_paving << fill_colour(green) << goal_paving << fill_colour(blue) << obstacle_paving;
+    fig << fill_colour(white) << sdomain_paving << fill_colour(blue) << goal_paving << fill_colour(red) << obstacle_paving;
     fig.write("heading_control");
 
     SPaving targets_paving;
@@ -234,4 +234,9 @@ void ariadne_main()
 
     //CONCLOG_PRINTLN_AT(1,"Safe forward graph:")
     //print_directed_graph(forward_graph,hashed_space,hashed_controller);
+
+    SPaving safe_paving(sgrid);
+    for (auto const& s : forward_graph) safe_paving.adjoin(s.first);
+    fig << fill_colour(green) << safe_paving;
+    fig.write("heading_control_safe");
 }

@@ -32,31 +32,30 @@ typedef GridTreePaving CPaving;
 
 typedef Map<SCell,Map<CCell,SPaving>> DirectedGraph;
 
-std::string to_identifier(BinaryWord const& w, std::map<int,int>& hashed) {
-    int expanded_id = 0;
-    for (SizeType i=0; i<w.size(); ++i) expanded_id += (2<<i)*w.at(i);
-
-    auto ref = hashed.find(expanded_id);
-    int result = hashed.size();
-    if (ref != hashed.end()) result = ref->second;
-    else hashed.insert(make_pair(expanded_id,hashed.size()));
-
-    return std::to_string(result);
+SizeType word_to_id(BinaryWord const& w) {
+    SizeType result = 0;
+    for (SizeType i=0; i<w.size(); ++i) result += static_cast<SizeType>((2<<i)*w.at(i));
+    return result;
 }
 
-void print_directed_graph(DirectedGraph const& g,  std::map<int,int>& hashed_space, std::map<int,int>& hashed_controller, bool show_boxes = false) {
+std::string to_identifier(GridCell const& cell, std::map<SizeType,SizeType> const& hashed) {
+    SizeType expanded_id = word_to_id(cell.word());
+    return to_string(hashed.at(expanded_id));
+}
+
+void print_directed_graph(DirectedGraph const& g, std::map<SizeType,SizeType> const& hashed_space, std::map<SizeType,SizeType> const& hashed_controller, bool show_boxes = false) {
 
     std::stringstream sstr;
     sstr << "{\n";
 
     for (auto const& src : g) {
-        sstr << to_identifier(src.first.word(),hashed_space);
+        sstr << to_identifier(src.first,hashed_space);
         if (show_boxes) sstr << src.first.box();
         sstr << ":[";
         for (auto const& ctrl : src.second) {
-            sstr << to_identifier(ctrl.first.word(),hashed_controller) << "->(";
+            sstr << to_identifier(ctrl.first,hashed_controller) << "->(";
             for (auto const& tgt : ctrl.second) {
-                sstr << to_identifier(tgt.word(),hashed_space) << ",";
+                sstr << to_identifier(tgt,hashed_space) << ",";
             }
             sstr.seekp(-1, std::ios_base::end);
             sstr << "),";
@@ -68,6 +67,194 @@ void print_directed_graph(DirectedGraph const& g,  std::map<int,int>& hashed_spa
 
     CONCLOG_PRINTLN_AT(1,sstr.str())
 }
+
+class ReachAvoidGridding {
+  public:
+    ReachAvoidGridding(EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
+        _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving), _unverified(state_paving),
+        _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
+        for (auto const& c : state_paving)
+            _state_ids.insert(make_pair(word_to_id(c.word()),_state_ids.size()));
+        for (auto const& c : controller_paving)
+            _controller_ids.insert(make_pair(word_to_id(c.word()),_controller_ids.size()));
+    }
+
+    ReachAvoidGridding& add_obstacle(ExactBoxType const& box) {
+        SPaving obstacle_paving(_state_paving.grid());
+        obstacle_paving.adjoin_outer_approximation(box,0);
+        obstacle_paving.restrict(_state_paving);
+        _unverified.remove(obstacle_paving);
+        _obstacles.adjoin(obstacle_paving);
+        return *this;
+    }
+
+    ReachAvoidGridding& add_goal(ExactBoxType const& box) {
+        SPaving goal_paving(_state_paving.grid());
+        goal_paving.adjoin_outer_approximation(box,0);
+        goal_paving.restrict(_state_paving);
+        _unverified.remove(goal_paving);
+        _goals.adjoin(goal_paving);
+        return *this;
+    }
+
+    SizeType state_size() const { return _state_paving.size(); }
+    SizeType controller_size() const { return _controller_paving.size(); }
+    SizeType obstacles_size() const { return _obstacles.size(); }
+    SizeType goals_size() const { return _goals.size(); }
+    SizeType unverified_size() const { return _unverified.size(); }
+    SizeType forward_sources_size() const { return _forward_graph.size(); }
+
+    void plot(ExactBoxType const& graphics_box, SizeType xaxis, SizeType yaxis) {
+        Figure fig(graphics_box,xaxis,yaxis);
+
+        SPaving safe = _state_paving;
+        safe.remove(_obstacles);
+        safe.remove(_goals);
+        safe.remove(_unverified);
+        CONCLOG_PRINTLN_AT(2,"Safe: " << safe.size())
+        fig << fill_colour(white) << _state_paving << fill_colour(green) << _goals << fill_colour(blue) << _obstacles << fill_colour(yellow) << safe;
+        fig.write("state_grid");
+    }
+
+    void print_goals() const {
+        std::stringstream ss;
+        for (auto const& g : _goals) ss << to_identifier(g,_state_ids) << " ";
+        CONCLOG_PRINTLN_AT(2,"Goals: " << ss.str())
+    }
+
+    void print_obstacles() const {
+        std::stringstream ss;
+        for (auto const& o : _obstacles) ss << to_identifier(o,_state_ids) << " ";
+        CONCLOG_PRINTLN_AT(2,"Obstacles: " << ss.str())
+    }
+
+    void print_forward_graph(bool show_boxes = false) const {
+        print_directed_graph(_forward_graph,_state_ids,_controller_ids, show_boxes);
+    }
+
+    void print_backward_graph(bool show_boxes = false) const {
+        print_directed_graph(_backward_graph,_state_ids,_controller_ids, show_boxes);
+    }
+
+    void reconstruct_reachability_graph() {
+        CONCLOG_SCOPE_CREATE
+
+        _forward_graph.clear();
+        _backward_graph.clear();
+
+        Stopwatch<Milliseconds> sw;
+
+        ProgressIndicator indicator(_unverified.size());
+        double indicator_value = 0;
+        for (auto const& state_cell : _unverified) {
+            CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+            Map<CCell,SPaving> targets;
+            for (auto const& controller_cell : _controller_paving) {
+                auto combined = product(state_cell.box(),controller_cell.box());
+                SPaving target_cells(_state_paving.grid());
+                target_cells.adjoin_outer_approximation(apply(_dynamics, combined),0);
+                target_cells.mince(0);
+                target_cells.restrict(_state_paving);
+                if (not target_cells.is_empty())
+                    targets.insert(make_pair(controller_cell,target_cells));
+                for (auto const& tc : target_cells) {
+                    auto tref = _backward_graph.find(tc);
+                    if (tref == _backward_graph.end()) {
+                        _backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
+                        tref = _backward_graph.find(tc);
+                    }
+                    auto sref = tref->second.find(controller_cell);
+                    if (sref == tref->second.end()) {
+                        tref->second.insert(make_pair(controller_cell,SPaving(_state_paving.grid())));
+                        sref = tref->second.find(controller_cell);
+                    }
+                    sref->second.adjoin(state_cell);
+                }
+            }
+            _forward_graph.insert(make_pair(state_cell,targets));
+            indicator.update_current(++indicator_value);
+        }
+        sw.click();
+        CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/_unverified.size()/_controller_paving.size() << ")")
+    }
+
+    void compute_safe_forward_graph() {
+        CONCLOG_SCOPE_CREATE
+
+        Stopwatch<Milliseconds> sw;
+
+        std::deque<SCell> unsafe;
+        for (auto const& c : _obstacles) unsafe.push_back(c);
+
+        double indicator_final_original = unsafe.size();
+        double indicator_current_value = 0;
+        ProgressIndicator indicator(indicator_final_original);
+        while(not unsafe.empty()) {
+            CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+            auto const& u = unsafe.front();
+            auto const& bref = _backward_graph.find(u);
+            if (bref != _backward_graph.end()) {
+                for (auto const& trans : bref->second) {
+                    for (auto const& src : trans.second) {
+                        auto const& fref = _forward_graph.find(src);
+                        if (fref != _forward_graph.end()) {
+                            fref->second.erase(trans.first);
+                            if (fref->second.empty()) {
+                                unsafe.push_back(src);
+                                indicator.update_final(++indicator_final_original);
+                                _forward_graph.erase(src);
+                            }
+                        }
+                    }
+                }
+            }
+            unsafe.pop_front();
+            indicator.update_current(++indicator_current_value);
+        }
+        sw.click();
+        CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
+
+        for (auto const& entry : _forward_graph)
+            _unverified.remove(entry.first);
+    }
+
+    SizeType forward_transitions() const {
+        SizeType result = 0;
+        for (auto const& src : _forward_graph) {
+            for (auto const& ctrl : src.second) {
+                result += ctrl.second.size();
+            }
+        }
+        return result;
+    }
+
+    SizeType backward_transitions() const {
+        SizeType result = 0;
+        for (auto const& tgt : _backward_graph) {
+            for (auto const& ctrl : tgt.second) {
+                result += ctrl.second.size();
+            }
+        }
+        return result;
+    }
+
+  private:
+
+    EffectiveVectorMultivariateFunction const _dynamics;
+
+    SPaving const _state_paving;
+    CPaving const _controller_paving;
+
+    SPaving _unverified;
+
+    SPaving _obstacles;
+    SPaving _goals;
+
+    std::map<SizeType,SizeType> _state_ids, _controller_ids;
+
+    DirectedGraph _forward_graph;
+    DirectedGraph _backward_graph;
+};
 
 void ariadne_main()
 {
@@ -89,156 +276,48 @@ void ariadne_main()
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
     sdomain_paving.mince(0);
-    auto num_state_domain_cells = sdomain_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_state_domain_cells)
-
-    SPaving obstacle_paving(sgrid);
-    ExactBoxType obstacle1({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
-    obstacle_paving.adjoin_outer_approximation(obstacle1,0);
-    ExactBoxType obstacle2({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
-    obstacle_paving.adjoin_outer_approximation(obstacle2,0);
-    ExactBoxType obstacle3({{2.5_x+eps,5-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
-    obstacle_paving.adjoin_outer_approximation(obstacle3,0);
-    ExactBoxType obstacle4({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
-    obstacle_paving.adjoin_outer_approximation(obstacle4,0);
-    auto num_obstacle_cells = obstacle_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_obstacle_cells)
-
-    SPaving goal_paving(sgrid);
-    ExactBoxType goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
-    goal_paving.adjoin_outer_approximation(goal,0);
-    auto num_goal_cells = goal_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_goal_cells)
-
-    SPaving scandidate_paving = sdomain_paving;
-    scandidate_paving.remove(obstacle_paving);
-    scandidate_paving.remove(goal_paving);
-    auto num_state_candidate_cells = scandidate_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_state_candidate_cells)
 
     Grid cgrid({0,0,0,0},{1.0_x,1.0_x,1.0_x,1.0_x});
     ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-1+eps,1-eps},{-10+eps,10-eps}});
     CPaving cdomain_paving(cgrid);
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
-    auto num_controller_cells = cdomain_paving.size();
-    CONCLOG_PRINTLN_VAR_AT(1,num_controller_cells)
 
-    ExactBoxType graphics_box({{-1,6},{-1,6},{-1,8}});
-    Figure fig(graphics_box,0,1);
-    fig << fill_colour(white) << sdomain_paving << fill_colour(blue) << goal_paving << fill_colour(red) << obstacle_paving;
-    fig.write("heading_control");
+    ReachAvoidGridding scs(dynamics,sdomain_paving, cdomain_paving);
+    CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
+    CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())
 
-    SPaving targets_paving;
-    SPaving obstacles_paving;
-    DirectedGraph forward_graph;
-    DirectedGraph backward_graph;
+    scs.add_obstacle({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
+    scs.add_obstacle({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
+    scs.add_obstacle({{2.5_x+eps,5-eps},{2.0_x+eps,3-eps},{0+eps,2*pi-eps}});
+    scs.add_obstacle({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
+    scs.print_obstacles();
+    CONCLOG_PRINTLN_VAR_AT(1,scs.obstacles_size())
 
-    Stopwatch<Milliseconds> sw;
+    scs.add_goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
+    scs.print_goals();
+    CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
 
-    for (auto const& state_cell : scandidate_paving) {
-        Map<CCell,SPaving> targets;
-        for (auto const& controller_cell : cdomain_paving) {
-            auto combined = product(state_cell.box(),controller_cell.box());
-            SPaving target_cells(sgrid);
-            target_cells.adjoin_outer_approximation(apply(dynamics, combined),0);
-            target_cells.mince(0);
-            target_cells.restrict(sdomain_paving);
-            if (not target_cells.is_empty())
-                targets.insert(make_pair(controller_cell,target_cells));
-            for (auto const& tc : target_cells) {
-                auto tref = backward_graph.find(tc);
-                if (tref == backward_graph.end()) {
-                    backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
-                    tref = backward_graph.find(tc);
-                }
-                auto sref = tref->second.find(controller_cell);
-                if (sref == tref->second.end()) {
-                    tref->second.insert(make_pair(controller_cell,SPaving(sgrid)));
-                    sref = tref->second.find(controller_cell);
-                }
-                sref->second.adjoin(state_cell);
-            }
-        }
-        forward_graph.insert(make_pair(state_cell,targets));
-    }
-    sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/num_state_candidate_cells/num_controller_cells << ")")
+    CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
-    SizeType forward_transitions_size = 0;
-    for (auto const& src : forward_graph) {
-        for (auto const& ctrl : src.second) {
-            forward_transitions_size += ctrl.second.size();
-        }
-    }
-    CONCLOG_PRINTLN_AT(1,"Graph transitions: " << forward_transitions_size)
+    scs.reconstruct_reachability_graph();
 
-    SizeType backward_transitions_size = 0;
-    for (auto const& tgt : backward_graph) {
-        for (auto const& ctrl : tgt.second) {
-            backward_transitions_size += ctrl.second.size();
-        }
-    }
-    CONCLOG_PRINTLN_AT(1,"Backward starting cells: " << backward_graph.size())
-
-    ARIADNE_ASSERT_EQUAL(forward_transitions_size,backward_transitions_size)
-
-    std::map<int,int> hashed_space, hashed_controller;
-
-    {
-        std::stringstream ss;
-        for (auto const& g : goal_paving) ss << to_identifier(g.word(),hashed_space) << " ";
-        CONCLOG_PRINTLN_AT(1,"Goal: " << ss.str())
-    }
-    {
-        std::stringstream ss;
-        for (auto const& o : obstacle_paving) ss << to_identifier(o.word(),hashed_space) << " ";
-        CONCLOG_PRINTLN_AT(1,"Obstacle: " << ss.str())
-    }
-
-    /*
+    CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
+/*
     CONCLOG_PRINTLN_AT(1,"Initial forward graph:")
-    print_directed_graph(forward_graph,hashed_space,hashed_controller);
-
+    scs.print_forward_graph();
     CONCLOG_PRINTLN_AT(1,"Backward graph:")
-    print_directed_graph(backward_graph,hashed_space,hashed_controller);
-    */
+    scs.print_backward_graph();
+*/
+    scs.compute_safe_forward_graph();
 
-    sw.restart();
+    CONCLOG_PRINTLN_AT(1,"Safe abstract states #: " << scs.forward_sources_size())
 
-    std::deque<SCell> unsafe;
-    for (auto const& c : obstacle_paving) unsafe.push_back(c);
+    CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
-    while(not unsafe.empty()) {
-        auto const& u = unsafe.front();
-        auto const& bref = backward_graph.find(u);
-        if (bref != backward_graph.end()) {
-            for (auto const& trans : bref->second) {
-                for (auto const& src : trans.second) {
-                    auto const& fref = forward_graph.find(src);
-                    if (fref != forward_graph.end()) {
-                        fref->second.erase(trans.first);
-                        if (fref->second.empty()) {
-                            unsafe.push_back(src);
-                            forward_graph.erase(src);
-                        }
-                    }
-                }
-            }
-        }
-        unsafe.pop_front();
-    }
+    scs.plot({{-1,6},{-1,6},{-1,8}},0,1);
 
-    sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
-
-    CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << forward_graph.size())
-
-    CONCLOG_PRINTLN_AT(1,"Safe forward graph:")
-    print_directed_graph(forward_graph,hashed_space,hashed_controller,true);
-
-    SPaving safe_paving(sgrid);
-    for (auto const& s : forward_graph) safe_paving.adjoin(s.first);
-    fig << fill_colour(green) << safe_paving;
-    fig.write("heading_control_safe");
+    //CONCLOG_PRINTLN_AT(2,"Safe forward graph:")
+    //CONCLOG_RUN_AT(1,scs.print_forward_graph(true))
 }

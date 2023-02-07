@@ -44,13 +44,15 @@ std::string to_identifier(BinaryWord const& w, std::map<int,int>& hashed) {
     return std::to_string(result);
 }
 
-void print_directed_graph(DirectedGraph const& g, std::map<int,int>& hashed_space, std::map<int,int>& hashed_controller) {
+void print_directed_graph(DirectedGraph const& g,  std::map<int,int>& hashed_space, std::map<int,int>& hashed_controller, bool show_boxes = false) {
 
     std::stringstream sstr;
     sstr << "{\n";
 
     for (auto const& src : g) {
-        sstr << to_identifier(src.first.word(),hashed_space) << ":[";
+        sstr << to_identifier(src.first.word(),hashed_space);
+        if (show_boxes) sstr << src.first.box();
+        sstr << ":[";
         for (auto const& ctrl : src.second) {
             sstr << to_identifier(ctrl.first.word(),hashed_controller) << "->(";
             for (auto const& tgt : ctrl.second) {
@@ -181,25 +183,25 @@ void ariadne_main()
 
     ARIADNE_ASSERT_EQUAL(forward_transitions_size,backward_transitions_size)
 
-    /*
     std::map<int,int> hashed_space, hashed_controller;
 
+    {
+        std::stringstream ss;
+        for (auto const& g : goal_paving) ss << to_identifier(g.word(),hashed_space) << " ";
+        CONCLOG_PRINTLN_AT(1,"Goal: " << ss.str())
+    }
+    {
+        std::stringstream ss;
+        for (auto const& o : obstacle_paving) ss << to_identifier(o.word(),hashed_space) << " ";
+        CONCLOG_PRINTLN_AT(1,"Obstacle: " << ss.str())
+    }
+
+    /*
     CONCLOG_PRINTLN_AT(1,"Initial forward graph:")
     print_directed_graph(forward_graph,hashed_space,hashed_controller);
 
     CONCLOG_PRINTLN_AT(1,"Backward graph:")
     print_directed_graph(backward_graph,hashed_space,hashed_controller);
-
-    {
-    std::stringstream ss;
-    for (auto const& g : goal_paving) ss << to_identifier(g.word(),hashed_space) << " ";
-    CONCLOG_PRINTLN_AT(1,"Goal: " << ss.str())
-    }
-    {
-    std::stringstream ss;
-    for (auto const& o : obstacle_paving) ss << to_identifier(o.word(),hashed_space) << " ";
-    CONCLOG_PRINTLN_AT(1,"Obstacle: " << ss.str())
-    }
     */
 
     sw.restart();
@@ -232,8 +234,8 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << forward_graph.size())
 
-    //CONCLOG_PRINTLN_AT(1,"Safe forward graph:")
-    //print_directed_graph(forward_graph,hashed_space,hashed_controller);
+    CONCLOG_PRINTLN_AT(1,"Safe forward graph:")
+    print_directed_graph(forward_graph,hashed_space,hashed_controller,true);
 
     SPaving safe_paving(sgrid);
     for (auto const& s : forward_graph) safe_paving.adjoin(s.first);

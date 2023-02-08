@@ -30,44 +30,117 @@ typedef GridCell CCell;
 typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
 
-typedef Map<SCell,Map<CCell,SPaving>> DirectedGraph;
+template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
 
-SizeType word_to_id(BinaryWord const& w, SizeType size) {
-    SizeType result = 0;
-    for (SizeType i=0; i<size; ++i) result += static_cast<SizeType>((2<<i)*w.at(i));
-    return result;
+String word_to_id(BinaryWord const& w, SizeType size) {
+    std::stringstream ss;
+    for (SizeType i=0; i<size; ++i) ss << to_string(w.at(i));
+    return ss.str();
 }
 
-std::string to_identifier(GridCell const& cell, SizeType default_extent, std::map<SizeType,SizeType> const& hashed) {
+SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<String,SizeType> const& hashed) {
     SizeType size_to_use = cell.word().size() - (cell.root_extent() - default_extent)*cell.dimension();
-    SizeType expanded_id = word_to_id(cell.word(),size_to_use);
-    return to_string(hashed.at(expanded_id));
+    String expanded_id = word_to_id(cell.word(),size_to_use);
+    return hashed.at(expanded_id);
 }
 
-void print_directed_graph(DirectedGraph const& g, SizeType default_extent, std::map<SizeType,SizeType> const& hashed_space, std::map<SizeType,SizeType> const& hashed_controller, bool show_boxes = false) {
+class DirectedHashedGraph {
+  public:
+    typedef SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>::iterator Iterator;
+  public:
+    DirectedHashedGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) : _hashed_space(hashed_space), _hashed_controller(hashed_controller),
+                        _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
 
-    std::stringstream sstr;
-    sstr << "{\n";
+    SizeType sources_size() const { return _graph.size(); }
 
-    for (auto const& src : g) {
-        sstr << to_identifier(src.first,default_extent,hashed_space);
-        if (show_boxes) sstr << src.first.box();
-        sstr << ":[";
-        for (auto const& ctrl : src.second) {
-            sstr << to_identifier(ctrl.first,default_extent,hashed_controller) << "->(";
-            for (auto const& tgt : ctrl.second) {
-                sstr << to_identifier(tgt,default_extent,hashed_space) << ",";
+    SizeType transitions_size() const {
+        SizeType result = 0;
+        for (auto const& src : _graph) {
+            for (auto const& ctrl : src.second.second) {
+                result += ctrl.second.second.size();
             }
-            sstr.seekp(-1, std::ios_base::end);
-            sstr << "),";
         }
-        sstr.seekp(-1, std::ios_base::end);
-        sstr << "]\n";
+        return result;
     }
-    sstr << "}";
 
-    CONCLOG_PRINTLN_AT(1,sstr.str())
-}
+    //! \brief Insert a forward entry from \a source_cell using \a controller_cell with associated \a target_cells
+    void insert_forward(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
+        auto ctrl_id = to_identifier(controller_cell,_default_controller_extent,_hashed_controller);
+        auto src_id = to_identifier(source_cell,_default_space_extent,_hashed_space);
+        auto src_ref = _graph.find(src_id);
+        if (src_ref == _graph.end()) {
+            _graph.insert(make_pair(src_id,make_pair(source_cell,Map<SizeType,Pair<CCell,SPaving>>())));
+            src_ref = _graph.find(src_id);
+        }
+        src_ref->second.second.insert(make_pair(ctrl_id,make_pair(controller_cell,target_cells)));
+    }
+
+    //! \brief Insert backward entries from each of \a target_cells to \a source_cell using \a controller_cell, hence
+    //! hashing on the target and controller
+    void insert_backward(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
+        auto ctrl_id = to_identifier(controller_cell,_default_controller_extent,_hashed_controller);
+        for (auto const& src : target_cells) {
+            auto src_id = to_identifier(src,_default_space_extent,_hashed_space);
+            auto src_ref = _graph.find(src_id);
+            if (src_ref == _graph.end()) {
+                _graph.insert(make_pair(src_id,make_pair(src,Map<SizeType,Pair<CCell,SPaving>>())));
+                src_ref = _graph.find(src_id);
+            }
+            auto tgt_ref = src_ref->second.second.find(ctrl_id);
+            if (tgt_ref == src_ref->second.second.end()) {
+                src_ref->second.second.insert(make_pair(ctrl_id,make_pair(controller_cell,SPaving(source_cell.grid()))));
+                tgt_ref = src_ref->second.second.find(ctrl_id);
+            }
+            tgt_ref->second.second.adjoin(source_cell);
+        }
+    }
+
+    Iterator find(SCell const& source_cell) {
+        return _graph.find(to_identifier(source_cell,_default_space_extent,_hashed_space));
+    }
+
+    bool contains(Iterator const& iterator) const {
+        return iterator != _graph.end();
+    }
+
+    void erase(SCell const& source_cell) {
+        _graph.erase(to_identifier(source_cell,_default_space_extent,_hashed_space));
+    }
+
+    //! \brief Subtract the source cells of the graph from \a paving
+    void prune(SPaving& paving) const {
+        for (auto const& entry : _graph) {
+            paving.remove(entry.second.first);
+        }
+    }
+
+    void clear() { _graph.clear(); }
+
+    friend OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
+        for (auto const& src : g._graph) {
+            os << src.first << src.second.first.box() << ":[";
+            for (auto const& ctrl : src.second.second) {
+                os << ctrl.first << "->(";
+                for (auto const& tgt : ctrl.second.second) {
+                    os << to_identifier(tgt,g._default_space_extent,g._hashed_space) << ",";
+                }
+                os.seekp(-1, std::ios_base::end);
+                os << "),";
+            }
+            os.seekp(-1, std::ios_base::end);
+            os << "]\n";
+        }
+        os << "}";
+
+        return os;
+    }
+  private:
+    std::map<String,SizeType> const _hashed_space;
+    std::map<String,SizeType> const _hashed_controller;
+    SizeType const _default_space_extent;
+    SizeType const _default_controller_extent;
+    SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>  _graph;
+};
 
 class ReachAvoidGridding {
   public:
@@ -77,8 +150,11 @@ class ReachAvoidGridding {
         _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
         for (auto const& c : state_paving)
             _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*state_paving.dimension()),_state_ids.size()));
-        for (auto const& c : controller_paving)
+        for (auto const& c : controller_paving) {
             _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*controller_paving.dimension()),_controller_ids.size()));
+        }
+        _forward_graph.reset(new DirectedHashedGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
+        _backward_graph.reset(new DirectedHashedGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
     }
 
     ReachAvoidGridding& add_obstacle(ExactBoxType const& box) {
@@ -104,7 +180,7 @@ class ReachAvoidGridding {
     SizeType obstacles_size() const { return _obstacles.size(); }
     SizeType goals_size() const { return _goals.size(); }
     SizeType unverified_size() const { return _unverified.size(); }
-    SizeType forward_sources_size() const { return _forward_graph.size(); }
+    SizeType forward_sources_size() const { return _forward_graph->sources_size(); }
 
     void plot(ExactBoxType const& graphics_box, SizeType xaxis, SizeType yaxis) {
         Figure fig(graphics_box,xaxis,yaxis);
@@ -130,19 +206,21 @@ class ReachAvoidGridding {
         CONCLOG_PRINTLN_AT(2,"Obstacles: " << ss.str())
     }
 
-    void print_forward_graph(bool show_boxes = false) const {
-        print_directed_graph(_forward_graph,_default_state_extent,_state_ids,_controller_ids, show_boxes);
+    void print_forward_graph() const {
+        CONCLOG_PRINTLN_AT(1,"Forward graph:")
+        CONCLOG_PRINTLN_AT(1,*_forward_graph)
     }
 
-    void print_backward_graph(bool show_boxes = false) const {
-        print_directed_graph(_backward_graph,_default_state_extent,_state_ids,_controller_ids, show_boxes);
+    void print_backward_graph() const {
+        CONCLOG_PRINTLN_AT(1,"Backward graph:")
+        CONCLOG_PRINTLN_AT(1,*_backward_graph)
     }
 
     void reconstruct_reachability_graph() {
         CONCLOG_SCOPE_CREATE
 
-        _forward_graph.clear();
-        _backward_graph.clear();
+        _forward_graph->clear();
+        _backward_graph->clear();
 
         Stopwatch<Milliseconds> sw;
 
@@ -150,30 +228,17 @@ class ReachAvoidGridding {
         double indicator_value = 0;
         for (auto const& state_cell : _unverified) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-            Map<CCell,SPaving> targets;
             for (auto const& controller_cell : _controller_paving) {
                 auto combined = product(state_cell.box(),controller_cell.box());
                 SPaving target_cells(_state_paving.grid());
                 target_cells.adjoin_outer_approximation(apply(_dynamics, combined),0);
                 target_cells.mince(0);
                 target_cells.restrict(_state_paving);
-                if (not target_cells.is_empty())
-                    targets.insert(make_pair(controller_cell,target_cells));
-                for (auto const& tc : target_cells) {
-                    auto tref = _backward_graph.find(tc);
-                    if (tref == _backward_graph.end()) {
-                        _backward_graph.insert(make_pair(tc,Map<CCell,SPaving>()));
-                        tref = _backward_graph.find(tc);
-                    }
-                    auto sref = tref->second.find(controller_cell);
-                    if (sref == tref->second.end()) {
-                        tref->second.insert(make_pair(controller_cell,SPaving(_state_paving.grid())));
-                        sref = tref->second.find(controller_cell);
-                    }
-                    sref->second.adjoin(state_cell);
+                if (not target_cells.is_empty()) {
+                    _forward_graph->insert_forward(state_cell,controller_cell,target_cells);
+                    _backward_graph->insert_backward(state_cell,controller_cell,target_cells);
                 }
             }
-            _forward_graph.insert(make_pair(state_cell,targets));
             indicator.update_current(++indicator_value);
         }
         sw.click();
@@ -191,20 +256,20 @@ class ReachAvoidGridding {
         double indicator_final_original = unsafe.size();
         double indicator_current_value = 0;
         ProgressIndicator indicator(indicator_final_original);
-        while(not unsafe.empty()) {
+        while (not unsafe.empty()) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
             auto const& u = unsafe.front();
-            auto const& bref = _backward_graph.find(u);
-            if (bref != _backward_graph.end()) {
-                for (auto const& trans : bref->second) {
-                    for (auto const& src : trans.second) {
-                        auto const& fref = _forward_graph.find(src);
-                        if (fref != _forward_graph.end()) {
-                            fref->second.erase(trans.first);
-                            if (fref->second.empty()) {
+            auto const& bref = _backward_graph->find(u);
+            if (_backward_graph->contains(bref)) {
+                for (auto const& trans : bref->second.second) {
+                    for (auto const& src : trans.second.second) {
+                        auto const& fref = _forward_graph->find(src);
+                        if (_forward_graph->contains(fref)) {
+                            fref->second.second.erase(trans.first);
+                            if (fref->second.second.empty()) {
                                 unsafe.push_back(src);
                                 indicator.update_final(++indicator_final_original);
-                                _forward_graph.erase(src);
+                                _forward_graph->erase(src);
                             }
                         }
                     }
@@ -216,29 +281,11 @@ class ReachAvoidGridding {
         sw.click();
         CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
 
-        for (auto const& entry : _forward_graph)
-            _unverified.remove(entry.first);
+        _forward_graph->prune(_unverified);
     }
 
-    SizeType forward_transitions() const {
-        SizeType result = 0;
-        for (auto const& src : _forward_graph) {
-            for (auto const& ctrl : src.second) {
-                result += ctrl.second.size();
-            }
-        }
-        return result;
-    }
-
-    SizeType backward_transitions() const {
-        SizeType result = 0;
-        for (auto const& tgt : _backward_graph) {
-            for (auto const& ctrl : tgt.second) {
-                result += ctrl.second.size();
-            }
-        }
-        return result;
-    }
+    SizeType forward_transitions() const { return _forward_graph->transitions_size(); }
+    SizeType backward_transitions() const { return _backward_graph->transitions_size(); }
 
   private:
 
@@ -255,10 +302,10 @@ class ReachAvoidGridding {
     SPaving _obstacles;
     SPaving _goals;
 
-    std::map<SizeType,SizeType> _state_ids, _controller_ids;
+    std::map<String,SizeType> _state_ids, _controller_ids;
 
-    DirectedGraph _forward_graph;
-    DirectedGraph _backward_graph;
+    Ariadne::SharedPointer<DirectedHashedGraph> _forward_graph;
+    Ariadne::SharedPointer<DirectedHashedGraph> _backward_graph;
 };
 
 void ariadne_main()
@@ -324,5 +371,5 @@ void ariadne_main()
     scs.plot({{-1,6},{-1,6},{-1,8}},0,1);
 
     CONCLOG_PRINTLN_AT(2,"Safe forward graph:")
-    CONCLOG_RUN_AT(1,scs.print_forward_graph(true))
+    CONCLOG_RUN_AT(1,scs.print_forward_graph())
 }

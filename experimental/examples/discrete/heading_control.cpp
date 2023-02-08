@@ -32,30 +32,31 @@ typedef GridTreePaving CPaving;
 
 typedef Map<SCell,Map<CCell,SPaving>> DirectedGraph;
 
-SizeType word_to_id(BinaryWord const& w) {
+SizeType word_to_id(BinaryWord const& w, SizeType size) {
     SizeType result = 0;
-    for (SizeType i=1; i<=w.size(); ++i) result += static_cast<SizeType>((2<<i)*w.at(w.size()-i));
+    for (SizeType i=0; i<size; ++i) result += static_cast<SizeType>((2<<i)*w.at(i));
     return result;
 }
 
-std::string to_identifier(GridCell const& cell, std::map<SizeType,SizeType> const& hashed) {
-    SizeType expanded_id = word_to_id(cell.word());
+std::string to_identifier(GridCell const& cell, SizeType default_extent, std::map<SizeType,SizeType> const& hashed) {
+    SizeType size_to_use = cell.word().size() - (cell.root_extent() - default_extent)*cell.dimension();
+    SizeType expanded_id = word_to_id(cell.word(),size_to_use);
     return to_string(hashed.at(expanded_id));
 }
 
-void print_directed_graph(DirectedGraph const& g, std::map<SizeType,SizeType> const& hashed_space, std::map<SizeType,SizeType> const& hashed_controller, bool show_boxes = false) {
+void print_directed_graph(DirectedGraph const& g, SizeType default_extent, std::map<SizeType,SizeType> const& hashed_space, std::map<SizeType,SizeType> const& hashed_controller, bool show_boxes = false) {
 
     std::stringstream sstr;
     sstr << "{\n";
 
     for (auto const& src : g) {
-        sstr << to_identifier(src.first,hashed_space);
+        sstr << to_identifier(src.first,default_extent,hashed_space);
         if (show_boxes) sstr << src.first.box();
         sstr << ":[";
         for (auto const& ctrl : src.second) {
-            sstr << to_identifier(ctrl.first,hashed_controller) << "->(";
+            sstr << to_identifier(ctrl.first,default_extent,hashed_controller) << "->(";
             for (auto const& tgt : ctrl.second) {
-                sstr << to_identifier(tgt,hashed_space) << ",";
+                sstr << to_identifier(tgt,default_extent,hashed_space) << ",";
             }
             sstr.seekp(-1, std::ios_base::end);
             sstr << "),";
@@ -71,12 +72,13 @@ void print_directed_graph(DirectedGraph const& g, std::map<SizeType,SizeType> co
 class ReachAvoidGridding {
   public:
     ReachAvoidGridding(EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
-        _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving), _unverified(state_paving),
-        _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
+        _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
+        _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
+        _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
         for (auto const& c : state_paving)
-            _state_ids.insert(make_pair(word_to_id(c.word()),_state_ids.size()));
+            _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*state_paving.dimension()),_state_ids.size()));
         for (auto const& c : controller_paving)
-            _controller_ids.insert(make_pair(word_to_id(c.word()),_controller_ids.size()));
+            _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*controller_paving.dimension()),_controller_ids.size()));
     }
 
     ReachAvoidGridding& add_obstacle(ExactBoxType const& box) {
@@ -118,22 +120,22 @@ class ReachAvoidGridding {
 
     void print_goals() const {
         std::stringstream ss;
-        for (auto const& g : _goals) ss << to_identifier(g,_state_ids) << " ";
+        for (auto const& g : _goals) ss << to_identifier(g,_default_state_extent,_state_ids) << " ";
         CONCLOG_PRINTLN_AT(2,"Goals: " << ss.str())
     }
 
     void print_obstacles() const {
         std::stringstream ss;
-        for (auto const& o : _obstacles) ss << to_identifier(o,_state_ids) << " ";
+        for (auto const& o : _obstacles) ss << to_identifier(o,_default_state_extent,_state_ids) << " ";
         CONCLOG_PRINTLN_AT(2,"Obstacles: " << ss.str())
     }
 
     void print_forward_graph(bool show_boxes = false) const {
-        print_directed_graph(_forward_graph,_state_ids,_controller_ids, show_boxes);
+        print_directed_graph(_forward_graph,_default_state_extent,_state_ids,_controller_ids, show_boxes);
     }
 
     void print_backward_graph(bool show_boxes = false) const {
-        print_directed_graph(_backward_graph,_state_ids,_controller_ids, show_boxes);
+        print_directed_graph(_backward_graph,_default_state_extent,_state_ids,_controller_ids, show_boxes);
     }
 
     void reconstruct_reachability_graph() {
@@ -244,6 +246,9 @@ class ReachAvoidGridding {
 
     SPaving const _state_paving;
     CPaving const _controller_paving;
+
+    SizeType const _default_state_extent;
+    SizeType const _default_controller_extent;
 
     SPaving _unverified;
 

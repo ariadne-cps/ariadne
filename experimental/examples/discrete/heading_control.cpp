@@ -34,7 +34,8 @@ template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
 
 String word_to_id(BinaryWord const& w, SizeType size) {
     std::stringstream ss;
-    for (SizeType i=0; i<size; ++i) ss << to_string(w.at(i));
+    auto size_offset = w.size()-size;
+    for (SizeType i=0; i<size; ++i) ss << to_string(w.at(size_offset+i));
     return ss.str();
 }
 

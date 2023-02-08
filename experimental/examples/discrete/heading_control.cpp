@@ -34,7 +34,7 @@ typedef Map<SCell,Map<CCell,SPaving>> DirectedGraph;
 
 SizeType word_to_id(BinaryWord const& w) {
     SizeType result = 0;
-    for (SizeType i=0; i<w.size(); ++i) result += static_cast<SizeType>((2<<i)*w.at(i));
+    for (SizeType i=1; i<=w.size(); ++i) result += static_cast<SizeType>((2<<i)*w.at(w.size()-i));
     return result;
 }
 
@@ -318,6 +318,6 @@ void ariadne_main()
 
     scs.plot({{-1,6},{-1,6},{-1,8}},0,1);
 
-    //CONCLOG_PRINTLN_AT(2,"Safe forward graph:")
-    //CONCLOG_RUN_AT(1,scs.print_forward_graph(true))
+    CONCLOG_PRINTLN_AT(2,"Safe forward graph:")
+    CONCLOG_RUN_AT(1,scs.print_forward_graph(true))
 }

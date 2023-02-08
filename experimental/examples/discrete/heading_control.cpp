@@ -358,9 +358,7 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
 /*
-    CONCLOG_PRINTLN_AT(1,"Initial forward graph:")
     scs.print_forward_graph();
-    CONCLOG_PRINTLN_AT(1,"Backward graph:")
     scs.print_backward_graph();
 */
     scs.compute_safe_forward_graph();
@@ -371,6 +369,5 @@ void ariadne_main()
 
     scs.plot({{-1,6},{-1,6},{-1,8}},0,1);
 
-    CONCLOG_PRINTLN_AT(2,"Safe forward graph:")
     CONCLOG_RUN_AT(1,scs.print_forward_graph())
 }

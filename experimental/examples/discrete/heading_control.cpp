@@ -188,6 +188,11 @@ public:
     SizeType unverified_size() const { return _unverified.size(); }
     SizeType forward_sources_size() const { return _forward_graph->sources_size(); }
 
+    //! \brief The percentage (in the 0-100 scale) of still unverified states
+    double unverified_percentage() const {
+        return static_cast<double>(_unverified.size())*100/(_state_paving.size()-_goals.size()-_obstacles.size());
+    }
+
     void plot(ExactBoxType const& graphics_box, SizeType xaxis, SizeType yaxis) {
         Figure fig(graphics_box,xaxis,yaxis);
 
@@ -370,9 +375,9 @@ void ariadne_main()
 */
     scs.compute_safe_forward_graph();
 
-    CONCLOG_PRINTLN_AT(1,"Safe abstract states #: " << scs.forward_sources_size())
+    CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.forward_sources_size())
 
-    CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
+    CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << scs.unverified_size() << " (" << scs.unverified_percentage() << "% left)")
 
     scs.plot({{0,5},{0,5},{0,6.28_x}},0,1);
     scs.plot({{0,5},{0,5},{0,6.28_x}},0,2);

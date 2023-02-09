@@ -150,8 +150,8 @@ private:
 
 class ReachAvoidGridding {
 public:
-    ReachAvoidGridding(EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
-            _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
+    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
+            _name(name), _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
             _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
             _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
         for (auto const& c : state_paving)
@@ -196,7 +196,9 @@ public:
         safe.remove(_goals);
         safe.remove(_unverified);
         fig << fill_colour(white) << _state_paving << fill_colour(green) << _goals << fill_colour(blue) << _obstacles << fill_colour(yellow) << safe;
-        fig.write("state_grid");
+        char num_char[64] = "";
+        snprintf(num_char,64,"[%zu,%zu]",xaxis,yaxis);
+        fig.write((_name+num_char).c_str());
     }
 
     void print_goals() const {
@@ -294,6 +296,7 @@ public:
 
 private:
 
+    String const _name;
     EffectiveVectorMultivariateFunction const _dynamics;
 
     SPaving const _state_paving;
@@ -340,7 +343,7 @@ void ariadne_main()
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
 
-    ReachAvoidGridding scs(dynamics,sdomain_paving, cdomain_paving);
+    ReachAvoidGridding scs("heading",dynamics,sdomain_paving, cdomain_paving);
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())
 
@@ -371,7 +374,9 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
-    scs.plot({{-1,6},{-1,6},{-1,8}},0,1);
+    scs.plot({{0,5},{0,5},{0,6.28_x}},0,1);
+    scs.plot({{0,5},{0,5},{0,6.28_x}},0,2);
+    scs.plot({{0,5},{0,5},{0,6.28_x}},1,2);
 
     CONCLOG_RUN_AT(1,scs.print_forward_graph())
 }

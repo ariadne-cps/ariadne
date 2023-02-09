@@ -46,11 +46,12 @@ SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<S
 }
 
 class DirectedHashedGraph {
-  public:
+public:
     typedef SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>::iterator Iterator;
-  public:
-    DirectedHashedGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) : _hashed_space(hashed_space), _hashed_controller(hashed_controller),
-                        _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
+public:
+    DirectedHashedGraph(EffectiveVectorMultivariateFunction const& dynamics, std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
+            _dynamics(dynamics), _hashed_space(hashed_space), _hashed_controller(hashed_controller),
+            _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
 
     SizeType sources_size() const { return _graph.size(); }
 
@@ -119,14 +120,17 @@ class DirectedHashedGraph {
 
     friend OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
         for (auto const& src : g._graph) {
-            os << src.first << src.second.first.box() << ":[";
+            os << src.first << src.second.first.box() << ":[\n";
             for (auto const& ctrl : src.second.second) {
-                os << ctrl.first << "->(";
+                os << ctrl.first << "->";
+                auto combined = product(src.second.first.box(),ctrl.second.first.box());
+                os << apply(g._dynamics,combined);
+                os << "(";
                 for (auto const& tgt : ctrl.second.second) {
                     os << to_identifier(tgt,g._default_space_extent,g._hashed_space) << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
-                os << "),";
+                os << ")\n";
             }
             os.seekp(-1, std::ios_base::end);
             os << "]\n";
@@ -135,7 +139,8 @@ class DirectedHashedGraph {
 
         return os;
     }
-  private:
+private:
+    EffectiveVectorMultivariateFunction const _dynamics;
     std::map<String,SizeType> const _hashed_space;
     std::map<String,SizeType> const _hashed_controller;
     SizeType const _default_space_extent;
@@ -144,18 +149,18 @@ class DirectedHashedGraph {
 };
 
 class ReachAvoidGridding {
-  public:
+public:
     ReachAvoidGridding(EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
-        _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
-        _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
-        _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
+            _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
+            _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
+            _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
         for (auto const& c : state_paving)
             _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*state_paving.dimension()),_state_ids.size()));
         for (auto const& c : controller_paving) {
             _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*controller_paving.dimension()),_controller_ids.size()));
         }
-        _forward_graph.reset(new DirectedHashedGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
-        _backward_graph.reset(new DirectedHashedGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
+        _forward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
+        _backward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
     }
 
     ReachAvoidGridding& add_obstacle(ExactBoxType const& box) {
@@ -190,7 +195,6 @@ class ReachAvoidGridding {
         safe.remove(_obstacles);
         safe.remove(_goals);
         safe.remove(_unverified);
-        CONCLOG_PRINTLN_AT(2,"Safe: " << safe.size())
         fig << fill_colour(white) << _state_paving << fill_colour(green) << _goals << fill_colour(blue) << _obstacles << fill_colour(yellow) << safe;
         fig.write("state_grid");
     }
@@ -288,7 +292,7 @@ class ReachAvoidGridding {
     SizeType forward_transitions() const { return _forward_graph->transitions_size(); }
     SizeType backward_transitions() const { return _backward_graph->transitions_size(); }
 
-  private:
+private:
 
     EffectiveVectorMultivariateFunction const _dynamics;
 

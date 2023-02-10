@@ -31,7 +31,8 @@ typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
 
 template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
-typedef Vector<Interval<double>> BoundsBox;
+typedef Interval<double> BoundType;
+typedef Vector<BoundType> BoundsBoxType;
 
 ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
     ExactBoxType result(bx.dimension());
@@ -40,7 +41,7 @@ ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
     return result;
 }
 
-ExactBoxType shrink(BoundsBox const& bx, FloatDP const& eps) {
+ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
     ExactBoxType result(bx.size());
     for (SizeType i=0; i<bx.size(); ++i)
         result[i] = Interval<FloatDP>(FloatDP(cast_exact(bx[i].lower_bound()),DoublePrecision())+eps,FloatDP(cast_exact(bx[i].upper_bound()),DoublePrecision())-eps);
@@ -165,7 +166,7 @@ private:
 
 class ReachAvoidGridding {
 public:
-    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBox const& state_bounds, Grid const& control_grid, BoundsBox const& control_bounds, ExactDouble eps) :
+    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, ExactDouble eps) :
             _name(name), _dynamics(dynamics), _eps({eps,DoublePrecision()}) {
 
         _state_paving = SPaving(state_grid);
@@ -193,7 +194,7 @@ public:
         _backward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
     }
 
-    ReachAvoidGridding& add_obstacle(BoundsBox const& box) {
+    ReachAvoidGridding& add_obstacle(BoundsBoxType const& box) {
         SPaving obstacle_paving(_state_paving.grid());
         obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),0);
         obstacle_paving.restrict(_state_paving);
@@ -202,7 +203,7 @@ public:
         return *this;
     }
 
-    ReachAvoidGridding& add_goal(BoundsBox const& box) {
+    ReachAvoidGridding& add_goal(BoundsBoxType const& box) {
         SPaving goal_paving(_state_paving.grid());
         goal_paving.adjoin_outer_approximation(shrink(box,_eps),0);
         goal_paving.restrict(_state_paving);
@@ -357,34 +358,36 @@ void ariadne_main()
 {
     Real deltat=0.1_dec;
     Real v=3;
-    RealVariable x("x"), y("y"), theta("theta"), Kx("Kx"), Ky("Ky"), Kt("Kt"), b("b");
-    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
-                         next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});
+    RealVariable x("x"), y("y"), theta("theta"), u("u");
+    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+u,next(u)=u});
 
-    auto dynamics = heading.function().zeros(3,7);
+    auto dynamics = heading.function().zeros(3,4);
     for (SizeType i=0; i<3; ++i)
         dynamics[i] = heading.function().get(i);
     CONCLOG_PRINTLN_VAR(dynamics);
 
     double pi_ = pi.get_d();
 
-    Grid sgrid({0.5,0.5,2*pi/8});
-    BoundsBox sdomain({{0,5},{0,5},{-2*pi_,2*pi_}});
-    Grid cgrid({1,1,1,1});
-    BoundsBox cdomain({{-1,1},{-1,1},{-1,1},{-10,10}});
+    Grid state_grid({0.5,0.5,2*pi/8});
+    BoundType theta_domain = {-2*pi_,2*pi_};
+    BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
+    Grid control_grid({pi/32});
+    BoundsBoxType control_domain({{-pi_,pi_}});
 
-    ReachAvoidGridding scs("heading",dynamics,sgrid,sdomain,cgrid,cdomain,1e-10_x);
+    ReachAvoidGridding scs("heading",dynamics,state_grid,state_domain,control_grid,control_domain,1e-10_x);
+
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())
 
-    scs.add_obstacle({{1,3.5},{4.5,5},{-2*pi_,2*pi_}});
-    scs.add_obstacle({{0,1},{2,3},{-2*pi_,2*pi_}});
-    scs.add_obstacle({{2.5,5},{2,3},{-2*pi_,2*pi_}});
-    scs.add_obstacle({{0,5},{0,0.5},{-2*pi_,2*pi_}});
+    scs.add_obstacle({{1,3.5},{4.5,5},theta_domain});
+    scs.add_obstacle({{0,1},{2,3},theta_domain});
+    scs.add_obstacle({{2.5,5},{2,3},theta_domain});
+    scs.add_obstacle({{0,5},{0,0.5},theta_domain});
     scs.print_obstacles();
     CONCLOG_PRINTLN_VAR_AT(1,scs.obstacles_size())
 
-    scs.add_goal({{4,5},{4.5,5},{-2*pi_,2*pi_}});
+    scs.add_goal({{4,5},{4.5,5},theta_domain});
+
     scs.print_goals();
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
 
@@ -394,10 +397,10 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
-/*
-    scs.print_forward_graph();
-    scs.print_backward_graph();
-*/
+
+    //scs.print_forward_graph();
+    //scs.print_backward_graph();
+
     scs.compute_safe_forward_graph();
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.forward_sources_size())

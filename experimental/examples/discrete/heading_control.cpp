@@ -31,11 +31,19 @@ typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
 
 template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
+typedef Vector<Interval<double>> BoundsBox;
 
 ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
-    ExactBoxType result(bx.size());
+    ExactBoxType result(bx.dimension());
     for (SizeType i=0; i<bx.size(); ++i)
         result[i] = Interval<FloatDP>(bx[i].lower_bound()+eps,bx[i].upper_bound()-eps);
+    return result;
+}
+
+ExactBoxType shrink(BoundsBox const& bx, FloatDP const& eps) {
+    ExactBoxType result(bx.size());
+    for (SizeType i=0; i<bx.size(); ++i)
+        result[i] = Interval<FloatDP>(FloatDP(cast_exact(bx[i].lower_bound()),DoublePrecision())+eps,FloatDP(cast_exact(bx[i].upper_bound()),DoublePrecision())-eps);
     return result;
 }
 
@@ -157,31 +165,46 @@ private:
 
 class ReachAvoidGridding {
 public:
-    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving, FloatDP const& eps) :
-            _name(name), _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving), _eps(eps),
-            _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
-            _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
-        for (auto const& c : state_paving)
-            _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*state_paving.dimension()),_state_ids.size()));
-        for (auto const& c : controller_paving) {
-            _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*controller_paving.dimension()),_controller_ids.size()));
+    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBox const& state_bounds, Grid const& control_grid, BoundsBox const& control_bounds, ExactDouble eps) :
+            _name(name), _dynamics(dynamics), _eps({eps,DoublePrecision()}) {
+
+        _state_paving = SPaving(state_grid);
+        _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),0);
+        _state_paving.mince(0);
+
+        _controller_paving = CPaving(control_grid);
+        _controller_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),0);
+        _controller_paving.mince(0);
+
+        _default_state_extent = _state_paving.begin()->root_extent();
+        _default_controller_extent = _controller_paving.begin()->root_extent();
+
+        _unverified = _state_paving;
+        _obstacles = SPaving(_state_paving.grid());
+        _goals = SPaving(_state_paving.grid());
+
+        for (auto const& c : _state_paving)
+            _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*_state_paving.dimension()),_state_ids.size()));
+        for (auto const& c : _controller_paving) {
+            _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*_controller_paving.dimension()),_controller_ids.size()));
         }
+
         _forward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
         _backward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
     }
 
-    ReachAvoidGridding& add_obstacle(ExactBoxType const& box) {
+    ReachAvoidGridding& add_obstacle(BoundsBox const& box) {
         SPaving obstacle_paving(_state_paving.grid());
-        obstacle_paving.adjoin_outer_approximation(box,0);
+        obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),0);
         obstacle_paving.restrict(_state_paving);
         _unverified.remove(obstacle_paving);
         _obstacles.adjoin(obstacle_paving);
         return *this;
     }
 
-    ReachAvoidGridding& add_goal(ExactBoxType const& box) {
+    ReachAvoidGridding& add_goal(BoundsBox const& box) {
         SPaving goal_paving(_state_paving.grid());
-        goal_paving.adjoin_outer_approximation(box,0);
+        goal_paving.adjoin_outer_approximation(shrink(box,_eps),0);
         goal_paving.restrict(_state_paving);
         _unverified.remove(goal_paving);
         _goals.adjoin(goal_paving);
@@ -311,13 +334,13 @@ private:
     String const _name;
     EffectiveVectorMultivariateFunction const _dynamics;
 
-    SPaving const _state_paving;
-    CPaving const _controller_paving;
+    SPaving _state_paving;
+    CPaving _controller_paving;
+
+    SizeType _default_state_extent;
+    SizeType _default_controller_extent;
 
     FloatDP const _eps;
-
-    SizeType const _default_state_extent;
-    SizeType const _default_controller_extent;
 
     SPaving _unverified;
 
@@ -343,32 +366,25 @@ void ariadne_main()
         dynamics[i] = heading.function().get(i);
     CONCLOG_PRINTLN_VAR(dynamics);
 
-    FloatDP eps(1e-10_x,DoublePrecision());
+    double pi_ = pi.get_d();
 
-    Grid sgrid({0,0,0},{0.5,0.5,2*pi/8});
-    ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{-2*pi+eps,2*pi-eps}});
-    SPaving sdomain_paving(sgrid);
-    sdomain_paving.adjoin_outer_approximation(sdomain,0);
-    sdomain_paving.mince(0);
+    Grid sgrid({0.5,0.5,2*pi/8});
+    BoundsBox sdomain({{0,5},{0,5},{-2*pi_,2*pi_}});
+    Grid cgrid({1,1,1,1});
+    BoundsBox cdomain({{-1,1},{-1,1},{-1,1},{-10,10}});
 
-    Grid cgrid({0,0,0,0},{1.0_x,1.0_x,1.0_x,1.0_x});
-    ExactBoxType cdomain({{-1+eps,1-eps},{-1+eps,1-eps},{-1+eps,1-eps},{-10+eps,10-eps}});
-    CPaving cdomain_paving(cgrid);
-    cdomain_paving.adjoin_outer_approximation(cdomain,0);
-    cdomain_paving.mince(0);
-
-    ReachAvoidGridding scs("heading",dynamics,sdomain_paving, cdomain_paving, eps);
+    ReachAvoidGridding scs("heading",dynamics,sgrid,sdomain,cgrid,cdomain,1e-10_x);
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())
 
-    scs.add_obstacle({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{-2*pi+eps,2*pi-eps}});
-    scs.add_obstacle({{0+eps,1-eps},{2+eps,3-eps},{-2*pi+eps+eps,2*pi-eps}});
-    scs.add_obstacle({{2.5_x+eps,5-eps},{2.0_x+eps,3-eps},{-2*pi+eps,2*pi-eps}});
-    scs.add_obstacle({{0+eps,5-eps},{0+eps,0.5_x-eps},{-2*pi+eps,2*pi-eps}});
+    scs.add_obstacle({{1,3.5},{4.5,5},{-2*pi_,2*pi_}});
+    scs.add_obstacle({{0,1},{2,3},{-2*pi_,2*pi_}});
+    scs.add_obstacle({{2.5,5},{2,3},{-2*pi_,2*pi_}});
+    scs.add_obstacle({{0,5},{0,0.5},{-2*pi_,2*pi_}});
     scs.print_obstacles();
     CONCLOG_PRINTLN_VAR_AT(1,scs.obstacles_size())
 
-    scs.add_goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{-2*pi+eps,2*pi-eps}});
+    scs.add_goal({{4,5},{4.5,5},{-2*pi_,2*pi_}});
     scs.print_goals();
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
 

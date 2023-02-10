@@ -264,186 +264,155 @@ Void export_domains(pybind11::module& module)
     euclidean_domain_class.def("__repr__", &__cstr__<EuclideanDomain>);
 }
 
-template<class P> Void export_scalar_univariate_function(pybind11::module& module)
-{
-    pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
-    function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
+template<class SIG> String signature_name() {
+    using RES = typename SignatureTraits<SIG>::ResultKind;
+    using ARG = typename SignatureTraits<SIG>::ArgumentKind;
+    return String(Same<RES,RealScalar> ? "Scalar" : "Vector") + (Same<ARG,RealScalar> ? "Univariate" : "Multivariate");
+}
+
+template<class P, class SIG> Void export_function(pybind11::module& module) {
+    using F=Function<P,SIG>;
+    using RES = typename SignatureTraits<SIG>::ResultKind;
+    using ARG = typename SignatureTraits<SIG>::ArgumentKind;
+    using DomainType = typename SignatureTraits<SIG>::DomainType;
+    using CodomainType = typename SignatureTraits<SIG>::CodomainType;
+    using ResultSizeType = ElementSizeType<CodomainType>;
+    using ArgumentSizeType = ElementSizeType<DomainType>;
+
+    pybind11::class_<F> function_class(module,(class_name<P>()+signature_name<SIG>()+"Function").c_str());
+
+    function_class.def(pybind11::init<F>());
     if constexpr (Same<P,ValidatedTag>) {
-        function_class.def(pybind11::init<ScalarUnivariateFunction<EffectiveTag>>());
-//        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
-    }
-    function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(IndexZero)const) &ScalarUnivariateFunction<P>::derivative);
-    function_class.def("derivative", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&)) &derivative);
-
-    export_function_evaluation(module,function_class);
-    if constexpr (not Same<P,ApproximateTag>) {
-        module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,1u).gradient()[0]);} );
-        module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
-    }
-    module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
-    module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
-
-    function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(RealDomain,Number<P>)) &ScalarUnivariateFunction<P>::constant);
-    function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::coordinate);
-    function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)(RealDomain)) &ScalarUnivariateFunction<P>::coordinate);
-    function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::identity);
-    function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)(RealDomain)) &ScalarUnivariateFunction<P>::identity);
-
-    define_elementary_algebra<ScalarUnivariateFunction<P>,Number<P>>(module,function_class);
-
-    function_class.def("__str__", &__cstr__<ScalarUnivariateFunction<P>>);
-}
-
-template<class P> Void export_vector_univariate_function(pybind11::module& module)
-{
-    pybind11::class_<VectorUnivariateFunction<P>> vector_univariate_function_class(module,(class_name<P>()+"VectorUnivariateFunction").c_str());
-    vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<P>>());
-    vector_univariate_function_class.def(pybind11::init<SizeType,RealDomain>());
-    if constexpr (Same<P,ValidatedTag>) {
-        vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<EffectiveTag>>());
-//        pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ValidatedTag>>();
-    }
-    // NOTE: This must go *after* the conversion constructor
-    vector_univariate_function_class.def(pybind11::init([](std::vector<ScalarUnivariateFunction<P>> const& lst){return VectorUnivariateFunction<P>(lst);}));
-
-    vector_univariate_function_class.def("result_size", &VectorUnivariateFunction<P>::result_size);
-    vector_univariate_function_class.def("argument_size", &VectorUnivariateFunction<P>::argument_size);
-    vector_univariate_function_class.def("__getitem__", &VectorUnivariateFunction<P>::get);
-    vector_univariate_function_class.def("__setitem__", &VectorUnivariateFunction<P>::set);
-
-    // TODO: Put these in C++ API
-    // define_vector_algebra_arithmetic<VectorUnivariateFunction<P>,ScalarUnivariateFunction<P>,Number<P>>(module,vector_univariate_function_class);
-
-    // FIXME: Define vector function operations for Validated and Approximate
-//    if constexpr (Same<P,EffectiveTag>) {
-//        define_vector_algebra_arithmetic<VectorUnivariateFunction<P>,ScalarUnivariateFunction<P>>(module,vector_univariate_function_class);
-//    }
-    export_function_evaluation(module,vector_univariate_function_class);
-
-    vector_univariate_function_class.def("__str__", &__cstr__<VectorUnivariateFunction<P>>);
-    vector_univariate_function_class.def("__repr__", &__crepr__<VectorUnivariateFunction<P>>);
-
-//    module.def("join", (VectorUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&, const ScalarUnivariateFunction<P>&)) &join);
-//    module.def("join", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&, const ScalarUnivariateFunction<P>&)) &join);
-//    module.def("join", (VectorUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&, const VectorUnivariateFunction<P>&)) &join);
-//    module.def("join", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&, const VectorUnivariateFunction<P>&)) &join);
-
-    module.def("compose", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&,const ScalarUnivariateFunction<P>&)) &compose);
-    module.def("compose", (ScalarUnivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorUnivariateFunction<P>&)) &compose);
-    module.def("compose", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&,const ScalarUnivariateFunction<P>&)) &compose);
-    module.def("compose", (VectorUnivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorUnivariateFunction<P>&)) &compose);
-}
-
-
-Void export_scalar_univariate_functions(pybind11::module& module)
-{
-    export_scalar_univariate_function<EffectiveTag>(module);
-    export_scalar_univariate_function<ValidatedTag>(module);
-    export_scalar_univariate_function<ApproximateTag>(module);
-    pybind11::implicitly_convertible<ScalarUnivariateFunction<EffectiveTag>,ScalarUnivariateFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<ScalarUnivariateFunction<EffectiveTag>,ScalarUnivariateFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<ScalarUnivariateFunction<ValidatedTag>,ScalarUnivariateFunction<ApproximateTag>>();
-}
-
-Void export_vector_univariate_functions(pybind11::module& module)
-{
-    export_vector_univariate_function<EffectiveTag>(module);
-    export_vector_univariate_function<ValidatedTag>(module);
-    export_vector_univariate_function<ApproximateTag>(module);
-    pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<VectorUnivariateFunction<ValidatedTag>,VectorUnivariateFunction<ApproximateTag>>();
-}
-
-
-
-template<class P> Void export_scalar_function(pybind11::module& module)
-{
-    pybind11::class_<ScalarMultivariateFunction<P>> scalar_function_class(module,(class_name<P>()+"ScalarMultivariateFunction").c_str());
-    scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<P>>());
-    scalar_function_class.def(pybind11::init<SizeType>());
-    scalar_function_class.def("argument_size", &ScalarMultivariateFunction<P>::argument_size);
-    scalar_function_class.def("derivative", &ScalarMultivariateFunction<P>::derivative);
-    define_elementary_algebra<ScalarMultivariateFunction<P>,Number<P>>(module,scalar_function_class);
-
-    if constexpr (Same<P,ValidatedTag>) {
-        scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<EffectiveTag>>());
-        pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
+        function_class.def(pybind11::init<Function<EffectiveTag,SIG>>());
+        pybind11::implicitly_convertible<Function<EffectiveTag,SIG>,Function<ValidatedTag,SIG>>();
     }
 
-    if constexpr (Same<P,EffectiveTag>) {
-        scalar_function_class.def("__eq__", &__eq__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
-        scalar_function_class.def("__le__", &__le__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
-        scalar_function_class.def("__ge__", &__ge__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+    function_class.def(pybind11::init<ResultSizeType,ArgumentSizeType>());
+    function_class.def(pybind11::init<ResultSizeType,DomainType>());
+    if constexpr (Same<RES,RealScalar>) {
+        function_class.def(pybind11::init<ArgumentSizeType>());
+        function_class.def(pybind11::init<DomainType>());
     }
 
-    scalar_function_class.def("__str__", &__cstr__<ScalarMultivariateFunction<P>>);
-    scalar_function_class.def("__repr__", &__crepr__<ScalarMultivariateFunction<P>>);
-
-    scalar_function_class.def_static("constant", (ScalarMultivariateFunction<P>(*)(SizeType,Number<P>)) &ScalarMultivariateFunction<P>::constant);
-    scalar_function_class.def_static("coordinate", (ScalarMultivariateFunction<P>(*)(EuclideanDomain,SizeType)) &ScalarMultivariateFunction<P>::coordinate);
-    scalar_function_class.def_static("coordinate", (ScalarMultivariateFunction<P>(*)(SizeType,SizeType)) &ScalarMultivariateFunction<P>::coordinate);
-
-    scalar_function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarMultivariateFunction<P>::gradient);
-    if constexpr (not Same<P,ApproximateTag>) {
-        scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarMultivariateFunction<P>::gradient);
+    if constexpr (Same<RES,RealVector>) {
+        // NOTE: This must go *after* the conversion constructor
+        function_class.def(pybind11::init([](std::vector<Function<P,RealScalar(ARG)>> const& lst){return F(lst);}));
     }
 
-    module.def("derivative", (ScalarMultivariateFunction<P>(ScalarMultivariateFunction<P>::*)(SizeType)const) &ScalarMultivariateFunction<P>::derivative);
+    function_class.def("result_size", &F::result_size);
+    function_class.def("argument_size", &F::argument_size);
 
-    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
-    if constexpr (not Same<P,ApproximateTag>) {
-        module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+    if constexpr (Same<RES,RealVector>) {
+        function_class.def("__getitem__", &F::get);
+        function_class.def("__setitem__", &F::set);
     }
 
-    export_function_evaluation(module,scalar_function_class);
-}
-
-
-template<class P> Void export_vector_function(pybind11::module& module)
-{
-    pybind11::class_<VectorMultivariateFunction<P>> vector_function_class(module,(class_name<P>()+"VectorMultivariateFunction").c_str());
-    vector_function_class.def(pybind11::init<VectorMultivariateFunction<P>>());
-    vector_function_class.def(pybind11::init<SizeType,SizeType>());
-    if constexpr (Same<P,ValidatedTag>) {
-        vector_function_class.def(pybind11::init<VectorMultivariateFunction<EffectiveTag>>());
-//        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
+    if constexpr (Same<ARG,RealScalar>) {
+        function_class.def("derivative", (F(F::*)(IndexZero)const) &F::derivative);
+        function_class.def("derivative", (F(*)(const F&)) &derivative);
+        module.def("derivative", (F(F::*)(IndexZero)const) &F::derivative);
+        module.def("derivative", (F(*)(const F&)) &derivative);
+    } else {
+        function_class.def("derivative", (F(F::*)(SizeType)const) &F::derivative);
+        module.def("derivative", (F(F::*)(SizeType)const) &F::derivative);
     }
-    // NOTE: This must go *after* the conversion constructor
-    vector_function_class.def(pybind11::init([](std::vector<ScalarMultivariateFunction<P>> const& lst){return VectorMultivariateFunction<P>(lst);}));
 
-    vector_function_class.def("result_size", &VectorMultivariateFunction<P>::result_size);
-    vector_function_class.def("argument_size", &VectorMultivariateFunction<P>::argument_size);
-    vector_function_class.def("__getitem__", &VectorMultivariateFunction<P>::get);
-    vector_function_class.def("__setitem__", &VectorMultivariateFunction<P>::set);
+
+    if constexpr (Same<RES,RealScalar>) { define_elementary_algebra<F,Number<P>>(module,function_class); }
 
     // TODO: Put these in C++ API
     // define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>,Number<P>>(module,vector_function_class);
-
     // FIXME: Define vector function operations for Validated and Approximate
-    if constexpr (Same<P,EffectiveTag>) {
-        define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>>(module,vector_function_class);
+    if constexpr (Same<RES,RealVector>) {
+        if constexpr (Same<ARG,RealVector> and Same<P,EffectiveTag>) {
+            define_vector_algebra_arithmetic<VectorFunction<P,ARG>,ScalarFunction<P,ARG>>(module,function_class);
+        }
     }
-    export_function_evaluation(module,vector_function_class);
 
-    vector_function_class.def("__str__", &__cstr__<VectorMultivariateFunction<P>>);
-    vector_function_class.def("__repr__", &__crepr__<VectorMultivariateFunction<P>>);
+    export_function_evaluation(module,function_class);
 
-    vector_function_class.def_static("zeros", (VectorMultivariateFunction<P>(*)(SizeType,SizeType)) &VectorMultivariateFunction<P>::zeros);
-    vector_function_class.def_static("zeros", (VectorMultivariateFunction<P>(*)(SizeType,EuclideanDomain)) &VectorMultivariateFunction<P>::zeros);
-    vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(SizeType)) &VectorMultivariateFunction<P>::identity);
-    vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(EuclideanDomain)) &VectorMultivariateFunction<P>::identity);
+    if constexpr (Same<SIG,RealScalar(RealScalar)>) {
+        if constexpr (not Same<P,ApproximateTag>) {
+            module.def("derivative", [](const F& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,1u).gradient()[0]);} );
+            module.def("second_derivative", [](const F& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
+        }
+        module.def("derivative", [](const F& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
+        module.def("second_derivative", [](const F& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
+    }
+    if constexpr (Same<SIG,RealScalar(RealVector)>) {
+        function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarMultivariateFunction<P>::gradient);
+        if constexpr (not Same<P,ApproximateTag>) {
+            function_class.def("gradient", (Covector<FloatDPBounds>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarMultivariateFunction<P>::gradient);
+        }
+    }
 
-    module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
-    module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
-    module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
-    module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
+    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
+        if constexpr (not Same<P,ApproximateTag>) {
+            module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+        }
 
-    module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&,const ScalarMultivariateFunction<P>&)) &compose);
-    module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
-    module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorUnivariateFunction<P>&,const ScalarMultivariateFunction<P>&)) &compose);
-    module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
+    if constexpr (Same<SIG,RealScalar(RealScalar)>) {
+        function_class.def_static("constant", (F(*)(Number<P>)) &F::constant);
+        function_class.def_static("constant", (F(*)(RealDomain,Number<P>)) &F::constant);
+        function_class.def_static("coordinate", (F(*)()) &F::coordinate);
+        function_class.def_static("coordinate", (F(*)(RealDomain)) &F::coordinate);
+        function_class.def_static("identity", (F(*)()) &F::identity);
+        function_class.def_static("identity", (F(*)(RealDomain)) &F::identity);
+    }
+    if constexpr (Same<SIG,RealVector(RealScalar)>) {
+        function_class.def_static("zeros", (F(*)(SizeType)) &F::zeros);
+        function_class.def_static("zeros", (F(*)(SizeType,RealDomain)) &F::zeros);
+    }
+    if constexpr (Same<SIG,RealScalar(RealVector)>) {
+        function_class.def_static("constant", (F(*)(SizeType,Number<P>)) &F::constant);
+        function_class.def_static("constant", (F(*)(EuclideanDomain,Number<P>)) &F::constant);
+        function_class.def_static("coordinate", (F(*)(SizeType,SizeType)) &F::coordinate);
+        function_class.def_static("coordinate", (F(*)(EuclideanDomain,SizeType)) &F::coordinate);
+    }
+    if constexpr (Same<SIG,RealVector(RealVector)>) {
+        function_class.def_static("zeros", (F(*)(SizeType,SizeType)) &F::zeros);
+        function_class.def_static("zeros", (F(*)(SizeType,EuclideanDomain)) &F::zeros);
+        function_class.def_static("identity", (F(*)(SizeType)) &F::identity);
+        function_class.def_static("identity", (F(*)(EuclideanDomain)) &F::identity);
+    }
+
+    function_class.def("__str__", &__cstr__<F>);
+    function_class.def("__repr__", &__crepr__<F>);
+
+    if constexpr (Same<RES,RealVector>) if constexpr (Same<ARG,RealVector>) {
+        module.def("join", (VectorFunction<P,ARG>(*)(const ScalarFunction<P,ARG>&, const ScalarFunction<P,ARG>&)) &join);
+        module.def("join", (VectorFunction<P,ARG>(*)(const VectorFunction<P,ARG>&, const ScalarFunction<P,ARG>&)) &join);
+        module.def("join", (VectorFunction<P,ARG>(*)(const ScalarFunction<P,ARG>&, const VectorFunction<P,ARG>&)) &join);
+        module.def("join", (VectorFunction<P,ARG>(*)(const VectorFunction<P,ARG>&, const VectorFunction<P,ARG>&)) &join);
+    }
+
+    module.def("compose", (Function<P,RES(ARG)>(*)(const Function<P,RES(RealScalar)>&,const Function<P,RealScalar(ARG)>&)) &compose);
+    module.def("compose", (Function<P,RES(ARG)>(*)(const Function<P,RES(RealVector)>&,const Function<P,RealVector(ARG)>&)) &compose);
+
+    if constexpr (Same<P,EffectiveTag> and Same<SIG,RealScalar(RealVector)>) {
+        function_class.def("__eq__", &__eq__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+        function_class.def("__le__", &__le__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+        function_class.def("__ge__", &__ge__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+    }
+
 }
+
+
+template<class SIG> Void export_functions(pybind11::module& module)
+{
+    export_function<EffectiveTag,SIG>(module);
+    export_function<ValidatedTag,SIG>(module);
+    export_function<ApproximateTag,SIG>(module);
+
+    pybind11::implicitly_convertible<Function<EffectiveTag,SIG>,Function<ValidatedTag,SIG>>();
+    pybind11::implicitly_convertible<Function<EffectiveTag,SIG>,Function<ApproximateTag,SIG>>();
+    pybind11::implicitly_convertible<Function<ValidatedTag,SIG>,Function<ApproximateTag,SIG>>();
+
+    if constexpr (Same<SIG,RealScalar(RealVector)>) {
+        module.def("lie_derivative", (ScalarMultivariateFunction<EffectiveTag>(*)(const ScalarMultivariateFunction<EffectiveTag>&,const VectorMultivariateFunction<EffectiveTag>&)) &lie_derivative);
+    }
+}
+
 
 template<class Y, class X> Void define_procedure_evaluation(pybind11::module& module) {
     module.def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
@@ -472,26 +441,6 @@ Void export_procedures(pybind11::module& module) {
     export_procedure<ValidatedNumber>(module);
 }
 
-Void export_scalar_functions(pybind11::module& module) {
-    export_scalar_function<ApproximateTag>(module);
-    export_scalar_function<ValidatedTag>(module);
-    export_scalar_function<EffectiveTag>(module);
-    pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<ScalarMultivariateFunction<ValidatedTag>,ScalarMultivariateFunction<ApproximateTag>>();
-    module.def("lie_derivative", (ScalarMultivariateFunction<EffectiveTag>(*)(const ScalarMultivariateFunction<EffectiveTag>&,const VectorMultivariateFunction<EffectiveTag>&)) &lie_derivative);
-}
-
-Void export_vector_functions(pybind11::module& module) {
-    export_vector_function<ApproximateTag>(module);
-    export_vector_function<ValidatedTag>(module);
-    export_vector_function<EffectiveTag>(module);
-    pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<VectorMultivariateFunction<ValidatedTag>,VectorMultivariateFunction<ApproximateTag>>();
-}
-
-
 
 
 Void function_submodule(pybind11::module& module) {
@@ -502,10 +451,10 @@ Void function_submodule(pybind11::module& module) {
 
     export_domains(module);
 
-    export_scalar_univariate_functions(module);
-    export_vector_univariate_functions(module);
-    export_scalar_functions(module);
-    export_vector_functions(module);
+    export_functions<RealScalar(RealScalar)>(module);
+    export_functions<RealVector(RealScalar)>(module);
+    export_functions<RealScalar(RealVector)>(module);
+    export_functions<RealVector(RealVector)>(module);
 
     export_procedures(module);
 }

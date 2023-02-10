@@ -32,6 +32,13 @@ typedef GridTreePaving CPaving;
 
 template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
 
+ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
+    ExactBoxType result(bx.size());
+    for (SizeType i=0; i<bx.size(); ++i)
+        result[i] = Interval<FloatDP>(bx[i].lower_bound()+eps,bx[i].upper_bound()-eps);
+    return result;
+}
+
 String word_to_id(BinaryWord const& w, SizeType size) {
     std::stringstream ss;
     auto size_offset = w.size()-size;
@@ -150,8 +157,8 @@ private:
 
 class ReachAvoidGridding {
 public:
-    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving) :
-            _name(name), _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving),
+    ReachAvoidGridding(String const& name, EffectiveVectorMultivariateFunction const& dynamics, SPaving const& state_paving, CPaving const& controller_paving, FloatDP const& eps) :
+            _name(name), _dynamics(dynamics), _state_paving(state_paving), _controller_paving(controller_paving), _eps(eps),
             _default_state_extent(state_paving.begin()->root_extent()), _default_controller_extent(controller_paving.begin()->root_extent()),
             _unverified(state_paving), _obstacles(state_paving.grid()), _goals(state_paving.grid()) {
         for (auto const& c : state_paving)
@@ -243,7 +250,7 @@ public:
             for (auto const& controller_cell : _controller_paving) {
                 auto combined = product(state_cell.box(),controller_cell.box());
                 SPaving target_cells(_state_paving.grid());
-                target_cells.adjoin_outer_approximation(apply(_dynamics, combined),0);
+                target_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),0);
                 target_cells.mince(0);
                 target_cells.restrict(_state_paving);
                 if (not target_cells.is_empty()) {
@@ -307,6 +314,8 @@ private:
     SPaving const _state_paving;
     CPaving const _controller_paving;
 
+    FloatDP const _eps;
+
     SizeType const _default_state_extent;
     SizeType const _default_controller_extent;
 
@@ -336,8 +345,8 @@ void ariadne_main()
 
     FloatDP eps(1e-10_x,DoublePrecision());
 
-    Grid sgrid({0,0,eps.get_d()/2},{0.5,0.5,2*pi/8});
-    ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{0+eps,2*pi-eps}});
+    Grid sgrid({0,0,0},{0.5,0.5,2*pi/8});
+    ExactBoxType sdomain({{0+eps,5-eps},{0+eps,5-eps},{-2*pi+eps,2*pi-eps}});
     SPaving sdomain_paving(sgrid);
     sdomain_paving.adjoin_outer_approximation(sdomain,0);
     sdomain_paving.mince(0);
@@ -348,18 +357,18 @@ void ariadne_main()
     cdomain_paving.adjoin_outer_approximation(cdomain,0);
     cdomain_paving.mince(0);
 
-    ReachAvoidGridding scs("heading",dynamics,sdomain_paving, cdomain_paving);
+    ReachAvoidGridding scs("heading",dynamics,sdomain_paving, cdomain_paving, eps);
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())
 
-    scs.add_obstacle({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
-    scs.add_obstacle({{0+eps,1-eps},{2+eps,3-eps},{0+eps,2*pi-eps}});
-    scs.add_obstacle({{2.5_x+eps,5-eps},{2.0_x+eps,3-eps},{0+eps,2*pi-eps}});
-    scs.add_obstacle({{0+eps,5-eps},{0+eps,0.5_x-eps},{0+eps,2*pi-eps}});
+    scs.add_obstacle({{1+eps,3.5_x-eps},{4.5_x+eps,5-eps},{-2*pi+eps,2*pi-eps}});
+    scs.add_obstacle({{0+eps,1-eps},{2+eps,3-eps},{-2*pi+eps+eps,2*pi-eps}});
+    scs.add_obstacle({{2.5_x+eps,5-eps},{2.0_x+eps,3-eps},{-2*pi+eps,2*pi-eps}});
+    scs.add_obstacle({{0+eps,5-eps},{0+eps,0.5_x-eps},{-2*pi+eps,2*pi-eps}});
     scs.print_obstacles();
     CONCLOG_PRINTLN_VAR_AT(1,scs.obstacles_size())
 
-    scs.add_goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{0+eps,2*pi-eps}});
+    scs.add_goal({{4+eps,5-eps},{4.5_x+eps,5-eps},{-2*pi+eps,2*pi-eps}});
     scs.print_goals();
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
 
@@ -379,9 +388,9 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << scs.unverified_size() << " (" << scs.unverified_percentage() << "% left)")
 
-    scs.plot({{0,5},{0,5},{0,6.28_x}},0,1);
-    scs.plot({{0,5},{0,5},{0,6.28_x}},0,2);
-    scs.plot({{0,5},{0,5},{0,6.28_x}},1,2);
+    scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,1);
+    scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,2);
+    scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},1,2);
 
-    CONCLOG_RUN_AT(1,scs.print_forward_graph())
+    CONCLOG_RUN_AT(2,scs.print_forward_graph())
 }

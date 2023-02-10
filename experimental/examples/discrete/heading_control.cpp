@@ -62,9 +62,9 @@ SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<S
 }
 
 class DirectedHashedGraph {
-public:
+  public:
     typedef SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>::iterator Iterator;
-public:
+  public:
     DirectedHashedGraph(EffectiveVectorMultivariateFunction const& dynamics, std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
             _dynamics(dynamics), _hashed_space(hashed_space), _hashed_controller(hashed_controller),
             _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
@@ -125,14 +125,40 @@ public:
         _graph.erase(to_identifier(source_cell,_default_space_extent,_hashed_space));
     }
 
+    //! \brief Erase for a given \a source and \a transition its \a target
+    void erase(SCell const& source, CCell const& transition, SCell const& target) {
+        auto const& src_ref = _graph.find(to_identifier(source,_default_space_extent,_hashed_space));
+        if (src_ref != _graph.end()) {
+            auto const& trans_ref = src_ref->second.second.find(to_identifier(transition,_default_controller_extent,_hashed_controller));
+            if (trans_ref != src_ref->second.second.end()) {
+                trans_ref->second.second.remove(target);
+            }
+        }
+    }
+
     //! \brief Subtract the source cells of the graph from \a paving
-    void prune(SPaving& paving) const {
+    void apply_to(SPaving& paving) const {
         for (auto const& entry : _graph) {
             paving.remove(entry.second.first);
         }
     }
 
     void clear() { _graph.clear(); }
+
+    //! \brief Remove transitions for which the set of targets is empty
+    //! and remove sources for which the set of transitions is empty
+    void sweep() {
+        auto src_it = _graph.begin();
+        while (src_it != _graph.end()) {
+            auto trans_it = src_it->second.second.begin();
+            while (trans_it != src_it->second.second.end()) {
+                if (trans_it->second.second.is_empty()) src_it->second.second.erase(trans_it++);
+                else ++trans_it;
+            }
+            if (src_it->second.second.empty()) _graph.erase(src_it++);
+            else  ++src_it;
+        }
+    }
 
     friend OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
         for (auto const& src : g._graph) {
@@ -259,7 +285,7 @@ public:
         CONCLOG_PRINTLN_AT(1,*_backward_graph)
     }
 
-    void reconstruct_reachability_graph() {
+    void compute_reachability_graph() {
         CONCLOG_SCOPE_CREATE
 
         _forward_graph->clear();
@@ -284,11 +310,12 @@ public:
             }
             indicator.update_current(++indicator_value);
         }
+
         sw.click();
         CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/_unverified.size()/_controller_paving.size() << ")")
     }
 
-    void compute_safe_forward_graph() {
+    void refine_to_safety_graph() {
         CONCLOG_SCOPE_CREATE
 
         Stopwatch<Milliseconds> sw;
@@ -302,29 +329,37 @@ public:
         while (not unsafe.empty()) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
             auto const& u = unsafe.front();
-            auto const& bref = _backward_graph->find(u);
-            if (_backward_graph->contains(bref)) {
-                for (auto const& trans : bref->second.second) {
-                    for (auto const& src : trans.second.second) {
-                        auto const& fref = _forward_graph->find(src);
-                        if (_forward_graph->contains(fref)) {
-                            fref->second.second.erase(trans.first);
-                            if (fref->second.second.empty()) {
-                                unsafe.push_back(src);
+            auto const& bw_unsafe_ref = _backward_graph->find(u);
+            if (_backward_graph->contains(bw_unsafe_ref)) {
+                for (auto const& bw_unsafe_trans : bw_unsafe_ref->second.second) {
+                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second.second) {
+                        auto const& fw_src_of_unsafe_trans = _forward_graph->find(src_of_unsafe_trans);
+                        if (_forward_graph->contains(fw_src_of_unsafe_trans)) {
+                            auto const& fw_trans = fw_src_of_unsafe_trans->second.second.at(bw_unsafe_trans.first);
+                            for (auto const& tgt_to_prune : fw_trans.second) {
+                                _backward_graph->erase(tgt_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
+                            }
+                            fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
+                            if (fw_src_of_unsafe_trans->second.second.empty()) {
+                                unsafe.push_back(src_of_unsafe_trans);
                                 indicator.update_final(++indicator_final_original);
-                                _forward_graph->erase(src);
+                                _forward_graph->erase(src_of_unsafe_trans);
                             }
                         }
                     }
                 }
             }
+            _backward_graph->erase(u);
             unsafe.pop_front();
             indicator.update_current(++indicator_current_value);
         }
+
+        _backward_graph->sweep();
+
+        _forward_graph->apply_to(_unverified);
+
         sw.click();
         CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
-
-        _forward_graph->prune(_unverified);
     }
 
     SizeType forward_transitions() const { return _forward_graph->transitions_size(); }
@@ -371,7 +406,7 @@ void ariadne_main()
     Grid state_grid({0.5,0.5,2*pi/8});
     BoundType theta_domain = {-2*pi_,2*pi_};
     BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
-    Grid control_grid({pi/32});
+    Grid control_grid({pi/4});
     BoundsBoxType control_domain({{-pi_,pi_}});
 
     ReachAvoidGridding scs("heading",dynamics,state_grid,state_domain,control_grid,control_domain,1e-10_x);
@@ -393,7 +428,7 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
-    scs.reconstruct_reachability_graph();
+    scs.compute_reachability_graph();
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
@@ -401,7 +436,10 @@ void ariadne_main()
     //scs.print_forward_graph();
     //scs.print_backward_graph();
 
-    scs.compute_safe_forward_graph();
+    scs.refine_to_safety_graph();
+
+    CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.forward_sources_size())
 

@@ -324,7 +324,7 @@ private:
 void ariadne_main()
 {
     Real deltat=0.1_dec;
-    Real v=3.3_dec;
+    Real v=3;
     RealVariable x("x"), y("y"), theta("theta"), Kx("Kx"), Ky("Ky"), Kt("Kt"), b("b");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*(Kx*x+Ky*y+Kt*theta+b),
                          next(Kx)=Kx,next(Ky)=Ky,next(Kt)=Kt,next(b)=b});

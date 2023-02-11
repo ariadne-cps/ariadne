@@ -42,12 +42,6 @@ String word_to_id(BinaryWord const& w, SizeType size) {
     return ss.str();
 }
 
-SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<String,SizeType> const& hashed) {
-    SizeType size_to_use = cell.word().size() - (cell.root_extent() - default_extent)*cell.dimension();
-    String expanded_id = word_to_id(cell.word(),size_to_use);
-    return hashed.at(expanded_id);
-}
-
 class IdentifiedCellFactory;
 
 struct IdentifiedCell {
@@ -67,7 +61,13 @@ class IdentifiedCellFactory {
     typedef std::map<String,SizeType> HashTableType;
   public:
     IdentifiedCellFactory(SizeType default_extent, HashTableType const& table) : _default_extent(default_extent), _table(table) { }
-    IdentifiedCell create(GridCell const& cell) const { return IdentifiedCell(to_identifier(cell, _default_extent, _table),cell); }
+    IdentifiedCell create(GridCell const& cell) const { return IdentifiedCell(_to_identifier(cell),cell); }
+  private:
+    SizeType _to_identifier(GridCell const& cell) const {
+        SizeType size_to_use = cell.word().size() - (cell.root_extent() - _default_extent)*cell.dimension();
+        String expanded_id = word_to_id(cell.word(),size_to_use);
+        return _table.at(expanded_id);
+    }
   private:
     SizeType const _default_extent;
     HashTableType const _table;

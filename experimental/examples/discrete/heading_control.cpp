@@ -28,6 +28,7 @@
 
 void ariadne_main()
 {
+
     Real deltat=0.1_dec;
     Real v=3;
     RealVariable x("x"), y("y"), theta("theta"), u("u");
@@ -68,14 +69,14 @@ void ariadne_main()
     Stopwatch<Milliseconds> sw;
     scs.compute_reachability_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.num_transitions())
 
     sw.restart();
     scs.refine_to_safety_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of reducing graph to safe one: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.num_transitions())
 

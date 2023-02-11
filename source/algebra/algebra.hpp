@@ -33,8 +33,10 @@
 #include "numeric/numeric.hpp"
 #include "utility/pointer.hpp"
 #include "utility/exceptions.hpp"
+#include "utility/metaprogramming.hpp"
 #include "numeric/operators.hpp"
 #include "algebra/algebra_interface.hpp"
+#include "algebra/algebra_wrapper.hpp"
 #include "algebra/operations.hpp"
 
 namespace Ariadne {
@@ -47,6 +49,23 @@ template<class X> struct AlgebraOperations<Algebra<X>,X> {
     static Algebra<X> apply(BinaryFieldOperator op, Algebra<X> a1, X const& c2) { return Algebra<X>(a1.managed_pointer()->_apply(op,c2)); }
     static Algebra<X> apply(BinaryRingOperator op, X const& c1, Algebra<X> a2) { return Algebra<X>(a2.managed_pointer()->_rapply(op,c1)); }
     static Algebra<X> apply(GradedRingOperator op, Algebra<X> a1, Nat m2) { return Algebra<X>(a1.managed_pointer()->_apply(op,m2)); }
+};
+
+template<class X> struct AlgebraOperations<TranscendentalAlgebra<X>,X> {
+    static TranscendentalAlgebraInterface<X> const* _upcast(AlgebraInterface<X> const* ap) {
+        return dynamic_cast<TranscendentalAlgebraInterface<X> const*>(ap); }
+    static TranscendentalAlgebraInterface<X> const* _upcast(TranscendentalAlgebraInterface<X> const* ap) {
+        return ap; }
+    static TranscendentalAlgebra<X> apply(BinaryFieldOperator op, TranscendentalAlgebra<X> a1, TranscendentalAlgebra<X> a2) {
+        return TranscendentalAlgebra<X>(_upcast(a1.raw_pointer())->_apply(op,a2.reference())); }
+    static TranscendentalAlgebra<X> apply(BinaryFieldOperator op, TranscendentalAlgebra<X> a1, X const& c2) {
+        return  TranscendentalAlgebra<X>(_upcast(a1.raw_pointer())->_apply(op,c2)); }
+    static TranscendentalAlgebra<X> apply(BinaryFieldOperator op, X const& c1, TranscendentalAlgebra<X> a2) {
+        return TranscendentalAlgebra<X>(_upcast(a2.raw_pointer())->_rapply(op,c1)); }
+    static TranscendentalAlgebra<X> apply(UnaryTranscendentalOperator op, TranscendentalAlgebra<X> a) {
+        return TranscendentalAlgebra<X>(_upcast(a.raw_pointer())->_apply(op)); }
+    static TranscendentalAlgebra<X> apply(Pow op, TranscendentalAlgebra<X> a1, Int n2) {
+        return TranscendentalAlgebra<X>(_upcast(a1.raw_pointer())->_apply(op,n2)); }
 };
 
 template<class X> struct AlgebraOperations<ElementaryAlgebra<X>,X> {
@@ -79,22 +98,53 @@ template<class X> class Algebra
     typedef typename X::NumericType NumericType;
   public:
     using Handle<Interface>::Handle;
-    template<class A> A extract() const { A const* ap=dynamic_cast<A const*>(this->managed_pointer().operator->()); assert(ap); return *ap; }
+    template<AnAlgebraOver<X> A> Algebra(A const&);
+    template<class A> A extract() const;
+    Algebra(const Algebra<X>& a) : Handle<AlgebraInterface<X>>(a) { }
+    Algebra<X>& operator=(const Algebra<X>& a) { (*this).Handle<AlgebraInterface<X>>::operator=(std::shared_ptr< AlgebraInterface<X> >(a.managed_pointer()->_create_copy())); return *this; }
     Algebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
-    Algebra<X>& operator=(const Algebra<X>& a) { (*this)=std::shared_ptr< AlgebraInterface<X> >(a.managed_pointer()->_create_copy()); return *this; }
     operator const AlgebraInterface<X>& () const { return *this->managed_pointer(); }
     Algebra<X> create() const { return Algebra<X>(this->managed_pointer()->_create_zero()); }
     Algebra<X> clone() const { return Algebra<X>(this->managed_pointer()->_create_copy()); }
     Algebra<X> create_zero() const { return Algebra<X>(this->managed_pointer()->_create_zero()); }
     Algebra<X> create_constant(X const& c) const { return Algebra<X>(this->managed_pointer()->_create_constant(c)); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
-  public:
-    Void iadd(const X& c) { this->managed_pointer()->_iadd(c); }
-    Void imul(const X& c) { this->managed_pointer()->_imul(c); }
-    Void isma(const X& c, const Algebra<X>& a) { this->managed_pointer()->_isma(c,*a.managed_pointer()); }
-    Void ifma(const Algebra<X>& a1, const Algebra<X>& a2) { this->managed_pointer()->_ifma(*a1.managed_pointer(),*a2.managed_pointer()); }
+    friend OutputStream& operator<<(OutputStream& os, Algebra<X> const& a) { return a.managed_pointer()->_write(os); }
+  private:
+    template<class A> static AlgebraInterface<X>* make_algebra(A const& a) {
+        if constexpr(BaseOf<AlgebraInterface<X>,A>) { return new A(a); }
+        else { return new AlgebraWrapper<A,X>(a); }
+    }
 };
 
+
+
+//! \brief Generic class for elements of unital algebras.
+template<class X> class TranscendentalAlgebra
+    : public Handle<TranscendentalAlgebraInterface<X>>
+    , public DispatchTranscendentalAlgebraOperations<TranscendentalAlgebra<X>,X>
+{
+  public:
+    typedef TranscendentalAlgebraInterface<X> Interface;
+    typedef X ScalarType;
+    typedef typename X::Paradigm Paradigm;
+    typedef typename X::NumericType NumericType;
+  public:
+    using Handle<Interface>::Handle;
+    TranscendentalAlgebra() : TranscendentalAlgebra(nullptr) { }
+    template<ATranscendentalAlgebraOver<X> A> explicit TranscendentalAlgebra(const A& a);
+    template<class A> A extract() const;
+    TranscendentalAlgebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
+    TranscendentalAlgebra<X> create() const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_zero()); }
+    TranscendentalAlgebra<X> clone() const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_copy()); }
+    TranscendentalAlgebra<X> create_zero() const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_zero()); }
+    TranscendentalAlgebra<X> create_constant(X const& c) const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_constant(c)); }
+    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+  private:
+    template<class A> static TranscendentalAlgebraInterface<X>* make_elementary_algebra(A const& a) {
+        if constexpr(BaseOf<TranscendentalAlgebraInterface<X>,A>) { return new A(a); }
+        else { return new TranscendentalAlgebraWrapper<A,X>(a); }
+    }
+};
 
 //! \brief Generic class for elements of unital algebras.
 template<class X> class ElementaryAlgebra
@@ -108,9 +158,8 @@ template<class X> class ElementaryAlgebra
     typedef typename X::NumericType NumericType;
   public:
     using Handle<Interface>::Handle;
-
     ElementaryAlgebra() : ElementaryAlgebra(nullptr) { }
-    explicit ElementaryAlgebra(const Algebra<X>& a);
+    template<AnElementaryAlgebraOver<X> A> explicit ElementaryAlgebra(const A& a);
     template<class A> A extract() const;
     ElementaryAlgebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
     ElementaryAlgebra<X> create() const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_zero()); }
@@ -118,16 +167,13 @@ template<class X> class ElementaryAlgebra
     ElementaryAlgebra<X> create_zero() const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_zero()); }
     ElementaryAlgebra<X> create_constant(X const& c) const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_constant(c)); }
     OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+  private:
+    template<class A> static ElementaryAlgebraInterface<X>* make_elementary_algebra(A const& a) {
+        if constexpr(BaseOf<ElementaryAlgebraInterface<X>,A>) { return new A(a); }
+        else { return new ElementaryAlgebraWrapper<A,X>(a); }
+    }
 };
 
-template<class X> ElementaryAlgebra<X>::ElementaryAlgebra(const Algebra<X>& a)
-    : ElementaryAlgebra(std::dynamic_pointer_cast<ElementaryAlgebraInterface<X>>(a.managed_pointer()))
-{
-    AlgebraInterface<X>* ap=a.raw_pointer();
-    if (ap && !this->_ptr) {
-        ARIADNE_THROW(BadCast,"ElementaryAlgebra(SharedPointer<AlgebraInterface<X>> ap)",
-                      "*ap="<<*ap<<"; "<<typeid(ap).name()<<", "<<typeid(*ap).name()); }
-}
 
 
 template<class X> class NormedAlgebra
@@ -224,6 +270,37 @@ template<class X> class SymbolicAlgebra
 
 template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x._write(os); }
 template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x._write(os); }
+
+
+
+
+template<class X> template<AnAlgebraOver<X> A> Algebra<X>::Algebra(A const& a)
+    : Handle<AlgebraInterface<X>>(make_algebra(a)) { }
+
+template<class X> template<class A> A Algebra<X>::extract() const {
+    if constexpr(BaseOf<AlgebraInterface<X>,A>) { auto ap=dynamic_cast<A const*>(this->raw_pointer()); assert(ap); return *ap; }
+    else { auto awp=dynamic_cast<AlgebraWrapper<A,X>const*>(this->raw_pointer()); assert(awp); return *awp; }
+}
+
+
+template<class X> template<ATranscendentalAlgebraOver<X> A> TranscendentalAlgebra<X>::TranscendentalAlgebra(A const& a)
+    : Handle<TranscendentalAlgebraInterface<X>>(make_elementary_algebra(a)) { }
+
+template<class X> template<class A> A TranscendentalAlgebra<X>::extract() const {
+    if constexpr(BaseOf<TranscendentalAlgebraInterface<X>,A>) { auto ap=dynamic_cast<A const*>(this->raw_pointer()); assert(ap); return *ap; }
+    else { auto awp=dynamic_cast<TranscendentalAlgebraWrapper<A,X>const*>(this->raw_pointer()); assert(awp); return *awp; }
+}
+
+
+template<class X> template<AnElementaryAlgebraOver<X> A> ElementaryAlgebra<X>::ElementaryAlgebra(A const& a)
+    : Handle<ElementaryAlgebraInterface<X>>(make_elementary_algebra(a)) { }
+
+template<class X> template<class A> A ElementaryAlgebra<X>::extract() const {
+    if constexpr(BaseOf<ElementaryAlgebraInterface<X>,A>) { auto ap=dynamic_cast<A const*>(this->raw_pointer()); assert(ap); return *ap; }
+    else { auto awp=dynamic_cast<ElementaryAlgebraWrapper<A,X>const*>(this->raw_pointer()); assert(awp); return *awp; }
+}
+
+
 
 } // namespace Ariadne
 

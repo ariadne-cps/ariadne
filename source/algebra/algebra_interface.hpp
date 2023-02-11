@@ -44,6 +44,8 @@ template<class X> class Algebra;
 template<class X> class NormedAlgebra;
 template<class X> class GradedAlgebra;
 template<class X> class SymbolicAlgebra;
+template<class X> class TranscendentalAlgebra;
+template<class X> class ElementaryAlgebra;
 
 template<class X> struct AlgebraTraits;
 
@@ -106,6 +108,8 @@ template<class X> class AlgebraInterface
     //! \brief Virtual destructor.
     virtual ~AlgebraInterface() = default;
     //! \brief Create a dynamically-allocated copy.
+    virtual AlgebraInterface<X>* _copy() const = 0;
+    //! \brief Create a dynamically-allocated copy.
     virtual AlgebraInterface<X>* _create_copy() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.
     virtual AlgebraInterface<X>* _create_zero() const = 0;
@@ -121,11 +125,11 @@ template<class X> class AlgebraInterface
     //! \brief Fused multiply and add \c r+=x1*x2 .
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
 
-    virtual AlgebraInterface<X>* _apply(Neg) const = 0;
+    virtual AlgebraInterface<X>* _apply(UnaryRingOperator) const = 0;
     virtual AlgebraInterface<X>* _apply(BinaryRingOperator,AlgebraInterface<X>const&) const = 0;
     virtual AlgebraInterface<X>* _apply(BinaryFieldOperator,X const&) const = 0;
     virtual AlgebraInterface<X>* _rapply(BinaryRingOperator,X const&) const = 0;
-    virtual AlgebraInterface<X>* _apply(Pow, Nat m) const = 0;
+    virtual AlgebraInterface<X>* _apply(GradedRingOperator, Nat m) const = 0;
 
 };
 
@@ -153,7 +157,7 @@ template<class X> class ElementaryAlgebraInterface
 
 //! \brief Interface for a normed unital algebra over a field \a X.
 template<class X> class TranscendentalAlgebraInterface
-    : public virtual AlgebraInterface<X>
+    : public virtual WritableInterface
 {
   public:
     typedef X NumericType;
@@ -166,8 +170,14 @@ template<class X> class TranscendentalAlgebraInterface
     virtual TranscendentalAlgebraInterface<X>* _create_zero() const = 0;
     virtual TranscendentalAlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
-    using AlgebraInterface<X>::_apply;
-    virtual TranscendentalAlgebraInterface<X>* _apply(UnaryTranscendentalOperator) const;
+    //! FIXME: Remove this; currently used to allow copy of Handle
+    virtual TranscendentalAlgebraInterface<X>* _copy() const { return this->_create_copy(); }
+
+    virtual TranscendentalAlgebraInterface<X>* _apply(BinaryFieldOperator, TranscendentalAlgebraInterface<X> const&) const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _apply(BinaryFieldOperator, X const&) const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _rapply(BinaryFieldOperator, X const&) const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _apply(UnaryTranscendentalOperator) const = 0;
+    virtual TranscendentalAlgebraInterface<X>* _apply(GradedFieldOperator, Int) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.

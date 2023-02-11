@@ -65,13 +65,13 @@ class DirectedHashedGraph {
   public:
     typedef SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>::iterator Iterator;
   public:
-    DirectedHashedGraph(EffectiveVectorMultivariateFunction const& dynamics, std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
-            _dynamics(dynamics), _hashed_space(hashed_space), _hashed_controller(hashed_controller),
+    DirectedHashedGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
+            _hashed_space(hashed_space), _hashed_controller(hashed_controller),
             _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
 
-    SizeType sources_size() const { return _graph.size(); }
+    SizeType num_sources() const { return _graph.size(); }
 
-    SizeType transitions_size() const {
+    SizeType num_transitions() const {
         SizeType result = 0;
         for (auto const& src : _graph) {
             for (auto const& ctrl : src.second.second) {
@@ -162,19 +162,16 @@ class DirectedHashedGraph {
 
     friend OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
         for (auto const& src : g._graph) {
-            os << src.first << src.second.first.box() << ":[\n";
+            os << src.first << src.second.first.box() << ":[";
             for (auto const& ctrl : src.second.second) {
                 os << ctrl.first << "->";
-                auto combined = product(src.second.first.box(),ctrl.second.first.box());
-                os << apply(g._dynamics,combined);
                 os << "(";
                 for (auto const& tgt : ctrl.second.second) {
                     os << to_identifier(tgt,g._default_space_extent,g._hashed_space) << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
-                os << ")\n";
+                os << ")";
             }
-            os.seekp(-1, std::ios_base::end);
             os << "]\n";
         }
         os << "}";
@@ -182,12 +179,90 @@ class DirectedHashedGraph {
         return os;
     }
 private:
-    EffectiveVectorMultivariateFunction const _dynamics;
     std::map<String,SizeType> const _hashed_space;
     std::map<String,SizeType> const _hashed_controller;
     SizeType const _default_space_extent;
     SizeType const _default_controller_extent;
     SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>  _graph;
+};
+
+class ReachabilityGraph {
+  public:
+    ReachabilityGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
+        _forward_graph(hashed_space,hashed_controller,default_space_extent,default_controller_extent),
+        _backward_graph(hashed_space,hashed_controller,default_space_extent,default_controller_extent) { }
+
+    SizeType num_transitions() const {
+        return _forward_graph.num_transitions();
+    }
+
+    SizeType num_sources() const {
+        return _forward_graph.num_sources();
+    }
+
+    SizeType num_targets() const {
+        return _backward_graph.num_sources();
+    }
+
+    void insert(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
+        _forward_graph.insert_forward(source_cell,controller_cell,target_cells);
+        _backward_graph.insert_backward(source_cell,controller_cell,target_cells);
+    }
+
+    void clear() {
+        _forward_graph.clear();
+        _backward_graph.clear();
+    }
+
+    void refine_to_safety_graph(SPaving const& obstacles, SPaving& unverified) {
+        CONCLOG_SCOPE_CREATE
+
+        std::deque<SCell> unsafe;
+        for (auto const& c : obstacles) unsafe.push_back(c);
+
+        double indicator_final_original = unsafe.size();
+        double indicator_current_value = 0;
+        ProgressIndicator indicator(indicator_final_original);
+        while (not unsafe.empty()) {
+            CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+            auto const& u = unsafe.front();
+            auto const& bw_unsafe_ref = _backward_graph.find(u);
+            if (_backward_graph.contains(bw_unsafe_ref)) {
+                for (auto const& bw_unsafe_trans : bw_unsafe_ref->second.second) {
+                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second.second) {
+                        auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_of_unsafe_trans);
+                        if (_forward_graph.contains(fw_src_of_unsafe_trans)) {
+                            auto const& fw_trans = fw_src_of_unsafe_trans->second.second.at(bw_unsafe_trans.first);
+                            for (auto const& tgt_to_prune : fw_trans.second) {
+                                _backward_graph.erase(tgt_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
+                            }
+                            fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
+                            if (fw_src_of_unsafe_trans->second.second.empty()) {
+                                unsafe.push_back(src_of_unsafe_trans);
+                                indicator.update_final(++indicator_final_original);
+                                _forward_graph.erase(src_of_unsafe_trans);
+                            }
+                        }
+                    }
+                }
+            }
+            _backward_graph.erase(u);
+            unsafe.pop_front();
+            indicator.update_current(++indicator_current_value);
+        }
+
+        _backward_graph.sweep();
+
+        _forward_graph.apply_to(unverified);
+    }
+
+    friend OutputStream& operator<<(OutputStream& os, ReachabilityGraph const& g) {
+        return os << "Forward:\n" << g._forward_graph << "\nBackward:\n" << g._backward_graph;
+    }
+
+  private:
+    DirectedHashedGraph _forward_graph;
+    DirectedHashedGraph _backward_graph;
 };
 
 class ReachAvoidGridding {
@@ -216,8 +291,7 @@ public:
             _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*_controller_paving.dimension()),_controller_ids.size()));
         }
 
-        _forward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
-        _backward_graph.reset(new DirectedHashedGraph(_dynamics,_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
+        _reachability_graph.reset(new ReachabilityGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
     }
 
     ReachAvoidGridding& add_obstacle(BoundsBoxType const& box) {
@@ -243,7 +317,8 @@ public:
     SizeType obstacles_size() const { return _obstacles.size(); }
     SizeType goals_size() const { return _goals.size(); }
     SizeType unverified_size() const { return _unverified.size(); }
-    SizeType forward_sources_size() const { return _forward_graph->sources_size(); }
+    SizeType num_sources() const { return _reachability_graph->num_sources(); }
+    SizeType num_targets() const { return _reachability_graph->num_targets(); }
 
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const {
@@ -266,32 +341,23 @@ public:
     void print_goals() const {
         std::stringstream ss;
         for (auto const& g : _goals) ss << to_identifier(g,_default_state_extent,_state_ids) << " ";
-        CONCLOG_PRINTLN_AT(2,"Goals: " << ss.str())
+        CONCLOG_PRINTLN("Goals: " << ss.str())
     }
 
     void print_obstacles() const {
         std::stringstream ss;
         for (auto const& o : _obstacles) ss << to_identifier(o,_default_state_extent,_state_ids) << " ";
-        CONCLOG_PRINTLN_AT(2,"Obstacles: " << ss.str())
+        CONCLOG_PRINTLN("Obstacles: " << ss.str())
     }
 
-    void print_forward_graph() const {
-        CONCLOG_PRINTLN_AT(1,"Forward graph:")
-        CONCLOG_PRINTLN_AT(1,*_forward_graph)
-    }
-
-    void print_backward_graph() const {
-        CONCLOG_PRINTLN_AT(1,"Backward graph:")
-        CONCLOG_PRINTLN_AT(1,*_backward_graph)
+    void print_graph() const {
+        CONCLOG_PRINTLN(*_reachability_graph)
     }
 
     void compute_reachability_graph() {
         CONCLOG_SCOPE_CREATE
 
-        _forward_graph->clear();
-        _backward_graph->clear();
-
-        Stopwatch<Milliseconds> sw;
+        _reachability_graph->clear();
 
         ProgressIndicator indicator(_unverified.size());
         double indicator_value = 0;
@@ -303,67 +369,18 @@ public:
                 target_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),0);
                 target_cells.mince(0);
                 target_cells.restrict(_state_paving);
-                if (not target_cells.is_empty()) {
-                    _forward_graph->insert_forward(state_cell,controller_cell,target_cells);
-                    _backward_graph->insert_backward(state_cell,controller_cell,target_cells);
-                }
+                if (not target_cells.is_empty())
+                    _reachability_graph->insert(state_cell,controller_cell,target_cells);
             }
             indicator.update_current(++indicator_value);
         }
-
-        sw.click();
-        CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds (per state: " << sw.elapsed_seconds()/_unverified.size()/_controller_paving.size() << ")")
     }
 
     void refine_to_safety_graph() {
-        CONCLOG_SCOPE_CREATE
-
-        Stopwatch<Milliseconds> sw;
-
-        std::deque<SCell> unsafe;
-        for (auto const& c : _obstacles) unsafe.push_back(c);
-
-        double indicator_final_original = unsafe.size();
-        double indicator_current_value = 0;
-        ProgressIndicator indicator(indicator_final_original);
-        while (not unsafe.empty()) {
-            CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-            auto const& u = unsafe.front();
-            auto const& bw_unsafe_ref = _backward_graph->find(u);
-            if (_backward_graph->contains(bw_unsafe_ref)) {
-                for (auto const& bw_unsafe_trans : bw_unsafe_ref->second.second) {
-                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second.second) {
-                        auto const& fw_src_of_unsafe_trans = _forward_graph->find(src_of_unsafe_trans);
-                        if (_forward_graph->contains(fw_src_of_unsafe_trans)) {
-                            auto const& fw_trans = fw_src_of_unsafe_trans->second.second.at(bw_unsafe_trans.first);
-                            for (auto const& tgt_to_prune : fw_trans.second) {
-                                _backward_graph->erase(tgt_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
-                            }
-                            fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
-                            if (fw_src_of_unsafe_trans->second.second.empty()) {
-                                unsafe.push_back(src_of_unsafe_trans);
-                                indicator.update_final(++indicator_final_original);
-                                _forward_graph->erase(src_of_unsafe_trans);
-                            }
-                        }
-                    }
-                }
-            }
-            _backward_graph->erase(u);
-            unsafe.pop_front();
-            indicator.update_current(++indicator_current_value);
-        }
-
-        _backward_graph->sweep();
-
-        _forward_graph->apply_to(_unverified);
-
-        sw.click();
-        CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
+        _reachability_graph->refine_to_safety_graph(_obstacles,_unverified);
     }
 
-    SizeType forward_transitions() const { return _forward_graph->transitions_size(); }
-    SizeType backward_transitions() const { return _backward_graph->transitions_size(); }
+    SizeType num_transitions() const { return _reachability_graph->num_transitions(); }
 
 private:
 
@@ -385,8 +402,7 @@ private:
 
     std::map<String,SizeType> _state_ids, _controller_ids;
 
-    Ariadne::SharedPointer<DirectedHashedGraph> _forward_graph;
-    Ariadne::SharedPointer<DirectedHashedGraph> _backward_graph;
+    Ariadne::SharedPointer<ReachabilityGraph> _reachability_graph;
 };
 
 void ariadne_main()
@@ -418,30 +434,31 @@ void ariadne_main()
     scs.add_obstacle({{0,1},{2,3},theta_domain});
     scs.add_obstacle({{2.5,5},{2,3},theta_domain});
     scs.add_obstacle({{0,5},{0,0.5},theta_domain});
-    scs.print_obstacles();
+    CONCLOG_RUN_AT(2,scs.print_obstacles())
     CONCLOG_PRINTLN_VAR_AT(1,scs.obstacles_size())
 
     scs.add_goal({{4,5},{4.5,5},theta_domain});
 
-    scs.print_goals();
+    CONCLOG_RUN_AT(2,scs.print_goals())
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
+    Stopwatch<Milliseconds> sw;
     scs.compute_reachability_graph();
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing forward/backward graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
-    CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,scs.num_transitions())
 
-    //scs.print_forward_graph();
-    //scs.print_backward_graph();
-
+    sw.restart();
     scs.refine_to_safety_graph();
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"Time cost of reducing forward graph to safe one: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,scs.forward_transitions())
-    CONCLOG_PRINTLN_VAR_AT(1,scs.backward_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,scs.num_transitions())
 
-    CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.forward_sources_size())
+    CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.num_sources())
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << scs.unverified_size() << " (" << scs.unverified_percentage() << "% left)")
 
@@ -449,5 +466,5 @@ void ariadne_main()
     scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,2);
     scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},1,2);
 
-    CONCLOG_RUN_AT(2,scs.print_forward_graph())
+    CONCLOG_RUN_AT(3,scs.print_graph())
 }

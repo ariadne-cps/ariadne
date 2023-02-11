@@ -187,37 +187,56 @@ private:
     SizeTypeMap<NCell,SizeTypeMap<ECell,SPaving>>  _graph;
 };
 
-class ReachabilityGraph {
+class ReachabilityGraphInterface {
+  public:
+    virtual SizeType num_transitions() const = 0;
+    virtual SizeType num_sources() const = 0;
+    virtual SizeType num_targets() const = 0;
+
+    virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) = 0;
+    virtual void clear() = 0;
+    virtual void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) = 0;
+    virtual ReachabilityGraphInterface* clone() const = 0;
+    virtual void write(std::ostream& os) const = 0;
+    virtual ~ReachabilityGraphInterface() = default;
+
+    friend OutputStream& operator<<(OutputStream& os, ReachabilityGraphInterface const& g) {
+        g.write(os);
+        return os;
+    }
+};
+
+class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
   public:
     typedef DirectedHashedGraph::HashTableType HashTableType;
   public:
-    ReachabilityGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
+    ForwardBackwardReachabilityGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
         _forward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent),
         _backward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent) { }
 
-    SizeType num_transitions() const {
+    SizeType num_transitions() const override {
         return _forward_graph.num_transitions();
     }
 
-    SizeType num_sources() const {
+    SizeType num_sources() const override {
         return _forward_graph.num_sources();
     }
 
-    SizeType num_targets() const {
+    SizeType num_targets() const override {
         return _backward_graph.num_sources();
     }
 
-    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
+    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) override {
         _forward_graph.insert_forward(source_cell,transition_cell,target_cells);
         _backward_graph.insert_backward(source_cell,transition_cell,target_cells);
     }
 
-    void clear() {
+    void clear() override {
         _forward_graph.clear();
         _backward_graph.clear();
     }
 
-    void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) {
+    void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) override {
         CONCLOG_SCOPE_CREATE
 
         std::deque<NCell> unsafe_cells_queue;
@@ -259,8 +278,12 @@ class ReachabilityGraph {
         _forward_graph.apply_to(unverified);
     }
 
-    friend OutputStream& operator<<(OutputStream& os, ReachabilityGraph const& g) {
-        return os << "Forward:\n" << g._forward_graph << "\nBackward:\n" << g._backward_graph;
+    ReachabilityGraphInterface* clone() const override {
+        return new ForwardBackwardReachabilityGraph(*this);
+    }
+
+    void write(std::ostream& os) const override {
+        os << "Forward:\n" << _forward_graph << "\nBackward:\n" << _backward_graph;
     }
 
   private:
@@ -294,7 +317,7 @@ public:
             _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*_controller_paving.dimension()),_controller_ids.size()));
         }
 
-        _reachability_graph.reset(new ReachabilityGraph(_state_ids,_controller_ids,_default_state_extent,_default_controller_extent));
+        _reachability_graph.reset(new ForwardBackwardReachabilityGraph(_state_ids, _controller_ids, _default_state_extent, _default_controller_extent));
     }
 
     ReachAvoidGridding& add_obstacle(BoundsBoxType const& box) {
@@ -405,7 +428,7 @@ private:
 
     std::map<String,SizeType> _state_ids, _controller_ids;
 
-    Ariadne::SharedPointer<ReachabilityGraph> _reachability_graph;
+    Ariadne::SharedPointer<ReachabilityGraphInterface> _reachability_graph;
 };
 
 void ariadne_main()

@@ -67,35 +67,35 @@ class DirectedHashedGraph {
         return result;
     }
 
-    //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a target_cells
-    void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
-        auto ctrl_id = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
+    //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
+    void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
+        auto trans_it = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
         auto src_id = to_identifier(source_cell, _default_vertex_extent, _hashed_vertices);
         auto src_ref = _graph.find(src_id);
         if (src_ref == _graph.end()) {
             _graph.insert(make_pair(src_id,make_pair(source_cell,Map<SizeType,Pair<ECell,SPaving>>())));
             src_ref = _graph.find(src_id);
         }
-        src_ref->second.second.insert(make_pair(ctrl_id,make_pair(transition_cell, target_cells)));
+        src_ref->second.second.insert(make_pair(trans_it, make_pair(transition_cell, destination_cells)));
     }
 
-    //! \brief Insert backward entries from each of \a target_cells to \a source_cell using \a transition_cell, hence
-    //! hashing on the target and transition
-    void insert_backward(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
+    //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
+    //! hashing on the destination and transition
+    void insert_backward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
         auto ctrl_id = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
-        for (auto const& src : target_cells) {
+        for (auto const& src : destination_cells) {
             auto src_id = to_identifier(src, _default_vertex_extent, _hashed_vertices);
             auto src_ref = _graph.find(src_id);
             if (src_ref == _graph.end()) {
                 _graph.insert(make_pair(src_id,make_pair(src,Map<SizeType,Pair<ECell,SPaving>>())));
                 src_ref = _graph.find(src_id);
             }
-            auto tgt_ref = src_ref->second.second.find(ctrl_id);
-            if (tgt_ref == src_ref->second.second.end()) {
+            auto dst_ref = src_ref->second.second.find(ctrl_id);
+            if (dst_ref == src_ref->second.second.end()) {
                 src_ref->second.second.insert(make_pair(ctrl_id,make_pair(transition_cell, SPaving(source_cell.grid()))));
-                tgt_ref = src_ref->second.second.find(ctrl_id);
+                dst_ref = src_ref->second.second.find(ctrl_id);
             }
-            tgt_ref->second.second.adjoin(source_cell);
+            dst_ref->second.second.adjoin(source_cell);
         }
     }
 
@@ -111,13 +111,13 @@ class DirectedHashedGraph {
         _graph.erase(to_identifier(source_cell, _default_vertex_extent, _hashed_vertices));
     }
 
-    //! \brief Erase for a given \a source and \a transition its \a target
-    void erase(NCell const& source, ECell const& transition, NCell const& target) {
+    //! \brief Erase for a given \a source and \a transition its \a destination
+    void erase(NCell const& source, ECell const& transition, NCell const& destination) {
         auto const& src_ref = _graph.find(to_identifier(source, _default_vertex_extent, _hashed_vertices));
         if (src_ref != _graph.end()) {
             auto const& trans_ref = src_ref->second.second.find(to_identifier(transition, _default_edge_extent, _hashed_edges));
             if (trans_ref != src_ref->second.second.end()) {
-                trans_ref->second.second.remove(target);
+                trans_ref->second.second.remove(destination);
             }
         }
     }
@@ -131,7 +131,7 @@ class DirectedHashedGraph {
 
     void clear() { _graph.clear(); }
 
-    //! \brief Remove transitions for which the set of targets is empty
+    //! \brief Remove transitions for which the set of destinations is empty
     //! and remove sources for which the set of transitions is empty
     void sweep() {
         auto src_it = _graph.begin();
@@ -152,8 +152,8 @@ class DirectedHashedGraph {
             for (auto const& ctrl : src.second.second) {
                 os << ctrl.first << "->";
                 os << "(";
-                for (auto const& tgt : ctrl.second.second) {
-                    os << to_identifier(tgt, g._default_vertex_extent, g._hashed_vertices) << ",";
+                for (auto const& dst : ctrl.second.second) {
+                    os << to_identifier(dst, g._default_vertex_extent, g._hashed_vertices) << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
                 os << ")";
@@ -176,9 +176,9 @@ class ReachabilityGraphInterface {
   public:
     virtual SizeType num_transitions() const = 0;
     virtual SizeType num_sources() const = 0;
-    virtual SizeType num_targets() const = 0;
+    virtual SizeType num_destinations() const = 0;
 
-    virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) = 0;
+    virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) = 0;
     virtual void clear() = 0;
     virtual void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) = 0;
     virtual ReachabilityGraphInterface* clone() const = 0;
@@ -207,13 +207,13 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
         return _forward_graph.num_sources();
     }
 
-    SizeType num_targets() const override {
+    SizeType num_destinations() const override {
         return _backward_graph.num_sources();
     }
 
-    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) override {
-        _forward_graph.insert_forward(source_cell,transition_cell,target_cells);
-        _backward_graph.insert_backward(source_cell,transition_cell,target_cells);
+    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) override {
+        _forward_graph.insert_forward(source_cell,transition_cell,destination_cells);
+        _backward_graph.insert_backward(source_cell,transition_cell,destination_cells);
     }
 
     void clear() override {
@@ -240,8 +240,8 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
                         auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_of_unsafe_trans);
                         if (_forward_graph.contains(fw_src_of_unsafe_trans)) {
                             auto const& fw_trans = fw_src_of_unsafe_trans->second.second.at(bw_unsafe_trans.first);
-                            for (auto const& tgt_to_prune : fw_trans.second) {
-                                _backward_graph.erase(tgt_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
+                            for (auto const& dst_to_prune : fw_trans.second) {
+                                _backward_graph.erase(dst_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
                             }
                             fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
                             if (fw_src_of_unsafe_trans->second.second.empty()) {

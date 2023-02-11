@@ -95,7 +95,7 @@ public:
     SizeType goals_size() const { return _goals.size(); }
     SizeType unverified_size() const { return _unverified.size(); }
     SizeType num_sources() const { return _reachability_graph->num_sources(); }
-    SizeType num_targets() const { return _reachability_graph->num_targets(); }
+    SizeType num_destinations() const { return _reachability_graph->num_destinations(); }
 
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const {
@@ -138,16 +138,16 @@ public:
 
         ProgressIndicator indicator(_unverified.size());
         double indicator_value = 0;
-        for (auto const& state_cell : _unverified) {
+        for (auto const& source_cell : _unverified) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
             for (auto const& controller_cell : _controller_paving) {
-                auto combined = product(state_cell.box(),controller_cell.box());
-                SPaving target_cells(_state_paving.grid());
-                target_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),0);
-                target_cells.mince(0);
-                target_cells.restrict(_state_paving);
-                if (not target_cells.is_empty())
-                    _reachability_graph->insert(state_cell,controller_cell,target_cells);
+                auto combined = product(source_cell.box(), controller_cell.box());
+                SPaving destination_cells(_state_paving.grid());
+                destination_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),0);
+                destination_cells.mince(0);
+                destination_cells.restrict(_state_paving);
+                if (not destination_cells.is_empty())
+                    _reachability_graph->insert(source_cell, controller_cell, destination_cells);
             }
             indicator.update_current(++indicator_value);
         }

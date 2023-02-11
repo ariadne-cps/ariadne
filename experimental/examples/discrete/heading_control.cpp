@@ -62,8 +62,8 @@ void ariadne_main()
     scs.add_goal({{4,5},{4.5,5},theta_domain});
 
     CONCLOG_RUN_AT(2,scs.print_goals())
+    
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
-
     CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
     Stopwatch<Milliseconds> sw;

@@ -25,8 +25,8 @@
 #include "ariadne_main.hpp"
 #include "utility/stopwatch.hpp"
 
-typedef GridCell SCell;
-typedef GridCell CCell;
+typedef GridCell NCell;
+typedef GridCell ECell;
 typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
 
@@ -63,11 +63,12 @@ SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<S
 
 class DirectedHashedGraph {
   public:
-    typedef SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>::iterator Iterator;
+    typedef SizeTypeMap<NCell,SizeTypeMap<ECell,SPaving>>::iterator Iterator;
+    typedef std::map<String,SizeType> HashTableType;
   public:
-    DirectedHashedGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
-            _hashed_space(hashed_space), _hashed_controller(hashed_controller),
-            _default_space_extent(default_space_extent), _default_controller_extent(default_controller_extent) { }
+    DirectedHashedGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
+            _hashed_vertices(hashed_vertices), _hashed_edges(hashed_edges),
+            _default_vertex_extent(default_vertex_extent), _default_edge_extent(default_edge_extent) { }
 
     SizeType num_sources() const { return _graph.size(); }
 
@@ -81,55 +82,55 @@ class DirectedHashedGraph {
         return result;
     }
 
-    //! \brief Insert a forward entry from \a source_cell using \a controller_cell with associated \a target_cells
-    void insert_forward(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
-        auto ctrl_id = to_identifier(controller_cell,_default_controller_extent,_hashed_controller);
-        auto src_id = to_identifier(source_cell,_default_space_extent,_hashed_space);
+    //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a target_cells
+    void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
+        auto ctrl_id = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
+        auto src_id = to_identifier(source_cell, _default_vertex_extent, _hashed_vertices);
         auto src_ref = _graph.find(src_id);
         if (src_ref == _graph.end()) {
-            _graph.insert(make_pair(src_id,make_pair(source_cell,Map<SizeType,Pair<CCell,SPaving>>())));
+            _graph.insert(make_pair(src_id,make_pair(source_cell,Map<SizeType,Pair<ECell,SPaving>>())));
             src_ref = _graph.find(src_id);
         }
-        src_ref->second.second.insert(make_pair(ctrl_id,make_pair(controller_cell,target_cells)));
+        src_ref->second.second.insert(make_pair(ctrl_id,make_pair(transition_cell, target_cells)));
     }
 
-    //! \brief Insert backward entries from each of \a target_cells to \a source_cell using \a controller_cell, hence
-    //! hashing on the target and controller
-    void insert_backward(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
-        auto ctrl_id = to_identifier(controller_cell,_default_controller_extent,_hashed_controller);
+    //! \brief Insert backward entries from each of \a target_cells to \a source_cell using \a transition_cell, hence
+    //! hashing on the target and transition
+    void insert_backward(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
+        auto ctrl_id = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
         for (auto const& src : target_cells) {
-            auto src_id = to_identifier(src,_default_space_extent,_hashed_space);
+            auto src_id = to_identifier(src, _default_vertex_extent, _hashed_vertices);
             auto src_ref = _graph.find(src_id);
             if (src_ref == _graph.end()) {
-                _graph.insert(make_pair(src_id,make_pair(src,Map<SizeType,Pair<CCell,SPaving>>())));
+                _graph.insert(make_pair(src_id,make_pair(src,Map<SizeType,Pair<ECell,SPaving>>())));
                 src_ref = _graph.find(src_id);
             }
             auto tgt_ref = src_ref->second.second.find(ctrl_id);
             if (tgt_ref == src_ref->second.second.end()) {
-                src_ref->second.second.insert(make_pair(ctrl_id,make_pair(controller_cell,SPaving(source_cell.grid()))));
+                src_ref->second.second.insert(make_pair(ctrl_id,make_pair(transition_cell, SPaving(source_cell.grid()))));
                 tgt_ref = src_ref->second.second.find(ctrl_id);
             }
             tgt_ref->second.second.adjoin(source_cell);
         }
     }
 
-    Iterator find(SCell const& source_cell) {
-        return _graph.find(to_identifier(source_cell,_default_space_extent,_hashed_space));
+    Iterator find(NCell const& source_cell) {
+        return _graph.find(to_identifier(source_cell, _default_vertex_extent, _hashed_vertices));
     }
 
     bool contains(Iterator const& iterator) const {
         return iterator != _graph.end();
     }
 
-    void erase(SCell const& source_cell) {
-        _graph.erase(to_identifier(source_cell,_default_space_extent,_hashed_space));
+    void erase(NCell const& source_cell) {
+        _graph.erase(to_identifier(source_cell, _default_vertex_extent, _hashed_vertices));
     }
 
     //! \brief Erase for a given \a source and \a transition its \a target
-    void erase(SCell const& source, CCell const& transition, SCell const& target) {
-        auto const& src_ref = _graph.find(to_identifier(source,_default_space_extent,_hashed_space));
+    void erase(NCell const& source, ECell const& transition, NCell const& target) {
+        auto const& src_ref = _graph.find(to_identifier(source, _default_vertex_extent, _hashed_vertices));
         if (src_ref != _graph.end()) {
-            auto const& trans_ref = src_ref->second.second.find(to_identifier(transition,_default_controller_extent,_hashed_controller));
+            auto const& trans_ref = src_ref->second.second.find(to_identifier(transition, _default_edge_extent, _hashed_edges));
             if (trans_ref != src_ref->second.second.end()) {
                 trans_ref->second.second.remove(target);
             }
@@ -167,7 +168,7 @@ class DirectedHashedGraph {
                 os << ctrl.first << "->";
                 os << "(";
                 for (auto const& tgt : ctrl.second.second) {
-                    os << to_identifier(tgt,g._default_space_extent,g._hashed_space) << ",";
+                    os << to_identifier(tgt, g._default_vertex_extent, g._hashed_vertices) << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
                 os << ")";
@@ -179,18 +180,20 @@ class DirectedHashedGraph {
         return os;
     }
 private:
-    std::map<String,SizeType> const _hashed_space;
-    std::map<String,SizeType> const _hashed_controller;
-    SizeType const _default_space_extent;
-    SizeType const _default_controller_extent;
-    SizeTypeMap<SCell,SizeTypeMap<CCell,SPaving>>  _graph;
+    std::map<String,SizeType> const _hashed_vertices;
+    std::map<String,SizeType> const _hashed_edges;
+    SizeType const _default_vertex_extent;
+    SizeType const _default_edge_extent;
+    SizeTypeMap<NCell,SizeTypeMap<ECell,SPaving>>  _graph;
 };
 
 class ReachabilityGraph {
   public:
-    ReachabilityGraph(std::map<String,SizeType> const& hashed_space, std::map<String,SizeType> const& hashed_controller, SizeType default_space_extent, SizeType default_controller_extent) :
-        _forward_graph(hashed_space,hashed_controller,default_space_extent,default_controller_extent),
-        _backward_graph(hashed_space,hashed_controller,default_space_extent,default_controller_extent) { }
+    typedef DirectedHashedGraph::HashTableType HashTableType;
+  public:
+    ReachabilityGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
+        _forward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent),
+        _backward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent) { }
 
     SizeType num_transitions() const {
         return _forward_graph.num_transitions();
@@ -204,9 +207,9 @@ class ReachabilityGraph {
         return _backward_graph.num_sources();
     }
 
-    void insert(SCell const& source_cell, CCell const& controller_cell, SPaving const& target_cells) {
-        _forward_graph.insert_forward(source_cell,controller_cell,target_cells);
-        _backward_graph.insert_backward(source_cell,controller_cell,target_cells);
+    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& target_cells) {
+        _forward_graph.insert_forward(source_cell,transition_cell,target_cells);
+        _backward_graph.insert_backward(source_cell,transition_cell,target_cells);
     }
 
     void clear() {
@@ -214,18 +217,18 @@ class ReachabilityGraph {
         _backward_graph.clear();
     }
 
-    void refine_to_safety_graph(SPaving const& obstacles, SPaving& unverified) {
+    void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) {
         CONCLOG_SCOPE_CREATE
 
-        std::deque<SCell> unsafe;
-        for (auto const& c : obstacles) unsafe.push_back(c);
+        std::deque<NCell> unsafe_cells_queue;
+        for (auto const& c : unsafe) unsafe_cells_queue.push_back(c);
 
         double indicator_final_original = unsafe.size();
         double indicator_current_value = 0;
         ProgressIndicator indicator(indicator_final_original);
-        while (not unsafe.empty()) {
+        while (not unsafe_cells_queue.empty()) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-            auto const& u = unsafe.front();
+            auto const& u = unsafe_cells_queue.front();
             auto const& bw_unsafe_ref = _backward_graph.find(u);
             if (_backward_graph.contains(bw_unsafe_ref)) {
                 for (auto const& bw_unsafe_trans : bw_unsafe_ref->second.second) {
@@ -238,7 +241,7 @@ class ReachabilityGraph {
                             }
                             fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
                             if (fw_src_of_unsafe_trans->second.second.empty()) {
-                                unsafe.push_back(src_of_unsafe_trans);
+                                unsafe_cells_queue.push_back(src_of_unsafe_trans);
                                 indicator.update_final(++indicator_final_original);
                                 _forward_graph.erase(src_of_unsafe_trans);
                             }
@@ -247,7 +250,7 @@ class ReachabilityGraph {
                 }
             }
             _backward_graph.erase(u);
-            unsafe.pop_front();
+            unsafe_cells_queue.pop_front();
             indicator.update_current(++indicator_current_value);
         }
 

@@ -55,20 +55,22 @@ public:
         _controller_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),0);
         _controller_paving.mince(0);
 
-        _default_state_extent = _state_paving.begin()->root_extent();
-        _default_controller_extent = _controller_paving.begin()->root_extent();
+        SizeType default_vertex_extent = _state_paving.begin()->root_extent();
+        SizeType default_edge_extent = _controller_paving.begin()->root_extent();
+        IdentifiedCellFactory::HashTableType vertex_ids;
+        IdentifiedCellFactory::HashTableType edge_ids;
 
         _unverified = _state_paving;
         _obstacles = SPaving(_state_paving.grid());
         _goals = SPaving(_state_paving.grid());
 
         for (auto const& c : _state_paving)
-            _state_ids.insert(make_pair(word_to_id(c.word(),_default_state_extent*_state_paving.dimension()),_state_ids.size()));
+            vertex_ids.insert(make_pair(word_to_id(c.word(),default_vertex_extent*_state_paving.dimension()),vertex_ids.size()));
         for (auto const& c : _controller_paving) {
-            _controller_ids.insert(make_pair(word_to_id(c.word(),_default_controller_extent*_controller_paving.dimension()),_controller_ids.size()));
+            edge_ids.insert(make_pair(word_to_id(c.word(),default_edge_extent*_controller_paving.dimension()),edge_ids.size()));
         }
 
-        _reachability_graph.reset(new ForwardBackwardReachabilityGraph(_state_ids, _controller_ids, _default_state_extent, _default_controller_extent));
+        _reachability_graph.reset(new ForwardBackwardReachabilityGraph(IdentifiedCellFactory(default_vertex_extent,vertex_ids),IdentifiedCellFactory(default_edge_extent,edge_ids)));
     }
 
     ReachAvoid& add_obstacle(BoundsBoxType const& box) {
@@ -77,6 +79,7 @@ public:
         obstacle_paving.restrict(_state_paving);
         _unverified.remove(obstacle_paving);
         _obstacles.adjoin(obstacle_paving);
+
         return *this;
     }
 
@@ -117,13 +120,13 @@ public:
 
     void print_goals() const {
         std::stringstream ss;
-        for (auto const& g : _goals) ss << to_identifier(g,_default_state_extent,_state_ids) << " ";
+        for (auto const& g : _goals) ss << _reachability_graph->vertex_id(g) << " ";
         CONCLOG_PRINTLN("Goals: " << ss.str())
     }
 
     void print_obstacles() const {
         std::stringstream ss;
-        for (auto const& o : _obstacles) ss << to_identifier(o,_default_state_extent,_state_ids) << " ";
+        for (auto const& o : _obstacles) ss << _reachability_graph->vertex_id(o) << " ";
         CONCLOG_PRINTLN("Obstacles: " << ss.str())
     }
 
@@ -167,17 +170,12 @@ private:
     SPaving _state_paving;
     CPaving _controller_paving;
 
-    SizeType _default_state_extent;
-    SizeType _default_controller_extent;
-
     FloatDP const _eps;
 
     SPaving _unverified;
 
     SPaving _obstacles;
     SPaving _goals;
-
-    std::map<String,SizeType> _state_ids, _controller_ids;
 
     Ariadne::SharedPointer<ReachabilityGraphInterface> _reachability_graph;
 };

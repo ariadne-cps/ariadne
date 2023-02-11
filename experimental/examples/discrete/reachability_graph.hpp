@@ -29,7 +29,9 @@ typedef GridCell ECell;
 typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
 
-template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
+struct IdentifiedCell;
+
+typedef Map<IdentifiedCell,Map<IdentifiedCell,GridTreePaving>> IdentifiedCellNestedMap;
 typedef Interval<double> BoundType;
 typedef Vector<BoundType> BoundsBoxType;
 
@@ -46,114 +48,146 @@ SizeType to_identifier(GridCell const& cell, SizeType default_extent, std::map<S
     return hashed.at(expanded_id);
 }
 
-class DirectedHashedGraph {
+class IdentifiedCellFactory;
+
+struct IdentifiedCell {
+    SizeType id() const { return _id; }
+    GridCell cell() const { return _cell; }
+    friend class IdentifiedCellFactory;
+    bool operator<(IdentifiedCell const& other) const { return this->_id < other._id; }
+  protected:
+    IdentifiedCell(SizeType id, GridCell const& cell) : _id(id), _cell(cell) { }
+  private:
+    SizeType const _id;
+    GridCell const _cell;
+};
+
+class IdentifiedCellFactory {
   public:
-    typedef SizeTypeMap<NCell,SizeTypeMap<ECell,SPaving>>::iterator Iterator;
     typedef std::map<String,SizeType> HashTableType;
   public:
-    DirectedHashedGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
-            _hashed_vertices(hashed_vertices), _hashed_edges(hashed_edges),
-            _default_vertex_extent(default_vertex_extent), _default_edge_extent(default_edge_extent) { }
+    IdentifiedCellFactory(SizeType default_extent, HashTableType const& table) : _default_extent(default_extent), _table(table) { }
+    IdentifiedCell create(GridCell const& cell) const { return IdentifiedCell(to_identifier(cell, _default_extent, _table),cell); }
+  private:
+    SizeType const _default_extent;
+    HashTableType const _table;
+};
 
-    SizeType num_sources() const { return _graph.size(); }
+class DirectedHashedGraph {
+  public:
+    typedef IdentifiedCellNestedMap::iterator Iterator;
+    typedef std::map<String,SizeType> HashTableType;
+  public:
+    DirectedHashedGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
+            _vertex_factory(vertex_factory), _edge_factory(edge_factory) { }
+
+    SizeType num_sources() const { return _map.size(); }
 
     SizeType num_transitions() const {
         SizeType result = 0;
-        for (auto const& src : _graph) {
-            for (auto const& ctrl : src.second.second) {
-                result += ctrl.second.second.size();
+        for (auto const& src : _map) {
+            for (auto const& trans : src.second) {
+                result += trans.second.size();
             }
         }
         return result;
     }
 
+    SizeType vertex_id(NCell const& cell) const {
+        return _vertex_factory.create(cell).id();
+    }
+
+    SizeType edge_id(NCell const& cell) const {
+        return _edge_factory.create(cell).id();
+    }
+
     //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
     void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
-        auto trans_it = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
-        auto src_id = to_identifier(source_cell, _default_vertex_extent, _hashed_vertices);
-        auto src_ref = _graph.find(src_id);
-        if (src_ref == _graph.end()) {
-            _graph.insert(make_pair(src_id,make_pair(source_cell,Map<SizeType,Pair<ECell,SPaving>>())));
-            src_ref = _graph.find(src_id);
+        auto itrans = _edge_factory.create(transition_cell);
+        auto isrc = _vertex_factory.create(source_cell);
+        auto src_ref = _map.find(isrc);
+        if (src_ref == _map.end()) {
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,SPaving>()));
+            src_ref = _map.find(isrc);
         }
-        src_ref->second.second.insert(make_pair(trans_it, make_pair(transition_cell, destination_cells)));
+        src_ref->second.insert(make_pair(itrans, destination_cells));
     }
 
     //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
     //! hashing on the destination and transition
     void insert_backward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
-        auto ctrl_id = to_identifier(transition_cell, _default_edge_extent, _hashed_edges);
+        auto itrans = _edge_factory.create(transition_cell);
         for (auto const& src : destination_cells) {
-            auto src_id = to_identifier(src, _default_vertex_extent, _hashed_vertices);
-            auto src_ref = _graph.find(src_id);
-            if (src_ref == _graph.end()) {
-                _graph.insert(make_pair(src_id,make_pair(src,Map<SizeType,Pair<ECell,SPaving>>())));
-                src_ref = _graph.find(src_id);
+            auto isrc = _vertex_factory.create(src);
+            auto src_ref = _map.find(isrc);
+            if (src_ref == _map.end()) {
+                _map.insert(make_pair(isrc, Map<IdentifiedCell,SPaving>()));
+                src_ref = _map.find(isrc);
             }
-            auto dst_ref = src_ref->second.second.find(ctrl_id);
-            if (dst_ref == src_ref->second.second.end()) {
-                src_ref->second.second.insert(make_pair(ctrl_id,make_pair(transition_cell, SPaving(source_cell.grid()))));
-                dst_ref = src_ref->second.second.find(ctrl_id);
+            auto dst_ref = src_ref->second.find(itrans);
+            if (dst_ref == src_ref->second.end()) {
+                src_ref->second.insert(make_pair(itrans, SPaving(source_cell.grid())));
+                dst_ref = src_ref->second.find(itrans);
             }
-            dst_ref->second.second.adjoin(source_cell);
+            dst_ref->second.adjoin(source_cell);
         }
     }
 
     Iterator find(NCell const& source_cell) {
-        return _graph.find(to_identifier(source_cell, _default_vertex_extent, _hashed_vertices));
+        return _map.find(_vertex_factory.create(source_cell));
     }
 
     bool contains(Iterator const& iterator) const {
-        return iterator != _graph.end();
+        return iterator != _map.end();
     }
 
     void erase(NCell const& source_cell) {
-        _graph.erase(to_identifier(source_cell, _default_vertex_extent, _hashed_vertices));
+        _map.erase(_vertex_factory.create(source_cell));
     }
 
     //! \brief Erase for a given \a source and \a transition its \a destination
     void erase(NCell const& source, ECell const& transition, NCell const& destination) {
-        auto const& src_ref = _graph.find(to_identifier(source, _default_vertex_extent, _hashed_vertices));
-        if (src_ref != _graph.end()) {
-            auto const& trans_ref = src_ref->second.second.find(to_identifier(transition, _default_edge_extent, _hashed_edges));
-            if (trans_ref != src_ref->second.second.end()) {
-                trans_ref->second.second.remove(destination);
+        auto const& src_ref = _map.find(_vertex_factory.create(source));
+        if (src_ref != _map.end()) {
+            auto const& trans_ref = src_ref->second.find(_edge_factory.create(transition));
+            if (trans_ref != src_ref->second.end()) {
+                trans_ref->second.remove(destination);
             }
         }
     }
 
-    //! \brief Subtract the source cells of the graph from \a paving
-    void apply_to(SPaving& paving) const {
-        for (auto const& entry : _graph) {
-            paving.remove(entry.second.first);
+    //! \brief Remove the source cells of the graph from \a paving
+    void apply_source_removal_to(SPaving& paving) const {
+        for (auto const& entry : _map) {
+            paving.remove(entry.first.cell());
         }
     }
 
-    void clear() { _graph.clear(); }
+    void clear() { _map.clear(); }
 
     //! \brief Remove transitions for which the set of destinations is empty
     //! and remove sources for which the set of transitions is empty
     void sweep() {
-        auto src_it = _graph.begin();
-        while (src_it != _graph.end()) {
-            auto trans_it = src_it->second.second.begin();
-            while (trans_it != src_it->second.second.end()) {
-                if (trans_it->second.second.is_empty()) src_it->second.second.erase(trans_it++);
+        auto src_it = _map.begin();
+        while (src_it != _map.end()) {
+            auto trans_it = src_it->second.begin();
+            while (trans_it != src_it->second.end()) {
+                if (trans_it->second.is_empty()) src_it->second.erase(trans_it++);
                 else ++trans_it;
             }
-            if (src_it->second.second.empty()) _graph.erase(src_it++);
+            if (src_it->second.empty()) _map.erase(src_it++);
             else  ++src_it;
         }
     }
 
     friend OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
-        for (auto const& src : g._graph) {
-            os << src.first << src.second.first.box() << ":[";
-            for (auto const& ctrl : src.second.second) {
-                os << ctrl.first << "->";
+        for (auto const& src : g._map) {
+            os << src.first.id() << src.first.cell() << ":[";
+            for (auto const& trans : src.second) {
+                os << trans.first.id() << "->";
                 os << "(";
-                for (auto const& dst : ctrl.second.second) {
-                    os << to_identifier(dst, g._default_vertex_extent, g._hashed_vertices) << ",";
+                for (auto const& dst : trans.second) {
+                    os << g._vertex_factory.create(dst).id() << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
                 os << ")";
@@ -165,11 +199,9 @@ class DirectedHashedGraph {
         return os;
     }
 private:
-    std::map<String,SizeType> const _hashed_vertices;
-    std::map<String,SizeType> const _hashed_edges;
-    SizeType const _default_vertex_extent;
-    SizeType const _default_edge_extent;
-    SizeTypeMap<NCell,SizeTypeMap<ECell,SPaving>>  _graph;
+    IdentifiedCellFactory const _vertex_factory;
+    IdentifiedCellFactory const _edge_factory;
+    IdentifiedCellNestedMap _map;
 };
 
 class ReachabilityGraphInterface {
@@ -177,6 +209,9 @@ class ReachabilityGraphInterface {
     virtual SizeType num_transitions() const = 0;
     virtual SizeType num_sources() const = 0;
     virtual SizeType num_destinations() const = 0;
+
+    virtual SizeType vertex_id(NCell const& cell) = 0;
+    virtual SizeType edge_id(NCell const& cell) = 0;
 
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) = 0;
     virtual void clear() = 0;
@@ -195,9 +230,16 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
   public:
     typedef DirectedHashedGraph::HashTableType HashTableType;
   public:
-    ForwardBackwardReachabilityGraph(HashTableType const& hashed_vertices, HashTableType const& hashed_edges, SizeType default_vertex_extent, SizeType default_edge_extent) :
-        _forward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent),
-        _backward_graph(hashed_vertices,hashed_edges,default_vertex_extent,default_edge_extent) { }
+    ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
+        _forward_graph(vertex_factory,edge_factory), _backward_graph(vertex_factory,edge_factory) { }
+
+    SizeType vertex_id(NCell const& cell) override {
+        return _forward_graph.vertex_id(cell);
+    }
+
+    SizeType edge_id(NCell const& cell) override {
+        return _forward_graph.edge_id(cell);
+    }
 
     SizeType num_transitions() const override {
         return _forward_graph.num_transitions();
@@ -235,16 +277,16 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
             auto const& u = unsafe_cells_queue.front();
             auto const& bw_unsafe_ref = _backward_graph.find(u);
             if (_backward_graph.contains(bw_unsafe_ref)) {
-                for (auto const& bw_unsafe_trans : bw_unsafe_ref->second.second) {
-                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second.second) {
+                for (auto const& bw_unsafe_trans : bw_unsafe_ref->second) {
+                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second) {
                         auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_of_unsafe_trans);
                         if (_forward_graph.contains(fw_src_of_unsafe_trans)) {
-                            auto const& fw_trans = fw_src_of_unsafe_trans->second.second.at(bw_unsafe_trans.first);
-                            for (auto const& dst_to_prune : fw_trans.second) {
-                                _backward_graph.erase(dst_to_prune,bw_unsafe_trans.second.first,src_of_unsafe_trans);
+                            auto const& fw_trans = fw_src_of_unsafe_trans->second.at(bw_unsafe_trans.first);
+                            for (auto const& dst_to_prune : fw_trans) {
+                                _backward_graph.erase(dst_to_prune,bw_unsafe_trans.first.cell(),src_of_unsafe_trans);
                             }
-                            fw_src_of_unsafe_trans->second.second.erase(bw_unsafe_trans.first);
-                            if (fw_src_of_unsafe_trans->second.second.empty()) {
+                            fw_src_of_unsafe_trans->second.erase(bw_unsafe_trans.first);
+                            if (fw_src_of_unsafe_trans->second.empty()) {
                                 unsafe_cells_queue.push_back(src_of_unsafe_trans);
                                 indicator.update_final(++indicator_final_original);
                                 _forward_graph.erase(src_of_unsafe_trans);
@@ -260,7 +302,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
 
         _backward_graph.sweep();
 
-        _forward_graph.apply_to(unverified);
+        _forward_graph.apply_source_removal_to(unverified);
     }
 
     ReachabilityGraphInterface* clone() const override {

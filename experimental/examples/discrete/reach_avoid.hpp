@@ -79,7 +79,6 @@ public:
         obstacle_paving.restrict(_state_paving);
         _unverified.remove(obstacle_paving);
         _obstacles.adjoin(obstacle_paving);
-
         return *this;
     }
 

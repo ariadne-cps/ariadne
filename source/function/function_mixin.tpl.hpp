@@ -138,7 +138,21 @@ template<class F,class SIG> auto
 FunctionMixin<F,EffectiveTag,SIG>::_call(const Argument<Formula<EffectiveNumber>>& x) const -> Result<Formula<EffectiveNumber>> {
     return this->_base_call(x); }
 
+} // namespace Ariadne
 
+
+#include "function/function_wrapper.hpp"
+
+namespace Ariadne {
+
+template<class F, class P, class... ARGS> auto
+FunctionWrapperGetterMixin<F,P,RealVector(ARGS...)>::_get(SizeType i) const -> ScalarFunctionInterface<P,ARGS...>* {
+    auto fp=static_cast<F const*>(this);
+    if (not fp) { ARIADNE_THROW(std::runtime_error,"_get","bad cast"); }
+    auto fi=(*fp)[i];
+    if constexpr (DerivedFrom<decltype(fi),ScalarFunctionInterface<P,ARGS...>>) { return heap_copy(fi); }
+    else { return make_function_wrapper<P,RealScalar(ARGS...)>(fi); }
+}
 
 } // namespace Ariadne
 

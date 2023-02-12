@@ -170,16 +170,34 @@ class FunctionMixin<F,EffectiveTag,SIG>
     virtual Result<Formula<EffectiveNumber>> _call(const Argument<Formula<EffectiveNumber>>& x) const override;
 };
 
+
+
+
+
+template<class F, class P, class SIG> class FunctionGetterMixin;
+
+template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealScalar(ARGS...)> {
+};
+
+template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealVector(ARGS...)>
+    : public virtual VectorOfFunctionInterface<P,ARGS...>
+{
+    virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const override;
+};
+
+
 template<class F, class P, class... ARGS> class ScalarFunctionMixin
     : public FunctionMixin<F,P,RealScalar(ARGS...)> { };
 
 template<class F, class P, class... ARGS> class VectorFunctionMixin
     : public FunctionMixin<F,P,RealVector(ARGS...)>
-    , public virtual VectorOfFunctionInterface<P,ARGS...>
+    , public FunctionGetterMixin<F,P,RealVector(ARGS...)>
 {
-    virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const override {
-        auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 };
+
+template<class F, class P, class... ARGS> auto
+FunctionGetterMixin<F,P,RealVector(ARGS...)>::_get(SizeType i) const -> ScalarFunctionInterface<P,ARGS...>* {
+    auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 
 
 template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_clone() const {
@@ -206,23 +224,6 @@ template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F
         return _heap_move(derivative(static_cast<const F&>(*this),j)); }
     else { assert(false); std::abort(); } }
 
-
-template<class F, class P, class SIG> class FunctionGetterMixin;
-
-template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealScalar(ARGS...)> {
-};
-
-template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealVector(ARGS...)>
-    : public virtual VectorOfFunctionInterface<P,ARGS...>
-{
-    virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const final {
-        return static_cast<F const&>(*this)[i].raw_pointer()->_clone(); }
-};
-
-
-
-
-
 } // namespace Ariadne
 
-#endif // ARIADNE_FUNCTION_TEMPLATE_HPP
+#endif // ARIADNE_FUNCTION_MIXIN_HPP

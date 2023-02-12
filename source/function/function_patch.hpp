@@ -179,7 +179,9 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
-    operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); }
+    operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
+    friend Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
+        return Function<P,SIG>(fp._ptr->_clone()); }
     operator FunctionPatchInterface<P,SIG>& () { return *_ptr; }
     operator const FunctionPatchInterface<P,SIG>& () const { return *_ptr; }
     const FunctionPatchInterface<P,SIG>* raw_pointer() const { return _ptr.operator->(); }
@@ -362,7 +364,9 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
     inline FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
     inline operator const FunctionPatchInterface<P,SIG>& () const { return *_ptr; }
-    inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); }
+    inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); } // DEPRECATED
+    friend inline Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
+        return Function<P,SIG>(*fp._ptr); }
     inline const FunctionPatchInterface<P,SIG>* raw_pointer() const { return _ptr.operator->(); }
     SharedPointer<FunctionPatchInterface<P,SIG>> managed_pointer() const {
         return SharedPointer<FunctionPatchInterface<P,SIG>>(this->_ptr->_clone()); }
@@ -528,6 +532,12 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
 template<class P, class... ARGS> VectorFunctionPatchElement<P,ARGS...>::operator const ScalarFunctionPatch<P,ARGS...> () const {
     return ScalarFunctionPatch<P,ARGS...>(_p->get(_i)); }
 
+
+template<class P, class SIG> class UncheckedFunctionPatch {
+    FunctionPatch<P,SIG> _fp;
+  public:
+    template<class... ARGS> auto operator() (ARGS... x) const { return unchecked_evaluate(this->_fp, x...); }
+};
 
 } // namespace Ariadne
 

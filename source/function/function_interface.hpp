@@ -55,6 +55,8 @@ template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
     typedef RES ResultKind;
     typedef typename DomainTraits<ARG>::EntireDomainType DomainType;
     typedef typename DomainTraits<RES>::EntireDomainType CodomainType;
+    typedef typename DomainTraits<ARG>::EntireDomainType EntireDomainType;
+    typedef typename DomainTraits<RES>::EntireDomainType EntireCodomainType;
     typedef typename DomainTraits<ARG>::BoundedDomainType BoundedDomainType;
     typedef typename DomainTraits<RES>::BoundedDomainType BoundedCodomainType;
     typedef typename DomainTraits<RES>::template RangeType<DoublePrecision> BoundedRangeType;

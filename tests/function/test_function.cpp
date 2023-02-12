@@ -182,12 +182,19 @@ Void TestFunction::test_vector_function()
     ARIADNE_TEST_PRINT(id_const_ref[0]);
     EffectiveVectorMultivariateFunction& id_ref=id;
     ARIADNE_TEST_PRINT(id_ref[0]);
+    const EffectiveScalarMultivariateFunction x0sqr = sqr(id[0]);
+    ARIADNE_TEST_PRINT(x0sqr);
 
     Vector<FloatDPApproximation> v={2.0_approx,3.0_approx,5.0_approx};
 
     ARIADNE_TEST_CONSTRUCT(EffectiveVectorMultivariateFunction,f,(id));
     ARIADNE_TEST_EQUAL(f(v),v);
     ARIADNE_TEST_EQUAL(f[0](v),v[0]);
+    auto f0=f[0];
+    ARIADNE_TEST_PRINT(f0);
+    ARIADNE_TEST_PRINT(f[0]);
+    ARIADNE_TEST_EXECUTE(f[0]);
+    ARIADNE_TEST_EXECUTE(f[0]=x0sqr);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
     ARIADNE_TEST_EQUAL(f[0](v),v[1]);
     ARIADNE_TEST_EQUAL(f(v)[0],v[1]);

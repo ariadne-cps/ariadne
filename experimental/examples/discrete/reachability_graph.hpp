@@ -101,6 +101,18 @@ class DirectedHashedGraph {
         return _edge_factory.create(cell).id();
     }
 
+    SPaving destinations_from(NCell const& source_cell) const {
+        SPaving result(source_cell.grid());
+        auto isrc = _vertex_factory.create(source_cell);
+        auto src_ref = _map.find(isrc);
+        if (src_ref != _map.end()) {
+            for (auto const& trans : src_ref->second) {
+                result.adjoin(trans.second);
+            }
+        }
+        return result;
+    }
+
     //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
     void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
         auto itrans = _edge_factory.create(transition_cell);
@@ -153,6 +165,31 @@ class DirectedHashedGraph {
             if (trans_ref != src_ref->second.end()) {
                 trans_ref->second.remove(destination);
             }
+        }
+    }
+
+    //! \brief Remove the source cells of the graph that are not in \a paving
+    void restrict_sources_to(SPaving const& paving) {
+        auto it = _map.begin();
+        while (it != _map.end()) {
+            if (not paving.superset(it->first.cell())) _map.erase(it++);
+            else ++it;
+        }
+    }
+
+    //! \brief Remove the destination cells of the graph that are not in \a paving
+    //! \details Removes transitions/sources when empty
+    void restrict_destinations_to(SPaving const& paving) {
+        auto src_it = _map.begin();
+        while (src_it != _map.end()) {
+            auto trans_it = src_it->second.begin();
+            while (trans_it != src_it->second.end()) {
+                trans_it->second.restrict(paving);
+                if (trans_it->second.is_empty()) src_it->second.erase(trans_it++);
+                else ++trans_it;
+            }
+            if (src_it->second.empty()) _map.erase(src_it++);
+            else ++src_it;
         }
     }
 
@@ -240,6 +277,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     typedef DirectedHashedGraph::HashTableType HashTableType;
   public:
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
+        _vertex_factory(vertex_factory), _edge_factory(edge_factory),
         _forward_graph(vertex_factory,edge_factory), _backward_graph(vertex_factory,edge_factory) { }
 
     SizeType vertex_id(NCell const& cell) override {
@@ -315,7 +353,20 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     }
 
     void reduce_to_possibly_reaching(SPaving const& goals) override {
+        SPaving analysed(goals.grid());
+        SPaving newly_reached = goals;
+        while (not newly_reached.is_empty()) {
+            auto destination = *newly_reached.begin();
+            analysed.adjoin(destination);
 
+            auto sources = _backward_graph.destinations_from(destination);
+            sources.remove(analysed);
+            newly_reached.adjoin(sources);
+            newly_reached.remove(destination);
+        }
+
+        _forward_graph.restrict_sources_to(analysed);
+        _backward_graph.restrict_destinations_to(analysed);
     }
 
     void apply_source_removal_to(SPaving& paving) const override {
@@ -331,6 +382,9 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     }
 
   private:
+    IdentifiedCellFactory const _vertex_factory;
+    IdentifiedCellFactory const _edge_factory;
+
     DirectedHashedGraph _forward_graph;
     DirectedHashedGraph _backward_graph;
 };

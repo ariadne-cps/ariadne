@@ -157,7 +157,10 @@ public:
 
     void refine_to_safety_graph() {
         _reachability_graph->reduce_to_not_reaching(_obstacles);
+    }
 
+    void refine_to_goal_reachable_graph() {
+        _reachability_graph->reduce_to_possibly_reaching(_goals);
     }
 
     void update_unverified() {

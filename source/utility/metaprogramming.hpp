@@ -171,6 +171,8 @@ template<class B, class D> concept BaseOf = std::derived_from<D,B>;
 template<class F, class... AS> concept Invocable = std::invocable<F,AS...>;
 template<class R, class F, class... AS> concept InvocableReturning = Invocable<F,AS...> and Convertible<InvokeResult<F,AS...>,R>;
 
+template<class F, class T> concept SameAsOrConvertibleTo = SameAs<F,T> or Convertible<F,T>;
+
 template<class T, class... US> concept OneOf = IsOneOf<T,US...>::value;
 template<class... TS> concept AllSame = AreAllSame<TS...>::value;
 

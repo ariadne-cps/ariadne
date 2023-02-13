@@ -487,6 +487,9 @@ struct BinaryElementaryOperator : OperatorVariant<Add,Sub,Mul,Div,Max,Min> { usi
 struct GradedRingOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
     template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
         return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
+struct GradedFieldOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
+    template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
+        return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
 struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
     template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
         return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };

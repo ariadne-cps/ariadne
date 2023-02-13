@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_differential
+    test_algebra
     test_expansion
     test_graded
     test_matrix

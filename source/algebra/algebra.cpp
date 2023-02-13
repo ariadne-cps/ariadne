@@ -26,9 +26,31 @@
 #include "config.hpp"
 
 #include "algebra.hpp"
+#include "algebra_concepts.hpp"
 #include "algebra_mixin.hpp"
 #include "algebra_operations.tpl.hpp"
 
+#include "algebra_wrapper.hpp"
+
 namespace Ariadne {
+
+// FIXME: Resolve _copy and _create_copy in Algebra / Handle
+template class Algebra<ValidatedNumber>;
+
+static_assert(AnAlgebraOver<AlgebraArchetype<Real>,Real>);
+//template class AlgebraWrapper<AlgebraArchetype<Real>,Real>;
+
+static_assert(AnInplaceAlgebraOver<InplaceAlgebraArchetype<Real>,Real>);
+//template class AlgebraWrapper<InplaceAlgebraArchetype<Real>,Real>;
+
+} // namespace Ariadne
+
+
+#include "differential.hpp"
+
+namespace Ariadne {
+
+template class AlgebraWrapper<Differential<FloatDPBounds>,FloatDPBounds>;
+template class AlgebraWrapper<Differential<FloatMPBounds>,FloatMPBounds>;
 
 } // namespace Ariadne

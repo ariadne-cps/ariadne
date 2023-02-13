@@ -28,9 +28,7 @@
 
 void ariadne_main()
 {
-
-    Real deltat=0.1_dec;
-    Real v=3;
+    Real deltat=0.1_dec, v=3;
     RealVariable x("x"), y("y"), theta("theta"), u("u");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+u,next(u)=u});
 
@@ -62,7 +60,7 @@ void ariadne_main()
     scs.add_goal({{4,5},{4.5,5},theta_domain});
 
     CONCLOG_RUN_AT(2,scs.print_goals())
-    
+
     CONCLOG_PRINTLN_VAR_AT(1,scs.goals_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.unverified_size())
 
@@ -82,6 +80,7 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.num_sources())
 
+    scs.update_unverified();
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << scs.unverified_size() << " (" << scs.unverified_percentage() << "% left)")
 
     scs.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,1);

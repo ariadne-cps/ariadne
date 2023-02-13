@@ -215,7 +215,16 @@ class ReachabilityGraphInterface {
 
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) = 0;
     virtual void clear() = 0;
-    virtual void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) = 0;
+
+    //! \brief Remove those sources that can reach the \a avoidance paving
+    virtual void reduce_to_not_reaching(SPaving const& avoidance) = 0;
+
+    //! \brief Remove those sources that can not reach the \a goal paving
+    virtual void reduce_to_possibly_reaching(SPaving const& goal) = 0;
+
+    //! \brief Remove from \a unverified all the sources of the graph
+    virtual void apply_source_removal_to(SPaving& unverified) const = 0;
+
     virtual ReachabilityGraphInterface* clone() const = 0;
     virtual void write(std::ostream& os) const = 0;
     virtual ~ReachabilityGraphInterface() = default;
@@ -242,7 +251,9 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     }
 
     SizeType num_transitions() const override {
-        return _forward_graph.num_transitions();
+        auto result = _forward_graph.num_transitions();
+        ARIADNE_ASSERT_EQUAL(result,_backward_graph.num_transitions())
+        return result;
     }
 
     SizeType num_sources() const override {
@@ -263,7 +274,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
         _backward_graph.clear();
     }
 
-    void refine_to_safety_graph(SPaving const& unsafe, SPaving& unverified) override {
+    void reduce_to_not_reaching(SPaving const& unsafe) override {
         CONCLOG_SCOPE_CREATE
 
         std::deque<NCell> unsafe_cells_queue;
@@ -301,8 +312,14 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
         }
 
         _backward_graph.sweep();
+    }
 
-        _forward_graph.apply_source_removal_to(unverified);
+    void reduce_to_possibly_reaching(SPaving const& goals) override {
+
+    }
+
+    void apply_source_removal_to(SPaving& paving) const override {
+        _forward_graph.apply_source_removal_to(paving);
     }
 
     ReachabilityGraphInterface* clone() const override {

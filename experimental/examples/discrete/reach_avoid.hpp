@@ -156,7 +156,12 @@ public:
     }
 
     void refine_to_safety_graph() {
-        _reachability_graph->refine_to_safety_graph(_obstacles,_unverified);
+        _reachability_graph->reduce_to_not_reaching(_obstacles);
+
+    }
+
+    void update_unverified() {
+        _reachability_graph->apply_source_removal_to(_unverified);
     }
 
     SizeType num_transitions() const { return _reachability_graph->num_transitions(); }

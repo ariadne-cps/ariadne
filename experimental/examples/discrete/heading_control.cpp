@@ -80,6 +80,15 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << scs.num_sources())
 
+    sw.restart();
+    scs.refine_to_goal_reachable_graph();
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"Time cost of reducing graph to goal-reachable one: " << sw.elapsed_seconds() << " seconds")
+
+    CONCLOG_PRINTLN_VAR_AT(1,scs.num_transitions())
+
+    CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << scs.num_sources())
+
     scs.update_unverified();
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << scs.unverified_size() << " (" << scs.unverified_percentage() << "% left)")
 

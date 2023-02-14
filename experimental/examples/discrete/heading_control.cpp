@@ -44,8 +44,9 @@ void ariadne_main()
     BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
     Grid control_grid({pi/4});
     BoundsBoxType control_domain({{-pi_,pi_}});
+    SizeType depth = 0;
 
-    ReachAvoid scs("heading", dynamics, state_grid, state_domain, control_grid, control_domain, 1e-10_x);
+    ReachAvoid scs("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())

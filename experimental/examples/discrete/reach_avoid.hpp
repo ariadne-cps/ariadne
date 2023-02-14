@@ -44,16 +44,16 @@ ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
 
 class ReachAvoid {
 public:
-    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, ExactDouble eps) :
-            _name(name), _dynamics(dynamics), _eps({eps,DoublePrecision()}) {
+    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps) :
+            _name(name), _dynamics(dynamics), _depth(depth), _eps({eps,DoublePrecision()}) {
 
         _state_paving = SPaving(state_grid);
-        _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),0);
-        _state_paving.mince(0);
+        _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),depth);
+        _state_paving.mince(depth);
 
         _controller_paving = CPaving(control_grid);
-        _controller_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),0);
-        _controller_paving.mince(0);
+        _controller_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),depth);
+        _controller_paving.mince(depth);
 
         SizeType default_vertex_extent = _state_paving.begin()->root_extent();
         SizeType default_edge_extent = _controller_paving.begin()->root_extent();
@@ -75,7 +75,7 @@ public:
 
     ReachAvoid& add_obstacle(BoundsBoxType const& box) {
         SPaving obstacle_paving(_state_paving.grid());
-        obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),0);
+        obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
         obstacle_paving.restrict(_state_paving);
         _unverified.remove(obstacle_paving);
         _obstacles.adjoin(obstacle_paving);
@@ -84,7 +84,7 @@ public:
 
     ReachAvoid& add_goal(BoundsBoxType const& box) {
         SPaving goal_paving(_state_paving.grid());
-        goal_paving.adjoin_outer_approximation(shrink(box,_eps),0);
+        goal_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
         goal_paving.restrict(_state_paving);
         _unverified.remove(goal_paving);
         _goals.adjoin(goal_paving);
@@ -145,8 +145,8 @@ public:
             for (auto const& controller_cell : _controller_paving) {
                 auto combined = product(source_cell.box(), controller_cell.box());
                 SPaving destination_cells(_state_paving.grid());
-                destination_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),0);
-                destination_cells.mince(0);
+                destination_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),_depth);
+                destination_cells.mince(_depth);
                 destination_cells.restrict(_state_paving);
                 if (not destination_cells.is_empty())
                     _reachability_graph->insert(source_cell, controller_cell, destination_cells);
@@ -176,6 +176,8 @@ private:
 
     SPaving _state_paving;
     CPaving _controller_paving;
+
+    SizeType const _depth;
 
     FloatDP const _eps;
 

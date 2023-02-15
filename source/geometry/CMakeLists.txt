@@ -5,6 +5,7 @@ add_library(${LIBRARY_NAME} OBJECT
     interval.cpp
     box.cpp
     curve.cpp
+    set.cpp
     function_set.cpp
     binary_tree.cpp
     grid.cpp

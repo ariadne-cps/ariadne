@@ -30,6 +30,7 @@
 #define ARIADNE_SET_WRAPPER_HPP
 
 #include "utility/handle.hpp"
+#include "geometry_concepts.hpp"
 #include "set.hpp"
 
 namespace Ariadne {
@@ -41,8 +42,6 @@ template<class SET, class P, class T> class OvertSetWrapper;
 template<class SET, class P, class T> class CompactSetWrapper;
 template<class SET, class P, class T> class LocatedSetWrapper;
 template<class SET, class P, class T> class RegularLocatedSetWrapper;
-
-template<class SET, class P, class T> class LowerMeasurableSetWrapper;
 
 
 template<class SET, class T> class OpenSetWrapper<SET,ValidatedTag,T>
@@ -176,7 +175,7 @@ template<class SET, class T> class LocatedSetWrapper<SET,ValidatedTag,T>
 };
 
 template<class SET, class T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
-    : public virtual RegularLocatedSet<ValidatedTag,T>::Interface
+    : public virtual ValidatedRegularLocatedSet<T>::Interface
     , public SET
 {
     using P = ValidatedTag;

@@ -39,6 +39,8 @@
 
 using namespace Ariadne;
 
+typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarMultivariateFormulaFunction;
+
 class TestDifferentialInclusion {
   public:
 
@@ -68,7 +70,7 @@ class TestDifferentialInclusion {
         ARIADNE_TEST_PRINT(ivf);
 
         auto nic = ivf.noise_independent_component();
-        const EffectiveVectorFormulaFunction& noise_independent_component = dynamic_cast<const EffectiveVectorFormulaFunction&>(nic.reference());
+        const EffectiveVectorFormulaFunction& noise_independent_component = dynamic_handle_extract<const EffectiveVectorFormulaFunction>(nic);
         ARIADNE_TEST_PRINT(noise_independent_component);
 
         EffectiveFormula zero = EffectiveFormula::zero();
@@ -81,7 +83,7 @@ class TestDifferentialInclusion {
         ARIADNE_TEST_ASSERT(identical(noise_independent_component.formulae(),{-yf,xf+twice*one_point_five}));
 
         auto id = ivf.input_derivatives();
-        const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(id[0].reference());
+        const EffectiveVectorFormulaFunction& input_derivatives = dynamic_handle_extract<const EffectiveVectorFormulaFunction>(id[0]);
         ARIADNE_TEST_PRINT(input_derivatives);
 
         ARIADNE_TEST_ASSERT(identical(input_derivatives.formulae(),{zero,one}));

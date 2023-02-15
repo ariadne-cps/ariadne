@@ -83,8 +83,29 @@ Vector<X> scale(const Vector<X>& v, const BoxDomainType& cd) {
     return Vector<X>(v.size(),[&](SizeType i){return scale(v[i],cd[i]);});
 }
 
+template<class F, class T> struct MyConvertible {
+    template<class TT> static Void convert(TT const&);
+    template<class FF, class TT, class=decltype(convert<TT>(std::declval<FF>()))>
+        static std::true_type test(int);
+    template<class FF, class TT>
+        static std::false_type test(...);
+    static const bool value = decltype(test<F,T>(1))::value;
+};
+
 template<class X> inline
 Vector<X> unscale(const Vector<X>& v, const BoxDomainType& d) {
+    X const& v0=v[0];
+    auto foo=[](X const&){return;};
+    foo(v0);
+    X x(v0);
+//    auto g=[&](SizeType i){return unscale(v[i],d[i]);};
+    auto g=[&](SizeType i){return static_cast<X>(unscale(v[i],d[i]));};
+    typedef decltype(g) G;
+    static_assert(MyConvertible<X,X>::value);
+    static_assert(std::convertible_to<X,X>);
+    static_assert(Constructible<X,X>);
+    static_assert(Convertible<X,X>);
+    static_assert(InvocableReturning<X,G,SizeType>);
     return Vector<X>(v.size(),[&](SizeType i){return unscale(v[i],d[i]);});
 }
 

@@ -78,7 +78,7 @@ Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transfor
 
 Void DifferentialInclusion::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
 
-    const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(function.reference());
+    const EffectiveVectorFormulaFunction& ff = dynamic_handle_extract<const EffectiveVectorFormulaFunction>(function);
 
     auto transformation = centered_coordinates_transformation(function.result_size(),inputs);
     CoordinateFormulaPairs centering_substitution = transformation.first;

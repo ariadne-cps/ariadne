@@ -50,7 +50,7 @@ template<class I> class Handle;
 template<class T, class I> const T& dynamic_handle_cast(const Handle<I>& h);
 template<class T, class I> T& dynamic_handle_cast(Handle<I>& h);
 
-template<class I, class T> class Wrapper
+template<class T, class I> class Wrapper
     : public virtual I, public T
 {
   protected:
@@ -119,13 +119,9 @@ template<class T, class... AS> Handle<T> make_handle(AS&& ... as) {
     return Handle<T>(std::make_shared<T>(as...));
 }
 
-inline void write_error(OutputStream& os, const char* i, const char* c, const char* t) {
-    os << "Error in dynamic_handle_cast: cannot convert object of static type " << c << " and dynamic type " << i << " to type " << t << "\n";
-}
-
-inline void write_error(OutputStream& os, const WritableInterface* w, const char* i, const char* c, const char* t) {
-    os << "Error in dynamic_handle_cast:" << std::flush;
-    os << " cannot convert "; assert(w); w->_write(os); os << std::flush;
+inline void write_error(OutputStream& os, const char* f, const WritableInterface* w, const char* i, const char* c, const char* t) {
+    os << "Error in " << f << ":" << std::flush;
+    os << " cannot convert "; if (w) { w->_write(os); } else { os << "object"; } os << std::flush;
     os << " of static type " << c << " and dynamic type " << i << " to type " << t << std::endl;
 }
 
@@ -141,35 +137,46 @@ template<class D, class B> D dynamic_handle_cast(B const& h) {
     }
     const BI* i=h.raw_pointer();
     const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
-    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(D).name()); }
-    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(D).name()); }
+    write_error(std::cerr,"dynamic_handle_cast",w,typeid(*i).name(),typeid(i).name(),typeid(D).name());
+    throw std::bad_cast();
+}
+
+template<class T, class I> const T& dynamic_handle_extract(const Handle<const I>& h) {
+    const I* i=h.raw_const_pointer();
+    const T* p=dynamic_cast<const T*>(i);
+    if(p) { return const_cast<T&>(*p); }
+    p=dynamic_cast<const Wrapper<T,I>*>(i);
+    if(p) { return *p; }
+    const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
+    write_error(std::cerr,"dynamic_handle_extract",w,typeid(*i).name(),typeid(i).name(),typeid(T).name());
     throw std::bad_cast();
 }
 
 template<class T, class I> const T& dynamic_handle_extract(const Handle<I>& h) {
-    const I* i=h.raw_const_pointer();
-    const T* p=dynamic_cast<const T*>(i);
-    if(p) { return const_cast<T&>(*p); }
-    p=dynamic_cast<const Wrapper<I,T>*>(i);
-    if(p) { return *p; }
-    const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
-    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
-    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
-    throw std::bad_cast();
+    return dynamic_handle_extract<T>(Handle<const I>(h));
 }
 
 template<class T, class I> T& dynamic_handle_extract(Handle<I>& h) {
     const I* i=h.raw_const_pointer();
     const T* p=dynamic_cast<const T*>(i);
     if(p) { return const_cast<T&>(*p); }
-    p=dynamic_cast<const Wrapper<I,T>*>(i);
+    p=dynamic_cast<const Wrapper<T,I>*>(i);
     if(p) { return const_cast<T&>(*p); }
     const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
-    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
-    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
+    write_error(std::cerr,"dynamic_handle_extract",w,typeid(*i).name(),typeid(i).name(),typeid(T).name());
     throw std::bad_cast();
 }
 
+
+
+template<class T, class I> SharedPointer<const T> dynamic_pointer_extract(const SharedPointer<const I>& ip) {
+    SharedPointer<const T> tp=dynamic_pointer_cast<const T>(ip);
+    if(tp) { return tp; }
+    tp=static_pointer_cast<const T>(dynamic_pointer_cast<const Wrapper<T,I>>(ip));
+    if(tp) { return tp; }
+    SharedPointer<const WritableInterface> wp=dynamic_pointer_cast<const WritableInterface>(ip);
+    return tp;
+}
 
 
 } // namespace Ariadne

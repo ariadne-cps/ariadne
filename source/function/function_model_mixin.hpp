@@ -63,7 +63,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
     using RES = RealScalar; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
     typedef FunctionPatchInterface<P,SIG> GenericInterface;
@@ -164,7 +164,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     , public VectorFunctionMixin<FM,P,ARG>
 {
     using RES = RealVector; using SIG=RES(ARG);
-    using C = DomainOfType<RES>; using D = DomainOfType<ARG>;
+    using C = BoundedDomainType<RES>; using D = BoundedDomainType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
     typedef FunctionPatchInterface<P,SIG> GenericInterface;
@@ -232,9 +232,9 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     Vector<Number<P>> _unchecked_evaluate(const Vector<Number<P>>& y) const override {
         return unchecked_evaluate(static_cast<const FM&>(*this),y); }
     Vector<CanonicalNumericType<P,DP>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,DP>>& x) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        auto pr=x.zero_element().precision(); return Vector<CanonicalNumericType<P,DP>>(unchecked_evaluate(static_cast<const FM&>(*this),x),pr); }
     Vector<CanonicalNumericType<P,MP>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,MP>>& x) const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        auto pr=x.zero_element().precision(); return Vector<CanonicalNumericType<P,MP>>(unchecked_evaluate(static_cast<const FM&>(*this),x),pr); }
     Vector<CanonicalNumericType<P,PR,PRE>> _concrete_unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const override {
         return unchecked_evaluate(static_cast<const FM&>(*this),x); }
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _compose(const ScalarMultivariateFunction<P>& f) const override {

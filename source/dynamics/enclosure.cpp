@@ -662,6 +662,11 @@ ValidatedScalarMultivariateFunctionPatch const& Enclosure::dwell_time_function()
 }
 
 ValidatedVectorMultivariateFunctionPatch const Enclosure::auxiliary_function() const {
+    static_assert(Same<decltype(this->_auxiliary_mapping),EffectiveVectorMultivariateFunction>);
+    static_assert(Same<decltype(this->_state_function),ValidatedVectorMultivariateFunctionPatch>);
+    static_assert(not Convertible<ValidatedVectorMultivariateFunction,EffectiveVectorMultivariateFunction>);
+    static_assert(not Convertible<ValidatedVectorMultivariateFunctionPatch,EffectiveVectorMultivariateFunction>);
+    static_assert(not Convertible<EffectiveVectorMultivariateFunction,ValidatedVectorMultivariateFunctionPatch>);
     return compose(this->_auxiliary_mapping,this->_state_function);
 }
 

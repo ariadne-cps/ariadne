@@ -104,14 +104,15 @@ class Array {
         this->_uninitialized_fill(first); }
 
     //! \brief Conversion constructor.
-    template<ConvertibleTo<T> TT>
+    template<class TT> requires Convertible<TT,T>
     Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
 
     //! \brief Explicit conversion constructor.
-    template<ExplicitlyConvertibleTo<T> TT>
+    //! \details Requirement ExplicitlyConvertible<TT,T> as a static_assert to avoid definition of \c TT being required.
+    template<class TT>
     explicit Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
-        this->_uninitialized_fill(a.begin()); }
+        static_assert(ExplicitlyConvertible<TT,T>); this->_uninitialized_fill(a.begin()); }
 
     //! \brief Explicit construction with properties parameter.
     template<class TT, class PR> requires Constructible<T,TT,PR>

@@ -113,7 +113,7 @@ FunctionModelFactoryInterface<P,PR,PRE>::create_identity(IntervalDomainType cons
     return ScalarFunctionModel<P,VARG,PR,PRE>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
 template<class FCTRY, class ARG> class FunctionModelCreator {
-    typedef DomainOfType<ARG> D;
+    typedef BoundedDomainType<ARG> D;
     typedef typename FCTRY::Paradigm P;
     typedef typename FCTRY::PrecisionType PR;
     typedef typename FCTRY::ErrorPrecisionType PRE;
@@ -197,7 +197,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     using RES=RealScalar; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     static_assert(Same<D,IntervalDomainType> or Same<D,BoxDomainType>,"");
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
@@ -445,7 +445,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     static_assert(Same<PRE,DoublePrecision> or Same<PRE,MultiplePrecision>,"");
     using RES=RealVector; using SIG=RES(ARG);
-    using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
+    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
   public:
@@ -659,8 +659,8 @@ template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const Scal
 template<class P> inline Vector<CanonicalNumeric64Type<P>> unchecked_evaluate(const VectorMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
     auto const* fmptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
     if(fmptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fmptr),x); }
-    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
-    if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionPatch<P>(*fptr),x); }
+    auto const* fptr = dynamic_cast<typename VectorMultivariateFunctionPatch<P>::Interface const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(VectorMultivariateFunctionPatch<P>(*fptr),x); }
     return evaluate(f,x);
 }
 

@@ -15,6 +15,8 @@ add_library(${LIBRARY_NAME} OBJECT
     taylor_model.cpp
     taylor_function.cpp
     taylor_multifunction.cpp
+
+    symbolic_function.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

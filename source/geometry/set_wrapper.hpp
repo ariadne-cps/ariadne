@@ -86,6 +86,26 @@ template<class SET, class T> class ClosedSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, ClosedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
+template<class SET, class T> class OvertSetWrapper<SET,ValidatedTag,T>
+    : public virtual ValidatedOvertSet<T>::Interface
+    , public SET
+{
+    using P = ValidatedTag;
+    SET const& base() const { return *this; }
+  public:
+    using typename OvertSetInterface<P,T>::DimensionType;
+    using typename OvertSetInterface<P,T>::BasicSetType;
+
+    using SET::SET;
+    explicit OvertSetWrapper(SET const& set) : SET(set) { }
+    virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
+    virtual OvertSetInterface<ValidatedTag,T>* clone() const final { return new OvertSetWrapper<SET,P,T>(this->base()); }
+    virtual DimensionType dimension() const final override { return this->base().dimension(); }
+    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    // Needed to prevent ambiguity
+    friend OutputStream& operator<<(OutputStream& os, OvertSetWrapper<SET,P,T> ops) { return os << ops.base(); }
+};
+
 template<class SET, class T> class CompactSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedCompactSet<T>::Interface
     , public SET
@@ -131,6 +151,29 @@ template<class SET, class T> class RegularSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, RegularSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
+template<class SET, class T> class LocatedSetWrapper<SET,ValidatedTag,T>
+    : public virtual ValidatedLocatedSet<T>::Interface
+    , public SET
+{
+    using P = ValidatedTag;
+    SET const& base() const { return *this; }
+  public:
+    using typename LocatedSetInterface<P,T>::DimensionType;
+    using typename LocatedSetInterface<P,T>::BasicSetType;
+    using typename LocatedSetInterface<P,T>::BoundingSetType;
+
+    using SET::SET;
+    LocatedSetWrapper(SET const& set) : SET(set) { }
+    virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
+    virtual LocatedSetInterface<P,T>* clone() const final { return new LocatedSetWrapper<SET,P,T>(this->base()); }
+    virtual DimensionType dimension() const final override { return this->base().dimension(); }
+    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual ValidatedLowerKleenean inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
+    virtual BoundingSetType bounding_box() const final { return static_cast<BoundingSetType>(this->base().bounding_box()); }
+    // Needed to prevent ambiguity
+    friend OutputStream& operator<<(OutputStream& os, LocatedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
+};
 
 template<class SET, class T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
     : public virtual RegularLocatedSet<ValidatedTag,T>::Interface
@@ -139,9 +182,9 @@ template<class SET, class T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
     using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
-    using typename SetInterface<P,T>::DimensionType;
-    using typename SetInterface<P,T>::BasicSetType;
-    using typename SetInterface<P,T>::BoundingSetType;
+    using typename RegularLocatedSetInterface<P,T>::DimensionType;
+    using typename RegularLocatedSetInterface<P,T>::BasicSetType;
+    using typename RegularLocatedSetInterface<P,T>::BoundingSetType;
 
     using SET::SET;
     RegularLocatedSetWrapper(SET const& set) : SET(set) { }

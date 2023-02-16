@@ -99,7 +99,7 @@ template<class F> ValidatedAffineModelConstraint<F> operator==(const ValidatedAf
 //! \sa ValidatedConstrainedImageSet
 class ValidatedAffineConstrainedImageSet
     : public virtual ValidatedEuclideanCompactSetInterface
-	, public virtual Drawable2dInterface
+    , public virtual Drawable2dInterface
 {
     ExactBoxType  _domain;
     Vector<ValidatedAffineModelDP> _space_models;
@@ -124,20 +124,20 @@ class ValidatedAffineConstrainedImageSet
     //!\brief The set \f$\{ x \mid x\in B\}\f$.
     ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& B);
 
-    ValidatedAffineConstrainedImageSet* clone() const;
+    virtual ValidatedAffineConstrainedImageSet* clone() const override;
     Void new_parameter_constraint(const EffectiveAffineConstraint& c);
     Void new_parameter_constraint(const ValidatedAffineConstraintDP& c);
     Void new_constraint(const ValidatedAffineModelConstraintDP& c);
 
-    DimensionType dimension() const;
+    virtual DimensionType dimension() const override;
     SizeType number_of_parameters() const;
     SizeType number_of_constraints() const;
     ExactBoxType domain() const;
 
     ValidatedKleenean is_bounded() const;
-    UpperBoxType bounding_box() const;
-    ValidatedLowerKleenean separated(const ExactBoxType& bx) const;
-    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
+    virtual UpperBoxType bounding_box() const override;
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& bx) const override;
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& bx) const override;
     ValidatedLowerKleenean is_empty() const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
@@ -149,8 +149,8 @@ class ValidatedAffineConstrainedImageSet
 
     List<Point2d> boundary(SizeType xc, SizeType yc) const;
 
-    virtual Void draw(CanvasInterface&, const Projection2d& p) const;
-    virtual OutputStream& _write(OutputStream& os) const;
+    virtual Void draw(CanvasInterface&, const Projection2d& p) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
 
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDP>& G, const Vector<FloatDP>& c);

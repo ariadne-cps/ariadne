@@ -576,19 +576,19 @@ template<> class BoxSet<ExactIntervalType>
     using Box<ExactIntervalType>::Box;
     BoxSet(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
-    virtual ExactBoxSetType* clone() const { return new ExactBoxSetType(*this); }
-    virtual DimensionType dimension() const final { return this->ExactBoxType::dimension(); }
-    virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
-    virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
-    virtual LowerKleenean covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
-    virtual LowerKleenean inside(const ExactBoxType& other) const final { return this->ExactBoxType::inside(other); }
-    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::separated(other); }
-    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::overlaps(other); }
-    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::covers(other); }
-    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::inside(other); }
-    virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
-    virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
+    virtual ExactBoxSetType* clone() const override { return new ExactBoxSetType(*this); }
+    virtual DimensionType dimension() const override final { return this->ExactBoxType::dimension(); }
+    virtual LowerKleenean separated(const ExactBoxType& other) const override final { return this->ExactBoxType::separated(other); }
+    virtual LowerKleenean overlaps(const ExactBoxType& other) const override final { return this->ExactBoxType::overlaps(other); }
+    virtual LowerKleenean covers(const ExactBoxType& other) const override final { return this->ExactBoxType::covers(other); }
+    virtual LowerKleenean inside(const ExactBoxType& other) const override final { return this->ExactBoxType::inside(other); }
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const override final { return this->ExactBoxType::separated(other); }
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const override final { return this->ExactBoxType::overlaps(other); }
+    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const override final { return this->ExactBoxType::covers(other); }
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const override final { return this->ExactBoxType::inside(other); }
+    virtual UpperBoxType bounding_box() const override final { return this->ExactBoxType::bounding_box(); }
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const override final { return Ariadne::draw(c,p,*this); }
+    virtual OutputStream& _write(OutputStream& os) const override final { return os << static_cast<const ExactBoxType&>(*this); }
 };
 
 template<> class BoxSet<ApproximateIntervalType>
@@ -600,9 +600,9 @@ template<> class BoxSet<ApproximateIntervalType>
     using Box<ApproximateIntervalType>::Box;
     BoxSet(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
-    virtual ApproximateBoxSetType* clone() const { return new ApproximateBoxSetType(*this); }
-    virtual DimensionType dimension() const final { return this->ApproximateBoxType::dimension(); }
-    virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
+    virtual ApproximateBoxSetType* clone() const override { return new ApproximateBoxSetType(*this); }
+    virtual DimensionType dimension() const override final { return this->ApproximateBoxType::dimension(); }
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const override final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
@@ -619,20 +619,20 @@ template<> class BoxSet<RealInterval>
     using Box<RealInterval>::Box;
     BoxSet(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 
-    virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->Box<RealInterval>::dimension(); }
-    virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return this->Box<RealInterval>::draw(c,p); }
-    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
+    virtual RealBoxSet* clone() const override { return new RealBoxSet(*this); }
+    virtual DimensionType dimension() const override final { return this->Box<RealInterval>::dimension(); }
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const override final { return this->Box<RealInterval>::draw(c,p); }
+    virtual OutputStream& _write(OutputStream& os) const override final { return os << static_cast<const Box<RealInterval>&>(*this); }
 
-    virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->BoxType::separated(DyadicBox(other)); }
-    virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->BoxType::overlaps(DyadicBox(other)); }
-    virtual LowerKleenean covers(const ExactBoxType& other) const final { return this->BoxType::covers(DyadicBox(other)); }
-    virtual LowerKleenean inside(const ExactBoxType& other) const final { return this->BoxType::inside(DyadicBox(other)); }
-    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const final { return this->BoxType::separated(other); }
-    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const final { return this->BoxType::overlaps(other); }
-    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const final { return this->BoxType::covers(other); }
-    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->BoxType::inside(other); }
-    virtual UpperBoxType bounding_box() const final { return UpperBoxType(this->BoxType::bounding_box()); }
+    virtual LowerKleenean separated(const ExactBoxType& other) const override final { return this->BoxType::separated(DyadicBox(other)); }
+    virtual LowerKleenean overlaps(const ExactBoxType& other) const override final { return this->BoxType::overlaps(DyadicBox(other)); }
+    virtual LowerKleenean covers(const ExactBoxType& other) const override final { return this->BoxType::covers(DyadicBox(other)); }
+    virtual LowerKleenean inside(const ExactBoxType& other) const override final { return this->BoxType::inside(DyadicBox(other)); }
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const override final { return this->BoxType::separated(other); }
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const override final { return this->BoxType::overlaps(other); }
+    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const override final { return this->BoxType::covers(other); }
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const override final { return this->BoxType::inside(other); }
+    virtual UpperBoxType bounding_box() const override final { return UpperBoxType(this->BoxType::bounding_box()); }
 };
 
 

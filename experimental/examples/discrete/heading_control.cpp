@@ -63,7 +63,7 @@ void ariadne_main()
     double pi_ = pi.get_d();
 
     Grid state_grid({0.5,0.5,2*pi/8});
-    BoundType theta_domain = {-2*pi_,2*pi_};
+    BoundType theta_domain = {0,2*pi_};
     BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
     SizeType depth = 0;
 

@@ -26,15 +26,38 @@
 #include "reach_avoid.hpp"
 #include "utility/stopwatch.hpp"
 
-void ariadne_main()
-{
+Tuple<IteratedMap,Grid,BoundsBoxType> u_control() {
     Real deltat=0.1_dec, v=3;
     RealVariable x("x"), y("y"), theta("theta"), u("u");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+u,next(u)=u});
 
-    auto dynamics = heading.function().zeros(3,4);
+    Grid control_grid({pi/4});
+    double pi_ = pi.get_d();
+    BoundsBoxType control_domain({{-2*pi_,2*pi_}});
+
+    return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
+}
+
+Tuple<IteratedMap,Grid,BoundsBoxType> cpwa_control() {
+    Real deltat = 0.1_dec, v = 3;
+    RealVariable x("x"), y("y"), theta("theta"), K1("K1"), K2("K2"), K3("K3"), b("b");
+    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*(K1*x+K2*y+K3*theta+b),
+                         next(K1)=K1,next(K2)=K2,next(K3)=K3,next(b)=b});
+
+    double pi_ = pi.get_d();
+    Grid control_grid({1,1,1,44/20*pi_});
+    BoundsBoxType control_domain({{-1,1},{-1,1},{-1,1},{-22*pi_,22*pi_}});
+
+    return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
+}
+
+void ariadne_main()
+{
+    auto sys = cpwa_control();
+
+    auto dynamics = get<0>(sys).function().zeros(3,get<0>(sys).dimension());
     for (SizeType i=0; i<3; ++i)
-        dynamics[i] = heading.function().get(i);
+        dynamics[i] = get<0>(sys).function().get(i);
     CONCLOG_PRINTLN_VAR(dynamics);
 
     double pi_ = pi.get_d();
@@ -42,11 +65,9 @@ void ariadne_main()
     Grid state_grid({0.5,0.5,2*pi/8});
     BoundType theta_domain = {-2*pi_,2*pi_};
     BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
-    Grid control_grid({pi/4});
-    BoundsBoxType control_domain({{-2*pi_,2*pi_}});
     SizeType depth = 0;
 
-    ReachAvoid scs("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
+    ReachAvoid scs("heading", dynamics, state_grid, state_domain, get<1>(sys), get<2>(sys), depth, 1e-10_x);
 
     CONCLOG_PRINTLN_VAR_AT(1,scs.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,scs.controller_size())

@@ -33,7 +33,7 @@ Tuple<IteratedMap,Grid,BoundsBoxType> u_control() {
 
     Grid control_grid({pi/4});
     double pi_ = pi.get_d();
-    BoundsBoxType control_domain({{-2*pi_,2*pi_}});
+    BoundsBoxType control_domain({{-pi_-pi_/4,pi_+pi_/4}});
 
     return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
 }
@@ -45,15 +45,15 @@ Tuple<IteratedMap,Grid,BoundsBoxType> cpwa_control() {
                          next(K1)=K1,next(K2)=K2,next(K3)=K3,next(b)=b});
 
     double pi_ = pi.get_d();
-    Grid control_grid({1,1,1,44/20*pi_});
-    BoundsBoxType control_domain({{-1,1},{-1,1},{-1,1},{-22*pi_,22*pi_}});
+    Grid control_grid({1,1,1,24*pi_/20});
+    BoundsBoxType control_domain({{-1,1},{-1,1},{-1,1},{-12*pi_,12*pi_}});
 
     return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
 }
 
 void ariadne_main()
 {
-    auto sys = cpwa_control();
+    auto sys = u_control();
 
     auto dynamics = get<0>(sys).function().zeros(3,get<0>(sys).dimension());
     for (SizeType i=0; i<3; ++i)

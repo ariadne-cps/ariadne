@@ -43,7 +43,7 @@ void ariadne_main()
     BoundType theta_domain = {-2*pi_,2*pi_};
     BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
     Grid control_grid({pi/4});
-    BoundsBoxType control_domain({{-pi_,pi_}});
+    BoundsBoxType control_domain({{-2*pi_,2*pi_}});
     SizeType depth = 0;
 
     ReachAvoid scs("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);

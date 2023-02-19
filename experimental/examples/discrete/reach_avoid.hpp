@@ -107,7 +107,7 @@ public:
         return static_cast<double>(_unverified.size())*100/(_state_paving.size()-_goals.size()-_obstacles.size());
     }
 
-    void plot(SizeType xaxis, SizeType yaxis) {
+    void plot(SizeType xaxis, SizeType yaxis) const {
         ExactBoxType graphics_box(_state_bounds.size());
         for (SizeType i=0; i<_state_bounds.size(); ++i)
             graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[0].lower_bound()),DoublePrecision()},{ExactDouble(_state_bounds[0].upper_bound()),DoublePrecision()});
@@ -121,6 +121,12 @@ public:
         char num_char[64] = "";
         snprintf(num_char,64,"[%zu,%zu]",xaxis,yaxis);
         fig.write((_name+num_char).c_str());
+    }
+
+    void plot() const {
+        for (SizeType i=0; i<_dynamics.result_size()-1; ++i)
+            for (SizeType j=i+1; j<_dynamics.result_size(); ++j)
+                plot(i,j);
     }
 
     void print_goals() const {

@@ -118,7 +118,7 @@ void check_scalabilities(SizeType n) {
     ReachAvoid u_ra("u_ra",u_dynamics,state_grid,state_domain,u_control_grid,u_control_domain,0,1e-10_x);
 
     CONCLOG_PRINTLN_AT(1,"State size: " << u_ra.state_size())
-    CONCLOG_PRINTLN_VAR_AT(1,u_ra.controller_size())
+    CONCLOG_PRINTLN_VAR_AT(1,u_ra.control_size())
 
     Stopwatch<Milliseconds> sw;
     u_ra.compute_reachability_graph();
@@ -129,7 +129,7 @@ void check_scalabilities(SizeType n) {
     Grid cpwa_control_grid(n+1,1);
     BoundsBoxType cpwa_control_domain(n+1,{0,2});
     ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x);
-    CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.controller_size())
+    CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.control_size())
 
     cpwa_ra.compute_reachability_graph();
     sw.click();
@@ -148,7 +148,7 @@ void ariadne_main()
     auto ra = set_workspace_1(dynamics,get<1>(sys), get<2>(sys));
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.state_size())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.controller_size())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.control_size())
 
     CONCLOG_RUN_AT(2,ra.print_obstacles())
     CONCLOG_PRINTLN_VAR_AT(1,ra.obstacles_size())
@@ -186,9 +186,9 @@ void ariadne_main()
     ra.update_unverified();
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
-    ra.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,1);
-    ra.plot({{0,5},{0,5},{-6.28_x,6.28_x}},0,2);
-    ra.plot({{0,5},{0,5},{-6.28_x,6.28_x}},1,2);
+    ra.plot(0,1);
+    ra.plot(0,2);
+    ra.plot(1,2);
 
     CONCLOG_RUN_AT(3,ra.print_graph())
 }

@@ -45,18 +45,18 @@ ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
 class ReachAvoid {
 public:
     ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps) :
-            _name(name), _dynamics(dynamics), _depth(depth), _eps({eps,DoublePrecision()}) {
+            _name(name), _dynamics(dynamics), _state_bounds(state_bounds), _control_bounds(control_bounds), _depth(depth), _eps({eps,DoublePrecision()}) {
 
         _state_paving = SPaving(state_grid);
         _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),depth);
         _state_paving.mince(depth);
 
-        _controller_paving = CPaving(control_grid);
-        _controller_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),depth);
-        _controller_paving.mince(depth);
+        _control_paving = CPaving(control_grid);
+        _control_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),depth);
+        _control_paving.mince(depth);
 
         SizeType default_vertex_extent = _state_paving.begin()->root_extent();
-        SizeType default_edge_extent = _controller_paving.begin()->root_extent();
+        SizeType default_edge_extent = _control_paving.begin()->root_extent();
         IdentifiedCellFactory::HashTableType vertex_ids;
         IdentifiedCellFactory::HashTableType edge_ids;
 
@@ -66,8 +66,8 @@ public:
 
         for (auto const& c : _state_paving)
             vertex_ids.insert(make_pair(word_to_id(c.word(),default_vertex_extent*_state_paving.dimension()),vertex_ids.size()));
-        for (auto const& c : _controller_paving) {
-            edge_ids.insert(make_pair(word_to_id(c.word(),default_edge_extent*_controller_paving.dimension()),edge_ids.size()));
+        for (auto const& c : _control_paving) {
+            edge_ids.insert(make_pair(word_to_id(c.word(),default_edge_extent*_control_paving.dimension()),edge_ids.size()));
         }
 
         _reachability_graph.reset(new ForwardBackwardReachabilityGraph(IdentifiedCellFactory(default_vertex_extent,vertex_ids),IdentifiedCellFactory(default_edge_extent,edge_ids)));
@@ -91,8 +91,11 @@ public:
         return *this;
     }
 
+    BoundsBoxType const& state_bounds() const { return _state_bounds; }
+    BoundsBoxType const& control_bounds() const { return _control_bounds; }
+
     SizeType state_size() const { return _state_paving.size(); }
-    SizeType controller_size() const { return _controller_paving.size(); }
+    SizeType control_size() const { return _control_paving.size(); }
     SizeType obstacles_size() const { return _obstacles.size(); }
     SizeType goals_size() const { return _goals.size(); }
     SizeType unverified_size() const { return _unverified.size(); }
@@ -104,9 +107,12 @@ public:
         return static_cast<double>(_unverified.size())*100/(_state_paving.size()-_goals.size()-_obstacles.size());
     }
 
-    void plot(ExactBoxType const& graphics_box, SizeType xaxis, SizeType yaxis) {
-        Figure fig(graphics_box,xaxis,yaxis);
+    void plot(SizeType xaxis, SizeType yaxis) {
+        ExactBoxType graphics_box(_state_bounds.size());
+        for (SizeType i=0; i<_state_bounds.size(); ++i)
+            graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[0].lower_bound()),DoublePrecision()},{ExactDouble(_state_bounds[0].upper_bound()),DoublePrecision()});
 
+        Figure fig(graphics_box,xaxis,yaxis);
         SPaving safe = _state_paving;
         safe.remove(_obstacles);
         safe.remove(_goals);
@@ -142,7 +148,7 @@ public:
         double indicator_value = 0;
         for (auto const& source_cell : _unverified) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
-            for (auto const& controller_cell : _controller_paving) {
+            for (auto const& controller_cell : _control_paving) {
                 auto combined = product(source_cell.box(), controller_cell.box());
                 SPaving destination_cells(_state_paving.grid());
                 destination_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),_depth);
@@ -174,8 +180,11 @@ private:
     String const _name;
     EffectiveVectorMultivariateFunction const _dynamics;
 
+    BoundsBoxType const _state_bounds;
+    BoundsBoxType const _control_bounds;
+
     SPaving _state_paving;
-    CPaving _controller_paving;
+    CPaving _control_paving;
 
     SizeType const _depth;
 

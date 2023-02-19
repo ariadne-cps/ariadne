@@ -94,6 +94,48 @@ ReachAvoid set_workspace_2(EffectiveVectorMultivariateFunction const& dynamics, 
     return ra;
 }
 
+void check_scalabilities(SizeType n) {
+
+    EffectiveVectorMultivariateFunction u_dynamics = EffectiveVectorMultivariateFunction::zeros(n,n+1);
+    for (SizeType i=0; i<n; ++i)
+        u_dynamics[i] = u_dynamics.coordinate(n+1,i) + u_dynamics.coordinate(n+1,n);
+    CONCLOG_PRINTLN_VAR(u_dynamics)
+
+    EffectiveVectorMultivariateFunction cpwa_dynamics = EffectiveVectorMultivariateFunction::zeros(n,2*n+1);
+    for (SizeType i=0; i<n; ++i) {
+        cpwa_dynamics[i] = cpwa_dynamics.coordinate(2*n+1,i);
+    }
+    for (SizeType j=n; j<2*n+1; ++j)
+        cpwa_dynamics[0] = cpwa_dynamics[0] + cpwa_dynamics.coordinate(2*n+1,j)/(n+1);
+    CONCLOG_PRINTLN_VAR(cpwa_dynamics)
+
+    Grid state_grid(n,1);
+    BoundsBoxType state_domain(n,{0,2});
+
+    Grid u_control_grid(1,1);
+    BoundsBoxType u_control_domain(1,{0,2});
+
+    ReachAvoid u_ra("u_ra",u_dynamics,state_grid,state_domain,u_control_grid,u_control_domain,0,1e-10_x);
+
+    CONCLOG_PRINTLN_AT(1,"State size: " << u_ra.state_size())
+    CONCLOG_PRINTLN_VAR_AT(1,u_ra.controller_size())
+
+    Stopwatch<Milliseconds> sw;
+    u_ra.compute_reachability_graph();
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"(u) Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
+    sw.restart();
+
+    Grid cpwa_control_grid(n+1,1);
+    BoundsBoxType cpwa_control_domain(n+1,{0,2});
+    ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x);
+    CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.controller_size())
+
+    cpwa_ra.compute_reachability_graph();
+    sw.click();
+    CONCLOG_PRINTLN_AT(1,"(CPWA) Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
+}
+
 void ariadne_main()
 {
     auto sys = u_control();

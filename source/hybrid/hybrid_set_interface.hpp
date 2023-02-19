@@ -86,7 +86,8 @@ class HybridSetInterfaceBase
     virtual ~HybridSetInterfaceBase() = default;
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual Set<RealVariable> variables(DiscreteLocation) const = 0;
-    inline EuclideanSetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EuclideanSetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EuclideanSetBase(this->_euclidean_set(loc,spc)); }
     virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& hs);
   protected:
@@ -100,7 +101,8 @@ template<> class HybridBoundedSetInterface<EffectiveTag>
   public:
     virtual HybridBoundedSetInterface<EffectiveTag>* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
-    inline EffectiveEuclideanBoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanBoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanBoundedSet(this->_euclidean_set(loc,spc)); }
     virtual LowerKleenean inside(const HybridExactBoxes& bx) const = 0;
     virtual HybridUpperBoxes bounding_box() const = 0;
   protected:
@@ -113,7 +115,8 @@ template<> class HybridOvertSetInterface<EffectiveTag>
 {
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
-    inline EffectiveEuclideanOvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanOvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanOvertSet(this->_euclidean_set(loc,spc)); }
     virtual LowerKleenean overlaps(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanOvertSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -125,7 +128,8 @@ template<> class HybridOpenSetInterface<EffectiveTag>
 {
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
-    inline EffectiveEuclideanOpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanOpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanOpenSet(this->_euclidean_set(loc,spc)); }
     virtual LowerKleenean covers(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanOpenSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -137,7 +141,8 @@ template<> class HybridClosedSetInterface<EffectiveTag>
 {
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
-    inline EffectiveEuclideanClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanClosedSet(this->_euclidean_set(loc,spc)); }
     virtual LowerKleenean separated(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanClosedSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -150,7 +155,8 @@ template<> class HybridCompactSetInterface<EffectiveTag>
 {
   public:
     virtual HybridCompactSetInterface* clone() const = 0;
-    inline EffectiveEuclideanCompactSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanCompactSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanCompactSet(this->_euclidean_set(loc,spc)); }
   protected:
     virtual EuclideanCompactSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -162,7 +168,8 @@ template<> class HybridRegularSetInterface<EffectiveTag>
 {
   public:
     virtual HybridRegularSetInterface* clone() const = 0;
-    inline EffectiveEuclideanRegularSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanRegularSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanRegularSet(this->_euclidean_set(loc,spc)); }
   protected:
     virtual EuclideanRegularSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -174,7 +181,8 @@ template<> class HybridLocatedSetInterface<EffectiveTag>
 {
   public:
     virtual HybridLocatedSetInterface* clone() const = 0;
-    inline EffectiveEuclideanLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanLocatedSet(this->_euclidean_set(loc,spc)); }
   protected:
     virtual EuclideanLocatedSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -186,7 +194,8 @@ template<> class HybridRegularLocatedSetInterface<EffectiveTag>
 {
   public:
     virtual HybridRegularLocatedSetInterface* clone() const = 0;
-    inline EffectiveEuclideanRegularLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
+    inline EffectiveEuclideanRegularLocatedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+        return EffectiveEuclideanRegularLocatedSet(this->_euclidean_set(loc,spc)); }
   protected:
     virtual EuclideanRegularLocatedSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };

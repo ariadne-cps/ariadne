@@ -22,8 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "geometry/set.hpp"
 #include "geometry/geometry_concepts.hpp"
+#include "geometry/set.hpp"
+#include "geometry/set_wrapper.hpp"
 
 namespace Ariadne {
 

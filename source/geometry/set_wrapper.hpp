@@ -35,16 +35,16 @@
 
 namespace Ariadne {
 
-template<class SET, class P, class T> class OpenSetWrapper;
-template<class SET, class P, class T> class ClosedSetWrapper;
-template<class SET, class P, class T> class RegularSetWrapper;
-template<class SET, class P, class T> class OvertSetWrapper;
-template<class SET, class P, class T> class CompactSetWrapper;
-template<class SET, class P, class T> class LocatedSetWrapper;
-template<class SET, class P, class T> class RegularLocatedSetWrapper;
+template<class SET, class P, class T> requires AnOpenSet<SET,P,T> class OpenSetWrapper;
+template<class SET, class P, class T> requires AClosedSet<SET,P,T> class ClosedSetWrapper;
+template<class SET, class P, class T> requires ARegularSet<SET,P,T> class RegularSetWrapper;
+template<class SET, class P, class T> requires AnOvertSet<SET,P,T> class OvertSetWrapper;
+template<class SET, class P, class T> requires ACompactSet<SET,P,T> class CompactSetWrapper;
+template<class SET, class P, class T> requires ALocatedSet<SET,P,T> class LocatedSetWrapper;
+template<class SET, class P, class T> requires ARegularLocatedSet<SET,P,T> class RegularLocatedSetWrapper;
 
 
-template<class SET, class T> class OpenSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires AnOpenSet<SET,ValidatedTag,T> class OpenSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedOpenSet<T>::Interface
     , public SET
 {
@@ -65,7 +65,7 @@ template<class SET, class T> class OpenSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, OpenSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class ClosedSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires AClosedSet<SET,ValidatedTag,T> class ClosedSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedClosedSet<T>::Interface
     , public SET
 {
@@ -85,7 +85,7 @@ template<class SET, class T> class ClosedSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, ClosedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class OvertSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires AnOvertSet<SET,ValidatedTag,T> class OvertSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedOvertSet<T>::Interface
     , public SET
 {
@@ -105,7 +105,7 @@ template<class SET, class T> class OvertSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, OvertSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class CompactSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires ACompactSet<SET,ValidatedTag,T> class CompactSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedCompactSet<T>::Interface
     , public SET
 {
@@ -128,7 +128,7 @@ template<class SET, class T> class CompactSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, CompactSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class RegularSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires ARegularSet<SET,ValidatedTag,T> class RegularSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedRegularSet<T>::Interface
     , public SET
 {
@@ -150,7 +150,7 @@ template<class SET, class T> class RegularSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, RegularSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class LocatedSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires ALocatedSet<SET,ValidatedTag,T> class LocatedSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedLocatedSet<T>::Interface
     , public SET
 {
@@ -174,7 +174,7 @@ template<class SET, class T> class LocatedSetWrapper<SET,ValidatedTag,T>
     friend OutputStream& operator<<(OutputStream& os, LocatedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
+template<class SET, class T> requires ARegularLocatedSet<SET,ValidatedTag,T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
     : public virtual ValidatedRegularLocatedSet<T>::Interface
     , public SET
 {
@@ -199,6 +199,39 @@ template<class SET, class T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, RegularLocatedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
+
+
+template<class S, class C> struct WrapperTrait;
+template<class S, class P, class T> struct WrapperTrait<S,OpenSet<P,T>> { typedef OpenSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,ClosedSet<P,T>> { typedef ClosedSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,OvertSet<P,T>> { typedef OvertSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,CompactSet<P,T>> { typedef CompactSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,RegularSet<P,T>> { typedef RegularSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,LocatedSet<P,T>> { typedef LocatedSetWrapper<S,P,T> Type; };
+template<class S, class P, class T> struct WrapperTrait<S,RegularLocatedSet<P,T>> { typedef RegularLocatedSetWrapper<S,P,T> Type; };
+
+template<class S, class C> using WrapperType = typename WrapperTrait<S,C>::Type;
+
+template<class C, class S> C wrap(S s) {
+    if constexpr (DerivedFrom<S,typename C::Interface>) { return C(s.clone()); }
+    else { return C(std::make_shared<WrapperType<S,C>>(s)); } }
+
+
+template<class P, class T> template<class S> requires AnOpenSet<S,P,T> OpenSet<P,T>::OpenSet(S const& s)
+    : OpenSet(wrap<OpenSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires AClosedSet<S,P,T> ClosedSet<P,T>::ClosedSet(S const& s)
+    : ClosedSet(wrap<ClosedSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires AnOvertSet<S,P,T> OvertSet<P,T>::OvertSet(S const& s)
+    : OvertSet(wrap<OvertSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires ACompactSet<S,P,T> CompactSet<P,T>::CompactSet(S const& s)
+    : CompactSet(wrap<CompactSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires ARegularSet<S,P,T> RegularSet<P,T>::RegularSet(S const& s)
+    : RegularSet(wrap<RegularSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires ALocatedSet<S,P,T> LocatedSet<P,T>::LocatedSet(S const& s)
+    : LocatedSet(wrap<LocatedSet<P,T>>(s)) { }
+template<class P, class T> template<class S> requires ARegularLocatedSet<S,P,T> RegularLocatedSet<P,T>::RegularLocatedSet(S const& s)
+    : RegularLocatedSet(wrap<RegularLocatedSet<P,T>>(s)) { }
+
 
 template<class SET> OpenSet<ValidatedTag,Real> wrap_open(SET const& s) {
     using P=ValidatedTag; using T=Real;

@@ -186,9 +186,7 @@ void ariadne_main()
     ra.update_unverified();
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
-    ra.plot(0,1);
-    ra.plot(0,2);
-    ra.plot(1,2);
+    ra.plot();
 
     CONCLOG_RUN_AT(3,ra.print_graph())
 }

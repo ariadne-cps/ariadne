@@ -188,4 +188,8 @@ LabelledInterpolatedCurve::draw(CanvasInterface& c, const Variables2d& v) const
     this->draw(c,proj);
 }
 
+template<> String class_name<InterpolatedCurve>() {
+    return "InterpolatedCurve";
+}
+
 } // namespace Ariadne

@@ -398,6 +398,9 @@ OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
         ", ExactBoxType: " << gridPavingCell.box() << " )";
 }
 
+template<> String class_name<GridCell>() {
+    return "GridCell";
+}
 
 //********************************************GridOpenCell******************************************/
 

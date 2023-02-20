@@ -119,13 +119,13 @@ Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint
     }
 }
 
-SizeType 
+SizeType
 Orbit<Vector<HybridApproximatePoint>>::size(Nat setNumber)
 {
     return this->_curves_ptr->at(setNumber).size();
 }
 
-Void 
+Void
 Orbit<Vector<HybridApproximatePoint>>::insert(HybridTime ht, const HybridApproximatePoint& hpt, SizeType setNumber)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size(setNumber));
@@ -148,7 +148,7 @@ Void
 Orbit<Vector<HybridApproximatePoint>>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<Vector<HybridApproximatePoint>>& orbit=*this;
     for(SizeType i=0; i<orbit._curves_ptr->size(); i++)
-    { 
+    {
         for(SizeType j=0; j!=orbit._curves_ptr->at(i).size(); ++j) {
             HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i).at(j);
             if(locations.empty() || locations.contains(hcurve.location())) {
@@ -592,13 +592,6 @@ HybridSpaceSetConstIterator<DS,HBS>::increment_loc()
 }
 
 Vector<FloatDPApproximation> evaluate(ApproximateVectorMultivariateFunction const& f, Vector<FloatDPApproximation> const& v);
-
-template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
-template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
-template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }
-template<> String class_name<UpperBoxType>() { return "UpperFloatDPBox"; }
-
-template<> String class_name<GridCell>() { return "GridCell"; }
 
 
 // Instantiations

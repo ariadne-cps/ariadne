@@ -458,6 +458,7 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("domain", &F::domain);
     scalar_taylor_function_class.def("codomain", &F::codomain);
     scalar_taylor_function_class.def("range", &F::range);
+    scalar_taylor_function_class.def("norm", &_norm_<F>);
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModel<FLT>&(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::model);
     scalar_taylor_function_class.def("polynomial", (MultivariatePolynomial<NumericType>(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ValidatedScalarMultivariateTaylorFunctionModel<FLT>::*)()const)&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::number_of_nonzeros);

@@ -159,6 +159,10 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
 
 template List<typename FloatDPExactBox::VertexType> Box<FloatDPExactInterval>::vertices() const;
 
+template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
+template<> String class_name<ExactBoxType>() { return "ExactFloatDPBox"; }
+template<> String class_name<UpperBoxType>() { return "UpperFloatDPBox"; }
+
 /*
 FloatDPLowerBox under_approximation(const RealBox& rbx) {
     FloatDPLowerBox bx(rbx.size());

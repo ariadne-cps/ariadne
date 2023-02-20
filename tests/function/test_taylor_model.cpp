@@ -353,6 +353,18 @@ template<class F> Void TestTaylorModel<F>::test_arithmetic()
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-0");
     }
 
+
+    // Regression test for multiplication
+    //   (5+7*x+11*x^2±2) * (13+17*x+19*x^2±3) = (65+176*x+357*x^2+320*x^3+209*x^4 ± 69 ± 98 ± 6)
+    //        = (65+176*x+357*x^2+320*x^3+209*x^4 ± 173)
+    //        = (65+176*x+357*x^2) ± 529 ± 173
+    //        = (65+176*x+357*x^2) ± 702
+    GradedSweeper<F> gswp4(pr,4);
+    ARIADNE_TEST_SAME(ValidatedTaylorModelType({{{0},5.0_x},{{1},7.0_x},{{2},11.0_x}},2.0_x,gswp4)*ValidatedTaylorModelType({{{0},13.0_x},{{1},17.0_x},{{2},19.0_x}},3.0_x,gswp4),
+                    ValidatedTaylorModelType({{{0},65.0_x},{{1},176.0_x},{{2},357.0_x},{{3},320.0_x},{{4},209.0_x}}, 173.0_x,gswp4));
+    GradedSweeper<F> gswp2(pr,2);
+    ARIADNE_TEST_SAME(ValidatedTaylorModelType({{{0},5.0_x},{{1},7.0_x},{{2},11.0_x}},2.0_x,gswp2)*ValidatedTaylorModelType({{{0},13.0_x},{{1},17.0_x},{{2},19.0_x}},3.0_x,gswp2),
+                    ValidatedTaylorModelType({{{0},65.0_x},{{1},176.0_x},{{2},357.0_x}}, 702.0_x,gswp2));
 }
 
 

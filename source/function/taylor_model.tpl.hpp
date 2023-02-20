@@ -1108,7 +1108,7 @@ template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorMo
             ++yiter;
         }
 
-        t.error()=te;
+        t.error()=r.error()+te;
         te = 0u;
 
         t.sweep();

@@ -592,6 +592,11 @@ EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFuncti
     return r;
 }
 
+EffectiveVectorMultivariateFunction combine(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2) {
+    typedef EuclideanDomain D; typedef EuclideanDomain C;
+    return EffectiveVectorMultivariateFunction(CombinedFunction<EffectiveTag,D,D,C,C>(f1,f2));
+}
+
 
 EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3) {
     typedef EuclideanDomain D; typedef RealDomain C;
@@ -895,6 +900,22 @@ ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction con
     }
 }
 
+ValidatedVectorMultivariateFunction combine(ValidatedVectorMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
+    auto f1ptr=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionPatch::Interface const>(f1.managed_pointer());
+    auto f2ptr=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionPatch::Interface const>(f2.managed_pointer());
+    if(f1ptr && f2ptr) {
+        ValidatedVectorMultivariateFunctionPatch f1ptch(f1ptr); ValidatedVectorMultivariateFunctionPatch f2ptch(f2ptr); return combine(f1ptch,f2ptch);
+    } else if(f1ptr) {
+        ValidatedVectorMultivariateFunctionPatch f1ptch(f1ptr); ValidatedVectorMultivariateFunctionPatch f2ptch=factory(f1ptch).create(f2); return combine(f1ptch,f2ptch);
+    } else if(f2ptr) {
+        ValidatedVectorMultivariateFunctionPatch f2ptch(f2ptr); ValidatedVectorMultivariateFunctionPatch f1ptch=factory(f2ptch).create(f1); return combine(f1ptch,f2ptch);
+    } else {
+        typedef ValidatedVectorMultivariateFunction::DomainType DomainType;
+        typedef ValidatedVectorMultivariateFunction::CodomainType CodomainType;
+        return ValidatedVectorMultivariateFunction(CombinedFunction<ValidatedTag,DomainType,DomainType,CodomainType,CodomainType>(f1,f2));
+    }
+}
+
 
 FloatDPUpperInterval evaluate_range(ValidatedScalarMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
     return static_cast<FloatDPUpperInterval>(f(reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
@@ -1022,6 +1043,10 @@ ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFu
     return r;
 }
 
+
+ApproximateVectorMultivariateFunction combine(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 ApproximateScalarUnivariateFunction compose(const ApproximateScalarUnivariateFunction& f, const ApproximateScalarUnivariateFunction& g) {
     return make_composed_function(f,g); }

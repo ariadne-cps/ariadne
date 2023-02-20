@@ -408,6 +408,7 @@ template<class M> class VectorScaledFunctionPatch;
 template<class M> struct Element<VectorScaledFunctionPatch<M>> { typedef ScaledFunctionPatch<M> Type; };
 
 typedef ScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarMultivariateTaylorFunctionModelDP;
+typedef VectorScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedVectorMultivariateTaylorFunctionModelDP;
 
 template<class P, class ARG, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,ARG,PR,PRE>, CanonicalNumericType<P,PR,PRE>>

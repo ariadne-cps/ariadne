@@ -49,6 +49,8 @@ using namespace ConcLog;
 
 namespace Ariadne {
 
+#warning  Template parameter in Constraint should be consistently range or bound
+
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to discretise a nonlinear set.
 enum class DiscretisationMethod : std::uint8_t { SUBDIVISION, AFFINE, CONSTRAINT };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.

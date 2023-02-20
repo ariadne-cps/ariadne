@@ -49,6 +49,16 @@ template<class S> using ElementIndexType = typename ElementTraits<S>::IndexType;
 
 template<class... R> struct DomainTraits;
 
+template<class... ARGS> struct DomainOfTypedef;
+template<> struct DomainOfTypedef<RealScalar> { typedef IntervalDomainType Type; };
+template<> struct DomainOfTypedef<RealVector> { typedef BoxDomainType Type; };
+template<class... ARGS> using DomainOfType = typename DomainOfTypedef<ARGS...>::Type;
+
+using ScalarUnivariate = RealScalar(RealScalar);
+using ScalarMultivariate = RealScalar(RealVector);
+using VectorUnivariate = RealVector(RealScalar);
+using VectorMultivariate = RealVector(RealVector);
+
 template<class SIG> struct SignatureTraits;
 template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
     typedef ARG ArgumentKind;

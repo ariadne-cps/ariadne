@@ -686,7 +686,7 @@ class CombinedFunction
 
     typedef CartesianProductType<D1,D2> D;
     typedef CartesianProductType<C1,C2> C;
-
+    using ARG=ElementKind<D>;
   public:
     typedef D DomainType;
     typedef C CodomainType;
@@ -700,10 +700,12 @@ class CombinedFunction
     CodomainType codomain() const { return product(_f1.codomain(),_f2.codomain()); }
     ResultSizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
     ArgumentSizeType argument_size() const { return _f1.argument_size()+_f2.argument_size(); }
+    ScalarFunction<P,ARG> operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
     template<class X> inline ElementType<C,X> operator() (const ElementType<D,X>& x) const {
-        return join(_f1.evaluate(project(x,range(0,_f1.argument_size()))),
-                    _f2.evaluate(project(x,range(_f1.argument_size(),this->argument_size())))); }
-    CombinedFunction<P,D1,D2,C1,C2> derivative(CombinedFunction<P,D1,D2,C1,C2> const& f, ArgumentIndexType j) {
+        ElementType<D1,X> x1=project(x,range(0,_f1.argument_size()));
+        ElementType<D2,X> x2=project(x,range(_f1.argument_size(),_f1.argument_size()+_f2.argument_size()));
+        return join(_f1.evaluate(x1),_f2.evaluate(x2)); }
+    friend CombinedFunction<P,D1,D2,C1,C2> derivative(CombinedFunction<P,D1,D2,C1,C2> const& f, ArgumentIndexType j) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, CombinedFunction<P,D1,D2,C1,C2> const& f) {
         return os << "CombinedFunction( f1="<<f._f1<<", f2="<<f._f2<<" )"; }

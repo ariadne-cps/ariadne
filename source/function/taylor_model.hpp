@@ -606,8 +606,8 @@ template<class P, class F, class X> decltype(auto) evaluate(const Vector<TaylorM
     return Vector<R>(tf.size(),[&](SizeType i){return evaluate(tf[i],x);});
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
+template<class P, class F> Vector<TaylorModel<P,F>> partial_evaluate(const Vector<TaylorModel<P,F>>& tf, SizeType k, const typename TaylorModel<P,F>::NumericType& c) {
+    Vector<TaylorModel<P,F>> r(tf.size(),TaylorModel<P,F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return r;
 }

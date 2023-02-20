@@ -70,10 +70,6 @@ class PavingInterface;
 class Drawer;
 
 
-//! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the image of a box \f$D\f$ under a function \f$f\f$.
-//! \see ConstrainedImageSet
-class ImageSet { };
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
@@ -303,6 +299,8 @@ class ValidatedConstrainedImageSet
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunctionModelDP& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunctionModelMP& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
+        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
     ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
@@ -388,6 +386,16 @@ class ValidatedConstrainedImageSet
     friend OutputStream& operator<<(OutputStream&, const ValidatedConstrainedImageSet&);
   private:
     virtual OutputStream& _write(OutputStream&) const override;
+};
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of a box \f$D\f$ under a function \f$f\f$.
+//! \see ConstrainedImageSet
+class ImageSet : public ConstrainedImageSet {
+    //! \brief Construct the box \a dom.
+    ImageSet(const RealBox& dom) : ConstrainedImageSet(dom) { }
+    //! \brief Construct the image of \a dom under \a fn.
+    ImageSet(const RealBox& dom, const EffectiveVectorMultivariateFunction& fn) : ConstrainedImageSet(dom,fn) { }
 };
 
 

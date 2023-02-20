@@ -54,6 +54,14 @@ class Constraint {
         : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT_MSG(decide(l<=u),"f="<<f<<"\nl="<<l<<", u="<<u); }
 
     //! <p/>
+    Constraint(FunctionType const& f, Interval<BoundType> const& x)
+        : _function(f), _lower_bound(x.lower_bound()), _upper_bound(x.upper_bound()) { }
+
+    //! <p/>
+    Constraint(FunctionType const& f, Interval<FloatDP> const& x)
+        : _function(f), _lower_bound(x.lower_bound()), _upper_bound(x.upper_bound()) { }
+
+    //! <p/>
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 

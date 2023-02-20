@@ -482,11 +482,16 @@ ValidatedVectorMultivariateFunction join(const ValidatedScalarMultivariateFuncti
 ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2);
 ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
 
-
 ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
+
+
+EffectiveVectorMultivariateFunction combine(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2);
+ValidatedVectorMultivariateFunction combine(const ValidatedVectorMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
+ApproximateVectorMultivariateFunction combine(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
+
 
 //! \brief A reference into an element of a vector function.
 template<class P, class... ARGS>

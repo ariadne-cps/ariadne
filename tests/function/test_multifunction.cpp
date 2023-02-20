@@ -33,6 +33,9 @@
 #include "config.hpp"
 #include "algebra/sweeper.hpp"
 #include "function/multifunction.hpp"
+#include "function/taylor_function.hpp"
+#warning
+//    #include "function/scaled_function_patch.tpl.hpp"
 #include "function/taylor_multifunction.hpp"
 #include "numeric/numeric.hpp"
 
@@ -47,15 +50,17 @@ using namespace Ariadne;
 
 class TestMultifunction
 {
-    using ScalarIntervalFunctionModel = ValidatedIntervalTaylorFunctionModel<FloatMP>;
-    using VectorIntervalFunctionModel = ValidatedVectorIntervalTaylorFunctionModel<FloatMP>;
+    using ScalarIntervalFunctionModelType = ValidatedScalarMultivariateIntervalTaylorFunctionModel<FloatMP>;
+    using VectorIntervalFunctionModelType = ValidatedVectorMultivariateIntervalTaylorFunctionModel<FloatMP>;
     using UpperInterval = Interval<FloatMPUpperBound>;
   public:
     Void test();
   private:
     Void test_evaluate();
-    Void test_taylor_concept();
+    Void test_image();
     Void test_taylor_evaluate();
+    Void test_interval_taylor_concept();
+    Void test_interval_taylor_evaluate();
     Void test_function_set();
     Void test_inclusion_solutions();
 };
@@ -64,7 +69,9 @@ Void TestMultifunction::test()
 {
     Dyadic::set_default_writer(DecimalWriter());
     ARIADNE_TEST_CALL(test_evaluate());
+    ARIADNE_TEST_CALL(test_image());
     ARIADNE_TEST_CALL(test_taylor_evaluate());
+    ARIADNE_TEST_CALL(test_interval_taylor_evaluate());
     ARIADNE_TEST_CALL(test_function_set());
     ARIADNE_TEST_CALL(test_inclusion_solutions());
 }
@@ -80,11 +87,11 @@ Void TestMultifunction::test_evaluate()
 
     Sweeper<FloatDP> swp;
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionPatch,mvfp,(f,prms));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateParametrisedPatchMultifunction,mvfp,(f,prms));
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunction,mvf,(mvfp));
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<DP>,mvfmdp,(dom,f,prms,swp));;
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<DP>,mvfdp,(mvfmdp));;
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateParametrisedMultifunctionModel<DP>,mvfmdp,(dom,f,prms,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateParametrisedMultifunctionModel<DP>,mvfdp,(mvfmdp));
 
     Vector<ValidatedNumber> v(2,1);
     ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedLocatedSet<RealVector>,res,mvfp(v));
@@ -93,14 +100,45 @@ Void TestMultifunction::test_evaluate()
     ARIADNE_TEST_ASSIGN(res,mvfdp(v));
 }
 
-Void TestMultifunction::test_taylor_concept()
-{
+Void TestMultifunction::test_image() {
+
+}
+
+Void TestMultifunction::test_taylor_evaluate() {
+    MP pr(128);
+    ThresholdSweeper<FloatMP> swp(pr,1e-10);
+    RealVariable x0("x0"), x1("x1"), p("p");
+    Decimal c01=4_dec, c=9_dec;
+    BoxDomainType dom({{-1,+3},{-1,+1}});
+    BoxDomainType pdom({{-1,+1}});
+    ValidatedVectorMultivariateFunction f=make_function({x0,x1,p},{c01*x0*x1+x0*p+c,x0+x1});
+    Vector<ValidatedNumber> v({0,0.5_dec});
+    //ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch,fp,(product(dom,pdom),f));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModel<FloatMP>,fm,(product(dom,pdom),f,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch,fp,(fm));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateParametrisedPatchMultifunction,mfp,(fp,pdom));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateParametrisedMultifunctionModel<MP>,mfm,(2u,fm));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(auto,mfpv,mfp(v));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(auto,mfmv,mfm(v));
+
+    ValidatedConstrainedImageSet vcis(dom);
+#warning
+//    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedConstrainedImageSet,imvcis,image(vcis,mfp));
+}
+
+inline Interval<FloatMPUpperBound> create_zero(Interval<FloatMPUpperBound> const& ivl) {
+    std::cerr<<"create_zero(ivl)\n";
+    std::cerr<<"ivl="<<ivl<<", nul(ivl.lower_bound())="<<nul(ivl.lower_bound())<<"\n";
+    return Interval<FloatMPUpperBound>(nul(ivl.lower_bound()),nul(ivl.upper_bound()));
+}
+
+Void TestMultifunction::test_interval_taylor_concept() {
 
     MP pr(128);
     BoxDomainType dom({{-1,+1},{-1,+1}});
     ThresholdSweeper<FloatMP> swp(pr,1e-10);
     UpperInterval c(pr);
-    ScalarIntervalFunctionModel f(dom,swp);
+    ScalarIntervalFunctionModelType f(dom,swp);
     Bounds<FloatMP> x(pr);
     ValidatedNumber y;
 
@@ -117,23 +155,18 @@ Void TestMultifunction::test_taylor_concept()
     sqrt(f); exp(f); log(f); sin(f); cos(f); tan(f); atan(f);
 }
 
-inline Interval<FloatMPUpperBound> create_zero(Interval<FloatMPUpperBound> const& ivl) {
-    std::cerr<<"create_zero(ivl)\n";
-    std::cerr<<"ivl="<<ivl<<", nul(ivl.lower_bound())="<<nul(ivl.lower_bound())<<"\n";
-    return Interval<FloatMPUpperBound>(nul(ivl.lower_bound()),nul(ivl.upper_bound()));
-}
-
-Void TestMultifunction::test_taylor_evaluate()
+Void TestMultifunction::test_interval_taylor_evaluate()
 {
     MP pr(128);
     BoxDomainType dom({{0,1},{1,3}});
     ThresholdSweeper<FloatMP> swp(pr,1e-10);
-    ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
-    ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
+
+    ScalarIntervalFunctionModelType x0=ScalarIntervalFunctionModelType::coordinate(dom,0,swp);
+    ScalarIntervalFunctionModelType x1=ScalarIntervalFunctionModelType::coordinate(dom,1,swp);
     UpperInterval one(1,1,pr);
     UpperInterval c01(3,5,pr);
     UpperInterval c(7,11,pr);
-    ScalarIntervalFunctionModel xc=ScalarIntervalFunctionModel::constant(dom,c,swp);
+    ScalarIntervalFunctionModelType xc=ScalarIntervalFunctionModelType::constant(dom,c,swp);
 
     Vector<ValidatedNumber> u({0.75_x,2.5_x});
     //Vector<ValidatedNumber> u({0.75_x,-0.5_x});
@@ -143,39 +176,51 @@ Void TestMultifunction::test_taylor_evaluate()
     ARIADNE_TEST_SAME(xc(v),c);
     ARIADNE_TEST_SAME(x0(v),one*v[0]);
     ARIADNE_TEST_SAME(x1(v),one*v[1]);
-    ARIADNE_TEST_CONSTRUCT(ScalarIntervalFunctionModel,sf,(c01*x0*x1+c));
+    ARIADNE_TEST_CONSTRUCT(ScalarIntervalFunctionModelType,sf,(c01*x0*x1+c));
     ARIADNE_TEST_SAME(sf(v),c01*v[0]*v[1]+c);
     //ARIADNE_TEST_SAME(sf(w),c01*w[0]*w[1]+c);
     ARIADNE_TEST_PRINT(sf(w));
 
-    ARIADNE_TEST_CONSTRUCT(VectorIntervalFunctionModel,vf,({c01*x0*x1+c,x0+x1}));
+    ARIADNE_TEST_CONSTRUCT(VectorIntervalFunctionModelType,vf,({c01*x0*x1+c,x0+x1}));
     ARIADNE_TEST_SAME(vf(v),Box<UpperInterval>({c01*v[0]*v[1]+c,one*v[0]+v[1]}));
+
+    using IntervalFunctionSetType = ValidatedVectorMultivariateIntervalTaylorFunctionModelSet<FloatMP>;
+    ARIADNE_TEST_CONSTRUCT(IntervalFunctionSetType,set,(dom,vf));
+
+#warning
+    ARIADNE_TEST_PRINT(vf.domain());
+    ARIADNE_TEST_PRINT(vf.models());
+    using VectorFunctionModelType = ValidatedVectorMultivariateTaylorFunctionModel<FloatMP>;
+    ARIADNE_TEST_CONSTRUCT(VectorFunctionModelType,vfm,(explicitly_parametrise(vf,0.0625_x)));
+    ARIADNE_TEST_PRINT(vfm.models());
+    ARIADNE_TEST_CONSTRUCT(VectorFunctionModelType,vfm2,(explicitly_parametrise(vf,0.75_x)));
+    ARIADNE_TEST_PRINT(vfm2.models());
 }
 
 Void TestMultifunction::test_function_set()
 {
-    using ScalarIntervalFunctionModel = ValidatedIntervalTaylorFunctionModel<FloatMP>;
+    using ScalarIntervalFunctionModelType = ValidatedScalarMultivariateIntervalTaylorFunctionModel<FloatMP>;
     using Ivl = Interval<FloatMPUpperBound>;
 
     MP pr(128);
     BoxDomainType dom({{-1,+1},{-1,+1}});
 //    BoxDomainType dom({{0,1},{1,3}});
     ThresholdSweeper<FloatMP> swp(pr,1e-10);
-    ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
-    ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
+    ScalarIntervalFunctionModelType x0=ScalarIntervalFunctionModelType::coordinate(dom,0,swp);
+    ScalarIntervalFunctionModelType x1=ScalarIntervalFunctionModelType::coordinate(dom,1,swp);
 
-    ScalarIntervalFunctionModel sf=Ivl(3,5,pr)*x0*x1+Ivl(7,11,pr);
+    ScalarIntervalFunctionModelType sf=Ivl(3,5,pr)*x0*x1+Ivl(7,11,pr);
 
-    ValidatedIntervalTaylorFunctionSet<FloatMP> fset(sf);
+    ValidatedScalarMultivariateIntervalTaylorFunctionModelSet<FloatMP> fset=sf;
     FunctionSet<ValidatedTag,Real(RealVector),CompactSet> gset(fset);
     CompactSet<ValidatedTag,Real(RealVector)> gfset(fset);
-
 }
+
 
 Void TestMultifunction::test_inclusion_solutions()
 {
-    using ScalarIntervalFunctionModel = ValidatedIntervalTaylorFunctionModel<FloatMP>;
-    using VectorIntervalFunctionModel = ValidatedVectorIntervalTaylorFunctionModel<FloatMP>;
+    using ScalarIntervalFunctionModelType = ValidatedScalarMultivariateIntervalTaylorFunctionModel<FloatMP>;
+    using VectorIntervalFunctionModelType = ValidatedVectorMultivariateIntervalTaylorFunctionModel<FloatMP>;
     using Ivl = Interval<FloatMPUpperBound>;
     using P=ValidatedTag;
 
@@ -183,11 +228,11 @@ Void TestMultifunction::test_inclusion_solutions()
     BoxDomainType dom({{-1,+1},{-1,+1},{0,+1}});
 //    BoxDomainType dom({{0,1},{1,3}});
     ThresholdSweeper<FloatMP> swp(pr,1e-10);
-    ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
-    ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
-    ScalarIntervalFunctionModel t=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
+    ScalarIntervalFunctionModelType x0=ScalarIntervalFunctionModelType::coordinate(dom,0,swp);
+    ScalarIntervalFunctionModelType x1=ScalarIntervalFunctionModelType::coordinate(dom,1,swp);
+    ScalarIntervalFunctionModelType t=ScalarIntervalFunctionModelType::coordinate(dom,1,swp);
 
-    VectorIntervalFunctionModel vf={Ivl(3,5,pr)*x0*x1*+Ivl(7,11,pr),x1*cos(t)};
+    VectorIntervalFunctionModelType vf={Ivl(3,5,pr)*x0*x1*+Ivl(7,11,pr),x1*cos(t)};
 
     Vector<ValidatedNumber> w0({.375_x,0.625_x});
     ValidatedNumber s(0.25_x);
@@ -205,6 +250,27 @@ Void TestMultifunction::test_inclusion_solutions()
     ARIADNE_TEST_PRINT(phif_w0);
     ARIADNE_TEST_PRINT(phi_w0_s);
     ARIADNE_TEST_PRINT(phif_w0_s);
+
+    FloatDPLowerBound(FloatMP(0,precision(128)),dp);
+
+    BoxDomainType xdom({dom[0],{0.625_x,0.75_x}});
+    BoxDomainType pdom({dom[2]});
+    ARIADNE_TEST_PRINT(pdom);
+    ARIADNE_TEST_PRINT(vf.argument_size());
+    auto mf=ParametrisedMultifunction(vf,pdom);
+    ARIADNE_TEST_PRINT(mf);
+    ARIADNE_TEST_PRINT(mf.argument_size());
+    auto mfimset=mf(w0);
+    ARIADNE_TEST_PRINT(mfimset);
+    auto imset=explicitly_parametrise(mfimset,0.0009765625_x);
+    ARIADNE_TEST_PRINT(imset);
+    ARIADNE_TEST_PRINT(imset.separated(xdom));
+
+    mfimset=image(mf,xdom);
+    ARIADNE_TEST_PRINT(mfimset);
+    ARIADNE_TEST_PRINT(mfimset.separated(xdom));
+
+
 }
 
 Int main() {

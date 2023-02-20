@@ -47,6 +47,7 @@
 #include "function/procedure.hpp"
 #include "function/function.hpp"
 #include "function/function_mixin.hpp"
+#include "function/function_patch.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"

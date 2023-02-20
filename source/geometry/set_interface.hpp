@@ -134,7 +134,6 @@ template<class T> class BoundedSetInterface<EffectiveTag,T>
     //! A set \a A is \em inside \a B if the closure of \a A is a subset of the interior of \a B.
     //! A set \f$A\f$ is \em inside \f$B\f$ if \f$\,\overline{\!A} \subset B^\circ\f$.
     virtual LowerKleenean inside(const BasicSetType& bx) const = 0;
-    virtual ValidatedLowerKleenean inside(const BasicSetType& bx, Effort eff) const = 0;
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty.
     virtual BoundingSetType bounding_box() const = 0;
@@ -154,7 +153,6 @@ template<class T> class OvertSetInterface<EffectiveTag,T>
     //! Sets \a A and \a B \em overlap if the interiors of \a A and \a B intersect.
     //! Sets \f$A\f$ and \f$B\f$ \em overlap if \f$A^\circ \cap B^\circ \neq \emptyset\f$.
     virtual LowerKleenean overlaps(const BasicSetType& bx) const = 0;
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bx, Effort eff) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend LowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops);
     friend ValidatedLowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops, const RawFloatDP& eps);
@@ -173,7 +171,6 @@ template<class T> class OpenSetInterface<EffectiveTag,T>
     //! A set \a A \em covers \a B if the interiors of \a A is a superset of the closure of \a B.
     //! A set \f$A\f$ \em covers \f$B\f$ if \f$A^\circ \supset \overline{B}\f$.
     virtual LowerKleenean covers(const BasicSetType& bx) const = 0;
-    virtual ValidatedLowerKleenean covers(const BasicSetType& bx, Effort eff) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend LowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops);
     friend ValidatedLowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops, const RawFloatDP& eps);
@@ -195,7 +192,6 @@ template<class T> class ClosedSetInterface<EffectiveTag,T>
     //! A set \a A is \em separated from \a B if the closures of \a A and \a B are disjoint.
     //! A set \f$A\f$ is \em separated from \f$B\f$ if \f$\,\overline{\!A} \cap \overline{B} = \emptyset\f$.
     virtual LowerKleenean separated(const BasicSetType& bx) const = 0;
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bx, Effort eff) const = 0;
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
     friend LowerKleenean separated(const CompactSetInterface<EffectiveTag,T>& cps, const ClosedSetInterface<EffectiveTag,T>& cls);
     friend ValidatedLowerKleenean separated(const CompactSetInterface<EffectiveTag,T>& cps, const ClosedSetInterface<EffectiveTag,T>& cls, const RawFloatDP& eps);

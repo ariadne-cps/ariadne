@@ -106,9 +106,10 @@ class ConstraintSet
     virtual LowerKleenean separated(const ExactBoxType&) const override;
     virtual LowerKleenean overlaps(const ExactBoxType&) const override;
     virtual LowerKleenean covers(const ExactBoxType&) const override;
-    virtual ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const override;
+
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
 
     friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
     friend BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
@@ -157,12 +158,13 @@ class BoundedConstraintSet
     virtual LowerKleenean overlaps(const ExactBoxType&) const override;
     virtual LowerKleenean covers(const ExactBoxType&) const override;
     virtual LowerKleenean inside(const ExactBoxType&) const override;
-    virtual ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const override;
     virtual UpperBoxType bounding_box() const override;
     virtual Void draw(CanvasInterface&,const Projection2d&) const override;
+
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
 
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
@@ -256,9 +258,9 @@ class ConstrainedImageSet
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
-    virtual ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const override;
-    virtual ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const override;
+    ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
+    ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     Kleenean satisfies(const EffectiveConstraint& c) const;

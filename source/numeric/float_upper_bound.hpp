@@ -82,6 +82,12 @@ template<class F> class UpperBound
     UpperBound(const UpperBound<F>& x, PR pr);
     //! A upper bound of type \p F from a generic upper bound \a y.
     UpperBound(const ValidatedUpperNumber& y, PR pr);
+    template<class PPR> requires Constructible<F,Float<PPR>,RND,PR>
+        UpperBound(const Float<PPR>& x, PR pr) : _u(x,up,pr) { }
+    template<class FF, class FFE> requires Constructible<F,FF,RND,PR>
+        UpperBound(const Ball<FF,FFE>& x, PR pr) : UpperBound(x.upper(),pr) { }
+    template<class FF> requires Constructible<F,FF,RND,PR>
+        UpperBound(const Bounds<FF>& x, PR pr) : UpperBound(x.upper(),pr) { }
     template<class FF> requires Constructible<F,FF,RND,PR>
         UpperBound(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
 

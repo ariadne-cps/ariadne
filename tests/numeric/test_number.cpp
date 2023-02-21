@@ -133,12 +133,12 @@ TestNumbers::test_float_value_behaviour()
         ARIADNE_TEST_NOTIFY("Binary addition on Dyadic and Float<DP> within ExactNumber yields "<<(w+y).class_name());
     } catch (const DispatchException& e) {
         ARIADNE_TEST_NOTIFY("Binary addition on Dyadic and Float<DP> within ExactNumber gives error:\n    "<<e.what());
-    } 
+    }
     try {
         ARIADNE_TEST_NOTIFY("Binary addition on Rational and Float<DP> within ExactNumber yields "<<(q+y).class_name());
     } catch (const DispatchException& e) {
         ARIADNE_TEST_NOTIFY("Binary addition on Rational and Float<DP> within ExactNumber gives error:\n    "<<e.what());
-    } 
+    }
     y=ExactNumber(FloatMP(1,MP(64)));
     try {
         ARIADNE_TEST_NOTIFY("Binary addition on Float<MP> within ExactNumber yields "<<(y+y).class_name());
@@ -397,14 +397,14 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator< ,yw2,yd1);
     ARIADNE_TEST_BINARY_PREDICATE(operator>=,yw1,yd2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<=,yw2,yd1);
-    
+
     ARIADNE_TEST_BINARY_PREDICATE(operator==,yd1,yd1);
     ARIADNE_TEST_BINARY_PREDICATE(operator!=,yd1,yd2);
     ARIADNE_TEST_BINARY_PREDICATE(operator> ,yd1,yd2);
     ARIADNE_TEST_BINARY_PREDICATE(operator< ,yd2,yd1);
     ARIADNE_TEST_BINARY_PREDICATE(operator>=,yd1,yd2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<=,yd2,yd1);
-    
+
 }
 
 template<> Void
@@ -436,11 +436,13 @@ template<class Y> class TestDirectedNumber
     Void test();
   private:
     Void test_concept();
+    Void test_get();
     Void test_operations();
 };
 
 template<class Y> Void
 TestDirectedNumber<Y>::test() {
+    test_get();
     test_operations();
 }
 
@@ -458,6 +460,55 @@ TestDirectedNumber<Y>::test_concept() {
     ny==y; ny!=y; ny<y; ny>y;
 }
 
+
+template<class Y> Void
+TestDirectedNumber<Y>::test_get() {
+    MP mp(32);
+    Dyadic wl(21,4u);
+    Dyadic wu(23,4u);
+    Dyadic wv(11,3u);
+    Dyadic we(1,4u);
+    if constexpr (Same<Y,ValidatedLowerNumber>) {
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDP(wv,dp)).get(dp),FloatDPLowerBound(wv,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDP(wv,dp)).get(mp),FloatMPLowerBound(wv,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMP(wv,mp)).get(dp),FloatDPLowerBound(wv,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMP(wv,mp)).get(mp),FloatMPLowerBound(wv,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPBall(wv,we,dp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPBall(wv,we,dp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPBall(wv,we,mp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPBall(wv,we,mp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPDPBall(wv,we,mp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPDPBall(wv,we,mp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPBounds(wl,wu,dp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPBounds(wl,wu,dp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPBounds(wl,wu,mp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPBounds(wl,wu,mp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPLowerBound(wl,dp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatDPLowerBound(wl,dp)).get(mp),FloatMPLowerBound(wl,mp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPLowerBound(wl,mp)).get(dp),FloatDPLowerBound(wl,dp));
+        ARIADNE_TEST_SAME(ValidatedLowerNumber(FloatMPLowerBound(wl,mp)).get(mp),FloatMPLowerBound(wl,mp));
+    }
+    if constexpr (Same<Y,ValidatedUpperNumber>) {
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDP(wv,dp)).get(dp),FloatDPUpperBound(wv,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDP(wv,dp)).get(mp),FloatMPUpperBound(wv,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMP(wv,mp)).get(dp),FloatDPUpperBound(wv,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMP(wv,mp)).get(mp),FloatMPUpperBound(wv,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPBall(wv,we,dp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPBall(wv,we,dp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPBall(wv,we,mp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPBall(wv,we,mp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPDPBall(wv,we,mp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPDPBall(wv,we,mp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPBounds(wl,wu,dp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPBounds(wl,wu,dp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPBounds(wl,wu,mp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPBounds(wl,wu,mp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPUpperBound(wu,dp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatDPUpperBound(wu,dp)).get(mp),FloatMPUpperBound(wu,mp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPUpperBound(wu,mp)).get(dp),FloatDPUpperBound(wu,dp));
+        ARIADNE_TEST_SAME(ValidatedUpperNumber(FloatMPUpperBound(wu,mp)).get(mp),FloatMPUpperBound(wu,mp));
+    }
+}
 
 template<class Y> Void
 TestDirectedNumber<Y>::test_operations() {
@@ -518,6 +569,8 @@ TestDirectedNumber<Y>::test_operations() {
 
     }
 }
+
+
 
 
 Int main() {

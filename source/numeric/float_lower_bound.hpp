@@ -82,6 +82,12 @@ template<class F> class LowerBound
     LowerBound(const LowerBound<F>& x, PR pr);
     //! A lower bound of type \p F from a generic lower bound \a y.
     LowerBound(const ValidatedLowerNumber& y, PR pr);
+    template<class PPR> requires Constructible<F,Float<PPR>,RND,PR>
+        LowerBound(const Float<PPR>& x, PR pr) : _l(x,down,pr) { }
+    template<class FF, class FFE> requires Constructible<F,FF,RND,PR>
+        LowerBound(const Ball<FF,FFE>& x, PR pr) : LowerBound(x.lower(),pr) { }
+    template<class FF> requires Constructible<F,FF,RND,PR>
+        LowerBound(const Bounds<FF>& x, PR pr) : LowerBound(x.lower(),pr) { }
     template<class FF> requires Constructible<F,FF,RND,PR>
         LowerBound(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
 

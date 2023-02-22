@@ -65,9 +65,9 @@ public:
         _goals = SPaving(_state_paving.grid());
 
         for (auto const& c : _state_paving)
-            vertex_ids.insert(make_pair(word_to_id(c.word(),default_vertex_extent*_state_paving.dimension()),vertex_ids.size()));
+            vertex_ids.insert(make_pair(word_to_id(c.word(),(default_vertex_extent+depth)*_state_paving.dimension()),vertex_ids.size()));
         for (auto const& c : _control_paving) {
-            edge_ids.insert(make_pair(word_to_id(c.word(),default_edge_extent*_control_paving.dimension()),edge_ids.size()));
+            edge_ids.insert(make_pair(word_to_id(c.word(),(default_edge_extent+depth)*_control_paving.dimension()),edge_ids.size()));
         }
 
         _reachability_graph.reset(new ForwardBackwardReachabilityGraph(IdentifiedCellFactory(default_vertex_extent,vertex_ids),IdentifiedCellFactory(default_edge_extent,edge_ids)));

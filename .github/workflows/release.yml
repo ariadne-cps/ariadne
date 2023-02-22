@@ -73,8 +73,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja ${{matrix.config.cxx-pkg}} python3 mpfr cairo gnuplot
-        export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
+        brew install ninja gcc@12 python3 mpfr cairo gnuplot pkg-config
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'

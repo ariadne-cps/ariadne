@@ -57,8 +57,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@12 python3 mpfr cairo gnuplot
-        export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
+        brew install ninja gcc@12 python3 mpfr cairo gnuplot pkg-config
         sudo easy_install pip
         sudo pip3 install --upgrade pip
         sudo pip3 install pytest

@@ -44,11 +44,10 @@ template<class SET, class P, class T> requires ALocatedSet<SET,P,T> class Locate
 template<class SET, class P, class T> requires ARegularLocatedSet<SET,P,T> class RegularLocatedSetWrapper;
 
 
-template<class SET, class T> requires AnOpenSet<SET,ValidatedTag,T> class OpenSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedOpenSet<T>::Interface
+template<class SET, class P, class T> requires AnOpenSet<SET,P,T> class OpenSetWrapper
+    : public virtual OpenSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename OpenSetInterface<P,T>::DimensionType;
@@ -57,19 +56,18 @@ template<class SET, class T> requires AnOpenSet<SET,ValidatedTag,T> class OpenSe
     using SET::SET;
     explicit OpenSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual OpenSetInterface<ValidatedTag,T>* clone() const final { return new OpenSetWrapper<SET,P,T>(this->base()); }
+    virtual OpenSetInterface<P,T>* clone() const final { return new OpenSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
-    virtual ValidatedLowerKleenean covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
+    virtual LowerKleeneanType<P> overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual LowerKleeneanType<P> covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, OpenSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires AClosedSet<SET,ValidatedTag,T> class ClosedSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedClosedSet<T>::Interface
+template<class SET, class P, class T> requires AClosedSet<SET,P,T> class ClosedSetWrapper
+    : public virtual ClosedSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename ClosedSetInterface<P,T>::DimensionType;
@@ -78,18 +76,17 @@ template<class SET, class T> requires AClosedSet<SET,ValidatedTag,T> class Close
     using SET::SET;
     explicit ClosedSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual ClosedSetInterface<ValidatedTag,T>* clone() const final { return new ClosedSetWrapper<SET,P,T>(this->base()); }
+    virtual ClosedSetInterface<P,T>* clone() const final { return new ClosedSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual LowerKleeneanType<P> separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, ClosedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires AnOvertSet<SET,ValidatedTag,T> class OvertSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedOvertSet<T>::Interface
+template<class SET, class P, class T> requires AnOvertSet<SET,P,T> class OvertSetWrapper
+    : public virtual OvertSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename OvertSetInterface<P,T>::DimensionType;
@@ -98,18 +95,17 @@ template<class SET, class T> requires AnOvertSet<SET,ValidatedTag,T> class Overt
     using SET::SET;
     explicit OvertSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual OvertSetInterface<ValidatedTag,T>* clone() const final { return new OvertSetWrapper<SET,P,T>(this->base()); }
+    virtual OvertSetInterface<P,T>* clone() const final { return new OvertSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual LowerKleeneanType<P> overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, OvertSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires ACompactSet<SET,ValidatedTag,T> class CompactSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedCompactSet<T>::Interface
+template<class SET, class P, class T> requires ACompactSet<SET,P,T> class CompactSetWrapper
+    : public virtual CompactSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename CompactSetInterface<P,T>::DimensionType;
@@ -119,20 +115,19 @@ template<class SET, class T> requires ACompactSet<SET,ValidatedTag,T> class Comp
     using SET::SET;
     explicit CompactSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual CompactSetInterface<ValidatedTag,T>* clone() const final { return new CompactSetWrapper<SET,P,T>(this->base()); }
+    virtual CompactSetInterface<P,T>* clone() const final { return new CompactSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
     virtual BoundingSetType bounding_box() const final { return static_cast<BoundingSetType>(this->base().bounding_box()); }
-    virtual ValidatedLowerKleenean inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual LowerKleeneanType<P> inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
+    virtual LowerKleeneanType<P> separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, CompactSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires ARegularSet<SET,ValidatedTag,T> class RegularSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedRegularSet<T>::Interface
+template<class SET, class P, class T> requires ARegularSet<SET,P,T> class RegularSetWrapper
+    : public virtual RegularSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename RegularSetInterface<P,T>::DimensionType;
@@ -141,20 +136,19 @@ template<class SET, class T> requires ARegularSet<SET,ValidatedTag,T> class Regu
     using SET::SET;
     explicit RegularSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual RegularSetInterface<ValidatedTag,T>* clone() const final { return new RegularSetWrapper<SET,P,T>(this->base()); }
+    virtual RegularSetInterface<P,T>* clone() const final { return new RegularSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
-    virtual ValidatedLowerKleenean covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual LowerKleeneanType<P> overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual LowerKleeneanType<P> covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
+    virtual LowerKleeneanType<P> separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, RegularSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires ALocatedSet<SET,ValidatedTag,T> class LocatedSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedLocatedSet<T>::Interface
+template<class SET, class P, class T> requires ALocatedSet<SET,P,T> class LocatedSetWrapper
+    : public virtual LocatedSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename LocatedSetInterface<P,T>::DimensionType;
@@ -166,19 +160,18 @@ template<class SET, class T> requires ALocatedSet<SET,ValidatedTag,T> class Loca
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
     virtual LocatedSetInterface<P,T>* clone() const final { return new LocatedSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
-    virtual ValidatedLowerKleenean inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
+    virtual LowerKleeneanType<P> overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual LowerKleeneanType<P> separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual LowerKleeneanType<P> inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
     virtual BoundingSetType bounding_box() const final { return static_cast<BoundingSetType>(this->base().bounding_box()); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, LocatedSetWrapper<SET,P,T> ops) { return os << ops.base(); }
 };
 
-template<class SET, class T> requires ARegularLocatedSet<SET,ValidatedTag,T> class RegularLocatedSetWrapper<SET,ValidatedTag,T>
-    : public virtual ValidatedRegularLocatedSet<T>::Interface
+template<class SET, class P, class T> requires ARegularLocatedSet<SET,P,T> class RegularLocatedSetWrapper
+    : public virtual RegularLocatedSet<P,T>::Interface
     , public SET
 {
-    using P = ValidatedTag;
     SET const& base() const { return *this; }
   public:
     using typename RegularLocatedSetInterface<P,T>::DimensionType;
@@ -188,13 +181,13 @@ template<class SET, class T> requires ARegularLocatedSet<SET,ValidatedTag,T> cla
     using SET::SET;
     RegularLocatedSetWrapper(SET const& set) : SET(set) { }
     virtual OutputStream& _write(OutputStream& os) const final override { return os << this->base(); }
-    virtual RegularLocatedSetInterface<ValidatedTag,T>* clone() const final {
+    virtual RegularLocatedSetInterface<P,T>* clone() const final {
         return new RegularLocatedSetWrapper<SET,P,T>(this->base()); }
     virtual DimensionType dimension() const final override { return this->base().dimension(); }
-    virtual ValidatedLowerKleenean overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
-    virtual ValidatedLowerKleenean covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
-    virtual ValidatedLowerKleenean separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
-    virtual ValidatedLowerKleenean inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
+    virtual LowerKleeneanType<P> overlaps(const BasicSetType& bs) const final { return this->base().overlaps(bs); }
+    virtual LowerKleeneanType<P> covers(const BasicSetType& bs) const final { return this->base().covers(bs); }
+    virtual LowerKleeneanType<P> separated(const BasicSetType& bs) const final { return this->base().separated(bs); }
+    virtual LowerKleeneanType<P> inside(const BasicSetType& bs) const final { return this->base().inside(bs); }
     virtual BoundingSetType bounding_box() const final { return static_cast<BoundingSetType>(this->base().bounding_box()); }
     // Needed to prevent ambiguity
     friend OutputStream& operator<<(OutputStream& os, RegularLocatedSetWrapper<SET,P,T> ops) { return os << ops.base(); }

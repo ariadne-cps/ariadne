@@ -82,6 +82,10 @@ template<> struct UpperLogicalTypedef<EffectiveTag> { typedef UpperKleenean Type
 template<> struct UpperLogicalTypedef<ValidatedTag> { typedef ValidatedUpperKleenean Type; };
 template<> struct UpperLogicalTypedef<ApproximateTag> { typedef ApproximateKleenean Type; };
 
+template<class P> using KleeneanType = LogicalType<P>;
+template<class P> using LowerKleeneanType = LowerLogicalType<P>;
+template<class P> using UpperKleeneanType = UpperLogicalType<P>;
+
 
 using Decidable = Boolean;
 using Quasidecidable = Kleenean;
@@ -110,7 +114,7 @@ namespace Detail {
 typedef short ComparableEnumerationType;
 #else
 typedef char ComparableEnumerationType;
-#endif    
+#endif
 
 enum class LogicalValue : ComparableEnumerationType;
 }

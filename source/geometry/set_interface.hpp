@@ -35,6 +35,7 @@
 #include "utility/tribool.hpp"
 #include "utility/writable.hpp"
 #include "numeric/numeric.hpp"
+#include "function/function_traits.hpp"
 
 #include "set.decl.hpp"
 #include "box.decl.hpp"
@@ -45,22 +46,28 @@ template<class X> class Vector;
 
 using DimensionOne = SizeOne;
 
+template<class S> struct ElementTraits;
+template<class S> using ElementKind = typename ElementTraits<S>::Kind;
+template<class S, class X> using ElementType = typename ValueTraits<ElementKind<S>>::template Type<X>;
+
+
 template<class T> struct SetTraits;
-template<> struct SetTraits<Real> {
-    typedef DimensionOne DimensionType;
-    typedef FloatDPExactInterval BasicSetType;
-    typedef FloatDPUpperInterval BoundingSetType;
-};
-template<> struct SetTraits<RealVector> {
-    typedef Ariadne::DimensionType DimensionType;
-    typedef FloatDPExactBox BasicSetType;
-    typedef FloatDPUpperBox BoundingSetType;
-};
+using EuclideanSetTraits = SetTraits<RealVector>;
+
 template<class T> using DimensionOfType = typename SetTraits<T>::DimensionType;
 template<class T> using BasicSetType = typename SetTraits<T>::BasicSetType;
 template<class T> using BoundingSetType = typename SetTraits<T>::BoundingSetType;
 
-using EuclideanSetTraits = SetTraits<RealVector>;
+template<> struct SetTraits<RealScalar> : public ScalarTraits {
+    typedef DimensionOne DimensionType;
+    typedef FloatDPExactInterval BasicSetType;
+    typedef FloatDPUpperInterval BoundingSetType;
+};
+template<> struct SetTraits<RealVector> : public VectorTraits {
+    typedef Ariadne::DimensionType DimensionType;
+    typedef FloatDPExactBox BasicSetType;
+    typedef FloatDPUpperBox BoundingSetType;
+};
 
 template<class UB> class Interval;
 typedef FloatDPExactInterval ExactIntervalType;
@@ -102,11 +109,11 @@ template<class T> class SetInterfaceBase
     //! \brief The type of element of the set.
     typedef T ElementType;
     //! \brief The type representing the dimension of the set.
-    typedef Ariadne::DimensionOfType<T> DimensionType;
+    typedef typename SetTraits<T>::DimensionType DimensionType;
     //! \brief The type of basic set in the space.
-    typedef Ariadne::BasicSetType<T> BasicSetType;
+    typedef typename SetTraits<T>::BasicSetType BasicSetType;
     //! \brief The type of basic set in the space.
-    typedef Ariadne::BoundingSetType<T> BoundingSetType;
+    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
     //! \brief Virtual destructor.
     virtual ~SetInterfaceBase() = default;

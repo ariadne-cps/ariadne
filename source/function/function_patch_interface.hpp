@@ -96,8 +96,8 @@ template<class P, class SIG> class FunctionPatchInterface
     typedef ElementSizeType<CodomainType> ResultSizeType;
     typedef ElementIndexType<DomainType> ArgumentIndexType;
 
-    template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
-    template<class Y> using Result = typename ElementTraits<CodomainType>::template Type<Y>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
     virtual Result<ErrorType> const _errors() const = 0;
 //    virtual CoefficientType const _gradient_value(ArgumentIndexType) const = 0;

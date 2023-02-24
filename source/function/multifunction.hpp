@@ -89,9 +89,8 @@ template<class P, class SIG, template<class,class>class SET=LocatedSet> class Mu
 template<class P, class SIG, template<class,class>class SET> class MultifunctionInterface {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
   public:
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     virtual ~MultifunctionInterface() = default;
     virtual SET<P,RES> _call(Argument<Number<P>> const& x) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
@@ -100,8 +99,7 @@ template<class P, class SIG, template<class,class>class SET> class Multifunction
 template<class F, class P, class SIG, template<class,class>class SET> struct IsMultifunction {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
     template<class FF, class=decltype(declval<SET<P,RES>>()=declval<FF>()(declval<Argument<Number<P>>>()))>
         static std::true_type test(int);
@@ -120,12 +118,10 @@ template<class P, class SIG, template<class,class>class SET> class Multifunction
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
     using ResultSetType = SET<P,RES>;
   public:
     typedef MultifunctionInterface<P,SIG,SET> Interface;
-    typedef D DomainType;
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
     using Handle<Interface>::Handle;
     //! \brief <p/>
@@ -143,9 +139,8 @@ template<class MF, class P, class SIG, template<class,class>class SET> class Mul
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
   public:
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
     MultifunctionWrapper(MF mf) : _mf(mf) { }
     MF const& base() const { return this->_mf; }
@@ -261,8 +256,7 @@ template<class P, class SIG, template<class,class>class SET=LocatedSet> class Fu
 template<class F, class P, class SIG, template<class,class>class SET> struct IsFunctionSet {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
     template<class FF, class=decltype(declval<SET<P,RES>>()=declval<FF>()(declval<Argument<Number<P>>>()))>
         static std::true_type test(int);
@@ -277,9 +271,8 @@ template<class F, class P, class SIG, template<class,class>class SET> concept AF
 template<class P, class SIG, template<class,class>class SET> class FunctionSetInterface {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
   public:
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     virtual ~FunctionSetInterface() = default;
     virtual SET<P,RES> _call(Argument<Number<P>> const& x) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
@@ -290,11 +283,9 @@ template<class P, class SIG, template<class,class>class SET> class FunctionSet
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef FunctionSetInterface<P,SIG,SET> Interface;
-    typedef D DomainType;
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
     using Handle<Interface>::Handle;
 
@@ -313,9 +304,8 @@ template<class FS, class P, class SIG, template<class,class>class SET> class Fun
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
-    using D=typename SignatureTraits<SIG>::DomainType;
   public:
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
 
     FunctionSetWrapper(FS mf) : _fs(mf) { }
     FS const& base() const { return this->_fs; }
@@ -351,9 +341,7 @@ template<class A1, class A2> using JoinType = decltype(join(declval<A1>(),declva
 template<class P, class RES, class PAR, class ARG, template<class,class>class SET> class FunctionSetFunction {
     typedef JoinType<ARG,PAR> ARGS;
   public:
-    using D=typename SignatureTraits<RES(ARG)>::DomainType;
-  public:
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename DomainTraits<ARG>::template Type<Y>;
     typedef SET<P,RES(PAR)> FunctionSetType;
     class Interface {
       private: public:

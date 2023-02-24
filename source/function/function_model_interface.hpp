@@ -99,16 +99,18 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface
 
     template<class X> using Argument = typename FunctionInterface<P,SIG>::template Argument<X>;
     template<class X> using Result = typename FunctionInterface<P,SIG>::template Result<X>;
+
+    using FLT = Float<PR>;
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef typename ElementTraits<CodomainType>::template RangeType<PR> RangeType;
+    typedef typename SignatureTraits<SIG>::template ConcreteRangeType<FLT> RangeType;
     typedef typename FunctionModelTraits<P,PR,PRE>::NormType NormType;
     typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
     typedef typename FunctionModelTraits<P,PR,PRE>::ErrorType ErrorType;
     typedef typename FunctionModelTraits<P,PR,PRE>::NumericType NumericType;
     typedef typename FunctionModelTraits<P,PR,PRE>::GenericNumericType GenericNumericType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
   public:
     virtual DomainType const domain() const = 0;
     virtual CodomainType const codomain() const = 0;

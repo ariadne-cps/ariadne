@@ -177,8 +177,8 @@ template<class M> class ScaledFunctionPatch
     typedef Number<Paradigm> GenericNumericType;
     typedef typename M::PropertiesType PropertiesType;
 
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
+    template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -567,8 +567,8 @@ template<class M> class VectorScaledFunctionPatch
     typedef FloatBounds<PR> ValidatedNumericType;
     typedef Float<PR> ExactNumericType;
 
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
+    template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
 
     //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables.
     VectorScaledFunctionPatch();

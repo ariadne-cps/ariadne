@@ -34,6 +34,12 @@ namespace Ariadne {
 
 using OutputStream = std::ostream;
 
+template<class T> struct SetTraits;
+template<class T> using DimensionOfType = typename SetTraits<T>::DimensionType;
+template<class T> using BasicSetType = typename SetTraits<T>::BasicSetType;
+template<class T> using BoundingSetType = typename SetTraits<T>::BoundingSetType;
+
+
 template<class W> concept Writable = requires(OutputStream& os, W const& w) {
     { os << w } -> SameAs<OutputStream&>;
 };
@@ -43,9 +49,6 @@ static_assert(SameAs<LogicalType<EffectiveTag>,Kleenean>);
 static_assert(SameAs<LogicalType<ValidatedTag>,ValidatedKleenean>);
 static_assert(SameAs<LogicalType<ApproximateTag>,ApproximateKleenean>);
 
-template<class T> struct SetTraits;
-template<class T> using BasicSetType = typename SetTraits<T>::BasicSetType;
-template<class T> using BoundingSetType = typename SetTraits<T>::BoundingSetType;
 
 template<class S, class T> concept ASetBase = CopyConstructible<T> and Writable<T> and requires(S s) {
     { s.dimension() } -> SameAs<typename SetTraits<T>::DimensionType>;

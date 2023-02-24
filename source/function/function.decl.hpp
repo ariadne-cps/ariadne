@@ -193,37 +193,6 @@ using ApproximateScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionM
 using ApproximateVectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< <p/>
 //!@}
 
-template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
-
-template<class F> class UnknownError;
-
-template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
-    typedef RawFloat<PR> F; typedef RawFloat<PRE> FE;
-    typedef F ValueType; typedef Error<FE> ErrorType;
-    typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
-    typedef Bounds<F> NumericType; typedef ValidatedNumber GenericNumericType;
-    typedef F RawFloatType;
-};
-template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
-    typedef RawFloat<PR> F;
-    typedef Approximation<F> ValueType; typedef UnknownError<F> ErrorType;
-    typedef PositiveApproximation<F> NormType; typedef Interval<Approximation<F>> RangeType;
-    typedef Approximation<F> NumericType; typedef ApproximateNumber GenericNumericType;
-    typedef F RawFloatType;
-};
-
-template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
-template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
-template<class P, class PRE> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
-
-template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,DoublePrecision>::NumericType;
-template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,DoublePrecision>::CoefficientType;
-template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,DoublePrecision,DoublePrecision>::ErrorType;
-
-template<class X> using PrecisionType = typename X::PrecisionType;
-template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
-
-
 
 template<class P, class PR, class PRE=PR> class FunctionModelFactoryInterface;
 

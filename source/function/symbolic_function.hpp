@@ -241,7 +241,7 @@ class ConstantFunction
     Y _value;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
 
     //ConstantFunction(SizeType as, const Y& c) : _argument_size(as), _value(c) { }
     ConstantFunction(DomainType dom, const Y& c) : _domain(dom), _value(c) { }
@@ -280,8 +280,8 @@ class CoordinateFunction
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
   private:
     DomainType _domain;
     ArgumentIndexType _index;
@@ -317,8 +317,8 @@ class UnaryFunction
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     UnaryFunction(const UnaryElementaryOperator& op, const ScalarFunction<P,ARGS...>& arg)
         : _op(op), _arg(arg) { }
@@ -361,7 +361,7 @@ class BinaryFunction
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
 
     BinaryFunction(BinaryArithmeticOperator op, const ScalarFunction<P,ARGS...>& arg1, const ScalarFunction<P,ARGS...>& arg2)
         : BinaryFunction(BinaryElementaryOperator(op.code()),arg1,arg2) { }
@@ -407,7 +407,7 @@ class GradedFunction
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
     GradedFunction(GradedElementaryOperator op, const ScalarFunction<P,ARGS...>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }
     DomainType domain() const {
@@ -457,8 +457,8 @@ class VectorOfScalarFunction
     friend class FunctionConstructors<P>;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     VectorOfScalarFunction(SizeType rs, SizeType as)
         : VectorOfScalarFunction(rs, ScalarFunction<P,ARGS...>(as)) { }
@@ -529,8 +529,8 @@ class FunctionElement
     using D=typename SignatureTraits<SIG>::DomainType;
   public:
     typedef D DomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     FunctionElement(const VectorFunction<P,ARGS...>& vf, SizeType i)
         : _vf(vf), _i(i) { ARIADNE_ASSERT(i<vf.result_size()); }
@@ -556,16 +556,14 @@ template<class P, class D1, class D2, class D3, class C>
 class EmbeddedFunction
 {
     typedef CartesianProductType<D1,D2,D3> D;
-
-    typedef ElementKind<D2> ARG;
-    typedef ElementKind<D2> ARG2;
-    typedef ElementKind<C> RES;
+    using ARG1=ElementKind<D1>; using ARG2=ElementKind<D2>; using ARG3=ElementKind<D3>;
+    using ARG=ElementKind<D>; using RES=ElementKind<C>; using SIG=RES(ARG);
   public:
 
     typedef D DomainType;
     typedef C CodomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementSizeType<C> ResultSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType;
 
     EmbeddedFunction(ElementSizeType<D1> as1, const Function<P,RES(ARG2)>& f2, ElementSizeType<D3> as3)
         : _dom1((as1)), _f2(f2), _dom3(as3) { ARIADNE_NOT_IMPLEMENTED; }
@@ -593,16 +591,18 @@ class EmbeddedFunction
 template<class P, class R, class T, class... AS>
 class ComposedFunction
 {
-    using D=EntireDomainType<AS...>;
-    using E=EntireDomainType<T>;
-    using C=EntireDomainType<R>;
+    using SIG=R(AS...);
+
+    using D=typename DomainTraits<AS...>::EntireDomainType;
+    using E=typename DomainTraits<T>::EntireDomainType;
+    using C=typename DomainTraits<R>::EntireDomainType;
 
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementSizeType<C> ResultSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
     typedef ElementIndexType<C> ResultIndexType;
 
     ComposedFunction(const Function<P,R(T)>& f, const Function<P,T(AS...)>& g)
@@ -643,19 +643,21 @@ class ComposedFunction
 template<class P, class D, class C1, class C2>
 class JoinedFunction
 {
+    typedef CartesianProductType<C1,C2> C;
+
     using ARG=ElementKind<D>;
     using RES1=ElementKind<C2>;
     using RES2=ElementKind<C1>;
-
+    using RES=ElementKind<C>;
+    using SIG=RES(ARG);
     static_assert(Same<typename VectorFunctionMixin<JoinedFunction<P,D,C1,C2>,P,ARG>::CodomainType,CartesianProductType<C1,C2>>);
 
-    typedef CartesianProductType<C1,C2> C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementSizeType<C> ResultSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     JoinedFunction(Function<P,RES1(ARG)> f1, Function<P,RES2(ARG)> f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
@@ -681,18 +683,18 @@ class JoinedFunction
 template<class P, class D1, class D2, class C1, class C2>
 class CombinedFunction
 {
-    template<class PP, class DD, class CC> using FunctionType = Function<PP,ElementKind<CC>(ElementKind<DD>)>;
-    template<class PP, class DD, class CC> using FunctionInterfaceType = FunctionInterface<PP,ElementKind<CC>(ElementKind<DD>)>;
-
     typedef CartesianProductType<D1,D2> D;
     typedef CartesianProductType<C1,C2> C;
+    using RES=ElementKind<C>; using ARG=ElementKind<C>; using SIG=RES(ARG);
+    template<class PP, class DD, class CC> using FunctionType = Function<PP,ElementKind<CC>(ElementKind<DD>)>;
+    template<class PP, class DD, class CC> using FunctionInterfaceType = typename FunctionType<PP,DD,CC>::Interface;
 
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementSizeType<C> ResultSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     CombinedFunction(FunctionType<P,D1,C1> f1, FunctionType<P,D2,C2> f2)
         : _f1(f1), _f2(f2) { }
@@ -716,9 +718,10 @@ class CombinedFunction
 template<class P, class D>
 class ProjectedFunction
 {
+    using ARG=ElementKind<D>; using RES=RealVector; using SIG=RES(ARG);
   public:
-    typedef ElementSizeType<D> ArgumentSizeType;
-    typedef ElementIndexType<D> ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
 
     ProjectedFunction(VectorFunction<P,D> f, Projection prj)
         : _f(f), _prj(prj) { ARIADNE_PRECONDITION(f.result_size()==prj.argument_size()); }

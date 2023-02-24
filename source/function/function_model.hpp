@@ -197,7 +197,8 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     using RES=RealScalar; using SIG=RES(ARG);
-    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
+    using C=typename SignatureTraits<SIG>::BoundedCodomainType;
+    using D=typename SignatureTraits<SIG>::BoundedDomainType;
     static_assert(Same<D,IntervalDomainType> or Same<D,BoxDomainType>,"");
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
@@ -213,8 +214,8 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     typedef typename Interface::NormType NormType;
     typedef typename Interface::RangeType RangeType;
 
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
+    template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
   public:
     explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
     FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }
@@ -445,7 +446,8 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>,"");
     static_assert(Same<PRE,DoublePrecision> or Same<PRE,MultiplePrecision>,"");
     using RES=RealVector; using SIG=RES(ARG);
-    using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
+    using C=typename SignatureTraits<SIG>::BoundedCodomainType;
+    using D=typename SignatureTraits<SIG>::BoundedDomainType;
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
   public:
@@ -462,8 +464,8 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     typedef typename Interface::NumericType NumericType;
     typedef typename Interface::GenericNumericType GenericNumericType;
 
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
-    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
+    template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
   public:
     inline explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
     inline FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }

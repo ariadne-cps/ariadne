@@ -106,43 +106,14 @@ class UnitBox {
     friend OutputStream& operator<<(OutputStream& os, UnitBox const& dom) { return os << "[-1:+1]^" << dom.dimension(); } //!< .
 };
 
-struct ScalarTraits {
-    template<class X> using Type=Scalar<X>;
-    typedef Scalar<Real> Kind;
-    typedef SizeOne SizeType;
-    typedef IndexZero IndexType;
-    using EntireDomainType = RealDomain;
-    using BoundedDomainType = IntervalDomainType;
-    template<class PR> using RangeType = Interval<FloatUpperBound<PR>>;
-};
-
-struct VectorTraits {
-    template<class X> using Type=Vector<X>;
-    typedef Vector<Real> Kind;
-    typedef Ariadne::SizeType SizeType;
-    typedef Ariadne::SizeType IndexType;
-    using EntireDomainType = EuclideanDomain;
-    using BoundedDomainType = BoxDomainType;
-    template<class PR> using RangeType = Box<Interval<FloatUpperBound<PR>>>;
-};
-
-template<class... R> struct DomainTraits;
-template<> struct DomainTraits<RealScalar> : ScalarTraits { };
-template<> struct DomainTraits<RealVector> : VectorTraits { };
-
-template<class... ARGS> using EntireDomainType = typename DomainTraits<ARGS...>::EntireDomainType;
-template<class... ARGS> using BoundedDomainType = typename DomainTraits<ARGS...>::BoundedDomainType;
-
 
 template<class S> struct ElementTraits;
-template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
-
-template<class UB> struct ElementTraits<Interval<UB>> : ScalarTraits { };
-template<class IVL> struct ElementTraits<Box<IVL>> : VectorTraits { };
-template<> struct ElementTraits<RealDomain> : ScalarTraits { };
-template<> struct ElementTraits<EuclideanDomain> : VectorTraits { };
-template<> struct ElementTraits<UnitInterval> : ScalarTraits { };
-template<> struct ElementTraits<UnitBox> : VectorTraits { };
+template<class UB> struct ElementTraits<Interval<UB>> : DomainTraits<RealScalar> { };
+template<class IVL> struct ElementTraits<Box<IVL>> : DomainTraits<RealVector> { };
+template<> struct ElementTraits<RealDomain> : DomainTraits<RealScalar> { };
+template<> struct ElementTraits<EuclideanDomain> : DomainTraits<RealVector> { };
+template<> struct ElementTraits<UnitInterval> : DomainTraits<RealScalar> { };
+template<> struct ElementTraits<UnitBox> : DomainTraits<RealVector> { };
 
 template<class... TS> using CartesianProductType = decltype(product(declval<TS>()...));
 

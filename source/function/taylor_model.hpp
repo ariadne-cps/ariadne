@@ -183,8 +183,8 @@ class TaylorModel
     typedef Sweeper<RawFloatType> SweeperType;
 
 
-    typedef IntervalDomainType CodomainType;
     typedef typename ModelNumericTraits<P,F>::RangeType RangeType;
+    typedef IntervalDomainType CodomainType;
 
     template<class X> using Argument = Vector<X>;
     template<class X> using Result = Scalar<X>;

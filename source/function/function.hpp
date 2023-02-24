@@ -198,15 +198,15 @@ class Function
     typedef D DomainType; //!< The type of the domain.
     typedef C CodomainType; //!< The type of the codomain.
     typedef Number<P> NumericType; //!< The numeric type required to construct a constant scalar function.
-    typedef ElementSizeType<DomainType> ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
-    typedef ElementSizeType<CodomainType> ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
-    typedef ElementIndexType<DomainType> ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
-    typedef ElementIndexType<CodomainType> ResultIndexType; //!< The type used to descibe an index into an element of the codomain.
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
+    typedef typename SignatureTraits<SIG>::ResultIndexType ResultIndexType; //!< The type used to descibe an index into an element of the codomain.
 
     //! \brief The type of an argument to the function whose scalar type is \a Y.
-    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     //! \brief The type for the result of calling the function whose scalar type is \a Y.
-    template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;
+    template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
 
 
     //! \name User constructors.
@@ -493,8 +493,9 @@ template<class P, class... ARGS>
 struct VectorFunctionElementReference
     : DispatchFunctionOperations<P,Real(ARGS...)>
 {
-    typedef EntireDomainType<ARGS...> DomainType;
-    template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
+    using RES=RealScalar; using SIG=RES(ARGS...);
+    typedef typename SignatureTraits<SIG>::DomainType DomainType;
+    template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     typedef VectorFunctionElementReference<P,ARGS...> SelfType;
     typedef ScalarFunction<P,ARGS...> ElementType;
     typedef typename ElementType::NumericType NumericType;

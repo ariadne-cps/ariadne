@@ -163,11 +163,11 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     typedef PositiveValidatedUpperNumber ErrorType;
     typedef Number<P> NumericType;
     typedef PositiveValidatedUpperNumber NormType;
-    typedef typename ElementTraits<DomainType>::SizeType ArgumentSizeType;
-    typedef typename ElementTraits<DomainType>::IndexType ArgumentIndexType;
+    typedef typename FunctionPatchInterface<P,SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename FunctionPatchInterface<P,SIG>::ArgumentIndexType ArgumentIndexType;
 
-    template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
-    template<class Y> using Result = typename ElementTraits<CodomainType>::template Type<Y>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
     clone_on_copy_ptr< FunctionPatchInterface<P,SIG> > _ptr;
   public:
@@ -359,8 +359,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     typedef PositiveValidatedUpperNumber ErrorType;
     typedef Number<P> NumericType;
     typedef PositiveValidatedUpperNumber NormType;
-    typedef typename ElementTraits<DomainType>::SizeType ArgumentSizeType;
-    typedef typename ElementTraits<DomainType>::IndexType ArgumentIndexType;
+    typedef typename FunctionPatchInterface<P,SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename FunctionPatchInterface<P,SIG>::ArgumentIndexType ArgumentIndexType;
     public:
     inline FunctionPatch() : _ptr() { }
     inline FunctionPatch(SharedPointer<const FunctionPatchInterface<P,SIG>> vfp)

@@ -101,9 +101,8 @@ class FunctionMixin<F,ApproximateTag,SIG>
     using P=ApproximateTag;
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
-  public:
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
     virtual FunctionInterface<ApproximateTag,SIG>* _clone() const override;
     virtual FunctionInterface<ApproximateTag,SIG>* _derivative(ElementIndexType<D> i) const override;
@@ -126,8 +125,8 @@ class FunctionMixin<F,ValidatedTag,SIG>
 {
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
     using FunctionMixin<F,ApproximateTag,SIG>::_call;
     virtual FunctionInterface<ValidatedTag,SIG>* _clone() const override;
@@ -156,8 +155,8 @@ class FunctionMixin<F,EffectiveTag,SIG>
 {
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
     using FunctionMixin<F,ValidatedTag,SIG>::_call;
     virtual FunctionInterface<EffectiveTag,SIG>* _clone() const override;

@@ -33,6 +33,7 @@
 
 #include "utility/declarations.hpp"
 #include "function/function.decl.hpp"
+#include "function/function_traits.hpp"
 
 namespace Ariadne {
 
@@ -40,34 +41,6 @@ static const Int SMOOTH=255;
 
 template<class T> struct Representation;
 template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation<Function<P,SIG>>& f);
-
-template<class S> struct ElementTraits;
-template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
-template<class S> using ElementKind = typename ElementTraits<S>::Kind;
-template<class S> using ElementSizeType = typename ElementTraits<S>::SizeType;
-template<class S> using ElementIndexType = typename ElementTraits<S>::IndexType;
-
-template<class... R> struct DomainTraits;
-
-template<class SIG> struct SignatureTraits;
-template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
-    typedef ARG ArgumentKind;
-    typedef RES ResultKind;
-    typedef typename DomainTraits<ARG>::EntireDomainType DomainType;
-    typedef typename DomainTraits<RES>::EntireDomainType CodomainType;
-    typedef typename DomainTraits<ARG>::EntireDomainType EntireDomainType;
-    typedef typename DomainTraits<RES>::EntireDomainType EntireCodomainType;
-    typedef typename DomainTraits<ARG>::BoundedDomainType BoundedDomainType;
-    typedef typename DomainTraits<RES>::BoundedDomainType BoundedCodomainType;
-    typedef typename DomainTraits<RES>::template RangeType<DoublePrecision> BoundedRangeType;
-
-    typedef ElementSizeType<DomainType> ArgumentSizeType;
-    typedef ElementIndexType<DomainType> ArgumentIndexType;
-    typedef ElementSizeType<CodomainType> ResultSizeType;
-
-    template<class X> using Argument = ElementType<DomainType,X>;
-    template<class X> using Result = ElementType<CodomainType,X>;
-};
 
 template<class P, class SIG> class FunctionInterface;
 
@@ -116,17 +89,15 @@ template<class P, class S> OutputStream& operator<<(OutputStream& os, const Repr
 template<class SIG>
 class FunctionInterface<Void,SIG>
 {
-    using D=typename SignatureTraits<SIG>::DomainType;
-    using C=typename SignatureTraits<SIG>::CodomainType;
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
-    typedef D DomainType;
-    typedef C CodomainType;
-    typedef ElementSizeType<DomainType> ArgumentSizeType;
-    typedef ElementSizeType<CodomainType> ResultSizeType;
-    typedef ElementIndexType<DomainType> ArgumentIndexType;
-    typedef ElementIndexType<CodomainType> ResultIndexType;
+    typedef typename SignatureTraits<SIG>::DomainType DomainType;
+    typedef typename SignatureTraits<SIG>::CodomainType CodomainType;
+    typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType;
+    typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType;
+    typedef typename SignatureTraits<SIG>::ResultIndexType ResultIndexType;
 
     virtual ~FunctionInterface() = default;
     virtual ArgumentSizeType argument_size() const = 0;
@@ -152,11 +123,10 @@ class FunctionInterface<ApproximateTag,SIG>
     : public virtual FunctionInterface<Void,SIG>
 {
     using P=ApproximateTag;
-    using D=typename SignatureTraits<SIG>::DomainType;
-    using C=typename SignatureTraits<SIG>::CodomainType;
   public:
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
+    using typename FunctionInterface<Void,SIG>::ArgumentIndexType;
   public:
     virtual Result<ApproximateNumber> _call(const Argument<ApproximateNumber>& x) const = 0;
     virtual Result<FloatDPApproximation> _call(const Argument<FloatDPApproximation>& x) const = 0;
@@ -170,7 +140,7 @@ class FunctionInterface<ApproximateTag,SIG>
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
-    virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
+    virtual FunctionInterface<P,SIG>* _derivative(ArgumentIndexType i) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -182,11 +152,10 @@ class FunctionInterface<ValidatedTag,SIG>
 {
     using P = ValidatedTag;
     using AP = ApproximateTag;
-    using D=typename SignatureTraits<SIG>::DomainType;
-    using C=typename SignatureTraits<SIG>::CodomainType;
   public:
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
+    using typename FunctionInterface<Void,SIG>::ArgumentIndexType;
   public:
     using FunctionInterface<AP,SIG>::_call;
     virtual Result<ValidatedNumber> _call(const Argument<ValidatedNumber>& x) const = 0;
@@ -211,7 +180,7 @@ class FunctionInterface<ValidatedTag,SIG>
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
-    virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
+    virtual FunctionInterface<P,SIG>* _derivative(ArgumentIndexType i) const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -226,8 +195,9 @@ class FunctionInterface<EffectiveTag,SIG>
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
   public:
-    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
-    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
+    using typename FunctionInterface<Void,SIG>::ArgumentIndexType;
   public:
     using FunctionInterface<WP,SIG>::_call;
     virtual Result<EffectiveNumber> _call(const Argument<EffectiveNumber>& x) const = 0;
@@ -239,7 +209,7 @@ class FunctionInterface<EffectiveTag,SIG>
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
     inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
-    virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
+    virtual FunctionInterface<P,SIG>* _derivative(ArgumentIndexType i) const = 0;
 };
 
 
@@ -274,4 +244,4 @@ template<> class FunctionFactoryInterface<ValidatedTag>
 
 } // namespace Ariadne
 
-#endif
+#endif /* ARIADNE_FUNCTION_INTERFACE_HPP */

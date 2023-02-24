@@ -194,13 +194,13 @@ class GridTreeSubpaving
     GridTreeSubpaving( const GridTreeSubpaving &otherSubset);
 
     //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for Drawable2dInterface.
-    GridTreeSubpaving* clone() const;
+    virtual GridTreeSubpaving* clone() const override;
 
     //!@}
 
     //! Virtual destructor. The destructor needs to be virtual since GridTreeSet is a subclass
     //! with different memory management.
-    virtual ~GridTreeSubpaving();
+    virtual ~GridTreeSubpaving() override;
 
     //!@{
     //! \name Properties
@@ -209,13 +209,13 @@ class GridTreeSubpaving
     Bool is_empty() const;
 
     //! \brief The number of activated cells in the set.
-    SizeType size() const;
+    virtual SizeType size() const override;
 
     //! \brief The dimension of the set.
-    DimensionType dimension() const;
+    virtual DimensionType dimension() const override;
 
     //! \brief Returns a constant reference to the underlying grid.
-    const Grid& grid() const;
+    virtual const Grid& grid() const override;
 
     //! \brief Returns the const pointer to the root BinaryTreeNode of the SubPaving*/
     const BinaryTreeNode * binary_tree() const;
@@ -231,10 +231,10 @@ class GridTreeSubpaving
 
     //! \brief Returns the \a GridCell corresponding to the ROOT NODE of this \a GridTreeSubset
     //! WARNING: It is NOT the primary cell of the paving!
-    GridCell root_cell() const;
+    virtual GridCell root_cell() const override;
 
     //! \brief Computes a bounding box for a grid set.
-    UpperBoxType bounding_box() const;
+    virtual UpperBoxType bounding_box() const override;
 
     //! \brief Allows to test if the two subpavings are "equal". The method returns true if
     //! the grida are equal and the binary trees are equal. Note that, only in case both
@@ -248,7 +248,7 @@ class GridTreeSubpaving
     //! \name Modifying operations
 
     //! \brief Sets the ROOT NODE of this \a GridTreeSubset to either enabled (true) or disabled (false).
-    Void set_root_cell(Bool enabled_or_disabled);
+    virtual Void set_root_cell(Bool enabled_or_disabled) override;
 
     //!@}
 
@@ -260,7 +260,7 @@ class GridTreeSubpaving
     //! \a numSubdivInDim is the number of subdivisions in each dimension, and D is the number of dimensions of our space.
     //! Note that, in case the subset is already subdivided to the required depth then nothing is done.
     //! The latter can happen if the root cell of the subset is below the depth ( extent + numSubdivInDim ) * D.
-    Void mince( Nat numSubdivInDim );
+    virtual Void mince( Nat numSubdivInDim ) override;
 
     //! \brief Subdivides the set up to the depth specified by the parameter.
     //! Note that the depth is measured from the unit cell and thus the subdivision
@@ -279,7 +279,7 @@ class GridTreeSubpaving
 
     //! \brief Recombines the subdivisions, for instance if all subcells of a cell are
     //! enabled/disabled then they are put together.
-    Void recombine();
+    virtual Void recombine() override;
 
     //!@}
 
@@ -310,16 +310,16 @@ class GridTreeSubpaving
     friend Bool intersect( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief Tests if a grid set equals another paving.
-    virtual Bool equals(const SubPavingInterface&) const;
+    virtual Bool equals(const SubPavingInterface&) const override;
 
     //! \brief Tests if a grid set is a subset of another paving.
-    virtual Bool subset(const SubPavingInterface&) const;
+    virtual Bool subset(const SubPavingInterface&) const override;
 
     //! \brief Tests if a grid set intersects another paving.
-    virtual Bool intersects(const SubPavingInterface&) const;
+    virtual Bool intersects(const SubPavingInterface&) const override;
 
     //! \brief Tests if a cell is a subset of the set.
-    Bool superset( const GridCell& theCell) const;
+    virtual Bool superset( const GridCell& theCell) const override;
 
     //! \brief Tests if a grid set is a subset of a box.
     Bool subset( const ExactBoxType& theBoxType ) const;
@@ -337,13 +337,13 @@ class GridTreeSubpaving
     ValidatedLowerKleenean covers( const ExactBoxType& theBoxType ) const;
 
     //! \brief Tests if (the closure of) a grid set is a subset of the interior of box.
-    ValidatedLowerKleenean inside( const ExactBoxType& theBoxType  ) const;
+    virtual ValidatedLowerKleenean inside( const ExactBoxType& theBoxType  ) const override;
 
     //! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box.
-    ValidatedLowerKleenean separated( const ExactBoxType& theBoxType  ) const;
+    virtual ValidatedLowerKleenean separated( const ExactBoxType& theBoxType  ) const override;
 
     //! \brief Tests if a grid set overlaps (intersects the interior of) a box.
-    ValidatedLowerKleenean overlaps( const ExactBoxType& theBoxType ) const;
+    virtual ValidatedLowerKleenean overlaps( const ExactBoxType& theBoxType ) const override;
 
     //!@}
 
@@ -373,18 +373,18 @@ class GridTreeSubpaving
     //! \name Input/Output
 
     //! \brief Draw on a two-dimensional canvas.
-    Void draw(CanvasInterface& canvas, const Projection2d& projection) const;
+    virtual Void draw(CanvasInterface& canvas, const Projection2d& projection) const override;
 
     //! \brief Write to an output stream.
-    OutputStream& _write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const override;
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
     //!@}
 
   private:
-    virtual GridTreeSubpaving* _branch(Bool left_or_right) const;
-    virtual ForwardConstantIteratorInterface<GridCell>* _begin() const;
-    virtual ForwardConstantIteratorInterface<GridCell>* _end() const;
+    virtual GridTreeSubpaving* _branch(Bool left_or_right) const override;
+    virtual ForwardConstantIteratorInterface<GridCell>* _begin() const override;
+    virtual ForwardConstantIteratorInterface<GridCell>* _end() const override;
 
 };
 

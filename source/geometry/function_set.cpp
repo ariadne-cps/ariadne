@@ -374,7 +374,9 @@ intersection(const ConstraintSet& cs1,const ConstraintSet& cs2)
     return ConstraintSet(catenate(cs1.constraints(),cs2.constraints()));
 }
 
-
+OutputStream& operator<<(OutputStream& os, ConstraintSet const& cs) {
+    return cs._write(os);
+}
 
 
 BoundedConstraintSet::BoundedConstraintSet(const RealBox& bx)
@@ -541,6 +543,9 @@ intersection(const ConstraintSet& cs,const BoundedConstraintSet& bcs)
     return intersection(bcs,cs);
 }
 
+OutputStream& operator<<(OutputStream& os, BoundedConstraintSet const& bcs) {
+    return bcs._write(os);
+}
 
 
 
@@ -719,6 +724,10 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 
 ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorMultivariateFunction& function) {
     set.apply(function); return set;
+}
+
+OutputStream& operator<<(OutputStream& os, ConstrainedImageSet const& set) {
+    return set._write(os);
 }
 
 

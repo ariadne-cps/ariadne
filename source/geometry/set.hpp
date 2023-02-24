@@ -37,6 +37,8 @@
 #include "geometry/set.decl.hpp"
 #include "geometry/set_interface.hpp"
 
+#include "geometry/geometry_concepts.hpp"
+
 namespace Ariadne {
 
 //! \ingroup GeometryModule SetSubModule
@@ -45,7 +47,7 @@ template<class T> class SetBase
     : public Handle<SetInterfaceBase<T>>
 {
   public:
-    template<class ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase<T>>(std::forward<Args>(args)...) { }
+    using Handle<SetInterfaceBase<T>>::Handle;
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
 };
@@ -53,20 +55,21 @@ template<class T> class SetBase
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded sets.
-template<class T> class BoundedSet<EffectiveTag,T>
-    : public Handle<BoundedSetInterface<EffectiveTag,T>>
+template<class P, class T> class BoundedSet
+    : public Handle<BoundedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<BoundedSetInterface<P,T>>::Handle;
+    template<class S> requires ABoundedSet<S,P,T> BoundedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is a inside of \a bx.
     //! A set \a A is \em inside \a B if the closure of \a A is a subset of the interior of \a B.
     //! A set \f$A\f$ is \em inside \f$B\f$ if \f$\,\overline{\!A} \subset B^\circ\f$.
-    inline LowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleeneanType<P> inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty.
     inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
@@ -75,299 +78,144 @@ template<class T> class BoundedSet<EffectiveTag,T>
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
-template<class T> class OvertSet<EffectiveTag,T>
-    : public Handle<OvertSetInterface<EffectiveTag,T>>
+template<class P, class T> class OvertSet
+    : public Handle<OvertSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<OvertSetInterface<P,T>>::Handle;
+    template<class S> requires AnOvertSet<S,P,T> OvertSet(S const& s);
+
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
-    inline LowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleeneanType<P> overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for open sets.
-template<class T> class OpenSet<EffectiveTag,T>
-    : public Handle<OpenSetInterface<EffectiveTag,T>>
+template<class P, class T> class OpenSet
+    : public Handle<OpenSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<OpenSetInterface<P,T>>::Handle;
+    template<class S> requires AnOpenSet<S,P,T> OpenSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
-    inline LowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleeneanType<P> overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
     //! \brief Tests if the set covers of \a bx.
     //! A set \a A \em covers \a B if the interiors of \a A is a superset of the closure of \a B.
     //! A set \f$A\f$ \em covers \f$B\f$ if \f$A^\circ \supset \overline{B}\f$.
-    inline LowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleeneanType<P> covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for closed sets.
-template<class T> class ClosedSet<EffectiveTag,T>
-    : public Handle<ClosedSetInterface<EffectiveTag,T>>
+template<class P, class T> class ClosedSet
+    : public Handle<ClosedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<ClosedSetInterface<P,T>>::Handle;
+    template<class S> requires AClosedSet<S,P,T> ClosedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
     //! A set \a A is \em separated from \a B if the closures of \a A and \a B are disjoint.
     //! A set \f$A\f$ is \em separated from \f$B\f$ if \f$\,\overline{\!A} \cap \overline{B} = \emptyset\f$.
-    inline LowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleeneanType<P> separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for compact (closed and bounded) sets.
-template<class T> class CompactSet<EffectiveTag,T>
-    : public Handle<CompactSetInterface<EffectiveTag,T>>
+template<class P, class T> class CompactSet
+    : public Handle<CompactSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<CompactSetInterface<P,T>>::Handle;
+    template<class S> requires ACompactSet<S,P,T> CompactSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
-    inline LowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleeneanType<P> separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
     //! \brief Tests if the set is a inside of \a bx.
-    inline LowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleeneanType<P> inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
     //! \brief Returns a bounding box for the set.
     inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
-template<class T> class RegularSet<EffectiveTag,T>
-    : public Handle<RegularSetInterface<EffectiveTag,T>>
+template<class P, class T> class RegularSet
+    : public Handle<RegularSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<RegularSetInterface<P,T>>::Handle;
+    template<class S> requires ARegularSet<S,P,T> RegularSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
-    inline LowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleeneanType<P> overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
     //! \brief Tests if the set covers of \a bx.
-    inline LowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleeneanType<P> covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
     //! \brief Tests if the set is separated from \a bx.
-    inline LowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleeneanType<P> separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for located (overt and compact) sets.
-template<class T> class LocatedSet<EffectiveTag,T>
-    : public Handle<LocatedSetInterface<EffectiveTag,T>>
+template<class P, class T> class LocatedSet
+    : public Handle<LocatedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<LocatedSetInterface<P,T>>::Handle;
+    template<class S> requires ALocatedSet<S,P,T> LocatedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
-    inline LowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleeneanType<P> overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
     //! \brief Tests if the set is separated from \a bx.
-    inline LowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleeneanType<P> separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
     //! \brief Tests if the set is a inside of \a bx.
-    inline LowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleeneanType<P> inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
     //! \brief Returns a bounding box for the set.
     inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded regular sets.
-template<class T> class RegularLocatedSet<EffectiveTag,T>
-    : public Handle<RegularLocatedSetInterface<EffectiveTag,T>>
+template<class P, class T> class RegularLocatedSet
+    : public Handle<RegularLocatedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<RegularLocatedSetInterface<EffectiveTag,T>>(std::forward<Args>(args)...) { }
+    using Handle<RegularLocatedSetInterface<P,T>>::Handle;
+    template<class S> requires ARegularLocatedSet<S,P,T> RegularLocatedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
-    inline LowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
+    inline LowerKleeneanType<P> overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
     //! \brief Tests if the set covers of \a bx.
-    inline LowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
+    inline LowerKleeneanType<P> covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
     //! \brief Tests if the set is separated from \a bx.
-    inline LowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
+    inline LowerKleeneanType<P> separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
     //! \brief Tests if the set is a inside of \a bx.
-    inline LowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
-    //! \brief Returns a bounding box for the set.
-    inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
-};
-
-
-
-
-
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for bounded sets.
-template<class T> class BoundedSet<ValidatedTag,T>
-    : public Handle<BoundedSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
-
-    template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set is a inside of \a bx.
-    //! A set \a A is \em inside \a B if the closure of \a A is a subset of the interior of \a B.
-    //! A set \f$A\f$ is \em inside \f$B\f$ if \f$\,\overline{\!A} \subset B^\circ\f$.
-    inline ValidatedLowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
-    //! \brief Returns a bounding box for the set.
-    //! If the set is empty, then the first component of the result should be empty.
-    inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
-};
-
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
-template<class T> class OvertSet<ValidatedTag,T>
-    : public Handle<OvertSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-
-    template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set overlaps \a bx.
-    inline ValidatedLowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for open sets.
-template<class T> class OpenSet<ValidatedTag,T>
-    : public Handle<OpenSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-
-    template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set overlaps \a bx.
-    inline ValidatedLowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
-    //! \brief Tests if the set covers of \a bx.
-    //! A set \a A \em covers \a B if the interiors of \a A is a superset of the closure of \a B.
-    //! A set \f$A\f$ \em covers \f$B\f$ if \f$A^\circ \supset \overline{B}\f$.
-    inline ValidatedLowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for closed sets.
-template<class T> class ClosedSet<ValidatedTag,T>
-    : public Handle<ClosedSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-
-    template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set is separated from \a bx.
-    //! A set \a A is \em separated from \a B if the closures of \a A and \a B are disjoint.
-    //! A set \f$A\f$ is \em separated from \f$B\f$ if \f$\,\overline{\!A} \cap \overline{B} = \emptyset\f$.
-    inline ValidatedLowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for compact (closed and bounded) sets.
-template<class T> class CompactSet<ValidatedTag,T>
-    : public Handle<CompactSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
-
-    template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set is separated from \a bx.
-    inline ValidatedLowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
-    //! \brief Tests if the set is a inside of \a bx.
-    inline ValidatedLowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
-    //! \brief Returns a bounding box for the set.
-    inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
-template<class T> class RegularSet<ValidatedTag,T>
-    : public Handle<RegularSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-
-    template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set overlaps \a bx.
-    inline ValidatedLowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
-    //! \brief Tests if the set covers of \a bx.
-    inline ValidatedLowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
-    //! \brief Tests if the set is separated from \a bx.
-    inline ValidatedLowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for located (overt and compact) sets.
-template<class T> class LocatedSet<ValidatedTag,T>
-    : public Handle<LocatedSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
-
-    template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set overlaps \a bx.
-    inline ValidatedLowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
-    //! \brief Tests if the set is separated from \a bx.
-    inline ValidatedLowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
-    //! \brief Tests if the set is a inside of \a bx.
-    inline ValidatedLowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
-    //! \brief Returns a bounding box for the set.
-    inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
-};
-
-//! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for bounded regular sets.
-template<class T> class RegularLocatedSet<ValidatedTag,T>
-    : public Handle<RegularLocatedSetInterface<ValidatedTag,T>>
-{
-  public:
-    typedef typename SetTraits<T>::BasicSetType BasicSetType;
-    typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
-
-    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<RegularLocatedSetInterface<ValidatedTag,T>>(std::forward<Args>(args)...) { }
-    //! \brief The dimension of the set.
-    inline DimensionType dimension() const { return this->reference().dimension(); }
-    //! \brief Tests if the set overlaps \a bx.
-    inline ValidatedLowerKleenean overlaps(const BasicSetType& bx) const { return this->reference().overlaps(bx); }
-    //! \brief Tests if the set covers of \a bx.
-    inline ValidatedLowerKleenean covers(const BasicSetType& bx) const { return this->reference().covers(bx); }
-    //! \brief Tests if the set is separated from \a bx.
-    inline ValidatedLowerKleenean separated(const BasicSetType& bx) const { return this->reference().separated(bx); }
-    //! \brief Tests if the set is a inside of \a bx.
-    inline ValidatedLowerKleenean inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
+    inline LowerKleeneanType<P> inside(const BasicSetType& bx) const { return this->reference().inside(bx); }
     //! \brief Returns a bounding box for the set.
     inline BoundingSetType bounding_box() const { return this->reference().bounding_box(); }
 };

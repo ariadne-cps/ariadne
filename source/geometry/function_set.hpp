@@ -101,19 +101,23 @@ class ConstraintSet
     //! \brief The \a i<sup>th</sup> constraint.
     EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
-    ConstraintSet* clone() const;
-    DimensionType dimension() const;
-    LowerKleenean separated(const ExactBoxType&) const;
-    LowerKleenean overlaps(const ExactBoxType&) const;
-    LowerKleenean covers(const ExactBoxType&) const;
+    virtual ConstraintSet* clone() const override;
+    virtual DimensionType dimension() const override;
+    virtual LowerKleenean separated(const ExactBoxType&) const override;
+    virtual LowerKleenean overlaps(const ExactBoxType&) const override;
+    virtual LowerKleenean covers(const ExactBoxType&) const override;
+
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
-    OutputStream& _write(OutputStream&) const;
 
     friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
     friend BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
     friend BoundedConstraintSet intersection(const RealBox& bx, const ConstraintSet& cs);
+
+    friend OutputStream& operator<<(OutputStream&, const ConstraintSet&);
+  private:
+    virtual OutputStream& _write(OutputStream&) const override;
 };
 
 
@@ -148,19 +152,19 @@ class BoundedConstraintSet
     //! \brief The \a i<sup>th</sup> constraint.
     EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
-    BoundedConstraintSet* clone() const;
-    DimensionType dimension() const;
-    LowerKleenean separated(const ExactBoxType&) const;
-    LowerKleenean overlaps(const ExactBoxType&) const;
-    LowerKleenean covers(const ExactBoxType&) const;
-    LowerKleenean inside(const ExactBoxType&) const;
+    virtual BoundedConstraintSet* clone() const override;
+    virtual DimensionType dimension() const override;
+    virtual LowerKleenean separated(const ExactBoxType&) const override;
+    virtual LowerKleenean overlaps(const ExactBoxType&) const override;
+    virtual LowerKleenean covers(const ExactBoxType&) const override;
+    virtual LowerKleenean inside(const ExactBoxType&) const override;
+    virtual UpperBoxType bounding_box() const override;
+    virtual Void draw(CanvasInterface&,const Projection2d&) const override;
+
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
-    UpperBoxType bounding_box() const;
-    OutputStream& _write(OutputStream&) const;
-    Void draw(CanvasInterface&,const Projection2d&) const;
 
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
@@ -168,6 +172,10 @@ class BoundedConstraintSet
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
     friend BoundedConstraintSet intersection(const RealBox& bx1, const BoundedConstraintSet& bcs2);
     friend ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorMultivariateFunction& function);
+
+    friend OutputStream& operator<<(OutputStream& os, const BoundedConstraintSet& set);
+  private:
+    virtual OutputStream& _write(OutputStream&) const override;
 };
 
 
@@ -227,11 +235,11 @@ class ConstrainedImageSet
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
         this->_constraints.append(EffectiveConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
-    ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
-    DimensionType dimension() const { return this->_function.result_size(); }
+    virtual ConstrainedImageSet* clone() const override { return new ConstrainedImageSet(*this); }
+    virtual DimensionType dimension() const override { return this->_function.result_size(); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    UpperBoxType bounding_box() const;
+    virtual UpperBoxType bounding_box() const override;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.
@@ -242,11 +250,11 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(SizeType j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
-    LowerKleenean inside(const ExactBoxType& bx) const;
+    virtual LowerKleenean inside(const ExactBoxType& bx) const override;
     //! \brief Test if the set is disjoint from a (closed) box.
-    LowerKleenean separated(const ExactBoxType&) const;
+    virtual LowerKleenean separated(const ExactBoxType&) const override;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    LowerKleenean overlaps(const ExactBoxType&) const;
+    virtual LowerKleenean overlaps(const ExactBoxType&) const override;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
@@ -259,12 +267,15 @@ class ConstrainedImageSet
     ValidatedKleenean satisfies(const EffectiveConstraint& c, Effort) const;
 
     //! \brief Draw to a canvas.
-    Void draw(CanvasInterface&,const Projection2d&) const;
-    //! \brief Write to an output stream.
-    OutputStream& _write(OutputStream&) const;
+    virtual Void draw(CanvasInterface&,const Projection2d&) const override;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorMultivariateFunction const& h);
+
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream&, const ConstrainedImageSet&);
+  private:
+    virtual OutputStream& _write(OutputStream&) const override;
 };
 
 
@@ -327,8 +338,8 @@ class ValidatedConstrainedImageSet
         this->_constraints.append(ValidatedConstraint(c.lower_bound(),compose(c.function(),this->function()),c.upper_bound()));
     }
 
-    ValidatedConstrainedImageSet* clone() const { return new ValidatedConstrainedImageSet(*this); }
-    DimensionType dimension() const { return this->_function.result_size(); }
+    virtual ValidatedConstrainedImageSet* clone() const override { return new ValidatedConstrainedImageSet(*this); }
+    virtual DimensionType dimension() const override { return this->_function.result_size(); }
 
     ValidatedVectorMultivariateFunction constraint_function() const;
     ExactBoxType constraint_bounds() const;
@@ -336,7 +347,7 @@ class ValidatedConstrainedImageSet
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
     Void reduce();
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    UpperBoxType bounding_box() const;
+    virtual UpperBoxType bounding_box() const override;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.
@@ -351,11 +362,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     ValidatedKleenean is_empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& bx) const override;
     //! \brief Test if the set is disjoint from a box.
-    ValidatedLowerKleenean separated(const ExactBoxType&) const;
+    virtual ValidatedLowerKleenean separated(const ExactBoxType&) const override;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType&) const override;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
@@ -365,19 +376,19 @@ class ValidatedConstrainedImageSet
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    Void draw(CanvasInterface&, const Projection2d&) const;
+    virtual Void draw(CanvasInterface&, const Projection2d&) const override;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;
     Void grid_draw(CanvasInterface&, const Projection2d&, Nat fineness) const;
-    //! \brief Write to an output stream.
-    OutputStream& _write(OutputStream&) const;
 
     friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
     friend ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
+
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream&, const ValidatedConstrainedImageSet&);
+  private:
+    virtual OutputStream& _write(OutputStream&) const override;
 };
-
-
 
 
 } //namespace Ariadne

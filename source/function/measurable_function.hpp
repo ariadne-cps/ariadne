@@ -64,18 +64,18 @@ template<class P, class RES, class ARG> class MeasurableFunctionInterface<P,RES(
 
 template<class P, class SIG> class MeasurableFunction;
 
-template<class F, class P, class SIG> struct IsMeasurableFunction;
+template<class FLT, class P, class SIG> struct IsMeasurableFunction;
 
-template<class F, class P, class R, class A> struct IsMeasurableFunction<F,P,R(A)> {
+template<class FLT, class P, class R, class A> struct IsMeasurableFunction<FLT,P,R(A)> {
     using LMS=LowerMeasurableSet<P,A>; using OPS=OpenSet<P,R>;
     template<class FF,class=decltype(declval<LMS>()=preimage(declval<OPS>(),declval<FF>()))>
         static std::true_type test(int);
     template<class FF>
         static std::false_type test(...);
-    static const bool value = decltype(test<F>(1))::value;
+    static const bool value = decltype(test<FLT>(1))::value;
 };
 
-template<class F, class P, class SIG> concept AMeasurableFunction = IsMeasurableFunction<F,P,SIG>::value;
+template<class FLT, class P, class SIG> concept AMeasurableFunction = IsMeasurableFunction<FLT,P,SIG>::value;
 
 template<class P, class RES, class ARG> class MeasurableFunction<P,RES(ARG)>
     : public Handle<const MeasurableFunctionInterface<P,RES(ARG)>>
@@ -85,19 +85,19 @@ template<class P, class RES, class ARG> class MeasurableFunction<P,RES(ARG)>
   public:
     using Handle<const Interface>::Handle;
     SizeType ref_count() const { return this->_ptr.ref_count(); }
-    template<AMeasurableFunction<P,SIG> F> MeasurableFunction(F const&);
+    template<AMeasurableFunction<P,SIG> FLT> MeasurableFunction(FLT const&);
     LowerMeasurableSet<P,ARG> preimage(OpenSet<P,RES> const& u) const { return this->_ptr->_preimage(u); }
 };
 
-template<class F, class P, class SIG> class MeasurableFunctionWrapper;
+template<class FLT, class P, class SIG> class MeasurableFunctionWrapper;
 
-template<class F, class P, class RES, class ARG> class MeasurableFunctionWrapper<F,P,RES(ARG)>
-    : public MeasurableFunctionInterface<P,RES(ARG)>, public F
+template<class FLT, class P, class RES, class ARG> class MeasurableFunctionWrapper<FLT,P,RES(ARG)>
+    : public MeasurableFunctionInterface<P,RES(ARG)>, public FLT
 {
     using SIG=RES(ARG);
   public:
     virtual LowerMeasurableSet<P,ARG> _preimage(OpenSet<P,RES> const& ops) const final override {
-        return preimage(ops,static_cast<F const&>(*this)); }
+        return preimage(ops,static_cast<FLT const&>(*this)); }
 };
 
 

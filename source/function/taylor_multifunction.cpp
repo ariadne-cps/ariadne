@@ -46,20 +46,20 @@
 
 namespace Ariadne {
 
-template<class F> auto ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>>::
+template<class FLT> auto ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FLT>>::
 _call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>
 {
-    Argument<Bounds<F>> cx(x,this->_upcast().precision());
-    Interval<UpperBound<F>> ivl=this->_upcast().operator()(cx);
-    IntervalSet<UpperBound<F>> ivls(std::move(ivl));
-    return CompactSet<P,Real>(std::make_shared<CompactSetWrapper<IntervalSet<UpperBound<F>>,ValidatedTag,Real>>(ivls));
+    Argument<Bounds<FLT>> cx(x,this->_upcast().precision());
+    Interval<UpperBound<FLT>> ivl=this->_upcast().operator()(cx);
+    IntervalSet<UpperBound<FLT>> ivls(std::move(ivl));
+    return CompactSet<P,Real>(std::make_shared<CompactSetWrapper<IntervalSet<UpperBound<FLT>>,ValidatedTag,Real>>(ivls));
 }
 
-template<class F> auto VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>>::
+template<class FLT> auto VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FLT>>::
 _call(Argument<Number<P>> const& x) const -> CompactSet<P,RES>
 {
-    typedef Box<Interval<UpperBound<F>>> BoxType;
-    Vector<Bounds<F>> cx(x,this->_upcast().precision());
+    typedef Box<Interval<UpperBound<FLT>>> BoxType;
+    Vector<Bounds<FLT>> cx(x,this->_upcast().precision());
     BoxType rbx=this->_upcast().operator()(cx);
     return CompactSet<P,RealVector>(std::make_shared<CompactSetWrapper<BoxType,ValidatedTag,RealVector>>(rbx));
 }

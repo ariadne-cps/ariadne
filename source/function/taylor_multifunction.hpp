@@ -77,82 +77,82 @@ template<class U> class IntervalSet : public IntervalSetBase<U> {
 
 
 
-template<class F> class ScaledFunctionPatchFactory<ValidatedIntervalTaylorModel<F>> {
+template<class FLT> class ScaledFunctionPatchFactory<ValidatedIntervalTaylorModel<FLT>> {
   public:
-    ScaledFunctionPatchFactory(Sweeper<F> const&) { }
+    ScaledFunctionPatchFactory(Sweeper<FLT> const&) { }
 };
 
-template<class F> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>>
+template<class FLT> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FLT>>
     : public MultifunctionInterface<ValidatedTag, Real(RealVector),CompactSet>
 {
-    using M=ValidatedIntervalTaylorModel<F>; using P=ValidatedTag; using RES=Real;
+    using M=ValidatedIntervalTaylorModel<FLT>; using P=ValidatedTag; using RES=Real;
     ScaledFunctionPatch<M> const& _upcast() const { return static_cast<ScaledFunctionPatch<M>const&>(*this); }
   protected:
     virtual CompactSet<P,RES> _call(Argument<Number<P>> const& x) const;
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_upcast(); }
 };
 
-template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>>
+template<class FLT> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<FLT>>
     : public MultifunctionInterface<ValidatedTag, RealVector(RealVector), CompactSet>
 {
-    using M=ValidatedIntervalTaylorModel<F>; using P=ValidatedTag; using RES=RealVector;
+    using M=ValidatedIntervalTaylorModel<FLT>; using P=ValidatedTag; using RES=RealVector;
     VectorScaledFunctionPatch<M> const& _upcast() const { return static_cast<VectorScaledFunctionPatch<M>const&>(*this); }
   protected:
     virtual CompactSet<P,RES> _call(Argument<Number<P>> const& x) const;
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_upcast(); }
 };
 
-template<class F> class ValidatedIntervalTaylorFunctionModel
-    : public ScaledFunctionPatch<ValidatedIntervalTaylorModel<F>>
+template<class FLT> class ValidatedIntervalTaylorFunctionModel
+    : public ScaledFunctionPatch<ValidatedIntervalTaylorModel<FLT>>
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=Real;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=Real;
   public:
     ValidatedIntervalTaylorFunctionModel(ScaledFunctionPatch<M> const& f) : ScaledFunctionPatch<M>(f) { }
     using ScaledFunctionPatch<M>::ScaledFunctionPatch;
-    Interval<UpperBound<F>> operator() (Vector<Bounds<F>> const& x) const {
+    Interval<UpperBound<FLT>> operator() (Vector<Bounds<FLT>> const& x) const {
         return evaluate(this->model(),Ariadne::unscale(x,this->domain())); }
     CompactSet<P,RES> operator() (Vector<Number<P>> const& x) const { return this->_call(x); }
 };
 
-template<class F> class ValidatedVectorIntervalTaylorFunctionModel
-    : public VectorScaledFunctionPatch<ValidatedIntervalTaylorModel<F>>
+template<class FLT> class ValidatedVectorIntervalTaylorFunctionModel
+    : public VectorScaledFunctionPatch<ValidatedIntervalTaylorModel<FLT>>
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=RealVector;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=RealVector;
   public:
     ValidatedVectorIntervalTaylorFunctionModel(VectorScaledFunctionPatch<M> const& f) : VectorScaledFunctionPatch<M>(f) { }
     using VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch;
-    Box<Interval<UpperBound<F>>> operator() (Vector<Bounds<F>> const& x) const {
+    Box<Interval<UpperBound<FLT>>> operator() (Vector<Bounds<FLT>> const& x) const {
         return evaluate(this->models(),Ariadne::unscale(x,this->domain())); }
     CompactSet<P,RES> operator() (Vector<Number<P>> const& x) const { return this->_call(x); }
 };
 
 
-template<class F> class ValidatedIntervalTaylorFunctionSet
+template<class FLT> class ValidatedIntervalTaylorFunctionSet
 //    : public FunctionSet<ValidatedTag,Real(RealVector),CompactSet>::Interface
     : public CompactSet<ValidatedTag,Real(RealVector)>::Interface
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=Real;
-    ValidatedIntervalTaylorFunctionModel<F> _function_model;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=Real;
+    ValidatedIntervalTaylorFunctionModel<FLT> _function_model;
   public:
     ValidatedIntervalTaylorFunctionSet(ScaledFunctionPatch<M> const& f) : _function_model(f) { }
     CompactSet<P,RES> operator() (Vector<Number<P>> const& x) const { return this->_function_model(x); }
-    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorFunctionSet<F> const& fs) {
+    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorFunctionSet<FLT> const& fs) {
         return os << "FunctionSet(" << fs._function_model << ")"; }
   private:
     virtual CompactSet<P,RES> _call(Vector<Number<P>> const& x) const { return this->operator()(x); }
     virtual OutputStream& _write(OutputStream& os) const { return os << *this; }
 };
 
-template<class F> class ValidatedVectorIntervalTaylorFunctionSet
+template<class FLT> class ValidatedVectorIntervalTaylorFunctionSet
 //    : public FunctionSet<ValidatedTag,Real(RealVector),CompactSet>::Interface
     : public CompactSet<ValidatedTag,RealVector(RealVector)>::Interface
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=RealVector;
-    ValidatedVectorIntervalTaylorFunctionModel<F> _function_model;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=RealVector;
+    ValidatedVectorIntervalTaylorFunctionModel<FLT> _function_model;
   public:
     ValidatedVectorIntervalTaylorFunctionSet(VectorScaledFunctionPatch<M> const& f) : _function_model(f) { }
     CompactSet<P,RES> operator() (Vector<Number<P>> const& x) const { return this->_function_model(x); }
-    friend OutputStream& operator<<(OutputStream& os, ValidatedVectorIntervalTaylorFunctionSet<F> const& fs) {
+    friend OutputStream& operator<<(OutputStream& os, ValidatedVectorIntervalTaylorFunctionSet<FLT> const& fs) {
         return os << "FunctionSet(" << fs._function_model << ")"; }
   private:
     virtual CompactSet<P,RES> _call(Vector<Number<P>> const& x) const { return this->operator()(x); }
@@ -160,17 +160,17 @@ template<class F> class ValidatedVectorIntervalTaylorFunctionSet
 };
 
 
-template<class F> class ValidatedIntervalTaylorCurriedTrajectorySet
+template<class FLT> class ValidatedIntervalTaylorCurriedTrajectorySet
     : public CompactSet<ValidatedTag,RealVector(Real)>::Interface
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=RealVector;
-    ValidatedVectorIntervalTaylorFunctionModel<F> _flow_model;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=RealVector;
+    ValidatedVectorIntervalTaylorFunctionModel<FLT> _flow_model;
     Vector<Number<P>> _initial_state;
   public:
-    ValidatedIntervalTaylorCurriedTrajectorySet(ValidatedVectorIntervalTaylorFunctionModel<F> const& phi, Vector<Number<P>> x0)
+    ValidatedIntervalTaylorCurriedTrajectorySet(ValidatedVectorIntervalTaylorFunctionModel<FLT> const& phi, Vector<Number<P>> x0)
         : _flow_model(phi), _initial_state(x0) { }
     CompactSet<P,RES> operator() (Scalar<Number<P>> const& t) const { return this->_flow_model(join(this->_initial_state,t)); }
-    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorCurriedTrajectorySet<F> const& trs) {
+    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorCurriedTrajectorySet<FLT> const& trs) {
         return os << "TrajectorySet(" << trs._flow_model << ", " << trs._initial_state << ")"; }
   private:
     virtual CompactSet<P,RES> _call(Scalar<Number<P>> const& t) const override {
@@ -180,13 +180,13 @@ template<class F> class ValidatedIntervalTaylorCurriedTrajectorySet
 
 
 
-template<class F> class ValidatedIntervalTaylorMultiflow
+template<class FLT> class ValidatedIntervalTaylorMultiflow
     : public ValidatedCompactMultiflow::Interface
 {
-    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<F>; using RES=Real;
-    typedef ValidatedVectorIntervalTaylorFunctionModel<F> FlowModelType;
-    typedef ValidatedIntervalTaylorCurriedTrajectorySet<F> TrajectorySetType;
-    typedef ValidatedVectorIntervalTaylorFunctionModel<F> ReachMapType;
+    using P=ValidatedTag; using M=ValidatedIntervalTaylorModel<FLT>; using RES=Real;
+    typedef ValidatedVectorIntervalTaylorFunctionModel<FLT> FlowModelType;
+    typedef ValidatedIntervalTaylorCurriedTrajectorySet<FLT> TrajectorySetType;
+    typedef ValidatedVectorIntervalTaylorFunctionModel<FLT> ReachMapType;
     FlowModelType _flow_model;
   public:
     ValidatedIntervalTaylorMultiflow(VectorScaledFunctionPatch<M> const& f) : _flow_model(f) { }
@@ -194,7 +194,7 @@ template<class F> class ValidatedIntervalTaylorMultiflow
         return TrajectorySetType(this->_flow_model,x0); }
     ReachMapType curry() const {
         return ReachMapType(this->_flow_model); }
-    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorMultiflow<F> const& phi) { return phi._write(os); }
+    friend OutputStream& operator<<(OutputStream& os, ValidatedIntervalTaylorMultiflow<FLT> const& phi) { return phi._write(os); }
   private: public:
     virtual CompactSet<P,RealVector(Real)> _call(Vector<Number<P>> const& x0) const override {
         return CompactSet<P,RealVector(Real)>(std::make_shared<TrajectorySetType>(this->_flow_model,x0)); }

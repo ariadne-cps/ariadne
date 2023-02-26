@@ -88,10 +88,10 @@ template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2
 */
 
 // FIXME: Try to abstract away this template
-template<class R, class F, class X> concept CanEvaluate
-    = requires(F const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
-template<class R, class F, class X> concept CanCall
-    = requires(F const& f, X const& x) { { f(x) } -> ConvertibleTo<R>; };
+template<class R, class FLT, class X> concept CanEvaluate
+    = requires(FLT const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
+template<class R, class FLT, class X> concept CanCall
+    = requires(FLT const& f, X const& x) { { f(x) } -> ConvertibleTo<R>; };
 
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
@@ -121,8 +121,8 @@ template<class M> class VectorScaledFunctionPatchMixin
 //! \ingroup FunctionModelSubModule
 //!  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a scaled function model, such as a polynomial \f$p\f$ on \f$\I^n\f$ with uniform error \f$e\f$.
 //!  \tparam M	The class used for the function model over the box \f$[-1\!:\!+1]^n\f$.
-//!   For example, \ref TaylorModel::ValidatedTaylorModel "ValidatedTaylorModel<F>" would give a scaled representation
-//!   which is a polynomial with coefficients of type \c F, with a uniform error bound.
+//!   For example, \ref TaylorModel::ValidatedTaylorModel "ValidatedTaylorModel<FLT>" would give a scaled representation
+//!   which is a polynomial with coefficients of type \c FLT, with a uniform error bound.
 //!
 //! \details Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
 //! \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
@@ -153,7 +153,7 @@ template<class M> class ScaledFunctionPatch
     typedef RealVector RES;
     typedef RES SIG(ARG);
     typedef typename M::Paradigm P;
-    typedef typename M::RawFloatType F;
+    typedef typename M::RawFloatType FLT;
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
   public:
@@ -544,8 +544,8 @@ template<class M> class VectorScaledFunctionPatch
     using RES = RealVector;
     using SIG = RES(ARG);
     using P = typename M::Paradigm;
-    using F = typename M::CoefficientType;
-    using FE = typename M::ErrorValueType;
+    using FLT = typename M::CoefficientType;
+    using FLTE = typename M::ErrorValueType;
     using PR = typename M::PrecisionType;
     using PRE = typename M::ErrorPrecisionType;
   public:
@@ -950,7 +950,7 @@ template<class M> class VectorScaledFunctionPatch
     friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
     }
-    friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunctionModel<P,F,FE>& g, const VectorScaledFunctionPatch<M>& f) {
+    friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunctionModel<P,FLT,FLTE>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
@@ -1107,17 +1107,17 @@ template<class M> OutputStream& operator<<(OutputStream& os, const Representatio
 template<class M> OutputStream& operator<<(OutputStream& os, const Representation<VectorScaledFunctionPatch<M>>& repr) {
     return repr.pointer->repr(os); }
 
-template<class F> struct ModelRepresentation { const F* pointer; double threshold; };
-template<class F> ModelRepresentation<F> model_representation(const F& f, double prpt) {
-    ModelRepresentation<F> r={&f,prpt}; return r; }
+template<class FLT> struct ModelRepresentation { const FLT* pointer; double threshold; };
+template<class FLT> ModelRepresentation<FLT> model_representation(const FLT& f, double prpt) {
+    ModelRepresentation<FLT> r={&f,prpt}; return r; }
 template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<ScaledFunctionPatch<M>>&);
 template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<VectorScaledFunctionPatch<M>>&);
 
-template<class F> struct PolynomialRepresentation { const F* pointer; double threshold; List<String> names; };
-template<class F> PolynomialRepresentation<F> polynomial_representation(const F& f, double prpt) {
-    PolynomialRepresentation<F> r={&f,prpt}; return r; }
-template<class F> PolynomialRepresentation<F> polynomial_representation(const F& f, double prpt, const List<String>& names) {
-    PolynomialRepresentation<F> r={&f,prpt,names}; return r; }
+template<class FLT> struct PolynomialRepresentation { const FLT* pointer; double threshold; List<String> names; };
+template<class FLT> PolynomialRepresentation<FLT> polynomial_representation(const FLT& f, double prpt) {
+    PolynomialRepresentation<FLT> r={&f,prpt}; return r; }
+template<class FLT> PolynomialRepresentation<FLT> polynomial_representation(const FLT& f, double prpt, const List<String>& names) {
+    PolynomialRepresentation<FLT> r={&f,prpt,names}; return r; }
 template<class M> OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<ScaledFunctionPatch<M>>&);
 template<class M> OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorScaledFunctionPatch<M>>&);
 
@@ -1245,8 +1245,8 @@ template<class M> class ScaledFunctionPatchFactory
     typedef RealVector ARG;
 
     typedef typename M::Paradigm P;
-    typedef typename M::CoefficientType F;
-    typedef typename M::ErrorType FE;
+    typedef typename M::CoefficientType FLT;
+    typedef typename M::ErrorType FLTE;
   public:
     typedef P Paradigm;
     typedef typename M::CoefficientType CoefficientType;
@@ -1259,7 +1259,7 @@ template<class M> class ScaledFunctionPatchFactory
     explicit ScaledFunctionPatchFactory<M>(PropertiesType properties) : _properties(properties) { }
     PropertiesType properties() const { return this->_properties; }
 
-    CanonicalNumericType<P,F,FE> create(const Number<P>& number) const;
+    CanonicalNumericType<P,FLT,FLTE> create(const Number<P>& number) const;
     ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,ARG>& function) const;
     VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,ARG>& function) const;
 
@@ -1275,7 +1275,7 @@ template<class M> class ScaledFunctionPatchFactory
     VectorScaledFunctionPatch<M> create_projection(const DomainType& domain, Range indices) const;
     VectorScaledFunctionPatch<M> create_identity(const DomainType& domain) const;
     ScalarScaledFunctionPatch<M> create_identity(const IntervalDomainType& domain) const { return this->create_coordinate(BoxDomainType(1u,domain),0u); };
-    CanonicalNumericType<P,F,FE> create_number(const Number<P>& number) const { return this->create(number); }
+    CanonicalNumericType<P,FLT,FLTE> create_number(const Number<P>& number) const { return this->create(number); }
     friend OutputStream& operator<<(OutputStream& os, ScaledFunctionPatchFactory<M> const& factory) {
         return os << "ScaledFunctionPatchFactory( properties=" << factory._properties << " )"; }
   private:

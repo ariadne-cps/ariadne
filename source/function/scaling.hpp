@@ -39,19 +39,19 @@ struct UnscalingException : std::runtime_error {
     inline UnscalingException(String msg, IntervalDomainType dom) : std::runtime_error(msg+to_str(dom)), domain(dom) { }
 };
 
-template<class F> inline Approximation<F> med_apprx(Interval<F> const& ivl) {
-    return Approximation<F>(hlf(add(approx,ivl.lower_bound().raw(),ivl.upper_bound().raw())));
+template<class FLT> inline Approximation<FLT> med_apprx(Interval<FLT> const& ivl) {
+    return Approximation<FLT>(hlf(add(approx,ivl.lower_bound().raw(),ivl.upper_bound().raw())));
 }
 
-template<class F> inline Approximation<F> rad_apprx(Interval<F> const& ivl) {
-    return Approximation<F>(hlf(sub(approx,ivl.upper_bound().raw(),ivl.lower_bound().raw())));
+template<class FLT> inline Approximation<FLT> rad_apprx(Interval<FLT> const& ivl) {
+    return Approximation<FLT>(hlf(sub(approx,ivl.upper_bound().raw(),ivl.lower_bound().raw())));
 }
 
-template<class F> inline Bounds<F> med_val(Interval<F> const& ivl) {
+template<class FLT> inline Bounds<FLT> med_val(Interval<FLT> const& ivl) {
     return hlf(ivl.lower_bound()+ivl.upper_bound());
 }
 
-template<class F> inline Bounds<F> rad_val(Interval<F> const& ivl) {
+template<class FLT> inline Bounds<FLT> rad_val(Interval<FLT> const& ivl) {
     return hlf(ivl.upper_bound()-ivl.lower_bound());
 }
 
@@ -83,13 +83,13 @@ Vector<X> scale(const Vector<X>& v, const BoxDomainType& cd) {
     return Vector<X>(v.size(),[&](SizeType i){return scale(v[i],cd[i]);});
 }
 
-template<class F, class T> struct MyConvertible {
+template<class FLT, class T> struct MyConvertible {
     template<class TT> static Void convert(TT const&);
     template<class FF, class TT, class=decltype(convert<TT>(std::declval<FF>()))>
         static std::true_type test(int);
     template<class FF, class TT>
         static std::false_type test(...);
-    static const bool value = decltype(test<F,T>(1))::value;
+    static const bool value = decltype(test<FLT,T>(1))::value;
 };
 
 template<class X> inline

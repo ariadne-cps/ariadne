@@ -135,8 +135,8 @@ template<class FCTRY, class ARG> class FunctionPatchCreator {
     DomainType _domain;
 };
 
-template<class F, class P, class SIG> concept FunctionPatchConcept = requires (F f) {
-    typename F::DomainType;
+template<class FLT, class P, class SIG> concept FunctionPatchConcept = requires (FLT f) {
+    typename FLT::DomainType;
     f.domain();
 };
 

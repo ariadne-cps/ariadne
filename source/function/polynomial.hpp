@@ -390,12 +390,12 @@ template<class I, class X> inline OutputStream& operator<<(OutputStream& os, con
 template<class I, class X> inline Bool compatible(const Polynomial<I,X>& x1, const Polynomial<I,X>& x2) {
     return x1.argument_size()==x2.argument_size(); }
 
-template<class F> struct NamedArgumentRepresentation {
-    const F& function; const List<String>& argument_names;
+template<class FLT> struct NamedArgumentRepresentation {
+    const FLT& function; const List<String>& argument_names;
 };
 
-template<class F> inline NamedArgumentRepresentation<F> named_argument_repr(const F& function, const List<String>& argument_names) {
-    NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
+template<class FLT> inline NamedArgumentRepresentation<FLT> named_argument_repr(const FLT& function, const List<String>& argument_names) {
+    NamedArgumentRepresentation<FLT> r={function,argument_names}; return r; }
 
 template<class I, class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<I,X>>& repr) {
     return repr.function._write(os,repr.argument_names); }

@@ -272,7 +272,7 @@ class Function
 
     //! \brief Construct from a class satisfying the function concept.
     // FIXME: Avoid IsFunctionClass requirement, which is needed do prevent AFunction concept checking conformance before argument classes are defined.
-    template<class F> requires (not IsFunctionClass<F,SIG>) and AFunction<F,P,SIG> Function(F const& f);
+    template<class FLT> requires (not IsFunctionClass<FLT,SIG>) and AFunction<FLT,P,SIG> Function(FLT const& f);
     //!@}
 
     //! \name Query domain and codomain.
@@ -357,7 +357,7 @@ class Function
 
 template<class P, class... ARGS> struct AlgebraOperations<ScalarFunction<P,ARGS...>,Number<P>>
 {
-    using F=ScalarFunction<P,ARGS...>;
+    using FLT=ScalarFunction<P,ARGS...>;
     using C=Number<P>;
     static ScalarFunction<P,ARGS...> apply(BinaryElementaryOperator op, ScalarFunction<P,ARGS...> const& f1, ScalarFunction<P,ARGS...> const& f2);
     static ScalarFunction<P,ARGS...> apply(UnaryElementaryOperator op, ScalarFunction<P,ARGS...> const& f);

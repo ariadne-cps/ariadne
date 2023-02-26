@@ -38,12 +38,12 @@ namespace Ariadne {
 //! \ingroup GeometryModule
 //! \brief A constraint defined by requiring values of a function \f$f\f$ to lie in a range \f$R\f$.
 //! i.e. restricts point \f$x\f$ to satsify \f$f(x)\in R\f$.
-//!    \param F The type of the function
+//!    \param FLT The type of the function
 //!    \param R The type of the range of values.
-template<class F, class R>
+template<class FLT, class R>
 class Constraint {
   public:
-    typedef F FunctionType; //!< <p/>
+    typedef FLT FunctionType; //!< <p/>
     typedef R BoundType; //!< <p/>
     typedef R UpperBoundType; //!< <p/>
     typedef NegationType<R> LowerBoundType; //!< <p/>
@@ -57,17 +57,17 @@ class Constraint {
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 
-    template< ConvertibleTo<F> FF, ConvertibleTo<R> RR>
+    template< ConvertibleTo<FLT> FF, ConvertibleTo<R> RR>
     Constraint(const Constraint<FF,RR>& c)
-        : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
+        : _function(static_cast<FLT>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
 
-    template< ConvertibleTo<F> FF, class RR> requires Constructible<R,RR,DoublePrecision>
+    template< ConvertibleTo<FLT> FF, class RR> requires Constructible<R,RR,DoublePrecision>
     Constraint(const RR& l, const FF& f, const RR& u)
-        : _function(static_cast<F>(f)), _lower_bound(l,dp), _upper_bound(u,dp) { }
+        : _function(static_cast<FLT>(f)), _lower_bound(l,dp), _upper_bound(u,dp) { }
 
-    template< ConvertibleTo<F> FF, class RR> requires Constructible<R,RR,DoublePrecision>
+    template< ConvertibleTo<FLT> FF, class RR> requires Constructible<R,RR,DoublePrecision>
     Constraint(const Constraint<FF,RR>& c)
-        : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound(),dp), _upper_bound(c.upper_bound(),dp) { }
+        : _function(static_cast<FLT>(c.function())), _lower_bound(c.lower_bound(),dp), _upper_bound(c.upper_bound(),dp) { }
 
     Void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
@@ -83,7 +83,7 @@ class Constraint {
     // FIXME: This function should not be used as it breaks type safety
     const Interval<FloatDP> bounds() const { DoublePrecision pr; return cast_exact(Interval<FloatDPUpperBound>({_lower_bound,pr},{_upper_bound,pr})); }
   private:
-    F _function;
+    FLT _function;
     R _lower_bound;
     R _upper_bound;
 };

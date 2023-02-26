@@ -177,9 +177,9 @@ inline OutputStream& operator<<(OutputStream& os, const Representation< BoxDomai
     return os;
 }
 
-template<class F> inline OutputStream& operator<<(OutputStream& os, const Representation< Sweeper<F> >& swp_repr)
+template<class FLT> inline OutputStream& operator<<(OutputStream& os, const Representation< Sweeper<FLT> >& swp_repr)
 {
-    const Sweeper<F>& swp=*swp_repr.pointer;
+    const Sweeper<FLT>& swp=*swp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
     os << swp;
@@ -541,12 +541,12 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
 
 template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<ScaledFunctionPatch<M>>& frepr)
 {
-    typedef typename M::RawFloatType F;
-    typedef typename F::PrecisionType PR;
+    typedef typename M::RawFloatType FLT;
+    typedef typename FLT::PrecisionType PR;
     ScaledFunctionPatch<M> const& function=*frepr.pointer;
     ScaledFunctionPatch<M> truncated_function = function;
     truncated_function.clobber();
-    truncated_function.simplify(ThresholdSweeper<F>(frepr.precision(),frepr.threshold));
+    truncated_function.simplify(ThresholdSweeper<FLT>(frepr.precision(),frepr.threshold));
     FloatError<PR> truncatation_error = truncated_function.error();
     truncated_function.clobber();
     MultivariatePolynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
@@ -642,7 +642,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 
 
 
-template<class C, class F> decltype(auto) common(C const& c, F const& f) {
+template<class C, class FLT> decltype(auto) common(C const& c, FLT const& f) {
     assert(c.size()>0);
     auto r=f(c[0]);
     for(SizeType i=1; i!=c.size(); ++i) { ARIADNE_ASSERT(f(c[i])==r); }
@@ -1010,8 +1010,8 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::repr(OutputStream&
 
 
 
-template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,F,FE> {
-    return CanonicalNumericType<P,F>(number,this->_properties.precision());
+template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,FLT,FLTE> {
+    return CanonicalNumericType<P,FLT>(number,this->_properties.precision());
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
     return ScaledFunctionPatch<M>(domain,function,this->_properties);

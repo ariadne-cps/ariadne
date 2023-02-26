@@ -52,13 +52,13 @@ typedef ElementaryAlgebra<ApproximateNumber> ApproximateElementaryAlgebra;
 typedef ElementaryAlgebra<ValidatedNumber> ValidatedElementaryAlgebra;
 typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 
-template<class F, class P, class SIG> class FunctionMixin { };
-template<class F, class P, class... ARGS> class ScalarFunctionMixin;
-template<class F, class P, class... ARGS> class VectorFunctionMixin;
-template<class F, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<F,P,RealScalar>;
-template<class F, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<F,P,RealScalar>;
-template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,RealVector>;
-template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,RealVector>;
+template<class FLT, class P, class SIG> class FunctionMixin { };
+template<class FLT, class P, class... ARGS> class ScalarFunctionMixin;
+template<class FLT, class P, class... ARGS> class VectorFunctionMixin;
+template<class FLT, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<FLT,P,RealScalar>;
+template<class FLT, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<FLT,P,RealScalar>;
+template<class FLT, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<FLT,P,RealVector>;
+template<class FLT, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<FLT,P,RealVector>;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
@@ -70,8 +70,8 @@ template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
 template<> inline BoxDomainType make_domain(SizeType d) { return BoxDomainType(d,IntervalDomainType(-inf,+inf)); }
 
-template<class F, class SIG>
-class FunctionMixin<F,Void,SIG>
+template<class FLT, class SIG>
+class FunctionMixin<FLT,Void,SIG>
     : public virtual FunctionInterface<Void,SIG>
 {
     using D=typename SignatureTraits<SIG>::DomainType;
@@ -88,15 +88,15 @@ class FunctionMixin<F,Void,SIG>
     virtual ArgumentSizeType argument_size() const override = 0;
     virtual ResultSizeType result_size() const override = 0;
   private:
-    virtual OutputStream& _write(OutputStream& os) const override { return os << static_cast<F const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const override { return os << static_cast<FLT const&>(*this); }
     virtual OutputStream& _repr(OutputStream& os) const override { return this->_write(os); }
 };
 
 
-template<class F, class SIG>
-class FunctionMixin<F,ApproximateTag,SIG>
+template<class FLT, class SIG>
+class FunctionMixin<FLT,ApproximateTag,SIG>
     : public virtual FunctionInterface<ApproximateTag,SIG>
-    , public FunctionMixin<F,Void,SIG>
+    , public FunctionMixin<FLT,Void,SIG>
 {
     using P=ApproximateTag;
     using D=typename SignatureTraits<SIG>::DomainType;
@@ -118,17 +118,17 @@ class FunctionMixin<F,ApproximateTag,SIG>
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F, class SIG>
-class FunctionMixin<F,ValidatedTag,SIG>
+template<class FLT, class SIG>
+class FunctionMixin<FLT,ValidatedTag,SIG>
     : public virtual FunctionInterface<ValidatedTag,SIG>
-    , public FunctionMixin<F,ApproximateTag,SIG>
+    , public FunctionMixin<FLT,ApproximateTag,SIG>
 {
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
     template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
     template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
-    using FunctionMixin<F,ApproximateTag,SIG>::_call;
+    using FunctionMixin<FLT,ApproximateTag,SIG>::_call;
     virtual FunctionInterface<ValidatedTag,SIG>* _clone() const override;
     virtual FunctionInterface<ValidatedTag,SIG>* _derivative(ElementIndexType<D> i) const override;
     virtual Result<ValidatedNumber> _call(const Argument<ValidatedNumber>& x) const override;
@@ -148,17 +148,17 @@ class FunctionMixin<F,ValidatedTag,SIG>
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F, class SIG>
-class FunctionMixin<F,EffectiveTag,SIG>
+template<class FLT, class SIG>
+class FunctionMixin<FLT,EffectiveTag,SIG>
     : public virtual FunctionInterface<EffectiveTag,SIG>
-    , public FunctionMixin<F,ValidatedTag,SIG>
+    , public FunctionMixin<FLT,ValidatedTag,SIG>
 {
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
     template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
     template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
   public:
-    using FunctionMixin<F,ValidatedTag,SIG>::_call;
+    using FunctionMixin<FLT,ValidatedTag,SIG>::_call;
     virtual FunctionInterface<EffectiveTag,SIG>* _clone() const override;
     virtual FunctionInterface<EffectiveTag,SIG>* _derivative(ElementIndexType<D> i) const override;
     virtual Result<EffectiveNumber> _call(const Argument<EffectiveNumber>& x) const override;
@@ -173,54 +173,54 @@ class FunctionMixin<F,EffectiveTag,SIG>
 
 
 
-template<class F, class P, class SIG> class FunctionGetterMixin;
+template<class FLT, class P, class SIG> class FunctionGetterMixin;
 
-template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealScalar(ARGS...)> {
+template<class FLT, class P, class... ARGS> class FunctionGetterMixin<FLT,P,RealScalar(ARGS...)> {
 };
 
-template<class F, class P, class... ARGS> class FunctionGetterMixin<F,P,RealVector(ARGS...)>
+template<class FLT, class P, class... ARGS> class FunctionGetterMixin<FLT,P,RealVector(ARGS...)>
     : public virtual VectorOfFunctionInterface<P,ARGS...>
 {
     virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const override;
 };
 
 
-template<class F, class P, class... ARGS> class ScalarFunctionMixin
-    : public FunctionMixin<F,P,RealScalar(ARGS...)> { };
+template<class FLT, class P, class... ARGS> class ScalarFunctionMixin
+    : public FunctionMixin<FLT,P,RealScalar(ARGS...)> { };
 
-template<class F, class P, class... ARGS> class VectorFunctionMixin
-    : public FunctionMixin<F,P,RealVector(ARGS...)>
-    , public FunctionGetterMixin<F,P,RealVector(ARGS...)>
+template<class FLT, class P, class... ARGS> class VectorFunctionMixin
+    : public FunctionMixin<FLT,P,RealVector(ARGS...)>
+    , public FunctionGetterMixin<FLT,P,RealVector(ARGS...)>
 {
 };
 
-template<class F, class P, class... ARGS> auto
-FunctionGetterMixin<F,P,RealVector(ARGS...)>::_get(SizeType i) const -> ScalarFunctionInterface<P,ARGS...>* {
-    auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
+template<class FLT, class P, class... ARGS> auto
+FunctionGetterMixin<FLT,P,RealVector(ARGS...)>::_get(SizeType i) const -> ScalarFunctionInterface<P,ARGS...>* {
+    auto fi=static_cast<FLT const&>(*this)[i]; return heap_copy(fi); }
 
 
-template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F,ValidatedTag,SIG>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
+template<class FLT,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<FLT,ApproximateTag,SIG>::_clone() const {
+    return new FLT(static_cast<const FLT&>(*this)); }
+template<class FLT,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<FLT,ValidatedTag,SIG>::_clone() const {
+    return new FLT(static_cast<const FLT&>(*this)); }
+template<class FLT,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<FLT,EffectiveTag,SIG>::_clone() const {
+    return new FLT(static_cast<const FLT&>(*this)); }
 
 template<class T> inline T* _heap_move(T&& t) { return new T(std::forward<T>(t)); }
 template<class P, class SIG> inline FunctionInterface<P,SIG>* _heap_move(Function<P,SIG>&& f) {
     return f.raw_pointer()->_clone(); }
 
-template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    if constexpr (BaseOf<FunctionInterface<ApproximateTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
-        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+template<class FLT,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<FLT,ApproximateTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    if constexpr (BaseOf<FunctionInterface<ApproximateTag,SIG>,decltype(derivative(static_cast<const FLT&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const FLT&>(*this),j)); }
     else { assert(false); std::abort(); } }
-template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F,ValidatedTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    if constexpr (BaseOf<FunctionInterface<ValidatedTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
-        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+template<class FLT,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<FLT,ValidatedTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    if constexpr (BaseOf<FunctionInterface<ValidatedTag,SIG>,decltype(derivative(static_cast<const FLT&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const FLT&>(*this),j)); }
     else { assert(false); std::abort(); } }
-template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_derivative(ElementIndexType<D> j) const {
-    if constexpr (BaseOf<FunctionInterface<EffectiveTag,SIG>,decltype(derivative(static_cast<const F&>(*this),j))>) {
-        return _heap_move(derivative(static_cast<const F&>(*this),j)); }
+template<class FLT,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<FLT,EffectiveTag,SIG>::_derivative(ElementIndexType<D> j) const {
+    if constexpr (BaseOf<FunctionInterface<EffectiveTag,SIG>,decltype(derivative(static_cast<const FLT&>(*this),j))>) {
+        return _heap_move(derivative(static_cast<const FLT&>(*this),j)); }
     else { assert(false); std::abort(); } }
 
 } // namespace Ariadne

@@ -62,17 +62,17 @@ struct ScalarMultivariateFunctionData
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
 //!
-//! Given a C++ class F with a (static) template method
+//! Given a C++ class FLT with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>ScalarUserFunction<F></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for ScalarUserFunction<F> takes a Vector<ApproximateNumericType> or Vector<ValidatedNumericType> argument which is used for \a p.
+//! the type <code>ScalarUserFunction<FLT></code> is an Ariadne function defined by \f$r=f(a)\f$.
+//! The constructor for ScalarUserFunction<FLT> takes a Vector<ApproximateNumericType> or Vector<ValidatedNumericType> argument which is used for \a p.
 //!
-//! The class F must also define meta-data <c>argument_size(), parameter_size()
+//! The class FLT must also define meta-data <c>argument_size(), parameter_size()
 //! and smoothness()</c>. These are most easily defined by inheriting from the
 //! <tt>ScalarMultivariateFunctionData<AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class F> class ScalarUserFunction
+template<class FLT> class ScalarUserFunction
     : public EffectiveScalarMultivariateFunction
 {
   private:
@@ -84,12 +84,12 @@ template<class F> class ScalarUserFunction
       public:
         Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
-        template<class R, class A> inline Void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
+        template<class R, class A> inline Void _compute(R& r, const A& a) const { FLT::compute(r,a,_p); }
 
         virtual Representation* clone() const { return new Representation(*this); }
 
-        virtual SizeType argument_size() const { return F::argument_size(); }
-        virtual SizeType parameter_size() const { return F::parameter_size(); }
+        virtual SizeType argument_size() const { return FLT::argument_size(); }
+        virtual SizeType parameter_size() const { return FLT::parameter_size(); }
 
 
         virtual EffectiveScalarMultivariateFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -109,7 +109,7 @@ template<class F> class ScalarUserFunction
     ScalarUserFunction(const Vector<Real>& p) : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumber>(p))) { }
     ScalarUserFunction(const Vector<EffectiveNumber>& p) : EffectiveScalarMultivariateFunction(new Representation(p)) { }
 
-    SizeType parameter_size() const { return F().parameter_size(); }
+    SizeType parameter_size() const { return FLT().parameter_size(); }
     //const Vector<ValidatedNumericType> parameters() const { return _p; }
 };
 
@@ -136,17 +136,17 @@ class VectorMultivariateFunctionData
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
 //!
-//! Given a C++ class F with a (static) template method
+//! Given a C++ class FLT with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>VectorUserFunction<F></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for VectorUserFunction<F> takes a Vector<EffectiveNumericType> argument which is used for \a p.
+//! the type <code>VectorUserFunction<FLT></code> is an Ariadne function defined by \f$r=f(a)\f$.
+//! The constructor for VectorUserFunction<FLT> takes a Vector<EffectiveNumericType> argument which is used for \a p.
 //!
-//! The class F must also define meta-data <c>result_size(), argument_size(), parameter_size()
+//! The class FLT must also define meta-data <c>result_size(), argument_size(), parameter_size()
 //! and smoothness()</c> as static functions. These are most easily defined by inheriting from the
 //! <tt>VectorMultivariateFunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class F> class VectorUserFunction
+template<class FLT> class VectorUserFunction
     : public EffectiveVectorMultivariateFunction
 {
     typedef DoublePrecision PR;
@@ -159,11 +159,11 @@ template<class F> class VectorUserFunction
 
         virtual Representation* clone() const { return new Representation(*this); }
 
-        virtual SizeType result_size() const { return F::result_size(); }
-        virtual SizeType argument_size() const { return F::argument_size(); }
-        virtual SizeType parameter_size() const { return F::parameter_size(); }
+        virtual SizeType result_size() const { return FLT::result_size(); }
+        virtual SizeType argument_size() const { return FLT::argument_size(); }
+        virtual SizeType parameter_size() const { return FLT::parameter_size(); }
 
-        template<class R, class A> inline Void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
+        template<class R, class A> inline Void _compute(R& r, const A& a) const { FLT::compute(r,a,_p); }
 
         virtual Matrix<FloatDPApproximation> jacobian(const Vector<FloatDPApproximation>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<FloatDPApproximation>::variables(1u,x))); }

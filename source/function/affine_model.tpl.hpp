@@ -62,9 +62,9 @@ Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> con
 }
 */
 
-template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
-    typedef typename F::PrecisionType PrecisionType;
-    typedef AffineModel<ApproximateTag,F> AffineModelType;
+template<class FLT> struct AlgebraOperations<AffineModel<ApproximateTag,FLT>> {
+    typedef typename FLT::PrecisionType PrecisionType;
+    typedef AffineModel<ApproximateTag,FLT> AffineModelType;
     typedef typename AffineModelType::NumericType NumericType;
     typedef typename AffineModelType::CoefficientType CoefficientType;
 
@@ -135,17 +135,17 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
 
 
 
-template<class F> PositiveUpperBound<F> norm(Covector<F> const& g) {
-    PositiveUpperBound<F> r=mag(g.zero_element());
+template<class FLT> PositiveUpperBound<FLT> norm(Covector<FLT> const& g) {
+    PositiveUpperBound<FLT> r=mag(g.zero_element());
     for (SizeType i=0; i!=g.size(); ++i) {
         r += mag(g[i]);
     }
     return r;
 }
 
-template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
-    typedef typename F::PrecisionType PrecisionType;
-    typedef AffineModel<ValidatedTag,F> AffineModelType;
+template<class FLT> struct AlgebraOperations<AffineModel<ValidatedTag,FLT>> {
+    typedef typename FLT::PrecisionType PrecisionType;
+    typedef AffineModel<ValidatedTag,FLT> AffineModelType;
     typedef typename AffineModelType::NumericType NumericType;
     typedef typename AffineModelType::CoefficientType CoefficientType;
     typedef typename AffineModelType::ErrorValueType ErrorValueType;
@@ -223,16 +223,16 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
 };
 
 
-template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericType>& affine)
+template<class FLT> AffineModel<ValidatedTag,FLT>::AffineModel(const Affine<NumericType>& affine)
     : AffineModel(affine.argument_size(),affine.value().precision())
 {
-    AffineModel<ValidatedTag,F>& affine_model=*this;
+    AffineModel<ValidatedTag,FLT>& affine_model=*this;
     affine_model = affine.value().value();
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
         affine_model[j] = affine[j].value();
     }
-    F::set_rounding_upward();
-    F e(affine_model.error().precision());
+    FLT::set_rounding_upward();
+    FLT e(affine_model.error().precision());
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
         e = add(rounded,e,max(sub(rounded,affine.gradient(j).upper().raw(),affine_model.gradient(j)),
                               sub(rounded,affine_model.gradient(j),affine.gradient(j).lower().raw())));
@@ -240,16 +240,16 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
     e = add(rounded,e,max(sub(rounded,affine.value().upper().raw(),affine_model.value()),
                           sub(rounded,affine_model.value(),affine.value().lower().raw())));
     affine_model.set_error(ErrorValueType(e));
-    F::set_rounding_to_nearest();
+    FLT::set_rounding_to_nearest();
 }
 
-template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<ValidatedTag,F>& taylor_model)
+template<class FLT> AffineModel<ValidatedTag,FLT>::AffineModel(const TaylorModel<ValidatedTag,FLT>& taylor_model)
     : AffineModel(taylor_model.argument_size(),taylor_model.value().precision())
 {
-    AffineModel<ValidatedTag,F>& affine_model=*this;
+    AffineModel<ValidatedTag,FLT>& affine_model=*this;
 
-    typename F::RoundingModeType rnd=F::get_rounding_mode();
-    F::set_rounding_upward();
+    typename FLT::RoundingModeType rnd=FLT::get_rounding_mode();
+    FLT::set_rounding_upward();
     for(auto iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
         if(iter->index().degree()>=2) {
             affine_model.set_error(mag(iter->coefficient())+affine_model.error());
@@ -265,7 +265,7 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
         }
     }
     affine_model.set_error(taylor_model.error()+affine_model.error());
-    F::set_rounding_mode(rnd);
+    FLT::set_rounding_mode(rnd);
 }
 
 template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarMultivariateFunction<P>& function, PR precision)
@@ -277,10 +277,10 @@ template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const B
 inline decltype(auto) operator<(FloatMPApproximation x,const FloatDP y) { return x<FloatMPApproximation(y.get_d(),x.precision()); }
 inline decltype(auto) operator<(FloatMP x,const FloatDP y) { return x<FloatMP(Dyadic(y.get_d()),x.precision()); }
 
-// FIXME: Clean up construction of interval with precision PrecisionType<F>
-template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
+// FIXME: Clean up construction of interval with precision PrecisionType<FLT>
+template<class FLT> AffineModel<ApproximateTag,FLT> AffineModel<ApproximateTag,FLT>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
-    AffineModel<ApproximateTag,F> r(n,pr);
+    AffineModel<ApproximateTag,FLT> r(n,pr);
     FloatApproximation<PR> l(codom.lower_bound().get_d(),pr);
     FloatApproximation<PR> u(codom.upper_bound().get_d(),pr);
     r.set_gradient(j,hlf(u-l));
@@ -288,19 +288,19 @@ template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::s
     return r;
 }
 
-template<class F> Vector<AffineModel<ApproximateTag,F>> AffineModel<ApproximateTag,F>::scalings(const BoxDomainType& codom, PrecisionType pr)
+template<class FLT> Vector<AffineModel<ApproximateTag,FLT>> AffineModel<ApproximateTag,FLT>::scalings(const BoxDomainType& codom, PrecisionType pr)
 {
     SizeType n=codom.dimension();
-    Vector<AffineModel<ApproximateTag,F>> r(n,AffineModel<ApproximateTag,F>(n,pr));
+    Vector<AffineModel<ApproximateTag,FLT>> r(n,AffineModel<ApproximateTag,FLT>(n,pr));
     for(SizeType i=0; i!=n; ++i) {
-        r[i] = AffineModel<ApproximateTag,F>::scaling(n,i,codom[i],pr);
+        r[i] = AffineModel<ApproximateTag,FLT>::scaling(n,i,codom[i],pr);
     }
     return r;
 }
 
-template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
+template<class FLT> AffineModel<ValidatedTag,FLT> AffineModel<ValidatedTag,FLT>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
-    AffineModel<ValidatedTag,F> r(n,pr);
+    AffineModel<ValidatedTag,FLT> r(n,pr);
     Float<PR> l(Dyadic(codom.lower_bound()),pr);
     Float<PR> u(Dyadic(codom.upper_bound()),pr);
     Interval<Float<PR>> ivl(l,u);
@@ -310,17 +310,17 @@ template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scali
     return r;
 }
 
-template<class F> Vector<AffineModel<ValidatedTag,F>> AffineModel<ValidatedTag,F>::scalings(const BoxDomainType& codom, PrecisionType pr)
+template<class FLT> Vector<AffineModel<ValidatedTag,FLT>> AffineModel<ValidatedTag,FLT>::scalings(const BoxDomainType& codom, PrecisionType pr)
 {
     SizeType n=codom.size();
-    Vector<AffineModel<ValidatedTag,F>> r(n,AffineModel<ValidatedTag,F>(n,pr));
+    Vector<AffineModel<ValidatedTag,FLT>> r(n,AffineModel<ValidatedTag,FLT>(n,pr));
     for(SizeType i=0; i!=n; ++i) {
-        r[i] = AffineModel<ValidatedTag,F>::scaling(n,i,codom[i],pr);
+        r[i] = AffineModel<ValidatedTag,FLT>::scaling(n,i,codom[i],pr);
     }
     return r;
 }
 
-template<class F> auto AffineModel<ApproximateTag,F>::range() const -> RangeType
+template<class FLT> auto AffineModel<ApproximateTag,FLT>::range() const -> RangeType
 {
     auto v=this->value();
     auto e=this->gradient().zero_element();
@@ -330,7 +330,7 @@ template<class F> auto AffineModel<ApproximateTag,F>::range() const -> RangeType
     return RangeType(v-e,v+e);
 }
 
-template<class F> auto AffineModel<ValidatedTag,F>::range() const -> RangeType
+template<class FLT> auto AffineModel<ValidatedTag,FLT>::range() const -> RangeType
 {
     auto v=this->value();
     ErrorValueType e=this->error();
@@ -340,7 +340,7 @@ template<class F> auto AffineModel<ValidatedTag,F>::range() const -> RangeType
     return RangeType(v-e,v+e);
 }
 
-template<class F> OutputStream& AffineModel<ApproximateTag,F>::_write(OutputStream& os) const
+template<class FLT> OutputStream& AffineModel<ApproximateTag,FLT>::_write(OutputStream& os) const
 {
     os << this->value().raw();
     for(SizeType j=0; j!=this->argument_size(); ++j) {
@@ -350,7 +350,7 @@ template<class F> OutputStream& AffineModel<ApproximateTag,F>::_write(OutputStre
     return os;
 }
 
-template<class F> OutputStream& AffineModel<ValidatedTag,F>::_write(OutputStream& os) const
+template<class FLT> OutputStream& AffineModel<ValidatedTag,FLT>::_write(OutputStream& os) const
 {
     os << this->value().raw();
     for(SizeType j=0; j!=this->argument_size(); ++j) {
@@ -361,24 +361,24 @@ template<class F> OutputStream& AffineModel<ValidatedTag,F>::_write(OutputStream
 
 }
 
-template<class F> auto
-AffineModel<ApproximateTag,F>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+template<class FLT> auto
+AffineModel<ApproximateTag,FLT>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,FLT>> const& g) -> AffineModel<P,FLT> {
     auto c=values(g);
     auto b=f(c);
     auto A=f.gradient(c);
     return b+A*(g-c);
 }
 
-template<class F> auto
-AffineModel<ApproximateTag,F>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+template<class FLT> auto
+AffineModel<ApproximateTag,FLT>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,FLT>> const& g) -> Vector<AffineModel<P,FLT>> {
     auto c=values(g);
     auto b=f(c);
     auto A=f.jacobian(c);
     return b+A*(g-c);
 }
 
-template<class F> auto
-AffineModel<ValidatedTag,F>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+template<class FLT> auto
+AffineModel<ValidatedTag,FLT>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,FLT>> const& g) -> AffineModel<P,FLT> {
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);
@@ -387,8 +387,8 @@ AffineModel<ValidatedTag,F>::_compose(const ScalarMultivariateFunction<P>& f, Ve
     return b+A*(g-c);
 }
 
-template<class F> auto
-AffineModel<ValidatedTag,F>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+template<class FLT> auto
+AffineModel<ValidatedTag,FLT>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,FLT>> const& g) -> Vector<AffineModel<P,FLT>> {
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);

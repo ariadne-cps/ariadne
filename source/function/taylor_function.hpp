@@ -81,8 +81,8 @@ class TaylorFunctionFactory
     friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
+FunctionModelFactoryInterface<ValidatedTag,FloatDP>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,FloatDP>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
 FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory();
 FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
 

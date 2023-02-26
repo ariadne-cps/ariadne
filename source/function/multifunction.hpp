@@ -96,7 +96,7 @@ template<class P, class SIG, template<class,class>class SET> class Multifunction
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
-template<class F, class P, class SIG, template<class,class>class SET> struct IsMultifunction {
+template<class FLT, class P, class SIG, template<class,class>class SET> struct IsMultifunction {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
@@ -105,10 +105,10 @@ template<class F, class P, class SIG, template<class,class>class SET> struct IsM
         static std::true_type test(int);
     template<class FF>
         static std::false_type test(...);
-    static const bool value = decltype(test<F>(1))::value;
+    static const bool value = decltype(test<FLT>(1))::value;
 };
 
-template<class F, class P, class SIG, template<class,class>class SET> concept AMultifunction = IsMultifunction<F,P,SIG,SET>::value;
+template<class FLT, class P, class SIG, template<class,class>class SET> concept AMultifunction = IsMultifunction<FLT,P,SIG,SET>::value;
 
 
 //! \ingroup Function
@@ -195,14 +195,14 @@ static_assert(AMultifunction<MultifunctionPatch<ValidatedTag,RealVector(RealVect
 
 template<class PR> class Sweeper;
 
-template<class P, class SIG, class PR> class MultifunctionModel;
-template<class P, class PR> using VectorMultivariateMultifunctionModel = MultifunctionModel<P,RealVector(RealVector),PR>;
-template<class PR> using ValidatedVectorMultivariateMultifunctionModel = VectorMultivariateMultifunctionModel<ValidatedTag,PR>;
+template<class P, class SIG, class FLT> class MultifunctionModel;
+template<class P, class FLT> using VectorMultivariateMultifunctionModel = MultifunctionModel<P,RealVector(RealVector),FLT>;
+template<class FLT> using ValidatedVectorMultivariateMultifunctionModel = VectorMultivariateMultifunctionModel<ValidatedTag,FLT>;
 
-template<class P, class PR> class MultifunctionModel<P,RealVector(RealVector),PR> {
+template<class P, class FLT> class MultifunctionModel<P,RealVector(RealVector),FLT> {
     using ARG=RealVector; using RES=RealVector; using SIG=RES(ARG);
-    using FLT=RawFloatType<PR>;
-    FunctionModel<P,SIG,PR> _f;
+    using PR=PrecisionType<FLT>;
+    FunctionModel<P,SIG,FLT> _f;
     SizeType _as;
   public:
     MultifunctionModel(BoxDomainType dom, VectorMultivariateFunction<P> f, BoxDomainType params, Sweeper<FLT> swp);
@@ -213,21 +213,19 @@ template<class P, class PR> class MultifunctionModel<P,RealVector(RealVector),PR
 
     ValidatedImageSet operator() (Vector<ValidatedNumber> const& x) const;
 
-    friend OutputStream& operator<<(OutputStream& os, MultifunctionModel<P,SIG,PR> const& fm) {
+    friend OutputStream& operator<<(OutputStream& os, MultifunctionModel<P,SIG,FLT> const& fm) {
         return os << "MultifunctionModel(model="<<fm._f<<", argument_size="<<fm._as<<")"; }
 };
 
 
-template<class P, class PR> auto
-MultifunctionModel<P,RealVector(RealVector),PR>::operator() (Vector<ValidatedNumber> const& x) const -> ValidatedImageSet
+template<class P, class FLT> auto
+MultifunctionModel<P,RealVector(RealVector),FLT>::operator() (Vector<ValidatedNumber> const& x) const -> ValidatedImageSet
 {
     auto fx=factory(this->_f).create_constants(error_domain(),x);
     auto fid=factory(this->_f).create_identity(error_domain());
-    FunctionModel<P,SIG,PR> fim=compose(_f,join(fx,fid));
+    FunctionModel<P,SIG,FLT> fim=compose(_f,join(fx,fid));
     return ValidatedImageSet(this->error_domain(),fim);
 }
-
-static_assert(AMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>,ValidatedTag,RealVector(RealVector),LocatedSet>);
 
 
 template<class P, class RES, class ARG> class Function<P,CompactSet<P,RES>(ARG)>
@@ -253,7 +251,7 @@ namespace Ariadne {
 
 template<class P, class SIG, template<class,class>class SET=LocatedSet> class FunctionSet;
 
-template<class F, class P, class SIG, template<class,class>class SET> struct IsFunctionSet {
+template<class FLT, class P, class SIG, template<class,class>class SET> struct IsFunctionSet {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
@@ -262,10 +260,10 @@ template<class F, class P, class SIG, template<class,class>class SET> struct IsF
         static std::true_type test(int);
     template<class FF>
         static std::false_type test(...);
-    static const bool value = decltype(test<F>(1))::value;
+    static const bool value = decltype(test<FLT>(1))::value;
 };
 
-template<class F, class P, class SIG, template<class,class>class SET> concept AFunctionSet = IsFunctionSet<F,P,SIG,SET>::value;
+template<class FLT, class P, class SIG, template<class,class>class SET> concept AFunctionSet = IsFunctionSet<FLT,P,SIG,SET>::value;
 
 
 template<class P, class SIG, template<class,class>class SET> class FunctionSetInterface {

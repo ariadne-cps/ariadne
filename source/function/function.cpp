@@ -786,11 +786,11 @@ ValidatedVectorMultivariateFunction operator/(ValidatedVectorMultivariateFunctio
 template<class P, class R, class T, class... AS> inline
 Function<P,R(AS...)> _validated_compose(const Function<P,R(T)>& f, const Function<P,T(AS...)>& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    typedef DoublePrecision PR;
+    typedef FloatDP FLT;
 
-    auto gp=std::dynamic_pointer_cast<typename FunctionModel<P,T(AS...),PR>::Interface const>(g.managed_pointer());
+    auto gp=std::dynamic_pointer_cast<typename FunctionModel<P,T(AS...),FLT>::Interface const>(g.managed_pointer());
     if(gp) {
-        return compose(f,FunctionModel<P,T(AS...),PR>(gp->_clone()));
+        return compose(f,FunctionModel<P,T(AS...),FLT>(gp->_clone()));
     } else {
         return make_composed_function(f,g);
     }

@@ -43,44 +43,44 @@ namespace Ariadne {
 
 
 /*
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
-    return ScalarMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create(domain,EffectiveScalarMultivariateFunction::zero(domain.size())))+value; };
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
-    typename CanonicalNumericType<P,PR,PRE>::PrecisionType pr=this->_ptr->create_number(0).precision();
-    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values,pr); return this->_ptr->create_constants(domain,concrete_values); }
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactory<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const {
-    return VectorMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create(domain,EffectiveVectorMultivariateFunction::zeros(values.size(),domain.size())))+values; };
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactory<P,F,FE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,F,FE>& value) const {
+    return ScalarMultivariateFunctionModel<P,F,FE>(this->_ptr->_create(domain,EffectiveScalarMultivariateFunction::zero(domain.size())))+value; };
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactory<P,F,FE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
+    typename CanonicalNumericType<P,F,FE>::PrecisionType pr=this->_ptr->create_number(0).precision();
+    Vector<CanonicalNumericType<P,F,FE>> concrete_values(values,pr); return this->_ptr->create_constants(domain,concrete_values); }
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactory<P,F,FE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,F,FE>>& values) const {
+    return VectorMultivariateFunctionModel<P,F,FE>(this->_ptr->_create(domain,EffectiveVectorMultivariateFunction::zeros(values.size(),domain.size())))+values; };
 */
 
 
 /*
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
     return this->_create(domain,function);
 }
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create(const DomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const {
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create(const DomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const {
     return this->_create(domain,function);
 }
 
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zero(const DomainType& domain) const {
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_zero(const DomainType& domain) const {
     return this->_create(domain,EffectiveScalarMultivariateFunction::zero(domain.size())); }
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_zeros(SizeType result_size, const DomainType& domain) const {
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_zeros(SizeType result_size, const DomainType& domain) const {
     return this->_create(domain,EffectiveVectorMultivariateFunction::zeros(result_size,domain.size())); }
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const DomainType& domain, const Number<P>& value) const {
-    CanonicalNumericType<P,PR,PRE> concrete_value=this->create_number(value); return this->create_constant(domain,concrete_value); }
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
-    return ScalarMultivariateFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveScalarMultivariateFunction::zero(domain.size())))+value; };
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
-    typename CanonicalNumericType<P,PR,PRE>::PrecisionType pr=this->create_number(0).precision();
-    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values,pr); return this->create_constants(domain,concrete_values); }
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,PR,PRE>>& values) const {
-    return VectorMultivariateFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveVectorMultivariateFunction::zeros(values.size(),domain.size())))+values; };
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_coordinate(const DomainType& domain, SizeType index) const {
-    return ScalarMultivariateFunctionModel<P,PR,PRE>(this->_create(domain,EffectiveScalarMultivariateFunction::coordinate(domain.size(),index))); };
-template<class P, class PR, class PRE> ScalarMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const IntervalDomainType& domain) const {
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_constant(const DomainType& domain, const Number<P>& value) const {
+    CanonicalNumericType<P,F,FE> concrete_value=this->create_number(value); return this->create_constant(domain,concrete_value); }
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_constant(const DomainType& domain, const CanonicalNumericType<P,F,FE>& value) const {
+    return ScalarMultivariateFunctionModel<P,F,FE>(this->_create(domain,EffectiveScalarMultivariateFunction::zero(domain.size())))+value; };
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_constants(const DomainType& domain, const Vector<Number<P>>& values) const {
+    typename CanonicalNumericType<P,F,FE>::PrecisionType pr=this->create_number(0).precision();
+    Vector<CanonicalNumericType<P,F,FE>> concrete_values(values,pr); return this->create_constants(domain,concrete_values); }
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_constants(const DomainType& domain, const Vector<CanonicalNumericType<P,F,FE>>& values) const {
+    return VectorMultivariateFunctionModel<P,F,FE>(this->_create(domain,EffectiveVectorMultivariateFunction::zeros(values.size(),domain.size())))+values; };
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_coordinate(const DomainType& domain, SizeType index) const {
+    return ScalarMultivariateFunctionModel<P,F,FE>(this->_create(domain,EffectiveScalarMultivariateFunction::coordinate(domain.size(),index))); };
+template<class P, class F, class FE> ScalarMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_identity(const IntervalDomainType& domain) const {
     return this->_create(DomainType(1,domain),EffectiveScalarMultivariateFunction::coordinate(1,0)); };
-template<class P, class PR, class PRE> VectorMultivariateFunctionModel<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_identity(const DomainType& domain) const {
+template<class P, class F, class FE> VectorMultivariateFunctionModel<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_identity(const DomainType& domain) const {
     return this->_create(domain,EffectiveVectorMultivariateFunction::identity(domain.size())); };
-template<class P, class PR, class PRE> CanonicalNumericType<P,PR,PRE> FunctionModelFactoryInterface<P,PR,PRE>::create_number(const Number<P>& number) const {
+template<class P, class F, class FE> CanonicalNumericType<P,F,FE> FunctionModelFactoryInterface<P,F,FE>::create_number(const Number<P>& number) const {
     return this->_create(number); }
 */
 

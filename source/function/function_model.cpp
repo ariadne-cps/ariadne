@@ -32,17 +32,17 @@
 
 namespace Ariadne {
 
-template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
-template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
+template class FunctionModelFactoryInterface<ValidatedTag,FloatDP,FloatDP>;
+template class FunctionModelFactoryInterface<ValidatedTag,FloatMP,FloatMP>;
 
-template class FunctionModel<ValidatedTag,RealScalar(RealScalar),DoublePrecision>;
-template class FunctionModel<ValidatedTag,RealScalar(RealScalar),MultiplePrecision>;
-template class FunctionModel<ValidatedTag,RealVector(RealScalar),DoublePrecision>;
-template class FunctionModel<ValidatedTag,RealVector(RealScalar),MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealScalar),FloatDP>;
+template class FunctionModel<ValidatedTag,RealScalar(RealScalar),FloatMP>;
+template class FunctionModel<ValidatedTag,RealVector(RealScalar),FloatDP>;
+template class FunctionModel<ValidatedTag,RealVector(RealScalar),FloatMP>;
 
-template class FunctionModel<ValidatedTag,RealScalar(RealVector),DoublePrecision>;
-template class FunctionModel<ValidatedTag,RealScalar(RealVector),MultiplePrecision>;
-template class FunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>;
-template class FunctionModel<ValidatedTag,RealVector(RealVector),MultiplePrecision>;
+template class FunctionModel<ValidatedTag,RealScalar(RealVector),FloatDP>;
+template class FunctionModel<ValidatedTag,RealScalar(RealVector),FloatMP>;
+template class FunctionModel<ValidatedTag,RealVector(RealVector),FloatDP>;
+template class FunctionModel<ValidatedTag,RealVector(RealVector),FloatMP>;
 
 } // namespace Ariadne

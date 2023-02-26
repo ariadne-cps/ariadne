@@ -148,7 +148,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     typedef AffineModel<ValidatedTag,F> AffineModelType;
     typedef typename AffineModelType::NumericType NumericType;
     typedef typename AffineModelType::CoefficientType CoefficientType;
-    typedef typename AffineModelType::ErrorType ErrorType;
+    typedef typename AffineModelType::ErrorValueType ErrorValueType;
 
     static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
@@ -239,7 +239,7 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
     }
     e = add(rounded,e,max(sub(rounded,affine.value().upper().raw(),affine_model.value()),
                           sub(rounded,affine_model.value(),affine.value().lower().raw())));
-    affine_model.set_error(ErrorType(e));
+    affine_model.set_error(ErrorValueType(e));
     F::set_rounding_to_nearest();
 }
 
@@ -333,7 +333,7 @@ template<class F> auto AffineModel<ApproximateTag,F>::range() const -> RangeType
 template<class F> auto AffineModel<ValidatedTag,F>::range() const -> RangeType
 {
     auto v=this->value();
-    ErrorType e=this->error();
+    ErrorValueType e=this->error();
     for(SizeType i=0; i!=this->argument_size(); ++i) {
         e+=abs(this->gradient(i));
     }

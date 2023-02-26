@@ -94,7 +94,7 @@ class IntersectionException : public std::runtime_error {
 
 template<class P, class F> struct ModelNumericTraits;
 template<class F> struct ModelNumericTraits<ValidatedTag,Interval<UpperBound<F>>>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,F>
 {
     typedef Interval<UpperBound<F>> CoefficientType;
     typedef Interval<UpperBound<F>> NumericType;
@@ -102,19 +102,19 @@ template<class F> struct ModelNumericTraits<ValidatedTag,Interval<UpperBound<F>>
     typedef F RawFloatType;
 };
 template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,F>
 {
     typedef Bounds<F> CoefficientType;
     typedef Bounds<F> NumericType;
     typedef F RawFloatType;
 };
 template<class F> struct ModelNumericTraits<ValidatedTag,F>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,F>
 {
     typedef F CoefficientType;
 };
 template<class F> struct ModelNumericTraits<ApproximateTag,F>
-    : public FunctionModelTraits<ApproximateTag,PrecisionType<F>>
+    : public FunctionModelTraits<ApproximateTag,F>
 {
     typedef Approximation<F> CoefficientType;
 };
@@ -176,6 +176,7 @@ class TaylorModel
     typedef typename ModelNumericTraits<P,F>::CoefficientType CoefficientType;
     typedef typename ModelNumericTraits<P,F>::ValueType ValueType;
     typedef typename ModelNumericTraits<P,F>::ErrorType ErrorType;
+    typedef typename ModelNumericTraits<P,F>::ErrorValueType ErrorValueType;
     typedef typename ModelNumericTraits<P,F>::NormType NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;

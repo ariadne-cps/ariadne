@@ -69,7 +69,7 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    using typename FunctionPatchInterface<P,SIG>::ErrorType;
+    using typename FunctionPatchInterface<P,SIG>::ErrorValueType;
     using typename FunctionPatchInterface<P,SIG>::NormType;
     typedef typename SignatureTraits<SIG>::BoundedRangeType RangeType;
     typedef Number<P> X;
@@ -90,10 +90,10 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
 
     RangeType const _range() const override {
         return RangeType(static_cast<const FP&>(*this).range()); }
-    ErrorType const _error() const override {
-        return static_cast<ErrorType>(static_cast<const FP&>(*this).error()); }
-    Scalar<ErrorType> const _errors() const override {
-        return static_cast<ErrorType>(static_cast<const FP&>(*this).error()); }
+    ErrorValueType const _error() const override {
+        return static_cast<ErrorValueType>(static_cast<const FP&>(*this).error()); }
+    Scalar<ErrorValueType> const _errors() const override {
+        return static_cast<ErrorValueType>(static_cast<const FP&>(*this).error()); }
 
     inline virtual Void _clobber() override {
         static_cast<FP&>(*this).clobber(); }
@@ -148,7 +148,7 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    using typename FunctionPatchInterface<P,SIG>::ErrorType;
+    using typename FunctionPatchInterface<P,SIG>::ErrorValueType;
     using typename FunctionPatchInterface<P,SIG>::NormType;
     typedef typename VectorFunctionPatchInterface<P,ARGS...>::RangeType RangeType;
     typedef typename Element<FP>::Type ScalarMultivariateFunctionType;
@@ -158,10 +158,10 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
     CodomainType const codomain() const override {
         return static_cast<FP const&>(*this).codomain(); }
 
-    ErrorType const _error() const override {
-        return static_cast<ErrorType>(static_cast<const FP&>(*this).error()); }
-    Vector<ErrorType> const _errors() const override {
-        return static_cast<Vector<ErrorType>>(static_cast<const FP&>(*this).errors()); }
+    ErrorValueType const _error() const override {
+        return static_cast<ErrorValueType>(static_cast<const FP&>(*this).error()); }
+    Vector<ErrorValueType> const _errors() const override {
+        return static_cast<Vector<ErrorValueType>>(static_cast<const FP&>(*this).errors()); }
 
     inline virtual Void _clobber() override {
         static_cast<FP&>(*this).clobber(); }

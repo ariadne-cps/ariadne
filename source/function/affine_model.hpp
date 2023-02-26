@@ -135,14 +135,14 @@ class AffineModel<ValidatedTag,F>
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef Float<PR> CoefficientType;
-    typedef FloatError<PR> ErrorType;
+    typedef FloatError<PR> ErrorValueType;
     typedef FloatBounds<PR> NumericType;
     typedef AffineModel<ValidatedTag,F> AffineModelType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
 
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)), _e(0u,prec) { }
     explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)), _e(nul(c)) { }
-    explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g, const ErrorType& e) : _c(c), _g(g), _e(e) { }
+    explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g, const ErrorValueType& e) : _c(c), _g(g), _e(e) { }
     explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u,c.precision()) { }
 
     explicit AffineModel(const Affine<FloatBounds<PR>>& affine);
@@ -167,15 +167,15 @@ class AffineModel<ValidatedTag,F>
     PrecisionType precision() const { return this->_c.precision(); }
     const Covector<CoefficientType>& a() const { return this->_g; }
     const CoefficientType& b() const { return this->_c; }
-    const ErrorType& e() const { return this->_e; }
+    const ErrorValueType& e() const { return this->_e; }
 
     const CoefficientType& value() const { return this->_c; }
     const Covector<CoefficientType>& gradient() const { return this->_g; }
     const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
-    const ErrorType& error() const { return this->_e; }
+    const ErrorValueType& error() const { return this->_e; }
     CoefficientType& value() { return this->_c; }
     CoefficientType& gradient(SizeType i) { return this->_g[i]; }
-    ErrorType& error() { return this->_e; }
+    ErrorValueType& error() { return this->_e; }
     CoefficientType& operator[](SizeType i) { return this->_g[i]; }
     const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }
 
@@ -184,7 +184,7 @@ class AffineModel<ValidatedTag,F>
     Void set_value(const CoefficientType& c) { _c=c; }
     Void set_gradient(SizeType j, const CoefficientType& g) { _g[j]=g; }
     Void set_gradient(SizeType j, const Dyadic& g) { _g[j]=g; }
-    Void set_error(const ErrorType& e) { _e=e; }
+    Void set_error(const ErrorValueType& e) { _e=e; }
     Void set_error(Nat m) { _e=m; }
 
     template<class X> X evaluate(const Vector<X>& v) const;
@@ -197,7 +197,7 @@ class AffineModel<ValidatedTag,F>
   private:
     CoefficientType _c;
     Covector<CoefficientType> _g;
-    ErrorType _e;
+    ErrorValueType _e;
 };
 
 template<class F> template<class X> X AffineModel<ValidatedTag,F>::evaluate(const Vector<X>& v) const

@@ -31,13 +31,16 @@
 
 namespace Ariadne {
 
-template<class P, class PR> MultifunctionModel<P,RealVector(RealVector),PR>::
+static_assert(AMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),FloatDP>,ValidatedTag,RealVector(RealVector),LocatedSet>);
+
+
+template<class P, class FLT> MultifunctionModel<P,RealVector(RealVector),FLT>::
     MultifunctionModel(BoxDomainType dom, VectorMultivariateFunction<P> f, BoxDomainType params, Sweeper<FLT> swp)
         : _f(VectorMultivariateTaylorFunctionModel<P,FLT>(product(dom,params),f,swp)), _as(dom.dimension()) { }
 
 template class Multifunction<ValidatedTag,RealVector(RealVector)>;
 template class MultifunctionPatch<ValidatedTag,RealVector(RealVector)>;
-template class MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>;
+template class MultifunctionModel<ValidatedTag,RealVector(RealVector),FloatDP>;
 
 } // namespace Ariadne
 

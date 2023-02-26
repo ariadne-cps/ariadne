@@ -72,10 +72,10 @@ template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
 
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
+FunctionModelFactoryInterface<ValidatedTag,FloatDP>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
     return new TaylorFunctionFactory(sweeper);
 }
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
+FunctionModelFactoryInterface<ValidatedTag,FloatDP>* make_taylor_function_factory() {
     return make_taylor_function_factory(Sweeper<FloatDP>());
 }
 FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper) {

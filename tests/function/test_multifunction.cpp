@@ -83,8 +83,8 @@ Void TestMultifunction::test_evaluate()
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionPatch,mvfp,(f,prms));
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunction,mvf,(mvfp));
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<DP>,mvfmdp,(dom,f,prms,swp));;
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<DP>,mvfdp,(mvfmdp));;
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<FloatDP>,mvfmdp,(dom,f,prms,swp));;
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateMultifunctionModel<FloatDP>,mvfdp,(mvfmdp));;
 
     Vector<ValidatedNumber> v(2,1);
     ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedLocatedSet<RealVector>,res,mvfp(v));

@@ -217,7 +217,7 @@ class TaylorModel
     //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion.
     typedef typename ExpansionType::ConstIterator ConstIterator;
   private:
-    ExpansionType _expansion;
+    PolynomialType _polynomial;
     ErrorType _error;
     mutable SweeperType _sweeper;
   public:
@@ -299,7 +299,7 @@ class TaylorModel
     //
     //! \brief Equality operator. Tests equality of representation, including error term.
     friend Bool same(const TaylorModel<P,FLT>& tm1, const TaylorModel<P,FLT>& tm2) {
-        return same(tm1._expansion, tm2._expansion) && same(tm1._error, tm2._error); }
+        return same(tm1.expansion(), tm2.expansion()) && same(tm1._error, tm2._error); }
 
     decltype(auto) operator<(const TaylorModel<P,FLT>& sd) const {
         return (sd-*this)>0; }
@@ -319,9 +319,13 @@ class TaylorModel
     //!@{
     //
     //! \brief The expansion.
-    const ExpansionType& expansion() const { return this->_expansion; }
+    const ExpansionType& expansion() const { return this->_polynomial.expansion(); }
     //! \brief A reference to the expansion.
-    ExpansionType& expansion() { return this->_expansion; }
+    ExpansionType& expansion() { return this->_polynomial.expansion(); }
+    //! \brief The polynomial approximation.
+    const PolynomialType& polynomial() const { return this->_polynomial; }
+    //! \brief A reference to the polynomial approximation.
+    PolynomialType& polynomial() { return this->_polynomial; }
     //! \brief The error of the expansion over the domain.
     const ErrorType& error() const { return this->_error; }
     //! \brief A reference to the error of the expansion over the domain.
@@ -351,10 +355,10 @@ class TaylorModel
 
     //! \brief Set the constant term in the expansion.
     Void set_value(const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::zero(this->argument_size()),c); }
+        this->expansion().set(MultiIndex::zero(this->argument_size()),c); }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     Void set_gradient(SizeType j, const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c); }
+        this->expansion().set(MultiIndex::unit(this->argument_size(),j),c); }
     Void set_gradient(SizeType j,const Dyadic& c) {
         this->set_gradient(j,CoefficientType(c,this->precision())); }
      //! \brief Set the error of the expansion.
@@ -362,26 +366,26 @@ class TaylorModel
     Void set_error(Nat m) { this->_error=m; }
 
     //! \brief The coefficient of the term in $x^a$.
-    const CoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const CoefficientType& operator[](const MultiIndex& a) const { return this->expansion()[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a); }
+    CoefficientType& operator[](const MultiIndex& a) { return this->expansion().at(a); }
 
     //! \brief An Iterator to the first term in the expansion.
-    Iterator begin() { return this->_expansion.begin(); }
+    Iterator begin() { return this->expansion().begin(); }
     //! \brief A constant Iterator to the first term in the expansion.
-    ConstIterator begin() const { return this->_expansion.begin(); }
+    ConstIterator begin() const { return this->expansion().begin(); }
     //! \brief An Iterator to the end of the expansion.
-    Iterator end() { return this->_expansion.end(); }
+    Iterator end() { return this->expansion().end(); }
     //! \brief A constant Iterator to the end of the expansion.
-    ConstIterator end() const { return this->_expansion.end(); }
+    ConstIterator end() const { return this->expansion().end(); }
 
     //! \brief The number of variables in the argument of the quantity.
-    SizeType argument_size() const { return this->_expansion.argument_size(); }
+    SizeType argument_size() const { return this->expansion().argument_size(); }
     //! \brief The maximum degree of terms in the expansion.
     DegreeType degree() const;
     //! \brief The number of nonzero terms in the expansion.
-    SizeType number_of_terms() const { return this->_expansion.number_of_terms(); }
-    SizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    SizeType number_of_terms() const { return this->expansion().number_of_terms(); }
+    SizeType number_of_nonzeros() const { return this->expansion().number_of_nonzeros(); }
     //!@}
 
     //! \name Function evaluation.
@@ -550,7 +554,7 @@ class TaylorModel
     OutputStream& repr(OutputStream&) const;
   public: // FIXME: Should be private
     Void _set_error(const RawFloat<PR>& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
-    Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
+    Void _append(MultiIndex const& a, CoefficientType const& v) { this->expansion().append(a,v); }
     static Bool _consistent(const TaylorModel<P,FLT>& tm1, const TaylorModel<P,FLT>& tm2);
     static Bool _inconsistent(const TaylorModel<P,FLT>& tm1, const TaylorModel<P,FLT>& tm2);
     static Bool _refines(const TaylorModel<P,FLT>& tm1, const TaylorModel<P,FLT>& tm2);

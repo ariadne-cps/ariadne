@@ -103,9 +103,9 @@ template<class I, class X> X& Polynomial<I,X>::operator[](const IndexType& a) { 
 
 template<class I, class X> const X& Polynomial<I,X>::operator[](const IndexType& a) const { return this->_expansion.get(a); }
 
-template<class I, class X> const Expansion<I,X>& Polynomial<I,X>::expansion() const { return this->_expansion; }
+template<class I, class X> const SortedExpansion<I,X,ReverseLexicographicIndexLess>& Polynomial<I,X>::expansion() const { return this->_expansion; }
 
-template<class I, class X> Expansion<I,X>& Polynomial<I,X>::expansion() { return this->_expansion; }
+template<class I, class X> SortedExpansion<I,X,ReverseLexicographicIndexLess>& Polynomial<I,X>::expansion() { return this->_expansion; }
 
 template<class I, class X> X const& Polynomial<I,X>::zero_coefficient() const { return this->_expansion.zero_coefficient(); }
 

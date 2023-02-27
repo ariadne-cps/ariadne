@@ -54,8 +54,13 @@ template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;
 
 template<> Void Polynomial<MultiIndex,FloatDP>::cleanup() { }
-
-template Expansion<MultiIndex,FloatDP>& MultivariatePolynomial<FloatDP>::expansion();
+template<> Void Polynomial<MultiIndex,FloatMP>::cleanup() { }
+template Polynomial<MultiIndex,FloatDP>::Polynomial(SizeType, FloatDP const&);
+template Polynomial<MultiIndex,FloatMP>::Polynomial(SizeType, FloatMP const&);
+template SortedExpansion<MultiIndex,FloatDP,ReverseLexicographicIndexLess>& MultivariatePolynomial<FloatDP>::expansion();
+template SortedExpansion<MultiIndex,FloatMP,ReverseLexicographicIndexLess>& MultivariatePolynomial<FloatMP>::expansion();
+template SortedExpansion<MultiIndex,FloatDP,ReverseLexicographicIndexLess>const& MultivariatePolynomial<FloatDP>::expansion() const;
+template SortedExpansion<MultiIndex,FloatMP,ReverseLexicographicIndexLess>const& MultivariatePolynomial<FloatMP>::expansion() const;
 template OutputStream& Polynomial<MultiIndex,FloatDP>::_write(OutputStream&) const;
 template OutputStream& Polynomial<MultiIndex,FloatDP>::_write(OutputStream&, Array<String> const&) const;
 

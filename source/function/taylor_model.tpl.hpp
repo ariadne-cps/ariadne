@@ -443,17 +443,17 @@ template<class FLT> FLT create_default() {
 
 
 template<class P, class FLT> TaylorModel<P,FLT>::TaylorModel()
-    : _expansion(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
+    : _polynomial(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
 {
 }
 
 template<class P, class FLT> TaylorModel<P,FLT>::TaylorModel(SizeType as, SweeperType swp)
-    : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
+    : _polynomial(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
 {
 }
 
 template<class P, class FLT> TaylorModel<P,FLT>::TaylorModel(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp)
-    : _expansion(f), _error(e), _sweeper(swp)
+    : _polynomial(f), _error(e), _sweeper(swp)
 {
     this->cleanup();
 }
@@ -509,7 +509,7 @@ template<class P, class FLT> TaylorModel<P,FLT> TaylorModel<P,FLT>::create_coord
     ARIADNE_PRECONDITION(j<this->argument_size());
     TaylorModel<P,FLT> r(this->argument_size(),this->_sweeper);
     CoefficientType o(1,this->precision());
-    r._expansion.append(MultiIndex::unit(this->argument_size(),j),o);
+    r.expansion().append(MultiIndex::unit(this->argument_size(),j),o);
     return r;
 }
 
@@ -521,13 +521,13 @@ template<class P, class FLT> TaylorModel<P,FLT> TaylorModel<P,FLT>::create_ball(
 }
 
 template<class P, class FLT> Void TaylorModel<P,FLT>::swap(TaylorModel<P,FLT>& tm) {
-    this->_expansion.swap(tm._expansion);
+    this->expansion().swap(tm.expansion());
     std::swap(this->_error,tm._error);
     std::swap(this->_sweeper,tm._sweeper);
 }
 
 template<class P, class FLT> Void TaylorModel<P,FLT>::clear() {
-    this->_expansion.clear();
+    this->expansion().clear();
     this->_error=0u;
 }
 
@@ -557,7 +557,7 @@ template<class P, class FLT> TaylorModel<P,FLT>& TaylorModel<P,FLT>::operator=(c
     this->clear();
     CoefficientType m=set_err(c,this->_error);
     if(not is_same_as_zero(m)) {
-        this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
+        this->expansion().append(MultiIndex::zero(this->argument_size()),m);
     }
     return *this;
 }
@@ -1228,7 +1228,7 @@ template<class P, class FLT> auto AlgebraOperations<P,FLT>::apply(Abs, ModelType
 
 
 template<class P, class FLT> TaylorModel<P,FLT>& TaylorModel<P,FLT>::sort() {
-    this->_expansion.sort();
+    this->expansion().sort();
     return *this;
 }
 
@@ -1251,19 +1251,19 @@ template<class P, class FLT> TaylorModel<P,FLT>& TaylorModel<P,FLT>::unique()
         ++current;
     }
     this->error()+=e;
-    this->_expansion.resize(static_cast<SizeType>(current-this->begin()));
+    this->expansion().resize(static_cast<SizeType>(current-this->begin()));
 
     return *this;
 }
 
 template<class P, class FLT> TaylorModel<P,FLT>& TaylorModel<P,FLT>::sweep() {
-//    this->_sweeper.sweep(reinterpret_cast<Expansion<MultiIndex,FLT>&>(this->_expansion),reinterpret_cast<FLT&>(this->_error));
-    this->_sweeper.sweep(this->_expansion,this->_error);
+//    this->_sweeper.sweep(reinterpret_cast<Expansion<MultiIndex,FLT>&>(this->expansion()),reinterpret_cast<FLT&>(this->_error));
+    this->_sweeper.sweep(this->expansion(),this->_error);
     return *this;
 }
 
 template<class P, class FLT> TaylorModel<P,FLT>& TaylorModel<P,FLT>::sweep(const SweeperType& sweeper) {
-    sweeper.sweep(this->_expansion,this->_error);
+    sweeper.sweep(this->expansion(),this->_error);
     return *this;
 }
 

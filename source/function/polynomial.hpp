@@ -108,6 +108,7 @@ class Polynomial
     : public PolynomialConstructors<I,X>
     , public DispatchAlgebraOperations<Polynomial<I,X>,X>
 {
+    using CMP = ReverseLexicographicIndexLess;
     template<class II, class XX> friend class Polynomial;
     friend struct AlgebraOperations<Polynomial<I,X>,X>;
   public:
@@ -195,9 +196,9 @@ class Polynomial
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     const X& operator[](const IndexType& a) const;
     //! \brief A constant reference to the raw data expansion.
-    const Expansion<I,X>& expansion() const;
+    const SortedExpansion<I,X,CMP>& expansion() const;
     //! \brief A reference to the raw data expansion.
-    Expansion<I,X>& expansion();
+    SortedExpansion<I,X,CMP>& expansion();
     //! \brief A zero value usable as a coefficient.
     X const& zero_coefficient() const;
     //!@}

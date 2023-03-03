@@ -1,6 +1,7 @@
 set(EXAMPLES_CONTINUOUS
     attractor
     vanderpol
+    lorenz
 )
 
 foreach(example ${EXAMPLES_CONTINUOUS})

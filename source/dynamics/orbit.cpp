@@ -50,18 +50,33 @@ Orbit<ExactPoint<F>>::insert(F t, const ExactPoint<F>& pt)
     _curve->insert(t,pt);
 }
 
-template<class F> Orbit<Vector<Point<Approximation<F>>>>::Orbit(Vector<Point<Approximation<F>>> const& ptLst)
-    : _curves(new Vector(ptLst.size(), InterpolatedCurve(ptLst.at(0))))
+
+template<class F> Orbit<List<Point<Approximation<F>>>>::Orbit(List<Point<Approximation<F>>> const& ptLst)
+    : _curves(new List<InterpolatedCurve>())
 {
-    for (SizeType i=0; i<ptLst.size(); i++)
-        _curves->at(i) = InterpolatedCurve(ptLst.at(i));
+    for (SizeType i=0; i<ptLst.size(); ++i) {
+        _curves->push_back(InterpolatedCurve(ptLst.at(i)));
+    }
 }
 
-
-template<class F> Void Orbit<Vector<Point<Approximation<F>>>>::insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber)
+template<class F> Void Orbit<List<Point<Approximation<F>>>>::insert(F t, const Point<Approximation<F>>& pt, SizeType curveNumber)
 {
     _curves->at(curveNumber).insert(t,pt);
 }
+
+
+template<class F> Orbit<List<LabelledPoint<Approximation<F>>>>::Orbit(const List<LabelledPoint<Approximation<F>>>& ptLst)
+    : _curves(new List<LabelledInterpolatedCurve>())
+{
+    for (SizeType i=0; i<ptLst.size(); ++i) {
+        _curves->push_back(LabelledInterpolatedCurve(ptLst.at(i)));
+    }
+}
+
+template<class F> Void Orbit<List<LabelledPoint<Approximation<F>>>>::insert(F t, const LabelledPoint<Approximation<F>>& pt, SizeType curveNumber) {
+    _curves->at(curveNumber).insert(static_cast<const RawFloatDP>(t), pt);
+}
+
 
 Orbit<Storage>::
 Orbit(const Storage& initial_set)
@@ -113,6 +128,11 @@ final() const
     return this->_data->final;
 }
 
+
+template class Orbit<Point<Approximation<FloatDP>>>;
+template class Orbit<List<Point<Approximation<FloatDP>>>>;
+template class Orbit<LabelledPoint<Approximation<FloatDP>>>;
+template class Orbit<List<LabelledPoint<Approximation<FloatDP>>>>;
 
 
 

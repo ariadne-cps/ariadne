@@ -69,6 +69,7 @@ template<class T> class Orbit;
 class VectorFieldSimulator
 {
   public:
+    typedef FloatDPApproximation ApproximateTimeType;
     typedef LabelledPoint<FloatDPApproximation> ApproximatePointType;
     typedef Vector<ApproximatePointType> ApproximateListPointType;
     typedef LabelledPoint<Real> RealPointType;

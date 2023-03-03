@@ -147,7 +147,7 @@ auto VectorFieldSimulator::orbit(const RealExpressionBoundedConstraintSet& init_
 
 auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationType& termination) const
 -> OrbitType
-{  
+{
     auto spc = _system->state_space();
     auto box = init_bx.euclidean_set(spc);
     UpperBoxType ubox(box);
@@ -164,7 +164,7 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
         if(lengths[i].get_d() > 0) { continue; }
         box_width_null++;
     }
-    if(box_width_null == lengths.size()) 
+    if(box_width_null == lengths.size())
     {
         auto midpoint = initial_box.midpoint();
         ApproximateListPointType pointList(1, LabelledPoint(_system->state_space(), Point<FloatDPApproximation>(midpoint, dp)));
@@ -209,9 +209,10 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
     auto const& curve_number = indexed_initial.first;
     auto const& initial = indexed_initial.second;
 
-    VectorField::TimeType t(0);
-    Dyadic h(cast_exact(_configuration->step_size()));
-    VectorField::TimeType tmax(termination);
+    ApproximateTimeType t(0,dp);
+    ApproximateTimeType h(_configuration->step_size(),dp);
+    ApproximateTimeType tmax(termination,dp);
+
     auto const& dynamic_function = _system->dynamic_function();
     auto const& auxiliary_function = _system->auxiliary_function();
 
@@ -221,13 +222,13 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 
     RungeKutta4Integrator integrator(_configuration->step_size().get_d());
     Point<FloatDPApproximation> state_pt = initial;
-    while(possibly(t<tmax)) {
+    while(decide(t<tmax)) {
         Int old_precision = std::clog.precision();
-        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t.get(dp).value() << " p=" << state_pt << std::setprecision(old_precision));
+        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
         state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
 
         t += h;
-        orbit->insert(t.get(DoublePrecision()).value(), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
+        orbit->insert(cast_exact(t), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
     }
 }
 

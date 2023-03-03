@@ -50,7 +50,7 @@
 namespace Ariadne {
 
 template class Orbit<LabelledPoint<Approximation<FloatDP>>>;
-template class Orbit<Vector<LabelledPoint<Approximation<FloatDP>>>>;
+template class Orbit<List<LabelledPoint<Approximation<FloatDP>>>>;
 
 template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
@@ -63,9 +63,9 @@ template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& sp
     return LabelledPoint<X>(saspc,sapt);
 }
 
-template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<Point<X>>& spt,
+template<class X> List<LabelledPoint<X>> make_state_auxiliary_point(const Vector<Point<X>>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
-    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    List<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
     for (SizeType i=0; i<spt.size(); i++){
         Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
         Point<X> apt = evaluate(auxiliary_function,spt.at(i));
@@ -80,9 +80,9 @@ template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vect
     return pointLst;
 }
 
-template<class X> Vector<LabelledPoint<X>> make_state_auxiliary_point(const Vector<LabelledPoint<X>>& spt,
+template<class X> List<LabelledPoint<X>> make_state_auxiliary_point(const List<LabelledPoint<X>>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
-    Vector<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
+    List<LabelledPoint<X>> pointLst(spt.size(), LabelledPoint<X>(saspc, Point<X>()));
     for (SizeType i=0; i<spt.size(); i++){
         Point<X> sapt(saspc.dimension(),spt.at(i).zero_element());
         Point<X> apt = evaluate(auxiliary_function,spt.at(i));
@@ -111,13 +111,13 @@ GridTreePaving create_paving(UpperBoxType box) {
     return gridPaving;
 }
 
-Vector<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
+List<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
 
     if(discretisation_type == DiscretisationType::Mince) paving.mince(mince_dimension);
     else paving.recombine();
 
     GridTreePaving::ConstIterator iter = paving.begin();
-    Vector<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
+    List<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
     SizeType k(0);
     for( ; iter != paving.end(); ++iter){
         UpperBoxType cell = iter->box();
@@ -222,13 +222,15 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 
     RungeKutta4Integrator integrator(_configuration->step_size().get_d());
     Point<FloatDPApproximation> state_pt = initial;
-    while(decide(t<tmax)) {
-        Int old_precision = std::clog.precision();
-        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
-        state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
 
+    Int old_precision = std::clog.precision();
+    CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
+    while(decide(t<tmax)) {
+        state_pt = integrator.step(dynamic_function, state_pt, _configuration->step_size());
         t += h;
         orbit->insert(cast_exact(t), make_state_auxiliary_point(ApproximatePointType(state_space, state_pt), state_space, auxiliary_space, state_auxiliary_space, auxiliary_function), curve_number);
+        old_precision = std::clog.precision();
+        CONCLOG_PRINTLN("t=" << std::setw(4) << std::left << t << " p=" << state_pt << std::setprecision(old_precision));
     }
 }
 

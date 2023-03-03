@@ -53,7 +53,6 @@ OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
     if(dtype == DiscretisationType::Mince){ os << "Mince"; }
     else{ os << "Recombine"; }
-    
     return os;
 }
 
@@ -71,9 +70,9 @@ class VectorFieldSimulator
   public:
     typedef FloatDPApproximation ApproximateTimeType;
     typedef LabelledPoint<FloatDPApproximation> ApproximatePointType;
-    typedef Vector<ApproximatePointType> ApproximateListPointType;
+    typedef List<ApproximatePointType> ApproximateListPointType;
     typedef LabelledPoint<Real> RealPointType;
-    typedef Vector<RealPointType> RealListPointType;
+    typedef List<RealPointType> RealListPointType;
     typedef RealVariablesBox RealBoxType;
     typedef Real TerminationType;
     typedef VectorField SystemType;

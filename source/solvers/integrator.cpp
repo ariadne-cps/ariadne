@@ -1119,8 +1119,6 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
     Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,dmid);
     Vector<ValidatedDifferential> bdphi = this->flow_derivative(f,cast_singleton(bbox));
 
-    ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
-
     const SizeType n=dom.size();
     DoublePrecision prec;
     FloatDPError zero_err(prec);

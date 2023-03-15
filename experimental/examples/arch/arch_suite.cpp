@@ -23,7 +23,7 @@
  */
 
 #include "ROBE21.hpp"
-#include "CVDP22.hpp"
+#include "CVDP23.hpp"
 #include "LALO20.hpp"
 #include "LOVO21.hpp"
 #include "SPRE22.hpp"
@@ -32,7 +32,7 @@
 void ariadne_main()
 {
     ROBE21();
-    CVDP22();
+    CVDP23();
     LALO20();
     LOVO21();
     SPRE22();

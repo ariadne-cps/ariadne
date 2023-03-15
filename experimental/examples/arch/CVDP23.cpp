@@ -1,7 +1,7 @@
 /***************************************************************************
- *            CVDP22.cpp
+ *            CVDP23.cpp
  *
- *  Copyright  2022  Luca Geretti
+ *  Copyright  2023  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CVDP22.hpp"
+#include "CVDP23.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    CVDP22();
+    CVDP23();
 }

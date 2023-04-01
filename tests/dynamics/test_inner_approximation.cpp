@@ -54,34 +54,42 @@ using namespace ConcLog;
 using namespace Ariadne;
 using namespace std;
 
+double gamma(LabelledEnclosure const& encl, SizeType idx) {
+    auto rng = encl.bounding_box().euclidean_set()[idx];
+    return rng.width().get_d();
+}
+
+double gamma_min(LabelledEnclosure const& inner, LabelledEnclosure const& outer) {
+    double result = std::numeric_limits<double>::infinity();
+    for (SizeType i=0; i<inner.dimension(); ++i)
+        result = min(result,gamma(inner,i)/gamma(outer,i));
+    return result;
+}
+
+List<LabelledEnclosure> boundary(LabelledEnclosure const& enclosure) {
+    List<LabelledEnclosure> result;
+    auto nv = enclosure.state_space().size();
+    for (SizeType i=0; i<nv; ++i) {
+        {
+            auto boundary_piece  = enclosure;
+            auto bounding_domain = boundary_piece.domain();
+            bounding_domain[i].set_lower_bound(bounding_domain[i].upper_bound());
+            boundary_piece.restrict(bounding_domain);
+            result.push_back(boundary_piece);
+        }
+        {
+            auto boundary_piece  = enclosure;
+            auto bounding_domain = boundary_piece.domain();
+            bounding_domain[i].set_upper_bound(bounding_domain[i].lower_bound());
+            boundary_piece.restrict(bounding_domain);
+            result.push_back(boundary_piece);
+        }
+    }
+    return result;
+}
+
 class TestInnerApproximation
 {
-  private:
-
-    List<LabelledEnclosure> _get_boundary(LabelledEnclosure const& enclosure) const {
-
-        List<LabelledEnclosure> result;
-
-        auto nv = enclosure.state_space().size();
-        for (SizeType i=0; i<nv; ++i) {
-            {
-                auto boundary_piece  = enclosure;
-                auto bounding_domain = boundary_piece.domain();
-                bounding_domain[i].set_lower_bound(bounding_domain[i].upper_bound());
-                boundary_piece.restrict(bounding_domain);
-                result.push_back(boundary_piece);
-            }
-            {
-                auto boundary_piece  = enclosure;
-                auto bounding_domain = boundary_piece.domain();
-                bounding_domain[i].set_upper_bound(bounding_domain[i].lower_bound());
-                boundary_piece.restrict(bounding_domain);
-                result.push_back(boundary_piece);
-            }
-        }
-
-        return result;
-    }
 
   public:
 
@@ -109,25 +117,29 @@ class TestInnerApproximation
 
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
-        auto final = evolution.final()[0];
+        auto outer_final = evolution.final()[0];
 
-        ARIADNE_TEST_PRINT(final)
+        ARIADNE_TEST_PRINT(outer_final)
 
+        auto outer_final_boundary = boundary(outer_final);
+        auto inner_final_domain = outer_final.domain();
+        inner_final_domain[0].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
+        inner_final_domain[0].set_upper_bound(FloatDP(0.84_x,DoublePrecision()));
+        inner_final_domain[1].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
+        inner_final_domain[1].set_upper_bound(FloatDP(0.85_x,DoublePrecision()));
+        auto inner_final = outer_final;
+        inner_final.restrict(inner_final_domain);
 
-        auto boundary = _get_boundary(final);
+        auto gamma = gamma_min(inner_final,outer_final);
+
+        ARIADNE_TEST_PRINT(gamma)
 
         GraphicsManager::instance().set_drawer(AffineDrawer(6));
-        fig << fill_colour(lightgrey) << final << fill_colour(red) << line_colour(red) << line_width(3.0);
-        for (auto const& encl : boundary)
+        fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
+        for (auto const& encl : outer_final_boundary)
             fig << encl;
 
-        auto final_domain = final.domain();
-        final_domain[0].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
-        final_domain[0].set_upper_bound(FloatDP(0.84_x,DoublePrecision()));
-        final_domain[1].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
-        final_domain[1].set_upper_bound(FloatDP(0.85_x,DoublePrecision()));
-        final.restrict(final_domain);
-        fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << final;
+        fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
         fig.write("test_inner_approximation");
     }
 };

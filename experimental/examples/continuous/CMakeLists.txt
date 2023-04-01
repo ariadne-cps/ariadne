@@ -1,4 +1,5 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
+    brusselator
     laub-loomis
 )
 

@@ -137,7 +137,7 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     return std::make_tuple(A,b,xl,xu);
 }
 
-ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, SizeType num_optimisable_vars, ExactBoxType const& d) {
+ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
     auto problem = construct_problem(f,d);
 
     auto const& A = get<0>(problem);
@@ -150,8 +150,8 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, S
     auto n = f.result_size();
     auto nv = f.argument_size()+2*n;
 
-    ExactBoxType q(num_optimisable_vars,ExactIntervalType(0,0,DoublePrecision()));
-    for (SizeType p=0;p<num_optimisable_vars;++p) {
+    ExactBoxType q(n,ExactIntervalType(0,0,DoublePrecision()));
+    for (SizeType p=0;p<n;++p) {
         auto c = Vector<FloatDPBounds>::unit(nv,p,DoublePrecision());
         auto sol_lower = solver.minimise(c,xl,xu,A,b);
         q[p].set_lower_bound(sol_lower[p].lower_raw());
@@ -196,25 +196,29 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     auto const& outer_function = result.state_function();
     auto outer_domain = result.domain();
 
+    auto n = outer_function.result_size();
+
     List<ValidatedVectorMultivariateFunctionPatch> boundaries;
-    for (SizeType i=0;i<outer_function.result_size();++i) {
+    for (SizeType i=0;i<n;++i) {
         boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].lower_bound().get_d())));
         boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].upper_bound().get_d())));
     }
 
-    ExactBoxType I = outer_domain;
+    ExactBoxType I = project(outer_domain,Range(0,n));
 
     for (auto const& boundary : boundaries) {
         auto outer_extension = embed(outer_function,boundary.domain());
         auto boundary_extension = embed(outer_function.domain(),boundary);
         auto f = outer_extension - boundary_extension;
 
-        auto extended_domain_restriction = product(I,boundary.domain());
-        auto intersection = intersection_domain(f,outer_domain.dimension(),extended_domain_restriction);
+        auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
+        auto intersection = intersection_domain(f,extended_domain_restriction);
         I = inner_difference(I,intersection);
     }
 
-    result.restrict(I);
+    auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
+
+    result.restrict(full_restricted_domain);
 
     return result;
 }

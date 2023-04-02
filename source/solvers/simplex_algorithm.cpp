@@ -1526,7 +1526,7 @@ template class SimplexSolver<RoundedFloatDP>;
 template class SimplexSolver<FloatDPApproximation>;
 template class SimplexSolver<FloatDP>;
 template class SimplexSolver<Rational>;
-
+template class SimplexSolver<Bounds<FloatDP>>;
 
 } // namespace Ariadne
 

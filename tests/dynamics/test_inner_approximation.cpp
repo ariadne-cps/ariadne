@@ -118,10 +118,19 @@ class TestInnerApproximation
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
         auto outer_final = evolution.final()[0];
+        auto outer_final_function = outer_final.state_function();
+        auto outer_domain = outer_final_function.domain();
 
-        ARIADNE_TEST_PRINT(outer_final)
+        auto outer_taylor_function = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(outer_final_function.reference());
 
-        auto outer_final_boundary = boundary(outer_final);
+        List<ValidatedVectorMultivariateTaylorFunctionModelDP> boundaries;
+        for (SizeType i=0;i<outer_taylor_function.result_size();++i) {
+            boundaries.push_back(partial_evaluate(outer_taylor_function,1,outer_domain[i].lower_bound()));
+            boundaries.push_back(partial_evaluate(outer_taylor_function,1,outer_domain[i].upper_bound()));
+        }
+
+        ARIADNE_TEST_PRINT(boundaries)
+
         auto inner_final_domain = outer_final.domain();
         inner_final_domain[0].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
         inner_final_domain[0].set_upper_bound(FloatDP(0.84_x,DoublePrecision()));
@@ -136,6 +145,8 @@ class TestInnerApproximation
 
         GraphicsManager::instance().set_drawer(AffineDrawer(6));
         fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
+
+        auto outer_final_boundary = boundary(outer_final);
         for (auto const& encl : outer_final_boundary)
             fig << encl;
 

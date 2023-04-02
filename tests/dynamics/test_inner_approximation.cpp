@@ -41,6 +41,7 @@
 #include "geometry/list_set.hpp"
 #include "geometry/function_set.hpp"
 #include "solvers/integrator.hpp"
+#include "solvers/linear_programming.hpp"
 #include "symbolic/expression_set.hpp"
 #include "io/figure.hpp"
 #include "io/drawer.hpp"
@@ -88,6 +89,119 @@ List<LabelledEnclosure> boundary(LabelledEnclosure const& enclosure) {
     return result;
 }
 
+Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>> construct_problem(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
+
+    auto x0 = midpoint(d);
+    auto Jx0 = f.jacobian(x0);
+    ARIADNE_TEST_PRINT(Jx0)
+
+    auto J_rng = jacobian_range(f,cast_vector(d));
+    auto b_rng = f(x0) - Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
+    ARIADNE_TEST_PRINT(b_rng)
+
+    auto n = f.result_size();
+    auto m = f.argument_size();
+    auto nv = m+2*n;
+
+    Matrix<FloatDPBounds> A(2*n,nv,FloatDP(0,DoublePrecision()));
+    for (SizeType i=0; i<n; ++i) {
+        for (SizeType j=0; j<m; ++j)
+            A.at(i,j) = -Jx0.at(i,j);
+        A.at(i,m+i) = 1;
+    }
+    for (SizeType i=0; i<n; ++i) {
+        for (SizeType j=0; j<m; ++j)
+            A.at(n+i,j) = Jx0.at(i,j);
+        A.at(n+i,m+n+i) = 1;
+    }
+    ARIADNE_TEST_PRINT(A)
+
+    Vector<FloatDPBounds> b(2*n,FloatDP(0,DoublePrecision()));
+    for (SizeType i=0; i<n; ++i) {
+        b.at(i) = -b_rng.at(i).lower_bound().raw();
+    }
+    for (SizeType i=0; i<n; ++i) {
+        b.at(n+i) = b_rng.at(i).upper_bound().raw();
+    }
+    ARIADNE_TEST_PRINT(b)
+
+    ARIADNE_TEST_EQUAL(A.row_size(),b.size())
+
+    Vector<FloatDPBounds> xl(nv,FloatDP(0,DoublePrecision()));
+    for (SizeType i=0; i<m; ++i) {
+        xl.at(i) = -1;
+    }
+    ARIADNE_TEST_PRINT(xl)
+
+    Vector<FloatDPBounds> xu(nv,FloatDP(0,DoublePrecision()));
+    for (SizeType i=0; i<m; ++i) {
+        xu.at(i) = 1;
+    }
+    for (SizeType i=m; i<nv; ++i) {
+        xu.at(i) = inf;
+    }
+    ARIADNE_TEST_PRINT(xu)
+
+    return std::make_tuple(A,b,xl,xu);
+}
+
+ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
+    auto problem = construct_problem(f,d);
+
+    auto const& A = get<0>(problem);
+    auto const& b = get<1>(problem);
+    auto const& xl = get<2>(problem);
+    auto const& xu = get<3>(problem);
+
+    SimplexSolver<FloatDPBounds> solver;
+
+    auto n = f.result_size();
+    auto m = f.argument_size();
+    auto nv = m+2*n;
+
+    ExactBoxType q(m,ExactIntervalType(0,0,DoublePrecision()));
+    for (SizeType p=0;p<m;++p) {
+        Vector<FloatDPBounds> c(nv,FloatDP(0,DoublePrecision()));
+        c[p] = 1;
+        auto sol_lower = solver.minimise(c,xl,xu,A,b);
+        ARIADNE_TEST_PRINT(sol_lower)
+        q[p].set_lower_bound(sol_lower[p].lower_raw());
+        c[p] = -1;
+        auto sol_upper = solver.minimise(c,xl,xu,A,b);
+        ARIADNE_TEST_PRINT(sol_upper)
+        q[p].set_upper_bound(sol_upper[p].upper_raw());
+    }
+    return q;
+}
+
+ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) {
+    ARIADNE_PRECONDITION(bx1.dimension() == bx2.dimension())
+
+    auto result = bx1;
+
+    auto n = bx1.dimension();
+
+    SizeType change_idx = 0;
+    Interval<FloatDPBounds> change_range(0,0);
+    FloatDPBounds vmax = FloatDP(-inf,DoublePrecision());
+
+    for (SizeType i=0; i<n; ++i) {
+        auto dl = bx2[i].lower_bound()-bx1[i].lower_bound();
+        auto du = bx1[i].upper_bound()-bx2[i].upper_bound();
+        auto v = max(dl,du);
+        if (definitely(v > vmax)) {
+            change_idx = i;
+            change_range = (definitely(dl >= du) ? Interval<FloatDPBounds>(bx1[i].lower_bound(),bx2[i].lower_bound()) : Interval<FloatDPBounds>(bx2[i].upper_bound(),bx1[i].upper_bound()));
+            vmax = v;
+        }
+    }
+
+    result[change_idx].set_lower_bound(change_range.lower_bound().lower_raw());
+    result[change_idx].set_upper_bound(change_range.upper_bound().upper_raw());
+
+    return result;
+}
+
 class TestInnerApproximation
 {
 
@@ -118,32 +232,39 @@ class TestInnerApproximation
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
         auto outer_final = evolution.final()[0];
+        outer_final.uniform_error_recondition();
         auto outer_final_function = outer_final.state_function();
         auto outer_domain = outer_final_function.domain();
 
-        auto outer_taylor_function = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(outer_final_function.reference());
-
-        List<ValidatedVectorMultivariateTaylorFunctionModelDP> boundaries;
-        for (SizeType i=0;i<outer_taylor_function.result_size();++i) {
-            boundaries.push_back(partial_evaluate(outer_taylor_function,1,outer_domain[i].lower_bound()));
-            boundaries.push_back(partial_evaluate(outer_taylor_function,1,outer_domain[i].upper_bound()));
+        List<ValidatedVectorMultivariateFunction> boundaries;
+        for (SizeType i=0;i<outer_final_function.result_size();++i) {
+            auto new_domain_lower = outer_domain;
+            new_domain_lower[i].set_upper_bound(new_domain_lower[i].lower_bound());
+            boundaries.push_back(restriction(outer_final_function,new_domain_lower));
+            auto new_domain_upper = outer_domain;
+            new_domain_upper[i].set_lower_bound(new_domain_upper[i].upper_bound());
+            boundaries.push_back(restriction(outer_final_function,new_domain_upper));
         }
-
         ARIADNE_TEST_PRINT(boundaries)
 
-        auto inner_final_domain = outer_final.domain();
-        inner_final_domain[0].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
-        inner_final_domain[0].set_upper_bound(FloatDP(0.84_x,DoublePrecision()));
-        inner_final_domain[1].set_lower_bound(FloatDP(-0.84_x,DoublePrecision()));
-        inner_final_domain[1].set_upper_bound(FloatDP(0.85_x,DoublePrecision()));
+        ExactBoxType I = outer_domain;
+
+        for (auto const& boundary : boundaries) {
+            ARIADNE_TEST_ASSERT(boundary.argument_size() == outer_final_function.argument_size())
+            auto f = outer_final_function - boundary;
+            auto intersection = intersection_domain(f,I);
+            ARIADNE_TEST_PRINT(intersection)
+            I = inner_difference(I,intersection);
+        }
+
         auto inner_final = outer_final;
-        inner_final.restrict(inner_final_domain);
+        inner_final.restrict(I);
 
         auto gamma = gamma_min(inner_final,outer_final);
 
         ARIADNE_TEST_PRINT(gamma)
 
-        GraphicsManager::instance().set_drawer(AffineDrawer(6));
+        GraphicsManager::instance().set_drawer(AffineDrawer(7));
         fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
 
         auto outer_final_boundary = boundary(outer_final);

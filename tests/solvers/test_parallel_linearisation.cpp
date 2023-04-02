@@ -118,8 +118,8 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto m = f.argument_size();
     auto nv = m+2*n;
 
-    ExactBoxType q(n,ExactIntervalType(0,0,DoublePrecision()));
-    for (SizeType p=0;p<n;++p) {
+    ExactBoxType q(m,ExactIntervalType(0,0,DoublePrecision()));
+    for (SizeType p=0;p<m;++p) {
         Vector<FloatDPBounds> c(nv,FloatDP(0,DoublePrecision()));
         c[p] = 1;
         auto sol_lower = solver.minimise(c,xl,xu,A,b);
@@ -131,6 +131,34 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
         q[p].set_upper_bound(sol_upper[p].upper_raw());
     }
     return q;
+}
+
+ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) {
+    ARIADNE_PRECONDITION(bx1.dimension() == bx2.dimension())
+
+    auto result = bx1;
+
+    auto n = bx1.dimension();
+
+    SizeType change_idx = 0;
+    Interval<FloatDPBounds> change_range(0,0);
+    FloatDPBounds vmax = FloatDP(-inf,DoublePrecision());
+
+    for (SizeType i=0; i<n; ++i) {
+        auto dl = bx2[i].lower_bound()-bx1[i].lower_bound();
+        auto du = bx1[i].upper_bound()-bx2[i].upper_bound();
+        auto v = max(dl,du);
+        if (definitely(v > vmax)) {
+            change_idx = i;
+            change_range = (definitely(dl >= du) ? Interval<FloatDPBounds>(bx1[i].lower_bound(),bx2[i].lower_bound()) : Interval<FloatDPBounds>(bx2[i].upper_bound(),bx1[i].upper_bound()));
+            vmax = v;
+        }
+    }
+
+    result[change_idx].set_lower_bound(change_range.lower_bound().lower_raw());
+    result[change_idx].set_upper_bound(change_range.upper_bound().upper_raw());
+
+    return result;
 }
 
 class TestParallelLinearisation
@@ -158,11 +186,13 @@ class TestParallelLinearisation
                                                           6.52_dec+0.02_dec*x1b-0.07_dec*sqr(x1b)+0.04_dec*x4b});
 
         auto f = outer - outer_b_x2_1;
-
         auto q = intersection_domain(f,d);
         ARIADNE_TEST_PRINT(q)
-    }
 
+        ExactBoxType I(f.result_size(),FloatDPExactInterval(-1,1));
+
+        auto diff = inner_difference(I,q);
+    }
 };
 
 Int main(Int argc, const char **argv) {

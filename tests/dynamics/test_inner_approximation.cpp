@@ -89,7 +89,7 @@ List<LabelledEnclosure> boundary(LabelledEnclosure const& enclosure) {
     return result;
 }
 
-Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>> construct_problem(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
+Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct_problem(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
 
     auto x0 = midpoint(d);
     auto Jx0 = f.jacobian(x0);
@@ -101,19 +101,19 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     auto m = f.argument_size();
     auto nv = m+2*n;
 
-    Matrix<FloatDPBounds> A(2*n,nv,FloatDP(0,DoublePrecision()));
+    Matrix<FloatDP> A(2*n,nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<n; ++i) {
         for (SizeType j=0; j<m; ++j)
-            A.at(i,j) = -Jx0.at(i,j);
+            A.at(i,j) = -Jx0.at(i,j).value();
         A.at(i,m+i) = 1;
     }
     for (SizeType i=0; i<n; ++i) {
         for (SizeType j=0; j<m; ++j)
-            A.at(n+i,j) = Jx0.at(i,j);
+            A.at(n+i,j) = Jx0.at(i,j).value();
         A.at(n+i,m+n+i) = 1;
     }
 
-    Vector<FloatDPBounds> b(2*n,FloatDP(0,DoublePrecision()));
+    Vector<FloatDP> b(2*n,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<n; ++i) {
         b.at(i) = -b_rng.at(i).lower_bound().raw();
     }
@@ -121,12 +121,12 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
         b.at(n+i) = b_rng.at(i).upper_bound().raw();
     }
 
-    Vector<FloatDPBounds> xl(nv,FloatDP(0,DoublePrecision()));
+    Vector<FloatDP> xl(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
         xl.at(i) = d[i].lower_bound();
     }
 
-    Vector<FloatDPBounds> xu(nv,FloatDP(0,DoublePrecision()));
+    Vector<FloatDP> xu(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
         xu.at(i) = d[i].upper_bound();
     }
@@ -137,6 +137,24 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     return std::make_tuple(A,b,xl,xu);
 }
 
+FloatDP solve(SizeType i, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
+    SimplexSolver<FloatDP> solver;
+    auto solution = solver.minimise(c,xl,xu,A,b);
+    return solution.at(i).value();
+}
+
+FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
+    auto nv = A.column_size();
+    auto c = Vector<FloatDP>::unit(nv,i,DoublePrecision());
+    return solve(i,c,A,b,xl,xu);
+}
+
+FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
+    auto nv = A.column_size();
+    auto c = -Vector<FloatDP>::unit(nv,i,DoublePrecision());
+    return solve(i,c,A,b,xl,xu);
+}
+
 ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
     auto problem = construct_problem(f,d);
 
@@ -145,19 +163,12 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto const& xl = get<2>(problem);
     auto const& xu = get<3>(problem);
 
-    SimplexSolver<FloatDPBounds> solver;
-
     auto n = f.result_size();
-    auto nv = f.argument_size()+2*n;
 
     ExactBoxType q(n,ExactIntervalType(0,0,DoublePrecision()));
     for (SizeType p=0;p<n;++p) {
-        auto c = Vector<FloatDPBounds>::unit(nv,p,DoublePrecision());
-        auto sol_lower = solver.minimise(c,xl,xu,A,b);
-        q[p].set_lower_bound(sol_lower[p].lower_raw());
-        c = -c;
-        auto sol_upper = solver.minimise(c,xl,xu,A,b);
-        q[p].set_upper_bound(sol_upper[p].upper_raw());
+        q[p].set_lower_bound(minimise(p,A,b,xl,xu));
+        q[p].set_upper_bound(maximise(p,A,b,xl,xu));
     }
     return q;
 }
@@ -206,6 +217,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
 
     ExactBoxType I = project(outer_domain,Range(0,n));
 
+    //ARIADNE_TEST_PRINT(I)
     for (auto const& boundary : boundaries) {
         auto outer_extension = embed(outer_function,boundary.domain());
         auto boundary_extension = embed(outer_function.domain(),boundary);
@@ -213,7 +225,9 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
         auto intersection = intersection_domain(f,extended_domain_restriction);
+        //ARIADNE_TEST_PRINT(intersection)
         I = inner_difference(I,intersection);
+        //ARIADNE_TEST_PRINT(I)
     }
 
     auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));

@@ -93,9 +93,9 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
 
     auto x0 = midpoint(d);
     auto Jx0 = f.jacobian(x0);
-
     auto J_rng = jacobian_range(f,cast_vector(d));
-    auto b_rng = f(x0) - Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
+    auto fx0 = f(x0);
+    auto b_rng = fx0- Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
 
     auto n = f.result_size();
     auto m = f.argument_size();
@@ -123,12 +123,12 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
 
     Vector<FloatDPBounds> xl(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
-        xl.at(i) = -1;
+        xl.at(i) = d[i].lower_bound();
     }
 
     Vector<FloatDPBounds> xu(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
-        xu.at(i) = 1;
+        xu.at(i) = d[i].upper_bound();
     }
     for (SizeType i=m; i<nv; ++i) {
         xu.at(i) = inf;
@@ -137,7 +137,7 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     return std::make_tuple(A,b,xl,xu);
 }
 
-ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
+ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, SizeType num_optimisable_vars, ExactBoxType const& d) {
     auto problem = construct_problem(f,d);
 
     auto const& A = get<0>(problem);
@@ -148,11 +148,10 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     SimplexSolver<FloatDPBounds> solver;
 
     auto n = f.result_size();
-    auto m = f.argument_size();
-    auto nv = m+2*n;
+    auto nv = f.argument_size()+2*n;
 
-    ExactBoxType q(m,ExactIntervalType(0,0,DoublePrecision()));
-    for (SizeType p=0;p<m;++p) {
+    ExactBoxType q(num_optimisable_vars,ExactIntervalType(0,0,DoublePrecision()));
+    for (SizeType p=0;p<num_optimisable_vars;++p) {
         auto c = Vector<FloatDPBounds>::unit(nv,p,DoublePrecision());
         auto sol_lower = solver.minimise(c,xl,xu,A,b);
         q[p].set_lower_bound(sol_lower[p].lower_raw());
@@ -164,7 +163,7 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
 }
 
 ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) {
-    ARIADNE_PRECONDITION(bx1.dimension() == bx2.dimension())
+    ARIADNE_PRECONDITION(bx1.intersects(bx2))
 
     auto result = bx1;
 
@@ -197,21 +196,21 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     auto const& outer_function = result.state_function();
     auto outer_domain = result.domain();
 
-    List<ValidatedVectorMultivariateFunction> boundaries;
+    List<ValidatedVectorMultivariateFunctionPatch> boundaries;
     for (SizeType i=0;i<outer_function.result_size();++i) {
-        auto new_domain_lower = outer_domain;
-        new_domain_lower[i].set_upper_bound(new_domain_lower[i].lower_bound());
-        boundaries.push_back(restriction(outer_function,new_domain_lower));
-        auto new_domain_upper = outer_domain;
-        new_domain_upper[i].set_lower_bound(new_domain_upper[i].upper_bound());
-        boundaries.push_back(restriction(outer_function,new_domain_upper));
+        boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].lower_bound().get_d())));
+        boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].upper_bound().get_d())));
     }
 
     ExactBoxType I = outer_domain;
 
     for (auto const& boundary : boundaries) {
-        auto f = outer_function - boundary;
-        auto intersection = intersection_domain(f,I);
+        auto outer_extension = embed(outer_function,boundary.domain());
+        auto boundary_extension = embed(outer_function.domain(),boundary);
+        auto f = outer_extension - boundary_extension;
+
+        auto extended_domain_restriction = product(I,boundary.domain());
+        auto intersection = intersection_domain(f,outer_domain.dimension(),extended_domain_restriction);
         I = inner_difference(I,intersection);
     }
 
@@ -230,24 +229,42 @@ class TestInnerApproximation
     }
 
     void test_inner_approximation() const {
-        RealVariable x1("x1"), x2("x2");
 
-        VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
+        /*
+        RealVariable x("x"), y("y");
+        VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
+
+        Real e1=5/100_q; Real e2=7/100_q;
+        RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
 
         StepMaximumError max_err=1e-6;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics,integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.01);
+        evolver.configuration().set_maximum_step_size(0.02);
 
+        Real evolution_time = 0.02_dec;
+
+        LabelledFigure fig=LabelledFigure({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec});
+        */
+
+        RealVariable x1("x1"), x2("x2");
+        VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
         RealExpressionBoundedConstraintSet initial_set({-1<=x1<=1,-1<=x2<=1});
+
+        StepMaximumError max_err=1e-6;
+        TaylorPicardIntegrator integrator(max_err);
+
+        VectorFieldEvolver evolver(dynamics,integrator);
+        evolver.configuration().set_maximum_enclosure_radius(1.0);
+        evolver.configuration().set_maximum_step_size(0.02);
 
         Real evolution_time = 1;
 
-        LabelledFigure fig=LabelledFigure({4<=x1<=8,4<=x2<=8});
-
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+
+        LabelledFigure fig=LabelledFigure({4<=x1<=8,4<=x2<=8});
 
         auto outer_final = evolution.final()[0];
 

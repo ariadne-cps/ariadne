@@ -153,11 +153,10 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
 
     ExactBoxType q(m,ExactIntervalType(0,0,DoublePrecision()));
     for (SizeType p=0;p<m;++p) {
-        Vector<FloatDPBounds> c(nv,FloatDP(0,DoublePrecision()));
-        c[p] = 1;
+        auto c = Vector<FloatDPBounds>::unit(nv,p,DoublePrecision());
         auto sol_lower = solver.minimise(c,xl,xu,A,b);
         q[p].set_lower_bound(sol_lower[p].lower_raw());
-        c[p] = -1;
+        c = -c;
         auto sol_upper = solver.minimise(c,xl,xu,A,b);
         q[p].set_upper_bound(sol_upper[p].upper_raw());
     }
@@ -192,6 +191,35 @@ ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) 
     return result;
 }
 
+LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
+    auto result = outer;
+    result.uniform_error_recondition();
+    auto const& outer_function = result.state_function();
+    auto outer_domain = result.domain();
+
+    List<ValidatedVectorMultivariateFunction> boundaries;
+    for (SizeType i=0;i<outer_function.result_size();++i) {
+        auto new_domain_lower = outer_domain;
+        new_domain_lower[i].set_upper_bound(new_domain_lower[i].lower_bound());
+        boundaries.push_back(restriction(outer_function,new_domain_lower));
+        auto new_domain_upper = outer_domain;
+        new_domain_upper[i].set_lower_bound(new_domain_upper[i].upper_bound());
+        boundaries.push_back(restriction(outer_function,new_domain_upper));
+    }
+
+    ExactBoxType I = outer_domain;
+
+    for (auto const& boundary : boundaries) {
+        auto f = outer_function - boundary;
+        auto intersection = intersection_domain(f,I);
+        I = inner_difference(I,intersection);
+    }
+
+    result.restrict(I);
+
+    return result;
+}
+
 class TestInnerApproximation
 {
 
@@ -222,35 +250,10 @@ class TestInnerApproximation
         auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
         auto outer_final = evolution.final()[0];
-        outer_final.uniform_error_recondition();
-        auto outer_final_function = outer_final.state_function();
-        auto outer_domain = outer_final_function.domain();
 
-        List<ValidatedVectorMultivariateFunction> boundaries;
-        for (SizeType i=0;i<outer_final_function.result_size();++i) {
-            auto new_domain_lower = outer_domain;
-            new_domain_lower[i].set_upper_bound(new_domain_lower[i].lower_bound());
-            boundaries.push_back(restriction(outer_final_function,new_domain_lower));
-            auto new_domain_upper = outer_domain;
-            new_domain_upper[i].set_lower_bound(new_domain_upper[i].upper_bound());
-            boundaries.push_back(restriction(outer_final_function,new_domain_upper));
-        }
-
-        ExactBoxType I = outer_domain;
-
-        for (auto const& boundary : boundaries) {
-            auto f = outer_final_function - boundary;
-            auto intersection = intersection_domain(f,I);
-            ARIADNE_TEST_PRINT(intersection)
-            I = inner_difference(I,intersection);
-        }
-        ARIADNE_TEST_PRINT(I)
-
-        auto inner_final = outer_final;
-        inner_final.restrict(I);
+        auto inner_final = inner_approximation(outer_final);
 
         auto gamma = gamma_min(inner_final,outer_final);
-
         ARIADNE_TEST_PRINT(gamma)
 
         GraphicsManager::instance().set_drawer(AffineDrawer(7));

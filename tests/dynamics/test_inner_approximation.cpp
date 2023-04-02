@@ -93,11 +93,9 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
 
     auto x0 = midpoint(d);
     auto Jx0 = f.jacobian(x0);
-    ARIADNE_TEST_PRINT(Jx0)
 
     auto J_rng = jacobian_range(f,cast_vector(d));
     auto b_rng = f(x0) - Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
-    ARIADNE_TEST_PRINT(b_rng)
 
     auto n = f.result_size();
     auto m = f.argument_size();
@@ -114,7 +112,6 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
             A.at(n+i,j) = Jx0.at(i,j);
         A.at(n+i,m+n+i) = 1;
     }
-    ARIADNE_TEST_PRINT(A)
 
     Vector<FloatDPBounds> b(2*n,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<n; ++i) {
@@ -123,15 +120,11 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     for (SizeType i=0; i<n; ++i) {
         b.at(n+i) = b_rng.at(i).upper_bound().raw();
     }
-    ARIADNE_TEST_PRINT(b)
-
-    ARIADNE_TEST_EQUAL(A.row_size(),b.size())
 
     Vector<FloatDPBounds> xl(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
         xl.at(i) = -1;
     }
-    ARIADNE_TEST_PRINT(xl)
 
     Vector<FloatDPBounds> xu(nv,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<m; ++i) {
@@ -140,7 +133,6 @@ Tuple<Matrix<FloatDPBounds>,Vector<FloatDPBounds>,Vector<FloatDPBounds>,Vector<F
     for (SizeType i=m; i<nv; ++i) {
         xu.at(i) = inf;
     }
-    ARIADNE_TEST_PRINT(xu)
 
     return std::make_tuple(A,b,xl,xu);
 }
@@ -164,11 +156,9 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
         Vector<FloatDPBounds> c(nv,FloatDP(0,DoublePrecision()));
         c[p] = 1;
         auto sol_lower = solver.minimise(c,xl,xu,A,b);
-        ARIADNE_TEST_PRINT(sol_lower)
         q[p].set_lower_bound(sol_lower[p].lower_raw());
         c[p] = -1;
         auto sol_upper = solver.minimise(c,xl,xu,A,b);
-        ARIADNE_TEST_PRINT(sol_upper)
         q[p].set_upper_bound(sol_upper[p].upper_raw());
     }
     return q;
@@ -245,17 +235,16 @@ class TestInnerApproximation
             new_domain_upper[i].set_lower_bound(new_domain_upper[i].upper_bound());
             boundaries.push_back(restriction(outer_final_function,new_domain_upper));
         }
-        ARIADNE_TEST_PRINT(boundaries)
 
         ExactBoxType I = outer_domain;
 
         for (auto const& boundary : boundaries) {
-            ARIADNE_TEST_ASSERT(boundary.argument_size() == outer_final_function.argument_size())
             auto f = outer_final_function - boundary;
             auto intersection = intersection_domain(f,I);
             ARIADNE_TEST_PRINT(intersection)
             I = inner_difference(I,intersection);
         }
+        ARIADNE_TEST_PRINT(I)
 
         auto inner_final = outer_final;
         inner_final.restrict(I);

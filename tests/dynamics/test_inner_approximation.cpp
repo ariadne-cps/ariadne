@@ -158,6 +158,7 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
         }
 
         glp_load_matrix(lp, num_auxiliary*num_structural, ia, ja, ar);
+        //glp_write_lp(lp,NULL,"problem.txt");
         optimisation_method(lp);
         double result = glp_get_col_prim(lp, k+1);
         glp_delete_prob(lp);
@@ -280,6 +281,27 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
     return std::make_tuple(A,b,xl,xu);
 }
 
+void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
+
+    SizeType num_auxiliary = A.row_size();
+    SizeType num_structural = A.column_size()-num_auxiliary;
+
+    for (SizeType i=0; i<num_auxiliary; ++i) {
+        cout << "a" << i+1 << ": ";
+        for (SizeType j=num_structural; j>0; j--) {
+            if (A.at(i,j-1) != 0)
+                cout << (A.at(i,j-1).get_d() > 0 ? "+" : "") << A.at(i,j-1).get_d() << " x" << j << " ";
+        }
+        cout << "<= " << b.at(i).get_d() << std::endl;
+    }
+
+    cout << std::endl;
+    for (SizeType i=0; i<num_structural; ++i) {
+        cout << xl.at(i).get_d() << " <= x" << i+1 << " <= " << xu.at(i).get_d() << std::endl;
+    }
+    cout << std::endl;
+}
+
 ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
     auto problem = construct_problem(f,d);
 
@@ -287,6 +309,8 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto const& b = get<1>(problem);
     auto const& xl = get<2>(problem);
     auto const& xu = get<3>(problem);
+
+    //print_problem(A,b,xl,xu);
 
     auto n = f.result_size();
 
@@ -350,6 +374,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     for (auto const& boundary : boundaries) {
         auto outer_extension = embed(outer_function,boundary.domain());
         auto boundary_extension = embed(outer_function.domain(),boundary);
+
         auto f = outer_extension - boundary_extension;
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());

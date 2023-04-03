@@ -62,26 +62,41 @@ struct ParallelLinearisationInterface {
     virtual FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
 };
 
-struct NativeSimplexParallelLinearisation : ParallelLinearisationInterface {
+struct NativeParallelLinearisation : ParallelLinearisationInterface {
 
     FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         auto nv = A.column_size();
         auto c = Vector<FloatDP>::unit(nv,k,DoublePrecision());
-        return _solve(k,c,A,b,xl,xu);
+        return solve(k,c,A,b,xl,xu);
     }
 
     FloatDP maximise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         auto nv = A.column_size();
         auto c = -Vector<FloatDP>::unit(nv,k,DoublePrecision());
-        return _solve(k,c,A,b,xl,xu);
+        return solve(k,c,A,b,xl,xu);
     }
 
-  private:
+  protected:
 
-    FloatDP _solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const {
+    virtual FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
+
+};
+
+struct NativeSimplexParallelLinearisation : NativeParallelLinearisation {
+  protected:
+    FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         SimplexSolver<FloatDP> solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
         return solution.at(k).value();
+    }
+};
+
+struct NativeIPMParallelLinearisation : NativeParallelLinearisation {
+protected:
+    FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        InteriorPointSolver solver;
+        auto solution = solver.minimise(c,xl,xu,A,b);
+        return get<1>(solution).at(k).raw();
     }
 };
 
@@ -152,11 +167,35 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
 };
 
 struct GLPKSimplexParallelLinearisation : GLPKParallelLinearisation {
-    void optimisation_method(glp_prob* lp) const override { glp_simplex(lp,NULL); }
+    void optimisation_method(glp_prob* lp) const override {
+        glp_simplex(lp,NULL);
+        auto status = glp_get_status(lp);
+        switch (status) {
+            case GLP_UNDEF :
+                throw std::runtime_error("Undefined solution to linear problem.");
+            case GLP_INFEAS :
+                throw std::runtime_error("Infeasible solution to linear problem.");
+            case GLP_NOFEAS :
+                throw std::runtime_error("No feasible solution to linear problem.");
+        }
+    }
 };
 
 struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
-    void optimisation_method(glp_prob* lp) const override { glp_interior(lp,NULL); }
+    void optimisation_method(glp_prob* lp) const override {
+        glp_interior(lp,NULL);
+        auto status = glp_ipt_status(lp);
+        switch (status) {
+            case GLP_UNDEF :
+                throw std::runtime_error("Undefined solution to linear problem.");
+            case GLP_INFEAS :
+                throw std::runtime_error("Infeasible solution to linear problem.");
+            case GLP_NOFEAS :
+                throw std::runtime_error("No feasible solution to linear problem.");
+            case GLP_UNBND :
+                throw std::runtime_error("Unbounded solution to linear problem.");
+        }
+    }
 };
 
 double gamma(LabelledEnclosure const& encl, SizeType idx) {
@@ -252,6 +291,7 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto n = f.result_size();
 
     //NativeSimplexParallelLinearisation solver;
+    //NativeIPMParallelLinearisation solver;
     //GLPKSimplexParallelLinearisation solver;
     GLPKIPMParallelLinearisation solver;
 

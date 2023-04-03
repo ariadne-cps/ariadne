@@ -132,6 +132,14 @@ if(NOT Threads_FOUND)
     message(FATAL_ERROR "Unable to find Threads library")
 endif()
 
+find_package(GLPK)
+if(GLPK_FOUND)
+    include_directories(SYSTEM ${GLPK_INCLUDES})
+else()
+    message(FATAL_ERROR "Unable to find GLPK")
+endif()
+
+
 find_package(GMP)
 if(GMP_FOUND)
     include_directories(SYSTEM ${GMP_INCLUDES})
@@ -215,8 +223,8 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:CONCLOG_SRC>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne dl ${GLPK_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl ${GLPK_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)

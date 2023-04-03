@@ -48,12 +48,116 @@
 #include "io/graphics_manager.hpp"
 #include "conclog/logging.hpp"
 
+#include "glpk.h"
+
 #include "../test.hpp"
 
 using namespace ConcLog;
 
 using namespace Ariadne;
 using namespace std;
+
+struct ParallelLinearisationInterface {
+    virtual FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
+    virtual FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
+};
+
+struct NativeSimplexParallelLinearisation : ParallelLinearisationInterface {
+
+    FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        auto nv = A.column_size();
+        auto c = Vector<FloatDP>::unit(nv,k,DoublePrecision());
+        return _solve(k,c,A,b,xl,xu);
+    }
+
+    FloatDP maximise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        auto nv = A.column_size();
+        auto c = -Vector<FloatDP>::unit(nv,k,DoublePrecision());
+        return _solve(k,c,A,b,xl,xu);
+    }
+
+  private:
+
+    FloatDP _solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const {
+        SimplexSolver<FloatDP> solver;
+        auto solution = solver.minimise(c,xl,xu,A,b);
+        return solution.at(k).value();
+    }
+};
+
+struct GLPKParallelLinearisation : ParallelLinearisationInterface {
+
+    FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        return _solve(GLP_MIN,k,A,b,xl,xu);
+    }
+
+    FloatDP maximise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        auto nv = A.column_size();
+        auto c = -Vector<FloatDP>::unit(nv,k,DoublePrecision());
+        return _solve(GLP_MAX,k,A,b,xl,xu);
+    }
+
+    virtual void optimisation_method(glp_prob* lp) const = 0;
+
+  private:
+
+    FloatDP _solve(int dir, SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const {
+
+        SizeType num_auxiliary = A.row_size();
+        SizeType num_structural = A.column_size()-num_auxiliary;
+
+        glp_term_out(GLP_OFF);
+        glp_prob *lp;
+        int ia[1+1000], ja[1+1000];
+        double ar[1+1000];
+        lp = glp_create_prob();
+
+        glp_set_obj_dir(lp, dir);
+
+        glp_add_rows(lp, num_auxiliary);
+        for (SizeType i=1; i<=num_auxiliary; ++i) {
+            char str[3] = "";
+            snprintf(str,3,"a%lu",i);
+            glp_set_row_name(lp, i, str);
+            glp_set_row_bnds(lp, i, GLP_UP, 0.0, b.at(i-1).get_d());
+        }
+
+        glp_add_cols(lp, num_structural);
+        for (SizeType i=1; i<=num_structural; ++i) {
+            char str[3] = "";
+            snprintf(str,3,"x%lu",i);
+            glp_set_col_name(lp, i, str);
+            glp_set_col_bnds(lp, i, GLP_DB, xl.at(i-1).get_d(), xu.at(i-1).get_d());
+            glp_set_obj_coef(lp,i, 0);
+        }
+        glp_set_obj_coef(lp,k+1, 1);
+
+        SizeType pr = 1;
+        for (SizeType i=0; i<num_auxiliary; ++i) {
+            for (SizeType j=0; j<num_structural; ++j) {
+                ia[pr] = i+1;
+                ja[pr] = j+1;
+                ar[pr] = A.at(i,j).get_d();
+                ++pr;
+            }
+        }
+
+        glp_load_matrix(lp, num_auxiliary*num_structural, ia, ja, ar);
+        optimisation_method(lp);
+        double result = glp_get_col_prim(lp, k+1);
+        glp_delete_prob(lp);
+
+        return FloatDP(cast_exact(result),DoublePrecision());
+    }
+};
+
+struct GLPKSimplexParallelLinearisation : GLPKParallelLinearisation {
+    void optimisation_method(glp_prob* lp) const override { glp_simplex(lp,NULL); }
+};
+
+struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
+    void optimisation_method(glp_prob* lp) const override { glp_interior(lp,NULL); }
+};
 
 double gamma(LabelledEnclosure const& encl, SizeType idx) {
     auto rng = encl.bounding_box().euclidean_set()[idx];
@@ -137,24 +241,6 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
     return std::make_tuple(A,b,xl,xu);
 }
 
-FloatDP solve(SizeType i, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
-    SimplexSolver<FloatDP> solver;
-    auto solution = solver.minimise(c,xl,xu,A,b);
-    return solution.at(i).value();
-}
-
-FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
-    auto nv = A.column_size();
-    auto c = Vector<FloatDP>::unit(nv,i,DoublePrecision());
-    return solve(i,c,A,b,xl,xu);
-}
-
-FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
-    auto nv = A.column_size();
-    auto c = -Vector<FloatDP>::unit(nv,i,DoublePrecision());
-    return solve(i,c,A,b,xl,xu);
-}
-
 ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
     auto problem = construct_problem(f,d);
 
@@ -165,16 +251,20 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
 
     auto n = f.result_size();
 
+    //NativeSimplexParallelLinearisation solver;
+    //GLPKSimplexParallelLinearisation solver;
+    GLPKIPMParallelLinearisation solver;
+
     ExactBoxType q(n,ExactIntervalType(0,0,DoublePrecision()));
     for (SizeType p=0;p<n;++p) {
-        q[p].set_lower_bound(minimise(p,A,b,xl,xu));
-        q[p].set_upper_bound(maximise(p,A,b,xl,xu));
+        q[p].set_lower_bound(solver.minimise(p,A,b,xl,xu));
+        q[p].set_upper_bound(solver.maximise(p,A,b,xl,xu));
     }
     return q;
 }
 
 ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) {
-    ARIADNE_PRECONDITION(bx1.intersects(bx2))
+    if (not bx1.intersects(bx2)) return bx1;
 
     auto result = bx1;
 
@@ -217,7 +307,6 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
 
     ExactBoxType I = project(outer_domain,Range(0,n));
 
-    //ARIADNE_TEST_PRINT(I)
     for (auto const& boundary : boundaries) {
         auto outer_extension = embed(outer_function,boundary.domain());
         auto boundary_extension = embed(outer_function.domain(),boundary);
@@ -225,9 +314,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
         auto intersection = intersection_domain(f,extended_domain_restriction);
-        //ARIADNE_TEST_PRINT(intersection)
         I = inner_difference(I,intersection);
-        //ARIADNE_TEST_PRINT(I)
     }
 
     auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
@@ -235,6 +322,44 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     result.restrict(full_restricted_domain);
 
     return result;
+}
+
+Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> brusselator_system() {
+    RealVariable x("x"), y("y");
+    VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
+
+    Real e1=5/100_q; Real e2=7/100_q;
+    RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
+
+    StepMaximumError max_err=1e-6;
+    TaylorPicardIntegrator integrator(max_err);
+
+    VectorFieldEvolver evolver(dynamics,integrator);
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(0.02);
+
+    Real evolution_time = 0.02_dec;
+
+    LabelledFigure fig=LabelledFigure({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec});
+
+    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec}));
+}
+
+Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> basic_system() {
+    RealVariable x1("x1"), x2("x2");
+    VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
+    RealExpressionBoundedConstraintSet initial_set({-1<=x1<=1,-1<=x2<=1});
+
+    StepMaximumError max_err=1e-6;
+    TaylorPicardIntegrator integrator(max_err);
+
+    VectorFieldEvolver evolver(dynamics,integrator);
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(0.02);
+
+    Real evolution_time = 1;
+
+    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({4<=x1<=8,4<=x2<=8}));
 }
 
 class TestInnerApproximation
@@ -248,41 +373,11 @@ class TestInnerApproximation
 
     void test_inner_approximation() const {
 
-        /*
-        RealVariable x("x"), y("y");
-        VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
+        auto sys = basic_system();
 
-        Real e1=5/100_q; Real e2=7/100_q;
-        RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
+        auto fig = LabelledFigure(get<3>(sys));
 
-        StepMaximumError max_err=1e-6;
-        TaylorPicardIntegrator integrator(max_err);
-
-        VectorFieldEvolver evolver(dynamics,integrator);
-        evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.02);
-
-        Real evolution_time = 0.02_dec;
-
-        LabelledFigure fig=LabelledFigure({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec});
-        */
-
-        RealVariable x1("x1"), x2("x2");
-        VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
-        RealExpressionBoundedConstraintSet initial_set({-1<=x1<=1,-1<=x2<=1});
-
-        StepMaximumError max_err=1e-6;
-        TaylorPicardIntegrator integrator(max_err);
-
-        VectorFieldEvolver evolver(dynamics,integrator);
-        evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.02);
-
-        Real evolution_time = 1;
-
-        auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-
-        LabelledFigure fig=LabelledFigure({4<=x1<=8,4<=x2<=8});
+        auto evolution = get<0>(sys).orbit(get<1>(sys),get<2>(sys),Semantics::UPPER);
 
         auto outer_final = evolution.final()[0];
 
@@ -305,6 +400,7 @@ class TestInnerApproximation
 
 Int main()
 {
-    ARIADNE_TEST_CALL(TestInnerApproximation().test());
+    TestInnerApproximation().test();
+
     return ARIADNE_TEST_FAILURES;
 }

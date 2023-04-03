@@ -92,7 +92,7 @@ struct NativeSimplexParallelLinearisation : NativeParallelLinearisation {
 };
 
 struct NativeIPMParallelLinearisation : NativeParallelLinearisation {
-protected:
+  protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         InteriorPointSolver solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
@@ -158,7 +158,10 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
         }
 
         glp_load_matrix(lp, num_auxiliary*num_structural, ia, ja, ar);
-        //glp_write_lp(lp,NULL,"problem.txt");
+        char filename[30] = "";
+        std::string dir_s = (dir == 1 ? "min" : "max");
+        snprintf(filename,30,"problem-x%lu-%s.txt",k+1,dir_s.c_str());
+        glp_write_lp(lp,NULL,filename);
         optimisation_method(lp);
         double result = glp_get_col_prim(lp, k+1);
         glp_delete_prob(lp);
@@ -236,6 +239,7 @@ List<LabelledEnclosure> boundary(LabelledEnclosure const& enclosure) {
 Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct_problem(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
 
     auto x0 = midpoint(d);
+
     auto Jx0 = f.jacobian(x0);
     auto J_rng = jacobian_range(f,cast_vector(d));
     auto fx0 = f(x0);
@@ -281,10 +285,14 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
     return std::make_tuple(A,b,xl,xu);
 }
 
-void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) {
+void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
 
     SizeType num_auxiliary = A.row_size();
     SizeType num_structural = A.column_size()-num_auxiliary;
+
+    SizeType coord = 1 + i / (num_auxiliary/2);
+
+    std::cout << (i % 2 == 0 ? "min" : "max") << " x" << coord << std::endl << std::endl;
 
     for (SizeType i=0; i<num_auxiliary; ++i) {
         cout << "a" << i+1 << ": ";
@@ -302,15 +310,49 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
     cout << std::endl;
 }
 
-ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) {
-    auto problem = construct_problem(f,d);
+void evaluate_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
 
+    SizeType n = A.row_size();
+    SizeType m = A.column_size()-n;
+
+    ExactBoxType domain(m,ExactIntervalType(0,0));
+    for (SizeType j=0;j<m;++j)
+        domain[j] = ExactIntervalType(xl.at(j),xu.at(j));
+
+    auto f = EffectiveVectorMultivariateFunction::zeros(n,m);
+
+    for (SizeType i=0; i<n; ++i) {
+        for (SizeType j=0; j<m; ++j)
+            if (A.at(i,j) != 0)
+                f[i] = f[i] + EffectiveScalarMultivariateFunction::coordinate(m,j)*EffectiveScalarMultivariateFunction::constant(m,cast_exact(A.at(i,j).get_d()));
+    }
+
+    auto pt = domain.midpoint();
+    SizeType coord = i / (n/2);
+    pt[coord] = (i % 2 == 1 ? domain[coord].upper_bound() : domain[coord].lower_bound());
+
+    ARIADNE_TEST_PRINT(pt)
+
+    auto eval = f.evaluate(pt);
+
+    for (SizeType i=0; i<n/2; ++i)
+        std::cout << eval.at(i).value() << " <= " << b.at(i) << std::endl;
+    for (SizeType i=n/2; i<n; ++i)
+        std::cout << eval.at(i).value() << " <= " << b.at(i) << std::endl;
+    cout << std::endl;
+}
+
+ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i) {
+
+    auto problem = construct_problem(f,d);
     auto const& A = get<0>(problem);
     auto const& b = get<1>(problem);
     auto const& xl = get<2>(problem);
     auto const& xu = get<3>(problem);
 
-    //print_problem(A,b,xl,xu);
+    print_problem(A,b,xl,xu,i);
+
+    evaluate_problem(A,b,xl,xu,i);
 
     auto n = f.result_size();
 
@@ -319,10 +361,14 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     //GLPKSimplexParallelLinearisation solver;
     GLPKIPMParallelLinearisation solver;
 
-    ExactBoxType q(n,ExactIntervalType(0,0,DoublePrecision()));
+    ExactBoxType q(n,ExactIntervalType::empty_interval());
     for (SizeType p=0;p<n;++p) {
-        q[p].set_lower_bound(solver.minimise(p,A,b,xl,xu));
-        q[p].set_upper_bound(solver.maximise(p,A,b,xl,xu));
+        auto lb = solver.minimise(p,A,b,xl,xu);
+        auto ub = solver.maximise(p,A,b,xl,xu);
+        if (lb < ub) {
+            q[p].set_lower_bound(lb);
+            q[p].set_upper_bound(ub);
+        }
     }
     return q;
 }
@@ -370,15 +416,16 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     }
 
     ExactBoxType I = project(outer_domain,Range(0,n));
-
-    for (auto const& boundary : boundaries) {
+    for (SizeType i=0; i < boundaries.size(); ++i) {
+        auto const& boundary =  boundaries.at(i);
         auto outer_extension = embed(outer_function,boundary.domain());
         auto boundary_extension = embed(outer_function.domain(),boundary);
 
-        auto f = outer_extension - boundary_extension;
+        ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
-        auto intersection = intersection_domain(f,extended_domain_restriction);
+        auto intersection = intersection_domain(f,extended_domain_restriction, i);
+        ARIADNE_TEST_PRINT(intersection)
         I = inner_difference(I,intersection);
     }
 
@@ -403,7 +450,7 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> brussel
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
 
-    Real evolution_time = 0.02_dec;
+    Real evolution_time = 1.0_dec;
 
     LabelledFigure fig=LabelledFigure({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec});
 
@@ -466,7 +513,7 @@ class TestInnerApproximation
 
     void test_inner_approximation() const {
 
-        auto sys = brusselator_system();
+        auto sys = basic_system();
 
         auto fig = LabelledFigure(get<3>(sys));
 

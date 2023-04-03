@@ -362,6 +362,34 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> basic_s
     return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({4<=x1<=8,4<=x2<=8}));
 }
 
+Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> vanderpol_system() {
+    RealConstant mu("mu",1);
+    RealVariable x("x"), y("y");
+
+    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+
+    StepMaximumError max_err=1e-6;
+    GradedTaylorSeriesIntegrator integrator(max_err);
+
+    VectorFieldEvolver evolver(dynamics,integrator);
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(0.02);
+    evolver.configuration().set_maximum_spacial_error(1e2);
+    CONCLOG_PRINTLN(evolver.configuration());
+
+    Real x0 = 1.40_dec;
+    Real y0 = 2.40_dec;
+    Real eps_x0 = 0.15_dec;
+    Real eps_y0 = 0.05_dec;
+
+    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+
+    CONCLOG_PRINTLN("Initial set: " << initial_set);
+    Real evolution_time = 7.0_dec;
+
+    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({1.6_dec<=x<=2.2_dec,0.5_dec<=y<=1.5_dec}));
+}
+
 class TestInnerApproximation
 {
 
@@ -373,7 +401,7 @@ class TestInnerApproximation
 
     void test_inner_approximation() const {
 
-        auto sys = basic_system();
+        auto sys = brusselator_system();
 
         auto fig = LabelledFigure(get<3>(sys));
 
@@ -398,7 +426,7 @@ class TestInnerApproximation
     }
 };
 
-Int main()
+int main()
 {
     TestInnerApproximation().test();
 

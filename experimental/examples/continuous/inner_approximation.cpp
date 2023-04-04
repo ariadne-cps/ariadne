@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_inner_approximation.cpp
+ *            inner_approximation.cpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,35 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-#include <iostream>
-
-#include "config.hpp"
-#include "utility/tuple.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/constraint.hpp"
-#include "function/taylor_function.hpp"
-#include "dynamics/enclosure.hpp"
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/function_set.hpp"
-#include "solvers/integrator.hpp"
-#include "solvers/linear_programming.hpp"
-#include "symbolic/expression_set.hpp"
-#include "io/figure.hpp"
+#include "ariadne.hpp"
+#include "ariadne_main.hpp"
 #include "io/drawer.hpp"
-#include "io/graphics_manager.hpp"
-#include "conclog/logging.hpp"
+#include "solvers/linear_programming.hpp"
 
 #include "glpk.h"
-
-#include "../test.hpp"
 
 using namespace ConcLog;
 
@@ -60,6 +37,8 @@ using namespace std;
 struct ParallelLinearisationInterface {
     virtual FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
     virtual FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
+
+    virtual ~ParallelLinearisationInterface() = default;
 };
 
 struct NativeParallelLinearisation : ParallelLinearisationInterface {
@@ -292,22 +271,23 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
 
     SizeType coord = 1 + i / (num_auxiliary/2);
 
-    std::cout << (i % 2 == 0 ? "min" : "max") << " x" << coord << std::endl << std::endl;
+    std::ostringstream ss;
+    ss << (i % 2 == 0 ? "min" : "max") << " x" << coord << std::endl << std::endl;
 
     for (SizeType i=0; i<num_auxiliary; ++i) {
-        cout << "a" << i+1 << ": ";
+        ss << "a" << i+1 << ": ";
         for (SizeType j=num_structural; j>0; j--) {
             if (A.at(i,j-1) != 0)
-                cout << (A.at(i,j-1).get_d() > 0 ? "+" : "") << A.at(i,j-1).get_d() << " x" << j << " ";
+                ss << (A.at(i,j-1).get_d() > 0 ? "+" : "") << A.at(i,j-1).get_d() << " x" << j << " ";
         }
-        cout << "<= " << b.at(i).get_d() << std::endl;
+        ss << "<= " << b.at(i).get_d() << std::endl;
     }
 
-    cout << std::endl;
+    ss << std::endl;
     for (SizeType i=0; i<num_structural; ++i) {
-        cout << xl.at(i).get_d() << " <= x" << i+1 << " <= " << xu.at(i).get_d() << std::endl;
+        ss << xl.at(i).get_d() << " <= x" << i+1 << " <= " << xu.at(i).get_d() << std::endl;
     }
-    cout << std::endl;
+    CONCLOG_PRINTLN(ss.str())
 }
 
 void evaluate_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
@@ -331,18 +311,16 @@ void evaluate_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector
     SizeType coord = i / (n/2);
     pt[coord] = (i % 2 == 1 ? domain[coord].upper_bound() : domain[coord].lower_bound());
 
-    ARIADNE_TEST_PRINT(pt)
+    CONCLOG_PRINTLN("Problem evaluation at " << pt << ":")
 
     auto eval = f.evaluate(pt);
 
-    for (SizeType i=0; i<n/2; ++i)
-        std::cout << eval.at(i).value() << " <= " << b.at(i) << std::endl;
-    for (SizeType i=n/2; i<n; ++i)
-        std::cout << eval.at(i).value() << " <= " << b.at(i) << std::endl;
-    cout << std::endl;
+    for (SizeType i=0; i<n; ++i) {
+        CONCLOG_PRINTLN(eval.at(i).value() << " <= " << b.at(i))
+    }
 }
 
-ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i) {
+ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i, std::shared_ptr<ParallelLinearisationInterface> solver) {
 
     auto problem = construct_problem(f,d);
     auto const& A = get<0>(problem);
@@ -356,15 +334,10 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
 
     auto n = f.result_size();
 
-    //NativeSimplexParallelLinearisation solver;
-    //NativeIPMParallelLinearisation solver;
-    //GLPKSimplexParallelLinearisation solver;
-    GLPKIPMParallelLinearisation solver;
-
     ExactBoxType q(n,ExactIntervalType::empty_interval());
     for (SizeType p=0;p<n;++p) {
-        auto lb = solver.minimise(p,A,b,xl,xu);
-        auto ub = solver.maximise(p,A,b,xl,xu);
+        auto lb = solver->minimise(p,A,b,xl,xu);
+        auto ub = solver->maximise(p,A,b,xl,xu);
         if (lb < ub) {
             q[p].set_lower_bound(lb);
             q[p].set_upper_bound(ub);
@@ -401,7 +374,7 @@ ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) 
     return result;
 }
 
-LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
+LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::shared_ptr<ParallelLinearisationInterface> solver) {
     auto result = outer;
     result.uniform_error_recondition();
     auto const& outer_function = result.state_function();
@@ -416,6 +389,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
     }
 
     ExactBoxType I = project(outer_domain,Range(0,n));
+    CONCLOG_PRINTLN_VAR(I)
     for (SizeType i=0; i < boundaries.size(); ++i) {
         auto const& boundary =  boundaries.at(i);
         auto outer_extension = embed(outer_function,boundary.domain());
@@ -424,9 +398,10 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer) {
         ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
-        auto intersection = intersection_domain(f,extended_domain_restriction, i);
-        ARIADNE_TEST_PRINT(intersection)
+        auto intersection = intersection_domain(f,extended_domain_restriction, i, solver);
+        CONCLOG_PRINTLN_VAR_AT(1,intersection)
         I = inner_difference(I,intersection);
+        CONCLOG_PRINTLN_VAR(I)
     }
 
     auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
@@ -502,45 +477,34 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> vanderp
     return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({1.6_dec<=x<=2.2_dec,0.5_dec<=y<=1.5_dec}));
 }
 
-class TestInnerApproximation
-{
+void ariadne_main() {
 
-  public:
+    auto sys = basic_system();
 
-    void test() const {
-        ARIADNE_TEST_CALL(test_inner_approximation());
-    }
+    auto fig = LabelledFigure(get<3>(sys));
 
-    void test_inner_approximation() const {
+    auto evolution = get<0>(sys).orbit(get<1>(sys), get<2>(sys), Semantics::UPPER);
 
-        auto sys = basic_system();
+    auto outer_final = evolution.final()[0];
 
-        auto fig = LabelledFigure(get<3>(sys));
+    //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeSimplexParallelLinearisation());
+    //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeIPMParallelLinearisation());
+    //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
+    std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
 
-        auto evolution = get<0>(sys).orbit(get<1>(sys),get<2>(sys),Semantics::UPPER);
+    auto inner_final = inner_approximation(outer_final, solver);
 
-        auto outer_final = evolution.final()[0];
+    auto gamma = gamma_min(inner_final, outer_final);
+    CONCLOG_PRINTLN_VAR(gamma)
 
-        auto inner_final = inner_approximation(outer_final);
+    GraphicsManager::instance().set_drawer(AffineDrawer(7));
+    fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
 
-        auto gamma = gamma_min(inner_final,outer_final);
-        ARIADNE_TEST_PRINT(gamma)
+    auto outer_final_boundary = boundary(outer_final);
+    for (auto const &encl: outer_final_boundary)
+        fig << encl;
 
-        GraphicsManager::instance().set_drawer(AffineDrawer(7));
-        fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
+    fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
+    fig.write("inner_approximation");
 
-        auto outer_final_boundary = boundary(outer_final);
-        for (auto const& encl : outer_final_boundary)
-            fig << encl;
-
-        fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
-        fig.write("test_inner_approximation");
-    }
-};
-
-int main()
-{
-    TestInnerApproximation().test();
-
-    return ARIADNE_TEST_FAILURES;
 }

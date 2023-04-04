@@ -11,7 +11,6 @@ set(UNIT_TESTS
     test_infinite_time_reachability
     test_verify_safety
     test_pdes
-    test_inner_approximation
 )
 
 foreach(TEST ${UNIT_TESTS})

@@ -411,7 +411,27 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
     return result;
 }
 
-Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> brusselator_system() {
+LabelledFigure bounded_figure(LabelledEnclosure const& e) {
+    auto bx = e.bounding_box().euclidean_set();
+    auto vars = List<RealVariable>(e.bounding_box().variables());
+    auto x = vars[0];
+    auto y = vars[1];
+    auto xlb = bx[0].lower_bound().get_d();
+    auto xub = bx[0].upper_bound().get_d();
+    auto ylb = bx[1].lower_bound().get_d();
+    auto yub = bx[1].upper_bound().get_d();
+
+    auto xw = xub-xlb;
+    auto yw = yub-ylb;
+    xlb = xlb - 0.1*xw;
+    xub = xub + 0.1*xw;
+    ylb = ylb - 0.1*yw;
+    yub = yub + 0.1*yw;
+
+    return LabelledFigure(Axes2d(xlb<=x<=xub,ylb<=y<=yub));
+}
+
+LabelledEnclosure brusselator_sample() {
     RealVariable x("x"), y("y");
     VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
 
@@ -429,10 +449,10 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> brussel
 
     LabelledFigure fig=LabelledFigure({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec});
 
-    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({0.8_dec<=x<=1.1_dec,0.9_dec<=y<=1.2_dec}));
+    return evolver.orbit(initial_set,evolution_time,Semantics::UPPER).final()[0];
 }
 
-Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> basic_system() {
+LabelledEnclosure article_sample() {
     RealVariable x1("x1"), x2("x2");
     VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
     RealExpressionBoundedConstraintSet initial_set({-1<=x1<=1,-1<=x2<=1});
@@ -446,10 +466,10 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> basic_s
 
     Real evolution_time = 1;
 
-    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({4<=x1<=8,4<=x2<=8}));
+    return evolver.orbit(initial_set,evolution_time,Semantics::UPPER).final()[0];
 }
 
-Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> vanderpol_system() {
+LabelledEnclosure vanderpol_sample() {
     RealConstant mu("mu",1);
     RealVariable x("x"), y("y");
 
@@ -474,23 +494,19 @@ Tuple<VectorFieldEvolver,RealExpressionBoundedConstraintSet,Real,Axes2d> vanderp
     CONCLOG_PRINTLN("Initial set: " << initial_set);
     Real evolution_time = 7.0_dec;
 
-    return std::make_tuple(evolver,initial_set,evolution_time,Axes2d({1.6_dec<=x<=2.2_dec,0.5_dec<=y<=1.5_dec}));
+    return evolver.orbit(initial_set,evolution_time,Semantics::UPPER).final()[0];
 }
 
 void ariadne_main() {
 
-    auto sys = basic_system();
-
-    auto fig = LabelledFigure(get<3>(sys));
-
-    auto evolution = get<0>(sys).orbit(get<1>(sys), get<2>(sys), Semantics::UPPER);
-
-    auto outer_final = evolution.final()[0];
-
     //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeSimplexParallelLinearisation());
     //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeIPMParallelLinearisation());
-    //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
-    std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
+    std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
+    //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
+
+    auto outer_final = article_sample();
+
+    auto fig = bounded_figure(outer_final);
 
     auto inner_final = inner_approximation(outer_final, solver);
 

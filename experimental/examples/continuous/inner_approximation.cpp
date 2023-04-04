@@ -138,7 +138,7 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
 
         glp_load_matrix(lp, num_auxiliary*num_structural, ia, ja, ar);
         char filename[30] = "";
-        std::string dir_s = (dir == 1 ? "min" : "max");
+        std::string dir_s = (dir == GLP_MIN ? "min" : "max");
         snprintf(filename,30,"problem-x%lu-%s.txt",k+1,dir_s.c_str());
         glp_write_lp(lp,NULL,filename);
         optimisation_method(lp);
@@ -222,7 +222,7 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
     auto Jx0 = f.jacobian(x0);
     auto J_rng = jacobian_range(f,cast_vector(d));
     auto fx0 = f(x0);
-    auto b_rng = fx0- Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
+    auto b_rng = fx0 -Jx0 * Vector<FloatDPUpperInterval>(x0) + (J_rng-Jx0) * (d-x0);
 
     auto n = f.result_size();
     auto m = f.argument_size();
@@ -242,10 +242,10 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
 
     Vector<FloatDP> b(2*n,FloatDP(0,DoublePrecision()));
     for (SizeType i=0; i<n; ++i) {
-        b.at(i) = -b_rng.at(i).lower_bound().raw();
+        b.at(i) = b_rng.at(i).upper_bound().raw();
     }
     for (SizeType i=0; i<n; ++i) {
-        b.at(n+i) = b_rng.at(i).upper_bound().raw();
+        b.at(n+i) = -b_rng.at(i).lower_bound().raw();
     }
 
     Vector<FloatDP> xl(nv,FloatDP(0,DoublePrecision()));
@@ -396,6 +396,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
         auto boundary_extension = embed(outer_function.domain(),boundary);
 
         ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+        CONCLOG_PRINTLN_VAR_AT(1,f)
 
         auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
         auto intersection = intersection_domain(f,extended_domain_restriction, i, solver);
@@ -453,20 +454,82 @@ LabelledEnclosure brusselator_sample() {
 }
 
 LabelledEnclosure article_sample() {
+    using VFT = ValidatedVectorMultivariateTaylorFunctionModelDP;
+    using SFT = ValidatedScalarMultivariateTaylorFunctionModelDP;
+
     RealVariable x1("x1"), x2("x2");
-    VectorField dynamics({dot(x1)=x2/2+5, dot(x2)= x1/200*(100-x1*(10+x2))+5});
-    RealExpressionBoundedConstraintSet initial_set({-1<=x1<=1,-1<=x2<=1});
+    RealSpace spc({x1,x2});
 
-    StepMaximumError max_err=1e-6;
-    TaylorPicardIntegrator integrator(max_err);
+    ExactBoxType domain({{-1,1},{-1,1},{-1,1},{-1,1}});
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
 
-    Real evolution_time = 1;
+    auto p0 = SFT::coordinate(domain,0,sweeper);
+    auto p1 = SFT::coordinate(domain,1,sweeper);
+    auto p2 = SFT::coordinate(domain,2,sweeper);
+    auto p3 = SFT::coordinate(domain,3,sweeper);
 
-    return evolver.orbit(initial_set,evolution_time,Semantics::UPPER).final()[0];
+    auto f = VFT(2,domain,sweeper);
+    f[0] = 6.39_x + 1.06_x*p0 + 0.5_x*p1 - 0.02_x*p0*p0 - 0.01_x*p0*p1 + 0.05_x*p2;
+    f[1] = 5.6_x + 0.08_x*p0 + 0.92_x*p1 - 0.07_x*p0*p0 - 0.06_x*p0*p1 + 0.04_x*p3;
+
+    auto factory = TaylorFunctionFactory(sweeper);
+    EnclosureConfiguration config(factory);
+
+    return {Enclosure(domain,f,config),spc};
+}
+
+LabelledEnclosure basic_linear_sample() {
+    using VFT = ValidatedVectorMultivariateTaylorFunctionModelDP;
+    using SFT = ValidatedScalarMultivariateTaylorFunctionModelDP;
+
+    RealVariable x1("x1"), x2("x2");
+    RealSpace spc({x1,x2});
+
+    ExactBoxType domain({{-1,1},{-1,1}});
+
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
+
+    auto p0 = SFT::coordinate(domain,0,sweeper);
+    auto p1 = SFT::coordinate(domain,1,sweeper);
+
+    auto f = VFT(2,domain,sweeper);
+    f[0] = p0;
+    f[1] = p1;
+
+    auto factory = TaylorFunctionFactory(sweeper);
+    EnclosureConfiguration config(factory);
+
+    return {Enclosure(domain,f,config),spc};
+}
+
+LabelledEnclosure basic_linear_noisy_sample() {
+    using VFT = ValidatedVectorMultivariateTaylorFunctionModelDP;
+    using SFT = ValidatedScalarMultivariateTaylorFunctionModelDP;
+
+    RealVariable x1("x1"), x2("x2");
+    RealSpace spc({x1,x2});
+
+    ExactBoxType domain({{-1,1},{-1,1},{-1,1},{-1,1}});
+
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
+
+    auto p0 = SFT::coordinate(domain,0,sweeper);
+    auto p1 = SFT::coordinate(domain,1,sweeper);
+    auto p2 = SFT::coordinate(domain,2,sweeper);
+    auto p3 = SFT::coordinate(domain,3,sweeper);
+
+    auto f = VFT(2,domain,sweeper);
+
+    ExactDouble noise_level = 1e-3_x;
+
+    f[0] = p0+noise_level*p2;
+    f[1] = p1+noise_level*p3;
+
+    auto factory = TaylorFunctionFactory(sweeper);
+    EnclosureConfiguration config(factory);
+
+    return {Enclosure(domain,f,config),spc};
 }
 
 LabelledEnclosure vanderpol_sample() {
@@ -506,6 +569,8 @@ void ariadne_main() {
 
     auto outer_final = article_sample();
 
+    CONCLOG_PRINTLN_AT(1,"enclosure function = " << outer_final.state_function())
+
     auto fig = bounded_figure(outer_final);
 
     auto inner_final = inner_approximation(outer_final, solver);
@@ -521,6 +586,6 @@ void ariadne_main() {
         fig << encl;
 
     fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
-    fig.write("inner_approximation");
+    CONCLOG_RUN_AT(2,fig.write("inner_approximation"));
 
 }

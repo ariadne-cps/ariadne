@@ -370,21 +370,81 @@ ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) 
 
 template<class T> class IntervalSearchInterface {
   public:
+    //! \brief Return the current point
     virtual T const& current() const = 0;
-    virtual bool move_next() = 0;
+    //! \brief Move to the next point according to the current outcome
+    //! \return Whether a next point is available
+    virtual bool move_next(bool current_outcome) = 0;
+    //! \brief Return whether a next point is available
     virtual bool ended() const = 0;
+    //! \brief Return whether one solution has been found
+    //! \details Even if one solution has been found, the search might not have ended, in case we want to refine it
+    virtual bool solution_found() const = 0;
 };
 
 template<class T> class DownwardSearch : public IntervalSearchInterface<T> {
   public:
-    DownwardSearch(T const& lower, T const& upper, T const& decrement) : _current(upper), _lower(lower), _decrement(decrement) { }
+    DownwardSearch(T const& lower, T const& upper, T const& decrement) : _current(upper), _lower(lower), _decrement(decrement), _solution_found(false) { }
     T const& current() const override { return _current; }
-    bool move_next() override { if (not ended()) { _current -= _decrement; return true;} else { return false; }}
+    bool move_next(bool current_outcome) override {
+        if (current_outcome) {
+            _solution_found = true;
+            _current = _lower;
+            return false;
+        } else if (not ended()) {
+            _current -= _decrement;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     bool ended() const override { return _current-_lower < _decrement; }
+    bool solution_found() const override { return _solution_found; }
   private:
     T _current;
     T _lower;
     T const _decrement;
+    bool _solution_found;
+};
+
+template<class T> class BisectionSearch : public IntervalSearchInterface<T> {
+public:
+    BisectionSearch(T const& lower, T const& upper, T const& threshold) :
+        _current(upper), _lower(lower), _lower_is_set(false), _upper(upper), _threshold(threshold), _solution_found(false) { }
+    T const& current() const override { return _current; }
+    bool move_next(bool current_outcome) override {
+        if (not ended()) {
+            if (current_outcome) {
+                _solution_found = true;
+                _lower = _current;
+                _lower_is_set = true;
+                if (_current == _upper) {
+                    return false;
+                }
+            } else {
+                _upper = _current;
+                if (_current == _lower) {
+                    return false;
+                }
+            }
+            _current = (_lower_is_set ? _lower + (_upper-_lower)/2 : _lower);
+            CONCLOG_PRINTLN("Range [" << _lower << "," << _upper << "]")
+            _lower_is_set = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    bool ended() const override { return _upper-_lower <= _threshold; }
+    bool solution_found() const override { return _solution_found; }
+private:
+    T _current;
+    T _lower;
+    bool _lower_is_set;
+    T _upper;
+    T const _threshold;
+    bool _solution_found;
 };
 
 LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::shared_ptr<ParallelLinearisationInterface> solver) {
@@ -422,11 +482,12 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
 
                 auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
 
-                DownwardSearch<double> scaling(0.1,1.0,0.01);
-                while (scaling.move_next()) {
-                    CONCLOG_PRINTLN("Trying with scaling " << scaling.current())
+                BisectionSearch<double> scaling_search(0.01,0.99,0.01);
+                while (not scaling_search.ended()) {
+                    CONCLOG_PRINTLN("Trying with scaling " << scaling_search.current())
+                    bool current_outcome = false;
                     try {
-                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling.current());
+                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling_search.current());
                         try {
                             auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
                             CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
@@ -436,20 +497,21 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
                             CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all not verified boundaries to try again")
                             I = project(non_intersection_dom, Range(0, n));
                             CONCLOG_PRINTLN_VAR(I)
+                            current_outcome = true;
                             verified[i] = true;
                             for (SizeType h = 0; h < verified.size(); ++h) {
                                 if (not possibly(verified[h]))
                                     verified[h] = indeterminate;
                             }
-                            break;
                         }
                     } catch (std::exception& e) {
                         CONCLOG_PRINTLN("No feasible nonlinear solution...")
-                        break;
                     }
+                    scaling_search.move_next(current_outcome);
                 }
-                if (scaling.ended())
+                if (not scaling_search.solution_found())
                     verified[i] = false;
+                CONCLOG_PRINTLN("Current boundary non-intersection verification status: " << verified)
             }
         }
 

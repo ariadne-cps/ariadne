@@ -368,6 +368,25 @@ ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) 
     return result;
 }
 
+template<class T> class IntervalSearchInterface {
+  public:
+    virtual T const& current() const = 0;
+    virtual bool move_next() = 0;
+    virtual bool ended() const = 0;
+};
+
+template<class T> class DownwardSearch : public IntervalSearchInterface<T> {
+  public:
+    DownwardSearch(T const& lower, T const& upper, T const& decrement) : _current(upper), _lower(lower), _decrement(decrement) { }
+    T const& current() const override { return _current; }
+    bool move_next() override { if (not ended()) { _current -= _decrement; return true;} else { return false; }}
+    bool ended() const override { return _current-_lower < _decrement; }
+  private:
+    T _current;
+    T _lower;
+    T const _decrement;
+};
+
 LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::shared_ptr<ParallelLinearisationInterface> solver) {
     auto result = outer;
     result.uniform_error_recondition();
@@ -403,12 +422,11 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
 
                 auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
 
-                double scaling = 1.0;
-                while (scaling >= 0.0) {
-                    scaling -= 0.01;
-                    CONCLOG_PRINTLN("Trying with scaling " << scaling)
+                DownwardSearch<double> scaling(0.1,1.0,0.01);
+                while (scaling.move_next()) {
+                    CONCLOG_PRINTLN("Trying with scaling " << scaling.current())
                     try {
-                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling);
+                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling.current());
                         try {
                             auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
                             CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
@@ -430,7 +448,7 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
                         break;
                     }
                 }
-                if (scaling <= 0)
+                if (scaling.ended())
                     verified[i] = false;
             }
         }

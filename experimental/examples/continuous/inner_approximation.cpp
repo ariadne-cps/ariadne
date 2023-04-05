@@ -351,7 +351,7 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
 
 ExactBoxType nonlinear_nonintersection_domain(ValidatedVectorMultivariateFunction const& h, ExactBoxType const& d, SizeType i, double scaling) {
 
-    bool minimise = (i % 2 == 1);
+    bool minimise = (i % 2 == 0);
     SizeType var_idx = i/2;
 
     NonlinearInfeasibleInteriorPointOptimiser nonlinear_solver;
@@ -410,60 +410,77 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
 
     List<ValidatedVectorMultivariateFunctionPatch> boundaries;
     for (SizeType i = 0; i < n; ++i) {
-        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
         boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].upper_bound().get_d())));
+        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
     }
 
     ExactBoxType I = project(outer_domain, Range(0, n));
     CONCLOG_PRINTLN_VAR(I)
-    double scaling = 0.99;
-    bool loop = true;
-    Vector<bool> done(boundaries.size());
-    for (SizeType i = 0; i < boundaries.size(); ++i)
-        done[i] = false;
-    while (scaling > 0) {
-        loop = false;
-        CONCLOG_PRINTLN("Trying at relaxation " << scaling)
+    Vector<Kleenean> verified(boundaries.size());
+
+    for (SizeType i = 0; i < verified.size(); ++i) {
+        verified[i] = indeterminate;
+    }
+
+    while (true) {
         for (SizeType i = 0; i < boundaries.size(); ++i) {
-            if (not done[i]) {
-                CONCLOG_PRINTLN("Boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "lower" : "upper") << " bound of x" << i/2 << ")")
-                auto const &boundary = boundaries.at(i);
-                auto outer_extension = embed(outer_function, boundary.domain());
-                auto boundary_extension = embed(outer_function.domain(), boundary);
-
-                ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
-                CONCLOG_PRINTLN_VAR_AT(1, f)
-
-                auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
-
-                try {
-                    auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling);
-                    try {
-                        auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
-                        CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
-                        feasible_dom = intersection_domain(f, feasible_dom, i, solver);
-                        CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", scaling further")
-                        scaling -= 0.01;
-                        loop = true;
-                        break;
-                    } catch (std::exception& e) {
-                        CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain")
-                        I = project(non_intersection_dom, Range(0, n));
-                        done[i] = true;
-                    }
-                } catch (std::exception& e) {
-                    CONCLOG_PRINTLN("No feasible nonlinear solution, scaling further...")
+            if (possibly(not verified[i])) {
+                CONCLOG_PRINTLN("Checking boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "upper" : "lower") << " bound of x" << i/2 << ")")
+                double scaling = 1.0;
+                while (scaling >= 0.0) {
                     scaling -= 0.01;
-                    loop = true;
-                    break;
+                    CONCLOG_PRINTLN("Trying with scaling " << scaling)
+                    auto const& boundary = boundaries.at(i);
+                    auto outer_extension = embed(outer_function, boundary.domain());
+                    auto boundary_extension = embed(outer_function.domain(), boundary);
+
+                    ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+
+                    auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+
+                    try {
+                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling);
+                        try {
+                            auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
+                            CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
+                            feasible_dom = intersection_domain(f, feasible_dom, i, solver);
+                            CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", retrying...")
+                        } catch (std::exception& e) {
+                            CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all not verified boundaries to try again")
+                            I = project(non_intersection_dom, Range(0, n));
+                            CONCLOG_PRINTLN_VAR(I)
+                            verified[i] = true;
+                            for (SizeType h = 0; h < verified.size(); ++h) {
+                                if (not possibly(verified[h]))
+                                    verified[h] = indeterminate;
+                            }
+                            break;
+                        }
+                    } catch (std::exception& e) {
+                        CONCLOG_PRINTLN("No feasible nonlinear solution...")
+                        break;
+                    }
                 }
-                CONCLOG_PRINTLN_VAR(I)
+                if (scaling <= 0)
+                    verified[i] = false;
             }
         }
-        if (not loop) break;
+
+        bool completed = true;
+        for (SizeType i = 0; i < verified.size(); ++i) {
+            if (possibly(not verified.at(i)) and possibly(verified.at(i))) {
+                completed = false;
+                break;
+            }
+        }
+        if (completed) break;
     }
-    if (scaling <= 0)
-        throw std::runtime_error("No inner approximation could be computed");
+
+    for (SizeType i = 0; i < verified.size(); ++i) {
+        if (definitely(not verified.at(i))) {
+            throw std::runtime_error("No inner approximation could be computed");
+        }
+    }
 
     auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
 

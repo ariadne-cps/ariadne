@@ -27,6 +27,7 @@
 #include "io/drawer.hpp"
 #include "solvers/linear_programming.hpp"
 #include "solvers/nonlinear_programming.hpp"
+#include "utility/stopwatch.hpp"
 
 #include "glpk.h"
 
@@ -426,18 +427,19 @@ LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::share
         for (SizeType i = 0; i < boundaries.size(); ++i) {
             if (possibly(not verified[i])) {
                 CONCLOG_PRINTLN("Checking boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "upper" : "lower") << " bound of x" << i/2 << ")")
+
+                auto const& boundary = boundaries.at(i);
+                auto outer_extension = embed(outer_function, boundary.domain());
+                auto boundary_extension = embed(outer_function.domain(), boundary);
+
+                ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+
+                auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+
                 double scaling = 1.0;
                 while (scaling >= 0.0) {
                     scaling -= 0.01;
                     CONCLOG_PRINTLN("Trying with scaling " << scaling)
-                    auto const& boundary = boundaries.at(i);
-                    auto outer_extension = embed(outer_function, boundary.domain());
-                    auto boundary_extension = embed(outer_function.domain(), boundary);
-
-                    ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
-
-                    auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
-
                     try {
                         auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling);
                         try {
@@ -650,7 +652,10 @@ void ariadne_main() {
 
     auto fig = bounded_figure(outer_final);
 
+    Stopwatch<Milliseconds> sw;
     auto inner_final = inner_approximation(outer_final, solver);
+    sw.click();
+    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
     auto gamma = gamma_min(inner_final, outer_final);
     CONCLOG_PRINTLN_VAR(gamma)

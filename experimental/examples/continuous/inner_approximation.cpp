@@ -293,37 +293,6 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
     CONCLOG_PRINTLN(ss.str())
 }
 
-void evaluate_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
-    CONCLOG_SCOPE_CREATE
-
-    SizeType n = A.row_size();
-    SizeType m = A.column_size()-n;
-
-    ExactBoxType domain(m,ExactIntervalType(0,0));
-    for (SizeType j=0;j<m;++j)
-        domain[j] = ExactIntervalType(xl.at(j),xu.at(j));
-
-    auto f = EffectiveVectorMultivariateFunction::zeros(n,m);
-
-    for (SizeType i=0; i<n; ++i) {
-        for (SizeType j=0; j<m; ++j)
-            if (A.at(i,j) != 0)
-                f[i] = f[i] + EffectiveScalarMultivariateFunction::coordinate(m,j)*EffectiveScalarMultivariateFunction::constant(m,cast_exact(A.at(i,j).get_d()));
-    }
-
-    auto pt = domain.midpoint();
-    SizeType coord = i / (n/2);
-    pt[coord] = (i % 2 == 1 ? domain[coord].upper_bound() : domain[coord].lower_bound());
-
-    CONCLOG_PRINTLN("Problem evaluation at " << pt << ":")
-
-    auto eval = f.evaluate(pt);
-
-    for (SizeType i=0; i<n; ++i) {
-        CONCLOG_PRINTLN(eval.at(i).value() << " <= " << b.at(i))
-    }
-}
-
 ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i, std::shared_ptr<ParallelLinearisationInterface> solver) {
 
     auto problem = construct_problem(f,d);
@@ -333,8 +302,6 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto const& xu = get<3>(problem);
 
     //print_problem(A,b,xl,xu,i);
-
-    //evaluate_problem(A,b,xl,xu,i);
 
     auto n = d.dimension();
 

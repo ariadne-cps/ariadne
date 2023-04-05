@@ -26,6 +26,7 @@
 #include "ariadne_main.hpp"
 #include "io/drawer.hpp"
 #include "solvers/linear_programming.hpp"
+#include "solvers/nonlinear_programming.hpp"
 
 #include "glpk.h"
 
@@ -265,6 +266,7 @@ Tuple<Matrix<FloatDP>,Vector<FloatDP>,Vector<FloatDP>,Vector<FloatDP>> construct
 }
 
 void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
+    CONCLOG_SCOPE_CREATE
 
     SizeType num_auxiliary = A.row_size();
     SizeType num_structural = A.column_size()-num_auxiliary;
@@ -291,6 +293,7 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
 }
 
 void evaluate_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu, SizeType i) {
+    CONCLOG_SCOPE_CREATE
 
     SizeType n = A.row_size();
     SizeType m = A.column_size()-n;
@@ -328,11 +331,11 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
     auto const& xl = get<2>(problem);
     auto const& xu = get<3>(problem);
 
-    print_problem(A,b,xl,xu,i);
+    //print_problem(A,b,xl,xu,i);
 
-    evaluate_problem(A,b,xl,xu,i);
+    //evaluate_problem(A,b,xl,xu,i);
 
-    auto n = f.result_size();
+    auto n = d.dimension();
 
     ExactBoxType q(n,ExactIntervalType::empty_interval());
     for (SizeType p=0;p<n;++p) {
@@ -344,6 +347,29 @@ ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, E
         }
     }
     return q;
+}
+
+ExactBoxType nonlinear_nonintersection_domain(ValidatedVectorMultivariateFunction const& h, ExactBoxType const& d, SizeType i, double scaling) {
+
+    bool minimise = (i % 2 == 1);
+    SizeType var_idx = i/2;
+
+    NonlinearInfeasibleInteriorPointOptimiser nonlinear_solver;
+    auto obj = ValidatedScalarMultivariateFunction::coordinate(d.dimension(),var_idx);
+    if (not minimise) obj = -obj;
+    ValidatedVectorMultivariateFunction g(0,d.dimension());
+
+    auto solution = nonlinear_solver.minimise(obj,d,g,h);
+    CONCLOG_PRINTLN_AT(1,"Solution for intersection: x" << var_idx << (minimise ? " >= " : " <= ") << solution.at(var_idx))
+
+    auto result = d;
+    double value_correction = d[var_idx].width().get_d()*(1.0-scaling);
+    if (minimise)
+        result[var_idx].set_upper_bound((solution[var_idx].lower_raw()-FloatDP(cast_exact(value_correction),DoublePrecision())).lower_raw());
+    else
+        result[var_idx].set_lower_bound((solution[var_idx].upper_raw()+FloatDP(cast_exact(value_correction),DoublePrecision())).upper_raw());
+    CONCLOG_PRINTLN_AT(1,"Resulting (shrinked) domain for non-intersection: " << result)
+    return result;
 }
 
 ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) {
@@ -377,33 +403,67 @@ ExactBoxType inner_difference(ExactBoxType const& bx1, ExactBoxType const& bx2) 
 LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::shared_ptr<ParallelLinearisationInterface> solver) {
     auto result = outer;
     result.uniform_error_recondition();
-    auto const& outer_function = result.state_function();
+    auto const &outer_function = result.state_function();
     auto outer_domain = result.domain();
 
     auto n = outer_function.result_size();
 
     List<ValidatedVectorMultivariateFunctionPatch> boundaries;
-    for (SizeType i=0;i<n;++i) {
-        boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].lower_bound().get_d())));
-        boundaries.push_back(partial_evaluate(outer_function,i,cast_exact(outer_domain[i].upper_bound().get_d())));
+    for (SizeType i = 0; i < n; ++i) {
+        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
+        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].upper_bound().get_d())));
     }
 
-    ExactBoxType I = project(outer_domain,Range(0,n));
+    ExactBoxType I = project(outer_domain, Range(0, n));
     CONCLOG_PRINTLN_VAR(I)
-    for (SizeType i=0; i < boundaries.size(); ++i) {
-        auto const& boundary =  boundaries.at(i);
-        auto outer_extension = embed(outer_function,boundary.domain());
-        auto boundary_extension = embed(outer_function.domain(),boundary);
+    double scaling = 0.99;
+    bool loop = true;
+    Vector<bool> done(boundaries.size());
+    for (SizeType i = 0; i < boundaries.size(); ++i)
+        done[i] = false;
+    while (scaling > 0) {
+        loop = false;
+        CONCLOG_PRINTLN("Trying at relaxation " << scaling)
+        for (SizeType i = 0; i < boundaries.size(); ++i) {
+            if (not done[i]) {
+                CONCLOG_PRINTLN("Boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "lower" : "upper") << " bound of x" << i/2 << ")")
+                auto const &boundary = boundaries.at(i);
+                auto outer_extension = embed(outer_function, boundary.domain());
+                auto boundary_extension = embed(outer_function.domain(), boundary);
 
-        ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
-        CONCLOG_PRINTLN_VAR_AT(1,f)
+                ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+                CONCLOG_PRINTLN_VAR_AT(1, f)
 
-        auto extended_domain_restriction = product(I,project(outer_domain,Range(n,outer_function.argument_size())),boundary.domain());
-        auto intersection = intersection_domain(f,extended_domain_restriction, i, solver);
-        CONCLOG_PRINTLN_VAR_AT(1,intersection)
-        I = inner_difference(I,intersection);
-        CONCLOG_PRINTLN_VAR(I)
+                auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+
+                try {
+                    auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling);
+                    try {
+                        auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
+                        CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
+                        feasible_dom = intersection_domain(f, feasible_dom, i, solver);
+                        CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", scaling further")
+                        scaling -= 0.01;
+                        loop = true;
+                        break;
+                    } catch (std::exception& e) {
+                        CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain")
+                        I = project(non_intersection_dom, Range(0, n));
+                        done[i] = true;
+                    }
+                } catch (std::exception& e) {
+                    CONCLOG_PRINTLN("No feasible nonlinear solution, scaling further...")
+                    scaling -= 0.01;
+                    loop = true;
+                    break;
+                }
+                CONCLOG_PRINTLN_VAR(I)
+            }
+        }
+        if (not loop) break;
     }
+    if (scaling <= 0)
+        throw std::runtime_error("No inner approximation could be computed");
 
     auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
 

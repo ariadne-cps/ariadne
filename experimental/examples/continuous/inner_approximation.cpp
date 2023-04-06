@@ -578,8 +578,13 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                 }
 
                 if (not scaling_search.solution_found()) {
-                    CONCLOG_PRINTLN_AT(1,"No valid solution found, setting failure for this boundary.")
-                    verified[bnd_idx] = false;
+                    if (not bound_found[bnd_idx]) {
+                        CONCLOG_PRINTLN_AT(1,"No valid solution found, setting failure for this boundary.")
+                        verified[bnd_idx] = false;
+                    } else {
+                        CONCLOG_PRINTLN_AT(1,"No valid solution found, keeping the original value for the bound, setting this boundary as verified.")
+                        verified[bnd_idx] = true;
+                    }
                 } else {
                     if (scaled_bound_is_an_improvement) {
                         CONCLOG_PRINTLN_AT(1,"Using optimal valid solution as a restriction to the inner domain, resetting all remaining boundaries to try again.")
@@ -590,7 +595,7 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                             verified[h] = indeterminate;
                         }
                     } else {
-                        CONCLOG_PRINTLN_AT(1,"Keeping the original value for the bound, setting this boundary as verified.")
+                        CONCLOG_PRINTLN_AT(1,"No improvement, keeping the original value for the bound, setting this boundary as verified.")
                     }
                     verified[bnd_idx] = true;
                     bound_found[bnd_idx] = true;
@@ -726,7 +731,7 @@ void ariadne_main() {
 
     auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver));
 
-    auto outer_final = article_sample();
+    auto outer_final = vanderpol_sample();
 
     CONCLOG_PRINTLN_AT(1,"enclosure function = " << outer_final.state_function())
 

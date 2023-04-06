@@ -490,16 +490,15 @@ class InnerApproximatorInterface {
 
 class InnerApproximatorBase : public InnerApproximatorInterface {
   public:
-    InnerApproximatorBase(ContractorInterface const& contractor, SizeType num_rounds) : _contractor_ptr(contractor.clone()), _num_rounds(num_rounds) { }
+    InnerApproximatorBase(ContractorInterface const& contractor) : _contractor_ptr(contractor.clone()) { }
 
   protected:
     std::shared_ptr<ContractorInterface> _contractor_ptr;
-    SizeType _num_rounds;
 };
 
 class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBase {
   public:
-    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType num_rounds = 2) : InnerApproximatorBase(contractor,num_rounds) { }
+    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor) : InnerApproximatorBase(contractor) { }
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
 
@@ -519,97 +518,94 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
         ExactBoxType I = project(outer_domain, Range(0, n));
         CONCLOG_PRINTLN_VAR(I)
         Vector<Kleenean> verified(boundaries.size());
+        Vector<bool> bound_found(boundaries.size());
 
         for (SizeType i = 0; i < verified.size(); ++i) {
             verified[i] = indeterminate;
+            bound_found[i] = false;
         }
 
-        SizeType current_round = 1;
+        SizeType rnd = 0;
+        bool completed = false;
+        while (not completed) {
+            auto bnd_idx = rnd % boundaries.size();
 
-        while (true) {
-            for (SizeType i = 0; i < boundaries.size(); ++i) {
-                if (possibly(not verified[i])) {
+            if (possibly(not verified[bnd_idx])) {
 
-                    SizeType var_idx = i/2;
-                    bool is_lower_boundary = (i % 2 == 1);
+                CONCLOG_PRINTLN_AT(1,"Round " << rnd)
 
-                    CONCLOG_PRINTLN_AT(1,"Checking boundary " << i << " (outer reach evaluated on the " << (is_lower_boundary ? "lower" : "upper") << " bound of x" << var_idx << ")")
+                SizeType var_idx = bnd_idx/2;
+                bool is_lower_boundary = (bnd_idx % 2 == 1);
 
-                    auto const& boundary = boundaries.at(i);
-                    auto outer_extension = embed(outer_function, boundary.domain());
-                    auto boundary_extension = embed(outer_function.domain(), boundary);
+                CONCLOG_PRINTLN_AT(1,"Checking boundary " << bnd_idx << " (outer reach evaluated on the " << (is_lower_boundary ? "lower" : "upper") << " bound of x" << var_idx << ")")
 
-                    ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+                auto const& boundary = boundaries.at(bnd_idx);
+                auto outer_extension = embed(outer_function, boundary.domain());
+                auto boundary_extension = embed(outer_function.domain(), boundary);
 
-                    auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+                ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
 
-                    auto intersection_bound = nonlinear_intersection_bound(f, extended_domain_restriction, var_idx, is_lower_boundary);
-                    CONCLOG_PRINTLN_AT(2,"Candidate solution for intersection: x" << var_idx << (is_lower_boundary ? " <= " : " >= ") << intersection_bound)
+                auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
 
-                    BisectionSearch<double> scaling_search(0.01,0.99,0.01);
-                    CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
-                    auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+                auto intersection_bound = nonlinear_intersection_bound(f, extended_domain_restriction, var_idx, is_lower_boundary);
+                CONCLOG_PRINTLN_AT(2,"Candidate solution for intersection: x" << var_idx << (is_lower_boundary ? " <= " : " >= ") << intersection_bound)
 
-                    auto scaled_bound_is_an_improvement = true;
-                    while (not scaling_search.ended()) {
+                BisectionSearch<double> scaling_search(0.01,0.99,0.01);
+                CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
+                auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
 
-                        CONCLOG_PRINTLN_AT(2,"Resulting candidate (shrinked) domain for non-intersection: " << non_intersection_dom)
+                auto scaled_bound_is_an_improvement = true;
+                while (not scaling_search.ended()) {
 
-                        bool current_outcome = false;
-                        try {
-                            auto feasible_dom = _contractor_ptr->contract(f, non_intersection_dom);
-                            CONCLOG_PRINTLN_AT(3,"First contraction round feasible domain still not empty: " << feasible_dom)
+                    CONCLOG_PRINTLN_AT(2,"Resulting candidate (shrinked) domain for non-intersection: " << non_intersection_dom)
+
+                    bool current_outcome = false;
+                    try {
+                        auto feasible_dom = _contractor_ptr->contract(f, non_intersection_dom);
+                        for (SizeType j = 1; j < 10; ++j) {
                             feasible_dom = _contractor_ptr->contract(f, feasible_dom);
-                            CONCLOG_PRINTLN_AT(2,"Nonlinear solution is not validated: found feasible domain " << feasible_dom << ", retrying...")
-                        } catch (std::exception& e) {
-                            CONCLOG_PRINTLN_AT(2,"Nonlinear solution is validated")
-                            current_outcome = true;
                         }
-
-                        scaling_search.move_next(current_outcome);
-                        CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
-                        non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
-                        scaled_bound_is_an_improvement =  (current_round == 1 or (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() < extended_domain_restriction[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound() > extended_domain_restriction[var_idx].upper_bound()));
+                        CONCLOG_PRINTLN_AT(2,"Nonlinear solution is not validated: found feasible domain " << feasible_dom << ", retrying...")
+                    } catch (std::exception& e) {
+                        CONCLOG_PRINTLN_AT(2,"Nonlinear solution is validated")
+                        current_outcome = true;
                     }
 
-                    if (not scaling_search.solution_found()) {
-                        CONCLOG_PRINTLN_AT(1,"No valid solution found, setting failure for this boundary.")
-                        verified[i] = false;
-                    } else {
-                        if (scaled_bound_is_an_improvement) {
-                            CONCLOG_PRINTLN_AT(1,"Using optimal valid solution as a restriction to the inner domain, resetting all failed boundaries to try again.")
-                            CONCLOG_PRINTLN_AT(2,"Value identified: x" << var_idx << (is_lower_boundary ? " >= " : " <= ") << (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound()))
-                            I = project(non_intersection_dom, Range(0, n));
-                            CONCLOG_PRINTLN_VAR_AT(1,I)
-                            for (SizeType h = 0; h < verified.size(); ++h) {
-                                if (not possibly(verified[h]))
-                                    verified[h] = indeterminate;
-                            }
-                        } else {
-                            CONCLOG_PRINTLN_AT(1,"Keeping the original value for the bound, setting this boundary as verified anyway.")
-                        }
-                        verified[i] = true;
-                    }
-                    CONCLOG_PRINTLN_AT(1,"Current boundary non-intersection verification status: " << verified)
+                    scaling_search.move_next(current_outcome);
+                    CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
+                    non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+                    scaled_bound_is_an_improvement =  (not bound_found[bnd_idx] or (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() < extended_domain_restriction[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound() > extended_domain_restriction[var_idx].upper_bound()));
                 }
+
+                if (not scaling_search.solution_found()) {
+                    CONCLOG_PRINTLN_AT(1,"No valid solution found, setting failure for this boundary.")
+                    verified[bnd_idx] = false;
+                } else {
+                    if (scaled_bound_is_an_improvement) {
+                        CONCLOG_PRINTLN_AT(1,"Using optimal valid solution as a restriction to the inner domain, resetting all remaining boundaries to try again.")
+                        CONCLOG_PRINTLN_AT(2,"Value identified: x" << var_idx << (is_lower_boundary ? " >= " : " <= ") << (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound()))
+                        I = project(non_intersection_dom, Range(0, n));
+                        CONCLOG_PRINTLN_VAR_AT(1,I)
+                        for (SizeType h = 0; h < verified.size(); ++h) {
+                            verified[h] = indeterminate;
+                        }
+                    } else {
+                        CONCLOG_PRINTLN_AT(1,"Keeping the original value for the bound, setting this boundary as verified.")
+                    }
+                    verified[bnd_idx] = true;
+                    bound_found[bnd_idx] = true;
+                }
+                CONCLOG_PRINTLN_AT(1,"Current boundary non-intersection verification status: " << verified)
             }
 
-            bool completed = true;
+            completed = true;
             for (SizeType i = 0; i < verified.size(); ++i) {
                 if (possibly(not verified.at(i)) and possibly(verified.at(i))) {
                     completed = false;
                     break;
                 }
             }
-
-            if (completed and current_round >= _num_rounds) break;
-            else if (completed) {
-                ++current_round;
-                CONCLOG_PRINTLN("Round " << current_round-1 << " of " << _num_rounds << " completed, resetting the 'verified' status on all variables")
-                for (SizeType i = 0; i < verified.size(); ++i) {
-                    verified[i] = indeterminate;
-                }
-            }
+            ++rnd;
         }
 
         for (SizeType i = 0; i < verified.size(); ++i) {

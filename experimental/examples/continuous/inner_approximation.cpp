@@ -36,16 +36,16 @@ using namespace ConcLog;
 using namespace Ariadne;
 using namespace std;
 
-class ParallelLinearisationInterface {
+class LinearSolverInterface {
   public:
     virtual FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
     virtual FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
 
-    virtual ParallelLinearisationInterface* clone() const = 0;
-    virtual ~ParallelLinearisationInterface() = default;
+    virtual LinearSolverInterface* clone() const = 0;
+    virtual ~LinearSolverInterface() = default;
 };
 
-class NativeParallelLinearisation : public ParallelLinearisationInterface {
+class NativeLinearSolver : public LinearSolverInterface {
   public:
     FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         auto nv = A.column_size();
@@ -65,7 +65,7 @@ class NativeParallelLinearisation : public ParallelLinearisationInterface {
 
 };
 
-class NativeSimplexParallelLinearisation : public NativeParallelLinearisation {
+class NativeSimplex : public NativeLinearSolver {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         SimplexSolver<FloatDP> solver;
@@ -73,10 +73,10 @@ class NativeSimplexParallelLinearisation : public NativeParallelLinearisation {
         return solution.at(k).value();
     }
   public:
-    ParallelLinearisationInterface* clone() const override { return new NativeSimplexParallelLinearisation(); }
+    LinearSolverInterface* clone() const override { return new NativeSimplex(); }
 };
 
-class NativeIPMParallelLinearisation : public NativeParallelLinearisation {
+class NativeIPM : public NativeLinearSolver {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         InteriorPointSolver solver;
@@ -84,10 +84,10 @@ class NativeIPMParallelLinearisation : public NativeParallelLinearisation {
         return get<1>(solution).at(k).raw();
     }
   public:
-    ParallelLinearisationInterface* clone() const override { return new NativeIPMParallelLinearisation(); }
+    LinearSolverInterface* clone() const override { return new NativeIPM(); }
 };
 
-class GLPKParallelLinearisation : public ParallelLinearisationInterface {
+class GLPKSolver : public LinearSolverInterface {
   public:
     FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         return _solve(GLP_MIN,k,A,b,xl,xu);
@@ -158,7 +158,7 @@ class GLPKParallelLinearisation : public ParallelLinearisationInterface {
     }
 };
 
-class GLPKSimplexParallelLinearisation : public GLPKParallelLinearisation {
+class GLPKSimplex : public GLPKSolver {
   protected:
     void optimisation_method(glp_prob* lp) const override {
         glp_simplex(lp,NULL);
@@ -173,10 +173,10 @@ class GLPKSimplexParallelLinearisation : public GLPKParallelLinearisation {
         }
     }
   public:
-    ParallelLinearisationInterface* clone() const override { return new GLPKSimplexParallelLinearisation(); }
+    LinearSolverInterface* clone() const override { return new GLPKSimplex(); }
 };
 
-class GLPKIPMParallelLinearisation : public GLPKParallelLinearisation {
+class GLPKIPM : public GLPKSolver {
   protected:
     void optimisation_method(glp_prob* lp) const override {
         glp_interior(lp,NULL);
@@ -193,7 +193,7 @@ class GLPKIPMParallelLinearisation : public GLPKParallelLinearisation {
         }
     }
   public:
-    ParallelLinearisationInterface* clone() const override { return new GLPKSimplexParallelLinearisation(); }
+    LinearSolverInterface* clone() const override { return new GLPKSimplex(); }
 };
 
 double gamma(LabelledEnclosure const& inner, LabelledEnclosure const& outer) {
@@ -435,17 +435,23 @@ private:
     bool _solution_found;
 };
 
-class InnerApproximatorInterface {
+//! \brief A class for contracting the domain of a function
+class ContractorInterface {
   public:
-    virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const = 0;
+    //! \brief Contract the domain \a d of a function \a f
+    //! \details The result is guaranteed to be a subset of \a d
+    virtual ExactBoxType contract(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) const = 0;
+    virtual ContractorInterface* clone() const = 0;
+    virtual ~ContractorInterface() = default;
 };
 
-class InnerApproximatorBase : public InnerApproximatorInterface {
+class ParallelLinearisationContractor : public ContractorInterface {
+  private:
+    ParallelLinearisationContractor(ParallelLinearisationContractor const& other) : _solver_ptr(other._solver_ptr) { }
   public:
-    InnerApproximatorBase(ParallelLinearisationInterface const& solver) : _solver_ptr(solver.clone()) { }
-  protected:
+    ParallelLinearisationContractor(LinearSolverInterface const& solver) : _solver_ptr(solver.clone()) { }
 
-    ExactBoxType contract(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) const {
+    ExactBoxType contract(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) const override {
 
         auto problem = construct_problem(f,d);
         auto const& A = get<0>(problem);
@@ -467,13 +473,28 @@ class InnerApproximatorBase : public InnerApproximatorInterface {
         return q;
     }
 
+    ContractorInterface* clone() const override { return new ParallelLinearisationContractor(*this); }
+
   private:
-    std::shared_ptr<ParallelLinearisationInterface> _solver_ptr;
+    std::shared_ptr<LinearSolverInterface> _solver_ptr;
+};
+
+class InnerApproximatorInterface {
+  public:
+    virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const = 0;
+};
+
+class InnerApproximatorBase : public InnerApproximatorInterface {
+  public:
+    InnerApproximatorBase(ContractorInterface const& contractor) : _contractor_ptr(contractor.clone()) { }
+
+  protected:
+    std::shared_ptr<ContractorInterface> _contractor_ptr;
 };
 
 class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBase {
   public:
-    NonlinearCandidateValidationInnerApproximator(ParallelLinearisationInterface const& solver) : InnerApproximatorBase(solver) { }
+    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor) : InnerApproximatorBase(contractor) { }
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
 
@@ -530,9 +551,9 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
 
                         bool current_outcome = false;
                         try {
-                            auto feasible_dom = contract(f, non_intersection_dom);
+                            auto feasible_dom = _contractor_ptr->contract(f, non_intersection_dom);
                             CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
-                            feasible_dom = contract(f, feasible_dom);
+                            feasible_dom = _contractor_ptr->contract(f, feasible_dom);
                             CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", retrying...")
                         } catch (std::exception& e) {
                             CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all failed boundaries to try again")
@@ -737,12 +758,12 @@ LabelledEnclosure vanderpol_sample() {
 
 void ariadne_main() {
 
-    //auto linear_solver = NativeSimplexParallelLinearisation();
-    //auto linear_solver = NativeIPMParallelLinearisation();
-    auto linear_solver = GLPKSimplexParallelLinearisation();
-    //auto linear_solver = GLPKIPMParallelLinearisation();
+    //auto linear_solver = NativeSimplex();
+    //auto linear_solver = NativeIPM();
+    auto linear_solver = GLPKSimplex();
+    //auto linear_solver = GLPKIPM();
 
-    auto approximator = NonlinearCandidateValidationInnerApproximator(linear_solver);
+    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver));
 
     auto outer_final = article_sample();
 

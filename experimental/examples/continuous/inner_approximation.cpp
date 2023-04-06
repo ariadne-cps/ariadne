@@ -184,7 +184,7 @@ struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
 };
 
 double gamma(LabelledEnclosure const& encl, SizeType idx) {
-    auto rng = encl.bounding_box().euclidean_set()[idx];
+    auto rng = encl.domain()[idx];
     return rng.width().get_d();
 }
 

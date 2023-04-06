@@ -36,15 +36,17 @@ using namespace ConcLog;
 using namespace Ariadne;
 using namespace std;
 
-struct ParallelLinearisationInterface {
+class ParallelLinearisationInterface {
+  public:
     virtual FloatDP minimise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
     virtual FloatDP maximise(SizeType i, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const = 0;
 
+    virtual ParallelLinearisationInterface* clone() const = 0;
     virtual ~ParallelLinearisationInterface() = default;
 };
 
-struct NativeParallelLinearisation : ParallelLinearisationInterface {
-
+class NativeParallelLinearisation : public ParallelLinearisationInterface {
+  public:
     FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         auto nv = A.column_size();
         auto c = Vector<FloatDP>::unit(nv,k,DoublePrecision());
@@ -63,26 +65,30 @@ struct NativeParallelLinearisation : ParallelLinearisationInterface {
 
 };
 
-struct NativeSimplexParallelLinearisation : NativeParallelLinearisation {
+class NativeSimplexParallelLinearisation : public NativeParallelLinearisation {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         SimplexSolver<FloatDP> solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
         return solution.at(k).value();
     }
+  public:
+    ParallelLinearisationInterface* clone() const override { return new NativeSimplexParallelLinearisation(); }
 };
 
-struct NativeIPMParallelLinearisation : NativeParallelLinearisation {
+class NativeIPMParallelLinearisation : public NativeParallelLinearisation {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         InteriorPointSolver solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
         return get<1>(solution).at(k).raw();
     }
+  public:
+    ParallelLinearisationInterface* clone() const override { return new NativeIPMParallelLinearisation(); }
 };
 
-struct GLPKParallelLinearisation : ParallelLinearisationInterface {
-
+class GLPKParallelLinearisation : public ParallelLinearisationInterface {
+  public:
     FloatDP minimise(SizeType k, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
         return _solve(GLP_MIN,k,A,b,xl,xu);
     }
@@ -93,6 +99,7 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
         return _solve(GLP_MAX,k,A,b,xl,xu);
     }
 
+  protected:
     virtual void optimisation_method(glp_prob* lp) const = 0;
 
   private:
@@ -151,7 +158,8 @@ struct GLPKParallelLinearisation : ParallelLinearisationInterface {
     }
 };
 
-struct GLPKSimplexParallelLinearisation : GLPKParallelLinearisation {
+class GLPKSimplexParallelLinearisation : public GLPKParallelLinearisation {
+  protected:
     void optimisation_method(glp_prob* lp) const override {
         glp_simplex(lp,NULL);
         auto status = glp_get_status(lp);
@@ -164,9 +172,12 @@ struct GLPKSimplexParallelLinearisation : GLPKParallelLinearisation {
                 throw std::runtime_error("No feasible solution to linear problem.");
         }
     }
+  public:
+    ParallelLinearisationInterface* clone() const override { return new GLPKSimplexParallelLinearisation(); }
 };
 
-struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
+class GLPKIPMParallelLinearisation : public GLPKParallelLinearisation {
+  protected:
     void optimisation_method(glp_prob* lp) const override {
         glp_interior(lp,NULL);
         auto status = glp_ipt_status(lp);
@@ -181,6 +192,8 @@ struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
                 throw std::runtime_error("Unbounded solution to linear problem.");
         }
     }
+  public:
+    ParallelLinearisationInterface* clone() const override { return new GLPKSimplexParallelLinearisation(); }
 };
 
 double gamma(LabelledEnclosure const& inner, LabelledEnclosure const& outer) {
@@ -284,30 +297,6 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
         ss << xl.at(i).get_d() << " <= x" << i+1 << " <= " << xu.at(i).get_d() << std::endl;
     }
     CONCLOG_PRINTLN(ss.str())
-}
-
-ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i, std::shared_ptr<ParallelLinearisationInterface> solver) {
-
-    auto problem = construct_problem(f,d);
-    auto const& A = get<0>(problem);
-    auto const& b = get<1>(problem);
-    auto const& xl = get<2>(problem);
-    auto const& xu = get<3>(problem);
-
-    //print_problem(A,b,xl,xu,i);
-
-    auto n = d.dimension();
-
-    ExactBoxType q(n,ExactIntervalType::empty_interval());
-    for (SizeType p=0;p<n;++p) {
-        auto lb = solver->minimise(p,A,b,xl,xu);
-        auto ub = solver->maximise(p,A,b,xl,xu);
-        if (lb < ub) {
-            q[p].set_lower_bound(lb);
-            q[p].set_upper_bound(ub);
-        }
-    }
-    return q;
 }
 
 ExactBoxType nonlinear_nonintersection_domain(ValidatedVectorMultivariateFunction const& h, ExactBoxType const& d, SizeType i, double scaling) {
@@ -439,96 +428,138 @@ private:
     bool _solution_found;
 };
 
-LabelledEnclosure inner_approximation(LabelledEnclosure const& outer, std::shared_ptr<ParallelLinearisationInterface> solver) {
-    auto result = outer;
-    result.uniform_error_recondition();
-    auto const &outer_function = result.state_function();
-    auto outer_domain = result.domain();
+class InnerApproximatorInterface {
+  public:
+    virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const = 0;
+};
 
-    auto n = outer_function.result_size();
+class InnerApproximatorBase : public InnerApproximatorInterface {
+  public:
+    InnerApproximatorBase(ParallelLinearisationInterface const& solver) : _solver_ptr(solver.clone()) { }
+  protected:
 
-    List<ValidatedVectorMultivariateFunctionPatch> boundaries;
-    for (SizeType i = 0; i < n; ++i) {
-        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].upper_bound().get_d())));
-        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
-    }
+    ExactBoxType intersection_domain(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d, SizeType i) const {
 
-    ExactBoxType I = project(outer_domain, Range(0, n));
-    CONCLOG_PRINTLN_VAR(I)
-    Vector<Kleenean> verified(boundaries.size());
+        auto problem = construct_problem(f,d);
+        auto const& A = get<0>(problem);
+        auto const& b = get<1>(problem);
+        auto const& xl = get<2>(problem);
+        auto const& xu = get<3>(problem);
 
-    for (SizeType i = 0; i < verified.size(); ++i) {
-        verified[i] = indeterminate;
-    }
+        auto n = d.dimension();
 
-    while (true) {
-        for (SizeType i = 0; i < boundaries.size(); ++i) {
-            if (possibly(not verified[i])) {
-                CONCLOG_PRINTLN("Checking boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "upper" : "lower") << " bound of x" << i/2 << ")")
-
-                auto const& boundary = boundaries.at(i);
-                auto outer_extension = embed(outer_function, boundary.domain());
-                auto boundary_extension = embed(outer_function.domain(), boundary);
-
-                ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
-
-                auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
-
-                BisectionSearch<double> scaling_search(0.01,0.99,0.01);
-                while (not scaling_search.ended()) {
-                    CONCLOG_PRINTLN("Trying with scaling " << scaling_search.current())
-                    bool current_outcome = false;
-                    try {
-                        auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling_search.current());
-                        try {
-                            auto feasible_dom = intersection_domain(f, non_intersection_dom, i, solver);
-                            CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
-                            feasible_dom = intersection_domain(f, feasible_dom, i, solver);
-                            CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", retrying...")
-                        } catch (std::exception& e) {
-                            CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all not verified boundaries to try again")
-                            I = project(non_intersection_dom, Range(0, n));
-                            CONCLOG_PRINTLN_VAR(I)
-                            current_outcome = true;
-                            verified[i] = true;
-                            for (SizeType h = 0; h < verified.size(); ++h) {
-                                if (not possibly(verified[h]))
-                                    verified[h] = indeterminate;
-                            }
-                        }
-                    } catch (std::exception& e) {
-                        CONCLOG_PRINTLN("No feasible nonlinear solution...")
-                    }
-                    scaling_search.move_next(current_outcome);
-                }
-                if (not scaling_search.solution_found())
-                    verified[i] = false;
-                CONCLOG_PRINTLN("Current boundary non-intersection verification status: " << verified)
+        ExactBoxType q(n,ExactIntervalType::empty_interval());
+        for (SizeType p=0;p<n;++p) {
+            auto lb = _solver_ptr->minimise(p,A,b,xl,xu);
+            auto ub = _solver_ptr->maximise(p,A,b,xl,xu);
+            if (lb < ub) {
+                q[p].set_lower_bound(lb);
+                q[p].set_upper_bound(ub);
             }
         }
+        return q;
+    }
 
-        bool completed = true;
+  private:
+    std::shared_ptr<ParallelLinearisationInterface> _solver_ptr;
+};
+
+class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBase {
+  public:
+    NonlinearCandidateValidationInnerApproximator(ParallelLinearisationInterface const& solver) : InnerApproximatorBase(solver) { }
+
+    LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
+
+        auto result = outer;
+        result.uniform_error_recondition();
+        auto const& outer_function = result.state_function();
+        auto outer_domain = result.domain();
+
+        auto n = outer_function.result_size();
+
+        List<ValidatedVectorMultivariateFunctionPatch> boundaries;
+        for (SizeType i = 0; i < n; ++i) {
+            boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].upper_bound().get_d())));
+            boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
+        }
+
+        ExactBoxType I = project(outer_domain, Range(0, n));
+        CONCLOG_PRINTLN_VAR(I)
+        Vector<Kleenean> verified(boundaries.size());
+
         for (SizeType i = 0; i < verified.size(); ++i) {
-            if (possibly(not verified.at(i)) and possibly(verified.at(i))) {
-                completed = false;
-                break;
+            verified[i] = indeterminate;
+        }
+
+        while (true) {
+            for (SizeType i = 0; i < boundaries.size(); ++i) {
+                if (possibly(not verified[i])) {
+                    CONCLOG_PRINTLN("Checking boundary " << i << " (outer reach evaluated on the " << (i % 2 == 0 ? "upper" : "lower") << " bound of x" << i/2 << ")")
+
+                    auto const& boundary = boundaries.at(i);
+                    auto outer_extension = embed(outer_function, boundary.domain());
+                    auto boundary_extension = embed(outer_function.domain(), boundary);
+
+                    ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+
+                    auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+
+                    BisectionSearch<double> scaling_search(0.01,0.99,0.01);
+                    while (not scaling_search.ended()) {
+                        CONCLOG_PRINTLN("Trying with scaling " << scaling_search.current())
+                        bool current_outcome = false;
+                        try {
+                            auto non_intersection_dom = nonlinear_nonintersection_domain(f, extended_domain_restriction, i, scaling_search.current());
+                            try {
+                                auto feasible_dom = intersection_domain(f, non_intersection_dom, i);
+                                CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
+                                feasible_dom = intersection_domain(f, feasible_dom, i);
+                                CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", retrying...")
+                            } catch (std::exception& e) {
+                                CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all not verified boundaries to try again")
+                                I = project(non_intersection_dom, Range(0, n));
+                                CONCLOG_PRINTLN_VAR(I)
+                                current_outcome = true;
+                                verified[i] = true;
+                                for (SizeType h = 0; h < verified.size(); ++h) {
+                                    if (not possibly(verified[h]))
+                                        verified[h] = indeterminate;
+                                }
+                            }
+                        } catch (std::exception& e) {
+                            CONCLOG_PRINTLN("No feasible nonlinear solution...")
+                        }
+                        scaling_search.move_next(current_outcome);
+                    }
+                    if (not scaling_search.solution_found())
+                        verified[i] = false;
+                    CONCLOG_PRINTLN("Current boundary non-intersection verification status: " << verified)
+                }
+            }
+
+            bool completed = true;
+            for (SizeType i = 0; i < verified.size(); ++i) {
+                if (possibly(not verified.at(i)) and possibly(verified.at(i))) {
+                    completed = false;
+                    break;
+                }
+            }
+            if (completed) break;
+        }
+
+        for (SizeType i = 0; i < verified.size(); ++i) {
+            if (definitely(not verified.at(i))) {
+                throw std::runtime_error("No inner approximation could be computed");
             }
         }
-        if (completed) break;
+
+        auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
+
+        result.restrict(full_restricted_domain);
+
+        return result;
     }
-
-    for (SizeType i = 0; i < verified.size(); ++i) {
-        if (definitely(not verified.at(i))) {
-            throw std::runtime_error("No inner approximation could be computed");
-        }
-    }
-
-    auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
-
-    result.restrict(full_restricted_domain);
-
-    return result;
-}
+};
 
 LabelledFigure bounded_figure(LabelledEnclosure const& e) {
     auto bx = e.bounding_box().euclidean_set();
@@ -680,12 +711,14 @@ LabelledEnclosure vanderpol_sample() {
 
 void ariadne_main() {
 
-    //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeSimplexParallelLinearisation());
-    //std::shared_ptr<ParallelLinearisationInterface> solver(new NativeIPMParallelLinearisation());
-    std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
-    //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
+    //auto linear_solver = NativeSimplexParallelLinearisation();
+    //auto linear_solver = NativeIPMParallelLinearisation();
+    auto linear_solver = GLPKSimplexParallelLinearisation();
+    //auto linear_solver = GLPKIPMParallelLinearisation();
 
-    auto outer_final = brusselator_sample();
+    auto approximator = NonlinearCandidateValidationInnerApproximator(linear_solver);
+
+    auto outer_final = article_sample();
 
     CONCLOG_PRINTLN_AT(1,"enclosure function = " << outer_final.state_function())
 
@@ -695,7 +728,7 @@ void ariadne_main() {
     auto inner_final = outer_final;
     try {
         Stopwatch<Milliseconds> sw;
-        inner_final = inner_approximation(outer_final, solver);
+        inner_final = approximator.compute_from(outer_final);
         sw.click();
         CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 

@@ -429,7 +429,6 @@ public:
                 }
             }
             _current = (_lower_is_set ? _lower + (_upper-_lower)/2 : _lower);
-            CONCLOG_PRINTLN("Range [" << _lower << "," << _upper << "]")
             _lower_is_set = true;
             return true;
         } else {
@@ -681,7 +680,7 @@ LabelledEnclosure vanderpol_sample() {
     RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     CONCLOG_PRINTLN("Initial set: " << initial_set);
-    Real evolution_time = 7.0_dec;
+    Real evolution_time = 0.3_dec;
 
     return evolver.orbit(initial_set,evolution_time,Semantics::UPPER).final()[0];
 }
@@ -693,19 +692,27 @@ void ariadne_main() {
     std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
     //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
 
-    auto outer_final = article_sample();
+    auto outer_final = vanderpol_sample();
 
     CONCLOG_PRINTLN_AT(1,"enclosure function = " << outer_final.state_function())
 
     auto fig = bounded_figure(outer_final);
 
-    Stopwatch<Milliseconds> sw;
-    auto inner_final = inner_approximation(outer_final, solver);
-    sw.click();
-    CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
+    bool inner_found = false;
+    auto inner_final = outer_final;
+    try {
+        Stopwatch<Milliseconds> sw;
+        inner_final = inner_approximation(outer_final, solver);
+        sw.click();
+        CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
-    auto gamma = gamma_min(inner_final, outer_final);
-    CONCLOG_PRINTLN_VAR(gamma)
+        inner_found = true;
+        auto gamma = gamma_min(inner_final, outer_final);
+        CONCLOG_PRINTLN_VAR(gamma)
+
+    } catch (std::exception& e) {
+        CONCLOG_PRINTLN("Inner approximation could not be found")
+    }
 
     GraphicsManager::instance().set_drawer(AffineDrawer(7));
     fig << fill_colour(lightgrey) << outer_final << fill_colour(red) << line_colour(red) << line_width(3.0);
@@ -714,7 +721,7 @@ void ariadne_main() {
     for (auto const &encl: outer_final_boundary)
         fig << encl;
 
-    fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
+    if (inner_found) fig << line_colour(black) << line_width(1.0) << fill_colour(orange) << inner_final;
     CONCLOG_RUN_AT(2,fig.write("inner_approximation"));
 
 }

@@ -689,59 +689,6 @@ LabelledEnclosure article_sample() {
     return {Enclosure(domain,f,config),spc};
 }
 
-LabelledEnclosure basic_linear_sample() {
-    using VFT = ValidatedVectorMultivariateTaylorFunctionModelDP;
-    using SFT = ValidatedScalarMultivariateTaylorFunctionModelDP;
-
-    RealVariable x1("x1"), x2("x2");
-    RealSpace spc({x1,x2});
-
-    ExactBoxType domain({{-1,1},{-1,1}});
-
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
-
-    auto p0 = SFT::coordinate(domain,0,sweeper);
-    auto p1 = SFT::coordinate(domain,1,sweeper);
-
-    auto f = VFT(2,domain,sweeper);
-    f[0] = p0;
-    f[1] = p1;
-
-    auto factory = TaylorFunctionFactory(sweeper);
-    EnclosureConfiguration config(factory);
-
-    return {Enclosure(domain,f,config),spc};
-}
-
-LabelledEnclosure basic_linear_noisy_sample() {
-    using VFT = ValidatedVectorMultivariateTaylorFunctionModelDP;
-    using SFT = ValidatedScalarMultivariateTaylorFunctionModelDP;
-
-    RealVariable x1("x1"), x2("x2");
-    RealSpace spc({x1,x2});
-
-    ExactBoxType domain({{-1,1},{-1,1},{-1,1},{-1,1}});
-
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
-
-    auto p0 = SFT::coordinate(domain,0,sweeper);
-    auto p1 = SFT::coordinate(domain,1,sweeper);
-    auto p2 = SFT::coordinate(domain,2,sweeper);
-    auto p3 = SFT::coordinate(domain,3,sweeper);
-
-    auto f = VFT(2,domain,sweeper);
-
-    ExactDouble noise_level = 1e-3_x;
-
-    f[0] = p0+noise_level*p2;
-    f[1] = p1+noise_level*p3;
-
-    auto factory = TaylorFunctionFactory(sweeper);
-    EnclosureConfiguration config(factory);
-
-    return {Enclosure(domain,f,config),spc};
-}
-
 LabelledEnclosure vanderpol_sample() {
     RealConstant mu("mu",1);
     RealVariable x("x"), y("y");

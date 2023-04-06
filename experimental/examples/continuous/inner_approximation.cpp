@@ -183,16 +183,9 @@ struct GLPKIPMParallelLinearisation : GLPKParallelLinearisation {
     }
 };
 
-double gamma(LabelledEnclosure const& encl, SizeType idx) {
-    auto rng = encl.domain()[idx];
-    return rng.width().get_d();
-}
-
-double gamma_min(LabelledEnclosure const& inner, LabelledEnclosure const& outer) {
-    double result = std::numeric_limits<double>::infinity();
-    for (SizeType i=0; i<inner.dimension(); ++i)
-        result = min(result,gamma(inner,i)/gamma(outer,i));
-    return result;
+double gamma(LabelledEnclosure const& inner, LabelledEnclosure const& outer) {
+    auto inner_domain = project(inner.domain(),Range(0,outer.domain().dimension()));
+    return (inner_domain.volume()/outer.domain().volume()).get_d();
 }
 
 List<LabelledEnclosure> boundary(LabelledEnclosure const& enclosure) {
@@ -692,7 +685,7 @@ void ariadne_main() {
     std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKSimplexParallelLinearisation());
     //std::shared_ptr<ParallelLinearisationInterface> solver(new GLPKIPMParallelLinearisation());
 
-    auto outer_final = vanderpol_sample();
+    auto outer_final = brusselator_sample();
 
     CONCLOG_PRINTLN_AT(1,"enclosure function = " << outer_final.state_function())
 
@@ -707,8 +700,8 @@ void ariadne_main() {
         CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
 
         inner_found = true;
-        auto gamma = gamma_min(inner_final, outer_final);
-        CONCLOG_PRINTLN_VAR(gamma)
+        auto gamma_value = gamma(inner_final, outer_final);
+        CONCLOG_PRINTLN_VAR(gamma_value)
 
     } catch (std::exception& e) {
         CONCLOG_PRINTLN("Inner approximation could not be found")

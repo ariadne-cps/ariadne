@@ -299,19 +299,24 @@ void print_problem(Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<Fl
     CONCLOG_PRINTLN(ss.str())
 }
 
-ApproximateOptimiser::ValidatedNumericType nonlinear_intersection_bound(ValidatedVectorMultivariateFunction const& h, ExactBoxType const& d, SizeType var_idx, bool maximise) {
+ApproximateOptimiser::ValidatedNumericType nonlinear_intersection_bound(ValidatedVectorMultivariateFunctionPatch const& h, ExactBoxType const& d, SizeType var_idx, bool maximise) {
 
     NonlinearInfeasibleInteriorPointOptimiser nonlinear_solver;
     auto obj = ValidatedScalarMultivariateFunction::coordinate(d.dimension(),var_idx);
     if (maximise) obj = -obj;
     ValidatedVectorMultivariateFunction g(0,d.dimension());
 
+    auto dom = d;
+    // Replace the domain for var_idx with that of h, in order to try the maximum possible range anyway
+    dom[var_idx] = h.domain()[var_idx];
+    CONCLOG_PRINTLN_VAR(h.domain())
+
     try {
         auto point = nonlinear_solver.minimise(obj,d,g,h);
         return point.at(var_idx);
     } catch (std::exception& e) {
         CONCLOG_PRINTLN_AT(1,"Nonlinear minimisation failed, using original domain bound instead")
-        return (maximise ? d[var_idx].lower_bound() : d[var_idx].upper_bound());
+        return (maximise ? dom[var_idx].lower_bound() : dom[var_idx].upper_bound());
     }
 }
 
@@ -486,15 +491,16 @@ class InnerApproximatorInterface {
 
 class InnerApproximatorBase : public InnerApproximatorInterface {
   public:
-    InnerApproximatorBase(ContractorInterface const& contractor) : _contractor_ptr(contractor.clone()) { }
+    InnerApproximatorBase(ContractorInterface const& contractor, SizeType num_rounds) : _contractor_ptr(contractor.clone()), _num_rounds(num_rounds) { }
 
   protected:
     std::shared_ptr<ContractorInterface> _contractor_ptr;
+    SizeType _num_rounds;
 };
 
 class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBase {
   public:
-    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor) : InnerApproximatorBase(contractor) { }
+    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType num_rounds = 2) : InnerApproximatorBase(contractor,num_rounds) { }
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
 
@@ -519,8 +525,7 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
             verified[i] = indeterminate;
         }
 
-        bool already_had_definite_solution = false;
-        ExactBoxType definite_solution = outer_domain;
+        SizeType current_round = 1;
 
         while (true) {
             for (SizeType i = 0; i < boundaries.size(); ++i) {
@@ -543,10 +548,11 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                     CONCLOG_PRINTLN_AT(1,"Candidate solution for intersection: x" << var_idx << (maximise_nonlinear_bound ? " <= " : " >= ") << intersection_bound)
 
                     BisectionSearch<double> scaling_search(0.01,0.99,0.01);
-                    while (not scaling_search.ended()) {
-                        CONCLOG_PRINTLN("Trying with scaling " << scaling_search.current())
+                    CONCLOG_PRINTLN("Trying with scaling " << scaling_search.current())
+                    auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, maximise_nonlinear_bound, scaling_search.current());
 
-                        auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, maximise_nonlinear_bound, scaling_search.current());
+                    while (not scaling_search.ended()) {
+
                         CONCLOG_PRINTLN_AT(1,"Resulting candidate (shrinked) domain for non-intersection: " << non_intersection_dom)
 
                         bool current_outcome = false;
@@ -554,23 +560,29 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                             auto feasible_dom = _contractor_ptr->contract(f, non_intersection_dom);
                             CONCLOG_PRINTLN("First round feasible domain still not empty: " << feasible_dom)
                             feasible_dom = _contractor_ptr->contract(f, feasible_dom);
-                            CONCLOG_PRINTLN("Nonlinear solution is not validated, after 2 rounds found feasible domain " << feasible_dom << ", retrying...")
+                            CONCLOG_PRINTLN("Nonlinear solution is not validated after 2 rounds: found feasible domain " << feasible_dom << ", retrying...")
                         } catch (std::exception& e) {
-                            CONCLOG_PRINTLN("Nonlinear solution is ultimately validated, using it as a restriction to the inner domain, resetting all failed boundaries to try again")
-                            I = project(non_intersection_dom, Range(0, n));
-                            CONCLOG_PRINTLN_VAR(I)
+                            CONCLOG_PRINTLN("Nonlinear solution is validated")
                             current_outcome = true;
-                            verified[i] = true;
-                            for (SizeType h = 0; h < verified.size(); ++h) {
-                                if (not possibly(verified[h]))
-                                    verified[h] = indeterminate;
-                            }
                         }
 
                         scaling_search.move_next(current_outcome);
+                        CONCLOG_PRINTLN("Retrying with scaling " << scaling_search.current())
+                        non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, maximise_nonlinear_bound, scaling_search.current());
                     }
-                    if (not scaling_search.solution_found())
+                    if (not scaling_search.solution_found()) {
+                        CONCLOG_PRINTLN("No valid solution found, setting failure for this boundary.")
                         verified[i] = false;
+                    } else {
+                        CONCLOG_PRINTLN("Using optimal valid solution as a restriction to the inner domain, resetting all failed boundaries to try again.")
+                        I = project(non_intersection_dom, Range(0, n));
+                        CONCLOG_PRINTLN_VAR(I)
+                        verified[i] = true;
+                        for (SizeType h = 0; h < verified.size(); ++h) {
+                            if (not possibly(verified[h]))
+                                verified[h] = indeterminate;
+                        }
+                    }
                     CONCLOG_PRINTLN("Current boundary non-intersection verification status: " << verified)
                 }
             }
@@ -583,11 +595,10 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                 }
             }
 
-            if (completed and already_had_definite_solution) break;
+            if (completed and current_round >= _num_rounds) break;
             else if (completed) {
-                already_had_definite_solution = true;
-                definite_solution = I;
-                CONCLOG_PRINTLN("First round completed, resetting the 'verified' status on all variables")
+                ++current_round;
+                CONCLOG_PRINTLN("Round " << current_round-1 << " of " << _num_rounds << " completed, resetting the 'verified' status on all variables")
                 for (SizeType i = 0; i < verified.size(); ++i) {
                     verified[i] = indeterminate;
                 }

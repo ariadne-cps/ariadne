@@ -456,7 +456,7 @@ class ParallelLinearisationContractor : public ContractorInterface {
   private:
     ParallelLinearisationContractor(ParallelLinearisationContractor const& other) : _solver_ptr(other._solver_ptr) , _num_iterations(other._num_iterations), _split_depth(other._split_depth) { }
   public:
-    ParallelLinearisationContractor(LinearSolverInterface const& solver, SizeType num_iterations, SizeType split_depth) : _solver_ptr(solver.clone()), _num_iterations(num_iterations), _split_depth(split_depth) { }
+    ParallelLinearisationContractor(LinearSolverInterface const& solver, SizeType num_iterations, SizeType split_depth = 0) : _solver_ptr(solver.clone()), _num_iterations(num_iterations), _split_depth(split_depth) { }
 
     ExactBoxType contract(ValidatedVectorMultivariateFunctionPatch const& f, ExactBoxType const& d) const override {
 
@@ -538,8 +538,11 @@ class InnerApproximatorBase : public InnerApproximatorInterface {
 };
 
 class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBase {
+  private:
+    SizeType const _max_rounds;
   public:
-    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor) : InnerApproximatorBase(contractor) { }
+    //! \brief Constructs from a \a contractor and a \a max_rounds for refinement, subject to the minimum given by the number of boundaries
+    NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType max_rounds = std::numeric_limits<SizeType>::max()) : InnerApproximatorBase(contractor), _max_rounds(max_rounds) { }
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
 
@@ -567,9 +570,11 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
         }
 
         SizeType rnd = 0;
+        SizeType max_rnds = std::max(boundaries.size(),_max_rounds);
         bool completed = false;
         bool all_bounds_found = false;
-        while (not completed) {
+        while (not completed and rnd < max_rnds) {
+
             auto bnd_idx = rnd % boundaries.size();
 
             if (possibly(not verified[bnd_idx])) {
@@ -660,8 +665,8 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
             ++rnd;
         }
 
-        for (SizeType i = 0; i < verified.size(); ++i) {
-            if (definitely(not verified.at(i))) {
+        for (SizeType i = 0; i < bound_found.size(); ++i) {
+            if (not bound_found.at(i)) {
                 throw std::runtime_error("No inner approximation could be computed");
             }
         }

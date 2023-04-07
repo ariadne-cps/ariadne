@@ -68,6 +68,7 @@ class NativeLinearSolver : public LinearSolverInterface {
 class NativeSimplex : public NativeLinearSolver {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        CONCLOG_SCOPE_CREATE
         SimplexSolver<FloatDP> solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
         return solution.at(k).value();
@@ -79,6 +80,7 @@ class NativeSimplex : public NativeLinearSolver {
 class NativeIPM : public NativeLinearSolver {
   protected:
     FloatDP solve(SizeType k, Vector<FloatDP> const& c, Matrix<FloatDP> const& A, Vector<FloatDP> const& b, Vector<FloatDP> const& xl, Vector<FloatDP> const& xu) const override {
+        CONCLOG_SCOPE_CREATE
         InteriorPointSolver solver;
         auto solution = solver.minimise(c,xl,xu,A,b);
         return get<1>(solution).at(k).raw();
@@ -555,9 +557,11 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                 auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
 
                 auto scaled_bound_is_an_improvement = true;
-                while (not scaling_search.ended()) {
+                while (true) {
 
                     CONCLOG_PRINTLN_AT(2,"Resulting candidate (shrinked) domain for non-intersection: " << non_intersection_dom)
+
+                    scaled_bound_is_an_improvement =  (not bound_found[bnd_idx] or (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() < extended_domain_restriction[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound() > extended_domain_restriction[var_idx].upper_bound()));
 
                     bool current_outcome = false;
                     try {
@@ -572,9 +576,10 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                     }
 
                     scaling_search.move_next(current_outcome);
+                    if (scaling_search.ended()) break;
+
                     CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
                     non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
-                    scaled_bound_is_an_improvement =  (not bound_found[bnd_idx] or (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() < extended_domain_restriction[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound() > extended_domain_restriction[var_idx].upper_bound()));
                 }
 
                 if (not scaling_search.solution_found()) {

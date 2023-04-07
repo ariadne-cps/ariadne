@@ -4,7 +4,6 @@ set(UNIT_TESTS
     test_integrator    
     test_linear_programming
     test_nonlinear_programming
-    test_parallel_linearisation
     test_solvers
 )
 

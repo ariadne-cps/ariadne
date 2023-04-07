@@ -447,49 +447,73 @@ class ContractorInterface {
     //! \brief Contract the domain \a d of a function \a f
     //! \return Returns the contracted box, the empty box if no feasible point is found anymore
     //! \details The result is guaranteed to be a subset of \a d
-    virtual ExactBoxType contract(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) const = 0;
+    virtual ExactBoxType contract(ValidatedVectorMultivariateFunctionPatch const& f, ExactBoxType const& d) const = 0;
     virtual ContractorInterface* clone() const = 0;
     virtual ~ContractorInterface() = default;
 };
 
 class ParallelLinearisationContractor : public ContractorInterface {
   private:
-    ParallelLinearisationContractor(ParallelLinearisationContractor const& other) : _solver_ptr(other._solver_ptr) , _num_iterations(other._num_iterations) { }
+    ParallelLinearisationContractor(ParallelLinearisationContractor const& other) : _solver_ptr(other._solver_ptr) , _num_iterations(other._num_iterations), _split_depth(other._split_depth) { }
   public:
-    ParallelLinearisationContractor(LinearSolverInterface const& solver, SizeType num_iterations) : _solver_ptr(solver.clone()), _num_iterations(num_iterations) { }
+    ParallelLinearisationContractor(LinearSolverInterface const& solver, SizeType num_iterations, SizeType split_depth) : _solver_ptr(solver.clone()), _num_iterations(num_iterations), _split_depth(split_depth) { }
 
-    ExactBoxType contract(ValidatedVectorMultivariateFunction const& f, ExactBoxType const& d) const override {
+    ExactBoxType contract(ValidatedVectorMultivariateFunctionPatch const& f, ExactBoxType const& d) const override {
 
         auto n = d.dimension();
+        auto m = f.result_size();
 
-        auto contraction = d;
-
-        try {
-            for (SizeType i=0; i<_num_iterations; ++i) {
-
-                auto problem = construct_parallel_linearisation_problem(f, contraction);
-                auto const& A = get<0>(problem);
-                auto const& b = get<1>(problem);
-                auto const& xl = get<2>(problem);
-                auto const& xu = get<3>(problem);
-
-                ExactBoxType q(n,ExactIntervalType::empty_interval());
-
-                for (SizeType p=0; p<n; ++p) {
-                    auto lb = _solver_ptr->minimise(p,A,b,xl,xu);
-                    auto ub = _solver_ptr->maximise(p,A,b,xl,xu);
-                    if (lb < ub) {
-                        q[p].set_lower_bound(lb);
-                        q[p].set_upper_bound(ub);
-                    }
+        List<ExactBoxType> splits;
+        splits.push_back(d);
+        for (SizeType k=0; k<_split_depth; ++k)
+            for (SizeType i=0; i<m; ++i) {
+                List<ExactBoxType> new_splits;
+                for (auto const& b : splits) {
+                    auto s1s2 = split(b,i);
+                    new_splits.push_back(s1s2.first);
+                    new_splits.push_back(s1s2.second);
                 }
-                contraction = q;
+                splits =new_splits;
             }
-        } catch (std::exception& e) {
-            contraction = ExactBoxType(n,ExactIntervalType::empty_interval());
+
+        List<ExactBoxType> contracted;
+
+        for (auto const& s : splits) {
+            auto contraction = s;
+            try {
+                for (SizeType i=0; i<_num_iterations; ++i) {
+
+                    auto problem = construct_parallel_linearisation_problem(f, contraction);
+                    auto const& A = get<0>(problem);
+                    auto const& b = get<1>(problem);
+                    auto const& xl = get<2>(problem);
+                    auto const& xu = get<3>(problem);
+
+                    ExactBoxType q(n,ExactIntervalType::empty_interval());
+
+                    for (SizeType p=0; p<n; ++p) {
+                        auto lb = _solver_ptr->minimise(p,A,b,xl,xu);
+                        auto ub = _solver_ptr->maximise(p,A,b,xl,xu);
+                        if (lb < ub) {
+                            q[p].set_lower_bound(lb);
+                            q[p].set_upper_bound(ub);
+                        }
+                    }
+                    contraction = q;
+                }
+                contracted.push_back(contraction);
+            } catch (std::exception& e) {
+            }
         }
 
-        return contraction;
+        if (contracted.empty()) return ExactBoxType(n,ExactIntervalType::empty_interval());
+
+        ExactBoxType result = contracted.at(0);
+        for (SizeType i=1; i<contracted.size(); ++i) {
+            result = hull(result,contracted.at(i));
+        }
+
+        return result;
     }
 
     ContractorInterface* clone() const override { return new ParallelLinearisationContractor(*this); }
@@ -497,6 +521,7 @@ class ParallelLinearisationContractor : public ContractorInterface {
   private:
     std::shared_ptr<LinearSolverInterface> _solver_ptr;
     SizeType const _num_iterations;
+    SizeType const _split_depth;
 };
 
 class InnerApproximatorInterface {
@@ -746,7 +771,7 @@ void ariadne_main() {
     auto linear_solver = GLPKSimplex();
     //auto linear_solver = GLPKIPM();
 
-    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver,10));
+    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver,2,0));
 
     auto outer_final = vanderpol_sample();
 

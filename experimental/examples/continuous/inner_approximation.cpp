@@ -557,7 +557,7 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
         }
 
         ExactBoxType I = project(outer_domain, Range(0, n));
-        CONCLOG_PRINTLN_VAR(I)
+        CONCLOG_PRINTLN("Starting domain: " << I)
         Vector<Kleenean> verified(boundaries.size());
         Vector<bool> bound_found(boundaries.size());
 
@@ -568,6 +568,7 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
 
         SizeType rnd = 0;
         bool completed = false;
+        bool all_bounds_found = false;
         while (not completed) {
             auto bnd_idx = rnd % boundaries.size();
 
@@ -629,10 +630,15 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                     }
                 } else {
                     if (scaled_bound_is_an_improvement) {
+                        bound_found[bnd_idx] = true;
+                        SizeType nbf = 0;
+                        for (SizeType i=0; i<bound_found.size(); ++i) if (bound_found[i]) ++nbf;
+                        if (nbf == bound_found.size()) all_bounds_found = true;
+
                         CONCLOG_PRINTLN_AT(1,"Using optimal valid solution as a restriction to the inner domain, resetting all remaining boundaries to try again.")
                         CONCLOG_PRINTLN_AT(2,"Value identified: x" << var_idx << (is_lower_boundary ? " >= " : " <= ") << (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound()))
                         I = project(non_intersection_dom, Range(0, n));
-                        CONCLOG_PRINTLN_VAR_AT(1,I)
+                        CONCLOG_PRINTLN_AT(1,"Current candidate: " << I << (not all_bounds_found ? " (incomplete) " : ""))
                         for (SizeType h = 0; h < verified.size(); ++h) {
                             verified[h] = indeterminate;
                         }
@@ -640,7 +646,6 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
                         CONCLOG_PRINTLN_AT(1,"No improvement, keeping the original value for the bound, setting this boundary as verified.")
                     }
                     verified[bnd_idx] = true;
-                    bound_found[bnd_idx] = true;
                 }
                 CONCLOG_PRINTLN_AT(1,"Current boundary non-intersection verification status: " << verified)
             }

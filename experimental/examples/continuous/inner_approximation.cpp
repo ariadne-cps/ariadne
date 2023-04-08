@@ -546,10 +546,10 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override {
 
-        auto result = outer;
-        result.uniform_error_recondition();
-        auto const& outer_function = result.state_function();
-        auto outer_domain = result.domain();
+        auto reconditioned_outer = outer;
+        reconditioned_outer.uniform_error_recondition();
+        auto const& outer_function = reconditioned_outer.state_function();
+        auto outer_domain = reconditioned_outer.domain();
 
         auto n = outer_function.result_size();
 
@@ -671,8 +671,9 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
             }
         }
 
-        auto full_restricted_domain = product(I,project(outer_domain,Range(outer_function.result_size(),outer_function.argument_size())));
+        auto full_restricted_domain = product(I,project(outer.domain(),Range(outer_function.result_size(),outer.state_function().argument_size())));
 
+        auto result = outer;
         result.restrict(full_restricted_domain);
 
         return result;

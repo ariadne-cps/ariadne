@@ -51,13 +51,22 @@ class ArchBenchmarkInstance {
     void write() const {
         std::ofstream outfile;
         outfile.open(_filename, std::ios_base::app);
-        outfile << _benchmark_name << ", " <<
-                   _instance_name << ", " <<
-                   _verified << ", " <<
-                   (_execution_time != 0 ? to_string(_execution_time) : "");
-        for (SizeType i=0; i < _losses.size(); ++i)
-            outfile << ", " << _losses[i];
-        outfile << std::endl;
+        if (_losses.empty()) {
+            outfile << _benchmark_name << ", " <<
+                    _instance_name << ", " <<
+                    _verified << ", " <<
+                    (_execution_time != 0 ? to_string(_execution_time) : "") << ", " <<
+                    std::endl;
+        } else {
+            for (auto loss : _losses) {
+                outfile << _benchmark_name << ", " <<
+                        _instance_name << ", " <<
+                        _verified << ", " <<
+                        (_execution_time != 0 ? to_string(_execution_time) : "") << ", " <<
+                        loss;
+                outfile << std::endl;
+            }
+        }
         outfile.close();
     }
   private:

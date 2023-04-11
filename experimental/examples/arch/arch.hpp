@@ -42,6 +42,12 @@ class ArchBenchmarkInstance {
     ArchBenchmarkInstance& set_verified(int value) { _verified = value; return *this; }
     ArchBenchmarkInstance& set_execution_time(double value) { _execution_time = value; return *this; }
     ArchBenchmarkInstance& add_loss(double value) { _losses.push_back(value); return *this; }
+    static void init() {
+        std::ofstream outfile;
+        outfile.open(_filename, std::ios_base::app);
+        outfile << "Tool, Benchmark, Instance, Result, Time, Accuracy" << std::endl;
+        outfile.close();
+    }
     void write() const {
         std::ofstream outfile;
         outfile.open(_filename, std::ios_base::app);

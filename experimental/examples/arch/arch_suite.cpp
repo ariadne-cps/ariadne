@@ -31,6 +31,7 @@
 
 void ariadne_main()
 {
+    ArchBenchmarkInstance::init();
     ROBE21();
     CVDP23();
     LALO20();

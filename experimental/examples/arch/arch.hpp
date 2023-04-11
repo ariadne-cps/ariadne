@@ -45,13 +45,13 @@ class ArchBenchmarkInstance {
     static void init() {
         std::ofstream outfile;
         outfile.open(_filename, std::ios_base::app);
-        outfile << "Tool, Benchmark, Instance, Result, Time, Accuracy" << std::endl;
+        outfile << "benchmark, instance, result, time, accuracy" << std::endl;
         outfile.close();
     }
     void write() const {
         std::ofstream outfile;
         outfile.open(_filename, std::ios_base::app);
-        outfile << "Ariadne, " << _benchmark_name << ", " <<
+        outfile << _benchmark_name << ", " <<
                    _instance_name << ", " <<
                    _verified << ", " <<
                    (_execution_time != 0 ? to_string(_execution_time) : "");

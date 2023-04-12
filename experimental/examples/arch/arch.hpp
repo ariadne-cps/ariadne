@@ -45,7 +45,7 @@ class ArchBenchmarkInstance {
     static void init() {
         std::ofstream outfile;
         outfile.open(_filename, std::ios_base::app);
-        outfile << "benchmark, instance, result, time, accuracy" << std::endl;
+        outfile << "benchmark,instance,result,time,accuracy" << std::endl;
         outfile.close();
     }
     void write() const {

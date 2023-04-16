@@ -142,16 +142,8 @@ template<class F> Void export_function_evaluation(pybind11::module module, pybin
     define_call<Differential<FloatDPApproximation>>(function_class);
     define_call<Differential<FloatMPApproximation>>(function_class);
 
-    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
-    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
-
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPApproximation>>);
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPApproximation>>);
-    module.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
-    module.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
-
-    define_named_derivatives<FloatDPApproximation>(module,function_class);
-    define_named_derivatives<FloatMPApproximation>(module,function_class);
 }
 
 template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class, ValidatedTag) {
@@ -160,16 +152,8 @@ template<class F> Void export_function_evaluation(pybind11::module module, pybin
     define_call<Differential<FloatDPBounds>>(function_class);
     define_call<Differential<FloatMPBounds>>(function_class);
 
-    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
-    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
-
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPBounds>>);
     module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPBounds>>);
-    module.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
-    module.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
-
-    define_named_derivatives<FloatDPBounds>(module,function_class);
-    define_named_derivatives<FloatMPBounds>(module,function_class);
 
     export_function_evaluation(module,function_class,ApproximateTag());
 }
@@ -181,6 +165,40 @@ template<class F> Void export_function_evaluation(pybind11::module module, pybin
 template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class)
 {
     export_function_evaluation(module, function_class, Paradigm<F>());
+}
+
+
+template<class F> Void export_function_derivatives(pybind11::module module, pybind11::class_<F>& function_class, ApproximateTag) {
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
+
+    module.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
+
+    define_named_derivatives<FloatDPApproximation>(module,function_class);
+    define_named_derivatives<FloatMPApproximation>(module,function_class);
+}
+
+template<class F> Void export_function_derivatives(pybind11::module module, pybind11::class_<F>& function_class, ValidatedTag) {
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
+    function_class.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
+
+    module.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
+
+    define_named_derivatives<FloatDPBounds>(module,function_class);
+    define_named_derivatives<FloatMPBounds>(module,function_class);
+
+    export_function_derivatives(module,function_class,ApproximateTag());
+}
+
+template<class F> Void export_function_derivatives(pybind11::module module, pybind11::class_<F>& function_class, EffectiveTag) {
+    export_function_derivatives(module,function_class,ValidatedTag());
+}
+
+template<class F> Void export_function_derivatives(pybind11::module module, pybind11::class_<F>& function_class)
+{
+    export_function_derivatives(module, function_class, Paradigm<F>());
 }
 
 
@@ -330,6 +348,7 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     }
 
     export_function_evaluation(module,function_class);
+    export_function_derivatives(module,function_class);
 
     if constexpr (Same<SIG,RealScalar(RealScalar)>) {
         if constexpr (not Same<P,ApproximateTag>) {
@@ -443,6 +462,72 @@ Void export_procedures(pybind11::module& module) {
 
 
 
+template<class P, class SIG> Void export_function_patch(pybind11::module& module) {
+    using FP=FunctionPatch<P,SIG>;
+    using RES = typename SignatureTraits<SIG>::ResultKind;
+    using ARG = typename SignatureTraits<SIG>::ArgumentKind;
+    using DomainType = typename FunctionPatch<P,SIG>::DomainType;
+    using ArgumentIndexType = ElementIndexType<DomainType>;
+
+    pybind11::class_<FP> function_patch_class(module,(class_name<P>()+signature_name<SIG>()+"FunctionPatch").c_str());
+    function_patch_class.def(pybind11::init<FunctionPatch<P,SIG>>());
+
+    function_patch_class.def("result_size", &FP::result_size);
+    function_patch_class.def("argument_size", &FP::argument_size);
+    function_patch_class.def("domain", &FP::domain);
+    function_patch_class.def("codomain", &FP::codomain);
+    function_patch_class.def("range", &FP::range);
+
+    function_patch_class.def("__str__", &__cstr__<FP>);
+
+    if constexpr (Same<RES,RealScalar>) {
+        define_elementary_algebra<FP,Number<P>>(module,function_patch_class);
+    }
+    if constexpr (Same<RES,RealVector>) {
+        define_vector_algebra_arithmetic<FunctionPatch<P,RealVector(ARG)>,FunctionPatch<P,RealScalar(ARG)>,Number<P>>(module,function_patch_class);
+    }
+
+    // TODO: Export all function operators
+    // export_function_evaluation(module,function_patch_class);
+    // export_function_derivatives(module,function_patch_class);
+
+
+    if constexpr (IsStronger<P,ApproximateTag>::value) {
+        define_call<FloatDPApproximation>(function_patch_class);
+        define_call<FloatMPApproximation>(function_patch_class);
+    }
+    if constexpr (IsStronger<P,ValidatedTag>::value) {
+        define_call<FloatDPBounds>(function_patch_class);
+        define_call<FloatMPBounds>(function_patch_class);
+    }
+
+    if  constexpr (Same<RES,RealVector>) {
+        module.def("antiderivative", [](FunctionPatch<P,SIG>const& fp, ArgumentIndexType j){return _antiderivative_(fp,j);});
+        module.def("antiderivative", [](FunctionPatch<P,SIG>const& fp, ArgumentIndexType j, Number<P> const& c){return _antiderivative_(fp,j,c);});
+    }
+
+    module.def("compose", [](const Function<P,RealScalar(RES)>& f, const FunctionPatch<P,SIG>& gp){return compose(f,gp);});
+    module.def("compose", [](const Function<P,RealVector(RES)>& f, const FunctionPatch<P,SIG>& gp){return compose(f,gp);});
+    module.def("compose", [](const FunctionPatch<P,RealScalar(RES)>& fp, const FunctionPatch<P,SIG>& gp){return compose(fp,gp);});
+    module.def("compose", [](const FunctionPatch<P,RealVector(RES)>& fp, const FunctionPatch<P,SIG>& gp){return compose(fp,gp);});
+    module.def("unchecked_compose", [](const FunctionPatch<P,RealScalar(RES)>& fp, const FunctionPatch<P,SIG>& gp){return unchecked_compose(fp,gp);});
+    module.def("unchecked_compose", [](const FunctionPatch<P,RealVector(RES)>& fp, const FunctionPatch<P,SIG>& gp){return unchecked_compose(fp,gp);});
+}
+
+template<class SIG> Void export_function_patches(pybind11::module& module) {
+    export_function_patch<ValidatedTag,SIG>(module);
+    export_function_patch<ApproximateTag,SIG>(module);
+}
+
+Void export_function_patches(pybind11::module& module) {
+    // TODO: Correct export of univariate function patches.
+    export_function_patches<RealScalar(RealScalar)>(module);
+    // export_function_patches<RealVector(RealScalar)>(module);
+    export_function_patches<RealScalar(RealVector)>(module);
+    export_function_patches<RealVector(RealVector)>(module);
+}
+
+
 Void function_submodule(pybind11::module& module) {
 
     export_multi_index(module);
@@ -456,6 +541,7 @@ Void function_submodule(pybind11::module& module) {
     export_functions<RealScalar(RealVector)>(module);
     export_functions<RealVector(RealVector)>(module);
 
+    export_function_patches(module);
     export_procedures(module);
 }
 

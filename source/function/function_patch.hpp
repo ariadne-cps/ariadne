@@ -163,6 +163,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     typedef PositiveValidatedUpperNumber ErrorType;
     typedef Number<P> NumericType;
     typedef PositiveValidatedUpperNumber NormType;
+    typedef typename FunctionPatchInterface<P,SIG>::ResultSizeType ResultSizeType;
     typedef typename FunctionPatchInterface<P,SIG>::ArgumentSizeType ArgumentSizeType;
     typedef typename FunctionPatchInterface<P,SIG>::ArgumentIndexType ArgumentIndexType;
 
@@ -194,11 +195,12 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     ScalarFunctionPatch<P,ARGS...>& operator=(const ScalarFunction<P,ARGS...>& f);
     ScalarFunctionPatch<P,ARGS...>& operator=(const ScalarFunctionPatchInterface<P,ARGS...>& f);
 
+    inline ResultSizeType result_size() const { return this->_ptr->result_size(); }
     inline ArgumentSizeType argument_size() const { return this->_ptr->argument_size(); }
-    template<class X> X operator() (const Vector<X>& x) const {
-        return this->_ptr->_evaluate(x); }
-    template<class X> X evaluate(const Vector<X>& x) const {
-        return this->_ptr->_evaluate(x); }
+    template<class X> X operator() (const Argument<X>& x) const {
+        return this->_ptr->_call(x); }
+    template<class X> X evaluate(const Argument<X>& x) const {
+        return this->_ptr->_call(x); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->_range(); }
@@ -236,7 +238,11 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
         return factory(fp2).create(f1)/fp2; }
   public:
     friend Number<P> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
-        return f._ptr->_evaluate(x); }
+        return f._ptr->_call(x); }
+    friend CanonicalNumericType<P,DP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+        return f._ptr->_call(x); }
+    friend CanonicalNumericType<P,MP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+        return f._ptr->_call(x); }
     friend Number<P> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
     friend CanonicalNumericType<P,DP> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
@@ -273,13 +279,28 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
         return join(VectorFunctionPatch<P,ARGS...>(1,f1),f2); }
     friend VectorFunctionPatch<P,ARGS...> combine(const ScalarFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2);
   public:
+    friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarUnivariateFunction<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
+    friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarUnivariateFunctionPatch<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
+    friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorUnivariateFunction<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
+    friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorUnivariateFunctionPatch<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
+
+    friend inline ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarUnivariateFunctionPatch<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+//        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_unchecked_compose(f)); }
+        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
+    friend inline VectorFunctionPatch<P,ARGS...> unchecked_compose(const VectorUnivariateFunctionPatch<P>& f, const ScalarFunctionPatch<P,ARGS...>& g) {
+        return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
+  public:
     friend Bool inconsistent(ScalarFunctionPatch<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& f2);
     friend Bool refines(ScalarFunctionPatch<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& f2) {
         return f1._ptr->_refines(f2); }
     friend ScalarFunctionPatch<P,ARGS...> refinement(ScalarFunctionPatch<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& f2);
   public:
     friend OutputStream& operator<<(OutputStream& os, const ScalarFunctionPatch<P,ARGS...>& f) {
-        return os <<  f.operator ScalarMultivariateFunction<P>(); }
+        return os <<  f.operator ScalarFunction<P,ARGS...>(); }
 };
 
 template<class P, class... ARGS> struct AlgebraOperations<ScalarFunctionPatch<P,ARGS...>> {
@@ -359,9 +380,12 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     typedef PositiveValidatedUpperNumber ErrorType;
     typedef Number<P> NumericType;
     typedef PositiveValidatedUpperNumber NormType;
+    typedef typename FunctionPatchInterface<P,SIG>::ResultSizeType ResultSizeType;
     typedef typename FunctionPatchInterface<P,SIG>::ArgumentSizeType ArgumentSizeType;
     typedef typename FunctionPatchInterface<P,SIG>::ArgumentIndexType ArgumentIndexType;
-    public:
+    template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
+    template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
+  public:
     inline FunctionPatch() : _ptr() { }
     inline FunctionPatch(SharedPointer<const FunctionPatchInterface<P,SIG>> vfp)
         : _ptr(vfp->_clone()) { }
@@ -387,11 +411,11 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline const FunctionPatchInterface<P,SIG>& reference() const { return *_ptr; }
     inline FunctionPatchInterface<P,SIG>& reference() { return *_ptr; }
 
-    inline SizeType result_size() const { return this->_ptr->result_size(); }
-    inline SizeType argument_size() const { return this->_ptr->argument_size(); }
+    inline ResultSizeType result_size() const { return this->_ptr->result_size(); }
+    inline ArgumentSizeType argument_size() const { return this->_ptr->argument_size(); }
     inline SizeType size() const { return this->_ptr->result_size(); }
-    template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
-    template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
+    template<class XX> inline Vector<XX> operator()(const Argument<XX>& v) const { return this->_ptr->_call(v); }
+    template<class XX> inline Vector<XX> evaluate(const Argument<XX>& v) const { return this->_ptr->_call(v); }
     inline ScalarFunctionPatch<P,ARGS...> const get(SizeType i) const { return ScalarFunctionPatch<P,ARGS...>(this->_ptr->_get(i)); }
     inline Void set(SizeType i, ScalarFunctionPatch<P,ARGS...> const& sf) { this->_ptr->_set(i,sf); }
     inline ScalarFunctionPatch<P,ARGS...> const operator[](SizeType i) const { return this->get(i); }
@@ -413,17 +437,17 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
   public:
     friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
-    friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+    friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
     friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
-    friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+    friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
-    friend inline ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+    friend inline ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
 //        return ScalarFunctionPatch<P,ARGS...>(g._ptr->_unchecked_compose(f)); }
         return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
-    friend inline VectorFunctionPatch<P,ARGS...> unchecked_compose(const VectorFunctionPatch<P,ARGS...>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+    friend inline VectorFunctionPatch<P,ARGS...> unchecked_compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
     friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f) {
@@ -444,8 +468,10 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
         VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*f2; } return r; }
     friend inline VectorFunctionPatch<P,ARGS...> operator/(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
         VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]/f2; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator+(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2);
-    friend inline VectorFunctionPatch<P,ARGS...> operator-(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2);
+    friend inline VectorFunctionPatch<P,ARGS...> operator+(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
+        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1[i]+f2[i]; } return r; }
+    friend inline VectorFunctionPatch<P,ARGS...> operator-(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
+        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1[i]-f2[i]; } return r; }
     friend inline VectorFunctionPatch<P,ARGS...> operator*(const VectorFunctionPatch<P,ARGS...>& f1, const Number<P>& c2) {
         VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
     friend inline VectorFunctionPatch<P,ARGS...> operator*(const Number<P>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
@@ -486,7 +512,11 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
         return VectorFunction<P,ARGS...>(std::dynamic_pointer_cast<VectorFunctionInterface<P,ARGS...>>(f.managed_pointer())); }
 
     friend Vector<Number<P>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
-        return f._ptr->_evaluate(x); }
+        return f._ptr->_call(x); }
+    friend Vector<CanonicalNumericType<P,DP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+        return f._ptr->_call(x); }
+    friend Vector<CanonicalNumericType<P,MP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+        return f._ptr->_call(x); }
 
     friend Vector<Number<P>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
@@ -499,7 +529,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
         return VectorFunctionPatch<P,ARGS...>(f._ptr->_partial_evaluate(j,c)); }
 
     friend OutputStream& operator<<(OutputStream& os, const VectorFunctionPatch<P,ARGS...>& f) {
-        return os <<  f.operator VectorMultivariateFunction<P>(); }
+        return os <<  f.operator VectorFunction<P,ARGS...>(); }
 
     friend ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         ScalarFunctionPatchInterface<P,ARGS...> const* fptr = dynamic_cast<ScalarFunctionPatchInterface<P,ARGS...> const*>(f.raw_pointer());

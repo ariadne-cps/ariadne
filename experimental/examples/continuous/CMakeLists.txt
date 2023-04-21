@@ -1,7 +1,7 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
     brusselator
     laub-loomis
-    inner_approximation
+    inner
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_CONTINUOUS})

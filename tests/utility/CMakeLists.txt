@@ -3,7 +3,6 @@ set(UNIT_TESTS
     test_container
     test_lru_cache
     test_stopwatch
-    test_stack_trace
 )
 
 foreach(TEST ${UNIT_TESTS})

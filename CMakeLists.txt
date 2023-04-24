@@ -90,6 +90,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/helper OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/helper submodules/helper WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
@@ -108,6 +110,11 @@ if(GIT_FOUND)
     else()
         message(STATUS "BetterThreads submodule found")
     endif()
+        if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/helper/CMakeLists.txt)
+        message(ERROR "Helper download failure")
+    else()
+        message(STATUS "Helper submodule found")
+    endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
 endif()
@@ -125,6 +132,11 @@ endif()
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
     execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/betterthreads/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
     message(STATUS "Created symbolic link to BetterThreads submodule")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/helper/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
+    message(STATUS "Created symbolic link to Helper submodule")
 endif()
 
 find_package(Threads)
@@ -187,16 +199,15 @@ add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
     source/geometry/interval.cpp
 )
 
 add_library(ariadne-kernel SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -206,10 +217,10 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
 )
 
 add_library(ariadne SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -221,6 +232,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
 )
 
 target_link_libraries(ariadne dl ${GLPK_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
@@ -241,3 +253,4 @@ install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")

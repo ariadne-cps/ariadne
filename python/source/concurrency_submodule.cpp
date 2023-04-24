@@ -25,21 +25,21 @@
 #include "pybind11.hpp"
 #include "utilities.hpp"
 
-#include "betterthreads/task_manager.hpp"
+#include "betterthreads/thread_manager.hpp"
 
 using namespace Ariadne;
-using BetterThreads::TaskManager;
+using BetterThreads::ThreadManager;
 
 Void export_task_manager(pybind11::module& module)
 {
     auto const& reference = pybind11::return_value_policy::reference;
 
-    pybind11::class_< TaskManager > task_manager_class(module,"TaskManager");
-    task_manager_class.def_static("instance", &TaskManager::instance, reference);
-    task_manager_class.def("concurrency", &TaskManager::concurrency);
-    task_manager_class.def("set_concurrency", &TaskManager::set_concurrency);
-    task_manager_class.def("maximum_concurrency", &TaskManager::maximum_concurrency);
-    task_manager_class.def("set_maximum_concurrency", &TaskManager::set_maximum_concurrency);
+    pybind11::class_<ThreadManager> task_manager_class(module,"TaskManager");
+    task_manager_class.def_static("instance", &ThreadManager::instance, reference);
+    task_manager_class.def("concurrency", &ThreadManager::concurrency);
+    task_manager_class.def("set_concurrency", &ThreadManager::set_concurrency);
+    task_manager_class.def("maximum_concurrency", &ThreadManager::maximum_concurrency);
+    task_manager_class.def("set_maximum_concurrency", &ThreadManager::set_maximum_concurrency);
 }
 
 Void concurrency_submodule(pybind11::module& module)

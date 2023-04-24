@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "betterthreads/task_manager.hpp"
+#include "betterthreads/thread_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"
@@ -37,8 +37,7 @@ using namespace ConcLog;
 
 namespace Ariadne {
 
-using BetterThreads::TaskManager;
-
+using BetterThreads::ThreadManager;
 
 ArgumentStream::ArgumentStream(List<String> const& args) {
     ARIADNE_PRECONDITION(args.size() > 0)
@@ -173,11 +172,11 @@ class ConcurrencyArgumentParser : public ValuedArgumentParserBase {
 
     VoidFunction _create_processor(ArgumentStream& stream) const override {
         String arg = stream.pop();
-        if (arg == "max") return []{ TaskManager::instance().set_maximum_concurrency(); };
+        if (arg == "max") return []{ ThreadManager::instance().set_maximum_concurrency(); };
         else {
             int val = std::stoi(arg);
             if (val < 0) throw std::exception();
-            return [val]{ TaskManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
+            return [val]{ ThreadManager::instance().set_concurrency(static_cast<unsigned int>(val)); };
         }
     }
 };

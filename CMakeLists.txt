@@ -92,6 +92,8 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/helper OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/helper submodules/helper WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/pexplore OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/pexplore submodules/pexplore WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
@@ -110,10 +112,15 @@ if(GIT_FOUND)
     else()
         message(STATUS "BetterThreads submodule found")
     endif()
-        if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/helper/CMakeLists.txt)
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/helper/CMakeLists.txt)
         message(ERROR "Helper download failure")
     else()
         message(STATUS "Helper submodule found")
+    endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/pexplore/CMakeLists.txt)
+        message(ERROR "pExplore download failure")
+    else()
+        message(STATUS "pExplore submodule found")
     endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
@@ -139,6 +146,11 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
     message(STATUS "Created symbolic link to Helper submodule")
 endif()
 
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pexplore)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/pexplore/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pexplore)
+    message(STATUS "Created symbolic link to pExplore submodule")
+endif()
+
 find_package(Threads)
 if(NOT Threads_FOUND)
     message(FATAL_ERROR "Unable to find Threads library")
@@ -150,7 +162,6 @@ if(GLPK_FOUND)
 else()
     message(FATAL_ERROR "Unable to find GLPK")
 endif()
-
 
 find_package(GMP)
 if(GMP_FOUND)
@@ -215,6 +226,8 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
+    $<TARGET_OBJECTS:PEXPLORE_SRC>
+    $<TARGET_OBJECTS:PRONEST_SRC>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
     $<TARGET_OBJECTS:HELPER_SRC>
@@ -230,6 +243,8 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:PEXPLORE_SRC>
+    $<TARGET_OBJECTS:PRONEST_SRC>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
     $<TARGET_OBJECTS:HELPER_SRC>
@@ -254,3 +269,4 @@ install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/pexplore DESTINATION include FILES_MATCHING PATTERN "*.hpp")

@@ -132,6 +132,8 @@ void GLPKSimplex::optimisation_method(glp_prob* lp) const {
             throw std::runtime_error("Infeasible solution to linear problem.");
         case GLP_NOFEAS :
             throw std::runtime_error("No feasible solution to linear problem.");
+        default :
+            throw std::runtime_error("Unhandled GLP status value " + to_string(status) + ".");
     }
 }
 
@@ -151,6 +153,8 @@ void GLPKIPM::optimisation_method(glp_prob* lp) const {
             throw std::runtime_error("No feasible solution to linear problem.");
         case GLP_UNBND :
             throw std::runtime_error("Unbounded solution to linear problem.");
+        default :
+            throw std::runtime_error("Unhandled GLP status value " + to_string(status) + ".");
     }
 }
 

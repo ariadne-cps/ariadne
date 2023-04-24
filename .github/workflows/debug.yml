@@ -65,7 +65,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-14 g++-12 libcairo2-dev gnuplot libmpfr-dev glpk python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-14 g++-12 libcairo2-dev gnuplot libmpfr-dev libglpk-dev python3-pip python3-dev
         sudo pip3 install pytest
 
     - name: Create Build Environment

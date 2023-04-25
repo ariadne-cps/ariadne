@@ -149,6 +149,12 @@ Void export_runnable_evolver(pybind11::module& module, const char* name)
     typedef typename EV::TerminationType TerminationType;
     typedef typename EV::OrbitType OrbitType;
 
+    char* runnable_name = new char[100];
+    std::strcpy(runnable_name,name);
+    strcat(runnable_name,"TaskRunnable");
+
+    pybind11::class_<TaskRunnable<EV>> runnable_class(module,runnable_name);
+
     pybind11::class_<Evolver,pybind11::bases<Interface,TaskRunnable<EV>>> evolver_class(module,name);
     evolver_class.def(pybind11::init<Params...>());
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);

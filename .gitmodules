@@ -13,3 +13,6 @@
 [submodule "submodules/pexplore"]
 	path = submodules/pexplore
 	url = https://github.com/ariadne-cps/pexplore
+[submodule "submodules/pronest"]
+	path = submodules/pronest
+	url = https://github.com/ariadne-cps/pronest

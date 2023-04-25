@@ -59,8 +59,8 @@ jobs:
       run: |
         brew install ninja gcc@12 python3 mpfr cairo gnuplot pkg-config
         sudo easy_install pip
-        sudo pip3 install --upgrade pip
-        sudo pip3 install pytest
+        pip3 install --upgrade pip
+        pip3 install pytest
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'

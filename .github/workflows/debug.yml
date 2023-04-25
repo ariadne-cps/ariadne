@@ -24,8 +24,8 @@ jobs:
             cxx: "clang++"
           }
           - {
-            name: "macOS 11 GCC 12 [Debug]",
-            os: macos-11,
+            name: "macOS 13 GCC 12 [Debug]",
+            os: macos-13,
             cxx: "g++-12"
           }
           - {

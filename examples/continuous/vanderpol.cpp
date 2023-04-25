@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
@@ -57,7 +57,7 @@ void ariadne_main()
     CONCLOG_PRINTLN("Initial set: " << initial_set);
     Real evolution_time = 7;
 
-    Stopwatch<Milliseconds> sw;
+    Helper::Stopwatch<std::chrono::milliseconds> sw;
     CONCLOG_PRINTLN("Computing simulation...");
     auto simulation = simulator.orbit(initial_set,evolution_time);
     sw.click();

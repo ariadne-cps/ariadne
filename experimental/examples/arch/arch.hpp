@@ -24,7 +24,7 @@
 
 #include <cstdarg>
 #include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 #ifndef ARIADNE_ARCH_HPP
 #define ARIADNE_ARCH_HPP

@@ -32,7 +32,7 @@ using StringType;
 
 #include "config.hpp"
 #include "function/taylor_model.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 using namespace Ariadne;
 

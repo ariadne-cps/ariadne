@@ -23,7 +23,7 @@
  */
 
 #include "ariadne_main.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 void ariadne_main()
 {
@@ -42,7 +42,7 @@ void ariadne_main()
 
     Real evolution_time = 50;
 
-    Stopwatch<Microseconds> sw;
+    Helper::Stopwatch<std::chrono::microseconds> sw;
 
     VectorFieldSimulator simulator(system);
     simulator.configuration().set_step_size(0.1);

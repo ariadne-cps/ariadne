@@ -28,7 +28,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 #if defined HAVE_FENV_H && defined HAVE_GMPXX_H
 

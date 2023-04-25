@@ -26,7 +26,7 @@
 #include "ariadne_main.hpp"
 #include "dynamics/inner_approximation.hpp"
 #include "io/drawer.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 using namespace ConcLog;
 

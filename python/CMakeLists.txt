@@ -17,7 +17,6 @@ if(PYTHON3_FOUND)
     add_library(pyariadne-numeric MODULE
             $<TARGET_OBJECTS:pyariadne-numeric-module-obj>
             $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>
-            $<TARGET_OBJECTS:ariadne-utility>
             $<TARGET_OBJECTS:ariadne-numeric>
             )
     set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "pyariadne_numeric" SUFFIX ".so")

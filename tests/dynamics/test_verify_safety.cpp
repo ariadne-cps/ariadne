@@ -40,6 +40,8 @@
 #include "solvers/integrator.hpp"
 #include "io/figure.hpp"
 #include "io/command_line_interface.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pronest/configurable.tpl.hpp"
 
 #include "../test.hpp"
 
@@ -98,7 +100,7 @@ class TestVerifySafety
     {
         GradedTaylorSeriesIntegrator integrator(StepMaximumError(1e-2_pr));
 
-        EvolverType evolver(system,integrator);
+        EvolverType evolver(system,Configuration<EvolverType>(),integrator);
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

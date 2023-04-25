@@ -42,6 +42,8 @@
 #include "dynamics/vector_field_evolver.hpp"
 #include "io/figure.hpp"
 #include "io/command_line_interface.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pronest/configurable.tpl.hpp"
 
 #include "../test.hpp"
 
@@ -66,8 +68,8 @@ public:
 
         // Set up the evolution parameters and grid
         Real time(2.0_dec);
-        ExactDouble step_size(0.5_x);
-        ExactDouble enclosure_radius(0.25_x);
+        double step_size = 0.5;
+        double enclosure_radius = 0.25;
 
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
@@ -92,10 +94,11 @@ public:
 
         Semantics semantics = Semantics::LOWER;
 
-        VectorFieldEvolver evolver(vanderpol, integrator);
-        evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
-        evolver.configuration().set_maximum_step_size(step_size);
-        ARIADNE_TEST_PRINT(evolver.configuration());
+        auto configuration = Configuration<VectorFieldEvolver>().
+                set_maximum_enclosure_radius(enclosure_radius).
+                set_maximum_step_size(step_size);
+        ARIADNE_TEST_PRINT(configuration)
+        VectorFieldEvolver evolver(vanderpol, configuration, integrator);
 
         LabelledFigure fig(Axes2d(-2.25 <= x <= +2.25, -2.25 <= v <= +2.25));
 
@@ -130,8 +133,8 @@ public:
 
         // Set up the evolution parameters and grid
         Real time(0.5_dec);
-        ExactDouble maximum_step_size(0.015625_pr);
-        ExactDouble enclosure_radius(0.25_x);
+        double maximum_step_size = 0.015625;
+        double enclosure_radius = 0.25;
 
 
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
@@ -141,10 +144,12 @@ public:
                                           minimum_temporal_order = 0, maximum_temporal_order = 8);
 
         VectorField fail_vf({dot(x)=1,dot(y)=y*y*100});
-        VectorFieldEvolver evolver(fail_vf, integrator);
-        evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
-        evolver.configuration().set_maximum_step_size(maximum_step_size);
-//        evolver.configuration().set_minimum_step_size(minimum_step_size);
+
+        auto configuration = Configuration<VectorFieldEvolver>().
+                set_maximum_enclosure_radius(enclosure_radius).
+                set_maximum_step_size(maximum_step_size);
+
+        VectorFieldEvolver evolver(fail_vf, configuration, integrator);
 
         RealVariablesBox initial_box({x==0,y==1});
 
@@ -165,11 +170,13 @@ public:
 
         TaylorPicardIntegrator integrator(max_err);
 
-        VectorFieldEvolver evolver(dynamics,integrator);
-        evolver.configuration().set_maximum_enclosure_radius(0.1);
-        evolver.configuration().set_maximum_step_size(0.1);
-        evolver.configuration().set_maximum_spacial_error(1e-5);
-        evolver.configuration().set_enable_subdivisions(true);
+        auto configuration = Configuration<VectorFieldEvolver>().
+                set_maximum_enclosure_radius(0.1).
+                set_maximum_step_size(0.1).
+                set_maximum_spacial_error(1e-5).
+                set_enable_subdivisions(true);
+
+        VectorFieldEvolver evolver(dynamics,configuration,integrator);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);
@@ -195,11 +202,13 @@ public:
 
         TaylorPicardIntegrator integrator(max_err);
 
-        VectorFieldEvolver evolver(dynamics,integrator);
-        evolver.configuration().set_maximum_enclosure_radius(0.1);
-        evolver.configuration().set_maximum_step_size(0.1);
-        evolver.configuration().set_maximum_spacial_error(1e-5);
-        evolver.configuration().set_enable_subdivisions(true);
+        auto configuration = Configuration<VectorFieldEvolver>().
+                set_maximum_enclosure_radius(0.1).
+                set_maximum_step_size(0.1).
+                set_maximum_spacial_error(1e-5).
+                set_enable_subdivisions(true);
+
+        VectorFieldEvolver evolver(dynamics,configuration,integrator);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);

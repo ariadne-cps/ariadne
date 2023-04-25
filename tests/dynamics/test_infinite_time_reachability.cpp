@@ -40,6 +40,8 @@
 #include "solvers/integrator.hpp"
 #include "io/figure.hpp"
 #include "io/command_line_interface.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pronest/configurable.tpl.hpp"
 
 #include "../test.hpp"
 
@@ -78,8 +80,6 @@ class TestInfiniteTimeReachability
     BoundingDomainType bounding;
     SymbolicSetType symbolic_initial_set;
     SetType initial_set;
-    SymbolicSetType symbolic_safe_set;
-    SetType safe_set;
     TimeType reach_time;
   public:
 
@@ -100,7 +100,7 @@ class TestInfiniteTimeReachability
     {
         GradedTaylorSeriesIntegrator integrator(StepMaximumError(1e-2_pr));
 
-        EvolverType evolver(system,integrator);
+        EvolverType evolver(system,Configuration<EvolverType>(),integrator);
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);
@@ -118,15 +118,12 @@ class TestInfiniteTimeReachability
           bounding({{-4,4},{-4,4}}),
           symbolic_initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
           initial_set(symbolic_initial_set.euclidean_set(system.state_space())),
-          symbolic_safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec},{sqr(x)+sqr(y)<=sqr((Real)3)}),
-          safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
           reach_time(3.0_x)
     {
-        cout << "Done creating initial and safe sets\n" << endl;
+        cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;
         cout << "initial_set=" << initial_set << endl;
-        cout << "safe_set=" << safe_set << endl;
     }
 
     Void test_infinite_time_lower_reach() {
@@ -147,9 +144,9 @@ class TestInfiniteTimeReachability
 
     Void test_outer_chain_reach() {
         cout << "Computing outer chain reachable set" << endl;
-        analyser.configuration().set_transient_time(12.0_dec);
-        analyser.configuration().set_lock_to_grid_time(6.0_dec);
-        analyser.configuration().set_maximum_grid_fineness(3);
+        //analyser.configuration().set_transient_time(12.0_dec);
+        //analyser.configuration().set_lock_to_grid_time(6.0_dec);
+        //analyser.configuration().set_maximum_grid_fineness(3);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 

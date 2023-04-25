@@ -27,7 +27,7 @@
 
 void ariadne_main()
 {
-    CONCLOG_PRINTLN("van der Pol oscillator");
+    CONCLOG_PRINTLN("van der Pol oscillator")
 
     RealConstant mu("mu",1);
     RealVariable x("x"), y("y");
@@ -47,7 +47,7 @@ void ariadne_main()
         set_maximum_spacial_error(1e-6);
 
     VectorFieldEvolver evolver(dynamics,configuration,integrator);
-    CONCLOG_PRINTLN(evolver.configuration());
+    CONCLOG_PRINTLN(evolver.configuration())
 
     Real x0 = 1.40_dec;
     Real y0 = 2.40_dec;
@@ -56,27 +56,27 @@ void ariadne_main()
 
     RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
-    CONCLOG_PRINTLN("Initial set: " << initial_set);
+    CONCLOG_PRINTLN("Initial set: " << initial_set)
     Real evolution_time = 7;
 
     Helper::Stopwatch<std::chrono::milliseconds> sw;
-    CONCLOG_PRINTLN("Computing simulation...");
+    CONCLOG_PRINTLN("Computing simulation...")
     auto simulation = simulator.orbit(initial_set,evolution_time);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
 
-    CONCLOG_PRINTLN("Plotting...");;
+    CONCLOG_PRINTLN("Plotting...")
     LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
     fig.draw(simulation);
     fig.write("vanderpol_simulation");
 
     sw.restart();
-    CONCLOG_PRINTLN("Computing evolution... ");
+    CONCLOG_PRINTLN("Computing evolution... ")
     auto evolution = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
+    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
 
-    CONCLOG_PRINTLN("Plotting...");
+    CONCLOG_PRINTLN("Plotting...")
     fig.clear();
     fig.draw(evolution);
     fig.write("vanderpol_evolution");

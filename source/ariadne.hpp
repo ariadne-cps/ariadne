@@ -83,5 +83,7 @@ namespace Ariadne {
 #include "hybrid/hybrid_graphics.hpp"
 
 #include "conclog/logging.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pronest/configurable.tpl.hpp"
 
 #endif

@@ -41,10 +41,12 @@ void ariadne_main()
 
     TaylorPicardIntegrator integrator(max_err);
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
-    evolver.configuration().set_maximum_spacial_error(1e-6);
+    auto configuration = Configuration<VectorFieldEvolver>().
+        set_maximum_enclosure_radius(1.0).
+        set_maximum_step_size(0.02).
+        set_maximum_spacial_error(1e-6);
+
+    VectorFieldEvolver evolver(dynamics,configuration,integrator);
     CONCLOG_PRINTLN(evolver.configuration());
 
     Real x0 = 1.40_dec;

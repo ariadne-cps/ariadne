@@ -19,14 +19,14 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 12 AppleClang 14 [Release]",
-            os: macos-12,
+            name: "macOS 13 AppleClang 14 [Release]",
+            os: macos-13,
             cxx-cmd: "clang++",
             pyld: "DY"
           }
           - {
-            name: "macOS 11 GCC 12 [Release]",
-            os: macos-11,
+            name: "macOS 13 GCC 12 [Release]",
+            os: macos-13,
             cxx-pkg: "gcc@12",
             cxx-cmd: "g++-12"
           }

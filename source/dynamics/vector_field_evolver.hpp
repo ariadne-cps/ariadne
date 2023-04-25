@@ -44,10 +44,23 @@
 #include "dynamics/evolver_interface.hpp"
 
 #include "betterthreads/workload.hpp"
-
+#include "pronest/configuration_interface.hpp"
+#include "pronest/searchable_configuration.hpp"
+#include "pronest/configurable.hpp"
+#include "pronest/configuration_property.hpp"
+#include "pexplore/task_runner_interface.hpp"
+#include "pexplore/task.tpl.hpp"
 #include "conclog/logging.hpp"
 
 using namespace ConcLog;
+
+namespace Ariadne {
+class VectorFieldEvolver;
+}
+
+namespace ProNest {
+template<> struct Configuration<Ariadne::VectorFieldEvolver>;
+}
 
 namespace Ariadne {
 
@@ -57,7 +70,8 @@ template<class ES> class Orbit;
 using Mutex = std::mutex;
 template<class T> using LockGuard = std::lock_guard<T>;
 using BetterThreads::DynamicWorkload;
-
+using ProNest::Configuration;
+using pExplore::TaskRunnable;
 class VectorFieldEvolverConfiguration;
 
 class RealExpressionBoundedConstraintSet;
@@ -66,11 +80,12 @@ class RealExpressionBoundedConstraintSet;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType>
+    : public EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType>,
+      public TaskRunnable<VectorFieldEvolver>
 {
   public:
     typedef EvolverInterface<VectorField,LabelledEnclosure,typename VectorField::TimeType> Interface;
-    typedef VectorFieldEvolverConfiguration ConfigurationType;
+    typedef Configuration<VectorFieldEvolver> ConfigurationType;
     typedef VectorField SystemType;
     typedef IntegratorInterface IntegratorType;
     typedef typename VectorField::TimeType TimeType;
@@ -95,23 +110,17 @@ class VectorFieldEvolver
     typedef DynamicWorkload<TimedEnclosureType,TimeType const&,Semantics,SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:
 
-    //! \brief Construct from parameters and an integrator to compute the flow.
-    VectorFieldEvolver(SystemType const&, IntegratorInterface const&);
+    //! \brief Construct from \a system, \a configuration and \a integrator.
+    VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration, IntegratorInterface const& integrator);
 
     //! \brief Make a dynamically-allocated copy.
-    VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
+    VectorFieldEvolver* clone() const;
 
     //! \brief Get the internal system.
     virtual const SystemType& system() const { return *_system; }
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
-
-    //!@{
-    //! \name Configuration for the class.
-    //! \brief A reference to the configuration controlling the evolution.
-    ConfigurationType& configuration() { return *this->_configuration; }
-    const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
@@ -140,65 +149,104 @@ class VectorFieldEvolver
   private:
     SharedPointer<SystemType> _system;
     SharedPointer<IntegratorType> _integrator;
-    SharedPointer<ConfigurationType> _configuration;
-};
-
-
-//! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
-class VectorFieldEvolverConfiguration : public ConfigurationInterface
-{
-  public:
-    typedef ExactDouble RealType;
-    typedef ApproximateDouble ApproximateRealType;
-
-    //! \brief Default constructor gives reasonable values.
-    VectorFieldEvolverConfiguration();
-
-    ~VectorFieldEvolverConfiguration() override = default;
-
-  private:
-
-    //! \brief The maximum allowable step size for integration.
-    //! Decreasing this value increases the accuracy of the computation.
-    RealType _maximum_step_size;
-
-    //! \brief The maximum allowable radius of a basic set during integration.
-    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
-    RealType _maximum_enclosure_radius;
-
-    //! \brief The maximum allowable approximation error in the parameter-to-space mapping of an enclosure set.
-    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
-    RealType _maximum_spacial_error;
-
-    //! \brief Enable reconditioning of basic sets.
-    Bool _enable_reconditioning;
-
-    //! \brief Enable subdivisions of basic sets along evolution for upper semantics.
-    //! \details Subdivisions are always allowed on the initial set.
-    Bool _enable_subdivisions;
-
-  public:
-
-    const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
-
-    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
-
-    const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
-
-    const Bool& enable_reconditioning() const { return _enable_reconditioning; }
-    Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
-
-    const Bool& enable_subdivisions() const { return _enable_subdivisions; }
-    Void set_enable_subdivisions(const Bool value) { _enable_subdivisions = value; }
-
-  public:
-
-    OutputStream& _write(OutputStream& os) const override;
 };
 
 } // namespace Ariadne
+
+namespace ProNest {
+
+using Ariadne::VectorFieldEvolver;
+using Ariadne::ExactDouble;
+using Ariadne::ApproximateDouble;
+using Ariadne::Bool;
+using Ariadne::IntegratorInterface;
+using ProNest::RangeConfigurationProperty;
+
+
+//! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
+template<> struct Configuration<VectorFieldEvolver> final : public SearchableConfiguration {
+    typedef Configuration<VectorFieldEvolver> C;
+    typedef double RealType;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+    typedef InterfaceListConfigurationProperty<IntegratorInterface> IntegratorProperty;
+
+    Configuration() {
+        add_property("enable_premature_termination",BooleanConfigurationProperty(false));
+        add_property("enable_reconditioning",BooleanConfigurationProperty(true));
+        add_property("enable_subdivisions",BooleanConfigurationProperty(false));
+        //add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("maximum_enclosure_radius",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_spacial_error",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
+        add_property("maximum_step_size",RealTypeProperty(std::numeric_limits<double>::max(),Log2SearchSpaceConverter<RealType>()));
+    }
+
+    //! \brief Enable premature termination of lower evolution
+    Bool const& enable_premature_termination() const { return at<BooleanConfigurationProperty>("enable_premature_termination").get(); }
+    C& set_enable_premature_termination(Bool const& value) { at<BooleanConfigurationProperty>("enable_premature_termination").set(value); return *this; }
+
+    //! \brief Enable reconditioning of basic sets
+    Bool const& enable_reconditioning() const { return at<BooleanConfigurationProperty>("enable_reconditioning").get(); }
+    C& set_enable_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("enable_reconditioning").set(value); return *this; }
+    C& set_both_enable_reconditioning() { at<BooleanConfigurationProperty>("enable_reconditioning").set_both(); return *this; }
+
+    //! \brief Enable subdivisions for upper evolution
+    Bool const& enable_subdivisions() const { return at<BooleanConfigurationProperty>("enable_subdivisions").get(); }
+    C& set_enable_subdivisions(Bool const& value) { at<BooleanConfigurationProperty>("enable_subdivisions").set(value); return *this; }
+
+    //! \brief The maximum allowable step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    RealType const& maximum_step_size() const { return at<RealTypeProperty>("maximum_step_size").get(); }
+    C& set_maximum_step_size(RealType const& value) { at<RealTypeProperty>("maximum_step_size").set(value); return *this; }
+    C& set_maximum_step_size(RealType const& lower, RealType const& upper) { at<RealTypeProperty>("maximum_step_size").set(lower,upper); return *this; }
+
+    //! \brief The maximum allowable approximation error for reconditioning
+    RealType const& maximum_spacial_error() const { return at<RealTypeProperty>("maximum_spacial_error").get(); }
+    C& set_maximum_spacial_error(RealType const& value) { at<RealTypeProperty>("maximum_spacial_error").set(value); return *this; }
+    C& set_maximum_spacial_error(RealType const& lower, RealType const& upper) { at<RealTypeProperty>("maximum_spacial_error").set(lower,upper); return *this; }
+
+    //! \brief The maximum allowable radius of a basic set during integration.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType const& maximum_enclosure_radius() const { return at<RealTypeProperty>("maximum_enclosure_radius").get(); }
+    C& set_maximum_enclosure_radius(RealType const& value) { at<RealTypeProperty>("maximum_enclosure_radius").set(value); return *this; }
+
+    //! \brief The integrator to be used.
+    //IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
+    //C& set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+    //C& set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+};
+
+} // namespace ProNest
+
+namespace pExplore {
+
+using Ariadne::VectorFieldEvolver;
+using Ariadne::LabelledEnclosure;
+using Ariadne::IntegratorInterface;
+using Ariadne::EffectiveVectorMultivariateFunction;
+using Ariadne::Dyadic;
+
+template<> struct TaskInput<VectorFieldEvolver> {
+    TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
+              Dyadic const& current_time_, shared_ptr<IntegratorInterface> integrator_ptr_) :
+            dynamic(dynamic_), current_set(current_set_), current_time(current_time_), integrator_ptr(integrator_ptr_) { }
+    EffectiveVectorMultivariateFunction const& dynamic;
+    LabelledEnclosure const& current_set;
+    Dyadic const& current_time;
+    shared_ptr<IntegratorInterface> integrator_ptr;
+};
+
+template<> struct TaskOutput<VectorFieldEvolver> {
+    TaskOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_) :
+            evolve(evolve_), reach(reach_), time(time_) { }
+    LabelledEnclosure const evolve;
+    LabelledEnclosure const reach;
+    Dyadic const time;
+};
+
+template<> struct Task<VectorFieldEvolver> final: ParameterSearchTaskBase<VectorFieldEvolver> {
+    TaskOutput<VectorFieldEvolver> run(TaskInput<VectorFieldEvolver> const& in, Configuration<VectorFieldEvolver> const& cfg) const override;
+};
+
+} // namespace pExplore
 
 #endif // ARIADNE_VECTOR_FIELD_EVOLVER_HPP

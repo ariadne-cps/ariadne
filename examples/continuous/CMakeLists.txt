@@ -1,6 +1,7 @@
 set(EXAMPLES_CONTINUOUS
     attractor
     vanderpol
+    constrained_vanderpol
 )
 
 foreach(example ${EXAMPLES_CONTINUOUS})

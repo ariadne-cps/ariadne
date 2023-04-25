@@ -30,8 +30,8 @@
 
 #include "hybrid/hybrid_simulator.hpp"
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "utility/tuple.hpp"
 #include "helper/stlio.hpp"
 #include "symbolic/valuation.hpp"

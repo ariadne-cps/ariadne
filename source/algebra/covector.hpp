@@ -32,7 +32,7 @@
 #define ARIADNE_COVECTOR_HPP
 
 #include "utility/metaprogramming.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "algebra/vector.hpp"
 
 namespace Ariadne {

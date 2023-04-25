@@ -26,10 +26,10 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "utility/tuple.hpp"
 #include "helper/stlio.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"

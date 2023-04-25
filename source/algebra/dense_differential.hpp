@@ -32,7 +32,7 @@
 #include <limits>
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

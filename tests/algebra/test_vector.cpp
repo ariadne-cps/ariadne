@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Helper;
 
 class TestVector {
   public:
@@ -132,7 +133,7 @@ Void
 TestVector::test_misc()
 {
     DoublePrecision pr;
-    Array<FloatDPApproximation> vary={{-4.0_x,3.0_x,1.0_x},pr};
+    Array<FloatDPApproximation> vary={{-4.0,3.0,1.0},pr};
     FloatDPApproximation x={1.5_x,pr};
 
     Vector<FloatDPApproximation> v0;

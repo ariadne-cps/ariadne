@@ -31,7 +31,7 @@
 #include "solvers/bounder.hpp"
 
 #include "conclog/logging.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/tuple.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

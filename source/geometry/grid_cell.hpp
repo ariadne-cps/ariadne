@@ -35,7 +35,7 @@
 #include <memory>
 
 #include "utility/tribool.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 
 #include "utility/binary_word.hpp"
 

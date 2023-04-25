@@ -30,7 +30,7 @@
 #define ARIADNE_SCALED_FUNCTION_PATCH_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/exceptions.hpp"
 #include "utility/declarations.hpp"
 #include "numeric/numeric.hpp"

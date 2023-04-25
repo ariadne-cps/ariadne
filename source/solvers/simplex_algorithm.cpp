@@ -898,7 +898,7 @@ SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, c
     Array<SizeType> p(A.column_size());
     Array<Slackness> vt(A.column_size());
     Matrix<XX> B(A.row_size(),A.row_size(),A.zero_element());
-    make_lpair(p,B)=this->compute_basis(A);
+    Ariadne::make_lpair(p,B)=this->compute_basis(A);
     vt=compute_vt(xl,xu,p,A.row_size());
 
     Bool done = false;
@@ -964,7 +964,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
     SizeType r; XX t=x.zero_element();
-    make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
+    Ariadne::make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         CONCLOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
         return true;
@@ -1022,7 +1022,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
     SizeType r; XX t=x.zero_element();
-    make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
+    Ariadne::make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         CONCLOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
         return r;
@@ -1249,7 +1249,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
 
     Array<SizeType> p;
     Matrix<XX> B(m,m,A.zero_element());
-    make_lpair(p,B)=compute_basis(A);
+    Ariadne::make_lpair(p,B)=compute_basis(A);
 
     Array<Slackness> vt=compute_vt(xl,xu,p,m);
 
@@ -1304,7 +1304,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     const SizeType m=A.row_size();
     //const SizeType n=A.column_size();
     if(vt.size()==0) {
-        make_lpair(p,B)=this->compute_basis(A);
+        Ariadne::make_lpair(p,B)=this->compute_basis(A);
         vt=Ariadne::compute_vt(xl,xu,p,m);
     }
     if(p.size()==0) {
@@ -1445,7 +1445,7 @@ SimplexSolver<X>::minimise(const Vector<X>& c, const Vector<X>& xl, const Vector
     Matrix<XX> B(m,m,A.zero_element());
     Vector<XX> x(n,xl.zero_element());
 
-    make_lpair(p,B)=compute_basis(A);
+    Ariadne::make_lpair(p,B)=compute_basis(A);
     for(SizeType k=0; k!=m; ++k) { vt[p[k]]=Slackness::BASIS; }
     for(SizeType k=m; k!=n; ++k) { vt[p[k]]=Slackness::LOWER; }
 

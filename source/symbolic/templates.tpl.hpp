@@ -27,6 +27,8 @@
 
 namespace Ariadne {
 
+using Helper::Map;
+
 template<class T> class Variable;
 
 template<class... OPS> class OperatorVariant;

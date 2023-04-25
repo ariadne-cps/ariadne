@@ -33,7 +33,7 @@
 #include "numeric/numeric.hpp"
 #include "algebra/series.hpp"
 #include "function/domain.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 namespace Ariadne {
 

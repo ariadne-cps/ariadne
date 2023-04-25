@@ -1,5 +1,5 @@
 #include "numeric/numeric.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "algebra/tensor.hpp"
 
 namespace Ariadne

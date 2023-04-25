@@ -40,7 +40,7 @@
 #include "conclog/logging.hpp"
 #include "utility/attribute.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 
 using namespace ConcLog;

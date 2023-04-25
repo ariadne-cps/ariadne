@@ -29,7 +29,7 @@
 
 #include "solvers/runge_kutta_integrator.hpp"
 
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/algebra.hpp"
@@ -38,6 +38,8 @@
 #include "function/formula.hpp"
 
 namespace Ariadne {
+
+using Helper::make_pair;
 
 inline auto operator*(ApproximateDouble s, FloatDPApproximationVector v) -> FloatDPApproximationVector { return FloatDPApproximation(cast_exact(s),dp)*v; }
 

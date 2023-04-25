@@ -29,7 +29,7 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 #include "numeric/logical.hpp"
 #include "numeric/floatdp.hpp"

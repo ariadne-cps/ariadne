@@ -34,7 +34,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 #include "symbolic/variable.hpp"
 

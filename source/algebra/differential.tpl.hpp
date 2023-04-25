@@ -25,7 +25,7 @@
 #include <map>
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/float.decl.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"

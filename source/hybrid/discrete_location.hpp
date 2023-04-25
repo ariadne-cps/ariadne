@@ -30,7 +30,7 @@
 #define ARIADNE_DISCRETE_LOCATION_HPP
 
 #include <string>
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "symbolic/valuation.hpp"
 
 namespace Ariadne {

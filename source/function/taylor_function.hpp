@@ -30,7 +30,7 @@
 #define ARIADNE_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/exceptions.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

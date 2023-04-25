@@ -26,7 +26,7 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "utility/tuple.hpp"
 #include "helper/stlio.hpp"
 #include "algebra/vector.hpp"

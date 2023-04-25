@@ -34,8 +34,8 @@
 #include <memory>
 
 #include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "symbolic/templates.hpp"

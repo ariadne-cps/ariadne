@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/declarations.hpp"
 #include "solvers/integrator.hpp"
 #include "numeric/numeric.hpp"
@@ -36,8 +36,9 @@
 
 namespace Ariadne {
 
+using Helper::List;
+
 template<class T1, class T2> using Pair = std::pair<T1,T2>;
-template<class T> class List;
 
 //! \brief An approximate differential equation integrator based on the classical 4th-order Runge-Kutta method.
 class RungeKutta4Integrator

@@ -33,7 +33,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/declarations.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "utility/pointer.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"

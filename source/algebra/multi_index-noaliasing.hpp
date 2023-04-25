@@ -38,7 +38,7 @@
 
 #include "utility/iterator.hpp"
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/numeric.hpp"
 
 namespace Ariadne {

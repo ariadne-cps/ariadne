@@ -36,7 +36,7 @@
 #include "utility/macros.hpp"
 #include "utility/declarations.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/writable.hpp"
 
 #include "numeric/logical.decl.hpp"
@@ -50,7 +50,9 @@
 
 namespace Ariadne {
 
-template<class T> class Set;
+using Helper::Set;
+using Helper::Map;
+
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 

@@ -30,7 +30,7 @@
 #define ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "algebra/series.hpp"
 #include "numeric/numeric.hpp"
 

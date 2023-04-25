@@ -32,7 +32,7 @@
 #define ARIADNE_VECTOR_HPP
 
 #include "utility/module.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 namespace Ariadne {
 

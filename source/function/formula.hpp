@@ -37,7 +37,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "helper/stlio.hpp"
 
 #include "numeric/operators.hpp"
@@ -50,6 +50,8 @@
 #include "symbolic/constant.hpp"
 
 namespace Ariadne {
+
+using Helper::Set;
 
 template<class X> using NumericType = typename X::NumericType;
 template<class X> using GenericType = typename X::GenericType;

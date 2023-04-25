@@ -35,12 +35,13 @@
 
 #include "utility/declarations.hpp"
 #include "conclog/logging.hpp"
+#include "helper/container.hpp"
 
 using namespace ConcLog;
 
 namespace Ariadne {
-template<class T> class Set;
-template<class T> class List;
+
+using Helper::Set;
 
 class SolverInterface;
 

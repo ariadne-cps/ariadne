@@ -42,6 +42,5 @@
 #include "clonable.hpp"
 
 #include "handle.hpp"
-#include "container.hpp"
 
 #endif

@@ -34,7 +34,7 @@
 #include <string>
 
 #include "utility/macros.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/tribool.hpp"
 
 #include "numeric/integer.hpp"
@@ -43,6 +43,9 @@
 
 namespace Ariadne {
 
+using Helper::Set;
+using Helper::Map;
+using Helper::List;
 
 // Sequencing operators to make Valuation objects or objects convertible to Valuations.
 template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const typename Variable<X>::Type& c) { return Pair<Variable<X>,X>(v,c); }

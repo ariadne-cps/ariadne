@@ -241,7 +241,7 @@ template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenea
 
 } // namespace Ariadne
 
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 
 namespace Ariadne {
 

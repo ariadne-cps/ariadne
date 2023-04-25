@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include "betterthreads/thread_manager.hpp"
 #include "utility/handle.hpp"
+#include "helper/container.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"
 #include "gnuplot.hpp"
@@ -37,6 +38,7 @@ using namespace ConcLog;
 
 namespace Ariadne {
 
+using Helper::Set;
 using BetterThreads::ThreadManager;
 
 ArgumentStream::ArgumentStream(List<String> const& args) {

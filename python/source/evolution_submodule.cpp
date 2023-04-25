@@ -30,7 +30,11 @@
 #include "dynamics/iterated_map_evolver.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
-
+#include "pronest/configuration_interface.hpp"
+#include "pronest/configurable.hpp"
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pexplore/task_runner_interface.hpp"
 
 using namespace Ariadne;
 
@@ -136,14 +140,31 @@ Void export_evolver(pybind11::module& module, const char* name)
     evolver_class.def("configuration",(ConfigurationType&(Evolver::*)())&Evolver::configuration,reference_internal);
 }
 
+template<class EV, class... Params>
+Void export_runnable_evolver(pybind11::module& module, const char* name)
+{
+    typedef EV Evolver;
+    typedef typename EV::Interface Interface;
+    typedef typename EV::EnclosureType EnclosureType;
+    typedef typename EV::TerminationType TerminationType;
+    typedef typename EV::OrbitType OrbitType;
+
+    pybind11::class_<Evolver,pybind11::bases<Interface,TaskRunnable<EV>>> evolver_class(module,name);
+    evolver_class.def(pybind11::init<Params...>());
+    evolver_class.def("orbit",(OrbitType(Evolver::*)(const EnclosureType&,const TerminationType&,Semantics)const) &Evolver::orbit);
+    evolver_class.def("orbit",(OrbitType(Evolver::*)(const RealExpressionBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
+}
+
 Void export_vector_field_evolver_configuration(pybind11::module& module) {
 
     typedef typename VectorFieldEvolver::ConfigurationType ConfigurationType;
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
+    using pybind11::overload_cast;
 
     pybind11::class_<ConfigurationType> vector_field_evolver_configuration_class(module,"VectorFieldEvolverConfiguration");
-    vector_field_evolver_configuration_class.def("set_maximum_step_size", &ConfigurationType::set_maximum_step_size);
-    vector_field_evolver_configuration_class.def("set_maximum_enclosure_radius", &ConfigurationType::set_maximum_enclosure_radius);
-    vector_field_evolver_configuration_class.def("set_maximum_spacial_error", &ConfigurationType::set_maximum_spacial_error);
+    vector_field_evolver_configuration_class.def("set_maximum_step_size", overload_cast<double const&>(&ConfigurationType::set_maximum_step_size),reference_internal);
+    vector_field_evolver_configuration_class.def("set_maximum_enclosure_radius", overload_cast<double const&>(&ConfigurationType::set_maximum_enclosure_radius),reference_internal);
+    vector_field_evolver_configuration_class.def("set_maximum_spacial_error", overload_cast<double const&>(&ConfigurationType::set_maximum_spacial_error),reference_internal);
     vector_field_evolver_configuration_class.def("set_enable_reconditioning", &ConfigurationType::set_enable_reconditioning);
     vector_field_evolver_configuration_class.def("set_enable_subdivisions", &ConfigurationType::set_enable_subdivisions);
     vector_field_evolver_configuration_class.def("__repr__",&__cstr__<ConfigurationType>);
@@ -212,10 +233,10 @@ Void evolution_submodule(pybind11::module& module)
 
     export_orbit<VectorFieldEvolver::OrbitType>(module,"LabelledEnclosureOrbit");
 
-    export_evolver<IteratedMapEvolver, IteratedMap>(module, "IteratedMapEvolver");
-    export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
-
     export_vector_field_evolver_configuration(module);
+
+    export_evolver<IteratedMapEvolver, IteratedMap>(module, "IteratedMapEvolver");
+    export_runnable_evolver<VectorFieldEvolver, VectorField, Configuration<VectorFieldEvolver>, IntegratorInterface const&>(module,"VectorFieldEvolver");
 
     export_safety_certificate<ContinuousReachabilityAnalyser>(module,"SafetyCertificate");
     export_reachability_analyser<ContinuousReachabilityAnalyser,VectorFieldEvolver>(module,"ContinuousReachabilityAnalyser");

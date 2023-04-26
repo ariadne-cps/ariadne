@@ -170,8 +170,9 @@ class EvaluationSequenceBuilder {
                             case SatisfactionPrescription::FALSE_FOR_SOME : rho = -tb.bounds[m].lower().get_d(); break;
                             default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
                         }
-                        //CONCLOG_PRINTLN("i="<< i <<",m="<< m << ",rho="<< rho << ",w-w0=" << width-width0[m])
-                        alpha[m] = std::min(alpha[m],rho/(width-width0[m]));
+                        auto this_alpha = rho/(width-width0[m]);
+                        //CONCLOG_PRINTLN("i="<< i <<",m="<< m << ",rho="<< rho << ",w-w0=" << width-width0[m]<<",alpha="<<this_alpha)
+                        if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                     }
                 }
             }
@@ -278,7 +279,8 @@ void ariadne_main()
     RealConstant ymin("ymin",-3.0_x);
     RealConstant xmin("xmin",-1.0_x);
     RealConstant xmax("xmax",2.5_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x};
+    RealConstant rsqr("r^2",11.0_x);
+    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, rsqr - sqr(x) - sqr(y)};
 
     auto approximate_configuration = Configuration<VectorFieldEvolver>().
         set_maximum_step_size(0.1);

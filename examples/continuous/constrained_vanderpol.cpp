@@ -23,6 +23,7 @@
  */
 
 #include "ariadne_main.hpp"
+#include "dynamics/inner_approximation.hpp"
 #include "helper/stopwatch.hpp"
 #include "pexplore/task_runner.tpl.hpp"
 
@@ -64,12 +65,12 @@ struct TimedBoxEvaluation {
     friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": box=" << tbe.box << ", eval=" << tbe.evaluation; }
 };
 
-struct HardConstraintConstants {
-  HardConstraintConstants(SatisfactionPrescription mu_, double t_star_, double alpha_) : mu(mu_), t_star(t_star_), alpha(alpha_) { }
-  SatisfactionPrescription mu;
+struct HardConstraintPrescription {
+  HardConstraintPrescription(SatisfactionPrescription sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
+  SatisfactionPrescription sigma;
   double t_star;
   double alpha;
-  friend ostream& operator<<(ostream& os, HardConstraintConstants const& hcc) { return os << "{mu=" << hcc.mu << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
+  friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
 struct TimedVolume {
@@ -84,10 +85,10 @@ class EvaluationSequenceBuilder;
 class EvaluationSequence {
     friend class EvaluationSequenceBuilder;
   protected:
-    EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintConstants> const& usages) : _sequence(tv), _usages(usages) { }
+    EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
   public:
 
-    size_t number_of_constraints() const { return _usages.size(); }
+    size_t number_of_constraints() const { return _prescriptions.size(); }
 
     //! \brief timed volume accessor by index
     TimedVolume const& at(size_t idx) const { return _sequence.at(idx); }
@@ -110,7 +111,7 @@ class EvaluationSequence {
     }
 
     //! \brief The usage given the constraint index \a idx
-    HardConstraintConstants const& usage(ConstraintIndexType idx) const { return _usages.at(idx); }
+    HardConstraintPrescription const& usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
 
     //! \brief The number of elements in the sequence
     size_t size() const { return _sequence.size(); }
@@ -118,12 +119,12 @@ class EvaluationSequence {
     friend ostream& operator<<(ostream& os, EvaluationSequence const& es) {
         os << "timed_volumes:{";
         for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
-        return os << es.at(es.size()-1) << "}, usages:" << es._usages;
+        return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
     }
 
   private:
     List<TimedVolume> _sequence;
-    Vector<HardConstraintConstants> _usages;
+    Vector<HardConstraintPrescription> _prescriptions;
 };
 
 class EvaluationSequenceBuilder {
@@ -203,7 +204,7 @@ class EvaluationSequenceBuilder {
             timed_volumes.push_back({tbe.time,v});
         }
 
-        Vector<HardConstraintConstants> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
+        Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
         for (ConstraintIndexType m=0; m<_M; ++m)
             constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
 
@@ -350,7 +351,7 @@ EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& or
     return sb.build();
 }
 
-ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(EvaluationSequence const& evaluation) {
+ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(EvaluationSequence const& evaluation, List<EffectiveScalarMultivariateFunction> const& hs) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
@@ -362,9 +363,32 @@ ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(E
             auto v0 = evaluation.at(0).volume;
             auto v_approx = evaluation.near(o.time.get_d());
             auto alpha = evaluation.usage(m).alpha;
-            return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().measure().get_d();
+            return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
         }).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
         );
+        constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+            if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)
+                return evaluate_from_function(hs.at(m),o.reach).lower().get_d();
+            else return evaluation.usage(m).t_star - o.time.get_d();
+        }).set_failure_kind(ConstraintFailureKind::HARD).build()
+        );
+        if (evaluation.usage(m).sigma != SatisfactionPrescription::TRUE) {
+            constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+                if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL)
+                    return -evaluate_from_function(hs.at(m),o.evolve).upper().get_d();
+                else {
+                    if (evaluate_from_function(hs.at(m),o.evolve).lower().get_d() < 0) {
+                        try {
+                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+                            auto inner_evolve = approximator.compute_from(o.evolve);
+                            return -evaluate_from_function(hs.at(m),inner_evolve).lower().get_d();
+                        } catch (std::exception&) { }
+                    }
+                    return -1.0;
+                }
+            }).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
+            );
+        }
     }
 
     return {constraints};
@@ -426,7 +450,7 @@ void ariadne_main()
 
     auto analysis = evaluate_approximate_orbit(approximate_orbit, hs);
 
-    auto constraining = build_constraining_specification(analysis);
+    auto constraining = build_constraining_specification(analysis, hs);
 
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")

@@ -364,19 +364,19 @@ ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(E
             auto v_approx = evaluation.near(o.time.get_d());
             auto alpha = evaluation.usage(m).alpha;
             return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
-        }).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
+        }).set_name("objective_soft"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
         );
         constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
             if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)
                 return evaluate_from_function(hs.at(m),o.reach).lower().get_d();
             else return evaluation.usage(m).t_star - o.time.get_d();
-        }).set_failure_kind(ConstraintFailureKind::HARD).build()
+        }).set_name("hard"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
         if (evaluation.usage(m).sigma != SatisfactionPrescription::TRUE) {
             constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
-                if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL)
-                    return -evaluate_from_function(hs.at(m),o.evolve).upper().get_d();
-                else {
+                if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL) {
+                    return -evaluate_from_function(hs.at(m), o.evolve).upper().get_d();
+                } else {
                     if (evaluate_from_function(hs.at(m),o.evolve).lower().get_d() < 0) {
                         try {
                             auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
@@ -386,7 +386,7 @@ ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(E
                     }
                     return -1.0;
                 }
-            }).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
+            }).set_name("falsify_success"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
             );
         }
     }
@@ -407,7 +407,7 @@ void ariadne_main()
     RealConstant xmax("xmax",2.5_x);
     RealConstant rsqr("r^2",2.0_x);
     List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
-    //List<RealExpression> constraints = {rsqr - sqr(x) - sqr(y)};
+    //List<RealExpression> constraints = {x-xmin};
 
     auto approximate_configuration = Configuration<VectorFieldEvolver>().
         set_maximum_step_size(0.1);

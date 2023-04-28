@@ -22,11 +22,19 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "helper/stopwatch.hpp"
 #include "ariadne_main.hpp"
+#include "helper/stopwatch.hpp"
+#include "pexplore/task_runner.tpl.hpp"
 
 using std::ostream;
 
+using pExplore::ConstrainingSpecification;
+using pExplore::ConstraintBuilder;
+using pExplore::ConstraintObjectiveImpact;
+using pExplore::ConstraintSuccessAction;
+using pExplore::ConstraintFailureKind;
+using pExplore::TaskInput;
+using pExplore::TaskOutput;
 using ConstraintIndexType = size_t;
 
 //! \brief The prescription to the satisfaction of the constraint
@@ -78,6 +86,9 @@ class EvaluationSequence {
   protected:
     EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintConstants> const& usages) : _sequence(tv), _usages(usages) { }
   public:
+
+    size_t number_of_constraints() const { return _usages.size(); }
+
     //! \brief timed volume accessor by index
     TimedVolume const& at(size_t idx) const { return _sequence.at(idx); }
 
@@ -105,7 +116,7 @@ class EvaluationSequence {
     size_t size() const { return _sequence.size(); }
 
     friend ostream& operator<<(ostream& os, EvaluationSequence const& es) {
-        os << "values:{";
+        os << "timed_volumes:{";
         for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
         return os << es.at(es.size()-1) << "}, usages:" << es._usages;
     }
@@ -146,14 +157,11 @@ class EvaluationSequenceBuilder {
             else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
 
             if (prescription_to_check != SatisfactionPrescription::TRUE) {
-                CONCLOG_PRINTLN("max robustness: " << _max_robustness_false[m].get(prescription_to_check))
                 auto chi = get_chi(tbe.box,_hs[m],prescription_to_check);
                 auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
-                CONCLOG_PRINTLN("robustness: " << robustness)
                 if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
                     _max_robustness_false[m].at(prescription_to_check) = robustness;
                     _t_false[m].at(prescription_to_check) = tbe.time;
-                    CONCLOG_PRINTLN("updated robustness, t_false: " << _t_false[m].at(prescription_to_check))
                 }
             }
         }
@@ -175,6 +183,7 @@ class EvaluationSequenceBuilder {
         List<TimedVolume> timed_volumes;
 
         double v0 = volume(_timed_box_evaluations.at(0).box);
+        timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0});
 
         Vector<double> alpha(_M, std::numeric_limits<double>::max());
         for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
@@ -186,7 +195,7 @@ class EvaluationSequenceBuilder {
                         double chi = get_chi(tbe.box,_hs[m],_prescriptions[m]);
                         double rho = get_rho(_N,chi,v,_prescriptions[m]);
                         auto this_alpha = rho/(v-v0);
-                        CONCLOG_PRINTLN("i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
+                        CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
                         if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                     }
                 }
@@ -341,6 +350,26 @@ EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& or
     return sb.build();
 }
 
+ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(EvaluationSequence const& evaluation) {
+    using A = VectorFieldEvolver;
+    using I = TaskInput<A>;
+    using O = TaskOutput<A>;
+
+    List<pExplore::Constraint<A>> constraints;
+
+    for (ConstraintIndexType m=0; m<evaluation.number_of_constraints(); ++m) {
+        constraints.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
+            auto v0 = evaluation.at(0).volume;
+            auto v_approx = evaluation.near(o.time.get_d());
+            auto alpha = evaluation.usage(m).alpha;
+            return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().measure().get_d();
+        }).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
+        );
+    }
+
+    return {constraints};
+}
+
 void ariadne_main()
 {
     RealConstant mu("mu",1);
@@ -395,19 +424,23 @@ void ariadne_main()
     auto hs = convert_to_functions(constraints, dynamics.state_space());
     CONCLOG_PRINTLN_VAR(hs)
 
-    auto preanalysis = evaluate_approximate_orbit(approximate_orbit, hs);
+    auto analysis = evaluate_approximate_orbit(approximate_orbit, hs);
+
+    auto constraining = build_constraining_specification(analysis);
+
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
-    CONCLOG_PRINTLN_VAR_AT(1,preanalysis)
+    CONCLOG_PRINTLN_VAR_AT(1,analysis)
 
     CONCLOG_PRINTLN("Plotting...")
-    LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
+    LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
     fig.draw(approximate_orbit);
     CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
 
     sw.restart();
     CONCLOG_PRINTLN("Computing rigorous evolution... ")
+    rigorous_evolver.set_constraining(constraining);
     auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")

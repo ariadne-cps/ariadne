@@ -43,11 +43,17 @@ std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescr
     }
 }
 
-struct TimedBounds {
-  TimedBounds(double time_, Vector<FloatDPBounds> const& bounds_) : time(time_), bounds(bounds_) { }
-  double time;
-  Vector<FloatDPBounds> bounds;
-  friend ostream& operator<<(ostream& os, TimedBounds& tb) { return os << tb.time << ":" << tb.bounds; }
+FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
+double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
+double get_rho(double chi, size_t N, double volume, SatisfactionPrescription prescription);
+double volume(Vector<FloatDPBounds> const& bnds);
+
+struct TimedBoxEvaluation {
+    TimedBoxEvaluation(double time_, Vector<FloatDPBounds> const& box_, Vector<FloatDPBounds> const& evaluation_) : time(time_), box(box_), evaluation(evaluation_) { }
+    double time;
+    Vector<FloatDPBounds> box;
+    Vector<FloatDPBounds> evaluation;
+    friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": box=" << tbe.box << ", eval=" << tbe.evaluation; }
 };
 
 struct HardConstraintConstants {
@@ -58,11 +64,11 @@ struct HardConstraintConstants {
   friend ostream& operator<<(ostream& os, HardConstraintConstants const& hcc) { return os << "{mu=" << hcc.mu << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
-struct TimedWidths {
-  TimedWidths(double time_, Map<ConstraintIndexType,double> const& widths_) : time(time_), widths(widths_) { }
+struct TimedVolume {
+  TimedVolume(double time_, double volume_) : time(time_), volume(volume_) { }
   double time;
-  Map<ConstraintIndexType,double> widths;
-  friend ostream& operator<<(ostream& os, TimedWidths const& te) { return os << te.time << ":" << te.widths; }
+  double volume;
+  friend ostream& operator<<(ostream& os, TimedVolume const& tv) { return os << tv.time << ":" << tv.volume; }
 };
 
 class EvaluationSequenceBuilder;
@@ -70,170 +76,249 @@ class EvaluationSequenceBuilder;
 class EvaluationSequence {
     friend class EvaluationSequenceBuilder;
   protected:
-    EvaluationSequence(List<TimedWidths> const& te, Vector<HardConstraintConstants> const& usages) : _sequence(te), _usages(usages) { }
+    EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintConstants> const& usages) : _sequence(tv), _usages(usages) { }
   public:
-    TimedWidths const& at(size_t idx) const { return _sequence.at(idx); }
-    //! \brief Get the widths with time closest to \a time
-    Map<ConstraintIndexType,double> const& near(double time) const {
+    //! \brief timed volume accessor by index
+    TimedVolume const& at(size_t idx) const { return _sequence.at(idx); }
+
+    //! \brief Get the volume with time closest to \a time
+    double const& near(double time) const {
         size_t lower = 0;
         size_t upper = size()-1;
 
-        if (_sequence.at(lower).time >= time) return _sequence.at(lower).widths;
-        if (_sequence.at(upper).time <= time) return _sequence.at(upper).widths;
+        if (_sequence.at(lower).time >= time) return _sequence.at(lower).volume;
+        if (_sequence.at(upper).time <= time) return _sequence.at(upper).volume;
 
         while (upper - lower > 1) {
             auto mid = (lower+upper)/2;
             if (_sequence.at(mid).time < time) lower = mid;
             else upper = mid;
         }
-        if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper).widths;
-        else return _sequence.at(lower).widths;
+        if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper).volume;
+        else return _sequence.at(lower).volume;
     }
 
+    //! \brief The usage given the constraint index \a idx
+    HardConstraintConstants const& usage(ConstraintIndexType idx) const { return _usages.at(idx); }
+
+    //! \brief The number of elements in the sequence
     size_t size() const { return _sequence.size(); }
 
     friend ostream& operator<<(ostream& os, EvaluationSequence const& es) {
-        os << "{";
+        os << "values:{";
         for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
-        return os << es.at(es.size()-1) << "}";
+        return os << es.at(es.size()-1) << "}, usages:" << es._usages;
     }
 
   private:
-    List<TimedWidths> _sequence;
+    List<TimedVolume> _sequence;
     Vector<HardConstraintConstants> _usages;
 };
 
 class EvaluationSequenceBuilder {
   public:
 
-    EvaluationSequenceBuilder(size_t M) : _M(M), _prescriptions(M,SatisfactionPrescription::TRUE),
-                                          _max_robustness_false(M,{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
-                                          _t_false(M,{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
+    EvaluationSequenceBuilder(size_t N, List<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
+                                          _max_robustness_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
+                                          _t_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
 
-    void add(TimedBounds const& tb) {
-        HELPER_PRECONDITION(_timed_bounds_list.empty() or _timed_bounds_list.at(_timed_bounds_list.size()-1).time < tb.time)
-        _timed_bounds_list.push_back(tb);
+    void add_from(LabelledEnclosure const& e) {
+        Vector<FloatDPBounds> eval(_M,DoublePrecision());
+        for (size_t m=0; m<_M; ++m) eval.at(m) = evaluate_from_function(_hs.at(m),e);
+
+        auto bb = e.euclidean_set().bounding_box();
+        add({e.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(bb),eval});
+    }
+
+    void add(TimedBoxEvaluation const& tbe) {
+        HELPER_PRECONDITION(_timed_box_evaluations.empty() or _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time < tbe.time)
+        _timed_box_evaluations.push_back(tbe);
         for (ConstraintIndexType m=0; m<_M; ++m) {
-            auto const& bounds = tb.bounds[m];
-            auto upper = bounds.upper().get_d();
-            auto lower = bounds.lower().get_d();
+            auto const& evaluation = tbe.evaluation[m];
+            auto upper = evaluation.upper().get_d();
+            auto lower = evaluation.lower().get_d();
             if (_prescriptions[m] != SatisfactionPrescription::FALSE_FOR_ALL) {
                 if (upper < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_ALL;
                 else if (lower < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_SOME;
             }
-            if (upper < 0) {
-                if (_max_robustness_false[m].get(SatisfactionPrescription::FALSE_FOR_ALL) < -upper) {
-                    _max_robustness_false[m].at(SatisfactionPrescription::FALSE_FOR_ALL) = -upper;
-                    _t_false[m].at(SatisfactionPrescription::FALSE_FOR_ALL) = tb.time;
-                }
-            } else if (lower < 0) {
-                if (_max_robustness_false[m].get(SatisfactionPrescription::FALSE_FOR_SOME) < -lower) {
-                    _max_robustness_false[m].at(SatisfactionPrescription::FALSE_FOR_SOME) = -lower;
-                    _t_false[m].at(SatisfactionPrescription::FALSE_FOR_SOME) = tb.time;
+            SatisfactionPrescription prescription_to_check = SatisfactionPrescription::TRUE;
+            if (upper < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_ALL;
+            else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
+
+            if (prescription_to_check != SatisfactionPrescription::TRUE) {
+                CONCLOG_PRINTLN("max robustness: " << _max_robustness_false[m].get(prescription_to_check))
+                auto chi = get_chi(tbe.box,_hs[m],prescription_to_check);
+                auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
+                CONCLOG_PRINTLN("robustness: " << robustness)
+                if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
+                    _max_robustness_false[m].at(prescription_to_check) = robustness;
+                    _t_false[m].at(prescription_to_check) = tbe.time;
+                    CONCLOG_PRINTLN("updated robustness, t_false: " << _t_false[m].at(prescription_to_check))
                 }
             }
         }
     }
 
     EvaluationSequence build() const {
-        HELPER_PRECONDITION(not _timed_bounds_list.empty())
+        HELPER_PRECONDITION(not _timed_box_evaluations.empty())
 
         Vector<double> T_star(_M, 0.0);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             switch (_prescriptions[m]) {
-                case SatisfactionPrescription::TRUE :           T_star[m] = _timed_bounds_list.at(_timed_bounds_list.size()-1).time; break;
+                case SatisfactionPrescription::TRUE :           T_star[m] = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time; break;
                 case SatisfactionPrescription::FALSE_FOR_ALL :  T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_ALL); break;
                 case SatisfactionPrescription::FALSE_FOR_SOME : T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_SOME); break;
                 default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
             }
         }
 
-        List<TimedWidths> timed_widths;
+        List<TimedVolume> timed_volumes;
 
-        Vector<double> width0(_M,0.0);
-        for (ConstraintIndexType m=0; m<_M; ++m)
-            width0[m] = _timed_bounds_list.at(0).bounds[m].upper().get_d()-_timed_bounds_list.at(0).bounds[m].lower().get_d();
+        double v0 = volume(_timed_box_evaluations.at(0).box);
 
         Vector<double> alpha(_M, std::numeric_limits<double>::max());
-        for (size_t i=1; i < _timed_bounds_list.size(); ++i) {
-            auto const& tb = _timed_bounds_list.at(i);
-            Map<ConstraintIndexType,double> widths;
+        for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
+            auto const& tbe = _timed_box_evaluations.at(i);
+            double v = volume(tbe.box);
             for (ConstraintIndexType m=0; m<_M; ++m) {
-                if (tb.time <= T_star[m]) {
-                    double width = tb.bounds[m].upper().get_d()-tb.bounds[m].lower().get_d();
-                    widths.insert(m,width);
-                    if (_prescriptions[m] == SatisfactionPrescription::TRUE or tb.time == T_star[m]) {
-                        double rho = 0;
-                        switch (_prescriptions[m]) {
-                            case SatisfactionPrescription::TRUE : rho = tb.bounds[m].lower().get_d(); break;
-                            case SatisfactionPrescription::FALSE_FOR_ALL : rho = -tb.bounds[m].upper().get_d(); break;
-                            case SatisfactionPrescription::FALSE_FOR_SOME : rho = -tb.bounds[m].lower().get_d(); break;
-                            default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
-                        }
-                        auto this_alpha = rho/(width-width0[m]);
-                        //CONCLOG_PRINTLN("i="<< i <<",m="<< m << ",rho="<< rho << ",w-w0=" << width-width0[m]<<",alpha="<<this_alpha)
+                if (tbe.time <= T_star[m]) {
+                    if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
+                        double chi = get_chi(tbe.box,_hs[m],_prescriptions[m]);
+                        double rho = get_rho(_N,chi,v,_prescriptions[m]);
+                        auto this_alpha = rho/(v-v0);
+                        CONCLOG_PRINTLN("i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
                         if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                     }
                 }
             }
-            if (widths.empty()) break;
-            timed_widths.push_back({tb.time,widths});
+            timed_volumes.push_back({tbe.time,v});
         }
 
         Vector<HardConstraintConstants> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
         for (ConstraintIndexType m=0; m<_M; ++m)
             constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
-        CONCLOG_PRINTLN_VAR(constants)
 
-        return {timed_widths, constants};
+        return {timed_volumes,constants};
     }
 
   private:
 
     size_t _list_index(double time) const {
-        auto initial_time = _timed_bounds_list.at(0).time;
-        auto final_time = _timed_bounds_list.at(_timed_bounds_list.size()-1).time;
+        auto initial_time = _timed_box_evaluations.at(0).time;
+        auto final_time = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time;
         HELPER_PRECONDITION(initial_time <= time)
         HELPER_PRECONDITION(final_time >= time)
 
         size_t lower = 0;
-        size_t upper = _timed_bounds_list.size()-1;
+        size_t upper = _timed_box_evaluations.size()-1;
 
         if (time == initial_time) return 0;
-        if (time == final_time) return _timed_bounds_list.size()-1;
+        if (time == final_time) return _timed_box_evaluations.size()-1;
 
         while (upper - lower > 0) {
             auto mid = (lower+upper)/2;
-            auto midtime = _timed_bounds_list.at(mid).time;
+            auto midtime = _timed_box_evaluations.at(mid).time;
             if (midtime == time) return mid;
             else if (midtime < time) lower = mid;
             else upper = mid;
         }
-        HELPER_ASSERT_MSG(_timed_bounds_list.at(lower).time == time, "The time " << time << " could not be found in the list")
+        HELPER_ASSERT_MSG(_timed_box_evaluations.at(lower).time == time, "The time " << time << " could not be found in the list")
         return lower;
     }
 
-    double _find_latest_false_time(ConstraintIndexType m, bool false_for_all) const {
-        double starting_time = _t_false[m].get(false_for_all ? SatisfactionPrescription::FALSE_FOR_ALL : SatisfactionPrescription::FALSE_FOR_SOME);
-        size_t idx = _list_index(starting_time)+1;
-        size_t max_idx = _timed_bounds_list.size()-1;
-        for ( ; idx<=max_idx; ++idx) {
-            double bound = (false_for_all ? _timed_bounds_list.at(idx).bounds[m].upper().get_d() : _timed_bounds_list.at(idx).bounds[m].lower().get_d());
-            if (bound >= 0) {
-                break;
-            }
-        }
-        return _timed_bounds_list.at(--idx).time;
-    }
-
   private:
+    size_t const _N;
     size_t const _M;
-    List<TimedBounds> _timed_bounds_list;
+    List<EffectiveScalarMultivariateFunction> const _hs;
+    List<TimedBoxEvaluation> _timed_box_evaluations;
 
     Vector<SatisfactionPrescription> _prescriptions;
     Vector<Map<SatisfactionPrescription,double>> _max_robustness_false;
     Vector<Map<SatisfactionPrescription,double>> _t_false;
 };
+
+Vector<FloatDPBounds> resize(Vector<FloatDPBounds> const& bx, double chi, bool widen) {
+    double factor = (widen ? chi - 1 : 1 - chi);
+    Vector<FloatDPBounds> result(bx.size(),DoublePrecision());
+    for(size_t i=0; i!=bx.size(); ++i) {
+        auto width = bx[i].upper()-bx[i].lower();
+        auto lower = cast_exact((bx[i].lower()-width*factor).get_d());
+        auto upper = cast_exact((bx[i].upper()+width*factor).get_d());
+        result[i] = FloatDPBounds(lower,upper,DoublePrecision());
+    }
+    return result;
+}
+
+double volume(Vector<FloatDPBounds> const& bnds) {
+    double result = 1;
+    for (size_t i=0; i<bnds.size(); ++i) result *= (bnds[i].upper()-bnds[i].lower()).get_d();
+    return result;
+}
+
+Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi) { return resize(bx,chi,true); }
+Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi) { return resize(bx,chi,false); }
+
+void search_chi_for_true(double& lower, double& upper, Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, double factor) {
+    while (true) {
+        if (constraint(widen(bnds, upper)).lower().get_d() <= 0) { lower = upper/2; break; }
+        else upper*=2;
+    }
+    double margin = (upper-lower)/factor;
+    while (upper-lower > margin) {
+        auto midpoint = (upper+lower)/2;
+        if (constraint(widen(bnds, midpoint)).lower().get_d() <= 0) upper = midpoint;
+        else lower = midpoint;
+    }
+}
+
+void search_chi_for_false_all(double& lower, double& upper, Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, double factor) {
+    while (true) {
+        if (constraint(widen(bnds, upper)).upper().get_d() >= 0) { lower = upper/2; break; }
+        else upper*=2;
+    }
+    double margin = (upper-lower)/factor;
+    while (upper-lower > margin) {
+        auto midpoint = (upper+lower)/2;
+        if (constraint(widen(bnds, midpoint)).upper().get_d() >= 0) upper = midpoint;
+        else lower = midpoint;
+    }
+}
+
+void search_chi_for_false_some(double& lower, double& upper, Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, double factor) {
+    while (true) {
+        auto eval = constraint(shrink(bnds, upper));
+        if (eval.upper().get_d() < 0) { lower = upper = std::numeric_limits<double>::max(); break; }
+        if (eval.lower().get_d() >= 0) { lower = upper/2; break; }
+        else upper*=2;
+    }
+    double margin = (upper-lower)/factor;
+    while (upper-lower > margin) {
+        auto midpoint = (upper+lower)/2;
+        if (constraint(shrink(bnds, midpoint)).lower().get_d() >= 0) upper = midpoint;
+        else lower = midpoint;
+    }
+}
+
+double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription) {
+    static const double FACTOR = 100;
+    double lower = 1.0;
+    double upper = 1.0;
+    switch (prescription) {
+        case SatisfactionPrescription::TRUE : HELPER_PRECONDITION(constraint(bnds).lower().get_d() > 0) search_chi_for_true(lower, upper, bnds, constraint, FACTOR); break;
+        case SatisfactionPrescription::FALSE_FOR_ALL : HELPER_PRECONDITION(constraint(bnds).upper().get_d() < 0) search_chi_for_false_all(lower, upper, bnds, constraint, FACTOR); break;
+        case SatisfactionPrescription::FALSE_FOR_SOME : HELPER_PRECONDITION(constraint(bnds).lower().get_d() < 0) search_chi_for_false_some(lower, upper, bnds, constraint, FACTOR); break;
+        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
+    }
+    return lower;
+}
+
+double get_rho(double chi, size_t N, double volume, SatisfactionPrescription prescription) {
+    if (prescription == SatisfactionPrescription::FALSE_FOR_SOME) {
+        auto pw = pow(chi,N);
+        return (pw == std::numeric_limits<double>::infinity() ? volume : volume*(1.0-1.0/pw));
+
+    } else return (pow(chi,N)-1)*volume;
+}
 
 List<EffectiveScalarMultivariateFunction> convert_to_functions(List<RealExpression> const& constraints, RealSpace const& spc) {
     List<EffectiveScalarMultivariateFunction> result;
@@ -247,25 +332,13 @@ FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& 
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
 
-void evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, List<EffectiveScalarMultivariateFunction> const& hs) {
+EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, List<EffectiveScalarMultivariateFunction> const& hs) {
     CONCLOG_SCOPE_CREATE
 
-    auto M = hs.size();
-
-    EvaluationSequenceBuilder sb(M);
-    Vector<FloatDPBounds> initial_eval(M,DoublePrecision());
-    for (size_t m=0; m<M; ++m)
-        initial_eval.at(m) = evaluate_from_function(hs.at(m),orbit.initial());
-    sb.add({orbit.initial().time_function().range().midpoint().get_d(),initial_eval});
-    for (auto const& e : orbit.intermediate()) {
-        Vector<FloatDPBounds> eval(M,DoublePrecision());
-        for (size_t m=0; m<M; ++m)
-            eval.at(m) = evaluate_from_function(hs.at(m),e);
-        sb.add({e.time_function().range().midpoint().get_d(),eval});
-    }
-    auto es = sb.build();
-
-    CONCLOG_PRINTLN_VAR_AT(1,es)
+    EvaluationSequenceBuilder sb(orbit.initial().dimension(),hs);
+    sb.add_from(orbit.initial());
+    for (auto const& e : orbit.intermediate()) { sb.add_from(e); }
+    return sb.build();
 }
 
 void ariadne_main()
@@ -279,8 +352,9 @@ void ariadne_main()
     RealConstant ymin("ymin",-3.0_x);
     RealConstant xmin("xmin",-1.0_x);
     RealConstant xmax("xmax",2.5_x);
-    RealConstant rsqr("r^2",11.0_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, rsqr - sqr(x) - sqr(y)};
+    RealConstant rsqr("r^2",2.0_x);
+    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
+    //List<RealExpression> constraints = {rsqr - sqr(x) - sqr(y)};
 
     auto approximate_configuration = Configuration<VectorFieldEvolver>().
         set_maximum_step_size(0.1);
@@ -313,7 +387,7 @@ void ariadne_main()
     CONCLOG_PRINTLN("Computing approximate evolution...")
     auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
+    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
     sw.restart();
     CONCLOG_PRINTLN("Processing approximate evolution for constraints... ")
@@ -321,9 +395,11 @@ void ariadne_main()
     auto hs = convert_to_functions(constraints, dynamics.state_space());
     CONCLOG_PRINTLN_VAR(hs)
 
-    evaluate_approximate_orbit(approximate_orbit, hs);
+    auto preanalysis = evaluate_approximate_orbit(approximate_orbit, hs);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
+    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
+
+    CONCLOG_PRINTLN_VAR_AT(1,preanalysis)
 
     CONCLOG_PRINTLN("Plotting...")
     LabelledFigure fig=LabelledFigure({-2.5<=x<=2.5,-3<=y<=3});
@@ -334,7 +410,7 @@ void ariadne_main()
     CONCLOG_PRINTLN("Computing rigorous evolution... ")
     auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
+    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
     CONCLOG_PRINTLN("Plotting...")
     fig.clear();

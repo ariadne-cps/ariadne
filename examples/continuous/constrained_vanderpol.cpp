@@ -29,7 +29,7 @@
 
 using std::ostream;
 
-using pExplore::ConstrainingSpecification;
+using pExplore::ConstrainingState;
 using pExplore::ConstraintBuilder;
 using pExplore::ConstraintObjectiveImpact;
 using pExplore::ConstraintSuccessAction;
@@ -130,7 +130,7 @@ class EvaluationSequence {
 class EvaluationSequenceBuilder {
   public:
 
-    EvaluationSequenceBuilder(size_t N, List<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
+    EvaluationSequenceBuilder(size_t N, Vector<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
                                           _max_robustness_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
                                           _t_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
 
@@ -239,7 +239,7 @@ class EvaluationSequenceBuilder {
   private:
     size_t const _N;
     size_t const _M;
-    List<EffectiveScalarMultivariateFunction> const _hs;
+    Vector<EffectiveScalarMultivariateFunction> const _hs;
     List<TimedBoxEvaluation> _timed_box_evaluations;
 
     Vector<SatisfactionPrescription> _prescriptions;
@@ -330,10 +330,10 @@ double get_rho(double chi, size_t N, double volume, SatisfactionPrescription pre
     } else return (pow(chi,N)-1)*volume;
 }
 
-List<EffectiveScalarMultivariateFunction> convert_to_functions(List<RealExpression> const& constraints, RealSpace const& spc) {
-    List<EffectiveScalarMultivariateFunction> result;
-    for (auto const& c : constraints)
-        result.push_back(make_function(spc,c));
+Vector<EffectiveScalarMultivariateFunction> convert_to_functions(List<RealExpression> const& constraints, RealSpace const& spc) {
+    Vector<EffectiveScalarMultivariateFunction> result(constraints.size());
+    for (ConstraintIndexType m=0; m<result.size(); ++m)
+        result[m] = make_function(spc,constraints.at(m));
     return result;
 }
 
@@ -342,7 +342,7 @@ FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& 
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
 
-EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, List<EffectiveScalarMultivariateFunction> const& hs) {
+EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, Vector<EffectiveScalarMultivariateFunction> const& hs) {
     CONCLOG_SCOPE_CREATE
 
     EvaluationSequenceBuilder sb(orbit.initial().dimension(),hs);
@@ -351,29 +351,29 @@ EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& or
     return sb.build();
 }
 
-ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(EvaluationSequence const& evaluation, List<EffectiveScalarMultivariateFunction> const& hs) {
+List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, Vector<EffectiveScalarMultivariateFunction> const& hs) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
 
-    List<pExplore::Constraint<A>> constraints;
+    List<pExplore::Constraint<A>> result;
 
     for (ConstraintIndexType m=0; m<evaluation.number_of_constraints(); ++m) {
-        constraints.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
+        result.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
             auto v0 = evaluation.at(0).volume;
             auto v_approx = evaluation.near(o.time.get_d());
             auto alpha = evaluation.usage(m).alpha;
             return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
-        }).set_name("objective_soft"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
+        }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
         );
-        constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+        result.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
             if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)
                 return evaluate_from_function(hs.at(m),o.reach).lower().get_d();
             else return evaluation.usage(m).t_star - o.time.get_d();
-        }).set_name("hard"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
+        }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
         if (evaluation.usage(m).sigma != SatisfactionPrescription::TRUE) {
-            constraints.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+            result.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
                 if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL) {
                     return -evaluate_from_function(hs.at(m), o.evolve).upper().get_d();
                 } else {
@@ -386,55 +386,39 @@ ConstrainingSpecification<VectorFieldEvolver> build_constraining_specification(E
                     }
                     return -1.0;
                 }
-            }).set_name("falsify_success"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
+            }).set_name("falsify/success#"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
             );
         }
     }
 
-    return {constraints};
+    return result;
 }
 
-void ariadne_main()
-{
-    RealConstant mu("mu",1);
-    RealVariable x("x"), y("y");
+Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining) {
+    auto M = preanalysis.number_of_constraints();
+    Vector<Kleenean> result(M,indeterminate);
+    for (auto const& state : constraining.states()) {
+        auto const& sigma = preanalysis.usage(state.constraint().group_id()).sigma;
+        if (sigma == SatisfactionPrescription::TRUE and state.constraint().failure_kind() == ConstraintFailureKind::HARD and not state.has_failed())
+            result.at(state.constraint().group_id()) = true;
+        else if (sigma != SatisfactionPrescription::TRUE and state.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and state.has_succeeded()) {
+            result.at(state.constraint().group_id()) = false;
+        }
+    }
+    return result;
+}
 
-    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
-
-    RealConstant ymax("ymax",2.8_x);
-    RealConstant ymin("ymin",-3.0_x);
-    RealConstant xmin("xmin",-1.0_x);
-    RealConstant xmax("xmax",2.5_x);
-    RealConstant rsqr("r^2",2.0_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
-    //List<RealExpression> constraints = {x-xmin};
-
-    auto approximate_configuration = Configuration<VectorFieldEvolver>().
-        set_maximum_step_size(0.1);
+Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+                                                                      List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
+    CONCLOG_SCOPE_CREATE
 
     AffineIntegrator approximate_integrator(2,2);
-    VectorFieldEvolver approximate_evolver(dynamics,approximate_configuration,approximate_integrator);
+    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>(),approximate_integrator);
     CONCLOG_PRINTLN_VAR(approximate_evolver.configuration())
-
-    auto rigorous_configuration = Configuration<VectorFieldEvolver>().
-            set_maximum_enclosure_radius(1.0).
-            set_maximum_step_size(0.02).
-            set_maximum_spacial_error(1e-6);
 
     StepMaximumError max_err=1e-6;
     TaylorPicardIntegrator rigorous_integrator(max_err);
-    VectorFieldEvolver rigorous_evolver(dynamics,rigorous_configuration,rigorous_integrator);
-    CONCLOG_PRINTLN_VAR(rigorous_evolver.configuration())
-
-    Real x0 = 1.40_dec;
-    Real y0 = 2.40_dec;
-    Real eps_x0 = 0.15_dec;
-    Real eps_y0 = 0.05_dec;
-
-    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
-
-    CONCLOG_PRINTLN("Initial set: " << initial_set)
-    Real evolution_time = 7;
+    VectorFieldEvolver rigorous_evolver(dynamics,configuration,rigorous_integrator);
 
     Helper::Stopwatch<std::chrono::microseconds> sw;
     CONCLOG_PRINTLN("Computing approximate evolution...")
@@ -450,7 +434,7 @@ void ariadne_main()
 
     auto analysis = evaluate_approximate_orbit(approximate_orbit, hs);
 
-    auto constraining = build_constraining_specification(analysis, hs);
+    auto task_constraints = build_task_constraints(analysis, hs);
 
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
@@ -458,19 +442,69 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,analysis)
 
     CONCLOG_PRINTLN("Plotting...")
-    LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
-    fig.draw(approximate_orbit);
-    CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
 
     sw.restart();
     CONCLOG_PRINTLN("Computing rigorous evolution... ")
-    rigorous_evolver.set_constraining(constraining);
+    rigorous_evolver.set_constraints(task_constraints);
     auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
+    auto constraining_state = rigorous_evolver.constraining_state();
+
+    for (auto state : constraining_state.states()) {
+        CONCLOG_PRINTLN_AT(1,state)
+    }
+
+    auto outcomes = synthesise_outcomes(analysis,constraining_state);
+    for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
+        CONCLOG_PRINTLN_AT(1,constraints.at(m) << " -> " << outcomes.at(m))
+    }
+
+    return {rigorous_orbit,outcomes};
+}
+
+void ariadne_main()
+{
+    RealConstant mu("mu",1);
+    RealVariable x("x"), y("y");
+
+    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+
+    RealConstant ymax("ymax",2.8_x);
+    RealConstant ymin("ymin",-3.0_x);
+    RealConstant xmin("xmin",-1.0_x);
+    RealConstant xmax("xmax",2.1_x);
+    RealConstant rsqr("r^2",2.0_x);
+    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
+
+    auto configuration = Configuration<VectorFieldEvolver>().
+            set_maximum_enclosure_radius(1.0).
+            set_maximum_step_size(0.02).
+            set_maximum_spacial_error(1e-6);
+    CONCLOG_PRINTLN_VAR(configuration)
+
+    Real x0 = 1.40_dec;
+    Real y0 = 2.40_dec;
+    Real eps_x0 = 0.15_dec;
+    Real eps_y0 = 0.05_dec;
+    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+
+    Real evolution_time = 7;
+
+    auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
+
+    auto const& orbit = result.first;
+    auto const& outcomes = result.second;
+
+    CONCLOG_PRINTLN("Constraint checking outcomes:")
+    for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
+        CONCLOG_PRINTLN(constraints.at(m) << " -> " << outcomes.at(m))
+    }
+
+    LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
     CONCLOG_PRINTLN("Plotting...")
     fig.clear();
-    fig.draw(rigorous_orbit);
+    fig.draw(orbit);
     CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
 }

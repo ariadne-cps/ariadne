@@ -408,7 +408,7 @@ Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, Cons
     return result;
 }
 
-Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
 
@@ -456,7 +456,7 @@ Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorFiel
 
     auto outcomes = synthesise_outcomes(analysis,constraining_state);
 
-    return {rigorous_orbit,outcomes};
+    return {approximate_orbit,rigorous_orbit,outcomes};
 }
 
 void ariadne_main()
@@ -475,8 +475,9 @@ void ariadne_main()
 
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
+            set_both_enable_reconditioning().
             set_maximum_step_size(0.005,0.1).
-            set_maximum_spacial_error(1e-6);
+            set_maximum_spacial_error(1e-8,1e-5);
     CONCLOG_PRINTLN_VAR(configuration)
 
     Real x0 = 1.40_dec;
@@ -489,8 +490,9 @@ void ariadne_main()
 
     auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
 
-    auto const& orbit = result.first;
-    auto const& outcomes = result.second;
+    auto const& approximate_orbit = get<0>(result);
+    auto const& rigorous_orbit = get<1>(result);
+    auto const& outcomes = get<2>(result);
 
     CONCLOG_PRINTLN("Constraint checking outcomes:")
     for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
@@ -499,12 +501,14 @@ void ariadne_main()
 
     auto best_scores = pExplore::TaskManager::instance().best_scores();
     for (auto const& b : best_scores) {
-        CONCLOG_PRINTLN(b)
+        CONCLOG_PRINTLN_AT(1,b)
     }
 
     LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
     CONCLOG_PRINTLN("Plotting...")
     fig.clear();
-    fig.draw(orbit);
+    fig.draw(approximate_orbit);
+    CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
+    fig.draw(rigorous_orbit);
     CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
 }

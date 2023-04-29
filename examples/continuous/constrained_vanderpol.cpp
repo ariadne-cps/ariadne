@@ -416,10 +416,6 @@ Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorFiel
     VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>(),approximate_integrator);
     CONCLOG_PRINTLN_VAR(approximate_evolver.configuration())
 
-    StepMaximumError max_err=1e-6;
-    TaylorPicardIntegrator rigorous_integrator(max_err);
-    VectorFieldEvolver rigorous_evolver(dynamics,configuration,rigorous_integrator);
-
     Helper::Stopwatch<std::chrono::microseconds> sw;
     CONCLOG_PRINTLN("Computing approximate evolution...")
     auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
@@ -441,9 +437,11 @@ Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorFiel
 
     CONCLOG_PRINTLN_VAR_AT(1,analysis)
 
-    CONCLOG_PRINTLN("Plotting...")
-
+    StepMaximumError max_err=1e-6;
+    TaylorPicardIntegrator rigorous_integrator(max_err);
+    VectorFieldEvolver rigorous_evolver(dynamics,configuration,rigorous_integrator);
     sw.restart();
+
     CONCLOG_PRINTLN("Computing rigorous evolution... ")
     rigorous_evolver.set_constraints(task_constraints);
     auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
@@ -457,9 +455,6 @@ Pair<Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorFiel
     }
 
     auto outcomes = synthesise_outcomes(analysis,constraining_state);
-    for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN_AT(1,constraints.at(m) << " -> " << outcomes.at(m))
-    }
 
     return {rigorous_orbit,outcomes};
 }
@@ -480,7 +475,7 @@ void ariadne_main()
 
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
-            set_maximum_step_size(0.02).
+            set_maximum_step_size(0.005,0.1).
             set_maximum_spacial_error(1e-6);
     CONCLOG_PRINTLN_VAR(configuration)
 
@@ -500,6 +495,11 @@ void ariadne_main()
     CONCLOG_PRINTLN("Constraint checking outcomes:")
     for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
         CONCLOG_PRINTLN(constraints.at(m) << " -> " << outcomes.at(m))
+    }
+
+    auto best_scores = pExplore::TaskManager::instance().best_scores();
+    for (auto const& b : best_scores) {
+        CONCLOG_PRINTLN(b)
     }
 
     LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});

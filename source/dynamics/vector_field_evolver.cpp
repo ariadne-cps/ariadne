@@ -68,30 +68,26 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-VectorFieldEvolver::VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration, IntegratorInterface const& integrator) :
-        TaskRunnable(configuration), _system(system.clone()), _integrator(integrator.clone())
+VectorFieldEvolver::VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration) :
+        TaskRunnable(configuration), _system(system.clone())
 { }
 
 VectorFieldEvolver* VectorFieldEvolver::clone() const {
-    return new VectorFieldEvolver(system(),configuration(),*_integrator->clone());
+    return new VectorFieldEvolver(system(),configuration());
 }
 
 auto VectorFieldEvolver::enclosure(const ExactBoxType& box) const -> EnclosureType {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
-}
-
-auto VectorFieldEvolver::function_factory() const -> FunctionFactoryType const& {
-    return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7))));
 }
 
 auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    auto enclosure = EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    auto enclosure = EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7))));
     enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
     return orbit(enclosure,time,semantics);
 }
 
 auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(this->function_factory()));
+    auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7))));
     enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
     return orbit(enclosure,time,semantics);
 }
@@ -180,7 +176,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     /////////////// Main Evolution ////////////////////////////////
 
     // Push inputs
-    runner()->push({system().dynamic_function(), current_set, current_time, _integrator});
+    runner()->push({system().dynamic_function(), current_set, current_time});
     // Pull outputs
     auto out = runner()->pull();
     // Save outputs
@@ -209,7 +205,7 @@ auto Task<VectorFieldEvolver>::run(TaskInput<VectorFieldEvolver> const& in, Conf
     auto set_bounds=cast_exact_box(next_set.euclidean_set().bounding_box());
     CONCLOG_PRINTLN_VAR_AT(1, set_bounds);
 
-    auto flow_model = in.integrator_ptr->flow_step(in.dynamic, set_bounds,chosen_step_size);
+    auto flow_model = cfg.integrator().flow_step(in.dynamic, set_bounds,chosen_step_size);
 
     CONCLOG_PRINTLN_VAR_AT(1, chosen_step_size);
     CONCLOG_PRINTLN_VAR_AT(1, flow_model);

@@ -216,7 +216,7 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
     EulerBounder bounder;
 
-    auto const& function_factory = static_cast<IntegratorBase const&>(*this->_integrator).function_factory();
+    auto const& function_factory = static_cast<IntegratorBase const&>(*this->_integrator).configuration().function_factory();
 
     EnclosureConfiguration config(function_factory);
 

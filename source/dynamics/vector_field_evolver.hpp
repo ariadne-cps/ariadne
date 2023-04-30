@@ -95,7 +95,7 @@ class VectorFieldEvolver
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef Pair<TimeStepType,EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
-    typedef ValidatedFunctionPatchFactory FunctionFactoryType;
+    typedef ValidatedFunctionPatchFactoryInterface FunctionFactoryType;
   private:
     //! \brief Synchronised wrapping of orbit to allow concurrent adjoining
     struct SynchronisedOrbit : public OrbitType {
@@ -111,7 +111,7 @@ class VectorFieldEvolver
   public:
 
     //! \brief Construct from \a system, \a configuration and \a integrator.
-    VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration, IntegratorInterface const& integrator);
+    VectorFieldEvolver(SystemType const& system, ConfigurationType const& configuration);
 
     //! \brief Make a dynamically-allocated copy.
     VectorFieldEvolver* clone() const;
@@ -121,9 +121,6 @@ class VectorFieldEvolver
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
-
-    //! \brief The class which constructs functions for the enclosures.
-    const FunctionFactoryType& function_factory() const;
 
     //!@}
 
@@ -148,7 +145,6 @@ class VectorFieldEvolver
 
   private:
     SharedPointer<SystemType> _system;
-    SharedPointer<IntegratorType> _integrator;
 };
 
 } // namespace Ariadne
@@ -169,12 +165,13 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     typedef double RealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef InterfaceListConfigurationProperty<IntegratorInterface> IntegratorProperty;
+    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
 
     Configuration() {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));
         add_property("enable_reconditioning",BooleanConfigurationProperty(true));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
-        //add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
         add_property("maximum_enclosure_radius",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_spacial_error",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_step_size",RealTypeProperty(std::numeric_limits<double>::max(),Log2SearchSpaceConverter<RealType>()));
@@ -210,9 +207,9 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     C& set_maximum_enclosure_radius(RealType const& value) { at<RealTypeProperty>("maximum_enclosure_radius").set(value); return *this; }
 
     //! \brief The integrator to be used.
-    //IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
-    //C& set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
-    //C& set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+    IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
+    C& set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+    C& set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
 };
 
 } // namespace ProNest
@@ -226,9 +223,8 @@ using Ariadne::EffectiveVectorMultivariateFunction;
 using Ariadne::Dyadic;
 
 template<> struct TaskInput<VectorFieldEvolver> {
-    TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_,
-              Dyadic const& current_time_, shared_ptr<IntegratorInterface> integrator_ptr_) :
-            dynamic(dynamic_), current_set(current_set_), current_time(current_time_), integrator_ptr(integrator_ptr_) { }
+    TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_, Dyadic const& current_time_) :
+        dynamic(dynamic_), current_set(current_set_), current_time(current_time_) { }
     EffectiveVectorMultivariateFunction const& dynamic;
     LabelledEnclosure const& current_set;
     Dyadic const& current_time;
@@ -237,7 +233,7 @@ template<> struct TaskInput<VectorFieldEvolver> {
 
 template<> struct TaskOutput<VectorFieldEvolver> {
     TaskOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_) :
-            evolve(evolve_), reach(reach_), time(time_) { }
+        evolve(evolve_), reach(reach_), time(time_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
     Dyadic const time;

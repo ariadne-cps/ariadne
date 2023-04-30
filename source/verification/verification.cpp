@@ -351,9 +351,7 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
 
-    AffineIntegrator approximate_integrator(2,2);
-    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>(),approximate_integrator);
-    CONCLOG_PRINTLN_VAR(approximate_evolver.configuration())
+    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>().set_integrator(AffineIntegrator(Configuration<AffineIntegrator>())));
 
     Helper::Stopwatch<std::chrono::microseconds> sw;
     CONCLOG_PRINTLN("Computing approximate evolution...")
@@ -376,9 +374,9 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
 
     CONCLOG_PRINTLN_VAR_AT(1,analysis)
 
-    StepMaximumError max_err=1e-6;
-    TaylorPicardIntegrator rigorous_integrator(max_err);
-    VectorFieldEvolver rigorous_evolver(dynamics,configuration,rigorous_integrator);
+    auto integr = dynamic_cast<TaylorPicardIntegrator const&>(configuration.integrator());
+    CONCLOG_PRINTLN_VAR_AT(1,integr.configuration())
+    VectorFieldEvolver rigorous_evolver(dynamics,configuration);
     sw.restart();
 
     CONCLOG_PRINTLN("Computing rigorous evolution... ")

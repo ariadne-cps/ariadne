@@ -1,9 +1,7 @@
-set(LIBRARY_NAME ariadne-symbolic)
+set(LIBRARY_NAME ariadne-verification)
 
 add_library(${LIBRARY_NAME} OBJECT
-    space.cpp
-    expression.cpp
-    expression_set.cpp
+    verification.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

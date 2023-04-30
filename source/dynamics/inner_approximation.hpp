@@ -22,6 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ARIADNE_INNER_APPROXIMATION
+#define ARIADNE_INNER_APPROXIMATION
+
 #include "numeric/floatdp.hpp"
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
@@ -223,3 +226,5 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
 };
 
 } // namespace Ariadne
+
+#endif // ARIADNE_INNER_APPROXIMATION

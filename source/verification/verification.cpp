@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constrained_vanderpol.cpp
+ *            verification.cpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,13 +22,20 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "solvers/integrator.hpp"
+#include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/inner_approximation.hpp"
 #include "helper/stopwatch.hpp"
+#include "helper/container.hpp"
 #include "pexplore/task_runner.tpl.hpp"
+#include "verification.hpp"
+
+namespace Ariadne {
 
 using std::ostream;
 
+using Helper::List;
 using pExplore::ConstrainingState;
 using pExplore::ConstraintBuilder;
 using pExplore::ConstraintObjectiveImpact;
@@ -38,214 +45,142 @@ using pExplore::TaskInput;
 using pExplore::TaskOutput;
 using ConstraintIndexType = size_t;
 
-//! \brief The prescription to the satisfaction of the constraint
-//! \details TRUE : always true for all points (required over-approximation)
-//!          FALSE_FOR_ALL : sometimes false for all points (can use over-approximation)
-//!          FALSE_FOR_SOME : sometimes false only for some points (must use under-approximation)
-enum class SatisfactionPrescription { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME };
-std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescription) {
-    switch(prescription) {
-        case SatisfactionPrescription::TRUE: os << "TRUE"; return os;
-        case SatisfactionPrescription::FALSE_FOR_ALL: os << "FALSE_FOR_ALL"; return os;
-        case SatisfactionPrescription::FALSE_FOR_SOME: os << "FALSE_FOR_SOME"; return os;
-        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value for printing")
+EvaluationSequence::EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
+
+size_t EvaluationSequence::number_of_constraints() const { return _prescriptions.size(); }
+
+TimedVolume const& EvaluationSequence::at(size_t idx) const { return _sequence.at(idx); }
+
+double const& EvaluationSequence::near(double time) const {
+    size_t lower = 0;
+    size_t upper = size()-1;
+
+    if (_sequence.at(lower).time >= time) return _sequence.at(lower).volume;
+    if (_sequence.at(upper).time <= time) return _sequence.at(upper).volume;
+
+    while (upper - lower > 1) {
+        auto mid = (lower+upper)/2;
+        if (_sequence.at(mid).time < time) lower = mid;
+        else upper = mid;
     }
+    if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper).volume;
+    else return _sequence.at(lower).volume;
 }
 
-FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
-double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
-double get_rho(double chi, size_t N, double volume, SatisfactionPrescription prescription);
-double volume(Vector<FloatDPBounds> const& bnds);
+HardConstraintPrescription const& EvaluationSequence::usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
 
-struct TimedBoxEvaluation {
-    TimedBoxEvaluation(double time_, Vector<FloatDPBounds> const& box_, Vector<FloatDPBounds> const& evaluation_) : time(time_), box(box_), evaluation(evaluation_) { }
-    double time;
-    Vector<FloatDPBounds> box;
-    Vector<FloatDPBounds> evaluation;
-    friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": box=" << tbe.box << ", eval=" << tbe.evaluation; }
-};
+size_t EvaluationSequence::size() const { return _sequence.size(); }
 
-struct HardConstraintPrescription {
-  HardConstraintPrescription(SatisfactionPrescription sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
-  SatisfactionPrescription sigma;
-  double t_star;
-  double alpha;
-  friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
-};
+ostream& operator<<(ostream& os, EvaluationSequence const& es) {
+    os << "timed_volumes:{";
+    for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
+    return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
+}
 
-struct TimedVolume {
-  TimedVolume(double time_, double volume_) : time(time_), volume(volume_) { }
-  double time;
-  double volume;
-  friend ostream& operator<<(ostream& os, TimedVolume const& tv) { return os << tv.time << ":" << tv.volume; }
-};
-
-class EvaluationSequenceBuilder;
-
-class EvaluationSequence {
-    friend class EvaluationSequenceBuilder;
-  protected:
-    EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
-  public:
-
-    size_t number_of_constraints() const { return _prescriptions.size(); }
-
-    //! \brief timed volume accessor by index
-    TimedVolume const& at(size_t idx) const { return _sequence.at(idx); }
-
-    //! \brief Get the volume with time closest to \a time
-    double const& near(double time) const {
-        size_t lower = 0;
-        size_t upper = size()-1;
-
-        if (_sequence.at(lower).time >= time) return _sequence.at(lower).volume;
-        if (_sequence.at(upper).time <= time) return _sequence.at(upper).volume;
-
-        while (upper - lower > 1) {
-            auto mid = (lower+upper)/2;
-            if (_sequence.at(mid).time < time) lower = mid;
-            else upper = mid;
-        }
-        if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper).volume;
-        else return _sequence.at(lower).volume;
-    }
-
-    //! \brief The usage given the constraint index \a idx
-    HardConstraintPrescription const& usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
-
-    //! \brief The number of elements in the sequence
-    size_t size() const { return _sequence.size(); }
-
-    friend ostream& operator<<(ostream& os, EvaluationSequence const& es) {
-        os << "timed_volumes:{";
-        for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
-        return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
-    }
-
-  private:
-    List<TimedVolume> _sequence;
-    Vector<HardConstraintPrescription> _prescriptions;
-};
-
-class EvaluationSequenceBuilder {
-  public:
-
-    EvaluationSequenceBuilder(size_t N, Vector<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
+EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, Vector<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
                                           _max_robustness_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
                                           _t_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
 
-    void add_from(LabelledEnclosure const& e) {
-        Vector<FloatDPBounds> eval(_M,DoublePrecision());
-        for (size_t m=0; m<_M; ++m) eval.at(m) = evaluate_from_function(_hs.at(m),e);
+void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& e) {
+    Vector<FloatDPBounds> eval(_M,DoublePrecision());
+    for (size_t m=0; m<_M; ++m) eval.at(m) = evaluate_from_function(_hs.at(m),e);
 
-        auto bb = e.euclidean_set().bounding_box();
-        add({e.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(bb),eval});
+    auto bb = e.euclidean_set().bounding_box();
+    add({e.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(bb),eval});
+}
+
+void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
+    HELPER_PRECONDITION(_timed_box_evaluations.empty() or _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time < tbe.time)
+    _timed_box_evaluations.push_back(tbe);
+    for (ConstraintIndexType m=0; m<_M; ++m) {
+        auto const& evaluation = tbe.evaluation[m];
+        auto upper = evaluation.upper().get_d();
+        auto lower = evaluation.lower().get_d();
+        if (_prescriptions[m] != SatisfactionPrescription::FALSE_FOR_ALL) {
+            if (upper < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_ALL;
+            else if (lower < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_SOME;
+        }
+        SatisfactionPrescription prescription_to_check = SatisfactionPrescription::TRUE;
+        if (upper < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_ALL;
+        else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
+
+        if (prescription_to_check != SatisfactionPrescription::TRUE) {
+            auto chi = get_chi(tbe.box,_hs[m],prescription_to_check);
+            auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
+            if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
+                _max_robustness_false[m].at(prescription_to_check) = robustness;
+                _t_false[m].at(prescription_to_check) = tbe.time;
+            }
+        }
+    }
+}
+
+EvaluationSequence EvaluationSequenceBuilder::build() const {
+    HELPER_PRECONDITION(not _timed_box_evaluations.empty())
+
+    Vector<double> T_star(_M, 0.0);
+    for (ConstraintIndexType m=0; m<_M; ++m) {
+        switch (_prescriptions[m]) {
+            case SatisfactionPrescription::TRUE :           T_star[m] = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time; break;
+            case SatisfactionPrescription::FALSE_FOR_ALL :  T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_ALL); break;
+            case SatisfactionPrescription::FALSE_FOR_SOME : T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_SOME); break;
+            default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
+        }
     }
 
-    void add(TimedBoxEvaluation const& tbe) {
-        HELPER_PRECONDITION(_timed_box_evaluations.empty() or _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time < tbe.time)
-        _timed_box_evaluations.push_back(tbe);
-        for (ConstraintIndexType m=0; m<_M; ++m) {
-            auto const& evaluation = tbe.evaluation[m];
-            auto upper = evaluation.upper().get_d();
-            auto lower = evaluation.lower().get_d();
-            if (_prescriptions[m] != SatisfactionPrescription::FALSE_FOR_ALL) {
-                if (upper < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_ALL;
-                else if (lower < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_SOME;
-            }
-            SatisfactionPrescription prescription_to_check = SatisfactionPrescription::TRUE;
-            if (upper < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_ALL;
-            else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
+    List<TimedVolume> timed_volumes;
 
-            if (prescription_to_check != SatisfactionPrescription::TRUE) {
-                auto chi = get_chi(tbe.box,_hs[m],prescription_to_check);
-                auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
-                if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
-                    _max_robustness_false[m].at(prescription_to_check) = robustness;
-                    _t_false[m].at(prescription_to_check) = tbe.time;
+    double v0 = volume(_timed_box_evaluations.at(0).box);
+    timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0});
+
+    Vector<double> alpha(_M, std::numeric_limits<double>::max());
+    for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
+        auto const& tbe = _timed_box_evaluations.at(i);
+        double v = volume(tbe.box);
+        for (ConstraintIndexType m=0; m<_M; ++m) {
+            if (tbe.time <= T_star[m]) {
+                if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
+                    double chi = get_chi(tbe.box,_hs[m],_prescriptions[m]);
+                    double rho = get_rho(_N,chi,v,_prescriptions[m]);
+                    auto this_alpha = rho/(v-v0);
+                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
+                    if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                 }
             }
         }
+        timed_volumes.push_back({tbe.time,v});
     }
 
-    EvaluationSequence build() const {
-        HELPER_PRECONDITION(not _timed_box_evaluations.empty())
+    Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
+    for (ConstraintIndexType m=0; m<_M; ++m)
+        constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
 
-        Vector<double> T_star(_M, 0.0);
-        for (ConstraintIndexType m=0; m<_M; ++m) {
-            switch (_prescriptions[m]) {
-                case SatisfactionPrescription::TRUE :           T_star[m] = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time; break;
-                case SatisfactionPrescription::FALSE_FOR_ALL :  T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_ALL); break;
-                case SatisfactionPrescription::FALSE_FOR_SOME : T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_SOME); break;
-                default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
-            }
-        }
+    return {timed_volumes,constants};
+}
 
-        List<TimedVolume> timed_volumes;
+size_t EvaluationSequenceBuilder::_list_index(double time) const {
+    auto initial_time = _timed_box_evaluations.at(0).time;
+    auto final_time = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time;
+    HELPER_PRECONDITION(initial_time <= time)
+    HELPER_PRECONDITION(final_time >= time)
 
-        double v0 = volume(_timed_box_evaluations.at(0).box);
-        timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0});
+    size_t lower = 0;
+    size_t upper = _timed_box_evaluations.size()-1;
 
-        Vector<double> alpha(_M, std::numeric_limits<double>::max());
-        for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
-            auto const& tbe = _timed_box_evaluations.at(i);
-            double v = volume(tbe.box);
-            for (ConstraintIndexType m=0; m<_M; ++m) {
-                if (tbe.time <= T_star[m]) {
-                    if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
-                        double chi = get_chi(tbe.box,_hs[m],_prescriptions[m]);
-                        double rho = get_rho(_N,chi,v,_prescriptions[m]);
-                        auto this_alpha = rho/(v-v0);
-                        CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
-                        if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
-                    }
-                }
-            }
-            timed_volumes.push_back({tbe.time,v});
-        }
+    if (time == initial_time) return 0;
+    if (time == final_time) return _timed_box_evaluations.size()-1;
 
-        Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
-        for (ConstraintIndexType m=0; m<_M; ++m)
-            constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
-
-        return {timed_volumes,constants};
+    while (upper - lower > 0) {
+        auto mid = (lower+upper)/2;
+        auto midtime = _timed_box_evaluations.at(mid).time;
+        if (midtime == time) return mid;
+        else if (midtime < time) lower = mid;
+        else upper = mid;
     }
+    HELPER_ASSERT_MSG(_timed_box_evaluations.at(lower).time == time, "The time " << time << " could not be found in the list")
+    return lower;
+}
 
-  private:
-
-    size_t _list_index(double time) const {
-        auto initial_time = _timed_box_evaluations.at(0).time;
-        auto final_time = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time;
-        HELPER_PRECONDITION(initial_time <= time)
-        HELPER_PRECONDITION(final_time >= time)
-
-        size_t lower = 0;
-        size_t upper = _timed_box_evaluations.size()-1;
-
-        if (time == initial_time) return 0;
-        if (time == final_time) return _timed_box_evaluations.size()-1;
-
-        while (upper - lower > 0) {
-            auto mid = (lower+upper)/2;
-            auto midtime = _timed_box_evaluations.at(mid).time;
-            if (midtime == time) return mid;
-            else if (midtime < time) lower = mid;
-            else upper = mid;
-        }
-        HELPER_ASSERT_MSG(_timed_box_evaluations.at(lower).time == time, "The time " << time << " could not be found in the list")
-        return lower;
-    }
-
-  private:
-    size_t const _N;
-    size_t const _M;
-    Vector<EffectiveScalarMultivariateFunction> const _hs;
-    List<TimedBoxEvaluation> _timed_box_evaluations;
-
-    Vector<SatisfactionPrescription> _prescriptions;
-    Vector<Map<SatisfactionPrescription,double>> _max_robustness_false;
-    Vector<Map<SatisfactionPrescription,double>> _t_false;
-};
 
 Vector<FloatDPBounds> resize(Vector<FloatDPBounds> const& bx, double chi, bool widen) {
     double factor = (widen ? chi - 1 : 1 - chi);
@@ -459,56 +394,4 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
     return {approximate_orbit,rigorous_orbit,outcomes};
 }
 
-void ariadne_main()
-{
-    RealConstant mu("mu",1);
-    RealVariable x("x"), y("y");
-
-    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
-
-    RealConstant ymax("ymax",2.8_x);
-    RealConstant ymin("ymin",-3.0_x);
-    RealConstant xmin("xmin",-1.0_x);
-    RealConstant xmax("xmax",2.1_x);
-    RealConstant rsqr("r^2",2.0_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
-
-    auto configuration = Configuration<VectorFieldEvolver>().
-            set_maximum_enclosure_radius(1.0).
-            set_both_enable_reconditioning().
-            set_maximum_step_size(0.005,0.1).
-            set_maximum_spacial_error(1e-8,1e-5);
-    CONCLOG_PRINTLN_VAR(configuration)
-
-    Real x0 = 1.40_dec;
-    Real y0 = 2.40_dec;
-    Real eps_x0 = 0.15_dec;
-    Real eps_y0 = 0.05_dec;
-    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
-
-    Real evolution_time = 7;
-
-    auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
-
-    auto const& approximate_orbit = get<0>(result);
-    auto const& rigorous_orbit = get<1>(result);
-    auto const& outcomes = get<2>(result);
-
-    CONCLOG_PRINTLN("Constraint checking outcomes:")
-    for (ConstraintIndexType m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN(constraints.at(m) << " -> " << outcomes.at(m))
-    }
-
-    auto best_scores = pExplore::TaskManager::instance().best_scores();
-    for (auto const& b : best_scores) {
-        CONCLOG_PRINTLN_AT(1,b)
-    }
-
-    LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
-    CONCLOG_PRINTLN("Plotting...")
-    fig.clear();
-    fig.draw(approximate_orbit);
-    CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
-    fig.draw(rigorous_orbit);
-    CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
-}
+} // namespace Ariadne

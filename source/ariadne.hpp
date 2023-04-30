@@ -71,6 +71,7 @@ namespace Ariadne {
 #include "dynamics/differential_inclusion_evolver.hpp"
 #include "dynamics/vector_field_simulator.hpp"
 #include "dynamics/iterated_map_evolver.hpp"
+#include "dynamics/inner_approximation.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
@@ -85,5 +86,7 @@ namespace Ariadne {
 #include "conclog/logging.hpp"
 #include "pronest/configuration_property.tpl.hpp"
 #include "pronest/configurable.tpl.hpp"
+
+#include "verification/verification.hpp"
 
 #endif

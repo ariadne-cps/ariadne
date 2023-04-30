@@ -77,13 +77,12 @@ ostream& operator<<(ostream& os, EvaluationSequence const& es) {
     return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
 }
 
-EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, Vector<EffectiveScalarMultivariateFunction> const& hs) : _N(N), _M(hs.size()), _hs(hs), _prescriptions(hs.size(),SatisfactionPrescription::TRUE),
-                                          _max_robustness_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
-                                          _t_false(hs.size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
+EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, EffectiveVectorMultivariateFunction const& h) : _N(N), _M(h.result_size()), _h(h), _prescriptions(h.result_size(),SatisfactionPrescription::TRUE),
+                                          _max_robustness_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
+                                          _t_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
 
 void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& e) {
-    Vector<FloatDPBounds> eval(_M,DoublePrecision());
-    for (size_t m=0; m<_M; ++m) eval.at(m) = evaluate_from_function(_hs.at(m),e);
+    auto eval = evaluate_from_function(_h,e);
 
     auto bb = e.euclidean_set().bounding_box();
     add({e.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(bb),eval});
@@ -105,7 +104,7 @@ void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
         else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
 
         if (prescription_to_check != SatisfactionPrescription::TRUE) {
-            auto chi = get_chi(tbe.box,_hs[m],prescription_to_check);
+            auto chi = get_chi(tbe.box,_h[m],prescription_to_check);
             auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
             if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
                 _max_robustness_false[m].at(prescription_to_check) = robustness;
@@ -140,7 +139,7 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
-                    double chi = get_chi(tbe.box,_hs[m],_prescriptions[m]);
+                    double chi = get_chi(tbe.box,_h[m],_prescriptions[m]);
                     double rho = get_rho(_N,chi,v,_prescriptions[m]);
                     auto this_alpha = rho/(v-v0);
                     CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
@@ -265,9 +264,9 @@ double get_rho(double chi, size_t N, double volume, SatisfactionPrescription pre
     } else return (pow(chi,N)-1)*volume;
 }
 
-Vector<EffectiveScalarMultivariateFunction> convert_to_functions(List<RealExpression> const& constraints, RealSpace const& spc) {
-    Vector<EffectiveScalarMultivariateFunction> result(constraints.size());
-    for (ConstraintIndexType m=0; m<result.size(); ++m)
+EffectiveVectorMultivariateFunction to_function(List<RealExpression> const& constraints, RealSpace const& spc) {
+    EffectiveVectorMultivariateFunction result(constraints.size(),spc.size());
+    for (ConstraintIndexType m=0; m<constraints.size(); ++m)
         result[m] = make_function(spc,constraints.at(m));
     return result;
 }
@@ -277,16 +276,21 @@ FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& 
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
 
-EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, Vector<EffectiveScalarMultivariateFunction> const& hs) {
+Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
+    auto bb = enclosure.euclidean_set().bounding_box();
+    return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
+}
+
+EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, EffectiveVectorMultivariateFunction const& h) {
     CONCLOG_SCOPE_CREATE
 
-    EvaluationSequenceBuilder sb(orbit.initial().dimension(),hs);
+    EvaluationSequenceBuilder sb(orbit.initial().dimension(),h);
     sb.add_from(orbit.initial());
     for (auto const& e : orbit.intermediate()) { sb.add_from(e); }
     return sb.build();
 }
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, Vector<EffectiveScalarMultivariateFunction> const& hs) {
+List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, EffectiveVectorMultivariateFunction const& h) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
@@ -301,22 +305,22 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
             return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
         }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
         );
-        result.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+        result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
             if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)
-                return evaluate_from_function(hs.at(m),o.reach).lower().get_d();
+                return evaluate_from_function(h[m],o.reach).lower().get_d();
             else return evaluation.usage(m).t_star - o.time.get_d();
         }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
         if (evaluation.usage(m).sigma != SatisfactionPrescription::TRUE) {
-            result.push_back(ConstraintBuilder<A>([evaluation,hs,m](I const&, O const& o) {
+            result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
                 if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL) {
-                    return -evaluate_from_function(hs.at(m), o.evolve).upper().get_d();
+                    return -evaluate_from_function(h[m], o.evolve).upper().get_d();
                 } else {
-                    if (evaluate_from_function(hs.at(m),o.evolve).lower().get_d() < 0) {
+                    if (evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
                         try {
                             auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
                             auto inner_evolve = approximator.compute_from(o.evolve);
-                            return -evaluate_from_function(hs.at(m),inner_evolve).lower().get_d();
+                            return -evaluate_from_function(h[m],inner_evolve).lower().get_d();
                         } catch (std::exception&) { }
                     }
                     return -1.0;
@@ -360,12 +364,12 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
     sw.restart();
     CONCLOG_PRINTLN("Processing approximate evolution for constraints... ")
 
-    auto hs = convert_to_functions(constraints, dynamics.state_space());
-    CONCLOG_PRINTLN_VAR(hs)
+    auto h = to_function(constraints, dynamics.state_space());
+    CONCLOG_PRINTLN_VAR(h)
 
-    auto analysis = evaluate_approximate_orbit(approximate_orbit, hs);
+    auto analysis = evaluate_approximate_orbit(approximate_orbit, h);
 
-    auto task_constraints = build_task_constraints(analysis, hs);
+    auto task_constraints = build_task_constraints(analysis, h);
 
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")

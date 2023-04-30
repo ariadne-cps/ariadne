@@ -62,10 +62,11 @@ std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescr
 class EvaluationSequence;
 
 FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
+Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, Vector<EffectiveScalarMultivariateFunction> const& hs);
+List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, EffectiveVectorMultivariateFunction const& h);
 Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining);
 Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                                                     List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
@@ -132,7 +133,7 @@ class EvaluationSequence {
 class EvaluationSequenceBuilder {
   public:
 
-    EvaluationSequenceBuilder(size_t N, Vector<EffectiveScalarMultivariateFunction> const& hs);
+    EvaluationSequenceBuilder(size_t N, EffectiveVectorMultivariateFunction const& h);
 
     void add_from(LabelledEnclosure const& e);
 
@@ -146,7 +147,7 @@ class EvaluationSequenceBuilder {
   private:
     size_t const _N;
     size_t const _M;
-    Vector<EffectiveScalarMultivariateFunction> const _hs;
+    EffectiveVectorMultivariateFunction const _h;
     List<TimedBoxEvaluation> _timed_box_evaluations;
 
     Vector<SatisfactionPrescription> _prescriptions;

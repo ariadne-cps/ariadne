@@ -208,10 +208,12 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     UpperBoxType const& bx=B;
     CONCLOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
-    FlowStepModelType phi0=this->configuration().function_factory().create_projection(wdom,range(0,nx));
+    auto function_factory = TaylorFunctionFactory(this->configuration().sweeper());
+
+    FlowStepModelType phi0=function_factory.create_projection(wdom,range(0,nx));
     CONCLOG_PRINTLN_AT(1,"phi0="<<phi0);
-    FlowStepModelType phi=this->configuration().function_factory().create_constants(wdom,cast_singleton(bx));
-    FlowStepModelType ta=this->configuration().function_factory().create_projection(wdom,tarng);
+    FlowStepModelType phi=function_factory.create_constants(wdom,cast_singleton(bx));
+    FlowStepModelType ta=function_factory.create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
     for(DegreeType k=0; k!=this->configuration().maximum_temporal_order(); ++k) {
@@ -1102,8 +1104,10 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 
     ExactBoxType flow_domain = product(dom,ExactIntervalType(0,h));
 
-    FlowStepModelType id = this->configuration().function_factory().create_identity(flow_domain);
-    FlowStepModelType res = this->configuration().function_factory().create_zeros(n,flow_domain);
+    auto function_factory = TaylorFunctionFactory(this->configuration().sweeper());
+
+    FlowStepModelType id = function_factory.create_identity(flow_domain);
+    FlowStepModelType res = function_factory.create_zeros(n,flow_domain);
     for(SizeType i=0; i!=n; ++i) {
         ValidatedScalarMultivariateFunctionPatch res_model = res[i] + static_cast<ValidatedNumber>(static_cast<ValidatedNumericType>(mdphi[i].expansion()[MultiIndex::zero(n+1)]));
         for(SizeType j=0; j!=mdphi[i].argument_size()-1; ++j) {

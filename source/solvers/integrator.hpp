@@ -122,11 +122,6 @@ class IntegratorBase
     IntegratorBase(Configuration<IntegratorBase> const& config);
   public:
 
-    //! \brief The class which constructs functions for representing the flow.
-    const ValidatedFunctionPatchFactory& function_factory() const;
-    //! \brief Set the class which constructs functions for representing the flow.
-    Void set_function_factory(const ValidatedFunctionPatchFactory& factory);
-
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
@@ -412,14 +407,15 @@ template<> struct LinearSearchSpaceConverter<unsigned short> : ConfigurationSear
 
 template<> struct Configuration<IntegratorBase> : public SearchableConfiguration {
     typedef Configuration<IntegratorBase> C;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
+    typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
-        add_property("function_factory",FunctionFactoryProperty(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7))));
+        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7)));
     }
 
-    //! \brief The function factory to be used.
-    ValidatedFunctionPatchFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 };
 
 template<> struct Configuration<BoundedIntegratorBase> : public Configuration<IntegratorBase> {
@@ -452,16 +448,10 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<B
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
-        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7)));
         add_property("step_maximum_error",RealTypeProperty(1e-6,Log10SearchSpaceConverter<RealType>()));
         add_property("minimum_temporal_order",DegreeTypeProperty(0u));
         add_property("maximum_temporal_order",DegreeTypeProperty(12u));
     }
-
-    //! \brief The sweeper to be used when creating a flow function.
-    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
-    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
-    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The maximum error produced on a single step of integration.
     RealType const& step_maximum_error() const { return at<RealTypeProperty>("step_maximum_error").get(); }
@@ -480,9 +470,10 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<B
 
     //! Base properties
 
-    ValidatedFunctionPatchFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
-    C& set_function_factory(ValidatedFunctionPatchFactoryInterface const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
-    C& set_function_factory(SharedPointer<ValidatedFunctionPatchFactoryInterface> const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
+    //! \brief The sweeper to be used when creating a flow function.
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
@@ -584,9 +575,10 @@ template<> struct Configuration<AffineIntegrator> : public Configuration<Bounded
 
     //! Base properties
 
-    ValidatedFunctionPatchFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
-    C& set_function_factory(ValidatedFunctionPatchFactoryInterface const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
-    C& set_function_factory(SharedPointer<ValidatedFunctionPatchFactoryInterface> const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
+    //! \brief The sweeper to be used when creating a flow function.
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.

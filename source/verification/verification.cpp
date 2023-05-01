@@ -374,8 +374,6 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
 
     CONCLOG_PRINTLN_VAR_AT(1,analysis)
 
-    auto integr = dynamic_cast<TaylorPicardIntegrator const&>(configuration.integrator());
-    CONCLOG_PRINTLN_VAR_AT(1,integr.configuration())
     VectorFieldEvolver rigorous_evolver(dynamics,configuration);
     sw.restart();
 

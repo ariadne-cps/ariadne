@@ -185,21 +185,14 @@ class TaylorPicardIntegrator : public BoundedIntegratorBase
 
     Configuration<TaylorPicardIntegrator> const& configuration() const;
 
-    virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
-    virtual Void _write(OutputStream& os) const;
+    IntegratorInterface* clone() const override;
+    Void _write(OutputStream& os) const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
-              const ExactBoxType& state_domain,
-              const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vector_field, const ExactBoxType& state_domain,
+                                const StepSizeType& time_step, const UpperBoxType& bounding_box) const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
-              const ExactBoxType& state_domain,
-              const Interval<StepSizeType>& time_domain,
-              const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& differential_equation, const ExactBoxType& state_domain,
+                                const Interval<StepSizeType>& time_domain, const ExactBoxType& parameter_domain, const UpperBoxType& bounding_box) const override;
 
     using BoundedIntegratorBase::flow_step;
 
@@ -314,21 +307,15 @@ class GradedTaylorSeriesIntegrator
 
     Configuration<GradedTaylorSeriesIntegrator> const& configuration() const;
 
-    virtual GradedTaylorSeriesIntegrator* clone() const { return new GradedTaylorSeriesIntegrator(*this); }
-    virtual Void _write(OutputStream& os) const;
+    IntegratorInterface* clone() const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
-              const ExactBoxType& state_domain,
-              const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
+    Void _write(OutputStream& os) const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
-              const ExactBoxType& state_domain,
-              const Interval<StepSizeType>& time_domain,
-              const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vector_field, const ExactBoxType& state_domain,
+                                const StepSizeType& time_step, const UpperBoxType& bounding_box) const override;
+
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& differential_equation, const ExactBoxType& state_domain,
+                                const Interval<StepSizeType>& time_domain, const ExactBoxType& parameter_domain, const UpperBoxType& bounding_box) const override;
 
     using BoundedIntegratorBase::flow_step;
 };
@@ -343,21 +330,14 @@ class AffineIntegrator
 
     Configuration<AffineIntegrator> const& configuration() const;
 
-    virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
-    virtual Void _write(OutputStream& os) const;
+    IntegratorInterface* clone() const override;
+    Void _write(OutputStream& os) const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
-              const ExactBoxType& state_domain,
-              const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vector_field, const ExactBoxType& state_domain,
+                                const StepSizeType& time_step, const UpperBoxType& bounding_box) const override;
 
-    virtual FlowStepModelType
-    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
-              const ExactBoxType& state_domain,
-              const Interval<StepSizeType>& time_domain,
-              const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& differential_equation, const ExactBoxType& state_domain,
+                                const Interval<StepSizeType>& time_domain, const ExactBoxType& parameter_domain, const UpperBoxType& bounding_box) const override;
 
     using BoundedIntegratorBase::flow_step;
 
@@ -485,6 +465,7 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<B
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
     C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
     C& set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
+    C& set_bounder(List<SharedPointer<BounderInterface>> const& bounders) { at<BounderProperty>("bounder").set(bounders); return *this; }
 };
 
 template<> struct Configuration<GradedTaylorSeriesIntegrator> : public Configuration<BoundedIntegratorBase> {

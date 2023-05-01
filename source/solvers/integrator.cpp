@@ -164,6 +164,10 @@ Configuration<TaylorPicardIntegrator> const& TaylorPicardIntegrator::configurati
     return static_cast<Configuration<TaylorPicardIntegrator> const&>(BoundedIntegratorBase::configuration());
 }
 
+IntegratorInterface* TaylorPicardIntegrator::clone() const {
+    return new TaylorPicardIntegrator(this->configuration());
+}
+
 FlowStepModelType
 TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
 {
@@ -387,6 +391,10 @@ GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(Configuration<GradedT
 
 Configuration<GradedTaylorSeriesIntegrator> const& GradedTaylorSeriesIntegrator::configuration() const {
     return static_cast<Configuration<GradedTaylorSeriesIntegrator> const&>(BoundedIntegratorBase::configuration());
+}
+
+IntegratorInterface* GradedTaylorSeriesIntegrator::clone() const {
+    return new GradedTaylorSeriesIntegrator(this->configuration());
 }
 
 namespace {
@@ -1049,6 +1057,10 @@ AffineIntegrator::AffineIntegrator(Configuration<AffineIntegrator> const& config
 
 Configuration<AffineIntegrator> const& AffineIntegrator::configuration() const {
     return static_cast<Configuration<AffineIntegrator> const&>(BoundedIntegratorBase::configuration());
+}
+
+IntegratorInterface* AffineIntegrator::clone() const {
+    return new AffineIntegrator(this->configuration());
 }
 
 Vector<ValidatedDifferential>

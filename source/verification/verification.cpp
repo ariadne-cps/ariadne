@@ -379,6 +379,7 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
 
     CONCLOG_PRINTLN("Computing rigorous evolution... ")
     rigorous_evolver.set_constraints(task_constraints);
+
     auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")

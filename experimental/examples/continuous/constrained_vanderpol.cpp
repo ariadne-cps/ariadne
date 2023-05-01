@@ -45,9 +45,8 @@ void ariadne_main()
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
             set_both_enable_reconditioning().
-            set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>().set_step_maximum_error(1e-6))).
-            set_maximum_step_size(0.005,0.1).
-            set_maximum_spacial_error(1e-8,1e-5);
+            set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>().set_step_maximum_error(1e-6,1e-5))).
+            set_maximum_step_size(0.005,1.0);
     CONCLOG_PRINTLN_VAR(configuration)
     CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space())
 

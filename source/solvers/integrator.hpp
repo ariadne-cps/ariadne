@@ -240,50 +240,34 @@ class GradedTaylorPicardIntegrator
                const UpperBoxType& bounding_box) const;
 };
 
-/*
-
 //! \ingroup DifferentialEquationSubModule
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
     : public BoundedIntegratorBase
 {
-    Sweeper<FloatDP> _sweeper;
-    DegreeType _order;
   public:
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(StepMaximumError err, Order order);
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip, Order order);
+    TaylorSeriesIntegrator(Configuration<TaylorSeriesIntegrator> const& config);
 
-    //! \brief The order of the method in space and time.
-    DegreeType order() const { return this->_order; }
-    Void set_order(DegreeType n) { this->_order=n; }
-    //! \brief  Set the sweep threshold of the Taylor model.
-    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
-    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
+    Configuration<TaylorSeriesIntegrator> const& configuration() const;
 
-    virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
-    virtual Void _write(OutputStream& os) const;
+    IntegratorInterface* clone() const override;
+    Void _write(OutputStream& os) const override;
 
-    virtual FlowStepModelType
+    FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
+              const UpperBoxType& bounding_box) const override;
 
-    virtual FlowStepModelType
+    FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
               const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
+              const UpperBoxType& bounding_box) const override;
 
     using BoundedIntegratorBase::flow_step;
-
-  private:
 };
-
-*/
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class GradedTaylorSeriesIntegrator
@@ -356,7 +340,7 @@ using Ariadne::BoundedIntegratorBase;
 using Ariadne::TaylorPicardIntegrator;
 using Ariadne::GradedTaylorSeriesIntegrator;
 using Ariadne::GradedTaylorPicardIntegrator;
-//using Ariadne::TaylorSeriesIntegrator;
+using Ariadne::TaylorSeriesIntegrator;
 using Ariadne::AffineIntegrator;
 using Ariadne::BounderInterface;
 using Ariadne::DegreeType;
@@ -562,6 +546,44 @@ template<> struct Configuration<GradedTaylorPicardIntegrator> : public Configura
     RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
     C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
     C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
+};
+
+template<> struct Configuration<TaylorSeriesIntegrator> : public Configuration<BoundedIntegratorBase> {
+
+    typedef Configuration<TaylorSeriesIntegrator> C;
+    typedef double RealType;
+    typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
+    typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
+    typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
+
+    Configuration() {
+        add_property("order",DegreeTypeProperty(4u));
+    }
+
+    //! \brief The order to be used for the flow function.
+    DegreeType const& order() const { return at<DegreeTypeProperty>("order").get(); }
+    C& set_order(DegreeType const& value) { at<DegreeTypeProperty>("order").set(value); return *this; }
+    C& set_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("order").set(lower,upper); return *this; }
+
+    //! Base properties
+
+    //! \brief The sweeper to be used when creating a flow function.
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
+
+    //! \brief The fraction L(f)*h used for a time step.
+    //! \details The convergence of the Picard iteration is approximately Lf*h.
+    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
+    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
+    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
+
+    //! \brief The bounder to be used.
+    BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
+    C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
+    C& set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
 };
 
 template<> struct Configuration<AffineIntegrator> : public Configuration<BoundedIntegratorBase> {

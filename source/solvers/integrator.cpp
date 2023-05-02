@@ -367,24 +367,6 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
 static const TwoExp SWEEP_THRESHOLD_RATIO=TwoExp(-10);
 
-/*
-TaylorSeriesIntegrator::TaylorSeriesIntegrator(Sweeper<FloatDP> const& sweeper, LipschitzTolerance lip, Order ord)
-    : BoundedIntegratorBase(sweeper, lip), _sweeper(sweeper), _order(ord)
-{ }
-
-TaylorSeriesIntegrator::TaylorSeriesIntegrator(StepMaximumError err, Order ord)
-    : TaylorSeriesIntegrator(ThresholdSweeper<FloatDP>(DP(),err.value()*SWEEP_THRESHOLD_RATIO),DEFAULT_LIPSCHITZ_TOLERANCE,ord)
-{ }
-
-TaylorSeriesBounderIntegrator::TaylorSeriesBounderIntegrator(StepMaximumError err, Sweeper<FloatDP> const& swp, LipschitzTolerance lip, Order ord)
-    : TaylorSeriesIntegrator(swp,lip,ord), _step_maximum_error(cast_exact(err.value()))
-{ }
-
-TaylorSeriesBounderIntegrator::TaylorSeriesBounderIntegrator(StepMaximumError err, Order ord)
-    : TaylorSeriesIntegrator(err,ord), _step_maximum_error(cast_exact(err.value()))
-{ }
-*/
-
 GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(Configuration<GradedTaylorSeriesIntegrator> const& config)
     : BoundedIntegratorBase(config)
 { }
@@ -877,90 +859,12 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f,
     return forwards_taylor_function_model;
 }
 
-/*
+TaylorSeriesIntegrator::TaylorSeriesIntegrator(Configuration<TaylorSeriesIntegrator> const& config)
+        : BoundedIntegratorBase(config)
+{ }
 
-FlowStepModelType
-TaylorSeriesBounderIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f,
-                                          const ExactBoxType& domx, StepSizeType& hsug) const
-{
-    Dyadic max_err=Dyadic(this->_step_maximum_error);
-    auto deg=this->order();
-    auto swp=this->sweeper();
-
-    StepSizeType h=hsug;
-    ExactIntervalType domt(0,h);
-    ExactBoxType doma;
-
-    ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
-    ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension()
-                            || f.argument_size()==domx.dimension()+domt.dimension()+doma.dimension());
-    const bool is_autonomous = f.argument_size()==domx.dimension()+doma.dimension();
-
-    typedef DoublePrecision PR;
-    typedef FloatBounds<PR> X;
-    PR pr;
-
-    Vector<X> cx(midpoint(domx),pr);
-    X ct(domt.lower_bound(),pr);
-    Vector<X> ca(midpoint(doma),pr);
-    Vector<Differential<X>> cdf = is_autonomous ? f.differential(join(cx,ca),deg) : f.differential(join(cx,ct,ca),deg);
-    Vector<Differential<X>> cdphi = is_autonomous ? differential_flow(cdf, cx,ca) : differential_flow(cdf, cx,ct,ca);
-
-    // Widen domain by doubling size
-    ExactBoxType wdomx=cast_exact_box(domx+(cast_singleton(domx)-domx.midpoint()));
-    // Widen time-step to h*3/2
-    StepSizeType wh=h+hlf(h);
-    ExactIntervalType wdomt(0,wh);
-
-    // Below is not needed, just useful to see minimum possible range
-    //   ExactBoxType domxta=join(domx,domt,doma);
-    //   FlowStepModelType phi=make_taylor_function_model(domxta,cdphi,cdphi,swp);
-
-    ExactBoxType domxta=join(domx,domt,doma);
-    ExactBoxType wdomxta=join(wdomx,wdomt,doma);
-    FlowStepModelType phi=make_taylor_function_model(wdomxta,cdphi,cdphi,swp);
-    UpperBoxType bndbx=phi.range();
-
-    Bool refined = false;
-    Bool accurate = false;
-    phi=series_flow_step(f,domx,domt,doma,bndbx,cdphi, deg,swp);
-    UpperBoxType xrng=phi.range();
-
-    if (refines(xrng,bndbx)) {
-        refined=true;
-    } else {
-        bndbx=cast_exact_box(xrng+(cast_singleton(domx)-domx.midpoint()));
-        // bndbx=hull(bndbx,rphi.range());
-    }
-
-    while (not refined or not accurate) {
-        phi=series_flow_step(f,domx,domt,doma,bndbx,cdphi, deg,swp);
-
-        if (refines(xrng,bndbx)) {
-            refined=true;
-            bndbx=xrng;
-            if (definitely(phi.error()<max_err)) { accurate=true; return phi; }
-        } else {
-            bndbx=cast_exact_box(xrng+(cast_singleton(domx)-domx.midpoint()));
-            //bndbx=hull(bndbx,xrng);
-        }
-
-        StepSizeType nh=hlf(wh);
-        wh=h;
-        h=nh;
-        domt=IntervalDomainType(0,h);
-    }
-
-    return phi;
-}
-
-Void TaylorSeriesBounderIntegrator::_write(OutputStream& os) const {
-    os << "TaylorSeriesBounderIntegrator"
-       << "( function_factory = " << this->function_factory()
-       << ", step_maximum_error = " << this->_step_maximum_error
-       << ", sweeper = " << this->sweeper()
-       << ", order = " << this->order()
-       << " )";
+IntegratorInterface* TaylorSeriesIntegrator::clone() const {
+    return new TaylorSeriesIntegrator(configuration());
 }
 
 FlowStepModelType
@@ -976,18 +880,17 @@ FlowStepModelType
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& domx, const Interval<StepSizeType>& rngt, const ExactBoxType& doma, const UpperBoxType& bndx) const
 {
     ExactIntervalType domt(rngt);
-    FlowStepModelType tphi=Ariadne::series_flow_step(f,domx,domt,doma,bndx,this->order(),this->sweeper());
+    FlowStepModelType tphi=Ariadne::series_flow_step(f,domx,domt,doma,bndx,this->configuration().order(),this->configuration().sweeper());
     return tphi;
 }
 
-Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
-    os << "TaylorSeriesIntegrator"
-       << "( function_factory = " << this->function_factory()
-       << ", sweeper = " << this->sweeper()
-       << ", order = " << this->order()
-       << " )";
+Configuration<TaylorSeriesIntegrator> const& TaylorSeriesIntegrator::configuration() const {
+    return static_cast<Configuration<TaylorSeriesIntegrator> const&>(BoundedIntegratorBase::configuration());
 }
-*/
+
+Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
+     os << "TaylorSeriesIntegrator: " << this->configuration();
+}
 
 namespace {
 template<class... DS> inline decltype(auto) differential_flow(DS const& ... ds) { return flow(ds...); }

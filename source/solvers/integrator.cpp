@@ -242,11 +242,18 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
     os << "TaylorPicardIntegrator: " << configuration();
 }
 
-/*
-GradedTaylorPicardIntegrator::GradedTaylorPicardIntegrator(StepMaximumError err, Order order)
-        : BoundedIntegratorBase(GradedSweeper<FloatDP>(DoublePrecision(), order)),
-          _step_maximum_error(cast_exact(err.value())), _sweeper(GradedSweeper<FloatDP>(DoublePrecision(), order)),
-          _error_refinement_minimum_improvement_percentage(cast_exact(0.02)), _order(order) { }
+GradedTaylorPicardIntegrator::GradedTaylorPicardIntegrator(Configuration<GradedTaylorPicardIntegrator> const& config)
+        : IntegratorBase(config) { }
+
+Configuration<GradedTaylorPicardIntegrator> const& GradedTaylorPicardIntegrator::configuration() const {
+    return static_cast<Configuration<GradedTaylorPicardIntegrator> const&>(IntegratorBase::configuration());
+}
+
+Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
+    os << "GradedTaylorPicardIntegrator: " << this->configuration();
+}
+
+IntegratorInterface* GradedTaylorPicardIntegrator::clone() const { return new GradedTaylorPicardIntegrator(this->configuration()); }
 
 FlowStepModelType
 GradedTaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
@@ -292,13 +299,15 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     UpperBoxType const& bx=B;
     CONCLOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
-    FlowStepModelType phi0=this->configuration().function_factory().create_projection(wdom,range(0,nx));
+    auto function_factory = TaylorFunctionFactory(this->configuration().sweeper());
+
+    FlowStepModelType phi0=function_factory.create_projection(wdom,range(0,nx));
     CONCLOG_PRINTLN_AT(1,"phi0="<<phi0);
-    FlowStepModelType phi=this->configuration().function_factory().create_constants(wdom,cast_singleton(bx));
-    FlowStepModelType ta=this->configuration().function_factory().create_projection(wdom,tarng);
+    FlowStepModelType phi=function_factory.create_constants(wdom,cast_singleton(bx));
+    FlowStepModelType ta=function_factory.create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
-    for (DegreeType k=0; k!=this->_order; ++k) {
+    for (DegreeType k=0; k!=this->configuration().temporal_order(); ++k) {
         FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
         CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
         phi=antiderivative(fphi,nx)+phi0;
@@ -324,7 +333,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         for (SizeType i=0; i<errors.size(); ++i) {
             if (possibly(errors[i] > 0)) {
                 auto error_improvement = cast_exact((errors[i]-new_errors[i])/errors[i]);
-                if (error_improvement >= this->_error_refinement_minimum_improvement_percentage) {
+                if (error_improvement >= this->configuration().error_refinement_minimum_improvement_percentage()) {
                     has_improved = true;
                     break;
                 }
@@ -335,21 +344,12 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         CONCLOG_PRINTLN_VAR_AT(2,errors);
     }
 
-    if (possibly(phi.error()>this->step_maximum_error())) {
-        ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<", which exceeds step maximum error "<<this->step_maximum_error());
+    if (phi.error().get(DoublePrecision()).get_d() > this->configuration().step_maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<", which exceeds step maximum error "<<this->configuration().step_maximum_error());
     }
 
     return phi;
 }
-
-Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
-    os << "GradedTaylorPicardIntegrator"
-       << "(step_maximum_error = " << this->step_maximum_error()
-       << ", function_factory = " << this->function_factory()
-       << ", order = " << this->order()
-       << " )";
-}
-*/
 
 } // namespace Ariadne
 

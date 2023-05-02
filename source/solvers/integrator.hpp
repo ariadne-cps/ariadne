@@ -205,45 +205,33 @@ class TaylorPicardIntegrator : public BoundedIntegratorBase
                const UpperBoxType& bounding_box) const;
 };
 
-/*
 //! \ingroup DifferentialEquationSubModule
 class GradedTaylorPicardIntegrator
         : public IntegratorBase
 {
-    ExactDouble _step_maximum_error;
-    GradedSweeper<FloatDP> _sweeper;
-    ExactDouble _error_refinement_minimum_improvement_percentage;
-    DegreeType _order;
-public:
+  public:
     //! \brief Default constructor.
-    GradedTaylorPicardIntegrator(StepMaximumError err, Order order);
+    GradedTaylorPicardIntegrator(Configuration<GradedTaylorPicardIntegrator> const& config);
 
-    //! \brief The order of the method.
-    DegreeType order() const { return this->_order; }
-    Void set_order(Nat m) { this->_order=m; this->_sweeper = GradedSweeper<FloatDP>(DoublePrecision(),m); }
-    //! \brief  Set the maximum error of a single step.
-    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
-    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
-    ExactDouble error_refinement_minimum_improvement_percentage() const { return this->_error_refinement_minimum_improvement_percentage; }
-    Void set_error_refinement_minimum_improvement_percentage(ApproximateDouble e) { _error_refinement_minimum_improvement_percentage = cast_exact(e); }
+    Configuration<GradedTaylorPicardIntegrator> const& configuration() const;
 
-    virtual GradedTaylorPicardIntegrator* clone() const { return new GradedTaylorPicardIntegrator(*this); }
-    virtual Void _write(OutputStream& os) const;
+    IntegratorInterface* clone() const override;
+    Void _write(OutputStream& os) const override;
 
-    virtual FlowStepModelType
+    FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
-              const UpperBoxType& bounding_box) const;
+              const UpperBoxType& bounding_box) const override;
 
-    virtual FlowStepModelType
+    FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
               const ExactBoxType& parameter_domain,
-              const UpperBoxType& bounding_box) const;
+              const UpperBoxType& bounding_box) const override;
 
-private:
+  private:
     FlowStepModelType
     _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
                const ExactBoxType& state_domain,
@@ -252,7 +240,7 @@ private:
                const UpperBoxType& bounding_box) const;
 };
 
-
+/*
 
 //! \ingroup DifferentialEquationSubModule
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
@@ -367,6 +355,8 @@ using Ariadne::IntegratorBase;
 using Ariadne::BoundedIntegratorBase;
 using Ariadne::TaylorPicardIntegrator;
 using Ariadne::GradedTaylorSeriesIntegrator;
+using Ariadne::GradedTaylorPicardIntegrator;
+//using Ariadne::TaylorSeriesIntegrator;
 using Ariadne::AffineIntegrator;
 using Ariadne::BounderInterface;
 using Ariadne::DegreeType;
@@ -479,18 +469,12 @@ template<> struct Configuration<GradedTaylorSeriesIntegrator> : public Configura
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
-        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7)));
         add_property("step_maximum_error",RealTypeProperty(1e-6,Log10SearchSpaceConverter<RealType>()));
         add_property("minimum_spacial_order",DegreeTypeProperty(1u));
         add_property("maximum_spacial_order",DegreeTypeProperty(4u));
         add_property("minimum_temporal_order",DegreeTypeProperty(4u));
         add_property("maximum_temporal_order",DegreeTypeProperty(12u));
     }
-
-    //! \brief The sweeper to be used when creating a flow function.
-    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
-    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
-    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The maximum error produced on a single step of integration.
     RealType const& step_maximum_error() const { return at<RealTypeProperty>("step_maximum_error").get(); }
@@ -519,9 +503,10 @@ template<> struct Configuration<GradedTaylorSeriesIntegrator> : public Configura
 
     //! Base properties
 
-    ValidatedFunctionPatchFactoryInterface const& function_factory() const { return at<FunctionFactoryProperty>("function_factory").get(); }
-    C& set_function_factory(ValidatedFunctionPatchFactoryInterface const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
-    C& set_function_factory(SharedPointer<ValidatedFunctionPatchFactoryInterface> const& factory) { at<FunctionFactoryProperty>("function_factory").set(factory); return *this; }
+    //! \brief The sweeper to be used when creating a flow function.
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
     //! \brief The fraction L(f)*h used for a time step.
     //! \details The convergence of the Picard iteration is approximately Lf*h.
@@ -533,6 +518,50 @@ template<> struct Configuration<GradedTaylorSeriesIntegrator> : public Configura
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
     C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
     C& set_bounder(SharedPointer<BounderInterface> const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
+};
+
+template<> struct Configuration<GradedTaylorPicardIntegrator> : public Configuration<IntegratorBase> {
+
+    typedef Configuration<GradedTaylorPicardIntegrator> C;
+    typedef double RealType;
+    typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
+    typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
+
+    Configuration() {
+        add_property("step_maximum_error",RealTypeProperty(1e-6,Log10SearchSpaceConverter<RealType>()));
+        add_property("temporal_order",DegreeTypeProperty(4u));
+        add_property("error_refinement_minimum_improvement_percentage",DegreeTypeProperty(2u));
+    }
+
+    //! \brief The maximum error produced on a single step of integration.
+    RealType const& step_maximum_error() const { return at<RealTypeProperty>("step_maximum_error").get(); }
+    C& set_step_maximum_error(double const& value) { at<RealTypeProperty>("step_maximum_error").set(value); return *this; }
+    C& set_step_maximum_error(double const& lower, double const& upper) { at<RealTypeProperty>("step_maximum_error").set(lower,upper); return *this; }
+
+    //! \brief The temporal order to be used for the flow function.
+    DegreeType const& temporal_order() const { return at<DegreeTypeProperty>("temporal_order").get(); }
+    C& set_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("temporal_order").set(value); return *this; }
+    C& set_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("temporal_order").set(lower,upper); return *this; }
+
+    //! \brief The minimum percentage of improvement required to continue refining the error, between 1 and 100.
+    DegreeType const& error_refinement_minimum_improvement_percentage() const { return at<DegreeTypeProperty>("error_refinement_minimum_improvement_percentage").get(); }
+    C& set_error_refinement_minimum_improvement_percentage(DegreeType const& value) { at<DegreeTypeProperty>("error_refinement_minimum_improvement_percentage").set(value); return *this; }
+    C& set_error_refinement_minimum_improvement_percentage(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("error_refinement_minimum_improvement_percentage").set(lower,upper); return *this; }
+
+    //! Base properties
+
+    //! \brief The sweeper to be used when creating a flow function.
+    Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
+    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
+    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
+
+    //! \brief The fraction L(f)*h used for a time step.
+    //! \details The convergence of the Picard iteration is approximately Lf*h.
+    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
+    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
+    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
 };
 
 template<> struct Configuration<AffineIntegrator> : public Configuration<BoundedIntegratorBase> {

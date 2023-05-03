@@ -90,6 +90,12 @@ if(GIT_FOUND)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
         execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/helper OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/helper submodules/helper WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/pronest OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/pronest submodules/pronest WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/pexplore OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/pexplore submodules/pexplore WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
     message(STATUS "Getting all submodules if not downloaded already...")
     execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
@@ -107,6 +113,21 @@ if(GIT_FOUND)
         message(ERROR "BetterThreads download failure")
     else()
         message(STATUS "BetterThreads submodule found")
+    endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/helper/CMakeLists.txt)
+        message(ERROR "Helper download failure")
+    else()
+        message(STATUS "Helper submodule found")
+    endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/pronest/CMakeLists.txt)
+        message(ERROR "ProNest download failure")
+    else()
+        message(STATUS "ProNest submodule found")
+    endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/pexplore/CMakeLists.txt)
+        message(ERROR "pExplore download failure")
+    else()
+        message(STATUS "pExplore submodule found")
     endif()
 else()
     message(FATAL_ERROR "Git not found, no submodules (including pybind11 for Python bindings) could be downloaded")
@@ -127,9 +148,31 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
     message(STATUS "Created symbolic link to BetterThreads submodule")
 endif()
 
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/helper/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/helper)
+    message(STATUS "Created symbolic link to Helper submodule")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pronest)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/pronest/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pronest)
+    message(STATUS "Created symbolic link to ProNest submodule")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pexplore)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/pexplore/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/pexplore)
+    message(STATUS "Created symbolic link to pExplore submodule")
+endif()
+
 find_package(Threads)
 if(NOT Threads_FOUND)
     message(FATAL_ERROR "Unable to find Threads library")
+endif()
+
+find_package(GLPK)
+if(GLPK_FOUND)
+    include_directories(SYSTEM ${GLPK_INCLUDES})
+else()
+    message(FATAL_ERROR "Unable to find GLPK")
 endif()
 
 find_package(GMP)
@@ -179,16 +222,15 @@ add_subdirectory(tutorials EXCLUDE_FROM_ALL)
 add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
     source/geometry/interval.cpp
 )
 
 add_library(ariadne-kernel SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -196,12 +238,14 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-io>
     $<TARGET_OBJECTS:ariadne-symbolic>
+    $<TARGET_OBJECTS:PEXPLORE_SRC>
+    $<TARGET_OBJECTS:PRONEST_SRC>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
 )
 
 add_library(ariadne SHARED
-    $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -211,12 +255,16 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:ariadne-verification>
+    $<TARGET_OBJECTS:PEXPLORE_SRC>
+    $<TARGET_OBJECTS:PRONEST_SRC>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
+    $<TARGET_OBJECTS:HELPER_SRC>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne dl ${GLPK_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ariadne-kernel dl ${GLPK_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(COVERAGE)
@@ -233,3 +281,6 @@ install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/betterthreads DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/pronest DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY submodules/.symbolic/pexplore DESTINATION include FILES_MATCHING PATTERN "*.hpp")

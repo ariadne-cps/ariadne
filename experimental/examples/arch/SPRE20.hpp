@@ -23,7 +23,7 @@
  */
 
 #include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 #include "arch.hpp"
 
 namespace Ariadne {

@@ -30,7 +30,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/exceptions.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/list_set.hpp"
 #include "geometry/grid.hpp"

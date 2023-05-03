@@ -28,6 +28,7 @@
 
 #ifdef HAVE_GNUPLOT_H
 
+#include <mutex>
 #include "io/figure.hpp"
 #include "io/gnuplot-iostream.hpp"
 
@@ -70,7 +71,7 @@ class GnuplotCanvas : public CanvasBase
     bool isanimate;
     _Labels labels;
 
-    Mutex _mux;
+    std::mutex _mux;
 
   public:
     ~GnuplotCanvas();

@@ -33,7 +33,8 @@
 
 #include "utility/macros.hpp"
 #include "utility/metaprogramming.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "utility/declarations.hpp"
 #include "numeric/builtin.hpp"
 
@@ -41,6 +42,9 @@
 #include "slice.hpp"
 
 namespace Ariadne {
+
+using Helper::Uninitialised;
+using Helper::List;
 
 //! \ingroup LinearAlgebraModule
 //! \brief A scalar of type \a X; defined as an synonym (typedef) of \a X.

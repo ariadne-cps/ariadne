@@ -37,12 +37,16 @@
 
 #include "utility/typedefs.hpp"
 #include "utility/declarations.hpp"
+#include "helper/container.hpp"
 #include "symbolic/variable.hpp"
 #include "colour.hpp"
 #include "graphics_base.hpp"
 #include "graphics_backend_interface.hpp"
 
 namespace Ariadne {
+
+using Helper::Map;
+using Helper::List;
 
 typedef ApproximateBoxType GraphicsBoundingBoxType;
 

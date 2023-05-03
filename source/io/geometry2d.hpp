@@ -29,12 +29,13 @@
 #ifndef ARIADNE_GEOMETRY2D_HPP
 #define ARIADNE_GEOMETRY2D_HPP
 
+#include "helper/container.hpp"
+
 typedef unsigned int Nat;
 
 namespace Ariadne {
 
-template<class T >
-class List;
+using Helper::List;
 
 template<class R, class A> inline R numeric_cast(const A&);
 

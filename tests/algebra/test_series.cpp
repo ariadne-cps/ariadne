@@ -28,12 +28,13 @@
 
 #include "../test.hpp"
 
+namespace Helper {
+    template<class X> List(InitializerList<X>) -> List<X>;
+}
+
 namespace Ariadne {
 
 template<class F> decltype(auto) operator==(Rounded<F> const& x, Rational const& q) { return x.raw()==q; }
-
-//template<class Iter> container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
-template<class X> List(InitializerList<X>) -> List<X>;
 
 template<class T1, class T2> EqualsType<T1,T2> operator==(List<T1> const& lst1, List<T2> const& lst2) {
     if(lst1.size()!=lst2.size()) { return false; }

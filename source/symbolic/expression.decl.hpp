@@ -31,6 +31,8 @@
 
 namespace Ariadne {
 
+using Helper::List;
+
 class String;
 class Integer;
 class Real;

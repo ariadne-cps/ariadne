@@ -32,7 +32,7 @@
 #include <map>
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
 #include "algebra/vector.hpp"
@@ -46,6 +46,8 @@
 #include "univariate_differential.hpp"
 
 namespace Ariadne {
+
+using Helper::Map;
 
 template<class X> class Vector;
 template<class X> class Matrix;

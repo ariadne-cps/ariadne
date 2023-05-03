@@ -37,8 +37,6 @@ namespace Ariadne {
 
 class String;
 
-template<class T> class Set;
-
 class Identifier;
 
 template<class T> class Variable;

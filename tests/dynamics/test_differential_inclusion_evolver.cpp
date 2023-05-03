@@ -75,12 +75,11 @@ class TestDifferentialInclusionEvolver {
         List<InputApproximation> approximations = {ZeroApproximation(), ConstantApproximation(), AffineApproximation(),
                                                    SinusoidalApproximation(), PiecewiseApproximation()};
 
-        TaylorPicardIntegrator integrator(
-                step_maximum_error = 1e-6_pr,
-                sweeper,
-                lipschitz_tolerance = 0.5_x,
-                minimum_temporal_order = 4,
-                maximum_temporal_order = 12);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                          .set_step_maximum_error(1e-6)
+                                          .set_sweeper(sweeper)
+                                          .set_minimum_temporal_order(4)
+                                          .set_maximum_temporal_order(12));
 
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);
@@ -161,12 +160,11 @@ public:
         ExactDouble sw_threshold = 1e-10_pr;
         ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
 
-        TaylorPicardIntegrator integrator(
-                step_maximum_error = 1e-6_pr,
-                sweeper,
-                lipschitz_tolerance = 0.5_x,
-                minimum_temporal_order = 4,
-                maximum_temporal_order = 12);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                                  .set_step_maximum_error(1e-6)
+                                                  .set_sweeper(sweeper)
+                                                  .set_minimum_temporal_order(4)
+                                                  .set_maximum_temporal_order(12));
 
         LohnerReconditioner reconditioner(initial.variables().size(), inputs.variables().size(),
                                           period_of_parameter_reduction, ratio_of_parameters_to_keep);

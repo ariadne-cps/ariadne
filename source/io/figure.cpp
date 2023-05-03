@@ -26,7 +26,7 @@
 #include "config.hpp"
 
 #include "utility/macros.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "function/function.hpp"
 #include "geometry/point.hpp"

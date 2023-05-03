@@ -29,7 +29,7 @@
 #include "numeric_submodule.hpp"
 
 #include "utility/typedefs.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"

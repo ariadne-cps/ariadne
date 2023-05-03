@@ -1,5 +1,5 @@
 /***************************************************************************
- *            laub-loomis-nonoise.cpp
+ *            laub-loomis.cpp
  *
  *  Copyright  2018  Luca Geretti
  *
@@ -23,7 +23,7 @@
  */
 
 #include "ariadne_main.hpp"
-#include "utility/stopwatch.hpp"
+#include "helper/stopwatch.hpp"
 
 using namespace Ariadne;
 

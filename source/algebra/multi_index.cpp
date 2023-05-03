@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/stlio.hpp"
-#include "utility/container.hpp"
+#include "helper/stlio.hpp"
+#include "helper/container.hpp"
 #include "multi_index.hpp"
 
 namespace Ariadne {

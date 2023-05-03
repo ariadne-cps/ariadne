@@ -33,11 +33,12 @@
 #include <functional>
 #include "utility/macros.hpp"
 #include "utility/handle.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/string.hpp"
 
 namespace Ariadne {
 
+using Helper::List;
 using VoidFunction = std::function<Void()>;
 
 //! \brief Exception for when no value is available, but it should be supplied

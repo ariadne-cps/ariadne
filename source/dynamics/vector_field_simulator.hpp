@@ -84,9 +84,9 @@ class VectorFieldSimulator
     struct SynchronisedOrbit : public OrbitType {
         SynchronisedOrbit(ApproximateListPointType const& initial_points) : OrbitType(initial_points) { }
         void insert(FloatDP const& t, ApproximatePointType const& pt, SizeType const& curve_number) {
-            BetterThreads::LockGuard<BetterThreads::Mutex> lock(_mux); OrbitType::insert(t,pt,curve_number); }
+            std::lock_guard<std::mutex> lock(_mux); OrbitType::insert(t,pt,curve_number); }
       private:
-        BetterThreads::Mutex _mux;
+        std::mutex _mux;
     };
     typedef BetterThreads::StaticWorkload<Pair<SizeType,ApproximatePointType>, TerminationType const&, SharedPointer<SynchronisedOrbit>> WorkloadType;
   public:

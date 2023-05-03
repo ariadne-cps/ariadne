@@ -76,10 +76,10 @@ void ariadne_main()
 
     // Create the analyser classes
 
-    GradedTaylorSeriesIntegrator series_integrator(1e-3);
-    series_integrator.set_maximum_spacial_order(6);
-    series_integrator.set_maximum_temporal_order(12);
-    TaylorPicardIntegrator picard_integrator(1e-5);
+    GradedTaylorSeriesIntegrator series_integrator(Configuration<GradedTaylorSeriesIntegrator>()
+            .set_step_maximum_error(1e-3)
+            .set_maximum_spacial_order(6)
+            .set_maximum_temporal_order(12));
     IntervalNewtonSolver solver(1e-12,8);
 
     // Create a GeneralHybridEvolver object

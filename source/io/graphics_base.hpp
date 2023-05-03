@@ -29,20 +29,20 @@
 #ifndef ARIADNE_GRAPHICS_BASE_HPP
 #define ARIADNE_GRAPHICS_BASE_HPP
 
+#include <mutex>
 #include "graphics_interface.hpp"
 #include "geometry2d.hpp"
-#include "betterthreads/typedefs.hpp"
 
 namespace Ariadne {
 
-using Mutex = std::mutex;
-template<class T> using LockGuard = std::lock_guard<T>;
+using std::mutex;
+using std::lock_guard;
 
 //! \brief Base for canvas classes
 class CanvasBase : public CanvasInterface {
   public:
     Void fill_boundary(List<Point2d> const& boundary) override final {
-        LockGuard<Mutex> lock(_mux);
+        lock_guard<mutex> lock(_mux);
         if(boundary.size()==1) { this->dot(boundary[0].x,boundary[0].y); }
 
         this->move_to(boundary[0].x,boundary[0].y);
@@ -53,7 +53,7 @@ class CanvasBase : public CanvasInterface {
         this->fill();
     }
   private:
-    Mutex _mux;
+    mutex _mux;
 };
 
 } // namespace Ariadne

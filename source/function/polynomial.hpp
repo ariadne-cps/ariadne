@@ -44,7 +44,6 @@
 
 namespace Ariadne {
 
-template<class T> class Array;
 template<class X> class Algebra;
 
 template<class I, class X> class Monomial;

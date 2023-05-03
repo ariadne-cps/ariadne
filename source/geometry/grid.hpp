@@ -29,7 +29,7 @@
 #ifndef ARIADNE_GRID_HPP
 #define ARIADNE_GRID_HPP
 
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 

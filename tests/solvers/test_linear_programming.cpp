@@ -104,7 +104,11 @@ class TestInteriorPointSolver
         Vector<FloatDP> xl({0.0_x,0.0_x,0.0_x},dp);
         Vector<FloatDP> xu({+inf,+inf,3.0_x},dp);
 
-        ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
+        auto res = optimiser->minimise(c,xl,xu,A,b);
+
+        ARIADNE_TEST_PRINT(get_first(res))
+        ARIADNE_TEST_PRINT(get_second(res))
+        ARIADNE_TEST_PRINT(get_third(res))
     }
 
 };

@@ -37,7 +37,7 @@
 #include "conclog/logging.hpp"
 #include "utility/declarations.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 #include "hybrid/hybrid_set.decl.hpp"
 #include "hybrid/discrete_location.hpp"

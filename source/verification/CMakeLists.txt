@@ -1,7 +1,7 @@
-set(LIBRARY_NAME ariadne-utility)
+set(LIBRARY_NAME ariadne-verification)
 
 add_library(${LIBRARY_NAME} OBJECT
-        stack_trace.cpp
+    verification.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

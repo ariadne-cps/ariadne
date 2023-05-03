@@ -32,10 +32,13 @@
 #include "utility/typedefs.hpp"
 #include "utility/handle.hpp"
 #include "numeric/paradigm.hpp"
+#include "helper/array.hpp"
 
 #include "logical.decl.hpp"
 
 namespace Ariadne {
+
+using Helper::Array;
 
 template<class X> class Sequence;
 

@@ -31,8 +31,8 @@
 
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 #include "symbolic/space.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/hybrid_set_interface.hpp"

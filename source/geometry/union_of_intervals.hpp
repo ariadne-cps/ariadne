@@ -29,9 +29,12 @@
 #ifndef ARIADNE_UNION_OF_INTERVALS_HPP
 #define ARIADNE_UNION_OF_INTERVALS_HPP
 
+#include "helper/container.hpp"
 #include "interval.hpp"
 
 namespace Ariadne {
+
+using Helper::apply;
 
 struct LowerUpperBoundLess {
     template<class U> decltype(auto) operator() (Interval<U> const& ivl1, Interval<U> const& ivl2) const {

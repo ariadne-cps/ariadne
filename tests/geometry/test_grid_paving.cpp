@@ -28,7 +28,7 @@
 #include <string>
 
 #include "config.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 
 #include "utility/macros.hpp"
 #include "utility/tribool.hpp"
@@ -1127,8 +1127,8 @@ Void test_grid_open_cell_five() {
 }
 
 Void test_grid_open_cell_six() {
-    std::vector<GridOpenCell> expectedResult;
-    std::vector<GridOpenCell> actualResult;
+    List<GridOpenCell> expectedResult;
+    List<GridOpenCell> actualResult;
     Nat theRootExtent;
 
     //Allocate a trivial Grid two dimensional grid

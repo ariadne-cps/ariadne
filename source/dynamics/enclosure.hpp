@@ -30,7 +30,7 @@
 #define ARIADNE_ENCLOSURE_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "geometry/set_interface.hpp"

@@ -172,7 +172,7 @@ Void
 TestMatrix::test_misc()
 {
     Array<FloatDPApproximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
-    Array<FloatDPBounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
+    Array<FloatDPBounds> iAary={{-1.0_x,pr},{3.0_x,pr},{-1.0_x,pr},{1.0_x,pr}};
     FloatDPApproximation* Aptr=Aary.begin();
 
     Matrix<FloatDPApproximation> A0(0,0,pr);

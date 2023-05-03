@@ -4,7 +4,6 @@ add_custom_target(tests-kernel)
 
 add_dependencies(everything tests)
 
-add_subdirectory(utility)
 add_subdirectory(numeric)
 add_subdirectory(algebra)
 add_subdirectory(function)

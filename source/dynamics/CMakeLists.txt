@@ -3,6 +3,7 @@ set(LIBRARY_NAME ariadne-dynamics)
 add_library(${LIBRARY_NAME} OBJECT
     enclosure.cpp
     orbit.cpp
+    inner_approximation.cpp
     differential_inclusion.cpp
     differential_inclusion_evolver.cpp
     first_order_pde.cpp

@@ -61,7 +61,7 @@ void differential_solver_demonstration() {
     //! [Differential Solver demonstration]
 
     // Compute the flow of the Taylor function f starting in the domain dom for time interval [-h,+h]
-    auto integrator=GradedTaylorSeriesIntegrator(1e-8);
+    auto integrator=GradedTaylorSeriesIntegrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-8));
 
     auto dom=BoxDomainType({{-1,+1}});
     auto bbx=BoxDomainType({{-4,+4}});

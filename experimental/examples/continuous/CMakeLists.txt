@@ -1,5 +1,8 @@
 set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
+    brusselator
     laub-loomis
+    inner
+    constrained_vanderpol
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_CONTINUOUS})

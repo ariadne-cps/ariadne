@@ -35,7 +35,7 @@
 #include <set>
 #include <map>
 
-#include "utility/lru_cache.hpp"
+#include "helper/lru_cache.hpp"
 #include "function/function.hpp"
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
@@ -49,6 +49,8 @@
 using namespace ConcLog;
 
 namespace Ariadne {
+
+using Helper::LRUCache;
 
 class HybridTime;
 class HybridSpace;

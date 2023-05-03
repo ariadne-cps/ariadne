@@ -29,11 +29,13 @@
 #ifndef ARIADNE_SERIES_HPP
 #define ARIADNE_SERIES_HPP
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "numeric/operators.hpp"
 
 namespace Ariadne {
+
+using Helper::List;
 
 template<class X> class Series;
 

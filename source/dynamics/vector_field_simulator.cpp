@@ -28,10 +28,10 @@
 
 #include "algebra/algebra.hpp"
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "symbolic/valuation.hpp"
 #include "symbolic/assignment.hpp"
 #include "symbolic/space.hpp"

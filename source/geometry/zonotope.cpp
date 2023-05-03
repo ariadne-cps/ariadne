@@ -32,7 +32,7 @@
 #include <algorithm>
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "solvers/linear_programming.hpp"

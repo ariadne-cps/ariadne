@@ -30,8 +30,8 @@
 #include <iostream>
 #include <iomanip>
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/expansion.hpp"

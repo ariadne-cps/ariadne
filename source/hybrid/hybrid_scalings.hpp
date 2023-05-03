@@ -32,8 +32,8 @@
 #include <iostream>
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 
 #include "symbolic/variable.hpp"
 

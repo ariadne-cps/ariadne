@@ -28,8 +28,8 @@
 #include <map>
 
 #include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "function/function.hpp"

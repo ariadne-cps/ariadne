@@ -25,8 +25,8 @@
 #include <iostream>
 
 #include "config.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/assignment.hpp"

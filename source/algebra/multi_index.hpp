@@ -34,11 +34,13 @@
 #include <iostream>
 
 #include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "utility/container.hpp"
+#include "helper/array.hpp"
+#include "helper/container.hpp"
 #include "numeric/numeric.hpp"
 
 namespace Ariadne {
+
+using Helper::List;
 
 class UniIndex {
     DegreeType _a;

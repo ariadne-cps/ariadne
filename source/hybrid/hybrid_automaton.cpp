@@ -28,8 +28,8 @@
 #include <map>
 
 #include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/space.hpp"
 #include "function/function.hpp"
@@ -39,6 +39,8 @@
 #include "hybrid/hybrid_automaton.hpp"
 
 namespace Ariadne {
+
+using Helper::LinkedList;
 
 EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& algebraic);
 EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, List<DottedRealAssignment> const& differential);

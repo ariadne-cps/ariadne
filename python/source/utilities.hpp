@@ -31,14 +31,15 @@
 
 #include "pybind11.hpp"
 
-#include "utility/array.hpp"
+#include "helper/array.hpp"
 #include "utility/tuple.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 #include "utility/declarations.hpp"
 
 
-
 namespace Ariadne {
+
+using Helper::Array;
 
 template<class T> struct PythonClassName;
 template<class T> inline std::string python_class_name() { return PythonClassName<T>().get(); }
@@ -380,14 +381,14 @@ void export_array(pybind11::module& module, const char* name)
 namespace pybind11::detail {
 
 // The third template argument is 'true' if the array is resizable
-template <class T> struct type_caster<Ariadne::Array<T>>
-    : array_caster<Ariadne::Array<T>, T, Ariadne::DefaultConstructible<T>> { };
-template <class T> struct type_caster<Ariadne::List<T>>
-    : list_caster<Ariadne::List<T>, T> { };
-template <class T> struct type_caster<Ariadne::Set<T>>
-    : set_caster<Ariadne::Set<T>, T> { };
-template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
-    : map_caster<Ariadne::Map<K,V>, K,V> { };
+template <class T> struct type_caster<Helper::Array<T>>
+    : array_caster<Helper::Array<T>, T, Helper::DefaultConstructible<T>> { };
+template <class T> struct type_caster<Helper::List<T>>
+    : list_caster<Helper::List<T>, T> { };
+template <class T> struct type_caster<Helper::Set<T>>
+    : set_caster<Helper::Set<T>, T> { };
+template <class K, class V> struct type_caster<Helper::Map<K,V>>
+    : map_caster<Helper::Map<K,V>, K,V> { };
 } // namespace pybind11::detail
 
 

@@ -30,7 +30,7 @@
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
 #include "conclog/logging.hpp"
-#include "utility/container.hpp"
+#include "helper/container.hpp"
 
 #include "utility/declarations.hpp"
 #include "utility/tribool.hpp"

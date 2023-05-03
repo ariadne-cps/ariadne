@@ -32,13 +32,15 @@
 #include <memory>
 
 #include "utility/macros.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
+#include "helper/container.hpp"
 #include "function/function.hpp"
 #include "geometry/box.decl.hpp"
 #include "io/graphics_interface.hpp"
 
 namespace Ariadne {
 
+using Helper::Map;
 
 template<class X> class Vector;
 
@@ -173,7 +175,7 @@ class InterpolatedCurve
   private:
     friend OutputStream& operator<<(OutputStream&, const InterpolatedCurve&);
   private:
-    std::map< ParameterType, PointType > _points;
+    Map< ParameterType, PointType > _points;
 };
 
 inline

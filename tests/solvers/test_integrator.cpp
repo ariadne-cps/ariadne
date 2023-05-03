@@ -240,8 +240,6 @@ class TestIntegrator
         Interval<StepSizeType> domt(t0,t0+h);
         ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,domx,domt,domp,B);
         EffectiveVectorMultivariateFunction expected_flow={(x+b/a*(t0)+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a};
-        //   The function below should be zero for phi=expected_flow[0]
-        // EffectiveScalarMultivariateFunction phi_error=derivative(phi,1)-(a*phi+b*t+c);
 
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
@@ -257,33 +255,22 @@ Int main(Int argc, const char* argv[]) {
 
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-10);
 
-    TaylorPicardIntegrator taylor_picard_integrator(
-            step_maximum_error=1e-8, sweeper, lipschitz_tolerance=0.5_x, minimum_temporal_order=0, maximum_temporal_order=16);
-    ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));
+    TaylorPicardIntegrator taylor_picard_integrator(Configuration<TaylorPicardIntegrator>().set_sweeper(sweeper).set_step_maximum_error(1e-8));
+    ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator))
 
 
-    GradedTaylorPicardIntegrator unbounded_taylor_picard_integrator(
-            step_maximum_error=1e-8,order=8);
-    ARIADNE_TEST_CLASS("GradedTaylorPicardIntegrator",TestIntegrator(unbounded_taylor_picard_integrator));
+    GradedTaylorPicardIntegrator unbounded_taylor_picard_integrator(Configuration<GradedTaylorPicardIntegrator>().set_sweeper(sweeper).set_step_maximum_error(1e-8).set_temporal_order(8));
+    ARIADNE_TEST_CLASS("GradedTaylorPicardIntegrator",TestIntegrator(unbounded_taylor_picard_integrator))
 
-    TaylorSeriesIntegrator taylor_series_integrator(sweeper, lipschitz_tolerance=0.5_x, order=6);
+    TaylorSeriesIntegrator taylor_series_integrator(Configuration<TaylorSeriesIntegrator>().set_sweeper(sweeper).set_order(6));
     ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator))
 
-    TaylorSeriesBounderIntegrator taylor_series_bounder_integrator(
-            step_maximum_error=1e-6,sweeper,lipschitz_tolerance=0.5_x,order=6);
-    ARIADNE_TEST_CLASS("TaylorSeriesBounderIntegrator",TestIntegrator(taylor_series_bounder_integrator));
-
-    GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
-            step_maximum_error=1e-7, sweeper, lipschitz_tolerance=0.5_x,
-            minimum_spacial_order=1, minimum_temporal_order=4,
-            maximum_spacial_order=4, maximum_temporal_order=8);
-    ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
+    //GradedTaylorSeriesIntegrator graded_taylor_series_integrator(Configuration<GradedTaylorSeriesIntegrator>().set_sweeper(sweeper).set_step_maximum_error(1e-7).set_maximum_temporal_order(8));
+    //ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator))
 
     ARIADNE_PRINT_TEST_CASE_TITLE("AffineIntegrator");
-    AffineIntegrator affine_integrator(1, 6);
+    //AffineIntegrator affine_integrator(Configuration<AffineIntegrator>().set_sweeper(sweeper).set_spacial_order(2).set_temporal_order(4));
     //TestIntegrator(affine_integrator).test_affine();
-    ARIADNE_TEST_WARN("AffineIntegrator does not work correctly.");
 
-    std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

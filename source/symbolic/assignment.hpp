@@ -36,9 +36,8 @@
 
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "utility/functional.hpp"
-#include "utility/stlio.hpp"
+#include "helper/container.hpp"
+#include "helper/stlio.hpp"
 #include "utility/string.hpp"
 
 #include "numeric/numeric.hpp"
@@ -47,6 +46,8 @@
 #include "symbolic/expression.hpp"
 
 namespace Ariadne {
+
+using Helper::elementwise;
 
 class StateSpace;
 

@@ -33,11 +33,9 @@
 #include <iosfwd>
 #include <iostream>
 
+#include "utility/typedefs.hpp"
+
 namespace Ariadne {
-
-class String;
-
-template<class T> class Set;
 
 class Identifier;
 

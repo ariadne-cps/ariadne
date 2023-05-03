@@ -568,7 +568,7 @@ template<class IVL> Void HybridBoxes<IVL>::draw(CanvasInterface& canvas, const S
 
 template<class DS, class HBS>
 HybridSpaceSetConstIterator<DS,HBS>::
-HybridSpaceSetConstIterator(const std::map<DiscreteLocation,DS>& map, const HybridSpace& spc, Bool end)
+HybridSpaceSetConstIterator(const Map<DiscreteLocation,DS>& map, const HybridSpace& spc, Bool end)
     : _loc_begin(map.begin()),
       _loc_end(map.end()),
       _loc_iter(end?_loc_end:_loc_begin),

@@ -98,14 +98,17 @@ template<class T1, class T2> using Pair = std::pair<T1,T2>;
 //! Internal alias for standard tuple.
 template<class... TS> using Tuple = std::tuple<TS...>;
 
+//! A class for encoding comparisons for use in ordered containers.
+template<class T> class ContainerComparison;
+
 //! A class wrapper for C-style arrays.
 template<class T> class Array;
 //! A thin wrapper around a std::vector.
 template<class T> class List;
 //! A thin wrapper around a std::set.
-template<class T> class Set;
+template<class T, class CMP=ContainerComparison<T>> class Set;
 //! A thin wrapper around a std::map.
-template<class K, class T> class Map;
+template<class K, class T, class CMP=ContainerComparison<K>> class Map;
 
 //! A tag for the size of a scalar object.
 struct SizeOne { operator SizeType() const { return 1u; } };

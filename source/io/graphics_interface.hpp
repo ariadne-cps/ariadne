@@ -37,7 +37,7 @@
 namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A&);
-template<class T> class Set;
+template<class T, class CMP> class Set;
 
 struct Vector2d;
 struct Point2d;
@@ -151,10 +151,10 @@ class CanvasInterface {
     virtual Void set_fill_colour(double r, double g, double b) = 0;
 
     //! \brief Set the colour palette.
-    virtual Void set_colour_palette() = 0;  
+    virtual Void set_colour_palette() = 0;
     //! \brief Draw and fill a 3d image.
     virtual Void fill_3d() = 0;
-      //! \brief Set a heatmap projection. 
+      //! \brief Set a heatmap projection.
     virtual Void set_heat_map(Bool b) = 0;
   public:
     template<class X, class Y> Void move_to(X x, Y y) { this->move_to(numeric_cast<double>(x),numeric_cast<double>(y)); }
@@ -183,7 +183,7 @@ class Drawable2d3dInterface : public Drawable2dInterface {
     virtual Drawable2d3dInterface* clone2d3d() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual Void draw(CanvasInterface& c, const Projection3d& p) const = 0;
-    using Drawable2dInterface::draw;	
+    using Drawable2dInterface::draw;
 };
 
 //! \ingroup GraphicsModule

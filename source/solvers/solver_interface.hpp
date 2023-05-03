@@ -39,7 +39,21 @@
 using namespace ConcLog;
 
 namespace Ariadne {
-template<class T> class Set;
+
+
+template<class X> class ContainerComparison<Vector<X>> {
+  public:
+    bool operator() (const Vector<X>& v1, const Vector<X>& v2) const {
+        if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
+        for(SizeType i=0; i!=v1.size(); ++i) {
+            if(decide(v1[i]<v2[i])) { return true; }
+            else if(decide(v1[i]>v2[i])) { return false; }
+        }
+        return false;
+    }
+};
+
+template<class T, class CMP> class Set;
 template<class T> class List;
 
 class SolverInterface;

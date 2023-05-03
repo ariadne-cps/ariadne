@@ -65,8 +65,10 @@ class SolverWrapper
         return this->get_override("implicit")(f,pd,ivl); }
     ValidatedVectorMultivariateFunctionPatch continuation(const ValidatedVectorMultivariateFunction& f, const Vector< ApproximateNumericType>& a, const ExactBoxType& X,  const ExactBoxType& A) const {
         return this->get_override("continuation")(f,a,X,A); }
-    Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
-        return this->get_override("solve_all")(f,bx); }
+    List< Vector<ValidatedNumericType> > list_solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+        Set< Vector<ValidatedNumericType> > set = this->get_override("solve_all")(f,bx);
+        return make_list(set);
+    }
     Void _write(OutputStream& os) const { this->get_override("_write")(os); }
 };
 
@@ -95,7 +97,7 @@ Void export_solvers(pybind11::module& module)
     solver_interface_class.def("solve", (Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve);
     solver_interface_class.def("implicit",(ValidatedVectorMultivariateFunctionPatch(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit);
     solver_interface_class.def("implicit",(ValidatedScalarMultivariateFunctionPatch(SolverInterface::*)(const ValidatedScalarMultivariateFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit);
-    solver_interface_class.def("solve_all",(Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve_all);
+    solver_interface_class.def("solve_all",[](SolverInterface const& s, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx){ return static_cast< List<Vector<ValidatedNumericType>> >( s.solve_all(f,bx) );});
     solver_interface_class.def("__str__",&__cstr__<SolverInterface>);
 
     pybind11::class_<IntervalNewtonSolver, SolverInterface> interval_newton_solver_class(module,"IntervalNewtonSolver");

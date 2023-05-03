@@ -512,7 +512,7 @@ class HybridSpaceSetConstIterator
   public:
     typedef HBS const& Reference;
   public:
-    HybridSpaceSetConstIterator(const std::map<DiscreteLocation,DS>&, const HybridSpace& hspc, Bool);
+    HybridSpaceSetConstIterator(const Map<DiscreteLocation,DS>&, const HybridSpace& hspc, Bool);
     Bool equal(const HybridSpaceSetConstIterator<DS,HBS>&) const;
     const HBS& dereference() const;
     Void increment();

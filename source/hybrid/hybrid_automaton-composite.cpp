@@ -548,11 +548,6 @@ List< Variable<Tp> > base(const List< Dec<Tp> >& variables) {
     return result;
 }
 
-template<class T>
-Set<T> make_set(const List<T>& list) {
-    return Set<T>(list.begin(),list.end());
-}
-
 template<class Var>
 Bool unique(const List<Var>& variables) {
     Set<Var> found;

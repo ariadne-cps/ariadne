@@ -50,7 +50,6 @@
 
 namespace Ariadne {
 
-template<class T> class Set;
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 

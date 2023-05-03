@@ -97,13 +97,18 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
     CONCLOG_SCOPE_CREATE
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
-    WorkloadType workload([time](TimedEnclosureType const& timed_enclosure, SharedPointer<ProgressIndicator> indicator){
-                                indicator->update_current(timed_enclosure.first.get_d());
-                                indicator->update_final(time.get_d());
-                              },
-                          std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
-    _append_initial_set(workload,TimeStepType(0u),initial_set);
-    workload.process();
+
+    try {
+        WorkloadType workload([time](TimedEnclosureType const& timed_enclosure, SharedPointer<ProgressIndicator> indicator){
+                                    indicator->update_current(timed_enclosure.first.get_d());
+                                    indicator->update_final(time.get_d());
+                                  },
+                              std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
+        _append_initial_set(workload,TimeStepType(0u),initial_set);
+        workload.process();
+    } catch (pExplore::NoActiveConstraintsException<VectorFieldEvolver>*) {
+        CONCLOG_PRINTLN("Terminated early due to no active constraints, returning partial orbit.")
+    }
 
     return std::move(*result);
 }

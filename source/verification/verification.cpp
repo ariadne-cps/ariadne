@@ -29,6 +29,7 @@
 #include "helper/stopwatch.hpp"
 #include "helper/container.hpp"
 #include "pexplore/task_runner.tpl.hpp"
+#include "pexplore/robustness_controller.hpp"
 #include "verification.hpp"
 
 namespace Ariadne {
@@ -43,6 +44,7 @@ using pExplore::ConstraintSuccessAction;
 using pExplore::ConstraintFailureKind;
 using pExplore::TaskInput;
 using pExplore::TaskOutput;
+using pExplore::TimeProgressLinearRobustnessController;
 using ConstraintIndexType = size_t;
 
 EvaluationSequence::EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
@@ -303,7 +305,9 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
             auto v_approx = evaluation.near(o.time.get_d());
             auto alpha = evaluation.usage(m).alpha;
             return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
-        }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT).build()
+        }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT)
+          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
+          .build()
         );
         result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
             if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)

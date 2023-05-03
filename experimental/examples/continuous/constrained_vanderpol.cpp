@@ -39,14 +39,20 @@ void ariadne_main()
     RealConstant ymin("ymin",-3.0_x);
     RealConstant xmin("xmin",-1.0_x);
     RealConstant xmax("xmax",2.1_x);
-    RealConstant rsqr("r^2",2.0_x);
+    RealConstant rsqr("r^2",2.5_x);
     List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
 
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
-            set_both_enable_reconditioning().
-            set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>().set_step_maximum_error(1e-6,1e-5))).
-            set_maximum_step_size(0.005,1.0);
+            set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>()
+                    .set_step_maximum_error(1e-6,1e-4)
+                    .set_sweeper({ThresholdSweeperDP(dp,1e-9),ThresholdSweeperDP(dp,1e-8),ThresholdSweeperDP(dp,1e-7)})
+                    .set_minimum_temporal_order(0,6)
+                    .set_maximum_temporal_order(6,12)
+                    .set_lipschitz_tolerance(0.01,0.5)
+                    )).
+            set_maximum_step_size(0.01,1.0);
+
     CONCLOG_PRINTLN_VAR(configuration)
     CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space())
 
@@ -74,6 +80,8 @@ void ariadne_main()
     for (auto const& b : best_scores) {
         CONCLOG_PRINTLN_AT(2,b)
     }
+
+    CONCLOG_PRINTLN_AT(1,"Optimal point: " << pExplore::TaskManager::instance().optimal_point())
 
     LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
     CONCLOG_PRINTLN("Plotting...")

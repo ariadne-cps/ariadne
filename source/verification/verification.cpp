@@ -47,26 +47,26 @@ using pExplore::TaskOutput;
 using pExplore::TimeProgressLinearRobustnessController;
 using ConstraintIndexType = size_t;
 
-EvaluationSequence::EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
+EvaluationSequence::EvaluationSequence(List<TimedMeasurement> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
 
 size_t EvaluationSequence::number_of_constraints() const { return _prescriptions.size(); }
 
-TimedVolume const& EvaluationSequence::at(size_t idx) const { return _sequence.at(idx); }
+TimedMeasurement const& EvaluationSequence::at(size_t idx) const { return _sequence.at(idx); }
 
-double const& EvaluationSequence::near(double time) const {
+TimedMeasurement const& EvaluationSequence::near(double time) const {
     size_t lower = 0;
     size_t upper = size()-1;
 
-    if (_sequence.at(lower).time >= time) return _sequence.at(lower).volume;
-    if (_sequence.at(upper).time <= time) return _sequence.at(upper).volume;
+    if (_sequence.at(lower).time >= time) return _sequence.at(lower);
+    if (_sequence.at(upper).time <= time) return _sequence.at(upper);
 
     while (upper - lower > 1) {
         auto mid = (lower+upper)/2;
         if (_sequence.at(mid).time < time) lower = mid;
         else upper = mid;
     }
-    if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper).volume;
-    else return _sequence.at(lower).volume;
+    if (time - _sequence.at(lower).time > _sequence.at(upper).time - time) return _sequence.at(upper);
+    else return _sequence.at(lower);
 }
 
 HardConstraintPrescription const& EvaluationSequence::usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
@@ -129,15 +129,16 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
         }
     }
 
-    List<TimedVolume> timed_volumes;
+    List<TimedMeasurement> timed_volumes;
 
     double v0 = volume(_timed_box_evaluations.at(0).box);
-    timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0});
+    timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0,0.0});
 
     Vector<double> alpha(_M, std::numeric_limits<double>::max());
     for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
         auto const& tbe = _timed_box_evaluations.at(i);
         double v = volume(tbe.box);
+        double B = timed_volumes.at(i-1).accumulated_reach_volume + (timed_volumes.at(i-1).section_volume)*(tbe.time-timed_volumes.at(i-1).time);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
@@ -149,7 +150,7 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
                 }
             }
         }
-        timed_volumes.push_back({tbe.time,v});
+        timed_volumes.push_back({tbe.time,v,B});
     }
 
     Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
@@ -301,10 +302,11 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
 
     for (ConstraintIndexType m=0; m<evaluation.number_of_constraints(); ++m) {
         result.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
-            auto v0 = evaluation.at(0).volume;
-            auto v_approx = evaluation.near(o.time.get_d());
+            auto near_evaluation = evaluation.near(o.time.get_d());
+            auto const& v = near_evaluation.section_volume;
+            auto const& B_approx = near_evaluation.accumulated_reach_volume;
             auto alpha = evaluation.usage(m).alpha;
-            return (alpha+1)*v_approx - alpha*v0 - o.evolve.euclidean_set().bounding_box().volume().get_d();
+            return alpha*B_approx + v - o.evolve.euclidean_set().bounding_box().volume().get_d();
         }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT)
           .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
           .build()

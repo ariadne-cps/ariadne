@@ -93,11 +93,12 @@ struct HardConstraintPrescription {
   friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
-struct TimedVolume {
-  TimedVolume(double time_, double volume_) : time(time_), volume(volume_) { }
+struct TimedMeasurement {
+  TimedMeasurement(double time_, double section_volume_, double accumulated_reach_volume_) : time(time_), section_volume(section_volume_), accumulated_reach_volume(accumulated_reach_volume_) { }
   double time;
-  double volume;
-  friend ostream& operator<<(ostream& os, TimedVolume const& tv) { return os << tv.time << ":" << tv.volume; }
+  double section_volume;
+  double accumulated_reach_volume;
+  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": section " << tm.section_volume << ", accumulated reach " << tm.accumulated_reach_volume; }
 };
 
 class EvaluationSequenceBuilder;
@@ -105,17 +106,17 @@ class EvaluationSequenceBuilder;
 class EvaluationSequence {
     friend class EvaluationSequenceBuilder;
   protected:
-    EvaluationSequence(List<TimedVolume> const& tv, Vector<HardConstraintPrescription> const& usages);
+    EvaluationSequence(List<TimedMeasurement> const& tv, Vector<HardConstraintPrescription> const& usages);
   public:
 
     //! \brief The number of constraints inserted during creation
     size_t number_of_constraints() const;
 
-    //! \brief timed volume accessor by index
-    TimedVolume const& at(size_t idx) const;
+    //! \brief Timed measurement accessor by index
+    TimedMeasurement const& at(size_t idx) const;
 
-    //! \brief Get the volume with time closest to \a time
-    double const& near(double time) const;
+    //! \brief Get the time measurement with time closest to \a time
+    TimedMeasurement const& near(double time) const;
 
     //! \brief The usage given the constraint index \a idx
     HardConstraintPrescription const& usage(ConstraintIndexType idx) const;
@@ -126,7 +127,7 @@ class EvaluationSequence {
     friend ostream& operator<<(ostream& os, EvaluationSequence const& es);
 
   private:
-    List<TimedVolume> _sequence;
+    List<TimedMeasurement> _sequence;
     Vector<HardConstraintPrescription> _prescriptions;
 };
 

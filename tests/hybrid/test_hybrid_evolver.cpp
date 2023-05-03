@@ -69,7 +69,7 @@ class TestHybridEvolver
     static Real zero,one;
   private:
     string evolver_name;
-    std::shared_ptr<GradedTaylorSeriesIntegrator> evolver_integrator;
+    GradedTaylorSeriesIntegrator const evolver_integrator;
     mutable std::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
@@ -109,14 +109,14 @@ TestHybridEvolver::TestHybridEvolver(
         const string ev_name,
         const GradedTaylorSeriesIntegrator& ev_integrator)
     : evolver_name(ev_name)
-    , evolver_integrator(ev_integrator.clone())
+    , evolver_integrator(ev_integrator)
 {
 }
 
 Void TestHybridEvolver::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver_ptr.reset(new GeneralHybridEvolver(system));
-    evolver_ptr->set_integrator(*evolver_integrator);
+    evolver_ptr->set_integrator(evolver_integrator);
 }
 
 Void TestHybridEvolver::test_all() const {
@@ -901,7 +901,7 @@ Int main(Int argc, const char* argv[])
 {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
-    GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
+    GradedTaylorSeriesIntegrator evolver_integrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-3));
     ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_integrator).test_all());
 
     std::cerr<<"INCOMPLETE ";

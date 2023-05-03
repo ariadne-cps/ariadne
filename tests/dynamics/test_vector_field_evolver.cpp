@@ -73,15 +73,10 @@ public:
 
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
-        // Set up the evaluators
-        TaylorPicardIntegrator picard_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_tolerance = 0.5_x,
-                                                 minimum_temporal_order = 0, maximum_temporal_order = 8);
-        // Set up the evaluators
-        GradedTaylorSeriesIntegrator series_integrator(step_maximum_error = 1e-7_pr, sweeper, lipschitz_tolerance = 0.5_x,
-                                                       minimum_spacial_order = 1, minimum_temporal_order = 4,
-                                                       maximum_spacial_order = 3, maximum_temporal_order = 8);
-
-        IntegratorInterface &integrator = picard_integrator;
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                                 .set_step_maximum_error(1e-7)
+                                                 .set_sweeper(sweeper)
+                                                 .set_maximum_temporal_order(8));
 
         ARIADNE_TEST_PRINT(integrator);
 
@@ -96,9 +91,10 @@ public:
 
         auto configuration = Configuration<VectorFieldEvolver>().
                 set_maximum_enclosure_radius(enclosure_radius).
-                set_maximum_step_size(step_size);
+                set_maximum_step_size(step_size).
+                set_integrator(integrator);
         ARIADNE_TEST_PRINT(configuration)
-        VectorFieldEvolver evolver(vanderpol, configuration, integrator);
+        VectorFieldEvolver evolver(vanderpol, configuration);
 
         LabelledFigure fig(Axes2d(-2.25 <= x <= +2.25, -2.25 <= v <= +2.25));
 
@@ -139,17 +135,21 @@ public:
 
         ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
 
-        // Set up the evaluators
-        TaylorPicardIntegrator integrator(step_maximum_error = 1e-6_pr, sweeper, lipschitz_tolerance = 0.5_x,
-                                          minimum_temporal_order = 0, maximum_temporal_order = 8);
+
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                                         .set_step_maximum_error(1e-6)
+                                                         .set_sweeper(sweeper)
+                                                         .set_maximum_temporal_order(8));
+
 
         VectorField fail_vf({dot(x)=1,dot(y)=y*y*100});
 
-        auto configuration = Configuration<VectorFieldEvolver>().
-                set_maximum_enclosure_radius(enclosure_radius).
-                set_maximum_step_size(maximum_step_size);
+        auto configuration = Configuration<VectorFieldEvolver>()
+                .set_maximum_enclosure_radius(enclosure_radius)
+                .set_maximum_step_size(maximum_step_size)
+                .set_integrator(integrator);
 
-        VectorFieldEvolver evolver(fail_vf, configuration, integrator);
+        VectorFieldEvolver evolver(fail_vf, configuration);
 
         RealVariablesBox initial_box({x==0,y==1});
 
@@ -166,17 +166,17 @@ public:
 
         VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
-        StepMaximumError max_err=1e-8;
-
-        TaylorPicardIntegrator integrator(max_err);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                                  .set_step_maximum_error(1e-8));
 
         auto configuration = Configuration<VectorFieldEvolver>().
                 set_maximum_enclosure_radius(0.1).
                 set_maximum_step_size(0.1).
                 set_maximum_spacial_error(1e-5).
-                set_enable_subdivisions(true);
+                set_enable_subdivisions(true).
+                set_integrator(integrator);
 
-        VectorFieldEvolver evolver(dynamics,configuration,integrator);
+        VectorFieldEvolver evolver(dynamics,configuration);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);
@@ -198,17 +198,17 @@ public:
 
         VectorField dynamics({dot(x)=1, dot(y)= sqr(x)});
 
-        StepMaximumError max_err=1e-8;
-
-        TaylorPicardIntegrator integrator(max_err);
+        TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
+                                                  .set_step_maximum_error(1e-8));
 
         auto configuration = Configuration<VectorFieldEvolver>().
                 set_maximum_enclosure_radius(0.1).
                 set_maximum_step_size(0.1).
                 set_maximum_spacial_error(1e-5).
-                set_enable_subdivisions(true);
+                set_enable_subdivisions(true).
+                set_integrator(integrator);
 
-        VectorFieldEvolver evolver(dynamics,configuration,integrator);
+        VectorFieldEvolver evolver(dynamics,configuration);
 
         Real x0(1.40_dec);
         Real y0(2.40_dec);

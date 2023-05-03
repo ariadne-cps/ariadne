@@ -36,7 +36,14 @@
 #include "solvers/integrator.hpp"
 #include "solvers/runge_kutta_integrator.hpp"
 
+#include "pronest/configuration_interface.hpp"
+#include "pronest/configurable.hpp"
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+#include "pexplore/task_runner_interface.hpp"
+
 using namespace Ariadne;
+using pExplore::TaskRunnable;
 
 namespace Ariadne {
 
@@ -109,7 +116,24 @@ Void export_solvers(pybind11::module& module)
 
 }
 
+template<class I> Void export_configurable_integrator(pybind11::module& module, const char* name)
+{
+    pybind11::class_<I,pybind11::bases<IntegratorInterface>> integrator_class(module,name);
+    integrator_class.def(pybind11::init<Configuration<I>>());
+    integrator_class.def("configuration",&I::configuration);
+}
 
+Void export_configurable_integrator_configurations(pybind11::module& module) {
+
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
+    using pybind11::overload_cast;
+
+    pybind11::class_<Configuration<TaylorPicardIntegrator>> taylor_picard_integrator_configuration_class(module,"TaylorPicardIntegratorConfiguration");
+    taylor_picard_integrator_configuration_class.def("set_step_maximum_error", overload_cast<double const&>(&Configuration<TaylorPicardIntegrator>::set_step_maximum_error),reference_internal);
+    taylor_picard_integrator_configuration_class.def("set_minimum_temporal_order", overload_cast<DegreeType const&>(&Configuration<TaylorPicardIntegrator>::set_minimum_temporal_order),reference_internal);
+    taylor_picard_integrator_configuration_class.def("set_maximum_temporal_order", overload_cast<DegreeType const&>(&Configuration<TaylorPicardIntegrator>::set_maximum_temporal_order),reference_internal);
+    taylor_picard_integrator_configuration_class.def("__repr__",&__cstr__<Configuration<TaylorPicardIntegrator>>);
+}
 
 Void export_integrators(pybind11::module& module)
 {
@@ -131,37 +155,11 @@ Void export_integrators(pybind11::module& module)
     integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
-    pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
-    taylor_picard_integrator_class.def(pybind11::init<ApproximateDouble>());
-    taylor_picard_integrator_class.def("minimum_temporal_order",&TaylorPicardIntegrator::minimum_temporal_order);
-    taylor_picard_integrator_class.def("maximum_temporal_order",&TaylorPicardIntegrator::maximum_temporal_order);
-    taylor_picard_integrator_class.def("step_maximum_error",&TaylorPicardIntegrator::step_maximum_error);
-    taylor_picard_integrator_class.def("set_minimum_temporal_order",&TaylorPicardIntegrator::set_minimum_temporal_order);
-    taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
-    taylor_picard_integrator_class.def("set_step_maximum_error",&TaylorPicardIntegrator::set_step_maximum_error);
-
-    pybind11::class_<GradedTaylorPicardIntegrator,IntegratorInterface> unbounded_taylor_picard_integrator_class(module, "GradedTaylorPicardIntegrator");
-    unbounded_taylor_picard_integrator_class.def(pybind11::init<ApproximateDouble,Order>());
-    unbounded_taylor_picard_integrator_class.def("order",&GradedTaylorPicardIntegrator::order);
-    unbounded_taylor_picard_integrator_class.def("step_maximum_error",&GradedTaylorPicardIntegrator::step_maximum_error);
-    unbounded_taylor_picard_integrator_class.def("error_refinement_minimum_improvement_percentage",&GradedTaylorPicardIntegrator::error_refinement_minimum_improvement_percentage);
-    unbounded_taylor_picard_integrator_class.def("set_order",&GradedTaylorPicardIntegrator::set_order);
-    unbounded_taylor_picard_integrator_class.def("set_step_maximum_error",&GradedTaylorPicardIntegrator::set_step_maximum_error);
-    unbounded_taylor_picard_integrator_class.def("set_error_refinement_minimum_improvement_percentage",&GradedTaylorPicardIntegrator::set_error_refinement_minimum_improvement_percentage);
-
-    pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
-    taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());
-    taylor_series_integrator_class.def("order",&TaylorSeriesIntegrator::order);
-    taylor_series_integrator_class.def("set_order",&TaylorSeriesIntegrator::set_order);
-
-    pybind11::class_<GradedTaylorSeriesIntegrator,IntegratorInterface> graded_taylor_series_integrator_class(module,"GradedTaylorSeriesIntegrator");
-    graded_taylor_series_integrator_class.def(pybind11::init<ApproximateDouble>());
-    graded_taylor_series_integrator_class.def("maximum_spacial_order",&GradedTaylorSeriesIntegrator::maximum_spacial_order);
-    graded_taylor_series_integrator_class.def("maximum_temporal_order",&GradedTaylorSeriesIntegrator::maximum_temporal_order);
-    graded_taylor_series_integrator_class.def("step_maximum_error",&GradedTaylorSeriesIntegrator::step_maximum_error);
-    graded_taylor_series_integrator_class.def("set_maximum_spacial_order",&GradedTaylorSeriesIntegrator::set_maximum_spacial_order);
-    graded_taylor_series_integrator_class.def("set_maximum_temporal_order",&GradedTaylorSeriesIntegrator::set_maximum_temporal_order);
-    graded_taylor_series_integrator_class.def("set_step_maximum_error",&GradedTaylorSeriesIntegrator::set_step_maximum_error);
+    export_configurable_integrator<TaylorPicardIntegrator>(module,"TaylorPicardIntegrator");
+    export_configurable_integrator<GradedTaylorPicardIntegrator>(module,"GradedTaylorPicardIntegrator");
+    export_configurable_integrator<TaylorSeriesIntegrator>(module,"TaylorSeriesIntegrator");
+    export_configurable_integrator<GradedTaylorSeriesIntegrator>(module,"GradedTaylorSeriesIntegrator");
+    export_configurable_integrator<AffineIntegrator>(module,"AffineIntegrator");
 
     pybind11::class_<RungeKutta4Integrator> runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
     runge_kutta_4_integrator_class.def(pybind11::init<ApproximateDouble>());
@@ -173,6 +171,7 @@ Void export_integrators(pybind11::module& module)
 Void solver_submodule(pybind11::module& module)
 {
     export_solvers(module);
+    export_configurable_integrator_configurations(module);
     export_integrators(module);
 }
 

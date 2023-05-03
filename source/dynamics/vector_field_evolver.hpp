@@ -40,7 +40,7 @@
 #include "dynamics/vector_field.hpp"
 #include "function/function_interface.hpp"
 #include "solvers/configuration_interface.hpp"
-#include "solvers/integrator_interface.hpp"
+#include "solvers/integrator.hpp"
 #include "dynamics/evolver_interface.hpp"
 
 #include "betterthreads/workload.hpp"
@@ -156,6 +156,7 @@ using Ariadne::ExactDouble;
 using Ariadne::ApproximateDouble;
 using Ariadne::Bool;
 using Ariadne::IntegratorInterface;
+using Ariadne::TaylorPicardIntegrator;
 using ProNest::RangeConfigurationProperty;
 
 
@@ -165,7 +166,6 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     typedef double RealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef InterfaceListConfigurationProperty<IntegratorInterface> IntegratorProperty;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
 
     Configuration() {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));

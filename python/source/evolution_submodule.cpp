@@ -242,7 +242,7 @@ Void evolution_submodule(pybind11::module& module)
     export_vector_field_evolver_configuration(module);
 
     export_evolver<IteratedMapEvolver, IteratedMap>(module, "IteratedMapEvolver");
-    export_runnable_evolver<VectorFieldEvolver, VectorField, Configuration<VectorFieldEvolver>, IntegratorInterface const&>(module,"VectorFieldEvolver");
+    export_runnable_evolver<VectorFieldEvolver, VectorField, Configuration<VectorFieldEvolver>>(module,"VectorFieldEvolver");
 
     export_safety_certificate<ContinuousReachabilityAnalyser>(module,"SafetyCertificate");
     export_reachability_analyser<ContinuousReachabilityAnalyser,VectorFieldEvolver>(module,"ContinuousReachabilityAnalyser");

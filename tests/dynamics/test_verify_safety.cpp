@@ -98,9 +98,9 @@ class TestVerifySafety
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        GradedTaylorSeriesIntegrator integrator(StepMaximumError(1e-2_pr));
+        GradedTaylorSeriesIntegrator integrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-2));
 
-        EvolverType evolver(system,Configuration<EvolverType>(),integrator);
+        EvolverType evolver(system,Configuration<EvolverType>().set_integrator(integrator));
 
         AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_fineness(3);

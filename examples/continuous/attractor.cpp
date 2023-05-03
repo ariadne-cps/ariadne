@@ -55,12 +55,15 @@ void ariadne_main()
     g << orbit;
     g.write("attractor_simulation");
 
-    AffineIntegrator affine_integrator(2,1);
+    auto evolver_configuration = Configuration<VectorFieldEvolver>()
+            .set_maximum_step_size(0.1)
+            .set_maximum_spacial_error(1e-2);
+
+    AffineIntegrator affine_integrator(Configuration<AffineIntegrator>().set_spacial_order(2).set_temporal_order(1));
+    evolver_configuration.set_integrator(affine_integrator);
+
     CONCLOG_PRINTLN("Evolving with affine integrator...")
-    Configuration<VectorFieldEvolver> configuration;
-    configuration.set_maximum_step_size(0.1);
-    configuration.set_maximum_spacial_error(1e-2);
-    VectorFieldEvolver affine_evolver(system,configuration,affine_integrator);
+    VectorFieldEvolver affine_evolver(system,evolver_configuration);
     sw.restart();
     auto affine_evolver_orbit = affine_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
@@ -69,9 +72,11 @@ void ariadne_main()
     g << affine_evolver_orbit;
     g.write("attractor_evolution_affine");
 
-    GradedTaylorSeriesIntegrator nonlinear_integrator(0.001);
+    GradedTaylorSeriesIntegrator nonlinear_integrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-7));
+    evolver_configuration.set_integrator(nonlinear_integrator);
+
     CONCLOG_PRINTLN("Evolving with nonlinear integrator...")
-    VectorFieldEvolver nonlinear_evolver(system,configuration,nonlinear_integrator);
+    VectorFieldEvolver nonlinear_evolver(system,evolver_configuration);
     sw.restart();
     auto nonlinear_evolver_orbit = nonlinear_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();

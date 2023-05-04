@@ -42,6 +42,8 @@ void ariadne_main()
     RealConstant rsqr("r^2",2.5_x);
     List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
 
+    CONCLOG_PRINTLN("Constraints: " << constraints)
+
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
             set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>()
@@ -51,10 +53,11 @@ void ariadne_main()
                     .set_maximum_temporal_order(6,12)
                     .set_lipschitz_tolerance(0.01,0.5)
                     )).
-            set_maximum_step_size(0.01,1.0);
+            set_maximum_step_size(0.005,1.0);
 
     CONCLOG_PRINTLN_VAR(configuration)
     CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space())
+    CONCLOG_PRINTLN_AT(1,"Total points: " << configuration.search_space().total_points())
 
     Real x0 = 1.40_dec;
     Real y0 = 2.40_dec;

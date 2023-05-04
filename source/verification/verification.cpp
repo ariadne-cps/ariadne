@@ -369,7 +369,6 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
     CONCLOG_PRINTLN("Processing approximate evolution for constraints... ")
 
     auto h = to_function(constraints, dynamics.state_space());
-    CONCLOG_PRINTLN_VAR(h)
 
     auto analysis = evaluate_approximate_orbit(approximate_orbit, h);
 

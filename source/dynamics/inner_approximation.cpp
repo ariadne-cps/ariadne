@@ -369,7 +369,7 @@ NonlinearCandidateValidationInnerApproximator::NonlinearCandidateValidationInner
     InnerApproximatorBase(contractor), _max_rounds(max_rounds) { }
 
 LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(LabelledEnclosure const& outer) const {
-
+    CONCLOG_SCOPE_CREATE
     auto reconditioned_outer = outer;
     reconditioned_outer.uniform_error_recondition();
     auto const& outer_function = reconditioned_outer.state_function();

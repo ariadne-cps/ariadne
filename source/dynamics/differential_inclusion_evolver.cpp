@@ -34,7 +34,11 @@
 #include "enclosure.hpp"
 #include "orbit.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+
 namespace Ariadne {
+
+using ProNest::Configuration;
 
 inline ValidatedVectorMultivariateTaylorFunctionModelDP compose(ValidatedVectorMultivariateFunctionPatch const& g, ValidatedVectorMultivariateTaylorFunctionModelDP const& f) {
     return compose(cast_unrestricted(g),f);
@@ -183,10 +187,11 @@ inline Map<InclusionIntegrator,ApproximateDouble> convert_to_percentages(Map<Inc
     return result;
 }
 
-DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
+DifferentialInclusionEvolver::DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner, BounderInterface const& bounder)
     : _system(system)
     , _integrator(integrator.clone())
     , _reconditioner(reconditioner)
+    , _bounder(bounder.clone())
     , _configuration(new ConfigurationType())
 {
     ARIADNE_PRECONDITION(system.inputs().size() > 0);
@@ -213,8 +218,6 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
     auto initial_box = initial_ranges_to_box(initial);
 
     StepSizeType hsug(_configuration->maximum_step_size());
-
-    EulerBounder bounder;
 
     auto function_factory = TaylorFunctionFactory(static_cast<IntegratorBase const&>(*this->_integrator).configuration().sweeper());
 
@@ -252,7 +255,7 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         UpperBoxType B;
         StepSizeType h;
 
-        CONCLOG_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),hsug));
+        CONCLOG_RUN_AT(1,std::tie(h,B)=_bounder->compute(_system.function(),domx,_system.inputs(),hsug));
         CONCLOG_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
 
         TimeStepType new_t = lower_bound(t+h);

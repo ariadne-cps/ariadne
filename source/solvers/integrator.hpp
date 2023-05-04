@@ -51,9 +51,7 @@
 #include "pronest/searchable_configuration.hpp"
 #include "pronest/configurable.hpp"
 #include "pronest/configuration_interface.hpp"
-#include "pronest/configurable.tpl.hpp"
 #include "pronest/configuration_property.hpp"
-#include "pronest/configuration_property.tpl.hpp"
 
 using namespace ConcLog;
 
@@ -368,8 +366,6 @@ template<> struct Configuration<IntegratorBase> : public SearchableConfiguration
     }
 
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
-    C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
-    C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 };
 
 template<> struct Configuration<BoundedIntegratorBase> : public Configuration<IntegratorBase> {
@@ -380,13 +376,8 @@ public:
     typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
 
     Configuration() {
-        add_property("lipschitz_tolerance",RealTypeProperty(0.5,Log2SearchSpaceConverter<RealType>()));
-        add_property("bounder",BounderProperty(EulerBounder()));
+        add_property("bounder",BounderProperty(EulerBounder(Configuration<EulerBounder>())));
     }
-
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
 
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
@@ -397,7 +388,6 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<B
     typedef double RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
     typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
@@ -428,12 +418,6 @@ template<> struct Configuration<TaylorPicardIntegrator> : public Configuration<B
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
     C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
-
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
-    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
 
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
@@ -492,12 +476,6 @@ template<> struct Configuration<GradedTaylorSeriesIntegrator> : public Configura
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
     C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
 
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
-    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
-
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
     C& set_bounder(BounderInterface const& bounder) { at<BounderProperty>("bounder").set(bounder); return *this; }
@@ -510,7 +488,6 @@ template<> struct Configuration<GradedTaylorPicardIntegrator> : public Configura
     typedef double RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
@@ -540,12 +517,6 @@ template<> struct Configuration<GradedTaylorPicardIntegrator> : public Configura
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
     C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
-
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
-    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
 };
 
 template<> struct Configuration<TaylorSeriesIntegrator> : public Configuration<BoundedIntegratorBase> {
@@ -554,7 +525,6 @@ template<> struct Configuration<TaylorSeriesIntegrator> : public Configuration<B
     typedef double RealType;
     typedef RangeConfigurationProperty<DegreeType> DegreeTypeProperty;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
-    typedef InterfaceListConfigurationProperty<ValidatedFunctionPatchFactoryInterface> FunctionFactoryProperty;
     typedef InterfaceListConfigurationProperty<BounderInterface> BounderProperty;
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
@@ -567,18 +537,12 @@ template<> struct Configuration<TaylorSeriesIntegrator> : public Configuration<B
     C& set_order(DegreeType const& value) { at<DegreeTypeProperty>("order").set(value); return *this; }
     C& set_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("order").set(lower,upper); return *this; }
 
-    //! Base properties
+    //! Inherited properties
 
     //! \brief The sweeper to be used when creating a flow function.
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
     C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
-
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
-    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
 
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }
@@ -605,18 +569,12 @@ template<> struct Configuration<AffineIntegrator> : public Configuration<Bounded
     C& set_temporal_order(DegreeType const& value) { at<DegreeTypeProperty>("temporal_order").set(value); return *this; }
     C& set_temporal_order(DegreeType const& lower, DegreeType const& upper) { at<DegreeTypeProperty>("temporal_order").set(lower,upper); return *this; }
 
-    //! Base properties
+    //! Inherited properties
 
     //! \brief The sweeper to be used when creating a flow function.
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }
     C& set_sweeper(Sweeper<FloatDP> const& sweeper) { at<SweeperProperty>("sweeper").set(sweeper); return *this; }
     C& set_sweeper(List<Sweeper<FloatDP>> const& sweepers) { at<SweeperProperty>("sweeper").set(sweepers); return *this; }
-
-    //! \brief The fraction L(f)*h used for a time step.
-    //! \details The convergence of the Picard iteration is approximately Lf*h.
-    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
-    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
-    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
 
     //! \brief The bounder to be used.
     BounderInterface const& bounder() const { return at<BounderProperty>("bounder").get(); }

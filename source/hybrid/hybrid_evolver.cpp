@@ -40,6 +40,9 @@
 #include "solvers/integrator.hpp"
 #include "solvers/solver.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 #include "hybrid/hybrid_evolver.hpp"
 
 namespace {

@@ -26,10 +26,13 @@
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 namespace Ariadne {
 
-BounderBase::BounderBase(LipschitzTolerance lipschitz, MinimumStepSize minimum_step)
-    : _lipschitz_tolerance(lipschitz), _minimum_step_size(minimum_step) { }
+BounderBase::BounderBase(Configuration<BounderBase> const& config)
+    : Configurable<BounderBase>(config) { }
 
 Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const {
     return this->compute(f,D,BoxDomainType(0u),hsug);
@@ -39,7 +42,18 @@ Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariate
     return this->compute(f,D,t,BoxDomainType(0u),hsug);
 }
 
-EulerBounder::EulerBounder(LipschitzTolerance lipschitz, MinimumStepSize minimum_step) : BounderBase(lipschitz,minimum_step) { }
+EulerBounder::EulerBounder(Configuration<EulerBounder> const& config) : BounderBase(config) { }
+
+Configuration<EulerBounder> const& EulerBounder::configuration() const {
+    return static_cast<Configuration<EulerBounder> const&>(BounderBase::configuration());
+}
+
+Void EulerBounder::_write(OutputStream& os) const {
+    os << "EulerBounder: " << this->configuration();
+}
+BounderInterface* EulerBounder::clone() const {
+    return new EulerBounder(this->configuration());
+}
 
 Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const {
     ARIADNE_PRECONDITION(f.result_size()==D.dimension());
@@ -66,7 +80,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     StepSizeType h=hsug;
 
     FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(product(D,to_time_bounds(t,t+h),A))))).upper();
-    StepSizeType hlip = static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance.value()/lipschitz));
+    StepSizeType hlip = static_cast<StepSizeType>(cast_exact(this->configuration().lipschitz_tolerance()/lipschitz));
     h=min(hlip,h);
     CONCLOG_PRINTLN("min(hlip,h)="<<h);
 
@@ -100,8 +114,8 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
             hprev=h;
             h=StepSizeType(hnew.get_d());
-            if (h < this->_minimum_step_size.value())
-                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << this->_minimum_step_size.value() << ") allowed, bounding could not be found.");
+            if (h.get_d() < this->configuration().minimum_step_size())
+                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << this->configuration().minimum_step_size() << ") allowed, bounding could not be found.");
             T = to_time_bounds(t,t+h);
         }
     }

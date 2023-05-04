@@ -43,7 +43,7 @@ inline ApproximateDouble score(ListSet<LabelledEnclosure> const& bbx) {
 
 void run_single(String name, DifferentialInclusion const& ivf, RealVariablesBox const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, IntegratorInterface const& integrator, Reconditioner const& reconditioner) {
     CONCLOG_SCOPE_CREATE;
-    auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
+    auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner, EulerBounder(Configuration<EulerBounder>()));
     evolver.configuration().set_approximations(approximations);
     evolver.configuration().set_maximum_step_size(step);
 

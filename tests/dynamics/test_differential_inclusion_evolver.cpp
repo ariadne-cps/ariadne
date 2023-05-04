@@ -36,6 +36,9 @@
 #include "io/command_line_interface.hpp"
 #include "symbolic/expression_set.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -45,7 +48,7 @@ class TestDifferentialInclusionEvolver {
     void run_single_test(String name, DifferentialInclusion const &ivf, RealVariablesBox const &initial, Real evolution_time,
                          ExactDouble step, List<InputApproximation> approximations,
                         IntegratorInterface const &integrator, Reconditioner const &reconditioner, bool draw) const {
-        auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner);
+        auto evolver = DifferentialInclusionEvolver(ivf, integrator, reconditioner, EulerBounder(Configuration<EulerBounder>()));
         evolver.configuration().set_approximations(approximations);
         evolver.configuration().set_maximum_step_size(step);
         ARIADNE_TEST_PRINT(evolver.configuration());

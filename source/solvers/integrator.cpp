@@ -52,6 +52,9 @@
 
 #include "algebra/expansion.inl.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 using namespace ConcLog;
 
 namespace Ariadne {

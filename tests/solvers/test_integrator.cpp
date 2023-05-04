@@ -38,6 +38,9 @@
 #include "function/formula.hpp"
 #include "io/command_line_interface.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -50,9 +53,10 @@ class TestIntegrator
     typedef Vector<ExactIntervalType> ExactIntervalVectorType;
   private:
     std::unique_ptr<IntegratorInterface> integrator_ptr;
+    std::unique_ptr<BounderInterface> bounder_ptr;
   public:
-    TestIntegrator(const IntegratorInterface& i)
-        : integrator_ptr(i.clone())
+    TestIntegrator(IntegratorInterface const& i)
+        : integrator_ptr(i.clone()), bounder_ptr(new EulerBounder(Configuration<EulerBounder>()))
     { }
 
     Int test() {
@@ -206,7 +210,7 @@ class TestIntegrator
         ExactBoxType d={ExactIntervalType(-0.5_x,1.5_x),ExactIntervalType(-0.5_x,2.5_x),ExactIntervalType(0.0_x,1.0_x)};
         StepSizeType t0=3.0_x;
         StepSizeType hsug=0.0625_x;
-        Pair<StepSizeType,UpperBoxType> step_bounds = EulerBounder().compute(f,d,t0,ExactBoxType(0u),hsug);
+        Pair<StepSizeType,UpperBoxType> step_bounds = bounder_ptr->compute(f,d,t0,ExactBoxType(0u),hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
         ValidatedVectorMultivariateFunctionPatch flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(t0,t0+h),ExactBoxType(0u),B);
@@ -234,7 +238,7 @@ class TestIntegrator
         StepSizeType t0=0.0_x;
         StepSizeType hsug=0.0625_x;
         ExactBoxType domp={ExactIntervalType{2.0_x,2.5_x},ExactIntervalType{-0.5_x,1.0_x},ExactIntervalType{0.5_x,1.0_x}};
-        Pair<StepSizeType,UpperBoxType> step_bounds = EulerBounder().compute(f,domx,t0,domp,hsug);
+        Pair<StepSizeType,UpperBoxType> step_bounds = bounder_ptr->compute(f,domx,t0,domp,hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
         Interval<StepSizeType> domt(t0,t0+h);

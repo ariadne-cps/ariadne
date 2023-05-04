@@ -44,6 +44,7 @@
 #include "solvers/integrator_interface.hpp"
 #include "solvers/inclusion_integrator.hpp"
 #include "solvers/configuration_interface.hpp"
+#include "solvers/bounder.hpp"
 #include "differential_inclusion.hpp"
 
 using namespace ConcLog;
@@ -132,9 +133,10 @@ class DifferentialInclusionEvolver {
     SystemType _system;
     SharedPointer<IntegratorInterface> _integrator;
     Reconditioner _reconditioner;
+    SharedPointer<BounderInterface> _bounder;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
+    DifferentialInclusionEvolver(SystemType const& system, IntegratorInterface const& integrator, Reconditioner const& reconditioner, BounderInterface const& bounder);
 
     //!@{
     //! \name Configuration for the class.

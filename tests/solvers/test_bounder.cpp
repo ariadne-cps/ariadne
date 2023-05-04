@@ -33,6 +33,9 @@
 #include "function/formula.hpp"
 #include "function/taylor_model.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 #include "../test.hpp"
 
 using namespace Ariadne;
@@ -186,10 +189,7 @@ class TestBounder
 
 Int main(Int argc, const char* argv[]) {
 
-    List<BounderHandle> bounders = { EulerBounder() };
-
-    for (BounderHandle bounder : bounders)
-        TestBounder(bounder).test();
+    TestBounder(EulerBounder(Configuration<EulerBounder>())).test();
 
     return ARIADNE_TEST_FAILURES;
 }

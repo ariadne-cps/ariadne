@@ -43,6 +43,9 @@
 #include "hybrid/hybrid_graphics.hpp"
 #include "io/command_line_interface.hpp"
 
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 #include "../test.hpp"
 
 using namespace Ariadne;

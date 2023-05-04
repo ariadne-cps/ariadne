@@ -35,11 +35,20 @@
 #include "function/domain.hpp"
 #include "function/function_model.hpp"
 #include "conclog/logging.hpp"
+
+#include "pronest/searchable_configuration.hpp"
+#include "pronest/configurable.hpp"
+#include "pronest/configuration_interface.hpp"
+#include "pronest/configuration_property.hpp"
+
 #include "integrator_interface.hpp"
 
 using namespace ConcLog;
 
 namespace Ariadne {
+
+using ProNest::Configuration;
+using ProNest::Configurable;
 
 class BoundingNotFoundException : public std::runtime_error {
   public:
@@ -88,28 +97,29 @@ class BounderInterface {
     virtual ~BounderInterface() = default;
 };
 
-class BounderBase : public BounderInterface {
+class BounderBase : public BounderInterface, public Configurable<BounderBase> {
   public:
-    BounderBase(LipschitzTolerance lipschitz, MinimumStepSize minimum_step);
+    BounderBase(Configuration<BounderBase> const& config);
+
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override = 0;
-  protected:
-    const LipschitzTolerance _lipschitz_tolerance;
-    const MinimumStepSize _minimum_step_size;
 };
 
 //! \ingroup DifferentialEquationSubModule
 //! \brief Compute bounds on the flow of a differential equation using a set-based Euler method.
 class EulerBounder final : public BounderBase {
   public:
-    EulerBounder(LipschitzTolerance lipschitz = DEFAULT_LIPSCHITZ_TOLERANCE, MinimumStepSize = DEFAULT_MINIMUM_STEP_SIZE);
+    EulerBounder(Configuration<EulerBounder> const& config);
+    Configuration<EulerBounder> const& configuration() const;
+
     using BounderBase::compute;
+
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override;
-    virtual Void _write(OutputStream& os) const override { os << "EulerBounder"; }
-    virtual EulerBounder* clone() const override { return new EulerBounder(*this); }
+    virtual Void _write(OutputStream& os) const override;
+    virtual BounderInterface* clone() const override;
   private:
     // Compute the bounds on the reach set of dx/dt = f(x,t,a) starting at time t, for a suggested step size of h.
     Pair<StepSizeType,UpperBoxType> _compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const;
@@ -119,39 +129,58 @@ class EulerBounder final : public BounderBase {
     UpperBoxType _refinement(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B) const;
 };
 
-class BounderHandle {
-  private:
-    SharedPointer<BounderInterface> _impl;
-  public:
-    BounderHandle(BounderInterface const& bounder) : _impl(bounder.clone()) { }
-    BounderHandle(BounderHandle const& other) : _impl(other._impl) { }
-    BounderHandle& operator=(BounderHandle const& other) { _impl = other._impl; return *this; }
+} // namespace Ariadne
 
-    operator BounderInterface const& () const { return *_impl; }
+namespace ProNest {
 
-    Void _write(OutputStream& os) const { _impl->_write(os); }
-    BounderHandle* clone() const { return new BounderHandle(*this); }
+using Ariadne::BounderBase;
+using Ariadne::EulerBounder;
+using Ariadne::DegreeType;
 
-    Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const {
-        return _impl->compute(f,D,hsug);
+template<> struct Configuration<BounderBase> : public SearchableConfiguration {
+public:
+    typedef Configuration<BounderBase> C;
+    typedef double RealType;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+
+    Configuration() {
+        add_property("lipschitz_tolerance",RealTypeProperty(0.5,Log2SearchSpaceConverter<RealType>()));
+        add_property("minimum_step_size",RealTypeProperty(1e-8,Log2SearchSpaceConverter<RealType>()));
     }
 
-    Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const {
-        return _impl->compute(f,D,A,hsug);
-    }
+    //! \brief The fraction L(f)*h used for a time step.
+    //! \details The convergence of the Picard iteration is approximately Lf*h.
+    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
 
-    Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const {
-        return _impl->compute(f,D,t,hsug);
-    }
-
-    Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const {
-        return _impl->compute(f,D,t,A,hsug);
-    }
-
+    //! \brief The minimum allowable step size for finding a bound.
+    //! Increasing this value prevents getting too low (and consequently slow) steps.
+    RealType const& minimum_step_size() const { return at<RealTypeProperty>("minimum_step_size").get(); }
 };
 
+template<> struct Configuration<EulerBounder> : public Configuration<BounderBase> {
+public:
+    typedef Configuration<EulerBounder> C;
+    typedef double RealType;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
 
+    Configuration() {
+    }
 
-} // namespace Ariadne
+    //! Inherited properties
+
+    //! \brief The fraction L(f)*h used for a time step.
+    //! \details The convergence of the Picard iteration is approximately Lf*h.
+    RealType const& lipschitz_tolerance() const { return at<RealTypeProperty>("lipschitz_tolerance").get(); }
+    C& set_lipschitz_tolerance(double const& value) { at<RealTypeProperty>("lipschitz_tolerance").set(value); return *this; }
+    C& set_lipschitz_tolerance(double const& lower, double const& upper) { at<RealTypeProperty>("lipschitz_tolerance").set(lower,upper); return *this; }
+
+    //! \brief The minimum allowable step size for finding a bound.
+    //! Increasing this value prevents getting too low (and consequently slow) steps.
+    RealType const& minimum_step_size() const { return at<RealTypeProperty>("minimum_step_size").get(); }
+    C& set_minimum_step_size(RealType const& value) { at<RealTypeProperty>("minimum_step_size").set(value); return *this; }
+    C& set_minimum_step_size(RealType const& lower, RealType const& upper) { at<RealTypeProperty>("minimum_step_size").set(lower,upper); return *this; }
+};
+
+}
 
 #endif /* ARIADNE_BOUNDER_HPP */

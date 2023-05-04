@@ -46,14 +46,15 @@ void ariadne_main()
 
     auto configuration = Configuration<VectorFieldEvolver>().
             set_maximum_enclosure_radius(1.0).
+            set_enable_reconditioning(false).
             set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>()
-                    .set_step_maximum_error(1e-6,1e-4)
-                    .set_sweeper({ThresholdSweeperDP(dp,1e-9),ThresholdSweeperDP(dp,1e-8),ThresholdSweeperDP(dp,1e-7)})
-                    .set_minimum_temporal_order(0,6)
-                    .set_maximum_temporal_order(6,12)
-                    .set_lipschitz_tolerance(0.01,0.5)
+                    .set_step_maximum_error(1e-6)
+                    .set_sweeper(ThresholdSweeperDP(dp,1e-8))
+                    .set_minimum_temporal_order(0)
+                    .set_maximum_temporal_order(6)
+                    .set_bounder(EulerBounder(Configuration<EulerBounder>().set_lipschitz_tolerance(0.5)))
                     )).
-            set_maximum_step_size(0.005,1.0);
+            set_maximum_step_size(0.01);
 
     CONCLOG_PRINTLN_VAR(configuration)
     CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space())
@@ -91,6 +92,15 @@ void ariadne_main()
     fig.clear();
     fig.draw(approximate_orbit);
     CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
+    fig.clear();
     fig.draw(rigorous_orbit);
+
+    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+    auto inner_evolve = approximator.compute_from(rigorous_orbit.final()[0]);
+    auto bnd = boundary(rigorous_orbit.final()[0]);
+    fig << fill_colour(red);
+    for (auto const& b : bnd) fig << b;
+    //fig << fill_colour(green) << inner_evolve;
+
     CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
 }

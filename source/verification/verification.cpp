@@ -357,7 +357,7 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
 
-    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>().set_integrator(AffineIntegrator(Configuration<AffineIntegrator>())));
+    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>().set_enable_clobbering(true).set_integrator(TaylorSeriesIntegrator(Configuration<TaylorSeriesIntegrator>())));
 
     Helper::Stopwatch<std::chrono::microseconds> sw;
     CONCLOG_PRINTLN("Computing approximate evolution...")

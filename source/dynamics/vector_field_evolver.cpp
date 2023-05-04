@@ -180,14 +180,24 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     /////////////// Main Evolution ////////////////////////////////
 
-    // Push inputs
     runner()->push({system().dynamic_function(), current_set, current_time});
-    // Pull outputs
     auto out = runner()->pull();
-    // Save outputs
+
     result->adjoin_reach(out.reach);
-    result->adjoin_intermediate(out.evolve);
-    workload.append({out.time,out.evolve});
+
+    if (this->configuration().enable_clobbering()) {
+        auto state_function = out.evolve.euclidean_set().state_function();
+        ValidatedVectorMultivariateTaylorFunctionModelDP tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(state_function.reference());
+        tf.clobber();
+        Enclosure new_evolve(out.evolve.euclidean_set().domain(),tf, out.evolve.euclidean_set().time_function(), out.evolve.constraints(),out.evolve.euclidean_set().configuration());
+        LabelledEnclosure new_labelled_evolve(new_evolve,out.evolve.state_space(),out.evolve.auxiliary_space());
+        new_labelled_evolve.set_auxiliary_mapping(out.evolve.auxiliary_mapping());
+        result->adjoin_intermediate(new_labelled_evolve);
+        workload.append({out.time,new_labelled_evolve});
+    } else {
+        result->adjoin_intermediate(out.evolve);
+        workload.append({out.time,out.evolve});
+    }
 }
 
 }

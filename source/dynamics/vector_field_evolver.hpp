@@ -171,6 +171,7 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));
         add_property("enable_reconditioning",BooleanConfigurationProperty(true));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
+        add_property("enable_clobbering",BooleanConfigurationProperty(false));
         add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
         add_property("maximum_enclosure_radius",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_spacial_error",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
@@ -189,6 +190,11 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     //! \brief Enable subdivisions for upper evolution
     Bool const& enable_subdivisions() const { return at<BooleanConfigurationProperty>("enable_subdivisions").get(); }
     C& set_enable_subdivisions(Bool const& value) { at<BooleanConfigurationProperty>("enable_subdivisions").set(value); return *this; }
+
+    //! \brief Enable clobbering (i.e., removing model error) to evolve state function
+    //! \details This makes the orbit result approximate
+    Bool const& enable_clobbering() const { return at<BooleanConfigurationProperty>("enable_clobbering").get(); }
+    C& set_enable_clobbering(Bool const& value) { at<BooleanConfigurationProperty>("enable_clobbering").set(value); return *this; }
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.

@@ -28,6 +28,7 @@
 #include "numeric/floatdp.hpp"
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
+#include "dynamics/orbit.hpp"
 #include "solvers/linear_programming.hpp"
 #include "solvers/nonlinear_programming.hpp"
 #include "glpk.h"
@@ -224,6 +225,9 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
 
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override;
 };
+
+ListSet<LabelledEnclosure> inner_approximate(ListSet<LabelledEnclosure> const& outer_list, InnerApproximatorInterface const& approximator);
+Orbit<LabelledEnclosure> inner_approximate(Orbit<LabelledEnclosure> const& outer_orbit, InnerApproximatorInterface const& approximator);
 
 } // namespace Ariadne
 

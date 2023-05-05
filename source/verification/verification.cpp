@@ -75,7 +75,7 @@ size_t EvaluationSequence::size() const { return _sequence.size(); }
 
 ostream& operator<<(ostream& os, EvaluationSequence const& es) {
     os << "timed_volumes:{";
-    for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ",";
+    for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ", ";
     return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
 }
 
@@ -380,7 +380,9 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
-    CONCLOG_PRINTLN_VAR_AT(1,analysis)
+    for (size_t m=0; m<constraints.size(); ++m) {
+        CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << analysis.usage(m))
+    }
 
     VectorFieldEvolver rigorous_evolver(dynamics,configuration);
     sw.restart();

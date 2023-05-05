@@ -201,8 +201,8 @@ template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<
     ThresholdSweeper(PR precision, Configuration<ThresholdSweeper<F>> const& config)
         : Configurable<ThresholdSweeper<F>>(config), _coefficient_precision(precision) { }
     inline PR precision() const { return _coefficient_precision; }
-    inline F sweep_threshold() const { return this->configuration().sweep_threshold(); }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->configuration().sweep_threshold(); }
+    inline F threshold() const { return this->configuration().threshold(); }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->configuration().threshold(); }
     virtual SweeperInterface<F>* _clone() const override final { return new ThresholdSweeper(_coefficient_precision,this->configuration()); }
   private:
     virtual Void _write(OutputStream& os) const override { os << "ThresholdSweeper: " << this->configuration(); };
@@ -244,13 +244,13 @@ public:
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
 
     Configuration() {
-        add_property("sweep_threshold",RealTypeProperty(F::min(F::get_default_precision()),Log10SearchSpaceConverter<F>()));
+        add_property("threshold",RealTypeProperty(F::min(F::get_default_precision()),Log10SearchSpaceConverter<F>()));
     }
 
     //! \brief The threshold value over which a term in the expansion is sweeped
-    RealType const& sweep_threshold() const { return at<RealTypeProperty>("sweep_threshold").get(); }
-    C& set_sweep_threshold(double const& value) { at<RealTypeProperty>("sweep_threshold").set(F(cast_exact(value),F::get_default_precision())); return *this; }
-    C& set_sweep_threshold(double const& lower, double const& upper) { at<RealTypeProperty>("sweep_threshold").set(F(cast_exact(lower),F::get_default_precision()),F(cast_exact(upper),F::get_default_precision())); return *this; }
+    RealType const& threshold() const { return at<RealTypeProperty>("threshold").get(); }
+    C& set_threshold(double const& value) { at<RealTypeProperty>("threshold").set(F(cast_exact(value),F::get_default_precision())); return *this; }
+    C& set_threshold(double const& lower, double const& upper) { at<RealTypeProperty>("threshold").set(F(cast_exact(lower),F::get_default_precision()),F(cast_exact(upper),F::get_default_precision())); return *this; }
 };
 
 }
@@ -261,15 +261,15 @@ namespace Ariadne {
 template<class F> class RelativeThresholdSweeper : public RelativeSweeperMixin<RelativeThresholdSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
-    F _relative_sweep_threshold;
+    F _relative_threshold;
   public:
-    RelativeThresholdSweeper(PR precision, F relative_sweep_threshold)
-        : _coefficient_precision(precision), _relative_sweep_threshold(relative_sweep_threshold) { ARIADNE_ASSERT(relative_sweep_threshold>0); }
+    RelativeThresholdSweeper(PR precision, F relative_threshold)
+        : _coefficient_precision(precision), _relative_threshold(relative_threshold) { ARIADNE_ASSERT(relative_threshold>0); }
     inline PR precision() const { return _coefficient_precision; }
-    inline F relative_sweep_threshold() const { return _relative_sweep_threshold; }
-    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < mul(approx,this->_relative_sweep_threshold,nrm); }
+    inline F relative_threshold() const { return _relative_threshold; }
+    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < mul(approx,this->_relative_threshold,nrm); }
   private:
-    virtual Void _write(OutputStream& os) const { os << "RelativeThresholdSweeper( relative_sweep_threshold="<<this->_relative_sweep_threshold<<" )"; };
+    virtual Void _write(OutputStream& os) const { os << "RelativeThresholdSweeper( relative_threshold="<<this->_relative_threshold<<" )"; };
 };
 
 //! \brief A sweeper class which does not discard any terms at all.
@@ -329,16 +329,16 @@ template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> 
 template<class F> class GradedThresholdSweeper : public SweeperMixin<GradedThresholdSweeper<F>,F> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
-    F _sweep_threshold;
+    F _threshold;
 public:
-    GradedThresholdSweeper(PR precision, DegreeType degree, F sweep_threshold)
-            : _coefficient_precision(precision), _sweep_threshold(sweep_threshold), _degree(degree) { ARIADNE_ASSERT(sweep_threshold>=0); }
+    GradedThresholdSweeper(PR precision, DegreeType degree, F threshold)
+            : _coefficient_precision(precision), _threshold(threshold), _degree(degree) { ARIADNE_ASSERT(threshold>=0); }
     DegreeType degree() const { return this->_degree; }
-    inline F sweep_threshold() const { return _sweep_threshold; }
+    inline F threshold() const { return _threshold; }
     inline PR precision() const { return _coefficient_precision; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree || abs(x) < this->_sweep_threshold; }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree || abs(x) < this->_threshold; }
 private:
-    virtual Void _write(OutputStream& os) const { os << "GradedThresholdSweeper( degree="<<this->_degree<<", sweep_threshold="<<this->_sweep_threshold<<" )"; }
+    virtual Void _write(OutputStream& os) const { os << "GradedThresholdSweeper( degree="<<this->_degree<<", threshold="<<this->_threshold<<" )"; }
 private:
     DegreeType _degree;
 };

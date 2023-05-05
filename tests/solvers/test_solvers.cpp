@@ -73,7 +73,7 @@ class TestSolver
     }
 
     Void test_implicit() {
-        //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
+        //TaylorModelAccuracy::set_default_threshold(1e-12);
 
         // FIXME: Should be able to use numbers yielding exact results for p,r
         EffectiveScalarMultivariateFunction aa=EffectiveScalarMultivariateFunction::coordinate(1,0);
@@ -141,7 +141,7 @@ class TestSolver
     }
 
     Void test_scalar_implicit() {
-        //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
+        //TaylorModelAccuracy::set_default_threshold(1e-12);
 
         EffectiveScalarMultivariateFunction aa=EffectiveScalarMultivariateFunction::coordinate(1,0);
         EffectiveScalarMultivariateFunction a=EffectiveScalarMultivariateFunction::coordinate(2,0);

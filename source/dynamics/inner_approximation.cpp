@@ -366,6 +366,32 @@ ContractorInterface* ParallelLinearisationContractor::clone() const {
 InnerApproximatorBase::InnerApproximatorBase(ContractorInterface const& contractor) :
     _contractor_ptr(contractor.clone()) { }
 
+ListSet<LabelledEnclosure> InnerApproximatorBase::compute_from(ListSet<LabelledEnclosure> const& outer_list) const {
+    ListSet<LabelledEnclosure> result;
+    for (auto const& e : outer_list) {
+        try { result.adjoin(compute_from(e)); }
+        catch (std::exception&) { }
+    }
+    return result;
+}
+
+Orbit<LabelledEnclosure> InnerApproximatorBase::compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const {
+    Orbit<LabelledEnclosure> result(outer_orbit.initial());
+    for (auto const& e : outer_orbit.intermediate()) {
+        try { result.adjoin_intermediate(compute_from(e)); }
+        catch (std::exception&) { }
+    }
+    for (auto const& e : outer_orbit.final()) {
+        try { result.adjoin_final(compute_from(e)); }
+        catch (std::exception&) { }
+    }
+    for (auto const& e : outer_orbit.reach()) {
+        try { result.adjoin_reach(compute_from(e)); }
+        catch (std::exception&) { }
+    }
+    return result;
+}
+
 NonlinearCandidateValidationInnerApproximator::NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType max_rounds) :
     InnerApproximatorBase(contractor), _max_rounds(max_rounds) { }
 
@@ -507,32 +533,6 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
     auto result = outer;
     result.restrict(full_restricted_domain);
 
-    return result;
-}
-
-ListSet<LabelledEnclosure> inner_approximate(ListSet<LabelledEnclosure> const& outer_list, InnerApproximatorInterface const& approximator) {
-    ListSet<LabelledEnclosure> result;
-    for (auto const& e : outer_list) {
-        try { result.adjoin(approximator.compute_from(e)); }
-        catch (std::exception&) { }
-    }
-    return result;
-}
-
-Orbit<LabelledEnclosure> inner_approximate(Orbit<LabelledEnclosure> const& outer_orbit, InnerApproximatorInterface const& approximator) {
-    Orbit<LabelledEnclosure> result(outer_orbit.initial());
-    for (auto const& e : outer_orbit.intermediate()) {
-        try { result.adjoin_intermediate(approximator.compute_from(e)); }
-        catch (std::exception&) { }
-    }
-    for (auto const& e : outer_orbit.final()) {
-        try { result.adjoin_final(approximator.compute_from(e)); }
-        catch (std::exception&) { }
-    }
-    for (auto const& e : outer_orbit.reach()) {
-        try { result.adjoin_reach(approximator.compute_from(e)); }
-        catch (std::exception&) { }
-    }
     return result;
 }
 

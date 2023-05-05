@@ -313,7 +313,7 @@ class TaylorModelPrinter:
     def children(self):
         #items = [ ('_expansion',self.val['_expansion']), \
         #          ('_error',self.val['_error']), \
-        #          ('_sweep_threshold',self.val['_accuracy_ptr']['px'].dereference()['_sweep_threshold']), \
+        #          ('_threshold',self.val['_accuracy_ptr']['px'].dereference()['_threshold']), \
         #          ('_maximum_degree',self.val['_accuracy_ptr']['px'].dereference()['_maximum_degree']) ]
         items = [ ('_expansion',self.val['_expansion']), \
                   ('_error',self.val['_error']), \
@@ -328,7 +328,7 @@ class TaylorModelAccuracyPrinter:
         self.val = val
 
     def to_string(self):
-        return '{ _sweep_threshold=%s, _maximum_degree=%d }' % (self.val['_sweep_threshold'], int(self.val['_maximum_degree']) )
+        return '{ _threshold=%s, _maximum_degree=%d }' % (self.val['_threshold'], int(self.val['_maximum_degree']) )
 
 class ScalarTaylorFunctionPrinter:
     def __init__(self, val):
@@ -351,7 +351,7 @@ class TaylorModelPrinter:
     def children(self):
         #items = [ ('_expansion',self.val['_expansion']), \
         #          ('_error',self.val['_error']), \
-        #          ('_sweep_threshold',self.val['_accuracy_ptr']['px'].dereference()['_sweep_threshold']), \
+        #          ('_threshold',self.val['_accuracy_ptr']['px'].dereference()['_threshold']), \
         #          ('_maximum_degree',self.val['_accuracy_ptr']['px'].dereference()['_maximum_degree']) ]
         items = [ ('_expansion',self.val['_expansion']), \
                   ('_error',self.val['_error']), \

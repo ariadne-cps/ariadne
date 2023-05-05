@@ -164,7 +164,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Sweeper<Fl
     auto swp_ptr = &static_cast<const SweeperInterface<FloatDP>&>(swp);
     auto thresh_swp_ptr = dynamic_cast<const ThresholdSweeper<FloatDP>*>(swp_ptr);
     if(thresh_swp_ptr) {
-        os << "ThresholdSweeperDP(" << thresh_swp_ptr->sweep_threshold() << ")";
+        os << "ThresholdSweeperDP(" << thresh_swp_ptr->threshold() << ")";
     } else {
         os << swp;
     }
@@ -216,7 +216,7 @@ ValidatedVectorMultivariateFunction unrestrict(const ValidatedVectorMultivariate
 static constexpr auto self = pybind11::detail::self;
 
 Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) {
-    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(x))); }
+    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(x))); }
 Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) {
     return Sweeper<FloatDP>(std::make_shared<GradedSweeper<FloatDP>>(pr,n)); }
 
@@ -627,7 +627,7 @@ Void calculus_submodule(pybind11::module& module)
 
     template_<ThresholdSweeper> threshold_sweeper_template(module);
     threshold_sweeper_template.instantiate<FloatDP>();
-    threshold_sweeper_template.def_new([](DP pr,ApproximateDouble eps){return ThresholdSweeper<FloatDP>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(eps.get_d())); });
+    threshold_sweeper_template.def_new([](DP pr,ApproximateDouble eps){return ThresholdSweeper<FloatDP>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(eps.get_d())); });
     template_<GradedSweeper> graded_sweeper_template(module);
     graded_sweeper_template.instantiate<FloatDP>();
     graded_sweeper_template.def_new([](DP pr,DegreeType deg){return GradedSweeper<FloatDP>(pr,deg);});

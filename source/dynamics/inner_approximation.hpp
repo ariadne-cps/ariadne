@@ -207,11 +207,17 @@ class ParallelLinearisationContractor : public ContractorInterface {
 class InnerApproximatorInterface {
   public:
     virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const = 0;
+    virtual ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const = 0;
+    virtual Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const = 0;
 };
 
 class InnerApproximatorBase : public InnerApproximatorInterface {
   public:
     InnerApproximatorBase(ContractorInterface const& contractor);
+    virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override = 0;
+  protected:
+    ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override;
+    Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override;
   protected:
     std::shared_ptr<ContractorInterface> _contractor_ptr;
 };
@@ -223,11 +229,10 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
     //! \brief Constructs from a \a contractor and a \a max_rounds for refinement, subject to the minimum given by the number of boundaries
     NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType max_rounds = std::numeric_limits<SizeType>::max());
 
-    LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override;
+    LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override final;
+    ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override final { return InnerApproximatorBase::compute_from(outer_list); }
+    Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override final { return InnerApproximatorBase::compute_from(outer_orbit); }
 };
-
-ListSet<LabelledEnclosure> inner_approximate(ListSet<LabelledEnclosure> const& outer_list, InnerApproximatorInterface const& approximator);
-Orbit<LabelledEnclosure> inner_approximate(Orbit<LabelledEnclosure> const& outer_orbit, InnerApproximatorInterface const& approximator);
 
 } // namespace Ariadne
 

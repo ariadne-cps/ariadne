@@ -41,14 +41,12 @@ LabelledUpperBoxType bounding_box(ListSet<LabelledEnclosure> const& es) {
 
 void constrained_execution(pExplore::String const& name, VectorField const& dynamics, List<RealExpression> const& constraints, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time) {
     auto configuration = Configuration<VectorFieldEvolver>().
-            set_maximum_enclosure_radius(1.0).
-            set_enable_reconditioning(true).
             set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>()
                     .set_step_maximum_error(1e-6,1e-4)
-                    .set_sweeper(ThresholdSweeperDP(dp,Configuration<ThresholdSweeperDP>().set_sweep_threshold(1e-8,1e-6)))
+                    .set_sweeper(ThresholdSweeperDP(dp,Configuration<ThresholdSweeperDP>().set_threshold(1e-8,1e-6)))
                     .set_minimum_temporal_order(0,5)
                     .set_maximum_temporal_order(5,10)
-                    .set_bounder(EulerBounder(Configuration<EulerBounder>().set_lipschitz_tolerance(0.5,0.5)))
+                    .set_bounder(EulerBounder(Configuration<EulerBounder>().set_lipschitz_tolerance(0.0675,0.5)))
                     ));
 
     CONCLOG_PRINTLN("Dynamics: " << dynamics)
@@ -92,7 +90,8 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
             CONCLOG_RUN_MUTED(fig.write((name+"_approximate"+var_char).c_str()))
             fig.clear();
             fig.draw(rigorous_orbit);
-            //auto inner = inner_approximate(rigorous_orbit.intermediate(),NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1)));
+            //auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1));
+            //auto inner = approximator.compute_from(rigorous_orbit.intermediate());
             //fig << fill_colour(red);
             //fig.draw(inner);
             CONCLOG_RUN_MUTED(fig.write((name+"_rigorous"+var_char).c_str()))

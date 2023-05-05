@@ -88,7 +88,7 @@ struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeT
 struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
-static const Generator<StepSweepThreshold> step_sweep_threshold = Generator<StepSweepThreshold>();
+static const Generator<StepSweepThreshold> step_threshold = Generator<StepSweepThreshold>();
 static const Generator<Order> order = Generator<Order>();
 static const Generator<SpacialOrder> spacial_order = Generator<SpacialOrder>();
 static const Generator<TemporalOrder> temporal_order = Generator<TemporalOrder>();
@@ -362,7 +362,7 @@ template<> struct Configuration<IntegratorBase> : public SearchableConfiguration
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
-        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-8))));
+        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8))));
     }
 
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }

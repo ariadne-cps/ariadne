@@ -77,17 +77,17 @@ VectorFieldEvolver* VectorFieldEvolver::clone() const {
 }
 
 auto VectorFieldEvolver::enclosure(const ExactBoxType& box) const -> EnclosureType {
-    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-7)))));
+    return EnclosureType(box,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-7)))));
 }
 
 auto VectorFieldEvolver::orbit(RealVariablesBox const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    auto enclosure = EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-7)))));
+    auto enclosure = EnclosureType(initial_set,this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-7)))));
     enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
     return orbit(enclosure,time,semantics);
 }
 
 auto VectorFieldEvolver::orbit(RealExpressionBoundedConstraintSet const& initial_set, TimeType const& time, Semantics semantics) const -> Orbit<EnclosureType> {
-    auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-7)))));
+    auto enclosure = EnclosureType(initial_set.euclidean_set(this->system().state_space()),this->system().state_space(),EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-7)))));
     enclosure.set_auxiliary(this->system().auxiliary_space(),this->system().auxiliary_mapping());
     return orbit(enclosure,time,semantics);
 }

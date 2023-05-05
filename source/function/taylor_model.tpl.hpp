@@ -1296,7 +1296,7 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::clobber() {
 template<class P, class F> auto TaylorModel<P,F>::tolerance() const -> RawFloatType {
     typedef RawFloatType FLT;
     const ThresholdSweeper<FLT>* ptr=dynamic_cast<const ThresholdSweeper<FLT>*>(&static_cast<const SweeperInterface<FLT>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : FLT(cast_exact(std::numeric_limits<double>::epsilon()),this->precision());
+    return (ptr) ? ptr->threshold() : FLT(cast_exact(std::numeric_limits<double>::epsilon()),this->precision());
 }
 
 
@@ -1507,7 +1507,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
 
     F max_truncation_error(MAX_TRUNCATION_ERROR,sweeper.precision());
     ThresholdSweeper<F> const* threshold_sweeper_ptr = dynamic_cast<ThresholdSweeper<F> const*>(&sweeper);
-    if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->sweep_threshold(); }
+    if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->threshold(); }
 
     DegreeType max_degree=MAX_DEGREE;
     GradedSweeper<F> const* graded_sweeper_ptr = dynamic_cast<GradedSweeper<F> const*>(&sweeper);

@@ -45,6 +45,8 @@ using pExplore::TaskInput;
 using pExplore::TaskOutput;
 using ConstraintIndexType = size_t;
 
+double nthroot(double value, size_t n);
+
 //! \brief The prescription to the satisfaction of the constraint
 //! \details TRUE : always true for all points (required over-approximation)
 //!          FALSE_FOR_ALL : sometimes false for all points (can use over-approximation)
@@ -72,8 +74,8 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
                                                                                                     List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
 
 double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
-double get_rho(double chi, size_t N, double volume, SatisfactionPrescription prescription);
-double volume(Vector<FloatDPBounds> const& bnds);
+double get_rho(double chi, double beta, SatisfactionPrescription prescription);
+double get_beta(Vector<FloatDPBounds> const& bnds, size_t n);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
@@ -93,12 +95,13 @@ struct HardConstraintPrescription {
   friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
+//! \brief A timed measurement in terms of beta (normalised volume) and B (accumulated volume multiplied by time interval)
 struct TimedMeasurement {
-  TimedMeasurement(double time_, double section_volume_, double accumulated_reach_volume_) : time(time_), section_volume(section_volume_), accumulated_reach_volume(accumulated_reach_volume_) { }
+  TimedMeasurement(double time_, double beta_, double B_) : time(time_), beta(beta_), B(B_) { }
   double time;
-  double section_volume;
-  double accumulated_reach_volume;
-  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": section " << tm.section_volume << ", accumulated reach " << tm.accumulated_reach_volume; }
+  double beta;
+  double B;
+  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": beta " << tm.beta << ", B " << tm.B; }
 };
 
 class EvaluationSequenceBuilder;

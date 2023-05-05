@@ -47,6 +47,19 @@ using pExplore::TaskOutput;
 using pExplore::TimeProgressLinearRobustnessController;
 using ConstraintIndexType = size_t;
 
+double nthroot(double value, size_t n) {
+    static const size_t NUM_ITERATIONS = 10;
+    auto number_of_sqrt = static_cast<size_t>(std::round(sqrt(n)));
+    double result = value;
+    for (size_t i=0; i<number_of_sqrt; ++i)
+        result = sqrt(result);
+
+    for (size_t i=0; i<NUM_ITERATIONS; ++i) {
+        result = result - (pow(result,n) - value)/(n*pow(result,n-1));
+    }
+    return result;
+}
+
 EvaluationSequence::EvaluationSequence(List<TimedMeasurement> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
 
 size_t EvaluationSequence::number_of_constraints() const { return _prescriptions.size(); }
@@ -74,7 +87,7 @@ HardConstraintPrescription const& EvaluationSequence::usage(ConstraintIndexType 
 size_t EvaluationSequence::size() const { return _sequence.size(); }
 
 ostream& operator<<(ostream& os, EvaluationSequence const& es) {
-    os << "timed_volumes:{";
+    os << "timed_beta_B:{";
     for (size_t i=0; i<es.size()-1; ++i) os << es.at(i) << ", ";
     return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
 }
@@ -107,7 +120,7 @@ void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
 
         if (prescription_to_check != SatisfactionPrescription::TRUE) {
             auto chi = get_chi(tbe.box,_h[m],prescription_to_check);
-            auto robustness = get_rho(chi,_N,volume(tbe.box),prescription_to_check);
+            auto robustness = get_rho(chi,get_beta(tbe.box,_N),prescription_to_check);
             if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
                 _max_robustness_false[m].at(prescription_to_check) = robustness;
                 _t_false[m].at(prescription_to_check) = tbe.time;
@@ -129,35 +142,35 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
         }
     }
 
-    List<TimedMeasurement> timed_volumes;
+    List<TimedMeasurement> timed_measurements;
 
-    double v0 = volume(_timed_box_evaluations.at(0).box);
-    timed_volumes.push_back({_timed_box_evaluations.at(0).time,v0,0.0});
+    double beta0 = get_beta(_timed_box_evaluations.at(0).box,_N);
+    timed_measurements.push_back({_timed_box_evaluations.at(0).time,beta0,0.0});
 
     Vector<double> alpha(_M, std::numeric_limits<double>::max());
     for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
         auto const& tbe = _timed_box_evaluations.at(i);
-        double v = volume(tbe.box);
-        double B = timed_volumes.at(i-1).accumulated_reach_volume + (timed_volumes.at(i-1).section_volume)*(tbe.time-timed_volumes.at(i-1).time);
+        double beta = get_beta(tbe.box,_N);
+        double B = timed_measurements.at(i-1).B + (timed_measurements.at(i - 1).beta) * (tbe.time - timed_measurements.at(i - 1).time);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
                     double chi = get_chi(tbe.box,_h[m],_prescriptions[m]);
-                    double rho = get_rho(_N,chi,v,_prescriptions[m]);
+                    double rho = get_rho(chi,beta,_prescriptions[m]);
                     auto this_alpha = rho/B;
                     CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",B=" << B <<",alpha="<<this_alpha)
                     if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                 }
             }
         }
-        timed_volumes.push_back({tbe.time,v,B});
+        timed_measurements.push_back({tbe.time,beta,B});
     }
 
     Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
     for (ConstraintIndexType m=0; m<_M; ++m)
         constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
 
-    return {timed_volumes,constants};
+    return {timed_measurements,constants};
 }
 
 size_t EvaluationSequenceBuilder::_list_index(double time) const {
@@ -196,10 +209,10 @@ Vector<FloatDPBounds> resize(Vector<FloatDPBounds> const& bx, double chi, bool w
     return result;
 }
 
-double volume(Vector<FloatDPBounds> const& bnds) {
+double get_beta(Vector<FloatDPBounds> const& bnds, size_t n) {
     double result = 1;
     for (size_t i=0; i<bnds.size(); ++i) result *= (bnds[i].upper()-bnds[i].lower()).get_d();
-    return result;
+    return nthroot(result,n);
 }
 
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi) { return resize(bx,chi,true); }
@@ -259,12 +272,10 @@ double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunc
     return lower;
 }
 
-double get_rho(double chi, size_t N, double volume, SatisfactionPrescription prescription) {
+double get_rho(double chi, double beta, SatisfactionPrescription prescription) {
     if (prescription == SatisfactionPrescription::FALSE_FOR_SOME) {
-        auto pw = pow(chi,N);
-        return (pw == std::numeric_limits<double>::infinity() ? volume : volume*(1.0-1.0/pw));
-
-    } else return (pow(chi,N)-1)*volume;
+        return (chi == std::numeric_limits<double>::infinity() ? beta : beta*(1.0-1.0/chi));
+    } else return (chi-1.0)*beta;
 }
 
 EffectiveVectorMultivariateFunction to_function(List<RealExpression> const& constraints, RealSpace const& spc) {
@@ -303,10 +314,10 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
     for (ConstraintIndexType m=0; m<evaluation.number_of_constraints(); ++m) {
         result.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
             auto near_evaluation = evaluation.near(o.time.get_d());
-            auto const& v = near_evaluation.section_volume;
-            auto const& B_approx = near_evaluation.accumulated_reach_volume;
+            auto const& beta_approx = near_evaluation.beta;
+            auto const& B_approx = near_evaluation.B;
             auto alpha = evaluation.usage(m).alpha;
-            return alpha*B_approx + v - o.evolve.euclidean_set().bounding_box().volume().get_d();
+            return alpha*B_approx + beta_approx - nthroot(o.evolve.euclidean_set().bounding_box().volume().get_d(),o.evolve.dimension());
         }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT)
           .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
           .build()

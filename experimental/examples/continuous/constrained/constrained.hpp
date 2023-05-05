@@ -31,12 +31,10 @@ using namespace pExplore;
 LabelledUpperBoxType bounding_box(ListSet<LabelledEnclosure> const& es) {
     HELPER_PRECONDITION(not es.empty())
     UpperBoxType result = es[0].euclidean_set().bounding_box();
-    CONCLOG_PRINTLN_VAR(es.size())
     for (auto const& e : es) {
         auto const& bx = e.euclidean_set().bounding_box();
-        for (size_t j=0; j<result.dimension(); ++j) {
+        for (size_t j=0; j<result.dimension(); ++j)
             result[j] = hull(result[j],bx[j]);
-        }
     }
     return {es[0].state_space(),result};
 }
@@ -80,8 +78,6 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
 
     auto variable_names = dynamics.state_space().variable_names();
     auto drawing_box = bounding_box(rigorous_orbit.reach());
-
-    CONCLOG_PRINTLN(drawing_box)
 
     CONCLOG_PRINTLN("Plotting...")
     for (size_t i=0; i<dynamics.dimension()-1; i++) {

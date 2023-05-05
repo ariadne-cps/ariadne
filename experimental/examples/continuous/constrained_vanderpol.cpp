@@ -95,12 +95,5 @@ void ariadne_main()
     fig.clear();
     fig.draw(rigorous_orbit);
 
-    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
-    auto inner_evolve = approximator.compute_from(rigorous_orbit.final()[0]);
-    auto bnd = boundary(rigorous_orbit.final()[0]);
-    fig << fill_colour(red);
-    for (auto const& b : bnd) fig << b;
-    //fig << fill_colour(green) << inner_evolve;
-
     CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
 }

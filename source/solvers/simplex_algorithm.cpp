@@ -736,7 +736,7 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
 
     if(r==n) {
         // Problem is either highly degenerate or optimal do nothing.
-        ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
+        CONCLOG_PRINTLN("SimplexSolver<X>::compute_rt(...): "<<
                      "Cannot find compute variable to exit basis\n"<<
                      "  xl="<<xl<<" x="<<x<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" d="<<d);
     }
@@ -783,7 +783,7 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
 
     if(r==n) {
         // Problem is either highly degenerate or optimal do nothing.
-        ARIADNE_WARN("SimplexSolver<X>::compute_rt(...): "<<
+        CONCLOG_PRINTLN("SimplexSolver<X>::compute_rt(...): "<<
                      "Cannot find compute variable to exit basis\n"<<
                      "  xl="<<xl<<" x="<<x<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" d="<<d);
     }

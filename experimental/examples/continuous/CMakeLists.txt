@@ -2,7 +2,6 @@ set(EXAMPLES_EXPERIMENTAL_CONTINUOUS
     brusselator
     laub-loomis
     inner
-    constrained_vanderpol
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_CONTINUOUS})
@@ -11,3 +10,4 @@ foreach(example ${EXAMPLES_EXPERIMENTAL_CONTINUOUS})
 endforeach()
 
 add_subdirectory(noisy)
+add_subdirectory(constrained)

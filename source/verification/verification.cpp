@@ -144,8 +144,8 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
                     double chi = get_chi(tbe.box,_h[m],_prescriptions[m]);
                     double rho = get_rho(_N,chi,v,_prescriptions[m]);
-                    auto this_alpha = rho/(v-v0);
-                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",v-v0=" << v-v0<<",alpha="<<this_alpha)
+                    auto this_alpha = rho/B;
+                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",B=" << B <<",alpha="<<this_alpha)
                     if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                 }
             }

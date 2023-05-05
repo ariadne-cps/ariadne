@@ -22,8 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne_main.hpp"
-#include "helper/stopwatch.hpp"
+#include "constrained.hpp"
 
 using namespace std;
 using namespace pExplore;
@@ -35,31 +34,6 @@ void ariadne_main()
 
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
-    RealConstant ymax("ymax",2.8_x);
-    RealConstant ymin("ymin",-3.0_x);
-    RealConstant xmin("xmin",-1.0_x);
-    RealConstant xmax("xmax",2.1_x);
-    RealConstant rsqr("r^2",2.5_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
-
-    CONCLOG_PRINTLN("Constraints: " << constraints)
-
-    auto configuration = Configuration<VectorFieldEvolver>().
-            set_maximum_enclosure_radius(1.0).
-            set_enable_reconditioning(false).
-            set_integrator(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>()
-                    .set_step_maximum_error(1e-6)
-                    .set_sweeper(ThresholdSweeperDP(dp,1e-8))
-                    .set_minimum_temporal_order(0)
-                    .set_maximum_temporal_order(6)
-                    .set_bounder(EulerBounder(Configuration<EulerBounder>().set_lipschitz_tolerance(0.5)))
-                    )).
-            set_maximum_step_size(0.01);
-
-    CONCLOG_PRINTLN_VAR(configuration)
-    CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space())
-    CONCLOG_PRINTLN_AT(1,"Total points: " << configuration.search_space().total_points())
-
     Real x0 = 1.40_dec;
     Real y0 = 2.40_dec;
     Real eps_x0 = 0.15_dec;
@@ -68,32 +42,12 @@ void ariadne_main()
 
     Real evolution_time = 7;
 
-    auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
+    RealConstant ymax("ymax",2.8_x);
+    RealConstant ymin("ymin",-3.0_x);
+    RealConstant xmin("xmin",-1.0_x);
+    RealConstant xmax("xmax",2.1_x);
+    RealConstant rsqr("r^2",2.5_x);
+    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
 
-    auto const& approximate_orbit = get<0>(result);
-    auto const& rigorous_orbit = get<1>(result);
-    auto const& outcomes = get<2>(result);
-
-    CONCLOG_PRINTLN("Constraint checking outcomes:")
-    for (size_t m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN(constraints.at(m) << " -> " << outcomes.at(m))
-    }
-
-    auto best_scores = pExplore::TaskManager::instance().best_scores();
-    CONCLOG_PRINTLN_AT(2,"Best scores:")
-    for (auto const& b : best_scores) {
-        CONCLOG_PRINTLN_AT(2,b)
-    }
-
-    CONCLOG_PRINTLN_AT(1,"Optimal point: " << pExplore::TaskManager::instance().optimal_point())
-
-    LabelledFigure fig=LabelledFigure({-3<=x<=3,-3<=y<=3});
-    CONCLOG_PRINTLN("Plotting...")
-    fig.clear();
-    fig.draw(approximate_orbit);
-    CONCLOG_RUN_MUTED(fig.write("vanderpol_approximate"))
-    fig.clear();
-    fig.draw(rigorous_orbit);
-
-    CONCLOG_RUN_MUTED(fig.write("vanderpol_rigorous"))
+    constrained_execution("vanderpol",dynamics,constraints,initial_set,evolution_time);
 }

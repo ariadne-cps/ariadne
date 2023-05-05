@@ -135,9 +135,9 @@ LabelledEnclosure vanderpol_sample() {
 
 void ariadne_main() {
 
-    //auto linear_solver = NativeSimplex();
+    auto linear_solver = NativeSimplex();
     //auto linear_solver = NativeIPM();
-    auto linear_solver = GLPKSimplex();
+    //auto linear_solver = GLPKSimplex();
     //auto linear_solver = GLPKIPM();
 
     auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver,2,1));

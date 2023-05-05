@@ -324,7 +324,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
                 } else {
                     if (evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
                         try {
-                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1));
                             auto inner_evolve = approximator.compute_from(o.evolve);
                             return -evaluate_from_function(h[m],inner_evolve).lower().get_d();
                         } catch (std::exception&) { }

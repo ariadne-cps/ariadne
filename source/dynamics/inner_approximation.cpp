@@ -301,6 +301,7 @@ ParallelLinearisationContractor::ParallelLinearisationContractor(LinearSolverInt
 _solver_ptr(solver.clone()), _num_iterations(num_iterations), _split_depth(split_depth) { }
 
 ExactBoxType ParallelLinearisationContractor::contract(ValidatedVectorMultivariateFunctionPatch const& f, ExactBoxType const& d) const {
+    CONCLOG_SCOPE_CREATE
 
     auto n = d.dimension();
     auto m = f.result_size();
@@ -424,6 +425,9 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
             BisectionSearch<double> scaling_search(0.01,0.99,0.01);
             CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
             auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+            if (non_intersection_dom.is_empty()) {
+                CONCLOG_PRINTLN_AT(1,"Non-intersection domain from nonlinear optimisation is empty.")
+            }
 
             auto scaled_bound_is_an_improvement = true;
             while (true) {
@@ -447,14 +451,15 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
 
                 CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
                 non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+                CONCLOG_PRINTLN_AT(1,non_intersection_dom << " empty? " << non_intersection_dom.is_empty())
             }
 
-            if (not scaling_search.solution_found()) {
+            if (non_intersection_dom.is_empty() or not scaling_search.solution_found()) {
                 if (not bound_found[bnd_idx]) {
-                    CONCLOG_PRINTLN_AT(1,"No valid solution found, setting failure for this boundary.")
+                    CONCLOG_PRINTLN_AT(1,"No solution found, setting failure for this boundary.")
                     verified[bnd_idx] = false;
                 } else {
-                    CONCLOG_PRINTLN_AT(1,"No valid solution found, keeping the original value for the bound, setting this boundary as verified.")
+                    CONCLOG_PRINTLN_AT(1,"No solution found, keeping the original value for the bound, setting this boundary as verified.")
                     verified[bnd_idx] = true;
                 }
             } else {
@@ -491,11 +496,13 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
 
     for (SizeType i = 0; i < bound_found.size(); ++i) {
         if (not bound_found.at(i)) {
-            throw std::runtime_error("No inner approximation could be computed");
+            throw std::runtime_error("No inner approximation could be computed.");
         }
     }
 
     auto full_restricted_domain = product(I,project(outer.domain(),Range(outer_function.result_size(),outer.state_function().argument_size())));
+
+    CONCLOG_PRINTLN("Domain for inner: " << full_restricted_domain)
 
     auto result = outer;
     result.restrict(full_restricted_domain);

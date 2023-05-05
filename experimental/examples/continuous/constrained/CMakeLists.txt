@@ -1,5 +1,5 @@
 set(EXAMPLES_CONSTRAINED
-    constrained_vanderpol
+    vanderpol_c
 )
 
 foreach(example ${EXAMPLES_CONSTRAINED})

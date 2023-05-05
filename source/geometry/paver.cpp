@@ -657,7 +657,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
             }
         }
     } else {
-        ThresholdSweeper<FloatDP> swp(dp,1e-12);
+        ThresholdSweeper<FloatDP> swp(dp,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-12));
         fg=ValidatedVectorMultivariateTaylorFunctionModelDP(d,join(f,g),swp);
     }
     Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);

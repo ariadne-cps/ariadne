@@ -216,7 +216,7 @@ ValidatedVectorMultivariateFunction unrestrict(const ValidatedVectorMultivariate
 static constexpr auto self = pybind11::detail::self;
 
 Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) {
-    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,x)); }
+    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(x))); }
 Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) {
     return Sweeper<FloatDP>(std::make_shared<GradedSweeper<FloatDP>>(pr,n)); }
 
@@ -229,7 +229,7 @@ template<class FLT> Void export_sweepers(pybind11::module& module)
     sweeper_class.def("__str__", &__cstr__<Sweeper<FLT>>);
 
     pybind11::class_<ThresholdSweeper<FLT>> threshold_sweeper_class(module,python_class_name<ThresholdSweeper<FLT>>().c_str());
-    threshold_sweeper_class.def(pybind11::init<PR,double>());
+    threshold_sweeper_class.def(pybind11::init<PR,Configuration<ThresholdSweeper<FLT>>>());
     threshold_sweeper_class.def("__str__", &__cstr__<ThresholdSweeper<FLT>>);
     sweeper_class.def(pybind11::init<ThresholdSweeper<FLT>>());
     pybind11::implicitly_convertible<ThresholdSweeper<FLT>,Sweeper<FLT>>();
@@ -627,7 +627,7 @@ Void calculus_submodule(pybind11::module& module)
 
     template_<ThresholdSweeper> threshold_sweeper_template(module);
     threshold_sweeper_template.instantiate<FloatDP>();
-    threshold_sweeper_template.def_new([](DP pr,ApproximateDouble eps){return ThresholdSweeper<FloatDP>(pr,eps);});
+    threshold_sweeper_template.def_new([](DP pr,ApproximateDouble eps){return ThresholdSweeper<FloatDP>(pr,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(eps.get_d())); });
     template_<GradedSweeper> graded_sweeper_template(module);
     graded_sweeper_template.instantiate<FloatDP>();
     graded_sweeper_template.def_new([](DP pr,DegreeType deg){return GradedSweeper<FloatDP>(pr,deg);});

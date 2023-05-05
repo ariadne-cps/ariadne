@@ -35,7 +35,18 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/expansion.hpp"
 
+#include "pronest/searchable_configuration.hpp"
+#include "pronest/configurable.hpp"
+#include "pronest/configuration_interface.hpp"
+#include "pronest/configuration_property.hpp"
+
+#include "pronest/configurable.tpl.hpp"
+#include "pronest/configuration_property.tpl.hpp"
+
 namespace Ariadne {
+
+using ProNest::Configuration;
+using ProNest::Configurable;
 
 template<class F> class Sweeper;
 template<class F> class SweeperBase;
@@ -118,7 +129,7 @@ template<class SWP, class F> class SweeperMixin
     : public virtual SweeperBase<F>
 {
     typedef typename F::PrecisionType PR;
-    virtual SweeperInterface<F>* _clone() const override final;
+    virtual SweeperInterface<F>* _clone() const override;
     virtual PR _precision() const override final;
     virtual Bool _discard(const MultiIndex& a, const F& x) const override final;
 };
@@ -183,21 +194,68 @@ auto RelativeSweeperMixin<SWP,F>::_discard(const F& x, const F& nrm) const -> Bo
 
 
 //! \brief A sweeper class which discards terms whose absolute value is smaller than a threshold.
-template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<F>,F> {
+template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<F>,F>, public Configurable<ThresholdSweeper<F>> {
     typedef PrecisionType<F> PR;
     PR _coefficient_precision;
-    F _sweep_threshold;
   public:
-    ThresholdSweeper(PR precision, F sweep_threshold)
-        : _coefficient_precision(precision), _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0); }
-    ThresholdSweeper(PR precision, ApproximateDouble sweep_threshold)
-        : _coefficient_precision(precision), _sweep_threshold(cast_exact(sweep_threshold),precision) { ARIADNE_ASSERT(cast_exact(sweep_threshold)>=0); }
+    ThresholdSweeper(PR precision, Configuration<ThresholdSweeper<F>> const& config)
+        : Configurable<ThresholdSweeper<F>>(config), _coefficient_precision(precision) { }
     inline PR precision() const { return _coefficient_precision; }
-    inline F sweep_threshold() const { return _sweep_threshold; }
-    inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->_sweep_threshold; }
+    inline F sweep_threshold() const { return this->configuration().sweep_threshold(); }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->configuration().sweep_threshold(); }
+    virtual SweeperInterface<F>* _clone() const override final { return new ThresholdSweeper(_coefficient_precision,this->configuration()); }
   private:
-    virtual Void _write(OutputStream& os) const { os << "ThresholdSweeper( sweep_threshold="<<this->_sweep_threshold<<" )"; };
+    virtual Void _write(OutputStream& os) const override { os << "ThresholdSweeper: " << this->configuration(); };
 };
+
+}
+
+namespace ProNest {
+
+using Ariadne::ThresholdSweeper;
+using Ariadne::FloatDP;
+using Ariadne::FloatMP;
+using Ariadne::dp;
+using Ariadne::inf;
+using Ariadne::cast_exact;
+
+template<> struct Log10SearchSpaceConverter<FloatDP> : ConfigurationSearchSpaceConverterInterface<FloatDP> {
+    int to_int(FloatDP const& value) const override {
+        if (value == inf) return std::numeric_limits<int>::max();
+        else if (value == -inf) return std::numeric_limits<int>::min();
+        else return static_cast<int>(std::round(log(value.get_d())/log(10.0))); }
+    FloatDP from_int(int i) const override { return FloatDP(cast_exact(exp(log(10.0)*i)),dp); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
+};
+
+template<> struct Log10SearchSpaceConverter<FloatMP> : ConfigurationSearchSpaceConverterInterface<FloatMP> {
+    int to_int(FloatMP const& value) const override {
+        if (value == inf) return std::numeric_limits<int>::max();
+        else if (value == -inf) return std::numeric_limits<int>::min();
+        else return static_cast<int>(std::round(log(value.get_d())/log(10.0))); }
+    FloatMP from_int(int i) const override { return FloatMP(cast_exact(exp(log(10.0)*i)),Ariadne::MultiplePrecision(128)); }
+    ConfigurationSearchSpaceConverterInterface* clone() const override { return new Log10SearchSpaceConverter(*this); }
+};
+
+template<class F> struct Configuration<ThresholdSweeper<F>> : public SearchableConfiguration {
+public:
+    typedef Configuration<ThresholdSweeper<F>> C;
+    typedef F RealType;
+    typedef RangeConfigurationProperty<RealType> RealTypeProperty;
+
+    Configuration() {
+        add_property("sweep_threshold",RealTypeProperty(F::min(F::get_default_precision()),Log10SearchSpaceConverter<F>()));
+    }
+
+    //! \brief The threshold value over which a term in the expansion is sweeped
+    RealType const& sweep_threshold() const { return at<RealTypeProperty>("sweep_threshold").get(); }
+    C& set_sweep_threshold(double const& value) { at<RealTypeProperty>("sweep_threshold").set(F(cast_exact(value),F::get_default_precision())); return *this; }
+    C& set_sweep_threshold(double const& lower, double const& upper) { at<RealTypeProperty>("sweep_threshold").set(F(cast_exact(lower),F::get_default_precision()),F(cast_exact(upper),F::get_default_precision())); return *this; }
+};
+
+}
+
+namespace Ariadne {
 
 //! \brief A sweeper class which does not discard any terms at all.
 template<class F> class RelativeThresholdSweeper : public RelativeSweeperMixin<RelativeThresholdSweeper<F>,F> {
@@ -285,10 +343,12 @@ private:
     DegreeType _degree;
 };
 
+using ProNest::Configuration;
+
 template<> inline Sweeper<FloatDP>::Sweeper()
-    : Sweeper(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
+    : Sweeper(new ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>())) { }
 template<> inline Sweeper<FloatMP>::Sweeper()
-    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),std::numeric_limits<double>::epsilon())) { }
+    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),Configuration<ThresholdSweeper<FloatMP>>())) { }
 
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;

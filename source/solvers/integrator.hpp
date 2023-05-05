@@ -362,7 +362,7 @@ template<> struct Configuration<IntegratorBase> : public SearchableConfiguration
     typedef HandleListConfigurationProperty<Sweeper<FloatDP>> SweeperProperty;
 
     Configuration() {
-        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(DoublePrecision(),1e-7)));
+        add_property("sweeper",SweeperProperty(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_sweep_threshold(1e-8))));
     }
 
     Sweeper<FloatDP> const& sweeper() const { return at<SweeperProperty>("sweeper").get(); }

@@ -145,25 +145,24 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
     List<TimedMeasurement> timed_measurements;
 
     double beta0 = get_beta(_timed_box_evaluations.at(0).box,_N);
-    timed_measurements.push_back({_timed_box_evaluations.at(0).time,beta0,0.0});
+    timed_measurements.push_back({_timed_box_evaluations.at(0).time,beta0});
 
     Vector<double> alpha(_M, std::numeric_limits<double>::max());
     for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
         auto const& tbe = _timed_box_evaluations.at(i);
         double beta = get_beta(tbe.box,_N);
-        double B = timed_measurements.at(i-1).B + (timed_measurements.at(i - 1).beta) * (tbe.time - timed_measurements.at(i - 1).time);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
                     double chi = get_chi(tbe.box,_h[m],_prescriptions[m]);
                     double rho = get_rho(chi,beta,_prescriptions[m]);
-                    auto this_alpha = rho/B;
-                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",B=" << B <<",alpha="<<this_alpha)
+                    auto this_alpha = rho*T_star[m]/beta/tbe.time;
+                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",alpha="<<this_alpha)
                     if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                 }
             }
         }
-        timed_measurements.push_back({tbe.time,beta,B});
+        timed_measurements.push_back({tbe.time,beta});
     }
 
     Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
@@ -313,13 +312,13 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
 
     for (ConstraintIndexType m=0; m<evaluation.number_of_constraints(); ++m) {
         result.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
-            auto near_evaluation = evaluation.near(o.time.get_d());
+            auto t = o.time.get_d();
+            auto near_evaluation = evaluation.near(t);
             auto const& beta_approx = near_evaluation.beta;
-            auto const& B_approx = near_evaluation.B;
             auto alpha = evaluation.usage(m).alpha;
-            return alpha*B_approx + beta_approx - nthroot(o.evolve.euclidean_set().bounding_box().volume().get_d(),o.evolve.dimension());
+            return beta_approx*(1.0+alpha*t/evaluation.usage(m).t_star) - nthroot(o.evolve.euclidean_set().bounding_box().volume().get_d(),o.evolve.dimension());
         }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT)
-          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
+          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))                                                                                                                                                                                                                                                                                                                                                          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
           .build()
         );
         result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {

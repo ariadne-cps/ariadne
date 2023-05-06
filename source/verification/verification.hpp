@@ -95,13 +95,12 @@ struct HardConstraintPrescription {
   friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
-//! \brief A timed measurement in terms of beta (normalised volume) and B (accumulated volume multiplied by time interval)
+//! \brief A timed measurement in terms of beta (normalised volume)
 struct TimedMeasurement {
-  TimedMeasurement(double time_, double beta_, double B_) : time(time_), beta(beta_), B(B_) { }
+  TimedMeasurement(double time_, double beta_) : time(time_), beta(beta_) { }
   double time;
   double beta;
-  double B;
-  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": beta " << tm.beta << ", B " << tm.B; }
+  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": " << tm.beta; }
 };
 
 class EvaluationSequenceBuilder;

@@ -57,10 +57,7 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
 
     auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
 
-    CONCLOG_PRINTLN("Constraint checking outcomes:")
-    for (size_t m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << result.outcomes.at(m))
-    }
+    CONCLOG_PRINTLN("Constraint satisfaction result:" << result.satisfaction)
 
     auto best_scores = pExplore::TaskManager::instance().best_scores();
     CONCLOG_PRINTLN_AT(2,"Best scores:")

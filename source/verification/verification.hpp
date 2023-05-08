@@ -63,16 +63,18 @@ std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescr
 
 class EvaluationSequence;
 struct ConstrainedEvolutionResult;
+class ConstraintSatisfaction;
 
 FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
 Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, EffectiveVectorMultivariateFunction const& h);
-Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining);
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h);
+List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation);
+ConstraintSatisfaction synthesise_satisfaction(List<RealExpression> const& constraints, EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                                                                    List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
+                                                 List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
 
 double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
 double get_rho(double chi, double beta, SatisfactionPrescription prescription);
@@ -107,14 +109,36 @@ struct TimedMeasurement {
     friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ":" << tm.approximate_beta << "(a)," << tm.rigorous_beta << "(r)"; }
 };
 
+class ConstraintSatisfaction {
+  public:
+    ConstraintSatisfaction(List<RealExpression> const& cs) : _cs(cs), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
+    size_t dimension() const { return _cs.size(); }
+    void set(size_t m, bool outcome) {
+        HELPER_PRECONDITION(m<dimension())
+        HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
+        _outcomes[m] = Detail::make_logical_value(outcome);
+    }
+    RealExpression const& expression(size_t m) const { HELPER_PRECONDITION(m<dimension()) return _cs[m]; }
+    LogicalValue const& outcome(size_t m) const { HELPER_PRECONDITION(m<dimension()) return _outcomes[m]; }
+    friend ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
+        os << "{";
+        for (size_t m=0; m<cs.dimension()-1; ++m) { os << cs.expression(m) << " >= 0 : " << cs.outcome(m) << ", "; }
+        if (cs.dimension() > 0) os << cs.expression(cs.dimension()-1) << " >= 0 : " << cs.outcome(cs.dimension()-1);
+        return os << "}";
+    }
+  private:
+    Vector<RealExpression> const _cs;
+    Vector<LogicalValue> _outcomes;
+};
+
 struct ConstrainedEvolutionResult {
-    ConstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate_, Orbit<LabelledEnclosure> const& rigorous_, Orbit<LabelledEnclosure> const& constrained_, Vector<Kleenean> const& outcomes_) :
-        approximate(approximate_), rigorous(rigorous_), constrained(constrained_), outcomes(outcomes_) { }
+    ConstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate_, Orbit<LabelledEnclosure> const& rigorous_, Orbit<LabelledEnclosure> const& constrained_, ConstraintSatisfaction const& satisfaction_) :
+        approximate(approximate_), rigorous(rigorous_), constrained(constrained_), satisfaction(satisfaction_) { }
 
     Orbit<LabelledEnclosure> approximate;
     Orbit<LabelledEnclosure> rigorous;
     Orbit<LabelledEnclosure> constrained;
-    Vector<Kleenean> outcomes;
+    ConstraintSatisfaction satisfaction;
 };
 
 class EvaluationSequenceBuilder;

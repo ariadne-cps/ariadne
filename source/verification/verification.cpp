@@ -320,7 +320,28 @@ EvaluationSequence evaluate_singleton_orbits(Orbit<LabelledEnclosure> const& app
     return sb.build();
 }
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, EffectiveVectorMultivariateFunction const& h) {
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h) {
+    using A = VectorFieldEvolver;
+    using I = TaskInput<A>;
+    using O = TaskOutput<A>;
+
+    List<pExplore::Constraint<A>> result;
+
+    for (ConstraintIndexType m=0; m<h.result_size(); ++m) {
+        result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
+            return evaluate_from_function(h[m],o.reach).lower().get_d();
+        }).set_name("true#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
+        );
+        result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
+            return -evaluate_from_function(h[m], o.evolve).upper().get_d();
+        }).set_name("false#"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
+        );
+    }
+
+    return result;
+}
+
+List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
@@ -367,15 +388,14 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
     return result;
 }
 
-Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining) {
-    auto M = preanalysis.number_of_constraints();
-    Vector<Kleenean> result(M,indeterminate);
+ConstraintSatisfaction synthesise_satisfaction(List<RealExpression> const& constraints, EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining) {;
+    ConstraintSatisfaction result(constraints);
     for (auto const& state : constraining.states()) {
         auto const& sigma = preanalysis.usage(state.constraint().group_id()).sigma;
         if (sigma == SatisfactionPrescription::TRUE and state.constraint().failure_kind() == ConstraintFailureKind::HARD and not state.has_failed())
-            result.at(state.constraint().group_id()) = true;
+            result.set(state.constraint().group_id(),true);
         else if (sigma != SatisfactionPrescription::TRUE and state.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and state.has_succeeded()) {
-            result.at(state.constraint().group_id()) = false;
+            result.set(state.constraint().group_id(),false);
         }
     }
     return result;
@@ -415,7 +435,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
     auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
 
-    auto task_constraints = build_task_constraints(analysis, h);
+    auto task_constraints = build_controlled_task_constraints(h, analysis);
 
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
@@ -440,7 +460,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
         CONCLOG_PRINTLN_AT(1,state)
     }
 
-    auto outcomes = synthesise_outcomes(analysis,constraining_state);
+    auto outcomes = synthesise_satisfaction(constraints,analysis,constraining_state);
 
     return {approximate_orbit,rigorous_orbit,constrained_orbit,outcomes};
 }

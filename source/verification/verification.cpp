@@ -407,7 +407,9 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
+    sw.restart();
     CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
+
 
     auto h = to_function(constraints, dynamics.state_space());
 
@@ -423,8 +425,8 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
     }
 
     VectorFieldEvolver constrained_evolver(dynamics,configuration);
-    sw.restart();
 
+    sw.restart();
     CONCLOG_PRINTLN("Computing constrained evolution... ")
     constrained_evolver.set_constraints(task_constraints);
 

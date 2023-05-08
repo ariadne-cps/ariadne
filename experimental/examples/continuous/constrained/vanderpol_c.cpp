@@ -47,7 +47,8 @@ void ariadne_main()
     RealConstant xmin("xmin",-1.0_x);
     RealConstant xmax("xmax",2.1_x);
     RealConstant rsqr("r^2",2.5_x);
-    List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
+    //List<RealExpression> constraints = {y - ymin, x - xmin, ymax - y, xmax - x, sqr(x) + sqr(y) - rsqr};
+    List<RealExpression> constraints = {ymax - y};
 
     constrained_execution("vanderpol",dynamics,constraints,initial_set,evolution_time);
 }

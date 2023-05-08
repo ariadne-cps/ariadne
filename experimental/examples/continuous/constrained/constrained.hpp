@@ -57,13 +57,9 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
 
     auto result = constrained_evolution(dynamics,initial_set,evolution_time,constraints,configuration);
 
-    auto const& approximate_orbit = get<0>(result);
-    auto const& rigorous_orbit = get<1>(result);
-    auto const& outcomes = get<2>(result);
-
     CONCLOG_PRINTLN("Constraint checking outcomes:")
     for (size_t m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << outcomes.at(m))
+        CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << result.outcomes.at(m))
     }
 
     auto best_scores = pExplore::TaskManager::instance().best_scores();
@@ -75,7 +71,7 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
     CONCLOG_PRINTLN_AT(1,"Optimal point: " << pExplore::TaskManager::instance().optimal_point())
 
     auto variable_names = dynamics.state_space().variable_names();
-    auto drawing_box = bounding_box(rigorous_orbit.reach());
+    auto drawing_box = bounding_box(result.rigorous.reach());
 
     CONCLOG_PRINTLN("Plotting...")
     for (size_t i=0; i<dynamics.dimension()-1; i++) {
@@ -84,17 +80,20 @@ void constrained_execution(pExplore::String const& name, VectorField const& dyna
             auto xj = RealVariable(variable_names.at(j));
             LabelledFigure fig=LabelledFigure({drawing_box[xi].lower_bound().get_d()<=xi<=drawing_box[xi].upper_bound().get_d(),drawing_box[xj].lower_bound().get_d()<=xj<=drawing_box[xj].upper_bound().get_d()});
             fig.clear();
-            fig.draw(approximate_orbit);
+            fig.draw(result.approximate);
             char var_char[64] = "";
             if (dynamics.dimension() > 2) snprintf(var_char,64,"[%s,%s]",xi.name().c_str(),xj.name().c_str());
             CONCLOG_RUN_MUTED(fig.write((name+"_approximate"+var_char).c_str()))
             fig.clear();
-            fig.draw(rigorous_orbit);
+            fig.draw(result.rigorous);
+            CONCLOG_RUN_MUTED(fig.write((name+"_rigorous"+var_char).c_str()))
             //auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1));
-            //auto inner = approximator.compute_from(rigorous_orbit.intermediate());
+            //auto inner = approximator.compute_from(result.constrained.intermediate());
             //fig << fill_colour(red);
             //fig.draw(inner);
-            CONCLOG_RUN_MUTED(fig.write((name+"_rigorous"+var_char).c_str()))
+            fig.clear();
+            fig.draw(result.constrained);
+            CONCLOG_RUN_MUTED(fig.write((name+"_constrained"+var_char).c_str()))
         }
     }
 }

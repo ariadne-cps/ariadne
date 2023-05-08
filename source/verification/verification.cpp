@@ -96,20 +96,21 @@ EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, EffectiveVectorMu
                                           _max_robustness_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
                                           _t_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
 
-void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& e) {
-    auto eval = evaluate_from_function(_h,e);
+void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& approximate, LabelledEnclosure const& rigorous) {
+    auto approximate_evaluation = evaluate_from_function(_h,approximate);
 
-    auto bb = e.euclidean_set().bounding_box();
-    add({e.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(bb),eval});
+    auto approximate_box = approximate.euclidean_set().bounding_box();
+    auto rigorous_box = rigorous.euclidean_set().bounding_box();
+    add({approximate.time_function().range().midpoint().get_d(),reinterpret_cast<Vector<FloatDPBounds>const&>(approximate_box),reinterpret_cast<Vector<FloatDPBounds>const&>(rigorous_box),approximate_evaluation});
 }
 
 void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
     HELPER_PRECONDITION(_timed_box_evaluations.empty() or _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time < tbe.time)
     _timed_box_evaluations.push_back(tbe);
     for (ConstraintIndexType m=0; m<_M; ++m) {
-        auto const& evaluation = tbe.evaluation[m];
-        auto upper = evaluation.upper().get_d();
-        auto lower = evaluation.lower().get_d();
+        auto const& approximate_evaluation = tbe.approximate_evaluation[m];
+        auto upper = approximate_evaluation.upper().get_d();
+        auto lower = approximate_evaluation.lower().get_d();
         if (_prescriptions[m] != SatisfactionPrescription::FALSE_FOR_ALL) {
             if (upper < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_ALL;
             else if (lower < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_SOME;
@@ -119,8 +120,8 @@ void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
         else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
 
         if (prescription_to_check != SatisfactionPrescription::TRUE) {
-            auto chi = get_chi(tbe.box,_h[m],prescription_to_check);
-            auto robustness = get_rho(chi,get_beta(tbe.box,_N),prescription_to_check);
+            auto chi = get_chi(tbe.approximate_box,_h[m],prescription_to_check);
+            auto robustness = get_rho(chi,get_beta(tbe.approximate_box,_N),prescription_to_check);
             if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
                 _max_robustness_false[m].at(prescription_to_check) = robustness;
                 _t_false[m].at(prescription_to_check) = tbe.time;
@@ -144,25 +145,27 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
 
     List<TimedMeasurement> timed_measurements;
 
-    double beta0 = get_beta(_timed_box_evaluations.at(0).box,_N);
-    timed_measurements.push_back({_timed_box_evaluations.at(0).time,beta0});
+    double approximate_beta0 = get_beta(_timed_box_evaluations.at(0).approximate_box,_N);
+    double rigorous_beta0 = get_beta(_timed_box_evaluations.at(0).rigorous_box,_N);
+    timed_measurements.push_back({_timed_box_evaluations.at(0).time,approximate_beta0,rigorous_beta0});
 
     Vector<double> alpha(_M, std::numeric_limits<double>::max());
     for (size_t i=1; i < _timed_box_evaluations.size(); ++i) {
         auto const& tbe = _timed_box_evaluations.at(i);
-        double beta = get_beta(tbe.box,_N);
+        double approximate_beta = get_beta(tbe.approximate_box,_N);
+        double rigorous_beta = get_beta(tbe.rigorous_box,_N);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
                 if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
-                    double chi = get_chi(tbe.box,_h[m],_prescriptions[m]);
-                    double rho = get_rho(chi,beta,_prescriptions[m]);
-                    auto this_alpha = rho*T_star[m]/beta/tbe.time;
-                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",alpha="<<this_alpha)
+                    double chi = get_chi(tbe.approximate_box,_h[m],_prescriptions[m]);
+                    double rho = get_rho(chi,approximate_beta,_prescriptions[m]);
+                    auto this_alpha = rho/(rigorous_beta-approximate_beta);
+                    CONCLOG_PRINTLN_AT(1,"i="<< i <<",m="<< m << ",chi="<< chi << ",rho="<<rho<<",e="<< rigorous_beta-approximate_beta << ",alpha="<<this_alpha)
                     if (this_alpha>0) alpha[m] = std::min(alpha[m],this_alpha);
                 }
             }
         }
-        timed_measurements.push_back({tbe.time,beta});
+        timed_measurements.push_back({tbe.time,approximate_beta,rigorous_beta});
     }
 
     Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
@@ -294,12 +297,26 @@ Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
 
-EvaluationSequence evaluate_approximate_orbit(Orbit<LabelledEnclosure> const& orbit, EffectiveVectorMultivariateFunction const& h) {
+EvaluationSequence evaluate_singleton_orbits(Orbit<LabelledEnclosure> const& approximate, Orbit<LabelledEnclosure> const& rigorous, EffectiveVectorMultivariateFunction const& h) {
     CONCLOG_SCOPE_CREATE
 
-    EvaluationSequenceBuilder sb(orbit.initial().dimension(),h);
-    sb.add_from(orbit.initial());
-    for (auto const& e : orbit.intermediate()) { sb.add_from(e); }
+    EvaluationSequenceBuilder sb(approximate.initial().dimension(),h);
+    sb.add_from(approximate.initial(),rigorous.initial());
+    size_t r_idx = 0;
+    for (auto const& a : approximate.intermediate()) {
+        auto a_t = a.time_function().range().midpoint().get_d();
+        LabelledEnclosure r = rigorous.intermediate()[r_idx];
+        while (r_idx < rigorous.intermediate().size()-1) {
+            auto r_t = r.time_function().range().midpoint().get_d();
+            LabelledEnclosure r_next = rigorous.intermediate()[r_idx+1];
+            auto r_t_next = r_next.time_function().range().midpoint().get_d();
+            if (abs(r_t_next - a_t) < abs(r_t - a_t)) {
+                ++r_idx;
+                r = r_next;
+            } else break;
+        }
+        sb.add_from(a,r);
+    }
     return sb.build();
 }
 
@@ -314,9 +331,10 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(Evaluation
         result.push_back(ConstraintBuilder<A>([evaluation,m](I const&, O const& o) {
             auto t = o.time.get_d();
             auto near_evaluation = evaluation.near(t);
-            auto const& beta_approx = near_evaluation.beta;
+            auto const& approximate_beta = near_evaluation.approximate_beta;
+            auto const& rigorous_beta = near_evaluation.rigorous_beta;
             auto alpha = evaluation.usage(m).alpha;
-            return beta_approx*(1.0+alpha*t/evaluation.usage(m).t_star) - nthroot(o.evolve.euclidean_set().bounding_box().volume().get_d(),o.evolve.dimension());
+            return (alpha+1.0)*approximate_beta - alpha*rigorous_beta - nthroot(o.evolve.euclidean_set().bounding_box().volume().get_d(),o.evolve.dimension());
         }).set_name("objective&soft#"+to_string(m)).set_group_id(m).set_objective_impact(ConstraintObjectiveImpact::UNSIGNED).set_failure_kind(ConstraintFailureKind::SOFT)
           .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))                                                                                                                                                                                                                                                                                                                                                          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
           .build()
@@ -363,27 +381,37 @@ Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, Cons
     return result;
 }
 
-Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
 
-    VectorFieldEvolver approximate_evolver(dynamics,Configuration<VectorFieldEvolver>().set_enable_clobbering(true).set_integrator(
-                           TaylorSeriesIntegrator(Configuration<TaylorSeriesIntegrator>().set_bounder(
-                                   EulerBounder(Configuration<EulerBounder>().set_lipschitz_tolerance(0.25))
-                                   ))));
+    auto analysis_point = configuration.search_space().initial_point();
+    CONCLOG_PRINTLN("Using point " << analysis_point << " for singleton analyses.")
+
+    auto singleton_configuration = make_singleton(configuration,analysis_point);
+    singleton_configuration.set_enable_clobbering(true);
+
+    VectorFieldEvolver approximate_evolver(dynamics,singleton_configuration);
 
     Helper::Stopwatch<std::chrono::microseconds> sw;
-    CONCLOG_PRINTLN("Computing approximate evolution...")
+    CONCLOG_PRINTLN("Computing approximate singleton evolution...")
     auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
     sw.restart();
-    CONCLOG_PRINTLN("Processing approximate evolution for constraints... ")
+    CONCLOG_PRINTLN("Computing rigorous singleton evolution...")
+    singleton_configuration.set_enable_clobbering(false);
+    VectorFieldEvolver rigorous_evolver(dynamics,singleton_configuration);
+    auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+    sw.click();
+    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
+
+    CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
 
     auto h = to_function(constraints, dynamics.state_space());
 
-    auto analysis = evaluate_approximate_orbit(approximate_orbit, h);
+    auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
 
     auto task_constraints = build_task_constraints(analysis, h);
 
@@ -394,17 +422,17 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
         CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << analysis.usage(m))
     }
 
-    VectorFieldEvolver rigorous_evolver(dynamics,configuration);
+    VectorFieldEvolver constrained_evolver(dynamics,configuration);
     sw.restart();
 
-    CONCLOG_PRINTLN("Computing rigorous evolution... ")
-    rigorous_evolver.set_constraints(task_constraints);
+    CONCLOG_PRINTLN("Computing constrained evolution... ")
+    constrained_evolver.set_constraints(task_constraints);
 
-    auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+    auto constrained_orbit = constrained_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     sw.click();
     CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
 
-    auto constraining_state = rigorous_evolver.constraining_state();
+    auto constraining_state = constrained_evolver.constraining_state();
 
     for (auto state : constraining_state.states()) {
         CONCLOG_PRINTLN_AT(1,state)
@@ -412,7 +440,7 @@ Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constr
 
     auto outcomes = synthesise_outcomes(analysis,constraining_state);
 
-    return {approximate_orbit,rigorous_orbit,outcomes};
+    return {approximate_orbit,rigorous_orbit,constrained_orbit,outcomes};
 }
 
 } // namespace Ariadne

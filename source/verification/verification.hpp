@@ -62,6 +62,7 @@ std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescr
 }
 
 class EvaluationSequence;
+struct ConstrainedEvolutionResult;
 
 FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
 Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure);
@@ -70,7 +71,7 @@ Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
 List<pExplore::Constraint<VectorFieldEvolver>> build_task_constraints(EvaluationSequence const& evaluation, EffectiveVectorMultivariateFunction const& h);
 Vector<Kleenean> synthesise_outcomes(EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining);
-Tuple<Orbit<LabelledEnclosure>,Orbit<LabelledEnclosure>,Vector<Kleenean>> constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                                                     List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
 
 double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
@@ -80,27 +81,40 @@ Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
 struct TimedBoxEvaluation {
-    TimedBoxEvaluation(double time_, Vector<FloatDPBounds> const& box_, Vector<FloatDPBounds> const& evaluation_) : time(time_), box(box_), evaluation(evaluation_) { }
+    TimedBoxEvaluation(double time_, Vector<FloatDPBounds> const& approximate_box_, Vector<FloatDPBounds> const& rigorous_box_, Vector<FloatDPBounds> const& approximate_evaluation_) :
+        time(time_), approximate_box(approximate_box_), rigorous_box(rigorous_box_), approximate_evaluation(approximate_evaluation_) { }
     double time;
-    Vector<FloatDPBounds> box;
-    Vector<FloatDPBounds> evaluation;
-    friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": box=" << tbe.box << ", eval=" << tbe.evaluation; }
+    Vector<FloatDPBounds> approximate_box;
+    Vector<FloatDPBounds> rigorous_box;
+    Vector<FloatDPBounds> approximate_evaluation;
+    friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": a_box=" << tbe.approximate_box << ", r_box=" << tbe.rigorous_box << ", eval=" << tbe.approximate_evaluation; }
 };
 
 struct HardConstraintPrescription {
-  HardConstraintPrescription(SatisfactionPrescription sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
-  SatisfactionPrescription sigma;
-  double t_star;
-  double alpha;
-  friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
+    HardConstraintPrescription(SatisfactionPrescription sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
+    SatisfactionPrescription sigma;
+    double t_star;
+    double alpha;
+    friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
-//! \brief A timed measurement in terms of beta (normalised volume)
+//! \brief A timed measurement in terms of beta (normalised volume) both for approximate and rigorous reachability
 struct TimedMeasurement {
-  TimedMeasurement(double time_, double beta_) : time(time_), beta(beta_) { }
-  double time;
-  double beta;
-  friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ": " << tm.beta; }
+    TimedMeasurement(double time_, double approximate_beta_, double rigorous_beta_) : time(time_), approximate_beta(approximate_beta_), rigorous_beta(rigorous_beta_) { }
+    double time;
+    double approximate_beta;
+    double rigorous_beta;
+    friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ":" << tm.approximate_beta << "(a)," << tm.rigorous_beta << "(r)"; }
+};
+
+struct ConstrainedEvolutionResult {
+    ConstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate_, Orbit<LabelledEnclosure> const& rigorous_, Orbit<LabelledEnclosure> const& constrained_, Vector<Kleenean> const& outcomes_) :
+        approximate(approximate_), rigorous(rigorous_), constrained(constrained_), outcomes(outcomes_) { }
+
+    Orbit<LabelledEnclosure> approximate;
+    Orbit<LabelledEnclosure> rigorous;
+    Orbit<LabelledEnclosure> constrained;
+    Vector<Kleenean> outcomes;
 };
 
 class EvaluationSequenceBuilder;
@@ -138,7 +152,9 @@ class EvaluationSequenceBuilder {
 
     EvaluationSequenceBuilder(size_t N, EffectiveVectorMultivariateFunction const& h);
 
-    void add_from(LabelledEnclosure const& e);
+    //! \brief Add an element of the sequence from \a approximate and \a rigorous enclosures
+    //! \details Assumes that the time has already been chosen the closest between the two and will use the approximate one
+    void add_from(LabelledEnclosure const& approximate, LabelledEnclosure const& rigorous);
 
     void add(TimedBoxEvaluation const& tbe);
 

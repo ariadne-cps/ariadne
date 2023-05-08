@@ -924,7 +924,7 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
         max_err,this->configuration().sweeper(), init_so,init_to,max_so,max_to);
 
-    if (tphi.error().get(DoublePrecision()).get_d() < this->configuration().step_maximum_error()) {
+    if (tphi.error().get(DoublePrecision()).get_d() > this->configuration().step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"GradedTaylorSeriesIntegrator::flow_step",
                       "Integration of "<<f<<" over "<<domx<<" for time interval "<<domt<<" has error "<<tphi.errors()<<
                       " using spacial order "<<max_so<<" and temporal order "<<max_to<<

@@ -512,34 +512,48 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
         CONCLOG_PRINTLN_VAR(satisfaction)
 
-        CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
+        if (num_indeterminates > 0) {
 
-        h = satisfaction.indeterminate_constraints_function();
-        auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
+            CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
 
-        auto controlled_task_constraints = build_controlled_task_constraints(h, analysis);
+            h = satisfaction.indeterminate_constraints_function();
+            auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
 
-        auto indeterminate_idxs = satisfaction.indeterminate_indexes();
-        for (size_t m = 0; m < analysis.number_of_constraints(); ++m) {
-            CONCLOG_PRINTLN(constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
-        }
+            auto controlled_task_constraints = build_controlled_task_constraints(h, analysis);
 
-        auto controlled_configuration = configuration;
-        auto approximate_bounding_box = bounding_box(approximate_orbit);
-        controlled_configuration.set_enable_premature_termination(true).set_maximum_enclosure_radius(approximate_bounding_box.radius().get_d());
-        VectorFieldEvolver controlled_evolver(dynamics, controlled_configuration);
+            auto indeterminate_idxs = satisfaction.indeterminate_indexes();
+            for (size_t m = 0; m < analysis.number_of_constraints(); ++m) {
+                CONCLOG_PRINTLN(constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
+            }
 
-        CONCLOG_PRINTLN("Computing controlled evolution... ")
-        controlled_evolver.set_constraints(controlled_task_constraints);
+            auto controlled_configuration = configuration;
+            auto approximate_bounding_box = bounding_box(approximate_orbit);
+            controlled_configuration.set_enable_premature_termination(true).set_maximum_enclosure_radius(
+                    approximate_bounding_box.radius().get_d());
+            VectorFieldEvolver controlled_evolver(dynamics, controlled_configuration);
 
-        controlled_orbit = controlled_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+            CONCLOG_PRINTLN("Computing controlled evolution... ")
+            controlled_evolver.set_constraints(controlled_task_constraints);
 
-        satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis);
+            controlled_orbit = controlled_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
 
-        if (satisfaction.indeterminate_indexes().size() == num_indeterminates)
+            satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis);
+
+            if (satisfaction.indeterminate_indexes().size() == num_indeterminates) {
+                CONCLOG_PRINTLN("No improvement in this round, aborting.")
+                break;
+            }
+
+            num_indeterminates = satisfaction.indeterminate_indexes().size();
+
+            if (num_indeterminates == 0) {
+                CONCLOG_PRINTLN("All constraints satisfiability determined, terminating.")
+                break;
+            }
+        } else {
+            CONCLOG_PRINTLN("Completed during singleton analysis, terminating earlier (controlled orbit will be the previous one).")
             break;
-
-        num_indeterminates = satisfaction.indeterminate_indexes().size();
+        }
     }
 
     return {approximate_orbit,rigorous_orbit,controlled_orbit,satisfaction};

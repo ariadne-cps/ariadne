@@ -504,7 +504,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
             satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state());
 
-            if (rigorous_orbit.final().empty()) break;
+            if (not rigorous_orbit.final().empty()) break;
             else { CONCLOG_PRINTLN_AT(1,"Early terminated due to set radius, retrying...") }
         }
 

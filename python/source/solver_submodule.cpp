@@ -40,6 +40,11 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class T> Nat __hash__(const T&);
+template<> Nat __hash__<FloatDPBoundsVector>(const FloatDPBoundsVector& v) {
+    return 0;
+}
+
 class SolverWrapper
   : public pybind11::wrapper< SolverInterface >
 {

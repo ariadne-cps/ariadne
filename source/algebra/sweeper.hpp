@@ -346,9 +346,9 @@ private:
 using ProNest::Configuration;
 
 template<> inline Sweeper<FloatDP>::Sweeper()
-    : Sweeper(new ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>())) { }
+    : Sweeper(new ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8))) { }
 template<> inline Sweeper<FloatMP>::Sweeper()
-    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),Configuration<ThresholdSweeper<FloatMP>>())) { }
+    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),Configuration<ThresholdSweeper<FloatMP>>().set_threshold(1e-8))) { }
 
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;

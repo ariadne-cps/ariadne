@@ -72,7 +72,6 @@ Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
 List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h);
 List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation);
-ConstraintSatisfaction synthesise_satisfaction(List<RealExpression> const& constraints, EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                  List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
 
@@ -111,23 +110,29 @@ struct TimedMeasurement {
 
 class ConstraintSatisfaction {
   public:
-    ConstraintSatisfaction(List<RealExpression> const& cs) : _cs(cs), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
-    size_t dimension() const { return _cs.size(); }
-    void set(size_t m, bool outcome) {
-        HELPER_PRECONDITION(m<dimension())
-        HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
-        _outcomes[m] = Detail::make_logical_value(outcome);
-    }
-    RealExpression const& expression(size_t m) const { HELPER_PRECONDITION(m<dimension()) return _cs[m]; }
-    LogicalValue const& outcome(size_t m) const { HELPER_PRECONDITION(m<dimension()) return _outcomes[m]; }
-    friend ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
-        os << "{";
-        for (size_t m=0; m<cs.dimension()-1; ++m) { os << cs.expression(m) << " >= 0 : " << cs.outcome(m) << ", "; }
-        if (cs.dimension() > 0) os << cs.expression(cs.dimension()-1) << " >= 0 : " << cs.outcome(cs.dimension()-1);
-        return os << "}";
-    }
+    ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc);
+
+    //! \brief The dimension of the satisfaction, i.e., the number of constraints
+    size_t dimension() const;
+
+    //! \brief Construct a vector function from the constraints that are still indeterminate
+    EffectiveVectorMultivariateFunction indeterminate_constraints_function() const;
+
+    void merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state);
+    void merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis);
+    List<size_t> indeterminate_indexes() const;
+    bool completed() const;
+
+    RealExpression const& expression(size_t m) const;
+    LogicalValue const& outcome(size_t m) const;
+    friend ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs);
+
+  private:
+    void set(size_t m, bool outcome);
+
   private:
     Vector<RealExpression> const _cs;
+    RealSpace const _space;
     Vector<LogicalValue> _outcomes;
 };
 

@@ -198,6 +198,79 @@ size_t EvaluationSequenceBuilder::_list_index(double time) const {
     return lower;
 }
 
+ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
+    _cs(cs), _space(spc), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
+
+size_t ConstraintSatisfaction::dimension() const {
+    return _cs.size();
+}
+
+EffectiveVectorMultivariateFunction ConstraintSatisfaction::indeterminate_constraints_function() const {
+    List<EffectiveScalarMultivariateFunction> result;
+    for (ConstraintIndexType m=0; m<_cs.size(); ++m)
+        if (Detail::is_indeterminate(_outcomes[m]))
+            result.push_back(make_function(_space,_cs.at(m)));
+    HELPER_ASSERT(not result.empty())
+    return result;
+}
+
+void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state) {
+    auto indeterminates = indeterminate_indexes();
+    for (auto const& s : state.states()) {
+        if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+            set(indeterminates.at(s.constraint().group_id()),true);
+        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
+            set(indeterminates.at(s.constraint().group_id()),false);
+        }
+    }
+}
+
+void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis) {
+    auto indeterminates = indeterminate_indexes();
+    for (auto const& s : state.states()) {
+        auto const& sigma = preanalysis.usage(s.constraint().group_id()).sigma;
+        if (sigma == SatisfactionPrescription::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+            set(indeterminates.at(s.constraint().group_id()),true);
+        else if (sigma != SatisfactionPrescription::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
+            set(indeterminates.at(s.constraint().group_id()),false);
+        }
+    }
+}
+
+List<size_t> ConstraintSatisfaction::indeterminate_indexes() const {
+    List<size_t> result;
+    for (size_t m=0; m<dimension(); ++m)
+        if (is_indeterminate(_outcomes[m]))
+            result.push_back(m);
+    return result;
+}
+
+bool ConstraintSatisfaction::completed() const {
+    return indeterminate_indexes().size() == 0;
+}
+
+RealExpression const& ConstraintSatisfaction::expression(size_t m) const {
+    HELPER_PRECONDITION(m<dimension())
+    return _cs[m];
+}
+
+LogicalValue const& ConstraintSatisfaction::outcome(size_t m) const {
+    HELPER_PRECONDITION(m<dimension())
+    return _outcomes[m];
+}
+
+ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
+    os << "{";
+    for (size_t m=0; m<cs.dimension()-1; ++m) { os << cs.expression(m) << " >= 0 : " << cs.outcome(m) << ", "; }
+    if (cs.dimension() > 0) os << cs.expression(cs.dimension()-1) << " >= 0 : " << cs.outcome(cs.dimension()-1);
+    return os << "}";
+}
+
+void ConstraintSatisfaction::set(size_t m, bool outcome) {
+    HELPER_PRECONDITION(m<dimension())
+    HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
+    _outcomes[m] = Detail::make_logical_value(outcome);
+}
 
 Vector<FloatDPBounds> resize(Vector<FloatDPBounds> const& bx, double chi, bool widen) {
     double factor = (widen ? chi - 1 : 1 - chi);
@@ -278,13 +351,6 @@ double get_rho(double chi, double beta, SatisfactionPrescription prescription) {
     if (prescription == SatisfactionPrescription::FALSE_FOR_SOME) {
         return (chi == std::numeric_limits<double>::infinity() ? beta : beta*(1.0-1.0/chi));
     } else return (chi-1.0)*beta;
-}
-
-EffectiveVectorMultivariateFunction to_function(List<RealExpression> const& constraints, RealSpace const& spc) {
-    EffectiveVectorMultivariateFunction result(constraints.size(),spc.size());
-    for (ConstraintIndexType m=0; m<constraints.size(); ++m)
-        result[m] = make_function(spc,constraints.at(m));
-    return result;
 }
 
 FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
@@ -388,19 +454,6 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
     return result;
 }
 
-ConstraintSatisfaction synthesise_satisfaction(List<RealExpression> const& constraints, EvaluationSequence const& preanalysis, ConstrainingState<VectorFieldEvolver> const& constraining) {;
-    ConstraintSatisfaction result(constraints);
-    for (auto const& state : constraining.states()) {
-        auto const& sigma = preanalysis.usage(state.constraint().group_id()).sigma;
-        if (sigma == SatisfactionPrescription::TRUE and state.constraint().failure_kind() == ConstraintFailureKind::HARD and not state.has_failed())
-            result.set(state.constraint().group_id(),true);
-        else if (sigma != SatisfactionPrescription::TRUE and state.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and state.has_succeeded()) {
-            result.set(state.constraint().group_id(),false);
-        }
-    }
-    return result;
-}
-
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
@@ -413,56 +466,45 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
     VectorFieldEvolver approximate_evolver(dynamics,singleton_configuration);
 
-    Helper::Stopwatch<std::chrono::microseconds> sw;
     CONCLOG_PRINTLN("Computing approximate singleton evolution...")
-    auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    sw.click();
-    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
+    auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
 
-    sw.restart();
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+
+    auto h = satisfaction.indeterminate_constraints_function();
+
     CONCLOG_PRINTLN("Computing rigorous singleton evolution...")
     singleton_configuration.set_enable_clobbering(false);
     VectorFieldEvolver rigorous_evolver(dynamics,singleton_configuration);
-    auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    sw.click();
-    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
+    auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
+    rigorous_evolver.set_constraints(uncontrolled_task_constraints);
+    auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
 
-    sw.restart();
+    satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state());
+    CONCLOG_PRINTLN_VAR(satisfaction)
+
     CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
 
-
-    auto h = to_function(constraints, dynamics.state_space());
-
+    h = satisfaction.indeterminate_constraints_function();
     auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
 
-    auto task_constraints = build_controlled_task_constraints(h, analysis);
+    auto controlled_task_constraints = build_controlled_task_constraints(h, analysis);
 
-    sw.click();
-    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
-
-    for (size_t m=0; m<constraints.size(); ++m) {
-        CONCLOG_PRINTLN(constraints.at(m) << " >= 0 : " << analysis.usage(m))
+    auto indeterminate_idxs = satisfaction.indeterminate_indexes();
+    for (size_t m=0; m<analysis.number_of_constraints(); ++m) {
+        CONCLOG_PRINTLN(constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
     }
 
     VectorFieldEvolver constrained_evolver(dynamics,configuration);
 
-    sw.restart();
-    CONCLOG_PRINTLN("Computing constrained evolution... ")
-    constrained_evolver.set_constraints(task_constraints);
+    CONCLOG_PRINTLN("Computing controlled evolution... ")
+    constrained_evolver.set_constraints(controlled_task_constraints);
 
-    auto constrained_orbit = constrained_evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
-    sw.click();
-    CONCLOG_PRINTLN_AT(0,"Done in " << sw.elapsed_seconds() << " seconds.")
+    auto constrained_orbit = constrained_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
 
-    auto constraining_state = constrained_evolver.constraining_state();
+    satisfaction.merge_from_controlled(constrained_evolver.constraining_state(),analysis);
 
-    for (auto state : constraining_state.states()) {
-        CONCLOG_PRINTLN_AT(1,state)
-    }
-
-    auto outcomes = synthesise_satisfaction(constraints,analysis,constraining_state);
-
-    return {approximate_orbit,rigorous_orbit,constrained_orbit,outcomes};
+    return {approximate_orbit,rigorous_orbit,constrained_orbit,satisfaction};
 }
 
 } // namespace Ariadne

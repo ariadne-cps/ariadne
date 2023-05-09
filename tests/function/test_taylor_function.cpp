@@ -709,7 +709,7 @@ Void TestTaylorFunctionFactory::test_create()
 {
     DP pr;
 
-    ThresholdSweeper<FloatDP> threshold_sweeper(pr,1e-4);
+    ThresholdSweeper<FloatDP> threshold_sweeper(pr,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-4));
     Sweeper<FloatDP> sweeper(threshold_sweeper);
     TaylorFunctionFactory factory(sweeper);
 
@@ -739,7 +739,7 @@ Void TestTaylorFunctionFactory::test_create()
 
 
 Int main() {
-    ThresholdSweeper<FloatDP> sweeper(dp,std::numeric_limits<float>::epsilon());
+    ThresholdSweeper<FloatDP> sweeper(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(std::numeric_limits<float>::epsilon()));
     TestScalarTaylorFunction(sweeper).test();
     TestVectorTaylorFunction(sweeper).test();
     TestTaylorFunctionFactory().test();

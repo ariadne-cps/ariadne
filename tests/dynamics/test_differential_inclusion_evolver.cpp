@@ -72,8 +72,8 @@ class TestDifferentialInclusionEvolver {
 
         SizeType period_of_parameter_reduction = 3;
         ExactDouble ratio_of_parameters_to_keep = 3.0_x;
-        ExactDouble sw_threshold = 1e-8_pr;
-        ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
+        double sw_threshold = 1e-8;
+        ThresholdSweeperDP sweeper(DoublePrecision(), Configuration<ThresholdSweeper<FloatDP>>().set_threshold(sw_threshold));
 
         List<InputApproximation> approximations = {ZeroApproximation(), ConstantApproximation(), AffineApproximation(),
                                                    SinusoidalApproximation(), PiecewiseApproximation()};
@@ -160,8 +160,8 @@ public:
 
         SizeType period_of_parameter_reduction = 3;
         ExactDouble ratio_of_parameters_to_keep = 1.25_x;
-        ExactDouble sw_threshold = 1e-10_pr;
-        ThresholdSweeperDP sweeper(DoublePrecision(), sw_threshold);
+        double sw_threshold = 1e-10;
+        ThresholdSweeperDP sweeper(DoublePrecision(), Configuration<ThresholdSweeper<FloatDP>>().set_threshold(sw_threshold));
 
         TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
                                                   .set_step_maximum_error(1e-6)

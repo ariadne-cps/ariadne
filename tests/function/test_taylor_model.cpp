@@ -622,7 +622,7 @@ template<class F> Void TestTaylorModel<F>::test_compose()
 
     // Regression test from failure in integration routing
     if constexpr (Same<F,FloatDP>) {
-        auto id=ValidatedTaylorModelType::coordinates(2,ThresholdSweeper<FloatDP>(double_precision,1e-10));
+        auto id=ValidatedTaylorModelType::coordinates(2,ThresholdSweeper<FloatDP>(double_precision,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-10)));
         auto s0=id[0];
         auto s1=id[1];
         auto x=( 0.3750000000000000_pr +0.1250000000000000_pr*s0 +0.0292968750000000_pr*s1 +0.0039062500000000_pr*s0*s1 +0.0004577636718750_pr*(s1^2) -0.0019531250000000_pr*(s0^2)*s1 -0.0003967285156250_pr*s0*(s1^2) -0.0000309944152832_pr*(s1^3) -0.0000915527343750_pr*(s0^2)*(s1^2) -0.0000184377034505_pr*s0*(s1^3) -0.0000010803341866_pr*(s1^4) +0.0000305175781250_pr*(s0^3)*(s1^2) +0.0000073115030924_pr*(s0^2)*(s1^3) +0.0000007127722104_pr*s0*(s1^4) +0.0000000334111974_pr*(s1^5) +0.0000019073486328_pr*(s0^3)*(s1^3) +0.0000005215406418_pr*(s0^2)*(s1^4) +0.0000000533492615_pr*s0*(s1^5) +0.0000000020839555_pr*(s1^6) -0.0000004768371582_pr*(s0^4)*(s1^3) -0.0000001241763433_pr*(s0^3)*(s1^4) -0.0000000131704534_pr*(s0^2)*(s1^5) -0.0000000007510809_pr*s0*(s1^6) -0.0000000372529030_pr*(s0^4)*(s1^4) -0.0000000125728548_pr*(s0^3)*(s1^5) -0.0000000017495040_pr*(s0^2)*(s1^6) -0.0000000001205073_pr*s0*(s1^7) +0.0000000074505806_pr*(s0^5)*(s1^4) +0.0000000019790605_pr*(s0^4)*(s1^5) +0.0000000001813735_pr*(s0^3)*(s1^6) +0.0000000006984919_pr*(s0^5)*(s1^5) +0.0000000002758801_pr*(s0^4)*(s1^6) -0.0000000001164153_pr*(s0^6)*(s1^5));
@@ -647,12 +647,12 @@ template<class F> Void TestTaylorModel<F>::test_recondition()
 
 
 Int main() {
-    ThresholdSweeper<FloatDP> sweeper_dp(dp,1e-8);
+    ThresholdSweeper<FloatDP> sweeper_dp(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
     TestTaylorModel<FloatDP>(sweeper_dp).test();
     MultiplePrecision mp(128);
-    ThresholdSweeper<FloatMP> sweeper_mp(mp,FloatMP(pow(two,-64),mp));
-    ARIADNE_TEST_PRINT(sweeper_mp.precision());
-    ARIADNE_TEST_PRINT(sweeper_mp);
+    ThresholdSweeper<FloatMP> sweeper_mp(mp,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(std::pow(2.0,-64)));
+    ARIADNE_TEST_PRINT(sweeper_mp.precision())
+    ARIADNE_TEST_PRINT(sweeper_mp)
     TestTaylorModel<FloatMP>(sweeper_mp).test();
 
     RelativeThresholdSweeper<FloatMP> relative_sweeper_mp(mp,FloatMP(pow(two,-64),mp));

@@ -257,7 +257,7 @@ class TestIntegrator
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-10);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-10));
 
     TaylorPicardIntegrator taylor_picard_integrator(Configuration<TaylorPicardIntegrator>().set_sweeper(sweeper).set_step_maximum_error(1e-8));
     ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator))

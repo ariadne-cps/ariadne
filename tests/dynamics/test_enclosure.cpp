@@ -71,14 +71,14 @@ class TestEnclosure
 
     Void test_construct_without_domain() const {
         Enclosure encl;
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)));
         EnclosureConfiguration configuration(function_factory);
         Enclosure encl_config(configuration);
     }
 
     Void test_construct_with_domain() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)));
         EnclosureConfiguration configuration(function_factory);
         Enclosure encl(dom,configuration);
         ARIADNE_TEST_PRINT(configuration);
@@ -91,7 +91,7 @@ class TestEnclosure
 
     Void test_is_bounded() const {
         ExactBoxType bounded_dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        EnclosureConfiguration configuration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8)));
+        EnclosureConfiguration configuration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8))));
         Enclosure encl(bounded_dom,configuration);
         ARIADNE_TEST_ASSERT(encl.is_bounded());
         ExactBoxType unbounded_dom({{0.0_x,infty},{1.0_x,3.0_x}});
@@ -101,7 +101,7 @@ class TestEnclosure
 
     Void test_subset_separated() const {
         ExactBoxType box1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)))));
         ARIADNE_TEST_ASSERT(definitely(encl.subset(box1)));
         ARIADNE_TEST_ASSERT(possibly(not encl.separated(box1)));
         ExactBoxType box2({{2.0_x,3.0_x},{-1.0_x,0.0_x}});
@@ -111,7 +111,7 @@ class TestEnclosure
 
     Void test_restriction() const {
         ExactBoxType box1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        Enclosure encl(box1,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)))));
         auto codomain1 = encl.codomain();
         ExactBoxType box2({{0.5_x,1.5_x},{1.5_x,2.5_x}});
         auto encl2 = restriction(encl,box2);
@@ -120,7 +120,7 @@ class TestEnclosure
 
     Void test_auxiliary_map() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)))));
         ARIADNE_TEST_PRINT(encl.auxiliary_function());
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
@@ -135,7 +135,7 @@ class TestEnclosure
 
     Void test_constraints() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)))));
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);
         encl.new_zero_state_constraint(x0+sqr(x1));
@@ -153,7 +153,7 @@ class TestEnclosure
 
     Void test_split() const {
         ExactBoxType dom1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto swp = ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom1,swp),0);
         Enclosure encl(dom1,fnc,EnclosureConfiguration(TaylorFunctionFactory(swp)));
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
@@ -174,7 +174,7 @@ class TestEnclosure
         RealSpace spc({x, y});
         ExactBoxType bx({{0.0_x,2.0_x},{1.0_x,3.0_x}});
         LabelledExactBoxType dom(spc, bx);
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)));
         EnclosureConfiguration configuration(function_factory);
         LabelledEnclosure labelled_encl1(dom, configuration);
         ARIADNE_TEST_PRINT(labelled_encl1)
@@ -198,7 +198,7 @@ class TestEnclosure
     Void test_labelled_product() const {
         RealVariable x("x"),y("y"),z("z");
         ExactBoxType dom1({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto swp = ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom1,swp),0);
         Enclosure e1(dom1,fnc,EnclosureConfiguration(TaylorFunctionFactory(swp)));
         LabelledEnclosure le1(e1,RealSpace({x,y}),RealSpace({z}));
@@ -216,7 +216,7 @@ class TestEnclosure
         ARIADNE_TEST_PRINT(drawer);
         GraphicsManager::instance().set_drawer(drawer);
         ExactBoxType dom({{0.0_x,1.0_x},{1.0_x,2.0_x}});
-        auto swp = ThresholdSweeper<FloatDP>(dp,1e-8);
+        auto swp = ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
         auto fnc = antiderivative(ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp),0);
         TaylorFunctionFactory function_factory(swp);
         EnclosureConfiguration configuration(function_factory);
@@ -236,7 +236,7 @@ class TestEnclosure
 
     void test_labelled_with_auxiliary_draw() const {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        EnclosureConfiguration config(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8)));
+        EnclosureConfiguration config(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8))));
         Enclosure encl(dom,config);
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);

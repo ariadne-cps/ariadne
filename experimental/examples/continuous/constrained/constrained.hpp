@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constrained_vanderpol.cpp
+ *            constrained.hpp
  *
  *  Copyright  2023  Luca Geretti
  *

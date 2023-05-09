@@ -174,7 +174,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarMultivariateFunctionPatch g=ValidatedScalarMultivariateTaylorFunctionModelDP(product(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionPatch g=ValidatedScalarMultivariateTaylorFunctionModelDP(product(p,r),f,ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-12)));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);

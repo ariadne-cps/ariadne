@@ -98,7 +98,7 @@ Void TestMultifunction::test_taylor_concept()
 
     MP pr(128);
     BoxDomainType dom({{-1,+1},{-1,+1}});
-    ThresholdSweeper<FloatMP> swp(pr,1e-10);
+    ThresholdSweeper<FloatMP> swp(pr,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(1e-10));
     UpperInterval c(pr);
     ScalarIntervalFunctionModel f(dom,swp);
     Bounds<FloatMP> x(pr);
@@ -127,7 +127,7 @@ Void TestMultifunction::test_taylor_evaluate()
 {
     MP pr(128);
     BoxDomainType dom({{0,1},{1,3}});
-    ThresholdSweeper<FloatMP> swp(pr,1e-10);
+    ThresholdSweeper<FloatMP> swp(pr,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(1e-10));
     ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
     ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
     UpperInterval one(1,1,pr);
@@ -160,7 +160,7 @@ Void TestMultifunction::test_function_set()
     MP pr(128);
     BoxDomainType dom({{-1,+1},{-1,+1}});
 //    BoxDomainType dom({{0,1},{1,3}});
-    ThresholdSweeper<FloatMP> swp(pr,1e-10);
+    ThresholdSweeper<FloatMP> swp(pr,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(1e-10));
     ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
     ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
 
@@ -182,7 +182,7 @@ Void TestMultifunction::test_inclusion_solutions()
     MP pr(128);
     BoxDomainType dom({{-1,+1},{-1,+1},{0,+1}});
 //    BoxDomainType dom({{0,1},{1,3}});
-    ThresholdSweeper<FloatMP> swp(pr,1e-10);
+    ThresholdSweeper<FloatMP> swp(pr,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(1e-10));
     ScalarIntervalFunctionModel x0=ScalarIntervalFunctionModel::coordinate(dom,0,swp);
     ScalarIntervalFunctionModel x1=ScalarIntervalFunctionModel::coordinate(dom,1,swp);
     ScalarIntervalFunctionModel t=ScalarIntervalFunctionModel::coordinate(dom,1,swp);

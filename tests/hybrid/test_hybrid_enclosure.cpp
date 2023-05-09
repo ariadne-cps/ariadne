@@ -46,7 +46,7 @@ class TestHybridEnclosure {
     void test_construct() {
         HybridEnclosure encl;
 
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)));
         EnclosureConfiguration config(function_factory);
         HybridEnclosure encl2(config);
         ARIADNE_TEST_PRINT(encl2.configuration())
@@ -63,7 +63,7 @@ class TestHybridEnclosure {
     }
 
     void test_space_having_time() {
-        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
+        TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)));
         EnclosureConfiguration config(function_factory);
         RealVariable x("x"), t("t");
         HybridRealBox box(DiscreteLocation(),{1<=t<=2,0<=x<=1});
@@ -73,7 +73,7 @@ class TestHybridEnclosure {
 
     void test_auxiliary() {
         ExactBoxType dom({{0.0_x,2.0_x},{1.0_x,3.0_x}});
-        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-8))));
+        Enclosure encl(dom,EnclosureConfiguration(TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8)))));
         ARIADNE_TEST_PRINT(encl.auxiliary_function());
         auto x0 = EffectiveScalarMultivariateFunction::coordinate(2,0);
         auto x1 = EffectiveScalarMultivariateFunction::coordinate(2,1);

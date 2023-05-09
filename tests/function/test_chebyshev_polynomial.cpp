@@ -165,8 +165,8 @@ Int main() {
     TestChebyshevPolynomial<FloatDPApproximation>(dp).test();
     TestChebyshevPolynomial<FloatMPApproximation>(mp).test();
 
-    ThresholdSweeper<FloatDP> sweeper_dp(dp,1e-8);
-    ThresholdSweeper<FloatMP> sweeper_mp(mp,std::pow(2.0,-64));
+    ThresholdSweeper<FloatDP> sweeper_dp(dp,Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
+    ThresholdSweeper<FloatMP> sweeper_mp(mp,Configuration<ThresholdSweeper<FloatMP>>().set_threshold(std::pow(2.0,-64)));
     ARIADNE_TEST_PRINT(sweeper_mp.precision());
     ARIADNE_TEST_PRINT(sweeper_mp);
 

@@ -71,7 +71,7 @@ public:
         double step_size = 0.5;
         double enclosure_radius = 0.25;
 
-        ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
+        ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
 
         TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()
                                                  .set_step_maximum_error(1e-7)
@@ -133,7 +133,7 @@ public:
         double enclosure_radius = 0.25;
 
 
-        ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), 1e-8_pr);
+        ThresholdSweeper<FloatDP> sweeper(DoublePrecision(), Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-8));
 
 
         TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>()

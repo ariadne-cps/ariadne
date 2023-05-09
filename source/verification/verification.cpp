@@ -454,33 +454,53 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
     return result;
 }
 
+BoundingBoxType bounding_box(Orbit<LabelledEnclosure> const& orbit) {
+    BoundingBoxType result = orbit.initial().euclidean_set().bounding_box();
+    for (auto const& e : orbit.reach()) {
+        result = hull(result,e.euclidean_set().bounding_box());
+    }
+    return result;
+}
+
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                                       List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
     CONCLOG_SCOPE_CREATE
 
-    auto analysis_point = configuration.search_space().initial_point();
-    CONCLOG_PRINTLN("Using point " << analysis_point << " for singleton analyses.")
-
-    auto singleton_configuration = make_singleton(configuration,analysis_point);
-    singleton_configuration.set_enable_clobbering(true);
-
-    VectorFieldEvolver approximate_evolver(dynamics,singleton_configuration);
-
-    CONCLOG_PRINTLN("Computing approximate singleton evolution...")
-    auto approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
-
     auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
-
     auto h = satisfaction.indeterminate_constraints_function();
 
-    CONCLOG_PRINTLN("Computing rigorous singleton evolution...")
-    singleton_configuration.set_enable_clobbering(false);
-    VectorFieldEvolver rigorous_evolver(dynamics,singleton_configuration);
-    auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
-    rigorous_evolver.set_constraints(uncontrolled_task_constraints);
-    auto rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
+    Orbit<LabelledEnclosure> approximate_orbit({});
+    Orbit<LabelledEnclosure> rigorous_orbit({});
 
-    satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state());
+    while (true) {
+        auto analysis_point = configuration.search_space().initial_point();
+        CONCLOG_PRINTLN("Using point " << analysis_point << " for singleton analyses.")
+
+        auto singleton_configuration = make_singleton(configuration,analysis_point);
+        singleton_configuration.set_enable_clobbering(true);
+
+        VectorFieldEvolver approximate_evolver(dynamics,singleton_configuration);
+
+        CONCLOG_PRINTLN("Computing approximate singleton evolution...")
+        approximate_orbit = approximate_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
+
+        CONCLOG_PRINTLN("Computing rigorous singleton evolution...")
+        auto approximate_bounding_box = bounding_box(approximate_orbit);
+        singleton_configuration.set_enable_clobbering(false).set_enable_premature_termination(true).set_maximum_enclosure_radius(approximate_bounding_box.radius().get_d());
+
+        VectorFieldEvolver rigorous_evolver(dynamics,singleton_configuration);
+
+        h = satisfaction.indeterminate_constraints_function();
+        auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
+        rigorous_evolver.set_constraints(uncontrolled_task_constraints);
+        rigorous_orbit = rigorous_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
+
+        satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state());
+
+        if (rigorous_orbit.final()[0].time_function().range().upper_bound().get_d() >= evolution_time.get_d())
+            break;
+    }
+
     CONCLOG_PRINTLN_VAR(satisfaction)
 
     CONCLOG_PRINTLN("Processing singleton evolutions for constraints... ")
@@ -495,16 +515,16 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
         CONCLOG_PRINTLN(constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
     }
 
-    VectorFieldEvolver constrained_evolver(dynamics,configuration);
+    VectorFieldEvolver controlled_evolver(dynamics,configuration);
 
     CONCLOG_PRINTLN("Computing controlled evolution... ")
-    constrained_evolver.set_constraints(controlled_task_constraints);
+    controlled_evolver.set_constraints(controlled_task_constraints);
 
-    auto constrained_orbit = constrained_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
+    auto controlled_orbit = controlled_evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
 
-    satisfaction.merge_from_controlled(constrained_evolver.constraining_state(),analysis);
+    satisfaction.merge_from_controlled(controlled_evolver.constraining_state(),analysis);
 
-    return {approximate_orbit,rigorous_orbit,constrained_orbit,satisfaction};
+    return {approximate_orbit,rigorous_orbit,controlled_orbit,satisfaction};
 }
 
 } // namespace Ariadne

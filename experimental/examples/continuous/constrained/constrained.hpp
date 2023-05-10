@@ -95,6 +95,57 @@ Configuration<VectorFieldEvolver> get_configuration() {
                     .set_lipschitz_tolerance(0.0675,0.5)))));
 }
 
+List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t num_constraints, SystemSpecification const& spec, Configuration<VectorFieldEvolver> const& configuration) {
+    auto analysis_point = configuration.search_space().initial_point();
+    auto singleton_configuration = make_singleton(configuration, analysis_point);
+    singleton_configuration.set_enable_clobbering(true);
+    VectorFieldEvolver approximate_evolver(spec.dynamics, singleton_configuration);
+    CONCLOG_RUN_MUTED(auto orbit = approximate_evolver.orbit(spec.initial_set, spec.evolution_time, Semantics::LOWER))
+    auto bb = bounding_box(orbit.intermediate());
+
+    List<RealExpression> constraints;
+
+    UniformRealRandomiser<double> lower_rnd(0.5,1.0);
+    UniformRealRandomiser<double> upper_rnd(1.0,1.5);
+
+    UniformIntRandomiser<int> sign_rnd(0,1);
+
+    for (size_t i=0; i<num_constraints/2; ++i) {
+        RealExpression expr = (sign_rnd.get()*2-1);
+        for (auto const& v : spec.dynamics.state_space().variables())
+            expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(lower_rnd.get()*bb[v].radius().get_d())))*(sign_rnd.get()*2-1);
+        constraints.push_back(expr);
+    }
+    for (size_t i=0; i<num_constraints/2; ++i) {
+        RealExpression expr = (sign_rnd.get()*2-1);
+        for (auto const& v : spec.dynamics.state_space().variables())
+            expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(upper_rnd.get()*bb[v].radius().get_d())))*(sign_rnd.get()*2-1);
+        constraints.push_back(expr);
+    }
+
+    List<EffectiveScalarMultivariateFunction> constraint_functions;
+    for (auto const& c : constraints)
+        constraint_functions.push_back(make_function(spec.dynamics.state_space(),c));
+
+    List<ConstraintPrescription> result;
+    for (auto const& c : constraints)
+        result.push_back({c, SatisfactionPrescriptionKind::TRUE});
+
+    for (auto const& encl : orbit.intermediate()) {
+        for (size_t m=0; m<constraints.size(); ++m) {
+            auto const& eval = evaluate_from_function(constraint_functions.at(m),encl);
+            auto upper = eval.upper().get_d();
+            auto lower = eval.lower().get_d();
+            if (result.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
+                if (upper < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
+                else if (lower < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
+            }
+        }
+    }
+
+    return result;
+}
+
 List<ConstraintPrescription> generate_ellipsoidal_constraints(size_t num_constraints, SystemSpecification const& spec, Configuration<VectorFieldEvolver> const& configuration) {
     auto analysis_point = configuration.search_space().initial_point();
     auto singleton_configuration = make_singleton(configuration, analysis_point);
@@ -105,8 +156,8 @@ List<ConstraintPrescription> generate_ellipsoidal_constraints(size_t num_constra
 
     List<RealExpression> constraints;
 
-    UniformRealRandomiser<double> lower_rnd(0.5,0.75);
-    UniformRealRandomiser<double> upper_rnd(1.25,1.5);
+    UniformRealRandomiser<double> lower_rnd(0.5,1.0);
+    UniformRealRandomiser<double> upper_rnd(1.0,1.5);
 
     for (size_t i=0; i<num_constraints/2; ++i) {
         RealExpression expr = -1;

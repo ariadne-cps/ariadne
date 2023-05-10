@@ -52,15 +52,15 @@ void ariadne_main() {
         CONCLOG_PRINTLN(s.name)
 
         CONCLOG_PRINTLN_AT(1,"Generating the constraints...")
-        auto constraints_prescriptions = generate_ellipsoidal_constraints(NUM_CONSTRAINTS,s,configuration);
+        auto constraints_prescriptions = generate_ellipsoidal_hyperbolic_constraints(NUM_CONSTRAINTS,s,configuration);
         CONCLOG_PRINTLN_AT(1,"Expected frequencies: " << frequencies(constraints_prescriptions))
 
         CONCLOG_PRINTLN_AT(1,"Running...")
         auto result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions));
 
-        CONCLOG_PRINTLN_VAR(result.prescription_ratios())
-        CONCLOG_PRINTLN_VAR(result.success_ratios())
-        CONCLOG_PRINTLN_VAR(result.global_success_ratio())
+        CONCLOG_PRINTLN_VAR(result.satisfaction().prescription_ratios())
+        CONCLOG_PRINTLN_VAR(result.satisfaction().success_ratios())
+        CONCLOG_PRINTLN_VAR(result.satisfaction().global_success_ratio())
     }
 
 }

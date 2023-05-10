@@ -199,7 +199,7 @@ size_t EvaluationSequenceBuilder::_list_index(double time) const {
 }
 
 ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
-    _cs(cs), _space(spc), _prescriptions(Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::UNSPECIFIED)), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
+    _cs(cs), _space(spc), _prescriptions(Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::TRUE)), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
 
 size_t ConstraintSatisfaction::dimension() const {
     return _cs.size();
@@ -218,10 +218,14 @@ void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFie
     auto indeterminates = indeterminate_indexes();
     for (auto const& s : state.states()) {
         auto const& m = indeterminates.at(s.constraint().group_id());
-        if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+        if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed()) {
             set_outcome(m,true);
-        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
+            reset_prescription(m,SatisfactionPrescriptionKind::TRUE);
+        }
+        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
             set_outcome(m,false);
+            reset_prescription(m,SatisfactionPrescriptionKind::FALSE_FOR_ALL);
+        }
     }
 }
 

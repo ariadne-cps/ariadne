@@ -51,14 +51,12 @@ double nthroot(double value, size_t n);
 //! \details TRUE : always true for all points (required over-approximation)
 //!          FALSE_FOR_ALL : sometimes false for all points (can use over-approximation)
 //!          FALSE_FOR_SOME : sometimes false only for some points (must use under-approximation)
-//!          UNSPECIFIED : not specified yet
-enum class SatisfactionPrescriptionKind { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME, UNSPECIFIED };
+enum class SatisfactionPrescriptionKind { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME };
 std::ostream& operator<<(std::ostream& os, const SatisfactionPrescriptionKind prescription) {
     switch(prescription) {
         case SatisfactionPrescriptionKind::TRUE: os << "TRUE"; return os;
         case SatisfactionPrescriptionKind::FALSE_FOR_ALL: os << "FALSE_FOR_ALL"; return os;
         case SatisfactionPrescriptionKind::FALSE_FOR_SOME: os << "FALSE_FOR_SOME"; return os;
-        case SatisfactionPrescriptionKind::UNSPECIFIED: os << "UNSPECIFIED"; return os;
         default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescriptionKind value for printing")
     }
 }

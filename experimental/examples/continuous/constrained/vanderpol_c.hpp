@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            vanderpol_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,13 +22,26 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "ariadne.hpp"
+#include "constrained.hpp"
 
-void ariadne_main() {
-    auto spec = VDP_c();
-    auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+using namespace std;
+using namespace Ariadne;
+
+SystemSpecification VDP_c()
+{
+    RealConstant mu("mu",1);
+    RealVariable x("x"), y("y");
+
+    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+
+    Real x0 = 1.40_dec;
+    Real y0 = 2.40_dec;
+    Real eps_x0 = 0.15_dec;
+    Real eps_y0 = 0.05_dec;
+    RealExpressionBoundedConstraintSet initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
+
+    Real evolution_time = 7;
+
+    return {"vanderpol",dynamics,initial_set,evolution_time};
 }

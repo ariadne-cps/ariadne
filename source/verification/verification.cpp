@@ -60,7 +60,7 @@ double nthroot(double value, size_t n) {
     return result;
 }
 
-EvaluationSequence::EvaluationSequence(List<TimedMeasurement> const& tv, Vector<HardConstraintPrescription> const& usages) : _sequence(tv), _prescriptions(usages) { }
+EvaluationSequence::EvaluationSequence(List<TimedMeasurement> const& tv, Vector<ControlSpecification> const& usages) : _sequence(tv), _prescriptions(usages) { }
 
 size_t EvaluationSequence::number_of_constraints() const { return _prescriptions.size(); }
 
@@ -82,7 +82,7 @@ TimedMeasurement const& EvaluationSequence::near(double time) const {
     else return _sequence.at(lower);
 }
 
-HardConstraintPrescription const& EvaluationSequence::usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
+ControlSpecification const& EvaluationSequence::usage(ConstraintIndexType idx) const { return _prescriptions.at(idx); }
 
 size_t EvaluationSequence::size() const { return _sequence.size(); }
 
@@ -92,9 +92,9 @@ ostream& operator<<(ostream& os, EvaluationSequence const& es) {
     return os << es.at(es.size()-1) << "}, usages:" << es._prescriptions;
 }
 
-EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, EffectiveVectorMultivariateFunction const& h) : _N(N), _M(h.result_size()), _h(h), _prescriptions(h.result_size(),SatisfactionPrescription::TRUE),
-                                          _max_robustness_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}),
-                                          _t_false(h.result_size(),{{SatisfactionPrescription::FALSE_FOR_ALL,0.0},{SatisfactionPrescription::FALSE_FOR_SOME,0.0}}) { }
+EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, EffectiveVectorMultivariateFunction const& h) : _N(N), _M(h.result_size()), _h(h), _prescriptions(h.result_size(), SatisfactionPrescriptionKind::TRUE),
+                                          _max_robustness_false(h.result_size(),{{SatisfactionPrescriptionKind::FALSE_FOR_ALL, 0.0}, {SatisfactionPrescriptionKind::FALSE_FOR_SOME, 0.0}}),
+                                          _t_false(h.result_size(),{{SatisfactionPrescriptionKind::FALSE_FOR_ALL, 0.0}, {SatisfactionPrescriptionKind::FALSE_FOR_SOME, 0.0}}) { }
 
 void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& approximate, LabelledEnclosure const& rigorous) {
     auto approximate_evaluation = evaluate_from_function(_h,approximate);
@@ -111,15 +111,15 @@ void EvaluationSequenceBuilder::add(TimedBoxEvaluation const& tbe) {
         auto const& approximate_evaluation = tbe.approximate_evaluation[m];
         auto upper = approximate_evaluation.upper().get_d();
         auto lower = approximate_evaluation.lower().get_d();
-        if (_prescriptions[m] != SatisfactionPrescription::FALSE_FOR_ALL) {
-            if (upper < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_ALL;
-            else if (lower < 0) _prescriptions[m] = SatisfactionPrescription::FALSE_FOR_SOME;
+        if (_prescriptions[m] != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
+            if (upper < 0) _prescriptions[m] = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
+            else if (lower < 0) _prescriptions[m] = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
         }
-        SatisfactionPrescription prescription_to_check = SatisfactionPrescription::TRUE;
-        if (upper < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_ALL;
-        else if (lower < 0) prescription_to_check = SatisfactionPrescription::FALSE_FOR_SOME;
+        SatisfactionPrescriptionKind prescription_to_check = SatisfactionPrescriptionKind::TRUE;
+        if (upper < 0) prescription_to_check = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
+        else if (lower < 0) prescription_to_check = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
 
-        if (prescription_to_check != SatisfactionPrescription::TRUE) {
+        if (prescription_to_check != SatisfactionPrescriptionKind::TRUE) {
             auto chi = get_chi(tbe.approximate_box,_h[m],prescription_to_check);
             auto robustness = get_rho(chi,get_beta(tbe.approximate_box,_N),prescription_to_check);
             if (_max_robustness_false[m].get(prescription_to_check) < robustness) {
@@ -136,10 +136,10 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
     Vector<double> T_star(_M, 0.0);
     for (ConstraintIndexType m=0; m<_M; ++m) {
         switch (_prescriptions[m]) {
-            case SatisfactionPrescription::TRUE :           T_star[m] = _timed_box_evaluations.at(_timed_box_evaluations.size()-1).time; break;
-            case SatisfactionPrescription::FALSE_FOR_ALL :  T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_ALL); break;
-            case SatisfactionPrescription::FALSE_FOR_SOME : T_star[m] = _t_false[m].get(SatisfactionPrescription::FALSE_FOR_SOME); break;
-            default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
+            case SatisfactionPrescriptionKind::TRUE : T_star[m] = _timed_box_evaluations.at(_timed_box_evaluations.size() - 1).time; break;
+            case SatisfactionPrescriptionKind::FALSE_FOR_ALL : T_star[m] = _t_false[m].get(SatisfactionPrescriptionKind::FALSE_FOR_ALL); break;
+            case SatisfactionPrescriptionKind::FALSE_FOR_SOME : T_star[m] = _t_false[m].get(SatisfactionPrescriptionKind::FALSE_FOR_SOME); break;
+            default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescriptionKind value")
         }
     }
 
@@ -156,7 +156,7 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
         double rigorous_beta = get_beta(tbe.rigorous_box,_N);
         for (ConstraintIndexType m=0; m<_M; ++m) {
             if (tbe.time <= T_star[m]) {
-                if (_prescriptions[m] == SatisfactionPrescription::TRUE or tbe.time == T_star[m]) {
+                if (_prescriptions[m] == SatisfactionPrescriptionKind::TRUE or tbe.time == T_star[m]) {
                     double chi = get_chi(tbe.approximate_box,_h[m],_prescriptions[m]);
                     double rho = get_rho(chi,approximate_beta,_prescriptions[m]);
                     auto this_alpha = rho/(rigorous_beta-approximate_beta);
@@ -168,7 +168,7 @@ EvaluationSequence EvaluationSequenceBuilder::build() const {
         timed_measurements.push_back({tbe.time,approximate_beta,rigorous_beta});
     }
 
-    Vector<HardConstraintPrescription> constants(_M, {SatisfactionPrescription::TRUE, 0.0, 0.0});
+    Vector<ControlSpecification> constants(_M, {SatisfactionPrescriptionKind::TRUE, 0.0, 0.0});
     for (ConstraintIndexType m=0; m<_M; ++m)
         constants[m] = {_prescriptions[m],T_star[m],alpha[m]};
 
@@ -199,7 +199,7 @@ size_t EvaluationSequenceBuilder::_list_index(double time) const {
 }
 
 ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
-    _cs(cs), _space(spc), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
+    _cs(cs), _space(spc), _prescriptions(Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::UNSPECIFIED)), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
 
 size_t ConstraintSatisfaction::dimension() const {
     return _cs.size();
@@ -217,11 +217,11 @@ EffectiveVectorMultivariateFunction ConstraintSatisfaction::indeterminate_constr
 void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state) {
     auto indeterminates = indeterminate_indexes();
     for (auto const& s : state.states()) {
+        auto const& m = indeterminates.at(s.constraint().group_id());
         if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
-            set(indeterminates.at(s.constraint().group_id()),true);
-        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
-            set(indeterminates.at(s.constraint().group_id()),false);
-        }
+            set_outcome(m,true);
+        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
+            set_outcome(m,false);
     }
 }
 
@@ -229,11 +229,12 @@ void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorField
     auto indeterminates = indeterminate_indexes();
     for (auto const& s : state.states()) {
         auto const& sigma = preanalysis.usage(s.constraint().group_id()).sigma;
-        if (sigma == SatisfactionPrescription::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
-            set(indeterminates.at(s.constraint().group_id()),true);
-        else if (sigma != SatisfactionPrescription::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
-            set(indeterminates.at(s.constraint().group_id()),false);
-        }
+        auto const& m = indeterminates.at(s.constraint().group_id());
+        if (sigma == SatisfactionPrescriptionKind::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+            set_outcome(m,true);
+        else if (sigma != SatisfactionPrescriptionKind::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
+            set_outcome(m,false);
+        reset_prescription(m,sigma);
     }
 }
 
@@ -254,6 +255,11 @@ RealExpression const& ConstraintSatisfaction::expression(size_t m) const {
     return _cs[m];
 }
 
+SatisfactionPrescriptionKind const& ConstraintSatisfaction::prescription(size_t m) const {
+    HELPER_PRECONDITION(m<dimension())
+    return _prescriptions[m];
+}
+
 LogicalValue const& ConstraintSatisfaction::outcome(size_t m) const {
     HELPER_PRECONDITION(m<dimension())
     return _outcomes[m];
@@ -261,12 +267,28 @@ LogicalValue const& ConstraintSatisfaction::outcome(size_t m) const {
 
 ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
     os << "{";
-    for (size_t m=0; m<cs.dimension()-1; ++m) { os << cs.expression(m) << " >= 0 : " << cs.outcome(m) << ", "; }
-    if (cs.dimension() > 0) os << cs.expression(cs.dimension()-1) << " >= 0 : " << cs.outcome(cs.dimension()-1);
+    for (size_t m=0; m<cs.dimension()-1; ++m) {
+        os << cs.expression(m) << " >= 0 : " << cs.outcome(m);
+        if (cs.prescription(m) != SatisfactionPrescriptionKind::TRUE or Detail::is_indeterminate(cs.outcome(m))) {
+            os << " (" << cs.prescription(m) << ")";
+        }
+        os << ", ";
+    }
+    if (cs.dimension() > 0) {
+        os << cs.expression(cs.dimension()-1) << " >= 0 : " << cs.outcome(cs.dimension()-1);
+        if (cs.prescription(cs.dimension()-1) != SatisfactionPrescriptionKind::TRUE or Detail::is_indeterminate(cs.outcome(cs.dimension()-1))) {
+            os << " (" << cs.prescription(cs.dimension()-1) << ")";
+        }
+    }
     return os << "}";
 }
 
-void ConstraintSatisfaction::set(size_t m, bool outcome) {
+void ConstraintSatisfaction::reset_prescription(size_t m, SatisfactionPrescriptionKind prescription) {
+    HELPER_PRECONDITION(m<dimension())
+    _prescriptions[m] = prescription;
+}
+
+void ConstraintSatisfaction::set_outcome(size_t m, bool outcome) {
     HELPER_PRECONDITION(m<dimension())
     HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
     _outcomes[m] = Detail::make_logical_value(outcome);
@@ -334,21 +356,21 @@ void search_chi_for_false_some(double& lower, double& upper, Vector<FloatDPBound
     }
 }
 
-double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription) {
+double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescriptionKind prescription) {
     static const double FACTOR = 100;
     double lower = 1.0;
     double upper = 1.0;
     switch (prescription) {
-        case SatisfactionPrescription::TRUE : HELPER_PRECONDITION(constraint(bnds).lower().get_d() > 0) search_chi_for_true(lower, upper, bnds, constraint, FACTOR); break;
-        case SatisfactionPrescription::FALSE_FOR_ALL : HELPER_PRECONDITION(constraint(bnds).upper().get_d() < 0) search_chi_for_false_all(lower, upper, bnds, constraint, FACTOR); break;
-        case SatisfactionPrescription::FALSE_FOR_SOME : HELPER_PRECONDITION(constraint(bnds).lower().get_d() < 0) search_chi_for_false_some(lower, upper, bnds, constraint, FACTOR); break;
-        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value")
+        case SatisfactionPrescriptionKind::TRUE : HELPER_PRECONDITION(constraint(bnds).lower().get_d() > 0) search_chi_for_true(lower, upper, bnds, constraint, FACTOR); break;
+        case SatisfactionPrescriptionKind::FALSE_FOR_ALL : HELPER_PRECONDITION(constraint(bnds).upper().get_d() < 0) search_chi_for_false_all(lower, upper, bnds, constraint, FACTOR); break;
+        case SatisfactionPrescriptionKind::FALSE_FOR_SOME : HELPER_PRECONDITION(constraint(bnds).lower().get_d() < 0) search_chi_for_false_some(lower, upper, bnds, constraint, FACTOR); break;
+        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescriptionKind value")
     }
     return lower;
 }
 
-double get_rho(double chi, double beta, SatisfactionPrescription prescription) {
-    if (prescription == SatisfactionPrescription::FALSE_FOR_SOME) {
+double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescription) {
+    if (prescription == SatisfactionPrescriptionKind::FALSE_FOR_SOME) {
         return (chi == std::numeric_limits<double>::infinity() ? beta : beta*(1.0-1.0/chi));
     } else return (chi-1.0)*beta;
 }
@@ -427,14 +449,14 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
           .build()
         );
         result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
-            if (evaluation.usage(m).sigma == SatisfactionPrescription::TRUE)
+            if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE)
                 return evaluate_from_function(h[m],o.reach).lower().get_d();
             else return evaluation.usage(m).t_star - o.time.get_d();
         }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
-        if (evaluation.usage(m).sigma != SatisfactionPrescription::TRUE) {
+        if (evaluation.usage(m).sigma != SatisfactionPrescriptionKind::TRUE) {
             result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
-                if (evaluation.usage(m).sigma == SatisfactionPrescription::FALSE_FOR_ALL) {
+                if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
                     return -evaluate_from_function(h[m], o.evolve).upper().get_d();
                 } else {
                     if (evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
@@ -463,10 +485,16 @@ BoundingBoxType bounding_box(Orbit<LabelledEnclosure> const& orbit) {
 }
 
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                                      List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration) {
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints) {
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+    return constrained_evolution(dynamics,initial_set,evolution_time,configuration,constraints,satisfaction);
+}
+
+ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& constraint_satisfaction) {
     CONCLOG_SCOPE_CREATE
 
-    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+    auto satisfaction = constraint_satisfaction;
     auto h = satisfaction.indeterminate_constraints_function();
 
     Orbit<LabelledEnclosure> approximate_orbit({});

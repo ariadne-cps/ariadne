@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            jet-engine_c.cpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -23,12 +23,13 @@
  */
 
 #include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "jet-engine_c.hpp"
 
 void ariadne_main() {
-    auto spec = VDP_c();
+    auto spec = JET_c();
     auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+    auto constraints_prescriptions = generate_ellipsoidal_constraints(100,spec,configuration);
+    CONCLOG_PRINTLN(frequencies(constraints_prescriptions))
+
+    constrained_execution(spec,configuration,constraints(constraints_prescriptions));
 }

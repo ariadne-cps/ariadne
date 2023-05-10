@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            lotka-volterra_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,13 +22,20 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "ariadne.hpp"
+#include "constrained.hpp"
 
-void ariadne_main() {
-    auto spec = VDP_c();
-    auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+using namespace std;
+using namespace Ariadne;
+
+SystemSpecification LOT_c()
+{
+    RealVariable x("x"), y("y");
+    DottedRealAssignments dynamics={dot(x)=3*x*(1-y),dot(y)=y*(x-1)};
+
+    RealExpressionBoundedConstraintSet initial_set={{x==1.2_dec},{y==1.1_dec}};
+
+    Real evolution_time=10;
+
+    return {"lotka-volterra",dynamics,initial_set,evolution_time};
 }

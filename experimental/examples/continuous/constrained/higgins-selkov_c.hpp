@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            higgins-selkov_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,13 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "ariadne.hpp"
+#include "constrained.hpp"
 
-void ariadne_main() {
-    auto spec = VDP_c();
-    auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+using namespace std;
+using namespace Ariadne;
+
+SystemSpecification HIG_c()
+{
+    RealVariable S("S"), P("P");
+    VectorField dynamics({dot(S)=-S*pow(P,2)+1,dot(P)=S*pow(P,2)-P});
+
+    Real e=1/100_q;
+    RealExpressionBoundedConstraintSet initial_set={{2-e<=S<=2+e},{1-e<=P<=1+e}};
+
+    Real evolution_time=10;
+
+    return {"higgins-selkov",dynamics,initial_set,evolution_time};
 }

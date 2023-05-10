@@ -51,13 +51,15 @@ double nthroot(double value, size_t n);
 //! \details TRUE : always true for all points (required over-approximation)
 //!          FALSE_FOR_ALL : sometimes false for all points (can use over-approximation)
 //!          FALSE_FOR_SOME : sometimes false only for some points (must use under-approximation)
-enum class SatisfactionPrescription { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME };
-std::ostream& operator<<(std::ostream& os, const SatisfactionPrescription prescription) {
+//!          UNSPECIFIED : not specified yet
+enum class SatisfactionPrescriptionKind { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME, UNSPECIFIED };
+std::ostream& operator<<(std::ostream& os, const SatisfactionPrescriptionKind prescription) {
     switch(prescription) {
-        case SatisfactionPrescription::TRUE: os << "TRUE"; return os;
-        case SatisfactionPrescription::FALSE_FOR_ALL: os << "FALSE_FOR_ALL"; return os;
-        case SatisfactionPrescription::FALSE_FOR_SOME: os << "FALSE_FOR_SOME"; return os;
-        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescription value for printing")
+        case SatisfactionPrescriptionKind::TRUE: os << "TRUE"; return os;
+        case SatisfactionPrescriptionKind::FALSE_FOR_ALL: os << "FALSE_FOR_ALL"; return os;
+        case SatisfactionPrescriptionKind::FALSE_FOR_SOME: os << "FALSE_FOR_SOME"; return os;
+        case SatisfactionPrescriptionKind::UNSPECIFIED: os << "UNSPECIFIED"; return os;
+        default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescriptionKind value for printing")
     }
 }
 
@@ -73,10 +75,12 @@ Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h);
 List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                 List<RealExpression> const& constraints, Configuration<VectorFieldEvolver> const& configuration);
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints);
+ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& satisfaction);
 
-double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescription prescription);
-double get_rho(double chi, double beta, SatisfactionPrescription prescription);
+double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescriptionKind prescription);
+double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescription);
 double get_beta(Vector<FloatDPBounds> const& bnds, size_t n);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
@@ -91,12 +95,12 @@ struct TimedBoxEvaluation {
     friend ostream& operator<<(ostream& os, TimedBoxEvaluation& tbe) { return os << tbe.time << ": a_box=" << tbe.approximate_box << ", r_box=" << tbe.rigorous_box << ", eval=" << tbe.approximate_evaluation; }
 };
 
-struct HardConstraintPrescription {
-    HardConstraintPrescription(SatisfactionPrescription sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
-    SatisfactionPrescription sigma;
+struct ControlSpecification {
+    ControlSpecification(SatisfactionPrescriptionKind sigma_, double t_star_, double alpha_) : sigma(sigma_), t_star(t_star_), alpha(alpha_) { }
+    SatisfactionPrescriptionKind sigma;
     double t_star;
     double alpha;
-    friend ostream& operator<<(ostream& os, HardConstraintPrescription const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
+    friend ostream& operator<<(ostream& os, ControlSpecification const& hcc) { return os << "{sigma=" << hcc.sigma << ",T*=" << hcc.t_star << ",alpha=" << hcc.alpha << "}"; }
 };
 
 //! \brief A timed measurement in terms of beta (normalised volume) both for approximate and rigorous reachability
@@ -106,6 +110,13 @@ struct TimedMeasurement {
     double approximate_beta;
     double rigorous_beta;
     friend ostream& operator<<(ostream& os, TimedMeasurement const& tm) { return os << tm.time << ":" << tm.approximate_beta << "(a)," << tm.rigorous_beta << "(r)"; }
+};
+
+struct ConstraintPrescription {
+    ConstraintPrescription(RealExpression const& expression_, SatisfactionPrescriptionKind const& prescription_) : expression(expression_), prescription(prescription_) { }
+    RealExpression expression;
+    SatisfactionPrescriptionKind prescription;
+    friend ostream& operator<<(ostream& os, ConstraintPrescription const& cp) { return os << cp.expression << " >= 0 : " << cp.prescription; }
 };
 
 class ConstraintSatisfaction {
@@ -124,15 +135,18 @@ class ConstraintSatisfaction {
     bool completed() const;
 
     RealExpression const& expression(size_t m) const;
+    SatisfactionPrescriptionKind const& prescription(size_t m) const;
     LogicalValue const& outcome(size_t m) const;
     friend ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs);
 
   private:
-    void set(size_t m, bool outcome);
+    void set_outcome(size_t m, bool outcome);
+    void reset_prescription(size_t m, SatisfactionPrescriptionKind prescription);
 
   private:
     Vector<RealExpression> const _cs;
     RealSpace const _space;
+    Vector<SatisfactionPrescriptionKind> _prescriptions;
     Vector<LogicalValue> _outcomes;
 };
 
@@ -151,7 +165,7 @@ class EvaluationSequenceBuilder;
 class EvaluationSequence {
     friend class EvaluationSequenceBuilder;
   protected:
-    EvaluationSequence(List<TimedMeasurement> const& tv, Vector<HardConstraintPrescription> const& usages);
+    EvaluationSequence(List<TimedMeasurement> const& tv, Vector<ControlSpecification> const& usages);
   public:
 
     //! \brief The number of constraints inserted during creation
@@ -164,7 +178,7 @@ class EvaluationSequence {
     TimedMeasurement const& near(double time) const;
 
     //! \brief The usage given the constraint index \a idx
-    HardConstraintPrescription const& usage(ConstraintIndexType idx) const;
+    ControlSpecification const& usage(ConstraintIndexType idx) const;
 
     //! \brief The number of elements in the sequence
     size_t size() const;
@@ -173,7 +187,7 @@ class EvaluationSequence {
 
   private:
     List<TimedMeasurement> _sequence;
-    Vector<HardConstraintPrescription> _prescriptions;
+    Vector<ControlSpecification> _prescriptions;
 };
 
 class EvaluationSequenceBuilder {
@@ -198,9 +212,9 @@ class EvaluationSequenceBuilder {
     EffectiveVectorMultivariateFunction const _h;
     List<TimedBoxEvaluation> _timed_box_evaluations;
 
-    Vector<SatisfactionPrescription> _prescriptions;
-    Vector<Map<SatisfactionPrescription,double>> _max_robustness_false;
-    Vector<Map<SatisfactionPrescription,double>> _t_false;
+    Vector<SatisfactionPrescriptionKind> _prescriptions;
+    Vector<Map<SatisfactionPrescriptionKind,double>> _max_robustness_false;
+    Vector<Map<SatisfactionPrescriptionKind,double>> _t_false;
 };
 
 } // namespace Ariadne

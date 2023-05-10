@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            jet-engine_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -22,13 +22,21 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "ariadne.hpp"
+#include "constrained.hpp"
 
-void ariadne_main() {
-    auto spec = VDP_c();
-    auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+using namespace std;
+using namespace Ariadne;
+
+SystemSpecification JET_c()
+{
+    RealVariable x("x"), y("y");
+    VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
+
+    Real e1=10/100_q; Real e2=14/100_q;
+    RealExpressionBoundedConstraintSet initial_set={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
+
+    Real evolution_time = 5;
+
+    return {"jet-engine",dynamics,initial_set,evolution_time};
 }

@@ -34,29 +34,42 @@
 
 void ariadne_main() {
     List<SystemSpecification> specs;
-    specs.push_back(JET_c());
+    //specs.push_back(JET_c());
     //specs.push_back(VDP_c());
     //specs.push_back(LAU_c());
     //specs.push_back(LOT_c());
-    //specs.push_back(HIG_c());
+    specs.push_back(HIG_c());
     //specs.push_back(CHE_c());
     //specs.push_back(PIC_c());
     //specs.push_back(ROS_c());
 
     auto configuration = get_configuration();
 
-    static const size_t NUM_CONSTRAINTS = 10;
+    static const size_t NUM_CONSTRAINTS = 100;
     //static const size_t NUM_RUNS_PER_SYSTEM = 10;
 
     for (auto const& s : specs) {
         CONCLOG_PRINTLN(s.name)
 
+        CONCLOG_PRINTLN_AT(1,"Generating the constraints...")
         auto constraints_prescriptions = generate_ellipsoidal_constraints(NUM_CONSTRAINTS,s,configuration);
         CONCLOG_PRINTLN(frequencies(constraints_prescriptions))
 
+        CONCLOG_PRINTLN_AT(1,"Running...")
         auto result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions));
 
-        CONCLOG_PRINTLN(result.satisfaction)
+        Map<SatisfactionPrescriptionKind,double> prescriptions;
+        prescriptions.insert(SatisfactionPrescriptionKind::TRUE,0.0);
+        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
+        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
+        Map<SatisfactionPrescriptionKind,double> successes = prescriptions;
+        for (size_t m=0; m<NUM_CONSTRAINTS; ++m) {
+            prescriptions[result.satisfaction.prescription(m)]++;
+            if (not is_indeterminate(result.satisfaction.outcome(m)))
+                successes[result.satisfaction.prescription(m)]++;
+        }
+        CONCLOG_PRINTLN(prescriptions)
+        CONCLOG_PRINTLN(successes)
     }
 
 }

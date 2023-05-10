@@ -498,6 +498,8 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
                                                  Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& constraint_satisfaction) {
     CONCLOG_SCOPE_CREATE
 
+    static const size_t MAX_SINGLETON_TRIES = 5;
+
     auto satisfaction = constraint_satisfaction;
     auto h = satisfaction.indeterminate_constraints_function();
 
@@ -510,7 +512,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
     for (size_t i=0; ; ++i) {
         CONCLOG_PRINTLN("Round #" << i)
 
-        for (size_t j=0; ; ++j) {
+        for (size_t j=0; j<MAX_SINGLETON_TRIES; ++j) {
             CONCLOG_PRINTLN_AT(1,"Singleton evolution try #" << j)
             auto analysis_point = configuration.search_space().initial_point();
             CONCLOG_PRINTLN_AT(1,"Using point " << analysis_point << " for singleton analyses.")
@@ -538,6 +540,11 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
             if (not rigorous_orbit.final().empty()) break;
             else { CONCLOG_PRINTLN_AT(1,"Early terminated due to set radius, retrying...") }
+        }
+
+        if (rigorous_orbit.final().empty()) {
+            CONCLOG_PRINTLN_AT(1,"Aborting since no full singleton rigorous orbit could be found in " << MAX_SINGLETON_TRIES << " tries...")
+            return {approximate_orbit,rigorous_orbit,controlled_orbit,satisfaction};
         }
 
         num_indeterminates = satisfaction.indeterminate_indexes().size();

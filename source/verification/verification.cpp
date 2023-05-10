@@ -64,6 +64,8 @@ EvaluationSequence::EvaluationSequence(List<TimedMeasurement> const& tv, Vector<
 
 size_t EvaluationSequence::number_of_constraints() const { return _prescriptions.size(); }
 
+double EvaluationSequence::maximum_time() const { return _sequence.at(_sequence.size()-1).time; }
+
 TimedMeasurement const& EvaluationSequence::at(size_t idx) const { return _sequence.at(idx); }
 
 TimedMeasurement const& EvaluationSequence::near(double time) const {
@@ -214,29 +216,33 @@ EffectiveVectorMultivariateFunction ConstraintSatisfaction::indeterminate_constr
     return result;
 }
 
-void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state) {
+void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state, bool exclude_truth) {
     auto indeterminates = indeterminate_indexes();
     for (auto const& s : state.states()) {
         auto const& m = indeterminates.at(s.constraint().group_id());
-        if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed()) {
-            set_outcome(m,true);
-            reset_prescription(m,SatisfactionPrescriptionKind::TRUE);
+        if (not exclude_truth) {
+            if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed()) {
+                set_outcome(m,true);
+                reset_prescription(m,SatisfactionPrescriptionKind::TRUE);
+            }
         }
-        else if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
+        if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
             set_outcome(m,false);
             reset_prescription(m,SatisfactionPrescriptionKind::FALSE_FOR_ALL);
         }
     }
 }
 
-void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis) {
+void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis, bool exclude_truth) {
     auto indeterminates = indeterminate_indexes();
     for (auto const& s : state.states()) {
         auto const& sigma = preanalysis.usage(s.constraint().group_id()).sigma;
         auto const& m = indeterminates.at(s.constraint().group_id());
-        if (sigma == SatisfactionPrescriptionKind::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
-            set_outcome(m,true);
-        else if (sigma != SatisfactionPrescriptionKind::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
+        if (not exclude_truth) {
+            if (sigma == SatisfactionPrescriptionKind::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+                set_outcome(m,true);
+        }
+        if (sigma != SatisfactionPrescriptionKind::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
             set_outcome(m,false);
         reset_prescription(m,sigma);
     }
@@ -408,6 +414,8 @@ EvaluationSequence evaluate_singleton_orbits(Orbit<LabelledEnclosure> const& app
             } else break;
         }
         sb.add_from(a,r);
+        if (r_idx == rigorous.intermediate().size()-1)
+            break; // Cuts short if the rigorous orbit terminated early
     }
     return sb.build();
 }
@@ -433,7 +441,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constrain
     return result;
 }
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation) {
+List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation, bool exclude_truth) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
@@ -452,12 +460,14 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
           .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))                                                                                                                                                                                                                                                                                                                                                          .set_controller(TimeProgressLinearRobustnessController<VectorFieldEvolver>([](I const&, O const& o){ return o.time.get_d(); },evaluation.usage(m).t_star))
           .build()
         );
-        result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
-            if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE)
-                return evaluate_from_function(h[m],o.reach).lower().get_d();
-            else return evaluation.usage(m).t_star - o.time.get_d();
-        }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
-        );
+        if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE and not exclude_truth) {
+            result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
+                if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE)
+                    return evaluate_from_function(h[m],o.reach).lower().get_d();
+                else return evaluation.usage(m).t_star - o.time.get_d();
+            }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
+            );
+        }
         if (evaluation.usage(m).sigma != SatisfactionPrescriptionKind::TRUE) {
             result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
                 if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
@@ -498,7 +508,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
                                                  Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& constraint_satisfaction) {
     CONCLOG_SCOPE_CREATE
 
-    static const size_t MAX_SINGLETON_TRIES = 5;
+    static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
 
     auto satisfaction = constraint_satisfaction;
     auto h = satisfaction.indeterminate_constraints_function();
@@ -512,40 +522,34 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
     for (size_t i=0; ; ++i) {
         CONCLOG_PRINTLN("Round #" << i)
 
-        for (size_t j=0; j<MAX_SINGLETON_TRIES; ++j) {
-            CONCLOG_PRINTLN_AT(1,"Singleton evolution try #" << j)
-            auto analysis_point = configuration.search_space().initial_point();
-            CONCLOG_PRINTLN_AT(1,"Using point " << analysis_point << " for singleton analyses.")
+        auto analysis_point = configuration.search_space().initial_point();
+        CONCLOG_PRINTLN_AT(1,"Using point " << analysis_point << " for singleton analyses.")
 
-            auto singleton_configuration = make_singleton(configuration, analysis_point);
-            singleton_configuration.set_enable_clobbering(true);
+        auto singleton_configuration = make_singleton(configuration, analysis_point);
+        singleton_configuration.set_enable_clobbering(true);
 
-            VectorFieldEvolver approximate_evolver(dynamics, singleton_configuration);
+        VectorFieldEvolver approximate_evolver(dynamics, singleton_configuration);
 
-            CONCLOG_PRINTLN_AT(1,"Computing approximate singleton evolution...")
-            approximate_orbit = approximate_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+        CONCLOG_PRINTLN_AT(1,"Computing approximate singleton evolution...")
+        approximate_orbit = approximate_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
 
-            CONCLOG_PRINTLN_AT(1,"Computing rigorous singleton evolution...")
-            auto approximate_bounding_box = bounding_box(approximate_orbit);
-            singleton_configuration.set_enable_clobbering(false).set_enable_premature_termination(true).set_maximum_enclosure_radius(approximate_bounding_box.radius().get_d());
+        CONCLOG_PRINTLN_AT(1,"Computing rigorous singleton evolution...")
+        auto approximate_bounding_box = bounding_box(approximate_orbit);
+        singleton_configuration.set_enable_clobbering(false).set_enable_premature_termination(true).set_maximum_enclosure_radius(approximate_bounding_box.radius().get_d()*MAXIMUM_ENCLOSURE_FRACTION);
 
-            VectorFieldEvolver rigorous_evolver(dynamics, singleton_configuration);
+        VectorFieldEvolver rigorous_evolver(dynamics, singleton_configuration);
 
-            h = satisfaction.indeterminate_constraints_function();
-            auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
-            rigorous_evolver.set_constraints(uncontrolled_task_constraints);
-            rigorous_orbit = rigorous_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+        h = satisfaction.indeterminate_constraints_function();
+        auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
+        rigorous_evolver.set_constraints(uncontrolled_task_constraints);
+        rigorous_orbit = rigorous_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
 
-            satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state());
-
-            if (not rigorous_orbit.final().empty()) break;
-            else { CONCLOG_PRINTLN_AT(1,"Early terminated due to set radius, retrying...") }
+        bool exclude_truth = rigorous_orbit.final().empty();
+        if (exclude_truth) {
+            CONCLOG_PRINTLN("Prescription TRUE will not be checked on this round.")
         }
 
-        if (rigorous_orbit.final().empty()) {
-            CONCLOG_PRINTLN_AT(1,"Aborting since no full singleton rigorous orbit could be found in " << MAX_SINGLETON_TRIES << " tries...")
-            return {approximate_orbit,rigorous_orbit,controlled_orbit,satisfaction};
-        }
+        satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state(), exclude_truth);
 
         num_indeterminates = satisfaction.indeterminate_indexes().size();
 
@@ -558,7 +562,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
             h = satisfaction.indeterminate_constraints_function();
             auto analysis = evaluate_singleton_orbits(approximate_orbit, rigorous_orbit, h);
 
-            auto controlled_task_constraints = build_controlled_task_constraints(h, analysis);
+            auto controlled_task_constraints = build_controlled_task_constraints(h, analysis, exclude_truth);
 
             auto indeterminate_idxs = satisfaction.indeterminate_indexes();
             for (size_t m = 0; m < analysis.number_of_constraints(); ++m) {
@@ -566,17 +570,18 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
             }
 
             auto controlled_configuration = configuration;
-            auto approximate_bounding_box = bounding_box(approximate_orbit);
             controlled_configuration.set_enable_premature_termination(true).set_maximum_enclosure_radius(
-                    approximate_bounding_box.radius().get_d());
+                    approximate_bounding_box.radius().get_d()*MAXIMUM_ENCLOSURE_FRACTION);
             VectorFieldEvolver controlled_evolver(dynamics, controlled_configuration);
 
-            CONCLOG_PRINTLN("Computing controlled evolution... ")
+            CONCLOG_PRINTLN("Computing controlled evolution up to " << analysis.maximum_time() << " sec ... ")
             controlled_evolver.set_constraints(controlled_task_constraints);
 
-            controlled_orbit = controlled_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+            controlled_orbit = controlled_evolver.orbit(initial_set, Real(cast_exact(analysis.maximum_time())), Semantics::LOWER);
 
-            satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis);
+            bool not_has_terminated = controlled_orbit.final().empty();
+
+            satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis, exclude_truth or not_has_terminated);
 
             if (satisfaction.indeterminate_indexes().size() == num_indeterminates) {
                 CONCLOG_PRINTLN("No improvement in this round, aborting.")

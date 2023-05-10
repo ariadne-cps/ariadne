@@ -153,7 +153,7 @@ void constrained_execution(SystemSpecification const& spec, Configuration<Vector
 
     auto result = constrained_evolution(spec.dynamics,spec.initial_set,spec.evolution_time,configuration,constraints);
 
-    CONCLOG_PRINTLN("Constraint satisfaction result:" << result.satisfaction)
+    CONCLOG_PRINTLN("Constraint satisfaction result:" << result.satisfaction())
 
     auto best_scores = pExplore::TaskManager::instance().best_scores();
     CONCLOG_PRINTLN_AT(2,"Best scores:")
@@ -164,7 +164,7 @@ void constrained_execution(SystemSpecification const& spec, Configuration<Vector
     CONCLOG_PRINTLN_AT(1,"Optimal point: " << pExplore::TaskManager::instance().optimal_point())
 
     auto variable_names = spec.dynamics.state_space().variable_names();
-    auto drawing_box = bounding_box(result.rigorous.reach());
+    auto drawing_box = bounding_box(result.rigorous().reach());
 
     CONCLOG_PRINTLN("Plotting...")
     for (size_t i=0; i<spec.dynamics.dimension()-1; i++) {
@@ -173,15 +173,15 @@ void constrained_execution(SystemSpecification const& spec, Configuration<Vector
             auto xj = RealVariable(variable_names.at(j));
             LabelledFigure fig=LabelledFigure({drawing_box[xi].lower_bound().get_d()<=xi<=drawing_box[xi].upper_bound().get_d(),drawing_box[xj].lower_bound().get_d()<=xj<=drawing_box[xj].upper_bound().get_d()});
             fig.clear();
-            fig.draw(result.approximate);
+            fig.draw(result.approximate());
             char var_char[64] = "";
             if (spec.dynamics.dimension() > 2) snprintf(var_char,64,"[%s,%s]",xi.name().c_str(),xj.name().c_str());
             CONCLOG_RUN_MUTED(fig.write((spec.name+"_approximate"+var_char).c_str()))
             fig.clear();
-            fig.draw(result.rigorous);
+            fig.draw(result.rigorous());
             CONCLOG_RUN_MUTED(fig.write((spec.name+"_rigorous"+var_char).c_str()))
             fig.clear();
-            fig.draw(result.constrained);
+            fig.draw(result.constrained());
             CONCLOG_RUN_MUTED(fig.write((spec.name+"_constrained"+var_char).c_str()))
         }
     }

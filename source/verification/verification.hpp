@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& os, const SatisfactionPrescriptionKind pr
 }
 
 class EvaluationSequence;
-struct ConstrainedEvolutionResult;
+class ConstrainedEvolutionResult;
 class ConstraintSatisfaction;
 
 FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
@@ -71,7 +71,8 @@ Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
 List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h);
-List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation);
+//! \brief Build the controlled constraints; we \a exclude_truth if the rigorous orbit from preanalysis was cut short due to the set being too large
+List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation, bool exclude_truth);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                  Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
@@ -127,8 +128,8 @@ class ConstraintSatisfaction {
     //! \brief Construct a vector function from the constraints that are still indeterminate
     EffectiveVectorMultivariateFunction indeterminate_constraints_function() const;
 
-    void merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state);
-    void merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis);
+    void merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state, bool exclude_truth);
+    void merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis, bool exclude_truth);
     List<size_t> indeterminate_indexes() const;
     bool completed() const;
 
@@ -148,14 +149,58 @@ class ConstraintSatisfaction {
     Vector<LogicalValue> _outcomes;
 };
 
-struct ConstrainedEvolutionResult {
-    ConstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate_, Orbit<LabelledEnclosure> const& rigorous_, Orbit<LabelledEnclosure> const& constrained_, ConstraintSatisfaction const& satisfaction_) :
-        approximate(approximate_), rigorous(rigorous_), constrained(constrained_), satisfaction(satisfaction_) { }
+class ConstrainedEvolutionResult {
+  public:
+    ConstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate, Orbit<LabelledEnclosure> const& rigorous, Orbit<LabelledEnclosure> const& constrained, ConstraintSatisfaction const& satisfaction) :
+        _approximate(approximate), _rigorous(rigorous), _constrained(constrained), _satisfaction(satisfaction) { }
 
-    Orbit<LabelledEnclosure> approximate;
-    Orbit<LabelledEnclosure> rigorous;
-    Orbit<LabelledEnclosure> constrained;
-    ConstraintSatisfaction satisfaction;
+
+    Orbit<LabelledEnclosure> const& approximate() const { return _approximate; }
+    Orbit<LabelledEnclosure> const& rigorous() const { return _rigorous; }
+    Orbit<LabelledEnclosure> const& constrained() const { return _constrained; }
+    ConstraintSatisfaction const& satisfaction() const { return _satisfaction; }
+
+    Map<SatisfactionPrescriptionKind,double> prescription_ratios() const {
+        Map<SatisfactionPrescriptionKind,double> ratios;
+        ratios.insert(SatisfactionPrescriptionKind::TRUE,0.0);
+        ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
+        ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
+        for (size_t m=0; m<_satisfaction.dimension(); ++m) {
+            ratios[_satisfaction.prescription(m)]++;
+        }
+
+        for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
+            ratios[p]/=static_cast<double>(_satisfaction.dimension());
+        return ratios;
+    }
+
+    Map<SatisfactionPrescriptionKind,double> success_ratios() const {
+        Map<SatisfactionPrescriptionKind,double> prescriptions;
+        prescriptions.insert(SatisfactionPrescriptionKind::TRUE,0.0);
+        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
+        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
+        Map<SatisfactionPrescriptionKind,double> successes = prescriptions;
+        for (size_t m=0; m<_satisfaction.dimension(); ++m) {
+            prescriptions[_satisfaction.prescription(m)]++;
+            if (not is_indeterminate(_satisfaction.outcome(m)))
+                successes[_satisfaction.prescription(m)]++;
+        }
+
+        Map<SatisfactionPrescriptionKind,double> ratios;
+        for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
+            ratios.insert(p,successes[p]/prescriptions[p]);
+        return ratios;
+    }
+
+    double global_success_ratio() const {
+        return static_cast<double>(_satisfaction.dimension()-_satisfaction.indeterminate_indexes().size())/static_cast<double>(_satisfaction.dimension());
+    }
+
+  private:
+    Orbit<LabelledEnclosure> const _approximate;
+    Orbit<LabelledEnclosure> const _rigorous;
+    Orbit<LabelledEnclosure> const _constrained;
+    ConstraintSatisfaction const _satisfaction;
 };
 
 class EvaluationSequenceBuilder;
@@ -168,6 +213,9 @@ class EvaluationSequence {
 
     //! \brief The number of constraints inserted during creation
     size_t number_of_constraints() const;
+
+    //! \brief The maximum time registered by the sequence
+    double maximum_time() const;
 
     //! \brief Timed measurement accessor by index
     TimedMeasurement const& at(size_t idx) const;

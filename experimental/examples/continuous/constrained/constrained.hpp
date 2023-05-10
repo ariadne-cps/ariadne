@@ -108,20 +108,29 @@ List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t 
     UniformRealRandomiser<double> lower_rnd(0.5,1.0);
     UniformRealRandomiser<double> upper_rnd(1.0,1.5);
 
-    UniformIntRandomiser<int> sign_rnd(0,1);
+    UniformIntRandomiser<size_t> sign_rnd(0,1);
 
-    for (size_t i=0; i<num_constraints/2; ++i) {
-        RealExpression expr = (sign_rnd.get()*2-1);
-        for (auto const& v : spec.dynamics.state_space().variables())
-            expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(lower_rnd.get()*bb[v].radius().get_d())))*(sign_rnd.get()*2-1);
-        constraints.push_back(expr);
+    for (size_t i=0; i<num_constraints; ++i) {
+        while (true) {
+            List<size_t> signs;
+            size_t sum = 0;
+            for (size_t j=0; j<spec.dynamics.dimension()+1; ++j) {
+                signs.append(sign_rnd.get());
+                sum += signs.at(j);
+            }
+            if (sum != 0 and sum != spec.dynamics.dimension()+1) {
+                size_t j=0;
+                RealExpression expr = cast_exact(static_cast<double>(signs.at(j++))*2-1);
+                bool use_lower = (sign_rnd.get() == 0);
+                for (auto const& v : spec.dynamics.state_space().variables())
+                    expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact((use_lower ? lower_rnd.get() : upper_rnd.get())*bb[v].radius().get_d())))*cast_exact(static_cast<double>(signs.at(j++))*2-1);
+                constraints.push_back(expr);
+                break;
+            }
+        }
     }
-    for (size_t i=0; i<num_constraints/2; ++i) {
-        RealExpression expr = (sign_rnd.get()*2-1);
-        for (auto const& v : spec.dynamics.state_space().variables())
-            expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(upper_rnd.get()*bb[v].radius().get_d())))*(sign_rnd.get()*2-1);
-        constraints.push_back(expr);
-    }
+
+    // Discard those with all negative or all positive signs
 
     List<EffectiveScalarMultivariateFunction> constraint_functions;
     for (auto const& c : constraints)

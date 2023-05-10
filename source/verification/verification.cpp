@@ -260,6 +260,42 @@ bool ConstraintSatisfaction::completed() const {
     return indeterminate_indexes().size() == 0;
 }
 
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::prescription_ratios() const {
+    Map<SatisfactionPrescriptionKind,double> ratios;
+    ratios.insert(SatisfactionPrescriptionKind::TRUE,0.0);
+    ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
+    ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
+    for (size_t m=0; m<dimension(); ++m) {
+        ratios[_prescriptions[m]]++;
+    }
+
+    for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
+        ratios[p]/=static_cast<double>(dimension());
+    return ratios;
+}
+
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::success_ratios() const {
+    Map<SatisfactionPrescriptionKind,double> prescriptions;
+    prescriptions.insert(SatisfactionPrescriptionKind::TRUE,0.0);
+    prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
+    prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
+    Map<SatisfactionPrescriptionKind,double> successes = prescriptions;
+    for (size_t m=0; m<dimension(); ++m) {
+        prescriptions[_prescriptions[m]]++;
+        if (not is_indeterminate(_outcomes[m]))
+            successes[_prescriptions[m]]++;
+    }
+
+    Map<SatisfactionPrescriptionKind,double> ratios;
+    for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
+        ratios.insert(p,successes[p]/prescriptions[p]);
+    return ratios;
+}
+
+double ConstraintSatisfaction::global_success_ratio() const {
+    return static_cast<double>(dimension()-indeterminate_indexes().size())/static_cast<double>(dimension());
+}
+
 RealExpression const& ConstraintSatisfaction::expression(size_t m) const {
     HELPER_PRECONDITION(m<dimension())
     return _cs[m];
@@ -548,6 +584,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
         num_indeterminates = satisfaction.indeterminate_indexes().size();
 
         CONCLOG_PRINTLN_VAR(satisfaction)
+        CONCLOG_PRINTLN_VAR(satisfaction.success_ratios())
 
         if (num_indeterminates > 0) {
 
@@ -576,6 +613,9 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
             bool not_has_terminated = controlled_orbit.final().empty();
 
             satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis, exclude_truth or not_has_terminated);
+
+            CONCLOG_PRINTLN_VAR(satisfaction)
+            CONCLOG_PRINTLN_VAR(satisfaction.success_ratios())
 
             if (satisfaction.indeterminate_indexes().size() == num_indeterminates) {
                 CONCLOG_PRINTLN("No improvement in this round, aborting.")

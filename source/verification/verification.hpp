@@ -131,6 +131,10 @@ class ConstraintSatisfaction {
     List<size_t> indeterminate_indexes() const;
     bool completed() const;
 
+    Map<SatisfactionPrescriptionKind,double> prescription_ratios() const;
+    Map<SatisfactionPrescriptionKind,double> success_ratios() const;
+    double global_success_ratio() const;
+
     RealExpression const& expression(size_t m) const;
     SatisfactionPrescriptionKind const& prescription(size_t m) const;
     LogicalValue const& outcome(size_t m) const;
@@ -157,42 +161,6 @@ class ConstrainedEvolutionResult {
     Orbit<LabelledEnclosure> const& rigorous() const { return _rigorous; }
     Orbit<LabelledEnclosure> const& constrained() const { return _constrained; }
     ConstraintSatisfaction const& satisfaction() const { return _satisfaction; }
-
-    Map<SatisfactionPrescriptionKind,double> prescription_ratios() const {
-        Map<SatisfactionPrescriptionKind,double> ratios;
-        ratios.insert(SatisfactionPrescriptionKind::TRUE,0.0);
-        ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
-        ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
-        for (size_t m=0; m<_satisfaction.dimension(); ++m) {
-            ratios[_satisfaction.prescription(m)]++;
-        }
-
-        for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
-            ratios[p]/=static_cast<double>(_satisfaction.dimension());
-        return ratios;
-    }
-
-    Map<SatisfactionPrescriptionKind,double> success_ratios() const {
-        Map<SatisfactionPrescriptionKind,double> prescriptions;
-        prescriptions.insert(SatisfactionPrescriptionKind::TRUE,0.0);
-        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
-        prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
-        Map<SatisfactionPrescriptionKind,double> successes = prescriptions;
-        for (size_t m=0; m<_satisfaction.dimension(); ++m) {
-            prescriptions[_satisfaction.prescription(m)]++;
-            if (not is_indeterminate(_satisfaction.outcome(m)))
-                successes[_satisfaction.prescription(m)]++;
-        }
-
-        Map<SatisfactionPrescriptionKind,double> ratios;
-        for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
-            ratios.insert(p,successes[p]/prescriptions[p]);
-        return ratios;
-    }
-
-    double global_success_ratio() const {
-        return static_cast<double>(_satisfaction.dimension()-_satisfaction.indeterminate_indexes().size())/static_cast<double>(_satisfaction.dimension());
-    }
 
   private:
     Orbit<LabelledEnclosure> const _approximate;

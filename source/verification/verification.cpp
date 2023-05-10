@@ -500,17 +500,11 @@ BoundingBoxType bounding_box(Orbit<LabelledEnclosure> const& orbit) {
 
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                  Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints) {
-    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
-    return constrained_evolution(dynamics,initial_set,evolution_time,configuration,constraints,satisfaction);
-}
-
-ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& constraint_satisfaction) {
     CONCLOG_SCOPE_CREATE
 
     static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
 
-    auto satisfaction = constraint_satisfaction;
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
     auto h = satisfaction.indeterminate_constraints_function();
 
     Orbit<LabelledEnclosure> approximate_orbit({});

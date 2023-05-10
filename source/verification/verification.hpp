@@ -75,8 +75,6 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constrain
 List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation, bool exclude_truth);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
                                                  Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints);
-ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, ConstraintSatisfaction const& satisfaction);
 
 double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescriptionKind prescription);
 double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescription);

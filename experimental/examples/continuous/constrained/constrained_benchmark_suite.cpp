@@ -58,9 +58,10 @@ void ariadne_main() {
         CONCLOG_PRINTLN_AT(1,"Running...")
         auto result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions));
 
-        CONCLOG_PRINTLN_VAR(result.satisfaction().prescription_ratios())
-        CONCLOG_PRINTLN_VAR(result.satisfaction().success_ratios())
-        CONCLOG_PRINTLN_VAR(result.satisfaction().global_success_ratio())
+        for (auto const& s : result.satisfaction().snapshots()) {
+            CONCLOG_PRINTLN(s.time() << ": " << s.success_ratios() << " (" << round(s.global_success_ratio()*100) << "%)")
+        }
+        CONCLOG_PRINTLN("Cost: " << result.satisfaction().cost())
     }
 
 }

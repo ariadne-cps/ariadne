@@ -35,7 +35,8 @@
 namespace Ariadne {
 
 using std::ostream;
-
+using Helper::Milliseconds;
+using Helper::Stopwatch;
 using pExplore::ConstrainingState;
 using pExplore::ConstraintBuilder;
 using pExplore::ConstraintObjectiveImpact;
@@ -116,6 +117,34 @@ struct ConstraintPrescription {
     friend ostream& operator<<(ostream& os, ConstraintPrescription const& cp) { return os << cp.expression << " >= 0 : " << cp.prescription; }
 };
 
+class ConstraintSatisfaction;
+
+class ConstraintSatisfactionSnapshot {
+    friend ConstraintSatisfaction;
+  public:
+    ConstraintSatisfactionSnapshot(double time, Vector<SatisfactionPrescriptionKind> const& prescriptions, Vector<LogicalValue> const& outcomes);
+
+    double time() const;
+    Vector<SatisfactionPrescriptionKind> const& prescriptions() const;
+    Vector<LogicalValue> const& outcomes() const;
+
+    Map<SatisfactionPrescriptionKind,double> prescription_ratios() const;
+    Map<SatisfactionPrescriptionKind,double> success_ratios() const;
+    double global_success_ratio() const;
+    List<size_t> indeterminate_indexes() const;
+    bool completed() const;
+    friend ostream& operator<<(ostream& os, ConstraintSatisfactionSnapshot const& s);
+
+  protected:
+    void set_prescription(size_t m, SatisfactionPrescriptionKind const& prescription);
+    void set_outcome(size_t m, bool outcome);
+
+  private:
+    double _time;
+    Vector<SatisfactionPrescriptionKind> _prescriptions;
+    Vector<LogicalValue> _outcomes;
+};
+
 class ConstraintSatisfaction {
   public:
     ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc);
@@ -135,20 +164,29 @@ class ConstraintSatisfaction {
     Map<SatisfactionPrescriptionKind,double> success_ratios() const;
     double global_success_ratio() const;
 
+    //! \brief The integral across snapshots of the global success ratio represents the cost
+    double cost() const;
+
     RealExpression const& expression(size_t m) const;
     SatisfactionPrescriptionKind const& prescription(size_t m) const;
     LogicalValue const& outcome(size_t m) const;
+
+    List<ConstraintSatisfactionSnapshot> const& snapshots() const;
+
     friend ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs);
 
   private:
-    void set_outcome(size_t m, bool outcome);
-    void reset_prescription(size_t m, SatisfactionPrescriptionKind prescription);
+    ConstraintSatisfactionSnapshot const& _last() const;
+    ConstraintSatisfactionSnapshot& _last();
+    void _add_snapshot();
+    void _set_last_outcome(size_t m, bool outcome);
+    void _set_last_prescription(size_t m, SatisfactionPrescriptionKind prescription);
 
   private:
     Vector<RealExpression> const _cs;
     RealSpace const _space;
-    Vector<SatisfactionPrescriptionKind> _prescriptions;
-    Vector<LogicalValue> _outcomes;
+    List<ConstraintSatisfactionSnapshot> _snapshots;
+    Stopwatch<Milliseconds> _sw;
 };
 
 class ConstrainedEvolutionResult {

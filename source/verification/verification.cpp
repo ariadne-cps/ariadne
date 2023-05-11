@@ -200,87 +200,52 @@ size_t EvaluationSequenceBuilder::_list_index(double time) const {
     return lower;
 }
 
-ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
-    _cs(cs), _space(spc), _prescriptions(Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::TRUE)), _outcomes(Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)) { }
+ConstraintSatisfactionSnapshot::ConstraintSatisfactionSnapshot(double time, Vector<SatisfactionPrescriptionKind> const& prescriptions, Vector<LogicalValue> const& outcomes) :
+    _time(time), _prescriptions(prescriptions), _outcomes(outcomes) { }
 
-size_t ConstraintSatisfaction::dimension() const {
-    return _cs.size();
+double ConstraintSatisfactionSnapshot::time() const {
+    return _time;
 }
 
-EffectiveVectorMultivariateFunction ConstraintSatisfaction::indeterminate_constraints_function() const {
-    List<EffectiveScalarMultivariateFunction> result;
-    for (ConstraintIndexType m=0; m<_cs.size(); ++m)
-        if (Detail::is_indeterminate(_outcomes[m]))
-            result.push_back(make_function(_space,_cs.at(m)));
-    HELPER_ASSERT(not result.empty())
-    return result;
+Vector<SatisfactionPrescriptionKind> const& ConstraintSatisfactionSnapshot::prescriptions() const {
+    return _prescriptions;
+}
+Vector<LogicalValue> const& ConstraintSatisfactionSnapshot::outcomes() const {
+    return _outcomes;
 }
 
-void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state, bool exclude_truth) {
-    auto indeterminates = indeterminate_indexes();
-    for (auto const& s : state.states()) {
-        auto const& m = indeterminates.at(s.constraint().group_id());
-        if (not exclude_truth) {
-            if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed()) {
-                set_outcome(m,true);
-                reset_prescription(m,SatisfactionPrescriptionKind::TRUE);
-            }
-        }
-        if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
-            set_outcome(m,false);
-            reset_prescription(m,SatisfactionPrescriptionKind::FALSE_FOR_ALL);
-        }
-    }
+void ConstraintSatisfactionSnapshot::set_prescription(size_t m, SatisfactionPrescriptionKind const& prescription) {
+    HELPER_PRECONDITION(m<_prescriptions.size())
+    _prescriptions[m] = prescription;
 }
 
-void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis, bool exclude_truth) {
-    auto indeterminates = indeterminate_indexes();
-    for (auto const& s : state.states()) {
-        auto const& sigma = preanalysis.usage(s.constraint().group_id()).sigma;
-        auto const& m = indeterminates.at(s.constraint().group_id());
-        if (not exclude_truth) {
-            if (sigma == SatisfactionPrescriptionKind::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
-                set_outcome(m,true);
-        }
-        if (sigma != SatisfactionPrescriptionKind::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
-            set_outcome(m,false);
-        reset_prescription(m,sigma);
-    }
+void ConstraintSatisfactionSnapshot::set_outcome(size_t m, bool outcome) {
+    HELPER_PRECONDITION(m<_outcomes.size())
+    HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
+    _outcomes[m] = Detail::make_logical_value(outcome);
 }
 
-List<size_t> ConstraintSatisfaction::indeterminate_indexes() const {
-    List<size_t> result;
-    for (size_t m=0; m<dimension(); ++m)
-        if (is_indeterminate(_outcomes[m]))
-            result.push_back(m);
-    return result;
-}
-
-bool ConstraintSatisfaction::completed() const {
-    return indeterminate_indexes().size() == 0;
-}
-
-Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::prescription_ratios() const {
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfactionSnapshot::prescription_ratios() const {
     Map<SatisfactionPrescriptionKind,double> ratios;
     ratios.insert(SatisfactionPrescriptionKind::TRUE,0.0);
     ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
     ratios.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
-    for (size_t m=0; m<dimension(); ++m) {
+    for (size_t m=0; m<_prescriptions.size(); ++m) {
         ratios[_prescriptions[m]]++;
     }
 
     for (auto const& p : {SatisfactionPrescriptionKind::TRUE,SatisfactionPrescriptionKind::FALSE_FOR_ALL,SatisfactionPrescriptionKind::FALSE_FOR_SOME})
-        ratios[p]/=static_cast<double>(dimension());
+        ratios[p]/=static_cast<double>(_prescriptions.size());
     return ratios;
 }
 
-Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::success_ratios() const {
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfactionSnapshot::success_ratios() const {
     Map<SatisfactionPrescriptionKind,double> prescriptions;
     prescriptions.insert(SatisfactionPrescriptionKind::TRUE,0.0);
     prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_ALL,0.0);
     prescriptions.insert(SatisfactionPrescriptionKind::FALSE_FOR_SOME,0.0);
     Map<SatisfactionPrescriptionKind,double> successes = prescriptions;
-    for (size_t m=0; m<dimension(); ++m) {
+    for (size_t m=0; m<_prescriptions.size(); ++m) {
         prescriptions[_prescriptions[m]]++;
         if (not is_indeterminate(_outcomes[m]))
             successes[_prescriptions[m]]++;
@@ -292,8 +257,119 @@ Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::success_ratios(
     return ratios;
 }
 
+double ConstraintSatisfactionSnapshot::global_success_ratio() const {
+    return static_cast<double>(_outcomes.size()-indeterminate_indexes().size())/static_cast<double>(_outcomes.size());
+}
+
+List<size_t> ConstraintSatisfactionSnapshot::indeterminate_indexes() const {
+    List<size_t> result;
+    for (size_t m=0; m<_outcomes.size(); ++m)
+        if (is_indeterminate(_outcomes[m]))
+            result.push_back(m);
+    return result;
+}
+
+bool ConstraintSatisfactionSnapshot::completed() const {
+    return indeterminate_indexes().size() == 0;
+}
+
+ostream& operator<<(ostream& os, ConstraintSatisfactionSnapshot const& s) {
+    return os << s._time << ": " << s._prescriptions << ", " << s._outcomes;
+}
+
+ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
+    _cs(cs), _space(spc), _snapshots({{0.0,Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::TRUE),Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)}}) { }
+
+size_t ConstraintSatisfaction::dimension() const {
+    return _cs.size();
+}
+
+ConstraintSatisfactionSnapshot const& ConstraintSatisfaction::_last() const {
+    return _snapshots.at(_snapshots.size()-1);
+}
+
+ConstraintSatisfactionSnapshot& ConstraintSatisfaction::_last() {
+    return _snapshots.at(_snapshots.size()-1);
+}
+
+List<ConstraintSatisfactionSnapshot> const& ConstraintSatisfaction::snapshots() const {
+    return _snapshots;
+}
+
+EffectiveVectorMultivariateFunction ConstraintSatisfaction::indeterminate_constraints_function() const {
+    List<EffectiveScalarMultivariateFunction> result;
+    for (ConstraintIndexType m=0; m<_cs.size(); ++m)
+        if (Detail::is_indeterminate(_last().outcomes()[m]))
+            result.push_back(make_function(_space,_cs.at(m)));
+    HELPER_ASSERT(not result.empty())
+    return result;
+}
+
+void ConstraintSatisfaction::merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state, bool exclude_truth) {
+    _add_snapshot();
+    auto indeterminates = indeterminate_indexes();
+    for (auto const& s : state.states()) {
+        auto const& m = indeterminates.at(s.constraint().group_id());
+        if (not exclude_truth) {
+            if (s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed()) {
+                _set_last_outcome(m,true);
+                _set_last_prescription(m,SatisfactionPrescriptionKind::TRUE);
+            }
+        }
+        if (s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded()) {
+            _set_last_outcome(m,false);
+            _set_last_prescription(m,SatisfactionPrescriptionKind::FALSE_FOR_ALL);
+        }
+    }
+}
+
+void ConstraintSatisfaction::merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis, bool exclude_truth) {
+    _add_snapshot();
+    auto indeterminates = indeterminate_indexes();
+    for (auto const& s : state.states()) {
+        auto const& sigma = preanalysis.usage(s.constraint().group_id()).sigma;
+        auto const& m = indeterminates.at(s.constraint().group_id());
+        if (not exclude_truth) {
+            if (sigma == SatisfactionPrescriptionKind::TRUE and s.constraint().failure_kind() == ConstraintFailureKind::HARD and not s.has_failed())
+                _set_last_outcome(m,true);
+        }
+        if (sigma != SatisfactionPrescriptionKind::TRUE and s.constraint().success_action() == ConstraintSuccessAction::DEACTIVATE and s.has_succeeded())
+            _set_last_outcome(m,false);
+        _set_last_prescription(m,sigma);
+    }
+}
+
+List<size_t> ConstraintSatisfaction::indeterminate_indexes() const {
+    return _last().indeterminate_indexes();
+}
+
+bool ConstraintSatisfaction::completed() const {
+    return _last().completed();
+}
+
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::prescription_ratios() const {
+    return _last().prescription_ratios();
+}
+
+Map<SatisfactionPrescriptionKind,double> ConstraintSatisfaction::success_ratios() const {
+    return _last().success_ratios();
+}
+
 double ConstraintSatisfaction::global_success_ratio() const {
-    return static_cast<double>(dimension()-indeterminate_indexes().size())/static_cast<double>(dimension());
+    return _last().global_success_ratio();
+}
+
+double ConstraintSatisfaction::cost() const {
+    HELPER_PRECONDITION(_snapshots.size()>1)
+    double result = 0;
+    for (size_t i=1; i<_snapshots.size(); ++i) {
+        auto const& current = _snapshots.at(i);
+        auto const& previous = _snapshots.at(i-1);
+        auto current_height = (1-current.global_success_ratio());
+        auto previous_height = (1-previous.global_success_ratio());
+        result += (current_height+(previous_height-current_height)/2)*(current.time()-previous.time());
+    }
+    return result;
 }
 
 RealExpression const& ConstraintSatisfaction::expression(size_t m) const {
@@ -303,12 +379,12 @@ RealExpression const& ConstraintSatisfaction::expression(size_t m) const {
 
 SatisfactionPrescriptionKind const& ConstraintSatisfaction::prescription(size_t m) const {
     HELPER_PRECONDITION(m<dimension())
-    return _prescriptions[m];
+    return _last().prescriptions()[m];
 }
 
 LogicalValue const& ConstraintSatisfaction::outcome(size_t m) const {
     HELPER_PRECONDITION(m<dimension())
-    return _outcomes[m];
+    return _last().outcomes()[m];
 }
 
 ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
@@ -329,15 +405,17 @@ ostream& operator<<(ostream& os, ConstraintSatisfaction const& cs) {
     return os << "}";
 }
 
-void ConstraintSatisfaction::reset_prescription(size_t m, SatisfactionPrescriptionKind prescription) {
-    HELPER_PRECONDITION(m<dimension())
-    _prescriptions[m] = prescription;
+void ConstraintSatisfaction::_add_snapshot() {
+    _sw.click();
+    _snapshots.push_back({_sw.elapsed_seconds(),_last().prescriptions(),_last().outcomes()});
 }
 
-void ConstraintSatisfaction::set_outcome(size_t m, bool outcome) {
-    HELPER_PRECONDITION(m<dimension())
-    HELPER_PRECONDITION(is_indeterminate(_outcomes[m]))
-    _outcomes[m] = Detail::make_logical_value(outcome);
+void ConstraintSatisfaction::_set_last_prescription(size_t m, SatisfactionPrescriptionKind prescription) {
+    _last().set_prescription(m,prescription);
+}
+
+void ConstraintSatisfaction::_set_last_outcome(size_t m, bool outcome) {
+    _last().set_outcome(m,outcome);
 }
 
 Vector<FloatDPBounds> resize(Vector<FloatDPBounds> const& bx, double chi, bool widen) {

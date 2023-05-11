@@ -384,6 +384,10 @@ double ConstraintSatisfaction::cost() const {
         auto current_height = (1-current.global_success_ratio());
         auto previous_height = (1-previous.global_success_ratio());
         result += (current_height+(previous_height-current_height)/2)*(current.time()-previous.time());
+        if (has_time_budget() and current.time() > time_budget()) {
+            result -= (current_height+(previous_height-current_height)/2*(current.time()-time_budget())/(current.time()-previous.time()))*(current.time() > time_budget());
+            break;
+        }
     }
     return result;
 }

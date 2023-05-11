@@ -62,9 +62,9 @@ void ariadne_main() {
             for (auto const& ss : c_result.satisfaction().snapshots()) {
                 CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round(ss.global_success_ratio()*100) << "%)")
             }
-            CONCLOG_PRINTLN_AT(1,"Constrained cost: " << c_result.satisfaction().cost())
+            CONCLOG_PRINTLN_AT(1,"Constrained cost: " << c_result.satisfaction().cost() << " (up to " << round(c_result.satisfaction().global_success_ratio()*100) << "%)")
 
-            CONCLOG_PRINTLN_AT(1,"Terminated in " << c_result.satisfaction().execution_time() << " s")
+            CONCLOG_PRINTLN_AT(2,"Terminated in " << c_result.satisfaction().execution_time() << " s")
 
             CONCLOG_PRINTLN_AT(2,"Unconstrained running...")
             CONCLOG_RUN_AT(1,auto u_result = unconstrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions),c_result.satisfaction().execution_time()))
@@ -72,7 +72,7 @@ void ariadne_main() {
             for (auto const& ss : u_result.satisfaction().snapshots()) {
                 CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round(ss.global_success_ratio()*100) << "%)")
             }
-            CONCLOG_PRINTLN_AT(1,"Unconstrained cost: " << u_result.satisfaction().cost())
+            CONCLOG_PRINTLN_AT(1,"Unconstrained cost: " << u_result.satisfaction().cost() << " (up to " << round(u_result.satisfaction().global_success_ratio()*100) << "%)")
         }
     }
 

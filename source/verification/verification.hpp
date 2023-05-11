@@ -52,12 +52,14 @@ double nthroot(double value, size_t n);
 //! \details TRUE : always true for all points (required over-approximation)
 //!          FALSE_FOR_ALL : sometimes false for all points (can use over-approximation)
 //!          FALSE_FOR_SOME : sometimes false only for some points (must use under-approximation)
-enum class SatisfactionPrescriptionKind { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME };
+//!          INDETERMINATE: not specified, either because not yet calculated or for uncontrolled evolution
+enum class SatisfactionPrescriptionKind { TRUE, FALSE_FOR_ALL, FALSE_FOR_SOME, INDETERMINATE };
 std::ostream& operator<<(std::ostream& os, const SatisfactionPrescriptionKind prescription) {
     switch(prescription) {
         case SatisfactionPrescriptionKind::TRUE: os << "TRUE"; return os;
         case SatisfactionPrescriptionKind::FALSE_FOR_ALL: os << "FALSE_FOR_ALL"; return os;
         case SatisfactionPrescriptionKind::FALSE_FOR_SOME: os << "FALSE_FOR_SOME"; return os;
+        case SatisfactionPrescriptionKind::INDETERMINATE: os << "INDETERMINATE"; return os;
         default: HELPER_FAIL_MSG("Unhandled SatisfactionPrescriptionKind value for printing")
     }
 }
@@ -72,7 +74,10 @@ Vector<FloatDPBounds> outer_evaluate_from_function(EffectiveVectorMultivariateFu
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h);
+//! \brief Build the uncontrolled constraints with simplified checks, using FALSE_FOR_ALL only to avoid inner approximation calculation
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_simplified_task_constraints(EffectiveVectorMultivariateFunction const& h);
+//! \brief Build the uncontrolled constraints with full checks, including FALSE_FOR_SOME
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_full_task_constraints(EffectiveVectorMultivariateFunction const& h);
 //! \brief Build the controlled constraints; we \a exclude_truth if the rigorous orbit from preanalysis was cut short due to the set being too large
 List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation, bool exclude_truth);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
@@ -83,6 +88,7 @@ double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescriptio
 double get_beta(Vector<FloatDPBounds> const& bnds, size_t n);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
+BoundingBoxType bounding_box(Orbit<LabelledEnclosure> const& orbit);
 
 struct TimedBoxEvaluation {
     TimedBoxEvaluation(double time_, Vector<FloatDPBounds> const& approximate_box_, Vector<FloatDPBounds> const& rigorous_box_, Vector<FloatDPBounds> const& approximate_evaluation_) :
@@ -168,6 +174,7 @@ class ConstraintSatisfaction {
     //! \brief The integral across snapshots of the global success ratio represents the cost
     double cost() const;
 
+    double execution_time() const;
     RealExpression const& expression(size_t m) const;
     SatisfactionPrescriptionKind const& prescription(size_t m) const;
     LogicalValue const& outcome(size_t m) const;

@@ -278,7 +278,7 @@ ostream& operator<<(ostream& os, ConstraintSatisfactionSnapshot const& s) {
 }
 
 ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
-    _cs(cs), _space(spc), _snapshots({{0.0,Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::TRUE),Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)}}) { }
+    _cs(cs), _space(spc), _snapshots({{0.0,Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::INDETERMINATE),Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)}}) { }
 
 size_t ConstraintSatisfaction::dimension() const {
     return _cs.size();
@@ -290,6 +290,10 @@ ConstraintSatisfactionSnapshot const& ConstraintSatisfaction::_last() const {
 
 ConstraintSatisfactionSnapshot& ConstraintSatisfaction::_last() {
     return _snapshots.at(_snapshots.size()-1);
+}
+
+double ConstraintSatisfaction::execution_time() const {
+    return _last().time();
 }
 
 List<ConstraintSatisfactionSnapshot> const& ConstraintSatisfaction::snapshots() const {
@@ -556,7 +560,28 @@ EvaluationSequence evaluate_singleton_orbits(Orbit<LabelledEnclosure> const& app
     return sb.build();
 }
 
-List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constraints(EffectiveVectorMultivariateFunction const& h) {
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_simplified_task_constraints(EffectiveVectorMultivariateFunction const& h) {
+    using A = VectorFieldEvolver;
+    using I = TaskInput<A>;
+    using O = TaskOutput<A>;
+
+    List<pExplore::Constraint<A>> result;
+
+    for (ConstraintIndexType m=0; m<h.result_size(); ++m) {
+        result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
+                             return outer_evaluate_from_function(h[m],o.reach).lower().get_d();
+                         }).set_name("true#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
+        );
+        result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
+                             return -outer_evaluate_from_function(h[m], o.evolve).upper().get_d();
+                         }).set_name("false#"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
+        );
+    }
+
+    return result;
+}
+
+List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_full_task_constraints(EffectiveVectorMultivariateFunction const& h) {
     using A = VectorFieldEvolver;
     using I = TaskInput<A>;
     using O = TaskOutput<A>;
@@ -569,7 +594,15 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constrain
         }).set_name("true#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
         result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
-            return -outer_evaluate_from_function(h[m], o.evolve).upper().get_d();
+            auto eval = outer_evaluate_from_function(h[m], o.evolve);
+            if (eval.upper().get_d() >= 0 and eval.lower().get_d() < 0) {
+                try {
+                    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+                    auto inner_evolve = approximator.compute_from(o.evolve);
+                    return -inner_find_negative_value_from_function(h[m],inner_evolve);
+                } catch (std::exception&) { }
+            }
+            return -eval.upper().get_d();
         }).set_name("false#"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
         );
     }
@@ -611,7 +644,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
                 } else {
                     if (outer_evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
                         try {
-                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1));
+                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
                             auto inner_evolve = approximator.compute_from(o.evolve);
                             return -inner_find_negative_value_from_function(h[m],inner_evolve);
                         } catch (std::exception&) { }
@@ -670,7 +703,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
         VectorFieldEvolver rigorous_evolver(dynamics, singleton_configuration);
 
         h = satisfaction.indeterminate_constraints_function();
-        auto uncontrolled_task_constraints = build_uncontrolled_task_constraints(h);
+        auto uncontrolled_task_constraints = build_uncontrolled_simplified_task_constraints(h);
         rigorous_evolver.set_constraints(uncontrolled_task_constraints);
         rigorous_orbit = rigorous_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
 
@@ -683,8 +716,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
         num_indeterminates = satisfaction.indeterminate_indexes().size();
 
-        CONCLOG_PRINTLN_VAR(satisfaction)
-        CONCLOG_PRINTLN_VAR(satisfaction.success_ratios())
+        CONCLOG_PRINTLN_VAR_AT(1,satisfaction)
 
         if (num_indeterminates > 0) {
 
@@ -697,7 +729,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
             auto indeterminate_idxs = satisfaction.indeterminate_indexes();
             for (size_t m = 0; m < analysis.number_of_constraints(); ++m) {
-                CONCLOG_PRINTLN(constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
+                CONCLOG_PRINTLN_AT(1,constraints.at(indeterminate_idxs.at(m)) << " >= 0 : " << analysis.usage(m))
             }
 
             auto controlled_configuration = configuration;
@@ -714,8 +746,8 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
             satisfaction.merge_from_controlled(controlled_evolver.constraining_state(), analysis, exclude_truth or not_has_terminated);
 
-            CONCLOG_PRINTLN_VAR(satisfaction)
-            CONCLOG_PRINTLN_VAR(satisfaction.success_ratios())
+            CONCLOG_PRINTLN_VAR_AT(1,satisfaction)
+            CONCLOG_PRINTLN("Success ratios: " << satisfaction.success_ratios() << " (" << std::round(satisfaction.global_success_ratio()*100) << "%)")
 
             if (satisfaction.indeterminate_indexes().size() == num_indeterminates) {
                 CONCLOG_PRINTLN("No improvement in this round, aborting.")

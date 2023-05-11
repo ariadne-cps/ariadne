@@ -44,6 +44,19 @@ struct SystemSpecification {
     Real evolution_time;
 };
 
+class UnconstrainedEvolutionResult {
+  public:
+    UnconstrainedEvolutionResult(Orbit<LabelledEnclosure> const& approximate_orbit, Orbit<LabelledEnclosure> const& rigorous_orbit, ConstraintSatisfaction const& satisfaction) :
+        _approximate_orbit(approximate_orbit), _rigorous_orbit(rigorous_orbit), _satisfaction(satisfaction) { }
+    Orbit<LabelledEnclosure> const& approximate_orbit() const { return _approximate_orbit; }
+    Orbit<LabelledEnclosure> const& rigorous_orbit() const { return _rigorous_orbit; }
+    ConstraintSatisfaction const& satisfaction() const { return _satisfaction; }
+  private:
+    Orbit<LabelledEnclosure> const _approximate_orbit;
+    Orbit<LabelledEnclosure> const _rigorous_orbit;
+    ConstraintSatisfaction const _satisfaction;
+};
+
 LabelledUpperBoxType bounding_box(ListSet<LabelledEnclosure> const& es) {
     HELPER_PRECONDITION(not es.empty())
     UpperBoxType result = es[0].euclidean_set().bounding_box();
@@ -53,6 +66,72 @@ LabelledUpperBoxType bounding_box(ListSet<LabelledEnclosure> const& es) {
             result[j] = hull(result[j],bx[j]);
     }
     return {es[0].state_space(),result};
+}
+
+UnconstrainedEvolutionResult unconstrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
+                                                     Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, double time_budget) {
+    CONCLOG_SCOPE_CREATE
+
+    static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
+
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+    auto h = satisfaction.indeterminate_constraints_function();
+
+    Orbit<LabelledEnclosure> approximate_orbit({});
+    Orbit<LabelledEnclosure> rigorous_orbit({});
+
+    size_t num_indeterminates = constraints.size();
+
+    Stopwatch<Milliseconds> sw;
+
+    for (size_t i=0; ; ++i) {
+        CONCLOG_PRINTLN("Round #" << i)
+
+        auto analysis_point = configuration.search_space().initial_point();
+        CONCLOG_PRINTLN_AT(1,"Using point " << analysis_point << " for singleton analyses.")
+
+        auto singleton_configuration = make_singleton(configuration, analysis_point);
+        singleton_configuration.set_enable_clobbering(true);
+
+        VectorFieldEvolver approximate_evolver(dynamics, singleton_configuration);
+
+        CONCLOG_PRINTLN_AT(1,"Computing approximate singleton evolution...")
+        approximate_orbit = approximate_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+
+        CONCLOG_PRINTLN_AT(1,"Computing rigorous singleton evolution...")
+        auto approximate_bounding_box = bounding_box(approximate_orbit);
+        singleton_configuration.set_enable_clobbering(false).set_enable_premature_termination(true).set_maximum_enclosure_radius(approximate_bounding_box.radius().get_d()*MAXIMUM_ENCLOSURE_FRACTION);
+
+        VectorFieldEvolver rigorous_evolver(dynamics, singleton_configuration);
+
+        h = satisfaction.indeterminate_constraints_function();
+        auto uncontrolled_task_constraints = build_uncontrolled_full_task_constraints(h);
+        rigorous_evolver.set_constraints(uncontrolled_task_constraints);
+        rigorous_orbit = rigorous_evolver.orbit(initial_set, evolution_time, Semantics::LOWER);
+
+        bool exclude_truth = rigorous_orbit.final().empty();
+        if (exclude_truth) {
+            CONCLOG_PRINTLN("Prescription TRUE will not be checked on this round.")
+        }
+
+        satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state(), exclude_truth);
+
+        num_indeterminates = satisfaction.indeterminate_indexes().size();
+
+        CONCLOG_PRINTLN_VAR_AT(1,satisfaction)
+        CONCLOG_PRINTLN_VAR(satisfaction.global_success_ratio())
+
+        if (num_indeterminates == 0) {
+            CONCLOG_PRINTLN("All constraints satisfiability determined, terminating.")
+            break;
+        }
+
+        sw.click();
+        if (sw.elapsed_seconds() > time_budget)
+            break;
+    }
+
+    return {approximate_orbit,rigorous_orbit,satisfaction};
 }
 
 Map<SatisfactionPrescriptionKind,double> frequencies(List<ConstraintPrescription> const& constraint_prescriptions) {

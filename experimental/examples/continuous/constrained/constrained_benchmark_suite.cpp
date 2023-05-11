@@ -46,22 +46,34 @@ void ariadne_main() {
     auto configuration = get_configuration();
 
     static const size_t NUM_CONSTRAINTS = 100;
-    //static const size_t NUM_RUNS_PER_SYSTEM = 10;
+    static const size_t NUM_EXECUTIONS_PER_SYSTEM = 1;
 
     for (auto const& s : specs) {
         CONCLOG_PRINTLN(s.name)
+        for (size_t i=0; i<NUM_EXECUTIONS_PER_SYSTEM; ++i) {
+            CONCLOG_PRINTLN_AT(1,"Execution #" << i)
+            CONCLOG_PRINTLN_AT(2,"Generating the constraints...")
+            auto constraints_prescriptions = generate_ellipsoidal_hyperbolic_constraints(NUM_CONSTRAINTS,s,configuration);
+            CONCLOG_PRINTLN_AT(2,"Expected frequencies: " << frequencies(constraints_prescriptions))
 
-        CONCLOG_PRINTLN_AT(1,"Generating the constraints...")
-        auto constraints_prescriptions = generate_ellipsoidal_hyperbolic_constraints(NUM_CONSTRAINTS,s,configuration);
-        CONCLOG_PRINTLN_AT(1,"Expected frequencies: " << frequencies(constraints_prescriptions))
+            CONCLOG_PRINTLN_AT(2,"Constrained running...")
+            CONCLOG_RUN_AT(1,auto c_result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions)))
 
-        CONCLOG_PRINTLN_AT(1,"Running...")
-        auto result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions));
+            for (auto const& ss : c_result.satisfaction().snapshots()) {
+                CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round(ss.global_success_ratio()*100) << "%)")
+            }
+            CONCLOG_PRINTLN_AT(1,"Constrained cost: " << c_result.satisfaction().cost())
 
-        for (auto const& s : result.satisfaction().snapshots()) {
-            CONCLOG_PRINTLN(s.time() << ": " << s.success_ratios() << " (" << round(s.global_success_ratio()*100) << "%)")
+            CONCLOG_PRINTLN_AT(1,"Terminated in " << c_result.satisfaction().execution_time() << " s")
+
+            CONCLOG_PRINTLN_AT(2,"Unconstrained running...")
+            CONCLOG_RUN_AT(1,auto u_result = unconstrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions),c_result.satisfaction().execution_time()))
+
+            for (auto const& ss : u_result.satisfaction().snapshots()) {
+                CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round(ss.global_success_ratio()*100) << "%)")
+            }
+            CONCLOG_PRINTLN_AT(1,"Unconstrained cost: " << u_result.satisfaction().cost())
         }
-        CONCLOG_PRINTLN("Cost: " << result.satisfaction().cost())
     }
 
 }

@@ -142,7 +142,7 @@ List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t 
 
     for (auto const& encl : orbit.intermediate()) {
         for (size_t m=0; m<constraints.size(); ++m) {
-            auto const& eval = evaluate_from_function(constraint_functions.at(m),encl);
+            auto const& eval = outer_evaluate_from_function(constraint_functions.at(m),encl);
             auto upper = eval.upper().get_d();
             auto lower = eval.lower().get_d();
             if (result.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
@@ -191,7 +191,7 @@ List<ConstraintPrescription> generate_ellipsoidal_constraints(size_t num_constra
 
     for (auto const& encl : orbit.intermediate()) {
         for (size_t m=0; m<constraints.size(); ++m) {
-            auto const& eval = evaluate_from_function(constraint_functions.at(m),encl);
+            auto const& eval = outer_evaluate_from_function(constraint_functions.at(m),encl);
             auto upper = eval.upper().get_d();
             auto lower = eval.lower().get_d();
             if (result.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {

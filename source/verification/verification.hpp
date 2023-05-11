@@ -66,8 +66,9 @@ class EvaluationSequence;
 class ConstrainedEvolutionResult;
 class ConstraintSatisfaction;
 
-FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
-Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure);
+double inner_find_negative_value_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
+FloatDPBounds outer_evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure);
+Vector<FloatDPBounds> outer_evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure);
 Vector<FloatDPBounds> widen(Vector<FloatDPBounds> const& bx, double chi);
 Vector<FloatDPBounds> shrink(Vector<FloatDPBounds> const& bx, double chi);
 

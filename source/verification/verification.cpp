@@ -99,7 +99,7 @@ EvaluationSequenceBuilder::EvaluationSequenceBuilder(size_t N, EffectiveVectorMu
                                           _t_false(h.result_size(),{{SatisfactionPrescriptionKind::FALSE_FOR_ALL, 0.0}, {SatisfactionPrescriptionKind::FALSE_FOR_SOME, 0.0}}) { }
 
 void EvaluationSequenceBuilder::add_from(LabelledEnclosure const& approximate, LabelledEnclosure const& rigorous) {
-    auto approximate_evaluation = evaluate_from_function(_h,approximate);
+    auto approximate_evaluation = outer_evaluate_from_function(_h,approximate);
 
     auto approximate_box = approximate.euclidean_set().bounding_box();
     auto rigorous_box = rigorous.euclidean_set().bounding_box();
@@ -499,12 +499,34 @@ double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescriptio
     } else return (chi-1.0)*beta;
 }
 
-FloatDPBounds evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
+double _inner_find_negative_value_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure, size_t splittings_left) {
+    auto bb = enclosure.euclidean_set().bounding_box();
+    auto bb_lower_bnd = function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb)).lower().get_d();
+    if (bb_lower_bnd >= 0) {
+        return bb_lower_bnd;
+    } else {
+        auto centre_bnd = bb.centre().bounding_box();
+        auto centre_val = function(reinterpret_cast<Vector<FloatDPBounds>const&>(centre_bnd)).upper().get_d();
+        if (centre_val < 0 or splittings_left == 0) {
+            return centre_val;
+        } else {
+            auto splits = enclosure.split();
+            return std::min(_inner_find_negative_value_from_function(function,splits.first,splittings_left-1), _inner_find_negative_value_from_function(function,splits.second,splittings_left-1));
+        }
+    }
+}
+
+double inner_find_negative_value_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
+    static const size_t NUM_SPLITTINGS = function.result_size()*4;
+    return _inner_find_negative_value_from_function(function,enclosure,NUM_SPLITTINGS);
+}
+
+FloatDPBounds outer_evaluate_from_function(EffectiveScalarMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
     auto bb = enclosure.euclidean_set().bounding_box();
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
 
-Vector<FloatDPBounds> evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
+Vector<FloatDPBounds> outer_evaluate_from_function(EffectiveVectorMultivariateFunction const& function, LabelledEnclosure const& enclosure) {
     auto bb = enclosure.euclidean_set().bounding_box();
     return function(reinterpret_cast<Vector<FloatDPBounds>const&>(bb));
 }
@@ -543,11 +565,11 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_task_constrain
 
     for (ConstraintIndexType m=0; m<h.result_size(); ++m) {
         result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
-            return evaluate_from_function(h[m],o.reach).lower().get_d();
+            return outer_evaluate_from_function(h[m],o.reach).lower().get_d();
         }).set_name("true#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
         );
         result.push_back(ConstraintBuilder<A>([h,m](I const&, O const& o) {
-            return -evaluate_from_function(h[m], o.evolve).upper().get_d();
+            return -outer_evaluate_from_function(h[m], o.evolve).upper().get_d();
         }).set_name("false#"+to_string(m)).set_group_id(m).set_success_action(ConstraintSuccessAction::DEACTIVATE).build()
         );
     }
@@ -577,7 +599,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
         if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE and not exclude_truth) {
             result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
                 if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::TRUE)
-                    return evaluate_from_function(h[m],o.reach).lower().get_d();
+                    return outer_evaluate_from_function(h[m],o.reach).lower().get_d();
                 else return evaluation.usage(m).t_star - o.time.get_d();
             }).set_name("hard#"+to_string(m)).set_group_id(m).set_failure_kind(ConstraintFailureKind::HARD).build()
             );
@@ -585,13 +607,13 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
         if (evaluation.usage(m).sigma != SatisfactionPrescriptionKind::TRUE) {
             result.push_back(ConstraintBuilder<A>([evaluation,h,m](I const&, O const& o) {
                 if (evaluation.usage(m).sigma == SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
-                    return -evaluate_from_function(h[m], o.evolve).upper().get_d();
+                    return -outer_evaluate_from_function(h[m], o.evolve).upper().get_d();
                 } else {
-                    if (evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
+                    if (outer_evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
                         try {
                             auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,1));
                             auto inner_evolve = approximator.compute_from(o.evolve);
-                            return -evaluate_from_function(h[m],inner_evolve).lower().get_d();
+                            return -inner_find_negative_value_from_function(h[m],inner_evolve);
                         } catch (std::exception&) { }
                     }
                     return -1.0;

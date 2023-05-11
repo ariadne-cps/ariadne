@@ -81,7 +81,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_full_task_cons
 //! \brief Build the controlled constraints; we \a exclude_truth if the rigorous orbit from preanalysis was cut short due to the set being too large
 List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints(EffectiveVectorMultivariateFunction const& h, EvaluationSequence const& evaluation, bool exclude_truth);
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints);
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, double time_budget = 0.0);
 
 double get_chi(Vector<FloatDPBounds>const& bnds, EffectiveScalarMultivariateFunction const& constraint, SatisfactionPrescriptionKind prescription);
 double get_rho(double chi, double beta, SatisfactionPrescriptionKind prescription);
@@ -154,7 +154,7 @@ class ConstraintSatisfactionSnapshot {
 
 class ConstraintSatisfaction {
   public:
-    ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc);
+    ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc, double time_budget);
 
     //! \brief The dimension of the satisfaction, i.e., the number of constraints
     size_t dimension() const;
@@ -165,16 +165,27 @@ class ConstraintSatisfaction {
     void merge_from_uncontrolled(ConstrainingState<VectorFieldEvolver> const& state, bool exclude_truth);
     void merge_from_controlled(ConstrainingState<VectorFieldEvolver> const& state, EvaluationSequence const& preanalysis, bool exclude_truth);
     List<size_t> indeterminate_indexes() const;
+    //! \brief Whether all constraints satisfaction has been determined
     bool completed() const;
+    //! \brief Whether there is a time budget
+    bool has_time_budget() const;
+    //! \brief Whether the time budget has been reached
+    bool has_expired() const;
+
+    //! \brief The current elapsed time from creation of the object
+    double execution_time() const;
+    //! \brief The maximum execution time after which termination should be enforced
+    //! \details Non-positive values are interpreted as having unlimited budget
+    double time_budget() const;
 
     Map<SatisfactionPrescriptionKind,double> prescription_ratios() const;
     Map<SatisfactionPrescriptionKind,double> success_ratios() const;
     double global_success_ratio() const;
 
     //! \brief The integral across snapshots of the global success ratio represents the cost
+    //! \details If a non-zero time budget exists, it is cut with respect to it
     double cost() const;
 
-    double execution_time() const;
     RealExpression const& expression(size_t m) const;
     SatisfactionPrescriptionKind const& prescription(size_t m) const;
     LogicalValue const& outcome(size_t m) const;
@@ -193,6 +204,7 @@ class ConstraintSatisfaction {
   private:
     Vector<RealExpression> const _cs;
     RealSpace const _space;
+    double const _time_budget;
     List<ConstraintSatisfactionSnapshot> _snapshots;
     Stopwatch<Milliseconds> _sw;
 };

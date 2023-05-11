@@ -74,7 +74,7 @@ UnconstrainedEvolutionResult unconstrained_evolution(VectorField const& dynamics
 
     static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
 
-    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space(), time_budget);
     auto h = satisfaction.indeterminate_constraints_function();
 
     Orbit<LabelledEnclosure> approximate_orbit({});
@@ -116,6 +116,11 @@ UnconstrainedEvolutionResult unconstrained_evolution(VectorField const& dynamics
 
         satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state(), exclude_truth);
 
+        if (satisfaction.has_expired()) {
+            CONCLOG_PRINTLN("Time budget hit, aborting.")
+            break;
+        }
+
         num_indeterminates = satisfaction.indeterminate_indexes().size();
 
         CONCLOG_PRINTLN_VAR_AT(1,satisfaction)
@@ -125,10 +130,6 @@ UnconstrainedEvolutionResult unconstrained_evolution(VectorField const& dynamics
             CONCLOG_PRINTLN("All constraints satisfiability determined, terminating.")
             break;
         }
-
-        sw.click();
-        if (sw.elapsed_seconds() > time_budget)
-            break;
     }
 
     return {approximate_orbit,rigorous_orbit,satisfaction};

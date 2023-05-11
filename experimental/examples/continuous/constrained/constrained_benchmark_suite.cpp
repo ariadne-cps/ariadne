@@ -46,7 +46,7 @@ void ariadne_main() {
     auto configuration = get_configuration();
 
     static const size_t NUM_CONSTRAINTS = 100;
-    static const size_t NUM_EXECUTIONS_PER_SYSTEM = 1;
+    static const size_t NUM_EXECUTIONS_PER_SYSTEM = 10;
 
     for (auto const& s : specs) {
         CONCLOG_PRINTLN(s.name)

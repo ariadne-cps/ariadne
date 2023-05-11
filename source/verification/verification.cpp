@@ -277,8 +277,8 @@ ostream& operator<<(ostream& os, ConstraintSatisfactionSnapshot const& s) {
     return os << s._time << ": " << s._prescriptions << ", " << s._outcomes;
 }
 
-ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc) :
-    _cs(cs), _space(spc), _snapshots({{0.0,Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::INDETERMINATE),Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)}}) { }
+ConstraintSatisfaction::ConstraintSatisfaction(List<RealExpression> const& cs, RealSpace const& spc, double time_budget) :
+    _cs(cs), _space(spc), _time_budget(time_budget), _snapshots({{0.0,Vector<SatisfactionPrescriptionKind>(cs.size(),SatisfactionPrescriptionKind::INDETERMINATE),Vector<LogicalValue>(cs.size(),LogicalValue::INDETERMINATE)}}) { }
 
 size_t ConstraintSatisfaction::dimension() const {
     return _cs.size();
@@ -292,8 +292,20 @@ ConstraintSatisfactionSnapshot& ConstraintSatisfaction::_last() {
     return _snapshots.at(_snapshots.size()-1);
 }
 
+bool ConstraintSatisfaction::has_time_budget() const {
+    return _time_budget > 0.0;
+}
+
+double ConstraintSatisfaction::time_budget() const {
+    return _time_budget;
+}
+
 double ConstraintSatisfaction::execution_time() const {
     return _last().time();
+}
+
+bool ConstraintSatisfaction::has_expired() const {
+    return has_time_budget() and execution_time() > _time_budget;
 }
 
 List<ConstraintSatisfactionSnapshot> const& ConstraintSatisfaction::snapshots() const {
@@ -668,12 +680,12 @@ BoundingBoxType bounding_box(Orbit<LabelledEnclosure> const& orbit) {
 }
 
 ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, RealExpressionBoundedConstraintSet const& initial_set, Real const& evolution_time,
-                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints) {
+                                                 Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, double time_budget) {
     CONCLOG_SCOPE_CREATE
 
     static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
 
-    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space());
+    auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space(), time_budget);
     auto h = satisfaction.indeterminate_constraints_function();
 
     Orbit<LabelledEnclosure> approximate_orbit({});
@@ -749,8 +761,13 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
             CONCLOG_PRINTLN_VAR_AT(1,satisfaction)
             CONCLOG_PRINTLN("Success ratios: " << satisfaction.success_ratios() << " (" << std::round(satisfaction.global_success_ratio()*100) << "%)")
 
-            if (satisfaction.indeterminate_indexes().size() == num_indeterminates) {
+            if (satisfaction.indeterminate_indexes().size() == num_indeterminates and not satisfaction.has_time_budget()) {
                 CONCLOG_PRINTLN("No improvement in this round, aborting.")
+                break;
+            }
+
+            if (satisfaction.has_expired()) {
+                CONCLOG_PRINTLN("Time budget hit, aborting.")
                 break;
             }
 

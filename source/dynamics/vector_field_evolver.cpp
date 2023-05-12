@@ -35,6 +35,7 @@
 #include "function/constraint.hpp"
 #include "dynamics/enclosure.hpp"
 #include "dynamics/orbit.hpp"
+#include "dynamics/inner_approximation.hpp"
 
 #include "solvers/integrator.hpp"
 
@@ -205,6 +206,9 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 namespace pExplore {
 
 using Ariadne::cast_exact;
+using Ariadne::NativeSimplex;
+using Ariadne::ParallelLinearisationContractor;
+using Ariadne::NonlinearCandidateValidationInnerApproximator;
 
 auto Task<VectorFieldEvolver>::run(TaskInput<VectorFieldEvolver> const& in, Configuration<VectorFieldEvolver> const& cfg) const -> TaskOutput<VectorFieldEvolver> {
     LabelledEnclosure next_set = in.current_set;
@@ -230,7 +234,14 @@ auto Task<VectorFieldEvolver>::run(TaskInput<VectorFieldEvolver> const& in, Conf
     CONCLOG_PRINTLN_VAR_AT(1, reach_set);
     next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
     CONCLOG_PRINTLN_VAR_AT(1, next_set);
-    return {next_set, reach_set, next_time};
+
+    Lazy<LabelledEnclosure> inner_next_set([next_set]{
+        auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,0));
+        auto inner_evolve = approximator.compute_from(next_set);
+        return inner_evolve.clone();
+    });
+
+    return {next_set, reach_set, inner_next_set, next_time};
 }
 
 } // namespace pExplore

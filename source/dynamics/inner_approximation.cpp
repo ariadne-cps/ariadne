@@ -477,7 +477,6 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
 
                 CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
                 non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
-                CONCLOG_PRINTLN_AT(1,non_intersection_dom << " empty? " << non_intersection_dom.is_empty())
             }
 
             if (non_intersection_dom.is_empty() or not scaling_search.solution_found()) {

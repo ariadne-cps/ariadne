@@ -43,6 +43,7 @@
 #include "solvers/integrator.hpp"
 #include "dynamics/evolver_interface.hpp"
 
+#include "helper/lazy.hpp"
 #include "betterthreads/workload.hpp"
 #include "pronest/configuration_interface.hpp"
 #include "pronest/searchable_configuration.hpp"
@@ -227,6 +228,7 @@ using Ariadne::LabelledEnclosure;
 using Ariadne::IntegratorInterface;
 using Ariadne::EffectiveVectorMultivariateFunction;
 using Ariadne::Dyadic;
+using Helper::Lazy;
 
 template<> struct TaskInput<VectorFieldEvolver> {
     TaskInput(EffectiveVectorMultivariateFunction const& dynamic_, LabelledEnclosure const& current_set_, Dyadic const& current_time_) :
@@ -238,10 +240,11 @@ template<> struct TaskInput<VectorFieldEvolver> {
 };
 
 template<> struct TaskOutput<VectorFieldEvolver> {
-    TaskOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Dyadic const& time_) :
-        evolve(evolve_), reach(reach_), time(time_) { }
+    TaskOutput(LabelledEnclosure const& evolve_, LabelledEnclosure const& reach_, Lazy<LabelledEnclosure> const& inner_, Dyadic const& time_) :
+        evolve(evolve_), reach(reach_), inner(inner_), time(time_) { }
     LabelledEnclosure const evolve;
     LabelledEnclosure const reach;
+    Lazy<LabelledEnclosure> const inner;
     Dyadic const time;
 };
 

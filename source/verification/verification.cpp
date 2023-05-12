@@ -755,6 +755,7 @@ ConstrainedEvolutionResult constrained_evolution(VectorField const& dynamics, Re
 
             CONCLOG_PRINTLN("Computing controlled evolution up to " << analysis.maximum_time() << " sec ... ")
             controlled_evolver.set_constraints(controlled_task_constraints);
+            controlled_evolver.set_initial_point(analysis_point);
 
             controlled_orbit = controlled_evolver.orbit(initial_set, Real(cast_exact(analysis.maximum_time())), Semantics::LOWER);
 

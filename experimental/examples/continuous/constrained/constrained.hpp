@@ -72,7 +72,7 @@ UnconstrainedEvolutionResult unconstrained_evolution(VectorField const& dynamics
                                                      Configuration<VectorFieldEvolver> const& configuration, List<RealExpression> const& constraints, double time_budget) {
     CONCLOG_SCOPE_CREATE
 
-    static const double MAXIMUM_ENCLOSURE_FRACTION = 0.25;
+    static const double MAXIMUM_ENCLOSURE_FRACTION = 0.5;
 
     auto satisfaction = ConstraintSatisfaction(constraints,dynamics.state_space(), time_budget);
     auto h = satisfaction.indeterminate_constraints_function();
@@ -181,12 +181,14 @@ Configuration<VectorFieldEvolver> get_configuration() {
 }
 
 List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t num_constraints, SystemSpecification const& spec, Configuration<VectorFieldEvolver> const& configuration) {
+    CONCLOG_SCOPE_CREATE
     auto analysis_point = configuration.search_space().initial_point();
     auto singleton_configuration = make_singleton(configuration, analysis_point);
     singleton_configuration.set_enable_clobbering(true);
     VectorFieldEvolver approximate_evolver(spec.dynamics, singleton_configuration);
-    CONCLOG_RUN_MUTED(auto orbit = approximate_evolver.orbit(spec.initial_set, spec.evolution_time, Semantics::LOWER))
-    auto bb = bounding_box(orbit.intermediate());
+    CONCLOG_PRINTLN_AT(1,"Compute approximate orbit for prescription evaluation...")
+    CONCLOG_RUN_MUTED(auto approximate_orbit = approximate_evolver.orbit(spec.initial_set, spec.evolution_time, Semantics::LOWER))
+    auto bb = bounding_box(approximate_orbit.intermediate());
 
     List<RealExpression> constraints;
 
@@ -195,7 +197,9 @@ List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t 
 
     UniformIntRandomiser<size_t> sign_rnd(0,1);
 
-    for (size_t i=0; i<num_constraints; ++i) {
+    CONCLOG_PRINTLN_AT(1,"Construct the initial set of constraints...")
+
+    for (size_t i=0; i<num_constraints*5; ++i) {
         while (true) {
             List<size_t> signs;
             size_t sum = 0;
@@ -215,76 +219,52 @@ List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t 
         }
     }
 
-    // Discard those with all negative or all positive signs
+    CONCLOG_PRINTLN_AT(1,"Evaluate the constraints...")
 
     List<EffectiveScalarMultivariateFunction> constraint_functions;
     for (auto const& c : constraints)
         constraint_functions.push_back(make_function(spec.dynamics.state_space(),c));
 
-    List<ConstraintPrescription> result;
+    List<ConstraintPrescription> initial_constraint_prescriptions;
     for (auto const& c : constraints)
-        result.push_back({c, SatisfactionPrescriptionKind::TRUE});
+        initial_constraint_prescriptions.push_back({c, SatisfactionPrescriptionKind::TRUE});
 
-    for (auto const& encl : orbit.intermediate()) {
+    for (auto const& encl : approximate_orbit.intermediate()) {
         for (size_t m=0; m<constraints.size(); ++m) {
             auto const& eval = outer_evaluate_from_function(constraint_functions.at(m),encl);
             auto upper = eval.upper().get_d();
             auto lower = eval.lower().get_d();
-            if (result.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
-                if (upper < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
-                else if (lower < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
+            if (initial_constraint_prescriptions.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
+                if (upper < 0) initial_constraint_prescriptions.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
+                else if (lower < 0) initial_constraint_prescriptions.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
             }
         }
     }
 
-    return result;
-}
+    CONCLOG_PRINTLN_AT(1,"Compute rigorous orbit to identify the trivially resolved constraints...")
+    singleton_configuration.set_enable_clobbering(false).set_enable_premature_termination(true).set_maximum_enclosure_radius(bb.euclidean_set().radius().get_d()/2);
+    VectorFieldEvolver rigorous_evolver(spec.dynamics, singleton_configuration);
+    ConstraintSatisfaction satisfaction(constraints,spec.dynamics.state_space(),0.0);
+    auto h = satisfaction.indeterminate_constraints_function();
+    auto uncontrolled_task_constraints = build_uncontrolled_simplified_task_constraints(h);
+    rigorous_evolver.set_constraints(uncontrolled_task_constraints);
 
-List<ConstraintPrescription> generate_ellipsoidal_constraints(size_t num_constraints, SystemSpecification const& spec, Configuration<VectorFieldEvolver> const& configuration) {
-    auto analysis_point = configuration.search_space().initial_point();
-    auto singleton_configuration = make_singleton(configuration, analysis_point);
-    singleton_configuration.set_enable_clobbering(true);
-    VectorFieldEvolver approximate_evolver(spec.dynamics, singleton_configuration);
-    CONCLOG_RUN_MUTED(auto orbit = approximate_evolver.orbit(spec.initial_set, spec.evolution_time, Semantics::LOWER))
-    auto bb = bounding_box(orbit.intermediate());
+    CONCLOG_RUN_MUTED(auto rigorous_orbit = rigorous_evolver.orbit(spec.initial_set, spec.evolution_time, Semantics::LOWER))
+    bool exclude_truth = rigorous_orbit.final().empty();
+    satisfaction.merge_from_uncontrolled(rigorous_evolver.constraining_state(),exclude_truth);
 
-    List<RealExpression> constraints;
-
-    UniformRealRandomiser<double> lower_rnd(0.5,1.0);
-    UniformRealRandomiser<double> upper_rnd(1.0,1.5);
-
-    for (size_t i=0; i<num_constraints/2; ++i) {
-        RealExpression expr = -1;
-        for (auto const& v : spec.dynamics.state_space().variables())
-            expr = expr + sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(lower_rnd.get()*bb[v].radius().get_d())));
-        constraints.push_back(expr);
-    }
-    for (size_t i=0; i<num_constraints/2; ++i) {
-        RealExpression expr = 1;
-        for (auto const& v : spec.dynamics.state_space().variables())
-            expr = expr - sqr((v - RealConstant(cast_exact(bb[v].midpoint().get_d())))/RealConstant(cast_exact(upper_rnd.get()*bb[v].radius().get_d())));
-        constraints.push_back(expr);
-    }
-
-    List<EffectiveScalarMultivariateFunction> constraint_functions;
-    for (auto const& c : constraints)
-        constraint_functions.push_back(make_function(spec.dynamics.state_space(),c));
+    auto indeterminate_indexes = satisfaction.indeterminate_indexes();
+    CONCLOG_PRINTLN_AT(1,"Obtained " << indeterminate_indexes.size() << " unresolved constraints.")
 
     List<ConstraintPrescription> result;
-    for (auto const& c : constraints)
-        result.push_back({c, SatisfactionPrescriptionKind::TRUE});
-
-    for (auto const& encl : orbit.intermediate()) {
-        for (size_t m=0; m<constraints.size(); ++m) {
-            auto const& eval = outer_evaluate_from_function(constraint_functions.at(m),encl);
-            auto upper = eval.upper().get_d();
-            auto lower = eval.lower().get_d();
-            if (result.at(m).prescription != SatisfactionPrescriptionKind::FALSE_FOR_ALL) {
-                if (upper < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_ALL;
-                else if (lower < 0) result.at(m).prescription = SatisfactionPrescriptionKind::FALSE_FOR_SOME;
-            }
-        }
+    for (size_t m=0; m<initial_constraint_prescriptions.size(); ++m) {
+        if (is_indeterminate(satisfaction.outcome(m)))
+            result.push_back(initial_constraint_prescriptions.at(m));
+        if (result.size() == num_constraints)
+            break;
     }
+
+    CONCLOG_PRINTLN_AT(1,"Ended up with " << result.size() << " constraints.")
 
     return result;
 }

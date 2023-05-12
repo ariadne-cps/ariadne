@@ -52,7 +52,7 @@ SystemSpecification LAU_c()
 
     RealExpressionBoundedConstraintSet initial_set({{x1_0-eps<=x1<=x1_0+eps},{x2_0-eps<=x2<=x2_0+eps},{x3_0-eps<=x3<=x3_0+eps},{x4_0-eps<=x4<=x4_0+eps},{x5_0-eps<=x5<=x5_0+eps},{x6_0-eps<=x6<=x6_0+eps},{x7_0-eps<=x7<=x7_0+eps}});
 
-    Real evolution_time(10);
+    Real evolution_time(5);
 
     return {"laub-loomis",dynamics,initial_set,evolution_time};
 }

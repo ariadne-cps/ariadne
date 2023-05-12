@@ -613,7 +613,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_uncontrolled_full_task_cons
             auto eval = outer_evaluate_from_function(h[m], o.evolve);
             if (eval.upper().get_d() >= 0 and eval.lower().get_d() < 0) {
                 try {
-                    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+                    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,0));
                     auto inner_evolve = approximator.compute_from(o.evolve);
                     return -inner_find_negative_value_from_function(h[m],inner_evolve);
                 } catch (std::exception&) { }
@@ -660,7 +660,7 @@ List<pExplore::Constraint<VectorFieldEvolver>> build_controlled_task_constraints
                 } else {
                     if (outer_evaluate_from_function(h[m],o.evolve).lower().get_d() < 0) {
                         try {
-                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(GLPKSimplex(),2,1));
+                            auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,0));
                             auto inner_evolve = approximator.compute_from(o.evolve);
                             return -inner_find_negative_value_from_function(h[m],inner_evolve);
                         } catch (std::exception&) { }

@@ -117,7 +117,7 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
 Void VectorFieldEvolver::
 _append_initial_set(WorkloadType& workload, TimeStepType const& initial_time, EnclosureType const& current_set) const
 {
-    if (decide(current_set.euclidean_set().bounding_box().radius() > configuration().maximum_enclosure_radius())) {
+    if (this->configuration().enable_initial_subdivision() and decide(current_set.euclidean_set().bounding_box().radius() > configuration().maximum_enclosure_radius())) {
         CONCLOG_PRINTLN_AT(1,"set is too large, splitting")
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(workload,initial_time,split_sets.first); }

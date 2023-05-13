@@ -171,6 +171,7 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     Configuration() {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));
         add_property("enable_reconditioning",BooleanConfigurationProperty(true));
+        add_property("enable_initial_subdivision",BooleanConfigurationProperty(false));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
         add_property("enable_clobbering",BooleanConfigurationProperty(false));
         add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
@@ -187,6 +188,11 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     Bool const& enable_reconditioning() const { return at<BooleanConfigurationProperty>("enable_reconditioning").get(); }
     C& set_enable_reconditioning(Bool const& value) { at<BooleanConfigurationProperty>("enable_reconditioning").set(value); return *this; }
     C& set_both_enable_reconditioning() { at<BooleanConfigurationProperty>("enable_reconditioning").set_both(); return *this; }
+
+    //! \brief Enable initial subdivision of the set if too large, works also for lower evolution
+    //! \details Superseded by enable_subdivisions set to true
+    Bool const& enable_initial_subdivision() const { return at<BooleanConfigurationProperty>("enable_initial_subdivision").get(); }
+    C& set_enable_initial_subdivision(Bool const& value) { at<BooleanConfigurationProperty>("enable_initial_subdivision").set(value); return *this; }
 
     //! \brief Enable subdivisions for upper evolution
     Bool const& enable_subdivisions() const { return at<BooleanConfigurationProperty>("enable_subdivisions").get(); }

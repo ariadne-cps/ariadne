@@ -65,12 +65,13 @@ LabelledEnclosure brusselator_sample() {
     Real e1=5/100_q; Real e2=7/100_q;
     RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
 
-    StepMaximumError max_err=1e-6;
-    TaylorPicardIntegrator integrator(max_err);
+    Configuration<VectorFieldEvolver> config;
+    config.set_integrator(GradedTaylorSeriesIntegrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-6)))
+            .set_maximum_enclosure_radius(1.0)
+            .set_maximum_step_size(0.02)
+            .set_maximum_spacial_error(1e2);
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
+    VectorFieldEvolver evolver(dynamics,config);
 
     Real evolution_time = 1.0_dec;
 
@@ -88,7 +89,7 @@ LabelledEnclosure article_sample() {
 
     ExactBoxType domain({{-1,1},{-1,1},{-1,1},{-1,1}});
 
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-9);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),Configuration<ThresholdSweeper<FloatDP>>().set_threshold(1e-9));
 
     auto p0 = SFT::coordinate(domain,0,sweeper);
     auto p1 = SFT::coordinate(domain,1,sweeper);
@@ -111,13 +112,13 @@ LabelledEnclosure vanderpol_sample() {
 
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
-    StepMaximumError max_err=1e-6;
-    GradedTaylorSeriesIntegrator integrator(max_err);
+    Configuration<VectorFieldEvolver> config;
+    config.set_integrator(GradedTaylorSeriesIntegrator(Configuration<GradedTaylorSeriesIntegrator>().set_step_maximum_error(1e-6)))
+          .set_maximum_enclosure_radius(1.0)
+          .set_maximum_step_size(0.02)
+          .set_maximum_spacial_error(1e2);
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
-    evolver.configuration().set_maximum_spacial_error(1e2);
+    VectorFieldEvolver evolver(dynamics,config);
     CONCLOG_PRINTLN(evolver.configuration());
 
     Real x0 = 1.40_dec;
@@ -140,7 +141,7 @@ void ariadne_main() {
     //auto linear_solver = GLPKSimplex();
     //auto linear_solver = GLPKIPM();
 
-    auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(linear_solver,2,1));
+    auto approximator = MinimalEffortInnerApproximator(ParallelLinearisationContractor(linear_solver,2,1));
 
     auto outer_final = vanderpol_sample();
 

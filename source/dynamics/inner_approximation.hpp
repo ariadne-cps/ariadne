@@ -234,6 +234,16 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
     Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override final { return InnerApproximatorBase::compute_from(outer_orbit); }
 };
 
+class MinimalEffortInnerApproximator : public InnerApproximatorBase {
+  public:
+    //! \brief Constructs from a \a contractor
+    MinimalEffortInnerApproximator(ContractorInterface const& contractor);
+
+    LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override final;
+    ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override final { return InnerApproximatorBase::compute_from(outer_list); }
+    Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override final { return InnerApproximatorBase::compute_from(outer_orbit); }
+};
+
 } // namespace Ariadne
 
 #endif // ARIADNE_INNER_APPROXIMATION

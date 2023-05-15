@@ -535,4 +535,99 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
     return result;
 }
 
+MinimalEffortInnerApproximator::MinimalEffortInnerApproximator(ContractorInterface const& contractor) :
+        InnerApproximatorBase(contractor) { }
+
+LabelledEnclosure MinimalEffortInnerApproximator::compute_from(LabelledEnclosure const& outer) const {
+    CONCLOG_SCOPE_CREATE
+    auto reconditioned_outer = outer;
+    reconditioned_outer.uniform_error_recondition();
+    auto const& outer_function = reconditioned_outer.state_function();
+    auto outer_domain = reconditioned_outer.domain();
+
+    auto n = outer_function.result_size();
+
+    List<ValidatedVectorMultivariateFunctionPatch> boundaries;
+    for (SizeType i = 0; i < n; ++i) {
+        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].upper_bound().get_d())));
+        boundaries.push_back(partial_evaluate(outer_function, i, cast_exact(outer_domain[i].lower_bound().get_d())));
+    }
+
+    ExactBoxType I = project(outer_domain, Range(0, n));
+    CONCLOG_PRINTLN("Starting domain: " << I)
+    Vector<bool> bound_found(boundaries.size(),false);
+
+    for (size_t bnd_idx=0; bnd_idx<boundaries.size(); ++bnd_idx) {
+
+        SizeType var_idx = bnd_idx/2;
+        bool is_lower_boundary = (bnd_idx % 2 == 1);
+
+        CONCLOG_PRINTLN_AT(1,"Checking boundary " << bnd_idx << " (outer reach evaluated on the " << (is_lower_boundary ? "lower" : "upper") << " bound of x" << var_idx << ")")
+
+        auto const& boundary = boundaries.at(bnd_idx);
+        auto outer_extension = embed(outer_function, boundary.domain());
+        auto boundary_extension = embed(outer_function.domain(), boundary);
+
+        ValidatedVectorMultivariateFunctionPatch f = outer_extension - boundary_extension;
+
+        auto extended_domain_restriction = product(I,project(outer_domain, Range(n, outer_function.argument_size())),boundary.domain());
+
+        auto intersection_bound = (is_lower_boundary ? f.domain()[var_idx].lower_bound() : f.domain()[var_idx].upper_bound());
+        CONCLOG_PRINTLN_AT(2,"Candidate solution for intersection: x" << var_idx << (is_lower_boundary ? " <= " : " >= ") << intersection_bound)
+
+        BisectionSearch<double> scaling_search(0.01,0.99,0.01);
+        CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
+        auto non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+
+        while (true) {
+
+            CONCLOG_PRINTLN_AT(2,"Resulting candidate (shrinked) domain for non-intersection: " << non_intersection_dom)
+
+            bool current_outcome = false;
+
+            auto feasible_dom = _contractor_ptr->contract(f, non_intersection_dom);
+            if (feasible_dom.is_empty()) {
+                CONCLOG_PRINTLN_AT(2,"Solution is validated")
+                current_outcome = true;
+            } else {
+                CONCLOG_PRINTLN_AT(2,"Solution is not validated: found feasible domain " << feasible_dom << ", retrying...")
+            }
+
+            scaling_search.move_next(current_outcome);
+            if (scaling_search.ended()) break;
+
+            CONCLOG_PRINTLN_AT(2,"Trying with scaling " << scaling_search.current())
+            non_intersection_dom = nonlinear_nonintersection_domain(intersection_bound, extended_domain_restriction, var_idx, is_lower_boundary, scaling_search.current());
+        }
+
+        if (non_intersection_dom.is_empty() or not scaling_search.solution_found()) {
+            if (not bound_found[bnd_idx]) {
+                CONCLOG_PRINTLN_AT(1,"No solution found, setting failure.")
+                break;
+            }
+        } else {
+            bound_found[bnd_idx] = true;
+
+            CONCLOG_PRINTLN_AT(1,"Using optimal valid solution as a restriction to the inner domain.")
+            CONCLOG_PRINTLN_AT(2,"Value identified: x" << var_idx << (is_lower_boundary ? " >= " : " <= ") << (is_lower_boundary ? non_intersection_dom[var_idx].lower_bound() : non_intersection_dom[var_idx].upper_bound()))
+            I = project(non_intersection_dom, Range(0, n));
+        }
+    }
+
+    for (size_t i = 0; i < bound_found.size(); ++i) {
+        if (not bound_found.at(i)) {
+            throw std::runtime_error("No inner approximation could be computed.");
+        }
+    }
+
+    auto full_restricted_domain = product(I,project(outer.domain(),Range(outer_function.result_size(),outer.state_function().argument_size())));
+
+    CONCLOG_PRINTLN("Domain for inner: " << full_restricted_domain)
+
+    auto result = outer;
+    result.restrict(full_restricted_domain);
+
+    return result;
+}
+
 }

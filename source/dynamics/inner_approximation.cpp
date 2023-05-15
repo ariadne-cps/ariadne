@@ -395,6 +395,14 @@ Orbit<LabelledEnclosure> InnerApproximatorBase::compute_from(Orbit<LabelledEnclo
 NonlinearCandidateValidationInnerApproximator::NonlinearCandidateValidationInnerApproximator(ContractorInterface const& contractor, SizeType max_rounds) :
     InnerApproximatorBase(contractor), _max_rounds(max_rounds) { }
 
+InnerApproximatorInterface* NonlinearCandidateValidationInnerApproximator::clone() const {
+    return new NonlinearCandidateValidationInnerApproximator(*this);
+}
+
+std::ostream& NonlinearCandidateValidationInnerApproximator::_write(std::ostream& os) const {
+    return os << "NonlinearCandidateValidationInnerApproximator";
+}
+
 LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(LabelledEnclosure const& outer) const {
     CONCLOG_SCOPE_CREATE
     auto reconditioned_outer = outer;
@@ -537,6 +545,14 @@ LabelledEnclosure NonlinearCandidateValidationInnerApproximator::compute_from(La
 
 MinimalEffortInnerApproximator::MinimalEffortInnerApproximator(ContractorInterface const& contractor) :
         InnerApproximatorBase(contractor) { }
+
+InnerApproximatorInterface* MinimalEffortInnerApproximator::clone() const {
+    return new MinimalEffortInnerApproximator(*this);
+}
+
+std::ostream& MinimalEffortInnerApproximator::_write(std::ostream& os) const {
+    return os << "MinimalEffortInnerApproximator";
+}
 
 LabelledEnclosure MinimalEffortInnerApproximator::compute_from(LabelledEnclosure const& outer) const {
     CONCLOG_SCOPE_CREATE

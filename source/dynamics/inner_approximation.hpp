@@ -204,11 +204,15 @@ class ParallelLinearisationContractor : public ContractorInterface {
     SizeType const _split_depth;
 };
 
-class InnerApproximatorInterface {
+class InnerApproximatorInterface : public WritableInterface {
   public:
     virtual LabelledEnclosure compute_from(LabelledEnclosure const& outer) const = 0;
     virtual ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const = 0;
     virtual Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const = 0;
+
+    virtual InnerApproximatorInterface* clone() const = 0;
+
+    virtual ~InnerApproximatorInterface() = default;
 };
 
 class InnerApproximatorBase : public InnerApproximatorInterface {
@@ -218,6 +222,7 @@ class InnerApproximatorBase : public InnerApproximatorInterface {
   protected:
     ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override;
     Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override;
+
   protected:
     std::shared_ptr<ContractorInterface> _contractor_ptr;
 };
@@ -232,6 +237,9 @@ class NonlinearCandidateValidationInnerApproximator : public InnerApproximatorBa
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override final;
     ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override final { return InnerApproximatorBase::compute_from(outer_list); }
     Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override final { return InnerApproximatorBase::compute_from(outer_orbit); }
+
+    InnerApproximatorInterface* clone() const override;
+    std::ostream& _write(std::ostream& os) const override;
 };
 
 class MinimalEffortInnerApproximator : public InnerApproximatorBase {
@@ -242,6 +250,9 @@ class MinimalEffortInnerApproximator : public InnerApproximatorBase {
     LabelledEnclosure compute_from(LabelledEnclosure const& outer) const override final;
     ListSet<LabelledEnclosure> compute_from(ListSet<LabelledEnclosure> const& outer_list) const override final { return InnerApproximatorBase::compute_from(outer_list); }
     Orbit<LabelledEnclosure> compute_from(Orbit<LabelledEnclosure> const& outer_orbit) const override final { return InnerApproximatorBase::compute_from(outer_orbit); }
+
+    InnerApproximatorInterface* clone() const override;
+    std::ostream& _write(std::ostream& os) const override;
 };
 
 } // namespace Ariadne

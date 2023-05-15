@@ -235,9 +235,8 @@ auto Task<VectorFieldEvolver>::run(TaskInput<VectorFieldEvolver> const& in, Conf
     next_set.apply_fixed_evolve_step(flow_model, chosen_step_size);
     CONCLOG_PRINTLN_VAR_AT(1, next_set);
 
-    Lazy<LabelledEnclosure> inner_next_set([next_set]{
-        auto approximator = NonlinearCandidateValidationInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2,0));
-        auto inner_evolve = approximator.compute_from(next_set);
+    Lazy<LabelledEnclosure> inner_next_set([next_set,cfg]{
+        auto inner_evolve = cfg.inner_approximator().compute_from(next_set);
         return inner_evolve.clone();
     });
 

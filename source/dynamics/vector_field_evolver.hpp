@@ -42,6 +42,7 @@
 #include "solvers/configuration_interface.hpp"
 #include "solvers/integrator.hpp"
 #include "dynamics/evolver_interface.hpp"
+#include "dynamics/inner_approximation.hpp"
 
 #include "helper/lazy.hpp"
 #include "betterthreads/workload.hpp"
@@ -158,6 +159,10 @@ using Ariadne::ApproximateDouble;
 using Ariadne::Bool;
 using Ariadne::IntegratorInterface;
 using Ariadne::TaylorPicardIntegrator;
+using Ariadne::InnerApproximatorInterface;
+using Ariadne::MinimalEffortInnerApproximator;
+using Ariadne::ParallelLinearisationContractor;
+using Ariadne::NativeSimplex;
 using ProNest::RangeConfigurationProperty;
 
 
@@ -167,6 +172,7 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     typedef double RealType;
     typedef RangeConfigurationProperty<RealType> RealTypeProperty;
     typedef InterfaceListConfigurationProperty<IntegratorInterface> IntegratorProperty;
+    typedef InterfaceListConfigurationProperty<InnerApproximatorInterface> InnerApproximatorProperty;
 
     Configuration() {
         add_property("enable_premature_termination",BooleanConfigurationProperty(false));
@@ -174,7 +180,8 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
         add_property("enable_initial_subdivision",BooleanConfigurationProperty(false));
         add_property("enable_subdivisions",BooleanConfigurationProperty(false));
         add_property("enable_clobbering",BooleanConfigurationProperty(false));
-        add_property("integrator", InterfaceListConfigurationProperty<IntegratorInterface>(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("integrator", IntegratorProperty(TaylorPicardIntegrator(Configuration<TaylorPicardIntegrator>())));
+        add_property("inner_approximator", InnerApproximatorProperty(MinimalEffortInnerApproximator(ParallelLinearisationContractor(NativeSimplex(),2))));
         add_property("maximum_enclosure_radius",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_spacial_error",RealTypeProperty(std::numeric_limits<double>::max(),Log10SearchSpaceConverter<RealType>()));
         add_property("maximum_step_size",RealTypeProperty(std::numeric_limits<double>::max(),Log2SearchSpaceConverter<RealType>()));
@@ -222,7 +229,10 @@ template<> struct Configuration<VectorFieldEvolver> final : public SearchableCon
     //! \brief The integrator to be used.
     IntegratorInterface const& integrator() const { return at<IntegratorProperty>("integrator").get(); }
     C& set_integrator(IntegratorInterface const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
-    C& set_integrator(SharedPointer<IntegratorInterface> const& integrator) { at<IntegratorProperty>("integrator").set(integrator); return *this; }
+
+    //! \brief The inner approximator to be used.
+    InnerApproximatorInterface const& inner_approximator() const { return at<InnerApproximatorProperty>("inner_approximator").get(); }
+    C& set_inner_approximator(InnerApproximatorInterface const& inner_approximator) { at<InnerApproximatorProperty>("inner_approximator").set(inner_approximator); return *this; }
 };
 
 } // namespace ProNest

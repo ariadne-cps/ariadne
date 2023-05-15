@@ -1,5 +1,5 @@
 /***************************************************************************
- *            pi-controller_c.hpp
+ *            jerk21_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -28,16 +28,16 @@
 using namespace std;
 using namespace Ariadne;
 
-SystemSpecification PIC_c()
+SystemSpecification J21_c()
 {
-    RealVariable v("v"), x("x");
-    RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
-    VectorField dynamics({dot(v)=dynv,dot(x)=-dynv + 3*(20-v)});
+    RealVariable x("x"), y("y"), z("z");
 
-    Real e=1/10_q;
-    RealExpressionBoundedConstraintSet initial_set={{5<=v<=9},{-e<=x<=+e}};
+    DottedRealAssignments dynamics={dot(x)=y,dot(y)=z,dot(z)=-pow(z,3)-y*pow(x,2)-0.25_dec*x};
 
-    Real evolution_time=5;
+    Real e=1/1024_q;
+    RealExpressionBoundedConstraintSet initial_set={{0.25_dec-e<=x<=0.25_dec+e},{-e<=y<=e},{-e<=z<=e}};
 
-    return {"pi-controller",dynamics,initial_set,evolution_time};
+    Real evolution_time=10;
+
+    return {"jerk21",dynamics,initial_set,evolution_time};
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            pi-controller_c.hpp
+ *            lorentz-attractor_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -28,16 +28,17 @@
 using namespace std;
 using namespace Ariadne;
 
-SystemSpecification PIC_c()
+SystemSpecification LOR_c()
 {
-    RealVariable v("v"), x("x");
-    RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
-    VectorField dynamics({dot(v)=dynv,dot(x)=-dynv + 3*(20-v)});
+    RealVariable x("x"), y("y"), z("z");
+    RealConstant sigma("sigma",10);
+    RealConstant beta("beta",8/3_q);
+    DottedRealAssignments dynamics={dot(x)=sigma*(y-x), dot(y)=x*(28-z)-y,dot(z)=x*y-beta*z};
 
-    Real e=1/10_q;
-    RealExpressionBoundedConstraintSet initial_set={{5<=v<=9},{-e<=x<=+e}};
+    Real e=1/100_q;
+    RealExpressionBoundedConstraintSet initial_set={1-e<=x<=1+e,1-e<=y<=1+e,1-e<=z<=1+e};
 
-    Real evolution_time=5;
+    Real evolution_time=1;
 
-    return {"pi-controller",dynamics,initial_set,evolution_time};
+    return {"lorentz-attractor",dynamics,initial_set,evolution_time};
 }

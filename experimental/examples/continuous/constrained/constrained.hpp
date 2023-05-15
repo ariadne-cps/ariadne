@@ -167,6 +167,8 @@ List<RealExpression> constraints(List<ConstraintPrescription> const& constraint_
 
 Configuration<VectorFieldEvolver> get_configuration() {
     return Configuration<VectorFieldEvolver>().
+            set_both_enable_reconditioning().
+            set_maximum_spacial_error(1e-8,1e-5).
             set_integrator(TaylorPicardIntegrator(
                 Configuration<TaylorPicardIntegrator>()
                 .set_step_maximum_error(1e-6,1e-4)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            lotka-volterra_c.hpp
+ *            brusselator_c.hpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -28,14 +28,15 @@
 using namespace std;
 using namespace Ariadne;
 
-SystemSpecification LOT_c()
+SystemSpecification BRU_c()
 {
     RealVariable x("x"), y("y");
-    DottedRealAssignments dynamics={dot(x)=3*x*(1-y),dot(y)=y*(x-1)};
+    VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
 
-    RealExpressionBoundedConstraintSet initial_set={{x==1.2_dec},{y==1.1_dec}};
+    Real e1=5/100_q; Real e2=7/100_q;
+    RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
 
-    Real evolution_time=10;
+    Real evolution_time = 1.0_dec;
 
-    return {"lotka-volterra",dynamics,initial_set,evolution_time};
+    return {"brusselator",dynamics,initial_set,evolution_time};
 }

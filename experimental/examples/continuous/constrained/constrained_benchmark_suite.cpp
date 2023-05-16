@@ -34,21 +34,25 @@
 #include "jerk16_c.hpp"
 #include "jerk21_c.hpp"
 #include "lorentz-attractor_c.hpp"
+#include "cvdp_c.hpp"
 
 void ariadne_main() {
     List<SystemSpecification> specs;
+    //specs.push_back(BRU_c());
     //specs.push_back(JET_c());
     //specs.push_back(HIG_c());
-    //specs.push_back(PIC_c());
-    specs.push_back(BRU_c());
+    //specs.push_back(LOR_c());
     //specs.push_back(ROS_c());
+    specs.push_back(CHE_c());
+
     //specs.push_back(J16_c());
     //specs.push_back(J21_c());
-    //specs.push_back(LOR_c());
 
+    //specs.push_back(PIC_c());
     //specs.push_back(VDP_c());
     //specs.push_back(LAU_c());
-    //specs.push_back(CHE_c());
+
+    //specs.push_back(COU_c());
 
     auto configuration = get_configuration();
 
@@ -57,7 +61,7 @@ void ariadne_main() {
     CONCLOG_PRINTLN_VAR_AT(1,configuration.search_space().total_points())
 
     static const size_t NUM_CONSTRAINTS = 100;
-    static const size_t NUM_EXECUTIONS_PER_SYSTEM = 10;
+    static const size_t NUM_EXECUTIONS_PER_SYSTEM = 20;
 
     for (auto const& s : specs) {
         CONCLOG_PRINTLN(s.name)
@@ -65,17 +69,19 @@ void ariadne_main() {
             CONCLOG_PRINTLN_AT(1,"Execution #" << i)
             CONCLOG_PRINTLN_AT(2,"Generating the constraints...")
             auto constraints_prescriptions = generate_ellipsoidal_hyperbolic_constraints(NUM_CONSTRAINTS,s,configuration);
-            CONCLOG_PRINTLN_AT(2,"Expected frequencies: " << frequencies(constraints_prescriptions))
+            CONCLOG_PRINTLN_AT(1,"Expected frequencies: " << frequencies(constraints_prescriptions))
 
             CONCLOG_PRINTLN_AT(2,"Constrained running...")
             CONCLOG_RUN_AT(1,auto c_result = constrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions)))
 
+            CONCLOG_PRINTLN_AT(1,"Time budget is " << c_result.satisfaction().execution_time() << " s")
+
             for (auto const& ss : c_result.satisfaction().snapshots()) {
                 CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round((1.0-ss.global_success_ratio())*100) << "% left)")
             }
-            CONCLOG_PRINTLN_AT(1,"Constrained cost: " << c_result.satisfaction().cost() << " (up to " << round((1.0-c_result.satisfaction().global_success_ratio())*100) << "% left)")
+            CONCLOG_PRINTLN_AT(1,"Constrained success ratios: " << c_result.satisfaction().success_ratios())
 
-            CONCLOG_PRINTLN_AT(2,"Terminated in " << c_result.satisfaction().execution_time() << " s")
+            CONCLOG_PRINTLN_AT(1,"Constrained cost: " << c_result.satisfaction().cost() << " (up to " << round((1.0-c_result.satisfaction().global_success_ratio())*100) << "% left)")
 
             CONCLOG_PRINTLN_AT(2,"Unconstrained running...")
             CONCLOG_RUN_AT(1,auto u_result = unconstrained_evolution(s.dynamics,s.initial_set,s.evolution_time,configuration,constraints(constraints_prescriptions),c_result.satisfaction().execution_time()))
@@ -83,6 +89,7 @@ void ariadne_main() {
             for (auto const& ss : u_result.satisfaction().snapshots()) {
                 CONCLOG_PRINTLN_AT(2,ss.time() << ": " << ss.success_ratios() << " (" << round((1.0-ss.global_success_ratio())*100) << "% left)")
             }
+
             CONCLOG_PRINTLN_AT(1,"Unconstrained cost: " << u_result.satisfaction().cost() << " (up to " << round((1.0-u_result.satisfaction().global_success_ratio())*100) << "% left)")
         }
     }

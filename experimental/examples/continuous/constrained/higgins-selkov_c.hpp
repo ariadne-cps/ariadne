@@ -33,10 +33,10 @@ SystemSpecification HIG_c()
     RealVariable S("S"), P("P");
     VectorField dynamics({dot(S)=-S*pow(P,2)+1,dot(P)=S*pow(P,2)-P});
 
-    Real e=1/100_q;
+    Real e=1/50_q;
     RealExpressionBoundedConstraintSet initial_set={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
-    Real evolution_time=10;
+    Real evolution_time=5;
 
     return {"higgins-selkov",dynamics,initial_set,evolution_time};
 }

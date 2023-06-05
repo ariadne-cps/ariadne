@@ -328,8 +328,7 @@ template<class IVL> IVL interval_from_list(pybind11::list lst) {
 
 template<class BX> BX box_from_list(pybind11::list lst) {
     typedef typename BX::IntervalType IVL;
-    std::vector<IVL> vec=pybind11::cast<std::vector<IVL>>(lst);
-    Array<IVL> ary(vec.begin(),vec.end());
+    Array<IVL> ary( lst.size(), [&lst](SizeType i){return pybind11::cast<IVL>(lst[i]);} );
     return BX(ary);
 }
 
@@ -496,6 +495,12 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     }
     if constexpr (HasPrecisionType<UpperBoundType>) {
         typedef PrecisionType<UpperBoundType> PrecisionType;
+        if constexpr (Constructible<IntervalType,FloatBounds<PrecisionType>>) {
+            interval_class.def(pybind11::init<FloatBounds<PrecisionType>>());
+            if constexpr(Convertible<FloatBounds<PrecisionType>,IntervalType>) {
+                pybind11::implicitly_convertible<FloatBounds<PrecisionType>,IntervalType>();
+            }
+        }
         if constexpr (Constructible<IntervalType,RealInterval,PrecisionType>) {
             interval_class.def(pybind11::init<RealInterval,PrecisionType>());
             interval_class.def(pybind11::init([](Real l, Real u, PrecisionType pr){return IntervalType(RealInterval(l,u),pr);}));

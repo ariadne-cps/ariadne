@@ -523,16 +523,26 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def("midpoint", &IntervalType::midpoint);
     interval_class.def("radius", &IntervalType::radius);
     interval_class.def("width", &IntervalType::width);
-    interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def("__str__",&__cstr__<IntervalType>);
     //interval_class.def("__repr__",&__repr__<IntervalType>);
+
+    interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
+    module.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
+    if constexpr (HasPrecisionType<UpperBoundType>) {
+        typedef PrecisionType<UpperBoundType> PrecisionType;
+        if constexpr (Same<UpperBoundType,FloatUpperBound<PrecisionType>> and false) {
+            interval_class.def("contains", (ContainsType(*)(IntervalType const&, FloatBounds<PrecisionType> const&)) &contains);
+            module.def("contains", (ContainsType(*)(IntervalType const&, FloatBounds<PrecisionType> const&)) &contains);
+        }
+    }
+
+
 
     module.def("midpoint", &IntervalType::midpoint);
     module.def("radius", &IntervalType::radius);
     module.def("width", &IntervalType::width);
 
-    module.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
     module.def("disjoint", (DisjointType(*)(IntervalType const&,IntervalType const&)) &disjoint);
     module.def("subset", (SubsetType(*)(Interval<UpperBoundType> const&,Interval<LowerBoundType> const&)) &subset);
 
@@ -654,7 +664,6 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
     box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
-    box_class.def("contains", (ContainsType(BX::*)(MidpointType const&)const) &BX::contains);
     box_class.def("separated", (SeparatedType(BX::*)(const BX&)const) &BX::separated);
     box_class.def("overlaps", (OverlapType(BX::*)(const BX&)const) &BX::overlaps);
     box_class.def("covers", (CoversType(BX::*)(const BX&)const) &BX::covers);
@@ -664,7 +673,16 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType)const) &BX::split);
     box_class.def("__str__",&__cstr__<BX>);
 
+    box_class.def("contains", (ContainsType(BX::*)(MidpointType const&)const) &BX::contains);
     module.def("contains", (ContainsType(*)(BX const&,MidpointType const&)) &contains);
+    if constexpr (HasPrecisionType<typename IntervalType::UpperBoundType>) {
+        typedef PrecisionType<typename IntervalType::UpperBoundType> PrecisionType;
+        if constexpr (Same<typename IntervalType::UpperBoundType,FloatUpperBound<PrecisionType>> and false) {
+            box_class.def("contains", (ContainsType(*)(BoxType const&, Vector<FloatBounds<PrecisionType>> const&)) &contains);
+            module.def("contains", (ContainsType(*)(BoxType const&, Vector<FloatBounds<PrecisionType>> const&)) &contains);
+        }
+    }
+
     module.def("disjoint", (DisjointType(*)(BX const&,BX const&)) &disjoint);
 
     if constexpr (Same<typename IVL::UpperBoundType, typename IVL::LowerBoundType>) {

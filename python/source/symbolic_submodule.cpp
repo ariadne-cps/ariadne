@@ -338,6 +338,7 @@ Void export_expressions(pybind11::module& module)
     real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression>);
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression>);
     real_expression_class.def(__py_rdiv__, &__rdiv__<RealExpression,RealExpression>);
+    real_expression_class.def("__pow__", &__pow__<RealExpression,Int>);
     real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
     real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
     real_expression_class.def("__lt__", &__lt__<RealExpression,RealExpression>);

@@ -225,6 +225,8 @@ class Function
     //! \brief Construct a function each of whose components are \a sf with the given domain \a dom.
     explicit Function(ResultSizeType rs, ScalarFunction<P,ARG> sf);
 
+    explicit Function(typename SignatureTraits<SIG>::ArgumentSpaceType const& spc, Result<RealExpression>const& e);
+
     //! \brief Create a vector function from an initializer list of scalar functions.
     Function(InitializerList<ScalarFunction<P,ARG>> const& lsf);
     //! \brief Create a vector function from a list of scalar functions.

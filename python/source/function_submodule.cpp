@@ -312,6 +312,8 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
         function_class.def(pybind11::init<DomainType>());
     }
 
+    function_class.def(pybind11::init<typename SignatureTraits<SIG>::ArgumentSpaceType, typename SignatureTraits<SIG>::template Result<RealExpression>>());
+
     if constexpr (Same<RES,RealVector>) {
         // NOTE: This must go *after* the conversion constructor
         function_class.def(pybind11::init([](std::vector<Function<P,RealScalar(ARG)>> const& lst){return F(lst);}));

@@ -43,12 +43,14 @@ template<> struct LinearAlgebraTraits<Scalar> {
     typedef Scalar<Real> Kind;
     typedef SizeOne SizeType;
     typedef IndexZero IndexType;
+    typedef RealVariable SpaceType;
 };
 template<> struct LinearAlgebraTraits<Vector> {
     template<class X> using Type=Vector<X>;
     typedef Vector<Real> Kind;
     typedef Ariadne::SizeType SizeType;
     typedef Ariadne::SizeType IndexType;
+    typedef RealSpace SpaceType;
 };
 template<> struct LinearAlgebraTraits<Matrix> {
     template<class X> using Type=Matrix<X>;
@@ -107,6 +109,8 @@ template<class RES, class ARG> struct SignatureTraits<RES(ARG)> {
     typedef typename ValueTraits<ARG>::IndexType ArgumentIndexType;
     typedef typename ValueTraits<RES>::SizeType ResultSizeType;
     typedef typename ValueTraits<RES>::IndexType ResultIndexType;
+
+    typedef typename ValueTraits<ARG>::SpaceType ArgumentSpaceType;
 
         typedef typename DomainTraits<ARG>::EntireDomainType DomainType;
     typedef typename DomainTraits<ARG>::EntireDomainType EntireDomainType;

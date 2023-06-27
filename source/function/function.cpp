@@ -120,6 +120,9 @@ template<class P, class SIG> Function<P,SIG>::Function(List<ScalarFunction<P,ARG
 template<class P, class SIG> Function<P,SIG>::Function(DomainType dom, Result<Formula<Y>>const& e)
     : Function(make_formula_function<P>(dom,e)) { }
 
+template<class P, class SIG> Function<P,SIG>::Function(typename SignatureTraits<SIG>::ArgumentSpaceType const& spc, Result<RealExpression> const& e)
+    : Function(make_function(spc,e)) { }
+
 template<class P, class SIG> struct MakeVectorMultivariateFunction;
 template<class P, class... ARGS> struct MakeVectorMultivariateFunction<P,Real(ARGS...)> {
     ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {

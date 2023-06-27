@@ -266,6 +266,7 @@ template<class FLT> Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def("argument_size", &ValidatedTaylorModel<FLT>::argument_size);
     taylor_model_class.def("domain", &ValidatedTaylorModel<FLT>::domain);
     taylor_model_class.def("range", &ValidatedTaylorModel<FLT>::range);
+    taylor_model_class.def("norm", &ValidatedTaylorModel<FLT>::norm);
     taylor_model_class.def("set_sweeper", &ValidatedTaylorModel<FLT>::set_sweeper);
     taylor_model_class.def("sweeper", &ValidatedTaylorModel<FLT>::sweeper);
     taylor_model_class.def("sweep", (ValidatedTaylorModel<FLT>&(ValidatedTaylorModel<FLT>::*)()) &ValidatedTaylorModel<FLT>::sweep, pybind11::return_value_policy::reference);
@@ -306,6 +307,7 @@ template<class FLT> Void export_approximate_taylor_model(pybind11::module& modul
     taylor_model_class.def("argument_size", &ModelType::argument_size);
     taylor_model_class.def("domain", &ModelType::domain);
     taylor_model_class.def("range", &ModelType::range);
+    taylor_model_class.def("norm", &ModelType::norm);
     taylor_model_class.def("set_sweeper", &ModelType::set_sweeper);
     taylor_model_class.def("sweeper", &ModelType::sweeper);
     taylor_model_class.def("sweep", (ModelType&(ModelType::*)()) &ModelType::sweep, pybind11::return_value_policy::reference);
@@ -363,6 +365,8 @@ template<class PR> Void export_scalar_function_model(pybind11::module& module)
     scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarMultivariateFunctionModel<PR>>);
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarMultivariateFunctionModel<PR>>);
 
+    module.def("norm", &_norm_<ValidatedScalarMultivariateFunctionModel<PR>>);
+
     module.def("evaluate", &_evaluate_<ValidatedScalarMultivariateFunctionModel<PR>,Vector<NumericType>>);
     module.def("partial_evaluate", &_partial_evaluate_<ValidatedScalarMultivariateFunctionModel<PR>,SizeType,NumericType>);
 
@@ -412,6 +416,8 @@ template<class PR> Void export_vector_function_model(pybind11::module& module)
     module.def("compose", &_compose_<ValidatedVectorMultivariateFunction,ValidatedVectorMultivariateFunctionModel<PR>>);
 
     module.def("unrestrict", (ValidatedVectorMultivariateFunction(*)(const ValidatedVectorMultivariateFunctionModel<PR>&)) &unrestrict);
+
+    module.def("norm", &_norm_<ValidatedVectorMultivariateFunctionModel<PR>>);
 
     module.def("join", &_join_<ValidatedScalarMultivariateFunctionModel<PR>,ValidatedScalarMultivariateFunctionModel<PR>>);
     module.def("join", &_join_<ValidatedScalarMultivariateFunctionModel<PR>,ValidatedVectorMultivariateFunctionModel<PR>>);
@@ -504,6 +510,7 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     module.def("derivative", &_derivative_<F,I>);
     module.def("antiderivative", &_antiderivative_<F,I>);
     module.def("antiderivative", &_antiderivative_<F,I,X>);
+    module.def("norm", &_norm_<F>);
 
     module.def("inconsistent", &_inconsistent_<F,F>);
     module.def("refines", &_refines_<F,F>);
@@ -575,6 +582,8 @@ template<class FLT> Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def_static("constant",(ValidatedVectorMultivariateTaylorFunctionModel<FLT>(*)(const ExactBoxType&, const Vector<NumericType>&,Sweeper<FLT>))&ValidatedVectorMultivariateTaylorFunctionModel<FLT>::constant);
     vector_taylor_function_class.def_static("constant",[](const ExactBoxType& bx, const Vector<ValidatedNumber>& c,Sweeper<FLT> swp){return ValidatedVectorMultivariateTaylorFunctionModel<FLT>::constant(bx,Vector<NumericType>(c,swp.precision()),swp);});
     vector_taylor_function_class.def_static("identity",(ValidatedVectorMultivariateTaylorFunctionModel<FLT>(*)(const ExactBoxType&,Sweeper<FLT>))&ValidatedVectorMultivariateTaylorFunctionModel<FLT>::identity);
+
+    module.def("norm", &_norm_<VF>);
 
     module.def("inconsistent", &_inconsistent_<VF,VF>);
     module.def("refinement", &_refinement_<VF,VF>);

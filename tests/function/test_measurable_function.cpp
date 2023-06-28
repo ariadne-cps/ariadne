@@ -85,7 +85,7 @@ Void TestMeasurableFunction::test_scalar_univariate_function()
 
         IntervalDomainType dom(-1,3);
         Error<FloatDP> err(0.093750_dy,dp);
-        FanModel<Real(Real),DP> fmodel(dom,f,err);
+        FanModel<Real(Real),FloatDP> fmodel(dom,f,err);
 
         ARIADNE_TEST_PRINT(fmodel);
         ARIADNE_TEST_PRINT(fmodel.preimage(vops));

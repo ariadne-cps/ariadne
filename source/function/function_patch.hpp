@@ -179,7 +179,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
-    template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
+    template<class F, class FE> FunctionPatch(FunctionModel<P,SIG,F,FE> fm);
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
     friend Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
         return Function<P,SIG>(fp._ptr->_clone()); }
@@ -239,15 +239,15 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
   public:
     friend Number<P> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_call(x); }
-    friend CanonicalNumericType<P,DP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+    friend CanonicalNumericType<P,FloatDP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatDP>>& x) {
         return f._ptr->_call(x); }
-    friend CanonicalNumericType<P,MP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+    friend CanonicalNumericType<P,FloatMP> evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatMP>>& x) {
         return f._ptr->_call(x); }
     friend Number<P> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
-    friend CanonicalNumericType<P,DP> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+    friend CanonicalNumericType<P,FloatDP> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatDP>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
-    friend CanonicalNumericType<P,MP> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+    friend CanonicalNumericType<P,FloatMP> unchecked_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatMP>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
 
     friend ScalarFunctionPatch<P,ARGS...> partial_evaluate(const ScalarFunctionPatch<P,ARGS...>& f, SizeType j, const Number<P>& c) {
@@ -397,7 +397,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline FunctionPatch(List<ScalarFunctionPatch<P,ARGS...>> const& lsf)
         : FunctionPatch(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
     inline explicit FunctionPatch(FunctionPatchInterface<P,SIG>* p) : _ptr(p) { }
-    template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
+    template<class F, class FE> FunctionPatch(FunctionModel<P,SIG,F,FE> fm);
     inline FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     inline FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
     inline FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
@@ -513,16 +513,16 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
 
     friend Vector<Number<P>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_call(x); }
-    friend Vector<CanonicalNumericType<P,DP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+    friend Vector<CanonicalNumericType<P,FloatDP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatDP>>& x) {
         return f._ptr->_call(x); }
-    friend Vector<CanonicalNumericType<P,MP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+    friend Vector<CanonicalNumericType<P,FloatMP>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatMP>>& x) {
         return f._ptr->_call(x); }
 
     friend Vector<Number<P>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
-    friend Vector<CanonicalNumericType<P,DP>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,DP>>& x) {
+    friend Vector<CanonicalNumericType<P,FloatDP>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatDP>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
-    friend Vector<CanonicalNumericType<P,MP>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,MP>>& x) {
+    friend Vector<CanonicalNumericType<P,FloatMP>> unchecked_evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<CanonicalNumericType<P,FloatMP>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
 
     friend VectorFunctionPatch<P,ARGS...> partial_evaluate(const VectorFunctionPatch<P,ARGS...>& f, SizeType j, const Number<P>& c) {

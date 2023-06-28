@@ -94,7 +94,7 @@ class IntersectionException : public std::runtime_error {
 
 template<class P, class F> struct ModelNumericTraits;
 template<class F> struct ModelNumericTraits<ValidatedTag,Interval<UpperBound<F>>>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,F>
 {
     typedef Interval<UpperBound<F>> CoefficientType;
     typedef Interval<UpperBound<F>> NumericType;
@@ -102,19 +102,20 @@ template<class F> struct ModelNumericTraits<ValidatedTag,Interval<UpperBound<F>>
     typedef F RawFloatType;
 };
 template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,F>
 {
     typedef Bounds<F> CoefficientType;
     typedef Bounds<F> NumericType;
     typedef F RawFloatType;
 };
 template<class F> struct ModelNumericTraits<ValidatedTag,F>
-    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+    : public FunctionModelTraits<ValidatedTag,RawFloatType<PrecisionType<F>>>
 {
+    static_assert(Same<F,FloatDP> or Same<F,FloatMP>);
     typedef F CoefficientType;
 };
 template<class F> struct ModelNumericTraits<ApproximateTag,F>
-    : public FunctionModelTraits<ApproximateTag,PrecisionType<F>>
+    : public FunctionModelTraits<ApproximateTag,RawFloatType<PrecisionType<F>>>
 {
     typedef Approximation<F> CoefficientType;
 };
@@ -173,6 +174,7 @@ class TaylorModel
     typedef PRE ErrorPrecisionType;
 
     typedef typename ModelNumericTraits<P,F>::RawFloatType RawFloatType;
+    typedef typename ModelNumericTraits<P,F>::RawErrorFloatType RawErrorFloatType;
     typedef typename ModelNumericTraits<P,F>::CoefficientType CoefficientType;
     typedef typename ModelNumericTraits<P,F>::ValueType ValueType;
     typedef typename ModelNumericTraits<P,F>::ErrorType ErrorType;

@@ -128,35 +128,40 @@ template<> struct CartesianProductBoxTypedef<Scalar> { template<class IVL> using
 template<> struct CartesianProductBoxTypedef<Vector> { template<class IVL> using Type = Box<IVL>; };
 template<template<class>class LIN, class IVL> using CartesianProductBoxType = typename CartesianProductBoxTypedef<LIN>::template Type<IVL>;
 
-template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
+template<class P, class F, class FE=F> struct FunctionModelTraits;
 
 template<class F> class UnknownError;
 
-template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
-    typedef RawFloat<PR> F; typedef RawFloat<PRE> FE;
+template<class F, class FE> struct FunctionModelTraits<ValidatedTag,F,FE> {
+    static_assert(Same<F,FloatDP> or Same<F,FloatMP>,"");
+    static_assert(Same<FE,FloatDP> or Same<FE,FloatMP>,"");
+    typedef PrecisionType<F> PR; typedef PrecisionType<FE> PRE;
     typedef F ValueType; typedef Error<FE> ErrorType;
     typedef PositiveUpperBound<F> NormType;
     typedef Interval<UpperBound<F>> RangeType;
     typedef Bounds<F> NumericType;
     typedef ValidatedNumber GenericNumericType;
     typedef F RawFloatType;
+    typedef FE RawErrorFloatType;
 };
-template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
-    typedef RawFloat<PR> F;
+template<class F> struct FunctionModelTraits<ApproximateTag,F> {
+    static_assert(Same<F,FloatDP> or Same<F,FloatMP>,"");
+    typedef PrecisionType<F> PR;
     typedef Approximation<F> ValueType; typedef UnknownError<F> ErrorType;
     typedef PositiveApproximation<F> NormType;
     typedef Interval<Approximation<F>> RangeType;
     typedef Approximation<F> NumericType; typedef ApproximateNumber GenericNumericType;
     typedef F RawFloatType;
+    typedef F RawErrorFloatType;
 };
 
-template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
-template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
-template<class P, class PRE> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
+template<class P, class F, class FE=F> using CanonicalNumericType = typename FunctionModelTraits<P,F,FE>::NumericType;
+template<class P, class F> using CanonicalCoefficientType = typename FunctionModelTraits<P,F>::CoefficientType;
+template<class P, class FE> using CanonicalErrorType = typename FunctionModelTraits<P,FE,FE>::ErrorType;
 
-template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,DoublePrecision>::NumericType;
-template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,DoublePrecision>::CoefficientType;
-template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,DoublePrecision,DoublePrecision>::ErrorType;
+template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,FloatDP>::NumericType;
+template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,FloatDP>::CoefficientType;
+template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,FloatDP,FloatDP>::ErrorType;
 
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;

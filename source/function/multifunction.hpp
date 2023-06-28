@@ -193,19 +193,18 @@ static_assert(AMultifunction<MultifunctionPatch<ValidatedTag,RealVector(RealVect
 
 
 
-template<class PR> class Sweeper;
+template<class F> class Sweeper;
 
-template<class P, class SIG, class PR> class MultifunctionModel;
-template<class P, class PR> using VectorMultivariateMultifunctionModel = MultifunctionModel<P,RealVector(RealVector),PR>;
-template<class PR> using ValidatedVectorMultivariateMultifunctionModel = VectorMultivariateMultifunctionModel<ValidatedTag,PR>;
+template<class P, class SIG, class F> class MultifunctionModel;
+template<class P, class F> using VectorMultivariateMultifunctionModel = MultifunctionModel<P,RealVector(RealVector),F>;
+template<class F> using ValidatedVectorMultivariateMultifunctionModel = VectorMultivariateMultifunctionModel<ValidatedTag,F>;
 
-template<class P, class PR> class MultifunctionModel<P,RealVector(RealVector),PR> {
+template<class P, class F> class MultifunctionModel<P,RealVector(RealVector),F> {
     using ARG=RealVector; using RES=RealVector; using SIG=RES(ARG);
-    using FLT=RawFloatType<PR>;
-    FunctionModel<P,SIG,PR> _f;
+    FunctionModel<P,SIG,F> _f;
     SizeType _as;
   public:
-    MultifunctionModel(BoxDomainType dom, VectorMultivariateFunction<P> f, BoxDomainType params, Sweeper<FLT> swp);
+    MultifunctionModel(BoxDomainType dom, VectorMultivariateFunction<P> f, BoxDomainType params, Sweeper<F> swp);
 
     SizeType argument_size() const { return this->_as; }
     BoxDomainType domain() const { return project(this->_f.domain(),Range(0u,this->argument_size())); }
@@ -213,21 +212,21 @@ template<class P, class PR> class MultifunctionModel<P,RealVector(RealVector),PR
 
     ValidatedImageSet operator() (Vector<ValidatedNumber> const& x) const;
 
-    friend OutputStream& operator<<(OutputStream& os, MultifunctionModel<P,SIG,PR> const& fm) {
+    friend OutputStream& operator<<(OutputStream& os, MultifunctionModel<P,SIG,F> const& fm) {
         return os << "MultifunctionModel(model="<<fm._f<<", argument_size="<<fm._as<<")"; }
 };
 
 
-template<class P, class PR> auto
-MultifunctionModel<P,RealVector(RealVector),PR>::operator() (Vector<ValidatedNumber> const& x) const -> ValidatedImageSet
+template<class P, class F> auto
+MultifunctionModel<P,RealVector(RealVector),F>::operator() (Vector<ValidatedNumber> const& x) const -> ValidatedImageSet
 {
     auto fx=factory(this->_f).create_constants(error_domain(),x);
     auto fid=factory(this->_f).create_identity(error_domain());
-    FunctionModel<P,SIG,PR> fim=compose(_f,join(fx,fid));
+    FunctionModel<P,SIG,F> fim=compose(_f,join(fx,fid));
     return ValidatedImageSet(this->error_domain(),fim);
 }
 
-static_assert(AMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),DoublePrecision>,ValidatedTag,RealVector(RealVector),LocatedSet>);
+static_assert(AMultifunction<MultifunctionModel<ValidatedTag,RealVector(RealVector),FloatDP>,ValidatedTag,RealVector(RealVector),LocatedSet>);
 
 
 template<class P, class RES, class ARG> class Function<P,CompactSet<P,RES>(ARG)>

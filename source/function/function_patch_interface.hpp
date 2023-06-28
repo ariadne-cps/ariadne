@@ -114,8 +114,8 @@ template<class P, class SIG> class FunctionPatchInterface
     virtual CodomainType const codomain() const = 0;
 
     virtual Result<Number<P>> _unchecked_evaluate(const Argument<Number<P>>& x) const = 0;
-    virtual Result<CanonicalNumericType<P,DP>> _unchecked_evaluate(const Argument<CanonicalNumericType<P,DP>>& x) const = 0;
-    virtual Result<CanonicalNumericType<P,MP>> _unchecked_evaluate(const Argument<CanonicalNumericType<P,MP>>& x) const = 0;
+    virtual Result<CanonicalNumericType<P,FloatDP>> _unchecked_evaluate(const Argument<CanonicalNumericType<P,FloatDP>>& x) const = 0;
+    virtual Result<CanonicalNumericType<P,FloatMP>> _unchecked_evaluate(const Argument<CanonicalNumericType<P,FloatMP>>& x) const = 0;
     virtual FunctionPatchInterface<P,SIG>* _partial_evaluate(SizeType j, const Number<P>& c) const = 0;
 
     virtual ScalarFunctionPatchInterface<P,ARG>* _compose(const ScalarFunction<P,RES>& f) const = 0;

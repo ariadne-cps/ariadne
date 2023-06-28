@@ -118,32 +118,32 @@ template<class RES, class ARG> class FastFanSequence<RES(ARG)>
 static_assert(AMeasurableFunction<FastFanSequence<Real(Real)>,EffectiveTag,Real(Real)>);
 
 
-template<class SIG, class PR, class PRE=PR> class FanModel;
+template<class SIG, class F, class FE=F> class FanModel;
 
-template<class PR, class PRE> class FanModel<Real(Real),PR,PRE> {
+template<class F, class FE> class FanModel<Real(Real),F,FE> {
     using P=ValidatedTag; using RES=Real; using ARG=Real; using SIG=RES(ARG);
   public:
     typedef IntervalDomainType DomainType;
-    typedef FloatError<PRE> ErrorType;
+    typedef Error<FE> ErrorType;
 
     DomainType _domain;
     ValidatedContinuousFunction<SIG> _function;
-    FloatError<PRE> _measure_error;
+    Error<FE> _measure_error;
   public:
-    FanModel(DomainType dom, ValidatedContinuousFunction<SIG> fn, FloatError<PRE> err)
+    FanModel(DomainType dom, ValidatedContinuousFunction<SIG> fn, Error<FE> err)
         : _domain(dom), _function(fn), _measure_error(err) { }
     DomainType const& domain() const { return this->_domain; }
     ValidatedContinuousFunction<SIG> const& function() const { return this->_function; }
     ErrorType const& measure_error() const { return this->_measure_error; }
     ValidatedLowerMeasurableSet<ARG> preimage(ValidatedOpenSet<RES> const&) const;
-    friend LowerMeasurableSet<P,ARG> preimage(OpenSet<P,RES> const& ops, FanModel<Real(Real),PR,PRE> const& fm) {
+    friend LowerMeasurableSet<P,ARG> preimage(OpenSet<P,RES> const& ops, FanModel<Real(Real),F,FE> const& fm) {
         return fm.preimage(ops); }
-    friend OutputStream& operator<<(OutputStream& os, FanModel<SIG,PR,PRE> const& fm) {
+    friend OutputStream& operator<<(OutputStream& os, FanModel<SIG,F,FE> const& fm) {
         return os << "FanModel(domain="<<fm._domain<<",function="<<fm._function<<",measure_error="<<fm._measure_error<<")"; }
 
 };
 
-static_assert(AMeasurableFunction<FanModel<Real(Real),DoublePrecision,DoublePrecision>,ValidatedTag,Real(Real)>);
+static_assert(AMeasurableFunction<FanModel<Real(Real),FloatDP,FloatDP>,ValidatedTag,Real(Real)>);
 
 // TODO: Move to Interval
 template<class PR> Interval<UpperBound<PR>> image(Interval<UpperBound<PR>> const& ivl, ValidatedContinuousFunction<Real(Real)> const& f) {
@@ -152,8 +152,8 @@ template<class PR> Interval<UpperBound<PR>> image(Interval<UpperBound<PR>> const
 
 ValidatedOpenSet<Real> preimage(ValidatedContinuousFunction<Real(Real)> const& f, ValidatedOpenSet<Real> const& ops, IntervalDomainType dom, Accuracy acc);
 
-template<class PR, class PRE> auto
-FanModel<Real(Real),PR,PRE>::preimage(ValidatedOpenSet<Real> const& rng) const -> ValidatedLowerMeasurableSet<Real> {
+template<class F, class FE> auto
+FanModel<Real(Real),F,FE>::preimage(ValidatedOpenSet<Real> const& rng) const -> ValidatedLowerMeasurableSet<Real> {
     // FIXME: Make accuracy dynamic
     Accuracy acc(exp2(-4));
 

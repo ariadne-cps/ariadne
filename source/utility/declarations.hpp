@@ -55,7 +55,7 @@ template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 template<class P, class F> class AffineModel;
-template<class P, class F> class TaylorModel;
+template<class P, class F, class FE=F> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 template<class X> class ElementaryAlgebra;

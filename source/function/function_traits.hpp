@@ -140,6 +140,7 @@ template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
     typedef Bounds<F> NumericType;
     typedef ValidatedNumber GenericNumericType;
     typedef F RawFloatType;
+    typedef FE RawErrorFloatType;
 };
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     typedef RawFloat<PR> F;
@@ -148,6 +149,7 @@ template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     typedef Interval<Approximation<F>> RangeType;
     typedef Approximation<F> NumericType; typedef ApproximateNumber GenericNumericType;
     typedef F RawFloatType;
+    typedef F RawErrorFloatType;
 };
 
 template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;

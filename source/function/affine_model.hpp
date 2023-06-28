@@ -49,7 +49,7 @@ template<class X> class Affine;
 
 template<class P, class F> class AffineModel;
 
-template<class P, class F> class TaylorModel;
+template<class P, class F, class FE> class TaylorModel;
 
 
 

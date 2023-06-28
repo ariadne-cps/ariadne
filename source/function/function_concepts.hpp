@@ -28,9 +28,9 @@
 
 namespace Ariadne {
 
-template<class P, class F> class TaylorModel;
+template<class P, class F, class FE> class TaylorModel;
 template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>;
-template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>;
+template<class F, class FE=F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F,FE>;
 
 template<class Y> class ElementaryAlgebra;
 

@@ -52,6 +52,9 @@ template class TaylorModel<ApproximateTag,FloatMP>;
 template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 
+template class TaylorModel<ValidatedTag,FloatMP,FloatDP>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatMP,FloatDP>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatMP,FloatDP>>;
 
 
 template class TaylorModel<ValidatedTag,FloatDPUpperInterval>;

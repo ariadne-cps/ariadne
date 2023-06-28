@@ -45,8 +45,11 @@ namespace Ariadne {
 
 template<class PR> std::string numeric_class_tag();
 
-template<template<class...>class T, class PR> std::string python_template_tag_name() { return python_template_name<T>()+numeric_class_tag<PR>(); }
-template<template<class...>class T, class FLT> std::string python_template_precision_tag_name() { return python_template_name<T>()+numeric_class_tag<typename FLT::PrecisionType>(); }
+template<template<class...>class T, class PR, class PRE=PR> std::string python_template_tag_name() {
+    if constexpr (Same<PR,PRE>) { return python_template_name<T>()+numeric_class_tag<PR>(); }
+    else { return python_template_name<T>()+numeric_class_tag<PR>()+numeric_class_tag<PRE>(); } }
+template<template<class...>class T, class FLT, class FLTE=FLT> std::string python_template_precision_tag_name() {
+    return python_template_tag_name<T,typename FLT::PrecisionType,typename FLTE::PrecisionType>(); }
 
 template<> struct PythonTemplateName<Sweeper> { static std::string get() { return "Sweeper"; } };
 template<> struct PythonTemplateName<ThresholdSweeper> { static std::string get() { return "ThresholdSweeper"; } };
@@ -72,8 +75,8 @@ template<class PR> struct PythonClassName<ValidatedVectorMultivariateFunctionMod
 
 template<class FLT> struct PythonClassName<ApproximateTaylorModel<FLT>> {
     static std::string get() { return python_template_precision_tag_name<ApproximateTaylorModel,FLT>(); } };
-template<class FLT> struct PythonClassName<ValidatedTaylorModel<FLT>> {
-    static std::string get() { return python_template_precision_tag_name<ValidatedTaylorModel,FLT>(); } };
+template<class FLT, class FLTE> struct PythonClassName<ValidatedTaylorModel<FLT,FLTE>> {
+    static std::string get() { return python_template_precision_tag_name<ValidatedTaylorModel,FLT,FLTE>(); } };
 
 template<class FLT> struct PythonClassName<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> {
     static std::string get() { return python_template_precision_tag_name<ValidatedScalarMultivariateTaylorFunctionModel,FLT>(); } };
@@ -195,7 +198,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedV
     return os;
 }
 
-template<class P, class F> List<MultiIndex> keys(const TaylorModel<P,F>& tm) {
+template<class P, class F, class FE> List<MultiIndex> keys(const TaylorModel<P,F,FE>& tm) {
     List<MultiIndex> r(tm.argument_size());
     for(auto iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
         r.append(iter->index());
@@ -243,35 +246,35 @@ template<class FLT> Void export_sweepers(pybind11::module& module)
 }
 
 
-Expansion<MultiIndex,FloatDP>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
-Expansion<MultiIndex,FloatDPApproximation>const& get_expansion(ApproximateTaylorModelDP const& tm) { return tm.expansion(); }
+template<class FLT, class FLTE> Expansion<MultiIndex,FLT>const& get_expansion(ValidatedTaylorModel<FLT,FLTE> const& tm) { return tm.expansion(); }
+template<class FLT> Expansion<MultiIndex,Approximation<FLT>>const& get_expansion(ApproximateTaylorModel<FLT> const& tm) { return tm.expansion(); }
 
 
-template<class FLT> Void export_validated_taylor_model(pybind11::module& module)
+template<class FLT, class FLTE=FLT> Void export_validated_taylor_model(pybind11::module& module)
 {
-    typedef ValidatedTaylorModel<FLT> ModelType;
+    typedef ValidatedTaylorModel<FLT,FLTE> ModelType;
     typedef NumericType<ModelType> NumericType;
     typedef GenericType<NumericType> GenericNumericType;
 
     Tag<GenericNumericType> generic_number_tag;
 
-    pybind11::class_<ValidatedTaylorModel<FLT>> taylor_model_class(module,python_class_name<ValidatedTaylorModel<FLT>>().c_str());
-    taylor_model_class.def(pybind11::init<ValidatedTaylorModel<FLT>>());
+    pybind11::class_<ValidatedTaylorModel<FLT,FLTE>> taylor_model_class(module,python_class_name<ValidatedTaylorModel<FLT,FLTE>>().c_str());
+    taylor_model_class.def(pybind11::init<ValidatedTaylorModel<FLT,FLTE>>());
     taylor_model_class.def(pybind11::init< SizeType,Sweeper<FLT> >());
-    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModel<FLT>&))&keys);
-    taylor_model_class.def("value", (const FloatDP(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::value);
-    taylor_model_class.def("error", (const FloatDPError&(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::error);
-    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FLT>&(*)(ValidatedTaylorModel<FLT> const&)) &get_expansion);
-    taylor_model_class.def("set_error", (Void(ValidatedTaylorModel<FLT>::*)(const FloatDPError&)) &ValidatedTaylorModel<FLT>::set_error);
-    taylor_model_class.def("argument_size", &ValidatedTaylorModel<FLT>::argument_size);
-    taylor_model_class.def("domain", &ValidatedTaylorModel<FLT>::domain);
-    taylor_model_class.def("range", &ValidatedTaylorModel<FLT>::range);
-    taylor_model_class.def("norm", &ValidatedTaylorModel<FLT>::norm);
-    taylor_model_class.def("set_sweeper", &ValidatedTaylorModel<FLT>::set_sweeper);
-    taylor_model_class.def("sweeper", &ValidatedTaylorModel<FLT>::sweeper);
-    taylor_model_class.def("sweep", (ValidatedTaylorModel<FLT>&(ValidatedTaylorModel<FLT>::*)()) &ValidatedTaylorModel<FLT>::sweep, pybind11::return_value_policy::reference);
-    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel<FLT>,MultiIndex,FLT>);
-    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel<FLT>,MultiIndex,FLT>);
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModel<FLT,FLTE>&))&keys);
+    taylor_model_class.def("value", (const FloatDP(ValidatedTaylorModel<FLT,FLTE>::*)()const) &ValidatedTaylorModel<FLT,FLTE>::value);
+    taylor_model_class.def("error", (const Error<FLTE>&(ValidatedTaylorModel<FLT,FLTE>::*)()const) &ValidatedTaylorModel<FLT,FLTE>::error);
+    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FLT>&(*)(ValidatedTaylorModel<FLT,FLTE> const&)) &get_expansion);
+    taylor_model_class.def("set_error", (Void(ValidatedTaylorModel<FLT,FLTE>::*)(const Error<FLTE>&)) &ValidatedTaylorModel<FLT,FLTE>::set_error);
+    taylor_model_class.def("argument_size", &ValidatedTaylorModel<FLT,FLTE>::argument_size);
+    taylor_model_class.def("domain", &ValidatedTaylorModel<FLT,FLTE>::domain);
+    taylor_model_class.def("range", &ValidatedTaylorModel<FLT,FLTE>::range);
+    taylor_model_class.def("norm", &ValidatedTaylorModel<FLT,FLTE>::norm);
+    taylor_model_class.def("set_sweeper", &ValidatedTaylorModel<FLT,FLTE>::set_sweeper);
+    taylor_model_class.def("sweeper", &ValidatedTaylorModel<FLT,FLTE>::sweeper);
+    taylor_model_class.def("sweep", (ValidatedTaylorModel<FLT,FLTE>&(ValidatedTaylorModel<FLT,FLTE>::*)()) &ValidatedTaylorModel<FLT,FLTE>::sweep, pybind11::return_value_policy::reference);
+    taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel<FLT,FLTE>,MultiIndex,FLT>);
+    taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel<FLT,FLTE>,MultiIndex,FLT>);
 
     define_elementary_algebra(module,taylor_model_class);
     define_inplace_algebra(module,taylor_model_class);
@@ -280,18 +283,18 @@ template<class FLT> Void export_validated_taylor_model(pybind11::module& module)
     define_lattice(module,taylor_model_class);
 
 
-    taylor_model_class.def("__str__", &__cstr__<ValidatedTaylorModel<FLT>>);
+    taylor_model_class.def("__str__", &__cstr__<ValidatedTaylorModel<FLT,FLTE>>);
 
-    taylor_model_class.def_static("constant",(ValidatedTaylorModel<FLT>(*)(SizeType, const FloatDPBounds&,Sweeper<FLT>))&ValidatedTaylorModel<FLT>::constant);
-    taylor_model_class.def_static("coordinate",(ValidatedTaylorModel<FLT>(*)(SizeType, SizeType,Sweeper<FLT>))&ValidatedTaylorModel<FLT>::coordinate);
+    taylor_model_class.def_static("constant",(ValidatedTaylorModel<FLT,FLTE>(*)(SizeType, const Bounds<FLT>&,Sweeper<FLT>))&ValidatedTaylorModel<FLT,FLTE>::constant);
+    taylor_model_class.def_static("coordinate",(ValidatedTaylorModel<FLT,FLTE>(*)(SizeType, SizeType,Sweeper<FLT>))&ValidatedTaylorModel<FLT,FLTE>::coordinate);
 
-    taylor_model_class.def("range", (UpperIntervalType(ValidatedTaylorModel<FLT>::*)()const) &ValidatedTaylorModel<FLT>::range);
+    taylor_model_class.def("range", (UpperIntervalType(ValidatedTaylorModel<FLT,FLTE>::*)()const) &ValidatedTaylorModel<FLT,FLTE>::range);
 
-    module.def("evaluate",&_evaluate_<ValidatedTaylorModel<FLT>,Vector<FloatDPBounds>>);
-    //module.def("split",&_split_<ValidatedTaylorModel<FLT>,SizeType,SplitPart>);
+    module.def("evaluate",&_evaluate_<ValidatedTaylorModel<FLT,FLTE>,Vector<Bounds<FLT>>>);
+    //module.def("split",&_split_<ValidatedTaylorModel<FLT,FLTE>,SizeType,SplitPart>);
 
-    //to_python< Vector<ValidatedTaylorModel<FLT>> >();
-    //from_python< Vector<ValidatedTaylorModel<FLT>> >();
+    //to_python< Vector<ValidatedTaylorModel<FLT,FLTE>> >();
+    //from_python< Vector<ValidatedTaylorModel<FLT,FLTE>> >();
 }
 
 template<class FLT> Void export_approximate_taylor_model(pybind11::module& module)
@@ -625,9 +628,13 @@ template<class FLT> Void export_vector_taylor_function(pybind11::module& module)
 Void calculus_submodule(pybind11::module& module)
 {
     export_sweepers<FloatDP>(module);
+    export_sweepers<FloatMP>(module);
 
     export_approximate_taylor_model<FloatDP>(module);
+    export_approximate_taylor_model<FloatMP>(module);
     export_validated_taylor_model<FloatDP>(module);
+    export_validated_taylor_model<FloatMP>(module);
+    export_validated_taylor_model<FloatMP,FloatDP>(module);
 
     export_scalar_function_model<DP>(module);
     export_vector_function_model<DP>(module);
@@ -652,8 +659,6 @@ Void calculus_submodule(pybind11::module& module)
     template_<ValidatedVectorMultivariateTaylorFunctionModel> vector_taylor_function_model_template(module);
     vector_taylor_function_model_template.instantiate<FloatDP>();
     vector_taylor_function_model_template.def_new([](BoxDomainType dom,ValidatedVectorMultivariateFunction f,Sweeper<FloatDP> swp){return ValidatedVectorMultivariateTaylorFunctionModel<FloatDP>(dom,f,swp);});
-
-
 
 }
 

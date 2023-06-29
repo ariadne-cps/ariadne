@@ -59,6 +59,7 @@ namespace Ariadne {
 
 template<> struct PythonTemplateName<MultivariatePolynomial> { static std::string get() { return "MultivariatePolynomial"; } };
 template<> struct PythonTemplateName<Procedure> { static std::string get() { return "Procedure"; } };
+template<> struct PythonTemplateName<Function> { static std::string get() { return "Function"; } };
 
 template<class X> struct PythonClassName<MultivariatePolynomial<X>> { static std::string get() { return python_template_class_name<X>("MultivariatePolynomial"); } };
 
@@ -545,5 +546,12 @@ Void function_submodule(pybind11::module& module) {
 
     export_function_patches(module);
     export_procedures(module);
+
+    template_<Function> function_template(module,python_template_name<Function>().c_str());
+    function_template.def_new([](RealVariable var, Scalar<RealExpression> e){return EffectiveScalarUnivariateFunction(var,e);});
+    function_template.def_new([](RealVariable var, Scalar<RealExpression> e){return EffectiveScalarUnivariateFunction(var,e);});
+    function_template.def_new([](RealSpace spc, Scalar<RealExpression> e){return EffectiveScalarMultivariateFunction(spc,e);});
+    function_template.def_new([](RealSpace spc, Vector<RealExpression> e){return EffectiveVectorMultivariateFunction(spc,e);});
+
 }
 

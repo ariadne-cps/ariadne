@@ -84,8 +84,8 @@ template<template<class...>class T> class template_ : public pybind11::class_<Te
     ~template_() {
         this->attr("_instantiations")=this->_instantiations;
         this->_def_class_getitem(this->_instantiations); }
-    template<class K> void instantiate(pybind11::class_<K> key, pybind11::class_<T<K>> value) {
-        _instantiations[key]=value; }
+//    template<class K> void instantiate(pybind11::class_<K> key, pybind11::class_<T<K>> value) {
+//        _instantiations[key]=value; }
     template<class V, class... K> void as_instantiate() {
         as_instantiate_template<V,K...>(this->_module,this->_instantiations); }
     template<class... K> void instantiate() {

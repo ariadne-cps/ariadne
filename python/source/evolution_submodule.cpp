@@ -64,8 +64,11 @@ Void export_enclosure(pybind11::module& module) {
 
 template<class T> Void export_list_set(pybind11::module& module, const char* name) {
     pybind11::class_<ListSet<T>> list_set_class(module,name);
-    list_set_class.def("__iter__", [](ListSet<T> const& l){return pybind11::make_iterator(l.begin(),l.end());});
     list_set_class.def("size",&ListSet<T>::size);
+    list_set_class.def("__len__",&ListSet<T>::size);
+    list_set_class.def("__getitem__", &__getitem__<ListSet<T>,SizeType>);
+    list_set_class.def("__iter__", [](ListSet<T> const& l){return pybind11::make_iterator(l);});
+    list_set_class.def("__str__", &__cstr__<ListSet<T>>);
 }
 
 

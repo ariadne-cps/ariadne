@@ -27,7 +27,7 @@ x = RealVariable("x")
 y = RealVariable("y")
 
 system = VectorField([dot(x)<<2*x-x*y,dot(y)<<2*x*x-y])
-initial_set = RealExpressionBoundedConstraintSet([(dec(0.9)<=x)&(x<=1),(dec(-2.2)<=y)&(y<=-2)],[sqr(x)+sqr(y+2)<=1])
+initial_set = RealExpressionBoundedConstraintSet([(dec_(0.9)<=x)&(x<=1),(dec_(-2.2)<=y)&(y<=-2)],[sqr(x)+sqr(y+2)<=1])
 safe_set = RealExpressionBoundedConstraintSet([(-1<=x)&(x<=4),(-4<=y)&(y<=6)],[sqr(x-2)+sqr(y-1)<=22])
 print(system)
 print(initial_set)
@@ -38,7 +38,7 @@ safe_constraint_set = safe_set.euclidean_set(system.state_space())
 print(initial_constraint_set)
 print(safe_constraint_set)
 
-evolution_time = Real(dec(50.0))
+evolution_time = Real(dec_(50.0))
 
 simulator = VectorFieldSimulator(system)
 simulator.configuration().set_step_size(0.1)
@@ -59,8 +59,8 @@ g.draw(evolver_orbit)
 g.write("attractor_evolution")
 
 analyser = ContinuousReachabilityAnalyser(evolver)
-analyser.configuration().set_transient_time(dec(0.75))
-analyser.configuration().set_lock_to_grid_time(dec(0.75))
+analyser.configuration().set_transient_time(dec_(0.75))
+analyser.configuration().set_lock_to_grid_time(dec_(0.75))
 analyser.configuration().set_maximum_grid_extent(5)
 
 print("Computing safety...")

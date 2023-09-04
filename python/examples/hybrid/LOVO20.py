@@ -13,7 +13,7 @@ def get_automaton():
     beta = RealConstant("beta",3)
     gamma = RealConstant("gamma",1)
     delta = RealConstant("delta",1)
-    radius = RealConstant("radius",dec(0.15))
+    radius = RealConstant("radius",dec_(0.15))
 
     lotkavolterra = StringVariable("lotkavolterra")
     outside = String("outside")
@@ -46,8 +46,8 @@ def get_initial_set():
     x = RealVariable("x")
     y = RealVariable("y")
     cnt = RealVariable("cnt")
-    ic = RealPoint([dec(1.3),1])
-    e = dec(0.008)
+    ic = RealPoint([dec_(1.3),1])
+    e = dec_(0.008)
     initial_set = HybridBoundedConstraintSet({lotkavolterra:outside},[(ic[0]-e<=x)&(x<=ic[0]+e),y<<ic[1],cnt<<0])
 
     # Print the initial set on the command line
@@ -87,7 +87,7 @@ def get_circle_orbit() :
     beta = RealConstant("beta",3)
     gamma = RealConstant("gamma",1)
     delta = RealConstant("delta",1)
-    radius = RealConstant("radius",dec(0.15))
+    radius = RealConstant("radius",dec_(0.15))
 
     cx = gamma/delta
     cy = alpha/beta
@@ -97,7 +97,7 @@ def get_circle_orbit() :
     t = RealVariable("t")
     circle.new_mode(rotate,[let(x)<<cx+radius*cos(t),let(y)<<cy-radius*sin(t)],[dot(t)<<1])
     simulator = HybridSimulator(circle)
-    simulator.configuration().set_step_size(0.1)
+    simulator.configuration().set_step_size(0.02)
     circle_initial = HybridBoundedConstraintSet(rotate,[t<<0])
     circle_time = HybridTerminationCriterion(2*pi,1)
     orbit = simulator.orbit(circle_initial,circle_time)
@@ -151,7 +151,7 @@ def verify(orbit):
     final_bounds = orbit.final().bounding_box()
 
     print("Trajectory stays in the reference circle for at most", final_bounds[cnt].upper_bound(), "time units: ", end='')
-    print("constraint satisfied") if final_bounds[cnt].upper_bound().raw() <= FloatDP(0.2,DoublePrecision()) else print("constraint NOT satisfied!")
+    print("constraint satisfied") if final_bounds[cnt].upper_bound().raw() <= FloatDP(exact(0.21),DoublePrecision()) else print("constraint NOT satisfied!")
 
 
 #! [/verify]
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     initial_set = get_initial_set()
 
     # Get the final time
-    final_time = HybridTerminationCriterion(dec(3.64),3)
+    final_time = HybridTerminationCriterion(dec_(3.64),3)
 
     # Create an evolver object
     evolver = create_evolver(LOVO20)

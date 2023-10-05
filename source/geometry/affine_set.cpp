@@ -49,28 +49,6 @@ typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl);
 Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl);
 
-template<class X, class XX>
-struct LinearProgram {
-    LinearProgram() : LinearProgram(0u,0u,X(dp)) { }
-    LinearProgram(SizeType m, SizeType n, X const& z);
-    Matrix<X> A;
-    Vector<X> b;
-    Vector<X> c;
-    Vector<X> l;
-    Vector<X> u;
-    Array<Slackness> vt;
-    Array<SizeType> p;
-    Matrix<XX> B;
-    Vector<XX> x;
-    Vector<XX> y;
-    Vector<XX> z;
-};
-
-template<class X, class XX> LinearProgram<X,XX>::LinearProgram(SizeType m, SizeType n, X const& zero)
-    : A(m,n,zero), b(m,zero), c(n,zero), l(n,zero), u(n,zero)
-    , vt(n), p(n), B(m,m,zero)
-    , x(n,zero), y(m,zero),z(n,zero) { }
-
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const RealBox& bx)
     : ValidatedAffineConstrainedImageSet(Box<Interval<FloatDPBall>>(bx,dp))
@@ -266,7 +244,7 @@ UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
 ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const ExactBoxType& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBoxType wbx=cast_exact_box(widen(bx));
-    LinearProgram<FloatDP> lp;
+    LinearProgramVertexData<FloatDP> lp;
     this->construct_linear_program(lp);
     for(SizeType i=0; i!=bx.size(); ++i) {
         lp.l[i]=FloatDP(sub(down,wbx[i].lower_bound(),this->_space_models[i].error().raw()));
@@ -274,9 +252,9 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
     }
     ValidatedKleenean feasible=indeterminate;
     try {
-        InteriorPointSolver optimiser;
+        InteriorPointLinearOptimiser optimiser;
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
-        //feasible=SimplexSolver<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+        //feasible=SimplexLinearOptimiser<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
     catch(const DegenerateFeasibilityProblemException& e) {
         feasible=indeterminate;
@@ -308,7 +286,7 @@ ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat depth
 }
 
 
-Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness)
+Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgramVertexData<FloatDP>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness)
 {
 
     // No need to check if cell is already part of the set
@@ -331,8 +309,8 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     Int maximum_depth=fineness*cell.dimension();
 
     // Check for disjointness using linear program
-    //ValidatedKleenean feasible=SimplexSolver<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
-    InteriorPointSolver optimiser;
+    //ValidatedKleenean feasible=SimplexLinearOptimiser<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    InteriorPointLinearOptimiser optimiser;
     ValidatedKleenean feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(definitely(!feasible)) { return; }
@@ -354,7 +332,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
 
 
 Void
-ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<FloatDP>& lp) const
+ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgramVertexData<FloatDP>& lp) const
 {
     // Set up linear programming problem.
     // We have parameter e and point x, which need to satisfy
@@ -443,7 +421,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     GridCell bounding_cell=GridCell::smallest_enclosing_primary_cell(this->bounding_box(),paving.grid());
 
     // Create linear program
-    LinearProgram<FloatDP> lp;
+    LinearProgramVertexData<FloatDP> lp;
     this->construct_linear_program(lp);
     Vector<FloatDPError> errors(this->dimension(),dp);
     for(SizeType i=0; i!=this->dimension(); ++i) {
@@ -455,9 +433,9 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
 
 
 
-Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness)
+Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgramVertexData<FloatDP>& lp, const Vector<FloatDPError>& errors, GridCell& cell, Nat fineness)
 {
-    SimplexSolver<FloatDP> lpsolver;
+    SimplexLinearOptimiser<FloatDP> lpsolver;
 
     const SizeType nx=cell.dimension();
     const SizeType nc=lp.A.row_size()-nx;
@@ -521,7 +499,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
-    SimplexSolver<FloatDP> lpsolver;
+    SimplexLinearOptimiser<FloatDP> lpsolver;
 
     GridCell bounding_cell=GridCell::smallest_enclosing_primary_cell(this->bounding_box(),paving.grid());
 
@@ -542,7 +520,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     const SizeType nc=this->number_of_constraints();
 
     // Create linear program
-    LinearProgram<FloatDP> lp;
+    LinearProgramVertexData<FloatDP> lp;
     lp.A.resize(nx+nc,nx+ne+nc+1u);
     lp.b.resize(nx+nc);
     lp.c.resize(nx+ne+nc+1u);
@@ -652,7 +630,7 @@ ValidatedAffineConstrainedImageSet::boundary(SizeType xind, SizeType yind) const
 
     CONCLOG_PRINTLN("xind="<<xind<<", yind="<<yind);
 
-    SimplexSolver<FloatDPApproximation> lpsolver;
+    SimplexLinearOptimiser<FloatDPApproximation> lpsolver;
     PerturbationGenerator eps;
 
     static const Int MAX_STEPS=1000;

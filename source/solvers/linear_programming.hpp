@@ -54,6 +54,53 @@ template<> struct ApproximateNumericsTraits<FloatMP> { typedef Approximation<Flo
 template<class X> using ApproximateNumericType = typename ApproximateNumericsTraits<X>::Type;
 
 
+//! \ingroup OptimisationSubModule
+//! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
+//! \see SimplexLinearOptimiser
+enum class Slackness : std::int8_t {
+    LOWER=-1, //!< <p/>
+    BASIS=0,  //!< <p/>
+    UPPER=+1, //!< <p/>
+    FIXED=+2  //!< <p/>
+};
+
+OutputStream& operator<<(OutputStream& os, Slackness t);
+
+//! \ingroup OptimisationSubModule
+//! \brief A linear program: minimise \f$c \cdot x\f$ subject to \f$Ax=b\f$, \f$l\leq x \leq u\f$
+template<class X>
+struct LinearProgram {
+    LinearProgram(SizeType m, SizeType n, X const& z);
+    Matrix<X> A;
+    Vector<X> b;
+    Vector<X> c;
+    Vector<X> l;
+    Vector<X> u;
+};
+
+template<class X, class XX=typename RigorousNumericsTraits<X>::Type>
+struct LinearProgramVertexData : public LinearProgram<X> {
+    LinearProgramVertexData();
+    LinearProgramVertexData(SizeType m, SizeType n, X const& z);
+    Array<Slackness> vt;
+    Array<SizeType> p;
+    Matrix<XX> B;
+    Vector<XX> x;
+    Vector<XX> y;
+    Vector<XX> z;
+};
+
+template<class X> LinearProgram<X>::LinearProgram(SizeType m, SizeType n, X const& zero)
+    : A(m,n,zero), b(m,zero), c(n,zero), l(n,zero), u(n,zero) { }
+
+template<class X, class XX> LinearProgramVertexData<X,XX>::LinearProgramVertexData()
+    : LinearProgramVertexData(0u,0u,X(dp)) { }
+
+template<class X, class XX> LinearProgramVertexData<X,XX>::LinearProgramVertexData(SizeType m, SizeType n, X const& zero)
+    : LinearProgram<X>(m,n,zero)
+    , vt(n), p(n), B(m,m,zero), x(n,zero), y(m,zero),z(n,zero) { }
+
+
 enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
 
 class DegenerateFeasibilityProblemException : public std::runtime_error {
@@ -82,7 +129,7 @@ struct InfeasibleLinearProgram : std::runtime_error {
 
 //! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
-class InteriorPointSolver
+class InteriorPointLinearOptimiser
 {
     typedef FloatDP X;
     typedef RigorousNumericType<X> VX;
@@ -133,21 +180,9 @@ class InteriorPointSolver
 
 
 //! \ingroup OptimisationSubModule
-//! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
-//! \see SimplexSolver
-enum class Slackness : std::int8_t {
-    LOWER=-1, //!< <p/>
-    BASIS=0,  //!< <p/>
-    UPPER=+1, //!< <p/>
-    FIXED=+2  //!< <p/>
-};
-
-OutputStream& operator<<(OutputStream& os, Slackness t);
-
-//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using the simplex algorithm.
 template<class X>
-class SimplexSolver
+class SimplexLinearOptimiser
 {
     typedef RigorousNumericType<X> XX;
   public:
@@ -286,8 +321,8 @@ class SimplexSolver
 };
 
 //!@{
-//! \relates SimplexSolver \name Type synonyms
-using RationalSimplexSolver = SimplexSolver<Rational>; //!< \relates SimplexSolver .
+//! \relates SimplexLinearOptimiser \name Type synonyms
+using RationalSimplexOptimiser = SimplexLinearOptimiser<Rational>; //!< \relates SimplexLinearOptimiser .
 //!@}
 
 } // namespace Ariadne

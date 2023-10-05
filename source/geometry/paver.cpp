@@ -347,7 +347,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
     ConstraintSolver solver;
-    NonlinearInteriorPointOptimiser optimiser;
+    InteriorPointOptimiser optimiser;
     ValidatedVectorMultivariateFunction fg=join(f,g);
 
     const SizeType m=fg.argument_size();
@@ -506,7 +506,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     CONCLOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
 
     ConstraintSolver solver;
-    NonlinearInteriorPointOptimiser optimiser;
+    InteriorPointOptimiser optimiser;
 
     FloatDP t{pr};
     FloatDPPoint z(x.size(),dp);

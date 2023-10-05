@@ -171,7 +171,7 @@ OutputStream& operator<<(OutputStream& os, LinearProgramStatus lps) {
     }
 }
 
-ValidatedKleenean InteriorPointSolver::
+ValidatedKleenean InteriorPointLinearOptimiser::
 validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
                      const Matrix<X>& A, const Vector<X>& b,
                      const Vector<AX>& ax, const Vector<AX>& ay) const
@@ -228,7 +228,7 @@ validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
 
 
 auto
-InteriorPointSolver::minimise(const Vector<X>& c,
+InteriorPointLinearOptimiser::minimise(const Vector<X>& c,
                               const Vector<X>& xl, const Vector<X>& xu,
                               const Matrix<X>& A, const Vector<X>& b) const
     -> Tuple< AX, Vector<AX>, Vector<AX> >
@@ -270,7 +270,7 @@ InteriorPointSolver::minimise(const Vector<X>& c,
 
 
 
-auto InteriorPointSolver::
+auto InteriorPointLinearOptimiser::
 hotstarted_minimise(const Vector<X>& c,
                     const Vector<X>& xl, const Vector<X>& xu,
                     const Matrix<X>& A, const Vector<X>& b,
@@ -310,7 +310,7 @@ hotstarted_minimise(const Vector<X>& c,
 
 
 ValidatedKleenean
-InteriorPointSolver::
+InteriorPointLinearOptimiser::
 feasible(const Vector<X>& xl, const Vector<X>& xu,
          const Matrix<X>& A, const Vector<X>& b) const
 {
@@ -372,7 +372,7 @@ feasible(const Vector<X>& xl, const Vector<X>& xu,
 
 
 
-LinearProgramStatus InteriorPointSolver::
+LinearProgramStatus InteriorPointLinearOptimiser::
 _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                    Vector<AX>& x, Vector<AX>& y, Vector<AX>& zl, Vector<AX>& zu) const
 {
@@ -479,7 +479,7 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
 
 
 
-LinearProgramStatus InteriorPointSolver::
+LinearProgramStatus InteriorPointLinearOptimiser::
 _feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                   Vector<AX>& x, Vector<AX>& y, Vector<AX>& zl, Vector<AX>& zu) const
 {

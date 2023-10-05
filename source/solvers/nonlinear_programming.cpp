@@ -786,22 +786,22 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 }
 
 
-//------- NonlinearInfeasibleInteriorPointOptimiser -------------------------//
+//------- InfeasibleInteriorPointOptimiser -------------------------//
 
-struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {
+struct InfeasibleInteriorPointOptimiser::PrimalDualData {
     PrimalDualData() : PrimalDualData(0u,0u,dp) { }
     PrimalDualData(SizeType m, SizeType n, DP pr) : w(m,pr), x(n,pr), y(m,pr) { }
     FloatDPApproximationVector w,x,y;
 };
 
-struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualData {
+struct InfeasibleInteriorPointOptimiser::StepData : public PrimalDualData {
     StepData() : StepData(0u,0u,dp) { }
     StepData(SizeType m, SizeType n, DP pr)
         : PrimalDualData(m,n,pr), vl(m,pr), wl(m,pr), xl(n,pr), zl(n,pr), vu(m,pr), wu(m,pr), xu(n,pr), zu(n,pr), mu(pr) { }
     FloatDPApproximationVector vl,wl,xl,zl,vu,wu,xu,zu; FloatDPApproximation mu;
 };
 
-ValidatedVectorType NonlinearInfeasibleInteriorPointOptimiser::
+ValidatedVectorType InfeasibleInteriorPointOptimiser::
 minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     CONCLOG_SCOPE_CREATE;
@@ -853,7 +853,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     throw IndeterminateFeasibilityException();
 }
 
-ValidatedKleenean NonlinearInfeasibleInteriorPointOptimiser::
+ValidatedKleenean InfeasibleInteriorPointOptimiser::
 feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     CONCLOG_SCOPE_CREATE
@@ -895,7 +895,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     return indeterminate;
 }
 
-Void NonlinearInfeasibleInteriorPointOptimiser::
+Void InfeasibleInteriorPointOptimiser::
 setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
                   StepData& v) const
 {
@@ -921,7 +921,7 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunc
 
 
 Void
-NonlinearInfeasibleInteriorPointOptimiser::step(
+InfeasibleInteriorPointOptimiser::step(
     const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     StepData& v) const
 {
@@ -1177,9 +1177,9 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
 
 
-//------- NonlinearInteriorPointOptimiser -----------------------------------//
+//------- InteriorPointOptimiser -----------------------------------//
 
-ValidatedVectorType NonlinearInteriorPointOptimiser::
+ValidatedVectorType InteriorPointOptimiser::
 minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     CONCLOG_SCOPE_CREATE;
@@ -1214,7 +1214,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
 
 // min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
 // Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
-Void NonlinearInteriorPointOptimiser::
+Void InteriorPointOptimiser::
 minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c, const ApproximateVectorMultivariateFunction& h,
                   FloatDPApproximationVector& x, FloatDPApproximationVector& w,
                   FloatDPApproximationVector& kappa, FloatDPApproximationVector& lambda, const FloatDPApproximation& mu) const
@@ -1374,7 +1374,7 @@ minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBox
 
 
 
-ValidatedKleenean NonlinearInteriorPointOptimiser::
+ValidatedKleenean InteriorPointOptimiser::
 feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
 {
     CONCLOG_SCOPE_CREATE;
@@ -1407,7 +1407,7 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
 
 
 Void
-NonlinearInteriorPointOptimiser::feasibility_step(
+InteriorPointOptimiser::feasibility_step(
     const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
 {
@@ -1416,7 +1416,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 
 Void
-NonlinearInteriorPointOptimiser::feasibility_step(
+InteriorPointOptimiser::feasibility_step(
     const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximation& t) const
 {
@@ -1544,7 +1544,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
         nyt=yt+alpha*dyt;
         ny=project(nyt,range(0,m));
         nt=nyt[m];
-        //NonlinearInteriorPointOptimiser::compute_z(d,g,c,ny,nt,nz);
+        //InteriorPointOptimiser::compute_z(d,g,c,ny,nt,nz);
         allpositive = egtr(nx,0.0) && egtr(nz,0.0) && egtr(emul(nx,nz),GAMMA*mu);
     }
     CONCLOG_PRINTLN("alpha="<<alpha);
@@ -1553,7 +1553,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     x=nx; y=project(nyt,range(0,m)); z=nz; t=nyt[m];
 }
 
-FloatDPApproximation NonlinearInteriorPointOptimiser::
+FloatDPApproximation InteriorPointOptimiser::
 compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
            const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const
 {
@@ -1575,7 +1575,7 @@ compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g
 }
 
 
-Void NonlinearInteriorPointOptimiser::
+Void InteriorPointOptimiser::
 setup_feasibility(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
                   FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
 {

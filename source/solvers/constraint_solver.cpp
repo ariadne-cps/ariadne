@@ -142,7 +142,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     point=static_cast<FloatApproximationVector>(midpoint(d));
     for(SizeType k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
-    NonlinearInteriorPointOptimiser optimiser;
+    InteriorPointOptimiser optimiser;
     optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
 
     CONCLOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);

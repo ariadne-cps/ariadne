@@ -71,7 +71,7 @@ class OptimiserInterface {
 
     //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
-    //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in ,D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
+    //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
@@ -104,7 +104,7 @@ class OptimiserInterface {
 };
 
 //! \ingroup OptimisationSubModule
-//! Common routines for nonlinear minimisation
+//! Common routines for nonlinear programming
 class OptimiserBase
     : public OptimiserInterface
 {
@@ -135,7 +135,7 @@ class OptimiserBase
 };
 
 //! \ingroup OptimisationSubModule
-//! \brief Solver for feasibility problems based on a penalty-function approach
+//! \brief Solver for nonlinear programming problems based on a penalty-function approach
 //!
 //! For the feasibility problem \f$x\in D,\ g(x)\in C,\ h(x)=0\f$ where \f$D\f$ is bounded and \f$D,C\f$ have nonempty interiors.
 //! Introduce slack variable \f$w=g(x)\f$, and minimise \f[ \sum_{j} (g_j(x)-w_j)^2 + \sum_k h_k(x)^2 \f] with \f$x\in D\f$ and \f$w\in C\f$.
@@ -164,14 +164,14 @@ class PenaltyFunctionOptimiser
 
 
 //! \ingroup OptimisationSubModule
-//! \brief Solver for linear programming problems using invalid interior point methods.
+//! \brief Solver for nonlinear programming problems using infeasible interior point methods.
 //! \details Introduces variables \f$w\f$ and attempts to find \f$x\in D\f$ and \f$w\in C\f$ such that \f$g(x)=w\f$.
 //!   The dual variables \f$y\f$ are unconstrained Lagrange multipliers for \f$y\cdot(g(x)-w)=0\f$.
-class NonlinearInfeasibleInteriorPointOptimiser
+class InfeasibleInteriorPointOptimiser
     : public OptimiserBase
 {
   public:
-    virtual NonlinearInfeasibleInteriorPointOptimiser* clone() const { return new NonlinearInfeasibleInteriorPointOptimiser(*this); }
+    virtual InfeasibleInteriorPointOptimiser* clone() const { return new InfeasibleInteriorPointOptimiser(*this); }
 
     using OptimiserBase::minimise;
     using OptimiserBase::feasible;
@@ -179,7 +179,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
     struct PrimalDualData;
     struct StepData;
 
-    //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
@@ -201,17 +201,19 @@ class NonlinearInfeasibleInteriorPointOptimiser
 
 
 //! \ingroup OptimisationSubModule
-//! Solver for linear programming problems using interior point methods.
-class NonlinearInteriorPointOptimiser
+//! Solver for nonlinear programming problems using interior point methods.
+//! \details Relies on an engine minimising \f$f(x)\f$ for \f$x\in D^\circ\f$ subject to \f$g(x)=w\f$ with \f$w\in C^\circ\f$ and \f$h(x)=0\f$.
+//! \deprecated Use InfeasibleInteriorPointOptimiser instead.
+class InteriorPointOptimiser
     : public OptimiserBase
 {
   public:
-    virtual NonlinearInteriorPointOptimiser* clone() const { return new NonlinearInteriorPointOptimiser(*this); }
+    virtual InteriorPointOptimiser* clone() const { return new InteriorPointOptimiser(*this); }
 
     using OptimiserBase::minimise;
     using OptimiserBase::feasible;
 
-    //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
@@ -263,7 +265,7 @@ class NonlinearInteriorPointOptimiser
 
 
 class IntervalOptimiser
-    : public NonlinearInteriorPointOptimiser
+    : public InteriorPointOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
@@ -273,7 +275,7 @@ class IntervalOptimiser
 
 
 class ApproximateOptimiser
-    : public NonlinearInteriorPointOptimiser
+    : public InteriorPointOptimiser
 {
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
@@ -283,7 +285,7 @@ class ApproximateOptimiser
 
 
 /*//! \ingroup OptimisationSubModule
-//! Solver for linear programming problems using interior point methods.
+//! Solver for nonlinear programming problems using interior point methods.
 //! WARNING: This class currently does not work; maybe there is a problem with the algorithms.
 class KrawczykOptimiser
     : public OptimiserBase

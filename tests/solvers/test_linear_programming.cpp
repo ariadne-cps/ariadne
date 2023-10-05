@@ -41,9 +41,9 @@ double infd=inf.get_d();
 
 class TestInteriorPointSolver
 {
-    InteriorPointSolver* optimiser;
+    InteriorPointLinearOptimiser* optimiser;
   public:
-    TestInteriorPointSolver(InteriorPointSolver& o) : optimiser(&o) { }
+    TestInteriorPointSolver(InteriorPointLinearOptimiser& o) : optimiser(&o) { }
 
     Void test() {
         ARIADNE_TEST_CALL(test_validate_feasibility());
@@ -114,7 +114,7 @@ Int main(Int argc, const char* argv[])
 {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
-    InteriorPointSolver interior_point_optimiser;
+    InteriorPointLinearOptimiser interior_point_optimiser;
     TestInteriorPointSolver(interior_point_optimiser).test();
 
     std::cerr<<"INCOMPLETE ";

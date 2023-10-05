@@ -202,10 +202,10 @@ class TestOptimiser
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
-    NonlinearInfeasibleInteriorPointOptimiser nlio;
+    InfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
     return ARIADNE_TEST_FAILURES;
-    NonlinearInteriorPointOptimiser nlo;
+    InteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();
 
     ApproximateOptimiser appo;

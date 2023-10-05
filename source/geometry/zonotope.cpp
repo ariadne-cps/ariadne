@@ -49,12 +49,6 @@ namespace Ariadne {
 inline Vector<FloatDP> add(approx,const Vector<FloatDP>& v1, const Vector<FloatDP>& v2) { return v1+v2; }
 inline Vector<FloatDP> sub(approx,const Vector<FloatDP>& v1, const Vector<FloatDP>& v2) { return v1-v2; }
 
-template<class X> class LinearProgram {
-  public:
-    LinearProgram(const Matrix<X>& A) { ARIADNE_NOT_IMPLEMENTED; }
-    Bool is_feasible() { ARIADNE_NOT_IMPLEMENTED; }
-};
-
 
 template<class BS>
 ListSet<BS>
@@ -866,7 +860,7 @@ separated(const Zonotope& z, const ExactBoxType& bx)
         xu[d+j]=+1;
     }
 
-    return ! SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
+    return ! SimplexOptimiser<FloatDP>().feasible(xl,xu,A,b);
 }
 
 
@@ -895,7 +889,7 @@ separated(const Zonotope& z1, const Zonotope& z2)
     project(A,range(0,d),range(0,ng1))=G1;
     project(A,range(0,d),range(ng1,ng1+ng2))=G2;
 
-    return ! SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
+    return ! SimplexOptimiser<FloatDP>().feasible(xl,xu,A,b);
 }
 
 
@@ -913,7 +907,7 @@ contains(const Zonotope& z, const ExactPoint& pt)
     Vector<FloatDP> xl(m,-1.0);
     Vector<FloatDP> xu(m,1.0);
 
-    ValidatedKleenean result=SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
+    ValidatedKleenean result=SimplexOptimiser<FloatDP>().feasible(xl,xu,A,b);
     return result;
 }
 

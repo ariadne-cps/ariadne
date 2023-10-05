@@ -1052,7 +1052,7 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
     ExactBoxType constraint_bounds = intersection(this->constraint_bounds(),cast_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
     ExactBoxType codomain = product(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
-    NonlinearInfeasibleInteriorPointOptimiser optimiser;
+    InfeasibleInteriorPointOptimiser optimiser;
 
     List<Pair<Nat,ExactBoxType> > subdomains;
     Nat splittings(0);

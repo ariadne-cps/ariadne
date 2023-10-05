@@ -1,5 +1,6 @@
 set(EXAMPLES_EXPERIMENTAL_DISCRETE
     heading_control
+    probability_map
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_DISCRETE})

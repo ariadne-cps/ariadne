@@ -37,8 +37,9 @@ typedef Vector<BoundType> BoundsBoxType;
 
 String word_to_id(BinaryWord const& w, SizeType size) {
     std::stringstream ss;
-    auto size_offset = w.size()-size;
-    for (SizeType i=0; i<size; ++i) ss << to_string(w.at(size_offset+i));
+    SizeType effective_size = (w.size()<size? w.size() : size);
+    auto size_offset = (w.size()<size? 0 : w.size()-size);
+    for (SizeType i=0; i<effective_size; ++i) ss << to_string(w.at(size_offset+i));
     return ss.str();
 }
 
@@ -64,8 +65,20 @@ class IdentifiedCellFactory {
     IdentifiedCell create(GridCell const& cell) const { return IdentifiedCell(_to_identifier(cell),cell); }
   private:
     SizeType _to_identifier(GridCell const& cell) const {
-        SizeType size_to_use = cell.word().size() - (cell.root_extent() - _default_extent)*cell.dimension();
+        SizeType size_to_use = (cell.root_extent() >= _default_extent ?
+                                cell.word().size() - (cell.root_extent() - _default_extent)*cell.dimension() :
+                                cell.word().size());
         String expanded_id = word_to_id(cell.word(),size_to_use);
+
+        if (cell.root_extent() < _default_extent) {
+
+            SizeType temporary_root_extent = cell.root_extent();
+            while (temporary_root_extent < _default_extent) {
+                expanded_id = (*expanded_id.begin() == '1' ? std::string(cell.dimension(),'0') : std::string(cell.dimension(),'1')) + expanded_id;
+                ++temporary_root_extent;
+            }
+            std::cout << expanded_id << std::endl;
+        }
         return _table.at(expanded_id);
     }
   private:

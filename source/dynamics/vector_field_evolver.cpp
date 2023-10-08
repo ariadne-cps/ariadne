@@ -215,7 +215,13 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     reach_set.apply_full_reach_step(flow_model);
     CONCLOG_PRINTLN_AT(1,"reach_set = " << reach_set)
     EnclosureType next_set=current_set;
-    next_set.apply_fixed_evolve_step(flow_model, step_size);
+    if (definitely(next_time > Dyadic(maximum_time.get_d())))
+    {
+        auto limited_step_size = step_size - (next_time - maximum_time);
+        CONCLOG_PRINTLN_AT(2,"Limiting step to size " << limited_step_size.get_d() << " due to maximum time being passed")
+        next_set.apply_fixed_evolve_step(flow_model, Dyadic(limited_step_size.get_d()));
+    } else
+        next_set.apply_fixed_evolve_step(flow_model, step_size);
     CONCLOG_PRINTLN_AT(1,"next_set = " << next_set)
 
     result->adjoin_reach(reach_set);

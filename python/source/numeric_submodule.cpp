@@ -85,6 +85,9 @@ template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Appro
 template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Error<F>> const& lit) {
     return os << "\"" << lit.reference().raw().literal(down) << "\""; }
 
+template OutputStream& operator<<(OutputStream&, PythonLiteral<Approximation<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonLiteral<Approximation<FloatMP>> const&);
+
 
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
     return os << python_class_name<T>() << "(" << repr.reference() << ")"; }
@@ -890,7 +893,7 @@ template<class PR> void export_raw_float(pymodule& module)
     module.def("hlf", &_hlf_<F>);
 
     export_rounded_operations<PR>(module);
-    
+
     module.def("abs", &_abs_<F>);
     module.def("max", &_min_<F,F>);
     module.def("min", &_max_<F,F>);
@@ -914,7 +917,7 @@ template<class PR> void export_rounded_float(pymodule& module)
     rounded_float_class.def(init<Rational,PR>());
 
     rounded_float_class.def_static("set_rounding_mode", &F::set_rounding_mode);
-    
+
     rounded_float_class.def("__str__", &__cstr__<X>);
     rounded_float_class.def("__repr__", &__repr__<X>);
 
@@ -952,7 +955,7 @@ template<class PR> void export_rounded_float(pymodule& module)
 
 template<class PR> void export_float_value(pymodule& module)
 {
-    pybind11::class_<Float<PR>> float_class(module,python_class_name<Float<PR>>().c_str());    
+    pybind11::class_<Float<PR>> float_class(module,python_class_name<Float<PR>>().c_str());
     float_class.def(init<PR>());
     float_class.def(init<RawFloat<PR>>());
     float_class.def(init<ExactDouble,PR>());
@@ -963,7 +966,7 @@ template<class PR> void export_float_value(pymodule& module)
     float_class.def(pybind11::init([](String v, PR pr){return Float<PR>(Dyadic(v),pr);}));
 
     float_class.def(init<Rational,Rounding,PR>());
-    
+
     define_infinitary(module,float_class);
 
     float_class.def_static("eps", &Float<PR>::eps);
@@ -1318,7 +1321,7 @@ template<class PR> Void export_user_floats(pymodule& module) {
     template_<Float> float_template(module,"Float");
     float_template.instantiate<PR>();
     float_template.def_new([](Dyadic w, PR pr){return Float<PR>(w,pr);});
-    
+
     template_<Error> error_template(module);
     template_<Ball> ball_template(module);
     template_<Bounds> bounds_template(module);
@@ -1496,7 +1499,7 @@ Void numeric_submodule(pymodule& module) {
     export_rounding_mode(module);
     export_precision<DoublePrecision>(module);
     export_precision<MultiplePrecision>(module);
-    
+
     export_rounded_float<DoublePrecision>(module);
     export_rounded_float<MultiplePrecision>(module);
 

@@ -67,23 +67,23 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatMP>& 
 
 template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr);
 
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& repr);
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<LowerBound<F>>& repr);
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperBound<F>>& repr);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
-template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<F>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& repr);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& repr);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<F>& repr);
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr);
 
-OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatDP>& x);
-OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatMP>& repr);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Approximation<F>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<LowerBound<F>>& repr);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<UpperBound<F>>& repr);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Bounds<F>>& x);
-template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Ball<F,FE>>& x);
-template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<F>& x);
-template<class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Error<FE>>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatDP>& lit);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatMP>& lit);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Approximation<F>>& lit);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<LowerBound<F>>& lit);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<UpperBound<F>>& lit);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Bounds<F>>& lit);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Ball<F,FE>>& lit);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<F>& lit);
+template<class FE> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Error<FE>>& lit);
 
 
 template<class X> X from_python_object_or_literal(pybind11::handle h) {

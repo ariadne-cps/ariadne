@@ -77,7 +77,6 @@ class IdentifiedCellFactory {
                 expanded_id = (*expanded_id.begin() == '1' ? std::string(cell.dimension(),'0') : std::string(cell.dimension(),'1')) + expanded_id;
                 ++temporary_root_extent;
             }
-            std::cout << expanded_id << std::endl;
         }
         return _table.at(expanded_id);
     }

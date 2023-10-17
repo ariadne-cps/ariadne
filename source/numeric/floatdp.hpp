@@ -161,12 +161,14 @@ template<> class Float<DP>
     template<BuiltinIntegral N> Float(N n, DoublePrecision) : dbl(n) { }
     Float(ExactDouble const& x, DoublePrecision);
     Float(TwoExp const& x, DoublePrecision);
-    Float(Dyadic const& x, DoublePrecision);
+    Float(Dyadic const& w, DoublePrecision);
     //! \brief Copy constructor.
     Float(const FloatDP& x) : dbl(x.dbl) { }
     Float(const FloatDP& x, DoublePrecision) : dbl(x.dbl) { }
     template<BuiltinIntegral N> FloatDP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
+    //! \brief Construct from an exact string literal.
+    explicit Float(String const& str, DoublePrecision);
     FloatDP& operator=(const ExactDouble& x);
     //! \brief Assignment from a dyadic number \a w. Requires \a w to be exactly representable as a double-precision floating-point number.
     FloatDP& operator=(const Dyadic& w);

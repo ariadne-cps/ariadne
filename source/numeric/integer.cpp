@@ -277,11 +277,13 @@ Boolean lt(Integer const& z1, Integer const& z2) {
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
 String Integer::literal() const {
-    static const int OUTPUT_BUFFER_SIZE=4096;
-    char str[OUTPUT_BUFFER_SIZE];
-    str[OUTPUT_BUFFER_SIZE-1]='\0';
-    mpz_get_str (str, 10, this->_mpz);
-    ARIADNE_ASSERT(str[OUTPUT_BUFFER_SIZE-1]=='\0');
+    SizeType output_buffer_size=mpz_sizeinbase(this->_mpz,10)+2;
+    char* cstr=new char[output_buffer_size];
+    cstr[output_buffer_size-1]='\0';
+    mpz_get_str (cstr, 10, this->_mpz);
+    ARIADNE_ASSERT(cstr[output_buffer_size-1]=='\0');
+    String str(cstr);
+    delete[] cstr;
     return str;
 }
 

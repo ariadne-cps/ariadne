@@ -83,7 +83,14 @@ FloatMP::Float(TwoExp const& t, MultiplePrecision pr) {
     mpfr_set_ui_2exp(_mpfr,1u,t.exponent(),near);
 }
 
-FloatMP::Float(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
+FloatMP::Float(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,near,pr) {
+    if (Dyadic(*this)==w || is_nan(w)) {
+    } else {
+        ARIADNE_THROW(std::runtime_error,"Float(Dyadic)","Dyadic \""<<w<<"\" is not an exact floating-point number with precision " << pr << ".");
+    }
+}
+
+FloatMP::Float(String const& str, MultiplePrecision pr) : FloatMP(Dyadic(str),pr) {
 }
 
 FloatMP::Float(ExactDouble d, RoundingModeType rnd, MultiplePrecision pr) {

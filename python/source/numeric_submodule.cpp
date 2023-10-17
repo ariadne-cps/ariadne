@@ -67,6 +67,8 @@ OutputStream& operator<<(OutputStream& os, PythonLiteral<Decimal> const& lit) {
     return os << "\"" << lit.reference() << "\""; }
 OutputStream& operator<<(OutputStream& os, PythonLiteral<Rational> const& lit) {
     return os << "\"" << lit.reference().numerator() << "/" << lit.reference().denominator() << "\""; }
+OutputStream& operator<<(OutputStream& os, PythonLiteral<Real> const& lit) {
+    return os << lit.reference(); }
 
 OutputStream& operator<<(OutputStream& os, PythonLiteral<FloatDP> const& lit) {
     return os << "\"" << lit.reference().literal() << "\""; }
@@ -121,9 +123,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<DecimalBou
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RationalBounds>& repr) {
     return os << "RationalBounds({"<<python_literal(repr.reference().lower())<<":"<<python_literal(repr.reference().upper())<<"})"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
-    return os << "FloatDP(\""<<repr.reference().literal(near)<<"\",near,dp)"; }
+    return os << "FloatDP(\""<<Decimal(Dyadic(repr.reference()))<<"\",dp)"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatMP>& repr) {
-    return os << "FloatMP(\""<<repr.reference().literal(near)<<"\",near," << repr.reference().precision() << ")"; }
+    return os << "FloatMP(\""<<Decimal(Dyadic(repr.reference()))<<"\"," << repr.reference().precision() << ")"; }
 
 template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr) {
     return os << class_name<Number<P>>()<<"("<<repr.reference()<<")"; }

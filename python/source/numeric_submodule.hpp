@@ -75,6 +75,11 @@ template<class F, class FE> OutputStream& operator<<(OutputStream& os, const Pyt
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<F>& repr);
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr);
 
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<Dyadic>& lit);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<Decimal>& lit);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<Rational>& lit);
+OutputStream& operator<<(OutputStream& os, const PythonLiteral<Real>& lit);
+
 OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatDP>& lit);
 OutputStream& operator<<(OutputStream& os, const PythonLiteral<FloatMP>& lit);
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Approximation<F>>& lit);

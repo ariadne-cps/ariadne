@@ -72,7 +72,15 @@ FloatDP::Float(TwoExp const& t, PrecisionType)
 FloatDP::Float(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())
 {
-    ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
+    if (Dyadic(*this)==w || is_nan(w)) {
+    } else {
+        ARIADNE_THROW(std::runtime_error,"Float(Dyadic)","Dyadic \""<<w<<"\" is not an exact double-precision floating-point number.");
+    }
+}
+
+FloatDP::Float(String const& str, PrecisionType pr)
+    : FloatDP(Dyadic(str),pr)
+{
 }
 
 FloatDP::Float(Integer const& x, RoundingModeType rnd, PrecisionType pr)

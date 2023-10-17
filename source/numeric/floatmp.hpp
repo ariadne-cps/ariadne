@@ -153,20 +153,22 @@ template<> class Float<MP>
     explicit Float(PrecisionType); //!< <p/>
     template<BuiltinIntegral N> explicit Float(N n, PrecisionType pr)
         : Float(ExactDouble(n),pr) { } //!< <p/>
-    explicit Float(FloatDP const&, PrecisionType); //!< <p/>
-    explicit Float(ExactDouble const& x, PrecisionType); //!< <p/>
-    explicit Float(TwoExp const& x, PrecisionType); //!< <p/>
-    explicit Float(Dyadic const&, PrecisionType); //!< <p/>
+    explicit Float(FloatDP const& x, PrecisionType pr); //!< <p/>
+    explicit Float(ExactDouble const& x, PrecisionType pr); //!< <p/>
+    explicit Float(TwoExp const& x, PrecisionType pr); //!< <p/>
+    explicit Float(Dyadic const& w, PrecisionType pr); //!< <p/>
+    //! \brief Construct from an exact string literal.
+    explicit Float(String const& str, PrecisionType pr); //!< <p/>
 
-    Float(const FloatMP&); //!< <p/>
-    Float(FloatMP&&); //!< <p/>
+    Float(const FloatMP& x); //!< <p/>
+    Float(FloatMP&& x); //!< <p/>
 
     template<BuiltinIntegral N> FloatMP& operator=(N n) {
         return this->operator=(ExactDouble(n)); } //!< <p/>
     FloatMP& operator=(const ExactDouble& x); //!< <p/>
-    FloatMP& operator=(const Dyadic& x); //!< <p/>
-    FloatMP& operator=(const FloatMP&); //!< <p/>
-    FloatMP& operator=(FloatMP&&); //!< <p/>
+    FloatMP& operator=(const Dyadic& w); //!< <p/>
+    FloatMP& operator=(const FloatMP& x); //!< <p/>
+    FloatMP& operator=(FloatMP&& x); //!< <p/>
 
     template<BuiltinIntegral N> Float(N n, RoundingModeType rnd, PrecisionType pr)
         : FloatMP(ExactDouble(n),rnd,pr) { } //!< <p/>

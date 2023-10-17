@@ -35,6 +35,7 @@
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
 #include "utility/declarations.hpp"
+#include "utility/metaprogramming.hpp"
 
 
 
@@ -319,10 +320,8 @@ template<class... AS> auto _inside_(AS const& ... as) -> decltype(inside(as...))
 template<class... AS> auto _image_(AS const& ... as) -> decltype(image(as...)) { return image(as...); }
 template<class... AS> auto _preimage_(AS const& ... as) -> decltype(preimage(as...)) { return preimage(as...); }
 
-
 template<class T> std::string __cstr__(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
-
 
 template<class T> struct Representation {
     const T* pointer;
@@ -395,6 +394,15 @@ template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
 namespace Ariadne {
 
 template<class... TS> struct Tag { };
+
+template<class F, class T> void define_conversion(pybind11::class_<T>& pyclass) {
+    if constexpr (Constructible<T,F> and not Same<T,F>) {
+        pyclass.def(pybind11::init<F>());
+        if constexpr (Convertible<F,T>) {
+            pybind11::implicitly_convertible<F,T>();
+        }
+    }
+}
 
 template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, pybind11::class_<A>& pyclass) {
     pyclass.def("__and__", &__and__<A,A>);

@@ -105,7 +105,7 @@ if __name__=='__main__':
     print(jacobian(h,v))
     print(h.differential(v,3))
 
-    dom=BoxDomainType([[0,1],[exact(0.5),exact(1.5)]])
+    dom=BoxDomainType([(0,1),(exact(0.5),exact(1.5))])
     th = ValidatedVectorMultivariateTaylorFunctionModelDP(dom,h,ThresholdSweeperDP(double_precision,1e-4))
     print(th)
     thh=compose(h,th)
@@ -122,12 +122,12 @@ if __name__=='__main__':
     h = EffectiveVectorMultivariateFunction([1+x+y*y,2+x-y])
     c=EffectiveConstraint(g<=1)
     cs=ConstraintSet([c])
-    bx=RealBox([[-2,+2],[-2,+2]])
+    bx=RealBox([(-2,+2),(-2,+2)])
 
     assert(type(g<=1)==EffectiveConstraint)
 
-    bbx=FloatDPApproximateBox([[-2,+4],[-2,+4]])
-    bcs=BoundedConstraintSet([[-2,+2],[-2,+2]],[g<=1])
+    bbx=FloatDPApproximateBox([(-2,+4),(-2,+4)])
+    bcs=BoundedConstraintSet([(-2,+2),(-2,+2)],[g<=1])
     bcs=intersection(bx,cs)
     cis=ConstrainedImageSet=image(bcs,h)
     print(cis)

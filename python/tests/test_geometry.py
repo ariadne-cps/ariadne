@@ -97,8 +97,8 @@ def test_box():
     w=Dyadic(0)
 
     wbx=DyadicBox([{-xd:xd},{-xd:xd}])
-    wbx=DyadicBox([[-xd,xd],[-xd,xd]])
-    wbx=DyadicBox([[-w,w],[-w,w]])
+    wbx=DyadicBox([(-xd,xd),(-xd,xd)])
+    wbx=DyadicBox([(-w,w),(-w,w)])
     rbx=RealBox(wbx)
 
     x=FloatDP(0,dp)
@@ -112,10 +112,10 @@ def test_box():
     abx=FloatDPApproximateBox([{-xd:xd},{-xd:xd}])
 #    abx=FloatDPApproximateBox([{-ad:ad},{-ad:ad}])
 
-    xbx=FloatDPExactBox([[-x,x],[-x,x]])
-    ubx=FloatDPUpperBox([[-u,u],[-u,u]])
-    lbx=FloatDPLowerBox([[-l,l],[-l,l]])
-    abx=FloatDPApproximateBox([[-a,a],[-a,a]])
+    xbx=FloatDPExactBox([(-x,x),(-x,x)])
+    ubx=FloatDPUpperBox([(-u,u),(-u,u)])
+    lbx=FloatDPLowerBox([(-l,l),(-l,l)])
+    abx=FloatDPApproximateBox([(-a,a),(-a,a)])
 
     xbx=FloatDPExactBox(wbx)
     ubx=FloatDPUpperBox(rbx)

@@ -87,6 +87,10 @@ template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Appro
 template<class F> OutputStream& operator<<(OutputStream& os, PythonLiteral<Error<F>> const& lit) {
     return os << "\"" << lit.reference().raw().literal(down) << "\""; }
 
+template OutputStream& operator<<(OutputStream&, PythonLiteral<UpperBound<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonLiteral<UpperBound<FloatMP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonLiteral<LowerBound<FloatDP>> const&);
+template OutputStream& operator<<(OutputStream&, PythonLiteral<LowerBound<FloatMP>> const&);
 template OutputStream& operator<<(OutputStream&, PythonLiteral<Approximation<FloatDP>> const&);
 template OutputStream& operator<<(OutputStream&, PythonLiteral<Approximation<FloatMP>> const&);
 

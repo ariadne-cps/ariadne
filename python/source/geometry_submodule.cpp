@@ -43,9 +43,6 @@ namespace Ariadne {
 
 
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
-    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<FloatDPBounds>(FloatDPBounds(ivl.lower_bound(),ivl.upper_bound()));
-}
 
 template<> struct PythonTemplateName<Point> { static std::string get() { return "Point"; } };
 template<> struct PythonTemplateName<Interval> { static std::string get() { return "Interval"; } };
@@ -77,6 +74,29 @@ template<> struct PythonClassName<Box<Interval<FloatDPLowerBound>>> {
     std::string get() const { return "FloatDPLowerBox"; } };
 template<> struct PythonClassName<Box<Interval<FloatDPApproximation>>> {
     std::string get() const { return "FloatDPApproximateBox"; } };
+
+
+template<class UB> OutputStream& operator<<(OutputStream& os, const PythonLiteral<Interval<UB>>& repr) {
+    Interval<UB> const& ivl=repr.reference();
+    // Use tuple literal rather than dict, as not all types support hashing
+    return os << "(" << python_literal(ivl.lower_bound()) << "," << python_literal(ivl.upper_bound()) << ")";
+}
+
+template<class UB> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Interval<UB>>& repr) {
+    Interval<UB> const& ivl=repr.reference();
+    return os << python_class_name<Interval<UB>>() << "(" << python_literal(ivl.lower_bound()) << "," << python_literal(ivl.upper_bound()) << ")";
+}
+
+template<class UB> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Box<UB>>& repr) {
+    Box<UB> const& bx=repr.reference();
+    os << python_class_name<Box<UB>>() << "([";
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
+        if(i!=0) { os << ','; }
+        os << python_literal(bx[i]);
+    }
+    os << "])";
+    return os;
+}
 
 class DrawableWrapper
   : public pybind11::wrapper< Drawable2dInterface >
@@ -292,22 +312,35 @@ template<class T> class LocatedSetWrapper<ValidatedTag,T>
 
 using namespace Ariadne;
 
+template<class X> X from_python_object_or_literal_allowing_default_precision(pybind11::handle h) {
+    if constexpr (Constructible<X,String>) {
+        try {
+            return X(pybind11::cast<String>(h));
+        } catch (pybind11::cast_error&) { }
+    }
+    if constexpr (ConstructibleGivenDefaultPrecision<X,String>) {
+        try {
+            PrecisionType<X> pr;
+            return X(pybind11::cast<String>(h),pr);
+        } catch (pybind11::cast_error&) { }
+    }
+    if constexpr (ConstructibleGivenDefaultPrecision<X,Dyadic>) {
+        PrecisionType<X> pr;
+        try {
+            return X(pybind11::cast<Dyadic>(h),pr);
+        } catch (pybind11::cast_error&) { }
+        try {
+            return X(Dyadic(pybind11::cast<String>(h)),pr);
+        } catch (pybind11::cast_error&) { }
+    }
+    return pybind11::cast<X>(h);
+}
 
 template<class IVL> IVL interval_from_pair(pybind11::handle lh, pybind11::handle uh) {
     typedef typename IVL::LowerBoundType LB;
     typedef typename IVL::UpperBoundType UB;
-    if constexpr (ConstructibleGivenDefaultPrecision<UB,Dyadic>) {
-        typedef PrecisionType<UB> PR; PR pr;
-        try {
-            LB lb(pybind11::cast<Dyadic>(lh),pr);
-            UB ub(pybind11::cast<Dyadic>(uh),pr);
-            return IVL(lb,ub);
-        }
-        catch(pybind11::cast_error& ) {
-        }
-    }
-    LB lb = pybind11::cast<LB>(lh);
-    UB ub = pybind11::cast<UB>(uh);
+    LB lb = from_python_object_or_literal_allowing_default_precision<LB>(lh);
+    UB ub = from_python_object_or_literal_allowing_default_precision<UB>(uh);
     return IVL(lb,ub);
 }
 
@@ -319,10 +352,10 @@ template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
     return interval_from_pair<IVL>(lh,uh);
 }
 
-template<class IVL> IVL interval_from_list(pybind11::list lst) {
-    assert(lst.size()==2);
-    pybind11::handle lh = lst[0];
-    pybind11::handle uh = lst[1];
+template<class IVL> IVL interval_from_tuple(pybind11::tuple tup) {
+    assert(tup.size()==2);
+    pybind11::handle lh = tup[0];
+    pybind11::handle uh = tup[1];
     return interval_from_pair<IVL>(lh,uh);
 }
 
@@ -469,9 +502,17 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def(pybind11::init<MidpointType>());
     interval_class.def(pybind11::init<LowerBoundType,UpperBoundType>());
     interval_class.def(pybind11::init([](pybind11::dict pydct){return interval_from_dict<IntervalType>(pydct);}));
-    interval_class.def(pybind11::init([](pybind11::list pylst){return interval_from_list<IntervalType>(pylst);}));
+    interval_class.def(pybind11::init([](pybind11::tuple pytup){return interval_from_tuple<IntervalType>(pytup);}));
     pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
-    pybind11::implicitly_convertible<pybind11::list, IntervalType>();
+    pybind11::implicitly_convertible<pybind11::tuple, IntervalType>();
+
+    if constexpr (Constructible<UpperBoundType,String>) {
+        interval_class.def(pybind11::init([](String lb, String ub){return Interval(LowerBoundType(lb),UpperBoundType(ub));}));
+    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,String>) {
+        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(lb,pr),UpperBoundType(ub,pr));}));
+    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,Dyadic>) {
+        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(Dyadic(lb),pr),UpperBoundType(Dyadic(ub),pr));}));
+    }
 
     if constexpr (Constructible<IntervalType,IntervalDomainType> and not Same<IntervalType,IntervalDomainType>) {
         interval_class.def(pybind11::init<IntervalDomainType>());
@@ -484,6 +525,13 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
         interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
         if constexpr(Convertible<DyadicInterval,IntervalType>) {
             pybind11::implicitly_convertible<DyadicInterval,IntervalType>();
+        }
+    }
+    if constexpr (Constructible<IntervalType,RationalInterval> and not Same<IntervalType,RationalInterval>) {
+        interval_class.def(pybind11::init<RationalInterval>());
+        interval_class.def(pybind11::init([](Rational l, Rational u){return IntervalType(RationalInterval(l,u));}));
+        if constexpr(Convertible<RationalInterval,IntervalType>) {
+            pybind11::implicitly_convertible<RationalInterval,IntervalType>();
         }
     }
     if constexpr (Constructible<IntervalType,RealInterval> and not Same<IntervalType,RealInterval>) {
@@ -525,7 +573,7 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def("width", &IntervalType::width);
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def("__str__",&__cstr__<IntervalType>);
-    //interval_class.def("__repr__",&__repr__<IntervalType>);
+    interval_class.def("__repr__",&__repr__<IntervalType>);
 
     interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
     module.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
@@ -622,28 +670,12 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init<BoxType>());
     box_class.def(pybind11::init<DimensionType>());
-    box_class.def(pybind11::init<Array<IntervalType>>());
-    box_class.def(pybind11::init(&box_from_list<BoxType>));
-    pybind11::implicitly_convertible<pybind11::list,BoxType>();
 
-    if constexpr (Constructible<BoxType,BoxDomainType> and not Same<BoxType,BoxDomainType>) {
-         box_class.def(pybind11::init<BoxDomainType>());
-         if constexpr(Convertible<BoxDomainType,BoxType>) {
-             pybind11::implicitly_convertible<BoxDomainType,BoxType>();
-         }
-    }
-    if constexpr (Constructible<BoxType,DyadicBox> and not Same<BoxType,DyadicBox>) {
-         box_class.def(pybind11::init<Box<Interval<Dyadic>>>());
-         if constexpr(Convertible<DyadicBox,BoxType>) {
-             pybind11::implicitly_convertible<DyadicBox,BoxType>();
-         }
-    }
-    if constexpr (Constructible<BoxType,RealBox> and not Same<BoxType,RealBox>) {
-        box_class.def(pybind11::init<RealBox>());
-         if constexpr(Convertible<RealBox,BoxType>) {
-             pybind11::implicitly_convertible<DyadicBox,BoxType>();
-         }
-    }
+    define_conversion<BoxDomainType>(box_class);
+    define_conversion<DyadicBox>(box_class);
+    define_conversion<RationalBox>(box_class);
+    define_conversion<RealBox>(box_class);
+
     if constexpr (HasPrecisionType<IntervalType>) {
         typedef PrecisionType<IntervalType> PrecisionType;
         if constexpr (Constructible<BoxType,RealBox,PrecisionType>) {
@@ -656,12 +688,17 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
         export_conversions<BoxWithUpperBound,FloatType>(box_class);
     }
 
+    box_class.def(pybind11::init<Array<IntervalType>>());
+    box_class.def(pybind11::init(&box_from_list<BoxType>));
+    pybind11::implicitly_convertible<pybind11::list,BoxType>();
+
     if constexpr (HasEquality<BX,BX>) {
         box_class.def("__eq__",  __eq__<BX,BX , Return<EqualityType<BX,BX>> >);
         box_class.def("__ne__",  __ne__<BX,BX , Return<InequalityType<BX,BX>> >);
     }
 
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
+    box_class.def("__getitem__", &__getitem__<BX,Int>);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
     box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
     box_class.def("separated", (SeparatedType(BX::*)(const BX&)const) &BX::separated);
@@ -672,6 +709,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("split", (Pair<BX,BX>(BX::*)()const) &BX::split);
     box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType)const) &BX::split);
     box_class.def("__str__",&__cstr__<BX>);
+    box_class.def("__repr__",&__repr__<BX>);
 
     box_class.def("contains", (ContainsType(BX::*)(MidpointType const&)const) &BX::contains);
     module.def("contains", (ContainsType(*)(BX const&,MidpointType const&)) &contains);
@@ -721,7 +759,10 @@ template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name
     box_class.def(pybind11::init(&box_from_list<BoxType>));
     box_class.def(pybind11::init<BoxType>());
     box_class.def(pybind11::init<BoxDomainType>());
+    box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
+    box_class.def("__getitem__", &__getitem__<BX,Int>);
     box_class.def("__str__",&__cstr__<BoxType>);
+    box_class.def("__repr__",&__repr__<BoxType>);
 
     pybind11::implicitly_convertible<pybind11::list,BoxType>();
     pybind11::implicitly_convertible<BoxDomainType,BoxType>();
@@ -733,9 +774,14 @@ template<> Void export_box<RationalBox>(pybind11::module& module, std::string na
     using BoxType = BX;
     pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init(&box_from_list<BoxType>));
+    box_class.def(pybind11::init<DyadicBox>());
     box_class.def(pybind11::init<BoxType>());
+    box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
+    box_class.def("__getitem__", &__getitem__<BX,Int>);
     box_class.def("__str__",&__cstr__<BoxType>);
+    box_class.def("__repr__",&__repr__<BoxType>);
 
+    pybind11::implicitly_convertible<DyadicBox,BoxType>();
     pybind11::implicitly_convertible<pybind11::list,BoxType>();
 }
 

@@ -409,6 +409,10 @@ template<class P, class X> Matrix<EvaluateType<P,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
 
+template<class P, class X> Matrix<EvaluateType<P,X>>
+hessian(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
+    return differential(f,x,2u).hessian(); }
+
 template<class P> template<class X> EvaluateType<P,X>
 FunctionFacade<P,RealScalar(RealScalar)>::slope(X const& x) const {
     return Ariadne::slope(static_cast<ScalarUnivariateFunction<P>const&>(*this),x);

@@ -119,9 +119,13 @@ template<class AT, class P> void define_named_derivatives(pybind11::module& modu
     function_class.def("slope", (R(F::*)(A const&)const) &F::slope);
 }
 template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<ScalarMultivariateFunction<P>>& function_class) {
-    typedef ScalarMultivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(gradient(declval<F>(),declval<A>())) R;
+    typedef ScalarMultivariateFunction<P> F; typedef typename F::template Argument<AT> A;
+    typedef decltype(gradient(declval<F>(),declval<A>())) R;
     module.def("gradient", (R(*)(F const&,A const&)) &gradient);
     function_class.def("gradient", (R(F::*)(A const&)const) &F::gradient);
+    typedef decltype(hessian(declval<F>(),declval<A>())) H;
+    module.def("hessian", (H(*)(F const&,A const&)) &hessian);
+    //function_class.def("hessian", (H(F::*)(A const&)const) &F::hessian);
 }
 template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<VectorUnivariateFunction<P>>& function_class) {
     typedef VectorUnivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(tangent(declval<F>(),declval<A>())) R;

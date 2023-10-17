@@ -248,7 +248,7 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
         UniformConstReference<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
-        else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
+        else { while(a[j]==0) { ++j; } H[i][j]=hlf(c); H[j][i]=hlf(c); }
         ++iter;
     }
     return H;

@@ -1007,19 +1007,6 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     FloatDPApproximationDiagonalMatrix E=El+Eu;
     CONCLOG_PRINTLN("E="<<E);
 
-    // normal equation matrix
-    FloatDPApproximationMatrix S=YH;
-    atda(S,A,D);
-    S+=E;
-
-    //FloatDPApproximationMatrix EE(n,n); for(SizeType j=0; j!=n; ++j) { EE[j][j]=E[j]; }
-    //FloatDPApproximationMatrix DD(m,m); for(SizeType i=0; i!=m; ++i) { DD[i][i]=E[i]; }
-
-    CONCLOG_PRINTLN("S="<<S);
-    ARIADNE_DEBUG_ASSERT(decide(norm(FloatDPApproximationMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8));
-    FloatDPApproximationMatrix Sinv=inverse(S);
-    CONCLOG_PRINTLN("Sinv="<<Sinv);
-
     // Construct the residuals
     // The residual for the slack variable xl is given by the duality condition xl.zl=mu as mu/xl-zl
     // The residual for the dual variable zl is given by the slackness condition x-xl-cl
@@ -1050,12 +1037,27 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // ( 0  H+E A^T) (dx) = (rx)
     // (-I   A   0 ) (dy) = (ry)
 
+    // Eliminate dw=A*dx-ry and dy=D*dw-rw
+    // Reduce to (H+E)*dx+A'*(D*(A*dx-ry)-rw)=rx
+    // Simplify to (H+E+A'*D*A)*dx=rx+A'*(D*ry+rw)
+
+    // normal equation matrix
+    FloatDPApproximationMatrix S=YH;
+    atda(S,A,D);
+    S+=E;
+
+    CONCLOG_PRINTLN("S="<<S);
+    ARIADNE_DEBUG_ASSERT(decide(norm(FloatDPApproximationMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8));
+    CONCLOG_PRINTLN("Sinv="<<inverse(S));
+
     FloatDPApproximationVector r = transpose(A)*(rw+D*ry)+rx;
     CONCLOG_PRINTLN("rw="<<rw<<" rx="<<rx<<" ry="<<ry);
     CONCLOG_PRINTLN("r="<<r);
 
     // Compute the differences
     FloatDPApproximationVector dx = solve(S,r);
+    // Apply correction to improve accuracy
+    dx = dx + solve(S,r-S*dx);
     CONCLOG_PRINTLN("S*dx="<<S*dx<<" r="<<r);
     CONCLOG_PRINTLN("S*inverse(S)-I="<<S*inverse(S)-FloatDPApproximationMatrix::identity(n,dp));
     ARIADNE_DEBUG_ASSERT(decide(norm(S*dx - r)/max(1.0_x,norm(r))<1e-4));
@@ -1070,6 +1072,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     ARIADNE_DEBUG_ASSERT(decide(norm(D*dw-dy-rw)/max(one,norm(rw))<1e-4));
     ARIADNE_DEBUG_ASSERT(decide(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(one,norm(rx))<1e-2));
     ARIADNE_DEBUG_ASSERT(decide(norm(-dw+A*dx-ry)/max(one,norm(ry))<1e-4));
+
 
     FloatDPApproximationVector dwl = evl-dw;
     FloatDPApproximationVector dwu = evu-dw;

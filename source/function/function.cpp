@@ -382,6 +382,7 @@ Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f)
 //------------------------ Vector Function ----------------------------------//
 
 template<class P, class SIG> auto Function<P,SIG>::get(SizeType i) const -> ScalarFunction<P,ARG> {
+    ARIADNE_ASSERT(i<this->result_size());
     if constexpr (Same<ResultSizeType,SizeType>) {
         const VectorOfFunctionInterface<P,ARG>* vfp = dynamic_cast<const VectorOfFunctionInterface<P,ARG>*>(this->raw_pointer());
         if(!vfp) { std::cerr<<"\nCannot get element of "<<*this<<"\n  of type "<<typeid(this->raw_pointer()).name()<<":"<<typeid(this->reference()).name()<<"\n\n"; }
@@ -393,6 +394,7 @@ template<class P, class SIG> auto Function<P,SIG>::get(SizeType i) const -> Scal
 }
 
 template<class P, class SIG> Void Function<P,SIG>::set(SizeType i, ScalarFunction<P,ARG> sf) {
+    ARIADNE_ASSERT(i<this->result_size());
     if constexpr (Same<ResultSizeType,SizeType>) {
         const VectorOfScalarFunction<P,ARG>& cvf = dynamic_cast<const FunctionWrapper<VectorOfScalarFunction<P,ARG>,P,SIG>&>(this->_ptr.operator*());
         VectorOfScalarFunction<P,ARG>& vf = const_cast<VectorOfScalarFunction<P,ARG>&>(cvf);

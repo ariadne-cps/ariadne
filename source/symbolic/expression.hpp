@@ -53,8 +53,8 @@ namespace Ariadne {
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 
-class PrefixExpressionWriter;
-class InfixExpressionWriter;
+class OperationExpressionWriter;
+class OperatorExpressionWriter;
 
 //! \ingroup SymbolicModule
 //! \brief A simple expression in named variables.
@@ -124,9 +124,9 @@ class Expression
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
     //! \brief A writer for Expression objects using prefix notation.
-    friend class PrefixExpressionWriter;
+    friend class OperationExpressionWriter;
     //! \brief A write for Expression objects using infix notation.
-    friend class InfixExpressionWriter;
+    friend class OperatorExpressionWriter;
   public:
     operator ElementaryAlgebra<Real>() const;
   public:
@@ -275,20 +275,20 @@ Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 
 
 //! \brief Infix notation for writing an Expression
-class InfixExpressionWriter {
+class OperatorExpressionWriter {
   private: public:
     template<class T> OutputStream& _write(OutputStream& os, Expression<T> const& e) const;
   public:
-    template<class T> WritableTemporary<T,InfixExpressionWriter> operator() (Expression<T> const& e) const {
+    template<class T> WritableTemporary<T,OperatorExpressionWriter> operator() (Expression<T> const& e) const {
         return WritableTemporary(*this,e); }
 };
 
 //! \brief Prefix notation for writing an Expression, using named operations instead of operator symbols.
-class PrefixExpressionWriter {
+class OperationExpressionWriter {
   private: public:
     template<class T> OutputStream& _write(OutputStream& os, Expression<T> const& e) const;
   public:
-    template<class T> WritableTemporary<T,PrefixExpressionWriter> operator() (Expression<T> const& e) const {
+    template<class T> WritableTemporary<T,OperationExpressionWriter> operator() (Expression<T> const& e) const {
         return WritableTemporary(*this,e); }
 };
 

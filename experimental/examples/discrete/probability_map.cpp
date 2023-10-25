@@ -96,157 +96,158 @@ void ariadne_main()
 
     auto identified_cell_factory = IdentifiedCellFactory(default_cell_extent,state_cells_ids);
 
-    ProgressIndicator indicator(state_paving.size()*control_paving.size());
-    for (auto const& state_cell : state_paving) {
-        for (auto const& control_cell : control_paving) {
-            auto combined_cell = product(state_cell.box(), control_cell.box());
+    List<Pair<ExactBoxType,ExactBoxType>> state_control_boxes;
 
-            auto dynamics = sys.function().zeros(state_spc.size(),sys.dimension());
-            for (SizeType i=0; i<state_spc.size(); ++i)
-                dynamics[i] = sys.function().get(i);
+    for (auto const& state_cell : state_paving)
+        for (auto const& control_cell : control_paving)
+            state_control_boxes.push_back(make_pair(state_cell.box(), control_cell.box()));
 
-            Stopwatch<Microseconds> sw;
+    BetterThreads::StaticWorkload<Pair<ExactBoxType,ExactBoxType>> workload([&](Pair<ExactBoxType,ExactBoxType> const& sc_boxes){
 
-            Map<SizeType,double> interval_probabilities;
+        auto dynamics = sys.function().zeros(state_spc.size(),sys.dimension());
+        for (SizeType i=0; i<state_spc.size(); ++i)
+            dynamics[i] = sys.function().get(i);
 
-            CONCLOG_PRINTLN_AT(1,"Computing using Interval Arithmetic...")
+        Stopwatch<Microseconds> sw;
 
-            auto final_box = shrink(cast_exact_box(apply(dynamics, combined_cell).bounding_box()),eps);
+        Map<SizeType,double> interval_probabilities;
 
-            GridTreePaving final_paving(state_grid);
-            final_paving.adjoin_outer_approximation(final_box,0);
-            final_paving.restrict(state_paving);
-            final_paving.mince(0);
+        CONCLOG_PRINTLN_AT(1,"Computing using Interval Arithmetic...")
 
-            if (not final_paving.is_empty()) {
+        auto final_box = shrink(cast_exact_box(apply(dynamics, product(sc_boxes.first, sc_boxes.second)).bounding_box()),eps);
 
-                GridTreePaving paving = intersection(state_paving,final_paving);
+        GridTreePaving final_paving(state_grid);
+        final_paving.adjoin_outer_approximation(final_box,0);
+        final_paving.restrict(state_paving);
+        final_paving.mince(0);
 
-                double total_volume = 0;
-                for (auto const& cell : paving) {
-                    auto icell = identified_cell_factory.create(cell);
-                    auto starting_box = intersection(cell.box(),final_box);
-                    auto current_volume = starting_box.volume().get_d();
-                    interval_probabilities.insert(icell.id(),current_volume);
-                    total_volume += current_volume;
+        if (not final_paving.is_empty()) {
+
+            GridTreePaving paving = intersection(state_paving,final_paving);
+
+            double total_volume = 0;
+            for (auto const& cell : paving) {
+                auto icell = identified_cell_factory.create(cell);
+                auto starting_box = intersection(cell.box(),final_box);
+                auto current_volume = starting_box.volume().get_d();
+                interval_probabilities.insert(icell.id(),current_volume);
+                total_volume += current_volume;
+            }
+
+            double maximum_interval_probability = 0;
+            for (auto& p : interval_probabilities) {
+                maximum_interval_probability = std::max(maximum_interval_probability,p.second);
+            }
+
+            Set<SizeType> to_remove;
+            double remaining_total_probability = 0;
+            for (auto& p : interval_probabilities) {
+                p.second = p.second/total_volume;
+                if (p.second < probability_threshold*maximum_interval_probability) to_remove.insert(p.first);
+                else remaining_total_probability += p.second;
+            }
+
+            interval_probabilities.remove_keys(to_remove);
+            CONCLOG_PRINTLN_AT(1,"Interval probabilities:")
+            for (auto& p : interval_probabilities) {
+                p.second = p.second/remaining_total_probability;
+                CONCLOG_PRINTLN_AT(1,p.first << ": " << p.second)
+            }
+
+            sw.click();
+            CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds()*1000 << " ms.")
+
+            SizeType ival_xtime = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
+
+            Vector<Map<SizeType,double>> point_probabilities(point_accuracy+1,Map<SizeType,double>());
+
+            Vector<SizeType> pt_xtime(point_accuracy+1);
+
+            for (SizeType acc=0; acc<=point_accuracy;++acc) {
+                CONCLOG_PRINTLN_VAR_AT(1,acc)
+                sw.restart();
+                GridTreePaving sampling(state_grid);
+                sampling.adjoin_outer_approximation(shrink(sc_boxes.first,eps),acc);
+
+                GridTreePaving intersected_sampling = intersection(state_paving,sampling);
+                intersected_sampling.mince(acc);
+
+                Map<SizeType,SizeType> occurrencies;
+                SizeType total_occurrencies = 0;
+
+                for (auto const& c : sampling) {
+                    auto input_box = product(ExactBoxType(c.box().centre()), sc_boxes.second);
+
+                    auto final_box = shrink(cast_exact_box(apply(dynamics, input_box).bounding_box()),eps);
+
+                    GridTreePaving target(state_grid);
+                    target.adjoin_outer_approximation(final_box,0);
+                    target.restrict(state_paving);
+                    target.mince(0);
+
+                    for (auto const& tcell : target) {
+                        auto itcell = identified_cell_factory.create(tcell);
+                        if (occurrencies.has_key(itcell.id()))
+                            occurrencies[itcell.id()]++;
+                        else
+                            occurrencies.insert(itcell.id(),1);
+                        ++total_occurrencies;
+                    }
                 }
 
-                double maximum_interval_probability = 0;
-                for (auto& p : interval_probabilities) {
-                    maximum_interval_probability = std::max(maximum_interval_probability,p.second);
-                }
-
-                Set<SizeType> to_remove;
-                double remaining_total_probability = 0;
-                for (auto& p : interval_probabilities) {
-                    p.second = p.second/total_volume;
-                    if (p.second < probability_threshold*maximum_interval_probability) to_remove.insert(p.first);
-                    else remaining_total_probability += p.second;
-                }
-
-                interval_probabilities.remove_keys(to_remove);
-                CONCLOG_PRINTLN_AT(1,"Interval probabilities:")
-                for (auto& p : interval_probabilities) {
-                    p.second = p.second/remaining_total_probability;
-                    CONCLOG_PRINTLN_AT(1,p.first << ": " << p.second)
+                for (auto const& occ : occurrencies) {
+                    point_probabilities.at(acc).insert(occ.first,static_cast<double>(occ.second)/total_occurrencies);
                 }
 
                 sw.click();
-                CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds()*1000 << " ms.")
+                CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
+                pt_xtime.at(acc) = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
 
-                SizeType ival_xtime = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
-
-                Vector<Map<SizeType,double>> point_probabilities(point_accuracy+1,Map<SizeType,double>());
-
-                Vector<SizeType> pt_xtime(point_accuracy+1);
-
-                for (SizeType acc=0; acc<=point_accuracy;++acc) {
-                    CONCLOG_PRINTLN_VAR_AT(1,acc)
-                    sw.restart();
-                    GridTreePaving sampling(state_grid);
-                    sampling.adjoin_outer_approximation(shrink(state_cell.box(),eps),acc);
-
-                    GridTreePaving intersected_sampling = intersection(state_paving,sampling);
-                    intersected_sampling.mince(acc);
-
-                    Map<SizeType,SizeType> occurrencies;
-                    SizeType total_occurrencies = 0;
-
-                    for (auto const& c : sampling) {
-                        auto input_box = product(ExactBoxType(c.box().centre()), control_cell.box());
-
-                        auto final_box = shrink(cast_exact_box(apply(dynamics, input_box).bounding_box()),eps);
-
-                        GridTreePaving target(state_grid);
-                        target.adjoin_outer_approximation(final_box,0);
-                        target.restrict(state_paving);
-                        target.mince(0);
-
-                        for (auto const& tcell : target) {
-                            auto itcell = identified_cell_factory.create(tcell);
-                            if (occurrencies.has_key(itcell.id()))
-                                occurrencies[itcell.id()]++;
-                            else
-                                occurrencies.insert(itcell.id(),1);
-                            ++total_occurrencies;
-                        }
-                    }
-
-                    for (auto const& occ : occurrencies) {
-                        point_probabilities.at(acc).insert(occ.first,static_cast<double>(occ.second)/total_occurrencies);
-                    }
-
-                    sw.click();
-                    CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
-                    pt_xtime.at(acc) = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
-
-                    for (auto const& pp : point_probabilities.at(acc)) {
-                        CONCLOG_PRINTLN_AT(1,pp.first << ": " << pp.second)
-                    }
+                for (auto const& pp : point_probabilities.at(acc)) {
+                    CONCLOG_PRINTLN_AT(1,pp.first << ": " << pp.second)
                 }
-
-                double interval_deviation = 0;
-                {
-                    for (auto const& p : interval_probabilities) {
-                        auto val = point_probabilities.at(point_accuracy).find(p.first);
-                        if (val == point_probabilities.at(point_accuracy).end())
-                            interval_deviation += p.second*p.second;
-                        else
-                            interval_deviation += pow(p.second-val->second,2);
-                    }
-                    interval_deviation = sqrt(interval_deviation/point_probabilities.at(point_accuracy).size());
-                    CONCLOG_PRINTLN_AT(1,"Interval deviation: " << interval_deviation)
-                }
-
-                SizeType reference_accuracy = 0;
-
-                Vector<double> point_deviations(point_accuracy,0.0);
-                bool found_reference = false;
-                for (SizeType acc=0;acc<point_accuracy;++acc) {
-                    CONCLOG_PRINTLN_AT(1,"Accuracy " << acc)
-                    for (auto const& p : point_probabilities.at(point_accuracy)) {
-                        auto val = point_probabilities.at(acc).find(p.first);
-                        if (val == point_probabilities.at(acc).end())
-                            point_deviations.at(acc) += p.second*p.second;
-                        else
-                            point_deviations.at(acc) += pow(p.second-val->second,2);
-                    }
-                    point_deviations.at(acc) = sqrt(point_deviations.at(acc)/point_probabilities.at(point_accuracy).size());
-                    CONCLOG_PRINTLN_AT(1,"Deviation: " << point_deviations.at(acc))
-                    if ((not found_reference) and acc > 0 and point_deviations.at(acc) < interval_deviation) {
-                        found_reference = true;
-                        reference_accuracy = acc-1;
-                    }
-                }
-
-                auto xratio = static_cast<double>(pt_xtime.at(reference_accuracy))/static_cast<double>(ival_xtime);
-                CONCLOG_PRINTLN("Execution time ratio: " << xratio)
-            } else {
-                CONCLOG_PRINTLN("Targets are outside the domain, skipping")
             }
 
-            indicator.update_current(indicator.current_value()+1);
-            CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ")
+            double interval_deviation = 0;
+            {
+                for (auto const& p : interval_probabilities) {
+                    auto val = point_probabilities.at(point_accuracy).find(p.first);
+                    if (val == point_probabilities.at(point_accuracy).end())
+                        interval_deviation += p.second*p.second;
+                    else
+                        interval_deviation += pow(p.second-val->second,2);
+                }
+                interval_deviation = sqrt(interval_deviation/point_probabilities.at(point_accuracy).size());
+                CONCLOG_PRINTLN_AT(1,"Interval deviation: " << interval_deviation)
+            }
+
+            SizeType reference_accuracy = 0;
+
+            Vector<double> point_deviations(point_accuracy,0.0);
+            bool found_reference = false;
+            for (SizeType acc=0;acc<point_accuracy;++acc) {
+                CONCLOG_PRINTLN_AT(1,"Accuracy " << acc)
+                for (auto const& p : point_probabilities.at(point_accuracy)) {
+                    auto val = point_probabilities.at(acc).find(p.first);
+                    if (val == point_probabilities.at(acc).end())
+                        point_deviations.at(acc) += p.second*p.second;
+                    else
+                        point_deviations.at(acc) += pow(p.second-val->second,2);
+                }
+                point_deviations.at(acc) = sqrt(point_deviations.at(acc)/point_probabilities.at(point_accuracy).size());
+                CONCLOG_PRINTLN_AT(1,"Deviation: " << point_deviations.at(acc))
+                if ((not found_reference) and acc > 0 and point_deviations.at(acc) < interval_deviation) {
+                    found_reference = true;
+                    reference_accuracy = acc-1;
+                }
+            }
+
+            auto xratio = static_cast<double>(pt_xtime.at(reference_accuracy))/static_cast<double>(ival_xtime);
+            CONCLOG_PRINTLN("Execution time ratio: " << xratio)
+        } else {
+            CONCLOG_PRINTLN("Targets are outside the domain, skipping")
         }
-    }
+    });
+    
+    workload.append(state_control_boxes).process();
 }

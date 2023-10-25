@@ -146,7 +146,7 @@ template<class T> class Variables : public List<Variable<T>> {
     //! \brief Construct \a n variables with base name \a name,
     //! so that the \a i<sup>th</sup> variable is <tt>x</tt><i>i</i>.
     Variables(Identifier name, SizeType n) : List<Variable<T>>() {
-        this->reserve(n); for(SizeType i=0; i!=n; ++i) { this->append(Variable<T>(name+to_str(i))); } }
+        this->reserve(n); for(SizeType i=0; i!=n; ++i) { this->append(Variable<T>(name+'['+to_str(i)+']')); } }
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
     //! \brief The Construct \a n variables with name \a name.
     Variable<T> const& operator[] (SizeType i) const { return this->List<Variable<T>>::operator[](i); }

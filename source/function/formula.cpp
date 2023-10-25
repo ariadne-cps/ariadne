@@ -86,7 +86,41 @@ template<class Y> inline Formula<Y> Formula<Y>::scalar(const BinaryElementaryOpe
 //    return Formula<Y>(new FormulaNode<Y>(ScalarFormulaNode<Y>(op,a1,c2)),PointerTag()); }
 
 
+template<class Y> class OperatorFormulaWriter {
+  public:
+    template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
+        OperatorSymbolicWriter<OperatorFormulaWriter<Y>>(*this)._write(os,s); }
+    Void _write(OutputStream& os, Formula<Y> const& f) const {
+        f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }
+};
 
+template<class Y> class OperationFormulaWriter {
+  public:
+    template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
+        OperationSymbolicWriter<OperationFormulaWriter<Y>>(*this)._write(os,s); }
+    Void _write(OutputStream& os, Formula<Y> const& f) const {
+        f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }
+};
+
+template<class Y> class OperatorUnivariateFormulaWriter {
+  public:
+    template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
+        OperatorSymbolicWriter<OperatorUnivariateFormulaWriter<Y>>(*this)._write(os,s); }
+    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const& s) const {
+        os << 'x'; }
+    Void _write(OutputStream& os, Formula<Y> const& f) const {
+        f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }
+};
+
+template<class Y> class OperationUnivariateFormulaWriter {
+  public:
+    template<class OP, class... ARGS> Void _write_impl(OutputStream& os, Symbolic<OP,ARGS...> const& s) const {
+        OperationSymbolicWriter<OperationUnivariateFormulaWriter<Y>>(*this)._write(os,s); }
+    Void _write_impl(OutputStream& os, Symbolic<Var,Index> const& s) const {
+        os << 'x'; }
+    Void _write(OutputStream& os, Formula<Y> const& f) const {
+        f.node_ref().accept([this,&os](auto s){this->_write_impl(os,s);}); }
+};
 
 
 template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
@@ -94,49 +128,27 @@ template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
     return this->_root->accept([j](auto fn){return static_cast<Formula<Y>>(derivative(fn,j));});
 }
 
-//! \brief Write to an output stream
-template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
-{
-    const Formula<Y>& f = *this;
-    f.node_ref().accept([&os](auto s){_write_impl(os,s);});
+template<class Y> OutputStream& Formula<Y>::_write_multivariate(OutputStream& os, Formula<Y> const& f) {
+    OperatorFormulaWriter<Y> w;
+    w._write(os,f);
     return os;
-/*
-    switch(f.op()) {
-        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
-        case OperatorCode::CNST:
-            os << f.val(); return os;
-            //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case OperatorCode::IND: case OperatorCode::VAR:
-            return os << "x" << f.ind();
-        case OperatorCode::ADD:
-            return os << f.arg1() << '+' << f.arg2();
-        case OperatorCode::SUB:
-            os << f.arg1() << '-';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::MUL:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '*';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::DIV:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '/';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::POW:
-            return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
-        default:
-            switch(f.kind()) {
-                case OperatorKind::UNARY: return os << f.op() << "(" << f.arg() << ")";
-                case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
-                case OperatorKind::COMPARISON: return os << "(" << f.arg1() << symbol(f.op()) << f.arg2() << ")";
-                case OperatorKind::SCALAR: return os << "(" << f.cnst() << symbol(f.op()) << f.arg() << ")";
-                default: ARIADNE_FAIL_MSG("Cannot output formula with operator "<<f.op()<<" of kind "<<f.kind());
-            }
-    }
-*/
 }
+
+template<class Y> OutputStream& Formula<Y>::_write_multivariate(OutputStream& os, Vector<Formula<Y>> const& f) {
+    os << "["; for (SizeType i=0; i!=f.size(); ++i) { if (i!=0) { os << ","; } _write_multivariate(os,f[i]); } os << "]"; return os;
+}
+
+template<class Y> OutputStream& Formula<Y>::_write_univariate(OutputStream& os, Formula<Y> const& f) {
+    OperatorUnivariateFormulaWriter<Y> w;
+    w._write(os,f);
+    return os;
+}
+
+template<class Y> OutputStream& Formula<Y>::_write_univariate(OutputStream& os, Vector<Formula<Y>> const& f) {
+    os << "["; for (SizeType i=0; i!=f.size(); ++i) { if (i!=0) { os << ","; } _write_univariate(os,f[i]); } os << "]"; return os;
+}
+
+
 
 template class Formula<ApproximateNumber>;
 template class Formula<ValidatedNumber>;

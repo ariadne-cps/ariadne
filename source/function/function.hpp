@@ -357,6 +357,9 @@ class Function
     friend VectorFunction<P,ARG> operator*(ScalarFunction<P,ARG> const&, Vector<Y> const&);
 };
 
+template<class P, class SIG> OutputStream& operator<<(OutputStream& os, Representation<Function<P,SIG>> const& f) {
+    f.reference().raw_pointer()->_repr(os); return os; }
+
 template<class P, class... ARGS> struct AlgebraOperations<ScalarFunction<P,ARGS...>,Number<P>>
 {
     using F=ScalarFunction<P,ARGS...>;

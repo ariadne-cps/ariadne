@@ -372,6 +372,8 @@ Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>
     return true;
 }
 
+template<class T> Writer<Expression<T>> Expression<T>::_default_writer = Writer<Expression<T>>(InfixExpressionWriter());
+
 namespace {
 
 template<class OP> constexpr Bool _identical(OP,OP) { return true; }
@@ -517,5 +519,17 @@ Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
 Formula<Real> make_formula(const EffectiveScalarMultivariateFunction& f);
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s) {
     return make_expression(make_formula(f),s); }
+
+template OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<Real> const& e) const;
+template OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<Kleenean> const& e) const;
+template OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<Integer> const& e) const;
+template OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<String> const& e) const;
+template OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<Boolean> const& e) const;
+
+template OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<Real> const& e) const;
+template OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<Kleenean> const& e) const;
+template OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<Integer> const& e) const;
+template OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<String> const& e) const;
+template OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<Boolean> const& e) const;
 
 } // namespace Ariadne

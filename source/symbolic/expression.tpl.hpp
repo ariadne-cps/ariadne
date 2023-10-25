@@ -200,14 +200,12 @@ template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
     return os << _default_writer(*this);
 }
 
-template<class T> Writer<Expression<T>> Expression<T>::_default_writer(new PrefixExpressionWriter<T>());
-
-template<class T> OutputStream& PrefixExpressionWriter<T>::_write(OutputStream& os, Expression<T> const& e) const {
-    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
+template<class T> OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([this,&os](auto expr){OperationSymbolicWriter(*this)._write(os,expr);}); return os;
 }
 
-template<class T> OutputStream& InfixExpressionWriter<T>::_write(OutputStream& os, Expression<T> const& e) const {
-    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
+template<class T> OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([this,&os](auto expr){OperatorSymbolicWriter(*this)._write(os,expr);}); return os;
 }
 
 template<class R> inline

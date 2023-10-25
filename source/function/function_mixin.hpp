@@ -66,6 +66,7 @@ template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
 template<class P, class D> ScalarFunctionInterface<P,D>* heap_copy(ScalarFunction<P,D> const& f) { return f.raw_pointer()->_clone(); }
 
 
+
 template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
 template<> inline BoxDomainType make_domain(SizeType d) { return BoxDomainType(d,IntervalDomainType(-inf,+inf)); }
@@ -89,7 +90,7 @@ class FunctionMixin<F,Void,SIG>
     virtual ResultSizeType result_size() const override = 0;
   private:
     virtual OutputStream& _write(OutputStream& os) const override { return os << static_cast<F const&>(*this); }
-    virtual OutputStream& _repr(OutputStream& os) const override { return this->_write(os); }
+    virtual OutputStream& _repr(OutputStream& os) const override { return os << representation(static_cast<F const&>(*this)); }
 };
 
 

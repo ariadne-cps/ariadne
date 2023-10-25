@@ -138,7 +138,7 @@ template<class X> class TranscendentalAlgebra
     TranscendentalAlgebra<X> clone() const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_copy()); }
     TranscendentalAlgebra<X> create_zero() const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_zero()); }
     TranscendentalAlgebra<X> create_constant(X const& c) const { return TranscendentalAlgebra<X>(this->managed_pointer()->_create_constant(c)); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, TranscendentalAlgebra<X> const& a) { return a.managed_pointer()->_write(os); }
   private:
     template<class A> static TranscendentalAlgebraInterface<X>* make_elementary_algebra(A const& a) {
         if constexpr(BaseOf<TranscendentalAlgebraInterface<X>,A>) { return new A(a); }
@@ -166,7 +166,7 @@ template<class X> class ElementaryAlgebra
     ElementaryAlgebra<X> clone() const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_copy()); }
     ElementaryAlgebra<X> create_zero() const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_zero()); }
     ElementaryAlgebra<X> create_constant(X const& c) const { return ElementaryAlgebra<X>(this->managed_pointer()->_create_constant(c)); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, ElementaryAlgebra<X> const& a) { return a.managed_pointer()->_write(os); }
   private:
     template<class A> static ElementaryAlgebraInterface<X>* make_elementary_algebra(A const& a) {
         if constexpr(BaseOf<ElementaryAlgebraInterface<X>,A>) { return new A(a); }
@@ -210,7 +210,7 @@ template<class X> class NormedAlgebra
     Void imul(const X& c) { this->managed_pointer()->_imul(c); }
     Void isma(const X& c, const NormedAlgebra<X>& x) { this->managed_pointer()->_isma(c,*x.managed_pointer()); }
     Void ifma(const NormedAlgebra<X>& x1, const NormedAlgebra<X>& x2) { this->managed_pointer()->_ifma(*x1.managed_pointer(),*x2.managed_pointer()); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, NormedAlgebra<X> const& a) { return a.managed_pointer()->_write(os); }
 };
 
 //! \brief Generic class for elements of unital algebras.
@@ -233,7 +233,7 @@ template<class X> class GradedAlgebra
     Nat degree() const { return this->managed_pointer()->degree(); }
     //! \brief The value in the null grade.
     const X& value() const { return this->managed_pointer()->value(); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, GradedAlgebra<X> const& a) { return a.managed_pointer()->_write(os); }
   public:
     Void iadd(const X& c) { this->managed_pointer()->_iadd(c); }
     Void imul(const X& c) { this->managed_pointer()->_imul(c); }
@@ -260,18 +260,13 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(this->managed_pointer()->_create_zero()); }
     SymbolicAlgebra<X> create_zero() const { return SymbolicAlgebra<X>(this->managed_pointer()->_create_zero()); }
     SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(this->managed_pointer()->_create_copy()); }
-    OutputStream& _write(OutputStream& os) const { return this->managed_pointer()->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, SymbolicAlgebra<X> const& a) { return a.managed_pointer()->_write(os); }
   public:
     Void iadd(const X& c) { this->managed_pointer()->_iadd(c); }
     Void imul(const X& c) { this->managed_pointer()->_imul(c); }
     Void isma(const X& c, const SymbolicAlgebra<X>& x) { this->managed_pointer()->_isma(c,*x.managed_pointer()); }
     Void ifma(const SymbolicAlgebra<X>& x1, const SymbolicAlgebra<X>& x2) { this->managed_pointer()->_ifma(*x1.managed_pointer(),*x2.managed_pointer()); }
 };
-
-template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x._write(os); }
-template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x._write(os); }
-
-
 
 
 template<class X> template<AnAlgebraOver<X> A> Algebra<X>::Algebra(A const& a)

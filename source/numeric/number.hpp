@@ -224,7 +224,7 @@ template<class P> class Number
     String class_name() const { return this->ref()._class_name(); }
 
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }\
+    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }
   private:
     template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y) { return Number<RP>(y.ref()._apply(op)); }
     template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y, Int n) { return Number<RP>(y.ref()._apply(op,n)); }

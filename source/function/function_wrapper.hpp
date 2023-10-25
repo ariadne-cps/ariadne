@@ -75,6 +75,7 @@ class FunctionWrapper
         return make_function_wrapper<P,SIG>(derivative(this->wrapped(),k)); }
     template<class T> Result<T> operator() (Argument<T> const& x) const { return this->wrapped()(x); }
     friend inline OutputStream& operator<<(OutputStream& os, FunctionWrapper<F,P,SIG> const& f) { return os << f.wrapped(); }
+    friend inline OutputStream& operator<<(OutputStream& os, Representation<FunctionWrapper<F,P,SIG>> const& f) { return os << Representation<F>(f.reference().wrapped()); }
         template<class I> decltype(auto) operator[](I i) const { return this->wrapped()[i]; }
 };
 

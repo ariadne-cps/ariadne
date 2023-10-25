@@ -123,16 +123,23 @@ template<class P, class SIG> Function<P,SIG>::Function(DomainType dom, Result<Fo
 template<class P, class SIG> Function<P,SIG>::Function(typename SignatureTraits<SIG>::ArgumentSpaceType const& spc, Result<RealExpression> const& e)
     : Function(make_function(spc,e)) { }
 
-template<class P, class SIG> struct MakeVectorMultivariateFunction;
-template<class P, class... ARGS> struct MakeVectorMultivariateFunction<P,Real(ARGS...)> {
+template<class P, class SIG> struct MakeVectorFunction;
+template<class P, class... ARGS> struct MakeVectorFunction<P,Real(ARGS...)> {
     ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
         ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
 };
-template<class P> struct MakeVectorMultivariateFunction<P,RealVector(Real)> {
+/*
+template<class P> struct MakeVectorFunction<P,RealVector(Real)> {
     VectorUnivariateFunction<P> create(Vector<ScalarUnivariateFunction<P>> const& lsf) {
-        ARIADNE_FAIL_MSG("Cannot construct multivariate function from list."); }
+        ARIADNE_FAIL_MSG("Cannot construct multivariate function from list of univariate functions."); }
 };
-template<class P> struct MakeVectorMultivariateFunction<P,RealVector(RealVector)> {
+*/
+template<class P> struct MakeVectorFunction<P,RealVector(Real)> {
+    VectorUnivariateFunction<P> create(Vector<ScalarUnivariateFunction<P>> const& lsf) {
+        return VectorUnivariateFunction<P>(VectorOfScalarFunction<P,RealScalar>(lsf));
+    }
+};
+template<class P> struct MakeVectorFunction<P,RealVector(RealVector)> {
     VectorMultivariateFunction<P> create(Vector<ScalarMultivariateFunction<P>> const& lsf) {
         if constexpr (Same<P,ValidatedTag>) {
             if (lsf.size()==1) {
@@ -150,7 +157,7 @@ template<class P> struct MakeVectorMultivariateFunction<P,RealVector(RealVector)
 
 
 template<class P, class SIG, class... ARGS> inline decltype(auto) make_vector_function(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
-    return MakeVectorMultivariateFunction<P,SIG>().create(lsf);
+    return MakeVectorFunction<P,SIG>().create(lsf);
 }
 
 template<class P, class SIG> Function<P,SIG>::Function(Vector<ScalarFunction<P,ARG>> const& vsf)

@@ -72,9 +72,9 @@ class ScalarUnivariateFormulaFunction
     friend ScalarUnivariateFormulaFunction<Y> derivative(ScalarUnivariateFormulaFunction<Y> const& f, IndexZero j) {
         return ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(f._formula,0)); }
     friend OutputStream& operator<<(OutputStream& os, ScalarUnivariateFormulaFunction<Y> const& f) {
-        return os << f._formula; }
-  private:
-    OutputStream& _repr(OutputStream& os) const { return os << "FF[R]("<<this->_formula<<")"; }
+        return Formula<Y>::_write_univariate(os,f); }
+    friend OutputStream& operator<<(OutputStream& os, Representation<ScalarUnivariateFormulaFunction<Y>> const& fr) {
+        return os << "ScalarUnivariateFormulaFunction("<< fr.reference() <<")"; }
 };
 
 typedef ScalarUnivariateFormulaFunction<EffectiveNumber> EffectiveScalarUnivariateFormulaFunction;
@@ -101,23 +101,22 @@ class VectorUnivariateFormulaFunction
     friend VectorUnivariateFormulaFunction<Y> derivative(VectorUnivariateFormulaFunction<Y> const& f, IndexZero j) {
         return VectorUnivariateFormulaFunction<Y>(Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
     friend OutputStream& operator<<(OutputStream& os, VectorUnivariateFormulaFunction<Y> const& f) {
-        return os << f._formulae; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "FF[R]("<<this->_formulae<<")"; }
+        return Formula<Y>::_write_univariate(os,f._formulae); }
+    friend OutputStream& operator<<(OutputStream& os, Representation<VectorUnivariateFormulaFunction<Y>> const& fr) {
+        return os << "VectorUnivariateFormulaFunction(" << fr.reference() << ")"; }
 };
 
 typedef VectorUnivariateFormulaFunction<EffectiveNumber> EffectiveVectorUnivariateFormulaFunction;
 
 //! A function defined by a formula
 template<class Y>
-class ScalarFormulaFunction
+class ScalarMultivariateFormulaFunction
 {
     typedef InformationTag<Y> P;
     SizeType _argument_size;
     Formula<Y> _formula;
   public:
-    ScalarFormulaFunction(SizeType as, const Formula<Y>& f) : _argument_size(as), _formula(f) { }
+    ScalarMultivariateFormulaFunction(SizeType as, const Formula<Y>& f) : _argument_size(as), _formula(f) { }
     Formula<Y> formula() const { return _formula; }
     operator Formula<Y>() const { return _formula; }
 
@@ -125,45 +124,48 @@ class ScalarFormulaFunction
     SizeType argument_size() const { return _argument_size; }
     SizeOne result_size() const { return SizeOne(); }
     template<class X> X operator() (const Vector<X>& x) const { return Ariadne::evaluate(_formula,x); }
-    friend ScalarFormulaFunction<Y> derivative(ScalarFormulaFunction<Y> const& f, SizeType j) {
-        return ScalarFormulaFunction<Y>(f._argument_size,Ariadne::derivative(f._formula,j)); }
-    friend OutputStream& operator<<(OutputStream& os, ScalarFormulaFunction<Y> const& f) {
+    friend ScalarMultivariateFormulaFunction<Y> derivative(ScalarMultivariateFormulaFunction<Y> const& f, SizeType j) {
+        return ScalarMultivariateFormulaFunction<Y>(f._argument_size,Ariadne::derivative(f._formula,j)); }
+    friend OutputStream& operator<<(OutputStream& os, ScalarMultivariateFormulaFunction<Y> const& f) {
         return os << f._formula; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "FF[R"<<this->_argument_size<<"]("<<this->_formula<<")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<ScalarMultivariateFormulaFunction<Y>> const& fr) {
+        ScalarMultivariateFormulaFunction<Y> const& f = fr.reference();
+        return os << "ScalarMultivariateFormulaFunction(" << f._argument_size << "," << f._formula << ")"; }
 };
+typedef ScalarMultivariateFormulaFunction<EffectiveNumber> EffectiveScalarMultivariateFormulaFunction;
 
+template<class Y> using ScalarFormulaFunction = ScalarMultivariateFormulaFunction<Y>;
 typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarFormulaFunction;
 
 //! A vector function defined by formulae
 template<class Y>
-class VectorFormulaFunction
+class VectorMultivariateFormulaFunction
 {
     SizeType _argument_size;
     Vector< Formula<Y> > _formulae;
-
   public:
-
-    VectorFormulaFunction(SizeType as, const List< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
-    VectorFormulaFunction(SizeType as, const Vector< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
+    VectorMultivariateFormulaFunction(SizeType as, const List< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
+    VectorMultivariateFormulaFunction(SizeType as, const Vector< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
     Vector<Formula<Y>> formulae() const { return _formulae; }
 
-    ScalarFormulaFunction<Y> operator[](SizeType i) const { return ScalarFormulaFunction(this->_argument_size,this->_formulae[i]); }
+    ScalarMultivariateFormulaFunction<Y> operator[](SizeType i) const { return ScalarMultivariateFormulaFunction(this->_argument_size,this->_formulae[i]); }
     EuclideanDomain domain() const { return EuclideanDomain(this->_argument_size); }
     SizeType result_size() const { return this->_formulae.size(); }
     SizeType argument_size() const { return this->_argument_size; }
     template<class X> Vector<X> operator() (const Vector<X>& x) const { return Ariadne::evaluate(this->_formulae,x); }
-    friend VectorFormulaFunction<Y> derivative(VectorFormulaFunction<Y> const& f, SizeType j) {
-        return VectorFormulaFunction<Y>(f._argument_size, Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
-    friend OutputStream& operator<<(OutputStream& os, VectorFormulaFunction<Y> const& f) {
+    friend VectorMultivariateFormulaFunction<Y> derivative(VectorMultivariateFormulaFunction<Y> const& f, SizeType j) {
+        return VectorMultivariateFormulaFunction<Y>(f._argument_size, Vector<Formula<Y>>(f._formulae.size(),[&](SizeType i){return derivative(f._formulae[i],j);})); }
+    friend OutputStream& operator<<(OutputStream& os, VectorMultivariateFormulaFunction<Y> const& f) {
         return os << f._formulae; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "FF[R"<<this->argument_size()<<"]("<<this->_formulae<<")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<VectorMultivariateFormulaFunction<Y>> const& fr) {
+        VectorMultivariateFormulaFunction<Y> const& f = fr.reference();
+        return os << "VectorMultivariateFormulaFunction("<<f._argument_size<<","<<f._formulae<<")"; }
 };
+typedef VectorMultivariateFormulaFunction<EffectiveNumber> EffectiveVectorMultivariateFormulaFunction;
 
+template<class Y> using VectorFormulaFunction = VectorMultivariateFormulaFunction<Y>;
 typedef VectorFormulaFunction<EffectiveNumber> EffectiveVectorFormulaFunction;
+
 typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
 typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
 
@@ -173,28 +175,28 @@ class NotFormulaFunctionException : public std::runtime_error {
 };
 
 //! \brief Returns \a true if the function \a f is syntactically constant in the indices \a is.
-template<class Y> Bool is_constant_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }
+template<class Y> Bool is_constant_in(const ScalarMultivariateFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }
 //! \brief Returns \a true if the function \a f is syntactically affine in the indices \a is.
-template<class Y> Bool is_affine_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formula,is); }
+template<class Y> Bool is_affine_in(const ScalarMultivariateFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formula,is); }
 //! \brief Returns \a true if the vector function \a f is syntactically affine in the indices \a is.
-template<class Y> Bool is_affine_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formulae,is); }
+template<class Y> Bool is_affine_in(const VectorMultivariateFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formulae,is); }
 //! \brief Returns \a true if the vector function \a f is syntactically additive (possibly with multipliers) in the indices \a is.
-template<class Y> Bool is_additive_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_additive_in(f._formulae,is); }
+template<class Y> Bool is_additive_in(const VectorMultivariateFormulaFunction<Y>& f, const Set<Nat>& is) { return is_additive_in(f._formulae,is); }
 
 template<class Y> Bool is_affine_in(const VectorMultivariateFunction<Y>& f, const Set<Nat>& is) {
-    auto ff = dynamic_pointer_extract<const EffectiveVectorFormulaFunction>(f.managed_pointer());
+    auto ff = dynamic_pointer_extract<const EffectiveVectorMultivariateFormulaFunction>(f.managed_pointer());
     if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"is_affine_in(f,is)","Affinity checking currently available only for formula functions.");
     return is_affine_in(ff->formulae(),is);
 }
 template<class Y> Bool is_additive_in(const VectorMultivariateFunction<Y>& f, const Set<Nat>& is) {
-    auto ff = dynamic_pointer_extract<const EffectiveVectorFormulaFunction>(f.managed_pointer());
-    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"is_additive_in(f,is)","Additivity check   ing currently available only for formula functions.");
+    auto ff = dynamic_pointer_extract<const EffectiveVectorMultivariateFormulaFunction>(f.managed_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"is_additive_in(f,is)","Additivity checking currently available only for formula functions.");
     return is_additive_in(ff->formulae(),is);
 }
 
 inline EffectiveVectorMultivariateFunction noise_independent_component(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
 
-    auto ff = dynamic_pointer_extract<const EffectiveVectorFormulaFunction>(function.managed_pointer());
+    auto ff = dynamic_pointer_extract<const EffectiveVectorMultivariateFormulaFunction>(function.managed_pointer());
     if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"noise_independent_component(f,num_inputs)","Noise independent component extraction currently available only for formula functions.");
 
     CoordinateFormulaPairs substitutions;
@@ -202,14 +204,14 @@ inline EffectiveVectorMultivariateFunction noise_independent_component(Effective
         substitutions.append({i,EffectiveFormula::zero()});
     }
 
-    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(ff->formulae(),substitutions)));
+    return EffectiveVectorMultivariateFormulaFunction(function.argument_size(),simplify(substitute(ff->formulae(),substitutions)));
 }
 
 inline Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
 
     Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
 
-    auto ff = dynamic_pointer_extract<const EffectiveVectorFormulaFunction>(function.managed_pointer());
+    auto ff = dynamic_pointer_extract<const EffectiveVectorMultivariateFormulaFunction>(function.managed_pointer());
     if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"input_derivatives(f,num_inputs)","Input derivatives extraction currently available only for formula functions.");
 
     SizeType n = function.result_size();
@@ -219,7 +221,7 @@ inline Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVe
         for (auto i : range(n)) {
             derivative_formulae[i] = simplify(derivative(ff->formulae()[i],n+j));
         }
-        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
+        result[j] = EffectiveVectorMultivariateFormulaFunction(function.argument_size(),derivative_formulae);
     }
 
     return result;
@@ -250,6 +252,7 @@ class ConstantFunction
     DomainType domain() const { return _domain; }
     ArgumentSizeType argument_size() const { return _domain.dimension(); }
     SizeOne result_size() const { return SizeOne(); }
+    Y const& value() const { return _value; }
 
     template<class X> inline X operator() (const ElementType<D,X>& x) const {
         return _make_constant(this->_value,x); }
@@ -257,9 +260,8 @@ class ConstantFunction
         return ConstantFunction<Y,ARGS...>(f._domain,Y(0)); }
     friend OutputStream& operator<<(OutputStream& os, ConstantFunction<Y,ARGS...> const& f) {
         return os << f._value; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "CF[R"<<this->argument_size()<<"]("<<_value<<")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<ConstantFunction<Y,ARGS...>> const& f) {
+        return os << "ConstantFunction(" << f.reference().domain() << "," << f.reference().value() << ")"; }
   private:
     template<class X> inline static X _make_constant(Y y, X const& x) { return make_constant(y,x); }
     template<class X> inline static X _make_constant(Y y, Vector<X> const& vx) { return make_constant(y,vx.zero_element()); }
@@ -301,10 +303,10 @@ class CoordinateFunction
         if(j==f._index) { return ConstantFunction<Y,ARGS...>(f.domain(),Y(1)); }
         else { return ConstantFunction<Y,ARGS...>(f.domain(),Y(0)); } }
     friend OutputStream& operator<<(OutputStream& os, CoordinateFunction<P,ARGS...> const& f) {
-        return os << "x"<<f._index; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "IF[R"<<this->argument_size()<<"](x"<<this->_index<<")"; }
+        if constexpr (Same<Tuple<ARGS...>,Tuple<RealScalar>>) { return os << "x"; }
+        else { return os << "x[" << f._index << "]"; } }
+    friend OutputStream& operator<<(OutputStream& os, Representation<CoordinateFunction<P,ARGS...>> const& f) {
+        return os << "CoordinateFunction(" << f.reference().argument_size() << "," << f.reference().index() << ")"; }
 };
 
 
@@ -335,9 +337,8 @@ class UnaryFunction
     }
     friend OutputStream& operator<<(OutputStream& os, UnaryFunction<P,ARGS...> const& f) {
         return os << f._op << '(' << f._arg << ')'; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "UF[R" << this->argument_size() << "](" << *this << ")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<UnaryFunction<P,ARGS...>> const& f) {
+        return os << "UnaryFunction(" << f.reference().argument_size() << "," << f.reference() << ")"; }
   private:
     UnaryElementaryOperator _op;
     ScalarFunction<P,ARGS...> _arg;
@@ -387,9 +388,8 @@ class BinaryFunction
         if(f._op.code()==OperatorCode::ADD || f._op.code()==OperatorCode::SUB) {
             return os << '(' << f._arg1 << symbol(f._op.code()) << f._arg2 << ')'; }
         else { return os << f._arg1 << symbol(f._op.code()) << f._arg2; } }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<BinaryFunction<P,ARGS...>> const& f) {
+        return os << "BinaryFunction(" << f.reference().argument_size() << "," << f.reference() << ")"; }
 
   private:
     BinaryElementaryOperator _op;
@@ -423,9 +423,8 @@ class GradedFunction
         return f._op.accept([&](auto op){ return op.derivative(f._arg1, f._arg1.derivative(j), f._arg2);}); }
     friend OutputStream& operator<<(OutputStream& os, GradedFunction<P,ARGS...> const& f) {
         return os << f._op.code() << "(" << f._arg1 << "," << f._arg2 << ")"; }
-  private:
-    OutputStream& _repr(OutputStream& os) const {
-        return os << "GF[R"<<this->argument_size()<<"]("<< *this <<")"; }
+    friend OutputStream& operator<<(OutputStream& os, Representation<GradedFunction<P,ARGS...>> const& f) {
+        return os << "GradedFunction(" << f.reference().argument_size() << "," << f.reference() << ")"; }
   private:
     GradedElementaryOperator _op;
     ScalarFunction<P,ARGS...> _arg1;
@@ -501,16 +500,16 @@ class VectorOfScalarFunction
         os << "[";
         for(SizeType i=0; i!=f._vec.size(); ++i) {
             if(i!=0) { os << ","; }
-            f._vec[i].raw_pointer()->_write(os); }
+            os << f[i]; }
         return os << "]"; }
 
-  private:
-    OutputStream& _repr(OutputStream& os) const {
+    friend OutputStream& operator<<(OutputStream& os, Representation<VectorOfScalarFunction<P,ARGS...>> const& fr) {
+        VectorOfScalarFunction<P,ARGS...> f = fr.reference();
         //os << "VoSF[R" << this->argument_size() << "->R" << this->result_size() << "]";
         os << "[";
-        for(SizeType i=0; i!=this->_vec.size(); ++i) {
+        for(SizeType i=0; i!=f.result_size(); ++i) {
             if(i!=0) { os << ","; }
-            this->_vec[i].raw_pointer()->_repr(os); }
+            os << representation(f[i]); }
         return os << "]"; }
 
   private:
@@ -769,7 +768,7 @@ class LieDerivativeFunction
     friend LieDerivativeFunction<P> derivative(LieDerivativeFunction<P> const& f, SizeType j) {
         ARIADNE_NOT_IMPLEMENTED; }
     friend OutputStream& operator<<(OutputStream& os, LieDerivativeFunction<P> const& f) {
-        return os << "LieDerivative( g="<<f._g<<", f="<<f._f<<" )"; }
+        return os << "LieDerivativeFunction( g="<<f._g<<", f="<<f._f<<" )"; }
   private:
     ScalarMultivariateFunction<P> _g;
     Vector< ScalarMultivariateFunction<P> > _dg;

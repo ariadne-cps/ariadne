@@ -163,10 +163,13 @@ class Formula
     const Formula<Y>& arg1() const;
     const Formula<Y>& arg2() const;
   public:
-    friend OutputStream& operator<<(OutputStream& os, Formula<Y> const& f) { return f._write(os); }
+    friend OutputStream& operator<<(OutputStream& os, Formula<Y> const& f) { return Formula<Y>::_write_multivariate(os,f); }
   public:
     Formula<Y> _derivative(SizeType j) const;
-    OutputStream& _write(OutputStream& os) const;
+    static OutputStream& _write_multivariate(OutputStream& os, Formula<Y> const& f);
+    static OutputStream& _write_multivariate(OutputStream& os, Vector<Formula<Y>> const& f);
+    static OutputStream& _write_univariate(OutputStream& os, Formula<Y> const& f);
+    static OutputStream& _write_univariate(OutputStream& os, Vector<Formula<Y>> const& f);
   public:
     const FormulaNode<Y>* node_ptr() const { return _root.operator->(); }
     const FormulaNode<Y>& node_ref() const { return _root.operator*(); }
@@ -281,6 +284,13 @@ template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& as, const Set<Nat>
 
 
 template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& as, const Set<Nat>& is);
+
+template<class Y> class Coordinates {
+  public:
+    operator Formula<Y> () const { return Formula<Y>::coordinate(0); }
+    Formula<Y> operator[] (SizeType i) const { return Formula<Y>::coordinate(i); }
+};
+static const Coordinates<EffectiveNumber> _ = Coordinates<EffectiveNumber>();
 
 } // namespace Ariadne
 

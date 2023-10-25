@@ -90,7 +90,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex
     MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os;
 }
 
-template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation< Function<P,SIG> >& frepr) {
+template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Function<P,SIG> >& frepr) {
     static_cast<const FunctionInterface<P,SIG>&>(frepr.reference())._repr(os); return os;
 }
 

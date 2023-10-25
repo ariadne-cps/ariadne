@@ -25,12 +25,112 @@
 #ifndef ARIADNE_SYMBOLIC_TEMPLATES_TPL_HPP
 #define ARIADNE_SYMBOLIC_TEMPLATES_TPL_HPP
 
+#include "templates.hpp"
+
 namespace Ariadne {
 
 template<class T> class Variable;
 
 template<class... OPS> class OperatorVariant;
 template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> const& ops1, OperatorVariant<OPS...> const& ops2);
+
+template<class W> class OperationSymbolicWriter {
+    W _w;
+  public:
+    OperationSymbolicWriter(W const& w) : _w(w) { }
+
+    template<class T> inline Void _write(OutputStream& os, Constant<T> const& c) {
+        os << c; }
+    template<class T> inline Void _write(OutputStream& os, Variable<T> const& v) {
+        os << v; }
+
+    template<class Y> void _write(OutputStream& os, Symbolic<Cnst,Y> const& c) {
+        os << c._val; }
+    template<class I> void _write(OutputStream& os, Symbolic<Var,I> const& v) {
+        if constexpr (Same<I,IndexZero>) { os << "x"; }
+        else if constexpr (Same<I,Index>) { os << "x[" << v._ind << "]"; }
+        else { os << v._ind; } }
+    template<class OP, class A, template<class>class E> void _write(OutputStream& os, Symbolic<OP,E<A>,A> const& s) {
+        os << s._op << '(' << make_writable(this->_w,s._arg) << ',' << s._cnst << ')'; }
+    template<class A, class N, template<class>class E> void _write(OutputStream& os, Symbolic<GradedElementaryOperator,E<A>,N> const& s) {
+        os << s._op << '(' << make_writable(this->_w,s._arg) << ',' << s._num << ')'; }
+    template<class OP, class A, template<class>class E> void _write(OutputStream& os, Symbolic<OP,A,E<A>> const& s) {
+        os << s._op << '(' << s._cnst << ',' << make_writable(this->_w,s._arg) << ')'; }
+    template<class OP, class A1, class A2> void _write(OutputStream& os, Symbolic<OP,A1,A2> const& s) {
+        os << s._op << '(' << make_writable(this->_w,s._arg1) << ',' << make_writable(this->_w,s._arg2) << ')'; }
+    template<class OP, class A> void _write(OutputStream& os, Symbolic<OP,A> const& s) {
+        os << s._op << '(' << make_writable(this->_w,s._arg) << ')'; }
+};
+template<class W> OperationSymbolicWriter(W const&) -> OperationSymbolicWriter<W>;
+
+
+template<class W> class OperatorSymbolicWriter {
+    W _w;
+  public:
+    OperatorSymbolicWriter(W const& w) : _w(w) { }
+
+    template<class Y, template<class>class E> void _write_impl(OutputStream& os, Add, E<Y> e1, E<Y> e2) {
+        os << make_writable(_w,e1) << '+' << make_writable(_w,e2); }
+    template<class Y, template<class>class E> void _write_impl(OutputStream& os, Sub, E<Y> e1, E<Y> e2) {
+        os << make_writable(_w,e1) << '-'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << make_writable(_w,e2) << ')'; break; default: os << make_writable(_w,e2); } }
+    template<class Y, template<class>class E> void _write_impl(OutputStream& os, Mul, E<Y> e1, E<Y> e2) {
+        switch(e1.op().code()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << make_writable(_w,e1) << ')'; break; default: os << make_writable(_w,e1); } os << '*';
+        switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << make_writable(_w,e2) << ')'; break; default: os << make_writable(_w,e2); } }
+    template<class Y, template<class>class E> void _write_impl(OutputStream& os, Div, E<Y> e1, E<Y> e2) {
+        switch(e1.op()) { case Add::code(): case Sub::code(): os << '(' << make_writable(_w,e1) << ')'; break; default: os << make_writable(_w,e1); } os << '/';
+        switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << make_writable(_w,e2) << ')'; break; default: os << make_writable(_w,e2); } }
+    template<class E1, class E2> void _write_impl(OutputStream& os, Max, E1 const& e1, E2 const& e2) { os << "max" << '(' << make_writable(_w,e1) << ',' << make_writable(_w,e2) << ')'; }
+    template<class E1, class E2> void _write_impl(OutputStream& os, Min, E1 const& e1, E2 const& e2) { os << "min" << '(' << make_writable(_w,e1) << ',' << make_writable(_w,e2) << ')'; }
+    template<class OP, class E1, class E2> void _write_impl(OutputStream& os, OP op, E1 const& e1, E2 const& e2) { os << op << '(' << make_writable(_w,e1) << ',' << make_writable(_w,e2) << ')'; }
+
+    template<class E> void _write_impl(OutputStream& os, Pos op, E const& e) {
+        os << '+' << make_writable(_w,e); }
+    template<class E> void _write_impl(OutputStream& os, Neg op, E const& e) {
+        os << '-'; switch(e.op()) { case Cnst::code(): case Var::code(): os << make_writable(_w,e); break; default: os << '(' << make_writable(_w,e) << ')'; } }
+    template<class OP, class E> void _write_impl(OutputStream& os, OP op, E const& e) {
+        os << op << '(' << make_writable(_w,e) << ')'; }
+
+    template<class T> inline Void _write(OutputStream& os, Constant<T> const& c) {
+        os << c; }
+    template<class T> inline Void _write(OutputStream& os, Variable<T> const& v) {
+        os << v; }
+
+
+    template<class Y> void _write(OutputStream& os, Symbolic<Cnst,Y> const& c) {
+        os << c._val; }
+    template<class I> void _write(OutputStream& os, Symbolic<Var,I> const& v) {
+        if constexpr (Same<I,IndexZero>) { os << "x"; }
+        else if constexpr (Same<I,Index>) { os << "x[" << v._ind << "]"; }
+        else { os << v._ind; } }
+
+    template<class A1, class A2, class... OPS> void _write(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
+        s._op.accept([this,&os,&s](auto op){this->_write_impl(os,op,s._arg1,s._arg2);}); }
+    template<class A1, class A2> void _write(OutputStream& os, Symbolic<BinaryLogicalOperator,A1,A2> const& s) {
+        s._op.accept([this,&os,&s](auto op){this->_write_impl(os,op,s._arg1,s._arg2);}); }
+    template<class A1, class A2> void _write(OutputStream& os, Symbolic<BinaryComparisonOperator,A1,A2> const& s) {
+        s._op.accept([this,&os,&s](auto op){this->_write_impl(os,op,s._arg1,s._arg2);}); }
+    template<class A1, class A2> void _write(OutputStream& os, Symbolic<BinaryElementaryOperator,A1,A2> const& s) {
+        s._op.accept([this,&os,&s](auto op){this->_write_impl(os,op,s._arg1,s._arg2);}); }
+    template<class A, template<class>class E> void _write(OutputStream& os, Symbolic<BinaryElementaryOperator,E<A>,A> const& s) {
+        os << '('; _write(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,s._arg,E<A>(s._cnst))); os << ')'; }
+    template<class A, template<class>class E> void _write(OutputStream& os, Symbolic<BinaryElementaryOperator,A,E<A>> const& s) {
+        os << '('; this->_write(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,E<A>(s._cnst),s._arg)); os << ')'; }
+    template<class A> void _write(OutputStream& os, Symbolic<UnaryElementaryOperator,A> const& s) {
+        s._op.accept([this,&os,&s](auto op){this->_write_impl(os,op,s._arg);}); }
+    template<class A, class N> void _write(OutputStream& os, Symbolic<GradedElementaryOperator,A,N> const& s) {
+        os << s._op << '(' << s._arg << ',' << s._num << ')'; }
+
+    template<class OP, class A1, class A2> void _write(OutputStream& os, Symbolic<OP,A1,A2> const& s) {
+        this->_write_impl(os,s._op,s._arg1,s._arg2); }
+    template<class OP, class A> void _write(OutputStream& os, Symbolic<OP,A> const& s) {
+        this->_write_impl(os,s._op,s._arg); }
+
+    //template<class A, class... OPS> void _write(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A> const& s) {
+    //    s._op.accept([&os,&s](auto op){_write(os,op,s._arg);}); }
+    //template<class A1, class A2, class... OPS> void _write(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
+    //    s._op.accept([&os,&s](auto op){_write(os,op,s._arg1,s._arg2);}); }
+};
+template<class W> OperatorSymbolicWriter(W const&) -> OperatorSymbolicWriter<W>;
 
 
 namespace {
@@ -63,68 +163,7 @@ template<class R, class OP, class E1, class E2, class V> R evaluate_as(const Sym
 template<class R, class OP, class E, class V> R evaluate_as(const Symbolic<OP,E,Int>& e, const V& x) {
     return _graded_evaluate_as_impl<R>(e._op,e._arg,e._num,x); }
 
-
-
-
-template<class Y, template<class>class E> void _write_impl(OutputStream& os, Add, E<Y> e1, E<Y> e2) {
-    os << e1 << '+' << e2; }
-template<class Y, template<class>class E> void _write_impl(OutputStream& os, Sub, E<Y> e1, E<Y> e2) {
-    os << e1 << '-'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
-template<class Y, template<class>class E> void _write_impl(OutputStream& os, Mul, E<Y> e1, E<Y> e2) {
-    switch(e1.op().code()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '*';
-    switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
-template<class Y, template<class>class E> void _write_impl(OutputStream& os, Div, E<Y> e1, E<Y> e2) {
-    switch(e1.op()) { case Add::code(): case Sub::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '/';
-    switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
-template<class E1, class E2> void _write_impl(OutputStream& os, Max, E1 const& e1, E2 const& e2) { os << "max" << '(' << e1 << ',' << e2 << ')'; }
-template<class E1, class E2> void _write_impl(OutputStream& os, Min, E1 const& e1, E2 const& e2) { os << "min" << '(' << e1 << ',' << e2 << ')'; }
-template<class OP, class E1, class E2> void _write_impl(OutputStream& os, OP op, E1 const& e1, E2 const& e2) { os << op << '(' << e1 << ',' << e2 << ')'; }
-
-template<class E> void _write_impl(OutputStream& os, Pos op, E const& e) {
-    os << '+' << e; }
-template<class E> void _write_impl(OutputStream& os, Neg op, E const& e) {
-    os << '-'; switch(e.op()) { case Cnst::code(): case Var::code(): os << e; break; default: os << '(' << e << ')'; } }
-template<class OP, class E> void _write_impl(OutputStream& os, OP op, E const& e) {
-    os << op << '(' << e << ')'; }
-
-template<class Y> void _write_impl(OutputStream& os, Symbolic<Cnst,Y> const& c) {
-    os << c._val; }
-template<class I> void _write_impl(OutputStream& os, Symbolic<Var,I> const& v) {
-    os << "x" << v._ind; }
-
-template<class T> inline Void _write_impl(OutputStream& os, Constant<T> const& c) {
-    os << c; }
-template<class T> inline Void _write_impl(OutputStream& os, Variable<T> const& v) {
-    os << v; }
-
-
-template<class A1, class A2, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
-    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryLogicalOperator,A1,A2> const& s) {
-    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryComparisonOperator,A1,A2> const& s) {
-    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A1,A2> const& s) {
-    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,E<A>,A> const& s) {
-    os << '('; _write_impl(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,s._arg,E<A>(s._cnst))); os << ')'; }
-template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A,E<A>> const& s) {
-    os << '('; _write_impl(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,E<A>(s._cnst),s._arg)); os << ')'; }
-template<class A> void _write_impl(OutputStream& os, Symbolic<UnaryElementaryOperator,A> const& s) {
-    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg);}); }
-template<class A, class N> void _write_impl(OutputStream& os, Symbolic<GradedElementaryOperator,A,N> const& s) {
-    os << s._op << '(' << s._arg << ',' << s._num << ')'; }
-
-template<class OP, class A1, class A2> void _write_impl(OutputStream& os, Symbolic<OP,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; }
-template<class OP, class A> void _write_impl(OutputStream& os, Symbolic<OP,A> const& s) {
-    os << s._op << '(' << s._arg << ')'; }
-
-//template<class A, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A> const& s) {
-//    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg);}); }
-//template<class A1, class A2, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
-//    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-}
+} // namespace
 
 
 namespace {

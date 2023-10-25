@@ -43,8 +43,8 @@ template<class O, class A, template<class>class E> struct Symbolic<O,A,E<A>> {
     template<class T> operator T() const { return _op(static_cast<T>(_cnst),static_cast<T>(_arg)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_cnst,_arg(vals...))) {
         return _op(_cnst(vals...),_arg(vals...)); }
-    friend OutputStream& operator<<(OutputStream& os, Symbolic expr) {
-        return os << expr._op.code() << "(" << expr._arg1 << "," << expr._arg2 << ")"; }
+    friend OutputStream& operator<<(OutputStream& os, Symbolic<O,A,E<A>> const& expr) {
+        return os << expr._op.code() << "(" << expr._cnst << "," << expr._arg << ")"; }
 };
 
 template<class Y> using FormulaNodeVariantType = Variant<ConstantFormulaNode<Y>,IndexFormulaNode<Y>, UnaryFormulaNode<Y>,BinaryFormulaNode<Y>,GradedFormulaNode<Y>,ScalarFormulaNode<Y>>;

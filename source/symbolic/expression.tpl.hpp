@@ -200,11 +200,11 @@ template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
     return os << _default_writer(*this);
 }
 
-template<class T> OutputStream& PrefixExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
+template<class T> OutputStream& OperationExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
     e.node_ref().accept([this,&os](auto expr){OperationSymbolicWriter(*this)._write(os,expr);}); return os;
 }
 
-template<class T> OutputStream& InfixExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
+template<class T> OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<T> const& e) const {
     e.node_ref().accept([this,&os](auto expr){OperatorSymbolicWriter(*this)._write(os,expr);}); return os;
 }
 

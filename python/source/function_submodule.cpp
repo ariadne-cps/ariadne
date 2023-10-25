@@ -74,6 +74,35 @@ MultiIndex multi_index_from_python(pybind11::tuple pytup) {
     return res;
 }
 
+template<class P, class ARG> pybind11::object function_from_python(typename DomainTraits<ARG>::EntireDomainType dom, pybind11::object pyf) {
+    Function<P,ARG(ARG)> id = Function<P,ARG(ARG)>::identity(dom);
+    pybind11::object pyobjf = pyf(id);
+    try {
+        VectorFunction<P,ARG> vf=pybind11::cast<VectorFunction<P,ARG>>(pyobjf);
+        return pybind11::cast(vf);
+    } catch (...) { }
+    try {
+        pybind11::list pylstf = pybind11::cast<pybind11::list>(pyobjf);
+        SizeType rs = len(pylstf);
+        //VectorFunction<P,ARG>(Vector<ScalarFunction<P,ARG>>(rs, [&id,&lstf](SizeType i){return pybind11::cast<ScalarFunction<P,ARG>>(lstf[i](id));}));
+        List<ScalarFunction<P,ARG>> lsf;
+        for (SizeType i=0; i!=rs; ++i) {
+            lsf.append(pybind11::cast<ScalarFunction<P,ARG>>(pylstf[i]));
+        }
+        return pybind11::cast(VectorFunction<P,ARG>(lsf));
+    } catch (...) { }
+    return pybind11::cast(pybind11::cast<ScalarFunction<P,ARG>>(pyobjf));
+}
+
+pybind11::object univariate_function_from_python(pybind11::object pyf) {
+    return function_from_python<EffectiveTag,RealScalar>(RealDomain(),pyf);
+}
+pybind11::object multivariate_function_from_python(SizeType as, pybind11::object pyf) {
+    return function_from_python<EffectiveTag,RealVector>(EuclideanDomain(as),pyf);
+}
+
+
+
 template<class X, class D>
 inline Matrix<X> get_jacobian(const Vector<D>& d) {
     const Nat rs=d.size(); const Nat as=d[0].argument_size();
@@ -91,7 +120,11 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex
 }
 
 template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Function<P,SIG> >& frepr) {
-    static_cast<const FunctionInterface<P,SIG>&>(frepr.reference())._repr(os); return os;
+    Function<P,SIG> const& f = frepr.reference();
+    os << "Function(";
+    if constexpr (Same<decltype(f.argument_size()),SizeOne>) { }
+    else { os << frepr.reference().argument_size() << ","; }
+    return os << " lambda x: " << frepr.reference() << " )";
 }
 
 }// namespace Ariadne
@@ -403,7 +436,8 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     }
 
     function_class.def("__str__", &__cstr__<F>);
-    function_class.def("__repr__", &__crepr__<F>);
+    function_class.def("__repr__", &__repr__<F>);
+    function_class.def("__crepr__", &__crepr__<F>);
 
     if constexpr (Same<RES,RealVector>) if constexpr (Same<ARG,RealVector>) {
         module.def("join", (VectorFunction<P,ARG>(*)(const ScalarFunction<P,ARG>&, const ScalarFunction<P,ARG>&)) &join);
@@ -553,9 +587,11 @@ Void function_submodule(pybind11::module& module) {
 
     template_<Function> function_template(module,python_template_name<Function>().c_str());
     function_template.def_new([](RealVariable var, Scalar<RealExpression> e){return EffectiveScalarUnivariateFunction(var,e);});
-    function_template.def_new([](RealVariable var, Scalar<RealExpression> e){return EffectiveScalarUnivariateFunction(var,e);});
+    function_template.def_new([](RealVariable var, Vector<RealExpression> e){return EffectiveVectorUnivariateFunction(var,e);});
     function_template.def_new([](RealSpace spc, Scalar<RealExpression> e){return EffectiveScalarMultivariateFunction(spc,e);});
     function_template.def_new([](RealSpace spc, Vector<RealExpression> e){return EffectiveVectorMultivariateFunction(spc,e);});
 
-}
+    function_template.def_new([](pybind11::object pyf){return univariate_function_from_python(pyf);});
+    function_template.def_new([](SizeType as, pybind11::object pyf){return multivariate_function_from_python(as,pyf);});
 
+}

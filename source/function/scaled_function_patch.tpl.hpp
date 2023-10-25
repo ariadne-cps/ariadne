@@ -80,20 +80,6 @@ template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDom
 }
 
 
-// Full output
-template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
-template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
-
-template<class T> concept HasRepr = requires(OutputStream& os, T const& t) { t._repr(os); };
-
-template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) {
-    if constexpr (HasRepr<T>) {
-        obj.reference()._repr(os); return os;
-    } else {
-        return os << obj.reference();
-    }
-}
-
 
 inline OutputStream& operator<<(OutputStream& os, const Representation<FloatDP>& flt_repr)
 {

@@ -323,14 +323,6 @@ template<class... AS> auto _preimage_(AS const& ... as) -> decltype(preimage(as.
 template<class T> std::string __cstr__(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
 
-template<class T> struct Representation {
-    const T* pointer;
-    Representation(const T& t) : pointer(&t) { }
-    const T& reference() const { return *pointer; }
-};
-template<class T> Representation<T> representation(const T& t) {
-    return Representation<T>(t); }
-
 template<class T> std::string __crepr__(const T& t) {
     std::stringstream ss; ss << representation(t); return ss.str(); }
 

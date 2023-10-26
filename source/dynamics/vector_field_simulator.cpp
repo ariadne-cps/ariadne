@@ -49,9 +49,6 @@
 
 namespace Ariadne {
 
-template class Orbit<LabelledPoint<Approximation<FloatDP>>>;
-template class Orbit<List<LabelledPoint<Approximation<FloatDP>>>>;
-
 template<class X> LabelledPoint<X> make_state_auxiliary_point(const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
     Point<X> sapt(saspc.dimension(),spt.zero_element());

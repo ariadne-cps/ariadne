@@ -359,10 +359,10 @@ However, taking these as a sub-base for all open sets yields a topology that may
 
 <i>Example</i> We now give an example to show that the lower and upper sets, when taken as closed sets, need not generate an order topology.
 <br/>
-Consider \f$\R\times\R\f$ with the standard product order \f$(x_1,y_1)\leq(x_2,y_2)\iff x_1\leq x_2\and y_1\leq y_2\f$.
-Suppose we take the sets \f$\{(x,y)\mid x\leq a\and y\leq b\}\f$ and \f$\{(x,y)\mid a\leq x\and b\leq y\}\f$ to generate the closed sets of the topology, so a sub-base of open sets is given by \f$\{(x,y)\mid x < a \or y < b\}\f$ and \f$\{(x,y)\mid a < x \or b < y\}\f$.
-Then any open set \f$U\f$ must contain a quadrants of the form \f$x< a \and y>b\f$ and \f$x>a \and y< b\f$, so any two open sets intersect, so the topology cannot yield a partially-ordered space.
-Note that in this case, the sets \f$\{ (x,y)  \mid \underline{a} < x < \overline{a} \and \underline{b} < y < \overline{b}\}\f$ are not open.
+Consider \f$\R\times\R\f$ with the standard product order \f$(x_1,y_1)\leq(x_2,y_2)\iff x_1\leq x_2\wedge y_1\leq y_2\f$.
+Suppose we take the sets \f$\{(x,y)\mid x\leq a\wedge y\leq b\}\f$ and \f$\{(x,y)\mid a\leq x\wedge b\leq y\}\f$ to generate the closed sets of the topology, so a sub-base of open sets is given by \f$\{(x,y)\mid x < a \vee y < b\}\f$ and \f$\{(x,y)\mid a < x \vee b < y\}\f$.
+Then any open set \f$U\f$ must contain a quadrants of the form \f$x< a \wedge y>b\f$ and \f$x>a \wedge y< b\f$, so any two open sets intersect, so the topology cannot yield a partially-ordered space.
+Note that in this case, the sets \f$\{ (x,y)  \mid \underline{a} < x < \overline{a} \wedge \underline{b} < y < \overline{b}\}\f$ are not open.
 
 \subsubsection partialorderedspace Partially ordered space
 

@@ -31,7 +31,7 @@
 \page algebraic_equations_page Algebraic Equations
 
 This page describes methods for the rigorous numerical solution of algebraic equations.
-For details on how this is implemented in Ariadne, see the \ref AlgebraicEquationSubModule documentation
+For details on how this is implemented in %Ariadne, see the \ref AlgebraicEquationSubModule documentation
 
 Consider the system of nonlinear algebraic equations
 \f[ f(x) = 0; \quad x\in D \f]
@@ -67,7 +67,7 @@ and rearrange to obtain
 The Krawczyk method is given by the contraction algorithm
 \f[ \boxed{ [x_{n+1}] = [x_n] \cap \bigl( x_n -J_nf(x_n) + (I - J_nDf[x_n]) ([x_n]-x]) \bigr) } \f]
 Typically, we take either
-\f[ \boxed{ J = \mathrm{mid}(Df[x]) \text{ or } J=Df(x) } \f]
+\f[ \boxed{ J = \mathrm{mid}(Df[x])^{-1} \text{ or } J=Df(x)^{-1} } \f]
 
 \section modified_krawczyk The Modified Krawczyk  Method
 

@@ -506,7 +506,7 @@ namespace Ariadne {
  * \ingroup SolverModule
  * \brief Classes and functions for solving nonlinear algebraic equations.
  *
- * \details For the mathematical theory of algebraic equations, including implicit function problems, see the \ref algebraic_equations_page Page.
+ * \details <em>For the mathematical theory of algebraic equations, including implicit function problems, see the \ref algebraic_equations_page Page.</em>
  *
  * A \a Solver class provides functionality for solving algebraic equations, as defined in the \ref SolverInterface.
  * %Two basic kinds of problem are considered.
@@ -529,9 +529,12 @@ namespace Ariadne {
  * \ingroup SolverModule
  * \brief Classes and functions for solving linear and nonlinear programming problems.
  *
- * The LinearProgram class supports construction and solution of linear
- * programming problems. Tests for feasibility only are also possible. The
- * computations are performed by a BLAS/LAPACK style lpslv() routing.
+ * \details <em>For the mathematical theory of linear programming, see the \ref linear_programming_page Page, and for the theory of nonlinear programming, see the \ref nonlinear_programming_page Page.</em>
+ *
+ * The \a LinearProgram class supports construction and solution of linear
+ * programming problems. Tests for feasibility only are also possible.
+ *
+ *
  */
 
 

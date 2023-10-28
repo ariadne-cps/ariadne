@@ -17,23 +17,24 @@ MathJax.Hub.Config({
       Y: "{\\mathbb{Y}}",
       A: "{\\mathbb{A}}",
       seq: ["{\\vec{#1}}",1],
+      dt: ["{\\dot{#1}}",1],
       fto: "{\\longrightarrow}",
+      pfto: "{\\dashrightarrow}",
+      psfto: "{\\dashrightarrow}",
       interval: ["{[#1]}",1],
       ivl: ["{[#1]}",1],
-      dt: ["{\\dot{#1}}",1],
       unl: ["{\\underline{#1}}",1],
       ovl: ["{\\overline{#1}}",1],
       der: ["{\\dot{#1}}",1],
-      dag: "{\\dagger}",
 
       hatR: "{\\,\\widehat{\\!R}}",
       hatX: "{\\,\\widehat{\\!X}}",
       hatY: "{\\widehat{Y}}",
 
-      tru: "{\\mathsc{T}}",
-      fls: "{\\mathsc{F}}",
-      indt: "{\\mathsc{I}}",
-      unkn: "{\\mathsc{U}}",
+      tru: "{\\mathsf{T}}",
+      fls: "{\\mathsf{F}}",
+      indt: "{\\mathsf{I}}",
+      unkn: "{\\mathsf{U}}",
 
       precless: "\\prec\\!<",
       precprec: "\\prec\\!\\!\\!\\prec",
@@ -42,24 +43,24 @@ MathJax.Hub.Config({
       succsucc: "\\succ\\!\\!\\!\\succ",
       gtrsucc: ">\\!\\succ",
 
-      and: "\\wedge",
-      or: "\\vee",
+//      and: "\\wedge",
+//      or: "\\vee",
+
+      dom: "{\\mathrm{dom}}",
 
       tand: "{\\text{ and }}",
       tor: "{\\text{ or }}",
       timplies: "{\\text{ implies }}",
 
+
+      dag: "{\\dagger}",
+
       twoheaddownarrow: "{\\!\\downarrow\\!\\!\\downarrow}",
       twoheaduparrow: "{\\!\\uparrow\\!\\!\\uparrow}",
 
-      pfto: "{\\dashrightarrow}",
-      psfto: "{\\dashrightarrow}",
-
-      dom: "{\\mathrm{dom}}",
-
       cline: ["",1],
-      textsc: ["{\\mathsc{#1}}",1],
       mathsc: ["\\text{#1}",1],
+      textsc: ["{\\mathsc{#1}}",1],
     }
   }
 });

@@ -1,12 +1,13 @@
-\usepackage[top=25mm,left=25mm,bottom=25mm,right=25mm]{geometry}
+%\usepackage[top=25mm,left=25mm,bottom=25mm,right=25mm]{geometry}
 
-\newcommand{\interval}[1]{{[#1]}}
-\newcommand{\ivl}[1]{{[#1]}}
+\usepackage{amssymb}
+
 \newcommand{\B}{\mathbb{N}}
 \newcommand{\K}{\mathbb{K}}
-\newcommand{\S}{\mathbb{S}}
+\renewcommand{\S}{\mathbb{S}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\I}{\mathbb{I}}
@@ -18,13 +19,21 @@
 \newcommand{\dt}[1]{\dot{#1}}
 \newcommand{\fto}{\longrightarrow}
 \newcommand{\pfto}{\dashrightarrow}
+\newcommand{\psfto}{\dashrightarrow}
+\newcommand{\interval}[1]{{[#1]}}
+\newcommand{\ivl}[1]{{[#1]}}
+\newcommand{\unl}[1]{{\underline{#1}}}
+\newcommand{\ovl}[1]{{\overline{#1}}}
+\newcommand{\der}[1]{\dot{#1}}
 
 \newcommand{\hatR}{\widehat{R}}
 \newcommand{\hatX}{\widehat{X}}
 \newcommand{\hatY}{\widehat{Y}}
 
-\newcommand{\unl}[1]{{\underline{#1}}}
-\newcommand{\ovl}[1]{{\overline{#1}}}
+\newcommand{\tru}{\mathsf{T}}
+\newcommand{\fls}{\mathsf{F}}
+\newcommand{\indt}{\mathsf{I}}
+\newcommand{\unkn}{\mathsf{U}}
 
 \newcommand{\precless}{\prec\!<}
 \newcommand{\precprec}{\prec\!\!\prec}
@@ -33,19 +42,11 @@
 \newcommand{\succsucc}{\succ\!\!\succ}
 \newcommand{\gtrsucc}{>\!\!\!\succ}
 
-\newcommand{\and}{\wedge}
-\newcommand{\or}{\vee}
+%\newcommand{\and}{\wedge}
+%\newcommand{\or}{\vee}
 
+\newcommand{\dom}{\mathrm{dom}}
 
 \newcommand{\tand}{\text{ and }}
 \newcommand{\tor}{\text{ or }}
 \newcommand{\timplies}{\text{ implies }}
-
-\newcommand{\dom}{\mathrm{dom}}
-
-\newcommand{\der}[1]{\dot{#1}}
-
-\newcommand{\tru}{\mathsf{T}}
-\newcommand{\fls}{\mathsf{F}}
-\newcommand{\indt}{\mathsf{I}}
-\newcommand{\unkn}{\mathsf{U}}

@@ -74,7 +74,7 @@ On computing yet more digits we might find \f$r_1=3.141592653589793\,238\cdots\f
 Of course, if \f$r_1\neq r_2\f$, by computing enough digits, we will \e eventually be able to decide which of \f$r_1<r_2\f$ or \f$r_2>r_1\f$ is true, but if \f$r_1=r_2\f$, then no matter how many digits we compute, we will still never know which if \f$r_1 \lesseqgtr r_2\f$ holds.
 In this case again the computation would run forever, and we would consider the value \a indeterminate.
 
-The resulting logic is <em>%Kleenean</em> logic \f$\K=\{T,F,I\}\f$, with three values \a true \f$\top,\mathsc{T}\f$, \a false \f$\bot,\mathsc{F}\f$ and \a indeterminate \f$\uparrow,\mathsc{I}\f$.
+The resulting logic is <em>%Kleenean</em> logic \f$\K=\{T,F,I\}\f$, with three values \a true \f$\top,\mathsf{T}\f$, \a false \f$\bot,\mathsf{F}\f$ and \a indeterminate \f$\uparrow,\mathsf{I}\f$.
 The %Kleenean type represents the result of <em>quasidecidable</em> predicates.
 
 A subtype of the %Kleeneans is given by the <em>%Sierpinskian</em> type \f$\S=\{\tru,\indt\}\f$ with open sets \f$\{\},\{\tru\},\{\tru,\indt\}\f$. The %Sierpinsian type represents the result of <em>verifiable</em> predicates.
@@ -147,7 +147,7 @@ One may also think of \f$\S\f$ as "positive" %Kleeneans \f$\K^+\f$.
 \section logical_operations Logical Operations
 
 The standard logical operators \f$\neg,\wedge,\vee,\rightarrow,\leftrightarrow\f$ are all defined on \f$\K\f$.
-They can be extracted from their %Boolean counterparts by considering a set-valued interpretation with \f$\mathsc{I}=\{\mathsc{T},\mathsc{F}\}\f$. Explicitly, the operators are given by
+They can be extracted from their %Boolean counterparts by considering a set-valued interpretation with \f$\mathsf{I}=\{\mathsf{T},\mathsf{F}\}\f$. Explicitly, the operators are given by
 \f[ \begin{array}[t]{|c|c|}\hline p&\!\neg{p}\!\\\hline \fls&\tru\\\indt&\indt\\\tru&\fls\\\hline \end{array} \qquad
     \begin{array}[t]{|c|ccc|}\hline \!p \wedge q\!&\fls&\indt&\tru\\\hline \fls&\fls&\fls&\fls\\\indt&\fls&\indt&\indt\\\tru&\fls&\indt&\tru\\\hline\end{array} \quad
     \begin{array}[t]{|c|ccc|}\hline \!p \vee q\!&\fls&\indt&\tru\\\hline \fls&\fls&\indt&\tru\\\indt&\indt&\indt&\tru\\\tru&\tru&\tru&\tru\\\hline\end{array} \quad

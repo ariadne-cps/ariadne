@@ -42,6 +42,71 @@
 using namespace std;
 using namespace Ariadne;
 
+
+class TestFeasibilityChecker
+{
+  private:
+    std::unique_ptr<FeasibilityCheckerInterface> feasibility_checker;
+    DoublePrecision pr;
+  public:
+    TestFeasibilityChecker(const FeasibilityCheckerInterface& fc)
+        : feasibility_checker(fc.clone()) { }
+
+    Void test() {
+        ARIADNE_TEST_CALL(test_feasibility_check());
+    }
+
+    Void test_feasibility_check() {
+        EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
+        ARIADNE_TEST_CONSTRUCT( EffectiveVectorMultivariateFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, D, ({{-1.0_x, 1.0_x},{-1.0_x,1.0_x}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, C, ({{0.0_x,0.0_x}}) );
+
+        ARIADNE_TEST_CONSTRUCT( ValidatedFeasibilityProblem, p, (D,g,C) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPVector, x1, ({1,0},pr) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->is_feasible_point(p,x1)) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPVector, x2, ({0.46875_x,0.62500_x},pr) );
+        ARIADNE_TEST_ASSERT( not possibly(feasibility_checker->is_feasible_point(p,x2)) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPApproximation, e2l, (0.000732421875,pr) );
+        ARIADNE_TEST_ASSERT( not probably(feasibility_checker->almost_feasible_point(p,x2,e2l)) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPApproximation, e2u, (0.001220703125,pr) );
+        ARIADNE_TEST_ASSERT( probably(feasibility_checker->almost_feasible_point(p,x2,e2u)) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, x3, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},pr) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPVector, y3, (1, {1,pr}) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, X3, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}}) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,X3)) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->check_feasibility(p,x3,y3)) );
+        ARIADNE_TEST_ASSERT( feasibility_checker->validate_feasibility(p,x3) );
+        ARIADNE_TEST_ASSERT( feasibility_checker->validate_feasibility(p.g,x3) );
+        ARIADNE_TEST_ASSERT( not feasibility_checker->validate_infeasibility(p,y3) );
+        ARIADNE_TEST_ASSERT( not feasibility_checker->validate_infeasibility(p,x3,y3) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, x4, ({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}},pr) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPVector, y4, (1, {1,pr}) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, X4, ({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}}) );
+        ARIADNE_TEST_PRINT( feasibility_checker->contains_feasible_point(p,X4) );
+        ARIADNE_TEST_PRINT( feasibility_checker->check_feasibility(p,x4,y4) );
+        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,X4)) );
+        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,X4)) );
+        ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p,x4) );
+        ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p.g,x4) );
+        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->check_feasibility(p,x4,y4)) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X5, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}},pr) );
+        ARIADNE_TEST_ASSERT( feasibility_checker->contains_feasible_point(p,UpperBoxType(X5.array())) );
+
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X6, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}},pr) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,UpperBoxType(X6.array()))) );
+
+        ARIADNE_TEST_CONSTRUCT(FloatDPVector, x7, ({0.343750_x,0.656250_x},pr) );
+        ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p,x7) );
+    }
+
+};
+
 class TestOptimiser
 {
   private:
@@ -52,7 +117,6 @@ class TestOptimiser
         : optimiser(opt.clone()) { }
 
     Void test() {
-        ARIADNE_TEST_CALL(test_feasibility_check());
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
         ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
@@ -176,37 +240,18 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
     }
 
-    Void test_feasibility_check() {
-        EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
-        ARIADNE_TEST_CONSTRUCT( EffectiveVectorMultivariateFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
-        ARIADNE_TEST_CONSTRUCT( ExactBoxType, D, ({{-1.0_x, 1.0_x},{-1.0_x,1.0_x}}) );
-        ARIADNE_TEST_CONSTRUCT( ExactBoxType, C, ({{0.0_x,0.0_x}}) );
-
-        ARIADNE_TEST_CONSTRUCT( ValidatedFeasibilityProblem, p, (D,g,C) );
-
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X1, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},pr) );
-        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(p,X1)) );
-
-        // The following test fails since it is difficult to find the feasible
-        // point in the box.
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X2, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}},pr) );
-        ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(p,X2) );
-
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X3, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}},pr) );
-        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(p,X3)) );
-
-        ARIADNE_TEST_CONSTRUCT(FloatDPVector, x2, ({0.343750_x,0.656250_x},pr) );
-        ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(p,x2) );
-    }
-
 };
 
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
+
+    FeasibilityChecker fc;
+    TestFeasibilityChecker(fc).test();
+
     InfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
-    return ARIADNE_TEST_FAILURES;
+/*
     InteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();
 
@@ -215,6 +260,7 @@ Int main(Int argc, const char* argv[]) {
 
     IntervalOptimiser ivlo;
     TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
+*/
     return ARIADNE_TEST_FAILURES;
 }
 

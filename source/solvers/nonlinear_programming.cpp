@@ -449,6 +449,7 @@ template<class P> OutputStream& operator<<(OutputStream& os, OptimisationProblem
 template OutputStream& operator<<(OutputStream&, OptimisationProblem<ApproximateTag> const&);
 template OutputStream& operator<<(OutputStream&, OptimisationProblem<ValidatedTag> const&);
 
+
 template<class R>
 class ConstrainedFeasibilityMatrix {
     ConstrainedFeasibilityMatrix(const Vector<R>& x, const Vector<R>& z, const Matrix<R>& a, const Matrix<R>& h)
@@ -483,128 +484,64 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
-    ExactBoxType r(bx);
+inline Box<Interval<FloatDP>> cast_exact_widen(Box<Interval<FloatDP>> const& bx, FloatDP e) {
+    Box<Interval<FloatDP>> r(bx);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        r[i]=ExactIntervalType(sub(down,bx[i].lower_bound(),e),add(up,bx[i].upper_bound(),e));
+        r[i]=Interval<FloatDP>(sub(down,bx[i].lower_bound(),e),add(up,bx[i].upper_bound(),e));
     }
-    return bx;
+    return r;
 }
 
 
-const FloatDP OptimiserBase::zero = FloatDP(0,dp);
-const FloatDP OptimiserBase::one = FloatDP(1,dp);
 
-ApproximateKleenean OptimiserBase::
+//------- FeasibilityChecker -----------------------------------//
+
+FeasibilityChecker* FeasibilityChecker::
+clone() const
+{
+    return new FeasibilityChecker(*this);
+}
+
+
+ApproximateKleenean FeasibilityChecker::
 almost_feasible_point(ValidatedFeasibilityProblem p, ApproximateVectorType ax, FloatDPApproximation error) const
 {
-    ExactVectorType ex=cast_exact(ax);
-    if(!contains(p.D,ex)) { return false; }
+    if (!probably(contains(p.D,ax))) { return false; }
     ApproximateVectorType gx=p.g(ax);
-    return probably(contains(cast_exact_widen(p.C,cast_exact(error)),gx));
+    return contains(cast_exact_widen(p.C,cast_exact(error)),gx);
 }
 
 
-ValidatedKleenean OptimiserBase::
+ValidatedKleenean FeasibilityChecker::
 is_feasible_point(ValidatedFeasibilityProblem p, ExactVectorType x) const
 {
-    if(!contains(p.D,x)) { return false; }
+    if (!contains(p.D,x)) { return false; }
     Vector<FloatDPBounds> gx=p.g(x);
     return contains(p.C,gx);
 }
 
-ValidatedKleenean OptimiserBase::
-contains_feasible_point(ValidatedFeasibilityProblem p, ValidatedVectorType X) const
+ValidatedKleenean FeasibilityChecker::
+contains_feasible_point(ValidatedFeasibilityProblem p, UpperBoxType X) const
 {
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("D="<<p.D<<", g="<<p.g<<", C="<<p.C<<", X="<<X);
-
-    auto& D=p.D; auto& g=p.g; auto& C=p.C;
-
-    // Now test if the (reduced) box X satisfies other constraints
-    if(definitely(disjoint(Box<UpperIntervalType>(X),D))) { return false; }
-    if(definitely(not subset(Box<UpperIntervalType>(X),D))) { return indeterminate; }
-
-    // Test inequality constraints
-    ValidatedKleenean result = true;
-    Vector<FloatDPBounds> gx=g(X);
-    CONCLOG_PRINTLN("g(X)="<<gx);
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(definitely(disjoint(UpperIntervalType(gx[i]),C[i]))) {
+    if (this->validate_feasibility(p,cast_singleton(X))) {
+        return true;
+    } else {
+        p.D=intersection(p.D,cast_exact_box(X));
+        if (this->validate_infeasibility(p)) {
             return false;
+        } else {
+            return indeterminate;
         }
-        if(!C[i].is_singleton()) {
-            if(definitely(not subset(UpperIntervalType(gx[i]),C[i]))) { result = indeterminate; }
-        }
     }
-
-    // Break if some inequality constraints indefinite
-    if(!definitely(result)) { return result; }
-
-    // Extract the equality constraints
-    List<SizeType> equality_constraints;
-    equality_constraints.reserve(C.size());
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].is_singleton()) { equality_constraints.append(i); }
-    }
-
-    // Construct the function g_e(x) = g_{e_i}(x)
-    ARIADNE_ASSERT(g.result_size()>0);
-    ValidatedVectorMultivariateFunction ge(equality_constraints.size(),g.domain());
-    ExactBoxType ce(equality_constraints.size());
-    for(SizeType i=0; i!=ge.result_size(); ++i) {
-        ge[i]=g[equality_constraints[i]];
-        ce[i]=C[equality_constraints[i]];
-    }
-
-    CONCLOG_PRINTLN("ge="<<ge<<", ce="<<ce);
-
-    // FIXME: Carefully change this code!
-    FloatDPBoundsMatrix ivlA=jacobian(ge,X);
-    CONCLOG_PRINTLN("ivlA="<<ivlA);
-    FloatDPApproximationVector fltD(X.size(),dp);
-    for(SizeType i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
-    FloatDPApproximationMatrix fltA=midpoint(ivlA);
-    CONCLOG_PRINTLN("A="<<fltA);
-    CONCLOG_PRINTLN("D="<<fltD);
-    FloatDPApproximationMatrix fltL = FloatDPApproximationDiagonalMatrix(fltD.array())*transpose(fltA);
-    CONCLOG_PRINTLN("L="<<fltL);
-
-    FloatDPBoundsMatrix ivlS = ivlA * cast_exact(fltL);
-    CONCLOG_PRINTLN("ivlS="<<ivlS);
-
-    FloatDPBoundsMatrix ivlR = inverse(ivlS);
-    try {
-        ivlR=inverse(ivlS);
-    }
-    catch (SingularMatrixException const& e) {
-        return indeterminate;
-    }
-
-    CONCLOG_PRINTLN("ivlR="<<ivlR);
-    FloatDPBoundsMatrix& valR=reinterpret_cast<FloatDPBoundsMatrix&>(ivlR);
-
-    // Projected interval Newton step. For h:R^n->R^m; Dh mxn, take L nxm.
-    // ExactIntervalType Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
-    // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
-    Vector<FloatDPBounds> x=midpoint(X);
-    Vector<FloatDPBounds> new_X = x - cast_exact(fltL) * (valR * (ge(x)-cast_singleton(ce)) );
-    CONCLOG_PRINTLN("old_X="<<X);
-    CONCLOG_PRINTLN("new_X="<<new_X);
-    Vector<FloatDPBounds> reduced_X = refinement(X,new_X);
-    CONCLOG_PRINTLN("reduced_X="<<reduced_X);
-
-    if(refines(new_X,X)) { return true; }
-    else { return indeterminate; }
 }
 
-ValidatedKleenean OptimiserBase::
+ValidatedKleenean FeasibilityChecker::
 check_feasibility(ValidatedFeasibilityProblem p,
-                  ExactVectorType x0, ExactVectorType y0) const
+                  ValidatedVectorType x, ExactVectorType y) const
 {
-    if (this->validate_feasibility(p,x0)) {
+    if (this->validate_feasibility(p,x)) {
         return true;
-    } else if (this->validate_infeasibility(p,x0,y0)) {
+    } else if (this->validate_infeasibility(p,x,y)) {
         return false;
     } else {
         return indeterminate;
@@ -612,168 +549,161 @@ check_feasibility(ValidatedFeasibilityProblem p,
 }
 
 
+Bool FeasibilityChecker::
+validate_feasibility(ValidatedVectorMultivariateFunction h,
+                     ValidatedVectorType X) const
+{
+    // Let h:R^n->R^m with m<n, and X define a box in R^n.
+    // Attempt to solve h(c+R*B*w)=0 for w, where c=mid(X), R is a diagonal scaling matrix, and B is an n*m matrix.
+    // Let z lie in the unit box Z=[-1:+1]^n, and take x=R*z+c where R=diag(rad(X)) is a scaling matrix.
+    // Then the function z->h(c+R*z) has Jacobian Dh(X)*R = [A]*R over Z.
+    // Then for an interval Newton step, we have [A]*R*B dw = -h(c+B*w)
+    // Take A to be an approximation to [A], such as A=mid([A]) or A=Dh(C), and set B=(A*R)^T=R*A^T
+    // Then we solve h(c+R*R*AT*w)=0 using Newton's method centred at w=0, yielding W' = -([A]*R*R*A^T)\h(c)
+    //
 
-Bool OptimiserBase::
+    Vector<FloatDPApproximation> ca = midpoint(X);
+    Vector<FloatDP> c = cast_exact(ca);
+    Matrix<FloatDP> AT = transpose(cast_exact(h.jacobian(ca)));
+    CONCLOG_PRINTLN("A="<<transpose(AT));
+
+
+    Vector<FloatDPBounds> W=h(X);
+    Matrix<FloatDPBounds> A = h.jacobian(X);
+    DiagonalMatrix<FloatDP> R(Array<FloatDP>(X.size(), [&X](SizeType i){return cast_exact(X[i].error());}));
+
+
+    // Could take w to be centre of set W
+    // Vector<FloatDP> w=cast_exact(W);
+    // new_W = w - gs_solve(A*AT,h(x+AT*w));
+    // Easier to take w = 0, which should be an element of W
+    Vector<FloatDPBounds> new_W = - gs_solve(A*(R*R*AT),h(c));
+    Vector<FloatDPBounds> new_X = c + (R * R) * (AT * new_W);
+
+    if (refines(new_X,X)) {
+        return true;
+    } else {
+        if (refines(new_W,W)) {
+            ARIADNE_WARN("Did not verify feasible point in "<<X<<", but one may exist.");
+        }
+        return false;
+    }
+}
+
+Bool FeasibilityChecker::
 validate_feasibility(ValidatedFeasibilityProblem p,
-                     ExactVectorType x0) const
+                     ValidatedVectorType x) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
-    ARIADNE_PRECONDITION(D.size()==g.argument_size());
-    ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(x0.size()==D.size());
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
-    CONCLOG_PRINTLN("x0="<<x0);
-
-    Vector<FloatDPBounds> x(x0);
     CONCLOG_PRINTLN("x="<<x);
 
-    Vector<FloatDPBounds> gx=g(x);
-    CONCLOG_PRINTLN("gx="<<gx);
+    ARIADNE_PRECONDITION(x.size()==D.size());
 
-    List<SizeType> equalities, inequalities;
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower_bound()==C[i].upper_bound()) {
-            equalities.append(i);
+
+    for(SizeType i=0; i!=D.size(); ++i) {
+        CONCLOG_PRINTLN_AT(1,"x["<<i<<"]="<<x[i]<<", D["<<i<<"]="<<D[i]);
+        if (!possibly(contains(D[i],x[i]))) {
+            return false;
+        } else if (definitely(contains(D[i],x[i]))) {
         } else {
-            inequalities.append(i);
-            if(!definitely(contains(C[i],gx[i]))) {
-                CONCLOG_PRINTLN_AT(1,"g["<<i<<"](x)="<<gx[i]<<", C["<<i<<"]="<<C[i]);
-                return false; }
+            x[i]=cast_singleton(intersection(UpperIntervalType(x[i]),D[i]));
         }
     }
 
-    if(equalities.empty()) { CONCLOG_PRINTLN("Feasible"); return true; }
+    FloatDPBoundsVector w=g(x);
+    CONCLOG_PRINTLN_AT(1,"w=g(x)="<<w);
 
-    SizeType k=equalities.size();
-    SizeType n=D.size();
+    List<SizeType> equalities;
+    for(SizeType j=0; j!=C.size(); ++j) {
+        CONCLOG_PRINTLN_AT(1,"w["<<j<<"]="<<w[j]<<", C["<<j<<"]="<<C[j]);
+        if (!possibly(contains(C[j],w[j]))) {
+            return false;
+        } else if (definitely(contains(C[j],w[j]))) {
+        } else {
+            // NOTE: It is safe to try solving a constraint as an equality
+            if ( true || decide(C[j].lower_bound()==C[j].upper_bound()) ) {
+                equalities.append(j);
+            }
+        }
+    }
+    if(equalities.empty()) {
+        return true;
+    }
+
     ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
-    ExactFloatDPVectorType c(equalities.size(),dp);
     for(SizeType i=0; i!=equalities.size(); ++i) {
-        h[i] = g[equalities[i]];
-        c[i] = C[equalities[i]].lower_bound();
+        SizeType j=equalities[i];
+        h[i] = g[j]-static_cast<ExactNumber>(intersection(UpperIntervalType(w[j]),C[j]).midpoint());
     }
-    CONCLOG_PRINTLN("h="<<h<<" c="<<c<<" h(x)-c="<<(h(x0)-c));
+    CONCLOG_PRINTLN_AT(1,"h="<<h);
 
-    // Attempt to solve h(x0+AT*w)=0
-    // TODO: Change to use validated numbers
-    Matrix<FloatDPBounds> AT = transpose(h.jacobian(x0));
-    CONCLOG_PRINTLN("A="<<transpose(AT));
-    Vector<FloatDPBounds> w0(k,FloatDPBounds(0,dp));
-
-    Bool found_solution=false;
-    Bool validated_solution=false;
-
-    Vector<FloatDPBounds> w(k,dp), mw(k,dp), nw(k,dp);
-    Vector<FloatDPBounds> mx(n,dp);
-
-    for(SizeType ii=0; ii!=12; ++ii) {
-        mw=midpoint(w);
-        x=x0+AT*w;
-        mx=x0+AT*mw;
-        nw = mw - solve(h.jacobian(x)*AT,Vector<FloatDPBounds>(h(mx)-c));
-        CONCLOG_PRINTLN_AT(1,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", refines="<<refines(nw,w));
-
-        if(!found_solution) {
-            if(refines(nw,w)) {
-                found_solution=true;
-                w=w+FloatDPBounds(0,1,dp)*(w0-w);
-            } else {
-                w=w+FloatDPBounds(0,1,dp)*(FloatDPBounds(2,dp)*nw-w);
-            }
-        } else {
-            if(refines(nw,w)) {
-                validated_solution=true;
-            } else if(validated_solution) {
-                // Not a contraction, so presumably accurate enough
-                break;
-            }
-            w=refinement(nw,w);
-        }
-
-    }
-    CONCLOG_PRINTLN("w="<<w<<", validated="<<validated_solution);
-
-    if(!validated_solution) { return false; }
-
-    // Compute x value
-    x=x0+AT*w;
-    CONCLOG_PRINTLN("x="<<x);
-    gx=g(x);
-    CONCLOG_PRINTLN("g(x)="<<gx);
-
-    // Check that equality constraints are plausible
-    ARIADNE_DEBUG_ASSERT(models(h(x)-c,ExactFloatDPVectorType(k,dp)));
-
-    // Check inequality constraints once more
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower_bound()==C[i].upper_bound()) {
-            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].midpoint()));
-        } else {
-            if(!definitely(element(gx[i],C[i]))) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return this->validate_feasibility(h,x);
 }
 
 
-Bool OptimiserBase::
+Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p,
                        UpperBoxType X, ExactVectorType y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
     ExactBoxType DX = intersection(D,cast_exact_box(X));
-    ExactVectorType x = midpoint(X);
-    return this->validate_infeasibility(ValidatedFeasibilityProblem(DX,g,C),x,y);
+    ApproximateVectorType xa = midpoint(X);
+    return this->validate_infeasibility(ValidatedFeasibilityProblem(DX,g,C),xa,y);
 }
 
 
-Bool OptimiserBase::
+Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p,
-                       ExactVectorType x, ExactVectorType y) const
+                       ApproximateVectorType xa, ExactVectorType y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
-    ARIADNE_PRECONDITION(D.size()==g.argument_size());
-    ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(x.size()==D.size());
-    ARIADNE_PRECONDITION(y.size()==C.size());
     CONCLOG_SCOPE_CREATE;
-    // Compute first-order approximation to g(D) centred at x.
-    // For feasibilty, have yg(D) cap yC nonempty.
-    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
+    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C<<", xa="<<xa<<", y="<<y);
 
-    // Compute y.C
-    UpperIntervalType yC = dot(y,cast_vector(C));
+    ARIADNE_PRECONDITION(xa.size()==D.size());
+    ARIADNE_PRECONDITION(y.size()==C.size());
+
+    if(y.size()==0) { return D.is_empty(); }
+
+    UpperIntervalType yC = dot(y,C);
 
     // Compute Taylor estimate of y g(X)
     ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
     ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
-    for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperIntervalType tygD = apply(tyg.function(),D);
+        for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j];
+    }
+    UpperIntervalType ygD = apply(tyg.function(),D);
+    // UpperIntervalType ygD = dot(y,apply(g,D));
 
-    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
-    UpperIntervalVectorType ydgD = transpose(dgD) * y;
-
-    UpperIntervalType ygx = dot(y,apply(g,UpperIntervalVectorType(x)));
-
-    UpperIntervalType ygD = ygx;
-    for(SizeType i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-x[i]);
+    if(definitely(disjoint(yC,ygD))) {
+        CONCLOG_PRINTLN("Infeasible");
+        return true;
     }
 
-    CONCLOG_PRINTLN("yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD);
+    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
+    UpperIntervalVectorType ydgD = transpose(dgD)*y;
 
-    if(definitely(intersection(yC,ygD).is_empty())) { CONCLOG_PRINTLN("Infeasible"); return true; }
+    ValidatedVectorType x = cast_exact(xa);
+    ValidatedNumericType ygx = tyg(x);
+    // ValidatedNumericType ygx = dot(y,g(x));
+    UpperIntervalType ygDx = UpperIntervalType(ygx);
+    for(SizeType i=0; i!=x.size(); ++i) {
+        ygDx += ydgD[i] * (D[i]-x[i]);
+    }
+
+    CONCLOG_PRINTLN("yC="<<yC<<", ygD="<<ygD<<", ygx="<<ygx<<", ydgD="<<ydgD<<", ygDx="<<ygDx);
+
+    if(definitely(disjoint(yC,intersection(ygD,ygDx)))) {
+        CONCLOG_PRINTLN("Infeasible"); return true; }
     else { return false; }
 }
 
 
-// FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
-Bool OptimiserBase::
+Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p, ExactVectorType y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
@@ -781,30 +711,56 @@ validate_infeasibility(ValidatedFeasibilityProblem p, ExactVectorType y) const
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C<<", y="<<y);
 
+    ARIADNE_PRECONDITION(y.size()==C.size());
+
     if(y.size()==0) { return D.is_empty(); }
 
-    // Try to prove lambda.(g(y)-c) != 0
-    const SizeType n=C.size();
+    UpperIntervalType yC = dot(y,C);
 
+    // Compute Taylor estimate of y g(X)
+    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
     ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
-    for(SizeType i=0; i!=n; ++i) {
-        tyg+=y[i]*ValidatedScalarMultivariateTaylorFunctionModelDP(D,g[i],default_sweeper());
+    for(SizeType j=0; j!=y.size(); ++j) {
+        tyg+=y[j]*tg[j];
     }
-    ValidatedNumericType iygx = tyg(cast_singleton(D));
+    UpperIntervalType ygD = apply(tyg.function(),D);
+    // UpperIntervalType ygD = dot(y,apply(g,D));
 
-    UpperIntervalType iyC(0,0);
-    for(SizeType i=0; i!=n; ++i) {
-        iyC+=y[i]*C[i];
-    }
-
-    if(definitely(disjoint(iyC,UpperIntervalType(iygx)))) {
+    if(definitely(disjoint(yC,ygD))) {
+        CONCLOG_PRINTLN("Infeasible");
         return true;
     } else {
         return false;
     }
 }
 
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p) const
+{
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
+
+    if (D.is_empty()) {
+        return true;
+    }
+
+    UpperBoxType W=apply(g,D);
+    return (definitely(disjoint(W,C)));
+}
+
+
+OutputStream& operator<<(OutputStream& os, FeasibilityChecker const& fc) {
+    return os << "FeasibilityChecker()";
+}
+
+
+
+//------- OptimiserBase -----------------------------------//
+
+const FloatDP OptimiserBase::zero = FloatDP(0,dp);
+const FloatDP OptimiserBase::one = FloatDP(1,dp);
 
 
 auto OptimiserBase::
@@ -904,7 +860,7 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
     for(SizeType i=0; i!=10; ++i) {
         this->feasibility_step(ApproximateFeasibilityProblem(D,g,C),w,x,y);
     }
-    return this->check_feasibility(p,cast_exact(x),cast_exact(y));
+    return FeasibilityChecker().check_feasibility(p,cast_exact(x),cast_exact(y));
 }
 
 Void PenaltyFunctionOptimiser::
@@ -1199,94 +1155,6 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
 }
 
 
-ValidatedKleenean PenaltyFunctionOptimiser::
-check_feasibility(ValidatedFeasibilityProblem p,
-                  ExactFloatDPVectorType x, ExactFloatDPVectorType y) const
-{
-    auto& D=p.D; auto& g=p.g; auto& C=p.C;
-    ARIADNE_PRECONDITION(D.size()==g.argument_size());
-    ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(x.size()==D.size());
-    ARIADNE_PRECONDITION(y.size()==C.size());
-
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"D="<<D<<" C="<<C);
-
-    FloatDPBoundsVector gx=g(x);
-    CONCLOG_PRINTLN_AT(1,"x="<<x<<" y="<<y<<" g(x)="<<gx);
-
-    ValidatedKleenean result = true;
-
-    List<SizeType> equalities;
-    for(SizeType j=0; j!=C.size(); ++j) {
-        if( definitely(gx[j].upper()<C[j].lower_bound() || gx[j].lower()>C[j].upper_bound()) ) {
-            return false;
-        }
-        if(C[j].lower_bound()==C[j].upper_bound()) {
-            equalities.append(j);
-        } else {
-            if(!definitely(contains(C[j],gx[j]))) { result = indeterminate; }
-        }
-    }
-
-    if(definitely(result)) {
-        if(equalities.empty()) { CONCLOG_PRINTLN("Feasible"); return true; }
-
-        ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
-        FloatDPBoundsVector c(equalities.size(),dp);
-        for(SizeType i=0; i!=equalities.size(); ++i) {
-            h[i] = g[equalities[i]];
-            c[i] = C[equalities[i]].lower_bound();
-        }
-        CONCLOG_PRINTLN_AT(1,"g="<<g);
-        CONCLOG_PRINTLN_AT(1,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c));
-
-        static const ExactDouble SEARCH_TOLERANCE=1e-8_pr;
-        FloatDPBoundsVector W(h.result_size(),FloatDPBounds(-1,+1,dp)*SEARCH_TOLERANCE);
-        FloatDPBoundsMatrix AT = transpose(midpoint(h.jacobian(x)));
-        FloatDPBoundsVector B = x+AT*W;
-        FloatDPBoundsMatrix IA = h.jacobian(B);
-        CONCLOG_PRINTLN_AT(1,"AT="<<AT<<" IA="<<IA);
-        CONCLOG_PRINTLN_AT(1,"B="<<B);
-
-        // Perform an interval Newton step to try to attain feasibility
-        FloatDPBoundsVector nW = inverse(IA*AT) * FloatDPBoundsVector(h(x)-cast_exact(c));
-        CONCLOG_PRINTLN_AT(1,"W="<<W<<"\nnew_W="<<nW);
-        if(definitely(subset(UpperBoxType(B),D)) && refines(nW,W)) { CONCLOG_PRINTLN("Feasible"); return true; }
-        else { result=indeterminate; }
-    }
-
-    // Compute first-order approximation to g(D) centred at x.
-    // For feasibilty, have yg(D) cap yC nonempty.
-    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
-
-    // Compute y.C
-    UpperIntervalVectorType iy(y);
-    UpperIntervalType yC = dot(iy,C);
-
-    // Compute Taylor estimate of y g(X)
-    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
-    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
-    for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
-
-    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
-    UpperIntervalVectorType ydgD = transpose(dgD) * y;
-
-    FloatDPBounds ygx = dot(y,gx);
-
-    UpperIntervalType ygD = UpperIntervalType(ygx);
-    for(SizeType i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-UpperIntervalType(x[i]));
-    }
-
-    CONCLOG_PRINTLN_AT(1,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD);
-
-    if(definitely(is_empty(intersection(yC,ygD)))) { CONCLOG_PRINTLN("Infeasible"); return false; }
-    else { return indeterminate; }
-}
-
-
 
 
 
@@ -1553,13 +1421,13 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
         this->feasibility_step(p,x,y);
         if(probably(LogicalValue(t>0))) {
             CONCLOG_PRINTLN_AT(1,"y="<<y<<", g(y)="<<g(y));
-            if(this->validate_feasibility(p,cast_exact(y))) {
+            if(FeasibilityChecker().validate_feasibility(p,cast_exact(y))) {
                 return true;
             }
         }
     }
     CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", g(y)="<<g(y));
-    if(this->validate_infeasibility(p,cast_exact(x))) {
+    if(FeasibilityChecker().validate_infeasibility(p,cast_exact(x))) {
         return false;
     }
     return indeterminate;
@@ -1853,7 +1721,7 @@ minimise(ApproximateOptimisationProblem p) const -> ApproximateVectorType
         CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         return x;
     }
-    CONCLOG_PRINTLN("indeterminate_feasibility");
+    CONCLOG_PRINTLN("indeterminate_feasibility")
     throw IndeterminateFeasibilityException();
 }
 
@@ -1887,7 +1755,7 @@ minimise(ValidatedOptimisationProblem p) const -> ValidatedVectorType
         oldx=x;
         FloatDPApproximation oldfx=f(oldx);
         this->step(p,v);
-        if(this->validate_infeasibility(p,cast_exact(y))) {
+        if(FeasibilityChecker().validate_infeasibility(p,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN_AT(1,"Infeasible");
             std::cerr<<"EXCEPTION: "<<ProblemException().what()<<"\n";
@@ -1903,7 +1771,7 @@ minimise(ValidatedOptimisationProblem p) const -> ValidatedVectorType
     }
     CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
 
-    if(this->validate_feasibility(p,cast_exact(x))) {
+    if(FeasibilityChecker().validate_feasibility(p,cast_exact(x))) {
         CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         return cast_exact(x);
     }
@@ -1938,12 +1806,12 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         this->step(optp,v);
-        if(this->validate_feasibility(p,cast_exact(x))) {
+        if(FeasibilityChecker().validate_feasibility(p,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Feasible");
             return true;
         }
-        if(this->validate_infeasibility(p,cast_exact(y))) {
+        if(FeasibilityChecker().validate_infeasibility(p,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Infeasible");
             return false;

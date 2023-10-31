@@ -144,6 +144,58 @@ using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryDa
 
 
 //! \ingroup OptimisationSubModule EvaluationModule
+//! Interface for methods to check feasibility of constraint systems.
+class FeasibilityCheckerInterface {
+    using FLT=FloatDP;
+  public:
+    typedef Bounds<FLT> ValidatedNumericType;
+    typedef Approximation<FLT> ApproximateNumericType;
+    typedef Vector<FLT> ExactVectorType;
+    typedef Vector<Bounds<FLT>> ValidatedVectorType;
+    typedef Vector<Approximation<FLT>> ApproximateVectorType;
+  public:
+    //! \brief Virtual destructor.
+    virtual ~FeasibilityCheckerInterface() = default;
+    //! \brief Create a dynamically-allocated copy.
+    virtual FeasibilityCheckerInterface* clone() const = 0;
+
+    //! \brief Tests if the point \a x is almost feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
+    virtual ApproximateKleenean almost_feasible_point(ValidatedFeasibilityProblem p,
+                                                      ApproximateVectorType x, FloatDPApproximation eps) const = 0;
+    //! \brief Tests whether the point \a x is feasible.
+    //! \details If there are non-algebraic equality constraints, then it is unlikely to find \f$x\f$ exactly atisfying constraints.
+    //! For this reason, this method should only be used if all constraints are inequalities, so the feasible set has nonempty interior.
+    virtual ValidatedKleenean is_feasible_point(ValidatedFeasibilityProblem p,
+                                                ExactVectorType x) const = 0;
+    //! \brief Tests whether the box \a X contains a feasible point.
+    virtual ValidatedKleenean contains_feasible_point(ValidatedFeasibilityProblem p,
+                                                      UpperBoxType X) const = 0;
+    //! \brief Tests whether the validated point \a x contains an exact feasible point, or if the Lagrange multipliers \a y are a certificate of infeasibility.
+    virtual ValidatedKleenean check_feasibility(ValidatedFeasibilityProblem p,
+                                                ValidatedVectorType x, ExactVectorType y) const = 0;
+
+    //! \brief Checks if the point \a x is definitely feasible.
+    virtual Bool validate_feasibility(ValidatedFeasibilityProblem p,
+                                      ValidatedVectorType x) const = 0;
+    //! \brief Check whether the system \f$h(x)=0\f$ definitely has a solution consistent with \f$x\f$.
+    virtual Bool validate_feasibility(ValidatedVectorMultivariateFunction h,
+                                      ValidatedVectorType x) const = 0;
+    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a xa.
+    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        ApproximateVectorType xa, ExactVectorType y) const = 0;
+    //! \brief Tests if the feasibility problem is definitely unsolvable over the box \a X, using multipliers \a y.
+    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        UpperBoxType X, ExactVectorType y) const = 0;
+    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y.
+    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        ExactVectorType y) const = 0;
+
+    //! \brief Tests if the feasibility problem is definitely unsolvable.
+    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p) const = 0;
+
+};
+
+//! \ingroup OptimisationSubModule EvaluationModule
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
     using FLT=FloatDP;
@@ -185,38 +237,68 @@ class OptimiserInterface {
     //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \f$D\f$ is bounded with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
+};
+
+//! \ingroup OptimisationSubModule
+//! Common routines for nonlinear programming
+class FeasibilityChecker
+    : public virtual FeasibilityCheckerInterface
+{
+  public:
+    virtual FeasibilityChecker* clone() const override;
+
 
     //! \brief Tests if the point \a x is almost feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual ApproximateKleenean almost_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ApproximateVectorType x, FloatDPApproximation eps) const = 0;
+                                                      ApproximateVectorType x, FloatDPApproximation eps) const override;
     //! \brief Tests whether the point \a x is feasible.
     virtual ValidatedKleenean is_feasible_point(ValidatedFeasibilityProblem p,
-                                                ExactVectorType x) const = 0;
-    //! \brief Tests whether the box \a X contains a feasible point.
+                                                ExactVectorType x) const override;
+    //! \brief Tests whether the validated point \a x contains an exact feasible point.
+    //! \details First tests whether \f$[x]\f$ is an element of \f$D\f$.
+    //! If definitely not, returns \a false.
+    //! If overlap, restricts \f$[x]\f$ to \f$D\f$.
+    //! Then computes \f$[w]=g([x])\f$ and tests whther this is an element of \f$C\f$.
+    //! If definitely not, returns \a false.
+    //! For any other component for which \f$[w]_j\f$ is not a subset of \f$C_j\f$, introduce an equality constraint which needs to be satisfied.
+    //! Check these equality constraints using an interval Newton contractor.
     virtual ValidatedKleenean contains_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ValidatedVectorType x) const = 0;
-    //! \brief Tests whether the point \a x is a feasible, or if the Lagrange multipliers \a y are a certificate of infeasibility.
+                                                      UpperBoxType x) const override;
+    //! \brief Tests whether the validated point \a x contains an exact feasible point, or if the Lagrange multipliers \a y are a certificate of infeasibility.
+    //! \details First checks feasibility of \f$[x]\f$ using \ref is_feasible_point.
+    //! If not definitely feasible, uses Lagrange multipliers \f$y\f$ to make a linear combination of constraint functions
+//     //! and tests \f$\sum y_j g_j(D)\f$ overlaps \f$\sum y_j C_j\f$, possibly using power series or linearisation to increase accuracy.
     virtual ValidatedKleenean check_feasibility(ValidatedFeasibilityProblem p,
-                                                ExactVectorType x, ExactVectorType y) const = 0;
+                                                ValidatedVectorType x, ExactVectorType y) const override;
 
     //! \brief Checks if the point \a x is definitely feasible.
     virtual Bool validate_feasibility(ValidatedFeasibilityProblem p,
-                                      ExactVectorType x) const = 0;
-    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
+                                      ValidatedVectorType x) const override;
+    //! \brief Check whether the system \f$h(x)=0\f$ definitely has a solution consistent with \f$x\f$.
+    virtual Bool validate_feasibility(ValidatedVectorMultivariateFunction h,
+                                      ValidatedVectorType x) const override;
+    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a xa.
     virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        ExactVectorType x, ExactVectorType y) const = 0;
+                                        ApproximateVectorType xa, ExactVectorType y) const override;
     //! \brief Tests if the feasibility problem is definitely unsolvable over the box \a X, using multipliers \a y.
     virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        UpperBoxType X, ExactVectorType y) const = 0;
-    //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
+                                        UpperBoxType X, ExactVectorType y) const override;
+    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y.
     virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        ExactVectorType y) const = 0;
+                                        ExactVectorType y) const override;
+    //! \brief Tests if the feasibility problem is definitely unsolvable.
+    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p) const override;
+
+    friend OutputStream& operator<<(OutputStream& os, FeasibilityChecker const& fc);
+  private:
+
+
 };
 
 //! \ingroup OptimisationSubModule
 //! Common routines for nonlinear programming
 class OptimiserBase
-    : public OptimiserInterface
+    : public virtual OptimiserInterface
 {
   protected:
     static const FloatDP zero;
@@ -233,25 +315,8 @@ class OptimiserBase
     virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override = 0;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const override;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const override;
-
-    virtual ApproximateKleenean almost_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ApproximateVectorType x, FloatDPApproximation error) const override;
-    virtual ValidatedKleenean is_feasible_point(ValidatedFeasibilityProblem p,
-                                                ExactVectorType x) const override;
-    virtual ValidatedKleenean contains_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ValidatedVectorType X) const override;
-    virtual ValidatedKleenean check_feasibility(ValidatedFeasibilityProblem p,
-                                                ExactVectorType x, ExactVectorType y) const override;
-
-    virtual Bool validate_feasibility(ValidatedFeasibilityProblem p,
-                                      ExactVectorType x) const override;
-    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        ExactVectorType x, ExactVectorType y) const override;
-    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        UpperBoxType X, ExactVectorType y) const override;
-    virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p,
-                                        ExactVectorType y) const override;
 };
+
 
 //! \ingroup OptimisationSubModule
 //! \brief Solver for nonlinear programming problems based on a penalty-function approach
@@ -272,8 +337,6 @@ class PenaltyFunctionOptimiser
     virtual Vector<ValidatedNumericType> minimise(ValidatedOptimisationProblem p) const override;
     virtual Vector<ApproximateNumericType> minimise(ApproximateOptimisationProblem p) const override;
     virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
-
-    virtual ValidatedKleenean check_feasibility(ValidatedFeasibilityProblem p, ExactVectorType x, ExactVectorType y) const override;
   public:
     virtual Void feasibility_step(ValidatedFeasibilityProblem p,
                                   ValidatedVectorType& w, ValidatedVectorType& x) const;

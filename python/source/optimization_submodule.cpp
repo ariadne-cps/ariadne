@@ -98,28 +98,42 @@ Void export_optimisation_problems(pybind11::module& module)
 }
 
 
-Void export_optimiser_interface(pybind11::module& module)
+Void export_feasibility_checker_interface(pybind11::module& module)
 {
     typedef OptimiserInterface::ApproximateNumericType ApproximateNumericType;
     typedef OptimiserInterface::ApproximateVectorType ApproximateVectorType;
-    typedef OptimiserInterface::ValidatedNumericType ValidatedNumericType;
     typedef OptimiserInterface::ValidatedVectorType ValidatedVectorType;
     typedef OptimiserInterface::ExactVectorType ExactVectorType;
 
+    pybind11::class_<FeasibilityCheckerInterface> feasibility_checker_interface_class(module,"FeasibilityCheckerInterface");
+
+    feasibility_checker_interface_class.def("almost_feasible_point", (ApproximateKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumericType)const) &FeasibilityCheckerInterface::almost_feasible_point);
+    feasibility_checker_interface_class.def("is_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &FeasibilityCheckerInterface::is_feasible_point);
+    feasibility_checker_interface_class.def("contains_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &FeasibilityCheckerInterface::contains_feasible_point);
+    feasibility_checker_interface_class.def("check_feasibility", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType, ValidatedVectorType)const) &FeasibilityCheckerInterface::check_feasibility);
+
+    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &FeasibilityCheckerInterface::validate_feasibility);
+    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedVectorMultivariateFunction, ValidatedVectorType)const) &FeasibilityCheckerInterface::validate_feasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType,ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, UpperBoxType, ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
+
+    pybind11::class_<FeasibilityChecker,FeasibilityCheckerInterface> feasibility_checker_class(module,"FeasibilityChecker");
+    feasibility_checker_class.def(pybind11::init<>());
+    feasibility_checker_class.def("__str__", &__cstr__<FeasibilityChecker>);
+
+
+}
+
+Void export_optimiser_interface(pybind11::module& module)
+{
+    typedef OptimiserInterface::ValidatedVectorType ValidatedVectorType;
+
     pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
-    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (ValidatedVectorType(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (ValidatedVectorType(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
     optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem)const) &OptimiserInterface::feasible);
 
-    optimiser_interface_class.def("almost_feasible_point", (ApproximateKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumericType)const) &OptimiserInterface::almost_feasible_point);
-    optimiser_interface_class.def("is_feasible_point", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &OptimiserInterface::is_feasible_point);
-    optimiser_interface_class.def("contains_feasible_point", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
-    optimiser_interface_class.def("check_feasibility", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
-
-    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType,ExactVectorType)const) &OptimiserInterface::validate_infeasibility);
-    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, UpperBoxType, ExactVectorType)const) &OptimiserInterface::validate_infeasibility);
-    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
     //NOTE: Not in C++ API
     //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
 }
@@ -182,6 +196,7 @@ Void optimization_submodule(pybind11::module& module) {
     export_slackness(module);
     export_constraint(module);
     export_optimisation_problems(module);
+    export_feasibility_checker_interface(module);
     export_optimiser_interface(module);
     export_interior_point_solvers(module);
     export_simplex_solver<FloatDPApproximation>(module);

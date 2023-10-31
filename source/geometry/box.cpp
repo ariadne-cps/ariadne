@@ -45,6 +45,24 @@ namespace Ariadne {
 typedef FloatDPBounds ValidatedNumericType;
 typedef Interval<FloatDPUpperBound> UpperIntervalType;
 
+UpperIntervalType apply(EffectiveScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    return apply(static_cast<ValidatedScalarUnivariateFunction>(f),ivl); }
+UpperBoxType apply(EffectiveVectorUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    return apply(static_cast<ValidatedVectorUnivariateFunction>(f),ivl); }
+UpperIntervalType apply(EffectiveScalarMultivariateFunction const& f, UpperBoxType const& bx) {
+    return apply(static_cast<ValidatedScalarMultivariateFunction>(f),bx); }
+UpperBoxType apply(EffectiveVectorMultivariateFunction const& f, UpperBoxType const& bx) {
+    return apply(static_cast<ValidatedVectorMultivariateFunction>(f),bx); }
+
+UpperIntervalType image(UpperIntervalType const& ivl, EffectiveScalarUnivariateFunction const& f) {
+    return apply(f,ivl); }
+UpperBoxType image(UpperIntervalType const& ivl, EffectiveVectorUnivariateFunction const& f) {
+    return apply(f,ivl); }
+UpperIntervalType image(UpperBoxType const& bx, EffectiveScalarMultivariateFunction const& f) {
+    return apply(f,bx); }
+UpperBoxType image(UpperBoxType const& bx, EffectiveVectorMultivariateFunction const& f) {
+    return apply(f,bx); }
+
 UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
     if (definitely(ivl.is_empty())) { return UpperIntervalType::empty_interval(); }
     return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
@@ -65,6 +83,42 @@ UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFuncti
 UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f) {
     return apply(f,bx); }
 UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f) {
+    return apply(f,bx); }
+
+template<class SIG> ValidatedFunction<SIG> cast_validated_function(ApproximateFunction<SIG> const& af) {
+    auto haf=af.managed_pointer();
+    auto hvf=dynamic_pointer_cast<FunctionInterface<ValidatedTag,SIG>const>(haf);
+    return hvf;
+}
+
+ApproximateIntervalType apply(ApproximateScalarUnivariateFunction const& f, ApproximateIntervalType const& ivl) {
+    if (decide(ivl.is_empty())) { return ApproximateIntervalType::empty_interval(); }
+    ValidatedScalarUnivariateFunction vf=cast_validated_function(f);
+    return static_cast<ApproximateIntervalType>(vf(reinterpret_cast<ValidatedNumericType const&>(ivl)));
+}
+ApproximateBoxType apply(ApproximateVectorUnivariateFunction const& f, ApproximateIntervalType const& ivl) {
+    if (decide(ivl.is_empty())) { return ApproximateBoxType(f.result_size(),ApproximateIntervalType::empty_interval()); }
+    ValidatedVectorUnivariateFunction vf=cast_validated_function(f);
+    return static_cast<ApproximateBoxType>(vf(reinterpret_cast<ValidatedNumericType const&>(ivl)));
+}
+ApproximateIntervalType apply(ApproximateScalarMultivariateFunction const& f, ApproximateBoxType const& bx) {
+    if (decide(bx.is_empty())) { return ApproximateIntervalType::empty_interval(); }
+    ValidatedScalarMultivariateFunction vf=cast_validated_function(f);
+    return static_cast<ApproximateIntervalType>(vf(reinterpret_cast<Vector<ValidatedNumericType> const&>(bx)));
+}
+ApproximateBoxType apply(ApproximateVectorMultivariateFunction const& f, ApproximateBoxType const& bx) {
+    if (decide(bx.is_empty())) { return ApproximateBoxType(f.result_size(),ApproximateIntervalType::empty_interval()); }
+    ValidatedVectorMultivariateFunction vf=cast_validated_function(f);
+    return static_cast<ApproximateBoxType>(vf(reinterpret_cast<Vector<ValidatedNumericType> const&>(bx)));
+}
+
+ApproximateIntervalType image(ApproximateIntervalType const& ivl, ApproximateScalarUnivariateFunction const& f) {
+    return apply(f,ivl); }
+ApproximateBoxType image(ApproximateIntervalType const& ivl, ApproximateVectorUnivariateFunction const& f) {
+    return apply(f,ivl); }
+ApproximateIntervalType image(ApproximateBoxType const& bx, ApproximateScalarMultivariateFunction const& f) {
+    return apply(f,bx); }
+ApproximateBoxType image(ApproximateBoxType const& bx, ApproximateVectorMultivariateFunction const& f) {
     return apply(f,bx); }
 
 template class Box<Interval<Real>>;

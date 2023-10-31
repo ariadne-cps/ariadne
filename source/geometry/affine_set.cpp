@@ -256,7 +256,7 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
         //feasible=SimplexLinearOptimiser<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
-    catch(const DegenerateFeasibilityProblemException& e) {
+    catch(const DegenerateLinearFeasibilityProblemException& e) {
         feasible=indeterminate;
     }
     return !feasible;

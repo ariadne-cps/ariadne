@@ -96,6 +96,18 @@ inline Vector<Differential<FloatDPApproximation>>const& cast_approximate(Vector<
     return reinterpret_cast<Vector<Differential<FloatDPApproximation>>const&>(v);
 }
 
+
+inline FloatDPApproximation operator*(ApproximateDouble x1, FloatDPApproximation x2) {
+    return FloatDPApproximation(x1,x2.precision()) * x2;
+}
+inline FloatDPApproximation operator*(FloatDPApproximation x1, ApproximateDouble x2) {
+    return x1 * FloatDPApproximation(x2,x1.precision());
+}
+inline ApproximateKleenean operator<(FloatDPApproximation x1, ApproximateDouble x2) {
+    return x1 < FloatDPApproximation(x2,x1.precision());
+}
+
+
 inline UpperIntervalType dot(Vector<UpperIntervalType> const& bx1, Vector<ExactIntervalType> const& bx2) {
     return dot(bx1,Vector<UpperIntervalType>(bx2));
 }
@@ -425,7 +437,17 @@ template<class X> Matrix<X> feasibility_adat(const Matrix<X>& H, const Matrix<X>
 
 
 
+template<class P> OutputStream& operator<<(OutputStream& os, FeasibilityProblem<P> const& p) {
+    return os << "FeasibilityProblem( D=" << p.D << ", g=" << p.g << ", C=" << p.C << " )";
+}
+template OutputStream& operator<<(OutputStream&, FeasibilityProblem<ApproximateTag> const&);
+template OutputStream& operator<<(OutputStream&, FeasibilityProblem<ValidatedTag> const&);
 
+template<class P> OutputStream& operator<<(OutputStream& os, OptimisationProblem<P> const& p) {
+    return os << "OptimisationProblem( f=" << p.f << ", p.D=" << p.D << ", g=" << p.g << ", C=" << p.C << " )";
+}
+template OutputStream& operator<<(OutputStream&, OptimisationProblem<ApproximateTag> const&);
+template OutputStream& operator<<(OutputStream&, OptimisationProblem<ValidatedTag> const&);
 
 template<class R>
 class ConstrainedFeasibilityMatrix {
@@ -473,30 +495,31 @@ inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
 const FloatDP OptimiserBase::zero = FloatDP(0,dp);
 const FloatDP OptimiserBase::one = FloatDP(1,dp);
 
-Bool OptimiserBase::
-almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ApproximateVectorType ax, FloatDPApproximation error) const
+ApproximateKleenean OptimiserBase::
+almost_feasible_point(ValidatedFeasibilityProblem p, ApproximateVectorType ax, FloatDPApproximation error) const
 {
     ExactVectorType ex=cast_exact(ax);
-    if(!contains(D,ex)) { return false; }
-    ApproximateVectorType gx=g(ax);
-    return probably(contains(cast_exact_widen(C,cast_exact(error)),gx));
-}
-
-
-Bool OptimiserBase::
-is_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactVectorType x) const
-{
-    if(!contains(D,x)) { return false; }
-    Vector<FloatDPBounds> gx=g(x);
-    return definitely(contains(C,gx));
+    if(!contains(p.D,ex)) { return false; }
+    ApproximateVectorType gx=p.g(ax);
+    return probably(contains(cast_exact_widen(p.C,cast_exact(error)),gx));
 }
 
 
 ValidatedKleenean OptimiserBase::
-contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ValidatedVectorType X) const
+is_feasible_point(ValidatedFeasibilityProblem p, ExactVectorType x) const
+{
+    if(!contains(p.D,x)) { return false; }
+    Vector<FloatDPBounds> gx=p.g(x);
+    return contains(p.C,gx);
+}
+
+ValidatedKleenean OptimiserBase::
+contains_feasible_point(ValidatedFeasibilityProblem p, ValidatedVectorType X) const
 {
     CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C<<", X="<<X);
+    CONCLOG_PRINTLN("D="<<p.D<<", g="<<p.g<<", C="<<p.C<<", X="<<X);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
     // Now test if the (reduced) box X satisfies other constraints
     if(definitely(disjoint(Box<UpperIntervalType>(X),D))) { return false; }
@@ -575,20 +598,27 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, E
     else { return indeterminate; }
 }
 
-
-
-
-Bool OptimiserBase::
-validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                     ExactVectorType x0, ExactVectorType y0) const
+ValidatedKleenean OptimiserBase::
+check_feasibility(ValidatedFeasibilityProblem p,
+                  ExactVectorType x0, ExactVectorType y0) const
 {
-    return this->validate_feasibility(D,g,C,x0);
+    if (this->validate_feasibility(p,x0)) {
+        return true;
+    } else if (this->validate_infeasibility(p,x0,y0)) {
+        return false;
+    } else {
+        return indeterminate;
+    }
 }
 
+
+
 Bool OptimiserBase::
-validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
+validate_feasibility(ValidatedFeasibilityProblem p,
                      ExactVectorType x0) const
 {
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
     ARIADNE_PRECONDITION(C.size()==g.result_size());
     ARIADNE_PRECONDITION(x0.size()==D.size());
@@ -691,9 +721,22 @@ validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exac
 
 
 Bool OptimiserBase::
-validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
+validate_infeasibility(ValidatedFeasibilityProblem p,
+                       UpperBoxType X, ExactVectorType y) const
+{
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    ExactBoxType DX = intersection(D,cast_exact_box(X));
+    ExactVectorType x = midpoint(X);
+    return this->validate_infeasibility(ValidatedFeasibilityProblem(DX,g,C),x,y);
+}
+
+
+Bool OptimiserBase::
+validate_infeasibility(ValidatedFeasibilityProblem p,
                        ExactVectorType x, ExactVectorType y) const
 {
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
     ARIADNE_PRECONDITION(C.size()==g.result_size());
     ARIADNE_PRECONDITION(x.size()==D.size());
@@ -710,7 +753,7 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Ex
     ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
     ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
     for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperIntervalType tygD = apply(tyg,D);
+    UpperIntervalType tygD = apply(tyg.function(),D);
 
     UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
     UpperIntervalVectorType ydgD = transpose(dgD) * y;
@@ -728,10 +771,13 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Ex
     else { return false; }
 }
 
+
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
-is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactFloatDPVectorType y) const
+validate_infeasibility(ValidatedFeasibilityProblem p, ExactVectorType y) const
 {
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C<<", y="<<y);
 
@@ -761,10 +807,15 @@ is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction
 
 
 
-typedef OptimiserBase::ValidatedVectorType ValidatedVectorType;
+auto OptimiserBase::
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> ValidatedVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    return this->minimise(ValidatedOptimisationProblem{f,D,g,C});
+}
 
-ValidatedVectorType OptimiserBase::
-minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const
+auto OptimiserBase::
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const -> ValidatedVectorType
 {
     CONCLOG_SCOPE_CREATE;
     ValidatedVectorMultivariateFunction gh=join(g,h);
@@ -773,10 +824,34 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     return this->minimise(f,D,gh,C);
 }
 
+auto OptimiserBase::
+minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const -> ApproximateVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    return this->minimise(ApproximateOptimisationProblem{f,D,g,C});
+}
+
+auto OptimiserBase::
+minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const -> ApproximateVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    ApproximateVectorMultivariateFunction gh=join(g,h);
+    ApproximateBoxType C(gh.result_size(),ExactIntervalType(0,0));
+    for(SizeType i=0; i!=g.result_size(); ++i) { C[i]=ExactIntervalType(-inf,0); }
+    return this->minimise(f,D,gh,C);
+}
 
 
-ValidatedKleenean OptimiserBase::
-feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const
+
+auto OptimiserBase::
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> ValidatedKleenean
+{
+    CONCLOG_SCOPE_CREATE;
+    return this->feasible(ValidatedFeasibilityProblem{D,g,C});
+}
+
+auto OptimiserBase::
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const -> ValidatedKleenean
 {
     CONCLOG_SCOPE_CREATE;
     ValidatedVectorMultivariateFunction gh=join(g,h);
@@ -786,7 +861,940 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 }
 
 
+//------- PenaltyFunctionOptimiser ------------------------------------------//
+
+PenaltyFunctionOptimiser* PenaltyFunctionOptimiser::
+clone() const
+{
+    return new PenaltyFunctionOptimiser(*this);
+}
+
+auto PenaltyFunctionOptimiser::
+minimise(ValidatedOptimisationProblem f) const -> ValidatedVectorType
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+auto PenaltyFunctionOptimiser::
+minimise(ApproximateOptimisationProblem p) const ->ApproximateVectorType
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+auto PenaltyFunctionOptimiser::
+feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("D="<<p.D<<" g="<<p.g<<" C="<<p.C<<" ");
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    ApproximateVectorType x=midpoint(D);
+
+    ApproximateVectorType w=midpoint(C);
+    for(SizeType i=0; i!=C.size(); ++i) {
+        if(C[i].upper_bound()==+infty) { w[i]=C[i].lower_bound()+one; }
+        else if(C[i].lower_bound()==-infty) { w[i]=C[i].upper_bound()-one; }
+    }
+
+    FloatDPApproximationVector y(C.size(),zero);
+
+    CONCLOG_PRINTLN("x="<<x<<" w="<<w<<" y="<<y);
+
+    for(SizeType i=0; i!=10; ++i) {
+        this->feasibility_step(ApproximateFeasibilityProblem(D,g,C),w,x,y);
+    }
+    return this->check_feasibility(p,cast_exact(x),cast_exact(y));
+}
+
+Void PenaltyFunctionOptimiser::
+feasibility_step(ApproximateFeasibilityProblem p,
+                 ApproximateVectorType& w, ApproximateVectorType& x, ApproximateNumericType& mu) const
+{
+    CONCLOG_SCOPE_CREATE;
+    auto& d=p.D; auto& g=p.g; auto& c=p.C;
+
+    ApproximateVectorMultivariateFunction h(0u,d.dimension());
+    const SizeType n=d.size();
+    const SizeType m=c.size();
+    const SizeType l=h.result_size();
+
+    CONCLOG_PRINTLN("x="<<x);
+    CONCLOG_PRINTLN("w="<<w);
+
+    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
+    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
+
+    mu *= 0.5;
+    CONCLOG_PRINTLN("mu="<<mu);
+
+    // G is the constraint value vector
+    FloatDPApproximationVector gx = ddgx.value();
+    FloatDPApproximationVector hx = ddhx.value();
+    CONCLOG_PRINTLN("g(x)="<<gx);
+    CONCLOG_PRINTLN("h(x)="<<hx);
+
+    // A is the transpose derivative matrix aij=dgi/dxj
+    FloatDPApproximationMatrix A = transpose(ddgx.jacobian());
+    CONCLOG_PRINTLN("A=Dg(x)="<<A);
+    FloatDPApproximationMatrix B = transpose(ddhx.jacobian());
+    // FIXME: Due to problems with zero-element differential, need to resize matrix if no h
+    if(l==0) { B.resize(n,0); }
+    CONCLOG_PRINTLN("B=Dh(x)="<<B);
+
+    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j] lambda[j]*dg[j]/dx[i1]dx[i2]
+    FloatDPApproximationMatrix H(n,n,dp);
+    for(SizeType j=0; j!=m; ++j) { H += (gx[j]-w[j]) * ddgx[j].hessian(); }
+    for(SizeType k=0; k!=l; ++k) { H += (hx[k]) * ddhx[k].hessian(); }
+    CONCLOG_PRINTLN("H="<<H);
+
+    FloatDPApproximationDiagonalMatrix E(n,dp);
+    FloatDPApproximationDiagonalMatrix D(m,dp);
+    for(SizeType i=0; i!=n; ++i) { E[i] = rec(sqr(x[i]-d[i].lower_bound())) + rec(sqr(d[i].upper_bound()-x[i])); }
+    for(SizeType j=0; j!=m; ++j) { D[j] = rec(sqr(w[j]-c[j].lower_bound())) + rec(sqr(c[j].upper_bound()-w[j])); }
+    CONCLOG_PRINTLN("E="<<E);
+    CONCLOG_PRINTLN("D="<<D);
+
+    FloatDPApproximationMatrix S = H + B * transpose(B);
+    S += E;
+    CONCLOG_PRINTLN("S="<<S);
+
+    FloatDPApproximationMatrix R=inverse(S);
+    CONCLOG_PRINTLN("inverse(S)="<<R);
+
+    // Compute residuals
+    FloatDPApproximationVector rx = A*gx + B * hx ; // + 1/(x.upper_bound()-x) + 1/x.lower_bound()-x if no regularisation
+    FloatDPApproximationVector rw = w-gx;
+
+    CONCLOG_PRINTLN("rx="<<rx);
+    CONCLOG_PRINTLN("rw="<<rw);
+
+    FloatDPApproximationVector dx = R * (rx + A * rw);
+    FloatDPApproximationVector dw = rw + transpose(A)*dx;
+    CONCLOG_PRINTLN("dx="<<dx);
+    CONCLOG_PRINTLN("dw="<<dw);
+
+
+    FloatDPApproximationVector newx(n,dp);
+    FloatDPApproximationVector neww(m,dp);
+
+    static const FloatDPApproximation ALPHA_SCALE_FACTOR = 0.75_approx;
+
+    FloatDPApproximation alpha = 1.0_approx;
+    do {
+        newx = x - alpha * dx;
+        neww = w - alpha * dw;
+        alpha *= ALPHA_SCALE_FACTOR;
+    } while ( ! decide(contains(d,newx)) || ! decide(contains(c,neww)) );
+    alpha /= ALPHA_SCALE_FACTOR;
+
+    CONCLOG_PRINTLN("alpha="<<alpha);
+
+    CONCLOG_PRINTLN("newx="<<newx);
+    CONCLOG_PRINTLN("neww="<<neww<<"\n");
+
+    x=newx;
+    w=neww;
+
+    return;
+}
+
+
+Void PenaltyFunctionOptimiser::
+feasibility_step(ValidatedFeasibilityProblem p,
+                 ValidatedVectorType& w, ValidatedVectorType& x) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+// Use a penalty approach without multipliers on the constraint functions
+// Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
+Void PenaltyFunctionOptimiser::
+feasibility_step(ApproximateFeasibilityProblem p,
+                 ApproximateVectorType& w, ApproximateVectorType& x, ApproximateVectorType& y) const
+{
+    CONCLOG_SCOPE_CREATE;
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    auto m=y.size(); auto n=x.size();
+
+    FloatDPApproximationVector cl=lower_bounds(C);
+    FloatDPApproximationVector cu=upper_bounds(C);
+    FloatDPApproximationVector dl=lower_bounds(D);
+    FloatDPApproximationVector du=upper_bounds(D);
+
+    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
+    CONCLOG_PRINTLN("dl="<<dl<<", du="<<du);
+    CONCLOG_PRINTLN("cl="<<cl<<", cu="<<cu);
+    CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y);
+
+    ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
+    ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);
+    ARIADNE_ASSERT(w.size()==m);
+    ARIADNE_ASSERT(x.size()==n);
+    ARIADNE_ASSERT(y.size()==m);
+
+    // Solve the problem
+    //   minimise Sum -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x)
+    //   subject to g(x)-w=0
+
+    // Lagrangian
+    //   -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x) - y.(g(x)-w)
+
+    // Conditions for a constrained minimum
+    // 1/(cu-w)-1/(w-cu) + y       = 0
+    // 1/(du-x)-1/(x-dl) - y.Dg(x) = 0
+    //          w - g(x)           = 0
+
+    // Second-order conditions
+    // (1/(w-cl)^2 + 1/(cu-w)^2) dw                 +   dy = - ( 1/(cu-w) - 1/(w-cl) + y       )
+    //   (1/(x-dl)^2 + 1/(du-x)^2 - y.D^2x) dx - Dg'(x) dy = - ( 1/(du-x) - 1/(x-dl) - y.Dg(x) )
+    //                           dw - Dg(x) dx             = - ( w - g(x) )
+
+    Vector<Differential<ApproximateNumericType>> ddgx=g.evaluate(Differential<ApproximateNumericType>::variables(2,x));
+    CONCLOG_PRINTLN("ddgx="<<ddgx);
+
+    Vector<ApproximateNumericType> gx = ddgx.value();
+    CONCLOG_PRINTLN("g(x)="<<gx);
+    Matrix<ApproximateNumericType> A = ddgx.jacobian();
+    CONCLOG_PRINTLN("Dg(x)="<<A);
+
+    Vector<ApproximateNumericType> yA=transpose(A)*y;
+
+    // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
+    Matrix<ApproximateNumericType> YH(x.size(),x.size(),dp);
+    for(SizeType i=0; i!=y.size(); ++i) {
+        YH+=y[i]*ddgx[i].hessian();
+    }
+    CONCLOG_PRINTLN("Y.D2g(x)="<<YH);
+
+    Vector<ApproximateNumericType> recwu=cu-w; recwu=erec(recwu);
+    Vector<ApproximateNumericType> recwl=w-cl; recwl=erec(recwl);
+    Vector<ApproximateNumericType> recxu=du-x; recxu=erec(recxu);
+    Vector<ApproximateNumericType> recxl=x-dl; recxl=erec(recxl);
+
+    Vector<ApproximateNumericType> diagDw=esqr(recwu)+esqr(recwl);
+    Matrix<ApproximateNumericType> Dw(m,m,dp); for(SizeType i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
+    DiagonalMatrix<ApproximateNumericType> Dx(esqr(recxu)+esqr(recxl));
+
+
+    for(SizeType i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
+
+    Matrix<ApproximateNumericType> AT=transpose(A);
+    Matrix<ApproximateNumericType> Znm(n,m,dp);
+    Matrix<ApproximateNumericType> Zmn(m,n,dp);
+    Matrix<ApproximateNumericType> Zmm(m,m,dp);
+    Matrix<ApproximateNumericType> Im=Matrix<ApproximateNumericType>::identity(m,dp);
+
+
+    Matrix<ApproximateNumericType> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
+    Vector<ApproximateNumericType> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
+
+    for(SizeType j=0; j!=m; ++j) {
+        if( decide(C[j].lower_bound()==C[j].upper_bound()) ) {
+            S[j][j]=1;
+            S[j][m+n+j]=0;
+            S[m+n+j][j]=0;
+            r[j]=0;
+        }
+    }
+
+    Vector<ApproximateNumericType> swxy = -solve(S,r);
+
+    Vector<ApproximateNumericType> sw(m,dp),sx(n,dp),sy(m,dp);
+    sw = project(swxy,range(0,m));
+    sx = project(swxy,range(m,m+n));
+    sy = project(swxy,range(m+n,m+n+m));
+
+    ApproximateNumericType al=one;
+    ApproximateVectorType nw=w+al*sw;
+    ApproximateVectorType nx=x+al*sx;
+    ApproximateVectorType ny(m,dp);
+    CONCLOG_PRINTLN("sx="<<sx);
+    CONCLOG_PRINTLN("sw="<<sw);
+    while( ! decide(contains(C,nw)) || ! decide(contains(D,nx)) ) {
+        al*=0.75;
+        nw=w+al*sw;
+        nx=x+al*sx;
+    }
+    CONCLOG_PRINTLN("al="<<sw);
+    ny=y+al*sy;
+
+    w=nw; x=nx; y=ny;
+}
+
+
+ValidatedKleenean ApproximateOptimiser::
+feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("D="<<D<<", h="<<h);
+    FloatDPApproximationVector x=midpoint(D);
+    FloatDPApproximationVector y(h.result_size(),zero);
+
+    for(SizeType i=0; i!=8; ++i) {
+        this->feasibility_step(D,h,x,y);
+    }
+
+    if( decide(norm(h(x))<1e-10) ) { return true; }
+
+    if(!possibly(contains(UpperIntervalType(dot(UpperIntervalVectorType(cast_exact(y)),apply(h,D))),zero))) { return false; }
+
+    return indeterminate;
+}
+
+Void ApproximateOptimiser::
+feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& h,
+                 FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("x="<<x<<" y="<<y);
+    static const double SCALE_FACTOR = 0.75;
+    const SizeType n=x.size();
+    const SizeType m=y.size();
+    // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
+    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
+    FloatDPApproximationMatrix A = ddhx.jacobian();
+    CONCLOG_PRINTLN_AT(1,"A="<<A<<" b="<<ddhx.value());
+
+    FloatDPApproximationMatrix H(n,n,dp);
+    for(SizeType i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
+    for(SizeType j=0; j!=n; ++j) {
+        H[j][j] += rec(sqr(x[j]-D[j].lower_bound()));
+        H[j][j] += rec(sqr(D[j].upper_bound()-x[j]));
+    }
+
+    FloatDPApproximationVector rx = transpose(A) * y;
+    for(SizeType j=0; j!=n; ++j) {
+        rx[j] -= rec(x[j]-D[j].lower_bound());
+        rx[j] += rec(D[j].upper_bound()-x[j]);
+    }
+    FloatDPApproximationVector ry = ddhx.value();
+    CONCLOG_PRINTLN("rx="<<rx<<" ry="<<ry);
+
+    // S = A Hinv AT
+    // H dx + AT dy = rx; A dx = ry;
+    //  dx = Hinv ( rx - AT dy )
+    //  dy = Sinv ( A Hinv rx - ry )
+    FloatDPApproximationMatrix Hinv=inverse(H);
+    CONCLOG_PRINTLN_AT(1,"H="<<H<<" Hinv="<<Hinv);
+    FloatDPApproximationMatrix S=A*Hinv*transpose(A);
+    FloatDPApproximationMatrix Sinv=inverse(S);
+    CONCLOG_PRINTLN_AT(1,"S="<<S<<" Sinv="<<Sinv);
+    FloatDPApproximationVector dy = Sinv * ( A*(Hinv*rx) - ry );
+    FloatDPApproximationVector dx = Hinv * ( rx - transpose(A) * dy);
+    CONCLOG_PRINTLN("dx="<<dx<<" dy="<<dy);
+
+    FloatDPApproximation ax = one;
+    FloatDPApproximationVector nx = x-ax*dx;
+    while(!contains(D,cast_exact(nx))) {
+        ax*=SCALE_FACTOR;
+        nx = x - ax * dx;
+    }
+    FloatDPApproximationVector ny = y-ax*dy;
+    CONCLOG_PRINTLN("nx="<<nx<<" ax="<<ax<<" ny="<<ny);
+    CONCLOG_PRINTLN_AT(1,"h(x)="<<h(nx));
+
+    x=nx; y=ny;
+}
+
+
+ValidatedKleenean PenaltyFunctionOptimiser::
+check_feasibility(ValidatedFeasibilityProblem p,
+                  ExactFloatDPVectorType x, ExactFloatDPVectorType y) const
+{
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    ARIADNE_PRECONDITION(D.size()==g.argument_size());
+    ARIADNE_PRECONDITION(C.size()==g.result_size());
+    ARIADNE_PRECONDITION(x.size()==D.size());
+    ARIADNE_PRECONDITION(y.size()==C.size());
+
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN_AT(1,"D="<<D<<" C="<<C);
+
+    FloatDPBoundsVector gx=g(x);
+    CONCLOG_PRINTLN_AT(1,"x="<<x<<" y="<<y<<" g(x)="<<gx);
+
+    ValidatedKleenean result = true;
+
+    List<SizeType> equalities;
+    for(SizeType j=0; j!=C.size(); ++j) {
+        if( definitely(gx[j].upper()<C[j].lower_bound() || gx[j].lower()>C[j].upper_bound()) ) {
+            return false;
+        }
+        if(C[j].lower_bound()==C[j].upper_bound()) {
+            equalities.append(j);
+        } else {
+            if(!definitely(contains(C[j],gx[j]))) { result = indeterminate; }
+        }
+    }
+
+    if(definitely(result)) {
+        if(equalities.empty()) { CONCLOG_PRINTLN("Feasible"); return true; }
+
+        ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
+        FloatDPBoundsVector c(equalities.size(),dp);
+        for(SizeType i=0; i!=equalities.size(); ++i) {
+            h[i] = g[equalities[i]];
+            c[i] = C[equalities[i]].lower_bound();
+        }
+        CONCLOG_PRINTLN_AT(1,"g="<<g);
+        CONCLOG_PRINTLN_AT(1,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c));
+
+        static const ExactDouble SEARCH_TOLERANCE=1e-8_pr;
+        FloatDPBoundsVector W(h.result_size(),FloatDPBounds(-1,+1,dp)*SEARCH_TOLERANCE);
+        FloatDPBoundsMatrix AT = transpose(midpoint(h.jacobian(x)));
+        FloatDPBoundsVector B = x+AT*W;
+        FloatDPBoundsMatrix IA = h.jacobian(B);
+        CONCLOG_PRINTLN_AT(1,"AT="<<AT<<" IA="<<IA);
+        CONCLOG_PRINTLN_AT(1,"B="<<B);
+
+        // Perform an interval Newton step to try to attain feasibility
+        FloatDPBoundsVector nW = inverse(IA*AT) * FloatDPBoundsVector(h(x)-cast_exact(c));
+        CONCLOG_PRINTLN_AT(1,"W="<<W<<"\nnew_W="<<nW);
+        if(definitely(subset(UpperBoxType(B),D)) && refines(nW,W)) { CONCLOG_PRINTLN("Feasible"); return true; }
+        else { result=indeterminate; }
+    }
+
+    // Compute first-order approximation to g(D) centred at x.
+    // For feasibilty, have yg(D) cap yC nonempty.
+    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
+
+    // Compute y.C
+    UpperIntervalVectorType iy(y);
+    UpperIntervalType yC = dot(iy,C);
+
+    // Compute Taylor estimate of y g(X)
+    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
+    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
+    for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
+    UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
+
+    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
+    UpperIntervalVectorType ydgD = transpose(dgD) * y;
+
+    FloatDPBounds ygx = dot(y,gx);
+
+    UpperIntervalType ygD = UpperIntervalType(ygx);
+    for(SizeType i=0; i!=x.size(); ++i) {
+        ygD += ydgD[i] * (D[i]-UpperIntervalType(x[i]));
+    }
+
+    CONCLOG_PRINTLN_AT(1,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD);
+
+    if(definitely(is_empty(intersection(yC,ygD)))) { CONCLOG_PRINTLN("Infeasible"); return false; }
+    else { return indeterminate; }
+}
+
+
+
+
+
+//------- InteriorPointOptimiser -----------------------------------//
+
+InteriorPointOptimiser::
+InteriorPointOptimiser() {
+}
+
+auto InteriorPointOptimiser::
+clone() const -> InteriorPointOptimiser* {
+    return new InteriorPointOptimiser(*this);
+}
+
+OutputStream& operator<<(OutputStream& os, InteriorPointOptimiser const& opt) {
+    return os << "InteriorPointOptimiser()";
+}
+
+
+auto InteriorPointOptimiser::
+minimise(ValidatedOptimisationProblem p) const -> ValidatedVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    ValidatedVectorMultivariateFunction h(0,D.dimension());
+
+    UpperBoxType gD = apply(g,D);
+    if(definitely(disjoint(gD,C))) { throw ProblemException(); }
+
+    FloatDPApproximationVector x = midpoint(D);
+    FloatDPApproximationVector w = midpoint(intersection(UpperBoxType(gD),C));
+
+    FloatDPApproximationVector kappa(g.result_size(),zero);
+    FloatDPApproximationVector lambda(h.result_size(),zero);
+    FloatDPApproximation mu = one;
+
+
+    for(SizeType i=0; i!=12; ++i) {
+        this->minimisation_step(p,h, w,x, kappa,lambda, mu);
+        if(i%3==0 && i<=10) { mu *= 0.25_exact; }
+    }
+
+    return ValidatedVectorType(cast_exact(x));
+}
+
+auto InteriorPointOptimiser::
+minimise(ApproximateOptimisationProblem p) const -> ApproximateVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    ValidatedVectorMultivariateFunction h(0,D.dimension());
+
+    ApproximateBoxType gD = apply(g,D);
+    if(decide(disjoint(gD,C))) { throw ProblemException(); }
+
+    FloatDPApproximationVector x = midpoint(D);
+    FloatDPApproximationVector w = midpoint(intersection(ApproximateBoxType(gD),C));
+
+    FloatDPApproximationVector kappa(g.result_size(),zero);
+    FloatDPApproximationVector lambda(h.result_size(),zero);
+    FloatDPApproximation mu = one;
+
+    for(SizeType i=0; i!=12; ++i) {
+        this->minimisation_step(p,h, w,w, kappa,lambda, mu);
+        if(i%3==0 && i<=10) { mu *= 0.25_exact; }
+    }
+
+    return ApproximateVectorType(x);
+}
+
+
+
+// See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
+// "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
+// For some of the terminology used
+
+
+// min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
+// Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
+Void InteriorPointOptimiser::
+minimisation_step(const ApproximateOptimisationProblem& p, const ApproximateVectorMultivariateFunction& h,
+                  FloatDPApproximationVector& w, FloatDPApproximationVector& x,
+                  FloatDPApproximationVector& kappa, FloatDPApproximationVector& lambda, const FloatDPApproximation& mu) const
+{
+    auto& f=p.f; auto& d=p.D; auto& g=p.g; auto& c=p.C;
+
+    const SizeType n=x.size();
+    const SizeType m=kappa.size();
+    const SizeType l=lambda.size();
+
+    ARIADNE_DEBUG_PRECONDITION(w.size()==kappa.size());
+    ARIADNE_DEBUG_PRECONDITION(f.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(g.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(h.argument_size()==n);
+    ARIADNE_DEBUG_PRECONDITION(g.result_size()==m);
+    ARIADNE_DEBUG_PRECONDITION(h.result_size()==l);
+    ARIADNE_DEBUG_PRECONDITION(decide(contains(d,x)));
+    ARIADNE_DEBUG_PRECONDITION(decide(contains(c,w)));
+    ARIADNE_DEBUG_PRECONDITION(decide(mu>0));
+
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("x="<<x);
+    CONCLOG_PRINTLN("w="<<w);
+    CONCLOG_PRINTLN_AT(1,"kappa="<<kappa);
+    CONCLOG_PRINTLN_AT(1,"lambda="<<lambda);
+    CONCLOG_PRINTLN_AT(1,"mu="<<mu);
+
+    FloatDPApproximationVector slack(2*n,dp);
+    FloatDPApproximationVectorRange slackl(slack,range(0,n));
+    FloatDPApproximationVectorRange slacku(slack,range(n,2*n));
+
+    FloatDPApproximationDifferential ddfx=f.evaluate(FloatDPApproximationDifferential::variables(2,x));
+    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
+    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
+
+    // G is the constraint value vector
+    FloatDPApproximation fx = ddfx.value();
+    FloatDPApproximationVector gx = ddgx.value();
+    FloatDPApproximationVector hx = ddhx.value();
+    CONCLOG_PRINTLN("f(x)="<<fx);
+    CONCLOG_PRINTLN("g(x)="<<gx);
+    CONCLOG_PRINTLN("h(x)="<<hx);
+    CONCLOG_PRINTLN_AT(1,"g(x)-w="<<(gx-w));
+
+    // A, B are the derivative matrices aij=dgi/dxj
+    // HACK: Need to explicitly set size of Jacobian if g or h have result_size of zero
+    FloatDPApproximationVector df = transpose(ddfx.gradient());
+    CONCLOG_PRINTLN_AT(1,"df(x)="<<df);
+    FloatDPApproximationMatrix A = ddgx.jacobian();
+    if(m==0) { A=FloatDPApproximationMatrix(m,n,dp); }
+    CONCLOG_PRINTLN("A="<<A);
+    FloatDPApproximationMatrix B = ddhx.jacobian();
+    if(l==0) { B=FloatDPApproximationMatrix(l,n,dp); }
+    CONCLOG_PRINTLN("B="<<B);
+
+
+
+    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j]kappa[j]*dg[j]/dx[i1]dx[i2] + Sum[k]lambda[k]*dh[k]/dx[i1]dx[i2]
+    FloatDPApproximationMatrix H = ddfx.hessian();
+    for(SizeType j=0; j!=m; ++j) { H += kappa[j] * ddgx[j].hessian(); }
+    for(SizeType k=0; k!=l; ++k) { H += lambda[k] * ddhx[k].hessian(); }
+    CONCLOG_PRINTLN("H="<<H);
+
+    // Determines the weighting to give to the relaxation parameter mu
+    // for equality constraints relative to other constraints
+    static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
+
+    // Compute the residuals and contributions from slack in x and w
+    //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] * lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
+    FloatDPApproximationVector rx = df + transpose(A) * kappa + transpose(B)* lambda;
+    FloatDPApproximationDiagonalMatrix D(n,dp);
+    for(SizeType i=0; i!=n; ++i) {
+        FloatDPApproximation nuu = rec(d[i].upper_bound()-x[i]);
+        FloatDPApproximation nul = rec(x[i]-d[i].lower_bound());
+        rx[i] += mu * ( nuu - nul );
+        D[i] = mu * ( nuu*nuu + nul*nul );
+    }
+
+    //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
+    FloatDPApproximationVector rw = -kappa;
+    FloatDPApproximationDiagonalMatrix C(m,dp);
+    for(SizeType j=0; j!=m; ++j) {
+        FloatDPApproximation nuu = rec(c[j].upper_bound()-w[j]);
+        FloatDPApproximation nul = rec(w[j]-c[j].lower_bound());
+        rw[j] += (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu - nul );
+        C[j] = (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu*nuu + nul*nul );
+    }
+
+    //   rkappa = g(x) - w
+    FloatDPApproximationVector rkappa = gx - w;
+
+    //   rlambda = h(x)
+    FloatDPApproximationVector const& rlambda = hx;
+
+    CONCLOG_PRINTLN("rx="<<rx);
+    CONCLOG_PRINTLN("rw="<<rw);
+    CONCLOG_PRINTLN("rkappa="<<rkappa);
+    CONCLOG_PRINTLN("rlambda="<<rlambda);
+
+    // Solve the equations
+    //   H+D dx        + AT dk + BT dl = rx
+    //            C dw -  I dk         = rw
+    //    A  dx - I dw                 = rk
+    //    B  dx                        = rl
+
+    // Eliminate dw, dk without fill-in to obtain
+    //   (H+D+ATCA) dx + BT dl = rx + AT rw + ATC rk
+    //         B    dx         = rl
+
+    // Set S=(H+D+ATCA); invert, and eliminate dx
+    //   dx = Sinv * (rx + AT rw + ATC rk - BT dl)
+    //   (B * Sinv * BT) dl = B * Sinv * (rx + AT rw + ATC rk) - rl
+    FloatDPApproximationMatrix& S=H;
+    S+=D;
+    S+=FloatDPApproximationMatrix(transpose(A))*C*A;
+    CONCLOG_PRINTLN("S="<<S);
+
+    FloatDPApproximationMatrix Sinv=inverse(S);
+    CONCLOG_PRINTLN("R=Sinv="<<Sinv);
+
+    FloatDPApproximationMatrix BSinvBT = (B*Sinv)*FloatDPApproximationMatrix( transpose(B) );
+    CONCLOG_PRINTLN("B*inverse(S)*BT="<<BSinvBT);
+    CONCLOG_PRINTLN("inverse(B*inverse(S)*BT)="<<inverse(BSinvBT));
+
+    FloatDPApproximationVector rr = Sinv * (rx + transpose(A) * (rkappa * C + rw));
+    FloatDPApproximationVector dlambda = inverse(BSinvBT) * (B * rr - rlambda);
+    FloatDPApproximationVector dx = rr - transpose(B*Sinv) * dlambda;
+    FloatDPApproximationVector dw = A * dx - rkappa;
+    FloatDPApproximationVector dkappa = rw - C * dw;
+
+    static const FloatDPApproximation ALPHA_SCALE_FACTOR = 0.75_approx;
+    static const FloatDPApproximation MINIMUM_ALPHA = 1e-16_approx;
+
+    // Compute distance to move variables preserving feasibility
+    // FIXME: Current implementation might fail due to getting too close to boundary!
+    FloatDPApproximationVector newx(n,dp);
+    FloatDPApproximationVector neww(m,dp);
+    FloatDPApproximation alpha = 1.0_approx;
+    Bool success = false;
+    do {
+        newx = x - alpha * dx;
+        neww = w - alpha * dw;
+        if (probably(contains(d,newx)) && probably(contains(c,neww))) { success = true; }
+        else { alpha *= ALPHA_SCALE_FACTOR; }
+        if (probably(alpha<MINIMUM_ALPHA)) { throw NearBoundaryOfFeasibleDomainException(); }
+    } while (!success);
+    CONCLOG_PRINTLN("alpha="<<alpha);
+
+    FloatDPApproximationVector newlambda = lambda - alpha * dlambda;
+    FloatDPApproximationVector newkappa = kappa - alpha * dkappa;
+
+    CONCLOG_PRINTLN("newx="<<newx);
+    CONCLOG_PRINTLN("neww="<<neww);
+    CONCLOG_PRINTLN("newkappa="<<newkappa);
+    CONCLOG_PRINTLN("newlambda="<<newlambda);
+
+    x=newx; w=neww; kappa=newkappa; lambda=newlambda;
+}
+
+
+
+auto InteriorPointOptimiser::
+feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    ARIADNE_ASSERT(g.argument_size()==D.size());
+    ARIADNE_ASSERT(g.result_size()==C.size());
+    FloatDPApproximation t(dp);
+    FloatDPApproximationVector x,y,z;
+
+    this->setup_feasibility(p,x,y);
+
+    // FIXME: Allow more steps
+    for(SizeType i=0; i!=12; ++i) {
+        CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z);
+        this->feasibility_step(p,x,y);
+        if(probably(LogicalValue(t>0))) {
+            CONCLOG_PRINTLN_AT(1,"y="<<y<<", g(y)="<<g(y));
+            if(this->validate_feasibility(p,cast_exact(y))) {
+                return true;
+            }
+        }
+    }
+    CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", g(y)="<<g(y));
+    if(this->validate_infeasibility(p,cast_exact(x))) {
+        return false;
+    }
+    return indeterminate;
+}
+
+
+Void
+InteriorPointOptimiser::feasibility_step(
+    const ApproximateFeasibilityProblem& p,
+    FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+Void
+InteriorPointOptimiser::feasibility_step(
+    const ApproximateFeasibilityProblem& p,
+    FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximation& t) const
+{
+    CONCLOG_SCOPE_CREATE;
+
+    auto& d=p.D; auto& g=p.g; auto& c=p.C;
+
+    static const ApproximateDouble GAMMA=0.0009765625; // 1.0/1024;
+    static const ApproximateDouble SIGMA=0.125;
+    static const ApproximateDouble SCALE=0.75;
+
+    const SizeType m=d.size();
+    const SizeType n=c.size();
+
+    FloatDPApproximationVector z(n,dp);
+
+    ARIADNE_ASSERT_MSG(g.argument_size()==m,"d="<<d<<" g="<<g);
+    ARIADNE_ASSERT_MSG(g.result_size()==n,"d="<<d<<" g="<<g<<" c="<<c);
+    ARIADNE_ASSERT(x.size()==m);
+    ARIADNE_ASSERT(y.size()==n);
+
+    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
+    CONCLOG_PRINTLN("ddgx="<<ddgx);
+
+    Vector<FloatDPApproximation> gx = ddgx.value();
+    CONCLOG_PRINTLN("g(x)="<<gx<<" ");
+    Matrix<FloatDPApproximation> A = transpose(ddgx.jacobian());
+    CONCLOG_PRINTLN("A="<<A<<" ");
+
+    // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) \lambda_k$
+    Matrix<FloatDPApproximation> H(m,m,dp);
+    for(SizeType i=0; i!=m; ++i) {
+        H+=y[i]*ddgx[i].hessian();
+    }
+    CONCLOG_PRINTLN("H="<<H<<" ");
+
+
+    // Add correction for singleton domain to diagonal elements of Hessian
+    for(SizeType i=0; i!=m; ++i) {
+    }
+
+    // Compute diagonal entries of KKT Hessian
+    Vector<FloatDPApproximation> D(n,dp);
+    for(SizeType j=0; j!=n; ++j) {
+        if (decide(c[j].lower_bound()==c[j].upper_bound())) {
+        } else if (decide(c[j].upper_bound()==+inf)) {
+        } else if (decide(c[j].lower_bound()==-inf)) {
+        } else {
+            ARIADNE_DEBUG_ASSERT(decide(-infty<c[j].lower_bound() && c[j].lower_bound()<c[j].upper_bound() && c[j].upper_bound()<+infty));
+        }
+    }
+
+    FloatDPApproximation sigma(SIGMA,dp);
+    FloatDPApproximation mu=dot(x,z)/m;
+    if(!egtr(emul(x,z),GAMMA*mu)) {
+        CONCLOG_PRINTLN("WARNING: near-degeneracy in Lyapunov multipliers in interior-point solver:\n  x="<<x<<", y="<<y<<", z="<<z);
+        x=(1-sigma)*x+FloatDPApproximationVector(x.size(),sigma/x.size());
+        mu=dot(x,z)/m;
+    }
+
+    FloatDPApproximationVector yt=join(y,t);
+    CONCLOG_PRINTLN("m="<<m<<" n="<<n);
+    CONCLOG_PRINTLN("x="<<x<<" yt="<<yt<<" z="<<z);
+
+
+    // Construct diagonal matrices
+    FloatDPApproximationVector DE=ediv(x,z);
+    CONCLOG_PRINTLN("D="<<DE);
+
+    // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
+    FloatDPApproximationVector gye(2*(m+n),dp);
+    //for(SizeType j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper_bound()+t; gye[n+j]=c[j].lower_bound()-gy[j]+t; }
+    //for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper_bound()+t; gye[2*n+m+i]=d[i].lower_bound()-y[i]+t; }
+    CONCLOG_PRINTLN("GE="<<gye);
+
+    // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
+    FloatDPApproximationMatrix AE(m+1,2*(m+n),dp);
+    //for(SizeType i=0; i!=m; ++i) { for(SizeType j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
+    //for(SizeType i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
+    //for(SizeType k=0; k!=o; ++k) { AE[m][k]=1; }
+    FloatDPApproximationMatrix AET=transpose(AE);
+
+    // Construct the symmetric matrix and its inverse
+    //FloatDPMatrix S(m+1,m+1); adat(S,AE,DE);
+    //CONCLOG_PRINTLN("S="<<S);
+    //S=FloatDPMatrix(m+1,m+1); simple_adat(S,AE,DE);
+    //CONCLOG_PRINTLN("S="<<S);
+    FloatDPApproximationMatrix S=feasibility_adat(H,A,DE);
+    CONCLOG_PRINTLN("S="<<S);
+    FloatDPApproximationMatrix Sinv=inverse(S);
+    CONCLOG_PRINTLN("Sinv="<<Sinv);
+
+    // FIXME: What if S is not invertible?
+
+    // Construct the residuals
+    FloatDPApproximationVector rx=esub(emul(x,z),mu*sigma);
+    //RawFloatDPVector ryt=-prod(AE,x); ryt[m]+=1; // FIXME: Need hessian
+    FloatDPApproximationVector ryt=-feasibility_mul(A,x); ryt[m]+=1; // FIXME: Need hessian
+    FloatDPApproximationVector rz=gye+z;
+    CONCLOG_PRINTLN("rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
+
+    //RawFloatDPVector rr=prod(AE,ediv(RawFloatDPVector(rx-emul(x,rz)),z))-ryt;
+    FloatDPApproximationVector rr=ryt + AE*ediv(FloatDPApproximationVector(rx-emul(x,rz)),z) - ryt;
+
+
+    // Compute the differences
+    FloatDPApproximationVector dyt=Sinv*rr;
+    //RawFloatDPVector dz=-rz-prod(AET,dyt);
+    FloatDPApproximationVector dz=-rz-feasibility_trmul(A,dyt);
+    FloatDPApproximationVector dx=-ediv(FloatDPApproximationVector(rx+emul(x,dz)),z);
+    CONCLOG_PRINTLN("dx="<<dx<<" dyt="<<dyt<<" dz="<<dz);
+
+    FloatDPApproximationVector nx,ny,nyt,nz; FloatDPApproximation nt(dp);
+
+    // Since we need to keep the point feasible, but the updates are linear
+    // we need to validate feasibility directly rather than assuming the
+    // linear update of y and z are good enough.
+    Bool allpositive=false;
+    FloatDPApproximation alpha=1/FloatDPApproximation(SCALE,dp);
+    if(!egtr(emul(x,z) , GAMMA*mu/16)) {
+        CONCLOG_PRINTLN("WARNING: x="<<x<<", z="<<z<< ", x.z="<<emul(x,z)<<"<"<<GAMMA*mu / 16);
+        throw NearBoundaryOfFeasibleDomainException();
+    }
+    while(!allpositive) {
+        alpha=alpha*SCALE;
+        nx=x+alpha*dx;
+        nyt=yt+alpha*dyt;
+        ny=project(nyt,range(0,m));
+        nt=nyt[m];
+        //InteriorPointOptimiser::compute_z(d,g,c,ny,nt,nz);
+        allpositive = egtr(nx,0.0) && egtr(nz,0.0) && egtr(emul(nx,nz),GAMMA*mu);
+    }
+    CONCLOG_PRINTLN("alpha="<<alpha);
+    CONCLOG_PRINTLN("nx="<<nx<<" nyt="<<nyt<<" nz="<<nz<<" nxz="<<emul(nx,nz));
+
+    x=nx; y=project(nyt,range(0,m)); z=nz; t=nyt[m];
+}
+
+auto InteriorPointOptimiser::
+compute_mu(const ApproximateFeasibilityProblem& p,
+           const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const -> FloatDPApproximation
+{
+    auto& g=p.g; auto& C=p.C;
+
+    // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
+    FloatDPApproximation mu=zero;
+    FloatDPApproximationVector gx = g(x);
+
+    for(SizeType i=0; i!=C.size(); ++i) {
+        if (decide(C[i].lower_bound()==C[i].upper_bound())) { }
+        else if (decide(C[i].lower_bound()==-infty)) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
+        else if (decide(C[i].upper_bound()==+infty)) { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
+        else { // std::cerr<<"FIXME: Compute mu for singleton constraint\n";
+            if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
+            else { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
+        }
+    }
+    mu /= C.size();
+    return mu;
+}
+
+
+Void InteriorPointOptimiser::
+setup_feasibility(const ApproximateFeasibilityProblem& p,
+                  FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
+{
+    const SizeType l=2*(p.D.size()+p.C.size());
+    y=midpoint(p.D);
+    x=FloatDPApproximationVector(l,one/l);
+    //compute_tz(d,g,c,y,t,z);
+}
+
+Void InteriorPointOptimiser::compute_tz(
+    const ApproximateBoxType& D, const ApproximateVectorMultivariateFunction& g, const ApproximateBoxType& C,
+    FloatDPApproximationVector& x, FloatDPApproximation& t, FloatDPApproximationVector& z) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Void InteriorPointOptimiser::feasibility_step(
+    const ApproximateBoxType& D, const ApproximateVectorMultivariateFunction& g, const ApproximateBoxType& C,
+    FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& t) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Void InteriorPointOptimiser::linearised_feasibility_step(
+    const ApproximateBoxType& D, const ApproximateVectorMultivariateFunction& g, const ApproximateBoxType& C,
+    FloatDPApproximation& slack, FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Void InteriorPointOptimiser::linearised_feasibility_step(
+    const ApproximateBoxType& D, const ApproximateVectorMultivariateFunction& g, const ApproximateBoxType& C,
+    FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& t) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
 //------- InfeasibleInteriorPointOptimiser -------------------------//
+
+InfeasibleInteriorPointOptimiser::
+InfeasibleInteriorPointOptimiser() {
+}
+
+auto InfeasibleInteriorPointOptimiser::
+clone() const -> InfeasibleInteriorPointOptimiser* {
+    return new InfeasibleInteriorPointOptimiser(*this);
+}
+
+OutputStream& operator<<(OutputStream& os, InfeasibleInteriorPointOptimiser const& opt) {
+    return os << "InfeasibleInteriorPointOptimiser()";
+}
+
+
 
 struct InfeasibleInteriorPointOptimiser::PrimalDualData {
     PrimalDualData() : PrimalDualData(0u,0u,dp) { }
@@ -801,11 +1809,61 @@ struct InfeasibleInteriorPointOptimiser::StepData : public PrimalDualData {
     FloatDPApproximationVector vl,wl,xl,zl,vu,wu,xu,zu; FloatDPApproximation mu;
 };
 
-ValidatedVectorType InfeasibleInteriorPointOptimiser::
-minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+auto InfeasibleInteriorPointOptimiser::
+minimise(ApproximateOptimisationProblem p) const -> ApproximateVectorType
 {
     CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("f="<<f<<", D="<<D<<", g="<<g<<", C="<<C);
+    CONCLOG_PRINTLN("p="<<0);
+
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    static const ApproximateDouble VALUE_TOLERANCE=1e-8;
+    static const ApproximateDouble STATE_TOLERANCE=1e-8;
+    static const CounterType MAXIMUM_STEPS=24;
+
+    ARIADNE_ASSERT(f.argument_size()==D.size());
+    ARIADNE_ASSERT(g.argument_size()==D.size());
+    ARIADNE_ASSERT(g.result_size()==C.size());
+    StepData v;
+    FloatDPApproximationVector& x=cast_approximate(v.x);
+    FloatDPApproximationVector& y=cast_approximate(v.y);
+    C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVectorType(C.size(),UpperIntervalType(-1,+1))));
+    this->setup_feasibility(p,v);
+    FloatDPApproximationVector oldx=x;
+
+    static const ApproximateDouble MU_MIN = 1e-12;
+
+    // FIXME: Allow more steps
+    for(SizeType i=0; i!=MAXIMUM_STEPS; ++i) {
+        CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+        oldx=x;
+        FloatDPApproximation oldfx=f(oldx);
+        this->step(p,v);
+        FloatDPApproximation fx=f(x);
+        if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
+            break;
+        }
+        if(probably(v.mu<MU_MIN)) {
+            break;
+        }
+    }
+    CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+
+    if (probably(D.contains(x)) && probably(C.contains(g(x)))) {
+        CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+        return x;
+    }
+    CONCLOG_PRINTLN("indeterminate_feasibility");
+    throw IndeterminateFeasibilityException();
+}
+
+auto InfeasibleInteriorPointOptimiser::
+minimise(ValidatedOptimisationProblem p) const -> ValidatedVectorType
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
     static const double VALUE_TOLERANCE=1e-8;
     static const double STATE_TOLERANCE=1e-8;
@@ -818,7 +1876,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     FloatDPApproximationVector& x=cast_approximate(v.x);
     FloatDPApproximationVector& y=cast_approximate(v.y);
     C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVectorType(C.size(),UpperIntervalType(-1,+1))));
-    this->setup_feasibility(D,g,C,v);
+    this->setup_feasibility(p,v);
     FloatDPApproximationVector oldx=x;
 
     static const ExactDouble MU_MIN = 1e-12_pr;
@@ -828,12 +1886,12 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         oldx=x;
         FloatDPApproximation oldfx=f(oldx);
-        this->step(f,D,g,C,v);
-        if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
+        this->step(p,v);
+        if(this->validate_infeasibility(p,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN_AT(1,"Infeasible");
-            std::cerr<<"EXCEPTION: "<<InfeasibleProblemException().what()<<"\n";
-            throw InfeasibleProblemException();
+            std::cerr<<"EXCEPTION: "<<ProblemException().what()<<"\n";
+            throw ProblemException();
         }
         FloatDPApproximation fx=f(x);
         if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
@@ -845,7 +1903,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     }
     CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
 
-    if(this->validate_feasibility(D,g,C,cast_exact(x))) {
+    if(this->validate_feasibility(p,cast_exact(x))) {
         CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         return cast_exact(x);
     }
@@ -853,11 +1911,13 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     throw IndeterminateFeasibilityException();
 }
 
-ValidatedKleenean InfeasibleInteriorPointOptimiser::
-feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+auto InfeasibleInteriorPointOptimiser::
+feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
 {
     CONCLOG_SCOPE_CREATE
-    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
     ARIADNE_ASSERT(g.argument_size()==D.size());
     ARIADNE_ASSERT(g.result_size()==C.size());
@@ -867,21 +1927,23 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     FloatDPApproximationVector& y=cast_approximate(v.y);
 
     ApproximateScalarMultivariateFunction f(EuclideanDomain(D.dimension()));
-    ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
-    this->setup_feasibility(D,g,R,v);
+    auto R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
+
+    ApproximateOptimisationProblem optp(f,D,g,R);
+    this->setup_feasibility(p,v);
 
     static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        this->step(f,D,g,R,v);
-        if(this->validate_feasibility(D,g,C,cast_exact(x))) {
+        this->step(optp,v);
+        if(this->validate_feasibility(p,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Feasible");
             return true;
         }
-        if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
+        if(this->validate_infeasibility(p,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Infeasible");
             return false;
@@ -896,21 +1958,21 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
 }
 
 Void InfeasibleInteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
+setup_feasibility(const ApproximateFeasibilityProblem& p,
                   StepData& v) const
 {
     ExactIntervalType I(-1,+1);
-    SizeType m=C.size(); SizeType n=D.size();
+    SizeType m=p.C.size(); SizeType n=p.D.size();
 
-    v.x=midpoint(D);
+    v.x=midpoint(p.D);
     v.y=FloatDPApproximationVector(m,zero);
-    v.w=midpoint(C);
+    v.w=midpoint(p.C);
 
     //stp.xl=lower_bound(D)-x;
     v.wl=Vector(m,-one);
     v.wu=Vector(m,+one);
-    v.xl=lower_bounds(D)-v.x;
-    v.xu=upper_bounds(D)-v.x;
+    v.xl=lower_bounds(p.D)-v.x;
+    v.xu=upper_bounds(p.D)-v.x;
     v.vl=Vector(m,-one);
     v.vu=Vector(m,+one);
     v.zl=Vector(n,-one);
@@ -922,9 +1984,11 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunc
 
 Void
 InfeasibleInteriorPointOptimiser::step(
-    const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
+    const ApproximateOptimisationProblem& p,
     StepData& v) const
 {
+    auto& f=p.f; auto& d=p.D; auto& g=p.g; auto& c=p.C;
+
     FloatDPApproximationVector& w=v.w; FloatDPApproximationVector& x=v.x; FloatDPApproximationVector& y=v.y;
     FloatDPApproximation& mu=v.mu;
     FloatDPApproximationVector& wl=v.wl; FloatDPApproximationVector& wu=v.wu;
@@ -1177,835 +2241,6 @@ InfeasibleInteriorPointOptimiser::step(
 
 
 
-//------- InteriorPointOptimiser -----------------------------------//
-
-ValidatedVectorType InteriorPointOptimiser::
-minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("f="<<f<<" D="<<D<<" g="<<g<<" C="<<C);
-    ValidatedVectorMultivariateFunction h(0,D.dimension());
-
-    UpperBoxType gD = apply(g,D);
-    if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
-
-    FloatDPApproximationVector x = midpoint(D);
-    FloatDPApproximationVector w = midpoint(intersection(UpperBoxType(gD),C));
-
-    FloatDPApproximationVector kappa(g.result_size(),zero);
-    FloatDPApproximationVector lambda(h.result_size(),zero);
-    FloatDPApproximation mu = one;
-
-
-    for(SizeType i=0; i!=12; ++i) {
-        this->minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu);
-        if(i%3==0 && i<=10) { mu *= 0.25_exact; }
-    }
-
-    return ValidatedVectorType(cast_exact(x));
-}
-
-
-
-// See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
-// "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
-// For some of the terminology used
-
-
-// min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
-// Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
-Void InteriorPointOptimiser::
-minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c, const ApproximateVectorMultivariateFunction& h,
-                  FloatDPApproximationVector& x, FloatDPApproximationVector& w,
-                  FloatDPApproximationVector& kappa, FloatDPApproximationVector& lambda, const FloatDPApproximation& mu) const
-{
-    const SizeType n=x.size();
-    const SizeType m=kappa.size();
-    const SizeType l=lambda.size();
-
-    ARIADNE_DEBUG_PRECONDITION(w.size()==kappa.size());
-    ARIADNE_DEBUG_PRECONDITION(f.argument_size()==n);
-    ARIADNE_DEBUG_PRECONDITION(g.argument_size()==n);
-    ARIADNE_DEBUG_PRECONDITION(h.argument_size()==n);
-    ARIADNE_DEBUG_PRECONDITION(g.result_size()==m);
-    ARIADNE_DEBUG_PRECONDITION(h.result_size()==l);
-    ARIADNE_DEBUG_PRECONDITION(contains(d,cast_exact(x)));
-    ARIADNE_DEBUG_PRECONDITION(contains(c,cast_exact(w)));
-    ARIADNE_DEBUG_PRECONDITION(mu.raw()>0);
-
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("x="<<x);
-    CONCLOG_PRINTLN("w="<<w);
-    CONCLOG_PRINTLN_AT(1,"kappa="<<kappa);
-    CONCLOG_PRINTLN_AT(1,"lambda="<<lambda);
-    CONCLOG_PRINTLN_AT(1,"mu="<<mu);
-
-    FloatDPApproximationVector slack(2*n,dp);
-    FloatDPApproximationVectorRange slackl(slack,range(0,n));
-    FloatDPApproximationVectorRange slacku(slack,range(n,2*n));
-
-    FloatDPApproximationDifferential ddfx=f.evaluate(FloatDPApproximationDifferential::variables(2,x));
-    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
-    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
-
-    // G is the constraint value vector
-    FloatDPApproximation fx = ddfx.value();
-    FloatDPApproximationVector gx = ddgx.value();
-    FloatDPApproximationVector hx = ddhx.value();
-    CONCLOG_PRINTLN("f(x)="<<fx);
-    CONCLOG_PRINTLN("g(x)="<<gx);
-    CONCLOG_PRINTLN("h(x)="<<hx);
-    CONCLOG_PRINTLN_AT(1,"g(x)-w="<<(gx-w));
-
-    // A, B are the derivative matrices aij=dgi/dxj
-    // HACK: Need to explicitly set size of Jacobian if g or h have result_size of zero
-    FloatDPApproximationVector df = transpose(ddfx.gradient());
-    CONCLOG_PRINTLN_AT(1,"df(x)="<<df);
-    FloatDPApproximationMatrix A = ddgx.jacobian();
-    if(m==0) { A=FloatDPApproximationMatrix(m,n,dp); }
-    CONCLOG_PRINTLN("A="<<A);
-    FloatDPApproximationMatrix B = ddhx.jacobian();
-    if(l==0) { B=FloatDPApproximationMatrix(l,n,dp); }
-    CONCLOG_PRINTLN("B="<<B);
-
-
-
-    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j]kappa[j]*dg[j]/dx[i1]dx[i2] + Sum[k]lambda[k]*dh[k]/dx[i1]dx[i2]
-    FloatDPApproximationMatrix H = ddfx.hessian();
-    for(SizeType j=0; j!=m; ++j) { H += kappa[j] * ddgx[j].hessian(); }
-    for(SizeType k=0; k!=l; ++k) { H += lambda[k] * ddhx[k].hessian(); }
-    CONCLOG_PRINTLN("H="<<H);
-
-    // Determines the weighting to give to the relaxation parameter mu
-    // for equality constraints relative to other constraints
-    static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
-
-    // Compute the residuals and contributions from slack in x and w
-    //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] * lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
-    FloatDPApproximationVector rx = df + transpose(A) * kappa + transpose(B)* lambda;
-    FloatDPApproximationDiagonalMatrix D(n,dp);
-    for(SizeType i=0; i!=n; ++i) {
-        FloatDPApproximation nuu = rec(d[i].upper_bound()-x[i]);
-        FloatDPApproximation nul = rec(x[i]-d[i].lower_bound());
-        rx[i] += mu * ( nuu - nul );
-        D[i] = mu * ( nuu*nuu + nul*nul );
-    }
-
-    //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
-    FloatDPApproximationVector rw = -kappa;
-    FloatDPApproximationDiagonalMatrix C(m,dp);
-    for(SizeType j=0; j!=m; ++j) {
-        FloatDPApproximation nuu = rec(c[j].upper_bound()-w[j]);
-        FloatDPApproximation nul = rec(w[j]-c[j].lower_bound());
-        rw[j] += (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu - nul );
-        C[j] = (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu*nuu + nul*nul );
-    }
-
-    //   rkappa = g(x) - w
-    FloatDPApproximationVector rkappa = gx - w;
-
-    //   rlambda = h(x)
-    FloatDPApproximationVector const& rlambda = hx;
-
-    CONCLOG_PRINTLN("rx="<<rx);
-    CONCLOG_PRINTLN("rw="<<rw);
-    CONCLOG_PRINTLN("rkappa="<<rkappa);
-    CONCLOG_PRINTLN("rlambda="<<rlambda);
-
-    // Solve the equations
-    //   H+D dx        + AT dk + BT dl = rx
-    //            C dw -  I dk         = rw
-    //    A  dx - I dw                 = rk
-    //    B  dx                        = rl
-
-    // Eliminate dw, dk without fill-in to obtain
-    //   (H+D+ATCA) dx + BT dl = rx + AT rw + ATC rk
-    //         B    dx         = rl
-
-    // Set S=(H+D+ATCA); invert, and eliminate dx
-    //   dx = Sinv * (rx + AT rw + ATC rk - BT dl)
-    //   (B * Sinv * BT) dl = B * Sinv * (rx + AT rw + ATC rk) - rl
-    FloatDPApproximationMatrix& S=H;
-    S+=D;
-    S+=FloatDPApproximationMatrix(transpose(A))*C*A;
-    CONCLOG_PRINTLN("S="<<S);
-
-    FloatDPApproximationMatrix Sinv=inverse(S);
-    CONCLOG_PRINTLN("R=Sinv="<<Sinv);
-
-    FloatDPApproximationMatrix BSinvBT = (B*Sinv)*FloatDPApproximationMatrix( transpose(B) );
-    CONCLOG_PRINTLN("B*inverse(S)*BT="<<BSinvBT);
-    CONCLOG_PRINTLN("inverse(B*inverse(S)*BT)="<<inverse(BSinvBT));
-
-    FloatDPApproximationVector rr = Sinv * (rx + transpose(A) * (rkappa * C + rw));
-    FloatDPApproximationVector dlambda = inverse(BSinvBT) * (B * rr - rlambda);
-    FloatDPApproximationVector dx = rr - transpose(B*Sinv) * dlambda;
-    FloatDPApproximationVector dw = A * dx - rkappa;
-    FloatDPApproximationVector dkappa = rw - C * dw;
-
-    static const FloatDPApproximation ALPHA_SCALE_FACTOR = 0.75_approx;
-    static const FloatDPApproximation MINIMUM_ALPHA = 1e-16_approx;
-
-    // Compute distance to move variables preserving feasibility
-    // FIXME: Current implementation might fail due to getting too close to boundary!
-    FloatDPApproximationVector newx(n,dp);
-    FloatDPApproximationVector neww(m,dp);
-    FloatDPApproximation alpha = 1.0_approx;
-    Bool success = false;
-    do {
-        newx = x - alpha * dx;
-        neww = w - alpha * dw;
-        if (contains(d,cast_exact(newx)) && contains(c,cast_exact(neww))) { success = true; }
-        else { alpha *= ALPHA_SCALE_FACTOR; }
-        if(probably(alpha<MINIMUM_ALPHA)) { throw NearBoundaryOfFeasibleDomainException(); }
-    } while(!success);
-    CONCLOG_PRINTLN("alpha="<<alpha);
-
-    FloatDPApproximationVector newlambda = lambda - alpha * dlambda;
-    FloatDPApproximationVector newkappa = kappa - alpha * dkappa;
-
-    CONCLOG_PRINTLN("newx="<<newx);
-    CONCLOG_PRINTLN("neww="<<neww);
-    CONCLOG_PRINTLN("newkappa="<<newkappa);
-    CONCLOG_PRINTLN("newlambda="<<newlambda);
-
-    x=newx; w=neww; kappa=newkappa; lambda=newlambda;
-}
-
-
-
-ValidatedKleenean InteriorPointOptimiser::
-feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("d="<<d<<", g="<<g<<", c="<<c);
-
-    ARIADNE_ASSERT(g.argument_size()==d.size());
-    ARIADNE_ASSERT(g.result_size()==c.size());
-    FloatDPApproximation t(dp);
-    FloatDPApproximationVector x,y,z;
-
-    this->setup_feasibility(d,g,c,x,y);
-
-    // FIXME: Allow more steps
-    for(SizeType i=0; i!=12; ++i) {
-        CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z);
-        this->feasibility_step(d,g,c,x,y);
-        if(probably(LogicalValue(t>0))) {
-            CONCLOG_PRINTLN_AT(1,"y="<<y<<", g(y)="<<g(y));
-            if(this->is_feasible_point(d,g,c,cast_exact(y))) {
-                return true;
-            }
-        }
-    }
-    CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", g(y)="<<g(y));
-    if(this->is_infeasibility_certificate(d,g,c,cast_exact(x))) {
-        return false;
-    }
-    return indeterminate;
-}
-
-
-Void
-InteriorPointOptimiser::feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
-    FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-Void
-InteriorPointOptimiser::feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
-    FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximation& t) const
-{
-    CONCLOG_SCOPE_CREATE;
-
-    static const ExactDouble GAMMA=0.0009765625_x; // 1.0/1024;
-    static const ExactDouble SIGMA=0.125_x;
-    static const ExactDouble SCALE=0.75_x;
-
-    const SizeType m=d.size();
-    const SizeType n=c.size();
-
-    FloatDPApproximationVector z(n,dp);
-
-    ARIADNE_ASSERT_MSG(g.argument_size()==m,"d="<<d<<" g="<<g);
-    ARIADNE_ASSERT_MSG(g.result_size()==n,"d="<<d<<" g="<<g<<" c="<<c);
-    ARIADNE_ASSERT(x.size()==m);
-    ARIADNE_ASSERT(y.size()==n);
-
-    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
-    CONCLOG_PRINTLN("ddgx="<<ddgx);
-
-    Vector<FloatDPApproximation> gx = ddgx.value();
-    CONCLOG_PRINTLN("g(x)="<<gx<<" ");
-    Matrix<FloatDPApproximation> A = transpose(ddgx.jacobian());
-    CONCLOG_PRINTLN("A="<<A<<" ");
-
-    // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) \lambda_k$
-    Matrix<FloatDPApproximation> H(m,m,dp);
-    for(SizeType i=0; i!=m; ++i) {
-        H+=y[i]*ddgx[i].hessian();
-    }
-    CONCLOG_PRINTLN("H="<<H<<" ");
-
-
-    // Add correction for singleton domain to diagonal elements of Hessian
-    for(SizeType i=0; i!=m; ++i) {
-    }
-
-    // Compute diagonal entries of KKT Hessian
-    Vector<FloatDPApproximation> D(n,dp);
-    for(SizeType j=0; j!=n; ++j) {
-        if(c[j].lower_bound()==c[j].upper_bound()) {
-        } else if(c[j].upper_bound().raw()==+inf) {
-        } else if(c[j].lower_bound().raw()==-inf) {
-        } else {
-            ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower_bound() && c[j].lower_bound()<c[j].upper_bound() && c[j].upper_bound()<+infty));
-        }
-    }
-
-    FloatDPApproximation sigma(SIGMA,dp);
-    FloatDPApproximation mu=dot(x,z)/m;
-    if(!egtr(emul(x,z),GAMMA*mu)) {
-        CONCLOG_PRINTLN("WARNING: near-degeneracy in Lyapunov multipliers in interior-point solver:\n  x="<<x<<", y="<<y<<", z="<<z);
-        x=(1-sigma)*x+FloatDPApproximationVector(x.size(),sigma/x.size());
-        mu=dot(x,z)/m;
-    }
-
-    FloatDPApproximationVector yt=join(y,t);
-    CONCLOG_PRINTLN("m="<<m<<" n="<<n);
-    CONCLOG_PRINTLN("x="<<x<<" yt="<<yt<<" z="<<z);
-
-
-    // Construct diagonal matrices
-    FloatDPApproximationVector DE=ediv(x,z);
-    CONCLOG_PRINTLN("D="<<DE);
-
-    // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
-    FloatDPApproximationVector gye(2*(m+n),dp);
-    //for(SizeType j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper_bound()+t; gye[n+j]=c[j].lower_bound()-gy[j]+t; }
-    //for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper_bound()+t; gye[2*n+m+i]=d[i].lower_bound()-y[i]+t; }
-    CONCLOG_PRINTLN("GE="<<gye);
-
-    // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
-    FloatDPApproximationMatrix AE(m+1,2*(m+n),dp);
-    //for(SizeType i=0; i!=m; ++i) { for(SizeType j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
-    //for(SizeType i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
-    //for(SizeType k=0; k!=o; ++k) { AE[m][k]=1; }
-    FloatDPApproximationMatrix AET=transpose(AE);
-
-    // Construct the symmetric matrix and its inverse
-    //FloatDPMatrix S(m+1,m+1); adat(S,AE,DE);
-    //CONCLOG_PRINTLN("S="<<S);
-    //S=FloatDPMatrix(m+1,m+1); simple_adat(S,AE,DE);
-    //CONCLOG_PRINTLN("S="<<S);
-    FloatDPApproximationMatrix S=feasibility_adat(H,A,DE);
-    CONCLOG_PRINTLN("S="<<S);
-    FloatDPApproximationMatrix Sinv=inverse(S);
-    CONCLOG_PRINTLN("Sinv="<<Sinv);
-
-    // FIXME: What if S is not invertible?
-
-    // Construct the residuals
-    FloatDPApproximationVector rx=esub(emul(x,z),mu*sigma);
-    //RawFloatDPVector ryt=-prod(AE,x); ryt[m]+=1; // FIXME: Need hessian
-    FloatDPApproximationVector ryt=-feasibility_mul(A,x); ryt[m]+=1; // FIXME: Need hessian
-    FloatDPApproximationVector rz=gye+z;
-    CONCLOG_PRINTLN("rx="<<rx<<" ryt="<<ryt<<" rz="<<rz);
-
-    //RawFloatDPVector rr=prod(AE,ediv(RawFloatDPVector(rx-emul(x,rz)),z))-ryt;
-    FloatDPApproximationVector rr=ryt + AE*ediv(FloatDPApproximationVector(rx-emul(x,rz)),z) - ryt;
-
-
-    // Compute the differences
-    FloatDPApproximationVector dyt=Sinv*rr;
-    //RawFloatDPVector dz=-rz-prod(AET,dyt);
-    FloatDPApproximationVector dz=-rz-feasibility_trmul(A,dyt);
-    FloatDPApproximationVector dx=-ediv(FloatDPApproximationVector(rx+emul(x,dz)),z);
-    CONCLOG_PRINTLN("dx="<<dx<<" dyt="<<dyt<<" dz="<<dz);
-
-    FloatDPApproximationVector nx,ny,nyt,nz; FloatDPApproximation nt(dp);
-
-    // Since we need to keep the point feasible, but the updates are linear
-    // we need to validate feasibility directly rather than assuming the
-    // linear update of y and z are good enough.
-    Bool allpositive=false;
-    FloatDPApproximation alpha=1/FloatDPApproximation(SCALE,dp);
-    if(!egtr(emul(x,z) , GAMMA*mu/16)) {
-        CONCLOG_PRINTLN("WARNING: x="<<x<<", z="<<z<< ", x.z="<<emul(x,z)<<"<"<<GAMMA*mu / 16);
-        throw NearBoundaryOfFeasibleDomainException();
-    }
-    while(!allpositive) {
-        alpha=alpha*SCALE;
-        nx=x+alpha*dx;
-        nyt=yt+alpha*dyt;
-        ny=project(nyt,range(0,m));
-        nt=nyt[m];
-        //InteriorPointOptimiser::compute_z(d,g,c,ny,nt,nz);
-        allpositive = egtr(nx,0.0) && egtr(nz,0.0) && egtr(emul(nx,nz),GAMMA*mu);
-    }
-    CONCLOG_PRINTLN("alpha="<<alpha);
-    CONCLOG_PRINTLN("nx="<<nx<<" nyt="<<nyt<<" nz="<<nz<<" nxz="<<emul(nx,nz));
-
-    x=nx; y=project(nyt,range(0,m)); z=nz; t=nyt[m];
-}
-
-FloatDPApproximation InteriorPointOptimiser::
-compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-           const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const
-{
-    // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
-    FloatDPApproximation mu=zero;
-    FloatDPApproximationVector gx = g(x);
-
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower_bound()==C[i].upper_bound()) { }
-        else if(C[i].lower_bound()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
-        else if(C[i].upper_bound()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
-        else { // std::cerr<<"FIXME: Compute mu for singleton constraint\n";
-            if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
-            else { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
-        }
-    }
-    mu /= C.size();
-    return mu;
-}
-
-
-Void InteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
-                  FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
-{
-    const SizeType l=2*(d.size()+c.size());
-    y=midpoint(d);
-    x=FloatDPApproximationVector(l,one/l);
-    //compute_tz(d,g,c,y,t,z);
-}
-
-
-
-
-//------- PenaltyFunctionOptimiser ------------------------------------------//
-
-PenaltyFunctionOptimiser* PenaltyFunctionOptimiser::
-clone() const
-{
-    return new PenaltyFunctionOptimiser(*this);
-}
-
-ValidatedVectorType PenaltyFunctionOptimiser::
-minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-ValidatedKleenean PenaltyFunctionOptimiser::
-feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("D="<<D<<" g="<<g<<" C="<<C<<" ");
-
-    FloatDPApproximationVector x=midpoint(D);
-
-    FloatDPApproximationVector w=midpoint(C);
-    for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].upper_bound()==+infty) { w[i]=C[i].lower_bound()+one; }
-        else if(C[i].lower_bound()==-infty) { w[i]=C[i].upper_bound()-one; }
-    }
-
-    FloatDPApproximationVector y(C.size(),zero);
-
-    CONCLOG_PRINTLN("x="<<x<<" w="<<w<<" y="<<y);
-
-    for(SizeType i=0; i!=10; ++i) {
-        this->feasibility_step(D,g,C,x,y,w);
-    }
-    return this->check_feasibility(D,g,C,cast_exact(x),cast_exact(y));
-}
-
-Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& W,
-                 FloatDPApproximationVector& x, FloatDPApproximationVector& w, FloatDPApproximation& mu) const
-{
-    CONCLOG_SCOPE_CREATE;
-    ApproximateVectorMultivariateFunction h(0u,X.dimension());
-    const SizeType n=X.size();
-    const SizeType m=W.size();
-    const SizeType l=h.result_size();
-
-    CONCLOG_PRINTLN("x="<<x);
-    CONCLOG_PRINTLN("w="<<w);
-
-    Vector<FloatDPApproximationDifferential> ddgx=g.evaluate(FloatDPApproximationDifferential::variables(2,x));
-    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
-
-    mu *= 0.5;
-    CONCLOG_PRINTLN("mu="<<mu);
-
-    // G is the constraint value vector
-    FloatDPApproximationVector gx = ddgx.value();
-    FloatDPApproximationVector hx = ddhx.value();
-    CONCLOG_PRINTLN("g(x)="<<gx);
-    CONCLOG_PRINTLN("h(x)="<<hx);
-
-    // A is the transpose derivative matrix aij=dgi/dxj
-    FloatDPApproximationMatrix A = transpose(ddgx.jacobian());
-    CONCLOG_PRINTLN("A=Dg(x)="<<A);
-    FloatDPApproximationMatrix B = transpose(ddhx.jacobian());
-    // FIXME: Due to problems with zero-element differential, need to resize matrix if no h
-    if(l==0) { B.resize(n,0); }
-    CONCLOG_PRINTLN("B=Dh(x)="<<B);
-
-    // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j] lambda[j]*dg[j]/dx[i1]dx[i2]
-    FloatDPApproximationMatrix H(n,n,dp);
-    for(SizeType j=0; j!=m; ++j) { H += (gx[j]-w[j]) * ddgx[j].hessian(); }
-    for(SizeType k=0; k!=l; ++k) { H += (hx[k]) * ddhx[k].hessian(); }
-    CONCLOG_PRINTLN("H="<<H);
-
-    FloatDPApproximationDiagonalMatrix D(n,dp);
-    FloatDPApproximationDiagonalMatrix E(m,dp);
-    for(SizeType i=0; i!=n; ++i) { D[i] = rec(sqr(x[i]-X[i].lower_bound())) + rec(sqr(X[i].upper_bound()-x[i])); }
-    for(SizeType j=0; j!=m; ++j) { E[j] = rec(sqr(w[j]-W[j].lower_bound())) + rec(sqr(W[j].upper_bound()-w[j])); }
-    CONCLOG_PRINTLN("D="<<D);
-    CONCLOG_PRINTLN("E="<<E);
-
-    FloatDPApproximationMatrix S = H + B * transpose(B);
-    S += D;
-    CONCLOG_PRINTLN("S="<<S);
-
-    FloatDPApproximationMatrix R=inverse(S);
-    CONCLOG_PRINTLN("inverse(S)="<<R);
-
-    // Compute residuals
-    FloatDPApproximationVector rx = A*gx + B * hx ; // + 1/(x.upper_bound()-x) + 1/x.lower_bound()-x if no regularisation
-    FloatDPApproximationVector rw = w-gx;
-
-    CONCLOG_PRINTLN("rx="<<rx);
-    CONCLOG_PRINTLN("rw="<<rw);
-
-    FloatDPApproximationVector dx = R * (rx + A * rw);
-    FloatDPApproximationVector dw = rw + transpose(A)*dx;
-    CONCLOG_PRINTLN("dx="<<dx);
-    CONCLOG_PRINTLN("dw="<<dw);
-
-
-    FloatDPApproximationVector newx(n,dp);
-    FloatDPApproximationVector neww(m,dp);
-
-    static const FloatDPApproximation ALPHA_SCALE_FACTOR = 0.75_approx;
-
-    FloatDPApproximation alpha = 1.0_approx;
-    do {
-        newx = x - alpha * dx;
-        neww = w - alpha * dw;
-        alpha *= ALPHA_SCALE_FACTOR;
-    } while ( !contains(X,cast_exact(newx)) || !contains(W,cast_exact(neww)) );
-    alpha /= ALPHA_SCALE_FACTOR;
-
-    CONCLOG_PRINTLN("alpha="<<alpha);
-
-    CONCLOG_PRINTLN("newx="<<newx);
-    CONCLOG_PRINTLN("neww="<<neww<<"\n");
-
-    x=newx;
-    w=neww;
-
-    return;
-}
-
-
-Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                 FloatDPBoundsVector& x, FloatDPBoundsVector& w) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-// Use a penalty approach without multipliers on the constraint functions
-// Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
-Void PenaltyFunctionOptimiser::
-feasibility_step(ExactBoxType const& D, ApproximateVectorMultivariateFunction const& g, ExactBoxType const& C,
-                 FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& w) const
-{
-    CONCLOG_SCOPE_CREATE;
-    auto m=y.size(); auto n=x.size();
-
-    FloatDPApproximationVector cl=lower_bounds(C);
-    FloatDPApproximationVector cu=upper_bounds(C);
-    FloatDPApproximationVector dl=lower_bounds(D);
-    FloatDPApproximationVector du=upper_bounds(D);
-
-    CONCLOG_PRINTLN("D="<<D<<", g="<<g<<", C="<<C);
-    CONCLOG_PRINTLN("dl="<<dl<<", du="<<du);
-    CONCLOG_PRINTLN("cl="<<cl<<", cu="<<cu);
-    CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y);
-
-    ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
-    ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);
-    ARIADNE_ASSERT(w.size()==m);
-    ARIADNE_ASSERT(x.size()==n);
-    ARIADNE_ASSERT(y.size()==m);
-
-    // Solve the problem
-    //   minimise Sum -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x)
-    //   subject to g(x)-w=0
-
-    // Lagrangian
-    //   -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x) - y.(g(x)-w)
-
-    // Conditions for a constrained minimum
-    // 1/(cu-w)-1/(w-cu) + y       = 0
-    // 1/(du-x)-1/(x-dl) - y.Dg(x) = 0
-    //          w - g(x)           = 0
-
-    // Second-order conditions
-    // (1/(w-cl)^2 + 1/(cu-w)^2) dw                 +   dy = - ( 1/(cu-w) - 1/(w-cl) + y       )
-    //   (1/(x-dl)^2 + 1/(du-x)^2 - y.D^2x) dx - Dg'(x) dy = - ( 1/(du-x) - 1/(x-dl) - y.Dg(x) )
-    //                           dw - Dg(x) dx             = - ( w - g(x) )
-
-    Vector<Differential<ApproximateNumericType>> ddgx=g.evaluate(Differential<ApproximateNumericType>::variables(2,x));
-    CONCLOG_PRINTLN("ddgx="<<ddgx);
-
-    Vector<ApproximateNumericType> gx = ddgx.value();
-    CONCLOG_PRINTLN("g(x)="<<gx);
-    Matrix<ApproximateNumericType> A = ddgx.jacobian();
-    CONCLOG_PRINTLN("Dg(x)="<<A);
-
-    Vector<ApproximateNumericType> yA=transpose(A)*y;
-
-    // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
-    Matrix<ApproximateNumericType> YH(x.size(),x.size(),dp);
-    for(SizeType i=0; i!=y.size(); ++i) {
-        YH+=y[i]*ddgx[i].hessian();
-    }
-    CONCLOG_PRINTLN("Y.D2g(x)="<<YH);
-
-    Vector<ApproximateNumericType> recwu=cu-w; recwu=erec(recwu);
-    Vector<ApproximateNumericType> recwl=w-cl; recwl=erec(recwl);
-    Vector<ApproximateNumericType> recxu=du-x; recxu=erec(recxu);
-    Vector<ApproximateNumericType> recxl=x-dl; recxl=erec(recxl);
-
-    Vector<ApproximateNumericType> diagDw=esqr(recwu)+esqr(recwl);
-    Matrix<ApproximateNumericType> Dw(m,m,dp); for(SizeType i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
-    DiagonalMatrix<ApproximateNumericType> Dx(esqr(recxu)+esqr(recxl));
-
-
-    for(SizeType i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
-
-    Matrix<ApproximateNumericType> AT=transpose(A);
-    Matrix<ApproximateNumericType> Znm(n,m,dp);
-    Matrix<ApproximateNumericType> Zmn(m,n,dp);
-    Matrix<ApproximateNumericType> Zmm(m,m,dp);
-    Matrix<ApproximateNumericType> Im=Matrix<ApproximateNumericType>::identity(m,dp);
-
-
-    Matrix<ApproximateNumericType> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
-    Vector<ApproximateNumericType> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
-
-    for(SizeType j=0; j!=m; ++j) {
-        if(C[j].lower_bound()==C[j].upper_bound()) {
-            S[j][j]=1;
-            S[j][m+n+j]=0;
-            S[m+n+j][j]=0;
-            r[j]=0;
-        }
-    }
-
-    Vector<ApproximateNumericType> swxy = -solve(S,r);
-
-    Vector<ApproximateNumericType> sw(m,dp),sx(n,dp),sy(m,dp);
-    sw = project(swxy,range(0,m));
-    sx = project(swxy,range(m,m+n));
-    sy = project(swxy,range(m+n,m+n+m));
-
-    ApproximateNumericType al=one;
-    ApproximateVectorType nw=w+al*sw;
-    ApproximateVectorType nx=x+al*sx;
-    ApproximateVectorType ny(m,dp);
-    CONCLOG_PRINTLN("sx="<<sx);
-    CONCLOG_PRINTLN("sw="<<sw);
-    while(!contains(C,cast_exact(nw)) || !contains(D,cast_exact(nx))) {
-        al*=0.75;
-        nw=w+al*sw;
-        nx=x+al*sx;
-    }
-    CONCLOG_PRINTLN("al="<<sw);
-    ny=y+al*sy;
-
-    w=nw; x=nx; y=ny;
-}
-
-
-ValidatedKleenean ApproximateOptimiser::
-feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("D="<<D<<", h="<<h);
-    FloatDPApproximationVector x=midpoint(D);
-    FloatDPApproximationVector y(h.result_size(),zero);
-
-    for(SizeType i=0; i!=8; ++i) {
-        this->feasibility_step(D,h,x,y);
-    }
-
-    if( decide(norm(h(x))<1e-10) ) { return true; }
-
-    if(!possibly(contains(UpperIntervalType(dot(UpperIntervalVectorType(cast_exact(y)),apply(h,D))),zero))) { return false; }
-
-    return indeterminate;
-}
-
-Void ApproximateOptimiser::
-feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& h,
-                 FloatDPApproximationVector& x, FloatDPApproximationVector& y) const
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("x="<<x<<" y="<<y);
-    static const double SCALE_FACTOR = 0.75;
-    const SizeType n=x.size();
-    const SizeType m=y.size();
-    // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
-    Vector<FloatDPApproximationDifferential> ddhx=h.evaluate(FloatDPApproximationDifferential::variables(2,x));
-    FloatDPApproximationMatrix A = ddhx.jacobian();
-    CONCLOG_PRINTLN_AT(1,"A="<<A<<" b="<<ddhx.value());
-
-    FloatDPApproximationMatrix H(n,n,dp);
-    for(SizeType i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
-    for(SizeType j=0; j!=n; ++j) {
-        H[j][j] += rec(sqr(x[j]-D[j].lower_bound()));
-        H[j][j] += rec(sqr(D[j].upper_bound()-x[j]));
-    }
-
-    FloatDPApproximationVector rx = transpose(A) * y;
-    for(SizeType j=0; j!=n; ++j) {
-        rx[j] -= rec(x[j]-D[j].lower_bound());
-        rx[j] += rec(D[j].upper_bound()-x[j]);
-    }
-    FloatDPApproximationVector ry = ddhx.value();
-    CONCLOG_PRINTLN("rx="<<rx<<" ry="<<ry);
-
-    // S = A Hinv AT
-    // H dx + AT dy = rx; A dx = ry;
-    //  dx = Hinv ( rx - AT dy )
-    //  dy = Sinv ( A Hinv rx - ry )
-    FloatDPApproximationMatrix Hinv=inverse(H);
-    CONCLOG_PRINTLN_AT(1,"H="<<H<<" Hinv="<<Hinv);
-    FloatDPApproximationMatrix S=A*Hinv*transpose(A);
-    FloatDPApproximationMatrix Sinv=inverse(S);
-    CONCLOG_PRINTLN_AT(1,"S="<<S<<" Sinv="<<Sinv);
-    FloatDPApproximationVector dy = Sinv * ( A*(Hinv*rx) - ry );
-    FloatDPApproximationVector dx = Hinv * ( rx - transpose(A) * dy);
-    CONCLOG_PRINTLN("dx="<<dx<<" dy="<<dy);
-
-    FloatDPApproximation ax = one;
-    FloatDPApproximationVector nx = x-ax*dx;
-    while(!contains(D,cast_exact(nx))) {
-        ax*=SCALE_FACTOR;
-        nx = x - ax * dx;
-    }
-    FloatDPApproximationVector ny = y-ax*dy;
-    CONCLOG_PRINTLN("nx="<<nx<<" ax="<<ax<<" ny="<<ny);
-    CONCLOG_PRINTLN_AT(1,"h(x)="<<h(nx));
-
-    x=nx; y=ny;
-}
-
-
-ValidatedKleenean PenaltyFunctionOptimiser::
-check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                     ExactFloatDPVectorType x, ExactFloatDPVectorType y) const
-{
-    ARIADNE_PRECONDITION(D.size()==g.argument_size());
-    ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(x.size()==D.size());
-    ARIADNE_PRECONDITION(y.size()==C.size());
-
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN_AT(1,"D="<<D<<" C="<<C);
-
-    FloatDPBoundsVector gx=g(x);
-    CONCLOG_PRINTLN_AT(1,"x="<<x<<" y="<<y<<" g(x)="<<gx);
-
-    ValidatedKleenean result = true;
-
-    List<SizeType> equalities;
-    for(SizeType j=0; j!=C.size(); ++j) {
-        if( definitely(gx[j].upper()<C[j].lower_bound() || gx[j].lower()>C[j].upper_bound()) ) {
-            return false;
-        }
-        if(C[j].lower_bound()==C[j].upper_bound()) {
-            equalities.append(j);
-        } else {
-            if(!definitely(contains(C[j],gx[j]))) { result = indeterminate; }
-        }
-    }
-
-    if(definitely(result)) {
-        if(equalities.empty()) { CONCLOG_PRINTLN("Feasible"); return true; }
-
-        ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
-        FloatDPBoundsVector c(equalities.size(),dp);
-        for(SizeType i=0; i!=equalities.size(); ++i) {
-            h[i] = g[equalities[i]];
-            c[i] = C[equalities[i]].lower_bound();
-        }
-        CONCLOG_PRINTLN_AT(1,"g="<<g);
-        CONCLOG_PRINTLN_AT(1,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c));
-
-        static const ExactDouble SEARCH_TOLERANCE=1e-8_pr;
-        FloatDPBoundsVector W(h.result_size(),FloatDPBounds(-1,+1,dp)*SEARCH_TOLERANCE);
-        FloatDPBoundsMatrix AT = transpose(midpoint(h.jacobian(x)));
-        FloatDPBoundsVector B = x+AT*W;
-        FloatDPBoundsMatrix IA = h.jacobian(B);
-        CONCLOG_PRINTLN_AT(1,"AT="<<AT<<" IA="<<IA);
-        CONCLOG_PRINTLN_AT(1,"B="<<B);
-
-        // Perform an interval Newton step to try to attain feasibility
-        FloatDPBoundsVector nW = inverse(IA*AT) * FloatDPBoundsVector(h(x)-cast_exact(c));
-        CONCLOG_PRINTLN_AT(1,"W="<<W<<"\nnew_W="<<nW);
-        if(definitely(subset(UpperBoxType(B),D)) && refines(nW,W)) { CONCLOG_PRINTLN("Feasible"); return true; }
-        else { result=indeterminate; }
-    }
-
-    // Compute first-order approximation to g(D) centred at x.
-    // For feasibilty, have yg(D) cap yC nonempty.
-    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
-
-    // Compute y.C
-    UpperIntervalVectorType iy(y);
-    UpperIntervalType yC = dot(iy,C);
-
-    // Compute Taylor estimate of y g(X)
-    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
-    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
-    for(SizeType j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
-
-    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
-    UpperIntervalVectorType ydgD = transpose(dgD) * y;
-
-    FloatDPBounds ygx = dot(y,gx);
-
-    UpperIntervalType ygD = UpperIntervalType(ygx);
-    for(SizeType i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-UpperIntervalType(x[i]));
-    }
-
-    CONCLOG_PRINTLN_AT(1,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD);
-
-    if(definitely(is_empty(intersection(yC,ygD)))) { CONCLOG_PRINTLN("Infeasible"); return false; }
-    else { return indeterminate; }
-}
-
-
-
-
-
-
 /*
 
 // Solve max log(x-xl) + log(xu-x) + log(zu-z) + log(z-zl) such that g(x)=z
@@ -2141,6 +2376,8 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
 }
 */
 
+//------- IntervalOptimiser -----------------------------------//
+
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 ValidatedKleenean IntervalOptimiser::
 feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const
@@ -2229,6 +2466,9 @@ feasibility_step(const ExactFloatDPVectorType& xl, const ExactFloatDPVectorType&
     for(SizeType i=0; i!=m; ++i) { nmu += sqr(y[i]); }
     mu=refinement(mu,nmu);
 }
+
+
+//------- Optimality condition functions -----------------------------------//
 
 /*
 
@@ -2360,7 +2600,12 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunction
     }
 };
 
+*/
 
+
+//------- KrawczykOptimiser -----------------------------------//
+
+/*
 
 ValidatedVectorType KrawczykOptimiser::
 minimise(ValidatedScalarMultivariateFunction f, ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
@@ -2407,7 +2652,7 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
         }
     }
     CONCLOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
-    if(this->is_infeasibility_certificate(d,g,c,midpoint(x))) {
+    if(this->is_infeasibility(d,g,c,midpoint(x))) {
         return false;
     }
     return indeterminate;

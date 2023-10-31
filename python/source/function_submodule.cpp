@@ -338,9 +338,12 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     pybind11::class_<F> function_class(module,(class_name<P>()+signature_name<SIG>()+"Function").c_str());
 
     function_class.def(pybind11::init<F>());
+    if constexpr (Same<P,ApproximateTag>) {
+        function_class.def(pybind11::init<Function<ValidatedTag,SIG>>());
+        function_class.def(pybind11::init<Function<EffectiveTag,SIG>>());
+    }
     if constexpr (Same<P,ValidatedTag>) {
         function_class.def(pybind11::init<Function<EffectiveTag,SIG>>());
-        pybind11::implicitly_convertible<Function<EffectiveTag,SIG>,Function<ValidatedTag,SIG>>();
     }
 
     function_class.def(pybind11::init<ResultSizeType,ArgumentSizeType>());

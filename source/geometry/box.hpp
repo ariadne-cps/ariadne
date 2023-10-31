@@ -174,6 +174,8 @@ class Box
     //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split() const;
 
+    //! \brief Test if the box contains the vector \a v.
+    template<class X> auto contains(const Vector<X>& v) const -> decltype(Ariadne::contains(declval<I>(),declval<X>()));
     //! \brief Test if the box contains the point \a pt.
     template<class X> auto contains(const Point<X>& pt) const -> decltype(Ariadne::contains(declval<I>(),declval<X>()));
 
@@ -254,8 +256,19 @@ template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }
 
-UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperIntervalType const& x);
-UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperIntervalType const& x);
+UpperIntervalType apply(EffectiveScalarUnivariateFunction const& f, UpperIntervalType const& x);
+UpperBoxType apply(EffectiveVectorUnivariateFunction const& f, UpperIntervalType const& x);
+UpperIntervalType apply(EffectiveScalarMultivariateFunction const& f, UpperBoxType const& x);
+UpperBoxType apply(EffectiveVectorMultivariateFunction const& f, UpperBoxType const& x);
+
+UpperIntervalType image(UpperIntervalType const& ivl, EffectiveScalarUnivariateFunction const& f);
+UpperBoxType image(UpperIntervalType const& ivl, EffectiveVectorUnivariateFunction const& f);
+UpperIntervalType image(UpperBoxType const& bx, EffectiveScalarMultivariateFunction const& f);
+UpperBoxType image(UpperBoxType const& bx, EffectiveVectorMultivariateFunction const& f);
+
+
+UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& x);
+UpperBoxType apply(ValidatedVectorUnivariateFunction const& f, UpperIntervalType const& x);
 UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& x);
 UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& x);
 
@@ -263,6 +276,17 @@ UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateF
 UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f);
 UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f);
 UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f);
+
+ApproximateIntervalType apply(ApproximateScalarUnivariateFunction const& f, ApproximateIntervalType const& x);
+ApproximateBoxType apply(ApproximateVectorUnivariateFunction const& f, ApproximateIntervalType const& x);
+ApproximateIntervalType apply(ApproximateScalarMultivariateFunction const& f, ApproximateBoxType const& x);
+ApproximateBoxType apply(ApproximateVectorMultivariateFunction const& f, ApproximateBoxType const& x);
+
+ApproximateIntervalType image(ApproximateIntervalType const& ivl, ApproximateScalarUnivariateFunction const& f);
+ApproximateBoxType image(ApproximateIntervalType const& ivl, ApproximateVectorUnivariateFunction const& f);
+ApproximateIntervalType image(ApproximateBoxType const& bx, ApproximateScalarMultivariateFunction const& f);
+ApproximateBoxType image(ApproximateBoxType const& bx, ApproximateVectorMultivariateFunction const& f);
+
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
@@ -420,6 +444,9 @@ template<class I> inline decltype(refines(declval<I>(),declval<I>())) refines(co
 
 template<class I> template<class X> inline auto Box<I>::contains(const Point<X>& pt) const -> decltype(Ariadne::contains(declval<I>(),declval<X>())) {
     return Ariadne::contains(*this,pt); }
+
+template<class I> template<class X> inline auto Box<I>::contains(const Vector<X>& vec) const -> decltype(Ariadne::contains(declval<I>(),declval<X>())) {
+    return Ariadne::contains(*this,vec); }
 
 template<class I1> template<class I2> inline auto Box<I1>::intersects(const Box<I2>& bx) const -> decltype(Ariadne::intersect(declval<I1>(),declval<I2>())) {
     return Ariadne::intersect(*this,bx); }

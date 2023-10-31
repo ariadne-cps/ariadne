@@ -182,19 +182,21 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( ExactBoxType, D, ({{-1.0_x, 1.0_x},{-1.0_x,1.0_x}}) );
         ARIADNE_TEST_CONSTRUCT( ExactBoxType, C, ({{0.0_x,0.0_x}}) );
 
+        ARIADNE_TEST_CONSTRUCT( ValidatedFeasibilityProblem, p, (D,g,C) );
+
         ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X1, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},pr) );
-        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(p,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
         ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X2, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}},pr) );
-        ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
+        ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(p,X2) );
 
         ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X3, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}},pr) );
-        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(p,X3)) );
 
         ARIADNE_TEST_CONSTRUCT(FloatDPVector, x2, ({0.343750_x,0.656250_x},pr) );
-        ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
+        ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(p,x2) );
     }
 
 };

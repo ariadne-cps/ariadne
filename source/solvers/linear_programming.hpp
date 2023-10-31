@@ -103,10 +103,10 @@ template<class X, class XX> LinearProgramVertexData<X,XX>::LinearProgramVertexDa
 
 enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
 
-class DegenerateFeasibilityProblemException : public std::runtime_error {
+class DegenerateLinearFeasibilityProblemException : public std::runtime_error {
   public:
-    DegenerateFeasibilityProblemException() : std::runtime_error("") { }
-    DegenerateFeasibilityProblemException(const StringType& what) : std::runtime_error(what) { }
+    DegenerateLinearFeasibilityProblemException() : std::runtime_error("") { }
+    DegenerateLinearFeasibilityProblemException(const StringType& what) : std::runtime_error(what) { }
 };
 
 struct SingularLinearProgram : std::runtime_error {

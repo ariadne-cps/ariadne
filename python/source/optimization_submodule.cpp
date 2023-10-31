@@ -54,63 +54,94 @@ Void export_slackness(pybind11::module& module)
 
 Void export_constraint(pybind11::module& module)
 {
-    pybind11::class_<EffectiveConstraint> effective_nonlinear_constraint_class(module,"EffectiveConstraint");
-    effective_nonlinear_constraint_class.def(pybind11::init<EffectiveConstraint>());
-    effective_nonlinear_constraint_class.def(pybind11::init<EffectiveNumber,EffectiveScalarMultivariateFunction,EffectiveNumber>());
-    effective_nonlinear_constraint_class.def(pybind11::init([](EffectiveScalarMultivariateFunction const& f, EffectiveNumber const& u){return EffectiveConstraint(EffectiveNumber(-infty),f,u);}));
-    effective_nonlinear_constraint_class.def(pybind11::init([](EffectiveNumber const& l, EffectiveScalarMultivariateFunction const& f){return EffectiveConstraint(l,f,EffectiveNumber(infty));}));
-    effective_nonlinear_constraint_class.def(pybind11::init<EffectiveScalarMultivariateFunction,EffectiveNumber>());
+    pybind11::class_<EffectiveConstraint> effective_constraint_class(module,"EffectiveConstraint");
+    effective_constraint_class.def(pybind11::init<EffectiveConstraint>());
+    effective_constraint_class.def(pybind11::init<EffectiveNumber,EffectiveScalarMultivariateFunction,EffectiveNumber>());
+    effective_constraint_class.def(pybind11::init([](EffectiveScalarMultivariateFunction const& f, EffectiveNumber const& u){return EffectiveConstraint(EffectiveNumber(-infty),f,u);}));
+    effective_constraint_class.def(pybind11::init([](EffectiveNumber const& l, EffectiveScalarMultivariateFunction const& f){return EffectiveConstraint(l,f,EffectiveNumber(infty));}));
+    effective_constraint_class.def(pybind11::init<EffectiveScalarMultivariateFunction,EffectiveNumber>());
 
-    effective_nonlinear_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
+    effective_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
 
-    pybind11::class_<ValidatedConstraint> validated_nonlinear_constraint_class(module,"ValidatedConstraint");
-    validated_nonlinear_constraint_class.def(pybind11::init<ValidatedNumber,ValidatedScalarMultivariateFunction,ValidatedNumber
+    pybind11::class_<ValidatedConstraint> validated_constraint_class(module,"ValidatedConstraint");
+    validated_constraint_class.def(pybind11::init<ValidatedNumber,ValidatedScalarMultivariateFunction,ValidatedNumber
     >());
-    validated_nonlinear_constraint_class.def(pybind11::init<ValidatedConstraint>());
-    validated_nonlinear_constraint_class.def(pybind11::init<EffectiveConstraint>());
-    validated_nonlinear_constraint_class.def("lower_bound", &ValidatedConstraint::lower_bound);
-    validated_nonlinear_constraint_class.def("upper_bound", &ValidatedConstraint::upper_bound);
-    validated_nonlinear_constraint_class.def("function", (const ValidatedScalarMultivariateFunction&(ValidatedConstraint::*)()const) &ValidatedConstraint::function);
-    validated_nonlinear_constraint_class.def("__str__",&__cstr__<ValidatedConstraint>);
+    validated_constraint_class.def(pybind11::init<ValidatedConstraint>());
+    validated_constraint_class.def(pybind11::init<EffectiveConstraint>());
+    validated_constraint_class.def("lower_bound", &ValidatedConstraint::lower_bound);
+    validated_constraint_class.def("upper_bound", &ValidatedConstraint::upper_bound);
+    validated_constraint_class.def("function", (const ValidatedScalarMultivariateFunction&(ValidatedConstraint::*)()const) &ValidatedConstraint::function);
+    validated_constraint_class.def("__str__",&__cstr__<ValidatedConstraint>);
 }
+
+template<class P> using BoxType = typename FeasibilityProblem<P>::template BoxType<P>;
+
+template<class P> Void export_optimisation_problem(pybind11::module& module)
+{
+    pybind11::class_<FeasibilityProblem<P>> feasibility_problem_class(module,(class_name<P>()+"FeasibilityProblem").c_str());
+    feasibility_problem_class.def(pybind11::init<BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
+    feasibility_problem_class.def("__str__",__cstr__<FeasibilityProblem<P>>);
+    feasibility_problem_class.attr("D");
+    feasibility_problem_class.attr("g");
+    feasibility_problem_class.attr("C");
+
+    pybind11::class_<OptimisationProblem<P>,pybind11::bases<FeasibilityProblem<P>>> optimisation_problem_class(module,(class_name<P>()+"OptimisationProblem").c_str());
+    optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
+    optimisation_problem_class.def("__str__",__cstr__<OptimisationProblem<P>>);
+    optimisation_problem_class.attr("D");
+}
+
+Void export_optimisation_problems(pybind11::module& module)
+{
+    export_optimisation_problem<ValidatedTag>(module);
+    export_optimisation_problem<ApproximateTag>(module);
+}
+
 
 Void export_optimiser_interface(pybind11::module& module)
 {
+    typedef OptimiserInterface::ApproximateNumericType ApproximateNumericType;
+    typedef OptimiserInterface::ApproximateVectorType ApproximateVectorType;
     typedef OptimiserInterface::ValidatedNumericType ValidatedNumericType;
+    typedef OptimiserInterface::ValidatedVectorType ValidatedVectorType;
     typedef OptimiserInterface::ExactVectorType ExactVectorType;
 
     pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
     optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ValidatedVectorMultivariateFunction)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::feasible);
-    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ValidatedVectorMultivariateFunction)const) &OptimiserInterface::feasible);
-    optimiser_interface_class.def("almost_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatDPApproximationVector, FloatDPApproximation)const) &OptimiserInterface::almost_feasible_point);
-    optimiser_interface_class.def("is_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatDPVector)const) &OptimiserInterface::is_feasible_point);
-    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVectorType)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVectorType,ExactVectorType)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVectorType,ExactVectorType)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatDPBoundsVector)const) &OptimiserInterface::contains_feasible_point);
-    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatDPBoundsVector)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem)const) &OptimiserInterface::feasible);
+
+    optimiser_interface_class.def("almost_feasible_point", (ApproximateKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumericType)const) &OptimiserInterface::almost_feasible_point);
+    optimiser_interface_class.def("is_feasible_point", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &OptimiserInterface::is_feasible_point);
+    optimiser_interface_class.def("contains_feasible_point", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("check_feasibility", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
+
+    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, ExactVectorType,ExactVectorType)const) &OptimiserInterface::validate_infeasibility);
+    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ValidatedFeasibilityProblem, UpperBoxType, ExactVectorType)const) &OptimiserInterface::validate_infeasibility);
+    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &OptimiserInterface::contains_feasible_point);
     //NOTE: Not in C++ API
     //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
 }
 
 Void export_interior_point_solvers(pybind11::module& module)
 {
-    pybind11::class_<InfeasibleInteriorPointOptimiser,OptimiserInterface> nonlinear_infeasible_interior_point_solver_class(module,"InfeasibleInteriorPointOptimiser");
-    nonlinear_infeasible_interior_point_solver_class.def(pybind11::init<>());
+    pybind11::class_<InfeasibleInteriorPointOptimiser,OptimiserInterface> infeasible_interior_point_solver_class(module,"InfeasibleInteriorPointOptimiser");
+    infeasible_interior_point_solver_class.def(pybind11::init<>());
+    infeasible_interior_point_solver_class.def("__str__", &__cstr__<InteriorPointOptimiser>);
 
-    pybind11::class_<InteriorPointOptimiser,OptimiserInterface> nonlinear_interior_point_solver_class(module,"InteriorPointOptimiser");
-    nonlinear_interior_point_solver_class.def(pybind11::init<>());
+    pybind11::class_<InteriorPointOptimiser,OptimiserInterface> interior_point_solver_class(module,"InteriorPointOptimiser");
+    interior_point_solver_class.def(pybind11::init<>());
+    interior_point_solver_class.def("__str__", &__cstr__<InteriorPointOptimiser>);
 }
 
-Void export_interior_point_solver(pybind11::module& module)
+Void export_linear_interior_point_solver(pybind11::module& module)
 {
-    pybind11::class_<InteriorPointLinearOptimiser> interior_point_solver_class(module,"InteriorPointLinearOptimiser");
-    interior_point_solver_class.def(pybind11::init<>());
-    interior_point_solver_class.def("minimise", &InteriorPointLinearOptimiser::minimise);
-    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointLinearOptimiser::*)(const Vector<FloatDP>&,const Vector<FloatDP>&, const Matrix<FloatDP>&,const Vector<FloatDP>&)const) &InteriorPointLinearOptimiser::feasible);
-    interior_point_solver_class.def("validate_feasibility", &InteriorPointLinearOptimiser::validate_feasibility);
+    pybind11::class_<InteriorPointLinearOptimiser> linear_interior_point_solver_class(module,"InteriorPointLinearOptimiser");
+    linear_interior_point_solver_class.def(pybind11::init<>());
+    linear_interior_point_solver_class.def("minimise", &InteriorPointLinearOptimiser::minimise);
+    linear_interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointLinearOptimiser::*)(const Vector<FloatDP>&,const Vector<FloatDP>&, const Matrix<FloatDP>&,const Vector<FloatDP>&)const) &InteriorPointLinearOptimiser::feasible);
+    linear_interior_point_solver_class.def("validate_feasibility", &InteriorPointLinearOptimiser::validate_feasibility);
 }
 
 
@@ -150,11 +181,12 @@ Void export_simplex_solver(pybind11::module& module)
 Void optimization_submodule(pybind11::module& module) {
     export_slackness(module);
     export_constraint(module);
+    export_optimisation_problems(module);
     export_optimiser_interface(module);
     export_interior_point_solvers(module);
     export_simplex_solver<FloatDPApproximation>(module);
     export_simplex_solver<FloatDP>(module);
     export_simplex_solver<Rational>(module);
-    export_interior_point_solver(module);
+    export_linear_interior_point_solver(module);
     export_constraint_solver(module);
 }

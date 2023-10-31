@@ -272,7 +272,7 @@ compute_vt(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, c
         } else if(decide(xu[p[k]]<+inf)) {
             vt[p[k]] = Slackness::UPPER;
         } else {
-            ARIADNE_THROW(DegenerateFeasibilityProblemException,"compute_vt",
+            ARIADNE_THROW(DegenerateLinearFeasibilityProblemException,"compute_vt",
                           "xl["<<p[k]<<"]="<<xl[p[k]]<<", xu["<<p[k]<<"]="<<xu[p[k]]<<"\n");
         }
     }
@@ -1206,7 +1206,7 @@ SimplexLinearOptimiser<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, c
             ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
                              <<"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
                              <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" ATy="<<(transpose(A)*compute_y(cc,p,B)));
-            throw DegenerateFeasibilityProblemException();
+            throw DegenerateLinearFeasibilityProblemException();
         }
     }
 

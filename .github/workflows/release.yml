@@ -31,16 +31,10 @@ jobs:
             cxx-cmd: "g++-12"
           }
           - {
-            name: "Ubuntu 22.04 Clang 11 [Release]",
+            name: "Ubuntu 22.04 Clang 15 [Release]",
             os: ubuntu-22.04,
-            cxx-pkg: "clang-11",
-            cxx-cmd: "clang++-11"
-          }
-          - {
-            name: "Ubuntu 22.04 Clang 14 [Release]",
-            os: ubuntu-22.04,
-            cxx-pkg: "clang-14",
-            cxx-cmd: "clang++-14"
+            cxx-pkg: "clang-15",
+            cxx-cmd: "clang++-15"
           }
           - {
             name: "Ubuntu 22.04 GCC 10 [Release]",

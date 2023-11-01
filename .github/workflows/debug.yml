@@ -29,9 +29,9 @@ jobs:
             cxx: "g++-12"
           }
           - {
-            name: "Ubuntu 22.04 Clang 14 [Debug]",
+            name: "Ubuntu 22.04 Clang 15 [Debug]",
             os: ubuntu-22.04,
-            cxx: "clang++-14"
+            cxx: "clang++-15"
           }
           - {
             name: "Ubuntu 22.04 GCC 12 [Debug]",
@@ -65,7 +65,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-14 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-15 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
         sudo pip3 install pytest
 
     - name: Create Build Environment

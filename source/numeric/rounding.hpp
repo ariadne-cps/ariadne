@@ -56,7 +56,7 @@
 
 namespace Ariadne {
 
-typedef std::uint16_t rounding_mode_t;
+typedef __uint16_t rounding_mode_t;
 
 const rounding_mode_t ROUND_TO_NEAREST  = _MM_ROUND_NEAREST;
 const rounding_mode_t ROUND_DOWNWARD    = _MM_ROUND_DOWN;

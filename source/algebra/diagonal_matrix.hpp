@@ -46,141 +46,186 @@ template<class X> class SymmetricMatrix;
 
 template<class X> class DiagonalMatrix;
 
+template<class X, class G> requires InvocableReturning<X,G,SizeType,SizeType>
+Matrix<X>& assign(Matrix<X>& A, G const& g) {
+    for (SizeType i=0; i!=A.row_size(); ++i) {
+        for (SizeType j=0; j!=A.column_size(); ++j) {
+            A.at(i,j)=g(i,j);
+        }
+    }
+    return A;
+}
+
 struct DiagonalMatrixOperations {
 
-    template<class X> friend OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& A) {
-        return A._write(os);
+    template<class X> friend OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& D) {
+        return D._write(os);
     }
 
-    template<class X> friend DiagonalMatrix<NegationType<X>> operator-(DiagonalMatrix<X> A) {
-        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=-A.at(i,i); }
-        return A;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-        ARIADNE_PRECONDITION(A1.size()==A2.size());
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator-(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-        ARIADNE_PRECONDITION(A1.size()==A2.size());
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))-=A2.at(i,i); }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(X const& s1, DiagonalMatrix<X> A2) {
-        for(SizeType i=0; i!=A2.size(); ++i) { const_cast<X&>(A2.at(i,i))*=s1; }
-        return A2;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, X const& s2) {
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=s2; }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, X const& s2) {
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=s2; }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-        if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
-        ARIADNE_PRECONDITION(A1.size()==A2.size());
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=A2.at(i,i); }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
-        if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
-        ARIADNE_PRECONDITION(A1.size()==A2.size());
-        for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
-        return A1;
-    }
-
-    template<class X> friend DiagonalMatrix<X> inverse(DiagonalMatrix<X> A) {
-        for(SizeType i=0; i!=A.size(); ++i) { const_cast<X&>(A.at(i,i))=rec(A.at(i,i)); }
-        return A;
-    }
-
-    template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
-        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
-        return A;
-    }
-
-    template<class X> friend Matrix<X> operator+(DiagonalMatrix<X> const& D, Matrix<X> A) {
-        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
-        return A;
-    }
-
-    template<class X> friend Matrix<X> operator-(Matrix<X> A, DiagonalMatrix<X> const& D) {
-        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-        for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)-=D.at(i,i); }
-        return A;
-    }
-
-    template<class X> friend Matrix<X> operator-(DiagonalMatrix<X> const& D, Matrix<X> A) {
-        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-        for(SizeType i=0; i!=A.row_size(); ++i) { 
-            for(SizeType j=0; j!=A.column_size(); ++j) { A.at(i,j)=-A.at(i,j); }
-            A.at(i,i)+=D.at(i,i); 
+    template<class X> friend DiagonalMatrix<NegationType<X>> operator-(DiagonalMatrix<X> D) {
+        if constexpr (Same<NegationType<X>,X>) {
+            for(SizeType i=0; i!=D.size(); ++i) { D._at(i)=-D._at(i); } return D;
+        } else {
+            return DiagonalMatrix<NegationType<X>>(D.size(),[&D](SizeType i){return -D._at(i);});
         }
-        return A;
     }
 
-    template<class X> friend Matrix<X> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
-        ARIADNE_PRECONDITION(A.column_size()==D.size());
-        for(SizeType j=0; j!=A.column_size(); ++j) {
+    template<class X1, class X2> friend DiagonalMatrix<SumType<X1,X2>> operator+(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
+        ARIADNE_PRECONDITION(D1.size()==D2.size());
+        if constexpr (Same<SumType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)+=D2._at(i); } return D1;
+        } else {
+            return DiagonalMatrix<SumType<X1,X2>>(D1.size(),[&D1,&D2](SizeType i){return D1._at(i)+D2._at(i);});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<DifferenceType<X1,X2>> operator-(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
+        ARIADNE_PRECONDITION(D1.size()==D2.size());
+        if constexpr (Same<DifferenceType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)-=D2._at(i); } return D1;
+        } else {
+            return DiagonalMatrix<DifferenceType<X1,X2>>(D1.size(),[&D1,&D2](SizeType i){return D1._at(i)-D2._at(i);});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,X2>> operator*(X1 const& s1, DiagonalMatrix<X2> D2) {
+        if constexpr (Same<ProductType<X1,X2>,X2>) {
+            for(SizeType i=0; i!=D2.size(); ++i) { D2._at(i)*=s1; } return D2;
+        } else {
+            return DiagonalMatrix<ProductType<X1,X2>>(D2.size(),[&s1,&D2](SizeType i){return s1*D2._at(i);});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,Scalar<X2>>> operator*(DiagonalMatrix<X1> D1, X2 const& s2) {
+        if constexpr (Same<ProductType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)*=s2; } return D1;
+        } else {
+            return DiagonalMatrix<ProductType<X1,X2>>(D1.size(),[&D1,&s2](SizeType i){return D1._at(i)*s2;});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<QuotientType<X1,X2>> operator/(DiagonalMatrix<X1> D1, X2 const& s2) {
+        if constexpr (Same<QuotientType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)/=s2; } return D1;
+        } else {
+            return DiagonalMatrix<QuotientType<X1,X2>>(D1.size(),[&D1,&s2](SizeType i){return D1._at(i)/s2;});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
+        ARIADNE_PRECONDITION(D1.size()==D2.size());
+        if constexpr (Same<ProductType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)*=D2._at(i); } return D1;
+        } else {
+            return DiagonalMatrix<ProductType<X1,X2>>(D1.size(),[&D1,&D2](SizeType i){return D1._at(i)*D2._at(i);});
+        }
+    }
+
+    template<class X1, class X2> friend DiagonalMatrix<QuotientType<X1,X2>> operator/(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
+        ARIADNE_PRECONDITION(D1.size()==D2.size());
+        if constexpr (Same<QuotientType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)/=D2._at(i); } return D1;
+        } else {
+            return DiagonalMatrix<QuotientType<X1,X2>>(D1.size(),[&D1,&D2](SizeType i){return D1._at(i)/D2._at(i);});
+        }
+    }
+
+    template<class X> friend DiagonalMatrix<ReciprocalType<X>> inverse(DiagonalMatrix<X> D) {
+        if constexpr (Same<ReciprocalType<X>,X>) {
+            for(SizeType i=0; i!=D.size(); ++i) { D._at(i)=rec(D._at(i)); } return D;
+        } else {
+            return DiagonalMatrix<ReciprocalType<X>>(D.size(),[&D](SizeType i){return rec(D._at(i));});
+        }
+    }
+
+    template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        if constexpr (Same<SumType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D._at(i); } return A;
+        } else {
+            Matrix<SumType<X1,X2>> R=A; for(SizeType i=0; i!=D.size(); ++i) { R.at(i,i)+=D._at(i); } return R;
+        }
+    }
+
+    template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        if constexpr (Same<SumType<X1,X2>,X2>) {
+            for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D._at(i); } return A;
+        } else {
+            Matrix<SumType<X1,X2>> R=A; for(SizeType i=0; i!=D.size(); ++i) { R.at(i,i)+=D._at(i); } return R;
+        }
+    }
+
+    template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        if constexpr (Same<DifferenceType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)-=D._at(i); } return A;
+        } else {
+            Matrix<SumType<X1,X2>> R=A; for(SizeType i=0; i!=D.size(); ++i) { R.at(i,i)-=D._at(i); } return R;
+        }
+    }
+
+    template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
+        ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
+        if constexpr (Same<DifferenceType<X1,X2>,X2>) {
             for(SizeType i=0; i!=A.row_size(); ++i) {
-                A.at(i,j)*=D.at(j,j);
+                for(SizeType j=0; j!=A.column_size(); ++j) { A.at(i,j)=-A.at(i,j); }
+                A.at(i,i)+=D._at(i);
             }
+            return A;
+        } else {
+            Matrix<DifferenceType<X1,X2>> R(A.row_size(),A.column_size(),[&A](SizeType i, SizeType j){return -A.at(i,j);});
+            for(SizeType i=0; i!=D.size(); ++i) { R.at(i,i)+=D._at(i); } return R;
         }
-        return A;
     }
 
-    template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Matrix<X> A) {
+    template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
+        ARIADNE_PRECONDITION(A.column_size()==D.size());
+        auto g = [&A,&D](SizeType i, SizeType j){return A.at(i,j)*D._at(j);};
+        if constexpr (Same<ProductType<X1,X2>,X1>) { assign(A,g); return A; }
+        else { return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g); }
+    }
+
+    template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
         ARIADNE_PRECONDITION(D.size()==A.row_size())
-        for(SizeType i=0; i!=A.row_size(); ++i) {
-            for(SizeType j=0; j!=A.column_size(); ++j) {
-                A.at(i,j)*=D.at(i,i);
-            }
-        }
-        return A;
+        auto g = [&D,&A](SizeType i, SizeType j){return D._at(i)*A.at(i,j);};
+        if constexpr (Same<ProductType<X1,X2>,X2>) { assign(A,g); return A; }
+        else { return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g); }
     }
 
-    template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Transpose<Matrix<X>> const& A) {
+    template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Transpose<Matrix<X2>> const& A) {
         ARIADNE_PRECONDITION(D.size()==A.row_size())
-        Matrix<X> R(A.row_size(),A.column_size(),(A.zero_element()*D.zero_element()*A.zero_element()));
-        for(SizeType i=0; i!=A.row_size(); ++i) {
-            for(SizeType j=0; j!=A.column_size(); ++j) {
-                R.at(i,j)=D.at(i,i)*A.at(i,j);
+        auto g = [&D,&A](SizeType i, SizeType j){return D._at(i)*A.at(i,j);};
+        return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g);
+    }
+
+    template<class X1, class X2> friend Vector<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Vector<X2> v) {
+        ARIADNE_PRECONDITION(D.size()==v.size())
+        if constexpr (Same<ProductType<X1,X2>,X2>) {
+            for(SizeType i=0; i!=v.size(); ++i) {
+                v.at(i)*=D._at(i);
             }
+            return v;
+        } else {
+            return Vector<ProductType<X1,X2>>(v.size(),[&D,&v](SizeType i){return D._at(i)*v.at(i);});
         }
-        return R;
     }
-
-    template<class X> friend Vector<X> operator*(DiagonalMatrix<X> const& D, Vector<X> v) {
+    template<class X1, class X2> friend Vector<ProductType<X1,X2>> operator*(Vector<X1> v, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(D.size()==v.size())
-        for(SizeType i=0; i!=v.size(); ++i) {
-            v.at(i)*=D.at(i,i);
+        if constexpr (Same<ProductType<X1,X2>,X1>) {
+            for(SizeType i=0; i!=v.size(); ++i) {
+                v.at(i)*=D._at(i);
+            }
+            return v;
+        } else {
+            return Vector<ProductType<X1,X2>>(v.size(),[&v,&D](SizeType i){return v.at(i)*D._at(i);});
         }
-        return v;
-    }
-
-    template<class X> friend Vector<X> operator*(Vector<X> v, DiagonalMatrix<X> const& D) {
-        ARIADNE_PRECONDITION(D.size()==v.size())
-        for(SizeType i=0; i!=v.size(); ++i) {
-            v.at(i)*=D.at(i,i);
-        }
-        return v;
     }
 
     template<class X> friend Vector<X> operator/(Vector<X> v, DiagonalMatrix<X> const& D) {
         ARIADNE_PRECONDITION(D.size()==v.size())
         for(SizeType i=0; i!=v.size(); ++i) {
-            v.at(i)/=D.at(i,i);
+            v.at(i)/=D._at(i);
         }
         return v;
     }
@@ -199,6 +244,7 @@ template<class X> class DiagonalMatrix
     explicit DiagonalMatrix(Array<X>);
     explicit DiagonalMatrix(Vector<X>);
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
+    template<class G> requires InvocableReturning<X,G,SizeType> DiagonalMatrix(SizeType n, G const& g);
     SizeType size() const;
     SizeType row_size() const;
     SizeType column_size() const;
@@ -212,6 +258,8 @@ template<class X> class DiagonalMatrix
     operator Matrix<X>() const;
     operator SymmetricMatrix<X>() const;
   private: public:
+    X& _at(SizeType i);
+    X const& _at(SizeType i) const;
     OutputStream& _write(OutputStream&) const;
 };
 
@@ -219,6 +267,12 @@ template<class X> template<class... PRS> requires Constructible<X,Nat,PRS...>
 DiagonalMatrix<X>::DiagonalMatrix(SizeType n, PRS... prs)
     : _zero(0u,prs...), _ary(n,_zero)
 { }
+
+template<class X> template<class G> requires InvocableReturning<X,G,SizeType>
+DiagonalMatrix<X>::DiagonalMatrix(SizeType n, G const& g)
+    : _zero(nul(g(0))), _ary(n,g)
+{
+}
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
     : _zero(create_zero(ary[0])), _ary(ary)
@@ -282,6 +336,14 @@ template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {
 
 template<class X> OutputStream& DiagonalMatrix<X>::_write(OutputStream& os) const {
     return os << "diag(" << this->_ary << ")";
+}
+
+template<class X> X& DiagonalMatrix<X>::_at(SizeType i) {
+    return _ary[i];
+}
+
+template<class X> X const& DiagonalMatrix<X>::_at(SizeType i) const {
+    return _ary[i];
 }
 
 } // namespace Ariadne

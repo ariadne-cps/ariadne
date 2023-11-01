@@ -90,6 +90,7 @@ template<class L1, class L2=L1> using LogicalConjunctionType = decltype(declval<
 template<class L1, class L2=L1> using LogicalDisjunctionType = decltype(declval<L1>() || declval<L2>());
 
 template<class X> using NegationType = decltype(-declval<X>());
+template<class X> using ReciprocalType = decltype(rec(declval<X>()));
 template<class X1, class X2=X1> using SumType = decltype(declval<X1>()+declval<X2>());
 template<class X1, class X2=X1> using DifferenceType = decltype(declval<X1>()-declval<X2>());
 template<class X1, class X2=X1> using ProductType = decltype(declval<X1>()*declval<X2>());

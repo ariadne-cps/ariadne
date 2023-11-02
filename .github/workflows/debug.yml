@@ -41,6 +41,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
     - name: Get macOS Concurrency
       if: runner.os == 'macOS'
@@ -57,7 +60,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@12 python3 mpfr cairo gnuplot pkg-config
+        brew install ninja gcc@12 mpfr cairo gnuplot pkg-config
         python3 -m pip install --upgrade pip
         pip3 install --upgrade pip
         pip3 install pytest
@@ -65,7 +68,8 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-15 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-15 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3.11-dev
+        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
         sudo pip3 install pytest
 
     - name: Create Build Environment

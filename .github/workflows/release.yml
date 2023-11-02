@@ -51,6 +51,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
     - name: Get macOS Concurrency
       if: runner.os == 'macOS'
@@ -72,7 +75,9 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config ${{matrix.config.cxx-pkg}} libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev
+        sudo apt install -y cmake ninja-build pkg-config ${{matrix.config.cxx-pkg}} libcairo2-dev gnuplot libmpfr-dev python3-pip python3.11-dev
+        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+        sudo pip3 install pytest
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

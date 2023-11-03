@@ -215,42 +215,53 @@ template<class X> Void define_infinitary(pybind11::module& module, pybind11::cla
 
 
 
+template<class T1, class T2> Pair<T1,T2> pair_from_python(pybind11::handle t1, pybind11::handle t2) {
+    return Pair<T1,T2>(from_python_object_or_literal<T1>(t1),from_python_object_or_literal<T2>(t2));
+}
 
-template<class L, class U> Pair<L,U> pair_from_dict(pybind11::dict dct) {
+template<class T1, class T2> Pair<T1,T2> pair_from_dict(pybind11::dict dct) {
     assert(dct.size()==1);
     pybind11::detail::dict_iterator::reference item = *dct.begin();
-    pybind11::handle lh = item.first;
-    pybind11::handle uh = item.second;
-    return Pair<L,U>(pybind11::cast<L>(lh),pybind11::cast<U>(uh));
+    return pair_from_python<T1,T2>(item.first,item.second);
+}
+
+template<class T1, class T2> Pair<T1,T2> pair_from_tuple(pybind11::tuple tup) {
+    assert(tup.size()==2);
+    return pair_from_python<T1,T2>(tup[0],tup[1]);
 }
 
 template<class X> X bounds_from_dict(pybind11::dict dct) {
     typedef decltype(declval<X>().lower_raw()) L;
     typedef decltype(declval<X>().upper_raw()) U;
-    assert(dct.size()==1);
-    pybind11::detail::dict_iterator::reference item = *dct.begin();
-    pybind11::handle lh = item.first;
-    pybind11::handle uh = item.second;
-    L l = from_python_object_or_literal<L>(lh);
-    U u = from_python_object_or_literal<U>(uh);
-    return X(l,u);
+    Pair<L,U> lu = pair_from_dict<L,U>(dct);
+    return X(lu.first,lu.second);
 }
 
 template<class X, class PR> X bounds_from_dict_and_properties(pybind11::dict dct, PR pr) {
     typedef ValidatedLowerNumber L;
     typedef ValidatedUpperNumber U;
-    assert(dct.size()==1);
-    pybind11::detail::dict_iterator::reference item = *dct.begin();
-    pybind11::handle lh = item.first;
-    pybind11::handle uh = item.second;
-    L l = from_python_object_or_literal<L>(lh);
-    U u = from_python_object_or_literal<U>(uh);
-    return X(l,u,pr);
+    Pair<L,U> lu = pair_from_dict<L,U>(dct);
+    return X(lu.first,lu.second,pr);
+}
+
+template<class X> X bounds_from_tuple(pybind11::tuple tup) {
+    typedef decltype(declval<X>().lower_raw()) L;
+    typedef decltype(declval<X>().upper_raw()) U;
+    Pair<L,U> lu = pair_from_tuple<L,U>(tup);
+    return X(lu.first,lu.second);
+}
+
+template<class X, class PR> X bounds_from_tuple_and_properties(pybind11::tuple tup, PR pr) {
+    typedef ValidatedLowerNumber L;
+    typedef ValidatedUpperNumber U;
+    Pair<L,U> lu = pair_from_tuple<L,U>(tup);
+    return X(lu.first,lu.second,pr);
 }
 
 
 template<> ValidatedNumber from_python_object_or_literal<ValidatedNumber>(pybind11::handle h) {
     try { return static_cast<ValidatedNumber>(bounds_from_dict<DecimalBounds>(pybind11::cast<pybind11::dict>(h))); } catch(...) { }
+    try { return static_cast<ValidatedNumber>(bounds_from_tuple<DecimalBounds>(pybind11::cast<pybind11::tuple>(h))); } catch(...) { }
     try { return static_cast<ValidatedNumber>(Decimal(pybind11::cast<String>(h))); } catch(...) { }
     return pybind11::cast<ValidatedNumber>(h);
 }
@@ -643,6 +654,7 @@ void export_numbers(pymodule& module)
     validated_number_class.def("__repr__", &__repr__<ValidatedNumber>);
 
     validated_number_class.def(pybind11::init([](pybind11::dict pydct){return ValidatedNumber(bounds_from_dict<DecimalBounds>(pydct));}));
+    validated_number_class.def(pybind11::init([](pybind11::tuple pytup){return ValidatedNumber(bounds_from_tuple<DecimalBounds>(pytup));}));
     validated_number_class.def(pybind11::init([](pybind11::str pystr){return ValidatedNumber(Decimal(String(pystr)));}));
 
     define_elementary(module,validated_number_class);
@@ -748,6 +760,7 @@ void export_dyadic_bounds(pymodule& module)
     dyadic_bounds_class.def(init<Dyadic>());
     dyadic_bounds_class.def(init<Dyadic,Dyadic>());
     dyadic_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<DyadicBounds>(pydct);}));
+    dyadic_bounds_class.def(pybind11::init([](pybind11::dict pytup){return bounds_from_tuple<DyadicBounds>(pytup);}));
     implicitly_convertible<int,DyadicBounds>();
     implicitly_convertible<Dyadic,DyadicBounds>();
     implicitly_convertible<pybind11::dict,DyadicBounds>();
@@ -769,6 +782,7 @@ void export_decimal_bounds(pymodule& module)
     decimal_bounds_class.def(init<Decimal>());
     decimal_bounds_class.def(init<Decimal,Decimal>());
     decimal_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<DecimalBounds>(pydct);}));
+    decimal_bounds_class.def(pybind11::init([](pybind11::tuple pytup){return bounds_from_tuple<DecimalBounds>(pytup);}));
     implicitly_convertible<int,DecimalBounds>();
     implicitly_convertible<Decimal,DecimalBounds>();
     decimal_bounds_class.def("lower", &DecimalBounds::lower);
@@ -785,6 +799,7 @@ void export_rational_bounds(pymodule& module)
     rational_bounds_class.def(init<Rational,Rational>());
     rational_bounds_class.def(init<DyadicBounds>());
     rational_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<RationalBounds>(pydct);}));
+    rational_bounds_class.def(pybind11::init([](pybind11::tuple pytup){return bounds_from_tuple<RationalBounds>(pytup);}));
     implicitly_convertible<int,RationalBounds>();
     implicitly_convertible<Rational,RationalBounds>();
     rational_bounds_class.def("lower", &RationalBounds::lower);
@@ -1117,7 +1132,8 @@ template<class PR> void export_float_bounds(pymodule& module)
 
     float_bounds_class.def(pybind11::init([](String l, String u, PR pr){return FloatBounds<PR>(Decimal(l),Decimal(u),pr);}));
     float_bounds_class.def(pybind11::init([](String lu, PR pr){return FloatBounds<PR>(Decimal(lu),pr);}));
-    float_bounds_class.def(pybind11::init([](pybind11::dict dct, PR pr){return bounds_from_dict_and_properties<FloatBounds<PR>>(dct,pr); }));
+    float_bounds_class.def(pybind11::init([](pybind11::dict pydct, PR pr){return bounds_from_dict_and_properties<FloatBounds<PR>>(pydct,pr); }));
+    float_bounds_class.def(pybind11::init([](pybind11::tuple pydct, PR pr){return bounds_from_tuple_and_properties<FloatBounds<PR>>(pydct,pr); }));
 
     float_bounds_class.def("__str__", &__cstr__<FloatBounds<PR>>);
     float_bounds_class.def("__repr__", &__repr__<FloatBounds<PR>>);

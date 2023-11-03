@@ -54,7 +54,7 @@ class NonSymmetricMatrixException { };
 //! \ingroup LinearAlgebraSubModule
 //! \brief Symmetric matrices over some type \a X.
 template<class X> class SymmetricMatrix
-    : public MatrixContainer<Matrix<X>>
+    : public MatrixContainer<SymmetricMatrix<X>>
 {
     X _zero;
     SizeType _s;

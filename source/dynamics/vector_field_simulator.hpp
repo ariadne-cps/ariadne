@@ -131,6 +131,8 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     FloatDPApproximation _step_size;
     Nat _num_subdivisions;
     DiscretisationType _discretisation_type;
+    Bool _is_using_subspace;
+    subspace _subspace;
 
   public:
 
@@ -142,6 +144,24 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
 
     Void set_num_subdivisions(Nat num_subdivisions) { _num_subdivisions = num_subdivisions; }
     Nat const& num_subdivisions() const { return _num_subdivisions; }
+
+    Void insert_subspace(RealVariable v, Nat n){
+        _is_using_subspace = true;
+        if(_subspace.has_key(v) == false){
+            //If key doesn't exists, then create it one with its value
+            _subspace.insert(v, n);
+        }else{
+            //if key already exists, error
+            ARIADNE_ERROR("The key " <<v<< "already exists creating subspace");
+        }
+    }
+
+    Void set_subspace(subspace subspace) {
+        _is_using_subspace = true;
+        _subspace = subspace;
+    }
+
+    subspace const& get_subspace() const { return _subspace; }
 
     virtual OutputStream& _write(OutputStream& os) const;
 

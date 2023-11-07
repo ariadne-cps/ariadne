@@ -232,7 +232,8 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine) {
+        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine), _is_using_subspace(false), _subspace()  {
+
 }
 
 OutputStream&

@@ -73,6 +73,8 @@ class TestVectorFieldSimulator
         simulator.configuration().set_step_size(0.05);
         simulator.configuration().set_num_subdivisions(1);
 
+        //simulator.configuration().insert_subspace(x, 10);
+
         ARIADNE_TEST_PRINT(simulator.configuration());
 
         Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);

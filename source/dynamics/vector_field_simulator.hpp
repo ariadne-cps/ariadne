@@ -146,20 +146,23 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     Nat const& num_subdivisions() const { return _num_subdivisions; }
 
     Void insert_subspace(RealVariable v, Nat n){
-        _is_using_subspace = true;
         if(_subspace.has_key(v) == false){
             //If key doesn't exists, then create it one with its value
             _subspace.insert(v, n);
+            _is_using_subspace = true;
+            _num_subdivisions = 0;
         }else{
             //if key already exists, error
             ARIADNE_ERROR("The key " <<v<< "already exists creating subspace");
         }
     }
 
-    Void set_subspace(subspace subspace) {
+    Void set_subspace(subspace _subspace_) {
         _is_using_subspace = true;
-        _subspace = subspace;
+        _subspace = _subspace_;
     }
+
+    Bool is_using_subspace() { return _is_using_subspace; }
 
     subspace const& get_subspace() const { return _subspace; }
 

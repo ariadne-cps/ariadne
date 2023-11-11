@@ -94,13 +94,22 @@ template<class X> List<LabelledPoint<X>> make_state_auxiliary_point(const List<L
     return pointLst;
 }
 
-GridTreePaving create_paving(UpperBoxType box) {
+GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
+    if(sspc.size() > spc.size()) {
+        ARIADNE_ERROR("Too much dimension on subdivision of subspace");
+    }
+    Nat div = 1;
     Point<FloatDP> tmpPointCenter = Point(box.centre());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
+        div = 1;
+        if(sspc.has_key(spc[i])) {
+            Nat val = sspc.get(spc[i]);
+            div = val;
+        }
         origin[i] = tmpPointCenter[i];
-        lengths[i] = box.widths().at(i).raw();
+        lengths[i] = (box.widths().at(i).raw()/div).value();
     }
     Grid grid(origin, lengths);
     GridTreePaving gridPaving(grid);
@@ -172,7 +181,8 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
         FloatDPUpperBound eps(0.0001_q,dp);
         initial_box = widen(initial_box, eps);
     }
-    GridTreePaving gridPaving = create_paving(initial_box);
+    GridTreePaving gridPaving = create_paving(initial_box, _system->state_space(), _configuration->get_subspace());
+    if(_configuration->is_using_subspace() == true) { _configuration->set_num_subdivisions(0); }
     gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
     ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
                                                            _configuration->discretisation_type(), _configuration->num_subdivisions());
@@ -243,6 +253,7 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
        << "\n  step_size=" << step_size()
        << "\n  discretisation_type=" << discretisation_type()
        << "\n  num_subdivisions=" << num_subdivisions()
+       << "\n  subspace=" << get_subspace()
        << ")\n";
     return os;
 }

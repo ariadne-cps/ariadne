@@ -56,6 +56,18 @@ template<class I> decltype(declval<I>().is_bounded()) Box<I>::is_bounded() const
 }
 
 
+template<class I> decltype(declval<I>().has_nonempty_interior()) Box<I>::has_nonempty_interior() const
+{
+    const Box<I>& bx=*this;
+    decltype(declval<I>().has_nonempty_interior()) res=true;
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
+        res=res && bx[i].has_nonempty_interior();
+        if(not possibly(res)) { return false; }
+    }
+    return res;
+}
+
+
 
 template<class I> SizeType irmax(const Box<I>& bx) {
     SizeType imw(0);

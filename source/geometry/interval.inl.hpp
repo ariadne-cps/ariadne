@@ -56,6 +56,7 @@ template<class U> Interval<U> Interval<U>::biinfinite_interval() { return Interv
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<declval<L>()) { return Ariadne::is_bounded(*this); }
 template<class U> auto Interval<U>::is_singleton() const -> decltype(declval<L>() == declval<U>()) { return this->_l == this->_u; }
+template<class U> auto Interval<U>::has_nonempty_interior() const -> decltype(declval<L>()<declval<U>()) { return this->_l < this->_u; }
 
 template<class U> auto Interval<U>::set_lower_bound(LowerBoundType l) -> void { _l=l; }
 template<class U> auto Interval<U>::set_upper_bound(UpperBoundType u) -> void { _u=u; }

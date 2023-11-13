@@ -160,9 +160,11 @@ class Box
     //! The bounding box.
     Box<IntervalType> bounding_box() const;
 
+    //! \brief Test if the box has a nonempty interior. Returns the same type as IntervalType::has_nonempty_interior().
+    auto has_nonempty_interior() const -> decltype(declval<IntervalType>().has_nonempty_interior());
     //! \brief Test if the box is empty. Returns the same type as IntervalType::is_empty().
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    //! \brief Test if the box is bounded.Returns the same type as IntervalType::is_bounded().
+    //! \brief Test if the box is bounded. Returns the same type as IntervalType::is_bounded().
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
     //! Splits the box along coordinate \a k and takes the lower , middle, or upper part as given by \a lmu.

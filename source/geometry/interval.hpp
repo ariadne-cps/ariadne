@@ -303,6 +303,8 @@ template<class U> class Interval
     auto is_singleton() const -> decltype(declval<L>() == declval<U>());
     //! Test if the interval is bounded.
     auto is_bounded() const -> decltype(declval<U>()<declval<L>());
+    //! Test if the interval has a nonempty interior.
+    auto has_nonempty_interior() const -> decltype(declval<L>() < declval<U>());
   public:
 #ifdef DOXYGEN
     //!@{ \name Interval arithmeric

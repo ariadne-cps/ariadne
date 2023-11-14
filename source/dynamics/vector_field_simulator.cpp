@@ -98,18 +98,37 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     if(sspc.size() > spc.size()) {
         ARIADNE_ERROR("Too much dimension on subdivision of subspace");
     }
-    Nat div = 1;
+    Nat divider = 1;
     Point<FloatDP> tmpPointCenter = Point(box.centre());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
+
+    auto lengths_ = box.widths();
+    Nat box_width_null = 0;
+    for(SizeType i=0; i<lengths_.size(); i++){
+        if(lengths_[i].get_d() > 0) { continue; }
+        box_width_null++;
+    }
+    if(box_width_null == lengths_.size())
+    {
+        tmpPointCenter = box.midpoint();
+    }else if (box_width_null > 0)
+    {
+        FloatDPUpperBound eps(0.000000001_q,dp);
+        box = widen(box, eps);
+    }
+
+    FloatDPUpperBound eps(0.000000001_q,dp);
+    box = widen(box, eps);
+
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
-        div = 1;
+        divider = 1;
         if(sspc.has_key(spc[i])) {
             Nat val = sspc.get(spc[i]);
-            div = val;
+            divider = val;
         }
         origin[i] = tmpPointCenter[i];
-        lengths[i] = (box.widths().at(i).raw()/div).value();
+        lengths[i] = (box.widths().at(i).raw()/divider).value();
     }
     Grid grid(origin, lengths);
     GridTreePaving gridPaving(grid);
@@ -164,6 +183,7 @@ auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationTy
 auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
 -> OrbitType
 {
+/*
     auto lengths = initial_box.widths();
     Nat box_width_null = 0;
     for(SizeType i=0; i<lengths.size(); i++){
@@ -181,6 +201,7 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
         FloatDPUpperBound eps(0.0001_q,dp);
         initial_box = widen(initial_box, eps);
     }
+*/
     GridTreePaving gridPaving = create_paving(initial_box, _system->state_space(), _configuration->get_subspace());
     if(_configuration->is_using_subspace() == true) { _configuration->set_num_subdivisions(0); }
     gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());

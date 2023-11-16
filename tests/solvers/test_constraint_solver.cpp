@@ -168,23 +168,29 @@ class TestConstraintSolver
     Void test_feasible() {
 
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(1);
-        EffectiveConstraint c = (x[0]-2<=0);
+        EffectiveConstraint constraint1 = (x[0]-2<=0);
+        EffectiveConstraint constraint2 = (-1<=x[0]-2<=0);
 
-        List<ValidatedConstraint> constraints;
-        constraints.append(c);
+        List<ValidatedConstraint> constraints1 = {constraint1};
+        List<ValidatedConstraint> constraints2 = {constraint2};
 
         ConstraintSolver contractor;
 
-        ARIADNE_TEST_PRINT(constraints);
+        ARIADNE_TEST_PRINT(constraints1);
+        ARIADNE_TEST_PRINT(constraints2);
 
         ExactBoxType domain1({{1.9375_x,2.0_x}});
-        ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints).first));
+        ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints1).first));
+        ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints2).first));
 
         ExactBoxType domain2({{2.015625_x,2.5_x}});
-        ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints).first));
+        ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints1).first));
+        ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints2).first));
 
         ExactBoxType domain3({{2.0_x,2.015625_x}});
-        ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints).first));
+        ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints1).first));
+        ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints2).first));
+
     }
 };
 

@@ -125,65 +125,81 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     }
 
 
-    const SizeType m=domain.size(); // The total number of variables
-    const SizeType n=codomain.size(); // The total number of nontrivial constraints
-    const SizeType l=(m+n)*2; // The total number of lagrange multipliers
+    const SizeType n=domain.size(); // The total number of variables
+    const SizeType m=codomain.size(); // The total number of nontrivial constraints
 
     DoublePrecision prec;
-    FloatApproximationVector point(m,dp); // The point in the domain which is the current test point
-    FloatDPApproximation violation(dp); // An upper bound on amount by which the constraints are violated by the test point
-    FloatApproximationVector multipliers(l,dp); // The lagrange multipliers for the constraints
-    FloatApproximationVector slack(l,dp); // The slack between the test point and the violated constraints
+    FloatApproximationVector point(n,dp); // The point x in the domain which is the current test point
+    FloatApproximationVector slack(m,dp); // The slack w between the image of the test point and the g(x) in C
+    FloatApproximationVector dual(m,dp); // The lagrange multipliers y for the constraint g(x)=w
+    FloatApproximationVector complementary(n,dp); // The lagrange multipliers z for the constraints x in D
+    FloatDPApproximation violation(dp); // An upper bound t on amount by which the constraints are violated by the test point
+    FloatDPApproximation& t=violation; FloatDPApproximationVector& w=slack; FloatApproximationVector& x=point; FloatApproximationVector& y=dual; FloatApproximationVector& z=complementary; //
+    // Aliases for the main quantities used
+    const ExactBoxType& D=domain; const ValidatedVectorMultivariateFunction& g=function; const ExactBoxType& C=codomain;
 
-    FloatDPApproximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
-    const ExactBoxType& d=domain; const ValidatedVectorMultivariateFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
-    ValidatedVectorMultivariateTaylorFunctionModelDP tfn(d,fn,default_sweeper());
+    ApproximateFeasibilityProblem p(D,g,C);
 
-    point=static_cast<FloatApproximationVector>(midpoint(d));
-    for(SizeType k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
+    ValidatedVectorMultivariateTaylorFunctionModelDP tfn(D,g,default_sweeper());
+
+    for(SizeType k=0; k!=n; ++k) { point[k]=midpoint(D[k]); }
+    for(SizeType k=0; k!=m; ++k) {
+        if (C[k].lower_bound()==-inf) { slack[k]=C[k].upper_bound()-1; }
+        else if (C[k].upper_bound()==+inf) { slack[k]=C[k].lower_bound()+1; }
+        else { slack[k]=midpoint(C[k]); }
+    }
+    for(SizeType k=0; k!=m; ++k) { dual[k]=1.0/m; }
+    for(SizeType k=0; k!=n; ++k) { complementary[k]=1.0/n; }
+
 
     InteriorPointOptimiser optimiser;
-    optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
+    t=optimiser.compute_t(p,x);
 
-    CONCLOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);
+    CONCLOG_PRINTLN_AT(1,"D="<<D<<", g="<<g<<", C="<<C);
 
     static const CounterType NUMBER_OF_STEPS=12u;
 
     // TODO: Don't use fixed number of steps
     for(CounterType i=0; i!=NUMBER_OF_STEPS; ++i) {
-        CONCLOG_PRINTLN_AT(2,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
-        optimiser.feasibility_step(d,fn,c,x,y,z,t);
+        CONCLOG_PRINTLN_AT(2,"t="<<t<<", w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
+        try {
+            optimiser.feasibility_step(p, w,x,y,z);
+        } catch (SingularMatrixException const& e) {
+            break;
+        }
+        t = optimiser.compute_t(p,x);
         if(decide(t>=TERR)) {
-            CONCLOG_PRINTLN("t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+            CONCLOG_PRINTLN("t="<<t<<", w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
             if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
-            else { CONCLOG_PRINTLN("f(y)="<<fn(cast_exact(y))); return make_pair(indeterminate,cast_exact(point)); }
+            else { CONCLOG_PRINTLN("g(y)="<<g(cast_exact(y))); return make_pair(indeterminate,cast_exact(point)); }
         }
     }
-    CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
+    CONCLOG_PRINTLN_AT(1,"t="<<t<<", w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
 
     if(decide(t<TERR)) {
         // Probably disjoint, so try to prove this
         UpperBoxType subdomain=domain;
 
-        Vector<FloatDP> x_exact=cast_exact(x);
+        Vector<FloatDP> y_exact=cast_exact(y);
+        Vector<FloatDP> z_exact=cast_exact(z);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
-        ValidatedNumericType cnst(0,prec);
-        for(SizeType j=0; j!=n; ++j) {
-            txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
-            cnst += (c[j].upper_bound()*x_exact[j]-c[j].lower_bound()*x_exact[n+j]);
+        ValidatedScalarMultivariateTaylorFunctionModelDP tyg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(D,default_sweeper());
+        UpperIntervalType cnst(ValidatedNumericType(0,prec));
+        for(SizeType j=0; j!=m; ++j) {
+            tyg = tyg + y_exact[j]*tfn[j];
+            cnst += y_exact[j]*C[j];
         }
-        for(SizeType i=0; i!=m; ++i) {
-            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
-            cnst += (d[i].upper_bound()*x_exact[2*n+i]-d[i].lower_bound()*x_exact[2*n+m+i]);
+        for(SizeType i=0; i!=n; ++i) {
+            tyg = tyg + (z_exact[i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(D,i,default_sweeper());
+            cnst += z_exact[i]*D[i];
         }
-        txg = cnst + txg;
+        tyg = tyg-cast_singleton(cnst);
 
-        CONCLOG_PRINTLN_AT(1,"txg="<<txg);
+        CONCLOG_PRINTLN_AT(1,"tyg="<<tyg);
 
         CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
-        this->hull_reduce(subdomain,txg,ExactIntervalType(0,_inf));
+        this->hull_reduce(subdomain,tyg,ExactIntervalType(0,_inf));
         CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
         if(definitely(subdomain.is_empty())) {
             CONCLOG_PRINTLN("Proved disjointness using hull reduce");
@@ -191,22 +207,22 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         }
 
         for(SizeType i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
+            this->box_reduce(subdomain,tyg,ExactIntervalType(0,_inf),i);
             CONCLOG_PRINTLN_AT(2,"dom="<<subdomain);
             if(definitely(subdomain.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return make_pair(false,ExactPointType()); }
         }
         CONCLOG_PRINTLN_AT(1,"dom="<<subdomain);
 
-        //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
+        //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),D);
         CONCLOG_PRINTLN("Splitting domain");
-        Pair<ExactBoxType,ExactBoxType> sd=d.split();
+        Pair<ExactBoxType,ExactBoxType> sd=D.split();
         FloatDPApproximation xsigma(XSIGMA,dp);
         Vector<FloatDPApproximation> nx = (1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
         Vector<FloatDPApproximation> ny = midpoint(sd.first);
-        ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
+        ValidatedKleenean result=this->feasible(sd.first, g, C).first;
         nx = FloatDPApproximation(1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
         ny = midpoint(sd.second);
-        result = result || this->feasible(sd.second, fn, c).first;
+        result = result || this->feasible(sd.second, g, C).first;
         return make_pair(result,ExactPointType());
     }
 

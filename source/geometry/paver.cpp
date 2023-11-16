@@ -350,15 +350,17 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     InteriorPointOptimiser optimiser;
     ValidatedVectorMultivariateFunction fg=join(f,g);
 
-    const SizeType m=fg.argument_size();
-    const SizeType n=fg.result_size();
+    const SizeType n=fg.argument_size();
+    const SizeType m=fg.result_size();
     CONCLOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
     CONCLOG_PRINTLN_AT(1,"x0="<<x<<", y0="<<y);
 
+    FloatDPPoint w(y.size(),dp);
     FloatDPPoint z(x.size(),dp);
     FloatDP t(dp);
     FloatDPApproximation one(1.0_x,dp);
 
+    Vector<FloatDPApproximation>& aw=reinterpret_cast<Vector<FloatDPApproximation>&>(w);
     Vector<FloatDPApproximation>& ax=reinterpret_cast<Vector<FloatDPApproximation>&>(x);
     Vector<FloatDPApproximation>& ay=reinterpret_cast<Vector<FloatDPApproximation>&>(y);
     Vector<FloatDPApproximation> az=reinterpret_cast<Vector<FloatDPApproximation>&>(z);
@@ -377,15 +379,17 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         return;
     }
 
+    ApproximateFeasibilityProblem p(d,fg,bx);
 
     // Relax x away from boundary
-    optimiser.compute_tz(d,fg,bx,ay,at,az);
+    optimiser.compute_tz(p,ay,at,az);
     CONCLOG_PRINTLN_AT(1,"z0="<<az<<", t0="<<at);
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(2,"t="<<at);
         //optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
         try {
-            optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
+            optimiser.feasibility_step(p,aw,ax,ay,az);
+            at = optimiser.compute_t(p, ax);
         }
         catch(const NearBoundaryOfFeasibleDomainException& exc) {
             break;
@@ -394,7 +398,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
             ARIADNE_FAIL_MSG(""<<err.what());
             break;
         }
-        CONCLOG_PRINTLN_AT(2,"x="<<ax<<", y="<<ay<<", z="<<az);
+        CONCLOG_PRINTLN_AT(2,"t="<<t<<", w="<<aw<<", x="<<ax<<", y="<<ay<<", z="<<az);
         CONCLOG_PRINTLN_AT(2,"x.z="<<emulrng(x,z));
         if(t>0) { break; }
         if(definitely(emulrng(x,z).upper_bound()<XZMIN)) { break; }
@@ -421,40 +425,43 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         TrivialSweeper<FloatDP> sweeper{dp};
-        EffectiveScalarMultivariateFunction zero_function=EffectiveScalarMultivariateFunction::zero(m);
-        EffectiveVectorMultivariateFunction identity_function=EffectiveVectorMultivariateFunction::identity(m);
-        ValidatedScalarMultivariateTaylorFunctionModelDP txg(domain,zero_function,sweeper);
-        FloatDPBounds cnst = {0,pr};
-        for(SizeType j=0; j!=n; ++j) {
-            txg = txg - (FloatDPBounds(x[j])-FloatDPBounds(x[n+j]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(fg[j]),sweeper);
-            cnst += (bx[j].upper_bound()*x[j]-bx[j].lower_bound()*x[n+j]);
-        }
-        for(SizeType i=0; i!=m; ++i) {
-            txg = txg - (FloatDPBounds(x[2*n+i])-FloatDPBounds(x[2*n+m+i]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(identity_function[i]),sweeper);
-            cnst += (d[i].upper_bound()*x[2*n+i]-d[i].lower_bound()*x[2*n+m+i]);
-        }
-        txg = FloatDPBounds(cnst) + txg;
+        EffectiveScalarMultivariateFunction zero_function=EffectiveScalarMultivariateFunction::zero(n);
+        EffectiveVectorMultivariateFunction identity_function=EffectiveVectorMultivariateFunction::identity(n);
 
-        CONCLOG_PRINTLN_AT(1,"txg="<<txg);
+        ValidatedVectorMultivariateTaylorFunctionModelDP tfg(domain,fg,sweeper);
+        ValidatedVectorMultivariateTaylorFunctionModelDP tid(domain,identity_function,sweeper);
+        ValidatedScalarMultivariateTaylorFunctionModelDP tyg(domain,zero_function,sweeper);
 
-        ValidatedConstraint constraint=(txg>=0);
+        FloatDPUpperInterval yc = {0,0,pr};
+        for(SizeType j=0; j!=m; ++j) {
+            tyg = tyg + y[j]*tfg[j];
+            yc += y[j]*bx[j];
+        }
+        for(SizeType i=0; i!=n; ++i) {
+            tyg = tyg + z[i]*tid[i];
+            yc += z[i]*d[i];
+        }
+
+        CONCLOG_PRINTLN_AT(1,"tyg="<<tyg<<", yc="<<yc);
+
+        ValidatedConstraint constraint=(cast_exact(yc.lower_bound())<=tyg<=cast_exact(yc.upper_bound()));
 
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
-        solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
+        solver.hull_reduce(nd,tyg,cast_exact_interval(yc));
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
             CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return;
         }
 
-        for(SizeType i=0; i!=m; ++i) {
-            solver.box_reduce(nd,txg,ExactIntervalType(0,inf),i);
+        for(SizeType i=0; i!=n; ++i) {
+            solver.box_reduce(nd,tyg,cast_exact_interval(yc),i);
             CONCLOG_PRINTLN_AT(2,"dom="<<nd);
             if(definitely(nd.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
 
-        solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
+        solver.hull_reduce(nd,tyg,cast_exact_interval(yc));
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
             CONCLOG_PRINTLN("Proved disjointness using hull reduce");
@@ -501,16 +508,18 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     static const FloatDP  TERR = {TwoExp(-10),pr};
     static const ExactDouble inf(Ariadne::inf.get_d());
 
-    const SizeType m=fg.argument_size();
-    const SizeType n=fg.result_size();
+    const SizeType n=fg.argument_size();
+    const SizeType m=fg.result_size();
     CONCLOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
 
     ConstraintSolver solver;
     InteriorPointOptimiser optimiser;
 
     FloatDP t{pr};
+    FloatDPPoint w=c.midpoint();
     FloatDPPoint z(x.size(),dp);
 
+    FloatDPApproximationVector& aw=reinterpret_cast<FloatDPApproximationVector&>(w);
     FloatDPApproximationVector& ax=reinterpret_cast<FloatDPApproximationVector&>(x);
     FloatDPApproximationVector& ay=reinterpret_cast<FloatDPApproximationVector&>(y);
     FloatDPApproximationVector& az=reinterpret_cast<FloatDPApproximationVector&>(z);
@@ -521,11 +530,13 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     }
 
     ExactBoxType bx=product(static_cast<const ExactBoxType&>(b.box()),static_cast<const ExactBoxType&>(c));
+    ApproximateFeasibilityProblem p(d,fg,bx);
 
-    optimiser.compute_tz(d,fg,bx,ay,at,az);
+    optimiser.compute_tz(p,ay,at,az);
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(2,"t="<<t);
-        optimiser.linearised_feasibility_step(d,fg,bx,ax,ay,az,at);
+        optimiser.feasibility_step(p,aw,ax,ay,az);
+        at = optimiser.compute_t(p,ax);
         if(t>0) { break; }
     }
     CONCLOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
@@ -536,31 +547,33 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ValidatedScalarMultivariateTaylorFunctionModelDP xg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,properties);
-        FloatDPBounds cnst = {0,pr};
-        for(SizeType j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ValidatedScalarMultivariateTaylorFunctionModelDP(d,fg[j],properties);
-            cnst += (bx[j].upper_bound()*x[j]-bx[j].lower_bound()*x[n+j]);
+        ValidatedVectorMultivariateTaylorFunctionModelDP tfg=ValidatedVectorMultivariateTaylorFunctionModelDP(d,fg,properties);
+        ValidatedVectorMultivariateTaylorFunctionModelDP tid=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(d,properties);
+        ValidatedScalarMultivariateTaylorFunctionModelDP tyg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,properties);
+        FloatDPUpperInterval yc = {0,0,pr};
+        for(SizeType j=0; j!=m; ++j) {
+            tyg = tyg + y[j]*tfg[j];
+            yc += y[j]*bx[j];
         }
-        for(SizeType i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,properties);
-            cnst += (d[i].upper_bound()*x[2*n+i]-d[i].lower_bound()*x[2*n+m+i]);
+        for(SizeType i=0; i!=n; ++i) {
+            tyg = tyg + z[i]*tid[i];
+            yc += z[i]*d[i];
         }
-        xg = (cnst) + xg;
 
-        CONCLOG_PRINTLN_AT(1,"xg="<<xg);
+        CONCLOG_PRINTLN_AT(1,"tyg="<<tyg);
+        CONCLOG_PRINTLN_AT(1,"yc="<<yc);
 
 
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
-        solver.hull_reduce(nd,xg,ExactIntervalType(0,inf));
+        solver.hull_reduce(nd,tyg,cast_exact_interval(yc));
         CONCLOG_PRINTLN_AT(1,"dom="<<nd);
         if(definitely(nd.is_empty())) {
             CONCLOG_PRINTLN("Proved disjointness using hull reduce");
             return;
         }
 
-        for(SizeType i=0; i!=m; ++i) {
-            solver.box_reduce(nd,xg,ExactIntervalType(0,inf),i);
+        for(SizeType i=0; i!=n; ++i) {
+            solver.box_reduce(nd,tyg,cast_exact_interval(yc),i);
             CONCLOG_PRINTLN_AT(2,"dom="<<nd);
             if(definitely(nd.is_empty())) { CONCLOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }

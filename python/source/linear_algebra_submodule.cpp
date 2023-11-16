@@ -170,9 +170,17 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
     vector_class.def(pybind11::init<Nat,X>());
     vector_class.def(pybind11::init([](pybind11::list const& lst){return vector_from_python<X>(lst);}));
 
-    // Convert from a Python list and properties
     if constexpr (HasGenericType<X> and HasPrecisionType<X>) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
+        if constexpr (Same<X,FloatDPBounds>) {
+            static_assert(Same<Y,ValidatedNumber>);
+            static_assert(Same<PR,DP>);
+        }
+        // Convert from a generic vector and properties
+        if constexpr(Constructible<Vector<X>,Vector<Y>,PR>) {
+            vector_class.def(pybind11::init<Vector<Y>,PR>());
+        }
+        // Convert from a Python list and properties
         if constexpr(Constructible<Vector<X>,Vector<Y>,PR>) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
         } else if constexpr(Constructible<Vector<X>,Vector<Dyadic>,PR>) {
@@ -183,11 +191,14 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
     pybind11::implicitly_convertible<pybind11::list,Vector<X>>();
 }
 
+template<class T, class... FS> void define_vector_constructions(pybind11::module& module, pybind11::class_<Vector<T>>& to_class) {
+    define_template_constructions<Vector,T,FS...>(module,to_class);
+}
+
 template<class Y, class X>
 Void define_vector_conversion(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
 {
-    vector_class.def(pybind11::init<Vector<Y>>());
-    pybind11::implicitly_convertible<Vector<Y>,Vector<X>>();
+    define_conversion<Vector<Y>>(module,vector_class);
 }
 
 template<class X, class Y>
@@ -210,6 +221,9 @@ Void define_vector(pybind11::module& module, pybind11::class_<Vector<X>>& vector
 {
     define_vector_constructors(module,vector_class);
     define_vector_concept(module,vector_class);
+
+    define_vector_constructions<X,ExactNumber,EffectiveNumber,ValidatedNumber,ApproximateNumber>(module,vector_class);
+
 
 //    module.def("join", &_join_<Vector<X>,Vector<X>>);
 //    module.def("join", &_join_<Vector<X>,X>);
@@ -660,6 +674,10 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_covector<Dyadic>(module);
 //    export_matrix<Dyadic>(module);
 
+    export_vector<ApproximateNumber>(module);
+    export_vector<ValidatedNumber>(module);
+    export_vector<EffectiveNumber>(module);
+    export_vector<ExactNumber>(module);
 
     template_<Vector> vector_template(module,python_template_name<Vector>().c_str());
     vector_template.instantiate<FloatDPApproximation>();
@@ -675,6 +693,10 @@ Void linear_algebra_submodule(pybind11::module& module) {
     vector_template.instantiate<Decimal>();
     vector_template.instantiate<Rational>();
     vector_template.instantiate<Real>();
+    vector_template.instantiate<ApproximateNumber>();
+    vector_template.instantiate<ValidatedNumber>();
+    vector_template.instantiate<EffectiveNumber>();
+    vector_template.instantiate<ExactNumber>();
 
     template_<Covector> covector_template(module,python_template_name<Covector>().c_str());
     covector_template.instantiate<FloatDPApproximation>();

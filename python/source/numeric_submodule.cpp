@@ -220,13 +220,13 @@ template<class T1, class T2> Pair<T1,T2> pair_from_python(pybind11::handle t1, p
 }
 
 template<class T1, class T2> Pair<T1,T2> pair_from_dict(pybind11::dict dct) {
-    assert(dct.size()==1);
+    if (dct.size()!=1) { throw pybind11::cast_error(); }
     pybind11::detail::dict_iterator::reference item = *dct.begin();
     return pair_from_python<T1,T2>(item.first,item.second);
 }
 
 template<class T1, class T2> Pair<T1,T2> pair_from_tuple(pybind11::tuple tup) {
-    assert(tup.size()==2);
+    if (tup.size()!=2) { throw pybind11::cast_error(); }
     return pair_from_python<T1,T2>(tup[0],tup[1]);
 }
 

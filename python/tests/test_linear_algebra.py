@@ -42,8 +42,11 @@ pr=Precision()
 one=ExactScalar(exact(1.000),pr)
 xa=ApproximateScalar(2.125,pr)
 xb=ValidatedScalar(exact(2.00),exact(2.25),pr)
+yb=ValidatedNumber(xb);
+ya=ApproximateNumber(xa);
 
 def test_generics():
+    print("FOO")
     assert(Vector[Dyadic]==DyadicVector)
     assert(Vector[Decimal]==DecimalVector)
     assert(Vector[Rational]==RationalVector)
@@ -88,7 +91,9 @@ def test_vector():
     vb=ValidatedVector([{2:3},{3:4}],pr)
     vb=ValidatedVector([{"1.875":"2.125"},{"0.875":"1.125"}],pr)
     vb=ValidatedVector([{exact(1.875):exact(2.125)},{exact(0.875):exact(1.125)}],pr)
-    vb=ValidatedVector([{exact(1.875):exact(2.125)},{"1.875":"2.125"},{2:3},exact(1.125),"2.1",xb],pr)
+    vb=ValidatedVector([{exact(1.875):exact(2.125)},{"1.875":"2.125"},{2:3}],pr)
+    vb=ValidatedVector([(exact(1.875),exact(2.125)),("1.875","2.125"),(2,3)],pr)
+    vb=ValidatedVector([exact(1.125),"2.1",xb,yb],pr)
     vb=ValidatedVector(2,pr)
 
     print(repr(vb))
@@ -157,3 +162,4 @@ def test_matrix():
 #    (Aa*d,Aa/d)
 #    (Ab*n,Ab/n)
 
+test_vector()

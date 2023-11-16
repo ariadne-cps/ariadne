@@ -387,14 +387,35 @@ namespace Ariadne {
 
 template<class... TS> struct Tag { };
 
-template<class F, class T> void define_conversion(pybind11::class_<T>& pyclass) {
+template<class F, class T> void define_conversion(pybind11::class_<T>& to_class) {
     if constexpr (Constructible<T,F> and not Same<T,F>) {
-        pyclass.def(pybind11::init<F>());
+        to_class.def(pybind11::init<F>());
         if constexpr (Convertible<F,T>) {
             pybind11::implicitly_convertible<F,T>();
         }
     }
 }
+
+template<class T, class F> void define_construction(pybind11::module& module, pybind11::class_<T>& to_class) {
+    if constexpr (Constructible<T,F> and not Same<T,F>) {
+        to_class.def(pybind11::init<F>());
+        if constexpr (Convertible<F,T>) {
+            pybind11::implicitly_convertible<F,T>();
+        }
+    }
+}
+
+template<class T> void define_constructions(pybind11::module& module, pybind11::class_<T>& to_class) {
+}
+template<class T, class F, class... FS> void define_constructions(pybind11::module& module, pybind11::class_<T>& to_class) {
+    define_construction<T,F>(module,to_class);
+    define_constructions<T,FS...>(module,to_class);
+}
+
+template<template<class>class G, class T, class... FS> void define_template_constructions(pybind11::module& module, pybind11::class_<G<T>>& to_class) {
+    define_constructions<G<T>,G<FS>...>(module,to_class);
+}
+
 
 template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, pybind11::class_<A>& pyclass) {
     pyclass.def("__and__", &__and__<A,A>);

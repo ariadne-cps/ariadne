@@ -341,7 +341,9 @@ template<class M> struct MatrixColumn
 };
 template<class M> struct IsVectorExpression<MatrixColumn<M>> : True { };
 
-template<class M> struct MatrixTranspose {
+template<class M> struct MatrixTranspose
+    : public MatrixExpression< MatrixTranspose<M> >
+{
     M const& _AT;
   public:
     typedef typename M::ScalarType ScalarType;
@@ -406,6 +408,8 @@ template<class M> struct MatrixRange
     ScalarType get(SizeType i, SizeType j) const { return _A.get(i+_rng1.start(),j+_rng2.start()); }
     decltype(auto) operator[](SizeType i) { return _A[_rng1[i]][_rng2]; }
     Void set(SizeType i, SizeType j, ScalarType const& x) const { _A.set(i+_rng1.start(),j+_rng2.start(),x); }
+    ScalarType& at(SizeType i, SizeType j) { return _A.at(i+_rng1.start(),j+_rng2.start()); }
+    ScalarType const& at(SizeType i, SizeType j) const { return _A.at(i+_rng1.start(),j+_rng2.start()); }
     template<class ME> MatrixRange<M>& operator=(const MatrixExpression<ME>& Ae) {
         ARIADNE_PRECONDITION(this->row_size()==Ae().row_size() && this->column_size()==Ae().column_size());
         for(SizeType i=0; i!=this->row_size(); ++i) { for(SizeType j=0; j!=this->column_size(); ++j) { this->set(i,j,Ae().get(i,j)); } }

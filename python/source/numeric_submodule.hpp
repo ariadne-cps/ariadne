@@ -36,6 +36,7 @@ template<class T> std::string numeric_class_tag();
 template<> inline std::string numeric_class_tag<DoublePrecision>() { return "DP"; }
 template<> inline std::string numeric_class_tag<MultiplePrecision>() { return "MP"; }
 
+template<> struct PythonTemplateName<Number> { static std::string get() { return "Number"; } };
 
 template<> struct PythonTemplateName<Float> { };
 template<> struct PythonTemplateName<Approximation> { static std::string get() { return "Approximation"; } };

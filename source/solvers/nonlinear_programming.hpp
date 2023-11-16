@@ -78,6 +78,7 @@ template<class P> struct FeasibilityProblem {
         : FeasibilityProblem(p.D,p.g,p.C) { }
 };
 template<class P> OutputStream& operator<<(OutputStream& os, FeasibilityProblem<P> const& p);
+
 //! \relates FeasibilityProblem
 //! \ingroup OptimisationSubModule
 //! \name Type synonyms
@@ -87,7 +88,7 @@ using ValidatedFeasibilityProblem = FeasibilityProblem<ValidatedTag>; //!< <p/>
 //!@}
 
 //! \ingroup OptimisationSubModule
-//! \brief Data for the feasibility problem \f$\text{minimise } f(x) \text{ subject to } x\in D \text{ and } g(x) \in C\f$, where \f$D\subset\R^n\f$ and \f$C\subset \R^m\f$ are boxes, and \f$f:\R^n\to\R\f$ and \f$g:\R^n\to\R^m\f$ are continuous.
+//! \brief Data for the optimisation problem \f$\text{minimise } f(x) \text{ subject to } x\in D \text{ and } g(x) \in C\f$, where \f$D\subset\R^n\f$ and \f$C\subset \R^m\f$ are boxes, and \f$f:\R^n\to\R\f$ and \f$g:\R^n\to\R^m\f$ are continuous.
 template<class P> struct OptimisationProblem : public FeasibilityProblem<P> {
   public:
     ScalarMultivariateFunction<P> f;//!< <p/>
@@ -100,6 +101,7 @@ template<class P> struct OptimisationProblem : public FeasibilityProblem<P> {
         : OptimisationProblem(p.f,p.D,p.g,p.C) { }
 };
 template<class P> OutputStream& operator<<(OutputStream& os, OptimisationProblem<P> const& p);
+
 //! \relates OptimisationProblem
 //! \ingroup OptimisationSubModule
 //! \name Type synonyms
@@ -115,9 +117,9 @@ using ValidatedOptimisationProblem = OptimisationProblem<ValidatedTag>; //!< <p/
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X.
 template<class X> struct PrimalData {
     Vector<X> x;
-    //! \brief .
+    //! \brief <p/>
     PrimalData(Vector<X> x_) : x(x_) { }
-    //! \brief .
+    //! \brief <p/>
     Vector<X> const& primal() const { return this->x; }
     //! \brief Convert to the primal variables.
     operator Vector<X> () const { return this->x; }
@@ -128,9 +130,9 @@ using ValidatedPrimalData = PrimalData<Bounds<FloatDP>>;
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X and dual variables of type \a Y.
 template<class X> struct PrimalDualData : public PrimalData<X> {
     Vector<X> y;
-    //! \brief .
+    //! \brief <p/>
     PrimalDualData(Vector<X> x_, Vector<X> y_) : PrimalData<X>(x_), y(y_) { }
-    //! \brief .
+    //! \brief <p/>
     Vector<X> const& dual() const { return this->y; }
 };
 using ApproximatePrimalDualData = PrimalDualData<Approximation<FloatDP>>;
@@ -139,9 +141,9 @@ using ValidatedPrimalDualData = PrimalDualData<Bounds<FloatDP>>;
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X>, dual variables of type \a Vector<X>, and complementary variables of type \a Vector<X>.
 template<class X> struct PrimalDualComplementaryData : public PrimalDualData<X> {
     Vector<X> z;
-    //! \brief .
+    //! \brief <p/>
     PrimalDualComplementaryData(Vector<X> x_, Vector<X> y_, Vector<X> z_) : PrimalDualData<X>(x_,y_), z(z_) { }
-    //! \brief .
+    //! \brief <p/>
     Vector<X> const& complementary() const { return this->z; }
 };
 using ApproximatePrimalDualComplementaryData = PrimalDualComplementaryData<Approximation<FloatDP>>;
@@ -150,9 +152,9 @@ using ValidatedPrimalDualComplementaryData = PrimalDualComplementaryData<Bounds<
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> and slack variables of type \a Vector<X>.
 template<class X> struct SlackPrimalData : public PrimalData<X> {
     Vector<X> w;
-    //! \brief .
+    //! \brief <p/>
     SlackPrimalData(Vector<X> w_, Vector<X> x_) : PrimalData<X>(x_), w(w_) { }
-    //! \brief .
+    //! \brief <p/>
     Vector<X> const& slack() const { return this->w; }
 };
 using ApproximateSlackPrimalData = SlackPrimalData<Approximation<FloatDP>>;
@@ -160,20 +162,48 @@ using ValidatedSlackPrimalData = SlackPrimalData<Bounds<FloatDP>>;
 
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> dual variables of type \a Vector<X>, slack variables of type \a Vector<X> and complementary variables of type \a Vector<X>.
 template<class X> struct SlackPrimalDualComplementaryData : public PrimalDualComplementaryData<X> {
+
     //! \brief The slack variables.
     Vector<X> w;
-    //! \brief .
-    SlackPrimalDualComplementaryData(Vector<X> w_, Vector<X> x_, Vector<X> y_, Vector<X> z_) : PrimalDualComplementaryData<X>(x_,y_,z_), w(w_) { }
-    //! \brief .
+    //! \brief <p/>
     Vector<X> const& slack() const { return this->w; }
+
+    //! \brief <p/>
+    SlackPrimalDualComplementaryData(SizeType m, SizeType n, DP pr)
+        : SlackPrimalDualComplementaryData(Vector<X>(m,pr),Vector<X>(n,pr),Vector<X>(m,pr),Vector<X>(n,pr)) { }
+    //! \brief <p/>
+    SlackPrimalDualComplementaryData(Vector<X> w_, Vector<X> x_, Vector<X> y_, Vector<X> z_)
+        : PrimalDualComplementaryData<X>(x_,y_,z_), w(w_) { }
+    //! \brief <p/>
+    template<class XX> requires Convertible<XX,X> SlackPrimalDualComplementaryData(SlackPrimalDualComplementaryData<XX> const& d)
+        : SlackPrimalDualComplementaryData(d.w,d.x,d.y,d.z) { }
+
+    //! \brief <p/>
+    SlackPrimalDualComplementaryData(SizeType m, SizeType n, Vector<X> r)
+        : SlackPrimalDualComplementaryData(r[range(0,m)],r[range(m,m+n)],r[range(m+n,2*m+n)],r[range(2*m+n,2*(m+n))])
+            { ARIADNE_DEBUG_PRECONDITION(r.size()==2*(m+n)); }
+    //! \brief <p/>
+    Vector<X> assemble() const;
+
+    //! \brief <p/>
+    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> d1, SlackPrimalDualComplementaryData<X> d2) {
+        return SlackPrimalDualComplementaryData<X>(d1.w-d2.w,d1.x-d2.x,d1.y-d2.y,d1.z-d2.z); }
+    //! \brief <p/>
+    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> d) {
+        return SlackPrimalDualComplementaryData<X>(-d.w,-d.x,-d.y,-d.z); }
+
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, SlackPrimalDualComplementaryData<X>& d) {
+        return os << "SlackPrimalDualComplementaryData(w=" << d.w << ", x=" << d.x << ", y=" << d.y << ", z=" << d.z << ")"; }
 };
 using ApproximateSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Approximation<FloatDP>>;
 using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Bounds<FloatDP>>;
 
+template<class T> struct SlackPrimalDualComplementaryMatrix;
 //!@}
 
 
-//! \ingroup OptimisationSubModule EvaluationModule
+//! \ingroup OptimisationSubModule
 //! Interface for methods to check feasibility of constraint systems.
 class FeasibilityCheckerInterface {
   public:
@@ -222,12 +252,24 @@ class FeasibilityCheckerInterface {
 };
 
 
-//! \ingroup OptimisationSubModule EvaluationModule
-//! Interface for nonlinear programming solvers.
-class OptimiserInterface {
+//! \ingroup OptimisationSubModule
+//! \brief Interfaces for nonlinear programming solvers.
+//! \details Specialised by \ref OptimiserInterface<ApproximateTag> and \ref OptimiserInterface<ValidatedTag>.
+template<class P> class OptimiserInterface;
+
+//! \ingroup OptimisationSubModule
+//! \relates OptimiserInterface<P>
+//! \name Type synonyms
+//!@{
+using ApproximateOptimiserInterface = OptimiserInterface<ApproximateTag>; //!< <p/>
+using ValidatedOptimiserInterface = OptimiserInterface<ValidatedTag>; //!< <p/>
+//!@}
+
+
+//! \relates OptimiserInterface<P>
+//! \brief Interface for approximate nonlinear programming solvers.
+template<> class OptimiserInterface<ApproximateTag> {
   public:
-    typedef Vector<ExactNumber> ExactVector;
-    typedef Vector<ValidatedNumber> ValidatedVector;
     typedef Vector<ApproximateNumber> ApproximateVector;
   public:
     //! \brief Virtual destructor.
@@ -235,39 +277,54 @@ class OptimiserInterface {
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
 
-    //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    //! \brief Solve the general nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const = 0;
+    //! \brief Approximatedly solve the general nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    //! \return A point \f$x\f$ is approximately satisfies the feasibility constraints (it may not be close to a genuinely feasible point) and is approximately locally optimal.
+    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const = 0;
+    //! \brief Approximately solve the standard nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
+    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const = 0;
+
+    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const = 0;
+    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    virtual ApproximateKleenean feasible(ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const = 0;
+};
+
+//! \relates OptimiserInterface<P>
+//! \brief Interface for validated nonlinear programming solvers.
+template<> class OptimiserInterface<ValidatedTag> {
+  public:
+    typedef Vector<ExactNumber> ExactVector;
+    typedef Vector<ValidatedNumber> ValidatedVector;
+  public:
+    //! \brief Virtual destructor.
+    virtual ~OptimiserInterface() = default;
+    //! \brief Create a dynamically-allocated copy.
+    virtual OptimiserInterface* clone() const = 0;
+
+    //! \brief Solve the general nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const = 0;
-    //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    //! \brief Solve the general nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A point \f$x\f$ is approximately satisfies the feasibility constraints (it may not be which definitely contains a feasible point, and contains a local optimum.
     virtual ValidatedVector minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
-    //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
+    //! \brief Solve the standard nonlinear programming problem \f$\text{minimise } f(x) \text{ such that } x\in D,\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior.
     //! \return A point \f$x\f$ is approximately satisfies the feasibility constraints (it may not be which definitely contains a feasible point, and contains a local optimum.
     virtual ValidatedVector minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
 
-    //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const = 0;
-    //! \brief Approximatedly solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    //! \return A point \f$x\f$ is approximately satisfies the feasibility constraints (it may not be close to a genuinely feasible point) and is approximately locally optimal.
-    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const = 0;
-    //! \brief Approximately solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
-    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const = 0;
-
-    //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const = 0;
-    //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
-    //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \f$D\f$ is bounded with nonempty interior.
+    //! \brief Tests if the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \f$D\f$ is bounded with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
-
-    //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const = 0;
 };
 
 //! \ingroup OptimisationSubModule
-//! Common routines for nonlinear programming
+//! General-purpose routines for validated feasibility checking.
 class FeasibilityChecker
     : public virtual FeasibilityCheckerInterface
 {
@@ -346,9 +403,47 @@ class FeasibilityChecker
 
 
 //! \ingroup OptimisationSubModule
-//! Common routines for nonlinear programming
-class OptimiserBase
-    : public virtual OptimiserInterface
+//! \brief Common routines for nonlinear programming
+//! \details Specialised by \ref OptimiserBase<ApproximateTag> and \ref OptimiserBase<ValidatedTag>.
+template<class P> class OptimiserBase;
+
+//! \ingroup OptimisationSubModule
+//! \relates OptimiserBase<P>
+//! \name Type synonyms
+//!@{
+using ApproximateOptimiserBase = OptimiserBase<ApproximateTag>; //!< <p/>
+using ValidatedOptimiserBase = OptimiserBase<ValidatedTag>; //!< <p/>
+//!@}
+
+//! \relates OptimiserBase<P>
+//! \brief Common routines for approximate nonlinear programming
+template<> class OptimiserBase<ApproximateTag>
+    : public virtual OptimiserInterface<ApproximateTag>
+{
+  protected:
+    template<class FLT> using Exact = FLT;
+    using FLT=FloatDP;
+    using PR=DP;
+    static constexpr PR pr=dp;
+  public:
+    typedef Approximation<FLT> ApproximateNumberType;
+    typedef Vector<Approximation<FLT>> ApproximateVectorType;
+  protected:
+    static const FLT zero;
+    static const FLT one;
+  public:
+    virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override = 0;
+    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
+    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const override;
+
+    virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override = 0;
+    virtual ApproximateKleenean feasible(ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
+};
+
+//! \relates OptimiserBase<P>
+//! \brief Common routines for validated nonlinear programming
+template<> class OptimiserBase<ValidatedTag>
+    : public virtual OptimiserInterface<ValidatedTag>
 {
   protected:
     template<class FLT> using Exact = FLT;
@@ -363,31 +458,20 @@ class OptimiserBase
     typedef Vector<Bounds<FLT>> ValidatedVectorType;
     typedef Vector<Approximation<FLT>> ApproximateVectorType;
   protected:
-    static const FloatDP zero;
-    static const FloatDP one;
+    static const FLT zero;
+    static const FLT one;
   public:
     virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override = 0;
     virtual ValidatedVector minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const override;
     virtual ValidatedVector minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const override;
 
-    virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override = 0;
-    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
-    virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const override;
-
     virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override = 0;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const override;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const override;
-
-    virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override = 0;
 };
 
-
-//! \ingroup OptimisationSubModule
-//! Common routines for nonlinear programming
-class ApproximateOptimiserBase
-    : public OptimiserBase
-{
-};
+using ApproximateOptimiserBase =  OptimiserBase<ApproximateTag>;
+using ValidatedOptimiserBase =  OptimiserBase<ValidatedTag>;
 
 struct InteriorPointOptimiserProperties {
     const double VALUE_TOLERANCE=1e-8;
@@ -395,18 +479,12 @@ struct InteriorPointOptimiserProperties {
     const CounterType MAXIMUM_STEPS=24;
 };
 
-
+//! \brief Common functionality for optimisers using interior-point methods.
 class InteriorPointOptimiserBase
-    : public OptimiserBase
+    : public ApproximateOptimiserBase
 {
+  protected:
     InteriorPointOptimiserProperties _properties;
-  public:
-    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C .\f$.
-    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
-    //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem) const override;
 };
 
 
@@ -418,32 +496,31 @@ class InteriorPointOptimiserBase
 //! Since the minimiser is not unique, we need to add penalty terms \f$-\mu/2(\log(x_u-x)+log(x-x_l))\f$ and \f$-\nu/2(\log(w_u-w)+log(w-w_l))\f$.
 //! It suffices to add a penalty in \f$x\f$.
 class PenaltyFunctionOptimiser
-    : public OptimiserBase
+    : public ApproximateOptimiserBase
 {
   public:
-    using OptimiserBase::minimise;
-    using OptimiserBase::feasible;
+    using ApproximateOptimiserBase::minimise;
+    using ApproximateOptimiserBase::feasible;
   public:
     virtual PenaltyFunctionOptimiser* clone() const override;
-
-    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
     virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override;
-    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
     virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override;
   public:
-    virtual Void feasibility_step(ValidatedFeasibilityProblem p,
-                                  Vector<Bounds<FLT>>& w, Vector<Bounds<FLT>>& x) const;
     virtual Void feasibility_step(ApproximateFeasibilityProblem p,
                                   Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Approximation<FLT>& mu) const;
     virtual Void feasibility_step(ApproximateFeasibilityProblem p,
                                   Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y) const;
+  private:
+    ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const;
 };
 
 
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of feasibility.
 struct FeasibilityCertificate
 {
-    using ValidatedVector = OptimiserInterface::ValidatedVector;
-    using ExactVector = OptimiserInterface::ExactVector;
+    using ValidatedVector = ValidatedOptimiserInterface::ValidatedVector;
+    using ExactVector = ValidatedOptimiserInterface::ExactVector;
 
     ValidatedVector x; ExactVector y;
 
@@ -454,10 +531,17 @@ struct FeasibilityCertificate
         return os << "FeasibilityCertificate(x=" << fc.x << ", y=" << fc.y << ")"; }
 };
 
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of local infeasibility.
 struct LocalInfeasibilityCertificate
 {
-    using ExactVector = OptimiserInterface::ExactVector;
-    ExactBoxType B; ExactVector y;
+    using ExactVector = ValidatedOptimiserInterface::ExactVector;
+
+    //! A subdomain \f$B\subset D\f$ such that \f$g(x)\not\in C\f$ for all \f$x\in C\f$. i.e. For which all (primal) variables are infeasible.
+    ExactBoxType B;
+    //! Dual variables (Lagrange multipliers) such that \f$\sum_{j=1} y_j g_j(x) \not\in \sum_{j} y_j C_j\f$ for all \f$x\in\B\f$.
+    ExactVector y;
+
     ExactBoxType bounds() const { return B; }
     ExactVector dual() const { return y; }
 
@@ -466,17 +550,24 @@ struct LocalInfeasibilityCertificate
         return os << "{B=" << lifc.B << ", y=" << lifc.y << "}"; }
 };
 
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of global infeasibility.
 struct InfeasibilityCertificate
     : public List<LocalInfeasibilityCertificate>
 {
+    using List<LocalInfeasibilityCertificate>::List;
 };
 
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of local optimality (minimality).
 struct LocalOptimalityCertificate
 {
-    using ValidatedVector = OptimiserInterface::ValidatedVector;
-    using ExactVector = OptimiserInterface::ExactVector;
+    using ValidatedVector = ValidatedOptimiserInterface::ValidatedVector;
+    using ExactVector = ValidatedOptimiserInterface::ExactVector;
 
-    ValidatedNumber v; ValidatedVector x; ExactVector y;
+    ValidatedNumber v; //!< The optimal value.
+    ValidatedVector x; //!< The optimal (primal) variables.
+    ExactVector y; //!< The optimal dual variables (Lagrange multipliers).
 
     ValidatedNumber value() const { return v; }
     ValidatedVector primal() const { return x; }
@@ -492,9 +583,12 @@ struct LocalOptimalityCertificate
         return os << "{v=" << loc.v << ", x=" << loc.x << ", y=" << loc.y << "}"; }
 };
 
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of global optimality (minimality).
 struct OptimalityCertificate
     : public List<LocalOptimalityCertificate>
 {
+    using List<LocalOptimalityCertificate>::List;
 };
 
 
@@ -506,14 +600,11 @@ struct OptimalityCertificate
 //!
 //! To check feasibility, we maximise \f$\mu \sum_{i}\bigl(\log(x_i-\unl{d}_i)+\log(\ovl{d}_i-x_i)\bigr) + \mu \sum_{j}\bigl(\log(w_j-\unl{c}_j)+\log(\ovl{c}_j-w_j)\bigr)\f$ under the constraints \f$g(x)-w=0\f$.
 //! Introducing the Lagrange multipliers \f$y_j = \bigl(1/(w_j-\unl{c}_j)-1/(\ovl{c}_j-x_j)\bigr)\f$ and \f$z_i = 1/(x_i-\unl{d}_i)-1/(\ovl{d}_i-x_i)\f$, we find optimality conditions \f$ \sum_{j} y_j \nabla{g_j}(x) + z = 0\f$, \f$g(x)-w=0\f$.
-//! These are exactly the central path equations with \f$\mu=1\f$ for the problem \f$\minimise f(x)\equiv 0\f$ subject to \f$x\in D\f$ and \f$g(x)\in C\f$, so we can use an optimisation step to improve feasibility.
+//! These are exactly the central path equations with \f$\mu=1\f$ for the problem \f$\mathrm{minimise} f(x)\equiv 0\f$ subject to \f$x\in D\f$ and \f$g(x)\in C\f$, so we can use an optimisation step to improve feasibility.
 class InteriorPointOptimiser
-    : public OptimiserBase
+    : public InteriorPointOptimiserBase
 {
-    InteriorPointOptimiserProperties _properties;
   public:
-    template<class T> struct SlackPrimalDualComplementaryData;
-    template<class T> struct SlackPrimalDualComplementaryMatrix;
     struct StepData;
 
   public:
@@ -526,25 +617,10 @@ class InteriorPointOptimiser
     //! \brief Construct with default accuracy parameters.
     InteriorPointOptimiser();
 
-    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
-    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
-
     //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
     virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override;
     //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
     virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override;
-
-        //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
-        //! hotstarting the method with the primal and dual variables.
-        Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
-        minimise_hotstarted(const ValidatedOptimisationProblem& p,
-                            const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
-
-        //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
-        //! hotstarting the method with the primal and dual variables.
-        Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-        feasible_hotstarted(const ValidatedFeasibilityProblem& p,
-                            const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
@@ -559,20 +635,20 @@ class InteriorPointOptimiser
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
 
-    //! \brief .
+    //! \brief <p/>
     SlackPrimalDualComplementaryData<Approximation<FLT>>
     minimisation_update(const ApproximateOptimisationProblem& p,
                         Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
                         Approximation<FLT>& mu) const;
 
-    //! \brief .
+    //! \brief <p/>
     Void minimisation_step(const ApproximateOptimisationProblem& p,
                            StepData& d) const;
-    //! \brief .
+    //! \brief <p/>
     Void minimisation_step(const ApproximateOptimisationProblem& p,
                            Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
                            Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Void feasibility_step(const ApproximateFeasibilityProblem& p,
                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z) const;
 
@@ -582,63 +658,31 @@ class InteriorPointOptimiser
     StepData initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
                                           const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
 
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_dual(const ApproximateBoxType& D, const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_x(const ApproximateFeasibilityProblem& p) const;
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_y(const ApproximateFeasibilityProblem& p, const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_w(const ApproximateFeasibilityProblem& p,
                                          const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_w(const ApproximateFeasibilityProblem& p,
                                          const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Vector<Approximation<FLT>> compute_z(const ApproximateFeasibilityProblem& p,
                                          const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
-    //! \brief .
+    //! \brief <p/>
     Approximation<FLT> compute_t(const ApproximateFeasibilityProblem& p,
                                    const Vector<Approximation<FLT>>& x) const;
-    //! \brief .
+    //! \brief <p/>
     Approximation<FLT> compute_mu(const ApproximateFeasibilityProblem& p,
                                     const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
     Void compute_tz(const ApproximateFeasibilityProblem& p,
                     Vector<Approximation<FLT>>& x, Approximation<FLT>& t, Vector<Approximation<FLT>>& z) const;
 
     friend OutputStream& operator<<(OutputStream& os, InteriorPointOptimiser const& opt);
-  private: public:
-    //! \brief Checks whether the point \f$x\f$ is feasible, or the multipliers \f$y\f$ provide a certificate of infeasibility based around \f$x\f$.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-    check_feasibility(const ValidatedFeasibilityProblem& p,
-                      const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
-
-    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-    check_minimality(const ValidatedOptimisationProblem& p,
-                     const Vector<Approximation<FLT>>& w, const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Vector<Approximation<FLT>>& z) const;
-
-    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-    check_minimality(const ValidatedOptimisationProblem& p,
-                     const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
-
-    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
-    nonsplitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
-                                     const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
-
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-    nonsplitting_feasible_hotstarted(const ValidatedFeasibilityProblem& p,
-                                     const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
-
-
-    Variant<OptimalityCertificate,InfeasibilityCertificate>
-    splitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
-                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
-
-    Variant<FeasibilityCertificate,InfeasibilityCertificate>
-    splitting_feasible_hotstarted(const ValidatedFeasibilityProblem& p,
-                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
 };
 
 
@@ -665,12 +709,12 @@ class PrimalSplitDualInteriorPointOptimiser
   public:
     struct StepData;
 
-    //! \brief .
+    //! \brief <p/>
     Tuple<ApproximateNumber,ApproximateVector,ApproximateVector>
     virtual minimise_hotstarted(const ApproximateOptimisationProblem& p,
                                 const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const override;
 
-    //! \brief .
+    //! \brief <p/>
     Void minimisation_step(const ApproximateOptimisationProblem& p,
                            Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x,
                            Vector<Approximation<FLT>>& yl, Vector<Approximation<FLT>>& yu, Vector<Approximation<FLT>>& zl, Vector<Approximation<FLT>>& zu,
@@ -711,13 +755,13 @@ class PrimalDualOnlyInteriorPointOptimiser
 //! Uses primal variables \f$x\f$, slack variables \f$w=g(x)\f$, dual variables \f$y\f$ for the constraints \f$w \in C\f$ and complementary variables \f$z\f$ for the constraints \f$x\in D\f$.
 //! \details The dual variables \f$y\f$ are unconstrained Lagrange multipliers for \f$y\cdot(g(x)-w)=0\f$.
 class InfeasibleInteriorPointOptimiser
-    : public OptimiserBase
+    : public InteriorPointOptimiserBase
 {
   public:
     virtual InfeasibleInteriorPointOptimiser* clone() const override;
 
-    using OptimiserBase::minimise;
-    using OptimiserBase::feasible;
+    using ApproximateOptimiserBase::minimise;
+    using ApproximateOptimiserBase::feasible;
 
     struct PrimalDualData;
     struct StepData;
@@ -726,25 +770,13 @@ class InfeasibleInteriorPointOptimiser
     //! \brief Construct with default accuracy parameters.
     InfeasibleInteriorPointOptimiser();
 
-    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
-    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
-    //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
-
     //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
     virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override;
-    //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override;
 
     friend OutputStream& operator<<(OutputStream& os, InfeasibleInteriorPointOptimiser const& opt);
   public:
-    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
-    //! hotstarting the method with the overall primal and dual variables.
-    Pair<ValidatedKleenean,Vector<Approximation<FLT>>> feasible_hotstarted(ValidatedFeasibilityProblem p,
-                                                                           const PrimalDualData& wxy0) const;
-
     Void setup_feasibility(const ApproximateFeasibilityProblem& p,
                            StepData& stp) const;
     Void minimisation_step(const ApproximateOptimisationProblem& p,
@@ -767,34 +799,115 @@ struct InfeasibleInteriorPointOptimiser::StepData : public InfeasibleInteriorPoi
 
 
 
+class KarushKuhnTuckerOptimiser
+    : public ValidatedOptimiserBase
+{
+  public:
+    KarushKuhnTuckerOptimiser* clone() const override;
+
+    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C .\f$.
+    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
+    //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
+    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
+    //! \brief Tests if the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem) const override;
+
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the primal and dual variables.
+    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    minimise_hotstarted(const ValidatedOptimisationProblem& p,
+                        const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the primal and dual variables.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    feasible_hotstarted(const ValidatedFeasibilityProblem& p,
+                        const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
+    //! \brief Checks whether the point \f$x\f$ is feasible, or the multipliers \f$y\f$ provide a certificate of infeasibility based around \f$x\f$.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    check_feasibility(const ValidatedFeasibilityProblem& p,
+                      const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
+
+    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    check_minimality(const ValidatedOptimisationProblem& p,
+                     const Vector<Approximation<FLT>>& w, const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Vector<Approximation<FLT>>& z) const;
+
+    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    check_minimality(const ValidatedOptimisationProblem& p,
+                     const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
+
+    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    nonsplitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
+                                     const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    nonsplitting_feasible_hotstarted(const ValidatedFeasibilityProblem& p,
+                                     const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
+
+    Variant<OptimalityCertificate,InfeasibilityCertificate>
+    splitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
+                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
+
+    Variant<FeasibilityCertificate,InfeasibilityCertificate>
+    splitting_feasible_hotstarted(const ValidatedFeasibilityProblem& p,
+                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
+};
+
+class InfeasibleKarushKuhnTuckerOptimiser
+    : public ValidatedOptimiserBase
+{
+  public:
+    using ValidatedVector = ValidatedOptimiserInterface::ValidatedVector;
+
+    virtual InfeasibleKarushKuhnTuckerOptimiser* clone() const override;
+
+    using ValidatedOptimiserBase::minimise;
+    using ValidatedOptimiserBase::feasible;
+
+    //! \brief Compute a \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
+    //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
+    virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override;
+    //! \brief Tests if the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
+
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the overall primal and dual variables.
+    Pair<ValidatedKleenean,Vector<Approximation<FLT>>> feasible_hotstarted(ValidatedFeasibilityProblem p,
+                                                                           const InfeasibleInteriorPointOptimiser::PrimalDualData& wxy0) const;
+};
 
 
 //! \ingroup OptimisationSubModule
 //! \brief An optimiser using rigorous interval-arithmetic methods based on the John conditions for feasibility problems.
 //! <br>Currently only provides rigorous solvers for feasibility problems; optimisation problems are not supported.
 class IntervalOptimiser
-    : public InteriorPointOptimiser
+    : public KarushKuhnTuckerOptimiser
 {
   private: public:
     virtual IntervalOptimiser* clone() const override;
-    //! \brief .
+    //! \brief <p/>
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
-    //! \brief .
+    //! \brief <p/>
     Void feasibility_step(const FloatDPVector& xl, const FloatDPVector& xu, const ValidatedVectorMultivariateFunction& h,
                           FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& zl, FloatDPBoundsVector zu, FloatDPBounds& mu) const;
 };
 
 
-//! \ingroup OptimisationSubModule
-//! \brief An optimiser based on the InteriorPointOptimiser. \deprecated
+// \ingroup OptimisationSubModule
+// \brief An optimiser based on the InteriorPointOptimiser. \deprecated
 class ApproximateOptimiser
     : public InteriorPointOptimiser
 {
   private: public:
     virtual ApproximateOptimiser* clone() const override;
-    //! \brief .
+    // \brief <p/>
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
-    //! \brief .
+    // \brief <p/>
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& h,
                           Vector<Approximation<FLT>>& X, Vector<Approximation<FLT>>& Lambda) const;
 };
@@ -812,7 +925,7 @@ class KrawczykOptimiser
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    //! \brief Tests if the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
   public:

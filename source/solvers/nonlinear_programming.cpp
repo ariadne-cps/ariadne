@@ -125,9 +125,9 @@ template<class T> struct Pretty;
 
 template<> struct Pretty<Matrix<FloatDPApproximation>> {
     static const uint prec=4; static const uint wdth=prec+6;
-    Matrix<FloatDPApproximation> const& A;
+    Matrix<FloatDPApproximation> const& ref;
     friend OutputStream& operator<<(OutputStream& os, Pretty<Matrix<FloatDPApproximation>> const& pA) {
-        auto& A=pA.A;
+        auto& A=pA.ref;
         os << "\n";
         for(SizeType i=0; i!=A.row_size(); ++i) {
             os << "[";
@@ -160,19 +160,8 @@ class NegatedIdentityMatrix {
 };
 
 
-inline Vector<Differential<RawFloatDP>>const& cast_raw(Vector<Differential<FloatDPApproximation>>const& v) {
-    return reinterpret_cast<Vector<Differential<RawFloatDP>>const&>(v);
-}
-
-inline Vector<FloatDPApproximation>& cast_approximate(Vector<RawFloatDP>& v) {
-    return reinterpret_cast<Vector<FloatDPApproximation>&>(v);
-}
-
 inline Vector<FloatDPApproximation>& cast_approximate(Vector<FloatDPApproximation>& v) {
     return v;
-}
-inline Vector<Differential<FloatDPApproximation>>const& cast_approximate(Vector<Differential<RawFloatDP>>const& v) {
-    return reinterpret_cast<Vector<Differential<FloatDPApproximation>>const&>(v);
 }
 
 
@@ -186,13 +175,6 @@ inline ApproximateKleenean operator<(FloatDPApproximation x1, ApproximateDouble 
     return x1 < FloatDPApproximation(x2,x1.precision());
 }
 
-
-inline UpperIntervalType dot(Vector<UpperIntervalType> const& bx1, Vector<ExactIntervalType> const& bx2) {
-    return dot(bx1,Vector<UpperIntervalType>(bx2));
-}
-
-template<class X1, class IVL2> inline decltype(auto) dot(Vector<X1> const& x1, Box<IVL2> const& bx2) {
-    return dot(x1,cast_vector(bx2)); }
 
 template<class X> inline
 DiagonalMatrix<X> diagonal_matrix(const Vector<X>& v) {
@@ -286,13 +268,14 @@ Vector<X> esqr(const Vector<X>& z) {
     Vector<X> r(z.size(),dp); for(SizeType i=0; i!=r.size(); ++i) { r[i]=sqr(z[i]); } return r;
 }
 
-inline
-ExactIntervalType eivl(const RawFloatDPVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactIntervalType r=ExactIntervalType(FloatDP(x[0]));
-    for(SizeType i=1; i!=x.size(); ++i) { r=hull(r,FloatDP(x[i])); } return r;
+} // namespace
+
+inline UpperIntervalType dot(Vector<UpperIntervalType> const& bx1, Vector<ExactIntervalType> const& bx2) {
+    return dot(bx1,Vector<UpperIntervalType>(bx2));
 }
 
-} // namespace
+template<class X1, class IVL2> inline decltype(auto) dot(Vector<X1> const& x1, Box<IVL2> const& bx2) {
+    return dot(x1,cast_vector(bx2)); }
 
 Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&);
 
@@ -936,18 +919,20 @@ OutputStream& operator<<(OutputStream& os, FeasibilityChecker const& fc) {
 
 //------- OptimiserBase -----------------------------------//
 
-const OptimiserBase::FLT OptimiserBase::zero = FLT(0,pr);
-const OptimiserBase::FLT OptimiserBase::one = FLT(1,pr);
+const OptimiserBase<ApproximateTag>::FLT OptimiserBase<ApproximateTag>::zero = FLT(0,pr);
+const OptimiserBase<ApproximateTag>::FLT OptimiserBase<ApproximateTag>::one = FLT(1,pr);
+const OptimiserBase<ValidatedTag>::FLT OptimiserBase<ValidatedTag>::zero = FLT(0,pr);
+const OptimiserBase<ValidatedTag>::FLT OptimiserBase<ValidatedTag>::one = FLT(1,pr);
 
 
-auto OptimiserBase::
+auto OptimiserBase<ValidatedTag>::
 minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> ValidatedVector
 {
     CONCLOG_SCOPE_CREATE;
     return this->minimise(ValidatedOptimisationProblem{f,D,g,C});
 }
 
-auto OptimiserBase::
+auto OptimiserBase<ValidatedTag>::
 minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const -> ValidatedVector
 {
     CONCLOG_SCOPE_CREATE;
@@ -957,14 +942,14 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
     return this->minimise(f,D,gh,C);
 }
 
-auto OptimiserBase::
+auto OptimiserBase<ApproximateTag>::
 minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const -> ApproximateVector
 {
     CONCLOG_SCOPE_CREATE;
     return this->minimise(ApproximateOptimisationProblem{f,D,g,C});
 }
 
-auto OptimiserBase::
+auto OptimiserBase<ApproximateTag>::
 minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateVectorMultivariateFunction h) const -> ApproximateVector
 {
     CONCLOG_SCOPE_CREATE;
@@ -976,14 +961,14 @@ minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, Approxim
 
 
 
-auto OptimiserBase::
+auto OptimiserBase<ValidatedTag>::
 feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> ValidatedKleenean
 {
     CONCLOG_SCOPE_CREATE;
     return this->feasible(ValidatedFeasibilityProblem{D,g,C});
 }
 
-auto OptimiserBase::
+auto OptimiserBase<ValidatedTag>::
 feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const -> ValidatedKleenean
 {
     CONCLOG_SCOPE_CREATE;
@@ -993,6 +978,13 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
     return this->feasible(D,gh,C);
 }
 
+auto OptimiserBase<ApproximateTag>::
+feasible(ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const -> ApproximateKleenean
+{
+    CONCLOG_SCOPE_CREATE;
+    return this->feasible(ApproximateFeasibilityProblem{D,g,C});
+}
+
 
 //------- PenaltyFunctionOptimiser ------------------------------------------//
 
@@ -1000,12 +992,6 @@ PenaltyFunctionOptimiser* PenaltyFunctionOptimiser::
 clone() const
 {
     return new PenaltyFunctionOptimiser(*this);
-}
-
-auto PenaltyFunctionOptimiser::
-minimise(ValidatedOptimisationProblem f) const -> ValidatedVector
-{
-    ARIADNE_NOT_IMPLEMENTED;
 }
 
 auto PenaltyFunctionOptimiser::
@@ -1154,14 +1140,6 @@ feasibility_step(ApproximateFeasibilityProblem p,
     w=neww;
 
     return;
-}
-
-
-Void PenaltyFunctionOptimiser::
-feasibility_step(ValidatedFeasibilityProblem p,
-                 ValidatedVectorType& w, ValidatedVectorType& x) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -1405,8 +1383,8 @@ primal_dual_matrix(SymmetricMatrix<T>const& Q, Matrix<T>const& A,
     return S;
 }
 
+template<class T>
 struct PrimalDualData {
-    using T = FloatDPApproximation;
     Vector<T> x,y;
     PrimalDualData()
         : PrimalDualData(0u,0u,dp) { }
@@ -1418,8 +1396,8 @@ struct PrimalDualData {
         : x(x_), y(y_) { }
     Vector<T> assemble() const {
         return join(x,y); }
-    friend PrimalDualData operator-(PrimalDualData d) {
-        return PrimalDualData(-d.x,-d.y); }
+    friend PrimalDualData<T> operator-(PrimalDualData<T> d) {
+        return PrimalDualData<T>(-d.x,-d.y); }
 };
 
 // [  Q   A' -I  ]
@@ -1445,8 +1423,8 @@ primal_dual_complementary_matrix(SymmetricMatrix<T>const& Q, Matrix<T>const& A,
     return S;
 }
 
+template<class T>
 struct PrimalDualComplementaryData {
-    using T = FloatDPApproximation;
     Vector<T> x,y,z;
     PrimalDualComplementaryData()
         : PrimalDualComplementaryData(0u,0u,dp) { }
@@ -1458,13 +1436,12 @@ struct PrimalDualComplementaryData {
         : x(x_), y(y_), z(z_) { }
     Vector<T> assemble() const {
         return join(x,join(y,z)); }
-    friend PrimalDualComplementaryData operator-(PrimalDualComplementaryData d) {
+    friend PrimalDualComplementaryData<T> operator-(PrimalDualComplementaryData<T> d) {
         return PrimalDualComplementaryData(-d.x,-d.y,-d.z); }
 };
 
+template<class T>
 struct PrimalDualComplementaryMatrix {
-    using T = FloatDPApproximation;
-
     SymmetricMatrix<T> Q; Matrix<T> A; DiagonalMatrix<T> W,X,Y,Z;
     PrimalDualComplementaryMatrix(SymmetricMatrix<T> Q_, Matrix<T> A_,
                                   DiagonalMatrix<T> W_, DiagonalMatrix<T> X_, DiagonalMatrix<T> Y_, DiagonalMatrix<T> Z_)
@@ -1478,7 +1455,7 @@ struct PrimalDualComplementaryMatrix {
         ARIADNE_ASSERT(W.size()==m); ARIADNE_ASSERT(Y.size()==m);
         ARIADNE_ASSERT(X.size()==n); ARIADNE_ASSERT(Z.size()==n); }
 
-    PrimalDualComplementaryData solve(PrimalDualComplementaryData const& d) const {
+    PrimalDualComplementaryData<T> solve(PrimalDualComplementaryData<T> const& d) const {
         Vector<T> dr = lu_solve(this->assemble(),d.assemble());
         return PrimalDualComplementaryData(this->A.row_size(),this->A.column_size(),dr);
     }
@@ -1513,33 +1490,13 @@ slack_primal_dual_complementary_matrix(SymmetricMatrix<T>const& Q, Matrix<T>cons
 
 
 
-template<class T> struct InteriorPointOptimiser::SlackPrimalDualComplementaryData {
-    Vector<T> w,x,y,z;
-    SlackPrimalDualComplementaryData()
-        : SlackPrimalDualComplementaryData(0u,0u,dp) { }
-    SlackPrimalDualComplementaryData(SizeType m, SizeType n, DP pr)
-        : w(m,pr), x(n,pr), y(m,pr), z(n,pr) { }
-    SlackPrimalDualComplementaryData(SizeType m, SizeType n, Vector<T> r)
-        : w(r[range(0,m)]), x(r[range(m,m+n)]), y(r[range(m+n,2*m+n)]), z(r[range(2*m+n,2*(m+n))]) { ARIADNE_DEBUG_PRECONDITION(r.size()==2*(m+n)); }
-    SlackPrimalDualComplementaryData(Vector<T> w_, Vector<T> x_, Vector<T> y_, Vector<T> z_)
-        : w(w_), x(x_), y(y_), z(z_) { }
-    template<class TT> requires Convertible<TT,T> SlackPrimalDualComplementaryData(SlackPrimalDualComplementaryData<TT>const& d)
-        : w(d.w), x(d.x), y(d.y), z(d.z) { }
-    Vector<T> assemble() const {
-        return join(join(w,x),join(y,z)); }
-    friend SlackPrimalDualComplementaryData<T> operator-(SlackPrimalDualComplementaryData<T> d1, SlackPrimalDualComplementaryData<T> d2) {
-        return SlackPrimalDualComplementaryData<T>(d1.w-d2.w,d1.x-d2.x,d1.y-d2.y,d1.z-d2.z); }
-    friend SlackPrimalDualComplementaryData<T> operator-(SlackPrimalDualComplementaryData<T> d) {
-        return SlackPrimalDualComplementaryData<T>(-d.w,-d.x,-d.y,-d.z); }
-
-    friend OutputStream& operator<<(OutputStream& os, SlackPrimalDualComplementaryData<T>& d) {
-        return os << "SlackPrimalDualComplementaryData(w=" << d.w << ", x=" << d.x << ", y=" << d.y << ", z=" << d.z << ")"; }
-};
+template<class T> auto SlackPrimalDualComplementaryData<T>::assemble() const -> Vector<T> {
+    return join(join(this->w,this->x),join(this->y,this->z)); }
 
 
 //! \brief A matrix defining the linear equations for a full Newton step for slack, primal, dual and complementary variables.
 //! \details Form is \f[ \begin{pmatrix}Y&0&W&0\\0&Q&A^T&I\\-I&A&0&0\\0&Z&0&X\end{pmatrix} . \f]
-template<class T> struct InteriorPointOptimiser::SlackPrimalDualComplementaryMatrix {
+template<class T> struct SlackPrimalDualComplementaryMatrix {
     SymmetricMatrix<T> Q; Matrix<T> A; DiagonalMatrix<T> W,X,Y,Z;
     SlackPrimalDualComplementaryMatrix(SymmetricMatrix<T> Q_, Matrix<T> A_,
                                        DiagonalMatrix<T> W_, DiagonalMatrix<T> X_, DiagonalMatrix<T> Y_, DiagonalMatrix<T> Z_)
@@ -1578,32 +1535,6 @@ OutputStream& operator<<(OutputStream& os, InteriorPointOptimiser const& opt) {
 
 
 
-auto
-InteriorPointOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
-{
-    CONCLOG_SCOPE_CREATE;
-
-    ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
-    ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
-    ApproximateVectorType x0=p.D.midpoint();
-    ApproximateVectorType y0(p.C.dimension(),zero);
-    return std::get<1>(this->minimise_hotstarted(p,x0,y0));
-}
-
-auto
-InteriorPointOptimiser::feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
-{
-    CONCLOG_SCOPE_CREATE;
-
-    ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
-    ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
-
-    ApproximateVectorType x0=p.D.midpoint();
-    ApproximateVectorType y0(p.C.dimension(),zero);
-
-    return std::get<0>(this->feasible_hotstarted(p,x0,y0));
-}
-
 
 auto
 InteriorPointOptimiser::minimise(ApproximateOptimisationProblem p) const -> ApproximateVector
@@ -1615,107 +1546,7 @@ InteriorPointOptimiser::minimise(ApproximateOptimisationProblem p) const -> Appr
     return std::get<1>(minimise_hotstarted(p,x0,y0));
 }
 
-auto
-InteriorPointOptimiser::minimise_hotstarted(
-    const ValidatedOptimisationProblem& p,
-    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
-{
-    UpperBoxType B=p.D;
 
-    auto r = this->splitting_minimise_hotstarted(p,B,x0,y0);
-
-    auto ro0 = std::get<OptimalityCertificate>(r)[0];
-    return make_tuple(ro0.value(),ro0.primal(),ro0.dual());
-}
-
-
-auto
-InteriorPointOptimiser::nonsplitting_minimise_hotstarted(
-    const ValidatedOptimisationProblem& p,
-    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
-{
-
-    auto r = this->minimise_hotstarted(ApproximateOptimisationProblem(p),x0,y0);
-    // FIXME: Find a better way of making the answer exact
-    const Scalar<ApproximateNumber>& av=std::get<0>(r);
-    const Vector<ApproximateNumber>& ax=std::get<1>(r);
-    const Vector<ApproximateNumber>& ay=std::get<2>(r);
-
-    Scalar<ValidatedNumber> v=to_generic(cast_exact(Scalar<Approximation<FLT>>(av,pr)));
-    Vector<ValidatedNumber> x=to_generic(cast_exact(Vector<Approximation<FLT>>(ax,pr)));
-    Vector<ValidatedNumber> y=to_generic(cast_exact(Vector<Approximation<FLT>>(ay,pr)));
-
-    return make_tuple(v,x,y);
-}
-
-
-auto
-InteriorPointOptimiser::splitting_minimise_hotstarted(
-    const ValidatedOptimisationProblem& p,
-    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
-        -> Variant<OptimalityCertificate,InfeasibilityCertificate>
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("p="<<p);
-
-    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
-
-    // Extra variables for use of optimization solver
-    ApproximateVectorType w=midpoint(C);
-    Approximation<FLT> mu = one;
-    ApproximateVectorType z=this->compute_z(p,x,mu);
-
-    for(SizeType i=0; i!=18; ++i) {
-        CONCLOG_PRINTLN_AT(1,"w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x))
-        this->minimisation_step(p, w,x,y,z, mu);
-        if (i>=2 && i<17) { mu=mu/4; }
-    }
-    CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x))
-
-    auto r=this->check_minimality(p,w,x,y,z);
-    if (definitely(std::get<0>(r))) {
-        CONCLOG_PRINTLN("r="<<r);
-        FloatDPBounds v=f(cast_exact(x));
-        return OptimalityCertificate({LocalOptimalityCertificate(v,cast_exact(x),cast_exact(y))});
-    } else {
-        ConstraintSolver cslvr;
-        UpperBoxType oldB=B;
-        cslvr.reduce(B,g,C);
-        CONCLOG_PRINTLN("r="<<r<<", D="<<D<<", B="<<oldB<<"="<<B);
-        if (definitely(B.is_empty())) {
-            return InfeasibilityCertificate({LocalInfeasibilityCertificate(cast_exact_box(oldB),cast_exact(y))});
-        } else {
-            if (decide(measure(B)<measure(oldB)/2)) {
-                return splitting_minimise_hotstarted(p,B,midpoint(B),y);
-            } else {
-                auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
-                auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
-                auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
-
-                if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
-                    // Both sub-boxes are feasible. Filter out clearly non-optimal points
-                    auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
-                    ARIADNE_DEBUG_ASSERT(not o.empty());
-                    auto v=o[0].v;
-                    for (auto lo : o) { v=min(v,lo.v); }
-                    OptimalityCertificate ro;
-                    for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
-                    return ro;
-                } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
-                    // B1 is feasible, but B2 is not
-                    return r1;
-                } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
-                    return r2;
-                } else {
-                    return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
-                }
-            }
-        }
-    }
-
-}
 
 auto
 InteriorPointOptimiser::minimise_hotstarted(
@@ -1760,269 +1591,6 @@ InteriorPointOptimiser::feasible(ApproximateFeasibilityProblem p) const -> Appro
 }
 
 
-
-auto
-InteriorPointOptimiser::splitting_feasible_hotstarted(
-    const ValidatedFeasibilityProblem& p,
-    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
-        -> Variant<FeasibilityCertificate,InfeasibilityCertificate>
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("p="<<p);
-
-    auto& D=p.D; auto& g=p.g; auto& C=p.C;
-
-    // Extra variables for use of optimization solver
-    ApproximateVectorType w=midpoint(C);
-    Approximation<FLT> mu = one;
-    ApproximateVectorType z=this->compute_z(p,x,mu);
-
-    // FIXME: Allow more steps
-    Approximation<FLT> t=this->compute_t(p,x);
-
-    for(SizeType i=0; i!=12; ++i) {
-        CONCLOG_PRINTLN_AT(1,"t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        this->feasibility_step(p, w,x,y,z);
-        t=this->compute_t(p,x);
-        if(probably(LogicalValue(t>0))) {
-            break;
-        }
-    }
-    CONCLOG_PRINTLN("t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x))
-
-    auto r=this->check_feasibility(p,x,y);
-    if (definitely(std::get<0>(r))) {
-        CONCLOG_PRINTLN("r="<<r);
-        return FeasibilityCertificate(Pair<ValidatedVector,ExactVector>(cast_exact(x),cast_exact(y)));
-    } else {
-        ConstraintSolver cslvr;
-        UpperBoxType oldB=B;
-        cslvr.reduce(B,g,C);
-        CONCLOG_PRINTLN("r="<<r<<", D="<<D<<", B="<<oldB<<"="<<B);
-        if (definitely(B.is_empty())) {
-            return InfeasibilityCertificate({LocalInfeasibilityCertificate(cast_exact_box(oldB),cast_exact(y))});
-        } else {
-            if (decide(measure(B)<measure(oldB)/2)) {
-                return splitting_feasible_hotstarted(p,B,midpoint(B),y);
-            } else {
-                auto sB=split(B);
-                auto r1=splitting_feasible_hotstarted(p,sB.first,midpoint(B),y);
-                if (std::holds_alternative<FeasibilityCertificate>(r1)) { return r1; }
-                auto r2=splitting_feasible_hotstarted(p,sB.second,midpoint(B),y);
-                if (std::holds_alternative<FeasibilityCertificate>(r2)) { return r2; }
-                return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
-            }
-        }
-    }
-
-}
-
-auto
-InteriorPointOptimiser::feasible_hotstarted(
-    const ValidatedFeasibilityProblem& p,
-    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("p="<<p<<", x0="<<x0<<", y0="<<y0)
-
-    auto r=splitting_feasible_hotstarted(p,p.D,x0,y0);
-    if (std::holds_alternative<FeasibilityCertificate>(r)) {
-        FeasibilityCertificate fc=std::get<FeasibilityCertificate>(r);
-        CONCLOG_PRINTLN("fc="<<fc)
-        return make_tuple(true,fc.x,fc.y);
-    } else {
-        InfeasibilityCertificate ifc=std::get<InfeasibilityCertificate>(r);
-        CONCLOG_PRINTLN("ifc="<<ifc)
-        return make_tuple(false,cast_singleton(ifc[0].B),ifc[0].y);
-    }
-}
-
-auto
-InteriorPointOptimiser::nonsplitting_feasible_hotstarted(
-    const ValidatedFeasibilityProblem& p,
-    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-{
-    CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("p="<<p);
-
-    auto& D=p.D; auto& g=p.g; auto& C=p.C;
-
-    ARIADNE_ASSERT(x0.size()==g.argument_size());
-    ARIADNE_ASSERT(y0.size()==g.result_size());
-
-    Vector<Approximation<FLT>> x=x0;
-    Vector<Approximation<FLT>> y=y0;
-
-    // Extra variables for use of optimization solver
-    Vector<Approximation<FLT>> w=midpoint(C);
-    Approximation<FLT> mu = one;
-    Vector<Approximation<FLT>> z=this->compute_z(p,x0,mu);
-
-    // FIXME: Allow more steps
-    Approximation<FLT> t=this->compute_t(p,x);
-
-    CONCLOG_PRINTLN_AT(1,"D="<<D<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-    for(SizeType i=0; i!=12; ++i) {
-        CONCLOG_PRINTLN_AT(1,"t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        CONCLOG_PRINTLN_AT(2,"w="<<w<<", z="<<z);
-        this->feasibility_step(p, w,x,y,z);
-        t=this->compute_t(p,x);
-        if(probably(LogicalValue(t>0))) {
-            return this->check_feasibility(p,x,y);
-        }
-    }
-    CONCLOG_PRINTLN("t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-    return this->check_feasibility(p,x,y);
-}
-
-
-auto
-InteriorPointOptimiser::check_feasibility(
-    const ValidatedFeasibilityProblem& p,
-    const ApproximateVectorType& xa, const ApproximateVectorType& ya) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-{
-    CONCLOG_SCOPE_CREATE;
-
-    auto& g=p.g;
-    const Vector<Exact<FLT>> x=cast_exact(xa);
-    const Vector<Exact<FLT>> y=cast_exact(ya);
-
-    CONCLOG_PRINTLN("p="<<p)
-    CONCLOG_PRINTLN("x="<<x<<", y="<<y<<", g(x)="<<g(x))
-
-    FeasibilityChecker fc;
-    ValidatedKleenean k=fc.check_feasibility(p,x,y);
-    return make_tuple(k,to_generic(x),to_generic(y));
-}
-
-
-auto
-InteriorPointOptimiser::check_minimality(
-    const ValidatedOptimisationProblem& p,
-    const ApproximateVectorType& wa, const ApproximateVectorType& xa, const ApproximateVectorType& ya, const ApproximateVectorType& za) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-{
-    //CONCLOG_SCOPE_CREATE;
-    auto& f=p.f; auto& g=p.g;
-
-    CONCLOG_PRINTLN("InteriorPointOptimiser::check_minimality(ValidatedOptimisationProblem p, ApproximateVectorType wa, xa, ya, za)");
-    CONCLOG_PRINTLN("wa="<<wa<<", xa="<<xa<<", ya="<<ya<<", za="<<za<<", f(xa)="<<f(xa)<<", g(xa)="<<g(xa));
-
-    ExactDouble se(std::numeric_limits<float>::epsilon());
-    se=ExactDouble(1.0/1024);
-    se=ExactDouble(1.0/1048576);
-    FloatDPBounds e=se*FloatDPBounds(-1,+1,dp);
-    auto cast_exact_widen = [&e](auto va){return eadd(cast_exact(va)*(1+e),e);};
-
-    FloatDPBoundsVector w=cast_exact_widen(wa);
-    FloatDPBoundsVector x=cast_exact_widen(xa);
-    FloatDPBoundsVector y=cast_exact_widen(ya);
-    FloatDPBoundsVector z=cast_exact_widen(za);
-
-    // auto restrict_number = [](FloatDPBounds xb, UpperIntervalType ivl) {
-    //     return FloatDPBounds(max(xb.lower(),ivl.lower_bound()),min(xb.upper(),ivl.upper_bound())); };
-    // auto restrict_vector = [&](Vector<FloatDPBounds> v, ExactBoxType bx) {
-    //     return Vector<FloatDPBounds>( v.size(), [&](SizeType i){return restrict_number(v[i],bx[i]);} ); };
-    // w=restrict_vector(w,p.C);
-    // x=restrict_vector(x,p.D);
-
-    CONCLOG_PRINTLN_AT(0, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
-    return this->check_minimality(p,w,x,y,z);
-}
-
-auto
-InteriorPointOptimiser::check_minimality(
-    const ValidatedOptimisationProblem& p,
-    const FloatDPBoundsVector& w_, const FloatDPBoundsVector& x_, const FloatDPBoundsVector& y_, const FloatDPBoundsVector& z_) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
-{
-    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
-    Vector<Bounds<FLT>> w(w_), x(x_), y(y_), z(z_);
-
-    //CONCLOG_SCOPE_CREATE;
-    CONCLOG_PRINTLN("InteriorPointOptimiser::check_minimality(ValidatedOptimisationProblem p, Vector<Bounds<FLT>> w, x, y, z)");
-    CONCLOG_PRINTLN_AT(1, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
-
-    // Set-up interval Newton contractor
-    // Want to solve KKT conditions:
-    // (w-cl)(cu-w)y=0
-    // df(x)+dg(x)'*y+z=0
-    // g(x)-w=0
-    // (x-dl)(du-x)z=0
-
-    // [ Y  0  W  0]
-    // [ 0  Q AT  I]
-    // [-I  A  0  0]
-    // [ 0  Z  0  X]
-
-    auto Cl=lower_bounds(C);
-    auto Cu=upper_bounds(C);
-    auto Dl=lower_bounds(D);
-    auto Du=upper_bounds(D);
-
-    auto midpoint = [](ExactIntervalType const& ivl) {
-        return FloatDPBounds(hlf(ivl.lower_bound()+ivl.upper_bound())); };
-    auto midpoints = [&midpoint](ExactBoxType const& bx) {
-        return Vector<FloatDPBounds>( bx.dimension(), [&midpoint,&bx](SizeType i){return midpoint(bx[i]);} ); };
-
-    bool is_refinement = false;
-    int step=0;
-
-    while (not is_refinement && step<8) {
-        auto ddfx=differential(f,x,2);
-        auto ddgx=differential(g,x,2);
-
-        auto A=ddgx.jacobian();
-        auto Q=ddfx.hessian();
-        for (SizeType i=0; i!=y.size(); ++i) { Q+=y[i]*ddgx[i].hessian(); }
-
-        auto W=DiagonalMatrix<Bounds<FLT>>(emul(w-Cl,Cu-w));
-        auto X=DiagonalMatrix<Bounds<FLT>>(emul(x-Dl,Du-x));
-        auto Y=DiagonalMatrix<Bounds<FLT>>(emul(2,midpoints(C)-w,y));
-        auto Z=DiagonalMatrix<Bounds<FLT>>(emul(2,midpoints(D)-x,z));
-
-        Vector<Exact<FLT>> we=cast_exact(w);
-        Vector<Exact<FLT>> xe=cast_exact(x);
-        Vector<Exact<FLT>> ye=cast_exact(y);
-        Vector<Exact<FLT>> ze=cast_exact(z);
-        Covector<Bounds<FLT>> ce=f.gradient(xe);
-        Matrix<Bounds<FLT>> Ae=g.jacobian(xe);
-
-        Vector<Bounds<FLT>> rw=emul(we-Cl,Cu-we,ye);
-        Vector<Bounds<FLT>> rx=transpose(ce)+transpose(Ae)*ye+ze;
-        Vector<Bounds<FLT>> ry=g(xe)-we;
-        Vector<Bounds<FLT>> rz=emul(xe-Dl,Du-xe,ze);
-
-        SlackPrimalDualComplementaryMatrix<Bounds<FLT>> S(Q,A,W,X,Y,Z);
-        SlackPrimalDualComplementaryData<Bounds<FLT>> r(rw,rx,ry,rz);
-        SlackPrimalDualComplementaryData<Exact<FLT>> q(we,xe,ye,ze);
-
-        auto Sa=Matrix<Approximation<FLT>>(S.assemble());
-        CONCLOG_PRINTLN("step="<<step);
-        CONCLOG_PRINTLN("C="<<C<<", D="<<D);
-        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
-        CONCLOG_PRINTLN("Sa="<<pretty(Sa))
-
-        SlackPrimalDualComplementaryData<Bounds<FLT>> nd=q-S.solve(r);
-        auto& nw=nd.w; auto& nx=nd.x; auto& ny=nd.y; auto& nz=nd.z;
-        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z)
-        CONCLOG_PRINTLN("nw="<<nw<<", nx="<<nx<<", ny="<<ny<<", nz="<<nz)
-        CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
-        CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
-        if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
-            return make_tuple(true,nx,ny);
-        } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
-            return make_tuple(false,x,ny);
-        } else {
-            w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
-            ++step;
-        }
-    }
-    return make_tuple(indeterminate,x,y);
-}
 
 auto
 InteriorPointOptimiser::feasible_hotstarted(
@@ -2778,7 +2346,429 @@ minimise(ApproximateOptimisationProblem p) const -> ApproximateVector
     throw IndeterminateFeasibilityException();
 }
 
-auto InfeasibleInteriorPointOptimiser::
+
+
+//------- KarushKuhnTuckerOptimiser -----------------------------------//
+
+auto
+KarushKuhnTuckerOptimiser::clone() const -> KarushKuhnTuckerOptimiser*
+{
+    return new KarushKuhnTuckerOptimiser(*this);
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
+{
+    CONCLOG_SCOPE_CREATE;
+
+    ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
+    ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
+    ApproximateVectorType x0=p.D.midpoint();
+    ApproximateVectorType y0(p.C.dimension(),zero);
+    return std::get<1>(this->minimise_hotstarted(p,x0,y0));
+}
+
+auto
+KarushKuhnTuckerOptimiser::feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
+{
+    CONCLOG_SCOPE_CREATE;
+
+    ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
+    ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
+
+    ApproximateVectorType x0=p.D.midpoint();
+    ApproximateVectorType y0(p.C.dimension(),zero);
+
+    return std::get<0>(this->feasible_hotstarted(p,x0,y0));
+}
+
+auto
+KarushKuhnTuckerOptimiser::minimise_hotstarted(
+    const ValidatedOptimisationProblem& p,
+    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
+        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+{
+    UpperBoxType B=p.D;
+
+    auto r = this->splitting_minimise_hotstarted(p,B,x0,y0);
+
+    auto ro0 = std::get<OptimalityCertificate>(r)[0];
+    return make_tuple(ro0.value(),ro0.primal(),ro0.dual());
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::nonsplitting_minimise_hotstarted(
+    const ValidatedOptimisationProblem& p,
+    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
+        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+{
+    ARIADNE_NOT_IMPLEMENTED;
+
+    InteriorPointOptimiser approximate_optimiser;
+
+    auto r = approximate_optimiser.minimise_hotstarted(ApproximateOptimisationProblem(p),x0,y0);
+    // FIXME: Find a better way of making the answer exact
+    const Scalar<ApproximateNumber>& av=std::get<0>(r);
+    const Vector<ApproximateNumber>& ax=std::get<1>(r);
+    const Vector<ApproximateNumber>& ay=std::get<2>(r);
+
+    Scalar<ValidatedNumber> v=to_generic(cast_exact(Scalar<Approximation<FLT>>(av,pr)));
+    Vector<ValidatedNumber> x=to_generic(cast_exact(Vector<Approximation<FLT>>(ax,pr)));
+    Vector<ValidatedNumber> y=to_generic(cast_exact(Vector<Approximation<FLT>>(ay,pr)));
+
+    return make_tuple(v,x,y);
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
+    const ValidatedOptimisationProblem& p,
+    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
+        -> Variant<OptimalityCertificate,InfeasibilityCertificate>
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    InteriorPointOptimiser approximate_optimiser;
+
+    // Extra variables for use of optimization solver
+    ApproximateVectorType w=midpoint(C);
+    Approximation<FLT> mu = one;
+    ApproximateVectorType z=approximate_optimiser.compute_z(p,x,mu);
+
+    for(SizeType i=0; i!=18; ++i) {
+        CONCLOG_PRINTLN_AT(1,"w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x))
+        approximate_optimiser.minimisation_step(p, w,x,y,z, mu);
+        if (i>=2 && i<17) { mu=mu/4; }
+    }
+    CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x))
+
+    auto r=this->check_minimality(p,w,x,y,z);
+    if (definitely(std::get<0>(r))) {
+        CONCLOG_PRINTLN("r="<<r);
+        FloatDPBounds v=f(cast_exact(x));
+        return OptimalityCertificate({LocalOptimalityCertificate(v,cast_exact(x),cast_exact(y))});
+    } else {
+        ConstraintSolver cslvr;
+        UpperBoxType oldB=B;
+        cslvr.reduce(B,g,C);
+        CONCLOG_PRINTLN("r="<<r<<", D="<<D<<", B="<<oldB<<"="<<B);
+        if (definitely(B.is_empty())) {
+            return InfeasibilityCertificate({LocalInfeasibilityCertificate(cast_exact_box(oldB),cast_exact(y))});
+        } else {
+            if (decide(measure(B)<measure(oldB)/2)) {
+                return splitting_minimise_hotstarted(p,B,midpoint(B),y);
+            } else {
+                auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
+                auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
+                auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
+
+                if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
+                    // Both sub-boxes are feasible. Filter out clearly non-optimal points
+                    auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
+                    ARIADNE_DEBUG_ASSERT(not o.empty());
+                    auto v=o[0].v;
+                    for (auto lo : o) { v=min(v,lo.v); }
+                    OptimalityCertificate ro;
+                    for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
+                    return ro;
+                } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
+                    // B1 is feasible, but B2 is not
+                    return r1;
+                } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
+                    return r2;
+                } else {
+                    return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
+                }
+            }
+        }
+    }
+
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::splitting_feasible_hotstarted(
+    const ValidatedFeasibilityProblem& p,
+    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
+        -> Variant<FeasibilityCertificate,InfeasibilityCertificate>
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    InteriorPointOptimiser approximate_optimiser;
+
+    // Extra variables for use of optimization solver
+    ApproximateVectorType w=midpoint(C);
+    Approximation<FLT> mu = one;
+    ApproximateVectorType z=approximate_optimiser.compute_z(p,x,mu);
+
+    // FIXME: Allow more steps
+    Approximation<FLT> t=approximate_optimiser.compute_t(p,x);
+
+    for(SizeType i=0; i!=12; ++i) {
+        CONCLOG_PRINTLN_AT(1,"t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+        approximate_optimiser.feasibility_step(p, w,x,y,z);
+        t=approximate_optimiser.compute_t(p,x);
+        if(probably(LogicalValue(t>0))) {
+            break;
+        }
+    }
+    CONCLOG_PRINTLN("t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x))
+
+    auto r=this->check_feasibility(p,x,y);
+    if (definitely(std::get<0>(r))) {
+        CONCLOG_PRINTLN("r="<<r);
+        return FeasibilityCertificate(Pair<ValidatedVector,ExactVector>(cast_exact(x),cast_exact(y)));
+    } else {
+        ConstraintSolver cslvr;
+        UpperBoxType oldB=B;
+        cslvr.reduce(B,g,C);
+        CONCLOG_PRINTLN("r="<<r<<", D="<<D<<", B="<<oldB<<"="<<B);
+        if (definitely(B.is_empty())) {
+            return InfeasibilityCertificate({LocalInfeasibilityCertificate(cast_exact_box(oldB),cast_exact(y))});
+        } else {
+            if (decide(measure(B)<measure(oldB)/2)) {
+                return splitting_feasible_hotstarted(p,B,midpoint(B),y);
+            } else {
+                auto sB=split(B);
+                auto r1=splitting_feasible_hotstarted(p,sB.first,midpoint(B),y);
+                if (std::holds_alternative<FeasibilityCertificate>(r1)) { return r1; }
+                auto r2=splitting_feasible_hotstarted(p,sB.second,midpoint(B),y);
+                if (std::holds_alternative<FeasibilityCertificate>(r2)) { return r2; }
+                return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
+            }
+        }
+    }
+
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::feasible_hotstarted(
+    const ValidatedFeasibilityProblem& p,
+    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p<<", x0="<<x0<<", y0="<<y0)
+
+    auto r=splitting_feasible_hotstarted(p,p.D,x0,y0);
+    if (std::holds_alternative<FeasibilityCertificate>(r)) {
+        FeasibilityCertificate fc=std::get<FeasibilityCertificate>(r);
+        CONCLOG_PRINTLN("fc="<<fc)
+        return make_tuple(true,fc.x,fc.y);
+    } else {
+        InfeasibilityCertificate ifc=std::get<InfeasibilityCertificate>(r);
+        CONCLOG_PRINTLN("ifc="<<ifc)
+        return make_tuple(false,cast_singleton(ifc[0].B),ifc[0].y);
+    }
+}
+
+auto
+KarushKuhnTuckerOptimiser::nonsplitting_feasible_hotstarted(
+    const ValidatedFeasibilityProblem& p,
+    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("p="<<p);
+
+    InteriorPointOptimiser approximate_optimiser;
+
+    auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    ARIADNE_ASSERT(x0.size()==g.argument_size());
+    ARIADNE_ASSERT(y0.size()==g.result_size());
+
+    Vector<Approximation<FLT>> x=x0;
+    Vector<Approximation<FLT>> y=y0;
+
+    // Extra variables for use of optimization solver
+    Vector<Approximation<FLT>> w=midpoint(C);
+    Approximation<FLT> mu = one;
+    Vector<Approximation<FLT>> z=approximate_optimiser.compute_z(p,x0,mu);
+
+    // FIXME: Allow more steps
+    Approximation<FLT> t=approximate_optimiser.compute_t(p,x);
+
+    CONCLOG_PRINTLN_AT(1,"D="<<D<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+    for(SizeType i=0; i!=12; ++i) {
+        CONCLOG_PRINTLN_AT(1,"t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+        CONCLOG_PRINTLN_AT(2,"w="<<w<<", z="<<z);
+        approximate_optimiser.feasibility_step(p, w,x,y,z);
+        t=approximate_optimiser.compute_t(p,x);
+        if(probably(LogicalValue(t>0))) {
+            return this->check_feasibility(p,x,y);
+        }
+    }
+    CONCLOG_PRINTLN("t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
+    return this->check_feasibility(p,x,y);
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::check_feasibility(
+    const ValidatedFeasibilityProblem& p,
+    const ApproximateVectorType& xa, const ApproximateVectorType& ya) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    CONCLOG_SCOPE_CREATE;
+
+    auto& g=p.g;
+    const Vector<Exact<FLT>> x=cast_exact(xa);
+    const Vector<Exact<FLT>> y=cast_exact(ya);
+
+    CONCLOG_PRINTLN("p="<<p)
+    CONCLOG_PRINTLN("x="<<x<<", y="<<y<<", g(x)="<<g(x))
+
+    FeasibilityChecker fc;
+    ValidatedKleenean k=fc.check_feasibility(p,x,y);
+    return make_tuple(k,to_generic(x),to_generic(y));
+}
+
+
+auto
+KarushKuhnTuckerOptimiser::check_minimality(
+    const ValidatedOptimisationProblem& p,
+    const ApproximateVectorType& wa, const ApproximateVectorType& xa, const ApproximateVectorType& ya, const ApproximateVectorType& za) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    //CONCLOG_SCOPE_CREATE;
+    auto& f=p.f; auto& g=p.g;
+
+    CONCLOG_PRINTLN("KarushKuhnTuckerOptimiser::check_minimality(ValidatedOptimisationProblem p, ApproximateVectorType wa, xa, ya, za)");
+    CONCLOG_PRINTLN("wa="<<wa<<", xa="<<xa<<", ya="<<ya<<", za="<<za<<", f(xa)="<<f(xa)<<", g(xa)="<<g(xa));
+
+    ExactDouble se(std::numeric_limits<float>::epsilon());
+    se=ExactDouble(1.0/1024);
+    se=ExactDouble(1.0/1048576);
+    FloatDPBounds e=se*FloatDPBounds(-1,+1,dp);
+    auto cast_exact_widen = [&e](auto va){return eadd(cast_exact(va)*(1+e),e);};
+
+    FloatDPBoundsVector w=cast_exact_widen(wa);
+    FloatDPBoundsVector x=cast_exact_widen(xa);
+    FloatDPBoundsVector y=cast_exact_widen(ya);
+    FloatDPBoundsVector z=cast_exact_widen(za);
+
+    // auto restrict_number = [](FloatDPBounds xb, UpperIntervalType ivl) {
+    //     return FloatDPBounds(max(xb.lower(),ivl.lower_bound()),min(xb.upper(),ivl.upper_bound())); };
+    // auto restrict_vector = [&](Vector<FloatDPBounds> v, ExactBoxType bx) {
+    //     return Vector<FloatDPBounds>( v.size(), [&](SizeType i){return restrict_number(v[i],bx[i]);} ); };
+    // w=restrict_vector(w,p.C);
+    // x=restrict_vector(x,p.D);
+
+    CONCLOG_PRINTLN_AT(0, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+    return this->check_minimality(p,w,x,y,z);
+}
+
+auto
+KarushKuhnTuckerOptimiser::check_minimality(
+    const ValidatedOptimisationProblem& p,
+    const FloatDPBoundsVector& w_, const FloatDPBoundsVector& x_, const FloatDPBoundsVector& y_, const FloatDPBoundsVector& z_) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    Vector<Bounds<FLT>> w(w_), x(x_), y(y_), z(z_);
+
+    //CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("InteriorPointOptimiser::check_minimality(ValidatedOptimisationProblem p, Vector<Bounds<FLT>> w, x, y, z)");
+    CONCLOG_PRINTLN_AT(1, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+
+    // Set-up interval Newton contractor
+    // Want to solve KKT conditions:
+    // (w-cl)(cu-w)y=0
+    // df(x)+dg(x)'*y+z=0
+    // g(x)-w=0
+    // (x-dl)(du-x)z=0
+
+    // [ Y  0  W  0]
+    // [ 0  Q AT  I]
+    // [-I  A  0  0]
+    // [ 0  Z  0  X]
+
+    auto Cl=lower_bounds(C);
+    auto Cu=upper_bounds(C);
+    auto Dl=lower_bounds(D);
+    auto Du=upper_bounds(D);
+
+    auto midpoint = [](ExactIntervalType const& ivl) {
+        return FloatDPBounds(hlf(ivl.lower_bound()+ivl.upper_bound())); };
+    auto midpoints = [&midpoint](ExactBoxType const& bx) {
+        return Vector<FloatDPBounds>( bx.dimension(), [&midpoint,&bx](SizeType i){return midpoint(bx[i]);} ); };
+
+    bool is_refinement = false;
+    int step=0;
+
+    while (not is_refinement && step<8) {
+        auto ddfx=differential(f,x,2);
+        auto ddgx=differential(g,x,2);
+
+        auto A=ddgx.jacobian();
+        auto Q=ddfx.hessian();
+        for (SizeType i=0; i!=y.size(); ++i) { Q+=y[i]*ddgx[i].hessian(); }
+
+        auto W=DiagonalMatrix<Bounds<FLT>>(emul(w-Cl,Cu-w));
+        auto X=DiagonalMatrix<Bounds<FLT>>(emul(x-Dl,Du-x));
+        auto Y=DiagonalMatrix<Bounds<FLT>>(emul(2,midpoints(C)-w,y));
+        auto Z=DiagonalMatrix<Bounds<FLT>>(emul(2,midpoints(D)-x,z));
+
+        Vector<Exact<FLT>> we=cast_exact(w);
+        Vector<Exact<FLT>> xe=cast_exact(x);
+        Vector<Exact<FLT>> ye=cast_exact(y);
+        Vector<Exact<FLT>> ze=cast_exact(z);
+        Covector<Bounds<FLT>> ce=f.gradient(xe);
+        Matrix<Bounds<FLT>> Ae=g.jacobian(xe);
+
+        Vector<Bounds<FLT>> rw=emul(we-Cl,Cu-we,ye);
+        Vector<Bounds<FLT>> rx=transpose(ce)+transpose(Ae)*ye+ze;
+        Vector<Bounds<FLT>> ry=g(xe)-we;
+        Vector<Bounds<FLT>> rz=emul(xe-Dl,Du-xe,ze);
+
+        SlackPrimalDualComplementaryMatrix<Bounds<FLT>> S(Q,A,W,X,Y,Z);
+        SlackPrimalDualComplementaryData<Bounds<FLT>> r(rw,rx,ry,rz);
+        SlackPrimalDualComplementaryData<Exact<FLT>> q(we,xe,ye,ze);
+
+        auto Sa=Matrix<Approximation<FLT>>(S.assemble());
+        CONCLOG_PRINTLN("step="<<step);
+        CONCLOG_PRINTLN("C="<<C<<", D="<<D);
+        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
+        CONCLOG_PRINTLN("Sa="<<pretty(Sa))
+
+        SlackPrimalDualComplementaryData<Bounds<FLT>> nd=q-S.solve(r);
+        auto& nw=nd.w; auto& nx=nd.x; auto& ny=nd.y; auto& nz=nd.z;
+        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z)
+        CONCLOG_PRINTLN("nw="<<nw<<", nx="<<nx<<", ny="<<ny<<", nz="<<nz)
+        CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
+        CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
+        if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
+            return make_tuple(true,nx,ny);
+        } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
+            return make_tuple(false,x,ny);
+        } else {
+            w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
+            ++step;
+        }
+    }
+    return make_tuple(indeterminate,x,y);
+}
+
+//------- InfeasibleKarushKuhnTuckerOptimiser -----------------------------------//
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::clone() const -> InfeasibleKarushKuhnTuckerOptimiser*
+{
+    return new InfeasibleKarushKuhnTuckerOptimiser(*this);
+}
+
+
+auto InfeasibleKarushKuhnTuckerOptimiser::
 minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
 {
     CONCLOG_SCOPE_CREATE;
@@ -2790,14 +2780,16 @@ minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
     static const ApproximateDouble STATE_TOLERANCE=1e-8;
     static const CounterType MAXIMUM_STEPS=24;
 
+    InfeasibleInteriorPointOptimiser approximate_optimiser;
+
     ARIADNE_ASSERT(f.argument_size()==D.size());
     ARIADNE_ASSERT(g.argument_size()==D.size());
     ARIADNE_ASSERT(g.result_size()==C.size());
-    StepData v;
+    InfeasibleInteriorPointOptimiser::StepData v;
     ApproximateVectorType& x=cast_approximate(v.x);
     ApproximateVectorType& y=cast_approximate(v.y);
     C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVectorType(C.size(),UpperIntervalType(-1,+1))));
-    this->setup_feasibility(p,v);
+    approximate_optimiser.setup_feasibility(p,v);
     ApproximateVectorType oldx=x;
 
     static const ExactDouble MU_MIN = 1e-12_pr;
@@ -2807,14 +2799,14 @@ minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
         oldx=x;
         FloatDPApproximation oldfx=f(oldx);
-        this->minimisation_step(p,v);
+        approximate_optimiser.minimisation_step(p,v);
         if(FeasibilityChecker().validate_infeasibility(p,cast_exact(y))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN_AT(1,"Infeasible");
             std::cerr<<"EXCEPTION: "<<InfeasibleProblemException().what()<<"\n";
             throw InfeasibleProblemException();
         }
-        FloatDPApproximation fx=f(x);
+        ApproximateNumberType fx=f(x);
         if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
             break;
         }
@@ -2832,7 +2824,8 @@ minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
     throw IndeterminateFeasibilityException();
 }
 
-auto InfeasibleInteriorPointOptimiser::
+
+auto InfeasibleKarushKuhnTuckerOptimiser::
 feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
 {
     CONCLOG_SCOPE_CREATE
@@ -2843,7 +2836,9 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
     ARIADNE_ASSERT(g.argument_size()==D.size());
     ARIADNE_ASSERT(g.result_size()==C.size());
 
-    StepData v;
+    InfeasibleInteriorPointOptimiser approximate_optimiser;
+
+    InfeasibleInteriorPointOptimiser::StepData v;
     ApproximateVectorType& x=cast_approximate(v.x);
     ApproximateVectorType& y=cast_approximate(v.y);
 
@@ -2851,14 +2846,14 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
     auto R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
 
     ApproximateOptimisationProblem optp(f,D,g,R);
-    this->setup_feasibility(p,v);
+    approximate_optimiser.setup_feasibility(p,v);
 
     static const ExactDouble MU_MIN = 1e-12_pr;
 
     // FIXME: Allow more steps
     for(SizeType i=0; i!=12; ++i) {
         CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        this->minimisation_step(optp,v);
+        approximate_optimiser.minimisation_step(optp,v);
         if(FeasibilityChecker().validate_feasibility(p,cast_exact(x))) {
             CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
             CONCLOG_PRINTLN("Feasible");
@@ -2914,9 +2909,9 @@ feasible(ApproximateFeasibilityProblem p) const -> ApproximateKleenean
 }
 
 
-auto InfeasibleInteriorPointOptimiser::
+auto InfeasibleKarushKuhnTuckerOptimiser::
 feasible_hotstarted(ValidatedFeasibilityProblem p,
-                    const PrimalDualData& wxy0) const
+                    const InfeasibleInteriorPointOptimiser::PrimalDualData& wxy0) const
                         -> Pair<ValidatedKleenean,ApproximateVectorType>
 {
     ARIADNE_NOT_IMPLEMENTED;

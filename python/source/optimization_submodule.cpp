@@ -132,18 +132,22 @@ Void export_feasibility_checker_interface(pybind11::module& module)
 
 Void export_optimiser_interface(pybind11::module& module)
 {
-    typedef OptimiserInterface::ValidatedVector ValidatedVector;
-    typedef OptimiserInterface::ApproximateVector ApproximateVector;
+    typedef ValidatedOptimiserInterface::ValidatedVector ValidatedVector;
+    typedef ApproximateOptimiserInterface::ApproximateVector ApproximateVector;
 
-    pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
-    optimiser_interface_class.def("minimise", (ValidatedVector(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("minimise", (ValidatedVector(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem)const) &OptimiserInterface::feasible);
+    pybind11::class_<ValidatedOptimiserInterface> validated_optimiser_interface_class(module,"ValidatedOptimiserInterface");
+    validated_optimiser_interface_class.def("minimise", (ValidatedVector(ValidatedOptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &ValidatedOptimiserInterface::minimise);
+    validated_optimiser_interface_class.def("minimise", (ValidatedVector(ValidatedOptimiserInterface::*)(ValidatedOptimisationProblem)const) &ValidatedOptimiserInterface::minimise);
+    validated_optimiser_interface_class.def("feasible", (ValidatedKleenean(ValidatedOptimiserInterface::*)( ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &ValidatedOptimiserInterface::feasible);
+    validated_optimiser_interface_class.def("feasible", (ValidatedKleenean(ValidatedOptimiserInterface::*)(ValidatedFeasibilityProblem)const) &ValidatedOptimiserInterface::feasible);
 
-    optimiser_interface_class.def("minimise", (ApproximateVector(OptimiserInterface::*)(ApproximateOptimisationProblem)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("feasible", (ApproximateKleenean(OptimiserInterface::*)(ApproximateFeasibilityProblem)const) &OptimiserInterface::feasible);
-    //NOTE: Not in C++ API
-    //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
+    pybind11::class_<ApproximateOptimiserInterface> approximate_optimiser_interface_class(module,"ApproximateOptimiserInterface");
+    approximate_optimiser_interface_class.def("minimise", (ApproximateVector(ApproximateOptimiserInterface::*)(ApproximateScalarMultivariateFunction, ApproximateBoxType, ApproximateVectorMultivariateFunction, ApproximateBoxType)const) &ApproximateOptimiserInterface::minimise);
+    approximate_optimiser_interface_class.def("minimise", (ApproximateVector(ApproximateOptimiserInterface::*)(ApproximateOptimisationProblem)const) &ApproximateOptimiserInterface::minimise);
+//    approximate_optimiser_interface_class.def("feasible", (ApproximateKleenean(ApproximateOptimiserInterface::*)(ApproximateBoxType, ApproximateVectorMultivariateFunction, ApproximateBoxType)const) &ApproximateOptimiserInterface::feasible);
+    approximate_optimiser_interface_class.def("feasible", (ApproximateKleenean(ApproximateOptimiserInterface::*)(ApproximateFeasibilityProblem)const) &ApproximateOptimiserInterface::feasible);
+        //NOTE: Not in C++ API
+        //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
 }
 
 Void export_interior_point_solvers(pybind11::module& module)
@@ -158,37 +162,35 @@ Void export_interior_point_solvers(pybind11::module& module)
     using YA = ApproximateNumber;
     using YB = ValidatedNumber;
     using XA = InteriorPointOptimiser::ApproximateNumberType;
-    using XB = InteriorPointOptimiser::ValidatedNumberType;
+    //using XB = KarushKuhnTuckerOptimiser::ValidatedNumberType;
     using VYA = Vector<YA>;
     using VYB = Vector<YB>;
     using VXA = Vector<XA>;
-    using VXB = Vector<XB>;
+    //using VXB = Vector<XB>;
     using AB = ApproximateBoxType;
+    //using EB = ExactBoxType;
 
     {
         using Self=InteriorPointOptimiser;
 
-        pybind11::class_<InteriorPointOptimiser,OptimiserInterface> interior_point_solver_class(module,"InteriorPointOptimiser");
-        interior_point_solver_class.def(pybind11::init<>());
-        interior_point_solver_class.def("__str__", &__cstr__<InteriorPointOptimiser>);
+        pybind11::class_<InteriorPointOptimiser,ApproximateOptimiserInterface> interior_point_optimiser_class(module,"InteriorPointOptimiser");
+        interior_point_optimiser_class.def(pybind11::init<>());
+        interior_point_optimiser_class.def("__str__", &__cstr__<InteriorPointOptimiser>);
 
-        interior_point_solver_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        interior_point_solver_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        interior_point_optimiser_class.def("minimise_hotstarted", (Tuple<YA,VYA,VYA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        interior_point_optimiser_class.def("feasible_hotstarted", (Tuple<AK,VYA,VYA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
 
-        interior_point_solver_class.def("minimise_hotstarted", (Tuple<YA,VYA,VYA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        interior_point_solver_class.def("feasible_hotstarted", (Tuple<AK,VYA,VYA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        interior_point_optimiser_class.def("minimisation_step", (Void(Self::*)(const AOP&, VXA&, VXA&, VXA&, VXA&, XA&)const) &Self::minimisation_step);
+        interior_point_optimiser_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, VXA&, VXA&)const) &Self::feasibility_step);
 
-        interior_point_solver_class.def("minimisation_step", (Void(Self::*)(const AOP&, VXA&, VXA&, VXA&, VXA&, XA&)const) &Self::minimisation_step);
-        interior_point_solver_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, VXA&, VXA&)const) &Self::feasibility_step);
+        interior_point_optimiser_class.def("compute_dual", (VXA(Self::*)(const AB&, const VXA&, const XA&)const) &Self::compute_dual);
+        interior_point_optimiser_class.def("initial_step_data", (Self::StepData(Self::*)(const AFP&)const) &Self::initial_step_data);
+        interior_point_optimiser_class.def("initial_step_data_hotstarted", (Self::StepData(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::initial_step_data_hotstarted);
+        interior_point_optimiser_class.def("compute_w", (VXA(Self::*)(const AFP&, const VXA&, const XA&)const) &Self::compute_w);
+        interior_point_optimiser_class.def("compute_z", (VXA(Self::*)(const AFP&, const VXA&, const XA&)const) &Self::compute_z);
+        interior_point_optimiser_class.def("compute_mu", (XA(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::compute_mu);
 
-        interior_point_solver_class.def("compute_dual", (VXA(Self::*)(const AB&, const VXA&, const XA&)const) &Self::compute_dual);
-        interior_point_solver_class.def("initial_step_data", (Self::StepData(Self::*)(const AFP&)const) &Self::initial_step_data);
-        interior_point_solver_class.def("initial_step_data_hotstarted", (Self::StepData(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::initial_step_data_hotstarted);
-        interior_point_solver_class.def("compute_w", (VXA(Self::*)(const AFP&, const VXA&, const XA&)const) &Self::compute_w);
-        interior_point_solver_class.def("compute_z", (VXA(Self::*)(const AFP&, const VXA&, const XA&)const) &Self::compute_z);
-        interior_point_solver_class.def("compute_mu", (XA(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::compute_mu);
-
-        interior_point_solver_class.def("compute_tz", (Void(Self::*)(const AFP&, VXA&, XA&, VXA&)const) &Self::compute_tz);
+        interior_point_optimiser_class.def("compute_tz", (Void(Self::*)(const AFP&, VXA&, XA&, VXA&)const) &Self::compute_tz);
 
         pybind11::class_<InteriorPointOptimiser::StepData> interior_point_solver_step_data_class(module,"InteriorPointOptimiserStepData");
         interior_point_solver_step_data_class.def("__str__", &__cstr__<InteriorPointOptimiser::StepData>);
@@ -198,22 +200,42 @@ Void export_interior_point_solvers(pybind11::module& module)
     {
         using Self=PrimalDualOnlyInteriorPointOptimiser;
 
-        pybind11::class_<PrimalDualOnlyInteriorPointOptimiser,InteriorPointOptimiser> primal_dual_only_interior_point_solver_class(module,"PrimalDualOnlyInteriorPointOptimiser");
+        pybind11::class_<PrimalDualOnlyInteriorPointOptimiser,InteriorPointOptimiser> primal_dual_only_interior_point_optimiser_class(module,"PrimalDualOnlyInteriorPointOptimiser");
 
-        primal_dual_only_interior_point_solver_class.def("feasible_hotstarted", (Tuple<AK,VXA,VXA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
-        primal_dual_only_interior_point_solver_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, XA&)const) &Self::feasibility_step);
+        primal_dual_only_interior_point_optimiser_class.def("feasible_hotstarted", (Tuple<AK,VYA,VYA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        primal_dual_only_interior_point_optimiser_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, XA&)const) &Self::feasibility_step);
     }
 
     {
         using Self = InfeasibleInteriorPointOptimiser;
 
-        pybind11::class_<InfeasibleInteriorPointOptimiser,OptimiserInterface> infeasible_interior_point_solver_class(module,"InfeasibleInteriorPointOptimiser");
-        infeasible_interior_point_solver_class.def(pybind11::init<>());
-        infeasible_interior_point_solver_class.def("__str__", &__cstr__<InfeasibleInteriorPointOptimiser>);
+        pybind11::class_<InfeasibleInteriorPointOptimiser,ApproximateOptimiserInterface> infeasible_interior_point_optimiser_class(module,"InfeasibleInteriorPointOptimiser");
+        infeasible_interior_point_optimiser_class.def(pybind11::init<>());
+        infeasible_interior_point_optimiser_class.def("__str__", &__cstr__<InfeasibleInteriorPointOptimiser>);
 
-        infeasible_interior_point_solver_class.def("feasible_hotstarted", (Pair<ValidatedKleenean,VXA>(Self::*)(VFP, const Self::PrimalDualData&)const) & Self::feasible_hotstarted);
-        infeasible_interior_point_solver_class.def("setup_feasibility", (Void(Self::*)(const AFP&, Self::StepData&)const) &Self::setup_feasibility);
-        infeasible_interior_point_solver_class.def("minimisation_step", (Void(Self::*)(const AOP&, Self::StepData&)const) &Self::minimisation_step);
+        infeasible_interior_point_optimiser_class.def("setup_feasibility", (Void(Self::*)(const AFP&, Self::StepData&)const) &Self::setup_feasibility);
+        infeasible_interior_point_optimiser_class.def("minimisation_step", (Void(Self::*)(const AOP&, Self::StepData&)const) &Self::minimisation_step);
+    }
+
+    {
+        using Self=KarushKuhnTuckerOptimiser;
+
+        pybind11::class_<KarushKuhnTuckerOptimiser,ValidatedOptimiserInterface> karush_kuhn_tucker_optimiser_class(module,"KarushKuhnTuckerOptimiser");
+        karush_kuhn_tucker_optimiser_class.def(pybind11::init<>());
+        //karush_kuhn_tucker_optimiser_class.def("__str__", &__cstr__<KarushKuhnTuckerOptimiser>);
+
+        karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+    }
+
+    {
+        using Self = InfeasibleKarushKuhnTuckerOptimiser;
+
+        pybind11::class_<InfeasibleKarushKuhnTuckerOptimiser,ValidatedOptimiserInterface> infeasible_karush_kuhn_tucker_optimiser_class(module,"InfeasibleKarushKuhnTuckerOptimiser");
+        infeasible_karush_kuhn_tucker_optimiser_class.def(pybind11::init<>());
+        //infeasible_karush_kuhn_tucker_optimiser_class.def("_str_", &_cstr_<InfeasibleKarushKuhnTuckerOptimiser>);
+
+        infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Pair<ValidatedKleenean,VXA>(Self::*)(VFP, const InfeasibleInteriorPointOptimiser::PrimalDualData&)const) & Self::feasible_hotstarted);
     }
 }
 
@@ -226,7 +248,7 @@ Void export_approximate_optimiser(pybind11::module& module)
 
 Void export_interval_optimiser(pybind11::module& module)
 {
-    pybind11::class_<IntervalOptimiser,InteriorPointOptimiser> interval_optimiser_class(module,"IntervalOptimiser");
+    pybind11::class_<IntervalOptimiser,KarushKuhnTuckerOptimiser> interval_optimiser_class(module,"IntervalOptimiser");
     interval_optimiser_class.def("feasible_zero", (ValidatedKleenean(IntervalOptimiser::*)(ExactBoxType, ValidatedVectorMultivariateFunction)const) &IntervalOptimiser::feasible_zero);
     interval_optimiser_class.def("feasibility_step", (Void(IntervalOptimiser::*)(const FloatDPVector&, const FloatDPVector&, const ValidatedVectorMultivariateFunction&, FloatDPBoundsVector&, FloatDPBoundsVector&, FloatDPBoundsVector&, FloatDPBoundsVector, FloatDPBounds& mu) const) &IntervalOptimiser::feasibility_step);
 }

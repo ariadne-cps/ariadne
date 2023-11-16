@@ -107,20 +107,55 @@ class TestFeasibilityChecker
 
 };
 
-class TestOptimiser
+class TestApproximateOptimiser
 {
   private:
-    std::unique_ptr<OptimiserInterface> optimiser;
+    std::unique_ptr<ApproximateOptimiserInterface> optimiser;
     DoublePrecision pr;
   public:
-    TestOptimiser(const OptimiserInterface& opt)
+    TestApproximateOptimiser(const ApproximateOptimiserInterface& opt)
+        : optimiser(opt.clone()) { }
+
+    Void test() {
+        ARIADNE_TEST_CALL(test_approximate_inequality_constrained_optimisation());
+    }
+
+    Void test_approximate_inequality_constrained_optimisation() {
+        List<ApproximateScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        ApproximateScalarMultivariateFunction x0s = sqr(x[0]);
+        ApproximateScalarMultivariateFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
+        ARIADNE_TEST_PRINT(f);
+        //EffectiveVectorMultivariateFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
+        ApproximateBoxType D = ApproximateBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{-3.0_x,5.0_x}};
+        ARIADNE_TEST_PRINT(D);
+        ApproximateVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875_x)};
+        ARIADNE_TEST_PRINT(g);
+        ApproximateBoxType C = ApproximateBoxType{{0.0_x,4.0_x},{0.0_x,4.0_x}};
+        ARIADNE_TEST_PRINT(C);
+
+        ARIADNE_TEST_PRINT(optimiser);
+        Vector<ApproximateNumber> x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_PRINT(x_optimal);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
+        //ExactDouble required_accuracy=1e-6_pr;
+        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
+    }
+};
+
+class TestValidatedOptimiser
+{
+  private:
+    std::unique_ptr<ValidatedOptimiserInterface> optimiser;
+    DoublePrecision pr;
+  public:
+    TestValidatedOptimiser(const ValidatedOptimiserInterface& opt)
         : optimiser(opt.clone()) { }
 
     Void test() {
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
         ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
-        ARIADNE_TEST_CALL(test_approximate_inequality_constrained_optimisation());
         ARIADNE_TEST_CALL(test_linear_feasibility());
         ARIADNE_TEST_CALL(test_nonlinear_feasibility());
         ARIADNE_TEST_CALL(test_nonlinear_equality_feasibility());
@@ -160,28 +195,6 @@ class TestOptimiser
         Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
-    }
-
-    Void test_approximate_inequality_constrained_optimisation() {
-        List<ApproximateScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
-        ApproximateScalarMultivariateFunction x0s = sqr(x[0]);
-        ApproximateScalarMultivariateFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
-        ARIADNE_TEST_PRINT(f);
-        //EffectiveVectorMultivariateFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
-        ApproximateBoxType D = ApproximateBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{-3.0_x,5.0_x}};
-        ARIADNE_TEST_PRINT(D);
-        ApproximateVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875_x)};
-        ARIADNE_TEST_PRINT(g);
-        ApproximateBoxType C = ApproximateBoxType{{0.0_x,4.0_x},{0.0_x,4.0_x}};
-        ARIADNE_TEST_PRINT(C);
-
-        ARIADNE_TEST_PRINT(optimiser);
-        Vector<ApproximateNumber> x_optimal=optimiser->minimise(f,D,g,C);
-        ARIADNE_TEST_PRINT(x_optimal);
-        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
-        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-        //ExactDouble required_accuracy=1e-6_pr;
-        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
     Void test_constrained_optimisation() {
@@ -271,11 +284,17 @@ Int main(Int argc, const char* argv[]) {
     FeasibilityChecker fc;
     TestFeasibilityChecker(fc).test();
 
-    InteriorPointOptimiser nlo;
-    ARIADNE_TEST_CLASS("InteriorPointOptimiser",TestOptimiser(nlo));
+    InteriorPointOptimiser ipto;
+    ARIADNE_TEST_CLASS("InteriorPointOptimiser",TestApproximateOptimiser(ipto));
 
-    InfeasibleInteriorPointOptimiser nlio;
-    ARIADNE_TEST_CLASS("InfeasibleInteriorPointOptimiser",TestOptimiser(nlio));
+    InfeasibleInteriorPointOptimiser iipto;
+    ARIADNE_TEST_CLASS("InfeasibleInteriorPointOptimiser",TestApproximateOptimiser(iipto));
+
+    KarushKuhnTuckerOptimiser kkto;
+    ARIADNE_TEST_CLASS("InteriorPointOptimiser",TestValidatedOptimiser(kkto));
+
+    InfeasibleKarushKuhnTuckerOptimiser ikkto;
+    ARIADNE_TEST_CLASS("InfeasibleInteriorPointOptimiser",TestValidatedOptimiser(ikkto));
 /*
     ApproximateOptimiser appo;
     ARIADNE_TEST_CLASS("ApproximateOptimiser",TestOptimiser(appo));

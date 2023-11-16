@@ -534,7 +534,7 @@ namespace Ariadne {
  * The \a LinearProgram class supports construction and solution of linear
  * programming problems. Tests for feasibility only are also possible.
  *
- *
+ * The \a OptimiserInterface classes support the solution of \a OptimisationProblem and \a FeasibilityProblem.
  */
 
 

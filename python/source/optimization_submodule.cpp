@@ -106,22 +106,22 @@ Void export_optimisation_problems(pybind11::module& module)
 
 Void export_feasibility_checker_interface(pybind11::module& module)
 {
-    typedef FeasibilityCheckerInterface::ApproximateVectorType ApproximateVectorType;
-    typedef FeasibilityCheckerInterface::ValidatedVectorType ValidatedVectorType;
-    typedef FeasibilityCheckerInterface::ExactVectorType ExactVectorType;
+    typedef FeasibilityCheckerInterface::ApproximateVector ApproximateVector;
+    typedef FeasibilityCheckerInterface::ValidatedVector ValidatedVector;
+    typedef FeasibilityCheckerInterface::ExactVector ExactVector;
 
     pybind11::class_<FeasibilityCheckerInterface> feasibility_checker_interface_class(module,"FeasibilityCheckerInterface");
 
-    feasibility_checker_interface_class.def("almost_feasible_point", (ApproximateKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumber)const) &FeasibilityCheckerInterface::almost_feasible_point);
-    feasibility_checker_interface_class.def("is_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &FeasibilityCheckerInterface::is_feasible_point);
+    feasibility_checker_interface_class.def("almost_feasible_point", (ApproximateKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVector, ApproximateNumber)const) &FeasibilityCheckerInterface::almost_feasible_point);
+    feasibility_checker_interface_class.def("is_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVector)const) &FeasibilityCheckerInterface::is_feasible_point);
     feasibility_checker_interface_class.def("contains_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, BoxRangeType)const) &FeasibilityCheckerInterface::contains_feasible_point);
-    feasibility_checker_interface_class.def("check_feasibility", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType, ExactVectorType)const) &FeasibilityCheckerInterface::check_feasibility);
+    feasibility_checker_interface_class.def("check_feasibility", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVector, ExactVector)const) &FeasibilityCheckerInterface::check_feasibility);
 
-    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType)const) &FeasibilityCheckerInterface::validate_feasibility);
-    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedVectorMultivariateFunction, ValidatedVectorType)const) &FeasibilityCheckerInterface::validate_feasibility);
-    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType,ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
-    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, UpperBoxType, ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
-    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &FeasibilityCheckerInterface::validate_infeasibility);
+    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVector)const) &FeasibilityCheckerInterface::validate_feasibility);
+    feasibility_checker_interface_class.def("validate_feasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedVectorMultivariateFunction, ValidatedVector)const) &FeasibilityCheckerInterface::validate_feasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVector,ExactVector)const) &FeasibilityCheckerInterface::validate_infeasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, UpperBoxType, ExactVector)const) &FeasibilityCheckerInterface::validate_infeasibility);
+    feasibility_checker_interface_class.def("validate_infeasibility", (Bool(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVector)const) &FeasibilityCheckerInterface::validate_infeasibility);
 
     pybind11::class_<FeasibilityChecker,FeasibilityCheckerInterface> feasibility_checker_class(module,"FeasibilityChecker");
     feasibility_checker_class.def(pybind11::init<>());
@@ -132,15 +132,15 @@ Void export_feasibility_checker_interface(pybind11::module& module)
 
 Void export_optimiser_interface(pybind11::module& module)
 {
-    typedef OptimiserInterface::ValidatedVectorType ValidatedVectorType;
-    typedef OptimiserInterface::ApproximateVectorType ApproximateVectorType;
+    typedef OptimiserInterface::ValidatedVector ValidatedVector;
+    typedef OptimiserInterface::ApproximateVector ApproximateVector;
 
     pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
-    optimiser_interface_class.def("minimise", (ValidatedVectorType(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("minimise", (ValidatedVectorType(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (ValidatedVector(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (ValidatedVector(OptimiserInterface::*)(ValidatedOptimisationProblem)const) &OptimiserInterface::minimise);
     optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ValidatedFeasibilityProblem)const) &OptimiserInterface::feasible);
 
-    optimiser_interface_class.def("minimise", (ApproximateVectorType(OptimiserInterface::*)(ApproximateOptimisationProblem)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (ApproximateVector(OptimiserInterface::*)(ApproximateOptimisationProblem)const) &OptimiserInterface::minimise);
     optimiser_interface_class.def("feasible", (ApproximateKleenean(OptimiserInterface::*)(ApproximateFeasibilityProblem)const) &OptimiserInterface::feasible);
     //NOTE: Not in C++ API
     //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
@@ -155,9 +155,13 @@ Void export_interior_point_solvers(pybind11::module& module)
 
     using AK = ApproximateKleenean;
     using VK = ValidatedKleenean;
-    using XA = FloatDPApproximation;
+    using YA = ApproximateNumber;
+    using YB = ValidatedNumber;
+    using XA = InteriorPointOptimiser::ApproximateNumberType;
+    using XB = InteriorPointOptimiser::ValidatedNumberType;
+    using VYA = Vector<YA>;
+    using VYB = Vector<YB>;
     using VXA = Vector<XA>;
-    using XB = FloatDPBounds;
     using VXB = Vector<XB>;
     using AB = ApproximateBoxType;
 
@@ -168,11 +172,11 @@ Void export_interior_point_solvers(pybind11::module& module)
         interior_point_solver_class.def(pybind11::init<>());
         interior_point_solver_class.def("__str__", &__cstr__<InteriorPointOptimiser>);
 
-        interior_point_solver_class.def("minimise_hotstarted", (Tuple<XB,VXB,VXB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        interior_point_solver_class.def("feasible_hotstarted", (Tuple<VK,VXB,VXB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        interior_point_solver_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        interior_point_solver_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
 
-        interior_point_solver_class.def("minimise_hotstarted", (Tuple<XA,VXA,VXA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        interior_point_solver_class.def("feasible_hotstarted", (Tuple<AK,VXA,VXA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        interior_point_solver_class.def("minimise_hotstarted", (Tuple<YA,VYA,VYA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        interior_point_solver_class.def("feasible_hotstarted", (Tuple<AK,VYA,VYA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
 
         interior_point_solver_class.def("minimisation_step", (Void(Self::*)(const AOP&, VXA&, VXA&, VXA&, VXA&, XA&)const) &Self::minimisation_step);
         interior_point_solver_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, VXA&, VXA&)const) &Self::feasibility_step);

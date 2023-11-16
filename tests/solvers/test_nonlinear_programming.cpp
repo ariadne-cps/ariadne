@@ -64,44 +64,44 @@ class TestFeasibilityChecker
 
         ARIADNE_TEST_CONSTRUCT( ValidatedFeasibilityProblem, p, (D,g,C) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPVector, x1, ({1,0},pr) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ExactNumber>, x1, ({1.0_x,0.0_x}) );
         ARIADNE_TEST_ASSERT( definitely(feasibility_checker->is_feasible_point(p,x1)) );
-        ARIADNE_TEST_CONSTRUCT( FloatDPVector, x2, ({0.46875_x,0.62500_x},pr) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ExactNumber>, x2, ({0.46875_x,0.62500_x}) );
         ARIADNE_TEST_ASSERT( not possibly(feasibility_checker->is_feasible_point(p,x2)) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPApproximation, e2l, (0.000732421875,pr) );
+        ARIADNE_TEST_CONSTRUCT( ApproximateNumber, e2l, (0.000732421875) );
         ARIADNE_TEST_ASSERT( not probably(feasibility_checker->almost_feasible_point(p,x2,e2l)) );
-        ARIADNE_TEST_CONSTRUCT( FloatDPApproximation, e2u, (0.001220703125,pr) );
+        ARIADNE_TEST_CONSTRUCT( ApproximateNumber, e2u, (0.001220703125) );
         ARIADNE_TEST_ASSERT( probably(feasibility_checker->almost_feasible_point(p,x2,e2u)) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, x3, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},pr) );
-        ARIADNE_TEST_CONSTRUCT( FloatDPVector, y3, (1, {1,pr}) );
-        ARIADNE_TEST_CONSTRUCT( UpperBoxType, X3, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}}) );
-        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,X3)) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ValidatedNumber>, x3, (Vector<FloatDPBounds>({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}},dp)) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ExactNumber>, y3, ({1.0_x}) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, B3, ({{0.296875_x,0.406250_x},{0.593750_x,0.703125_x}}) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,B3)) );
         ARIADNE_TEST_ASSERT( definitely(feasibility_checker->check_feasibility(p,x3,y3)) );
         ARIADNE_TEST_ASSERT( feasibility_checker->validate_feasibility(p,x3) );
         ARIADNE_TEST_ASSERT( feasibility_checker->validate_feasibility(p.g,x3) );
         ARIADNE_TEST_ASSERT( not feasibility_checker->validate_infeasibility(p,y3) );
         ARIADNE_TEST_ASSERT( not feasibility_checker->validate_infeasibility(p,x3,y3) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, x4, ({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}},pr) );
-        ARIADNE_TEST_CONSTRUCT( FloatDPVector, y4, (1, {1,pr}) );
-        ARIADNE_TEST_CONSTRUCT( UpperBoxType, X4, ({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}}) );
-        ARIADNE_TEST_PRINT( feasibility_checker->contains_feasible_point(p,X4) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ValidatedNumber>, x4, (Vector<FloatDPBounds>({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}},dp)) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ExactNumber>, y4, ({1.0_x}) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, B4, ({{0.328125_x,0.406250_x},{0.671875_x,0.703125_x}}) );
+        ARIADNE_TEST_PRINT( feasibility_checker->contains_feasible_point(p,B4) );
         ARIADNE_TEST_PRINT( feasibility_checker->check_feasibility(p,x4,y4) );
-        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,X4)) );
-        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,X4)) );
+        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,B4)) );
+        ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->contains_feasible_point(p,B4)) );
         ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p,x4) );
         ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p.g,x4) );
         ARIADNE_TEST_ASSERT( not definitely(feasibility_checker->check_feasibility(p,x4,y4)) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X5, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}},pr) );
-        ARIADNE_TEST_ASSERT( feasibility_checker->contains_feasible_point(p,UpperBoxType(X5.array())) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, B5, ({{0.296875_x,0.406250_x},{0.656250_x,0.656250_x}}) );
+        ARIADNE_TEST_ASSERT( feasibility_checker->contains_feasible_point(p,B5) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X6, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}},pr) );
-        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,UpperBoxType(X6.array()))) );
+        ARIADNE_TEST_CONSTRUCT( UpperBoxType, B6, ({{0.296875_x,0.406250_x},{0.656250_x,0.687500_x}}) );
+        ARIADNE_TEST_ASSERT( definitely(feasibility_checker->contains_feasible_point(p,B6)) );
 
-        ARIADNE_TEST_CONSTRUCT(FloatDPVector, x7, ({0.343750_x,0.656250_x},pr) );
+        ARIADNE_TEST_CONSTRUCT( Vector<ExactNumber>, x7, ({0.343750_x,0.656250_x}) );
         ARIADNE_TEST_ASSERT( not feasibility_checker->validate_feasibility(p,x7) );
     }
 
@@ -138,7 +138,7 @@ class TestOptimiser
         ExactBoxType C=ExactBoxType{};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
         //ExactDouble required_accuracy=1e-8_pr;
@@ -157,7 +157,7 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         ExactDouble required_accuracy=1e-7_pr;
-        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
     }
@@ -176,7 +176,7 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(C);
 
         ARIADNE_TEST_PRINT(optimiser);
-        FloatDPApproximationVector x_optimal=optimiser->minimise(f,D,g,C);
+        Vector<ApproximateNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_PRINT(x_optimal);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
@@ -197,7 +197,7 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType{{0.0_x,inf},{0.0_x,inf}};
         ARIADNE_TEST_PRINT(C);
 
-        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
         //ExactDouble required_accuracy=1e-6_pr;
@@ -217,7 +217,7 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType {{-1.0_x,-0.5_x},{0.0_x,0.0_x}};
         ARIADNE_TEST_PRINT(C);
 
-        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
+        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,gh,C);
         ExactDouble required_accuracy=1e-8_pr;
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }

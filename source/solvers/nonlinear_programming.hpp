@@ -176,13 +176,10 @@ using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryDa
 //! \ingroup OptimisationSubModule EvaluationModule
 //! Interface for methods to check feasibility of constraint systems.
 class FeasibilityCheckerInterface {
-    using FLT=FloatDP;
   public:
-    typedef Bounds<FLT> ValidatedNumericType;
-    typedef Approximation<FLT> ApproximateNumericType;
-    typedef Vector<FLT> ExactVectorType;
-    typedef Vector<Bounds<FLT>> ValidatedVectorType;
-    typedef Vector<Approximation<FLT>> ApproximateVectorType;
+    typedef Vector<ExactNumber> ExactVectorType;
+    typedef Vector<ValidatedNumber> ValidatedVectorType;
+    typedef Vector<ApproximateNumber> ApproximateVectorType;
   public:
     //! \brief Virtual destructor.
     virtual ~FeasibilityCheckerInterface() = default;
@@ -191,7 +188,7 @@ class FeasibilityCheckerInterface {
 
     //! \brief Tests if the point \a x is almost feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual ApproximateKleenean almost_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ApproximateVectorType x, FloatDPApproximation eps) const = 0;
+                                                      ApproximateVectorType x, ApproximateNumber eps) const = 0;
     //! \brief Tests whether the point \a x is feasible.
     //! \details If there are non-algebraic equality constraints, then it is unlikely to find \f$x\f$ exactly atisfying constraints.
     //! For this reason, this method should only be used if all constraints are inequalities, so the feasible set has nonempty interior.
@@ -280,13 +277,15 @@ class OptimiserInterface {
 class FeasibilityChecker
     : public virtual FeasibilityCheckerInterface
 {
+    template<class FLT> using Exact = FLT;
+    using FLT=FloatDP;
+    static constexpr DP pr=dp;
   public:
     virtual FeasibilityChecker* clone() const override;
 
-
     //! \brief Tests if the point \a x is almost feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual ApproximateKleenean almost_feasible_point(ValidatedFeasibilityProblem p,
-                                                      ApproximateVectorType x, FloatDPApproximation eps) const override;
+                                                      ApproximateVectorType x, ApproximateNumber eps) const override;
     //! \brief Tests whether the point \a x is feasible.
     virtual ValidatedKleenean is_feasible_point(ValidatedFeasibilityProblem p,
                                                 ExactVectorType x) const override;
@@ -326,7 +325,28 @@ class FeasibilityChecker
     virtual Bool validate_infeasibility(ValidatedFeasibilityProblem p) const override;
 
     friend OutputStream& operator<<(OutputStream& os, FeasibilityChecker const& fc);
-  private:
+  private: public:
+    ValidatedKleenean check_feasibility(ValidatedFeasibilityProblem p,
+                                        Vector<Bounds<FLT>> x, Vector<Bounds<FLT>> y) const;
+
+    Bool validate_feasibility(ValidatedFeasibilityProblem p,
+                                      Vector<Bounds<FLT>> x) const;
+    Bool validate_feasibility(ValidatedVectorMultivariateFunction h,
+                                      Vector<Bounds<FLT>> x) const;
+
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        UpperBoxType X, Vector<Bounds<FLT>> y) const;
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        Vector<Approximation<FLT>> xa, Vector<Bounds<FLT>> y) const;
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        Vector<Bounds<FLT>> y) const;
+
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        UpperBoxType X, Vector<Exact<FLT>> y) const;
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        Vector<Approximation<FLT>> xa, Vector<Exact<FLT>> y) const;
+    Bool validate_infeasibility(ValidatedFeasibilityProblem p,
+                                        Vector<Exact<FLT>> y) const;
 };
 
 

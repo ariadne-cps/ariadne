@@ -601,20 +601,25 @@ clone() const
 
 
 ApproximateKleenean FeasibilityChecker::
-almost_feasible_point(ValidatedFeasibilityProblem p, ApproximateVectorType ax, FloatDPApproximation error) const
+almost_feasible_point(ValidatedFeasibilityProblem p, ApproximateVectorType ax, ApproximateNumber e) const
 {
-    if (!probably(contains(p.D,ax))) { return false; }
-    ApproximateVectorType gx=p.g(ax);
-    return contains(cast_exact_widen(p.C,cast_exact(error)),gx);
+    Vector<Approximation<FLT>> axf(ax,pr);
+    Approximation<FLT> ef(e,pr);
+
+    if (!probably(contains(p.D,axf))) { return false; }
+    Vector<Approximation<FLT>> gxf=p.g(axf);
+    return contains(cast_exact_widen(p.C,cast_exact(ef)),gxf);
 }
 
 
 ValidatedKleenean FeasibilityChecker::
 is_feasible_point(ValidatedFeasibilityProblem p, ExactVectorType x) const
 {
-    if (!contains(p.D,x)) { return false; }
-    Vector<FloatDPBounds> gx=p.g(x);
-    return contains(p.C,gx);
+    Vector<Bounds<FLT>> xf(x,pr);
+
+    if (not possibly(contains(p.D,xf))) { return false; }
+    Vector<Bounds<FLT>> gxf=p.g(xf);
+    return contains(p.C,gxf);
 }
 
 ValidatedKleenean FeasibilityChecker::
@@ -632,9 +637,17 @@ contains_feasible_point(ValidatedFeasibilityProblem p, UpperBoxType X) const
     }
 }
 
+
 ValidatedKleenean FeasibilityChecker::
 check_feasibility(ValidatedFeasibilityProblem p,
                   ValidatedVectorType x, ExactVectorType y) const
+{
+    return this->check_feasibility(p, Vector<Bounds<FLT>>(x,dp), Vector<Bounds<FLT>>(y,pr));
+}
+
+ValidatedKleenean FeasibilityChecker::
+check_feasibility(ValidatedFeasibilityProblem p,
+                  Vector<Bounds<FLT>> x, Vector<Bounds<FLT>> y) const
 {
     if (this->validate_feasibility(p,x)) {
         return true;
@@ -648,7 +661,15 @@ check_feasibility(ValidatedFeasibilityProblem p,
 
 Bool FeasibilityChecker::
 validate_feasibility(ValidatedVectorMultivariateFunction h,
-                     ValidatedVectorType X) const
+                     ValidatedVectorType x) const
+{
+    return this->validate_feasibility(h, Vector<Bounds<FLT>>(x,pr));
+}
+
+
+Bool FeasibilityChecker::
+validate_feasibility(ValidatedVectorMultivariateFunction h,
+                     Vector<Bounds<FLT>> X) const
 {
     // Let h:R^n->R^m with m<n, and X define a box in R^n.
     // Attempt to solve h(c+R*B*w)=0 for w, where c=mid(X), R is a diagonal scaling matrix, and B is an n*m matrix.
@@ -657,16 +678,15 @@ validate_feasibility(ValidatedVectorMultivariateFunction h,
     // Then for an interval Newton step, we have [A]*R*B dw = -h(c+B*w)
     // Take A to be an approximation to [A], such as A=mid([A]) or A=Dh(C), and set B=(A*R)^T=R*A^T
     // Then we solve h(c+R*R*AT*w)=0 using Newton's method centred at w=0, yielding W' = -([A]*R*R*A^T)\h(c)
-    //
 
-    Vector<FloatDPApproximation> ca = midpoint(X);
-    Vector<FloatDP> c = cast_exact(ca);
-    Matrix<FloatDP> AT = transpose(cast_exact(h.jacobian(ca)));
+    Vector<Approximation<FLT>> ca = midpoint(X);
+    Vector<FLT> c = cast_exact(ca);
+    Matrix<FLT> AT = transpose(cast_exact(h.jacobian(ca)));
     CONCLOG_PRINTLN("A="<<transpose(AT));
 
 
-    Vector<FloatDPBounds> W=h(X);
-    Matrix<FloatDPBounds> A = h.jacobian(X);
+    Vector<Bounds<FLT>> W=h(X);
+    Matrix<Bounds<FLT>> A = h.jacobian(X);
     DiagonalMatrix<FloatDP> R(Array<FloatDP>(X.size(), [&X](SizeType i){return cast_exact(X[i].error());}));
 
 
@@ -674,8 +694,8 @@ validate_feasibility(ValidatedVectorMultivariateFunction h,
     // Vector<FloatDP> w=cast_exact(W);
     // new_W = w - gs_solve(A*AT,h(x+AT*w));
     // Easier to take w = 0, which should be an element of W
-    Vector<FloatDPBounds> new_W = - gs_solve(A*(R*R*AT),h(c));
-    Vector<FloatDPBounds> new_X = c + (R * R) * (AT * new_W);
+    Vector<Bounds<FLT>> new_W = - gs_solve(A*(R*R*AT),h(c));
+    Vector<Bounds<FLT>> new_X = c + (R * R) * (AT * new_W);
 
     if (refines(new_X,X)) {
         return true;
@@ -690,6 +710,13 @@ validate_feasibility(ValidatedVectorMultivariateFunction h,
 Bool FeasibilityChecker::
 validate_feasibility(ValidatedFeasibilityProblem p,
                      ValidatedVectorType x) const
+{
+    return this->validate_feasibility(p,Vector<Bounds<FLT>>(x,pr));
+}
+
+Bool FeasibilityChecker::
+validate_feasibility(ValidatedFeasibilityProblem p,
+                     Vector<Bounds<FLT>> x) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
@@ -710,7 +737,7 @@ validate_feasibility(ValidatedFeasibilityProblem p,
         }
     }
 
-    FloatDPBoundsVector w=g(x);
+    Vector<Bounds<FLT>> w=g(x);
     CONCLOG_PRINTLN_AT(1,"w=g(x)="<<w);
 
     List<SizeType> equalities;
@@ -743,18 +770,46 @@ validate_feasibility(ValidatedFeasibilityProblem p,
 
 Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p,
-                       UpperBoxType X, ExactVectorType y) const
+                       UpperBoxType B, ExactVectorType y) const
+{
+    return validate_infeasibility(p,B,Vector<Bounds<FLT>>(y,pr));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p,
+                       UpperBoxType B, Vector<Exact<FLT>> y) const
+{
+    return validate_infeasibility(p,B,Vector<Bounds<FLT>>(y));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p,
+                       UpperBoxType B, Vector<Bounds<FLT>> y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
-    ExactBoxType DX = intersection(D,cast_exact_box(X));
-    ApproximateVectorType xa = midpoint(X);
-    return this->validate_infeasibility(ValidatedFeasibilityProblem(DX,g,C),xa,y);
+    ExactBoxType DB = intersection(D,cast_exact_box(B));
+    Vector<Approximation<FLT>> xa = midpoint(B);
+    return this->validate_infeasibility(ValidatedFeasibilityProblem(DB,g,C),xa,y);
 }
 
 
 Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p,
                        ApproximateVectorType xa, ExactVectorType y) const
+{
+    return validate_infeasibility(p, Vector<Approximation<FLT>>(xa,dp), Vector<Bounds<FLT>>(y,pr));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p,
+                       Vector<Approximation<FLT>> xa, Vector<Exact<FLT>> y) const
+{
+    return validate_infeasibility(p, xa, Vector<Bounds<FLT>>(y));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p,
+                       Vector<Approximation<FLT>> xa, Vector<Bounds<FLT>> y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
@@ -784,8 +839,8 @@ validate_infeasibility(ValidatedFeasibilityProblem p,
     UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
     UpperIntervalVectorType ydgD = transpose(dgD)*y;
 
-    ValidatedVectorType x = cast_exact(xa);
-    ValidatedNumericType ygx = tyg(x);
+    Vector<Bounds<FLT>> x = cast_exact(xa);
+    Bounds<FLT> ygx = tyg(x);
     // ValidatedNumericType ygx = dot(y,g(x));
     UpperIntervalType ygDx = UpperIntervalType(ygx);
     for(SizeType i=0; i!=x.size(); ++i) {
@@ -802,6 +857,18 @@ validate_infeasibility(ValidatedFeasibilityProblem p,
 
 Bool FeasibilityChecker::
 validate_infeasibility(ValidatedFeasibilityProblem p, ExactVectorType y) const
+{
+    return this->validate_infeasibility(p,Vector<Bounds<FLT>>(y,pr));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p, Vector<Exact<FLT>> y) const
+{
+    return this->validate_infeasibility(p,Vector<Bounds<FLT>>(y));
+}
+
+Bool FeasibilityChecker::
+validate_infeasibility(ValidatedFeasibilityProblem p, Vector<Bounds<FLT>> y) const
 {
     auto& D=p.D; auto& g=p.g; auto& C=p.C;
 

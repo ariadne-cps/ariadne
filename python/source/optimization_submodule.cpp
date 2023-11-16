@@ -106,14 +106,13 @@ Void export_optimisation_problems(pybind11::module& module)
 
 Void export_feasibility_checker_interface(pybind11::module& module)
 {
-    typedef OptimiserInterface::ApproximateNumericType ApproximateNumericType;
-    typedef OptimiserInterface::ApproximateVectorType ApproximateVectorType;
-    typedef OptimiserInterface::ValidatedVectorType ValidatedVectorType;
-    typedef OptimiserInterface::ExactVectorType ExactVectorType;
+    typedef FeasibilityCheckerInterface::ApproximateVectorType ApproximateVectorType;
+    typedef FeasibilityCheckerInterface::ValidatedVectorType ValidatedVectorType;
+    typedef FeasibilityCheckerInterface::ExactVectorType ExactVectorType;
 
     pybind11::class_<FeasibilityCheckerInterface> feasibility_checker_interface_class(module,"FeasibilityCheckerInterface");
 
-    feasibility_checker_interface_class.def("almost_feasible_point", (ApproximateKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumericType)const) &FeasibilityCheckerInterface::almost_feasible_point);
+    feasibility_checker_interface_class.def("almost_feasible_point", (ApproximateKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ApproximateVectorType, ApproximateNumber)const) &FeasibilityCheckerInterface::almost_feasible_point);
     feasibility_checker_interface_class.def("is_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ExactVectorType)const) &FeasibilityCheckerInterface::is_feasible_point);
     feasibility_checker_interface_class.def("contains_feasible_point", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, BoxRangeType)const) &FeasibilityCheckerInterface::contains_feasible_point);
     feasibility_checker_interface_class.def("check_feasibility", (ValidatedKleenean(FeasibilityCheckerInterface::*)(ValidatedFeasibilityProblem, ValidatedVectorType, ExactVectorType)const) &FeasibilityCheckerInterface::check_feasibility);

@@ -114,59 +114,61 @@ using ValidatedOptimisationProblem = OptimisationProblem<ValidatedTag>; //!< <p/
 
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X.
 template<class X> struct PrimalData {
-    X x;
+    Vector<X> x;
     //! \brief .
-    PrimalData(X x_) : x(x_) { }
+    PrimalData(Vector<X> x_) : x(x_) { }
     //! \brief .
-    X const& primal() const { return this->x; }
+    Vector<X> const& primal() const { return this->x; }
     //! \brief Convert to the primal variables.
-    operator X () const { return this->x; }
+    operator Vector<X> () const { return this->x; }
 };
+using ApproximatePrimalData = PrimalData<FloatDPApproximation>;
+using ValidatedPrimalData = PrimalData<FloatDPBounds>;
 
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X and dual variables of type \a Y.
-template<class X, class Y> struct PrimalDualData : public PrimalData<X> {
-    Y y;
+template<class X> struct PrimalDualData : public PrimalData<X> {
+    Vector<X> y;
     //! \brief .
-    PrimalDualData(X x_, Y y_) : PrimalData<X>(x_), y(y_) { }
+    PrimalDualData(Vector<X> x_, Vector<X> y_) : PrimalData<X>(x_), y(y_) { }
     //! \brief .
-    Y const& dual() const { return this->y; }
+    Vector<X> const& dual() const { return this->y; }
 };
-using ApproximatePrimalDualData = PrimalDualData<Vector<FloatDPApproximation>,Vector<FloatDPApproximation>>;
-using ValidatedPrimalDualData = PrimalDualData<Vector<FloatDPBounds>,Vector<FloatDPBounds>>;
+using ApproximatePrimalDualData = PrimalDualData<FloatDPApproximation>;
+using ValidatedPrimalDualData = PrimalDualData<FloatDPBounds>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a X, dual variables of type \a Y, and complementary variables of type \a Z.
-template<class X, class Y, class Z=X> struct PrimalDualComplementaryData : public PrimalDualData<X,Y> {
-    Z z;
+//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X>, dual variables of type \a Vector<X>, and complementary variables of type \a Vector<X>.
+template<class X> struct PrimalDualComplementaryData : public PrimalDualData<X> {
+    Vector<X> z;
     //! \brief .
-    PrimalDualComplementaryData(X x_, Y y_, Z z_) : PrimalDualData<X,Y>(x_,y_), z(z_) { }
+    PrimalDualComplementaryData(Vector<X> x_, Vector<X> y_, Vector<X> z_) : PrimalDualData<X>(x_,y_), z(z_) { }
     //! \brief .
-    Z const& complementary() const { return this->z; }
+    Vector<X> const& complementary() const { return this->z; }
 };
-using ApproximatePrimalDualComplementaryData = PrimalDualComplementaryData<Vector<FloatDPApproximation>,Vector<FloatDPApproximation>>;
-using ValidatedPrimalDualComplementaryData = PrimalDualComplementaryData<Vector<FloatDPBounds>,Vector<FloatDPBounds>>;
+using ApproximatePrimalDualComplementaryData = PrimalDualComplementaryData<FloatDPApproximation>;
+using ValidatedPrimalDualComplementaryData = PrimalDualComplementaryData<FloatDPBounds>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a X and slack variables of type \a W.
-template<class X, class W=X> struct SlackPrimalData : public PrimalData<X> {
-    W w;
+//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> and slack variables of type \a Vector<X>.
+template<class X> struct SlackPrimalData : public PrimalData<X> {
+    Vector<X> w;
     //! \brief .
-    SlackPrimalData(W w_, X x_) : PrimalData<X>(x_), w(w_) { }
+    SlackPrimalData(Vector<X> w_, Vector<X> x_) : PrimalData<X>(x_), w(w_) { }
     //! \brief .
-    W const& slack() const { return this->w; }
+    Vector<X> const& slack() const { return this->w; }
 };
-using ApproximateSlackPrimalData = SlackPrimalData<Vector<FloatDPApproximation>,Vector<FloatDPApproximation>>;
-using ValidatedSlackPrimalData = SlackPrimalData<Vector<FloatDPBounds>,Vector<FloatDPBounds>>;
+using ApproximateSlackPrimalData = SlackPrimalData<FloatDPApproximation>;
+using ValidatedSlackPrimalData = SlackPrimalData<FloatDPBounds>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a X dual variables of type \a Y, slack variables of type \a W and complementary variables of type \a Z.
-template<class W, class X=W, class Y=W, class Z=X> struct SlackPrimalDualComplementaryData : public PrimalDualComplementaryData<X,Y,Z> {
+//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> dual variables of type \a Vector<X>, slack variables of type \a Vector<X> and complementary variables of type \a Vector<X>.
+template<class X> struct SlackPrimalDualComplementaryData : public PrimalDualComplementaryData<X> {
     //! \brief The slack variables.
-    W w;
+    Vector<X> w;
     //! \brief .
-    SlackPrimalDualComplementaryData(W w_, X x_, Y y_, Z z_) : PrimalDualComplementaryData<X,Y,Z>(x_,y_,z_), w(w_) { }
+    SlackPrimalDualComplementaryData(Vector<X> w_, Vector<X> x_, Vector<X> y_, Vector<X> z_) : PrimalDualComplementaryData<X>(x_,y_,z_), w(w_) { }
     //! \brief .
-    W const& slack() const { return this->w; }
+    Vector<X> const& slack() const { return this->w; }
 };
-using ApproximateSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Vector<FloatDPApproximation>,Vector<FloatDPApproximation>>;
-using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Vector<FloatDPBounds>,Vector<FloatDPBounds>>;
+using ApproximateSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<FloatDPApproximation>;
+using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<FloatDPBounds>;
 
 //!@}
 

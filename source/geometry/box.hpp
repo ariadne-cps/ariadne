@@ -76,18 +76,22 @@ class Box
     typedef L LowerBoundType;
     //! The type used for the upper bound of a component interval.
     typedef U UpperBoundType;
+    //! The type used for the centre of a component interval.
+    typedef C CentreValueType;
     //! The type used for the midpoint of a component interval.
-    typedef M CentreValueType;
-    //! The type used for the midpoint of a component interval.
-    typedef C MidpointValueType;
+    //! Must be convertible to both the lower and upper bound types.
+    typedef M MidpointValueType;
     //! A type which can be used for the both the lower and upper bound of a component interval.
     typedef V VertexBoundType;
     //! A type which can be used for the radius or length of a side.
     typedef R RadiusType;
+    //! A type which can be used for the measure (area, volume) of the box.
+    typedef R MeasureType;
   public:
     //! A type which can be used for the vertices of the box.
     typedef Point<V> VertexType;
     //! A type which can be used for the midpoint of the box.
+
     typedef Point<M> MidpointType;
     //! A type which can be used for the exact centre of the box.
     typedef Point<C> CentreType;
@@ -147,10 +151,6 @@ class Box
 
     const Box<IntervalType> operator[](Range is) const;
 
-    //! The (mid)point of the box.
-    MidpointType midpoint() const;
-    //! The exact centre of the box.
-    CentreType centre() const;
     //! The lower corner of the box.
     VertexType lower_bounds() const;
     //! The upper corner of the box.
@@ -186,17 +186,22 @@ class Box
     template<class II> auto inside(const Box<II>& bx) const -> decltype(Ariadne::inside(declval<I>(),declval<II>()));
     template<class II> auto separated(const Box<II>& bx) const -> decltype(Ariadne::separated(declval<I>(),declval<II>()));
 
-    //! The area or volume of the box.
-    RadiusType measure() const;
-    RadiusType volume() const;
-    //! The widths of the sides.
-    Vector<RadiusType> widths() const;
-    //! The radii of the sides.
-    Vector<RadiusType> radii() const;
-    //! The sum of the lengths of the sides.
-    RadiusType semiperimeter() const;
+
+    //! The exact centre of the box.
+    CentreType centre() const;
+    //! The (mid)point of the box.
+    MidpointType midpoint() const;
     //! Half the length of the longest side.
     RadiusType radius() const;
+    //! The radii of the sides.
+    Vector<RadiusType> radii() const;
+    //! The widths of the sides.
+    Vector<RadiusType> widths() const;
+    //! The sum of the lengths of the sides.
+    RadiusType semiperimeter() const;
+    //! The measure (area or volume) of the box.
+    MeasureType measure() const;
+    MeasureType volume() const;
 
     Void draw(CanvasInterface& c, const Projection2d& p) const;
   public:
@@ -221,7 +226,10 @@ template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : _vec(lst) 
 template<class I> decltype(declval<Box<I>>().is_empty()) is_empty(const Box<I>& bx) { return bx.is_empty(); }
 template<class I> decltype(declval<Box<I>>().is_bounded()) is_bounded(const Box<I>& bx) { return bx.is_bounded(); }
 
+template<class I> decltype(declval<Box<I>>().centre()) centre(const Box<I>& bx) { return bx.centre(); }
+template<class I> decltype(declval<Box<I>>().midpoint()) midpoint(const Box<I>& bx) { return bx.midpoint(); }
 template<class I> decltype(declval<Box<I>>().radius()) radius(const Box<I>& bx) { return bx.radius(); }
+template<class I> decltype(declval<Box<I>>().radii()) radii(const Box<I>& bx) { return bx.radii(); }
 template<class I> decltype(declval<Box<I>>().widths()) widths(const Box<I>& bx) { return bx.widths(); }
 template<class I> decltype(declval<Box<I>>().measure()) measure(const Box<I>& bx) { return bx.measure(); }
 template<class I> decltype(declval<Box<I>>().volume()) volume(const Box<I>& bx) { return bx.volume(); }
@@ -260,10 +268,6 @@ UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction c
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
 template<class I> inline Box<I> project(const Box<I> & bx, Range const& rng) { return Box<I>::_project(bx,rng); }
-
-template<class I> auto midpoint(const Box<I>& bx) -> typename Box<I>::MidpointType {
-    return bx.midpoint();
-}
 
 template<class I> auto lower_bounds(const Box<I>& bx) -> typename Box<I>::VertexType {
     return bx.lower_bounds();

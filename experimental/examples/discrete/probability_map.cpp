@@ -70,6 +70,7 @@ void ariadne_main()
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.05;
     SizeType point_accuracy = 7;
+    bool use_preimage = false;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,pi/4}});
     List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4}});
@@ -137,13 +138,13 @@ void ariadne_main()
 
         if (not final_paving.is_empty()) {
 
-            GridTreePaving paving = intersection(state_paving,final_paving);
-
             double total_volume = 0;
-            for (auto const& cell : paving) {
+            for (auto const& cell : final_paving) {
                 auto icell = identified_cell_factory.create(cell);
                 auto starting_box = intersection(cell.box(),final_box);
-                auto current_volume = starting_box.volume().get_d();
+                auto used_box = (use_preimage ? apply(backward_dynamics, product(starting_box, sc_boxes.second)).bounding_box() : starting_box);
+
+                auto current_volume = used_box.volume().get_d();
                 interval_probabilities.insert(icell.id(),current_volume);
                 total_volume += current_volume;
             }

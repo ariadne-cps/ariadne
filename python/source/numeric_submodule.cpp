@@ -113,7 +113,10 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<FloatMP>&
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& repr) {
     return os << "Integer("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr) {
-    return os << "Dyadic(\""<<Decimal(repr.reference())<<"\")"; }
+    const Dyadic& w=repr.reference();
+    if (is_finite(w)) { return os << "Dyadic(\""<<Decimal(w)<<"\")"; }
+    else if (is_nan(w)) { return os << "Dyadic.nan()"; }
+    else { if (w<0) { os << '-'; } return os << "Dyadic.inf()"; } }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& repr) {
     return os << "Decimal(\""<<repr.reference()<<"\")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {

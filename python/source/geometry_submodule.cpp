@@ -568,6 +568,7 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
 
     interval_class.def("lower_bound", &IntervalType::lower_bound);
     interval_class.def("upper_bound", &IntervalType::upper_bound);
+    interval_class.def("centre", &IntervalType::centre  );
     interval_class.def("midpoint", &IntervalType::midpoint);
     interval_class.def("radius", &IntervalType::radius);
     interval_class.def("width", &IntervalType::width);
@@ -585,8 +586,7 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
         }
     }
 
-
-
+    module.def("centre", &IntervalType::centre);
     module.def("midpoint", &IntervalType::midpoint);
     module.def("radius", &IntervalType::radius);
     module.def("width", &IntervalType::width);
@@ -700,7 +700,12 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
     box_class.def("__getitem__", &__getitem__<BX,Int>);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
+    box_class.def("midpoint", (typename BX::MidpointType(BX::*)()const) &BX::midpoint);
     box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
+    box_class.def("radii", (Vector<typename BX::RadiusType>(BX::*)()const) &BX::radii);
+    box_class.def("widths", (Vector<typename BX::RadiusType>(BX::*)()const) &BX::widths);
+    box_class.def("measure", (typename BX::MeasureType(BX::*)()const) &BX::measure);
+    box_class.def("volume", (typename BX::MeasureType(BX::*)()const) &BX::volume);
     box_class.def("separated", (SeparatedType(BX::*)(const BX&)const) &BX::separated);
     box_class.def("overlaps", (OverlapType(BX::*)(const BX&)const) &BX::overlaps);
     box_class.def("covers", (CoversType(BX::*)(const BX&)const) &BX::covers);
@@ -710,6 +715,14 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType)const) &BX::split);
     box_class.def("__str__",&__cstr__<BX>);
     box_class.def("__repr__",&__repr__<BX>);
+
+    module.def("centre", (typename BX::CentreType(*)(BX const&)) &centre);
+    module.def("midpoint", (typename BX::MidpointType(*)(BX const&)) &midpoint);
+    module.def("radius", (typename BX::RadiusType(*)(BX const&)) &radius);
+    module.def("radii", (Vector<typename BX::RadiusType>(*)(BX const&)) &radii);
+    module.def("widths", (Vector<typename BX::RadiusType>(*)(BX const&)) &widths);
+    module.def("measure", (typename BX::MeasureType(*)(BX const&)) &measure);
+    module.def("volume", (typename BX::MeasureType(*)(BX const&)) &volume);
 
     box_class.def("contains", (ContainsType(BX::*)(MidpointType const&)const) &BX::contains);
     module.def("contains", (ContainsType(*)(BX const&,MidpointType const&)) &contains);
@@ -722,7 +735,6 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     }
 
     module.def("disjoint", (DisjointType(*)(BX const&,BX const&)) &disjoint);
-
     if constexpr (Same<typename IVL::UpperBoundType, typename IVL::LowerBoundType>) {
         module.def("subset", (SubsetType(*)(const BX&,const BX&)) &subset);
     } else {
@@ -809,6 +821,9 @@ Void export_boxes(pybind11::module& module) {
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperBox const&, ValidatedVectorMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperBox const&, ValidatedScalarMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperInterval const&, ValidatedVectorUnivariateFunction const&)) &_image_);
+
+    module.def("cast_singleton", (Vector<FloatDPBounds>(*)(Box<Interval<FloatDPUpperBound>> const&)) &cast_singleton);
+    module.def("cast_singleton", (Vector<FloatMPBounds>(*)(Box<Interval<FloatMPUpperBound>> const&)) &cast_singleton);
 
     template_<Box> box_template(module);
     // TODO: Change templates so that

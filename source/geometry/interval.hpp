@@ -191,11 +191,12 @@ template<class U> class Interval
     typedef L LowerBoundType;
     //! \brief The type of the upper bound of the interval.
     typedef U UpperBoundType;
-    //! \brief The type returned by the midpoint() method. The midpoint need not be the exact mid-point
-    //! of the interval, but must be convertible to both the upper and lower bound types.
+    //! \brief The type returned by the centre() method.
+    //! The result must contain the exact centre (mid-point) of the interval.
     typedef C CentreType;
-    //! \brief The type returned by the midpoint() method. The midpoint need not be the exact mid-point
-    //! of the interval, but must be convertible to both the upper and lower bound types.
+    //! \brief The type returned by the midpoint() method.
+    //! The result need not be the exact centre (mid-point) of the interval,
+    //! but must be convertible to both the upper and lower bound types.
     typedef M MidpointType;
     //! \brief The type returned by the radius() methods.
     typedef R RadiusType;
@@ -283,10 +284,10 @@ template<class U> class Interval
     LowerBoundType const& lower_bound() const;
     //! \brief The upper bound of the interval.
     UpperBoundType const& upper_bound() const;
-    //! \brief The midpoint of the interval. Need not be the exact midpoint. \sa radius()
-    MidpointType midpoint() const;
     //! \brief The centre of the interval, computed with whatever rounding is appropriate.
     CentreType centre() const;
+    //! \brief The midpoint of the interval. Need not be the exact midpoint. \sa radius()
+    MidpointType midpoint() const;
     //! \brief The radius of the interval. In validated computation, must be an upper bound for the both \c u-m and \c m-l, where \c m is the midpoint. \sa midpoint()
     RadiusType radius() const;
     //! \brief The width of the interval.

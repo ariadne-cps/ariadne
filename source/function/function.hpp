@@ -477,6 +477,8 @@ EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFuncti
 EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2);
 EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2);
 
+EffectiveVectorMultivariateFunction derivatives(const EffectiveScalarMultivariateFunction& f);
+
 EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 

@@ -370,7 +370,7 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
         function_class.def("derivative", (F(*)(const F&)) &derivative);
         module.def("derivative", (F(F::*)(IndexZero)const) &F::derivative);
         module.def("derivative", (F(*)(const F&)) &derivative);
-    } else {
+    } else if constexpr (Same<ARG,RealVector>) {
         function_class.def("derivative", (F(F::*)(SizeType)const) &F::derivative);
         module.def("derivative", (F(F::*)(SizeType)const) &F::derivative);
     }
@@ -469,6 +469,7 @@ template<class SIG> Void export_functions(pybind11::module& module)
     pybind11::implicitly_convertible<Function<ValidatedTag,SIG>,Function<ApproximateTag,SIG>>();
 
     if constexpr (Same<SIG,RealScalar(RealVector)>) {
+        module.def("derivatives", (VectorMultivariateFunction<EffectiveTag>(*)(const ScalarMultivariateFunction<EffectiveTag>&)) &derivatives);
         module.def("lie_derivative", (ScalarMultivariateFunction<EffectiveTag>(*)(const ScalarMultivariateFunction<EffectiveTag>&,const VectorMultivariateFunction<EffectiveTag>&)) &lie_derivative);
     }
 }

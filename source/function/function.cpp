@@ -647,6 +647,10 @@ EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFun
     return make_composed_function(f,g);
 }
 
+EffectiveVectorMultivariateFunction derivatives(const EffectiveScalarMultivariateFunction& f) {
+    return VectorOfScalarFunction(Vector<EffectiveScalarMultivariateFunction>(f.argument_size(),[&f](SizeType i){return f.derivative(i);}));
+}
+
 EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f) {
     ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g);
     ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g);

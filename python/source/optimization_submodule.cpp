@@ -79,14 +79,14 @@ template<class P> Void export_optimisation_problem(pybind11::module& module)
     pybind11::class_<FeasibilityProblem<P>> feasibility_problem_class(module,(class_name<P>()+"FeasibilityProblem").c_str());
     feasibility_problem_class.def(pybind11::init<BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
     feasibility_problem_class.def("__str__",__cstr__<FeasibilityProblem<P>>);
-    feasibility_problem_class.attr("D");
-    feasibility_problem_class.attr("g");
-    feasibility_problem_class.attr("C");
+    feasibility_problem_class.def_readwrite("D", &FeasibilityProblem<P>::D);
+    feasibility_problem_class.def_readwrite("g", &FeasibilityProblem<P>::g);
+    feasibility_problem_class.def_readwrite("C", &FeasibilityProblem<P>::C);
 
     pybind11::class_<OptimisationProblem<P>,pybind11::bases<FeasibilityProblem<P>>> optimisation_problem_class(module,(class_name<P>()+"OptimisationProblem").c_str());
     optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
     optimisation_problem_class.def("__str__",__cstr__<OptimisationProblem<P>>);
-    optimisation_problem_class.attr("D");
+    optimisation_problem_class.def_readwrite("f", &OptimisationProblem<P>::f);
 
     if constexpr (Same<P,ApproximateTag>) {
         feasibility_problem_class.def(pybind11::init<FeasibilityProblem<ValidatedTag>>());

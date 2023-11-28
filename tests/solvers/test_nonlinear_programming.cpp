@@ -143,6 +143,7 @@ class TestApproximateOptimiser
     }
 };
 
+
 class TestValidatedOptimiser
 {
   private:
@@ -284,17 +285,23 @@ Int main(Int argc, const char* argv[]) {
     FeasibilityChecker fc;
     TestFeasibilityChecker(fc).test();
 
-    InteriorPointOptimiser ipto;
-    ARIADNE_TEST_CLASS("InteriorPointOptimiser",TestApproximateOptimiser(ipto));
+    PrimalDualInteriorPointOptimiser pd_ipto;
+    ARIADNE_TEST_CLASS("PrimalDualInteriorPointOptimiser",TestApproximateOptimiser(pd_ipto));
 
-    InfeasibleInteriorPointOptimiser iipto;
-    ARIADNE_TEST_CLASS("InfeasibleInteriorPointOptimiser",TestApproximateOptimiser(iipto));
+    PrimalDualComplementaryInteriorPointOptimiser pdc_ipto;
+    ARIADNE_TEST_CLASS("PrimalDualComplementaryInteriorPointOptimiser",TestApproximateOptimiser(pdc_ipto));
+
+    SlackPrimalDualComplementaryInteriorPointOptimiser spdc_ipto;
+    ARIADNE_TEST_CLASS("SlackPrimalDualComplementaryInteriorPointOptimiser",TestApproximateOptimiser(spdc_ipto));
+
+    SlackPrimalSplitDualComplementaryInteriorPointOptimiser spsdc_ipto;
+    ARIADNE_TEST_CLASS("SlackPrimalSplitDualComplementaryInteriorPointOptimiser",TestApproximateOptimiser(spsdc_ipto));
 
     KarushKuhnTuckerOptimiser kkto;
-    ARIADNE_TEST_CLASS("InteriorPointOptimiser",TestValidatedOptimiser(kkto));
+    ARIADNE_TEST_CLASS("KarushKuhnTuckerOptimiser",TestValidatedOptimiser(kkto));
 
     InfeasibleKarushKuhnTuckerOptimiser ikkto;
-    ARIADNE_TEST_CLASS("InfeasibleInteriorPointOptimiser",TestValidatedOptimiser(ikkto));
+    ARIADNE_TEST_CLASS("InfeasibleKarushKuhnTuckerOptimiser",TestValidatedOptimiser(ikkto));
 /*
     ApproximateOptimiser appo;
     ARIADNE_TEST_CLASS("ApproximateOptimiser",TestOptimiser(appo));

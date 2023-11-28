@@ -152,7 +152,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     for(SizeType k=0; k!=n; ++k) { complementary[k]=1.0/n; }
 
 
-    InteriorPointOptimiser optimiser;
+    InfeasibleInteriorPointOptimiser optimiser;
     t=optimiser.compute_t(p,x);
 
     CONCLOG_PRINTLN_AT(1,"D="<<D<<", g="<<g<<", C="<<C);

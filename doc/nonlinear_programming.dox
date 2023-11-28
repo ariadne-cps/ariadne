@@ -153,7 +153,7 @@ Introducing Lagrange multipliers \f$y_j = (g_j(x)-w_j)/\nu\f$ gives
 Setting \f$z_i=\mu \bigl( 1/(\ovl{d}_i-x_i) - 1/(x_i-\unl{d}_i) \bigr)\f$ and taking \f$\nu=0\f$ yields the <em>central path conditions</em>
 \f[ \boxed{ \displaystyle \begin{gathered}   g_j(x)-w_j = 0 ; \\ \nabla_{\!i\,}f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) + z_i = 0; \\ \mu \Bigl( \frac{1}{\ovl{c}_j-w_j} - \frac{1}{w_j-\unl{c}_j} \Bigr) -  y_j = 0 ; \\ \mu \Bigl( \frac{1}{\ovl{d}_i-x_i} - \frac{1}{x_i-\unl{d}_i} \Bigr) - z_i = 0; \\ \unl{c}_j < w_j < \ovl{c}_j; \\ \unl{d}_i < x_i < \ovl{d}_i. \end{gathered} } \f]
 Equivalently
-\f[ \boxed{ \displaystyle \begin{gathered}  g_j(x)-w_j = 0; \\  \nabla_{\!i\,}f(x) - \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) - z_i = 0; \\ (w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j -  \mu (2w_j - \unl{c}_j - \ovl{c}_j) = 0; \\ (x_i-\unl{d}_i)(\ovl{d}_i-x_i)z_i - \mu (2x_i - \unl{d}_i - \ovl{d}_i) = 0; \\ \unl{c}_j \leq w_j \leq \ovl{c}_j; \\ \unl{d}_i < x_i < \ovl{d}_i .  \end{gathered} } \f]
+\f[ \boxed{ \displaystyle \begin{gathered}  g_j(x)-w_j = 0; \\  \nabla_{\!i\,}f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) + z_i = 0; \\ (w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j -  \mu (2w_j - \unl{c}_j - \ovl{c}_j) = 0; \\ (x_i-\unl{d}_i)(\ovl{d}_i-x_i)z_i - \mu (2x_i - \unl{d}_i - \ovl{d}_i) = 0; \\ \unl{c}_j \leq w_j \leq \ovl{c}_j; \\ \unl{d}_i < x_i < \ovl{d}_i .  \end{gathered} } \f]
 
 If \f$ \unl{c}_j < \ovl{c}_j \f$, then we must have \f$\unl{c}_j < w_j < \ovl{c}_j\f$, since if \f$w_j\in\{\unl{c}_j,\ovl{c}_j\}\f$ we have \f$(w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j=0\f$ but \f$\mu (\unl{c}_j + \ovl{c}_j - 2w_j)=\pm\mu(\ovl{c}_j-\unl{c}_j)\neq0\f$, a contradiction.
 
@@ -226,7 +226,7 @@ The Lagrangian function for feasibility is defined as
 \f[ \boxed{ \displaystyle L(w,x,y,\mu) = f(x) + \mu \sum_{j=1}^{m} \bigl( \log(w_j-\unl{c}_j)+\log(\ovl{c}_j-w_j) \bigr) + \mu \sum_{i=1}^{n} \bigl( \log(x_i-\unl{d}_i)+\log(\ovl{d}_i-x_i) \bigr) + \sum_{j=1}^{m} y_j(g_j(x)-w_j) } \f]
 
 An alternative approach is to maximise the minimal slack among \f$g_j(x)-\unl{c}_j\f$ and \f$\ovl{c}_j-g_j(x)\f$.
-We introduce a new variable \f$t\f$, change constraints to \f$g_j(x)-t-\unl{c}_j\geq0\f$ and \f$\ovl{c}_j-t-g_j(x)\geq 0\f$, and consider the objective function \f$t\f$.
+We introduce a new variable \f$t\f$, change constraints to \f$g_j(x)-t-\unl{c}_j\geq0\f$ and \f$\ovl{c}_j-t-g_j(x)\geq 0\f$, and consider minimising the objective function \f$-t\f$.
 
 
 
@@ -370,10 +370,37 @@ We can also split the dual variables \f$y_j=\ovl{y}_j-\unl{y}_j\f$ and \f$z_i=\o
 \f[ \begin{gathered} (w_j-\unl{c}_j)\unl{y}_j = \mu, \quad (\ovl{c}_j-w_j)\ovl{y}_j = \mu, \\ (x_i-\unl{d}_i)\unl{z}_i = \mu, \quad (\ovl{d}_i-x_i)\ovl{z}_i = \mu. \end{gathered} \f]
 We can solve for \f$\Delta{x}_i\f$ and \f$\Delta{w}_j\f$ as previously, and then use the updates
 \f[ \begin{gathered}
-\unl{y}_j \Delta{w_j} + (w_j-\unl{c}_j)\Delta{\unl{y}_j} = -((w_j-\unl{c}_j)\unl{y}_j - \mu), \quad -\ovl{y}_j \Delta{w_j} + (\ovl{c}_j-w_j)\Delta{\ovl{y}_j} = -(\ovl{c}_j-w_j)\ovl{y}_j - \mu); \\
-\unl{z}_i \Delta{x_i} + (x_i-\unl{d}_i)\Delta{\unl{z}_i} = -((x_i-\unl{d}_i)\unl{z}_i - \mu), \quad -\ovl{z}_i \Delta{x_i} + (\ovl{d}_i-x_i)\Delta{\ovl{z}_i} = -(\ovl{d}_i-x_i)\ovl{z}_i - \mu).
+\unl{y}_j \Delta{w_j} + (w_j-\unl{c}_j)\Delta{\unl{y}_j} = -((w_j-\unl{c}_j)\unl{y}_j - \mu), \quad -\ovl{y}_j \Delta{w_j} + (\ovl{c}_j-w_j)\Delta{\ovl{y}_j} = -((\ovl{c}_j-w_j)\ovl{y}_j - \mu); \\
+\unl{z}_i \Delta{x_i} + (x_i-\unl{d}_i)\Delta{\unl{z}_i} = -((x_i-\unl{d}_i)\unl{z}_i - \mu), \quad -\ovl{z}_i \Delta{x_i} + (\ovl{d}_i-x_i)\Delta{\ovl{z}_i} = -((\ovl{d}_i-x_i)\ovl{z}_i - \mu).
 \end{gathered} \f]
+We can combine \f$\Delta{\ovl{y}_j}\f$ and \f$\Delta{\unl{y}_j}\f$ to obtain
+\f[ -((\ovl{c}_j-w_j) \unl{y}_j + (w_j-\unl{c}_j)\ovl{y}_j) \Delta{w_j} + (\ovl{c}_j-w_j)(w_j-\unl{c}_j)\Delta{y_j} = -\bigl( (\ovl{c}_j-w_j)(w_j-\unl{c}_j)y_j - \mu(2w_j-\unl{c}_j-\ovl{c}_j) \bigr) , \f]
+and similarly
+\f[ -((\ovl{d}_i-x_i) \unl{z}_i + (x_i-\unl{d}_i)\ovl{z}_i) \Delta{x_i} + (\ovl{d}_i-x_i)(x_i-\unl{d}_i)\Delta{z_i} = -\bigl( (\ovl{d}_i-x_i)(x_i-\unl{d}_i)z_i - \mu(2w_i-\unl{d}_i-\ovl{d}_i) \bigr) . \f]
 
+
+\subsection hotstarting_interior_point Hotstarting interior point methods
+
+Given primal variables \f$x\in D^\circ\f$ and dual variables \f$y\f$, we can hotstart an interor-point method.
+This may also require computing suitable values for \f$w\f$, \f$\unl{y},\ovl{y}\f$ and \f$z,\unl{z},\ovl{z}\f$
+
+The \f$z\f$-variables can be simply computed from \f$x\f$ using the defining equations:
+\f[ \begin{aligned} \unl{z} &= \mu/(x-\unl{d}); \\ \ovl{z} &= \mu/(\ovl{d}-x); \\ z &= \ovl{z}-\unl{z} . \end{aligned} \f]
+
+The variables \f$w,\unl{y},\ovl{y}\f$ can be estimated from \f$y\f$ by using the following equations:
+\f[ (w-\unl{c})\unl{y} = \mu; \quad  (\ovl{c}-w)\ovl{y}=\mu; \quad \ovl{y}-\unl{y} = y . \f]
+Take \f$m=(\unl{c}+\ovl{c})/2\f$, \f$r=(\ovl{c}-\unl{c})/2\f$ and \f$u=w-m\f$, so
+\f[ (u+r)\unl{y} = \mu; \quad  (r-u)\ovl{y}=\mu . \f]
+Then
+\f[ \mu(1/(r-u)-1/(r+u)) = y  \f]
+so
+\f[ y u^2 + 2u\mu - y r^2 = 0 . \f]
+This has solution
+\f[ u = \frac{\sqrt{4\mu^2+4y^2r^2}-2\mu}{2y} = \sqrt{(\mu/y)^2+r^2}-\mu/y = \frac{\mu}{y} \bigl(\sqrt{1+(ry/\mu)^2}_1\bigr)  \f]
+with \f$u=0\f$ if \f$y=0\f$, so
+\f[ \boxed{w = \frac{\unl{c}+\ovl{c}}{2} + \frac{\mu}{y} \Bigl( \sqrt{1+\bigl((\ovl{c}-\unl{c})y/2\mu\bigr)^2}-1\Bigr); \quad w=\frac{\unl{c}+\ovl{c}}{2} \text{ if } y=0 .} \f]
+
+For this solution to make sense, we need \f$|u|<r\f$, This condition is always satisfied.
 
 \section nonlinear_optimisation_interval_methods Interval Methods for Nonlinear Programming
 

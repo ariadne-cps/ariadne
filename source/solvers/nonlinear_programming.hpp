@@ -76,6 +76,9 @@ template<class P> struct FeasibilityProblem {
     //! <p/>
     template<class PP> requires Convertible<PP,P> FeasibilityProblem(const FeasibilityProblem<PP>& p)
         : FeasibilityProblem(p.D,p.g,p.C) { }
+
+    SizeType number_of_variables() const { return this->g.argument_size(); }
+    SizeType number_of_constraints() const { return this->g.result_size(); }
 };
 template<class P> OutputStream& operator<<(OutputStream& os, FeasibilityProblem<P> const& p);
 
@@ -114,7 +117,7 @@ using ValidatedOptimisationProblem = OptimisationProblem<ValidatedTag>; //!< <p/
 //! \name Data structures storing primal, dual, complementary and/or slack variables.
 //!@{
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a X.
+//! \brief Data for the solution of an optimization problem, with primal variables \a x of type \a X.
 template<class X> struct PrimalData {
     Vector<X> x;
     //! \brief <p/>
@@ -127,29 +130,53 @@ template<class X> struct PrimalData {
 using ApproximatePrimalData = PrimalData<Approximation<FloatDP>>;
 using ValidatedPrimalData = PrimalData<Bounds<FloatDP>>;
 
+
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X and dual variables of type \a Y.
 template<class X> struct PrimalDualData : public PrimalData<X> {
     Vector<X> y;
+    PrimalDualData(SizeType m, SizeType n, PrecisionType<X> pr)
+        : PrimalDualData(Vector<X>(n,pr),Vector<X>(m,pr)) { }
+    PrimalDualData(SizeType m, SizeType n, Vector<X> r)
+        : PrimalDualData(r[range(0,n)],r[range(n,m+n)]) { ARIADNE_DEBUG_PRECONDITION(r.size()==m+n); }
     //! \brief <p/>
     PrimalDualData(Vector<X> x_, Vector<X> y_) : PrimalData<X>(x_), y(y_) { }
     //! \brief <p/>
     Vector<X> const& dual() const { return this->y; }
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, const PrimalDualData<X>& d) {
+        return os << "PrimalDualData(x=" << d.x << ", y=" << d.y << ")"; }
+    friend PrimalDualData<X> operator-(PrimalDualData<X> d) {
+        return PrimalDualData<X>(-d.x,-d.y); }
 };
 using ApproximatePrimalDualData = PrimalDualData<Approximation<FloatDP>>;
 using ValidatedPrimalDualData = PrimalDualData<Bounds<FloatDP>>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X>, dual variables of type \a Vector<X>, and complementary variables of type \a Vector<X>.
+//! \brief Data for the solution of an optimization problem, with primal variables \a x, dual variables \a y, and complementary variables \a z dual to bounds on \a x, all of type \a Vector<X>.
 template<class X> struct PrimalDualComplementaryData : public PrimalDualData<X> {
     Vector<X> z;
+    //! \brief <p/>
+    PrimalDualComplementaryData(SizeType m, SizeType n, PrecisionType<X> pr)
+        : PrimalDualComplementaryData(Vector<X>(n,pr), Vector<X>(m,pr), Vector<X>(n,pr)) { }
+    PrimalDualComplementaryData(SizeType m, SizeType n, Vector<X> r)
+        : PrimalDualComplementaryData(r[range(0,n)], r[range(n,m+n)], r[range(m+n,m+2*n)]) { ARIADNE_DEBUG_PRECONDITION(r.size()==m+2*n); }
     //! \brief <p/>
     PrimalDualComplementaryData(Vector<X> x_, Vector<X> y_, Vector<X> z_) : PrimalDualData<X>(x_,y_), z(z_) { }
     //! \brief <p/>
     Vector<X> const& complementary() const { return this->z; }
+
+    static PrimalDualComplementaryData<X> disassemble(SizeType m, SizeType n, Vector<X> r);
+    Vector<X> assemble() const;
+
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, const PrimalDualComplementaryData<X>& d) {
+        return os << "PrimalDualComplementaryData(x=" << d.x << ", y=" << d.y << ", z=" << d.z << ")"; }
 };
 using ApproximatePrimalDualComplementaryData = PrimalDualComplementaryData<Approximation<FloatDP>>;
 using ValidatedPrimalDualComplementaryData = PrimalDualComplementaryData<Bounds<FloatDP>>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> and slack variables of type \a Vector<X>.
+
+
+//! \brief Data for the solution of an optimization problem, with primal variables \a x and slack variables \a w of type \a X.
 template<class X> struct SlackPrimalData : public PrimalData<X> {
     Vector<X> w;
     //! \brief <p/>
@@ -160,13 +187,22 @@ template<class X> struct SlackPrimalData : public PrimalData<X> {
 using ApproximateSlackPrimalData = SlackPrimalData<Approximation<FloatDP>>;
 using ValidatedSlackPrimalData = SlackPrimalData<Bounds<FloatDP>>;
 
-//! \brief Data for the solution of an optimization problem, with primal variables of type \a Vector<X> dual variables of type \a Vector<X>, slack variables of type \a Vector<X> and complementary variables of type \a Vector<X>.
-template<class X> struct SlackPrimalDualComplementaryData : public PrimalDualComplementaryData<X> {
-
-    //! \brief The slack variables.
+//! \brief Data for the solution of an optimization problem, with primal variables \a x, slack variables \a w approximating \a g(x), and dual variables \a y of type \a X.
+template<class X> struct SlackPrimalDualData : public PrimalDualData<X> {
     Vector<X> w;
+    SlackPrimalDualData(SizeType m, SizeType n, PrecisionType<X> pr)
+        : PrimalDualData<X>(Vector<X>(n,pr),Vector<X>(m,pr)), w(m,pr) { }
+    //! \brief <p/>
+    SlackPrimalDualData(Vector<X> w_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), w(w_) { }
     //! \brief <p/>
     Vector<X> const& slack() const { return this->w; }
+};
+using ApproximateSlackPrimalDualData = SlackPrimalDualData<Approximation<FloatDP>>;
+using ValidatedSlackPrimalDualData = SlackPrimalDualData<Bounds<FloatDP>>;
+
+//! \brief Data for the solution of an optimization problem, with primal variables \a x, dual variables \a y, slack variables \a w and complementary variables \a z, all of type \a Vector<X>.
+template<class X> struct SlackPrimalDualComplementaryData : public PrimalDualComplementaryData<X> {
+    Vector<X> w;
 
     //! \brief <p/>
     SlackPrimalDualComplementaryData(SizeType m, SizeType n, DP pr)
@@ -179,27 +215,138 @@ template<class X> struct SlackPrimalDualComplementaryData : public PrimalDualCom
         : SlackPrimalDualComplementaryData(d.w,d.x,d.y,d.z) { }
 
     //! \brief <p/>
-    SlackPrimalDualComplementaryData(SizeType m, SizeType n, Vector<X> r)
-        : SlackPrimalDualComplementaryData(r[range(0,m)],r[range(m,m+n)],r[range(m+n,2*m+n)],r[range(2*m+n,2*(m+n))])
-            { ARIADNE_DEBUG_PRECONDITION(r.size()==2*(m+n)); }
+    static SlackPrimalDualComplementaryData<X> disassemble(SizeType m, SizeType n, Vector<X> r);
     //! \brief <p/>
     Vector<X> assemble() const;
 
     //! \brief <p/>
-    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> d1, SlackPrimalDualComplementaryData<X> d2) {
-        return SlackPrimalDualComplementaryData<X>(d1.w-d2.w,d1.x-d2.x,d1.y-d2.y,d1.z-d2.z); }
-    //! \brief <p/>
-    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> d) {
-        return SlackPrimalDualComplementaryData<X>(-d.w,-d.x,-d.y,-d.z); }
-
-    //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, SlackPrimalDualComplementaryData<X>& d) {
         return os << "SlackPrimalDualComplementaryData(w=" << d.w << ", x=" << d.x << ", y=" << d.y << ", z=" << d.z << ")"; }
+
+    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> const& d) {
+        return SlackPrimalDualComplementaryData<X>(-d.w, -d.x, -d.y, -d.z); }
+    friend SlackPrimalDualComplementaryData<X> operator-(SlackPrimalDualComplementaryData<X> const& d1, SlackPrimalDualComplementaryData<X> const& d2) {
+        return SlackPrimalDualComplementaryData<X>(d1.w-d2.w, d1.x-d2.x, d1.y-d2.y, d1.z-d2.z); }
 };
 using ApproximateSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Approximation<FloatDP>>;
 using ValidatedSlackPrimalDualComplementaryData = SlackPrimalDualComplementaryData<Bounds<FloatDP>>;
 
-template<class T> struct SlackPrimalDualComplementaryMatrix;
+//! \brief Data for the solution of an optimization problem, with primal variables \a x, slack variables \a w approximating \a g(x), dual variables \a yl and \a yu for lower- and upper-bounds of \a w, and complementary variables \a zl, \a zu for lower- and upper-bounds of \a x.
+template<class X> struct SlackPrimalSplitDualComplementaryData : public SlackPrimalData<X> {
+    Vector<X> yl,yu,zl,zu;
+
+    //! \brief <p/>
+    SlackPrimalSplitDualComplementaryData(SizeType m, SizeType n, DP pr)
+        : SlackPrimalSplitDualComplementaryData(Vector<X>(m,pr),Vector<X>(n,pr),Vector<X>(m,pr),Vector<X>(m,pr),Vector<X>(n,pr),Vector<X>(n,pr)) { }
+    //! \brief <p/>
+    SlackPrimalSplitDualComplementaryData(Vector<X> w_, Vector<X> x_, Vector<X> yl_, Vector<X> yu_, Vector<X> zl_, Vector<X> zu_)
+        : SlackPrimalData<X>(w_,x_), yl(yl_), yu(yu_), zl(zl_), zu(zu_) { }
+    //! \brief <p/>
+    template<class XX> requires Convertible<XX,X> SlackPrimalSplitDualComplementaryData(SlackPrimalSplitDualComplementaryData<XX> const& d)
+        : SlackPrimalSplitDualComplementaryData(d.w,d.x,d.yl,d.yu,d.zl,d.zu) { }
+
+    //! \brief <p/>
+    static SlackPrimalSplitDualComplementaryData<X> disassemble(SizeType m, SizeType n, Vector<X> r);
+    //! \brief <p/>
+    Vector<X> assemble() const;
+
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, SlackPrimalSplitDualComplementaryData<X>& d) {
+        return os << "SlackPrimalSplitDualComplementaryData(w=" << d.w << ", x=" << d.x << ", yl=" << d.yl << ", yu=" << d.yu << ", zl=" << d.zl << ", zu=" << d.zu << ")"; }
+};
+using ApproximateSlackPrimalSplitDualComplementaryData = SlackPrimalSplitDualComplementaryData<Approximation<FloatDP>>;
+using ValidatedSlackPrimalSplitDualComplementaryData = SlackPrimalSplitDualComplementaryData<Bounds<FloatDP>>;
+
+
+
+template<class X> struct FeasiblePrimalDualData : PrimalDualData<X> {
+    ComparisonType<X> r;
+    FeasiblePrimalDualData(ComparisonType<X> r_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), r(r_) { }
+};
+
+template<class X> struct ValuePrimalDualData : PrimalDualData<X> {
+    X v;
+    ValuePrimalDualData(X v_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), v(v_) { }
+};
+
+template<class X> struct SlackPrimalDualComplementaryMatrix;
+
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of feasibility.
+struct FeasibilityCertificate
+{
+    using ValidatedVector = Vector<ValidatedNumber>;
+    using ExactVector = Vector<ExactNumber>;
+
+    ValidatedVector x; ExactVector y;
+
+    FeasibilityCertificate(ValidatedVector x_, ExactVector y_) : x(x_), y(y_) { }
+    FeasibilityCertificate(Pair<ValidatedVector,ExactVector>const& pr)
+        : FeasibilityCertificate(std::get<0>(pr),std::get<1>(pr)) { }
+    friend OutputStream& operator<<(OutputStream& os, FeasibilityCertificate& fc) {
+        return os << "FeasibilityCertificate(x=" << fc.x << ", y=" << fc.y << ")"; }
+};
+
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of local infeasibility.
+struct LocalInfeasibilityCertificate
+{
+    using ExactVector = Vector<ExactNumber>;
+
+    //! A subdomain \f$B\subset D\f$ such that \f$g(x)\not\in C\f$ for all \f$x\in C\f$. i.e. For which all (primal) variables are infeasible.
+    ExactBoxType B;
+    //! Dual variables (Lagrange multipliers) such that \f$\sum_{j=1} y_j g_j(x) \not\in \sum_{j} y_j C_j\f$ for all \f$x\in\B\f$.
+    ExactVector y;
+
+    ExactBoxType bounds() const { return B; }
+    ExactVector dual() const { return y; }
+
+    LocalInfeasibilityCertificate(ExactBoxType B_, ExactVector y_) : B(B_), y(y_) { }
+    friend OutputStream& operator<<(OutputStream& os, const LocalInfeasibilityCertificate& lifc) {
+        return os << "{B=" << lifc.B << ", y=" << lifc.y << "}"; }
+};
+
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of global infeasibility.
+struct InfeasibilityCertificate
+    : public List<LocalInfeasibilityCertificate>
+{
+    using List<LocalInfeasibilityCertificate>::List;
+};
+
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of local optimality (minimality).
+struct LocalOptimalityCertificate
+{
+    using ValidatedVector = Vector<ValidatedNumber>;
+    using ExactVector = Vector<ExactNumber>;
+
+    ValidatedNumber v; //!< The optimal value.
+    ValidatedVector x; //!< The optimal (primal) variables.
+    ExactVector y; //!< The optimal dual variables (Lagrange multipliers).
+
+    ValidatedNumber value() const { return v; }
+    ValidatedVector primal() const { return x; }
+    ExactVector dual() const { return y; }
+
+    LocalOptimalityCertificate(ValidatedNumber v_, ValidatedVector x_, ExactVector y_)
+        : v(v_), x(x_), y(y_) { }
+    LocalOptimalityCertificate(Bounds<FloatDP> v_, Vector<Bounds<FloatDP>> x_, Vector<FloatDP> y_)
+        : v(v_), x(x_), y(y_) { }
+    LocalOptimalityCertificate(Tuple<ValidatedNumber,ValidatedVector,ExactVector>const& tup)
+        : LocalOptimalityCertificate(std::get<0>(tup),std::get<1>(tup),std::get<2>(tup)) { }
+    friend OutputStream& operator<<(OutputStream& os, const LocalOptimalityCertificate& loc) {
+        return os << "{v=" << loc.v << ", x=" << loc.x << ", y=" << loc.y << "}"; }
+};
+
+//! \ingroup OptimisationSubModule
+//! \brief Information providing evidence of global optimality (minimality).
+struct OptimalityCertificate
+    : public List<LocalOptimalityCertificate>
+{
+    using List<LocalOptimalityCertificate>::List;
+};
+
 //!@}
 
 
@@ -473,20 +620,13 @@ template<> class OptimiserBase<ValidatedTag>
 using ApproximateOptimiserBase =  OptimiserBase<ApproximateTag>;
 using ValidatedOptimiserBase =  OptimiserBase<ValidatedTag>;
 
+
+
 struct InteriorPointOptimiserProperties {
     const double VALUE_TOLERANCE=1e-8;
     const double STATE_TOLERANCE=1e-8;
     const CounterType MAXIMUM_STEPS=24;
 };
-
-//! \brief Common functionality for optimisers using interior-point methods.
-class InteriorPointOptimiserBase
-    : public ApproximateOptimiserBase
-{
-  protected:
-    InteriorPointOptimiserProperties _properties;
-};
-
 
 //! \ingroup OptimisationSubModule
 //! \brief Solver for nonlinear programming problems based on a penalty-function approach
@@ -515,108 +655,15 @@ class PenaltyFunctionOptimiser
 };
 
 
-//! \ingroup OptimisationSubModule
-//! \brief Information providing evidence of feasibility.
-struct FeasibilityCertificate
+//! \brief Common functionality for optimisers using interior-point methods.
+class InteriorPointOptimiserBase
+    : public ApproximateOptimiserBase
 {
-    using ValidatedVector = ValidatedOptimiserInterface::ValidatedVector;
-    using ExactVector = ValidatedOptimiserInterface::ExactVector;
-
-    ValidatedVector x; ExactVector y;
-
-    FeasibilityCertificate(ValidatedVector x_, ExactVector y_) : x(x_), y(y_) { }
-    FeasibilityCertificate(Pair<ValidatedVector,ExactVector>const& pr)
-        : FeasibilityCertificate(std::get<0>(pr),std::get<1>(pr)) { }
-    friend OutputStream& operator<<(OutputStream& os, FeasibilityCertificate& fc) {
-        return os << "FeasibilityCertificate(x=" << fc.x << ", y=" << fc.y << ")"; }
-};
-
-//! \ingroup OptimisationSubModule
-//! \brief Information providing evidence of local infeasibility.
-struct LocalInfeasibilityCertificate
-{
-    using ExactVector = ValidatedOptimiserInterface::ExactVector;
-
-    //! A subdomain \f$B\subset D\f$ such that \f$g(x)\not\in C\f$ for all \f$x\in C\f$. i.e. For which all (primal) variables are infeasible.
-    ExactBoxType B;
-    //! Dual variables (Lagrange multipliers) such that \f$\sum_{j=1} y_j g_j(x) \not\in \sum_{j} y_j C_j\f$ for all \f$x\in\B\f$.
-    ExactVector y;
-
-    ExactBoxType bounds() const { return B; }
-    ExactVector dual() const { return y; }
-
-    LocalInfeasibilityCertificate(ExactBoxType B_, ExactVector y_) : B(B_), y(y_) { }
-    friend OutputStream& operator<<(OutputStream& os, const LocalInfeasibilityCertificate& lifc) {
-        return os << "{B=" << lifc.B << ", y=" << lifc.y << "}"; }
-};
-
-//! \ingroup OptimisationSubModule
-//! \brief Information providing evidence of global infeasibility.
-struct InfeasibilityCertificate
-    : public List<LocalInfeasibilityCertificate>
-{
-    using List<LocalInfeasibilityCertificate>::List;
-};
-
-//! \ingroup OptimisationSubModule
-//! \brief Information providing evidence of local optimality (minimality).
-struct LocalOptimalityCertificate
-{
-    using ValidatedVector = ValidatedOptimiserInterface::ValidatedVector;
-    using ExactVector = ValidatedOptimiserInterface::ExactVector;
-
-    ValidatedNumber v; //!< The optimal value.
-    ValidatedVector x; //!< The optimal (primal) variables.
-    ExactVector y; //!< The optimal dual variables (Lagrange multipliers).
-
-    ValidatedNumber value() const { return v; }
-    ValidatedVector primal() const { return x; }
-    ExactVector dual() const { return y; }
-
-    LocalOptimalityCertificate(ValidatedNumber v_, ValidatedVector x_, ExactVector y_)
-        : v(v_), x(x_), y(y_) { }
-    LocalOptimalityCertificate(Bounds<FloatDP> v_, Vector<Bounds<FloatDP>> x_, Vector<FloatDP> y_)
-        : v(v_), x(x_), y(y_) { }
-    LocalOptimalityCertificate(Tuple<ValidatedNumber,ValidatedVector,ExactVector>const& tup)
-        : LocalOptimalityCertificate(std::get<0>(tup),std::get<1>(tup),std::get<2>(tup)) { }
-    friend OutputStream& operator<<(OutputStream& os, const LocalOptimalityCertificate& loc) {
-        return os << "{v=" << loc.v << ", x=" << loc.x << ", y=" << loc.y << "}"; }
-};
-
-//! \ingroup OptimisationSubModule
-//! \brief Information providing evidence of global optimality (minimality).
-struct OptimalityCertificate
-    : public List<LocalOptimalityCertificate>
-{
-    using List<LocalOptimalityCertificate>::List;
-};
-
-
-
-
-//! \ingroup OptimisationSubModule
-//! Solver for nonlinear programming problems using the infeasible interior point method with primal (\f$x\f$), dual (\f$y\f$) and complementary (\f$z\f$)  variables.
-//! \details Relies on an engine minimising \f$f(x)\f$ for \f$x\in D^\circ\f$ subject to \f$g(x)=w\f$ with \f$w\in C^\circ\f$.
-//!
-//! To check feasibility, we maximise \f$\mu \sum_{i}\bigl(\log(x_i-\unl{d}_i)+\log(\ovl{d}_i-x_i)\bigr) + \mu \sum_{j}\bigl(\log(w_j-\unl{c}_j)+\log(\ovl{c}_j-w_j)\bigr)\f$ under the constraints \f$g(x)-w=0\f$.
-//! Introducing the Lagrange multipliers \f$y_j = \bigl(1/(w_j-\unl{c}_j)-1/(\ovl{c}_j-x_j)\bigr)\f$ and \f$z_i = 1/(x_i-\unl{d}_i)-1/(\ovl{d}_i-x_i)\f$, we find optimality conditions \f$ \sum_{j} y_j \nabla{g_j}(x) + z = 0\f$, \f$g(x)-w=0\f$.
-//! These are exactly the central path equations with \f$\mu=1\f$ for the problem \f$\mathrm{minimise} f(x)\equiv 0\f$ subject to \f$x\in D\f$ and \f$g(x)\in C\f$, so we can use an optimisation step to improve feasibility.
-class InteriorPointOptimiser
-    : public InteriorPointOptimiserBase
-{
-  public:
+  protected:
     struct StepData;
-
+  protected:
+    InteriorPointOptimiserProperties _properties;
   public:
-    virtual InteriorPointOptimiser* clone() const override;
-
-    using OptimiserBase::minimise;
-    using OptimiserBase::feasible;
-
-  public:
-    //! \brief Construct with default accuracy parameters.
-    InteriorPointOptimiser();
-
     //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
     virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override;
     //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
@@ -628,36 +675,26 @@ class InteriorPointOptimiser
     virtual Tuple<ApproximateNumber,ApproximateVector,ApproximateVector>
     minimise_hotstarted(const ApproximateOptimisationProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
     virtual Tuple<ApproximateKleenean,ApproximateVector,ApproximateVector>
     feasible_hotstarted(const ApproximateFeasibilityProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
+    //! \brief <p/>
+    StepData* initial_step_data(const ApproximateFeasibilityProblem& p) const;
 
     //! \brief <p/>
-    SlackPrimalDualComplementaryData<Approximation<FLT>>
-    minimisation_update(const ApproximateOptimisationProblem& p,
-                        Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
-                        Approximation<FLT>& mu) const;
+    StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                           const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
 
-    //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           StepData& d) const;
-    //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
-                           Approximation<FLT>& mu) const;
-    //! \brief <p/>
-    Void feasibility_step(const ApproximateFeasibilityProblem& p,
-                          Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z) const;
+    Void minimisation_step(const ApproximateOptimisationProblem& p, StepData& d) const;
 
-    //! \brief <p/>
-    StepData initial_step_data(const ApproximateFeasibilityProblem& p) const;
-    //! \brief <p/>
-    StepData initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
-                                          const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
+    Void feasibility_step(const ApproximateFeasibilityProblem& p, StepData& d) const;
 
+
+  public:
     //! \brief <p/>
     Vector<Approximation<FLT>> compute_dual(const ApproximateBoxType& D, const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
     //! \brief <p/>
@@ -674,129 +711,291 @@ class InteriorPointOptimiser
     Vector<Approximation<FLT>> compute_z(const ApproximateFeasibilityProblem& p,
                                          const Vector<Approximation<FLT>>& x, const Approximation<FLT>& mu) const;
     //! \brief <p/>
-    Approximation<FLT> compute_t(const ApproximateFeasibilityProblem& p,
-                                   const Vector<Approximation<FLT>>& x) const;
-    //! \brief <p/>
     Approximation<FLT> compute_mu(const ApproximateFeasibilityProblem& p,
                                     const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
     Void compute_tz(const ApproximateFeasibilityProblem& p,
                     Vector<Approximation<FLT>>& x, Approximation<FLT>& t, Vector<Approximation<FLT>>& z) const;
 
-    friend OutputStream& operator<<(OutputStream& os, InteriorPointOptimiser const& opt);
-};
-
-
-struct InteriorPointOptimiser::StepData {
-    Vector<Approximation<FLT>> w,x,y,z; Approximation<FLT> mu;
-
-    StepData(SizeType m, SizeType n, DP pr)
-        : w(m,pr), x(n,pr), y(m,pr), z(n,pr), mu(pr) { }
-    StepData(Vector<Approximation<FLT>> w_, Vector<Approximation<FLT>> x_, Vector<Approximation<FLT>> y_, Vector<Approximation<FLT>> z_, Approximation<FLT> mu_)
-        : w(w_), x(x_), y(y_), z(z_), mu(mu_) { }
-    friend OutputStream& operator<<(OutputStream& os, StepData const& d) {
-        return os << "InteriorPointOptimiser::StepData(w=" << d.w << ", x=" << d.x << ", y=" << d.y << ", z=" << d.z << ", mu=" << d.mu << ")"; }
-};
-
-
-//! \ingroup OptimisationSubModule
-//! Solver for nonlinear programming problems using the infeasible interior point method with primal (\f$x\f$), dual (\f$y\f$), slack (\f$w\f$) and complementary (\f$z\f$) variables.
-//! The dual and complementary variables are split into lower and upper versions, corresponding to lower and upper constraint bounds.
-//! \details The complementary variables satisfy the central path equations \f$(x-\unl{d})\unl{z} = \mu\f$ and \f$(\ovl{d}-x)\ovl{z} = \mu\f$ with \f$\unl{z},\ovl{z}>0\f$, and can be combined into \f$z = \ovl{z}-\unl{z}\f$ satisfying \f$z = \mu\bigl(1/(\ovl{d}-x)-1/(x-\unl{d})\bigr)\f$, or equivalently \f$(x-\unl{d})(\ovl{d}-x)z + (\unl{d}+\ovl{d}-2x) \mu = 0\f$. Similarly, \f$(w-\unl{c})\unl{y} = \mu\f$ and \f$(\ovl{c}-w)\ovl{y} = \mu\f$ where \f$w=g(x)\f$.
-class PrimalSplitDualInteriorPointOptimiser
-    : public InteriorPointOptimiser
-{
-    virtual PrimalSplitDualInteriorPointOptimiser* clone() const override;
-  public:
-    struct StepData;
+    //! \brief <p/>
+    Approximation<FLT> compute_t(const ApproximateFeasibilityProblem& p,
+                                 const Vector<Approximation<FLT>>& x) const;
+  protected:
+    virtual StepData* _initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                                    const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const = 0;
+    //! \brief <p/>
+    virtual Void _minimisation_step(const ApproximateOptimisationProblem& p, StepData& d) const = 0;
 
     //! \brief <p/>
-    Tuple<ApproximateNumber,ApproximateVector,ApproximateVector>
-    virtual minimise_hotstarted(const ApproximateOptimisationProblem& p,
-                                const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const override;
+    virtual Void _feasibility_step(const ApproximateFeasibilityProblem& p, StepData& d) const;
 
-    //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x,
-                           Vector<Approximation<FLT>>& yl, Vector<Approximation<FLT>>& yu, Vector<Approximation<FLT>>& zl, Vector<Approximation<FLT>>& zu,
-                           Approximation<FLT> mu) const;
 };
 
-//! \relates PrimalSplitDualInteriorPointOptimiser
-struct PrimalSplitDualInteriorPointOptimiser::StepData {
-    using FLT = PrimalSplitDualInteriorPointOptimiser::FLT;
-    using PR = PrimalSplitDualInteriorPointOptimiser::PR;
-
-    Vector<Approximation<FLT>> w,x,yl,yu,zl,zu; Approximation<FLT> mu;
-
-    StepData(SizeType m, SizeType n, PR pr)
-        : w(m,pr), x(n,pr), yl(m,pr), yu(m,pr), zl(n,pr), zu(n,pr), mu(pr) { }
-    StepData(Vector<Approximation<FLT>> w_, Vector<Approximation<FLT>> x_, Vector<Approximation<FLT>> yl_, Vector<Approximation<FLT>> yu_, Vector<Approximation<FLT>> zl_, Vector<Approximation<FLT>> zu_, Approximation<FLT> mu_)
-        : w(w_), x(x_), yl(yl_), yu(yu_), zl(zl_), zu(zu_), mu(mu_) { }
+struct InteriorPointOptimiserBase::StepData {
+    using T=Approximation<FLT>;
+    T mu;
+    virtual ~StepData() = default;
+    explicit StepData(T mu_) : mu(mu_) { }
+    explicit StepData(DP pr) : StepData(T(pr)) { }
+    virtual Vector<T> primal() const = 0;
+    virtual Vector<T> dual() const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const StepData& d) {
+        return d._write(os); }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 };
+
+
 
 //! \ingroup OptimisationSubModule
 //! An interior-point optimiser using only primal (\f$x\f$) and dual (\f$y\f$) variables.
 //! In particular, there are no complementary variables dual to the constraints \f$\unl{d}_i\leq x_i \leq \ovl{d}_i\f$, or slack variables \f$w=g(x)\f$.
-class PrimalDualOnlyInteriorPointOptimiser
-    : public InteriorPointOptimiser
+//! The initial point \f$x_0\f$ for the optimisation iteration must satisfy \f$x_0\in D^\circ\f$ and \f$g(x_0)\in C^\circ\f$.
+class PrimalDualInteriorPointOptimiser
+    : public InteriorPointOptimiserBase
 {
-    virtual PrimalDualOnlyInteriorPointOptimiser* clone() const override;
-  public:
-    Tuple<ApproximateKleenean,ApproximateVector,ApproximateVector>
-    virtual feasible_hotstarted(const ApproximateFeasibilityProblem& p,
-                                const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const override;
+    using StepDataBase = InteriorPointOptimiserBase::StepData;
 
-    Void feasibility_step(const ApproximateFeasibilityProblem& p,
-                          Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Approximation<FLT>& t) const;
+    virtual PrimalDualInteriorPointOptimiser* clone() const override;
+  public:
+    struct StepData;
+
+    StepData* initial_step_data(const ApproximateFeasibilityProblem& p) const;
+    StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                           const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
+    Void minimisation_step(const ApproximateOptimisationProblem& p,
+                           StepData& d) const;
+
+    friend OutputStream& operator<<(OutputStream& os, const PrimalDualInteriorPointOptimiser& opt);
+  public:
+    Void error_feasibility_step(const ApproximateFeasibilityProblem& p,
+                                ApproximateVectorType& x, ApproximateVectorType& y, ApproximateNumberType& t) const;
+  private:
+    virtual StepDataBase* _initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                                        const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const override;
+
+    virtual Void _minimisation_step(const ApproximateOptimisationProblem& p, StepDataBase& d) const override;
 };
 
+//! \relates PrimalDualInteriorPointOptimiser
+struct PrimalDualInteriorPointOptimiser::StepData
+    : virtual InteriorPointOptimiserBase::StepData, PrimalDualData<Approximation<FLT>>
+{
+    StepData(Vector<T> x_, Vector<T> y_)
+        : InteriorPointOptimiserBase::StepData(T(1,pr)), PrimalDualData<T>(x_,y_) { }
+    virtual Vector<Approximation<FLT>> primal() const override { return this->x; }
+    virtual Vector<Approximation<FLT>> dual() const override { return this->y; }
+    friend OutputStream& operator<<(OutputStream& os, const StepData& d) {
+      return os << "(x=" << d.x << ", y=" << d.y << ", mu=" << d.mu << ")"; }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << *this; }
+};
+
+
 //! \ingroup OptimisationSubModule
-//! \brief Solver for nonlinear programming problems using infeasible interior point methods.
-//! Uses primal variables \f$x\f$, slack variables \f$w=g(x)\f$, dual variables \f$y\f$ for the constraints \f$w \in C\f$ and complementary variables \f$z\f$ for the constraints \f$x\in D\f$.
-//! \details The dual variables \f$y\f$ are unconstrained Lagrange multipliers for \f$y\cdot(g(x)-w)=0\f$.
-class InfeasibleInteriorPointOptimiser
+//! Solver for nonlinear programming problems using the infeasible interior point method with primal (\f$x\f$), dual (\f$y\f$) and complementary (\f$z\f$)  variables.
+//! The initial point \f$x_0\f$ for the optimisation iteration must satisfy \f$x_0\in D^\circ\f$ and \f$g(x_0)\in C^\circ\f$.
+//! \details Relies on an engine minimising \f$f(x)\f$ for \f$x\in D^\circ\f$ subject to \f$g(x)=w\f$ with \f$w\in C^\circ\f$.
+//!
+//! To check feasibility, we maximise \f$\mu \sum_{i}\bigl(\log(x_i-\unl{d}_i)+\log(\ovl{d}_i-x_i)\bigr) + \mu \sum_{j}\bigl(\log(w_j-\unl{c}_j)+\log(\ovl{c}_j-w_j)\bigr)\f$ where \f$w=g(x)\f$.
+//! Introducing the Lagrange multipliers \f$y_j = \bigl(1/(w_j-\unl{c}_j)-1/(\ovl{c}_j-x_j)\bigr)\f$ and \f$z_i = 1/(x_i-\unl{d}_i)-1/(\ovl{d}_i-x_i)\f$, we find optimality conditions \f$ \sum_{j} y_j \nabla{g_j}(x) + z = 0\f$.
+//! These are exactly the central path equations with \f$\mu=1\f$ for the problem \f$\mathrm{minimise} f(x)\equiv 0\f$ subject to \f$x\in D\f$ and \f$g(x)\in C\f$, so we can use an optimisation step to improve feasibility.
+class PrimalDualComplementaryInteriorPointOptimiser
     : public InteriorPointOptimiserBase
 {
   public:
-    virtual InfeasibleInteriorPointOptimiser* clone() const override;
+    using StepDataBase = InteriorPointOptimiserBase::StepData;
 
-    using ApproximateOptimiserBase::minimise;
-    using ApproximateOptimiserBase::feasible;
-
-    struct PrimalDualData;
     struct StepData;
 
   public:
-    //! \brief Construct with default accuracy parameters.
-    InfeasibleInteriorPointOptimiser();
+    virtual PrimalDualComplementaryInteriorPointOptimiser* clone() const override;
 
-    //! \brief Compute an approximate \em local optimum of nonlinear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
-    virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override;
-    //! \brief Tests if the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual ApproximateKleenean feasible(ApproximateFeasibilityProblem p) const override;
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
 
-    friend OutputStream& operator<<(OutputStream& os, InfeasibleInteriorPointOptimiser const& opt);
   public:
-    Void setup_feasibility(const ApproximateFeasibilityProblem& p,
-                           StepData& stp) const;
+    //! \brief Construct with default accuracy parameters.
+    PrimalDualComplementaryInteriorPointOptimiser();
+
+    //! \brief <p/>
+    StepData* initial_step_data(const ApproximateFeasibilityProblem& p) const;
+
+    //! \brief <p/>
+    StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                           const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
+    //! \brief <p/>
     Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           StepData& stp) const;
+                           StepData&) const;
+
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, PrimalDualComplementaryInteriorPointOptimiser const& opt);
+  public:
+    //! \brief <p/>
+    Void minimisation_step(const ApproximateOptimisationProblem& p,
+                           Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
+                           Approximation<FLT>& mu) const;
+    //! \brief <p/>
+    Void feasibility_step(const ApproximateFeasibilityProblem& p,
+                          Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z) const;
+
+    PrimalDualComplementaryData<Approximation<FLT>> minimisation_update(
+        const ApproximateOptimisationProblem& p,
+        ApproximateVectorType& x, ApproximateVectorType& y, ApproximateVectorType& z, Approximation<FLT>& mu) const;
+  public:
+    Void error_feasibility_step(const ApproximateFeasibilityProblem& p,
+                                ApproximateVectorType& x, ApproximateVectorType& yl, ApproximateVectorType& yu, ApproximateVectorType& z,
+                                ApproximateNumberType& t) const;
+  private:
+    virtual StepDataBase* _initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                                        const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const override;
+    virtual Void _minimisation_step(const ApproximateOptimisationProblem& p,
+                                    StepDataBase&) const override;
 };
 
-struct InfeasibleInteriorPointOptimiser::PrimalDualData {
-    PrimalDualData() : PrimalDualData(0u,0u,dp) { }
-    PrimalDualData(SizeType m, SizeType n, DP pr) : w(m,pr), x(n,pr), y(m,pr) { }
-    Vector<Approximation<FLT>> w,x,y;
-};
-
-//! \relates InfeasibleInteriorPointOptimiser
-struct InfeasibleInteriorPointOptimiser::StepData : public InfeasibleInteriorPointOptimiser::PrimalDualData {
-    StepData() : StepData(0u,0u,dp) { }
+//! \relates PrimalDualComplementaryInteriorPointOptimiser
+struct PrimalDualComplementaryInteriorPointOptimiser::StepData
+    : public virtual InteriorPointOptimiserBase::StepData, public PrimalDualComplementaryData<Approximation<FLT>>
+{
     StepData(SizeType m, SizeType n, DP pr)
-        : PrimalDualData(m,n,pr), vl(m,pr), wl(m,pr), xl(n,pr), zl(n,pr), vu(m,pr), wu(m,pr), xu(n,pr), zu(n,pr), mu(pr) { }
-    Vector<Approximation<FLT>> vl,wl,xl,zl,vu,wu,xu,zu; Approximation<FLT> mu;
+        : InteriorPointOptimiserBase::StepData(pr), PrimalDualComplementaryData<T>(m,n,pr) { }
+    StepData(Vector<T> x_, Vector<T> y_, Vector<T> z_, T mu_)
+        : InteriorPointOptimiserBase::StepData(mu_), PrimalDualComplementaryData<T>(x_,y_,z_) { }
+    virtual Vector<T> primal() const override { return this->x; }
+    virtual Vector<T> dual() const override { return this->y; }
+    friend OutputStream& operator<<(OutputStream& os, StepData const& d) {
+        return os << "(x=" << d.x << ", y=" << d.y << ", z=" << d.z << ", mu=" << d.mu << ")"; }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << *this; }
 };
 
+
+
+
+//! \ingroup OptimisationSubModule
+//! Solver for nonlinear programming problems using the infeasible interior point method with primal (\f$x\f$), dual (\f$y\f$) and complementary (\f$z\f$)  variables.
+//! \details Relies on an engine minimising \f$f(x)\f$ for \f$x\in D^\circ\f$ subject to \f$g(x)=w\f$ with \f$w\in C\f$.
+//!
+//! To check feasibility, we maximise \f$\mu \sum_{i}\bigl(\log(x_i-\unl{d}_i)+\log(\ovl{d}_i-x_i)\bigr) + \mu \sum_{j}\bigl(\log(w_j-\unl{c}_j)+\log(\ovl{c}_j-w_j)\bigr)\f$ under the constraints \f$g(x)-w=0\f$.
+//! Introducing the Lagrange multipliers \f$y_j = \bigl(1/(w_j-\unl{c}_j)-1/(\ovl{c}_j-x_j)\bigr)\f$ and \f$z_i = 1/(x_i-\unl{d}_i)-1/(\ovl{d}_i-x_i)\f$, we find optimality conditions \f$ \sum_{j} y_j \nabla{g_j}(x) + z = 0\f$, \f$g(x)-w=0\f$.
+//! These are exactly the central path equations with \f$\mu=1\f$ for the problem \f$\mathrm{minimise} f(x)\equiv 0\f$ subject to \f$x\in D\f$ and \f$g(x)\in C\f$, so we can use an optimisation step to improve feasibility.
+class SlackPrimalDualComplementaryInteriorPointOptimiser
+    : public InteriorPointOptimiserBase
+{
+  public:
+    using StepDataBase = InteriorPointOptimiserBase::StepData;
+
+    struct StepData;
+
+  public:
+    virtual SlackPrimalDualComplementaryInteriorPointOptimiser* clone() const override;
+
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
+
+  public:
+    //! \brief Construct with default accuracy parameters.
+    SlackPrimalDualComplementaryInteriorPointOptimiser();
+
+    //! \brief <p/>
+    StepData* initial_step_data(const ApproximateFeasibilityProblem& p) const;
+    //! \brief <p/>
+    StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                           const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
+    //! \brief <p/>
+    Void minimisation_step(const ApproximateOptimisationProblem& p,
+                           StepData&) const;
+
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, SlackPrimalDualComplementaryInteriorPointOptimiser const& opt);
+  public:
+    //! \brief <p/>
+    Void minimisation_step(const ApproximateOptimisationProblem& p,
+                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
+                           Approximation<FLT>& mu) const;
+    //! \brief <p/>
+    Void feasibility_step(const ApproximateFeasibilityProblem& p,
+                          Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z) const;
+
+    SlackPrimalDualComplementaryData<Approximation<FLT>> minimisation_update(
+        const ApproximateOptimisationProblem& p,
+        ApproximateVectorType& w, ApproximateVectorType& x, ApproximateVectorType& y, ApproximateVectorType& z, Approximation<FLT>& mu) const;
+
+  private:
+    virtual StepDataBase* _initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                                        const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const override;
+    virtual Void _minimisation_step(const ApproximateOptimisationProblem& p,
+                                    StepDataBase&) const override;
+};
+
+//! \relates SlackPrimalDualComplementaryInteriorPointOptimiser
+struct SlackPrimalDualComplementaryInteriorPointOptimiser::StepData
+    : public virtual InteriorPointOptimiserBase::StepData, public SlackPrimalDualComplementaryData<Approximation<FLT>>
+{
+    StepData(SizeType m, SizeType n, DP pr)
+        : InteriorPointOptimiserBase::StepData(pr), SlackPrimalDualComplementaryData<T>(m,n,pr) { }
+    StepData(Vector<T> w_, Vector<T> x_, Vector<T> y_, Vector<T> z_, T mu_)
+        : InteriorPointOptimiserBase::StepData(mu_), SlackPrimalDualComplementaryData<T>(w_,x_,y_,z_) { }
+    virtual Vector<T> primal() const override { return this->x; }
+    virtual Vector<T> dual() const override { return this->y; }
+    friend OutputStream& operator<<(OutputStream& os, StepData const& d) {
+        return os << "(w=" << d.w << ", x=" << d.x << ", y=" << d.y << ", z=" << d.z << ", mu=" << d.mu << ")"; }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << *this; }
+};
+
+
+
+
+//! \ingroup OptimisationSubModule
+//! Solver for nonlinear programming problems using the infeasible interior point method with primal (\f$x\f$), dual (\f$\unl{y},\ovl{y}\f$), slack (\f$w\f$) and complementary (\f$\unl{z},\ovl{z}\f$) variables.
+//! The dual and complementary variables are split into lower and upper versions, corresponding to lower and upper constraint bounds.
+//! \details The complementary variables satisfy the central path equations \f$(x-\unl{d})\unl{z} = \mu\f$ and \f$(\ovl{d}-x)\ovl{z} = \mu\f$ with \f$\unl{z},\ovl{z}>0\f$, and can be combined into \f$z = \ovl{z}-\unl{z}\f$ satisfying \f$z = \mu\bigl(1/(\ovl{d}-x)-1/(x-\unl{d})\bigr)\f$, or equivalently \f$(x-\unl{d})(\ovl{d}-x)z + (\unl{d}+\ovl{d}-2x) \mu = 0\f$. Similarly, \f$(w-\unl{c})\unl{y} = \mu\f$ and \f$(\ovl{c}-w)\ovl{y} = \mu\f$ where \f$w=g(x)\f$.
+class SlackPrimalSplitDualComplementaryInteriorPointOptimiser
+    : public InteriorPointOptimiserBase
+{
+    using StepDataBase = InteriorPointOptimiserBase::StepData;
+
+    virtual SlackPrimalSplitDualComplementaryInteriorPointOptimiser* clone() const override;
+  public:
+    struct StepData;
+
+    //! \brief <p/>
+    StepData* initial_step_data(const ApproximateFeasibilityProblem& p) const;
+    //! \brief <p/>
+    StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                           const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+    //! \brief <p/>
+    Void minimisation_step(const ApproximateOptimisationProblem& p,
+                           StepData& d) const;
+    //! \brief <p/>
+    friend OutputStream& operator<<(OutputStream& os, SlackPrimalSplitDualComplementaryInteriorPointOptimiser const& opt);
+  private:
+    virtual StepDataBase* _initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
+                                                        const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const override;
+
+    virtual Void _minimisation_step(const ApproximateOptimisationProblem& p, StepDataBase& d) const override;
+};
+
+//! \relates SlackPrimalSplitDualComplementaryInteriorPointOptimiser
+struct SlackPrimalSplitDualComplementaryInteriorPointOptimiser::StepData
+    : virtual InteriorPointOptimiserBase::StepData, SlackPrimalSplitDualComplementaryData<Approximation<FLT>>
+{
+    StepData(SizeType m, SizeType n, PR pr)
+        : InteriorPointOptimiserBase::StepData(T(pr)), SlackPrimalSplitDualComplementaryData<T>(m,n,pr) { }
+    StepData(Vector<T> w_, Vector<T> x_, Vector<T> yl_, Vector<T> yu_, Vector<T> zl_, Vector<T> zu_, T mu_)
+        : InteriorPointOptimiserBase::StepData(mu_), SlackPrimalSplitDualComplementaryData<T>(w_,x_,yl_,yu_,zl_,zu_) { }
+    virtual Vector<T> primal() const override { return this->x; }
+    virtual Vector<T> dual() const override { return this->yu-this->yl; }
+    friend OutputStream& operator<<(OutputStream& os, const StepData& d) {
+      return os << "(w=" << d.w << ", x=" << d.x << ", yl=" << d.yl << ", yu=" << d.yu << ", zl=" << d.zl << ", zu=" << d.zu << ", mu=" << d.mu << ")"; }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const override { return os << *this; }
+};
+
+
+using InteriorPointOptimiser = PrimalDualComplementaryInteriorPointOptimiser;
+using InfeasibleInteriorPointOptimiser = SlackPrimalDualComplementaryInteriorPointOptimiser;
+using SplitInfeasibleInteriorPointOptimiser = SlackPrimalSplitDualComplementaryInteriorPointOptimiser;
 
 
 class KarushKuhnTuckerOptimiser
@@ -878,7 +1077,7 @@ class InfeasibleKarushKuhnTuckerOptimiser
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
     Pair<ValidatedKleenean,Vector<Approximation<FLT>>> feasible_hotstarted(ValidatedFeasibilityProblem p,
-                                                                           const InfeasibleInteriorPointOptimiser::PrimalDualData& wxy0) const;
+                                                                           const SlackPrimalDualData<Approximation<FLT>>& wxy0) const;
 };
 
 
@@ -899,9 +1098,9 @@ class IntervalOptimiser
 
 
 // \ingroup OptimisationSubModule
-// \brief An optimiser based on the InteriorPointOptimiser. \deprecated
+// \brief An optimiser based on the PrimalDualComplementaryInteriorPointOptimiser. \deprecated
 class ApproximateOptimiser
-    : public InteriorPointOptimiser
+    : public PrimalDualComplementaryInteriorPointOptimiser
 {
   private: public:
     virtual ApproximateOptimiser* clone() const override;

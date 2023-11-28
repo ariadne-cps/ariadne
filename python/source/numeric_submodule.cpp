@@ -157,6 +157,11 @@ template<class F, class FE> OutputStream& operator<<(OutputStream& os, const Pyt
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr) {
     return os << class_name<FE>() << "Error("<<python_literal(repr.reference())<<","<<repr.reference().precision()<<")"; }
 
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Number<ApproximateTag>>&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Number<ValidatedTag>>&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Number<EffectiveTag>>&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Number<ExactTag>>&);
+
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatDP>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatMP>&);
 

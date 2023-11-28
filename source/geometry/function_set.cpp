@@ -601,7 +601,7 @@ ConstrainedImageSet::affine_approximation() const
         iter!=this->_constraints.end(); ++iter)
     {
         ValidatedAffineModelDP a=affine_model(D,iter->function(),prec);
-        ExactIntervalType b=iter->bounds();
+        ExactIntervalType b=iter->cast_exact_bounds();
         result.new_constraint(ValidatedAffineModelConstraintDP(b.lower_bound(),a,b.upper_bound()));
     }
 
@@ -926,7 +926,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
-        constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
+        constraint_models.append(ValidatedAffineModelConstraintDP({constraint.lower_bound(),dp},am,{constraint.upper_bound(),dp}));
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
@@ -944,7 +944,7 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
     for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
-        constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
+        constraint_models.append(ValidatedAffineModelConstraintDP({constraint.lower_bound(),dp},am,{constraint.upper_bound(),dp}));
     }
 
     for(SizeType i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
@@ -1120,7 +1120,7 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
     const ExactBoxType& domain=this->_domain;
     List<ValidatedConstraint> all_constraints=this->constraints();
     ValidatedScalarMultivariateFunction composed_function = compose(nc.function(),this->_function);
-    const ExactIntervalType& bounds = nc.bounds();
+    const ExactIntervalType& bounds = nc.cast_exact_bounds();
 
     ValidatedKleenean result;
     if(definitely(bounds.upper_bound()<+infty)) {

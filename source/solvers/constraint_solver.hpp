@@ -126,11 +126,11 @@ class ConstraintSolver
     Pair<UpperBoxType,UpperBoxType> split(const UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
 
     Bool hull_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint) const {
-        return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
+        return this->hull_reduce(bx,constraint.function(),constraint.cast_exact_bounds()); }
     Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
-        return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
+        return this->box_reduce(bx,constraint.function(),constraint.cast_exact_bounds(),j); }
     Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
-        return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
+        return this->monotone_reduce(bx,constraint.function(),constraint.cast_exact_bounds(),j); }
 
     virtual ~ConstraintSolver() = default;
 };

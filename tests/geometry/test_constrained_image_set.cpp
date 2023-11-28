@@ -37,6 +37,22 @@
 
 #include "../test.hpp"
 
+namespace Ariadne {
+// FIXME: Ensure correct dispatching of constraints
+template<ConvertibleTo<ExactNumber> N> inline decltype(auto)
+operator>=(EffectiveScalarMultivariateFunction const& f, N const& l) {
+    return LowerConstraint<EffectiveScalarMultivariateFunction,ExactNumber>(l,f); }
+template<ConvertibleTo<ExactNumber> N> inline decltype(auto)
+operator<=(EffectiveScalarMultivariateFunction const& f, N const& u) {
+    return UpperConstraint<EffectiveScalarMultivariateFunction,ExactNumber>(f,u); }
+template<ConvertibleTo<ExactNumber> N> inline decltype(auto)
+operator>=(ValidatedScalarMultivariateFunction const& f, N const& l) {
+    return LowerConstraint<ValidatedScalarMultivariateFunction,ExactNumber>(l,f); }
+template<ConvertibleTo<ExactNumber> N> inline decltype(auto)
+operator<=(ValidatedScalarMultivariateFunction const& f, N const& u) {
+    return UpperConstraint<ValidatedScalarMultivariateFunction,ExactNumber>(f,u); }
+}
+
 using namespace Ariadne;
 using namespace std;
 

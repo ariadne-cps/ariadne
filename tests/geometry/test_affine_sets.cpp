@@ -44,14 +44,14 @@ static const Colour expected_colour(1.0,0.25,0.25);
 namespace Ariadne {
 
 template<class X> AffineConstraint<X> operator<=(const Dyadic& l, const Affine<X>& a) {
-    return AffineConstraint<X>({l,a.value().precision()},a,{+infty,a.value().precision()}); }
+    auto pr=a.value().precision(); return AffineConstraint<X>({l,pr},a,{+infty,pr}); }
 template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const Dyadic& u) {
-    return AffineConstraint<X>(-infty,a,u); }
+    auto pr=a.value().precision(); return AffineConstraint<X>({-infty,pr},a,{u,pr}); }
 template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const Dyadic& u) {
     ARIADNE_ASSERT(decide(ac.upper_bound()==infty));
-    return AffineConstraint<X>(ac.lower_bound(),ac.function(),{u,ac.lower_bound().precision()}); }
+    auto pr=ac.function().value().precision(); return AffineConstraint<X>(ac.lower_bound(),ac.function(),{u,pr}); }
 template<class X> AffineConstraint<X> operator==(const Affine<X>& a, const Dyadic& u) {
-    return AffineConstraint<X>(u,a,u); }
+    auto pr=a.value().precision(); return AffineConstraint<X>({u,pr},a,{u,pr}); }
 }
 
 struct FloatDPVector2d : FloatDPVector, Vector2d {

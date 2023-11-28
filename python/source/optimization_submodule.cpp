@@ -52,32 +52,48 @@ Void export_slackness(pybind11::module& module)
     variable_enum.value("UPPER", Slackness::UPPER);
 }
 
-Void export_constraint(pybind11::module& module)
+template<class P> pybind11::class_<ConstraintType<P>> export_constraint(pybind11::module& module)
 {
-    pybind11::class_<EffectiveConstraint> effective_constraint_class(module,"EffectiveConstraint");
-    effective_constraint_class.def(pybind11::init<EffectiveConstraint>());
-    effective_constraint_class.def(pybind11::init<EffectiveNumber,EffectiveScalarMultivariateFunction,EffectiveNumber>());
-    effective_constraint_class.def(pybind11::init([](EffectiveScalarMultivariateFunction const& f, EffectiveNumber const& u){return EffectiveConstraint(EffectiveNumber(-infty),f,u);}));
-    effective_constraint_class.def(pybind11::init([](EffectiveNumber const& l, EffectiveScalarMultivariateFunction const& f){return EffectiveConstraint(l,f,EffectiveNumber(infty));}));
-    effective_constraint_class.def(pybind11::init<EffectiveScalarMultivariateFunction,EffectiveNumber>());
+    pybind11::class_<ConstraintType<P>> constraint_class(module,(class_name<P>()+"Constraint").c_str());
+    constraint_class.def(pybind11::init<ConstraintType<P>>());
+    constraint_class.def(pybind11::init<Number<P>,ScalarMultivariateFunction<P>,Number<P>>());
+    constraint_class.def(pybind11::init([](ScalarMultivariateFunction<P> const& f, Number<P> const& u){return ConstraintType<P>(Number<P>(-infty),f,u);}));
+    constraint_class.def(pybind11::init([](Number<P> const& l, ScalarMultivariateFunction<P> const& f){return ConstraintType<P>(l,f,Number<P>(infty));}));
+    constraint_class.def(pybind11::init<ScalarMultivariateFunction<P>,Number<P>>());
+    constraint_class.def("lower_bound", &ConstraintType<P>::lower_bound);
+    constraint_class.def("upper_bound", &ConstraintType<P>::upper_bound);
+    constraint_class.def("function", (const ScalarMultivariateFunction<P>&(ConstraintType<P>::*)()const) &ConstraintType<P>::function);
+    constraint_class.def("__str__",&__cstr__<ConstraintType<P>>);
+    constraint_class.def("__bool__",[](ConstraintType<P> z){throw pybind11::type_error("Cannot use " + class_name<P>() + "Constraint" + " object in boolean context");});
 
-    effective_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
+    pybind11::class_<LowerConstraintType<P>,pybind11::bases<ConstraintType<P>>> lower_constraint_class(module,(class_name<P>()+"LowerConstraint").c_str());
+    lower_constraint_class.def("__le__", (ConstraintType<P>(*)(LowerConstraintType<P> const&, Number<P>const&)) operator<=);
+    lower_constraint_class.def("__str__",&__cstr__<LowerConstraintType<P>>);
 
-    pybind11::class_<ValidatedConstraint> validated_constraint_class(module,"ValidatedConstraint");
-    validated_constraint_class.def(pybind11::init<ValidatedNumber,ValidatedScalarMultivariateFunction,ValidatedNumber
-    >());
-    validated_constraint_class.def(pybind11::init<ValidatedConstraint>());
+    pybind11::class_<UpperConstraintType<P>,pybind11::bases<ConstraintType<P>>> upper_constraint_class(module,(class_name<P>()+"UpperConstraint").c_str());
+    upper_constraint_class.def("__ge__", (ConstraintType<P>(*)(UpperConstraintType<P> const&, Number<P>const&)) operator>=);
+    upper_constraint_class.def("__str__",&__cstr__<UpperConstraintType<P>>);
+
+    pybind11::class_<EqualityConstraintType<P>,pybind11::bases<ConstraintType<P>>> equality_constraint_class(module,(class_name<P>()+"EqualityConstraint").c_str());
+    equality_constraint_class.def("__str__",&__cstr__<EqualityConstraintType<P>>);
+
+    return constraint_class;
+}
+
+Void export_constraints(pybind11::module& module)
+{
+    auto effective_constraint_class=export_constraint<EffectiveTag>(module);
+    auto validated_constraint_class=export_constraint<ValidatedTag>(module);
+
     validated_constraint_class.def(pybind11::init<EffectiveConstraint>());
-    validated_constraint_class.def("lower_bound", &ValidatedConstraint::lower_bound);
-    validated_constraint_class.def("upper_bound", &ValidatedConstraint::upper_bound);
-    validated_constraint_class.def("function", (const ValidatedScalarMultivariateFunction&(ValidatedConstraint::*)()const) &ValidatedConstraint::function);
-    validated_constraint_class.def("__str__",&__cstr__<ValidatedConstraint>);
+    pybind11::implicitly_convertible<EffectiveConstraint,ValidatedConstraint>();
 }
 
 template<class P> Void export_optimisation_problem(pybind11::module& module)
 {
     pybind11::class_<FeasibilityProblem<P>> feasibility_problem_class(module,(class_name<P>()+"FeasibilityProblem").c_str());
     feasibility_problem_class.def(pybind11::init<BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
+    feasibility_problem_class.def(pybind11::init<BoxType<P>,const List<ConstraintType<P>>&>());
     feasibility_problem_class.def("__str__",__cstr__<FeasibilityProblem<P>>);
     feasibility_problem_class.def_readwrite("D", &FeasibilityProblem<P>::D);
     feasibility_problem_class.def_readwrite("g", &FeasibilityProblem<P>::g);
@@ -85,6 +101,7 @@ template<class P> Void export_optimisation_problem(pybind11::module& module)
 
     pybind11::class_<OptimisationProblem<P>,pybind11::bases<FeasibilityProblem<P>>> optimisation_problem_class(module,(class_name<P>()+"OptimisationProblem").c_str());
     optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
+    optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,const List<ConstraintType<P>>&>());
     optimisation_problem_class.def("__str__",__cstr__<OptimisationProblem<P>>);
     optimisation_problem_class.def_readwrite("f", &OptimisationProblem<P>::f);
 
@@ -352,7 +369,7 @@ Void export_simplex_solver(pybind11::module& module)
 
 Void optimization_submodule(pybind11::module& module) {
     export_slackness(module);
-    export_constraint(module);
+    export_constraints(module);
 
     export_optimisation_problems(module);
     export_feasibility_checker_interface(module);

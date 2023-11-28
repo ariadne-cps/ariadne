@@ -72,9 +72,10 @@ inline Sign sign(const ExactIntervalType& ivl) {
 
 
 inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    if(c.bounds().lower_bound()==c.bounds().upper_bound()) { return os << c.function() << "==" << c.bounds().upper_bound(); }
-    if(c.bounds().upper_bound()==infty) { return os << c.bounds().lower_bound() << "<=" << c.function(); }
-    if(c.bounds().lower_bound()==-infty) { return os << c.function() << "<=" << c.bounds().upper_bound(); }
+    auto exact_bounds = c.cast_exact_bounds();
+    if(exact_bounds.lower_bound()==exact_bounds.upper_bound()) { return os << c.function() << "==" << c.bounds().upper_bound(); }
+    if(exact_bounds.upper_bound()==infty) { return os << c.bounds().lower_bound() << "<=" << c.function(); }
+    if(exact_bounds.lower_bound()==-infty) { return os << c.function() << "<=" << c.bounds().upper_bound(); }
     return os << c.bounds().lower_bound() << "<=" << c.function() << "<=" << c.bounds().upper_bound();
 }
 
@@ -90,7 +91,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
 
     for(SizeType i=0; i!=constraints.size(); ++i) {
         function[i]=constraints[i].function();
-        bounds[i]=constraints[i].bounds();
+        bounds[i]=constraints[i].cast_exact_bounds();
     }
     return this->feasible(domain,function,bounds);
 }
@@ -289,14 +290,14 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
 
     do {
         for(SizeType i=0; i!=constraints.size(); ++i) {
-            this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
+            this->hull_reduce(domain,constraints[i].function(),constraints[i].cast_exact_bounds());
         }
         if(definitely(domain.is_empty())) { return true; }
 
         if(USE_BOX_REDUCE) {
             for(SizeType i=0; i!=constraints.size(); ++i) {
                 for(SizeType j=0; j!=domain.size(); ++j) {
-                    this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
+                    this->box_reduce(domain,constraints[i].function(),constraints[i].cast_exact_bounds(),j);
                     if(definitely(domain[j].is_empty())) { return true; }
                 }
             }

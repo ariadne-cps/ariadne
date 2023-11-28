@@ -455,9 +455,9 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     module.def("compose", (Function<P,RES(ARG)>(*)(const Function<P,RES(RealVector)>&,const Function<P,RealVector(ARG)>&)) &compose);
 
     if constexpr (Same<P,EffectiveTag> and Same<SIG,RealScalar(RealVector)>) {
-        function_class.def("__eq__", &__eq__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
-        function_class.def("__le__", &__le__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
-        function_class.def("__ge__", &__ge__<EffectiveScalarMultivariateFunction,EffectiveNumber,Return<EffectiveConstraint>>);
+        function_class.def("__eq__", &__eq__<EffectiveScalarMultivariateFunction,EffectiveNumber>);
+        function_class.def("__le__", &__le__<EffectiveScalarMultivariateFunction,EffectiveNumber>);
+        function_class.def("__ge__", &__ge__<EffectiveScalarMultivariateFunction,EffectiveNumber>);
     }
 
 }

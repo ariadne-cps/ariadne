@@ -92,7 +92,7 @@ template<class X> class SymmetricMatrix
     //!@}
 
     //! Explicit conversion of a normal matrix to a symmetric matrix.
-    SymmetricMatrix(const Matrix<X>& A);
+    explicit SymmetricMatrix(const Matrix<X>& A);
 
     //! Conversion of a symmetric matrix to a dense matrix.
     operator Matrix<X> () const;
@@ -128,14 +128,22 @@ template<class X> class SymmetricMatrix
     X zero_element() const;
   public:
     template<class T> friend OutputStream& operator<<(OutputStream& os, SymmetricMatrix<T>const& A);
-    template<class T> friend SymmetricMatrix<T> operator+(SymmetricMatrix<T> const&, SymmetricMatrix<T> const&);
-    template<class T> friend SymmetricMatrix<T> operator-(SymmetricMatrix<T> const&, SymmetricMatrix<T> const&);
-    template<class T> friend SymmetricMatrix<T> operator*(T const&, SymmetricMatrix<T> const&);
-    template<class T> friend SymmetricMatrix<T> operator*(SymmetricMatrix<T> const&, T const&);
-    template<class T> friend SymmetricMatrix<T> operator/(SymmetricMatrix<T> const&, T const&);
-    template<class T> friend SymmetricMatrix<T> symmetrize(Matrix<T> const& A);
-    template<class T> friend SymmetricMatrix<T> outer(Matrix<T> const& A);
-    template<class T> friend SymmetricMatrix<T> AxTpTA(Matrix<T> const&, SymmetricMatrix<T> const&);
+    template<class T1, class T2> requires CanInplaceAdd<T1,T2> friend SymmetricMatrix<T1>& operator+=(SymmetricMatrix<T1>&, SymmetricMatrix<T2> const&);
+    template<class T> friend SymmetricMatrix<NegType<T>> operator-(SymmetricMatrix<T> const&);
+    template<class T1, class T2> requires CanInplaceSubtract<T1,T2> friend SymmetricMatrix<T1>& operator-=(SymmetricMatrix<T1>&, SymmetricMatrix<T2> const&);
+    template<class T1, class T2> friend SymmetricMatrix<SumType<T1,T2>> operator+(SymmetricMatrix<T1> const&, SymmetricMatrix<T2> const&);
+    template<class T1, class T2> friend SymmetricMatrix<DifferenceType<T1,T2>> operator-(SymmetricMatrix<T1> const&, SymmetricMatrix<T2> const&);
+    template<class T1, class T2> friend SymmetricMatrix<ProductType<T1,T2>> operator*(T1 const&, SymmetricMatrix<T2> const&);
+    template<class T1, class T2> friend SymmetricMatrix<ProductType<T1,T2>> operator*(SymmetricMatrix<T1> const&, T2 const&);
+    template<class T1, class T2> friend SymmetricMatrix<QuotientType<T1,T2>> operator/(SymmetricMatrix<T1> const&, T2 const&);
+    //! \brief Compute the symmetric matrix \f$(A+A^T)/2\f$ for a square matrix \f$A\f$.
+    template<class T> friend SymmetricMatrix<SumType<T>> symmetrize(Matrix<T> const& A);
+    //! \brief Compute the product \f$A^T A\f$ for a matrix \f$A\f$.
+    template<class T> friend SymmetricMatrix<ArithmeticType<T>> outer(Matrix<T> const& A);
+    //! \brief Compute the product \f$A^T S A\f$ for a symmetric matrix \f$S\f$.
+    template<class T1, class T2> friend SymmetricMatrix<ArithmeticType<T1,T2>> outer(Matrix<T1> const& A, SymmetricMatrix<T2> const& S);
+    //! \brief Compute the product \f$A^T D A\f$ for a diagonal matrix \f$D\f$.
+    template<class T1, class T2> friend SymmetricMatrix<ArithmeticType<T1,T2>> outer(Matrix<T1> const& A, DiagonalMatrix<T2> const& D);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
     OutputStream& _write(OutputStream& os) const;
@@ -266,54 +274,81 @@ template<class X> OutputStream& SymmetricMatrix<X>::_write(OutputStream& os) con
     return os << Matrix<X>(*this);
 }
 
-template<class X> SymmetricMatrix<X> operator+(SymmetricMatrix<X> const& S1, SymmetricMatrix<X> const& S2) {
+template<class X1, class X2> requires CanInplaceAdd<X1,X2> SymmetricMatrix<X1>& operator+=(SymmetricMatrix<X1>& S1, SymmetricMatrix<X2> const& S2) {
     assert(S1.size()==S2.size());
     const SizeType n=S1.size();
-    SymmetricMatrix<X> R(n,S1.zero_element()+S2.zero_element());
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        S1._ary[i]+=S2._ary[i];
+    }
+    return S1;
+}
+
+template<class X1, class X2> requires CanInplaceSubtract<X1,X2> SymmetricMatrix<X1>& operator-=(SymmetricMatrix<X1>& S1, SymmetricMatrix<X2> const& S2) {
+    assert(S1.size()==S2.size());
+    const SizeType n=S1.size();
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        S1._ary[i]-=S2._ary[i];
+    }
+    return S1;
+}
+
+template<class X> SymmetricMatrix<NegType<X>> operator-(SymmetricMatrix<X> const& S) {
+    const SizeType n=S.size();
+    SymmetricMatrix<NegType<X>> R(n,-S.zero_element());
+    for(SizeType i=0; i!=n*(n+1)/2; ++i) {
+        R._ary[i]=-S._ary[i];
+    }
+    return R;
+}
+
+template<class X1, class X2> SymmetricMatrix<SumType<X1,X2>> operator+(SymmetricMatrix<X1> const& S1, SymmetricMatrix<X2> const& S2) {
+    assert(S1.size()==S2.size());
+    const SizeType n=S1.size();
+    SymmetricMatrix<SumType<X1,X2>> R(n,S1.zero_element()+S2.zero_element());
     for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=S1._ary[i]+S2._ary[i];
     }
     return R;
 }
 
-template<class X> SymmetricMatrix<X> operator-(SymmetricMatrix<X> const& S1, SymmetricMatrix<X> const& S2) {
+template<class X1, class X2> SymmetricMatrix<DifferenceType<X1,X2>> operator-(SymmetricMatrix<X1> const& S1, SymmetricMatrix<X2> const& S2) {
     assert(S1.size()==S2.size());
     const SizeType n=S1.size();
-    SymmetricMatrix<X> R(n,S1.zero_element()-S2.zero_element());
+    SymmetricMatrix<DifferenceType<X1,X2>> R(n,S1.zero_element()-S2.zero_element());
     for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=S1._ary[i]-S2._ary[i];
     }
     return R;
 }
 
-template<class X> SymmetricMatrix<X> operator*(X const& x1, SymmetricMatrix<X> const& S2) {
+template<class X1, class X2> SymmetricMatrix<ProductType<X1,X2>> operator*(X1 const& x1, SymmetricMatrix<X2> const& S2) {
     const SizeType n=S2.size();
-    SymmetricMatrix<X> R(n,x1*S2.zero_element());
+    SymmetricMatrix<ProductType<X1,X2>> R(n,x1*S2.zero_element());
     for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=x1*S2._ary[i];
     }
     return R;
 }
 
-template<class X> SymmetricMatrix<X> operator*(SymmetricMatrix<X> const& S1, X const& x2) {
+template<class X1, class X2> SymmetricMatrix<ProductType<X1,X2>> operator*(SymmetricMatrix<X1> const& S1, X2 const& x2) {
     const SizeType n=S1.size();
-    SymmetricMatrix<X> R(n,S1.zero_element()*x2);
+    SymmetricMatrix<ProductType<X1,X2>> R(n,S1.zero_element()*x2);
     for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=S1._ary[i]*x2;
     }
     return R;
 }
 
-template<class X> SymmetricMatrix<X> operator/(SymmetricMatrix<X> const& S1, X const& x2) {
+template<class X1, class X2> SymmetricMatrix<QuotientType<X1,X2>> operator/(SymmetricMatrix<X1> const& S1, X2 const& x2) {
     const SizeType n=S1.size();
-    SymmetricMatrix<X> R(n,S1.zero_element()/x2);
+    SymmetricMatrix<QuotientType<X1,X2>> R(n,S1.zero_element()/x2);
     for(SizeType i=0; i!=n*(n+1)/2; ++i) {
         R._ary[i]=S1._ary[i]/x2;
     }
     return R;
 }
 
-template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
+template<class X> SymmetricMatrix<ArithmeticType<X>> outer(Matrix<X> const& A) {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     SymmetricMatrix<X> S(n,A.zero_element());
@@ -329,7 +364,7 @@ template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
     return S;
 }
 
-template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
+template<class X> SymmetricMatrix<ArithmeticType<X>> outer(SymmetricMatrix<X> const& A) {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     SymmetricMatrix<X> S(n,A.zero_element());
@@ -345,7 +380,7 @@ template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
     return S;
 }
 
-template<class X> SymmetricMatrix<X> symmetrize(Matrix<X> const& A) {
+template<class X> SymmetricMatrix<SumType<X>> symmetrize(Matrix<X> const& A) {
     assert(A.row_size()==A.column_size());
     const SizeType n=A.row_size();
     SymmetricMatrix S(n,A.zero_element());

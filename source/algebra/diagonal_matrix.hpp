@@ -58,10 +58,12 @@ Matrix<X>& assign(Matrix<X>& A, G const& g) {
 
 struct DiagonalMatrixOperations {
 
+    //! \brief <p/>
     template<class X> friend OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& D) {
         return D._write(os);
     }
 
+    //! \brief <p/>
     template<class X> friend DiagonalMatrix<NegationType<X>> operator-(DiagonalMatrix<X> D) {
         if constexpr (Same<NegationType<X>,X>) {
             for(SizeType i=0; i!=D.size(); ++i) { D._at(i)=-D._at(i); } return D;
@@ -70,6 +72,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<SumType<X1,X2>> operator+(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
         ARIADNE_PRECONDITION(D1.size()==D2.size());
         if constexpr (Same<SumType<X1,X2>,X1>) {
@@ -79,6 +82,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<DifferenceType<X1,X2>> operator-(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
         ARIADNE_PRECONDITION(D1.size()==D2.size());
         if constexpr (Same<DifferenceType<X1,X2>,X1>) {
@@ -88,6 +92,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,X2>> operator*(X1 const& s1, DiagonalMatrix<X2> D2) {
         if constexpr (Same<ProductType<X1,X2>,X2>) {
             for(SizeType i=0; i!=D2.size(); ++i) { D2._at(i)*=s1; } return D2;
@@ -96,6 +101,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,Scalar<X2>>> operator*(DiagonalMatrix<X1> D1, X2 const& s2) {
         if constexpr (Same<ProductType<X1,X2>,X1>) {
             for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)*=s2; } return D1;
@@ -104,6 +110,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<QuotientType<X1,X2>> operator/(DiagonalMatrix<X1> D1, X2 const& s2) {
         if constexpr (Same<QuotientType<X1,X2>,X1>) {
             for(SizeType i=0; i!=D1.size(); ++i) { D1._at(i)/=s2; } return D1;
@@ -112,6 +119,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
         ARIADNE_PRECONDITION(D1.size()==D2.size());
         if constexpr (Same<ProductType<X1,X2>,X1>) {
@@ -121,6 +129,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend DiagonalMatrix<QuotientType<X1,X2>> operator/(DiagonalMatrix<X1> D1, DiagonalMatrix<X2> const& D2) {
         ARIADNE_PRECONDITION(D1.size()==D2.size());
         if constexpr (Same<QuotientType<X1,X2>,X1>) {
@@ -130,6 +139,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X> friend DiagonalMatrix<ReciprocalType<X>> inverse(DiagonalMatrix<X> D) {
         if constexpr (Same<ReciprocalType<X>,X>) {
             for(SizeType i=0; i!=D.size(); ++i) { D._at(i)=rec(D._at(i)); } return D;
@@ -138,6 +148,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         if constexpr (Same<SumType<X1,X2>,X1>) {
@@ -147,6 +158,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<SumType<X1,X2>> operator+(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         if constexpr (Same<SumType<X1,X2>,X2>) {
@@ -156,6 +168,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         if constexpr (Same<DifferenceType<X1,X2>,X1>) {
@@ -165,6 +178,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<DifferenceType<X1,X2>> operator-(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         if constexpr (Same<DifferenceType<X1,X2>,X2>) {
@@ -179,6 +193,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(Matrix<X1> A, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(A.column_size()==D.size());
         auto g = [&A,&D](SizeType i, SizeType j){return A.at(i,j)*D._at(j);};
@@ -186,6 +201,7 @@ struct DiagonalMatrixOperations {
         else { return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g); }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Matrix<X2> A) {
         ARIADNE_PRECONDITION(D.size()==A.row_size())
         auto g = [&D,&A](SizeType i, SizeType j){return D._at(i)*A.at(i,j);};
@@ -193,12 +209,14 @@ struct DiagonalMatrixOperations {
         else { return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g); }
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Matrix<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Transpose<Matrix<X2>> const& A) {
         ARIADNE_PRECONDITION(D.size()==A.row_size())
         auto g = [&D,&A](SizeType i, SizeType j){return D._at(i)*A.at(i,j);};
         return Matrix<ProductType<X1,X2>>(A.row_size(),A.column_size(),g);
     }
 
+    //! \brief <p/>
     template<class X1, class X2> friend Vector<ProductType<X1,X2>> operator*(DiagonalMatrix<X1> const& D, Vector<X2> v) {
         ARIADNE_PRECONDITION(D.size()==v.size())
         if constexpr (Same<ProductType<X1,X2>,X2>) {
@@ -210,6 +228,8 @@ struct DiagonalMatrixOperations {
             return Vector<ProductType<X1,X2>>(v.size(),[&D,&v](SizeType i){return D._at(i)*v.at(i);});
         }
     }
+
+    //! \brief <p/>
     template<class X1, class X2> friend Vector<ProductType<X1,X2>> operator*(Vector<X1> v, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(D.size()==v.size())
         if constexpr (Same<ProductType<X1,X2>,X1>) {
@@ -222,6 +242,7 @@ struct DiagonalMatrixOperations {
         }
     }
 
+    //! \brief <p/>
     template<class X> friend Vector<X> operator/(Vector<X> v, DiagonalMatrix<X> const& D) {
         ARIADNE_PRECONDITION(D.size()==v.size())
         for(SizeType i=0; i!=v.size(); ++i) {
@@ -229,6 +250,10 @@ struct DiagonalMatrixOperations {
         }
         return v;
     }
+
+    //! \brief The product \f$A^TDA\f$.
+    template<class X1, class X2> friend SymmetricMatrix<ArithmeticType<X1,X2>> outer(Matrix<X1> const& A, DiagonalMatrix<X2> D);
+
 };
 
 
@@ -240,23 +265,23 @@ template<class X> class DiagonalMatrix
     X _zero;
     Array<X> _ary;
   public:
-    template<class... PRS> requires Constructible<X,Nat,PRS...> explicit DiagonalMatrix(SizeType n, PRS...);
-    explicit DiagonalMatrix(Array<X>);
+    template<class... PRS> requires Constructible<X,Nat,PRS...> explicit DiagonalMatrix(SizeType n, PRS...); //!< <p/>
+    explicit DiagonalMatrix(Array<X>); //!< <p/>
     explicit DiagonalMatrix(Vector<X>);
-    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
-    template<class G> requires InvocableReturning<X,G,SizeType> DiagonalMatrix(SizeType n, G const& g);
-    SizeType size() const;
-    SizeType row_size() const;
-    SizeType column_size() const;
-    X const& zero_element() const;
-    X const& operator[](SizeType i) const;
-    X const& at(SizeType i, SizeType j) const;
-    X const& get(SizeType i, SizeType j) const;
-    X& operator[](SizeType i);
-    Void set(SizeType i, SizeType j, X const& x);
-    Vector<X> diagonal() const;
-    operator Matrix<X>() const;
-    operator SymmetricMatrix<X>() const;
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...); //!< <p/>
+    template<class G> requires InvocableReturning<X,G,SizeType> DiagonalMatrix(SizeType n, G const& g); //!< <p/>
+    SizeType size() const; //!< <p/>
+    SizeType row_size() const; //!< <p/>
+    SizeType column_size() const; //!< <p/>
+    X const& zero_element() const; //!< <p/>
+    X const& operator[](SizeType i) const; //!< <p/>
+    X const& at(SizeType i, SizeType j) const; //!< <p/>
+    X const& get(SizeType i, SizeType j) const; //!< <p/>
+    X& operator[](SizeType i); //!< <p/>
+    Void set(SizeType i, SizeType j, X const& x); //!< <p/>
+    Vector<X> diagonal() const; //!< <p/>
+    operator Matrix<X>() const; //!< <p/>
+    operator SymmetricMatrix<X>() const; //!< <p/>
   private: public:
     X& _at(SizeType i);
     X const& _at(SizeType i) const;

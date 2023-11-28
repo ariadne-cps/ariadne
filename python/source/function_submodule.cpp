@@ -34,6 +34,8 @@
 #include "utility/container.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/symmetric_matrix.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/expansion.inl.hpp"
 #include "algebra/multi_index.hpp"

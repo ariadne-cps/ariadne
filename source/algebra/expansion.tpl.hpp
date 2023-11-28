@@ -211,8 +211,6 @@ template<class I, class X> Void Expansion<I,X>::remove_zeros() {
     this->resize(static_cast<SizeType>(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin()));
 }
 
-template<class X, class Y> concept CanInplaceAdd = requires(X& x, Y const& y) { x+=y; };
-
 template<class I, class X>Void combine_terms(Expansion<I,X>& e) {
     if constexpr (CanInplaceAdd<X,X>) {
         auto begin=e.begin();

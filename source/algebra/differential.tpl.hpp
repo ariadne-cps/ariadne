@@ -30,6 +30,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
 #include "algebra/matrix.hpp"
+#include "algebra/symmetric_matrix.hpp"
 #include "algebra/multi_index.hpp"
 #include "algebra/series.hpp"
 #include "algebra/expansion.hpp"
@@ -237,9 +238,9 @@ template<class X> Covector<X> Differential<X>::gradient() const {
     return g;
 }
 
-template<class X> Matrix<X> Differential<X>::half_hessian() const {
+template<class X> SymmetricMatrix<X> Differential<X>::half_hessian() const {
     ARIADNE_PRECONDITION(this->degree()>=2);
-    Matrix<X> H(this->argument_size(),this->argument_size(),nul(this->value()));
+    SymmetricMatrix<X> H(this->argument_size(),nul(this->value()));
     ConstIterator iter=this->begin();
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
@@ -248,13 +249,13 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
         UniformConstReference<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
-        else { while(a[j]==0) { ++j; } H[i][j]=hlf(c); H[j][i]=hlf(c); }
+        else { while(a[j]==0) { ++j; } H[i][j]=hlf(c); }
         ++iter;
     }
     return H;
 }
 
-template<class X> Matrix<X> Differential<X>::hessian() const {
+template<class X> SymmetricMatrix<X> Differential<X>::hessian() const {
     return this->half_hessian()*2;
 }
 

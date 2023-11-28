@@ -34,6 +34,7 @@
 #include "algebra/covector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/diagonal_matrix.hpp"
+#include "algebra/symmetric_matrix.hpp"
 
 #include "algebra/matrix.tpl.hpp"
 
@@ -45,6 +46,7 @@ template<> struct PythonTemplateName<Vector> { static std::string get() { return
 template<> struct PythonTemplateName<Covector> { static std::string get() { return "Covector"; } };
 template<> struct PythonTemplateName<Matrix> { static std::string get() { return "Matrix"; } };
 template<> struct PythonTemplateName<DiagonalMatrix> { static std::string get() { return "DiagonalMatrix"; } };
+template<> struct PythonTemplateName<SymmetricMatrix> { static std::string get() { return "SymmetricMatrix"; } };
 
 template<class X> struct PythonClassName<Vector<X>> { static std::string get() { return python_template_class_name<X>("Vector"); } };
 template<class X> struct PythonClassName<Covector<X>> { static std::string get() { return python_template_class_name<X>("Covector"); } };
@@ -609,6 +611,36 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
 }
 
 
+template<class X> pybind11::class_<SymmetricMatrix<X>> export_symmetric_matrix(pybind11::module& module)
+{
+    pybind11::class_<SymmetricMatrix<X>> symmetric_matrix_class(module,python_class_name<SymmetricMatrix<X>>().c_str());
+    if constexpr (Constructible<X,Nat>) {
+        symmetric_matrix_class.def(pybind11::init<SizeType>());
+    }
+    if constexpr (HasPrecisionType<X>) {
+        typedef typename X::PrecisionType PR;
+        symmetric_matrix_class.def(pybind11::init<SizeType,PR>());
+    }
+    symmetric_matrix_class.def("__setitem__", &SymmetricMatrix<X>::set);
+    symmetric_matrix_class.def("__getitem__", &SymmetricMatrix<X>::get);
+    symmetric_matrix_class.def("__str__",&__cstr__<SymmetricMatrix<X>>);
+
+    symmetric_matrix_class.def("__neg__", &__neg__<SymmetricMatrix<X> , Return<SymmetricMatrix<X>> >);
+
+    if constexpr (Same<ArithmeticType<X>,X>) {
+        symmetric_matrix_class.def("__add__", &__add__<SymmetricMatrix<X>,SymmetricMatrix<X>>, pybind11::is_operator());
+        symmetric_matrix_class.def("__sub__", &__sub__<SymmetricMatrix<X>,SymmetricMatrix<X>>, pybind11::is_operator());
+        symmetric_matrix_class.def("__rmul__", &__rmul__<SymmetricMatrix<X>,X>, pybind11::is_operator());
+        symmetric_matrix_class.def("__mul__", &__mul__<SymmetricMatrix<X>,X>, pybind11::is_operator());
+        symmetric_matrix_class.def(__py_div__, &__div__<SymmetricMatrix<X>,X>, pybind11::is_operator());
+    }
+
+    pybind11::implicitly_convertible<SymmetricMatrix<X>,Matrix<X>>();
+
+    return symmetric_matrix_class;
+}
+
+
 pybind11::class_<PivotMatrix> export_pivot_matrix(pybind11::module& module)
 {
 
@@ -657,6 +689,13 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_diagonal_matrix<FloatMPApproximation>(module);
     export_diagonal_matrix<FloatMPBounds>(module);
     export_diagonal_matrix<FloatMP>(module);
+
+    export_symmetric_matrix<FloatDPApproximation>(module);
+    export_symmetric_matrix<FloatDPBounds>(module);
+    export_symmetric_matrix<FloatDP>(module);
+    export_symmetric_matrix<FloatMPApproximation>(module);
+    export_symmetric_matrix<FloatMPBounds>(module);
+    export_symmetric_matrix<FloatMP>(module);
 
     export_vector<Real>(module);
     export_covector<Real>(module);
@@ -727,5 +766,13 @@ Void linear_algebra_submodule(pybind11::module& module) {
     diagonal_matrix_template.instantiate<FloatMPBounds>();
     diagonal_matrix_template.instantiate<FloatDP>();
     diagonal_matrix_template.instantiate<FloatMP>();
+
+    template_<SymmetricMatrix> symmetric_matrix_template(module,python_template_name<SymmetricMatrix>().c_str());
+    symmetric_matrix_template.instantiate<FloatDPApproximation>();
+    symmetric_matrix_template.instantiate<FloatMPApproximation>();
+    symmetric_matrix_template.instantiate<FloatDPBounds>();
+    symmetric_matrix_template.instantiate<FloatMPBounds>();
+    symmetric_matrix_template.instantiate<FloatDP>();
+    symmetric_matrix_template.instantiate<FloatMP>();
 
 }

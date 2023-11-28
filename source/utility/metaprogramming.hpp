@@ -187,6 +187,10 @@ template<class A1, class A2> concept CanAdd = requires(A1 a1, A2 a2) { { a1+a2 }
 template<class A1, class A2> concept CanSubtract = requires(A1 a1, A2 a2) { { a1-a2 }; };
 template<class A1, class A2> concept CanMultiply = requires(A1 a1, A2 a2) { { a1*a2 }; };
 template<class A1, class A2> concept CanDivide = requires(A1 a1, A2 a2) { { a1/a2 }; };
+template<class A1, class A2> concept CanInplaceAdd = requires(A1& a1, A2 const& a2) { { a1+=a2 }; };
+template<class A1, class A2> concept CanInplaceSubtract = requires(A1& a1, A2 const& a2) { { a1-=a2 }; };
+template<class A1, class A2> concept CanInplaceMultiply = requires(A1& a1, A2 const& a2) { { a1*=a2 }; };
+template<class A1, class A2> concept CanInplaceDivide = requires(A1& a1, A2 const& a2) { { a1/=a2 }; };
 
 
 } // namespace Ariadne

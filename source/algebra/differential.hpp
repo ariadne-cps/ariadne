@@ -204,8 +204,8 @@ class Differential
     //! \brief The Hessian matrix.
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
-    Matrix<X> hessian() const;
-    Matrix<X> half_hessian() const;
+    SymmetricMatrix<X> hessian() const;
+    SymmetricMatrix<X> half_hessian() const;
 
     //! \brief A reference to the coefficient of \f$x_j\f$.
     X& operator[](const SizeType& j);

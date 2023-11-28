@@ -36,6 +36,7 @@
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
+#include "algebra/symmetric_matrix.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/evaluate.hpp"
 #include "function/formula.hpp"

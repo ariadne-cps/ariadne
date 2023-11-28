@@ -33,6 +33,8 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
+#include "algebra/matrix.hpp"
+#include "algebra/symmetric_matrix.hpp"
 #include "algebra/differential.hpp"
 #include "algebra/univariate_differential.hpp"
 #include "algebra/fixed_differential.hpp"

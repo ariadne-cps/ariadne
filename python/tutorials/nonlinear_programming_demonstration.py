@@ -33,18 +33,33 @@ print("x:",x)
 v=Vector[FloatDPBounds]([{"0.625":"0.7"},("-1.5","-1.25")],dp)
 print("v:",v)
 
-
+# Construct functions and Boxes
 g=Function(2, lambda x : [sqr(x[0])+2*sqr(x[1])-1])
-
+print("g:",g,type(g))
 f=Function(2, lambda x :  2*x[0]+3*x[1])
+print("f:",f,type(f))
 D=BoxDomainType([{-2:2},(-1,1)])
+print("D:",D,type(D))
 C=BoxDomainType([{0:0}])
 C=BoxDomainType([{"-0.0625":"0.0625"}])
+print("C:",C,type(C))
 
 opt = InfeasibleInteriorPointOptimiser()
 # Simple feasible case
 D1=BoxDomainType([{-1:2},(-1,1)])
 fp1 = ValidatedFeasibilityProblem(D1,g,C)
+print("fp1:",fp1)
+print("opt.feasible(D1,g,C):",opt.feasible(fp1))
+# Construct using constraints
+g0=g[0]
+C0l=ExactNumber(C[0].lower_bound())
+C0u=ExactNumber(C[0].upper_bound())
+gC0=C0l<=(g0<=C0u)
+print("gC0:",gC0,type(gC0))
+fp1 = ValidatedFeasibilityProblem(D1,[C0l<=(g0<=C0u)])
+fp1 = ValidatedFeasibilityProblem(D1,[(C0l<=g0)<=C0u])
+# Note that we cannot construct a constraint using Cl <= g <= Cu, need (Cl <= g) <= Cu or Cl <= (g <= Cu)
+# We can also construct constraints C0l<=g0, g0>=C0u, g0<=C0u, g0=C0
 print("fp1:",fp1)
 print("opt.feasible(D1,g,C):",opt.feasible(fp1))
 

@@ -67,6 +67,15 @@ is also available in Python as <tt>Float[DP]</tt>,
 and the C++ template class \ref Bounds "Bounds<Float<DP>>" with python class name \ref FloatDPBounds,
 is also available in Python as <tt>Bounds[Float[DP]]</tt> or <tt>Bounds[FloatDP]</tt>.
 
+ - <em>Construction:</em> <br>
+Whenever a C++ object can be constructed from an \ref Array "Array<T>", \ref List "List<T>",
+or \ref InitializerList "InitializerList<T>",
+the corresponding Python object can be constructed from a Python \a list.
+Whenever there is a conversion from a C++ \ref Pair "Pair<T1,T2>" or \ref Tuple "Tuple<TS...>",
+there is a conversion from a Python \a tuple to the object.
+In particular, if a C++ object can be constructed from an array or list of pairs or tuples,
+then there is a constructor from a Python \a list of \a tuple objects.
+In particular, a \ref Vector[\ref Bounds[F]], and a \ref Box[I] can be constructed from a list of pairs,
  - <em>Conversion:</em> <br>
 Conversions from a class <tt>F</tt> to a class <tt>T</tt> are defined by a constructor
 <tt>T(F)</tt> in class <tt>T</tt>, or by a conversion operator <tt>operator T()</tt>

@@ -91,9 +91,14 @@ template<class I> Box<I> Box<I>::split(SizeType k, SplitPart lmu) const
 template<class I> Pair< Box<I>, Box<I> > Box<I>::split(SizeType k) const
 {
     const Box<I>& bx=*this;
+    return bx.split(k,bx[k].midpoint());
+}
+
+template<class I> Pair< Box<I>, Box<I> > Box<I>::split(SizeType k, typename I::MidpointType const& c) const
+{
+    const Box<I>& bx=*this;
     ARIADNE_ASSERT(k<bx.dimension());
     Pair< Box<I>, Box<I> > r(bx,bx);
-    auto c=bx[k].midpoint();
     r.first[k].set_upper_bound(c);
     r.second[k].set_lower_bound(c);
     return r;

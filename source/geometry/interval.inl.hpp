@@ -154,11 +154,11 @@ template<class U> inline auto split(Interval<U> const& ivl, SplitPart lmu) -> In
 }
 
 template<class U> inline auto split(Interval<U> const& ivl) -> Pair<Interval<U>,Interval<U>> {
-    auto c=make_split_point(hlf(ivl.lower_bound()+ivl.upper_bound()));
-    return std::make_pair(Interval<U>(ivl.lower_bound(),c),Interval<U>(c,ivl.upper_bound()));
+    return split(ivl,ivl.midpoint());
 }
 
-
+template<class U> inline auto split(Interval<U> const& ivl, typename Interval<U>::MidpointType const& c) -> Pair<Interval<U>,Interval<U>> {
+    return std::make_pair(Interval<U>(ivl.lower_bound(),c),Interval<U>(c,ivl.upper_bound())); }
 
 template<class U> inline auto operator==(Interval<U> const& ivl1, Interval<U> const& ivl2) -> decltype(ivl1.upper_bound()==ivl2.upper_bound()) {
     return ivl1.lower_bound()==ivl2.lower_bound() && ivl1.upper_bound()==ivl2.upper_bound(); }

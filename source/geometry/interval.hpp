@@ -390,6 +390,8 @@ template<class U, class X> inline auto hull(X x1, Interval<U> const& ivl2) -> In
 template<class U> inline auto split(Interval<U> const& ivl1, SplitPart lmu) -> Interval<U>;
 //! \related Interval \brief Split an interval into its lower and upper half.
 template<class U> inline auto split(Interval<U> const& ivl) -> Pair<Interval<U>,Interval<U>>;
+//! \related Interval \brief Split an interval into lower and upper pieces at value \a c.
+template<class U> inline auto split(Interval<U> const& ivl, typename Interval<U>::MidpointType const& c) -> Pair<Interval<U>,Interval<U>>;
 
 
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects given information on endpoints.

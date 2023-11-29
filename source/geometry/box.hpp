@@ -167,13 +167,15 @@ class Box
     //! \brief Test if the box is bounded. Returns the same type as IntervalType::is_bounded().
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
-    //! Splits the box along coordinate \a k and takes the lower , middle, or upper part as given by \a lmu.
+    //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SizeType k, SplitPart lmu) const;
-    //! Splits the box along the longest direction \a k and takes the lower , middle, or upper part as given by \a lmu.
+    //! Splits the box along the widest coordinate and takes the lower, middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SplitPart lmu) const;
-    //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
+    //! Splits the box along coordinate \a k and returns both the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split(SizeType k) const;
-    //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
+    //! Splits the box along coordinate \a k at value \a c and returns both the lower and upper parts.
+    Pair< Box<IntervalType>, Box<IntervalType> > split(SizeType k, typename IntervalType::MidpointType const& c) const;
+    //! Splits the box along widest coordinate and returns both the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split() const;
 
     //! \brief Test if the box contains the vector \a v.
@@ -242,6 +244,7 @@ template<class I> inline Box<I> split(const Box<I>& bx, SizeType k, SplitPart lm
 template<class I> inline Box<I> split(const Box<I>& bx, SplitPart lmu) { return bx.split(lmu); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx) { return bx.split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx, SizeType k) { return bx.split(k); }
+template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx, SizeType k, typename I::MidpointType const& c) { return bx.split(k,c); }
 
 //! \relates FloatDPExactBox \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }

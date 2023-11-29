@@ -51,6 +51,7 @@ struct DoubleInput {
 
 //! \ingroup BasicSetSubModule GeometryModule
 //! \brief A box in Euclidean space.
+//! \details A %Box can be constructed as an initializer-list of (brace-enclosed) pairs, consisting of lower and upper bounds for each component.
 template<class I>
 class Box
 {

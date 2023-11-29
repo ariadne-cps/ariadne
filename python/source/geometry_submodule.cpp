@@ -597,6 +597,7 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     module.def("intersection", (IntervalType(*)(IntervalType const&,IntervalType const&)) &intersection);
     module.def("hull", (IntervalType(*)(IntervalType const&, IntervalType const&)) &hull);
     module.def("split", (Pair<IntervalType,IntervalType>(*)(IntervalType const&)) &split);
+    module.def("split", (Pair<IntervalType,IntervalType>(*)(IntervalType const&, MidpointType const&)) &split);
 
     if constexpr (Same<IVL,IntervalDomainType>) {
         module.attr("IntervalDomainType")=interval_class;
@@ -713,6 +714,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     box_class.def("is_empty", (SeparatedType(BX::*)()const) &BX::is_empty);
     box_class.def("split", (Pair<BX,BX>(BX::*)()const) &BX::split);
     box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType)const) &BX::split);
+    box_class.def("split", (Pair<BX,BX>(BX::*)(SizeType, typename IVL::MidpointType const&)const) &BX::split);
     box_class.def("__str__",&__cstr__<BX>);
     box_class.def("__repr__",&__repr__<BX>);
 
@@ -747,7 +749,10 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     module.def("product", (BX(*)(const BX&,const BX&)) &product);
     module.def("hull", (BX(*)(const BX&,const BX&)) &hull);
     module.def("intersection", (BX(*)(const BX&,const BX&)) &intersection);
+
     module.def("split", (Pair<BX,BX>(*)(BX const&)) &split);
+    module.def("split", (Pair<BX,BX>(*)(BX const&, SizeType)) &split);
+    module.def("split", (Pair<BX,BX>(*)(BX const&, SizeType, typename IVL::MidpointType const&)) &split);
 
     if constexpr (Same<BX,BoxDomainType>) {
         module.attr("BoxDomainType")=box_class;

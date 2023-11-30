@@ -189,30 +189,42 @@ template<class R, class X1, class X2> inline R _concrete_apply_max_or_min(Binary
     if (op.code()==BinaryElementaryOperator(Max()).code()) { return _make_number_wrapper(max(x1,x2)); }
     else if (op.code()==BinaryElementaryOperator(Min()).code()) { return _make_number_wrapper(min(x1,x2)); }
     String yc1=class_name<X1>(); String yc2=class_name<X2>();
-    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+    ARIADNE_THROW(DispatchException,"Not max or min: "<<op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+}
+
+template<class R, class X1, class X2> inline R _concrete_apply_special_max_or_min(BinaryElementaryOperator op, X1 const& x1, X2 const& x2) {
+#warning
+    std::cerr<<"_concrete_apply_special_max_or_min(BinaryElementaryOperator op, "<<class_name<X1>()<<" x1, "<<class_name<X2>()<<" x2) with op="<<op<<", x1="<<x1<<", x2="<<x2<<"\n";
+    if (op.code()==BinaryElementaryOperator(Max()).code()) { return _make_number_wrapper(max(x1,x2)); }
+    else if (op.code()==BinaryElementaryOperator(Min()).code()) { return _make_number_wrapper(min(x1,x2)); }
+    else { return _make_number_wrapper(op(x1,x2)); }
 }
 
 // FIXME: Prefer symbolic dispatch
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, F const& x2) {
-    return _concrete_apply_max_or_min<R>(op,x1,x2);
+    return _concrete_apply_special_max_or_min<R>(op,x1,x2);
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Integer const& z2) {
-    return _concrete_apply_max_or_min<R>(op,x1,z2);
+    return _concrete_apply_special_max_or_min<R>(op,x1,z2);
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Integer const& z1, F const& x2) {
-    return _concrete_apply_max_or_min<R>(op,z1,x2);
+    return _concrete_apply_special_max_or_min<R>(op,z1,x2);
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Dyadic const& w2) {
-    return _concrete_apply_max_or_min<R>(op,x1,w2);
+    return _concrete_apply_special_max_or_min<R>(op,x1,w2);
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Dyadic const& w1, F const& x2) {
-    return _concrete_apply_max_or_min<R>(op,w1,x2);
+    return _concrete_apply_special_max_or_min<R>(op,w1,x2);
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, F const& x1, Rational const& q2) {
+    return _concrete_apply_special_max_or_min<R>(op,x1,q2);
+#warning
     String yc1=class_name<F>(); String yc2=class_name<Rational>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<q2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
 template<class R, ARawFloat F> inline R _concrete_apply(BinaryElementaryOperator op, Rational const& q1, F const& x2) {
+#warning
+    return _concrete_apply_special_max_or_min<R>(op,q1,x2);
     String yc1=class_name<Rational>(); String yc2=class_name<F>();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<q1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }

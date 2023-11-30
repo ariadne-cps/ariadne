@@ -913,16 +913,17 @@ class SlackPrimalDualComplementaryInteriorPointOptimiser
     StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
                                            const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
     //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           StepData&) const;
+    Approximation<FLT> minimisation_step(const ApproximateOptimisationProblem& p,
+                                         StepData&) const;
 
     //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, SlackPrimalDualComplementaryInteriorPointOptimiser const& opt);
   public:
     //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
-                           Approximation<FLT>& mu) const;
+    Approximation<FLT> minimisation_step(const ApproximateOptimisationProblem& p,
+                                         Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x,
+                                         Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z,
+                                         Approximation<FLT>& mu) const;
     //! \brief <p/>
     Void feasibility_step(const ApproximateFeasibilityProblem& p,
                           Vector<Approximation<FLT>>& w, Vector<Approximation<FLT>>& x, Vector<Approximation<FLT>>& y, Vector<Approximation<FLT>>& z) const;
@@ -975,9 +976,9 @@ class SlackPrimalSplitDualComplementaryInteriorPointOptimiser
     //! \brief <p/>
     StepData* initial_step_data_hotstarted(const ApproximateFeasibilityProblem& p,
                                            const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
-    //! \brief <p/>
-    Void minimisation_step(const ApproximateOptimisationProblem& p,
-                           StepData& d) const;
+    //! \brief Performs one step of the interior point algorithm on \a d in-place. Returns the step-size parameter \f$\alpha\f$ used.
+    Approximation<FLT> minimisation_step(const ApproximateOptimisationProblem& p,
+                                         StepData& d) const;
     //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, SlackPrimalSplitDualComplementaryInteriorPointOptimiser const& opt);
   private:
@@ -1086,9 +1087,33 @@ class InfeasibleKarushKuhnTuckerOptimiser
     virtual ValidatedKleenean feasible(ValidatedFeasibilityProblem p) const override;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the primal and dual variables.
+    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    minimise_hotstarted(const ValidatedOptimisationProblem& p,
+                        const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
+
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<ValidatedKleenean,Vector<Approximation<FLT>>> feasible_hotstarted(ValidatedFeasibilityProblem p,
-                                                                           const SlackPrimalDualData<Approximation<FLT>>& wxy0) const;
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    feasible_hotstarted(ValidatedFeasibilityProblem p,
+        const SlackPrimalDualData<Approximation<FLT>>& wxy0) const;
+
+    Variant<OptimalityCertificate,InfeasibilityCertificate>
+    splitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
+                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
+
+    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    check_minimality(const ValidatedOptimisationProblem& p,
+                     const Vector<Approximation<FLT>>& w, const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Vector<Approximation<FLT>>& z) const;
+
+    //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    check_minimality(const ValidatedOptimisationProblem& p,
+                     const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
+
+
+    auto minimise_old(ValidatedOptimisationProblem p) const -> ValidatedVector;
 };
 
 

@@ -132,7 +132,7 @@ Note that for \f$\unl{c}\leq g(x)\leq\ovl{c}\f$ we have \f$|2g(x)-\unl{c}-\ovl{c
 \subsubsection nonlinear_state_constraints State constraints
 
 Taking state constraints \f$\unl{d}\leq x\leq\ovl{d}\f$, we obtain the central path
-\f[ \boxed{ \begin{gathered} \nabla f(x) + z = 0; \\ (\ovl{d}-x)(x-\unl{d})z + (2x-\unl{d}-\ovl{d}) \mu = 0 . \end{gathered} } \f]
+\f[ \boxed{ \begin{gathered} \nabla f(x) + z = 0; \\ (x-\unl{d})(\ovl{d}-x)z - (2x-\unl{d}-\ovl{d}) \mu = 0 . \end{gathered} } \f]
 If \f$\ovl{d}=-\unl{d}=d\f$, this simplifies to \f$ (d^2-x^2) z - 2 x \mu = 0 . \f$
 
 
@@ -160,11 +160,14 @@ If \f$ \unl{c}_j < \ovl{c}_j \f$, then we must have \f$\unl{c}_j < w_j < \ovl{c}
 If \f$ \unl{c}_j = \ovl{c}_j \f$ have common value \f$c_j\f$, then \f$ -(w_j - c_j)^2 y_j - 2 \mu(w_j-c_j)=0 \f$. Hence \f$w_j=c_j\f$ and there are no further conditions on \f$y_j\f$.
 The equation \f$(w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j -  \mu (2w_j - \unl{c}_j - \ovl{c}_j) = 0\f$ is therefore replaced by \f$w_j-c_j = 0\f$ for this \f$j\f$.
 
-If \f$\unl{c}_j=0\f$ and \f$\ovl{c}_j=\infty\f$, then \f$ \mu ( 1/\infty - 1/w_j ) - y_j = 0  \f$ so \f$ w_j \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
-If \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j=0\f$, then \f$ \mu ( 1/w_j - 1/\infty ) - y_j = 0  \f$ so \f$ w_j \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+If \f$\unl{c}_j>-\infty\f$ and \f$\ovl{c}_j=\infty\f$, then \f$ \mu ( 1/\infty - 1/(w_j-\unl{c}_j) ) - y_j = 0  \f$ so \f$ (w_j-\unl{c}_j) \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
+If additionally \f$\unl{c}_j=0\f$, then \f$ w_j \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
 
-We therefore have the following special cases for the central path:
-\f[ \boxed{ \displaystyle \begin{gathered} \unl{c}_j < \ovl{c}_j \implies \unl{c}_j < w_j < \ovl{c}_j ; \\ \unl{c}_j = \ovl{c}_j = c_j \implies w_j = c_j; \\ \unl{c}_j = 0 \wedge \ovl{c}_j = \infty \implies w_j y_j + \mu = 0 \wedge y_j<0 ; \\ \unl{c}_j = -\infty \wedge \ovl{c}_j = 0 \implies w_j y_j - \mu = 0 \wedge y_j>0 . \end{gathered} } \f]
+If \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j<\infty\f$, then \f$ \mu ( 1/(\ovl{c}_j-w_j) - 1/\infty ) - y_j = 0  \f$ so \f$ (\ovl{c}_j-w_j) \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+If additionally \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j=0\f$, then \f$ w_j \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+
+We therefore have the following cases for the central path:
+\f[ \boxed{ \displaystyle \begin{gathered} \unl{c}_j < \ovl{c}_j \implies (w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j-\mu(2w_j-\unl{c}_j-\ovl{c}_j) = 0 \wedge \unl{c}_j < w_j < \ovl{c}_j ; \\ \unl{c}_j = \ovl{c}_j = c_j \implies w_j = c_j; \\ \ovl{c}_j = \infty \implies (w_j-\unl{c}_j) y_j + \mu = 0 \wedge y_j<0 ; \\ \unl{c}_j = -\infty  \implies (\ovl{c}_j-w_j) y_j - \mu = 0 \wedge y_j>0 . \end{gathered} } \f]
 
 
 The Karush optimality conditions are obtained by taking \f$\mu\to 0\f$:

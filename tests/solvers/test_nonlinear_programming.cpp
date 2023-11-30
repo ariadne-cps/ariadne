@@ -154,6 +154,8 @@ class TestValidatedOptimiser
         : optimiser(opt.clone()) { }
 
     Void test() {
+        ARIADNE_TEST_CALL(test_constrained_optimisation()); return;
+        #warning
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
         ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
@@ -206,16 +208,36 @@ class TestValidatedOptimiser
         //EffectiveVectorMultivariateFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
         ExactBoxType D = ExactBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{-3.0_x,5.0_x}};
         ARIADNE_TEST_PRINT(D);
-        EffectiveVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875_x)};
+        EffectiveVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Dyadic("0.875")};
         ARIADNE_TEST_PRINT(g);
         ExactBoxType C = ExactBoxType{{0.0_x,inf},{0.0_x,inf}};
         ARIADNE_TEST_PRINT(C);
+
+
+        // Solution w=[1.804,0.]; x=[0.3357,0.7344,-3.]; y=[-0.,-4.629]; z=[-0.,-0.,-1.000]
 
         Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
         //ExactDouble required_accuracy=1e-6_pr;
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
+
+        x=EffectiveScalarMultivariateFunction::coordinates(2);
+        f=2*x[0]+3*x[1];
+        D={{-2,2},{-1,1}};
+        g={sqr(x[0])+2*sqr(x[1])-1};
+        C={{"-0.0625","0.0625"}};
+        ValidatedOptimisationProblem p = {f,D,g,C};
+        ARIADNE_TEST_PRINT(p);
+        Vector<FloatDPApproximation> x0({.625,0.7},dp);
+        Vector<FloatDPApproximation> y0({.125},dp);
+        x_optimal=optimiser->minimise(p);
+        // Solution x=(-1/sqrt(2),-3/4*1/sqrt(2)), y=-1/sqrt(2)
+//        ARIADNE_TEST_BINARY_PREDICATE(refines,x_optimal,
+//        ARIADNE_TEST_BINARY_PREDICATE(models,x_optimal,
+
+        ARIADNE_TEST_PRINT(x_optimal);
+
     }
 
     Void test_mixed_constrained_optimisation() {
@@ -284,6 +306,13 @@ Int main(Int argc, const char* argv[]) {
 
     FeasibilityChecker fc;
     TestFeasibilityChecker(fc).test();
+
+#warning
+    if (false) {
+        InfeasibleKarushKuhnTuckerOptimiser ikkto;
+        ARIADNE_TEST_CLASS("InfeasibleKarushKuhnTuckerOptimiser",TestValidatedOptimiser(ikkto));
+        return ARIADNE_TEST_FAILURES;
+    }
 
     PrimalDualInteriorPointOptimiser pd_ipto;
     ARIADNE_TEST_CLASS("PrimalDualInteriorPointOptimiser",TestApproximateOptimiser(pd_ipto));

@@ -1270,14 +1270,34 @@ Void compute_linear_equation(const ApproximateIntervalType& C, const Approximati
         // w-Clu=0
         r=w-Cl; cdw=1; cdy=0;
     } else if (decide(Cu==+inf)) {
-        // (w-Cl)*y-mu=0
-        r=(w-Cl)*y-mu; cdw=y; cdy=w-Cl;
+        // (w-Cl)*y+mu=0
+        r=(w-Cl)*y+mu; cdw=y; cdy=w-Cl;
     } else if (decide(Cl==-inf)) {
         // (Cu-w)*y-mu=0
         r=(Cu-w)*y-mu; cdw=-y; cdy=Cu-w;
     } else {
         // (w-Cl)*(Cu-w)*y-mu*(Cl+Cu-2*w)=0
         r=(w-Cl)*(Cu-w)*y-mu*(Cl+Cu-2*w); cdw=(Cl+Cu-2*w)*y+2*mu; cdy=(w-Cl)*(Cu-w);
+    }
+}
+
+template<class X>
+Void compute_linear_equation(const ExactIntervalType& C, const X& w, const X& y,
+                             ArithmeticType<X>& cdw, ArithmeticType<X>& cdy, ArithmeticType<X>& r)
+{
+    auto& Cl=C.lower_bound(); auto& Cu=C.upper_bound();
+    if (Cl==Cu) {
+        // w-Clu=0
+        r=w-Cl; cdw=1; cdy=0;
+    } else if (Cu==+inf) {
+        // (w-Cl)*y+mu=0
+        r=(w-Cl)*y; cdw=y; cdy=w-Cl;
+    } else if (Cl==-inf) {
+        // (Cu-w)*y-mu=0
+        r=(Cu-w)*y; cdw=-y; cdy=Cu-w;
+    } else {
+        // (w-Cl)*(Cu-w)*y-mu*(Cl+Cu-2*w)=0
+        r=(w-Cl)*(Cu-w)*y; cdw=(Cl+Cu-2*w)*y; cdy=(w-Cl)*(Cu-w);
     }
 }
 
@@ -1288,11 +1308,22 @@ compute_linear_equations(const BX& C, const Vector<X>& w, const Vector<X>& y, co
     const SizeType m=C.dimension(); const X zero(mu.precision());
     DiagonalMatrix<X> Y(m,zero), W(m,zero); Vector<X> r(m,zero);
     for (SizeType j=0; j!=m; ++j) {
-        compute_linear_equation(C[j],w[j],y[j],mu, Y.at(j), W.at(j), r.at(j));
+        compute_linear_equation(C[j],w[j],y[j],mu, Y._at(j), W._at(j), r.at(j));
     }
     return make_tuple(Y,W,r);
 }
 
+template<class X, class BX>
+Tuple<DiagonalMatrix<ArithmeticType<X>>,DiagonalMatrix<ArithmeticType<X>>,Vector<ArithmeticType<X>>>
+compute_linear_equations(const BX& C, const Vector<X>& w, const Vector<X>& y)
+{
+    const SizeType m=C.dimension(); const X zero(w.zero_element().precision());
+    DiagonalMatrix<ArithmeticType<X>> Y(m,zero), W(m,zero); Vector<ArithmeticType<X>> r(m,zero);
+    for (SizeType j=0; j!=m; ++j) {
+        compute_linear_equation(C[j],w[j],y[j], Y._at(j), W._at(j), r.at(j));
+    }
+    return make_tuple(Y,W,r);
+}
 
 auto
 InteriorPointOptimiserBase::compute_t(
@@ -1433,8 +1464,18 @@ InteriorPointOptimiserBase::feasible_hotstarted(
 auto
 InteriorPointOptimiserBase::initial_step_data(const ApproximateFeasibilityProblem& p) const -> StepData*
 {
+    CONCLOG_PRINTLN("InteriorPointOptimiserBase::initial_step_data(ApproximateFeasibilityProblem p)");
+    CONCLOG_PRINTLN("p="<<p);
+
     Vector<Approximation<FLT>> x0=midpoint(p.D);
     Vector<Approximation<FLT>> y0(p.number_of_constraints(),zero);
+    for (SizeType i=0; i!=p.number_of_constraints(); ++i) {
+        if (decide(p.C[i].lower_bound()==inf)) {
+            y0[i]=1;
+        } else if (decide(p.C[i].upper_bound()==inf)) {
+            y0[i]=-1;
+        }
+    }
     return this->_initial_step_data_hotstarted(p,x0,y0);
 }
 
@@ -1508,8 +1549,10 @@ InteriorPointOptimiserBase::compute_w(
         if (decide(C[j].lower_bound()==C[j].upper_bound())) {
             w[j]=C[j].lower_bound();
         } else if (decide(C[j].lower_bound()==-inf)) {
+            ARIADNE_ASSERT (decide(y[j]!=0));
             w[j]=C[j].upper_bound()-mu/y[j];
         } else if (decide(C[j].upper_bound()==+inf)) {
+            ARIADNE_ASSERT (decide(y[j]!=0));
             w[j]=C[j].lower_bound()-mu/y[j];
         } else {
             if (decide(y[j]==0)) {
@@ -1536,12 +1579,20 @@ InteriorPointOptimiserBase::compute_w(
     auto& C=p.C;
     auto gx=p.g(x);
 
-    ApproximateVectorType w(gx.size(),gx.zero_element());
-    for(SizeType j=0; j!=C.size(); ++j) {
-        if (decide(C[j].radius()<=mu*GAMMA)) {
-            w[j]=C[j].midpoint();
+    ApproximateVectorType w=midpoint(C);
+    for (SizeType j=0; j!=w.size(); ++j) {
+        if (decide(C[j].lower_bound()==C[j].upper_bound())) {
+            w[j]=C[j].lower_bound();
+        } else if (decide(C[j].lower_bound()==-inf)) {
+            w[j]=min(gx[j],C[j].upper_bound()-mu*GAMMA);
+        } else if (decide(C[j].upper_bound()==+inf)) {
+            max(gx[j], C[j].lower_bound()+mu*GAMMA);
         } else {
-            w[j]=min( max( gx[j], C[j].lower_bound()+mu*GAMMA ), C[j].upper_bound()-mu*GAMMA );
+            if (decide(C[j].radius()<=mu*GAMMA)) {
+                w[j]=C[j].midpoint();
+            } else {
+                w[j]=min( max( gx[j], C[j].lower_bound()+mu*GAMMA ), C[j].upper_bound()-mu*GAMMA );
+            }
         }
     }
     return w;
@@ -2435,11 +2486,11 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::_minimisation_step(const App
 
 // min f(x) | x\in D & w\in C | g(x) = w
 // Lagrange multipliers y d(g(x)-w); z dx
-Void
-SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(const ApproximateOptimisationProblem& p, StepData& d) const
+auto
+SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(const ApproximateOptimisationProblem& p, StepData& d) const -> Approximation<FLT>
 {
     auto& w=d.w; auto& x=d.x; auto& y=d.y; auto& z=d.z; auto& mu=d.mu;
-    this->minimisation_step(p, w,x,y,z,mu);
+    return this->minimisation_step(p, w,x,y,z,mu);
 }
 
 auto
@@ -2524,7 +2575,7 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_update(
     // FIXME: Make this more consistent
     for (SizeType j=0; j!=m; ++j) {
         if (decide(Cl[j]==-inf)) { ry[j]=(Cu[j]-w[j])*y[j]-mu; W._at(j)=Cu[j]-w[j]; Y._at(j)=y[j]; }
-        else if (decide(Cu[j]==+inf)) { ry[j]=(w[j]-Cl[j])*y[j]-mu; W._at(j)=w[j]-Cl[j]; Y._at(j)=y[j]; }
+        else if (decide(Cu[j]==+inf)) { ry[j]=(w[j]-Cl[j])*y[j]+mu; W._at(j)=w[j]-Cl[j]; Y._at(j)=y[j]; }
     }
 
     CONCLOG_PRINTLN("rw="<<rw);
@@ -2535,16 +2586,20 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_update(
     SlackPrimalDualComplementaryMatrix<Approximation<FLT>> S(Q,A,W,X,Y,Z);
     SlackPrimalDualComplementaryData<Approximation<FLT>> r(rw,rx,ry,rz);
 
-    SlackPrimalDualComplementaryData<Approximation<FLT>> dr=S.solve(r);
-
-    return dr;
+    CONCLOG_PRINTLN("S="<<pretty(S.assemble()));
+    SlackPrimalDualComplementaryData<Approximation<FLT>> d=S.solve(r);
+    CONCLOG_PRINTLN("dw="<<d.w);
+    CONCLOG_PRINTLN("dx="<<d.x);
+    CONCLOG_PRINTLN("dy="<<d.y);
+    CONCLOG_PRINTLN("dz="<<d.z);
+    return d;
 }
 
-Void
+auto
 SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(
     const ApproximateOptimisationProblem& p,
     ApproximateVectorType& w, ApproximateVectorType& x, ApproximateVectorType& y, ApproximateVectorType& z,
-    Approximation<FLT>& mu) const
+    Approximation<FLT>& mu) const -> Approximation<FLT>
 {
     auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
@@ -2558,6 +2613,7 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(
     ARIADNE_DEBUG_PRECONDITION(decide(mu>0));
 
     CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(p, w,x,y,z,my)");
     CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu);
 
     SlackPrimalDualComplementaryData<Approximation<FLT>> dr = this->minimisation_update(p, w,x,y,z, mu);
@@ -2586,6 +2642,8 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::minimisation_step(
     CONCLOG_PRINTLN("neww="<<neww<<", newx="<<newx<<", newy="<<newy<<", newz="<<newz);
 
     x=newx; w=neww; y=newy; z=newz;
+
+    return alpha;
 }
 
 
@@ -2621,11 +2679,11 @@ SlackPrimalDualComplementaryInteriorPointOptimiser::initial_step_data_hotstarted
     CONCLOG_PRINTLN("SlackPrimalDualComplementaryInteriorPointOptimiser::initial_step_data_hotstarted(p,x0,y0)");
     CONCLOG_PRINTLN("p="<<p);
     CONCLOG_PRINTLN("x0="<<x0<<", y0="<<y0);
-    Approximation<FLT> mu=one;
-    ApproximateVectorType w0=this->compute_w(p,x0,y0,mu);
-    ApproximateVectorType z0=this->compute_z(p,x0,mu);
-    CONCLOG_PRINTLN("w0="<<w0<<", z0="<<z0);
-    return new StepData(w0,x0,y0,z0,mu);
+    Approximation<FLT> mu0=one;
+    ApproximateVectorType w0=this->compute_w(p,x0,y0,mu0);
+    ApproximateVectorType z0=this->compute_z(p,x0,mu0);
+    CONCLOG_PRINTLN("w0="<<w0<<", z0="<<z0<<", mu0="<<mu0);
+    return new StepData(w0,x0,y0,z0,mu0);
 }
 
 auto
@@ -2715,10 +2773,10 @@ SlackPrimalSplitDualComplementaryInteriorPointOptimiser::_minimisation_step(
     this->minimisation_step(p,dynamic_cast<StepData&>(d));
 }
 
-Void
+auto
 SlackPrimalSplitDualComplementaryInteriorPointOptimiser::minimisation_step(
     const ApproximateOptimisationProblem& p,
-    StepData& d) const
+    StepData& d) const -> ApproximateNumericType
 {
     using XA = ApproximateNumberType;
 
@@ -2843,6 +2901,7 @@ auto
 KarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
 {
     CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("KarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector");
 
     ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
     ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
@@ -3164,14 +3223,14 @@ KarushKuhnTuckerOptimiser::check_minimality(
 
     // Set-up interval Newton contractor
     // Want to solve KKT conditions:
-    // (w-cl)(cu-w)y=0
-    // df(x)+dg(x)'*y+z=0
     // g(x)-w=0
+    // df(x)+dg(x)'*y+z=0
+    // (w-cl)(cu-w)y=0
     // (x-dl)(du-x)z=0
 
-    // [ Y  0  W  0]
-    // [ 0  Q AT  I]
     // [-I  A  0  0]
+    // [ 0  Q AT  I]
+    // [ Y  0  W  0]
     // [ 0  Z  0  X]
 
     auto Cl=lower_bounds(C);
@@ -3207,9 +3266,9 @@ KarushKuhnTuckerOptimiser::check_minimality(
         Covector<Bounds<FLT>> ce=f.gradient(xe);
         Matrix<Bounds<FLT>> Ae=g.jacobian(xe);
 
-        Vector<Bounds<FLT>> rw=emul(we-Cl,Cu-we,ye);
+        Vector<Bounds<FLT>> rw=g(xe)-we;
         Vector<Bounds<FLT>> rx=transpose(ce)+transpose(Ae)*ye+ze;
-        Vector<Bounds<FLT>> ry=g(xe)-we;
+        Vector<Bounds<FLT>> ry=emul(we-Cl,Cu-we,ye);
         Vector<Bounds<FLT>> rz=emul(xe-Dl,Du-xe,ze);
 
         SlackPrimalDualComplementaryMatrix<Bounds<FLT>> S(Q,A,W,X,Y,Z);
@@ -3222,19 +3281,25 @@ KarushKuhnTuckerOptimiser::check_minimality(
         CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
         CONCLOG_PRINTLN("Sa="<<pretty(Sa))
 
-        SlackPrimalDualComplementaryData<Bounds<FLT>> nd=q-S.solve(r);
-        auto& nw=nd.w; auto& nx=nd.x; auto& ny=nd.y; auto& nz=nd.z;
-        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z)
-        CONCLOG_PRINTLN("nw="<<nw<<", nx="<<nx<<", ny="<<ny<<", nz="<<nz)
-        CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
-        CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
-        if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
-            return make_tuple(true,nx,ny);
-        } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
-            return make_tuple(false,x,ny);
-        } else {
-            w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
-            ++step;
+        try {
+            SlackPrimalDualComplementaryData<Bounds<FLT>> nd=q-S.solve(r);
+            auto& nw=nd.w; auto& nx=nd.x; auto& ny=nd.y; auto& nz=nd.z;
+            CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z)
+            CONCLOG_PRINTLN("nw="<<nw<<", nx="<<nx<<", ny="<<ny<<", nz="<<nz)
+            CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
+            CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
+            if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
+                return make_tuple(true,nx,ny);
+            } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
+                return make_tuple(false,x,ny);
+            } else {
+                w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
+                ++step;
+            }
+        } catch (const SingularMatrixException& e) {
+            std::cerr<<"S="<<S.assemble()<<"\nSa="<<pretty(Sa)<<"\n" << std::flush;
+            //std::cerr<<"inv(Sa)="<<pretty(inverse(Sa))<<"\n";
+            throw(e);
         }
     }
     return make_tuple(indeterminate,x,y);
@@ -3249,10 +3314,118 @@ InfeasibleKarushKuhnTuckerOptimiser::clone() const -> InfeasibleKarushKuhnTucker
 }
 
 
-auto InfeasibleKarushKuhnTuckerOptimiser::
-minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
+auto
+InfeasibleKarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector
 {
     CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector");
+    CONCLOG_PRINTLN("p="<<p);
+
+    ARIADNE_PRECONDITION(p.D.has_nonempty_interior());
+    ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
+    ApproximateVectorType x0=p.D.midpoint();
+    ApproximateNumericType mu0(1,x0.zero_element().precision());
+    InfeasibleInteriorPointOptimiser approximate_optimiser;
+    ApproximateVectorType y0=approximate_optimiser.compute_y(p,x0,mu0);
+    return std::get<1>(this->minimise_hotstarted(p,x0,y0));
+}
+
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::minimise_hotstarted(
+    const ValidatedOptimisationProblem& p,
+    const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
+        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+{
+    UpperBoxType B=p.D;
+
+    auto r = this->splitting_minimise_hotstarted(p,B,x0,y0);
+
+    auto ro0 = std::get<OptimalityCertificate>(r)[0];
+    return make_tuple(ro0.value(),ro0.primal(),ro0.dual());
+}
+
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
+    const ValidatedOptimisationProblem& p,
+    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
+        -> Variant<OptimalityCertificate,InfeasibilityCertificate>
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(p, B0,x0,y0)");
+    CONCLOG_PRINTLN("B0="<<B<<", x0="<<x<<", y0="<<y);
+
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
+
+    SlackPrimalDualComplementaryInteriorPointOptimiser approximate_optimiser;
+
+    // Extra variables for use of optimization solver
+    Approximation<FLT> mu = one;
+    ApproximateVectorType z=approximate_optimiser.compute_z(p,x,mu);
+    ApproximateVectorType w=approximate_optimiser.compute_w(p,x,y,mu);
+#warning
+    auto perturb = [](ApproximateVectorType& v){ for(SizeType i=0; i!=v.size(); ++i) { v[i]+=Dyadic(1,10u); } };
+    perturb(w); perturb(x); perturb(y); perturb(z);
+
+    CONCLOG_PRINTLN("w0="<<w<<", x0="<<x<<", y0="<<y<<", z0="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+
+    for(SizeType i=0; i!=18; ++i) {
+        CONCLOG_PRINTLN_AT(1,"w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+        approximate_optimiser.minimisation_step(p, w,x,y,z, mu);
+        if (i>=2 && i<17) { mu=mu/4; }
+    }
+    CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+
+    auto r=this->check_minimality(p,g(x),x,y,z);
+    if (definitely(std::get<0>(r))) {
+        CONCLOG_PRINTLN("r="<<r);
+        FloatDPBounds v=f(cast_exact(x));
+        return OptimalityCertificate({LocalOptimalityCertificate(v,cast_exact(x),cast_exact(y))});
+    } else {
+        ConstraintSolver cslvr;
+        UpperBoxType oldB=B;
+        cslvr.reduce(B,g,C);
+        CONCLOG_PRINTLN("r="<<r<<", D="<<D<<", B="<<oldB<<"="<<B);
+        if (definitely(B.is_empty())) {
+            return InfeasibilityCertificate({LocalInfeasibilityCertificate(cast_exact_box(oldB),cast_exact(y))});
+        } else {
+            if (decide(measure(B)<measure(oldB)/2)) {
+                return splitting_minimise_hotstarted(p,B,midpoint(B),y);
+            } else {
+                auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
+                auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
+                auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
+
+                if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
+                    // Both sub-boxes are feasible. Filter out clearly non-optimal points
+                    auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
+                    ARIADNE_DEBUG_ASSERT(not o.empty());
+                    auto v=o[0].v;
+                    for (auto lo : o) { v=min(v,lo.v); }
+                    OptimalityCertificate ro;
+                    for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
+                    return ro;
+                } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
+                    // B1 is feasible, but B2 is not
+                    return r1;
+                } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
+                    return r2;
+                } else {
+                    return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
+                }
+            }
+        }
+    }
+
+}
+
+#warning Remove from header
+auto InfeasibleKarushKuhnTuckerOptimiser::
+minimise_old(ValidatedOptimisationProblem p) const -> ValidatedVector
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> ValidatedVector");
     CONCLOG_PRINTLN("p="<<p);
 
     auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
@@ -3356,11 +3529,165 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
 auto InfeasibleKarushKuhnTuckerOptimiser::
 feasible_hotstarted(ValidatedFeasibilityProblem p,
                     const SlackPrimalDualData<ApproximateNumericType>& wxy0) const
-                        -> Pair<ValidatedKleenean,ApproximateVectorType>
+                        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::check_minimality(
+    const ValidatedOptimisationProblem& p,
+    const ApproximateVectorType& wa, const ApproximateVectorType& xa, const ApproximateVectorType& ya, const ApproximateVectorType& za) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    //CONCLOG_SCOPE_CREATE;
+    auto& f=p.f; auto& g=p.g;
+
+    CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::check_minimality(ValidatedOptimisationProblem p, ApproximateVectorType wa, xa, ya, za)");
+    CONCLOG_PRINTLN("wa="<<wa<<", xa="<<xa<<", ya="<<ya<<", za="<<za<<", f(xa)="<<f(xa)<<", g(xa)="<<g(xa));
+
+    Approximation<FLT> sa=sqrt(FLT::eps(xa.zero_element().precision()));
+    FLT se=cast_exact(sa);
+#warning
+    //se=ExactDouble(1.0/1024);
+    //se=ExactDouble(1.0/1048576);
+    FloatDPBounds e=se*FloatDPBounds(-1,+1,dp);
+    auto cast_exact_widen = [&e](auto va){return eadd(cast_exact(va)*(1+e),e);};
+
+    FloatDPBoundsVector w=cast_exact_widen(wa);
+    FloatDPBoundsVector x=cast_exact_widen(xa);
+    FloatDPBoundsVector y=cast_exact_widen(ya);
+    FloatDPBoundsVector z=cast_exact_widen(za);
+
+    // auto restrict_number = [](FloatDPBounds xb, UpperIntervalType ivl) {
+    //     return FloatDPBounds(max(xb.lower(),ivl.lower_bound()),min(xb.upper(),ivl.upper_bound())); };
+    // auto restrict_vector = [&](Vector<FloatDPBounds> v, ExactBoxType bx) {
+    //     return Vector<FloatDPBounds>( v.size(), [&](SizeType i){return restrict_number(v[i],bx[i]);} ); };
+    // w=restrict_vector(w,p.C);
+    // x=restrict_vector(x,p.D);
+
+    CONCLOG_PRINTLN_AT(0, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+    return this->check_minimality(p,w,x,y,z);
+}
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::check_minimality(
+    const ValidatedOptimisationProblem& p,
+    const ValidatedVectorType& w_, const ValidatedVectorType& x_, const ValidatedVectorType& y_, const ValidatedVectorType& z_) const
+        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+{
+    auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
+    Vector<Bounds<FLT>> w(w_), x(x_), y(y_), z(z_);
+
+    auto restrict_number = [](FloatDPBounds xb, UpperIntervalType ivl) {
+        return FloatDPBounds(max(xb.lower(),ivl.lower_bound()),min(xb.upper(),ivl.upper_bound())); };
+    auto restrict_vector = [&](Vector<FloatDPBounds> v, ExactBoxType bx) {
+        return Vector<FloatDPBounds>( v.size(), [&](SizeType i){return restrict_number(v[i],bx[i]);} ); };
+
+    //CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::check_minimality(ValidatedOptimisationProblem p, Vector<Bounds<FLT>> w, x, y, z)");
+    CONCLOG_PRINTLN_AT(1, "w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", f(x)="<<f(x)<<", g(x)="<<g(x));
+
+    w=restrict_vector(w,p.C);
+    x=restrict_vector(x,p.D);
+
+
+    // Set-up interval Newton contractor
+    // Want to solve KKT conditions:
+    // g(x)-w=0
+    // df(x)+dg(x)'*y+z=0
+    // (w-cl)(cu-w)y=0
+    // (x-dl)(du-x)z=0
+
+    // [-I  A  0  0]
+    // [ 0  Q AT  I]
+    // [ Y  0  W  0]
+    // [ 0  Z  0  X]
+
+    auto Cl=lower_bounds(C);
+    auto Cu=upper_bounds(C);
+    auto Dl=lower_bounds(D);
+    auto Du=upper_bounds(D);
+
+    auto midpoint = [](ExactIntervalType const& ivl) {
+        return FloatDPBounds(hlf(ivl.lower_bound()+ivl.upper_bound())); };
+    auto midpoints = [&midpoint](ExactBoxType const& bx) {
+        return Vector<FloatDPBounds>( bx.dimension(), [&midpoint,&bx](SizeType i){return midpoint(bx[i]);} ); };
+
+    bool is_refinement = false;
+    int step=0;
+
+    while (not is_refinement && step<8) {
+        auto ddfx=differential(f,x,2);
+        auto ddgx=differential(g,x,2);
+
+        auto A=ddgx.jacobian();
+        auto Q=ddfx.hessian();
+        for (SizeType i=0; i!=y.size(); ++i) { Q+=y[i]*ddgx[i].hessian(); }
+
+
+#warning
+//        Tuple<DiagonalMatrix<X>,DiagonalMatrix<X>,Vector<X>> compute_linear_equations(const BX& C, const Vector<X>& w, const Vector<X>& y, const X& mu)
+
+        auto YWrw = compute_linear_equations(C,w,y);
+        DiagonalMatrix<Bounds<FLT>>& Y=std::get<0>(YWrw);
+        DiagonalMatrix<Bounds<FLT>>& W=std::get<1>(YWrw);
+        auto ZXrx = compute_linear_equations(D,x,z);
+        DiagonalMatrix<Bounds<FLT>>& Z=std::get<0>(ZXrx);
+        DiagonalMatrix<Bounds<FLT>>& X=std::get<1>(ZXrx);
+
+        Vector<Exact<FLT>> we=cast_exact(w);
+        Vector<Exact<FLT>> xe=cast_exact(x);
+        Vector<Exact<FLT>> ye=cast_exact(y);
+        Vector<Exact<FLT>> ze=cast_exact(z);
+        Covector<Bounds<FLT>> ce=f.gradient(xe);
+        Matrix<Bounds<FLT>> Ae=g.jacobian(xe);
+
+        Vector<Bounds<FLT>> rwe=g(xe)-we;
+        Vector<Bounds<FLT>> rxe=transpose(ce)+transpose(Ae)*ye+ze;
+        Vector<Bounds<FLT>> rye = std::get<2>(compute_linear_equations(C,we,ye));
+        Vector<Bounds<FLT>> rze = std::get<2>(compute_linear_equations(D,xe,ze));
+
+        SlackPrimalDualComplementaryMatrix<Bounds<FLT>> S(Q,A,W,X,Y,Z);
+#warning Check order of variables in matrix
+        SlackPrimalDualComplementaryData<Bounds<FLT>> re(rwe,rxe,rye,rze);
+        SlackPrimalDualComplementaryData<Exact<FLT>> qe(we,xe,ye,ze);
+
+        auto Sa=Matrix<Approximation<FLT>>(S.assemble());
+        CONCLOG_PRINTLN("step="<<step);
+        CONCLOG_PRINTLN("C="<<C<<", D="<<D);
+        CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z);
+        CONCLOG_PRINTLN_AT(1,"Q="<<Q<<", A="<<A);
+        CONCLOG_PRINTLN_AT(1,"W="<<W<<", X="<<X<<", Y="<<Y<<", Z="<<Z);
+        CONCLOG_PRINTLN("we="<<we<<", xe="<<xe<<", ye="<<ye<<", ze="<<ze);
+        CONCLOG_PRINTLN("rwe="<<rwe<<", rxe="<<rxe<<", rye="<<rye<<", rze="<<rze);
+        CONCLOG_PRINTLN("Sa="<<pretty(Sa))
+        CONCLOG_PRINTLN("re="<<re)
+
+        try {
+            SlackPrimalDualComplementaryData<Bounds<FLT>> nd=qe-S.solve(re);
+            auto& nw=nd.w; auto& nx=nd.x; auto& ny=nd.y; auto& nz=nd.z;
+            CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z)
+            CONCLOG_PRINTLN("nw="<<nw<<", nx="<<nx<<", ny="<<ny<<", nz="<<nz)
+            CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
+            CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
+            if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
+                return make_tuple(true,nx,ny);
+            } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
+                return make_tuple(false,x,ny);
+            } else {
+                w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
+                ++step;
+            }
+        } catch (const SingularMatrixException& e) {
+            std::cerr<<"S="<<(S.assemble())<<"\nSa="<<pretty(Sa)<<"\n"<<std::flush;
+            //std::cerr<<"inv(Sa)="<<pretty(lu_inverse(Sa))<<"\n"<<std::flush;
+            throw(e);
+        }
+    }
+    return make_tuple(indeterminate,x,y);
+}
 
 
 

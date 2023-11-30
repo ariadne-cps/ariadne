@@ -19,6 +19,9 @@
 
 from pyariadne import *
 
+# Set logging verbosity
+Logger.instance().configuration().set_verbosity(0)
+
 # Available approximate optimisers
 opt = InteriorPointOptimiser()
 opt = InfeasibleInteriorPointOptimiser()
@@ -101,7 +104,7 @@ print("step_data",step_data)
 
 # Compute approximate local optimum
 vxy_opt = opt.minimise_hotstarted(p,x0,y0)
-print("optimal_vxy:",vxy_opt,type(vxy_opt))
+print("opt.minimise_hotstarted(p,x0,y0):",vxy_opt,type(vxy_opt))
 v_opt = vxy_opt[0]
 x_opt = vxy_opt[1]
 y_opt = vxy_opt[2]
@@ -113,17 +116,21 @@ print()
 # Rigorous solvers
 opt=InfeasibleKarushKuhnTuckerOptimiser()
 p = ValidatedOptimisationProblem(f,D,g,C)
+print("opt:",opt)
+print("p:",p)
 vxy_opt = opt.minimise(p)
-print(vxy_opt)
+print("opt.minimise(p):",vxy_opt,type(vxy_opt))
+print()
 
 
 
 # Interval Newton approach for unconstrained optimisation
 
+print("Hand-coded interval Newton solver")
 f=Function(2, lambda x : (((x[0]+3)*x[0]-2)*x[0]+1)*x[0]-5*x[0]*x[1]+3*x[1]*x[1])
-print(f)
 g=derivatives(f)
-print(g)
+print("f:",f)
+print("f':",g)
 
 tolerance=Decimal("0.000001")
 
@@ -138,6 +145,7 @@ def error(X):
 B=BoxDomainType([("0.5","0.75"),("0.25","0.5")])
 print("B",B,type(B))
 X=cast_singleton(B)
+is_refinement=False
 while possibly(error(X)>tolerance):
     x=cast_exact(X) # The midpoint of X
     ddfX=hessian(f,X)
@@ -157,9 +165,14 @@ while possibly(error(X)>tolerance):
         break
     elif (refines(nX,X)):
         print("Refinement found! Unique critical point in B.")
+        is_refinement=True
         X=nX
     else:
         X=refinement(X,nX)
+if is_refinement:
+    print("Verified unique critical point in B at",X)
+else:
+    print("Could not verifiy critical point in B")
 print()
 
 # Solve using a builtin Ariadne solver

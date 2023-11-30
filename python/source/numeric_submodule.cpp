@@ -815,6 +815,8 @@ void export_rational_bounds(pymodule& module)
     module.def("sqr", &_sqr_<RationalBounds>);
     module.def("rec", &_rec_<RationalBounds>);
 
+    rational_bounds_class.def("refines", &_refines_<RationalBounds,RationalBounds>);
+
     rational_bounds_class.def("__str__", &__cstr__<RationalBounds>);
     rational_bounds_class.def("__repr__", &__repr__<RationalBounds>);
 }
@@ -1075,6 +1077,8 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     float_ball_class.def(init<RawFloat<PR>,RawFloat<PRE>>());
     float_ball_class.def(init<Float<PR>,FloatError<PRE>>());
     float_ball_class.def(init<Real,PR>());
+    float_ball_class.def(init<RationalBounds,PR>());
+
 
     float_ball_class.def(init<ExactDouble,PR>());
     float_ball_class.def(init<ValidatedNumber,PR>());
@@ -1127,6 +1131,9 @@ template<class PR> void export_float_bounds(pymodule& module)
     float_bounds_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
     float_bounds_class.def(init<ValidatedLowerNumber,ValidatedUpperNumber,PR>());
     float_bounds_class.def(init<Real,PR>());
+
+    float_bounds_class.def(init<RationalBounds,PR>());
+
 
     float_bounds_class.def(init<ExactDouble,PR>());
     float_bounds_class.def(init<ExactDouble,ExactDouble,PR>());

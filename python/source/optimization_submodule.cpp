@@ -39,6 +39,8 @@
 #include "solvers/nonlinear_programming.hpp"
 #include "solvers/constraint_solver.hpp"
 
+#include "solvers/nonlinear_programming.tpl.hpp"
+
 using namespace Ariadne;
 
 
@@ -104,6 +106,8 @@ template<class P> Void export_optimisation_problem(pybind11::module& module)
     feasibility_problem_class.def_readwrite("D", &FeasibilityProblem<P>::D);
     feasibility_problem_class.def_readwrite("g", &FeasibilityProblem<P>::g);
     feasibility_problem_class.def_readwrite("C", &FeasibilityProblem<P>::C);
+    feasibility_problem_class.def("number_of_constraints", &FeasibilityProblem<P>::number_of_constraints);
+    feasibility_problem_class.def("number_of_variables", &FeasibilityProblem<P>::number_of_variables);
 
     pybind11::class_<OptimisationProblem<P>,pybind11::bases<FeasibilityProblem<P>>> optimisation_problem_class(module,(class_name<P>()+"OptimisationProblem").c_str());
     optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
@@ -257,19 +261,30 @@ Void export_interior_point_solvers(pybind11::module& module)
 
         module.attr("InfeasibleInteriorPointOptimiser") = module.attr("SlackPrimalDualComplementaryInteriorPointOptimiser");
 
-        interior_point_optimiser_class.def("minimisation_step", (Void(Self::*)(const AOP&, VXA&, VXA&, VXA&, VXA&, XA&)const) &Self::minimisation_step);
+        interior_point_optimiser_class.def("minimisation_step", (XA(Self::*)(const AOP&, VXA&, VXA&, VXA&, VXA&, XA&)const) &Self::minimisation_step);
         interior_point_optimiser_class.def("feasibility_step", (Void(Self::*)(const AFP&, VXA&, VXA&, VXA&, VXA&)const) &Self::feasibility_step);
 
         interior_point_optimiser_class.def("initial_step_data", (Self::StepData*(Self::*)(const AFP&)const) &Self::initial_step_data);
-        interior_point_optimiser_class.def("minimisation_step", (Void(Self::*)(const AOP&, Self::StepData&)const) &Self::minimisation_step);
+        interior_point_optimiser_class.def("initial_step_data_hotstarted", (Self::StepData*(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::initial_step_data_hotstarted);
+        interior_point_optimiser_class.def("minimisation_step", (XA(Self::*)(const AOP&, Self::StepData&)const) &Self::minimisation_step);
 
         pybind11::class_<Self::StepData> interior_point_optimiser_step_data_class(module,"SlackPrimalDualComplementaryInteriorPointOptimiserStepData");
+        interior_point_optimiser_step_data_class.def(pybind11::init<VXA,VXA,VXA,VXA,XA>());
+        interior_point_optimiser_step_data_class.def(pybind11::init<Self::StepData>());
         interior_point_optimiser_step_data_class.def_readwrite("w", &Self::StepData::w);
         interior_point_optimiser_step_data_class.def_readwrite("x", &Self::StepData::x);
         interior_point_optimiser_step_data_class.def_readwrite("y", &Self::StepData::y);
         interior_point_optimiser_step_data_class.def_readwrite("z", &Self::StepData::z);
         interior_point_optimiser_step_data_class.def_readwrite("mu", &Self::StepData::mu);
+        interior_point_optimiser_step_data_class.def("assemble", &Self::StepData::assemble);
         interior_point_optimiser_step_data_class.def("__str__", &__cstr__<Self::StepData>);
+
+        using MXA=Matrix<XA>; using SMXA=SymmetricMatrix<XA>; using DMXA=DiagonalMatrix<XA>;
+        pybind11::class_<SlackPrimalDualComplementaryMatrix<XA>> interior_point_optimiser_matrix_class(module,"SlackPrimalDualComplementaryMatrix");
+#warning
+        //interior_point_optimiser_matrix_class.def(pybind11::init<Self::StepData>());
+        interior_point_optimiser_matrix_class.def(pybind11::init<SMXA,MXA,DMXA,DMXA,DMXA,DMXA>());
+        interior_point_optimiser_matrix_class.def("assemble", &SlackPrimalDualComplementaryMatrix<XA>::assemble);
     }
 
     {
@@ -313,6 +328,8 @@ Void export_interior_point_solvers(pybind11::module& module)
         infeasible_karush_kuhn_tucker_optimiser_class.def(pybind11::init<>());
         //infeasible_karush_kuhn_tucker_optimiser_class.def("_str_", &_cstr_<InfeasibleKarushKuhnTuckerOptimiser>);
 
+        infeasible_karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
         infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Pair<ValidatedKleenean,VXA>(Self::*)(VFP, const SlackPrimalDualData<XA>&)const) &Self::feasible_hotstarted);
     }
 }

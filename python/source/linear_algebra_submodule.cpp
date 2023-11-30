@@ -578,6 +578,16 @@ template<class X> pybind11::class_<Matrix<X>> export_matrix(pybind11::module& mo
     return matrix_class;
 }
 
+template<class X> X __dmgetitem__(DiagonalMatrix<X> const& A, std::tuple<Nat,Nat> ind) {
+    Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); return (i==j) ? A._at(i) : A.zero_element();
+}
+
+template<class X> Void __dmsetitem__(DiagonalMatrix<X>& A, const std::tuple<Nat,Nat>& ind, const X& x) {
+    Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); assert(i==j); A._at(i)=x;
+}
+
+
+
 template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pybind11::module& module)
 {
     pybind11::class_<DiagonalMatrix<X>> diagonal_matrix_class(module,python_class_name<DiagonalMatrix<X>>().c_str());
@@ -589,8 +599,8 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
         diagonal_matrix_class.def(pybind11::init<SizeType,PR>());
     }
     diagonal_matrix_class.def(pybind11::init<Vector<X>>());
-    diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
-    diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);
+    diagonal_matrix_class.def("__setitem__", &__dmsetitem__<X>);
+    diagonal_matrix_class.def("__getitem__", &__dmgetitem__<X>);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
 
     diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);

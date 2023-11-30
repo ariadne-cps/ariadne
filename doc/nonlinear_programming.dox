@@ -132,7 +132,7 @@ Note that for \f$\unl{c}\leq g(x)\leq\ovl{c}\f$ we have \f$|2g(x)-\unl{c}-\ovl{c
 \subsubsection nonlinear_state_constraints State constraints
 
 Taking state constraints \f$\unl{d}\leq x\leq\ovl{d}\f$, we obtain the central path
-\f[ \boxed{ \begin{gathered} \nabla f(x) + z = 0; \\ (\ovl{d}-x)(x-\unl{d})z + (2x-\unl{d}-\ovl{d}) \mu = 0 . \end{gathered} } \f]
+\f[ \boxed{ \begin{gathered} \nabla f(x) + z = 0; \\ (x-\unl{d})(\ovl{d}-x)z - (2x-\unl{d}-\ovl{d}) \mu = 0 . \end{gathered} } \f]
 If \f$\ovl{d}=-\unl{d}=d\f$, this simplifies to \f$ (d^2-x^2) z - 2 x \mu = 0 . \f$
 
 
@@ -160,11 +160,14 @@ If \f$ \unl{c}_j < \ovl{c}_j \f$, then we must have \f$\unl{c}_j < w_j < \ovl{c}
 If \f$ \unl{c}_j = \ovl{c}_j \f$ have common value \f$c_j\f$, then \f$ -(w_j - c_j)^2 y_j - 2 \mu(w_j-c_j)=0 \f$. Hence \f$w_j=c_j\f$ and there are no further conditions on \f$y_j\f$.
 The equation \f$(w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j -  \mu (2w_j - \unl{c}_j - \ovl{c}_j) = 0\f$ is therefore replaced by \f$w_j-c_j = 0\f$ for this \f$j\f$.
 
-If \f$\unl{c}_j=0\f$ and \f$\ovl{c}_j=\infty\f$, then \f$ \mu ( 1/\infty - 1/w_j ) - y_j = 0  \f$ so \f$ w_j \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
-If \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j=0\f$, then \f$ \mu ( 1/w_j - 1/\infty ) - y_j = 0  \f$ so \f$ w_j \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+If \f$\unl{c}_j>-\infty\f$ and \f$\ovl{c}_j=\infty\f$, then \f$ \mu ( 1/\infty - 1/(w_j-\unl{c}_j) ) - y_j = 0  \f$ so \f$ (w_j-\unl{c}_j) \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
+If additionally \f$\unl{c}_j=0\f$, then \f$ w_j \,y_j + \mu = 0  \f$ and \f$y_j<0\f$.
 
-We therefore have the following special cases for the central path:
-\f[ \boxed{ \displaystyle \begin{gathered} \unl{c}_j < \ovl{c}_j \implies \unl{c}_j < w_j < \ovl{c}_j ; \\ \unl{c}_j = \ovl{c}_j = c_j \implies w_j = c_j; \\ \unl{c}_j = 0 \wedge \ovl{c}_j = \infty \implies w_j y_j + \mu = 0 \wedge y_j<0 ; \\ \unl{c}_j = -\infty \wedge \ovl{c}_j = 0 \implies w_j y_j - \mu = 0 \wedge y_j>0 . \end{gathered} } \f]
+If \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j<\infty\f$, then \f$ \mu ( 1/(\ovl{c}_j-w_j) - 1/\infty ) - y_j = 0  \f$ so \f$ (\ovl{c}_j-w_j) \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+If additionally \f$\unl{c}_j=-\infty\f$ and \f$\ovl{c}_j=0\f$, then \f$ w_j \,y_j - \mu = 0 \f$ and \f$y_j>0\f$.
+
+We therefore have the following cases for the central path:
+\f[ \boxed{ \displaystyle \begin{gathered} \unl{c}_j < \ovl{c}_j \implies (w_j-\unl{c}_j)(\ovl{c}_j-w_j)y_j-\mu(2w_j-\unl{c}_j-\ovl{c}_j) = 0 \wedge \unl{c}_j < w_j < \ovl{c}_j ; \\ \unl{c}_j = \ovl{c}_j = c_j \implies w_j = c_j; \\ \ovl{c}_j = \infty \implies (w_j-\unl{c}_j) y_j + \mu = 0 \wedge y_j<0 ; \\ \unl{c}_j = -\infty  \implies (\ovl{c}_j-w_j) y_j - \mu = 0 \wedge y_j>0 . \end{gathered} } \f]
 
 
 The Karush optimality conditions are obtained by taking \f$\mu\to 0\f$:
@@ -297,7 +300,7 @@ The values of \f$s(w,y,\mu)\f$ are given below for various constraints involving
  - \f$g(x)\leq \ovl{c} : s(w,y,\mu) = (\ovl{c}-w) y - \mu; \ \ -y\Delta{w}+(\ovl{c}-w)\Delta{y}=-((\ovl{c}-w) y - \mu) \f$
  \par
  - \f$|g(x)|\leq c : s(w,y,\mu) = (c^2-w^2)y - 2w\mu; \ \partial s/\partial w = -2(wy+\mu); \ \ -2(wy+\mu)\Delta{w} - w^2\Delta{y} = -\bigl((c^2-w^2)y - 2w\mu \bigr); \f$
- - \f$\unl{c} \leq g(x) \leq \ovl{c}: s(w,y,\mu) = (\ovl{c}-w)(w-\unl{c})y -(2w-\unl{c}-\ovl{c})\mu; \ \ \big((2w-\unl{c}-\ovl{c})y - 2\mu\bigr)\Delta{w}+(\ovl{c}-w)(w-\unl{c})\Delta{y}=-\bigl((\ovl{c}-w)(w-\unl{c})y -(2w-\unl{c}-\ovl{c})\mu\bigr).\f$
+ - \f$\unl{c} \leq g(x) \leq \ovl{c}: s(w,y,\mu) = (\ovl{c}-w)(w-\unl{c})y + (\unl{c}+\ovl{c}-2w)\mu; \ \ \big((\unl{c}+\ovl{c}-2w)y - 2\mu\bigr)\Delta{w}+(\ovl{c}-w)(w-\unl{c})\Delta{y}=-\bigl((\ovl{c}-w)(w-\unl{c})y -(2w-\unl{c}-\ovl{c})\mu\bigr).\f$
  - \f$\unl{c} \leq g(x) \leq \ovl{c}: s(w,y,\mu) = (w-\unl{c})(\ovl{c}-w)/(2w-\unl{c}-\ovl{c})\;y-\mu; \ \  -\bigl((w-\unl{c})^2+(\ovl{c}-w))^2\bigr)y \Delta{w} + (w-\unl{c})(\ovl{c}-w)(2w-\unl{c}-\ovl{c}) \Delta{y} = - \bigl((w-\unl{c})(\ovl{c}-w)\;y - \mu(2w-\unl{c}-\ovl{c})\bigr)(2w-\unl{c}-\ovl{c}) . \f$.
 
 Note that in the case of an equality constraint \f$g(x)=c\f$, we initialise \f$w\f$ to \f$c\f$, so \f$\Delta{w}=0\f$.
@@ -311,9 +314,9 @@ Set
 \f[ \begin{gathered} Q=\nabla^2 f(x) + \sum_j y_j \nabla^2 g_j(x) , \\ A=\nabla g(X)^T, \ W_{jj} = \partial s_j/\partial y_j ; \quad Y_{jj} = \partial s_j/\partial w_j ; \quad X_{ii}=\partial{t_i}/{\partial{z_i}}; \ Z_{ii}=\partial{t_i}/{\partial{x_i}} . \end{gathered} \f]
 Note that for a positivity constraint \f$g_j(x)\geq0\f$ we have \f$s_j(w_j,y_j,\mu)=w_jy_j-\mu\f$, so \f$W_{jj}=s_{j,y}(w_j,y_j,\mu)=w_j\f$ and  \f$Y_{jj}=s_{j,w}(w_j,y_j,\mu)=y_j\f$.
 The system of linear equations is then
-\f[ \begin{pmatrix} -I & A & O & O \\ O & Q & A^T & I \\ Y & O & W & O \\ O & Z & O & X \end{pmatrix} \begin{pmatrix}\Delta{w}\\\Delta{x}\\\Delta{y}\\\Delta{z}\end{pmatrix} = - \begin{pmatrix} g(x)-w \\ f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g(x) \\ s(g(x),y,\mu) \\ t(x,z,\mu) \end{pmatrix} . \f]
+\f[ \begin{pmatrix} -I & A & O & O \\ O & Q & A^T & I \\ Y & O & W & O \\ O & Z & O & X \end{pmatrix} \begin{pmatrix}\Delta{w}\\\Delta{x}\\\Delta{y}\\\Delta{z}\end{pmatrix} = - \begin{pmatrix} g(x)-w \\ f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g(x) \\ s(w,y,\mu) \\ t(x,z,\mu) \end{pmatrix} . \f]
 This can be symmetrised to give
-\f[ \begin{pmatrix} -W \backslash Y & O & -I & O \\ O & Q & A^T & I \\ -I & A & O & O \\ O & I & O & Z \backslash X \end{pmatrix} \begin{pmatrix}\Delta{w}\\\Delta{x}\\\Delta{y}\\\Delta{z}\end{pmatrix} = - \begin{pmatrix} -W \backslash s(g(x),y,\mu) \\ f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g(x) \\ g(x)-w \\ Z \backslash t(x,z,\mu) \end{pmatrix} . \f]
+\f[ \begin{pmatrix} -W \backslash Y & O & -I & O \\ O & Q & A^T & I \\ -I & A & O & O \\ O & I & O & Z \backslash X \end{pmatrix} \begin{pmatrix}\Delta{w}\\\Delta{x}\\\Delta{y}\\\Delta{z}\end{pmatrix} = - \begin{pmatrix} -W \backslash s(w,y,\mu) \\ f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g(x) \\ g(x)-w \\ Z \backslash t(x,z,\mu) \end{pmatrix} . \f]
 Eliminating \f$\Delta{w}\f$ using \f$Y\Delta{w}+W\Delta{Y}=-s(w,y,\mu)\f$ gives
 \f[ \begin{pmatrix} Q & A^T & I \\ Y A & W & O \\ Z & O & X \end{pmatrix} \begin{pmatrix}\Delta{x}\\\Delta{y}\\\Delta{z}\end{pmatrix} = - \begin{pmatrix} f(x) + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g(x) \\ s(w,y,\mu) + Y (g(x)-w) \\ t(x,z,\mu) \end{pmatrix} . \f]
 with symmetric form
@@ -396,7 +399,10 @@ Then
 so
 \f[ y u^2 + 2u\mu - y r^2 = 0 . \f]
 This has solution
-\f[ u = \frac{\sqrt{4\mu^2+4y^2r^2}-2\mu}{2y} = \sqrt{(\mu/y)^2+r^2}-\mu/y = \frac{\mu}{y} \bigl(\sqrt{1+(ry/\mu)^2}_1\bigr)  \f]
+\f[ u = \frac{\sqrt{4\mu^2+4y^2r^2}-2\mu}{2y} = \sqrt{(\mu/y)^2+r^2}-\mu/y = \frac{\mu}{y} \bigl(\sqrt{1+(ry/\mu)^2}-1\bigr) . \f]
+Completing the square gives
+\f[ u = r \, \frac{ry/\mu}{\sqrt{1+(ry/\mu)^2}+1} . \f]
+
 with \f$u=0\f$ if \f$y=0\f$, so
 \f[ \boxed{w = \frac{\unl{c}+\ovl{c}}{2} + \frac{\mu}{y} \Bigl( \sqrt{1+\bigl((\ovl{c}-\unl{c})y/2\mu\bigr)^2}-1\Bigr); \quad w=\frac{\unl{c}+\ovl{c}}{2} \text{ if } y=0 .} \f]
 

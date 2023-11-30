@@ -266,6 +266,7 @@ template<class X> class DiagonalMatrix
     Array<X> _ary;
   public:
     template<class... PRS> requires Constructible<X,Nat,PRS...> explicit DiagonalMatrix(SizeType n, PRS...); //!< <p/>
+    explicit DiagonalMatrix(SizeType n, X const& z); //!< <p/>
     explicit DiagonalMatrix(Array<X>); //!< <p/>
     explicit DiagonalMatrix(Vector<X>);
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...); //!< <p/>
@@ -301,6 +302,10 @@ DiagonalMatrix<X>::DiagonalMatrix(SizeType n, G const& g)
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
     : _zero(create_zero(ary[0])), _ary(ary)
+{ }
+
+template<class X> DiagonalMatrix<X>::DiagonalMatrix(SizeType n, X const& z)
+    : _zero(nul(z)), _ary(n,z)
 { }
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Vector<X> vec)

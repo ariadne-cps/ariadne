@@ -80,18 +80,20 @@ template<class P, class ARG> pybind11::object function_from_python(typename Doma
     Function<P,ARG(ARG)> id = Function<P,ARG(ARG)>::identity(dom);
     pybind11::object pyobjf = pyf(id);
     try {
-        VectorFunction<P,ARG> vf=pybind11::cast<VectorFunction<P,ARG>>(pyobjf);
-        return pybind11::cast(vf);
+        return pybind11::cast(pybind11::cast<VectorFunction<P,ARG>>(pyobjf));
     } catch (...) { }
     try {
         pybind11::list pylstf = pybind11::cast<pybind11::list>(pyobjf);
         SizeType rs = len(pylstf);
-        //VectorFunction<P,ARG>(Vector<ScalarFunction<P,ARG>>(rs, [&id,&lstf](SizeType i){return pybind11::cast<ScalarFunction<P,ARG>>(lstf[i](id));}));
         List<ScalarFunction<P,ARG>> lsf;
         for (SizeType i=0; i!=rs; ++i) {
             lsf.append(pybind11::cast<ScalarFunction<P,ARG>>(pylstf[i]));
         }
-        return pybind11::cast(VectorFunction<P,ARG>(lsf));
+        if (lsf.size()==0) {
+            return pybind11::cast(VectorFunction<P,ARG>(0,dom));
+        } else {
+            return pybind11::cast(VectorFunction<P,ARG>(lsf));
+        }
     } catch (...) { }
     return pybind11::cast(pybind11::cast<ScalarFunction<P,ARG>>(pyobjf));
 }

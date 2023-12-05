@@ -94,6 +94,7 @@ template<class P, class D> VectorFunction<P,ElementKind<D>> make_zero_function(S
 }
 
 template<class P, class SIG> Function<P,SIG>::Function() : Function(nullptr) {
+    ARIADNE_WARN_ONCE("Default constructor of Function yields nullptr value.");
 }
 
 template<class P, class SIG> Function<P,SIG>::Function(DomainType dom)
@@ -104,11 +105,6 @@ template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, Argume
 
 template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, DomainType dom)
     : Function(make_zero_function<P,D>(rs,dom)) { }
-
-template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ScalarFunction<P,ARG> sf)
-    : Function(Vector<ScalarFunction<P,ARG>>(SizeType(rs),sf)) {
-}
-
 template<class P, class SIG> Function<P,SIG>::Function(InitializerList<ScalarFunction<P,ARG>> const& lsf)
     : Function(Vector<ScalarFunction<P,ARG>>(lsf)) {
 }
@@ -123,42 +119,40 @@ template<class P, class SIG> Function<P,SIG>::Function(DomainType dom, Result<Fo
 template<class P, class SIG> Function<P,SIG>::Function(typename SignatureTraits<SIG>::ArgumentSpaceType const& spc, Result<RealExpression> const& e)
     : Function(make_function(spc,e)) { }
 
-template<class P, class SIG> struct MakeVectorFunction;
-template<class P, class... ARGS> struct MakeVectorFunction<P,Real(ARGS...)> {
-    ScalarFunction<P,ARGS...> create(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
-        ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
-};
-/*
-template<class P> struct MakeVectorFunction<P,RealVector(Real)> {
-    VectorUnivariateFunction<P> create(Vector<ScalarUnivariateFunction<P>> const& lsf) {
-        ARIADNE_FAIL_MSG("Cannot construct multivariate function from list of univariate functions."); }
-};
-*/
-template<class P> struct MakeVectorFunction<P,RealVector(Real)> {
-    VectorUnivariateFunction<P> create(Vector<ScalarUnivariateFunction<P>> const& lsf) {
-        return VectorUnivariateFunction<P>(VectorOfScalarFunction<P,RealScalar>(lsf));
-    }
-};
-template<class P> struct MakeVectorFunction<P,RealVector(RealVector)> {
-    VectorMultivariateFunction<P> create(Vector<ScalarMultivariateFunction<P>> const& lsf) {
-        if constexpr (Same<P,ValidatedTag>) {
-            if (lsf.size()==1) {
-                auto fmptr = dynamic_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const*>(lsf[0].raw_pointer());
-                if (fmptr) {
-                    auto fm = ValidatedScalarMultivariateFunctionModelDP(*fmptr);
-                    auto vfm = ValidatedVectorMultivariateFunctionModelDP(List<ValidatedScalarMultivariateFunctionModelDP>(1u,fm));
-                    return VectorMultivariateFunction<P>(vfm);
+template<class P, class... ARGS> ScalarFunction<P,ARGS...> const& make_sized_function(SizeOne, ScalarFunction<P,ARGS...> const& sf) {
+    return sf; }
+template<class P, class... ARGS> VectorFunction<P,ARGS...> make_sized_function(SizeType rs, ScalarFunction<P,ARGS...> const& sf) {
+    return VectorOfScalarFunction(rs,sf); }
+
+template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ScalarFunction<P,ARG> sf)
+    : Function(make_sized_function(rs,sf)) {
+}
+
+
+template<class... ARGS> struct Tag { };
+
+template<class P, class SIG, class... ARGS> inline Function<P,SIG> make_vector_function(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
+    if constexpr (Same<SIG,RealVector(ARGS...)>) {
+        if constexpr (Same<Tag<ARGS...>,Tag<RealScalar>>) {
+            return VectorUnivariateFunction<P>(VectorOfScalarFunction<P,RealScalar>(lsf));
+        } else {
+            if constexpr (Same<P,ValidatedTag>) {
+                if (lsf.size()==1) {
+                    auto fmptr = dynamic_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const*>(lsf[0].raw_pointer());
+                    if (fmptr) {
+                        auto fm = ValidatedScalarMultivariateFunctionModelDP(*fmptr);
+                        auto vfm = ValidatedVectorMultivariateFunctionModelDP(List<ValidatedScalarMultivariateFunctionModelDP>(1u,fm));
+                        return VectorMultivariateFunction<P>(vfm);
+                    }
                 }
             }
+            return VectorMultivariateFunction<P>(VectorOfScalarFunction<P,RealVector>(lsf));
         }
-        return VectorMultivariateFunction<P>(VectorOfScalarFunction<P,RealVector>(lsf));
+    } else {
+        ARIADNE_FAIL_MSG("Cannot construct scalar function from list.");
     }
-};
-
-
-template<class P, class SIG, class... ARGS> inline decltype(auto) make_vector_function(Vector<ScalarFunction<P,ARGS...>> const& lsf) {
-    return MakeVectorFunction<P,SIG>().create(lsf);
 }
+
 
 template<class P, class SIG> Function<P,SIG>::Function(Vector<ScalarFunction<P,ARG>> const& vsf)
     : Function<P,SIG>(make_vector_function<P,SIG>(vsf)) {

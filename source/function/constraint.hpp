@@ -142,14 +142,17 @@ using EffectiveExactConstraint = Constraint<EffectiveScalarMultivariateFunction,
 using EffectiveLowerConstraint = LowerConstraint<EffectiveScalarMultivariateFunction,EffectiveNumber>;
 using ValidatedExactLowerConstraint = LowerConstraint<ValidatedScalarMultivariateFunction,ExactNumber>;
 using ValidatedLowerConstraint = LowerConstraint<ValidatedScalarMultivariateFunction,ValidatedNumber>;
+using ApproximateLowerConstraint = LowerConstraint<ApproximateScalarMultivariateFunction,ApproximateNumber>;
 
 using EffectiveUpperConstraint = UpperConstraint<EffectiveScalarMultivariateFunction,EffectiveNumber>;
 using ValidatedExactUpperConstraint = UpperConstraint<ValidatedScalarMultivariateFunction,ExactNumber>;
 using ValidatedUpperConstraint = UpperConstraint<ValidatedScalarMultivariateFunction,ValidatedNumber>;
+using ApproximateUpperConstraint = UpperConstraint<ApproximateScalarMultivariateFunction,ApproximateNumber>;
 
 using EffectiveEqualityConstraint = EqualityConstraint<EffectiveScalarMultivariateFunction,EffectiveNumber>;
 using ValidatedExactEqualityConstraint = EqualityConstraint<ValidatedScalarMultivariateFunction,ExactNumber>;
 using ValidatedEqualityConstraint = EqualityConstraint<ValidatedScalarMultivariateFunction,ValidatedNumber>;
+using ApproximateEqualityConstraint = EqualityConstraint<ApproximateScalarMultivariateFunction,ApproximateNumber>;
 //!@}
 
 inline EffectiveLowerConstraint operator<=(const EffectiveNumber& l, const EffectiveScalarMultivariateFunction& f) {
@@ -185,12 +188,25 @@ inline ValidatedUpperConstraint operator<=(const ValidatedScalarMultivariateFunc
 inline ValidatedConstraint operator==(const ValidatedScalarMultivariateFunction& f, const ValidatedNumber& c) {
     return ValidatedConstraint(c,f,c); }
 
+inline ApproximateLowerConstraint operator<=(const ApproximateNumber& l, const ApproximateScalarMultivariateFunction& f) {
+    return ApproximateLowerConstraint(l,f); }
+inline ApproximateUpperConstraint operator>=(const ApproximateNumber& u, const ApproximateScalarMultivariateFunction& f) {
+    return ApproximateUpperConstraint(f,u); }
+inline ApproximateLowerConstraint operator>=(const ApproximateScalarMultivariateFunction& f, const ApproximateNumber& l) {
+    return ApproximateLowerConstraint(l,f); }
+inline ApproximateUpperConstraint operator<=(const ApproximateScalarMultivariateFunction& f, const ApproximateNumber& u) {
+    return ApproximateUpperConstraint(f,u); }
+inline ApproximateConstraint operator==(const ApproximateScalarMultivariateFunction& f, const ApproximateNumber& c) {
+    return ApproximateConstraint(c,f,c); }
+
 inline EffectiveConstraint operator<=(const EffectiveLowerConstraint& lc, const EffectiveNumber& u) {
     return EffectiveConstraint(lc.lower_bound(),lc.function(),u); }
 inline ValidatedExactConstraint operator<=(const ValidatedExactLowerConstraint& lc, const ExactNumber& u) {
     return ValidatedExactConstraint(lc.lower_bound(),lc.function(),u); }
 inline ValidatedConstraint operator<=(const ValidatedLowerConstraint& lc, const ValidatedNumber& u) {
     return ValidatedConstraint(lc.lower_bound(),lc.function(),u); }
+inline ApproximateConstraint operator<=(const ApproximateLowerConstraint& lc, const ApproximateNumber& u) {
+    return ApproximateConstraint(lc.lower_bound(),lc.function(),u); }
 
 inline EffectiveConstraint operator>=(const EffectiveUpperConstraint& uc, const EffectiveNumber& l) {
     return EffectiveConstraint(l,uc.function(),uc.upper_bound()); }
@@ -198,6 +214,8 @@ inline ValidatedExactConstraint operator>=(const ValidatedExactUpperConstraint& 
     return ValidatedExactConstraint(l,uc.function(),uc.upper_bound()); }
 inline ValidatedConstraint operator>=(const ValidatedUpperConstraint& uc, const ValidatedNumber& l) {
     return ValidatedConstraint(l,uc.function(),uc.upper_bound()); }
+inline ApproximateConstraint operator>=(const ApproximateUpperConstraint& uc, const ApproximateNumber& l) {
+    return ApproximateConstraint(l,uc.function(),uc.upper_bound()); }
 
 inline ValidatedExactConstraint operator<=(const ValidatedScalarMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2) {
     return (f1-f2) <= ExactNumber(0); }

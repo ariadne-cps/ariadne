@@ -72,11 +72,9 @@ template<class P> struct FeasibilityProblem {
     BoxType<P> C; //!< <p/>
   public:
     //! <p/>
-    FeasibilityProblem(BoxType<P> D_, VectorMultivariateFunction<P> g_, BoxType<P> C_)
-        : D(D_), g(g_), C(C_) { }
+    FeasibilityProblem(BoxType<P> D_, VectorMultivariateFunction<P> g_, BoxType<P> C_);
     //! <p/>
-    FeasibilityProblem(BoxType<P> D_, const List<ConstraintType<P>>& cl)
-        : D(D_), g(_function(cl)), C(_bounds(cl)) { }
+    FeasibilityProblem(BoxType<P> D_, const List<ConstraintType<P>>& cl);
     //! <p/>
     template<class PP> requires Convertible<PP,P> FeasibilityProblem(const FeasibilityProblem<PP>& p)
         : FeasibilityProblem(p.D,p.g,p.C) { }
@@ -84,10 +82,8 @@ template<class P> struct FeasibilityProblem {
     SizeType number_of_variables() const { return this->g.argument_size(); }
     SizeType number_of_constraints() const { return this->g.result_size(); }
   private:
-    static VectorMultivariateFunction<P> _function(const List<ConstraintType<P>>& cl) {
-      return Vector<ScalarMultivariateFunction<P>>(cl.size(),[&cl](SizeType i){return cl[i].function();}); }
-    static BoxType<P> _bounds(const List<ConstraintType<P>>& cl) {
-      return BoxType<P>(cl.size(),[&cl](SizeType i){return cl[i].cast_exact_bounds();}); }
+    static VectorMultivariateFunction<P> _function(SizeType as, const List<ConstraintType<P>>& cl);
+    static BoxType<P> _bounds(const List<ConstraintType<P>>& cl);
 };
 template<class P> OutputStream& operator<<(OutputStream& os, FeasibilityProblem<P> const& p);
 
@@ -107,10 +103,13 @@ template<class P> struct OptimisationProblem : public FeasibilityProblem<P> {
   public:
     //! <p/>
     OptimisationProblem(ScalarMultivariateFunction<P> f_, BoxType<P> D_, VectorMultivariateFunction<P> g_, BoxType<P> C_)
-        : FeasibilityProblem<P>(D_,g_,C_), f(f_) { }
+        : FeasibilityProblem<P>(D_,g_,C_), f(f_) { ARIADNE_PRECONDITION(f_.argument_size()==D_.dimension()); }
     //! <p/>
     OptimisationProblem(ScalarMultivariateFunction<P> f_, BoxType<P> D_, const List<ConstraintType<P>>& cl)
-        : FeasibilityProblem<P>(D_,cl), f(f_) { }
+        : FeasibilityProblem<P>(D_,cl), f(f_) { ARIADNE_PRECONDITION(f_.argument_size()==D_.dimension()); }
+    //! <p/>
+    OptimisationProblem(ScalarMultivariateFunction<P> f_, BoxType<P> D_)
+        : OptimisationProblem(f_,D_, List<ConstraintType<P>>()) { }
     //! <p/>
     template<class PP> requires Convertible<PP,P> OptimisationProblem(const OptimisationProblem<PP>& p)
         : OptimisationProblem(p.f,p.D,p.g,p.C) { }

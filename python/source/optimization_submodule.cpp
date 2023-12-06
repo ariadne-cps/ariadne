@@ -84,9 +84,15 @@ Void export_constraints(pybind11::module& module)
 {
     auto effective_constraint_class=export_constraint<EffectiveTag>(module);
     auto validated_constraint_class=export_constraint<ValidatedTag>(module);
+    auto approximate_constraint_class=export_constraint<ApproximateTag>(module);
 
     validated_constraint_class.def(pybind11::init<EffectiveConstraint>());
     pybind11::implicitly_convertible<EffectiveConstraint,ValidatedConstraint>();
+
+    approximate_constraint_class.def(pybind11::init<EffectiveConstraint>());
+    pybind11::implicitly_convertible<EffectiveConstraint,ApproximateConstraint>();
+    approximate_constraint_class.def(pybind11::init<ValidatedConstraint>());
+    pybind11::implicitly_convertible<ValidatedConstraint,ApproximateConstraint>();
 }
 
 template<class P> Void export_optimisation_problem(pybind11::module& module)
@@ -102,6 +108,7 @@ template<class P> Void export_optimisation_problem(pybind11::module& module)
     pybind11::class_<OptimisationProblem<P>,pybind11::bases<FeasibilityProblem<P>>> optimisation_problem_class(module,(class_name<P>()+"OptimisationProblem").c_str());
     optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,VectorMultivariateFunction<P>,BoxType<P>>());
     optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>,const List<ConstraintType<P>>&>());
+    optimisation_problem_class.def(pybind11::init<ScalarMultivariateFunction<P>,BoxType<P>>());
     optimisation_problem_class.def("__str__",__cstr__<OptimisationProblem<P>>);
     optimisation_problem_class.def_readwrite("f", &OptimisationProblem<P>::f);
 

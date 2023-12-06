@@ -552,6 +552,38 @@ inline Box<Interval<FloatDP>> cast_exact_widen(Box<Interval<FloatDP>> const& bx,
 
 
 
+//------- FeasibilityProblem -----------------------------------//
+
+template<class P> FeasibilityProblem<P>::FeasibilityProblem(BoxType<P> D_, VectorMultivariateFunction<P> g_, BoxType<P> C_)
+    : D(D_), g(g_), C(C_)
+{
+    ARIADNE_PRECONDITION(g.argument_size()==D.dimension());
+    ARIADNE_PRECONDITION(g.result_size()==C.dimension());
+}
+
+template<class P> FeasibilityProblem<P>::FeasibilityProblem(BoxType<P> D_, const List<ConstraintType<P>>& cl)
+    : D(D_), g(_function(D.dimension(),cl)), C(_bounds(cl)) { }
+
+template<class P> auto FeasibilityProblem<P>::_function(SizeType as, const List<ConstraintType<P>>& cl) -> VectorMultivariateFunction<P> {
+    if (cl.size()==0) {
+        return VectorMultivariateFunction<P>(0u, ScalarMultivariateFunction<P>(as));
+    } else {
+        List<ScalarMultivariateFunction<P>> lst;
+        for (SizeType i=0; i!=cl.size(); ++i) {
+            lst.append(cl[i].function());
+        }
+        return VectorMultivariateFunction<P>(lst);
+    }
+}
+
+template<class P> auto FeasibilityProblem<P>::_bounds(const List<ConstraintType<P>>& cl) -> BoxType<P> {
+    return BoxType<P>(cl.size(),[&cl](SizeType i){return cl[i].cast_exact_bounds();});
+}
+
+template struct FeasibilityProblem<ValidatedTag>;
+template struct FeasibilityProblem<ApproximateTag>;
+
+
 //------- FeasibilityChecker -----------------------------------//
 
 FeasibilityChecker* FeasibilityChecker::

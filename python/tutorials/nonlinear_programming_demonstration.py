@@ -41,15 +41,15 @@ g=Function(2, lambda x : [sqr(x[0])+2*sqr(x[1])-1])
 print("g:",g,type(g))
 f=Function(2, lambda x :  2*x[0]+3*x[1])
 print("f:",f,type(f))
-D=BoxDomainType([{-2:2},(-1,1)])
+D=ExactBoxType([{-2:2},(-1,1)])
 print("D:",D,type(D))
-C=BoxDomainType([{0:0}])
-C=BoxDomainType([{"-0.0625":"0.0625"}])
+C=ExactBoxType([{0:0}])
+C=ExactBoxType([{"-0.0625":"0.0625"}])
 print("C:",C,type(C))
 
 opt = InfeasibleInteriorPointOptimiser()
 # Simple feasible case
-D1=BoxDomainType([{-1:2},(-1,1)])
+D1=ExactBoxType([{-1:2},(-1,1)])
 fp1 = ValidatedFeasibilityProblem(D1,g,C)
 print("fp1:",fp1)
 print("opt.feasible(D1,g,C):",opt.feasible(fp1))
@@ -67,15 +67,15 @@ print("fp1:",fp1)
 print("opt.feasible(D1,g,C):",opt.feasible(fp1))
 
 # Feasible case
-D2=BoxDomainType([{"0.75":2},("0.375",1)])
+D2=ExactBoxType([{"0.75":2},("0.375",1)])
 print("opt.feasible(D2,g,C):",opt.feasible(ValidatedFeasibilityProblem(D2,g,C)))
 
 # Boundary case; only feasibly point is (0.75,0.5)
-D3=BoxDomainType([{"0.75":2},("0.5",1)])
+D3=ExactBoxType([{"0.75":2},("0.5",1)])
 print("opt.feasible(D3,g,C):",opt.feasible(ValidatedFeasibilityProblem(D3,g,C)))
 
 # infeasible case
-D4=BoxDomainType([{"0.5":2},("0.75",1)])
+D4=ExactBoxType([{"0.5":2},("0.75",1)])
 print("opt.feasible(D4,g,C):",opt.feasible(ValidatedFeasibilityProblem(D4,g,C)))
 
 print()
@@ -142,7 +142,7 @@ def error(X):
     return Dyadic(cast_exact(FloatDPApproximation(e))) # Conversion should be unnecessary here
 
 
-B=BoxDomainType([("0.5","0.75"),("0.25","0.5")])
+B=ExactBoxType([("0.5","0.75"),("0.25","0.5")])
 print("B",B,type(B))
 X=cast_singleton(B)
 is_refinement=False
@@ -180,7 +180,7 @@ tolerance=1e-6
 max_steps=32
 algslv=IntervalNewtonSolver(tolerance, max_steps)
 
-B=BoxDomainType([("0.0","1.0"),("0.0","1.0")])
+B=ExactBoxType([("0.0","1.0"),("0.0","1.0")])
 bxs=algslv.solve_all(g,B)
 print(bxs)
 

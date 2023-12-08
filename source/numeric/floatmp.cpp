@@ -492,6 +492,9 @@ Int abslog10floor(FloatMP const& x)
 
 String print(const mpfr_t x, int fdgts, mpfr_rnd_t rnd) {
     // fdgts is the number of places allocated for the fractional part
+    if (mpfr_nan_p(x)) { return "nan"; }
+    if (mpfr_inf_p(x)) { if (mpfr_sgn(x)>=0) { return "inf"; } else { return "-inf"; } }
+    if (mpfr_zero_p(x)) { return "0."; }
     char fmt[16];
     std::strcpy(fmt,"%.");
     std::snprintf(fmt+2, 14, "%d", fdgts);
@@ -512,8 +515,6 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
 }
 
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
-    if (is_nan(x)) { return "nan"; }
-    if (x==0) { return "0."; }
     int edgts = abslog10floor(x.get_d())+1;
     int fdgts = std::max(static_cast<int>(figs)-edgts,0);
     return print(x._mpfr,fdgts,rnd);

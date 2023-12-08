@@ -295,6 +295,7 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
 //    vector_class.def(pybind11::init<Array<ApproximateNumber>,PR>());
     vector_class.def(pybind11::init<Vector<Rational>,PR>());
     vector_class.def(pybind11::init<Vector<Bounds<F>>>());
+    vector_class.def(pybind11::init<Vector<F>>());
     pybind11::implicitly_convertible<Vector<Bounds<F>>,Vector<Approximation<F>>>();
     pybind11::implicitly_convertible<Vector<F>,Vector<Approximation<F>>>();
 

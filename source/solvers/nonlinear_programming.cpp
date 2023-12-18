@@ -1003,7 +1003,7 @@ InteriorPointOptimiserBase::minimise(ApproximateOptimisationProblem p) const -> 
     Approximation<FLT> mu0(1,pr);
     auto x0 = midpoint(p.D);
     auto y0 = this->compute_y(p,x0,mu0);
-    return std::get<1>(minimise_hotstarted(p,x0,y0));
+    return minimise_hotstarted(p,x0,y0).primal();
 }
 
 
@@ -1012,7 +1012,7 @@ auto
 InteriorPointOptimiserBase::minimise_hotstarted(
     const ApproximateOptimisationProblem& p,
     const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const
-        -> Tuple<ApproximateNumber,ApproximateVector,ApproximateVector>
+        -> ValuePrimalDualData<ApproximateNumber>
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("p="<<p);
@@ -1053,7 +1053,7 @@ InteriorPointOptimiserBase::minimise_hotstarted(
     if (probably(D.contains(x)) && probably(C.contains(g(x)))) {
         Vector<Approximation<FLT>> y=d.dual();
         CONCLOG_PRINTLN("f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x));
-        return make_tuple(f(x),x,y);
+        return ValuePrimalDualData<ApproximateNumber>(f(x),x,y);
     } else {
         CONCLOG_PRINTLN("indeterminate_feasibility")
         throw IndeterminateFeasibilityException();
@@ -1066,7 +1066,7 @@ InteriorPointOptimiserBase::feasible(ApproximateFeasibilityProblem p) const -> A
 {
     ApproximateVectorType x0 = p.D.midpoint();
     ApproximateVectorType y0(p.g.result_size(),zero);
-    return std::get<0>(this->feasible_hotstarted(p,x0,y0));
+    return this->feasible_hotstarted(p,x0,y0).is_feasible();
 }
 
 
@@ -1075,7 +1075,7 @@ auto
 InteriorPointOptimiserBase::feasible_hotstarted(
     const ApproximateFeasibilityProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ApproximateKleenean,ApproximateVector,ApproximateVector>
+        -> FeasiblePrimalDualData<ApproximateNumber>
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("p="<<p);
@@ -1103,11 +1103,11 @@ InteriorPointOptimiserBase::feasible_hotstarted(
         y=d.dual();
         t=this->compute_t(p,x);
         if (probably(LogicalValue(t>0))) {
-            return make_tuple(true,x,y);
+            return FeasiblePrimalDualData<ApproximateNumber>(true,x,y);
         }
     }
     CONCLOG_PRINTLN("x="<<x<<", y="<<y<<", g(x)="<<g(x));
-    return make_tuple(false,x,y);
+    return FeasiblePrimalDualData<ApproximateNumber>(false,x,y);
 }
 
 
@@ -2443,7 +2443,7 @@ KarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) const -> Val
     ARIADNE_PRECONDITION(p.C.has_nonempty_interior());
     ApproximateVectorType x0=p.D.midpoint();
     ApproximateVectorType y0(p.C.dimension(),zero);
-    return std::get<1>(this->minimise_hotstarted(p,x0,y0));
+    return this->minimise_hotstarted(p,x0,y0).primal();
 }
 
 auto
@@ -2457,21 +2457,21 @@ KarushKuhnTuckerOptimiser::feasible(ValidatedFeasibilityProblem p) const -> Vali
     ApproximateVectorType x0=p.D.midpoint();
     ApproximateVectorType y0(p.C.dimension(),zero);
 
-    return std::get<0>(this->feasible_hotstarted(p,x0,y0));
+    return this->feasible_hotstarted(p,x0,y0).is_feasible();
 }
 
 auto
 KarushKuhnTuckerOptimiser::minimise_hotstarted(
     const ValidatedOptimisationProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+        -> ValuePrimalDualData<ValidatedNumber>
 {
     UpperBoxType B=p.D;
 
     auto r = this->splitting_minimise_hotstarted(p,B,x0,y0);
 
     auto ro0 = std::get<OptimalityCertificate>(r)[0];
-    return make_tuple(ro0.value(),ro0.primal(),ro0.dual());
+    return ValuePrimalDualData<ValidatedNumber>(ro0.value(),ro0.primal(),ro0.dual());
 }
 
 
@@ -2479,7 +2479,7 @@ auto
 KarushKuhnTuckerOptimiser::nonsplitting_minimise_hotstarted(
     const ValidatedOptimisationProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+        -> ValuePrimalDualData<ValidatedNumber>
 {
     ARIADNE_NOT_IMPLEMENTED;
 
@@ -2487,15 +2487,16 @@ KarushKuhnTuckerOptimiser::nonsplitting_minimise_hotstarted(
 
     auto r = approximate_optimiser.minimise_hotstarted(ApproximateOptimisationProblem(p),x0,y0);
     // FIXME: Find a better way of making the answer exact
-    const Scalar<ApproximateNumber>& av=std::get<0>(r);
-    const Vector<ApproximateNumber>& ax=std::get<1>(r);
-    const Vector<ApproximateNumber>& ay=std::get<2>(r);
+    const Scalar<ApproximateNumber>& av=r.value();
+    const Vector<ApproximateNumber>& ax=r.primal();
+    const Vector<ApproximateNumber>& ay=r.dual();
 
     Scalar<ValidatedNumber> v=to_generic(cast_exact(Scalar<Approximation<FLT>>(av,pr)));
     Vector<ValidatedNumber> x=to_generic(cast_exact(Vector<Approximation<FLT>>(ax,pr)));
     Vector<ValidatedNumber> y=to_generic(cast_exact(Vector<Approximation<FLT>>(ay,pr)));
 
-    return make_tuple(v,x,y);
+    ARIADNE_WARN("KarushKuhnTuckerOptimiser::nonsplitting_minimise_hotstarted(p,x0a,y0a): Result may not be reliable.");
+    return ValuePrimalDualData<ValidatedNumber>(v,x,y);
 }
 
 
@@ -2523,8 +2524,8 @@ KarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
     }
     CONCLOG_PRINTLN("x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x))
 
-    auto r=this->check_minimality(p,g(x),x,y,z);
-    if (definitely(std::get<0>(r))) {
+    FeasiblePrimalDualData<ValidatedNumber> r=this->check_minimality(p,g(x),x,y,z);
+    if (definitely(r.is_feasible())) {
         CONCLOG_PRINTLN("r="<<r);
         FloatDPBounds v=f(cast_exact(x));
         return OptimalityCertificate({LocalOptimalityCertificate(v,cast_exact(x),cast_exact(y))});
@@ -2598,8 +2599,8 @@ KarushKuhnTuckerOptimiser::splitting_feasible_hotstarted(
     }
     CONCLOG_PRINTLN("t="<<t<<", x="<<x<<", y="<<y<<", g(x)="<<g(x))
 
-    auto r=this->check_feasibility(p,x,y);
-    if (definitely(std::get<0>(r))) {
+    FeasiblePrimalDualData<ValidatedNumber> r=this->check_feasibility(p,x,y);
+    if (definitely(r.is_feasible())) {
         CONCLOG_PRINTLN("r="<<r);
         return FeasibilityCertificate(Pair<ValidatedVector,ExactVector>(cast_exact(x),cast_exact(y)));
     } else {
@@ -2630,7 +2631,7 @@ auto
 KarushKuhnTuckerOptimiser::feasible_hotstarted(
     const ValidatedFeasibilityProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+        -> FeasiblePrimalDualData<ValidatedNumber>
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("p="<<p<<", x0="<<x0<<", y0="<<y0)
@@ -2639,11 +2640,11 @@ KarushKuhnTuckerOptimiser::feasible_hotstarted(
     if (std::holds_alternative<FeasibilityCertificate>(r)) {
         FeasibilityCertificate fc=std::get<FeasibilityCertificate>(r);
         CONCLOG_PRINTLN("fc="<<fc)
-        return make_tuple(true,fc.x,fc.y);
+        return FeasiblePrimalDualData<ValidatedNumber>(true,fc.x,fc.y);
     } else {
         InfeasibilityCertificate ifc=std::get<InfeasibilityCertificate>(r);
         CONCLOG_PRINTLN("ifc="<<ifc)
-        return make_tuple(false,cast_singleton(ifc[0].B),ifc[0].y);
+        return FeasiblePrimalDualData<ValidatedNumber>(false,cast_singleton(ifc[0].B),ifc[0].y);
     }
 }
 
@@ -2651,7 +2652,7 @@ auto
 KarushKuhnTuckerOptimiser::nonsplitting_feasible_hotstarted(
     const ValidatedFeasibilityProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+        -> FeasiblePrimalDualData<ValidatedNumber>
 {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN("p="<<p);
@@ -2693,7 +2694,7 @@ auto
 KarushKuhnTuckerOptimiser::check_feasibility(
     const ValidatedFeasibilityProblem& p,
     const ApproximateVectorType& xa, const ApproximateVectorType& ya) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+        -> FeasiblePrimalDualData<ValidatedNumber>
 {
     CONCLOG_SCOPE_CREATE;
 
@@ -2706,7 +2707,7 @@ KarushKuhnTuckerOptimiser::check_feasibility(
 
     FeasibilityChecker fc;
     ValidatedKleenean k=fc.check_feasibility(p,x,y);
-    return make_tuple(k,to_generic(x),to_generic(y));
+    return FeasiblePrimalDualData<ValidatedNumber>(k,to_generic(x),to_generic(y));
 }
 
 
@@ -2714,7 +2715,7 @@ auto
 KarushKuhnTuckerOptimiser::check_minimality(
     const ValidatedOptimisationProblem& p,
     const ApproximateVectorType& wa, const ApproximateVectorType& xa, const ApproximateVectorType& ya, const ApproximateVectorType& za) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+        -> FeasiblePrimalDualData<ValidatedNumber>
 {
     //CONCLOG_SCOPE_CREATE;
     auto& f=p.f; auto& g=p.g;
@@ -2748,7 +2749,7 @@ auto
 KarushKuhnTuckerOptimiser::check_minimality(
     const ValidatedOptimisationProblem& p,
     const FloatDPBoundsVector& w_, const FloatDPBoundsVector& x_, const FloatDPBoundsVector& y_, const FloatDPBoundsVector& z_) const
-        -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+        -> FeasiblePrimalDualData<ValidatedNumber>
 {
     auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
     Vector<Bounds<FLT>> w(w_), x(x_), y(y_), z(z_);
@@ -2825,9 +2826,9 @@ KarushKuhnTuckerOptimiser::check_minimality(
             CONCLOG_PRINTLN("refines(nw,w)="<<refines(nw,w)<<", refines(nx,x)="<<refines(nx,x)<<", refines(ny,y)="<<refines(ny,y)<<", refines(nz,z)="<<refines(nz,z));
             CONCLOG_PRINTLN("inconsistent(nw,w)="<<inconsistent(nw,w)<<", inconsistent(nx,x)="<<inconsistent(nx,x)<<", inconsistent(ny,y)="<<inconsistent(ny,y)<<", inconsistent(nz,z)="<<inconsistent(nz,z));
             if (refines(nw,w) && refines(nx,x) && refines(ny,y) && refines(nz,z)) {
-                return make_tuple(true,nx,ny);
+                return FeasiblePrimalDualData<ValidatedNumber>(true,nx,ny);
             } else if (inconsistent(nw,w) || inconsistent(nx,x) || inconsistent(ny,y) || inconsistent(nz,z)) {
-                return make_tuple(false,x,ny);
+                return FeasiblePrimalDualData<ValidatedNumber>(false,x,ny);
             } else {
                 w=refinement(w,nw); x=refinement(x,nx); y=refinement(y,ny); z=refinement(z,nz);
                 ++step;
@@ -2838,7 +2839,7 @@ KarushKuhnTuckerOptimiser::check_minimality(
             throw(e);
         }
     }
-    return make_tuple(indeterminate,x,y);
+    return FeasiblePrimalDualData<ValidatedNumber>(indeterminate,x,y);
 }
 
 //------- InfeasibleKarushKuhnTuckerOptimiser -----------------------------------//
@@ -2863,7 +2864,7 @@ InfeasibleKarushKuhnTuckerOptimiser::minimise(ValidatedOptimisationProblem p) co
     ApproximateNumericType mu0(1,x0.zero_element().precision());
     InfeasibleInteriorPointOptimiser approximate_optimiser;
     ApproximateVectorType y0=approximate_optimiser.compute_y(p,x0,mu0);
-    return std::get<1>(this->minimise_hotstarted(p,x0,y0));
+    return this->minimise_hotstarted(p,x0,y0).primal();
 }
 
 
@@ -2871,7 +2872,7 @@ auto
 InfeasibleKarushKuhnTuckerOptimiser::minimise_hotstarted(
     const ValidatedOptimisationProblem& p,
     const ApproximateVectorType& x0, const ApproximateVectorType& y0) const
-        -> Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+        -> ValuePrimalDualData<ValidatedNumber>
 {
     CONCLOG_PRINTLN("InfeasibleKarushKuhnTuckerOptimiser::minimise_hotstarted(ValidatedOptimisationProblem p, ApproximateVectorType xa0, ya0)");
 
@@ -2880,9 +2881,39 @@ InfeasibleKarushKuhnTuckerOptimiser::minimise_hotstarted(
     auto r = this->splitting_minimise_hotstarted(p,B,x0,y0);
 
     auto ro0 = std::get<OptimalityCertificate>(r)[0];
-    return make_tuple(ro0.value(),ro0.primal(),ro0.dual());
+    return ValuePrimalDualData<ValidatedNumber>(ro0.value(),ro0.primal(),ro0.dual());
 }
 
+
+
+auto
+InfeasibleKarushKuhnTuckerOptimiser::_splitting_minimise_subdivide(
+    const ValidatedOptimisationProblem& p,
+    UpperBoxType B, ApproximateVectorType x, ApproximateVectorType y) const
+        -> Variant<OptimalityCertificate,InfeasibilityCertificate>
+{
+    auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
+    auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
+    auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
+
+    if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
+        // Both sub-boxes are feasible. Filter out clearly non-optimal points
+        auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
+        ARIADNE_DEBUG_ASSERT(not o.empty());
+        auto v=o[0].v;
+        for (auto lo : o) { v=min(v,lo.v); }
+        OptimalityCertificate ro;
+        for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
+        return ro;
+    } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
+        // B1 is feasible, but B2 is not
+        return r1;
+    } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
+        return r2;
+    } else {
+        return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
+    }
+}
 
 auto
 InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
@@ -2896,31 +2927,6 @@ InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
     CONCLOG_PRINTLN("D="<<p.D<<", C="<<p.C);
     CONCLOG_PRINTLN("B0="<<B<<", xa0="<<x<<", ya0="<<y);
 
-    auto subdivide = [&](UpperBoxType B) -> Variant<OptimalityCertificate,InfeasibilityCertificate> {
-        auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
-        auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
-        auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
-
-        if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
-            // Both sub-boxes are feasible. Filter out clearly non-optimal points
-            auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
-            ARIADNE_DEBUG_ASSERT(not o.empty());
-            auto v=o[0].v;
-            for (auto lo : o) { v=min(v,lo.v); }
-            OptimalityCertificate ro;
-            for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
-            return ro;
-        } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
-            // B1 is feasible, but B2 is not
-            return r1;
-        } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
-            return r2;
-        } else {
-            return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
-        }
-    };
-
-
     auto& f=p.f; auto& D=p.D; auto& g=p.g; auto& C=p.C;
 
     SlackPrimalDualComplementaryInteriorPointOptimiser approximate_optimiser;
@@ -2932,7 +2938,7 @@ InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
 
     CONCLOG_PRINTLN("w0="<<w<<", x0="<<x<<", y0="<<y<<", z0="<<z<<", mu0="<<mu<<", f(x0)="<<f(x)<<", g(x0)="<<g(x));
 
-#warning FIXME: Change to pure mimimisation
+#warning FIXME: Change to pure mimimisation. Remove verbosity switch
     for(SizeType i=0; i!=18; ++i) {
         try {
             auto v=ConcLog::Logger::instance().configuration().verbosity();
@@ -2940,14 +2946,14 @@ InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
             approximate_optimiser.minimisation_step(p, w,x,y,z, mu);
             ConcLog::Logger::instance().configuration().set_verbosity(v);
         } catch (SingularMatrixException e) {
-            return subdivide(B);
+            return this->_splitting_minimise_subdivide(p,B,x,y);
         }
         if (i>=2 && i<17) { mu=mu/4; }
         CONCLOG_PRINTLN_AT(1,"w"<<i+1<<"="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x));
     }
     CONCLOG_PRINTLN("w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", mu="<<mu<<", f(x)="<<f(x)<<", g(x)="<<g(x));
 
-    auto r=this->check_minimality(p,w,x,y,z);
+    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector> r=this->check_minimality(p,w,x,y,z);
 
     if (definitely(std::get<0>(r))) {
         CONCLOG_PRINTLN("r="<<r);
@@ -2964,27 +2970,7 @@ InfeasibleKarushKuhnTuckerOptimiser::splitting_minimise_hotstarted(
             if (decide(measure(B)<measure(oldB)/2)) {
                 return splitting_minimise_hotstarted(p,B,midpoint(B),y);
             } else {
-                auto sB=split(B); auto& B1=sB.first; auto& B2=sB.second;
-                auto r1=splitting_minimise_hotstarted(p,B1,midpoint(B),y);
-                auto r2=splitting_minimise_hotstarted(p,B2,midpoint(B),y);
-
-                if (std::holds_alternative<OptimalityCertificate>(r1) && std::holds_alternative<OptimalityCertificate>(r2)) {
-                    // Both sub-boxes are feasible. Filter out clearly non-optimal points
-                    auto o=catenate(std::get<OptimalityCertificate>(r1),std::get<OptimalityCertificate>(r2));
-                    ARIADNE_DEBUG_ASSERT(not o.empty());
-                    auto v=o[0].v;
-                    for (auto lo : o) { v=min(v,lo.v); }
-                    OptimalityCertificate ro;
-                    for (auto lo : o) { if (possibly(lo.v<=v)) { ro.append(lo); } }
-                    return ro;
-                } else if (std::holds_alternative<OptimalityCertificate>(r1)) {
-                    // B1 is feasible, but B2 is not
-                    return r1;
-                } else if (std::holds_alternative<OptimalityCertificate>(r2)) {
-                    return r2;
-                } else {
-                    return InfeasibilityCertificate(catenate(std::get<InfeasibilityCertificate>(r1),std::get<InfeasibilityCertificate>(r2)));
-                }
+                return this->_splitting_minimise_subdivide(p,B,x,y);
             }
         }
     }
@@ -3040,7 +3026,7 @@ feasible(ValidatedFeasibilityProblem p) const -> ValidatedKleenean
 
 
 auto InfeasibleKarushKuhnTuckerOptimiser::
-feasible_hotstarted(ValidatedFeasibilityProblem p,
+feasible_hotstarted(const ValidatedFeasibilityProblem& p,
                     const SlackPrimalDualData<ApproximateNumericType>& wxy0) const
                         -> Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
 {

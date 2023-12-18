@@ -198,13 +198,23 @@ Void export_interior_point_solvers(pybind11::module& module)
     using AB = ApproximateBoxType;
     //using EB = ExactBoxType;
 
+    pybind11::class_<ValuePrimalDualData<YA>> value_primal_dual_data_class(module,"ApproximateValuePrimalDualData");
+    value_primal_dual_data_class.def("value",&ValuePrimalDualData<YA>::value);
+    value_primal_dual_data_class.def("primal",&ValuePrimalDualData<YA>::primal);
+    value_primal_dual_data_class.def("dual",&ValuePrimalDualData<YA>::dual);
+
+    pybind11::class_<FeasiblePrimalDualData<YA>> feasible_primal_dual_data_class(module,"ApproximateFeasiblePrimalDualData");
+    feasible_primal_dual_data_class.def("is_feasible",&FeasiblePrimalDualData<YA>::is_feasible);
+    feasible_primal_dual_data_class.def("primal",&FeasiblePrimalDualData<YA>::primal);
+    feasible_primal_dual_data_class.def("dual",&FeasiblePrimalDualData<YA>::dual);
+
     {
         using Self=InteriorPointOptimiserBase;
 
         pybind11::class_<InteriorPointOptimiserBase,ApproximateOptimiserInterface> interior_point_optimiser_base_class(module,"InteriorPointOptimiserBase");
 
-        interior_point_optimiser_base_class.def("minimise_hotstarted", (Tuple<YA,VYA,VYA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        interior_point_optimiser_base_class.def("feasible_hotstarted", (Tuple<AK,VYA,VYA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        interior_point_optimiser_base_class.def("minimise_hotstarted", (ValuePrimalDualData<YA>(Self::*)(const AOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        interior_point_optimiser_base_class.def("feasible_hotstarted", (FeasiblePrimalDualData<YA>(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
 
         interior_point_optimiser_base_class.def("compute_dual", (VXA(Self::*)(const AB&, const VXA&, const XA&)const) &Self::compute_dual);
 
@@ -222,7 +232,8 @@ Void export_interior_point_solvers(pybind11::module& module)
         interior_point_optimiser_class.def(pybind11::init<>());
         interior_point_optimiser_class.def("__str__", &__cstr__<Self>);
 
-        interior_point_optimiser_class.def("feasibility_step", (Void(Self::*)(const AFP&, Self::StepData&)const) &Self::feasibility_step);
+#warning
+        //        interior_point_optimiser_class.def("feasibility_step", (Void(Self::*)(const AFP&, Self::StepData&)const) &Self::feasibility_step);
 
         interior_point_optimiser_class.def("initial_step_data", (Self::StepData*(Self::*)(const AFP&)const) &Self::initial_step_data);
         interior_point_optimiser_class.def("initial_step_data_hotstarted", (Self::StepData*(Self::*)(const AFP&, const VXA&, const VXA&)const) &Self::initial_step_data_hotstarted);
@@ -317,8 +328,8 @@ Void export_interior_point_solvers(pybind11::module& module)
         karush_kuhn_tucker_optimiser_class.def(pybind11::init<>());
         //karush_kuhn_tucker_optimiser_class.def("__str__", &__cstr__<KarushKuhnTuckerOptimiser>);
 
-        karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
+        karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (ValuePrimalDualData<YB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (FeasiblePrimalDualData<YB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
     }
 
     {
@@ -328,9 +339,8 @@ Void export_interior_point_solvers(pybind11::module& module)
         infeasible_karush_kuhn_tucker_optimiser_class.def(pybind11::init<>());
         //infeasible_karush_kuhn_tucker_optimiser_class.def("_str_", &_cstr_<InfeasibleKarushKuhnTuckerOptimiser>);
 
-        infeasible_karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (Tuple<YB,VYB,VYB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
-        infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Tuple<VK,VYB,VYB>(Self::*)(const VFP&, const VXA&, const VXA&)const) &Self::feasible_hotstarted);
-        infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (Pair<ValidatedKleenean,VXA>(Self::*)(VFP, const SlackPrimalDualData<XA>&)const) &Self::feasible_hotstarted);
+        infeasible_karush_kuhn_tucker_optimiser_class.def("minimise_hotstarted", (ValuePrimalDualData<YB>(Self::*)(const VOP&, const VXA&, const VXA&)const) &Self::minimise_hotstarted);
+        infeasible_karush_kuhn_tucker_optimiser_class.def("feasible_hotstarted", (FeasiblePrimalDualData<YB>(Self::*)(const VFP&, const SlackPrimalDualData<XA>&)const) &Self::feasible_hotstarted);
     }
 }
 

@@ -289,7 +289,7 @@ class TestValidatedOptimiser
 
         if (ikkt_optimiser) {
             auto vxy_optimal=ikkt_optimiser->minimise_hotstarted(p,x0,y0);
-            auto x_optimal=std::get<1>(vxy_optimal);
+            auto x_optimal=vxy_optimal.primal();
             ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
             ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
             //ExactDouble required_accuracy=1e-6_pr;
@@ -327,9 +327,9 @@ class TestValidatedOptimiser
                 return r;
             };
 
-            ValidatedNumber v=std::get<0>(vxy_optimal);
-            Vector<ValidatedNumber> x=std::get<1>(vxy_optimal);
-            Vector<ValidatedNumber> y=std::get<2>(vxy_optimal);
+            ValidatedNumber v=vxy_optimal.value();
+            Vector<ValidatedNumber> x=vxy_optimal.primal();
+            Vector<ValidatedNumber> y=vxy_optimal.dual();
 
             ARIADNE_TEST_PRINT(v);
             ARIADNE_TEST_PRINT(expected_v.get(dp));

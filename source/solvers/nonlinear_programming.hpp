@@ -143,21 +143,21 @@ using ValidatedPrimalData = PrimalData<Bounds<FloatDP>>;
 
 
 //! \brief Data for the solution of an optimization problem, with primal variables of type \a X and dual variables of type \a Y.
-template<class X> struct PrimalDualData : public PrimalData<X> {
-    Vector<X> y;
-    PrimalDualData(SizeType m, SizeType n, PrecisionType<X> pr)
+template<class X, class Y=X> struct PrimalDualData : public PrimalData<X> {
+    Vector<Y> y;
+    template<class PR> requires Constructible<X,PR> PrimalDualData(SizeType m, SizeType n, PR pr)
         : PrimalDualData(Vector<X>(n,pr),Vector<X>(m,pr)) { }
     PrimalDualData(SizeType m, SizeType n, Vector<X> r)
         : PrimalDualData(r[range(0,n)],r[range(n,m+n)]) { ARIADNE_DEBUG_PRECONDITION(r.size()==m+n); }
     //! \brief <p/>
-    PrimalDualData(Vector<X> x_, Vector<X> y_) : PrimalData<X>(x_), y(y_) { }
+    PrimalDualData(Vector<X> x_, Vector<Y> y_) : PrimalData<X>(x_), y(y_) { }
     //! \brief <p/>
-    Vector<X> const& dual() const { return this->y; }
+    Vector<Y> const& dual() const { return this->y; }
     //! \brief <p/>
-    friend OutputStream& operator<<(OutputStream& os, const PrimalDualData<X>& d) {
+    friend OutputStream& operator<<(OutputStream& os, const PrimalDualData<X,Y>& d) {
         return os << "PrimalDualData(x=" << d.x << ", y=" << d.y << ")"; }
-    friend PrimalDualData<X> operator-(PrimalDualData<X> d) {
-        return PrimalDualData<X>(-d.x,-d.y); }
+    friend PrimalDualData<X,Y> operator-(PrimalDualData<X,Y> d) {
+        return PrimalDualData<X,Y>(-d.x,-d.y); }
 };
 using ApproximatePrimalDualData = PrimalDualData<Approximation<FloatDP>>;
 using ValidatedPrimalDualData = PrimalDualData<Bounds<FloatDP>>;
@@ -184,7 +184,6 @@ template<class X> struct PrimalDualComplementaryData : public PrimalDualData<X> 
 };
 using ApproximatePrimalDualComplementaryData = PrimalDualComplementaryData<Approximation<FloatDP>>;
 using ValidatedPrimalDualComplementaryData = PrimalDualComplementaryData<Bounds<FloatDP>>;
-
 
 
 //! \brief Data for the solution of an optimization problem, with primal variables \a x and slack variables \a w of type \a X.
@@ -273,11 +272,14 @@ using ValidatedSlackPrimalSplitDualComplementaryData = SlackPrimalSplitDualCompl
 template<class X> struct FeasiblePrimalDualData : PrimalDualData<X> {
     ComparisonType<X> r;
     FeasiblePrimalDualData(ComparisonType<X> r_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), r(r_) { }
+    ComparisonType<X> const& is_feasible() const { return this->r; }
+
 };
 
 template<class X> struct ValuePrimalDualData : PrimalDualData<X> {
     X v;
     ValuePrimalDualData(X v_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), v(v_) { }
+    X const& value() const { return this->v; }
 };
 
 template<class X> struct SlackPrimalDualComplementaryMatrix;
@@ -683,13 +685,13 @@ class InteriorPointOptimiserBase
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
-    virtual Tuple<ApproximateNumber,ApproximateVector,ApproximateVector>
+    virtual ValuePrimalDualData<ApproximateNumber>
     minimise_hotstarted(const ApproximateOptimisationProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
-    virtual Tuple<ApproximateKleenean,ApproximateVector,ApproximateVector>
+    virtual FeasiblePrimalDualData<ApproximateNumber>
     feasible_hotstarted(const ApproximateFeasibilityProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
@@ -1031,36 +1033,36 @@ class KarushKuhnTuckerOptimiser
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
-    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    ValuePrimalDualData<ValidatedNumber>
     minimise_hotstarted(const ValidatedOptimisationProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     feasible_hotstarted(const ValidatedFeasibilityProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
     //! \brief Checks whether the point \f$x\f$ is feasible, or the multipliers \f$y\f$ provide a certificate of infeasibility based around \f$x\f$.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     check_feasibility(const ValidatedFeasibilityProblem& p,
                       const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y) const;
 
     //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     check_minimality(const ValidatedOptimisationProblem& p,
                      const Vector<Approximation<FLT>>& w, const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Vector<Approximation<FLT>>& z) const;
 
     //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     check_minimality(const ValidatedOptimisationProblem& p,
                      const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
 
-    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    ValuePrimalDualData<ValidatedNumber>
     nonsplitting_minimise_hotstarted(const ValidatedOptimisationProblem& p,
                                      const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     nonsplitting_feasible_hotstarted(const ValidatedFeasibilityProblem& p,
                                      const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
@@ -1094,7 +1096,7 @@ class InfeasibleKarushKuhnTuckerOptimiser
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual variables.
-    Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>
+    ValuePrimalDualData<ValidatedNumber>
     minimise_hotstarted(const ValidatedOptimisationProblem& p,
                         const Vector<Approximation<FLT>>& x0, const Vector<Approximation<FLT>>& y0) const;
 
@@ -1117,7 +1119,10 @@ class InfeasibleKarushKuhnTuckerOptimiser
     Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
     check_minimality(const ValidatedOptimisationProblem& p,
                      const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
-
+  private:
+    Variant<OptimalityCertificate,InfeasibilityCertificate>
+    _splitting_minimise_subdivide(const ValidatedOptimisationProblem& p,
+                                  UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
 
     auto minimise_old(ValidatedOptimisationProblem p) const -> ValidatedVector;
 };

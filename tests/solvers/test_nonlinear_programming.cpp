@@ -128,9 +128,7 @@ class TestApproximateOptimiser
         : optimiser(opt.clone()) { }
 
     Void test() {
-#warning
         ARIADNE_TEST_CALL(test_approximate_inequality_constrained_optimisation_step());
-        return;
         ARIADNE_TEST_CALL(test_approximate_inequality_constrained_optimisation());
     }
 
@@ -280,77 +278,76 @@ class TestValidatedOptimiser
         // Solution w=[1.804,0.]; x=[0.3357,0.7344,-3.]; y=[-0.,-4.629]; z=[-0.,-0.,-1.000]
         // Solution w=[1.8044485689555270,0], x=[0.33567895605503406,0.73438480645024651,-3], y=[0,-4.6287340651384685], z=[0,0,-1]
 
-        Vector<FloatDPApproximation> x0({0.6,1.1,1.1},dp);
-        Vector<FloatDPApproximation> y0({-1,-1},dp);
+        Vector<FloatDPBounds> expected_x1({"0.33567895605503406"_dec,"0.73438480645024651"_dec,-3},dp);
 
-#warning Also minimise without hotstarting
-//        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
+        //        Vector<ValidatedNumber> x_optimal=optimiser->minimise(f,D,g,C);
         auto ikkt_optimiser=dynamic_cast<InfeasibleKarushKuhnTuckerOptimiser*>(optimiser.get());
-
         if (ikkt_optimiser) {
+            Vector<FloatDPApproximation> x0({0.6,1.1,1.1},dp);
+            Vector<FloatDPApproximation> y0({-1,-1},dp);
             auto vxy_optimal=ikkt_optimiser->minimise_hotstarted(p,x0,y0);
             auto x_optimal=vxy_optimal.primal();
-            ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
-            ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
-            //ExactDouble required_accuracy=1e-6_pr;
-            //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
-
-            CONCLOG_PRINTLN("\n\n\n\n\n\n\n");
-            x=EffectiveScalarMultivariateFunction::coordinates(2);
-            f=-2*x[0]-3*x[1];
-            D={{-2,2},{-1,1}};
-            g={sqr(x[0])+2*sqr(x[1])-1};
-            C={{"-0.0625","0.0625"}};
-            p = {f,D,g,C};
-            // Solution w=[-0.625], x=(1/sqrt(2),3/4*1/sqrt(2)), y=[sqrt(2)], z=[0,0]
-
-            ARIADNE_TEST_PRINT(p);
-            x0=Vector<FloatDPApproximation>{{.625,0.7},dp};
-            y0=Vector<FloatDPApproximation>{{.125},dp};
-
-            auto sqrt_two=sqrt(Real(2));
-
-            auto expected_v=-17/4_q/sqrt_two;
-            auto expected_w=RealVector({Dyadic(5,3u)});
-            auto expected_x=RealVector({1,Rational(3,4)})/sqrt_two;
-            auto expected_y=RealVector({sqrt_two});
-            auto expected_z=RealVector({0,0});
-
-            vxy_optimal=ikkt_optimiser->minimise_hotstarted(p,x0,y0);
             ARIADNE_TEST_PRINT(vxy_optimal);
+            ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+            auto possibly_element = [](auto x, auto s) { return possibly(element(x,s)); };
+            ARIADNE_TEST_BINARY_PREDICATE(possibly_element,g(x_optimal),C);
+            ExactDouble required_accuracy=1e-8_pr;
+            ARIADNE_TEST_LESS(norm(x_optimal-expected_x1),required_accuracy);
+        }
 
-            auto models = [] (Vector<ValidatedNumber> vv, Vector<EffectiveNumber> ve) {
-                bool r=true;
-                for (SizeType i=0; i!=vv.size(); ++i) {
-                    r=r && refines(ve[i].get(dp),vv[i].get(dp));
-                }
-                return r;
-            };
+        x=EffectiveScalarMultivariateFunction::coordinates(2);
+        f=-2*x[0]-3*x[1];
+        D={{-2,2},{-1,1}};
+        g={sqr(x[0])+2*sqr(x[1])-1};
+        C={{"-0.0625","0.0625"}};
+        p = {f,D,g,C};
+        // Solution v=-17/4/sqrt(2), w=[0.0625], x=[-1/sqrt(2),-3/4*1/sqrt(2)], y=[sqrt(2)], z=[0,0]
+        //   v=-3.005203820042827, w=[0.06250000000000000], x=[0.7071067811865475,0.5303300858899106], y=[1.4142135623730951], z=[0,0]
 
-            ValidatedNumber v=vxy_optimal.value();
-            Vector<ValidatedNumber> x=vxy_optimal.primal();
-            Vector<ValidatedNumber> y=vxy_optimal.dual();
+        ARIADNE_TEST_PRINT(p);
+        auto x0=Vector<FloatDPApproximation>{{.625,0.7},dp};
+        auto y0=Vector<FloatDPApproximation>{{.125},dp};
 
-            ARIADNE_TEST_PRINT(v);
+        auto sqrt_two=sqrt(Real(2));
+        auto expected_v=-17/4_q/sqrt_two;
+        auto expected_w=RealVector({Dyadic(1,4u)});
+        auto expected_x=RealVector({1,Dyadic(3,2u)})/sqrt_two;
+        auto expected_y=RealVector({sqrt_two});
+        auto expected_z=RealVector({0,0});
+
+        auto models = [] (Vector<ValidatedNumber> vv, Vector<EffectiveNumber> ve) {
+            bool r=true;
+            for (SizeType i=0; i!=vv.size(); ++i) {
+                r=r && refines(ve[i].get(dp),vv[i].get(dp));
+            }
+            return r;
+        };
+
+        if (ikkt_optimiser) {
+            auto computed_vxy=ikkt_optimiser->minimise_hotstarted(p,x0,y0);
+            ARIADNE_TEST_PRINT(computed_vxy);
+
+            ValidatedNumber computed_v=computed_vxy.value();
+            Vector<ValidatedNumber> computed_x=computed_vxy.primal();
+            Vector<ValidatedNumber> computed_y=computed_vxy.dual();
+
+            ARIADNE_TEST_PRINT(computed_v);
             ARIADNE_TEST_PRINT(expected_v.get(dp));
-            ARIADNE_TEST_PRINT(x);
+            ARIADNE_TEST_PRINT(computed_x);
             ARIADNE_TEST_PRINT(Vector<FloatDPBounds>(expected_x,dp));
-            ARIADNE_TEST_PRINT(y);
+            ARIADNE_TEST_PRINT(computed_y);
             ARIADNE_TEST_PRINT(Vector<FloatDPBounds>(expected_y,dp));
 
-            ARIADNE_TEST_BINARY_PREDICATE(refines,expected_v.get(dp),v.get(dp));
+            ARIADNE_TEST_BINARY_PREDICATE(refines,expected_v.get(dp),computed_v.get(dp));
             ARIADNE_TEST_PRINT(Vector<FloatDPBounds>(expected_x,dp));
-            ARIADNE_TEST_BINARY_PREDICATE(models,x,expected_x);
-            ARIADNE_TEST_BINARY_PREDICATE(models,y,expected_y);
+            ARIADNE_TEST_BINARY_PREDICATE(models,computed_x,expected_x);
+            ARIADNE_TEST_BINARY_PREDICATE(models,computed_y,expected_y);
             //ARIADNE_TEST_ASSERT(models(v,expected_v.get(dp)));
-
-
-
-            x_optimal=optimiser->minimise(p);
-    //        ARIADNE_TEST_BINARY_PREDICATE(refines,x_optimal,
-    //        ARIADNE_TEST_BINARY_PREDICATE(models,x_optimal,
-            ARIADNE_TEST_PRINT(x_optimal);
         }
+
+        auto x_optimal=optimiser->minimise(p);
+        ARIADNE_TEST_PRINT(x_optimal);
+        ARIADNE_TEST_BINARY_PREDICATE(models,x_optimal,expected_x);
 
     }
 
@@ -420,13 +417,6 @@ Int main(Int argc, const char* argv[]) {
 
     FeasibilityChecker fc;
     TestFeasibilityChecker(fc).test();
-
-#warning Short-cut of unwanted tests
-    if (true) {
-        InfeasibleKarushKuhnTuckerOptimiser ikkto;
-        ARIADNE_TEST_CLASS("InfeasibleKarushKuhnTuckerOptimiser",TestValidatedOptimiser(ikkto));
-        return ARIADNE_TEST_FAILURES;
-    }
 
     PrimalDualInteriorPointOptimiser pd_ipto;
     ARIADNE_TEST_CLASS("PrimalDualInteriorPointOptimiser",TestApproximateOptimiser(pd_ipto));

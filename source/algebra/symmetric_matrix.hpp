@@ -32,7 +32,10 @@
 #include <initializer_list>
 
 #include "utility/metaprogramming.hpp"
+
 #include "vector.hpp"
+#include "matrix.hpp"
+#include "diagonal_matrix.hpp"
 
 namespace Ariadne {
 
@@ -44,6 +47,7 @@ template<class X> class Vector;
 template<class X> class Covector;
 
 template<class X> class Matrix;
+template<class X> class DiagonalMatrix;
 
 class SingularMatrixException;
 
@@ -273,6 +277,17 @@ template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
 template<class X> OutputStream& SymmetricMatrix<X>::_write(OutputStream& os) const {
     return os << Matrix<X>(*this);
 }
+
+template<class X> DiagonalMatrix<X>::operator SymmetricMatrix<X>() const {
+    DiagonalMatrix<X> const& D=*this;
+    SymmetricMatrix<X> S(D.size(),D.zero_element());
+    for(SizeType i=0; i!=D.size(); ++i) {
+        S.at(i,i)=D._at(i);
+    }
+    return S;
+}
+
+
 
 template<class X1, class X2> requires CanInplaceAdd<X1,X2> SymmetricMatrix<X1>& operator+=(SymmetricMatrix<X1>& S1, SymmetricMatrix<X2> const& S2) {
     assert(S1.size()==S2.size());

@@ -581,12 +581,18 @@ template<class X> pybind11::class_<Matrix<X>> export_matrix(pybind11::module& mo
 template<class X> X __dmgetitem__(DiagonalMatrix<X> const& A, std::tuple<Nat,Nat> ind) {
     Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); return (i==j) ? A._at(i) : A.zero_element();
 }
-
 template<class X> Void __dmsetitem__(DiagonalMatrix<X>& A, const std::tuple<Nat,Nat>& ind, const X& x) {
     Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); assert(i==j); A._at(i)=x;
 }
 
+template<class X> X __smgetitem__(SymmetricMatrix<X> const& A, std::tuple<Nat,Nat> ind) {
+    Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); return A.at(i,j);
+}
+template<class X> Void __smsetitem__(SymmetricMatrix<X>& A, std::tuple<Nat,Nat> ind, const X& x) {
+    Nat i=std::get<0>(ind); Nat j=std::get<1>(ind); A.at(i,j)=x;
+}
 
+#warning TODO: Add DiagonalMatrix and SymmetricMatrix __repr__
 
 template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pybind11::module& module)
 {
@@ -597,8 +603,17 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
     if constexpr (HasPrecisionType<X>) {
         typedef typename X::PrecisionType PR;
         diagonal_matrix_class.def(pybind11::init<SizeType,PR>());
+        if constexpr (HasGenericType<X>) {
+            typedef typename X::GenericType Y;
+            if constexpr (Constructible<X,Y,PR>) {
+                diagonal_matrix_class.def(pybind11::init<Array<Y>const&,PR>());
+            }
+        }
     }
-    diagonal_matrix_class.def(pybind11::init<Vector<X>>());
+    diagonal_matrix_class.def(pybind11::init<Array<X>>());
+    diagonal_matrix_class.def("size", &DiagonalMatrix<X>::size);
+    diagonal_matrix_class.def("row_size", &DiagonalMatrix<X>::size);
+    diagonal_matrix_class.def("column_size", &DiagonalMatrix<X>::size);
     diagonal_matrix_class.def("__setitem__", &__dmsetitem__<X>);
     diagonal_matrix_class.def("__getitem__", &__dmgetitem__<X>);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
@@ -618,6 +633,10 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
         module.def("inverse", &_inverse_<DiagonalMatrix<X>>);
     }
 
+    pybind11::class_<Matrix<X>> matrix_class = module.attr(python_class_name<Matrix<X>>().c_str());
+    matrix_class.def(pybind11::init<DiagonalMatrix<X>>());
+    pybind11::implicitly_convertible<DiagonalMatrix<X>,Matrix<X>>();
+
     return diagonal_matrix_class;
 }
 
@@ -625,6 +644,7 @@ template<class X> pybind11::class_<DiagonalMatrix<X>> export_diagonal_matrix(pyb
 template<class X> pybind11::class_<SymmetricMatrix<X>> export_symmetric_matrix(pybind11::module& module)
 {
     pybind11::class_<SymmetricMatrix<X>> symmetric_matrix_class(module,python_class_name<SymmetricMatrix<X>>().c_str());
+    symmetric_matrix_class.def(pybind11::init<DiagonalMatrix<X>>());
     if constexpr (Constructible<X,Nat>) {
         symmetric_matrix_class.def(pybind11::init<SizeType>());
     }
@@ -632,8 +652,8 @@ template<class X> pybind11::class_<SymmetricMatrix<X>> export_symmetric_matrix(p
         typedef typename X::PrecisionType PR;
         symmetric_matrix_class.def(pybind11::init<SizeType,PR>());
     }
-    symmetric_matrix_class.def("__setitem__", &SymmetricMatrix<X>::set);
-    symmetric_matrix_class.def("__getitem__", &SymmetricMatrix<X>::get);
+    symmetric_matrix_class.def("__setitem__", &__smsetitem__<X>);
+    symmetric_matrix_class.def("__getitem__", &__smgetitem__<X>);
     symmetric_matrix_class.def("__str__",&__cstr__<SymmetricMatrix<X>>);
 
     symmetric_matrix_class.def("__neg__", &__neg__<SymmetricMatrix<X> , Return<SymmetricMatrix<X>> >);
@@ -646,6 +666,10 @@ template<class X> pybind11::class_<SymmetricMatrix<X>> export_symmetric_matrix(p
         symmetric_matrix_class.def(__py_div__, &__div__<SymmetricMatrix<X>,X>, pybind11::is_operator());
     }
 
+    pybind11::class_<Matrix<X>> matrix_class = module.attr(python_class_name<Matrix<X>>().c_str());
+    matrix_class.def(pybind11::init<SymmetricMatrix<X>>());
+
+    pybind11::implicitly_convertible<DiagonalMatrix<X>,SymmetricMatrix<X>>();
     pybind11::implicitly_convertible<SymmetricMatrix<X>,Matrix<X>>();
 
     return symmetric_matrix_class;
@@ -687,7 +711,6 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_matrix<FloatDPApproximation>(module);
     export_matrix<FloatDPBounds>(module);
     export_matrix<FloatDP>(module);
-
     export_matrix<FloatMPApproximation>(module);
     export_matrix<FloatMPBounds>(module);
     export_matrix<FloatMP>(module);

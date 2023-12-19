@@ -266,9 +266,10 @@ template<class X> class DiagonalMatrix
     Array<X> _ary;
   public:
     template<class... PRS> requires Constructible<X,Nat,PRS...> explicit DiagonalMatrix(SizeType n, PRS...); //!< <p/>
+    template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(Array<Y> const&, PRS...); //!< <p/>
     explicit DiagonalMatrix(SizeType n, X const& z); //!< <p/>
     explicit DiagonalMatrix(Array<X>); //!< <p/>
-    explicit DiagonalMatrix(Vector<X>);
+    explicit DiagonalMatrix(Vector<X>); //!< \deprecated <p/>
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...); //!< <p/>
     template<class G> requires InvocableReturning<X,G,SizeType> DiagonalMatrix(SizeType n, G const& g); //!< <p/>
     SizeType size() const; //!< <p/>
@@ -292,6 +293,11 @@ template<class X> class DiagonalMatrix
 template<class X> template<class... PRS> requires Constructible<X,Nat,PRS...>
 DiagonalMatrix<X>::DiagonalMatrix(SizeType n, PRS... prs)
     : _zero(0u,prs...), _ary(n,_zero)
+{ }
+
+template<class X> template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
+DiagonalMatrix<X>::DiagonalMatrix(Array<Y> const& a, PRS... prs)
+    : _zero(0u,prs...), _ary(a,prs...)
 { }
 
 template<class X> template<class G> requires InvocableReturning<X,G,SizeType>

@@ -150,9 +150,17 @@ Vector<X> esqr(const Vector<X>& z) {
 template<class X1, class IVL2> inline decltype(auto) dot(Vector<X1> const& x1, Box<IVL2> const& bx2) {
     return dot(x1,cast_vector(bx2)); }
 
-template<> inline UpperIntervalType dot<UpperIntervalType,ExactIntervalType>(Vector<UpperIntervalType> const& bx1, Vector<ExactIntervalType> const& bx2) {
-    return dot(bx1,Vector<UpperIntervalType>(bx2));
+
+template<class FLT> inline
+Bounds<FLT> restriction(Bounds<FLT> const& x, UpperIntervalType const& ivl) {
+    return Bounds<FLT>(max(x.lower(),ivl.lower_bound()),min(x.upper(),ivl.upper_bound()));
 }
+template<class FLT> inline
+Vector<Bounds<FLT>> restriction(Vector<Bounds<FLT>> const& v, UpperBoxType const& bx) {
+    ARIADNE_DEBUG_PRECONDITION(v.size()==bx.dimension());
+    return Vector<Bounds<FLT>>(v.size(), [&v,&bx](SizeType i){return restriction(v[i],bx[i]);});
+}
+
 
 template<class X> Matrix<X> join(Matrix<X> const& A1, Matrix<X> const& A2, Matrix<X> const& A3) {
     SizeType m=A1.row_size(); SizeType n1=A1.column_size(); SizeType n2=A2.column_size(); SizeType n3=A3.column_size();

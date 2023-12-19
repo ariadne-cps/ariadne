@@ -272,6 +272,8 @@ using ValidatedSlackPrimalSplitDualComplementaryData = SlackPrimalSplitDualCompl
 template<class X> struct FeasiblePrimalDualData : PrimalDualData<X> {
     ComparisonType<X> r;
     FeasiblePrimalDualData(ComparisonType<X> r_, Vector<X> x_, Vector<X> y_) : PrimalDualData<X>(x_,y_), r(r_) { }
+    template<class XX> requires Convertible<XX,X> FeasiblePrimalDualData(FeasiblePrimalDualData<XX> const& d)
+        : FeasiblePrimalDualData(d.r,d.x,d.y) { }
     ComparisonType<X> const& is_feasible() const { return this->r; }
 
 };
@@ -336,17 +338,17 @@ struct LocalOptimalityCertificate
 
     ValidatedNumber v; //!< The optimal value.
     ValidatedVector x; //!< The optimal (primal) variables.
-    ExactVector y; //!< The optimal dual variables (Lagrange multipliers).
+    ValidatedVector y; //!< The optimal dual variables (Lagrange multipliers).
 
     ValidatedNumber value() const { return v; }
     ValidatedVector primal() const { return x; }
-    ExactVector dual() const { return y; }
+    ValidatedVector dual() const { return y; }
 
-    LocalOptimalityCertificate(ValidatedNumber v_, ValidatedVector x_, ExactVector y_)
+    LocalOptimalityCertificate(ValidatedNumber v_, ValidatedVector x_, ValidatedVector y_)
         : v(v_), x(x_), y(y_) { }
-    LocalOptimalityCertificate(Bounds<FloatDP> v_, Vector<Bounds<FloatDP>> x_, Vector<FloatDP> y_)
+    LocalOptimalityCertificate(Bounds<FloatDP> v_, Vector<Bounds<FloatDP>> x_, Vector<Bounds<FloatDP>> y_)
         : v(v_), x(x_), y(y_) { }
-    LocalOptimalityCertificate(Tuple<ValidatedNumber,ValidatedVector,ExactVector>const& tup)
+    LocalOptimalityCertificate(Tuple<ValidatedNumber,ValidatedVector,ValidatedVector>const& tup)
         : LocalOptimalityCertificate(std::get<0>(tup),std::get<1>(tup),std::get<2>(tup)) { }
     friend OutputStream& operator<<(OutputStream& os, const LocalOptimalityCertificate& loc) {
         return os << "{v=" << loc.v << ", x=" << loc.x << ", y=" << loc.y << "}"; }
@@ -584,13 +586,13 @@ template<> class OptimiserBase<ApproximateTag>
     template<class FLT> using Exact = FLT;
     using FLT=FloatDP;
     using PR=DP;
-    static constexpr PR pr=dp;
+    static constexpr PR _pr=dp;
   public:
     typedef Approximation<FLT> ApproximateNumberType;
     typedef Vector<Approximation<FLT>> ApproximateVectorType;
   protected:
-    static const FLT zero;
-    static const FLT one;
+    static const FLT _zero;
+    static const FLT _one;
   public:
     virtual ApproximateVector minimise(ApproximateOptimisationProblem p) const override = 0;
     virtual ApproximateVector minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
@@ -609,7 +611,7 @@ template<> class OptimiserBase<ValidatedTag>
     template<class FLT> using Exact = FLT;
     using FLT=FloatDP;
     using PR=DP;
-    static constexpr PR pr=dp;
+    static constexpr PR _pr=dp;
   public:
     typedef FLT ExactNumberType;
     typedef Bounds<FLT> ValidatedNumberType;
@@ -618,8 +620,8 @@ template<> class OptimiserBase<ValidatedTag>
     typedef Vector<Bounds<FLT>> ValidatedVectorType;
     typedef Vector<Approximation<FLT>> ApproximateVectorType;
   protected:
-    static const FLT zero;
-    static const FLT one;
+    static const FLT _zero;
+    static const FLT _one;
   public:
     virtual ValidatedVector minimise(ValidatedOptimisationProblem p) const override = 0;
     virtual ValidatedVector minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const override;
@@ -794,7 +796,7 @@ struct PrimalDualInteriorPointOptimiser::StepData
     : virtual InteriorPointOptimiserBase::StepData, PrimalDualData<Approximation<FLT>>
 {
     StepData(Vector<T> x_, Vector<T> y_)
-        : InteriorPointOptimiserBase::StepData(T(1,pr)), PrimalDualData<T>(x_,y_) { }
+        : InteriorPointOptimiserBase::StepData(T(1,_pr)), PrimalDualData<T>(x_,y_) { }
     virtual Vector<Approximation<FLT>> primal() const override { return this->x; }
     virtual Vector<Approximation<FLT>> dual() const override { return this->y; }
     friend OutputStream& operator<<(OutputStream& os, const StepData& d) {
@@ -1102,7 +1104,7 @@ class InfeasibleKarushKuhnTuckerOptimiser
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     feasible_hotstarted(ValidatedFeasibilityProblem p,
         const SlackPrimalDualData<Approximation<FLT>>& wxy0) const;
 
@@ -1111,18 +1113,26 @@ class InfeasibleKarushKuhnTuckerOptimiser
                                   UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
 
     //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     check_minimality(const ValidatedOptimisationProblem& p,
-                     const Vector<Approximation<FLT>>& w, const Vector<Approximation<FLT>>& x, const Vector<Approximation<FLT>>& y, const Vector<Approximation<FLT>>& z) const;
+                     const SlackPrimalDualComplementaryData<Approximation<FLT>>& wxyz) const;
 
     //! \brief Tests whether the validated point \a x contains a locally optimal point, using Lagrange multipliers \a y.
-    Tuple<ValidatedKleenean,ValidatedVector,ValidatedVector>
+    FeasiblePrimalDualData<ValidatedNumber>
     check_minimality(const ValidatedOptimisationProblem& p,
-                     const Vector<Bounds<FLT>>& w, const Vector<Bounds<FLT>>& x, const Vector<Bounds<FLT>>& y, const Vector<Bounds<FLT>>& z) const;
+                     const SlackPrimalDualComplementaryData<Bounds<FLT>>& wxyz) const;
   private:
     Variant<OptimalityCertificate,InfeasibilityCertificate>
     _splitting_minimise_subdivide(const ValidatedOptimisationProblem& p,
                                   UpperBoxType B, Vector<Approximation<FLT>> x, Vector<Approximation<FLT>> y) const;
+
+    FeasiblePrimalDualData<Bounds<FLT>>
+    _check_minimality(const ValidatedOptimisationProblem& p,
+                      const SlackPrimalDualComplementaryData<Bounds<FLT>>& wxyz) const;
+
+    FeasiblePrimalDualData<Bounds<FLT>>
+    _check_minimality(const ValidatedOptimisationProblem& p,
+                      const SlackPrimalDualComplementaryData<Approximation<FLT>>& wxyz) const;
 
     auto minimise_old(ValidatedOptimisationProblem p) const -> ValidatedVector;
 };

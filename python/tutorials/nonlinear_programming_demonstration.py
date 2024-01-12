@@ -36,6 +36,46 @@ print("x:",x)
 v=Vector[FloatDPBounds]([{"0.625":"0.7"},("-1.5","-1.25")],dp)
 print("v:",v)
 
+#Constructors for polynomials
+p=MultivariatePolynomial[FloatDPBounds].coordinates(2,dp)
+q=2*p[0]*(p[0]-p[1]-3)
+print("q:",q)
+print("q**2:",q**2)
+q=MultivariatePolynomial[FloatDPBounds]({ (1,1):-2, (2,0):2, (1,0):-6},dp)
+print("q:",q)
+print("q[(1,1)]:",q[(1,1)])
+a=MultiIndex((1,1))
+a=MultiIndex([1,1])
+print("a:",a)
+print("q[a]:",q[a])
+print("q.coefficient(a):",q.coefficient(a))
+print("q.terms():",[(term.index(),term.coefficient()) for term in q])
+v=Vector[FloatDPBounds]([3,5],dp)
+print("q(v):",q(v))
+print("evaluate(q,v):",evaluate(q,v))
+print("compose(q,p):",compose(q,p))
+print("derivative(q,0):",derivative(q,0))
+print("derivative(q,1):",derivative(q,1))
+print("antiderivative(q,0):",antiderivative(q,0))
+print("antiderivative(q,1):",antiderivative(q,1))
+
+def to_function(p):
+    id=ValidatedVectorMultivariateFunction.identity(2)
+    first_term=True
+    for term in q:
+        a=term.index()
+        c=term.coefficient()
+        t=c * ( (id[0]**a[0]) * (id[1]**a[1]) )
+        if first_term:
+            first_term=False
+            f=t
+        else:
+            f=f+t
+    return f
+print("to_function(q):",to_function(q))
+print()
+
+
 # Construct functions and Boxes
 g=Function(2, lambda x : [sqr(x[0])+2*sqr(x[1])-1])
 print("g:",g,type(g))

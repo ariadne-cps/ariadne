@@ -31,27 +31,36 @@
 
 namespace Ariadne {
 
+template class Polynomial<UniIndex,Rational>;
 template class Polynomial<UniIndex,RoundedFloatDP>;
 template class Polynomial<UniIndex,FloatDPApproximation>;
 template class Polynomial<UniIndex,FloatDPBounds>;
 template class Polynomial<UniIndex,FloatMPApproximation>;
 template class Polynomial<UniIndex,FloatMPBounds>;
 
+template struct AlgebraOperations<Polynomial<UniIndex,Rational>>;
 template struct AlgebraOperations<Polynomial<UniIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 
+template class Polynomial<MultiIndex,Rational>;
 template class Polynomial<MultiIndex,RoundedFloatDP>;
 template class Polynomial<MultiIndex,FloatDPApproximation>;
 template class Polynomial<MultiIndex,FloatDPBounds>;
 template class Polynomial<MultiIndex,FloatDPUpperInterval>;
 
+template struct AlgebraOperations<Polynomial<MultiIndex,Rational>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;
+
+template Rational Polynomial<MultiIndex,Rational>::operator() (Vector<Rational> const&) const;
+template RoundedFloatDP Polynomial<MultiIndex,RoundedFloatDP>::operator() (Vector<RoundedFloatDP> const&) const;
+template FloatDPApproximation Polynomial<MultiIndex,FloatDPApproximation>::operator() (Vector<FloatDPApproximation> const&) const;
+template FloatDPBounds Polynomial<MultiIndex,FloatDPBounds>::operator() (Vector<FloatDPBounds> const&) const;
 
 template<> Void Polynomial<MultiIndex,FloatDP>::cleanup() { }
 
@@ -66,6 +75,9 @@ template class Polynomial<MultiIndex,FloatMPUpperInterval>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPUpperInterval>>;
+template RoundedFloatMP Polynomial<MultiIndex,RoundedFloatMP>::operator() (Vector<RoundedFloatMP> const&) const;
+template FloatMPApproximation Polynomial<MultiIndex,FloatMPApproximation>::operator() (Vector<FloatMPApproximation> const&) const;
+template FloatMPBounds Polynomial<MultiIndex,FloatMPBounds>::operator() (Vector<FloatMPBounds> const&) const;
 
 } //namespace Ariadne
 

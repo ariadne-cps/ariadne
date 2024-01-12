@@ -95,8 +95,10 @@ template<class X> class PolynomialConstructors<MultiIndex,X> {
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
     static Polynomial<I,X> coordinate(SizeType as, SizeType j, X const& z) { return
         Polynomial<I,X>::_coordinate(as,j,z); }
-    template<class... PRS> requires Constructible<X,Nat,PRS...> static Polynomial<I,X> coordinate(SizeType as, SizeType j, PRS... prs) { return
-        Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
+    template<class... PRS> requires Constructible<X,Nat,PRS...> static Polynomial<I,X> coordinate(SizeType as, SizeType j, PRS... prs) {
+        return Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
+    template<class... PRS> requires Constructible<X,Nat,PRS...> static Vector<Polynomial<I,X>> coordinates(SizeType as, PRS... prs) {
+        return Vector<Polynomial<I,X>>(as, [&as,&prs...](SizeType j){return Polynomial<I,X>::coordinate(as,j,prs...);}); }
     template<class... PRS> static Polynomial<I,X> variable(SizeType as, SizeType j, PRS... prs) { return Polynomial<I,X>::_coordinate(as,j,X(0u,prs...)); }
 };
 
@@ -238,8 +240,8 @@ class Polynomial
     //!@{
     //! \name Evaluation
 
-    //! Evaluate on a vector of algebra elements.
-    template<class A> A operator() (Vector<A> const&) const;
+    //! Evaluate on algebra elements.
+    template<class A> A operator() (Argument<A> const&) const;
     //!@}
 
     //!@{
@@ -286,14 +288,20 @@ class Polynomial
         friend Polynomial<I,X> operator-(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p-xc; }
     template<AssignableTo<X> Y>
-        friend Polynomial<I,X> operator*(const Y& c, Polynomial<I,X> p) {
-            X xc=p.value(); xc=c; return xc*p; }
-    template<AssignableTo<X> Y>
         friend Polynomial<I,X> operator*(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p*xc; }
     template<AssignableTo<X> Y>
         friend Polynomial<I,X> operator/(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p/xc; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X> operator+(const Y& c, Polynomial<I,X> p) {
+            X xc=p.value(); xc=c; return xc+p; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X> operator-(const Y& c, Polynomial<I,X> p) {
+            X xc=p.value(); xc=c; return xc-p; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X> operator*(const Y& c, Polynomial<I,X> p) {
+            X xc=p.value(); xc=c; return xc*p; }
 
 };
 

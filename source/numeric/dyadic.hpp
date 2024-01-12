@@ -72,6 +72,7 @@ class Dyadic
     mpf_t _mpf;
   public:
     typedef ExactTag Paradigm;
+    typedef Dyadic NumericType;
 
     //! \brief Construct a Dyadic number from a GNU mpf object.
     explicit Dyadic (mpf_t mpf);

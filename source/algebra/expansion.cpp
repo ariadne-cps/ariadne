@@ -41,6 +41,11 @@ namespace Ariadne {
     template class Expansion<MultiIndex,ExactDouble>;
     template class Expansion<MultiIndex,Dyadic>;
 
+    template class Expansion<MultiIndex,Rational>;
+    template class SortedExpansion<MultiIndex,Rational,GradedIndexLess>;
+    template class SortedExpansion<MultiIndex,Rational,ReverseLexicographicIndexLess>;
+
+
     template class Expansion<MultiIndex,RoundedFloatDP>;
     template class Expansion<MultiIndex,FloatDP>;
     template class Expansion<MultiIndex,FloatDPBounds>;

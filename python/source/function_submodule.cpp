@@ -70,10 +70,87 @@ template struct PythonClassName<MultivariatePolynomial<FloatMPApproximation>>;
 template struct PythonClassName<MultivariatePolynomial<FloatDPBounds>>;
 template struct PythonClassName<MultivariatePolynomial<FloatMPBounds>>;
 
-MultiIndex multi_index_from_python(pybind11::tuple pytup) {
+
+template<class K, class V> pybind11::dict to_python_dict(Map<K,V> const& map) {
+    pybind11::dict pydict;
+    for (auto item : map) {
+        pydict[item.first]=item.second;
+    }
+    return pydict;
+}
+
+template<class K, class V> Map<K,V> map_from_python(pybind11::dict pydict) {
+    Map<K,V> r;
+    for (auto item : pydict) {
+        auto k = pybind11::cast<K>(item.first);
+        auto v = pybind11::cast<V>(item.second);
+        r.insert(std::make_pair(k,v));
+    }
+    return r;
+}
+
+template Map<int,double> map_from_python(pybind11::dict);
+
+MultiIndex multi_index_from_python_tuple(pybind11::tuple pytup) {
     MultiIndex res(static_cast<SizeType>(len(pytup)));
     for(SizeType i=0; i!=res.size(); ++i) { res.set(i,pybind11::cast<Nat>(pytup[i])); }
     return res;
+}
+
+MultiIndex multi_index_from_python_list(pybind11::list pylst) {
+    MultiIndex res(static_cast<SizeType>(len(pylst)));
+    for(SizeType i=0; i!=res.size(); ++i) { res.set(i,pybind11::cast<Nat>(pylst[i])); }
+    return res;
+}
+
+pybind11::tuple multi_index_to_python_tuple(MultiIndex const& a) {
+    pybind11::list pylst;
+    for(SizeType i=0; i!=a.size(); ++i) { pylst.append(a[i]); }
+    return pybind11::tuple(pylst);
+}
+
+template<class I, class X> pybind11::dict expansion_to_python_dict(Expansion<I,X> const& e) {
+    pybind11::dict pydict;
+    for (auto t : e) {
+        I a=t.index();
+        X c=t.coefficient();
+        if constexpr (Same<I,MultiIndex>) {
+            pydict[multi_index_to_python_tuple(a)]=c;
+        } else {
+            pybind11::handle k=pybind11::cast(a);
+            pydict[k]=c;
+        }
+    }
+    return pydict;
+}
+
+template<class I, class X> Expansion<I,X> expansion_from_python(pybind11::dict dct) {
+    auto item0 = *dct.begin();
+    auto a0 = pybind11::cast<I>(item0.first);
+    auto c0 = pybind11::cast<X>(item0.second);
+    Expansion<I,X> e(a0.size(),nul(c0));
+    for (auto item : dct) {
+        auto a = pybind11::cast<I>(item.first);
+        auto c = pybind11::cast<X>(item.second);
+        e.append(a,c);
+    }
+    return e;
+//    return Expansion<I,X>(map_from_python<I,X>(dct))
+}
+
+template<class I, class X, class... PRS> Expansion<I,X> expansion_from_python(pybind11::dict dct, PRS... prs) {
+    using Y=typename X::GenericType;
+    static_assert(Constructible<X,Y,PRS...>);
+    auto item0 = *dct.begin();
+    auto a0 = pybind11::cast<I>(item0.first);
+    auto z0 = X(prs...);
+    Expansion<I,X> e(a0.size(),z0);
+    for (auto item : dct) {
+        auto a = pybind11::cast<I>(item.first);
+        auto c = pybind11::cast<Y>(item.second);
+        e.append(a,X(c,prs...));
+    }
+    return e;
 }
 
 template<class P, class ARG> pybind11::object function_from_python(typename DomainTraits<ARG>::EntireDomainType dom, pybind11::object pyf) {
@@ -248,7 +325,8 @@ Void export_multi_index(pybind11::module& module)
 {
     pybind11::class_< MultiIndex > multi_index_class(module,"MultiIndex");
     multi_index_class.def(pybind11::init<Nat>());
-    multi_index_class.def(pybind11::init(&multi_index_from_python));
+    multi_index_class.def(pybind11::init(&multi_index_from_python_tuple));
+    multi_index_class.def(pybind11::init(&multi_index_from_python_list));
     multi_index_class.def(pybind11::init<MultiIndex>());
     multi_index_class.def("__len__",&MultiIndex::size);
     multi_index_class.def("__getitem__",&MultiIndex::get);
@@ -258,7 +336,20 @@ Void export_multi_index(pybind11::module& module)
     multi_index_class.def("__repr__", &__repr__<MultiIndex>);
 
     pybind11::implicitly_convertible<pybind11::tuple,MultiIndex>();
+    //multi_index_class.def("tuple",&multi_index_to_python_tuple);
 }
+
+
+template<class I, class X> struct PythonExpansionIterator : public Expansion<I,X>::ConstIterator {
+    PythonExpansionIterator(typename Expansion<I,X>::ConstIterator iter)
+        : Expansion<I,X>::ConstIterator(iter) { }
+    Monomial<I,X> operator*() const {
+        auto ac=this->Expansion<I,X>::ConstIterator::operator*();
+        return Monomial<I,X>(ac.index(),ac.coefficient());
+    }
+};
+template<class I, class X> decltype(auto) pybegin(Expansion<I,X> const& e) { return PythonExpansionIterator<I,X>(e.begin()); }
+template<class I, class X> decltype(auto) pyend(Expansion<I,X> const& e) { return PythonExpansionIterator<I,X>(e.end()); }
 
 
 template<class X>
@@ -270,28 +361,46 @@ pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module
     monomial_class.def("coefficient", (X const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::coefficient);
     monomial_class.def("__str__", &__cstr__<MultivariateMonomial<X>>);
 
-
     pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_template_class_name<X>("MultivariatePolynomial").c_str());
     polynomial_class.def(pybind11::init< MultivariatePolynomial<X> >());
+    polynomial_class.def(pybind11::init([](pybind11::dict const& dct){return MultivariatePolynomial<X>(expansion_from_python<MultiIndex,X>(dct));}));
+    polynomial_class.def( pybind11::init<Expansion<MultiIndex,X>>());
     polynomial_class.def_static("constant", (MultivariatePolynomial<X>(*)(SizeType,X const&)) &MultivariatePolynomial<X>::constant);
-
     if constexpr (HasPrecisionType<X>) {
         typedef typename X::PrecisionType PR;
         polynomial_class.def(pybind11::init<Nat,PR>());
-        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("variables", [](Nat as,PR pr){return MultivariatePolynomial<X>::variables(as,pr).array();});
+        polynomial_class.def(pybind11::init([](pybind11::dict const& dct, PR pr){return MultivariatePolynomial<X>(expansion_from_python<MultiIndex,X>(dct,pr));}));
+        //polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
+        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::coordinate);
+        polynomial_class.def_static("coordinates", (Vector<MultivariatePolynomial<X>>(*)(SizeType,PR)) &MultivariatePolynomial<X>::coordinates);
     } else {
         polynomial_class.def(pybind11::init<Nat>());
-        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
+        //polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
         polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
-        polynomial_class.def_static("variables", [](Nat as){return MultivariatePolynomial<X>::variables(as).array();});
+        polynomial_class.def_static("coordinates", [](Nat as){return MultivariatePolynomial<X>::coordinates(as).array();});
     }
 
     polynomial_class.def("argument_size", &MultivariatePolynomial<X>::argument_size);
     polynomial_class.def("insert", &MultivariatePolynomial<X>::insert);
+    //polynomial_class.def("expansion", (Expansion<MultiIndex,X>const&(MultivariatePolynomial<X>::*)()const) &MultivariatePolynomial<X>::expansion, pybind11::return_value_policy::reference_internal);
+    //polynomial_class.def("expansion", [](MultivariatePolynomial<X>const& p){return expansion_to_python_dict(p.expansion());});
+    polynomial_class.def("coefficient", (X const&(MultivariatePolynomial<X>::*)(MultiIndex const&)const) &MultivariatePolynomial<X>::operator[]);
+    polynomial_class.def("__getitem__", (X const&(MultivariatePolynomial<X>::*)(MultiIndex const&)const) &MultivariatePolynomial<X>::operator[]);
+    polynomial_class.def("__iter__", [](MultivariatePolynomial<X> const& p){return pybind11::make_iterator(pybegin(p.expansion()),pyend(p.expansion()));});
+
+    polynomial_class.def("__call__", (X(MultivariatePolynomial<X>::*)(Vector<X>const&)const) &MultivariatePolynomial<X>::operator());
+    module.def("evaluate", (X(*)(MultivariatePolynomial<X>const&,Vector<X>const&)) &evaluate);
 
     define_algebra(module,polynomial_class);
+    if constexpr (HasGenericType<X>) {
+        typedef typename X::GenericType Y;
+        define_mixed_arithmetic(module,polynomial_class,Tag<Y>());
+    }
+
+    module.def("compose", (MultivariatePolynomial<X>(*)(MultivariatePolynomial<X>const&,Vector<MultivariatePolynomial<X>>const&)) &compose);
+    module.def("derivative", (MultivariatePolynomial<X>(*)(MultivariatePolynomial<X>,SizeType j)) &derivative);
+    module.def("antiderivative", (MultivariatePolynomial<X>(*)(MultivariatePolynomial<X>,SizeType j)) &antiderivative);
+
     polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
 
     export_vector<MultivariatePolynomial<X>>(module, (python_template_class_name<X>("MultivariatePolynomialVector")).c_str());
@@ -301,12 +410,14 @@ pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module
 
 Void export_polynomials(pybind11::module& module)
 {
+    export_polynomial<Rational>(module);
     export_polynomial<FloatDPBounds>(module);
     export_polynomial<FloatDPApproximation>(module);
     export_polynomial<FloatMPBounds>(module);
     export_polynomial<FloatMPApproximation>(module);
 
     template_<MultivariatePolynomial> multivariate_polynomial_template(module);
+    multivariate_polynomial_template.instantiate<Rational>();
     multivariate_polynomial_template.instantiate<FloatDPBounds>();
     multivariate_polynomial_template.instantiate<FloatDPApproximation>();
     multivariate_polynomial_template.instantiate<FloatMPBounds>();

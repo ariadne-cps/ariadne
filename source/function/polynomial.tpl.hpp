@@ -362,6 +362,10 @@ template<class I, class X> Polynomial<MultiIndex,X> Polynomial<I,X>::_compose(co
     return evaluate(p,q);
 }
 
+template<class I, class X> template<class A> A Polynomial<I,X>::operator() (const Argument<A>& a) const {
+    return horner_evaluate(this->_expansion,a);
+}
+
 
 
 

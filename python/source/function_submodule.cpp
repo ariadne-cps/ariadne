@@ -351,6 +351,17 @@ template<class I, class X> struct PythonExpansionIterator : public Expansion<I,X
 template<class I, class X> decltype(auto) pybegin(Expansion<I,X> const& e) { return PythonExpansionIterator<I,X>(e.begin()); }
 template<class I, class X> decltype(auto) pyend(Expansion<I,X> const& e) { return PythonExpansionIterator<I,X>(e.end()); }
 
+#warning Use generic pow
+namespace Ariadne {
+template<class I, class X> Polynomial<I,X> pypow(Polynomial<I,X> p, Nat m) {
+    if (m==0) { return nul(p)+1; }
+    Polynomial<I,X> r=p;
+    for (Nat i=1; i!=m; ++i) {
+        r=r*p;
+    }
+    return r;
+}
+} // namespace Ariadne
 
 template<class X>
 pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module& module)
@@ -392,6 +403,7 @@ pybind11::class_< MultivariatePolynomial<X> > export_polynomial(pybind11::module
     module.def("evaluate", (X(*)(MultivariatePolynomial<X>const&,Vector<X>const&)) &evaluate);
 
     define_algebra(module,polynomial_class);
+    polynomial_class.def("__pow__", [](MultivariatePolynomial<X> const& p, Nat m){return pypow(p,m);});
     if constexpr (HasGenericType<X>) {
         typedef typename X::GenericType Y;
         define_mixed_arithmetic(module,polynomial_class,Tag<Y>());
@@ -495,7 +507,11 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     }
 
 
-    if constexpr (Same<RES,RealScalar>) { define_elementary_algebra<F,Number<P>>(module,function_class); }
+    if constexpr (Same<RES,RealScalar>) {
+        define_elementary_algebra<F,Number<P>>(module,function_class);
+        module.def("pow", [](F const& f, Int n){return pow(f,n);});
+        function_class.def("__pow__", [](F const& f, Int n){return pow(f,n);});
+    }
 
     // TODO: Put these in C++ API
     // define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>,Number<P>>(module,vector_function_class);

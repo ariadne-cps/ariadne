@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *            algebra/multi_index.hpp
  *
@@ -62,7 +61,7 @@ template<> class Reference<const MultiIndexReference>;
 
 //struct MultiIndexData { unsigned int _n; unsigned int* _p; };
 
-//A reference to a MultiIndex
+// A reference to a MultiIndex
 class MultiIndexReference {
     friend class MultiIndexListIterator;
     friend class MultiIndexListConstIterator;
@@ -79,70 +78,70 @@ class MultiIndexReference {
     //typedef unsigned long long int WordType;
   protected:
   public:
-    //! \brief Constructors.
+    // Constructors.
     MultiIndexReference(SizeType n, IndexType* p);
   public:
-    //! \brief Assign values.
+    // Assign values.
     MultiIndexReference& operator=(const MultiIndexReference& a);
-    //! \brief Resize to hold n variables.
+    // Resize to hold n variables.
     Void resize(SizeType n);
-    //! \brief Assigns values from another index. Precondition: the size of \a a must equal the current size.
+    // Assigns values from another index. Precondition: the size of \a a must equal the current size.
     Void assign(const MultiIndexReference& a);
-    //! \brief Set all values to zero.
+    // Set all values to zero.
     Void clear();
-    //! \brief The number of variables.
+    // The number of variables.
     SizeType size() const;
-    //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
+    // The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
     IndexType degree() const;
-     //! \brief The number of variables.
+     // The number of variables.
     SizeType number_of_variables() const;
-    //! \brief The number of occurrences of the \a i th variable.
+    // The number of occurrences of the \a i th variable.
     IndexType get(SizeType i) const;
-    //! \brief Set the number of occurrences of the \a i th variable to \a n.
+    // Set the number of occurrences of the \a i th variable to \a n.
     Void set(SizeType i, IndexType n);
-    //! \brief The number of occurrences of the \a i th variable.
+    // The number of occurrences of the \a i th variable.
     const_reference operator[](SizeType i) const;
-    //! \brief The number of occurrences of the \a i th variable.
+    // The number of occurrences of the \a i th variable.
     reference operator[](SizeType i);
-    //! \brief Increment the value of the \a ith element
+    // Increment the value of the \a ith element
     Void increment(SizeType i);
-    //! \brief Decrement the value of the \a ith element
+    // Decrement the value of the \a ith element
     Void decrement(SizeType i);
 
-    //! \brief Equality operator.
+    // Equality operator.
     friend Bool operator==(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
-    //! \brief Inequality operator.
+    // Inequality operator.
     friend Bool operator!=(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
-    //! \brief Comparison operator.
+    // Comparison operator.
     friend Bool operator<(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
 
-    //! \brief Increment. No post-increment operator as we sometimes pass MultiIndexReference by reference.
+    // Increment. No post-increment operator as we sometimes pass MultiIndexReference by reference.
     MultiIndexReference& operator++(); // inline
     // No post-increment operator as we sometimes pass MultiIndexReference by reference.Post increment.
     // MultiIndexReference operator++(Int);
-    //! \brief Inplace sum.
+    // Inplace sum.
     MultiIndexReference& operator+=(const MultiIndexReference& a); // inline
-    //! \brief Inplace difference.
+    // Inplace difference.
     MultiIndexReference& operator-=(const MultiIndexReference& a); // inline
-    //! \brief Inplace scalar product.
+    // Inplace scalar product.
     MultiIndexReference& operator*=(const IndexType& a); // inline
-    //! \brief Sum.
+    // Sum.
     friend MultiIndexReference operator+(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
-    //! \brief Difference.
+    // Difference.
     friend MultiIndexReference operator-(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
-    //! \brief Scalar product.
+    // Scalar product.
     friend MultiIndexReference operator*(const MultiIndexReference& a, IndexType s); // inline
-    //! \brief Scalar product.
+    // Scalar product.
     friend MultiIndexReference operator*(IndexType s, const MultiIndexReference& a); // inline
 
-    //! \brief The position of the element in the Array of tensor values.
+    // The position of the element in the Array of tensor values.
     unsigned int position() const;
-    //! \brief The product of the factorials of the indices.
+    // The product of the factorials of the indices.
     unsigned int factorial() const;
-    //! \brief The number of ordered index arrays with each element occurring the number of times specified by the multi index.
+    // The number of ordered index arrays with each element occurring the number of times specified by the multi index.
     unsigned int number() const;
 
-    //! \brief Write to an output stream.
+    // Write to an output stream.
     friend OutputStream& operator<<(OutputStream&, const MultiIndexReference&);
   public:
     //IndexType& at(SizeType i) { return _p[i]; }
@@ -165,29 +164,29 @@ class MultiIndexReference {
 
 class MultiIndex : public MultiIndexReference {
   public:
-    //! \brief Destructor.
+    // Destructor.
     ~MultiIndex();
-    //! \brief Construct a multi index with no coefficients.
+    // Construct a multi index with no coefficients.
     explicit MultiIndex();
-    //! \brief Construct a multi index of degree \a 0 with \a nv variables.
+    // Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(SizeType nv);
-    //! \brief Construct a multi index with \a nv variables from the Array \a ary.
+    // Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(SizeType nv, const Int* ary);
-    //! \brief Construct a multi index with \a nv variables from variable arguments.
+    // Construct a multi index with \a nv variables from variable arguments.
     explicit MultiIndex(SizeType nv, Int a1, ...);
 
-    //! \brief Copy constructor.
+    // Copy constructor.
     MultiIndex(const MultiIndex& a);
-    //! \brief Copy from a reference.
+    // Copy from a reference.
     MultiIndex(const MultiIndexReference& a);
-    //! \brief Copy assignment operator.
+    // Copy assignment operator.
     MultiIndex& operator=(const MultiIndexReference& a);
 
-    //! \brief Construct the zero multi index with \a nv variables.
+    // Construct the zero multi index with \a nv variables.
     static MultiIndex zero(SizeType nv);
-    //! \brief Construct the unit multi index in variable \a j with \a nv variables.
+    // Construct the unit multi index in variable \a j with \a nv variables.
     static MultiIndex unit(SizeType nv, SizeType j);
-    //! \brief Construct the first multi index of degree \a d with \a nv variables.
+    // Construct the first multi index of degree \a d with \a nv variables.
     static MultiIndex first(SizeType nv, IndexType d);
 };
 
@@ -570,9 +569,8 @@ OutputStream& operator<<(OutputStream& os, const MultiIndexReference& a) {
 
 
 
-//! \brief \brief A bound on a MultiIndexReference object, allowing different groups of
-//!variables to have different maximum degrees.
-
+// A bound on a MultiIndexReference object, allowing different groups of
+// variables to have different maximum degrees.
 class MultiIndexBound {
   public:
     typedef MultiIndexReference::SizeType SizeType;

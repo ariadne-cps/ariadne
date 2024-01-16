@@ -250,6 +250,7 @@ Void export_multi_index(pybind11::module& module)
     multi_index_class.def(pybind11::init<Nat>());
     multi_index_class.def(pybind11::init(&multi_index_from_python));
     multi_index_class.def(pybind11::init<MultiIndex>());
+    multi_index_class.def("__len__",&MultiIndex::size);
     multi_index_class.def("__getitem__",&MultiIndex::get);
     multi_index_class.def("__setitem__",&MultiIndex::set);
     multi_index_class.def("degree",&MultiIndex::degree);

@@ -156,11 +156,12 @@ Void TestPolynomial::test_cleanup()
     // Test to see if the cleanup/sort operations work.
     // Since these are used in the constructors, we can't use the main constructors to test this
     MultiIndex a(3);
-    MultiIndex b(3); ++b;
+    MultiIndex b(3); lexicographic_increment(b);
     MultivariatePolynomial<RoundedFloatDP> p(3,dp);
     RoundedFloatDP c(1,dp);
     for(Nat i=0; i!=2; ++i) {
-        if(i%2) { p.expansion().append(a,c); ++b; ++b; a=b; ++b; } else { p.expansion().append(b,c);}
+        if(i%2) { p.expansion().append(a,c); lexicographic_increment(b); lexicographic_increment(b); a=b; lexicographic_increment(b); }
+        else { p.expansion().append(b,c);}
         c=hlf(c);
     }
     ARIADNE_TEST_PRINT(p)

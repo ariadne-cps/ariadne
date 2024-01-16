@@ -40,6 +40,7 @@
 
 namespace Ariadne {
 
+//! \brief \ingroup AlgebraModule The index of a monomial.
 class UniIndex {
     DegreeType _a;
   public:
@@ -81,6 +82,7 @@ struct MultiIndexData {
     friend Bool operator==(const MultiIndexData& a1, const MultiIndexData& a2);
     friend Bool operator!=(const MultiIndexData& a1, const MultiIndexData& a2);
   public:
+    friend MultiIndexData& lexicographic_increment(MultiIndexData& a);
     friend Bool graded_less(const MultiIndexData& a1, const MultiIndexData& a2);
     friend Bool lexicographic_less(const MultiIndexData& a1, const MultiIndexData& a2);
     friend Bool reverse_lexicographic_less(const MultiIndexData& a1, const MultiIndexData& a2);
@@ -95,36 +97,64 @@ struct MultiIndexData {
     IndexType* _p;
 };
 
+//! \brief A finite tuple of indices \f$\alpha=(\alpha_0,\ldots,\alpha_{n-1})\in\N^n\f$, such as the exponents in a multivariate monomial \f$x^\alpha := \prod_{i=0}^{n-1} x_{i}^{\alpha_i}\f$. The <em>total degree</em> is \f$|\alpha|=\sum_{i=0}^{n-1}\alpha_i\f$
 class MultiIndex
     : public MultiIndexData
 {
   public:
-    ~MultiIndex();
-    explicit MultiIndex();
-    explicit MultiIndex(SizeType nv);
-    explicit MultiIndex(SizeType nv, const DegreeType* ary);
-    MultiIndex(InitializerList<DegreeType> lst);
+    typedef DegreeType IndexType; //!< The type used as a single (numerical) index.
 
-    MultiIndex(const MultiIndex& a);
-    MultiIndex& operator=(const MultiIndex& a);
+    ~MultiIndex(); //!< \brief Destructor.
+    explicit MultiIndex(); //!< \brief Construct a multi index of size zero i.e. with no coefficients..
+    explicit MultiIndex(SizeType nv); //!< Construct a multi index of degree \a 0 pm \a nv variables.
+    explicit MultiIndex(SizeType nv, const IndexType* ary); //!< \brief Construct a multi index with \a nv variables from the Array \a ary.
+    MultiIndex(InitializerList<IndexType> lst); //!< \brief Construct a multi index from an initializer list.
 
-    static MultiIndex zero(SizeType nv);
-    static MultiIndex unit(SizeType nv, SizeType j);
+    MultiIndex(const MultiIndex& a); //!< \brief Copy constructor.
+    MultiIndex& operator=(const MultiIndex& a); //!< \brief Copy assignment operator.
 
-    Void resize(SizeType n);
-    Void clear();
+    static MultiIndex zero(SizeType nv); //!< \brief Construct the zero multi index with \a nv variables..
+    static MultiIndex unit(SizeType nv, SizeType j); //!< \brief Construct the unit multi index in variable \a j with \a nv variables. i.e. \f$a_j=1\f$ and \f$a_i=0\f$ for \f$i=0,\ldots,n-1,\;i\neq j\f$.
 
-    MultiIndex& operator++();
+#ifdef DOXYGEN
+    SizeType size() const; //!< \brief .
+    SizeType number_of_variables() const; //!< \brief .
+    DegreeType degree() const; //!< \brief .
+    IndexType const& operator[](SizeType i) const; //!< \brief .
+    IndexType& operator[](SizeType i); //!< \brief .
+    IndexType get(SizeType i) const; //!< \brief .
+    Void set(SizeType i, IndexType n); //!< \brief .
+
+    friend OutputStream& operator<<(OutputStream& os, const MultiIndex& a); //!< \brief Write to an output stream.
+#endif // DOXYGEN
+
+    Void resize(SizeType n); //!< \brief Resize to \a n variables.
+    Void clear(); //!< \brief Set all elements to zeros.
+    friend Void swap(MultiIndex& a1, MultiIndex& a2); //!< \brief Efficiently swaps multi indices \a a1 and \a a2.
 
     MultiIndex& operator+=(const MultiIndex& a);
     MultiIndex& operator-=(const MultiIndex& a);
-    MultiIndex& operator*=(const DegreeType& a);
-    friend MultiIndex operator+(MultiIndex a1, const MultiIndex& a2);
-    friend MultiIndex operator-(MultiIndex a1, const MultiIndex& a2);
-    friend MultiIndex operator*(MultiIndex a, IndexType s);
-    friend MultiIndex operator*(DegreeType s, MultiIndex a);
+    MultiIndex& operator*=(const IndexType& s);
+#ifdef DOXYGEN
+    friend MultiIndex& operator+=(MultiIndex& a1, const MultiIndex& a2); //!< \brief .
+    friend MultiIndex& operator-=(MultiIndex& a1, const MultiIndex& a2); //!< \brief .
+    friend MultiIndex& operator*=(MultiIndex& a1, const IndexType& s); //!< \brief .
+#endif // DOXYGEN
+    friend MultiIndex operator+(MultiIndex a1, const MultiIndex& a2); //!< \brief .
+    friend MultiIndex operator-(MultiIndex a1, const MultiIndex& a2); //!< \brief .
+    friend MultiIndex operator*(MultiIndex a, IndexType s); //!< \brief .
+    friend MultiIndex operator*(IndexType s, MultiIndex a); //!< \brief .
 
-    friend Void swap(MultiIndex& a1, MultiIndex& a2);
+#ifdef DOXYGEN
+    //! \brief Increment the multi index in the lexicographic order.
+    friend MultiIndex& lexicographic_increment(MultiIndex& a);
+    //! \brief A comparison satisfying \f$|a_1|<|a_2| \implies a_1 < a_2\f$.
+    friend Bool graded_less(const MultiIndex& a1, const MultiIndex& a2);
+     //! \brief The lexicogaphic (dictionary) order, defined by \f$a_1 < a_2 \iff \exists k, a_{1,k}<a_{2,k} \wedge \forall i<k, a_{1,i} = a_{2,i}\f$.
+    friend Bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);
+     //! \brief The reverse of the lexicogaphic (dictionary) order, defined by \f$a_1 < a_2 \iff \exists k, a_{1,k} > a_{2,k} \wedge \forall i<k, a_{1,i} = a_{2,i}\f$.
+    friend Bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);
+#endif // DOXYGEN
 
 //    SizeType position() const;
 //    SizeType factorial() const;
@@ -150,7 +180,7 @@ struct GradedLess {
 static const SizeType DEFAULT_CAPACITY = 4u;
 
 struct MultiIndexReference : public MultiIndexData {
-    MultiIndexReference(SizeType n, IndexType* p);
+    MultiIndexReference(SizeType n, DegreeType* p);
     MultiIndexReference(MultiIndexData const&);
     MultiIndexReference(MultiIndexReference const&) = default;
     MultiIndexReference& operator=(MultiIndexReference const&);

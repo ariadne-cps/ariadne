@@ -120,7 +120,7 @@ class TestMultiIndex
         MultiIndex a(4);
         SizeType n=0;
         while(a.degree()<=5) {
-            MultiIndex b=a; ++a; ++n;
+            MultiIndex b=a; lexicographic_increment(a); ++n;
             ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);
             MultiIndex::IndexType d=0; for(SizeType i=0; i!=a.size(); ++i) { d+=a[i]; }
             ARIADNE_TEST_EQUAL(a.degree(),d);

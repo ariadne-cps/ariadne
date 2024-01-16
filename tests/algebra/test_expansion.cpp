@@ -331,7 +331,7 @@ template<class F> Void TestExpansion<F>::test_data_access()
 template<class F> Void TestExpansion<F>::test_equality()
 {
     MultiIndex a(2);
-    MultiIndex b(2); ++b;
+    MultiIndex b(2); lexicographic_increment(b);
     Expansion<MI,F> e1(2,zero),e2(2,zero);
     e1.append(a,1.0_x); e1.append(b,2.0_x);
     e2.append(a,1.0_x); e2.append(b,3.0_x);
@@ -377,7 +377,7 @@ template<class F> Void TestExpansion<F>::test_cleanup()
     // Test to see if the cleanup/sort operations work.
     // Since these are used in the constructors, we can't use the main constructors to test this
     MultiIndex a(3);
-    MultiIndex b(3); ++b;
+    MultiIndex b(3); lexicographic_increment(b);
     ARIADNE_TEST_PRINT(a);
     ARIADNE_TEST_PRINT(b);
 
@@ -386,7 +386,8 @@ template<class F> Void TestExpansion<F>::test_cleanup()
     ARIADNE_TEST_PRINT(e);
     for(Nat i=0; i!=2; ++i) {
         c=hlf(c);
-        if(i%2) { e.append(a,c); ++b; ++b; a=b; ++b; } else { e.append(b,c);}
+        if(i%2) { e.append(a,c); lexicographic_increment(b); lexicographic_increment(b); a=b; lexicographic_increment(b); }
+        else { e.append(b,c);}
         ARIADNE_TEST_PRINT(e);
     }
 

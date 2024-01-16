@@ -332,7 +332,7 @@ Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs) : _expansion(as,X(prs...)), _degree(deg) {
     auto iter = lst.begin();
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+    for(MultiIndex j(as); j.degree()<=deg; lexicographic_increment(j)) {
         ExactDouble const& y=*iter; if(y!=0.0_x) { _expansion.append(j,X(y,prs...)); } ++iter; }
     this->cleanup();
 }

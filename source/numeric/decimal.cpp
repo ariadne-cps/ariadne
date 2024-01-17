@@ -59,6 +59,7 @@ Decimal::Decimal(Integer p, Nat q) : _p(p), _q(q)
 
 Decimal::Decimal(Dyadic const& w)
 {
+    ARIADNE_ASSERT(is_finite(w));
     if (is_finite(w)) {
         assert(w.exponent()>=0);
         this->_p=w.mantissa();
@@ -302,15 +303,6 @@ template<> String class_name<Decimal>() { return "Decimal"; }
 template<> String class_name<DecimalBounds>() { return "DecimalBounds"; }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
-    if (d._q==0) {
-        if (d._p==0) {
-            return os << "nan";
-        } else {
-            if (d._p<0) { os << '-'; }
-            return os << "inf";
-        }
-    }
-
     Integer p=abs(d._p);
     Integer q=pow(ten,d._q);
     Integer n = quot(p,q);

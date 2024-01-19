@@ -56,6 +56,10 @@ template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_zero() const 
     return Polynomial<I,X>(this->argument_size(),this->zero_coefficient());
 }
 
+template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_constant(const X& c) const {
+    return Polynomial<I,X>(this->argument_size(),c);
+}
+
 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_constant(ArgumentSizeType as, const X& c) {
     Polynomial<I,X> r(as,nul(c)); r[zero_index(as)]=c; return r;}
@@ -86,6 +90,8 @@ template<class I, class X> Polynomial<I,X>& Polynomial<I,X>::operator=(const X& 
 
 
 template<class I, class X> auto Polynomial<I,X>::argument_size() const -> ArgumentSizeType { return this->_expansion.argument_size(); }
+
+template<class I, class X> auto Polynomial<I,X>::result_size() const -> SizeOne { return SizeOne(); }
 
 template<class I, class X> SizeType Polynomial<I,X>::number_of_terms() const { return this->_expansion.number_of_terms(); }
 
@@ -349,6 +355,14 @@ template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::
     return p;
 }
 
+template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Sqr, const Polynomial<I,X>& p) {
+    return p*p;
+}
+
+template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Pow, const Polynomial<I,X>& p, Nat m) {
+    return generic_pow(p,m);
+}
+
 
 template<class I, class X> X Polynomial<I,X>::_evaluate(const Polynomial<I,X>& p, const Argument<X>& x) {
     return horner_evaluate(p._expansion,x);
@@ -362,7 +376,8 @@ template<class I, class X> Polynomial<MultiIndex,X> Polynomial<I,X>::_compose(co
     return evaluate(p,q);
 }
 
-template<class I, class X> template<class A> A Polynomial<I,X>::operator() (const Argument<A>& a) const {
+template<class I, class X> template<class A> requires CanMultiply<X,A>
+ArithmeticType<X,A> Polynomial<I,X>::operator() (const Argument<A>& a) const {
     return horner_evaluate(this->_expansion,a);
 }
 

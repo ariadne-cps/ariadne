@@ -39,6 +39,15 @@ using VectorUnivariate = RealVector(RealScalar);
 using ScalarMultivariate = RealScalar(RealVector);
 using VectorMultivariate = RealVector(RealVector);
 
+// FIXME: Try to abstract away this template
+template<class R, class F, class X> concept CanEvaluate
+    = requires(F const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
+template<class R, class F, class X> concept CanCall
+    = requires(F const& f, X const& x) { { f(x) } -> ConvertibleTo<R>; };
+
+template<class F, class X> concept HasCall
+    = requires(F const& f, X const& x) { { f(x) }; };
+
 
 template<class F, template<class>class A, template<class>class R, class T> concept CallableOn = requires(F f, A<T> a) {
     { f(a) } -> SameAs<R<T>>;

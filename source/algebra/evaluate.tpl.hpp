@@ -42,14 +42,15 @@ namespace Ariadne {
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& x);
+template<class X, class A> requires CanMultiply<X,A> ArithmeticType<X,A> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& x);
 
-template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
+template<class X, class Y> requires CanMultiply<X,Y>
+ArithmeticType<X,Y> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
 {
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
     typedef ArithmeticType<X,Y> R;
     const SizeType n=e.argument_size();
-    const R z(x.zero_element()); // The zero element of the ring Y
+    const R z(e.zero_coefficient() * x.zero_element()); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
     Array< R > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
@@ -115,7 +116,8 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<M
     return t;
 }
 
-template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<UniIndex,X>& e, const Y& x)
+template<class X, class Y> requires CanMultiply<X,Y>
+ArithmeticType<X,Y> horner_evaluate(const Expansion<UniIndex,X>& e, const Y& x)
 {
     typedef ArithmeticType<X,Y> R;
     typedef typename Expansion<UniIndex,X>::ConstIterator ConstIterator;
@@ -147,7 +149,7 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<U
     return r;
 }
 
-template<class X, class Y>
+template<class X, class Y> requires CanMultiply<X,Y>
 ArithmeticType<X,Y> power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     typedef ArithmeticType<X,Y> R;
@@ -176,22 +178,22 @@ ArithmeticType<X,Y> power_evaluate(const Expansion<MultiIndex,X>& e, const Vecto
 }
 
 
-template<class X, class Y>
+template<class X, class Y> requires CanMultiply<X,Y>
 ArithmeticType<X,Y> evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
-template<class X, class Y>
+template<class X, class Y> requires CanMultiply<X,Y>
 ArithmeticType<X,Y> simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
-template<class X, class Y>
+template<class X, class Y> requires CanMultiply<X,Y>
 Vector<ArithmeticType<X,Y>> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
 {
-    Vector<Y> r(x.size(),y.zero_element());
+    Vector<ArithmeticType<X,Y>> r(x.size(),x.zero_coefficient()*y.zero_element());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=evaluate(x[i],y);
     }

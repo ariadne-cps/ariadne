@@ -134,6 +134,8 @@ class Polynomial
 
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
+    typedef Number<Paradigm> GenericNumericType;
+
     typedef Polynomial<I,X> SelfType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef ReverseLexicographicLess IndexComparisonType;
@@ -159,9 +161,12 @@ class Polynomial
 
     //! \brief Create the null polynomial in the same number of variables.
     Polynomial<I,X> create_zero() const;
+    Polynomial<I,X> create_constant(X const& c) const;
+    template<class Y> requires Assignable<X,Y> Polynomial<I,X> create_constant(Y const& c) const;
 
     using PolynomialConstructors<I,X>::constant;
     using PolynomialConstructors<I,X>::coordinate;
+
 
     //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
@@ -183,6 +188,11 @@ class Polynomial
 
     //!@{
     //! \name Data access
+
+    //! \brief The number of variables in the result of the polynomial.
+    SizeOne result_size() const;
+    //! \brief The domain of the function.
+    EuclideanDomain domain() const;
 
     //! \brief The number of variables in the argument of the polynomial.
     ArgumentSizeType argument_size() const;
@@ -241,7 +251,7 @@ class Polynomial
     //! \name Evaluation
 
     //! Evaluate on algebra elements.
-    template<class A> A operator() (Argument<A> const&) const;
+    template<class A> requires CanMultiply<X,A> ArithmeticType<X,A> operator() (Argument<A> const&) const;
     //!@}
 
     //!@{
@@ -302,6 +312,15 @@ class Polynomial
     template<AssignableTo<X> Y>
         friend Polynomial<I,X> operator*(const Y& c, Polynomial<I,X> p) {
             X xc=p.value(); xc=c; return xc*p; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X>& operator+=(Polynomial<I,X>& p, const Y& c) {
+            X xc=p.value(); xc=c; return p+=xc; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X>& operator-=(Polynomial<I,X>& p, const Y& c) {
+            X xc=p.value(); xc=c; return p-=xc; }
+    template<AssignableTo<X> Y>
+        friend Polynomial<I,X>& operator*=(Polynomial<I,X>& p, const Y& c) {
+            X xc=p.value(); xc=c; return p*=xc; }
 
 };
 
@@ -311,6 +330,8 @@ template<class I, class X> struct AlgebraOperations<Polynomial<I,X>> {
     static Polynomial<I,X> apply(Nul, const Polynomial<I,X>& p);
     static Polynomial<I,X> apply(Pos, const Polynomial<I,X>& p);
     static Polynomial<I,X> apply(Neg, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Sqr, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Pow, const Polynomial<I,X>& p, Nat m);
     static Polynomial<I,X> apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
     static Polynomial<I,X> apply(Sub, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
     static Polynomial<I,X> apply(Mul, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
@@ -341,6 +362,10 @@ template<class I, class X> template<class XX> EqualityType<X,XX> Polynomial<I,X>
     const_cast<Polynomial<I,X>*>(this)->cleanup();
     const_cast<Polynomial<I,XX>&>(p).cleanup();
     return this->_expansion==p._expansion;
+}
+
+template<class I, class X> template<class Y> requires Assignable<X,Y> Polynomial<I,X> Polynomial<I,X>::create_constant(Y const& c) const {
+    X xc=this->zero_coefficient(); xc=c; return this->create_constant(c);
 }
 
 template<class I, class X> template<class XX> InequalityType<X,XX> Polynomial<I,X>::operator!=(const Polynomial<I,XX>& p) const {

@@ -46,12 +46,14 @@ template struct AlgebraOperations<Polynomial<UniIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 
 template class Polynomial<MultiIndex,Rational>;
+template class Polynomial<MultiIndex,ApproximateNumber>;
 template class Polynomial<MultiIndex,RoundedFloatDP>;
 template class Polynomial<MultiIndex,FloatDPApproximation>;
 template class Polynomial<MultiIndex,FloatDPBounds>;
 template class Polynomial<MultiIndex,FloatDPUpperInterval>;
 
 template struct AlgebraOperations<Polynomial<MultiIndex,Rational>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,ApproximateNumber>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;

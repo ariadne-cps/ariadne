@@ -87,12 +87,6 @@ template<class X> X operator*(const GenericType<X>& y1, const X& x2) { return x2
 template<class X> X operator/(const GenericType<X>& y1, const X& x2) { return x2.create(y1)/x2; }
 */
 
-// FIXME: Try to abstract away this template
-template<class R, class F, class X> concept CanEvaluate
-    = requires(F const& f, X const& x) { { evaluate(f,x) } -> AssignableTo<R>; };
-template<class R, class F, class X> concept CanCall
-    = requires(F const& f, X const& x) { { f(x) } -> ConvertibleTo<R>; };
-
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
 

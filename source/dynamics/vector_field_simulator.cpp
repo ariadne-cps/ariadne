@@ -99,7 +99,8 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
         ARIADNE_ERROR("Too much dimension on subdivision of subspace");
     }
     Nat divider = 1;
-    Point<FloatDP> tmpPointCenter = Point(box.centre());
+    //Point<FloatDP> tmpPointCenter = Point(box.centre());
+    Point<FloatDP> tmpPointCenter = Point(box.lower_bounds());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
 
@@ -112,14 +113,14 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     if(box_width_null == lengths_.size())
     {
         tmpPointCenter = box.midpoint();
-    }else if (box_width_null > 0)
-    {
-        FloatDPUpperBound eps(0.000000001_q,dp);
-        box = widen(box, eps);
-    }
+    }//else if (box_width_null > 0)
+    //{
+    //    FloatDPUpperBound eps(0.000000001_q,dp);
+    //    box = widen(box, eps);
+    //}
 
-    FloatDPUpperBound eps(0.000000001_q,dp);
-    box = widen(box, eps);
+    FloatDP eps(0.000000001_q, Ariadne::ROUND_TO_NEAREST, dp);
+    //box = widen(box, eps);
 
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
         divider = 1;
@@ -127,8 +128,15 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
             Nat val = sspc.get(spc[i]);
             divider = val;
         }
+        lengths[i] = (box[i].width().raw() / divider).value();
+        lengths[i] = (lengths[i] + eps).value();
         origin[i] = tmpPointCenter[i];
-        lengths[i] = (box.widths().at(i).raw()/divider).value();
+//        if (divider > 1) {
+
+            //lengths[i] = lengths[i] + eps;
+//        }else{
+//            lengths[i] = (box.widths().at(i).raw() / divider).value();
+//        }
     }
     Grid grid(origin, lengths);
     GridTreePaving gridPaving(grid);
@@ -139,14 +147,15 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
 List<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
 
     if(discretisation_type == DiscretisationType::Mince) paving.mince(mince_dimension);
-    else paving.recombine();
+    else if(discretisation_type == DiscretisationType::Recombine) paving.recombine();
 
     GridTreePaving::ConstIterator iter = paving.begin();
     List<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
     SizeType k(0);
     for( ; iter != paving.end(); ++iter){
         UpperBoxType cell = iter->box();
-        auto midpoint = cell.midpoint();
+        //auto midpoint = cell.midpoint();
+        auto midpoint = cell.centre();
         LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
         result.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
         k++;
@@ -203,7 +212,9 @@ auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationTyp
     }
 */
     GridTreePaving gridPaving = create_paving(initial_box, _system->state_space(), _configuration->get_subspace());
-    if(_configuration->is_using_subspace() == true) { _configuration->set_num_subdivisions(0); }
+    if(_configuration->is_using_subspace() == true) {
+        _configuration->set_num_subdivisions(0);
+    }
     gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
     ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
                                                            _configuration->discretisation_type(), _configuration->num_subdivisions());
@@ -263,7 +274,7 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine), _is_using_subspace(false), _subspace()  {
+        _step_size(0.125_x, dp), _num_subdivisions(2), _discretisation_type(DiscretisationType::Recombine), _is_using_subspace(false), _subspace()  {
 
 }
 

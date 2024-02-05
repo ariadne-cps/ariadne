@@ -45,6 +45,7 @@ namespace Ariadne {
 
 enum class DiscretisationType
 {
+  None,
   Mince,
   Recombine
 };
@@ -52,7 +53,8 @@ enum class DiscretisationType
 OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
     if(dtype == DiscretisationType::Mince){ os << "Mince"; }
-    else{ os << "Recombine"; }
+    else if(dtype == DiscretisationType::Recombine){ os << "Recombine"; }
+    else { os << "None"; }
     return os;
 }
 
@@ -150,7 +152,6 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
             //If key doesn't exists, then create it one with its value
             _subspace.insert(v, n);
             _is_using_subspace = true;
-            _num_subdivisions = 0;
         }else{
             //if key already exists, error
             ARIADNE_ERROR("The key " <<v<< "already exists creating subspace");

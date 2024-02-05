@@ -71,8 +71,9 @@ class TestVectorFieldSimulator
 
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
-        //simulator.configuration().set_num_subdivisions(1);
-        simulator.configuration().insert_subspace(y, 10);
+        simulator.configuration().set_num_subdivisions(0);
+        //simulator.configuration().set_discretisation_type(DiscretisationType::Recombine);
+        simulator.configuration().insert_subspace(x, 3);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 

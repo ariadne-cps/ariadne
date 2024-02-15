@@ -60,6 +60,7 @@ template<class PR> using FloatApproximateInterval = Interval<FloatApproximation<
 //! \relates Interval
 //! \name Type synonyms
 using DyadicInterval = Interval<Dyadic>; //!< <p/>
+using DecimalInterval = Interval<Decimal>; //!< <p/>
 using RationalInterval = Interval<Rational>; //!< <p/>
 using RealInterval = Interval<Real>; //!< <p/>
 

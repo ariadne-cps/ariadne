@@ -133,6 +133,17 @@ Decimal operator"" _decimal (const char* str, std::size_t);
 
 template<BuiltinIntegral N> inline Decimal::Decimal(N n) : Decimal(n,0u) { }
 
+
+template<> class Positive<Decimal> : public Decimal {
+  public:
+    Positive() : Decimal() { }
+    template<BuiltinUnsignedIntegral M> Positive(M m) : Decimal(m) { }
+    Positive(int n) = delete;
+    explicit Positive(Decimal const& w) : Decimal(w) { ARIADNE_ASSERT(w>=0); }
+};
+inline Positive<Decimal> cast_positive(Decimal const& w) { return Positive<Decimal>(w); }
+using PositiveDecimal = Positive<Decimal>;
+
 template<> class Bounds<Decimal> {
     Decimal _l, _u;
   public:

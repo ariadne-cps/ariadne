@@ -119,13 +119,13 @@ Orbit<Vector<HybridApproximatePoint>>::Orbit(const Vector<HybridApproximatePoint
     }
 }
 
-SizeType 
+SizeType
 Orbit<Vector<HybridApproximatePoint>>::size(Nat setNumber)
 {
     return this->_curves_ptr->at(setNumber).size();
 }
 
-Void 
+Void
 Orbit<Vector<HybridApproximatePoint>>::insert(HybridTime ht, const HybridApproximatePoint& hpt, SizeType setNumber)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size(setNumber));
@@ -148,7 +148,7 @@ Void
 Orbit<Vector<HybridApproximatePoint>>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<Vector<HybridApproximatePoint>>& orbit=*this;
     for(SizeType i=0; i<orbit._curves_ptr->size(); i++)
-    { 
+    {
         for(SizeType j=0; j!=orbit._curves_ptr->at(i).size(); ++j) {
             HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i).at(j);
             if(locations.empty() || locations.contains(hcurve.location())) {
@@ -307,6 +307,12 @@ HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
     this->adjoin(loc,cs);
 }
 
+HybridConstraintSet::HybridConstraintSet(const Set<DiscreteLocation>& locs,
+                                         const RealExpressionConstraintSet& cs)
+{
+    for(auto loc : locs) { this->adjoin(loc,cs); }
+}
+
 HybridConstraintSet* HybridConstraintSet::clone() const {
     return new HybridConstraintSet(*this);
 }
@@ -385,6 +391,12 @@ HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& l
                                                        const RealExpressionBoundedConstraintSet& set)
 {
     this->adjoin(loc,set);
+}
+
+HybridBoundedConstraintSet::HybridBoundedConstraintSet(const Set<DiscreteLocation>& locs,
+                                                       const RealExpressionBoundedConstraintSet& set)
+{
+    for (auto loc : locs) { this->adjoin(loc,set); }
 }
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,

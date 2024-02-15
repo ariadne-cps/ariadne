@@ -469,6 +469,7 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
 
 
     pybind11::class_<RealVariableInterval> real_variable_interval_class(module,"RealVariableInterval");
+    real_variable_interval_class.def(pybind11::init<RealVariable,RealInterval>());
     real_variable_interval_class.def(pybind11::init<Real,RealVariable,Real>());
     real_variable_interval_class.def("variable", &RealVariableInterval::variable);
     real_variable_interval_class.def("interval", &RealVariableInterval::interval);
@@ -477,10 +478,12 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     real_variable_interval_class.def("__str__",&__cstr__<RealVariableInterval>);
 
     pybind11::class_<RealVariablesBox> real_variables_box_class(module,"RealVariablesBox");
+    real_variables_box_class.def(pybind11::init([](pybind11::dict dct){return RealVariablesBox(pybind11::cast<Map<RealVariable,RealInterval>>(dct));}));
     real_variables_box_class.def(pybind11::init<Map<RealVariable,RealInterval>>());
     real_variables_box_class.def(pybind11::init<List<RealVariableInterval>>());
     real_variables_box_class.def("__getitem__", &RealVariablesBox::operator[]);
     real_variables_box_class.def("__str__",&__cstr__<RealVariablesBox>);
+    pybind11::implicitly_convertible<pybind11::dict,RealVariablesBox>();
 
     typedef VariablesBox<FloatDPUpperInterval> FloatDPVariablesBox;
     pybind11::class_<FloatDPVariablesBox> floatdp_variables_box_class(module,"FloatDPVariablesBox");
@@ -501,13 +504,17 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     real_expression_bounded_constraint_set_class.def("euclidean_set", (BoundedConstraintSet(RealExpressionBoundedConstraintSet::*)(RealSpace const&)) &RealExpressionBoundedConstraintSet::euclidean_set);
     real_expression_bounded_constraint_set_class.def("__str__",&__cstr__<RealExpressionBoundedConstraintSet>);
 
+    module.def("intersection", [](RealVariablesBox const& bx, RealExpressionConstraintSet const& cs){return intersection(bx,cs);});
+
     module.def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
     module.def("make_set", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
     module.def("make_set", (ConstraintSet(*)(RealSpace const&, RealExpressionConstraintSet const&)) &make_set);
     module.def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealExpressionBoundedConstraintSet const&)) &make_set);
     module.def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&)) &make_set);
 
-    pybind11::implicitly_convertible<List<RealVariableInterval>,RealVariablesBox>();
+    pybind11::implicitly_convertible<Pair<Real,Real>,RealInterval>();
+    pybind11::implicitly_convertible<std::map<RealVariable,RealInterval>,RealVariablesBox>();
+//    pybind11::implicitly_convertible<List<RealVariableInterval>,RealVariablesBox>();
     pybind11::implicitly_convertible<List<ContinuousPredicate>,RealExpressionConstraintSet>();
 }
 

@@ -270,7 +270,7 @@ def get_initial_set():
     # Define the initial set, by supplying the location as a list of locations for each composed automata, and
     # the continuous set as a list of variable assignments for each variable controlled on that location
     # (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},[(dec_(6.9)<=height)&(height<=7)])
+    initial_set = HybridBoundedConstraintSet({valve:opened,controller:rising},{height:(dec_(6.9),7)})
 
     # Print the initial set on the command line
     print("initial_set =",initial_set)

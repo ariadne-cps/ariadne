@@ -164,6 +164,8 @@ class HybridConstraintSet
                         const List<ContinuousPredicate>& constraints);
     HybridConstraintSet(const DiscreteLocation& location,
                         const RealExpressionConstraintSet& constraint_set);
+    HybridConstraintSet(const Set<DiscreteLocation>& locations,
+                        const RealExpressionConstraintSet& constraint_set);
 
     //! \brief Adjoin the set defined by \a constraints in \a location.
     HybridConstraintSet& adjoin(const DiscreteLocation& location, const List<ContinuousPredicate>& set);
@@ -214,6 +216,8 @@ class HybridBoundedConstraintSet
     HybridBoundedConstraintSet(const DiscreteLocation& location,
                                const InitializerList<RealVariableInterval>& bounds,
                                const InitializerList<ContinuousPredicate>& constraints);
+    HybridBoundedConstraintSet(const Set<DiscreteLocation>& locations,
+                               const RealExpressionBoundedConstraintSet& constraint_set);
 
     HybridBoundedConstraintSet& adjoin(const DiscreteLocation& loc, const RealExpressionBoundedConstraintSet& set);
 

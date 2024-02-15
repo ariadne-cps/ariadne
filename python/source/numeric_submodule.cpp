@@ -129,10 +129,6 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<DecimalBou
     return os << "DecimalBounds({"<<python_literal(repr.reference().lower())<<":"<<python_literal(repr.reference().upper())<<"})"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RationalBounds>& repr) {
     return os << "RationalBounds({"<<python_literal(repr.reference().lower())<<":"<<python_literal(repr.reference().upper())<<"})"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
-    return os << "FloatDP(\""<<Decimal(Dyadic(repr.reference()))<<"\",dp)"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatMP>& repr) {
-    return os << "FloatMP(\""<<Decimal(Dyadic(repr.reference()))<<"\"," << repr.reference().precision() << ")"; }
 
 template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Number<P>>& repr) {
     return os << class_name<Number<P>>()<<"("<<repr.reference()<<")"; }
@@ -140,6 +136,11 @@ template<class P> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os << class_name<UpperNumber<P>>()<<"("<<repr.reference()<<")"; }
 template<class P> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<LowerNumber<P>>& repr) {
     return os << class_name<LowerNumber<P>>()<<"("<<repr.reference()<<")"; }
+
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
+    return os << "FloatDP(\""<<Decimal(Dyadic(repr.reference()))<<"\",dp)"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatMP>& repr) {
+    return os << "FloatMP(\""<<Decimal(Dyadic(repr.reference()))<<"\"," << repr.reference().precision() << ")"; }
 
 template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& repr) {
     return os << class_name<F>() << "Approximation("<<python_literal(repr.reference())<<","<<repr.reference().precision()<<")"; }
@@ -156,6 +157,12 @@ template<class F, class FE> OutputStream& operator<<(OutputStream& os, const Pyt
     return os << class_name<F>() << numeric_class_tag<PRE>() << "Ball(" << python_literal(repr.reference()) << "," << repr.reference().precision() << ")"; }
 template<class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Error<FE>>& repr) {
     return os << class_name<FE>() << "Error("<<python_literal(repr.reference())<<","<<repr.reference().precision()<<")"; }
+
+
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<ApproximateNumber> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<ValidatedNumber> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<EffectiveNumber> const&);
+template OutputStream& operator<<(OutputStream&, PythonRepresentation<ExactNumber> const&);
 
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatDP>&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<FloatMP>&);
@@ -1164,6 +1171,9 @@ template<class PR> void export_float_bounds(pymodule& module)
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
 
     float_bounds_class.def_static("set_output_places",&FloatBounds<PR>::set_output_places);
+
+    pybind11::class_<Positive<FloatBounds<PR>>,pybind11::bases<FloatBounds<PR>>> positive_bounds_class(module,python_class_name<Positive<FloatBounds<PR>>>().c_str());
+    positive_bounds_class.def("__str__", &__cstr__<Positive<FloatBounds<PR>>>);
 }
 
 

@@ -37,6 +37,8 @@ template<> inline std::string numeric_class_tag<DoublePrecision>() { return "DP"
 template<> inline std::string numeric_class_tag<MultiplePrecision>() { return "MP"; }
 
 
+template<> struct PythonTemplateName<Positive> { static std::string get() { return "Positive"; } };
+
 template<> struct PythonTemplateName<Float> { };
 template<> struct PythonTemplateName<Approximation> { static std::string get() { return "Approximation"; } };
 template<> struct PythonTemplateName<LowerBound> { static std::string get() { return "LowerBound"; } };
@@ -45,6 +47,8 @@ template<> struct PythonTemplateName<Bounds> { static std::string get() { return
 template<> struct PythonTemplateName<Ball> { static std::string get() { return "Ball"; } };
 template<> struct PythonTemplateName<Error> { static std::string get() { return "Error"; } };
 template<> struct PythonTemplateName<Rounded> { static std::string get() { return "Rounded"; } };
+
+template<> struct PythonTemplateName<Number> { static std::string get() { return "Number"; } };
 
 template<class T> struct PythonClassName { static std::string get() { return class_name<T>(); } };
 

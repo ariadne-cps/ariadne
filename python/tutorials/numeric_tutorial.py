@@ -33,10 +33,9 @@ def compute_iterates(f,x0,n):
         xs.append(f(xs[-1]))
     return xs
 
-def print_iterates(xs):
+def print_iterates(xs,str="x"):
     for i in range(len(xs)):
-        print('x[',i,']:',xs[i])
-    print()
+        print(str,'[',i,']:',xs[i])
 
 
 def numeric_tutorial():

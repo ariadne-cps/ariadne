@@ -313,6 +313,11 @@ template<class T> class LocatedSetWrapper<ValidatedTag,T>
 using namespace Ariadne;
 
 template<class X> X from_python_object_or_literal_allowing_default_precision(pybind11::handle h) {
+    if constexpr (Same<X,Decimal>) {
+        try {
+            return X(pybind11::cast<double>(h));
+        } catch(pybind11::cast_error&) { }
+    }
     if constexpr (Constructible<X,String>) {
         try {
             return X(pybind11::cast<String>(h));
@@ -613,10 +618,14 @@ Void export_intervals(pybind11::module& module) {
 //    export_interval<UpperIntervalType>(module,"UpperIntervalType");
 //    export_interval<ApproximateIntervalType>(module,"ApproximateIntervalType");
     export_interval<DyadicInterval>(module);
+    export_interval<DecimalInterval>(module);
     export_interval<RationalInterval>(module);
     export_interval<RealInterval>(module);
+    pybind11::implicitly_convertible<DyadicInterval,DecimalInterval>();
     pybind11::implicitly_convertible<DyadicInterval,RationalInterval>();
     pybind11::implicitly_convertible<DyadicInterval,RealInterval>();
+    pybind11::implicitly_convertible<DecimalInterval,RationalInterval>();
+    pybind11::implicitly_convertible<DecimalInterval,RealInterval>();
     pybind11::implicitly_convertible<RationalInterval,RealInterval>();
 
     export_interval<FloatDPExactInterval>(module);
@@ -639,6 +648,7 @@ Void export_intervals(pybind11::module& module) {
 
     template_<Interval> interval_template(module);
     interval_template.instantiate<Dyadic>();
+    interval_template.instantiate<Decimal>();
     interval_template.instantiate<Rational>();
     interval_template.instantiate<Real>();
     interval_template.instantiate<FloatDP>();
@@ -673,6 +683,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
 
     define_conversion<BoxDomainType>(box_class);
     define_conversion<DyadicBox>(box_class);
+    define_conversion<DecimalBox>(box_class);
     define_conversion<RationalBox>(box_class);
     define_conversion<RealBox>(box_class);
 
@@ -763,47 +774,44 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
 }
 
 
-template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name)
+template<class BX> Void export_simple_box(pybind11::module& module, std::string name=python_class_name<BX>())
 {
-    using BX=DyadicBox;
     using BoxType = BX;
     pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init(&box_from_list<BoxType>));
-    box_class.def(pybind11::init<BoxType>());
-    box_class.def(pybind11::init<BoxDomainType>());
+    if constexpr (Constructible<BX,DyadicBox>) {
+        box_class.def(pybind11::init<DyadicBox>());
+    }
+    if constexpr (Constructible<BX,DecimalBox>) {
+        box_class.def(pybind11::init<DecimalBox>());
+    }
+    if constexpr (Constructible<BX,RationalBox>) {
+        box_class.def(pybind11::init<RationalBox>());
+    }
+    if constexpr (Constructible<BoxType,BoxDomainType>) {
+        box_class.def(pybind11::init<BoxDomainType>());
+        pybind11::implicitly_convertible<BoxDomainType,BoxType>();
+    }
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
     box_class.def("__getitem__", &__getitem__<BX,Int>);
     box_class.def("__str__",&__cstr__<BoxType>);
     box_class.def("__repr__",&__repr__<BoxType>);
-
-    pybind11::implicitly_convertible<pybind11::list,BoxType>();
-    pybind11::implicitly_convertible<BoxDomainType,BoxType>();
-}
-
-template<> Void export_box<RationalBox>(pybind11::module& module, std::string name)
-{
-    using BX=RationalBox;
-    using BoxType = BX;
-    pybind11::class_<BoxType> box_class(module,name.c_str());
-    box_class.def(pybind11::init(&box_from_list<BoxType>));
-    box_class.def(pybind11::init<DyadicBox>());
-    box_class.def(pybind11::init<BoxType>());
-    box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
-    box_class.def("__getitem__", &__getitem__<BX,Int>);
-    box_class.def("__str__",&__cstr__<BoxType>);
-    box_class.def("__repr__",&__repr__<BoxType>);
-
-    pybind11::implicitly_convertible<DyadicBox,BoxType>();
-    pybind11::implicitly_convertible<pybind11::list,BoxType>();
 }
 
 Void export_boxes(pybind11::module& module) {
     export_box<RealBox>(module);
-    export_box<RationalBox>(module);
-    export_box<DyadicBox>(module);
+    export_simple_box<RationalBox>(module);
+    export_simple_box<DecimalBox>(module);
+    export_simple_box<DyadicBox>(module);
 //    export_box<ExactBoxType>(module,"ExactBoxType");
 //    export_box<UpperBoxType>(module,"UpperBoxType");
 //    export_box<ApproximateBoxType>(module,"ApproximateBoxType");
+    pybind11::implicitly_convertible<DyadicBox,DecimalBox>();
+    pybind11::implicitly_convertible<DyadicBox,RationalBox>();
+    pybind11::implicitly_convertible<DyadicBox,RealBox>();
+    pybind11::implicitly_convertible<DecimalBox,RationalBox>();
+    pybind11::implicitly_convertible<DecimalBox,RealBox>();
+    pybind11::implicitly_convertible<RationalBox,RealBox>();
 
     export_box<FloatDPExactBox>(module);
     export_box<FloatDPUpperBox>(module);
@@ -828,6 +836,7 @@ Void export_boxes(pybind11::module& module) {
     template_<Box> box_template(module);
     // TODO: Change templates so that
     box_template.as_instantiate<DyadicBox,Dyadic>();
+    box_template.as_instantiate<DecimalBox,Decimal>();
     box_template.as_instantiate<RationalBox,Rational>();
     box_template.as_instantiate<RealBox,Real>();
     box_template.as_instantiate<FloatDPExactBox,FloatDP>();

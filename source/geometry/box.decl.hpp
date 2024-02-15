@@ -36,6 +36,7 @@ template<class IVL> class VariablesBox;
 //! \relates Box
 //! \name Type synonyms
 using DyadicBox = Box<DyadicInterval>; //!< <p/>
+using DecimalBox = Box<DecimalInterval>; //!< <p/>
 using RationalBox = Box<RationalInterval>; //!< <p/>
 using RealBox = Box<RealInterval>; //!< <p/>
 

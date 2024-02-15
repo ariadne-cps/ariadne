@@ -112,7 +112,7 @@ def function_tutorial():
 
     dom=BoxDomainType([[x_(-0.25),x_(0.25)],[0,x_(0.5)]])
     swp=ThresholdSweeper[FloatDP](dp,1e-3)
-    p=ValidatedVectorMultivariateTaylorFunctionModel(dom,f,swp)
+    p=ValidatedVectorMultivariateTaylorFunctionModelDP(dom,f,swp)
     print("p:",p)
 
     fp=compose(f,p)

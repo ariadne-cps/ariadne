@@ -264,9 +264,9 @@ template<class F> class Approximation
     //!@{
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, Approximation<F> const& x) {
-        return write(os,x.raw(),DecimalPrecision{Approximation<F>::output_places},to_nearest); } //!< Write to an output stream.
+        os << "~"; write(os,x.raw(),DecimalPrecision{Approximation<F>::output_places},to_nearest); os << "~"; return os; } //!< Write to an output stream.
     friend InputStream& operator>>(InputStream& is, Approximation<F>& x) {
-        is >> x._a; return is; } //!< Read from an input stream.
+        char c; is >> c; assert(c=='~'); is >> x._a; is >> c; assert(c=='~'); return is; } //!< Read from an input stream.
     //!@}
   public:
     static Nat output_places;

@@ -442,6 +442,8 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     using NumericType = NumericType<FunctionModelType>;
     using GenericNumericType = GenericType<NumericType>;
 
+    typedef ValidatedScalarUnivariateFunction SFN;
+    typedef ValidatedVectorUnivariateFunction VFN;
     typedef ValidatedScalarMultivariateTaylorFunctionModel<FLT> F;
     typedef ValidatedVectorMultivariateTaylorFunctionModel<FLT> VF;
     typedef typename F::DomainType D;
@@ -497,6 +499,7 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def_static("constant",(ValidatedScalarMultivariateTaylorFunctionModel<FLT>(*)(const ExactBoxType&,const NumericType&,Sweeper<FLT>))&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::constant);
     scalar_taylor_function_class.def_static("constant",[](const ExactBoxType& bx, const ValidatedNumber& c,Sweeper<FLT> swp){return ValidatedScalarMultivariateTaylorFunctionModel<FLT>::constant(bx,NumericType(c,swp.precision()),swp);});
     scalar_taylor_function_class.def_static("coordinate",(ValidatedScalarMultivariateTaylorFunctionModel<FLT>(*)(const ExactBoxType&,SizeType,Sweeper<FLT>))&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::coordinate);
+    scalar_taylor_function_class.def_static("unit_ball",(ValidatedScalarMultivariateTaylorFunctionModel<FLT>(*)(const ExactBoxType&,Sweeper<FLT>))&ValidatedScalarMultivariateTaylorFunctionModel<FLT>::unit_ball);
 
 
     module.def("restriction", &_restriction_<F,D>);
@@ -516,6 +519,8 @@ template<class FLT> Void export_scalar_taylor_function(pybind11::module& module)
     module.def("refines", &_refines_<F,F>);
     module.def("refinement", &_refinement_<F,F>);
 
+    module.def("compose", &_compose_<SFN,F>);
+    module.def("compose", &_compose_<VFN,F>);
 
 //    to_python< Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> >();
 }

@@ -86,6 +86,7 @@ Void export_figure(pybind11::module& module)
 
     pybind11::class_<Axes2d> axes2d_class(module,"Axes2d");
     axes2d_class.def(pybind11::init<double,RealVariable,double,double,RealVariable,double>());
+    axes2d_class.def(pybind11::init<Real,RealVariable,Real,Real,RealVariable,Real>());
 
     static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
 

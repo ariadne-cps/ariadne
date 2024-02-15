@@ -69,7 +69,6 @@ template class HybridPoint<Real>;
 
 } // namespace Ariadne
 
-
 Void export_discrete_location(pybind11::module& module) {
     pybind11::class_<DiscreteLocation> discrete_location_class(module,"DiscreteLocation");
     discrete_location_class.def(pybind11::init<>());
@@ -179,6 +178,7 @@ Void export_hybrid_constraint_set(pybind11::module& module) {
         hybrid_constraint_set_class(module,"HybridConstraintSet",pybind11::multiple_inheritance());
     hybrid_constraint_set_class.def(pybind11::init<DiscreteLocation,List<ContinuousPredicate>>());
     hybrid_constraint_set_class.def(pybind11::init<DiscreteLocation,RealExpressionConstraintSet>());
+    hybrid_constraint_set_class.def(pybind11::init<Set<DiscreteLocation>,RealExpressionConstraintSet>());
     hybrid_constraint_set_class.def("adjoin",pybind11::overload_cast<DiscreteLocation const&,List<ContinuousPredicate> const&>(&HybridConstraintSet::adjoin));
     hybrid_constraint_set_class.def("adjoin",pybind11::overload_cast<DiscreteLocation const&,RealExpressionConstraintSet const&>(&HybridConstraintSet::adjoin));
 
@@ -203,7 +203,9 @@ Void export_hybrid_bounded_constraint_set(pybind11::module& module) {
     pybind11::class_<HybridBoundedConstraintSet,pybind11::bases<EffectiveHybridRegularLocatedSetInterface>>
         hybrid_bounded_constraint_set_class(module,"HybridBoundedConstraintSet",pybind11::multiple_inheritance());
     hybrid_bounded_constraint_set_class.def(pybind11::init<DiscreteLocation,RealVariablesBox>());
+    hybrid_bounded_constraint_set_class.def(pybind11::init<Set<DiscreteLocation>,RealVariablesBox>());
     hybrid_bounded_constraint_set_class.def(pybind11::init<DiscreteLocation,RealExpressionBoundedConstraintSet>());
+    hybrid_bounded_constraint_set_class.def(pybind11::init<Set<DiscreteLocation>,RealExpressionBoundedConstraintSet>());
 //    hybrid_bounded_constraint_set_class.def(pybind11::init<DiscreteLocation,List<RealVariableInterval>>());
 //    hybrid_bounded_constraint_set_class.def(pybind11::init<DiscreteLocation,List<RealVariableInterval>,List<ContinuousPredicate>>());
     hybrid_bounded_constraint_set_class.def("adjoin", &HybridBoundedConstraintSet::adjoin);
@@ -299,14 +301,32 @@ Void export_list_set_hybrid_enclosure(pybind11::module& module) {
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
     pybind11::class_<ListSet<HybridEnclosure>> list_set_hybrid_enclosure_class(module,"HybridEnclosureListSet");
     list_set_hybrid_enclosure_class.def("__iter__", [](ListSet<HybridEnclosure> const& l){return pybind11::make_iterator(l.begin(),l.end());});
+    list_set_hybrid_enclosure_class.def("__len__",&ListSet<HybridEnclosure>::size);
     list_set_hybrid_enclosure_class.def("__getitem__",&ListSet<HybridEnclosure>::get,reference_internal);
     list_set_hybrid_enclosure_class.def("bounding_box",&ListSet<HybridEnclosure>::bounding_box);
 }
 
+template<class V, class E> decltype(auto) to_list(Map<V,E>const& map) {
+    using A=decltype(declval<V>()=declval<E>());
+    List<A> lst; for (auto ve : map) { lst.append(ve.first=ve.second); } return lst;
+}
+
+/*
+template<class V, class E> List<Assignment<V,E>> to_list(Map<V,E>const& map) {
+    List<Assignment<V,E>> lst; for (auto ve : map) { lst.append(ve.first=ve.second); } return lst;
+}
+template<class E> List<Assignment<RealVariable,E>> to_list(Map<LetRealVariable,E>const& map) {
+    List<Assignment<RealVariable,E>> lst; for (auto ve : map) { lst.append(RealAssignment(ve.first.base(),ve.second)); } return lst;
+}
+*/
+
 Void export_hybrid_automaton(pybind11::module& module)
 {
+    using RealAssignmentMap = Map<LetRealVariable,RealExpression>;
+    using DottedRealAssignmentMap = Map<DottedRealVariable,RealExpression>;
+    using PrimedRealAssignmentMap = Map<PrimedRealVariable,RealExpression>;
+
     // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
-    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
     using pybind11::overload_cast;
 
@@ -328,6 +348,8 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("dynamic_assignments", &HybridAutomaton::dynamic_assignments);
     hybrid_automaton_class.def("auxiliary_assignments", &HybridAutomaton::auxiliary_assignments);
     hybrid_automaton_class.def("reset_assignments", &HybridAutomaton::reset_assignments);
+/*
+    auto const& reference_internal = pybind11::return_value_policy::reference_internal;
     hybrid_automaton_class.def("new_mode",overload_cast<List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<List<RealAssignment>const&,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
@@ -336,17 +358,35 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation,List<RealAssignment>const&>( &HybridAutomaton::new_mode),reference_internal);
     hybrid_automaton_class.def("new_mode",overload_cast<DiscreteLocation,List<RealAssignment>const&,List<DottedRealAssignment>const&>(&HybridAutomaton::new_mode),reference_internal);
+*/
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DottedRealAssignmentMap dyn){ha.new_mode(to_list(dyn));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,RealAssignmentMap alg){ha.new_mode(to_list(alg));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,RealAssignmentMap alg, DottedRealAssignmentMap dyn){ha.new_mode(to_list(alg),to_list(dyn));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha, DottedRealAssignmentMap dyn,RealAssignmentMap alg){ha.new_mode(to_list(dyn),to_list(alg));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DiscreteLocation loc){ha.new_mode(loc);});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DiscreteLocation loc,DottedRealAssignmentMap dyn){ha.new_mode(loc,to_list(dyn));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DiscreteLocation loc,RealAssignmentMap alg){ha.new_mode(loc,to_list(alg));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DiscreteLocation loc,RealAssignmentMap alg, DottedRealAssignmentMap dyn){ha.new_mode(loc,to_list(alg),to_list(dyn));});
+    hybrid_automaton_class.def("new_mode",[](HybridAutomaton& ha,DiscreteLocation loc,DottedRealAssignmentMap dyn, RealAssignmentMap alg){ha.new_mode(loc,to_list(dyn),to_list(alg));});
+
     hybrid_automaton_class.def("new_invariant",overload_cast<DiscreteLocation,ContinuousPredicate const&,DiscreteEvent>(&HybridAutomaton::new_invariant));
+/*
     hybrid_automaton_class.def("new_transition",overload_cast<DiscreteLocation,DiscreteEvent,DiscreteLocation,List<PrimedRealAssignment>const&,ContinuousPredicate const&,EventKind>(&HybridAutomaton::new_transition));
     hybrid_automaton_class.def("new_transition",overload_cast<DiscreteLocation,DiscreteEvent,DiscreteLocation,ContinuousPredicate const&,EventKind>(&HybridAutomaton::new_transition));
     hybrid_automaton_class.def("new_transition",overload_cast<DiscreteLocation,DiscreteEvent,DiscreteLocation,List<PrimedRealAssignment>const&>(&HybridAutomaton::new_transition));
-    hybrid_automaton_class.def("__repr__", &__cstr__<HybridAutomaton>);
+*/
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate const& grd,EventKind knd){return ha.new_transition(s,e,t,grd,knd);});
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,PrimedRealAssignmentMap res){return ha.new_transition(s,e,t,to_list(res));});
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,PrimedRealAssignmentMap res,ContinuousPredicate const& grd,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate const& grd,PrimedRealAssignmentMap res,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});    hybrid_automaton_class.def("__str__ ", &__cstr__<HybridAutomaton>);
+    hybrid_automaton_class.def("__repr__", &__crepr__<HybridAutomaton>);
 
     pybind11::class_<CompositeHybridAutomaton,pybind11::bases<HybridAutomatonInterface>>
         composite_hybrid_automaton_class(module,"CompositeHybridAutomaton");
     composite_hybrid_automaton_class.def(pybind11::init<const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def(pybind11::init<Identifier,const List<HybridAutomaton>&>());
-    composite_hybrid_automaton_class.def("__repr__", &__cstr__<CompositeHybridAutomaton>);
+    composite_hybrid_automaton_class.def("__str__", &__cstr__<CompositeHybridAutomaton>);
+    composite_hybrid_automaton_class.def("__repr__", &__crepr__<CompositeHybridAutomaton>);
     composite_hybrid_automaton_class.def("__iter__", [](CompositeHybridAutomaton const& c){return pybind11::make_iterator(c.begin(),c.end());});
 }
 
@@ -357,7 +397,8 @@ Void export_hybrid_time(pybind11::module& module) {
     hybrid_time_class.def(pybind11::init<Real,Integer>());
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time);
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time);
-    hybrid_time_class.def("__repr__", &__cstr__<HybridTime>);
+    hybrid_time_class.def("__str__", &__cstr__<HybridTime>);
+    hybrid_time_class.def("__repr__", &__crepr__<HybridTime>);
 }
 
 Void export_hybrid_termination_criterion(pybind11::module& module) {
@@ -371,7 +412,8 @@ Void export_hybrid_termination_criterion(pybind11::module& module) {
     hybrid_termination_criterion_class.def("maximum_time", &HybridTerminationCriterion::maximum_time);
     hybrid_termination_criterion_class.def("maximum_steps", &HybridTerminationCriterion::maximum_steps);
     hybrid_termination_criterion_class.def("terminating_events", &HybridTerminationCriterion::terminating_events);
-    hybrid_termination_criterion_class.def("__repr__", &__cstr__<HybridTerminationCriterion>);
+    hybrid_termination_criterion_class.def("__str__", &__cstr__<HybridTerminationCriterion>);
+    hybrid_termination_criterion_class.def("__repr__", &__crepr__<HybridTerminationCriterion>);
 }
 
 template<class SIM> Void export_simulator(pybind11::module& module, const char* name);
@@ -446,6 +488,7 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_class.def("orbit",(OrbitType(Evolver::*)(const HybridBoundedConstraintSet&,const TerminationType&,Semantics)const) &Evolver::orbit);
     evolver_class.def("set_integrator",&Evolver::set_integrator);
     evolver_class.def("configuration",pybind11::overload_cast<>(&Evolver::configuration),reference_internal);
+    evolver_class.def("__str__",&__cstr__<GeneralHybridEvolver>);
 
     typedef typename EV::ConfigurationType Configuration;
     pybind11::class_<Configuration> evolver_configuration_class(module,"GeneralHybridEvolverConfiguration");
@@ -454,7 +497,7 @@ Void export_evolver<GeneralHybridEvolver>(pybind11::module& module, const char* 
     evolver_configuration_class.def("set_maximum_spacial_error", &Configuration::set_maximum_spacial_error);
     evolver_configuration_class.def("set_enable_subdivisions", &Configuration::set_enable_subdivisions);
     evolver_configuration_class.def("set_enable_reconditioning", &Configuration::set_enable_reconditioning);
-    evolver_configuration_class.def("__repr__",&__cstr__<Configuration>);
+    evolver_configuration_class.def("__str__",&__cstr__<Configuration>);
 }
 
 template<class RA> Void export_safety_certificate(pybind11::module& module, const char* name) {
@@ -497,6 +540,8 @@ Void export_reachability_analyser<HybridReachabilityAnalyser>(pybind11::module& 
     pybind11::class_<Configuration> reachability_analyser_configuration_class(module,"HybridReachabilityAnalyserConfiguration");
     reachability_analyser_configuration_class.def("set_maximum_grid_fineness", &Configuration::set_maximum_grid_fineness);
     reachability_analyser_configuration_class.def("set_lock_to_grid_time", &Configuration::set_lock_to_grid_time);
+    reachability_analyser_configuration_class.def("set_lock_to_grid_steps", &Configuration::set_lock_to_grid_steps);
+    reachability_analyser_configuration_class.def("set_scaling", &Configuration::set_scaling);
     reachability_analyser_configuration_class.def("__repr__",&__cstr__<Configuration>);
 }
 
@@ -521,6 +566,8 @@ Void export_hybrid_figure(pybind11::module& module) {
 Void export_hybrid_plots(pybind11::module& module) {
     module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitListType const&))&plot);
     module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitListType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,HybridSimulator::OrbitType const&))&plot);
+    module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,HybridSimulator::OrbitType const&))&plot);
 
     module.def("plot", (Void(*)(const char*,Axes2d const&,GeneralHybridEvolver::OrbitType const&))&plot);
     module.def("plot", (Void(*)(const char*,Axes2d const&,Colour const&,GeneralHybridEvolver::OrbitType const&))&plot);
@@ -555,7 +602,7 @@ Void hybrid_submodule(pybind11::module& module) {
     export_hybrid_termination_criterion(module);
 
     export_hybrid_drawable_interface(module);
-    
+
     export_simulator<HybridSimulator>(module,"HybridSimulator");
 
     export_orbit<Orbit<HybridEnclosure>>(module, "HybridEnclosureOrbit");

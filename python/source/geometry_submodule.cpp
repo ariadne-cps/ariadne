@@ -515,6 +515,8 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
         interval_class.def(pybind11::init([](String lb, String ub){return Interval(LowerBoundType(lb),UpperBoundType(ub));}));
     } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,String>) {
         interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(lb,pr),UpperBoundType(ub,pr));}));
+    } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,Decimal>) {
+        interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(Decimal(lb),pr),UpperBoundType(Decimal(ub),pr));}));
     } else if constexpr (ConstructibleGivenDefaultPrecision<UpperBoundType,Dyadic>) {
         interval_class.def(pybind11::init([](String lb, String ub){PrecisionType<UpperBoundType> pr;return Interval(LowerBoundType(Dyadic(lb),pr),UpperBoundType(Dyadic(ub),pr));}));
     }
@@ -548,6 +550,12 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     }
     if constexpr (HasPrecisionType<UpperBoundType>) {
         typedef PrecisionType<UpperBoundType> PrecisionType;
+        if constexpr (Constructible<UpperBoundType,String,PrecisionType>) {
+            interval_class.def(pybind11::init([](String ls, String us, PrecisionType pr){return IntervalType(LowerBoundType(ls,pr),UpperBoundType(us,pr));}));
+        } else if constexpr (Constructible<UpperBoundType,Decimal,PrecisionType>) {
+            interval_class.def(pybind11::init([](String ls, String us, PrecisionType pr){return IntervalType(LowerBoundType(Decimal(ls),pr),UpperBoundType(Decimal(us),pr));}));
+        }
+
         if constexpr (Constructible<IntervalType,FloatBounds<PrecisionType>>) {
             interval_class.def(pybind11::init<FloatBounds<PrecisionType>>());
             if constexpr(Convertible<FloatBounds<PrecisionType>,IntervalType>) {

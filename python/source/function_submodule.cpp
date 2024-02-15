@@ -554,6 +554,8 @@ template<class P, class SIG> Void export_function_patch(pybind11::module& module
     module.def("compose", [](const FunctionPatch<P,RealVector(RES)>& fp, const FunctionPatch<P,SIG>& gp){return compose(fp,gp);});
     module.def("unchecked_compose", [](const FunctionPatch<P,RealScalar(RES)>& fp, const FunctionPatch<P,SIG>& gp){return unchecked_compose(fp,gp);});
     module.def("unchecked_compose", [](const FunctionPatch<P,RealVector(RES)>& fp, const FunctionPatch<P,SIG>& gp){return unchecked_compose(fp,gp);});
+
+    //module.def("restriction", (FunctionPatch<P,SIG>(*)(Function<P,SIG> const&, DomainType const&)) &restriction);
 }
 
 template<class SIG> Void export_function_patches(pybind11::module& module) {

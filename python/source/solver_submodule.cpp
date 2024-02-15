@@ -120,8 +120,9 @@ Void export_solvers(pybind11::module& module)
 
 Void export_integrators(pybind11::module& module)
 {
-    pybind11::class_<FlowStepModelType> flow_step_model_class(module,"FlowStepModelType");
+    pybind11::class_<FlowStepModelType,pybind11::bases<ValidatedVectorMultivariateFunctionPatch>> flow_step_model_class(module,"FlowStepModelType");
     flow_step_model_class.def("__str__", &__cstr__<FlowStepModelType>);
+
     pybind11::class_<FlowModelType> flow_model_class(module,"FlowModelType");
     flow_model_class.def("size",&FlowModelType::size);
     // Use a lambda here to prevent errors when using Clang/GCC
@@ -157,6 +158,7 @@ Void export_integrators(pybind11::module& module)
     unbounded_taylor_picard_integrator_class.def("set_error_refinement_minimum_improvement_percentage",&GradedTaylorPicardIntegrator::set_error_refinement_minimum_improvement_percentage);
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
+    taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());
     taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());
     taylor_series_integrator_class.def("order",&TaylorSeriesIntegrator::order);
     taylor_series_integrator_class.def("set_order",&TaylorSeriesIntegrator::set_order);

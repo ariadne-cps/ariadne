@@ -40,7 +40,7 @@ template<class T> struct KeyValue { };
 
 template<> struct KeyValue<RealVariableInterval> {
     typedef RealVariable KeyType; typedef RealInterval ValueType;
-    KeyType const& key(const RealVariableInterval& ivl) { return ivl.variable(); }
+    KeyType const key(const RealVariableInterval& ivl) { return ivl.variable(); }
     ValueType value(const RealVariableInterval& ivl) { return ivl.interval(); }
 };
 
@@ -48,7 +48,7 @@ template<class T> Bool unique_keys(const List<T>& lst) {
     typedef typename KeyValue<T>::KeyType K;
     Set<K> keys;
     for(typename List<T>::ConstIterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
-        const K& k=KeyValue<T>().key(*lst_iter);
+        const K k=KeyValue<T>().key(*lst_iter);
         if(keys.contains(k)) {
             return false;
         }

@@ -315,10 +315,10 @@ template<> class Float<DP>
     template<BuiltinIntegral N> friend Comparison cmp(FloatDP const& x1, N n2) { return _generic_cmp(x1.dbl,n2); }
     template<BuiltinIntegral N> friend Comparison cmp(N n1, FloatDP const& x2) { return _generic_cmp(n1,x2.dbl); }
 #ifdef DOXYGEN
-    friend Comparison cmp(FloatMP const& x1, Nat m2); //!< <p/>
-    friend Comparison cmp(Nat m1, FloatMP const& x2); //!< <p/>
-    friend Comparison cmp(FloatMP const& x1, Int n2); //!< <p/>
-    friend Comparison cmp(Int n1, FloatMP const& x2); //!< <p/>
+    friend Comparison cmp(FloatDP const& x1, Nat m2); //!< <p/>
+    friend Comparison cmp(Nat m1, FloatDP const& x2); //!< <p/>
+    friend Comparison cmp(FloatDP const& x1, Int n2); //!< <p/>
+    friend Comparison cmp(Int n1, FloatDP const& x2); //!< <p/>
 #endif // DOXYGEN
     friend Comparison cmp(FloatDP x1, ExactDouble x2) { return _generic_cmp(x1.dbl,x2.get_d()); } //!< <p/>
     friend Comparison cmp(ExactDouble x1, FloatDP x2) { return _generic_cmp(x1.get_d(),x2.dbl); } //!< <p/>
@@ -415,16 +415,18 @@ template<> class Float<DP>
     template<class OP> static Boolean _cmp(OP op, FloatDP x1, FloatDP x2) {
         return op(x1.dbl,x2.dbl);
     }
-    template<class OP, AnExactNumber Y> static Boolean _cmp(OP op, FloatDP x1, Y const& y2) {
+/*
+    template<class OP, AnExactNumber Y> static Boolean _cmp(OP op, FloatDP const&  x1, Y const& y2) {
         if constexpr (BuiltinIntegral<Y>) { return op(x1.dbl,y2); }
         else if constexpr (Same<Y,ExactDouble>) { return op(x1.dbl,y2.get_d()); }
         else { return op(cmp(x1,y2),Comparison::EQUAL); }
     }
-    template<class OP, AnExactNumber Y> static Boolean _cmp(OP op, Y const& y1, FloatDP x2) {
+    template<class OP, AnExactNumber Y> static Boolean _cmp(OP op, Y const& y1, FloatDP const&  x2) {
         if constexpr (BuiltinIntegral<Y>) { return op(y1,x2.dbl); }
         else if constexpr (Same<Y,ExactDouble>) { return op(y1.get_d(),x2.dbl); }
         else { return op(cmp(y1,x2),Comparison::EQUAL); }
     }
+*/
   public:
     //!@{
     //! \name Exact information tests

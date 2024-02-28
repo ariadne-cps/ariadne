@@ -2,7 +2,7 @@
 
 # Ariadne <img align="right" src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="80"/> 
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Release Status](https://github.com/ariadne-cps/ariadne/workflows/Release/badge.svg)](https://github.com/ariadne-cps/ariadne/actions/workflows/release.yml) [![Debug Status](https://github.com/ariadne-cps/ariadne/workflows/Debug/badge.svg)](https://github.com/ariadne-cps/ariadne/actions/workflows/debug.yml) [![codecov](https://codecov.io/gh/ariadne-cps/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/ariadne)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Release Status](https://github.com/ariadne-cps/ariadne/workflows/release.yml/badge.svg)](https://github.com/ariadne-cps/ariadne/actions/workflows/release.yml) [![Debug Status](https://github.com/ariadne-cps/ariadne/workflows/debug.yml/badge.svg)](https://github.com/ariadne-cps/ariadne/actions/workflows/debug.yml) [![codecov](https://codecov.io/gh/ariadne-cps/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/ariadne)
 
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 

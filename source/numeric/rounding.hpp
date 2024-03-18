@@ -52,6 +52,7 @@
 
 #if defined ARIADNE_SSE_ROUNDING
 
+#include <cstdint>
 #include <xmmintrin.h>
 
 namespace Ariadne {

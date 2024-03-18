@@ -29,6 +29,7 @@
 #ifndef ARIADNE_COMMAND_LINE_INTERFACE_HPP
 #define ARIADNE_COMMAND_LINE_INTERFACE_HPP
 
+#include <functional>
 #include <queue>
 #include <functional>
 #include "utility/macros.hpp"

@@ -198,6 +198,7 @@ class Function
     typedef D DomainType; //!< The type of the domain.
     typedef C CodomainType; //!< The type of the codomain.
     typedef Number<P> NumericType; //!< The numeric type required to construct a constant scalar function.
+    typedef typename SignatureTraits<SIG>::ArgumentSpaceType ArgumentSpaceType; //!< The type used to descibe an ordered set of argument variables.
     typedef typename SignatureTraits<SIG>::ArgumentSizeType ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
     typedef typename SignatureTraits<SIG>::ResultSizeType ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
     typedef typename SignatureTraits<SIG>::ArgumentIndexType ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
@@ -225,7 +226,8 @@ class Function
     //! \brief Construct a function each of whose components are \a sf with the given domain \a dom.
     explicit Function(ResultSizeType rs, ScalarFunction<P,ARG> sf);
 
-    explicit Function(typename SignatureTraits<SIG>::ArgumentSpaceType const& spc, Result<RealExpression>const& e);
+    //! \brief Construct from argument variable(s) \a spc and expression(s) \a e in terms of these variables.
+    explicit Function(ArgumentSpaceType const& spc, Result<RealExpression>const& e);
 
     //! \brief Create a vector function from an initializer list of scalar functions.
     Function(InitializerList<ScalarFunction<P,ARG>> const& lsf);
@@ -356,6 +358,21 @@ class Function
 
     friend VectorFunction<P,ARG> operator*(ScalarFunction<P,ARG> const&, Vector<Y> const&);
 };
+
+//! \relates Function
+//! \name Function template deduction guides
+//!@{
+//
+//! \brief Deduction guide for constructing scalar univariate functions from an expression.
+explicit Function(RealVariable const& s, Scalar<RealExpression> const& e) -> Function<EffectiveTag,RealScalar(RealScalar)>;
+//! \brief Deduction guide for constructing vector univariate functions from expressions.
+explicit Function(RealVariable const& s, Vector<RealExpression> const& e) -> Function<EffectiveTag,RealVector(RealScalar)>;
+//! \relates Function \brief Deduction guide for constructing scalar multivariate functions from an expression.
+explicit Function(RealSpace const& s, Scalar<RealExpression> const& e) -> Function<EffectiveTag,RealScalar(RealVector)>;
+//! \relates Function \brief Deduction guide for constructing vector multivariate functions from expressions.
+explicit Function(RealSpace const& s, Vector<RealExpression> const& e) -> Function<EffectiveTag,RealVector(RealVector)>;
+//!@}
+
 
 template<class P, class SIG> OutputStream& operator<<(OutputStream& os, Representation<Function<P,SIG>> const& f) {
     f.reference().raw_pointer()->_repr(os); return os; }

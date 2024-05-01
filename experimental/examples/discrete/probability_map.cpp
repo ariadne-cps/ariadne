@@ -65,18 +65,18 @@ void ariadne_main()
 
     Real deltat = 0.1_dec;
 
-    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=u/deltat}};
+    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+deltat*u}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.05;
     SizeType point_accuracy = 7;
     bool use_preimage = false;
 
-    List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,pi/4}});
-    List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4}});
+    List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,pi/8}});
+    List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi}});
 
     UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps}, {0.0_dec+eps,2*pi-eps}});
-    UpperBoxType control_domain({{0.0_dec+eps,2*pi-eps}});
+    UpperBoxType control_domain({{-10*pi+eps,10*pi-eps}});
 
     //! Processing
 

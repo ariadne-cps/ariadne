@@ -314,4 +314,11 @@ void constrained_execution(SystemSpecification const& spec, Configuration<Vector
     }
 }
 
+void run_specification(SystemSpecification const& spec, SizeType num_constraints) {
+    auto configuration = get_configuration();
+    auto constraints_frequencies = generate_ellipsoidal_hyperbolic_constraints(num_constraints,spec,configuration);
+    CONCLOG_PRINTLN(constraints_frequencies)
+    constrained_execution(spec,configuration,constraints(constraints_frequencies));
+}
+
 #endif

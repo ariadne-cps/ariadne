@@ -26,10 +26,5 @@
 #include "jet-engine_c.hpp"
 
 void ariadne_main() {
-    auto spec = JET_c();
-    auto configuration = get_configuration();
-    auto constraints_prescriptions = generate_ellipsoidal_constraints(100,spec,configuration);
-    CONCLOG_PRINTLN(frequencies(constraints_prescriptions))
-
-    constrained_execution(spec,configuration,constraints(constraints_prescriptions));
+    run_specification(JET_c(),4);
 }

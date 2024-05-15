@@ -26,9 +26,5 @@
 #include "vanderpol_c.hpp"
 
 void ariadne_main() {
-    auto spec = VDP_c();
-    auto configuration = get_configuration();
-    auto constraints_frequencies = generate_ellipsoidal_constraints(4,spec,configuration);
-    CONCLOG_PRINTLN(constraints_frequencies.second)
-    constrained_execution(spec,configuration,constraints_frequencies.first);
+    run_specification(VDP_c(),4);
 }

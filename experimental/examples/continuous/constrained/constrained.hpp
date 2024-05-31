@@ -194,8 +194,8 @@ List<ConstraintPrescription> generate_ellipsoidal_hyperbolic_constraints(size_t 
 
     List<RealExpression> constraints;
 
-    UniformRealRandomiser<double> lower_rnd(0.5,1.0);
-    UniformRealRandomiser<double> upper_rnd(1.0,1.5);
+    UniformRealRandomiser<double> lower_rnd(0.25,1.0);
+    UniformRealRandomiser<double> upper_rnd(1.0,1.75);
 
     UniformIntRandomiser<size_t> sign_rnd(0,1);
 
@@ -308,6 +308,7 @@ void constrained_execution(SystemSpecification const& spec, Configuration<Vector
             fig.draw(result.rigorous());
             CONCLOG_RUN_MUTED(fig.write((spec.name+"_rigorous"+var_char).c_str()))
             fig.clear();
+            fig << line_style(false);
             fig.draw(result.constrained());
             CONCLOG_RUN_MUTED(fig.write((spec.name+"_constrained"+var_char).c_str()))
         }

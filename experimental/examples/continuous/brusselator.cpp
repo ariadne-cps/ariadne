@@ -29,24 +29,23 @@ using namespace Ariadne;
 
 void ariadne_main()
 {
-    RealVariable x1("x1"),x2("x2"),x3("x3"),x4("x4"),x5("x5"),x6("x6"),x7("x7");
-    RealConstant a("a",1),b("b",1.5_dec);
-    VectorField dynamics({dot(x1)=a+sqr(x1)*x2-b*x1-x1, dot(x2)=b*x1-sqr(x1)*x2});
+    RealVariable x("x"), y("y");
+    VectorField dynamics({dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec,dot(y)=3*x-y});
 
-    StepMaximumError max_err=1e-6;
-    //TaylorPicardIntegrator integrator(max_err);
-    GradedTaylorSeriesIntegrator integrator(max_err,ThresholdSweeper<FloatDP>(DoublePrecision(),1e-8),LipschitzTolerance(0.5_x),MaximumTemporalOrder(5));
+    Real e1=5/100_q; Real e2=7/100_q;
+    RealExpressionBoundedConstraintSet initial_set({1-e1<=x<=1+e1,1-e2<=y<=1+e2});
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.02);
-    evolver.configuration().set_maximum_spacial_error(1e-6);
-    CONCLOG_PRINTLN(evolver.configuration())
+    Real evolution_time = 0.81_dec;
 
-    RealExpressionBoundedConstraintSet initial_set({{0.8_dec<=x1<=1},{0<=x2<=0.2_dec}});
+    TaylorPicardIntegrator integrator(Configuration<TaylorPicardIntegrator>().set_step_maximum_error(1e-6));
 
-    CONCLOG_PRINTLN_VAR(initial_set);
-    Real evolution_time(3);
+    auto configuration = Configuration<VectorFieldEvolver>().
+            set_maximum_enclosure_radius(1.0).
+            set_maximum_step_size(0.02).
+            set_maximum_spacial_error(1e-6).
+            set_integrator(integrator);
+
+    VectorFieldEvolver evolver(dynamics,configuration);
 
     Stopwatch<Milliseconds> sw;
     CONCLOG_PRINTLN("Computing orbit...")
@@ -56,7 +55,7 @@ void ariadne_main()
 
     CONCLOG_PRINTLN("Plotting...")
     CONCLOG_PRINTLN_AT(1,"Plotting...")
-    LabelledFigure fig(Axes2d{{0<=x1<=2},{0<=x2<=2}});
+    LabelledFigure fig(Axes2d{{-1<=x<=2},{-1<=y<=2}});
     fig << orbit;
     fig.write("brusselator");
     sw.click();

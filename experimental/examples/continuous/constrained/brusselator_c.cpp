@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol_c.cpp
+ *            brusselator_c.cpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -23,8 +23,8 @@
  */
 
 #include "ariadne_main.hpp"
-#include "vanderpol_c.hpp"
+#include "brusselator_c.hpp"
 
 void ariadne_main() {
-    run_specification(VDP_c(),6);
+    run_specification(BRU_c(),4);
 }

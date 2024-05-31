@@ -1,5 +1,6 @@
 set(EXAMPLES_CONSTRAINED
     vanderpol_c
+    brusselator_c
     jet-engine_c
     constrained_benchmark_suite
 )

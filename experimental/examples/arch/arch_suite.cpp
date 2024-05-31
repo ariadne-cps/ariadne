@@ -35,5 +35,4 @@ void ariadne_main()
     ROBE21();
     LALO20();
     LOVO21();
-    SPRE22();
 }

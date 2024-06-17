@@ -100,7 +100,7 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     }
     Nat divider = 1;
     //Point<FloatDP> tmpPointCenter = Point(box.centre());
-    Point<FloatDP> tmpPointCenter = Point(box.lower_bounds());
+    Point<FloatDP> tmpPointCenter = Point(box.midpoint());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
 

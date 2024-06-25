@@ -172,8 +172,6 @@ template<class F> class Bounds
     //! Add \a e to upper bound, and subtract \a e from lower bound.
     Bounds<F> pm(Error<F> const& e) const;
 
-    // DEPRECATED
-    explicit operator RawType () const { return value_raw(); }
     friend Approximation<F> round(Approximation<F> const& x);
     friend F midpoint(Bounds<F> const& x);
   public:

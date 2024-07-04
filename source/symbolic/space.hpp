@@ -41,7 +41,6 @@
 
 namespace Ariadne {
 
-
 template<class T> class Space;
 template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc);
 
@@ -72,9 +71,14 @@ template<class T> class Space
 {
   public:
     typedef Variable<T> VariableType;
+  private:
+    template<class... VS> Space(List<Variable<T>> s, Variable<T> v, VS... vs) : Space(catenate(s,v),vs...) { }
+    template<class... VS> Space(List<Variable<T>> s, Variables<T> v, VS... vs) : Space(catenate(s,v),vs...) { }
   public:
     //! \brief The trivial space \f$T^0\f$.
     Space();
+    //! \brief Construct a space from a list of Variable<T> and Variables<T>.
+    template<class... VS> Space(VS... vs) : Space(List<Variable<T>>(),vs...) { }
     Space(const List<VariableType>& vl);
     Space(const List<Identifier>& vl);
     Space(const InitializerList<VariableType>& vl);

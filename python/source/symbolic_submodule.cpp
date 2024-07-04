@@ -286,7 +286,7 @@ Void export_expressions(pybind11::module& module)
 {
     pybind11::class_<RealSpace> real_space_class(module,"RealSpace");
     real_space_class.def(pybind11::init<RealVariables>());
-    real_space_class.def(pybind11::init<std::vector<RealVariable>>());
+    real_space_class.def(pybind11::init<List<RealVariable>>());
     real_space_class.def(pybind11::init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
     real_space_class.def("variable", &RealSpace::variable);

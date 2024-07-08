@@ -24,6 +24,7 @@
 
 #include "ariadne.hpp"
 
+typedef double ProbabilityType;
 typedef GridCell NCell;
 typedef GridCell ECell;
 typedef GridTreePaving SPaving;
@@ -31,7 +32,7 @@ typedef GridTreePaving CPaving;
 
 struct IdentifiedCell;
 
-typedef Map<IdentifiedCell,Map<IdentifiedCell,GridTreePaving>> IdentifiedCellNestedMap;
+typedef Map<IdentifiedCell,Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>> TransitionProbabilityMap;
 typedef Interval<double> BoundType;
 typedef Vector<BoundType> BoundsBoxType;
 
@@ -87,7 +88,7 @@ class IdentifiedCellFactory {
 
 class DirectedHashedGraph {
   public:
-    typedef IdentifiedCellNestedMap::iterator Iterator;
+    typedef TransitionProbabilityMap::iterator Iterator;
     typedef std::map<String,SizeType> HashTableType;
   public:
     DirectedHashedGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
@@ -119,7 +120,9 @@ class DirectedHashedGraph {
         auto src_ref = _map.find(isrc);
         if (src_ref != _map.end()) {
             for (auto const& trans : src_ref->second) {
-                result.adjoin(trans.second);
+                for (auto const& dest : trans.second) {
+                    result.adjoin(dest.first.cell());
+                }
             }
         }
         return result;
@@ -131,10 +134,16 @@ class DirectedHashedGraph {
         auto isrc = _vertex_factory.create(source_cell);
         auto src_ref = _map.find(isrc);
         if (src_ref == _map.end()) {
-            _map.insert(make_pair(isrc, Map<IdentifiedCell,SPaving>()));
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
             src_ref = _map.find(isrc);
         }
-        src_ref->second.insert(make_pair(itrans, destination_cells));
+
+        src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+        auto trans_ref = src_ref->second.find(itrans);
+        for (auto const& dst : destination_cells) {
+            auto idst = _vertex_factory.create(dst);
+            trans_ref->second.insert(make_pair(idst, 0.0));
+        }
     }
 
     //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
@@ -145,15 +154,16 @@ class DirectedHashedGraph {
             auto isrc = _vertex_factory.create(src);
             auto src_ref = _map.find(isrc);
             if (src_ref == _map.end()) {
-                _map.insert(make_pair(isrc, Map<IdentifiedCell,SPaving>()));
+                _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
                 src_ref = _map.find(isrc);
             }
-            auto dst_ref = src_ref->second.find(itrans);
-            if (dst_ref == src_ref->second.end()) {
-                src_ref->second.insert(make_pair(itrans, SPaving(source_cell.grid())));
-                dst_ref = src_ref->second.find(itrans);
+            auto trans_ref = src_ref->second.find(itrans);
+            if (trans_ref == src_ref->second.end()) {
+                src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+                trans_ref = src_ref->second.find(itrans);
             }
-            dst_ref->second.adjoin(source_cell);
+            auto idst = _vertex_factory.create(source_cell);
+            trans_ref->second.insert(make_pair(idst, 0.0));
         }
     }
 
@@ -175,7 +185,7 @@ class DirectedHashedGraph {
         if (src_ref != _map.end()) {
             auto const& trans_ref = src_ref->second.find(_edge_factory.create(transition));
             if (trans_ref != src_ref->second.end()) {
-                trans_ref->second.remove(destination);
+                trans_ref->second.erase(_vertex_factory.create(destination));
             }
         }
     }
@@ -196,9 +206,16 @@ class DirectedHashedGraph {
         while (src_it != _map.end()) {
             auto trans_it = src_it->second.begin();
             while (trans_it != src_it->second.end()) {
-                trans_it->second.restrict(paving);
-                if (trans_it->second.is_empty()) src_it->second.erase(trans_it++);
-                else ++trans_it;
+                for (auto const& dest : trans_it->second) {
+                    if (not paving.superset(dest.first.cell()))
+                        trans_it->second.erase(dest.first);
+                    if (trans_it->second.empty()) {
+                        src_it->second.erase(trans_it++);
+                        break;
+                    }
+                }
+                if (not trans_it->second.empty())
+                    ++trans_it;
             }
             if (src_it->second.empty()) _map.erase(src_it++);
             else ++src_it;
@@ -221,7 +238,7 @@ class DirectedHashedGraph {
         while (src_it != _map.end()) {
             auto trans_it = src_it->second.begin();
             while (trans_it != src_it->second.end()) {
-                if (trans_it->second.is_empty()) src_it->second.erase(trans_it++);
+                if (trans_it->second.empty()) src_it->second.erase(trans_it++);
                 else ++trans_it;
             }
             if (src_it->second.empty()) _map.erase(src_it++);
@@ -236,7 +253,7 @@ class DirectedHashedGraph {
                 os << trans.first.id() << "->";
                 os << "(";
                 for (auto const& dst : trans.second) {
-                    os << g._vertex_factory.create(dst).id() << ",";
+                    os << dst.first.id() << "@" << dst.second << ",";
                 }
                 os.seekp(-1, std::ios_base::end);
                 os << ")";
@@ -250,7 +267,7 @@ class DirectedHashedGraph {
 private:
     IdentifiedCellFactory const _vertex_factory;
     IdentifiedCellFactory const _edge_factory;
-    IdentifiedCellNestedMap _map;
+    TransitionProbabilityMap _map;
 };
 
 class ReachabilityGraphInterface {
@@ -330,7 +347,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
         std::deque<NCell> unsafe_cells_queue;
         for (auto const& c : unsafe) unsafe_cells_queue.push_back(c);
 
-        double indicator_final_original = unsafe.size();
+        auto indicator_final_original = static_cast<double>(unsafe.size());
         double indicator_current_value = 0;
         ProgressIndicator indicator(indicator_final_original);
         while (not unsafe_cells_queue.empty()) {
@@ -339,18 +356,22 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
             auto const& bw_unsafe_ref = _backward_graph.find(u);
             if (_backward_graph.contains(bw_unsafe_ref)) {
                 for (auto const& bw_unsafe_trans : bw_unsafe_ref->second) {
-                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second) {
-                        auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_of_unsafe_trans);
+                    std::deque<NCell> sources;
+                    for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second)
+                        sources.push_back(src_of_unsafe_trans.first.cell());
+
+                    for (auto const& src_cell : sources) {
+                        auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_cell);
                         if (_forward_graph.contains(fw_src_of_unsafe_trans)) {
                             auto const& fw_trans = fw_src_of_unsafe_trans->second.at(bw_unsafe_trans.first);
                             for (auto const& dst_to_prune : fw_trans) {
-                                _backward_graph.erase(dst_to_prune,bw_unsafe_trans.first.cell(),src_of_unsafe_trans);
+                                _backward_graph.erase(dst_to_prune.first.cell(),bw_unsafe_trans.first.cell(),src_cell);
                             }
                             fw_src_of_unsafe_trans->second.erase(bw_unsafe_trans.first);
                             if (fw_src_of_unsafe_trans->second.empty()) {
-                                unsafe_cells_queue.push_back(src_of_unsafe_trans);
+                                unsafe_cells_queue.push_back(src_cell);
                                 indicator.update_final(++indicator_final_original);
-                                _forward_graph.erase(src_of_unsafe_trans);
+                                _forward_graph.erase(src_cell);
                             }
                         }
                     }

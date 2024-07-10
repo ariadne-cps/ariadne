@@ -30,15 +30,16 @@ typedef Vector<BoundType> BoundsBoxType;
 
 ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
     ExactBoxType result(bx.dimension());
-    for (SizeType i=0; i<bx.size(); ++i)
-        result[i] = Interval<FloatDP>(bx[i].lower_bound()+eps,bx[i].upper_bound()-eps);
+    for (SizeType i=0; i<bx.size(); ++i) {
+        result[i] = Interval<FloatDP>((eps+bx[i].lower_bound()).lower_raw(),(-eps+bx[i].upper_bound()).upper_raw());
+    }
     return result;
 }
 
 ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
     ExactBoxType result(bx.size());
     for (SizeType i=0; i<bx.size(); ++i)
-        result[i] = Interval<FloatDP>(FloatDP(cast_exact(bx[i].lower_bound()),DoublePrecision())+eps,FloatDP(cast_exact(bx[i].upper_bound()),DoublePrecision())-eps);
+        result[i] = Interval<FloatDP>((FloatDP(cast_exact(bx[i].lower_bound()),DoublePrecision())+eps).lower_raw(),(FloatDP(cast_exact(bx[i].upper_bound()),DoublePrecision())-eps).upper_raw());
     return result;
 }
 

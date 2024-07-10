@@ -45,8 +45,8 @@ ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
 
 class ReachAvoid {
 public:
-    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps) :
-            _name(name), _dynamics(dynamics), _state_bounds(state_bounds), _control_bounds(control_bounds), _depth(depth), _eps({eps,DoublePrecision()}) {
+    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold) :
+            _name(name), _dynamics(dynamics), _state_bounds(state_bounds), _control_bounds(control_bounds), _depth(depth), _eps({eps,DoublePrecision()}), _probability_threshold(probability_threshold) {
 
         _state_paving = SPaving(state_grid);
         _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),depth);
@@ -152,19 +152,53 @@ public:
         _reachability_graph->clear();
 
         ProgressIndicator indicator(_unverified.size());
-        double indicator_value = 0;
         for (auto const& source_cell : _unverified) {
             CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
             for (auto const& controller_cell : _control_paving) {
                 auto combined = product(source_cell.box(), controller_cell.box());
-                SPaving destination_cells(_state_paving.grid());
-                destination_cells.adjoin_outer_approximation(shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()),_eps),_depth);
-                destination_cells.mince(_depth);
-                destination_cells.restrict(_state_paving);
-                if (not destination_cells.is_empty())
-                    _reachability_graph->insert(source_cell, controller_cell, destination_cells);
+                SPaving destination_paving(_state_paving.grid());
+                auto destination_box = shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()), _eps);
+                destination_paving.adjoin_outer_approximation(destination_box, _depth);
+                destination_paving.mince(_depth);
+                destination_paving.restrict(_state_paving);
+                if (not destination_paving.is_empty()) {
+                    List<Pair<NCell,ProbabilityType>> destination_cells;
+
+                    double total_volume = 0;
+                    for (auto const& cell : destination_paving) {
+                        auto intersection_box = intersection(cell.box(),destination_box);
+
+                        auto current_volume = intersection_box.volume().get_d();
+                        destination_cells.append({cell,current_volume});
+                        total_volume += current_volume;
+                    }
+
+                    double maximum_probability = 0;
+                    for (auto& p : destination_cells) {
+                        maximum_probability = std::max(maximum_probability,p.second);
+                    }
+
+                    List<Pair<NCell,ProbabilityType>> pruned_cells;
+
+                    double total_probability = 0;
+                    for (auto& p : destination_cells) {
+                        p.second = p.second/total_volume;
+                        if (p.second >= _probability_threshold*maximum_probability) {
+                            pruned_cells.append(p);
+                            total_probability += p.second;
+                        }
+                    }
+
+                    CONCLOG_PRINTLN_AT(1,"Probabilities for state " << source_cell.box() << " and control " << controller_cell.box() << ":")
+                    for (auto& p : pruned_cells) {
+                        p.second = p.second/total_probability;
+                        CONCLOG_PRINTLN_AT(1,p.first.box() << ": " << p.second)
+                    }
+
+                    _reachability_graph->insert(source_cell, controller_cell, pruned_cells);
+                }
             }
-            indicator.update_current(++indicator_value);
+            indicator.update_current(indicator.current_value()+1.0);
         }
     }
 
@@ -196,6 +230,7 @@ private:
     SizeType const _depth;
 
     FloatDP const _eps;
+    ProbabilityType const _probability_threshold;
 
     SPaving _unverified;
 

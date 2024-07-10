@@ -129,7 +129,7 @@ class DirectedHashedGraph {
     }
 
     //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
-    void insert_forward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
+    void insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
         auto itrans = _edge_factory.create(transition_cell);
         auto isrc = _vertex_factory.create(source_cell);
         auto src_ref = _map.find(isrc);
@@ -141,17 +141,17 @@ class DirectedHashedGraph {
         src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
         auto trans_ref = src_ref->second.find(itrans);
         for (auto const& dst : destination_cells) {
-            auto idst = _vertex_factory.create(dst);
-            trans_ref->second.insert(make_pair(idst, 0.0));
+            auto idst = _vertex_factory.create(dst.first);
+            trans_ref->second.insert(make_pair(idst, dst.second));
         }
     }
 
     //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
     //! hashing on the destination and transition
-    void insert_backward(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) {
+    void insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
         auto itrans = _edge_factory.create(transition_cell);
         for (auto const& src : destination_cells) {
-            auto isrc = _vertex_factory.create(src);
+            auto isrc = _vertex_factory.create(src.first);
             auto src_ref = _map.find(isrc);
             if (src_ref == _map.end()) {
                 _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
@@ -163,7 +163,7 @@ class DirectedHashedGraph {
                 trans_ref = src_ref->second.find(itrans);
             }
             auto idst = _vertex_factory.create(source_cell);
-            trans_ref->second.insert(make_pair(idst, 0.0));
+            trans_ref->second.insert(make_pair(idst, src.second));
         }
     }
 
@@ -279,7 +279,7 @@ class ReachabilityGraphInterface {
     virtual SizeType vertex_id(NCell const& cell) = 0;
     virtual SizeType edge_id(NCell const& cell) = 0;
 
-    virtual void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) = 0;
+    virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) = 0;
     virtual void clear() = 0;
 
     //! \brief Remove those sources that can reach the \a avoidance paving
@@ -331,7 +331,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
         return _backward_graph.num_sources();
     }
 
-    void insert(NCell const& source_cell, ECell const& transition_cell, SPaving const& destination_cells) override {
+    void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) override {
         _forward_graph.insert_forward(source_cell,transition_cell,destination_cells);
         _backward_graph.insert_backward(source_cell,transition_cell,destination_cells);
     }

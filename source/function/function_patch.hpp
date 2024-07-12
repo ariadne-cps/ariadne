@@ -51,6 +51,10 @@
 
 namespace Ariadne {
 
+template<class T> class SpacePatch;
+using RealSpacePatch = SpacePatch<Real>;
+template<class P, class T> class ExpressionPatch;
+
 template<class P> class FunctionPatchFactory;
 using ValidatedFunctionPatchFactory = FunctionPatchFactory<ValidatedTag>;
 
@@ -430,6 +434,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline Void clobber() { this->_ptr->_clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 
+    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
   public:
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(VectorFunctionPatch<P,ARGS...> const& f) {
         FunctionPatchFactory<P> factory(f._ptr->_factory());

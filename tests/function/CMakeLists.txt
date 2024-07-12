@@ -8,6 +8,7 @@ set(UNIT_TESTS
     test_procedure
     test_taylor_function
     test_taylor_model
+    test_function_patch
 )
 
 foreach(TEST ${UNIT_TESTS})

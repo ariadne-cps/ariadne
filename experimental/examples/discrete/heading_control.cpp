@@ -23,7 +23,7 @@
  */
 
 #include "ariadne_main.hpp"
-#include "reach_avoid.hpp"
+#include "verification/reach_avoid.hpp"
 #include "utility/stopwatch.hpp"
 
 Tuple<IteratedMap,Grid,BoundsBoxType> u_control() {

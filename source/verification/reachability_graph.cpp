@@ -1,0 +1,337 @@
+/***************************************************************************
+ *            reachability_graph.cpp
+ *
+ *  Copyright  2023  Luca Geretti
+ *
+ ****************************************************************************/
+
+/*
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Ariadne is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "reachability_graph.hpp"
+
+#include "geometry/grid_cell.hpp"
+#include "geometry/grid_paving.hpp"
+
+#include "conclog/logging.hpp"
+#include "conclog/progress_indicator.hpp"
+
+using namespace ConcLog;
+
+namespace Ariadne {
+
+String word_to_id(BinaryWord const& w, SizeType length) {
+    std::stringstream ss;
+    SizeType effective_size = (w.size()<length? w.size() : length);
+    auto size_offset = (w.size()<length? 0 : w.size()-length);
+    for (SizeType i=0; i<effective_size; ++i) ss << to_string(w.at(size_offset+i));
+    return ss.str();
+}
+
+IdentifiedCellFactory::IdentifiedCellFactory(SizeType default_extent, HashTableType const& table) : _default_extent(default_extent), _table(table) { }
+
+IdentifiedCell IdentifiedCellFactory::create(GridCell const& cell) const { return IdentifiedCell(_to_identifier(cell),cell); }
+
+SizeType IdentifiedCellFactory::_to_identifier(GridCell const& cell) const {
+    SizeType size_to_use = (cell.root_extent() >= _default_extent ? cell.word().size() - (cell.root_extent() - _default_extent)*cell.dimension() : cell.word().size());
+    String expanded_id = word_to_id(cell.word(),size_to_use);
+
+    if (cell.root_extent() < _default_extent) {
+
+        SizeType temporary_root_extent = cell.root_extent();
+        while (temporary_root_extent < _default_extent) {
+            expanded_id = (*expanded_id.begin() == '1' ? std::string(cell.dimension(),'0') : std::string(cell.dimension(),'1')) + expanded_id;
+            ++temporary_root_extent;
+        }
+    }
+    return _table.at(expanded_id);
+}
+
+DirectedHashedGraph::DirectedHashedGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
+    _vertex_factory(vertex_factory), _edge_factory(edge_factory) { }
+
+SizeType DirectedHashedGraph::num_sources() const { return _map.size(); }
+
+SizeType DirectedHashedGraph::num_transitions() const {
+    SizeType result = 0;
+    for (auto const& src : _map) {
+        for (auto const& trans : src.second) {
+            result += trans.second.size();
+        }
+    }
+    return result;
+}
+
+SizeType DirectedHashedGraph::vertex_id(NCell const& cell) const {
+    return _vertex_factory.create(cell).id();
+}
+
+SizeType DirectedHashedGraph::edge_id(NCell const& cell) const {
+    return _edge_factory.create(cell).id();
+}
+
+SPaving DirectedHashedGraph::destinations_from(NCell const& source_cell) const {
+    SPaving result(source_cell.grid());
+    auto isrc = _vertex_factory.create(source_cell);
+    auto src_ref = _map.find(isrc);
+    if (src_ref != _map.end()) {
+        for (auto const& trans : src_ref->second) {
+            for (auto const& dest : trans.second) {
+                result.adjoin(dest.first.cell());
+            }
+        }
+    }
+    return result;
+}
+
+void DirectedHashedGraph::insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+        auto itrans = _edge_factory.create(transition_cell);
+        auto isrc = _vertex_factory.create(source_cell);
+        auto src_ref = _map.find(isrc);
+        if (src_ref == _map.end()) {
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
+            src_ref = _map.find(isrc);
+        }
+
+        src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+        auto trans_ref = src_ref->second.find(itrans);
+        for (auto const& dst : destination_cells) {
+            auto idst = _vertex_factory.create(dst.first);
+            trans_ref->second.insert(make_pair(idst, dst.second));
+        }
+    }
+
+void DirectedHashedGraph::insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+    auto itrans = _edge_factory.create(transition_cell);
+    for (auto const& src : destination_cells) {
+        auto isrc = _vertex_factory.create(src.first);
+        auto src_ref = _map.find(isrc);
+        if (src_ref == _map.end()) {
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
+            src_ref = _map.find(isrc);
+        }
+        auto trans_ref = src_ref->second.find(itrans);
+        if (trans_ref == src_ref->second.end()) {
+            src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+            trans_ref = src_ref->second.find(itrans);
+        }
+        auto idst = _vertex_factory.create(source_cell);
+        trans_ref->second.insert(make_pair(idst, src.second));
+    }
+}
+
+DirectedHashedGraph::Iterator DirectedHashedGraph::find(NCell const& source_cell) {
+    return _map.find(_vertex_factory.create(source_cell));
+}
+
+bool DirectedHashedGraph::contains(Iterator const& iterator) const {
+    return iterator != _map.end();
+}
+
+void DirectedHashedGraph::erase(NCell const& source_cell) {
+    _map.erase(_vertex_factory.create(source_cell));
+}
+
+void DirectedHashedGraph::erase(NCell const& source, ECell const& transition, NCell const& destination) {
+    auto const& src_ref = _map.find(_vertex_factory.create(source));
+    if (src_ref != _map.end()) {
+        auto const& trans_ref = src_ref->second.find(_edge_factory.create(transition));
+        if (trans_ref != src_ref->second.end()) {
+            trans_ref->second.erase(_vertex_factory.create(destination));
+        }
+    }
+}
+
+void DirectedHashedGraph::restrict_sources_to(SPaving const& paving) {
+    auto it = _map.begin();
+    while (it != _map.end()) {
+        if (not paving.superset(it->first.cell())) _map.erase(it++);
+        else ++it;
+    }
+}
+
+void DirectedHashedGraph::restrict_destinations_to(SPaving const& paving) {
+    auto src_it = _map.begin();
+    while (src_it != _map.end()) {
+        auto trans_it = src_it->second.begin();
+        while (trans_it != src_it->second.end()) {
+            for (auto const& dest : trans_it->second) {
+                if (not paving.superset(dest.first.cell()))
+                    trans_it->second.erase(dest.first);
+                if (trans_it->second.empty()) {
+                    src_it->second.erase(trans_it++);
+                    break;
+                }
+            }
+            if (not trans_it->second.empty())
+                ++trans_it;
+        }
+        if (src_it->second.empty()) _map.erase(src_it++);
+        else ++src_it;
+    }
+}
+
+void DirectedHashedGraph::apply_source_removal_to(SPaving& paving) const {
+    for (auto const& entry : _map) {
+        paving.remove(entry.first.cell());
+    }
+}
+
+void DirectedHashedGraph::clear() { _map.clear(); }
+
+void DirectedHashedGraph::sweep() {
+    auto src_it = _map.begin();
+    while (src_it != _map.end()) {
+        auto trans_it = src_it->second.begin();
+        while (trans_it != src_it->second.end()) {
+            if (trans_it->second.empty()) src_it->second.erase(trans_it++);
+            else ++trans_it;
+        }
+        if (src_it->second.empty()) _map.erase(src_it++);
+        else  ++src_it;
+    }
+}
+
+OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
+    for (auto const& src : g._map) {
+        os << src.first.id() << src.first.cell() << ":[";
+        for (auto const& trans : src.second) {
+            os << trans.first.id() << "->";
+            os << "(";
+            for (auto const& dst : trans.second) {
+                os << dst.first.id() << "@" << dst.second << ",";
+            }
+            os.seekp(-1, std::ios_base::end);
+            os << ")";
+        }
+        os << "]\n";
+    }
+    os << "}";
+
+    return os;
+}
+
+ForwardBackwardReachabilityGraph::ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
+    _vertex_factory(vertex_factory), _edge_factory(edge_factory),
+    _forward_graph(vertex_factory,edge_factory), _backward_graph(vertex_factory,edge_factory) { }
+
+SizeType ForwardBackwardReachabilityGraph::vertex_id(NCell const& cell) {
+    return _forward_graph.vertex_id(cell);
+}
+
+SizeType ForwardBackwardReachabilityGraph::edge_id(NCell const& cell) {
+    return _forward_graph.edge_id(cell);
+}
+
+SizeType ForwardBackwardReachabilityGraph::num_transitions() const {
+    auto result = _forward_graph.num_transitions();
+    ARIADNE_ASSERT_EQUAL(result,_backward_graph.num_transitions())
+    return result;
+}
+
+SizeType ForwardBackwardReachabilityGraph::num_sources() const {
+    return _forward_graph.num_sources();
+}
+
+SizeType ForwardBackwardReachabilityGraph::num_destinations() const {
+    return _backward_graph.num_sources();
+}
+
+void ForwardBackwardReachabilityGraph::insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+    _forward_graph.insert_forward(source_cell,transition_cell,destination_cells);
+    _backward_graph.insert_backward(source_cell,transition_cell,destination_cells);
+}
+
+void ForwardBackwardReachabilityGraph::clear() {
+    _forward_graph.clear();
+    _backward_graph.clear();
+}
+
+void ForwardBackwardReachabilityGraph::reduce_to_not_reaching(SPaving const& unsafe) {
+    CONCLOG_SCOPE_CREATE
+
+    std::deque<NCell> unsafe_cells_queue;
+    for (auto const& c : unsafe) unsafe_cells_queue.push_back(c);
+
+    auto indicator_final_original = static_cast<double>(unsafe.size());
+    double indicator_current_value = 0;
+    ProgressIndicator indicator(indicator_final_original);
+    while (not unsafe_cells_queue.empty()) {
+        CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+        auto const& u = unsafe_cells_queue.front();
+        auto const& bw_unsafe_ref = _backward_graph.find(u);
+        if (_backward_graph.contains(bw_unsafe_ref)) {
+            for (auto const& bw_unsafe_trans : bw_unsafe_ref->second) {
+                std::deque<NCell> sources;
+                for (auto const& src_of_unsafe_trans : bw_unsafe_trans.second)
+                    sources.push_back(src_of_unsafe_trans.first.cell());
+
+                for (auto const& src_cell : sources) {
+                    auto const& fw_src_of_unsafe_trans = _forward_graph.find(src_cell);
+                    if (_forward_graph.contains(fw_src_of_unsafe_trans)) {
+                        auto const& fw_trans = fw_src_of_unsafe_trans->second.at(bw_unsafe_trans.first);
+                        for (auto const& dst_to_prune : fw_trans) {
+                            _backward_graph.erase(dst_to_prune.first.cell(),bw_unsafe_trans.first.cell(),src_cell);
+                        }
+                        fw_src_of_unsafe_trans->second.erase(bw_unsafe_trans.first);
+                        if (fw_src_of_unsafe_trans->second.empty()) {
+                            unsafe_cells_queue.push_back(src_cell);
+                            indicator.update_final(++indicator_final_original);
+                            _forward_graph.erase(src_cell);
+                        }
+                    }
+                }
+            }
+        }
+        _backward_graph.erase(u);
+        unsafe_cells_queue.pop_front();
+        indicator.update_current(++indicator_current_value);
+    }
+
+    _backward_graph.sweep();
+}
+
+void ForwardBackwardReachabilityGraph::reduce_to_possibly_reaching(SPaving const& goals) {
+    SPaving analysed(goals.grid());
+    SPaving newly_reached = goals;
+    while (not newly_reached.is_empty()) {
+        auto destination = *newly_reached.begin();
+        analysed.adjoin(destination);
+
+        auto sources = _backward_graph.destinations_from(destination);
+        sources.remove(analysed);
+        newly_reached.adjoin(sources);
+        newly_reached.remove(destination);
+    }
+
+    _forward_graph.restrict_sources_to(analysed);
+    _backward_graph.restrict_destinations_to(analysed);
+}
+
+void ForwardBackwardReachabilityGraph::apply_source_removal_to(SPaving& paving) const {
+    _forward_graph.apply_source_removal_to(paving);
+}
+
+ReachabilityGraphInterface* ForwardBackwardReachabilityGraph::clone() const {
+    return new ForwardBackwardReachabilityGraph(*this);
+}
+
+void ForwardBackwardReachabilityGraph::write(std::ostream& os) const {
+    os << "Forward:\n" << _forward_graph << "\nBackward:\n" << _backward_graph;
+}
+
+} // namespace Ariadne

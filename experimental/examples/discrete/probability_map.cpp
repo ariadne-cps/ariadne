@@ -25,7 +25,7 @@
 #include "ariadne_main.hpp"
 #include "utility/stopwatch.hpp"
 
-#include "reach_avoid.hpp"
+#include "verification/reach_avoid.hpp"
 using namespace Ariadne;
 
 Grid make_grid_from_lengths(RealSpace const& spc, List<Pair<RealVariable,Real>> const& lengths) {

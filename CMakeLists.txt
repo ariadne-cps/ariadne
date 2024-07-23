@@ -211,6 +211,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
+    $<TARGET_OBJECTS:ariadne-verification>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
     $<TARGET_OBJECTS:CONCLOG_SRC>
 )

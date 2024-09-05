@@ -59,6 +59,7 @@ using FloatMPApproximateBox = Box<FloatMPApproximateInterval>; //!< <p/>
 //!@{
 //! \ingroup GeometryModule
 //! \name Type definitions
+
 //! The type used for the domain of a multivariate function. \ingroup GeometryModule
 typedef FloatDPExactBox BoxDomainType;
 //! The type used for an over-approximation to the range of a validated vector function. \ingroup GeometryModule

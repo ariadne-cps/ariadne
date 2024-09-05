@@ -239,10 +239,13 @@ template<class I> inline Box<I> split(const Box<I>& bx, SplitPart lmu) { return 
 template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx) { return bx.split(); }
 template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx, SizeType k) { return bx.split(k); }
 
-//! \relates FloatDPExactBox \brief The cartesian product of two boxes.
+//! \relates Box \brief The Cartesian product of two boxes, defined as \f$ B_1 \times B_2 = \{ (x_1,x_2) \mid x_1 \in B_1 \wedge x_2 \in B_2 \} \f$.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
+//! \relates Box \brief The Cartesian product of an interval and a box.
 template<class I> inline Box<I> product(const Interval<I>& ivl1, const Box<I>& bx2) { return Box<I>::_product(ivl1,bx2); }
+//! \relates Box \brief The Cartesian product of a box and an interval.
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
+//! \relates Box \brief The Cartesian product of three boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2, const Box<I>& bx3) { return Box<I>::_product(bx1,Box<I>({ivl2}),bx3); }
 
@@ -254,14 +257,22 @@ template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }
 
-UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperIntervalType const& x);
-UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperIntervalType const& x);
-UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& x);
-UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& x);
+//! \relates Interval \brief Compute an over-approximation to the image \f$f(I) = \{ f(x) \mid x\in I \}\f$.
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperIntervalType const& ivl);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(I) = \{ f(x) \mid x\in I \}\f$.
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperIntervalType const& ivl);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(B) = \{ f(x) \mid x\in B \}\f$.
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& bx);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(B) = \{ f(x) \mid x\in B \}\f$.
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& bx);
 
+//! \relates Interval \brief Compute an over-approximation to the image \f$f(I) = \{ f(x) \mid x\in I \}\f$.
 UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateFunction const& f);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(I) = \{ f(x) \mid x\in I \}\f$.
 UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(B) = \{ f(x) \mid x\in B \}\f$.
 UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f);
+//! \relates Box \brief Compute an over-approximation to the image \f$f(B) = \{ f(x) \mid x\in B \}\f$.
 UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f);
 
 //! \relates Box \brief Project onto the variables \a rng.
@@ -336,72 +347,84 @@ template<class I1, class I2> Box<decltype(intersection(declval<I1>(),declval<I2>
     return res;
 }
 
-template<class I, class X> decltype(element(declval<X>(),declval<I>())) element(const Vector<X>& pt1, const Box<I>& bx2) {
+//! \relates Box \brief Tests if a value is an element of a box.
+template<class I, class X> decltype(element(declval<X>(),declval<I>())) element(const Vector<X>& x1, const Box<I>& bx2) {
     decltype(element(declval<X>(),declval<I>())) res=true;
-    for(SizeType i=0; i!=bx2.dimension(); ++i) { res = res && element(pt1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx2.dimension(); ++i) { res = res && element(x1[i],bx2[i]); }
     return res;
 }
 
-template<class I, class X> decltype(contains(declval<I>(),declval<X>())) contains(const Box<I>& bx1, const Vector<X>& vec2) {
+//! \relates Box \brief Tests if a box contains a value.
+template<class I, class X> decltype(contains(declval<I>(),declval<X>())) contains(const Box<I>& bx1, const Vector<X>& x2) {
     decltype(contains(declval<I>(),declval<X>())) res=true;
-    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && contains(bx1[i],vec2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && contains(bx1[i],x2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if a box contains a point.
 template<class I, class X> decltype(contains(declval<I>(),declval<X>())) contains(const Box<I>& bx1, const Point<X>& pt2) {
     decltype(contains(declval<I>(),declval<X>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && contains(bx1[i],pt2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if two boxes are disjoint.
 template<class I1, class I2> decltype(disjoint(declval<I1>(),declval<I2>())) disjoint(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(disjoint(declval<I1>(),declval<I2>())) res=false;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res || disjoint(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if two boxes intersect.
 template<class I1, class I2> decltype(intersect(declval<I1>(),declval<I2>())) intersect(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(intersect(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && intersect(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if two boxes are equal.
 template<class I1, class I2> decltype(equal(declval<I1>(),declval<I2>())) equal(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(equal(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && equal(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if a box is a subset of another.
 template<class I1, class I2> decltype(subset(declval<I1>(),declval<I2>())) subset(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(subset(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && subset(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if a box is a superset of another.
 template<class I1, class I2> decltype(superset(declval<I1>(),declval<I2>())) superset(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(superset(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && superset(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if the interior of a box is a superset of the closure of another.
 template<class I1, class I2> decltype(covers(declval<I1>(),declval<I2>())) covers(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(covers(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && covers(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if the interiors of two boxes intersect.
 template<class I1, class I2> decltype(overlap(declval<I1>(),declval<I2>())) overlap(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(overlap(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && overlap(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if the closures of two boxes are disjoint.
 template<class I1, class I2> decltype(separated(declval<I1>(),declval<I2>())) separated(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(separated(declval<I1>(),declval<I2>())) res=false;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res || separated(bx1[i],bx2[i]); }
     return res;
 }
 
+//! \relates Box \brief Tests if the closure of a box is a subset of the interior of another.
 template<class I1, class I2> decltype(inside(declval<I1>(),declval<I2>())) inside(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(inside(declval<I1>(),declval<I2>())) res=true;
     for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && inside(bx1[i],bx2[i]); }
@@ -409,6 +432,7 @@ template<class I1, class I2> decltype(inside(declval<I1>(),declval<I2>())) insid
 }
 
 
+//! \relates Box \brief Tests if an over-approximation to a box is a tighter over-approximation than another.
 template<class I> inline decltype(refines(declval<I>(),declval<I>())) refines(const Box<typename Box<I>::IntervalType>& bx1, const Box<I>& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
     for(SizeType i=0; i!=bx1.dimension(); ++i) {
@@ -440,7 +464,7 @@ template<class I1> template<class I2> inline auto Box<I1>::separated(const Box<I
 
 
 
-// Declare related functions
+//! \relates Box \brief Draws a two-dimensional projection by \a p of box \a bx.
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx);
 ExactBoxType make_box(const String& str);
 

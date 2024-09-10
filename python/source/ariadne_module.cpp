@@ -40,6 +40,7 @@ void system_submodule(pybind11::module& module);
 void evolution_submodule(pybind11::module& module);
 void graphics_submodule(pybind11::module& module);
 void hybrid_submodule(pybind11::module& module);
+void verification_submodule(pybind11::module& module);
 
 PYBIND11_MODULE(pyariadne, module) {
     numeric_submodule(module);
@@ -58,4 +59,5 @@ PYBIND11_MODULE(pyariadne, module) {
     evolution_submodule(module);
     graphics_submodule(module);
     hybrid_submodule(module);
+    verification_submodule(module);
 }

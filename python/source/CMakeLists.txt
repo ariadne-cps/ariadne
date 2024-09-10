@@ -35,6 +35,7 @@ add_library(pyariadne-extra-submodule-obj OBJECT
     evolution_submodule.cpp
     graphics_submodule.cpp
     hybrid_submodule.cpp
+    verification_submodule.cpp
 )
 
 add_library(pyariadne-module-obj OBJECT

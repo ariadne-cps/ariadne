@@ -51,14 +51,12 @@ class ReachAvoid {
     SizeType obstacles_size() const;
     SizeType goals_size() const;
     SizeType unverified_size() const;
+
     SizeType num_sources() const;
     SizeType num_destinations() const;
-
-    //! \brief The percentage (in the 0-100 scale) of still unverified states
-    double unverified_percentage() const;
+    SizeType num_transitions() const;
 
     void plot(SizeType xaxis, SizeType yaxis) const;
-
     void plot() const;
 
     void print_goals() const;
@@ -73,7 +71,8 @@ class ReachAvoid {
 
     void update_unverified();
 
-    SizeType num_transitions() const;
+    //! \brief The percentage (in the 0-100 scale) of still unverified states
+    double unverified_percentage() const;
 
 private:
 

@@ -21,6 +21,7 @@ if(PYTHON_TESTS)
         geometry
         solvers
         symbolic
+        verification
     )
 
     foreach(TESTNAME ${TESTS_PYTHON})

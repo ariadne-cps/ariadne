@@ -210,6 +210,8 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
 
     //real_variable_class.def("__ge__", &__ge__<RealVariable,Real>);
 
+    real_variable_class.def("name", &UntypedVariable::name);
+
     pybind11::class_<RealVariables> real_variables_class(module,"RealVariables");
     real_variables_class.def(pybind11::init<StringType,SizeType>());
     real_variables_class.def("__getitem__", &__getitem__<RealVariables,SizeType,RealVariable>);

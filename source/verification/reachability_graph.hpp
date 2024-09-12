@@ -38,8 +38,6 @@ typedef GridTreePaving CPaving;
 struct IdentifiedCell;
 
 typedef Map<IdentifiedCell,Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>> TransitionProbabilityMap;
-typedef Interval<double> BoundType;
-typedef Vector<BoundType> BoundsBoxType;
 
 String word_to_id(BinaryWord const& w, SizeType length);
 

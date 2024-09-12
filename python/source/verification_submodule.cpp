@@ -38,7 +38,7 @@ Void export_reach_avoid(pybind11::module& module)
     auto const& reference_internal = pybind11::return_value_policy::reference_internal;
 
     pybind11::class_<ReachAvoid> reach_avoid_class(module,"ReachAvoid");
-    reach_avoid_class.def(pybind11::init<String,EffectiveVectorMultivariateFunction const&,Grid const&,BoundsBoxType const&,Grid const&,BoundsBoxType const&,SizeType,ExactDouble,ProbabilityType>());
+    reach_avoid_class.def(pybind11::init<String,EffectiveVectorMultivariateFunction const&,Grid const&,RealBox const&,Grid const&,RealBox const&,SizeType,ExactDouble,ProbabilityType>());
     reach_avoid_class.def("add_obstacle", &ReachAvoid::add_obstacle,reference_internal);
     reach_avoid_class.def("add_goal", &ReachAvoid::add_goal,reference_internal);
 

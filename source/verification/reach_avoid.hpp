@@ -30,21 +30,19 @@
 namespace Ariadne {
 
 template<class K, class V> using SizeTypeMap = Map<SizeType,Pair<K,V>>;
-typedef Interval<double> BoundType;
-typedef Vector<BoundType> BoundsBoxType;
 
 ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps);
-ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps);
+ExactBoxType shrink(RealBox const& bx, FloatDP const& eps);
 
 class ReachAvoid {
   public:
-    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold);
+    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold);
 
-    ReachAvoid& add_obstacle(BoundsBoxType const& box);
-    ReachAvoid& add_goal(BoundsBoxType const& box);
+    ReachAvoid& add_obstacle(RealBox const& box);
+    ReachAvoid& add_goal(RealBox const& box);
 
-    BoundsBoxType const& state_bounds() const;
-    BoundsBoxType const& control_bounds() const;
+    RealBox const& state_bounds() const;
+    RealBox const& control_bounds() const;
 
     SizeType state_size() const;
     SizeType control_size() const;
@@ -79,8 +77,8 @@ private:
     String const _name;
     EffectiveVectorMultivariateFunction const _dynamics;
 
-    BoundsBoxType const _state_bounds;
-    BoundsBoxType const _control_bounds;
+    RealBox const _state_bounds;
+    RealBox const _control_bounds;
 
     SPaving _state_paving;
     CPaving _control_paving;

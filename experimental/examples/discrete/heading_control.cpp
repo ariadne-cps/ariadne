@@ -26,70 +26,65 @@
 #include "verification/reach_avoid.hpp"
 #include "utility/stopwatch.hpp"
 
-Tuple<IteratedMap,Grid,BoundsBoxType> u_control() {
+Tuple<IteratedMap,Grid,RealBox> u_control() {
     Real deltat=0.1_dec, v=3;
     RealVariable x("x"), y("y"), theta("theta"), u("u");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+u,next(u)=u});
 
     Grid control_grid({pi/4});
-    double pi_ = pi.get_d();
-    BoundsBoxType control_domain({{-pi_-pi_/4,pi_+pi_/4}});
+    RealBox control_domain({{-pi-pi/4,pi+pi/4}});
 
-    return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
+    return {heading,control_grid,control_domain};
 }
 
-Tuple<IteratedMap,Grid,BoundsBoxType> cpwa_control() {
+Tuple<IteratedMap,Grid,RealBox> cpwa_control() {
     Real deltat = 0.1_dec, v = 3;
     RealVariable x("x"), y("y"), theta("theta"), K1("K1"), K2("K2"), K3("K3"), b("b");
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*(K1*x+K2*y+K3*theta+b),
                          next(K1)=K1,next(K2)=K2,next(K3)=K3,next(b)=b});
 
-    double pi_ = pi.get_d();
-    Grid control_grid({1,1,1,24*pi_/20});
-    BoundsBoxType control_domain({{-1,1},{-1,1},{-1,1},{-12*pi_,12*pi_}});
+    Grid control_grid({1,1,1,24*pi/20});
+    RealBox control_domain({{-1,1},{-1,1},{-1,1},{-12*pi,12*pi}});
 
-    return Tuple<IteratedMap,Grid,BoundsBoxType>(heading,control_grid,control_domain);
+    return {heading,control_grid,control_domain};
 }
 
-ReachAvoid set_workspace_1(EffectiveVectorMultivariateFunction const& dynamics, Grid const& control_grid, BoundsBoxType const& control_domain) {
-    double pi_ = pi.get_d();
+ReachAvoid set_workspace_1(EffectiveVectorMultivariateFunction const& dynamics, Grid const& control_grid, RealBox const& control_domain) {
 
     Grid state_grid({0.5,0.5,2*pi/8});
-    BoundType theta_domain = {0,2*pi_};
-    BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
+    RealInterval theta_domain = {0, 2*pi};
+    RealBox state_domain({{0,5},{0,5},theta_domain});
     SizeType depth = 0;
 
     ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x, 1e-4);
 
-    ra.add_obstacle({{1,3.5},{4.5,5},theta_domain});
+    ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
     ra.add_obstacle({{0,1},{2,3},theta_domain});
-    ra.add_obstacle({{2.5,5},{2,3},theta_domain});
-    ra.add_obstacle({{0,5},{0,0.5},theta_domain});
+    ra.add_obstacle({{2.5_x,5},{2,3},theta_domain});
+    ra.add_obstacle({{0,5},{0,0.5_x},theta_domain});
 
-    ra.add_goal({{4,5},{4.5,5},theta_domain});
+    ra.add_goal({{4,5},{4.5_x,5},theta_domain});
 
     return ra;
 }
 
-ReachAvoid set_workspace_2(EffectiveVectorMultivariateFunction const& dynamics, Grid const& control_grid, BoundsBoxType const& control_domain) {
-
-    double pi_ = pi.get_d();
+ReachAvoid set_workspace_2(EffectiveVectorMultivariateFunction const& dynamics, Grid const& control_grid, RealBox const& control_domain) {
 
     Grid state_grid({0.25,0.25,2*pi/8});
-    BoundType theta_domain = {0,2*pi_};
-    BoundsBoxType state_domain({{0,5},{0,5},theta_domain});
+    RealInterval theta_domain = {0, 2 * pi};
+    RealBox state_domain({{0,5},{0,5},theta_domain});
     SizeType depth = 0;
 
     ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x, 1e-4);
 
-    ra.add_obstacle({{0,0.5},{0,5},theta_domain});
-    ra.add_obstacle({{1.5,2},{0,3},theta_domain});
-    ra.add_obstacle({{1.5,2},{4,5},theta_domain});
-    ra.add_obstacle({{3,3.5},{0,1},theta_domain});
-    ra.add_obstacle({{3,3.5},{2,5},theta_domain});
-    ra.add_obstacle({{4.5,5},{0,5},theta_domain});
+    ra.add_obstacle({{0,0.5_x},{0,5},theta_domain});
+    ra.add_obstacle({{1.5_x,2},{0,3},theta_domain});
+    ra.add_obstacle({{1.5_x,2},{4,5},theta_domain});
+    ra.add_obstacle({{3,3.5_x},{0,1},theta_domain});
+    ra.add_obstacle({{3,3.5_x},{2,5},theta_domain});
+    ra.add_obstacle({{4.5_x,5},{0,5},theta_domain});
 
-    ra.add_goal({{3.75,4.25},{4.5,5},theta_domain});
+    ra.add_goal({{3.75_x,4.25_x},{4.5_x,5},theta_domain});
 
     return ra;
 }
@@ -110,10 +105,10 @@ void check_scalabilities(SizeType n) {
     CONCLOG_PRINTLN_VAR(cpwa_dynamics)
 
     Grid state_grid(n,1);
-    BoundsBoxType state_domain(n,{0,2});
+    RealBox state_domain(n,{0,2});
 
     Grid u_control_grid(1,1);
-    BoundsBoxType u_control_domain(1,{0,2});
+    RealBox u_control_domain(1,{0,2});
 
     ReachAvoid u_ra("u_ra",u_dynamics,state_grid,state_domain,u_control_grid,u_control_domain,0,1e-10_x,1e-4);
 
@@ -127,7 +122,7 @@ void check_scalabilities(SizeType n) {
     sw.restart();
 
     Grid cpwa_control_grid(n+1,1);
-    BoundsBoxType cpwa_control_domain(n+1,{0,2});
+    RealBox cpwa_control_domain(n+1,{0,2});
     ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x,1e-4);
     CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.control_size())
 

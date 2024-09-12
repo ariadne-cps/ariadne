@@ -45,14 +45,14 @@ ExactBoxType shrink(ExactBoxType const& bx, FloatDP const& eps) {
     return result;
 }
 
-ExactBoxType shrink(BoundsBoxType const& bx, FloatDP const& eps) {
+ExactBoxType shrink(RealBox const& bx, FloatDP const& eps) {
     ExactBoxType result(bx.size());
     for (SizeType i=0; i<bx.size(); ++i)
-        result[i] = Interval<FloatDP>((FloatDP(cast_exact(bx[i].lower_bound()),DoublePrecision())+eps).lower_raw(),(FloatDP(cast_exact(bx[i].upper_bound()),DoublePrecision())-eps).upper_raw());
+        result[i] = Interval<FloatDP>((FloatDP(cast_exact(bx[i].lower_bound().get_d()),DoublePrecision())+eps).lower_raw(),(FloatDP(cast_exact(bx[i].upper_bound().get_d()),DoublePrecision())-eps).upper_raw());
     return result;
 }
 
-ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, BoundsBoxType const& state_bounds, Grid const& control_grid, BoundsBoxType const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold) :
+ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold) :
             _name(name), _dynamics(dynamics), _state_bounds(state_bounds), _control_bounds(control_bounds), _depth(depth), _eps({eps,DoublePrecision()}), _probability_threshold(probability_threshold) {
 
         _state_paving = SPaving(state_grid);
@@ -81,7 +81,7 @@ ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction c
         _reachability_graph.reset(new ForwardBackwardReachabilityGraph(IdentifiedCellFactory(default_vertex_extent,vertex_ids),IdentifiedCellFactory(default_edge_extent,edge_ids)));
     }
 
-ReachAvoid& ReachAvoid::add_obstacle(BoundsBoxType const& box) {
+ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     SPaving obstacle_paving(_state_paving.grid());
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     obstacle_paving.restrict(_state_paving);
@@ -90,7 +90,7 @@ ReachAvoid& ReachAvoid::add_obstacle(BoundsBoxType const& box) {
     return *this;
 }
 
-ReachAvoid& ReachAvoid::add_goal(BoundsBoxType const& box) {
+ReachAvoid& ReachAvoid::add_goal(RealBox const& box) {
     SPaving goal_paving(_state_paving.grid());
     goal_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     goal_paving.restrict(_state_paving);
@@ -99,11 +99,11 @@ ReachAvoid& ReachAvoid::add_goal(BoundsBoxType const& box) {
     return *this;
 }
 
-BoundsBoxType const& ReachAvoid::state_bounds() const {
+RealBox const& ReachAvoid::state_bounds() const {
     return _state_bounds;
 }
 
-BoundsBoxType const& ReachAvoid::control_bounds() const {
+RealBox const& ReachAvoid::control_bounds() const {
     return _control_bounds;
 }
 
@@ -142,7 +142,7 @@ double ReachAvoid::unverified_percentage() const {
 void ReachAvoid::plot(SizeType xaxis, SizeType yaxis) const {
     ExactBoxType graphics_box(_state_bounds.size());
     for (SizeType i=0; i<_state_bounds.size(); ++i)
-        graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[0].lower_bound()),DoublePrecision()},{ExactDouble(_state_bounds[0].upper_bound()),DoublePrecision()});
+        graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[0].lower_bound().get_d()),DoublePrecision()},{ExactDouble(_state_bounds[0].upper_bound().get_d()),DoublePrecision()});
 
     Figure fig(graphics_box,xaxis,yaxis);
     SPaving safe = _state_paving;

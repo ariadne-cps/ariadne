@@ -64,6 +64,23 @@ SizeType IdentifiedCellFactory::_to_identifier(GridCell const& cell) const {
 DirectedHashedGraph::DirectedHashedGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
     _vertex_factory(vertex_factory), _edge_factory(edge_factory) { }
 
+DirectedHashedGraph::DirectedHashedGraph(DirectedHashedGraph const& other) :
+    _vertex_factory(other._vertex_factory), _edge_factory(other._edge_factory) {
+
+    _map = TransitionProbabilityMap();
+    for (auto const& s : other._map) {
+        _map.insert(s.first,Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>>());
+        auto& s_it = _map[s.first];
+        for (auto const& c : s.second) {
+            s_it.insert(c.first,Map<IdentifiedCell, ProbabilityType>());
+            auto& c_it = s_it[c.first];
+            for (auto const& d : c.second) {
+                c_it.insert(d.first,d.second);
+            }
+        }
+    }
+}
+
 SizeType DirectedHashedGraph::num_sources() const { return _map.size(); }
 
 SizeType DirectedHashedGraph::num_transitions() const {
@@ -226,8 +243,10 @@ OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
 }
 
 ForwardBackwardReachabilityGraph::ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory) :
-    _vertex_factory(vertex_factory), _edge_factory(edge_factory),
     _forward_graph(vertex_factory,edge_factory), _backward_graph(vertex_factory,edge_factory) { }
+
+ForwardBackwardReachabilityGraph::ForwardBackwardReachabilityGraph(ForwardBackwardReachabilityGraph const& other) :
+    _forward_graph(other._forward_graph), _backward_graph(other._backward_graph) { }
 
 SizeType ForwardBackwardReachabilityGraph::vertex_id(NCell const& cell) const {
     return _forward_graph.vertex_id(cell);
@@ -332,6 +351,96 @@ ReachabilityGraphInterface* ForwardBackwardReachabilityGraph::clone() const {
 
 void ForwardBackwardReachabilityGraph::write(std::ostream& os) const {
     os << "Forward:\n" << _forward_graph << "\nBackward:\n" << _backward_graph;
+}
+
+UnconstrainedRAG::UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> graph) :
+    _internal(graph) { }
+
+UnconstrainedRAG& UnconstrainedRAG::operator=(UnconstrainedRAG const& other) {
+    _internal = other._internal;
+    return *this;
+}
+
+UnconstrainedRAG::UnconstrainedRAG(UnconstrainedRAG const& other) {
+    this->_internal = other._internal;
+}
+
+ReachabilityGraphInterface const& UnconstrainedRAG::internal() const {
+    return *_internal;
+}
+
+bool UnconstrainedRAG::is_empty() const {
+    return _internal == nullptr;
+}
+
+SizeType UnconstrainedRAG::num_sources() const {
+    return _internal->num_sources();
+}
+
+SizeType UnconstrainedRAG::num_destinations() const {
+    return _internal->num_destinations();
+}
+
+AvoidingRAG UnconstrainedRAG::reduce_to_not_reaching(SPaving const& unsafe) const {
+    return AvoidingRAG(*this, unsafe);
+}
+
+AvoidingRAG::AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()) {
+    _internal->reduce_to_not_reaching(unsafe);
+}
+
+AvoidingRAG& AvoidingRAG::operator=(AvoidingRAG const& other) {
+    _internal = other._internal;
+    return *this;
+}
+
+AvoidingRAG::AvoidingRAG(AvoidingRAG const& other) {
+    this->_internal = other._internal;
+}
+
+ReachabilityGraphInterface const& AvoidingRAG::internal() const {
+    return *_internal;
+}
+
+SizeType AvoidingRAG::num_sources() const {
+    return _internal->num_sources();
+}
+
+SizeType AvoidingRAG::num_destinations() const {
+    return _internal->num_destinations();
+}
+
+PossiblyReachingRAG AvoidingRAG::reduce_to_possibly_reaching(SPaving const& goals) const {
+    return PossiblyReachingRAG(*this, goals);
+}
+
+PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : _internal(avoid_graph.internal().clone()) {
+    _internal->reduce_to_possibly_reaching(goals);
+}
+
+PossiblyReachingRAG::PossiblyReachingRAG(PossiblyReachingRAG const& other) {
+    this->_internal = other._internal;
+}
+
+PossiblyReachingRAG& PossiblyReachingRAG::operator=(PossiblyReachingRAG const& other) {
+    _internal = other._internal;
+    return *this;
+}
+
+ReachabilityGraphInterface const& PossiblyReachingRAG::internal() const {
+    return *_internal;
+}
+
+SizeType PossiblyReachingRAG::num_sources() const {
+    return _internal->num_sources();
+}
+
+SizeType PossiblyReachingRAG::num_destinations() const {
+    return _internal->num_destinations();
+}
+
+void PossiblyReachingRAG::apply_source_removal_to(SPaving& paving) const {
+    _internal->apply_source_removal_to(paving);
 }
 
 } // namespace Ariadne

@@ -68,12 +68,14 @@ class IdentifiedCellFactory {
     HashTableType const _table;
 };
 
+//! \brief A class for a directed graph with hashed sources, transitions and destinations
 class DirectedHashedGraph {
   public:
     typedef TransitionProbabilityMap::iterator Iterator;
     typedef std::map<String,SizeType> HashTableType;
   public:
     DirectedHashedGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
+    DirectedHashedGraph(DirectedHashedGraph const& other);
 
     SizeType num_sources() const;
 
@@ -125,6 +127,7 @@ class DirectedHashedGraph {
     TransitionProbabilityMap _map;
 };
 
+//! \brief Interface for graphs used for discrete reachability under control laws
 class ReachabilityGraphInterface {
   public:
     virtual SizeType num_transitions() const = 0;
@@ -133,9 +136,6 @@ class ReachabilityGraphInterface {
 
     virtual SizeType vertex_id(NCell const& cell) const = 0;
     virtual SizeType edge_id(NCell const& cell) const = 0;
-
-    //! \brief The list of sets having a progressively higher discrete distance from the final states
-    //virtual List<Set<NCell>> backward_reachable_sets() const = 0;
 
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) = 0;
     virtual void clear() = 0;
@@ -159,11 +159,13 @@ class ReachabilityGraphInterface {
     }
 };
 
+//! \brief Graph having a dual forward and backward structure
 class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
   public:
     typedef DirectedHashedGraph::HashTableType HashTableType;
   public:
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
+    ForwardBackwardReachabilityGraph(ForwardBackwardReachabilityGraph const& other);
 
     SizeType vertex_id(NCell const& cell) const override;
     SizeType edge_id(NCell const& cell) const override;
@@ -184,11 +186,62 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     void write(std::ostream& os) const override;
 
   private:
-    IdentifiedCellFactory const _vertex_factory;
-    IdentifiedCellFactory const _edge_factory;
-
     DirectedHashedGraph _forward_graph;
     DirectedHashedGraph _backward_graph;
+};
+
+class AvoidingRAG;
+
+//! \brief Graph with no reach or avoid restrictions
+class UnconstrainedRAG {
+  public:
+    UnconstrainedRAG() = default;
+    UnconstrainedRAG(UnconstrainedRAG const& other);
+    bool is_empty() const;
+    UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> graph);
+    AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
+    ReachabilityGraphInterface const& internal() const;
+    SizeType num_sources() const;
+    SizeType num_destinations() const;
+    UnconstrainedRAG& operator=(UnconstrainedRAG const& other);
+  private:
+    SharedPointer<ReachabilityGraphInterface> _internal;
+};
+
+class PossiblyReachingRAG;
+
+//! \brief Graph with avoid restrictions
+class AvoidingRAG {
+  public:
+    friend class UnconstrainedRAG;
+    AvoidingRAG() = default;
+    AvoidingRAG(AvoidingRAG const& other);
+    ReachabilityGraphInterface const& internal() const;
+    PossiblyReachingRAG reduce_to_possibly_reaching(SPaving const& goals) const;
+    SizeType num_sources() const;
+    SizeType num_destinations() const;
+    AvoidingRAG& operator=(AvoidingRAG const& other);
+  protected:
+    AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe);
+  private:
+    SharedPointer<ReachabilityGraphInterface> _internal;
+};
+
+//! \brief Graph with reach and avoid restrictions
+class PossiblyReachingRAG {
+  public:
+    friend class AvoidingRAG;
+    PossiblyReachingRAG() = default;
+    PossiblyReachingRAG(PossiblyReachingRAG const& other);
+    ReachabilityGraphInterface const& internal() const;
+    SizeType num_sources() const;
+    SizeType num_destinations() const;
+    void apply_source_removal_to(SPaving& paving) const;
+    PossiblyReachingRAG& operator=(PossiblyReachingRAG const& other);
+  protected:
+    PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals);
+  private:
+    SharedPointer<ReachabilityGraphInterface> _internal;
 };
 
 } // namespace Ariadne

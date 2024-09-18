@@ -78,7 +78,8 @@ ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction c
             edge_ids.insert(make_pair(word_to_id(c.word(),(default_edge_extent+depth)*_control_paving.dimension()),edge_ids.size()));
         }
 
-        _reachability_graph.reset(new ForwardBackwardReachabilityGraph(IdentifiedCellFactory(default_vertex_extent,vertex_ids),IdentifiedCellFactory(default_edge_extent,edge_ids)));
+        _vertex_factory.reset(new IdentifiedCellFactory(default_vertex_extent,vertex_ids));
+        _edge_factory.reset(new IdentifiedCellFactory(default_edge_extent,edge_ids));
     }
 
 ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
@@ -128,11 +129,23 @@ SizeType ReachAvoid::unverified_size() const {
 }
 
 SizeType ReachAvoid::num_sources() const {
-    return _reachability_graph->num_sources();
+    if (_free_graph.is_empty())
+        return state_size();
+    return _free_graph.num_sources();
 }
 
 SizeType ReachAvoid::num_destinations() const {
-    return _reachability_graph->num_destinations();
+    if (_free_graph.is_empty())
+        return state_size();
+    return _free_graph.num_destinations();
+}
+
+SizeType ReachAvoid::_vertex_id(NCell const& cell) const {
+    return _vertex_factory->create(cell).id();
+}
+
+SizeType ReachAvoid::_edge_id(NCell const& cell) const {
+    return _edge_factory->create(cell).id();
 }
 
 double ReachAvoid::unverified_percentage() const {
@@ -163,24 +176,20 @@ void ReachAvoid::plot() const {
 
 void ReachAvoid::print_goals() const {
     std::stringstream ss;
-    for (auto const& g : _goals) ss << _reachability_graph->vertex_id(g) << " ";
+    for (auto const& g : _goals) ss << _vertex_id(g) << " ";
     CONCLOG_PRINTLN("Goals: " << ss.str())
 }
 
 void ReachAvoid::print_obstacles() const {
     std::stringstream ss;
-    for (auto const& o : _obstacles) ss << _reachability_graph->vertex_id(o) << " ";
+    for (auto const& o : _obstacles) ss << _vertex_id(o) << " ";
     CONCLOG_PRINTLN("Obstacles: " << ss.str())
 }
 
-void ReachAvoid::print_graph() const {
-    CONCLOG_PRINTLN(*_reachability_graph)
-}
-
-void ReachAvoid::compute_reachability_graph() {
+void ReachAvoid::compute_free_graph() {
     CONCLOG_SCOPE_CREATE
 
-    _reachability_graph->clear();
+    SharedPointer<ReachabilityGraphInterface> result(new ForwardBackwardReachabilityGraph(*_vertex_factory,*_edge_factory));
 
     ProgressIndicator indicator(_unverified.size());
     for (auto const& source_cell : _unverified) {
@@ -226,27 +235,37 @@ void ReachAvoid::compute_reachability_graph() {
                     CONCLOG_PRINTLN_AT(1,p.first.box() << ": " << p.second)
                 }
 
-                _reachability_graph->insert(source_cell, controller_cell, pruned_cells);
+                result->insert(source_cell, controller_cell, pruned_cells);
             }
         }
         indicator.update_current(indicator.current_value()+1.0);
     }
+
+    _free_graph = UnconstrainedRAG(result);
 }
 
-void ReachAvoid::refine_to_safety_graph() {
-    _reachability_graph->reduce_to_not_reaching(_obstacles);
+void ReachAvoid::compute_avoid_graph() {
+    _avoid_graph = _free_graph.reduce_to_not_reaching(_obstacles);
 }
 
-void ReachAvoid::refine_to_goal_reachable_graph() {
-    _reachability_graph->reduce_to_possibly_reaching(_goals);
+void ReachAvoid::compute_possibly_reaching_graph() {
+    _reach_avoid_graph = _avoid_graph.reduce_to_possibly_reaching(_goals);
 }
 
 void ReachAvoid::update_unverified() {
-    _reachability_graph->apply_source_removal_to(_unverified);
+    _reach_avoid_graph.apply_source_removal_to(_unverified);
 }
 
-SizeType ReachAvoid::num_transitions() const {
-    return _reachability_graph->num_transitions();
+SizeType ReachAvoid::unconstrained_num_transitions() const {
+    return _free_graph.internal().num_transitions();
+}
+
+SizeType ReachAvoid::avoiding_num_transitions() const {
+    return _avoid_graph.internal().num_transitions();
+}
+
+SizeType ReachAvoid::possibly_reaching_num_transitions() const {
+    return _reach_avoid_graph.internal().num_transitions();
 }
 
 }

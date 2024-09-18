@@ -116,9 +116,9 @@ void check_scalabilities(SizeType n) {
     CONCLOG_PRINTLN_VAR_AT(1,u_ra.control_size())
 
     Stopwatch<Milliseconds> sw;
-    u_ra.compute_reachability_graph();
+    u_ra.compute_free_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"(u) Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"(u) Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
     sw.restart();
 
     Grid cpwa_control_grid(n+1,1);
@@ -126,9 +126,9 @@ void check_scalabilities(SizeType n) {
     ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x,1e-4);
     CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.control_size())
 
-    cpwa_ra.compute_reachability_graph();
+    cpwa_ra.compute_free_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"(CPWA) Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"(CPWA) Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
 }
 
 void ariadne_main()
@@ -154,27 +154,27 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,ra.unverified_size())
 
     Stopwatch<Milliseconds> sw;
-    ra.compute_reachability_graph();
+    ra.compute_free_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing reachability graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1, ra.unconstrained_num_transitions())
 
     sw.restart();
-    ra.refine_to_safety_graph();
+    ra.compute_avoid_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of reducing graph to safe one: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoid graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1, ra.avoiding_num_transitions())
 
     CONCLOG_PRINTLN_AT(1,"Safe abstract states: " << ra.num_sources())
 
     sw.restart();
-    ra.refine_to_goal_reachable_graph();
+    ra.compute_possibly_reaching_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of reducing graph to goal-reachable one: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing possibly reaching graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_num_transitions())
 
     CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << ra.num_sources())
 
@@ -182,6 +182,4 @@ void ariadne_main()
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
     ra.plot();
-
-    CONCLOG_RUN_AT(3,ra.print_graph())
 }

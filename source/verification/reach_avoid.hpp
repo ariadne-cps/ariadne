@@ -52,27 +52,35 @@ class ReachAvoid {
 
     SizeType num_sources() const;
     SizeType num_destinations() const;
-    SizeType num_transitions() const;
+
+    SizeType unconstrained_num_transitions() const;
+    SizeType avoiding_num_transitions() const;
+    SizeType possibly_reaching_num_transitions() const;
+
 
     void plot(SizeType xaxis, SizeType yaxis) const;
     void plot() const;
 
     void print_goals() const;
     void print_obstacles() const;
-    void print_graph() const;
 
-    void compute_reachability_graph();
+    void compute_free_graph();
 
-    void refine_to_safety_graph();
+    void compute_avoid_graph();
 
-    void refine_to_goal_reachable_graph();
+    void compute_possibly_reaching_graph();
 
     void update_unverified();
 
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const;
 
-private:
+  private:
+
+    SizeType _vertex_id(NCell const& cell) const;
+    SizeType _edge_id(NCell const& cell) const;
+
+  private:
 
     String const _name;
     EffectiveVectorMultivariateFunction const _dynamics;
@@ -93,7 +101,12 @@ private:
     SPaving _obstacles;
     SPaving _goals;
 
-    Ariadne::SharedPointer<ReachabilityGraphInterface> _reachability_graph;
+    SharedPointer<IdentifiedCellFactory> _vertex_factory;
+    SharedPointer<IdentifiedCellFactory> _edge_factory;
+
+    UnconstrainedRAG _free_graph;
+    AvoidingRAG _avoid_graph;
+    PossiblyReachingRAG _reach_avoid_graph;
 };
 
 } // namespace Ariadne

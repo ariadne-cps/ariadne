@@ -131,8 +131,11 @@ class ReachabilityGraphInterface {
     virtual SizeType num_sources() const = 0;
     virtual SizeType num_destinations() const = 0;
 
-    virtual SizeType vertex_id(NCell const& cell) = 0;
-    virtual SizeType edge_id(NCell const& cell) = 0;
+    virtual SizeType vertex_id(NCell const& cell) const = 0;
+    virtual SizeType edge_id(NCell const& cell) const = 0;
+
+    //! \brief The list of sets having a progressively higher discrete distance from the final states
+    //virtual List<Set<NCell>> backward_reachable_sets() const = 0;
 
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) = 0;
     virtual void clear() = 0;
@@ -162,8 +165,8 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
   public:
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
 
-    SizeType vertex_id(NCell const& cell) override;
-    SizeType edge_id(NCell const& cell) override;
+    SizeType vertex_id(NCell const& cell) const override;
+    SizeType edge_id(NCell const& cell) const override;
 
     SizeType num_transitions() const override;
     SizeType num_sources() const override;

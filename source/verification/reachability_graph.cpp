@@ -229,11 +229,11 @@ ForwardBackwardReachabilityGraph::ForwardBackwardReachabilityGraph(IdentifiedCel
     _vertex_factory(vertex_factory), _edge_factory(edge_factory),
     _forward_graph(vertex_factory,edge_factory), _backward_graph(vertex_factory,edge_factory) { }
 
-SizeType ForwardBackwardReachabilityGraph::vertex_id(NCell const& cell) {
+SizeType ForwardBackwardReachabilityGraph::vertex_id(NCell const& cell) const {
     return _forward_graph.vertex_id(cell);
 }
 
-SizeType ForwardBackwardReachabilityGraph::edge_id(NCell const& cell) {
+SizeType ForwardBackwardReachabilityGraph::edge_id(NCell const& cell) const {
     return _forward_graph.edge_id(cell);
 }
 

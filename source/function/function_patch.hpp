@@ -54,6 +54,10 @@ namespace Ariadne {
 template<class T> class SpacePatch;
 using RealSpacePatch = SpacePatch<Real>;
 template<class P, class T> class ExpressionPatch;
+template<class T> class ConstantOrVariable;
+template<class T> class ConstantOrVariablePatch;
+class AnyConstantOrVariable;
+class AnyConstantOrVariablePatch;
 
 template<class P> class FunctionPatchFactory;
 using ValidatedFunctionPatchFactory = FunctionPatchFactory<ValidatedTag>;
@@ -182,6 +186,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
     FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
+    FunctionPatch(const DomainType& dom, const Function<P,SIG>& f);
     FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
@@ -201,6 +206,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
 
     inline ResultSizeType result_size() const { return this->_ptr->result_size(); }
     inline ArgumentSizeType argument_size() const { return this->_ptr->argument_size(); }
+    ExpressionPatch<P,RES> operator() (const ConstantOrVariable<ARGS...>& x) const;
     template<class X> X operator() (const Argument<X>& x) const {
         return this->_ptr->_call(x); }
     template<class X> X evaluate(const Argument<X>& x) const {
@@ -404,6 +410,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     inline FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     inline FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
+    FunctionPatch(const DomainType& dom, const Function<P,SIG>& f);
     inline FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
     inline operator const FunctionPatchInterface<P,SIG>& () const { return *_ptr; }
     inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); } // DEPRECATED
@@ -435,6 +442,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 
     FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
+    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS...> const&) const;
     ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
   public:
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(VectorFunctionPatch<P,ARGS...> const& f) {

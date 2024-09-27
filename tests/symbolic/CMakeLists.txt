@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_expression
+    test_expression_patch
     test_expression_set
 )
 

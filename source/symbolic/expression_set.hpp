@@ -283,6 +283,27 @@ template<> template<class IVL> inline VariablesBox<IVL> Variables<Real>::in(cons
     return bnds;
 }
 
+template<class IVL> class VectorVariableBox {
+    Variable<RealVector> _v;
+    Box<IVL> _bx;
+  public:
+    VectorVariableBox(Variable<RealVector> v, Box<IVL> bx) : _v(v.name(),v.size()), _bx(bx) {
+        assert(v.size()==bx.dimension()); }
+    Variable<RealVector> variable() const { return this->_v; }
+    DimensionType dimension() const { return _bx.dimension(); }
+    Box<IVL> box() const { return this->_bx; }
+    decltype(auto) is_empty() const { return this->_bx.is_empty(); }
+    decltype(auto) operator[](SizeType i) const { return VariableInterval(_v[i],_bx[i]); }
+    friend OutputStream& operator<<(OutputStream& os, VectorVariableBox<IVL> const& vbx) {
+        return os << vbx._v << "|" << vbx._bx; }
+};
+
+template<class UB> VariableInterval<UB> operator|(RealVariable v, Interval<UB> ivl) {
+    return VariableInterval<UB>(v,ivl); }
+template<class IVL> VectorVariableBox<IVL> operator|(RealVectorVariable v, Box<IVL> bx) {
+    return VectorVariableBox<IVL>(v,bx); }
+
+
 //! \ingroup ExpressionSetSubModule
 //! \brief A set defined as the preimage of a box under a continuous function.
 //! The set is described as \f$S=g^{-1}(C)\f$ where \f$g\f$ the constraint function and \f$C\f$ the codomain.

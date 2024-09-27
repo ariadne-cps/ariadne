@@ -161,6 +161,7 @@ class Expression<Vector<Real>>
     Expression(Constant<Vector<Real>> c);
     Expression(Variable<Vector<Real>>);
     Expression(Vector<Expression<Real>>);
+    explicit operator Vector<Expression<Real>>();
     Operator op() const;
     SizeType size() const;
     Expression<Real> get(SizeType i) const;

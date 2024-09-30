@@ -123,23 +123,30 @@ template<class P> auto inline
 FunctionPatchFactoryInterface<P>::create_identity(IntervalDomainType const& dom) const -> ScalarFunctionPatch<P,VARG> {
     return ScalarFunctionPatch<P,VARG>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
-template<class FCTRY, class ARG> class FunctionPatchCreator {
+template<class FCTRY, class ARG> class FunctionPatchCreator
+    : public FCTRY
+{
     typedef typename FCTRY::Paradigm P;
   public:
     typedef FCTRY FactoryType;
     typedef typename DomainTraits<ARG>::BoundedDomainType DomainType;
     typedef P Paradigm;
 
-    explicit FunctionPatchCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
+    explicit FunctionPatchCreator(DomainType domain, FactoryType factory) : FactoryType(factory), _domain(domain) { }
 
-    decltype(auto) create(ScalarFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create(VectorFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
-    decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
-    decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
-    decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
+    using FactoryType::create;
+    using FactoryType::create_zero;
+    using FactoryType::create_zeros;
+    using FactoryType::create_constant;
+    using FactoryType::create_identity;
+
+    decltype(auto) create(ScalarFunction<P,ARG> const& f) { return this->create(this->_domain,f); }
+    decltype(auto) create(VectorFunction<P,ARG> const& f) { return this->create(this->_domain,f); }
+    decltype(auto) create_zero() { return this->create_zero(this->_domain); }
+    decltype(auto) create_zeros(SizeType n) { return this->create_zeros(n,this->_domain); }
+    decltype(auto) create_constant(Number<P> const& c) const { return this->create_constant(this->_domain,c); }
+    decltype(auto) create_identity() { return this->create_identity(this->_domain); }
   protected:
-    FactoryType _factory;
     DomainType _domain;
 };
 
@@ -187,7 +194,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     FunctionPatch(const DomainType& dom, const Function<P,SIG>& f);
-    FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
+    //explicit FunctionPatch(const Function<P,SIG>& f) : _ptr(&dynamic_cast<FunctionPatchInterface<P,SIG>&>(*f.raw_pointer()->_clone())) { }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
     friend Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
@@ -206,7 +213,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
 
     inline ResultSizeType result_size() const { return this->_ptr->result_size(); }
     inline ArgumentSizeType argument_size() const { return this->_ptr->argument_size(); }
-    ExpressionPatch<P,RES> operator() (const ConstantOrVariable<ARGS...>& x) const;
+    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS>... x) const;
     template<class X> X operator() (const Argument<X>& x) const {
         return this->_ptr->_call(x); }
     template<class X> X evaluate(const Argument<X>& x) const {
@@ -357,8 +364,8 @@ template<class P, class... ARGS> class VectorFunctionPatchElement
     typedef typename ScalarFunctionPatch<P,ARGS...>::GenericType GenericType;
     operator const ScalarFunctionPatch<P,ARGS...> () const;
     VectorFunctionPatchElement(VectorFunctionPatch<P,ARGS...>* p, SizeType i) : _p(p), _i(i) { }
-    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunctionPatch<P,ARGS...>& sf) {
-        _p->set(_i,sf); return *this; }
+    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunction<P,ARGS...>& sf) { _p->set(_i,sf); return *this; }
+    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunctionPatch<P,ARGS...>& sf) { _p->set(_i,sf); return *this; }
     VectorFunctionPatchElement<P,ARGS...>& operator=(const VectorFunctionPatchElement<P,ARGS...>& sf) {
         return this->operator=(static_cast<ScalarFunctionPatch<P,ARGS...>const>(sf)); }
     Void clobber() { ScalarFunctionPatch<P,ARGS...> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
@@ -399,8 +406,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline FunctionPatch() : _ptr() { }
     inline FunctionPatch(SharedPointer<const FunctionPatchInterface<P,SIG>> vfp)
         : _ptr(vfp->_clone()) { }
-    inline FunctionPatch(SizeType n, const ScalarFunctionPatchInterface<P,ARGS...>& sf) {
-        FunctionPatchFactory<P> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
+    inline FunctionPatch(SizeType n, const ScalarFunctionPatch<P,ARGS...>& sf) {
+        FunctionPatchFactory<P> factory(sf.reference()._factory()); *this=factory.create_zeros(n,sf.domain());
         for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline FunctionPatch(Array<ScalarFunctionPatch<P,ARGS...>> const& asf)
         : FunctionPatch(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
@@ -428,6 +435,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     template<class XX> inline Vector<XX> operator()(const Argument<XX>& v) const { return this->_ptr->_call(v); }
     template<class XX> inline Vector<XX> evaluate(const Argument<XX>& v) const { return this->_ptr->_call(v); }
     inline ScalarFunctionPatch<P,ARGS...> const get(SizeType i) const { return ScalarFunctionPatch<P,ARGS...>(this->_ptr->_get(i)); }
+    inline Void set(SizeType i, ScalarFunction<P,ARGS...> const& sf) { this->_ptr->_set(i,sf); }
     inline Void set(SizeType i, ScalarFunctionPatch<P,ARGS...> const& sf) { this->_ptr->_set(i,sf); }
     inline ScalarFunctionPatch<P,ARGS...> const operator[](SizeType i) const { return this->get(i); }
     inline VectorFunctionPatchElement<P,ARGS...> operator[](SizeType i) { return VectorFunctionPatchElement<P,ARGS...>(this,i); }
@@ -443,7 +451,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
 
     FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
     ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
-    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS...> const&) const;
+    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS>...) const;
     ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
   public:
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(VectorFunctionPatch<P,ARGS...> const& f) {
@@ -455,8 +463,10 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend inline ScalarFunctionPatch<P,ARGS...> compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return ScalarFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
     friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+        std::cerr<<"compose(VectorMultivariateFunction,VectorFunctionPatch)\n";
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(f)); }
     friend inline VectorFunctionPatch<P,ARGS...> compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
+        std::cerr<<"compose(VectorMultivariateFunctionPatch,VectorFunctionPatch)\n";
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
     friend inline ScalarFunctionPatch<P,ARGS...> unchecked_compose(const ScalarMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {

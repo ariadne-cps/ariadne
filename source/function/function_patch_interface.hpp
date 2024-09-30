@@ -72,7 +72,7 @@ template<class P, class... ARGS> class FunctionPatchAlgebraInterface<P,RealVecto
   public:
     typedef SizeType ResultIndexType;
     virtual ScalarFunctionPatchInterface<P,ARGS...>* _get(ResultIndexType) const = 0;
-    virtual Void _set(ResultIndexType, ScalarFunctionPatchInterface<P,ARGS...> const&) = 0;
+    virtual Void _set(ResultIndexType, ScalarFunctionInterface<P,ARGS...> const&) = 0;
     virtual Void _adjoin(const ScalarFunctionPatchInterface<P,ARGS...>& f2) = 0;
     virtual VectorFunctionPatchInterface<P,ARGS...>* _join(const VectorFunctionPatchInterface<P,ARGS...>& f2) const = 0;
     virtual VectorFunctionPatchInterface<P,ARGS...>* _combine(const VectorFunctionPatchInterface<P,ARGS...>& f2) const = 0;

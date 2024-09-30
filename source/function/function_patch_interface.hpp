@@ -70,7 +70,7 @@ template<class P, class... ARGS> class FunctionPatchAlgebraInterface<P,RealVecto
 {
     using RES=RealVector; using SIG=RES(ARGS...);
   public:
-    typedef SizeType ResultIndexType;
+    typedef typename SignatureTraits<SIG>::ResultIndexType ResultIndexType;
     virtual ScalarFunctionPatchInterface<P,ARGS...>* _get(ResultIndexType) const = 0;
     virtual Void _set(ResultIndexType, ScalarFunctionPatchInterface<P,ARGS...> const&) = 0;
     virtual Void _adjoin(const ScalarFunctionPatchInterface<P,ARGS...>& f2) = 0;
@@ -86,6 +86,7 @@ template<class P, class SIG> class FunctionPatchInterface
     static_assert(Same<RES,RealScalar> or Same<RES,RealVector>);
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
   public:
+    using typename FunctionInterface<P,SIG>::ResultIndexType;
     typedef typename SignatureTraits<SIG>::BoundedCodomainType CodomainType;
     typedef typename SignatureTraits<SIG>::BoundedDomainType DomainType;
     typedef typename SignatureTraits<SIG>::BoundedRangeType RangeType;

@@ -178,10 +178,9 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
         return this->_compose(f); }
 
     virtual VectorFunctionPatchInterface<P,ARGS...>* _clone() const override { return new FP(static_cast<const FP&>(*this)); }
-    virtual Void _set(SizeType i, const ScalarFunctionPatchInterface<P,ARGS...>& sf) override {
-        if(!dynamic_cast<const typename FP::ScalarMultivariateFunctionType*>(&sf)) {
-            ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionPatch "<<*this<<" to "<<sf<<"\n"); }
-        static_cast<FP&>(*this).FP::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
+    virtual Void _set(SizeType i, const ScalarFunctionInterface<P,ARGS...>& sf) override {
+        if(auto sfpp = dynamic_cast<const typename FP::ScalarMultivariateFunctionType*>(&sf)) { static_cast<FP&>(*this).FP::set(i,*sfpp); }
+        else { static_cast<FP&>(*this).FP::set(i,factory(*this).create(sf)); } }
     virtual VectorFunctionPatchInterface<P,ARGS...>* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType j) const override {

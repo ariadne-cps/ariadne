@@ -94,9 +94,14 @@ Void TestExpressionPatch::test_expression_function_patch()
 
     ValidatedVectorExpressionPatch phiep = phifp({x[0],x[1],t,u0});
     ARIADNE_TEST_PRINT(phiep);
+    phiep = phifp({x,t,u0});
+    ARIADNE_TEST_PRINT(phiep);
     ValidatedVectorExpressionPatch phi1ep = phiep;
-    ValidatedVectorExpressionPatch phieptu({phifp({x,t,u0}),t|tdom,u|udom});
+    ARIADNE_TEST_PRINT(phi1ep);
+    ValidatedVectorExpressionPatch phieptu({phi1ep,t|tdom,u|udom});
+    ARIADNE_TEST_PRINT(phieptu);
     ValidatedVectorExpressionPatch phi2ep = phifp(phieptu);
+    ARIADNE_TEST_PRINT(phi2ep);
 
     phi2ep = phifp({phifp({x,t,u0}),t|tdom,u|udom});
     ARIADNE_TEST_PRINT(phi2ep);

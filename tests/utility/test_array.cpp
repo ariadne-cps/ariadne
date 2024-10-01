@@ -26,6 +26,7 @@
 
 #include "config.hpp"
 #include "utility/array.hpp"
+#include "utility/uniform_array.hpp"
 #include "utility/container.hpp"
 
 #include "../test.hpp"
@@ -66,7 +67,38 @@ class TestArray {
 
 };
 
+class Size {
+    std::size_t _n;
+  public:
+    Size(std::size_t n) : _n(n) { }
+    operator std::size_t () const { return this->_n; }
+};
+
+class ConstantFunction {
+    Size _argument_size;
+    double _value;
+  public:
+    ConstantFunction(Size as) : _argument_size(as), _value(0.0) { }
+    ConstantFunction(Size as, double v) : _argument_size(as), _value(v) { }
+    Size configuration() const { return this->_argument_size; }
+    friend OutputStream& operator<<(OutputStream& os, ConstantFunction const& cf) {
+        return os << "ConstantFunction(as="<<cf._argument_size<<", c="<<cf._value<<")"; }
+};
+
+class TestUniformArray {
+  public:
+    Void test() {
+        SizeType as=2u;
+        UniformArray<ConstantFunction> a(3, as);
+        ConstantFunction cf0=ConstantFunction(as,3);
+        a.set(0,cf0);
+        ConstantFunction cf1=ConstantFunction(as+1,5);
+        ARIADNE_TEST_FAIL(a.set(1,cf1));
+    }
+};
+
 Int main() {
     TestArray().test();
+    TestUniformArray().test();
     return ARIADNE_TEST_FAILURES;
 }

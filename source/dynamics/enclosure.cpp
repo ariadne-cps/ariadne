@@ -97,6 +97,19 @@ inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunction
 inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, FloatDPBounds const& c) {
     return ValidatedConstraintModel(c,f,c); }
 
+inline ValidatedConstraintModelDP operator>=(ValidatedScalarMultivariateFunctionPatch const& f, ExactNumber const& l) {
+    return f>=FloatDPBounds(l,dp); }
+inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunctionPatch const& f, ExactNumber const& u) {
+    return f<=FloatDPBounds(u,dp); }
+inline ValidatedConstraintModelDP operator==(ValidatedScalarMultivariateFunctionPatch const& f, ExactNumber const& c) {
+    return f==FloatDPBounds(c,dp); }
+
+inline ValidatedConstraintModelDP operator<=(ValidatedScalarMultivariateFunctionPatch const& f1, ValidatedScalarMultivariateFunctionPatch const& f2) {
+    return (f1-f2) <= FloatDPBounds(0,dp); }
+inline ValidatedConstraintModelDP operator>=(ValidatedScalarMultivariateFunctionPatch const& f1, ValidatedScalarMultivariateFunctionPatch const& f2) {
+    return (f1-f2) >= FloatDPBounds(0,dp); }
+
+
 Pair<Interval<FloatDP>,FloatDPError> make_domain(Interval<Real> const& ivl);
 
 namespace {
@@ -560,6 +573,12 @@ std::cerr<<"Here 5\n";
 Void Enclosure::new_state_time_bound(ValidatedScalarMultivariateFunction gamma) {
     ARIADNE_ASSERT(gamma.argument_size()==this->state_dimension());
     this->_is_fully_reduced=false;
+#warning
+//    auto gamma_state_function=compose(gamma,this->state_function());
+//    auto this_time_function=this->time_function();
+//    auto constraint=compose(gamma,this->state_function())<=this->time_function();
+//    auto foo=[](ValidatedScalarMultivariateFunctionPatch,ValidatedScalarMultivariateFunctionPatch,int){};
+//    foo(gamma_state_function,this_time_function,constraint);
     this->_constraints.append(compose(gamma,this->state_function())<=this->time_function());
     this->_check();
 }

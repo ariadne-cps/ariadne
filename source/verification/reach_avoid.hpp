@@ -22,6 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ARIADNE_REACH_AVOID_HPP
+#define ARIADNE_REACH_AVOID_HPP
+
 #include "function/function.hpp"
 #include "utility/metaprogramming.hpp"
 
@@ -36,6 +39,7 @@ ExactBoxType shrink(RealBox const& bx, FloatDP const& eps);
 
 class ReachAvoid {
   public:
+
     ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold);
 
     ReachAvoid& add_obstacle(RealBox const& box);
@@ -75,6 +79,8 @@ class ReachAvoid {
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const;
 
+    PossiblyReachingRAG const& possibly_reaching_graph() const;
+
   private:
 
     SizeType _vertex_id(NCell const& cell) const;
@@ -110,3 +116,5 @@ class ReachAvoid {
 };
 
 } // namespace Ariadne
+
+#endif

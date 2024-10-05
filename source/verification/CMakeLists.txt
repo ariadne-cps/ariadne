@@ -3,6 +3,7 @@ set(LIBRARY_NAME ariadne-verification)
 add_library(${LIBRARY_NAME} OBJECT
     reach_avoid.cpp
     reachability_graph.cpp
+    reach_avoid_strategy.cpp
 )
 
 foreach(WARN ${LIBRARY_EXCLUSIVE_WARN})

@@ -24,6 +24,7 @@
 
 #include "ariadne_main.hpp"
 #include "verification/reach_avoid.hpp"
+#include "verification/reach_avoid_strategy.hpp"
 #include "utility/stopwatch.hpp"
 
 Tuple<IteratedMap,Grid,RealBox> u_control() {
@@ -182,4 +183,7 @@ void ariadne_main()
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
     ra.plot();
+
+    ReachAvoidStrategyBuilder strategy_builder(ra.possibly_reaching_graph());
+    strategy_builder.build();
 }

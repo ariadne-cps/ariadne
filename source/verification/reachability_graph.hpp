@@ -22,10 +22,14 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ARIADNE_REACHABILITY_GRAPH_HPP
+#define ARIADNE_REACHABILITY_GRAPH_HPP
+
 #include "utility/string.hpp"
 #include "utility/container.hpp"
 #include "algebra/vector.hpp"
 #include "geometry/paving_interface.hpp"
+#include "geometry/grid_paving.hpp"
 
 namespace Ariadne {
 
@@ -48,11 +52,13 @@ struct IdentifiedCell {
     GridCell cell() const { return _cell; }
     friend class IdentifiedCellFactory;
     bool operator<(IdentifiedCell const& other) const { return this->_id < other._id; }
+    //friend OutputStream& operator<<(OutputStream& os, IdentifiedCell const& ic) { os << "{" << ic._id << ":" << ic._cell.box() << "}"; return os; }
+    friend OutputStream& operator<<(OutputStream& os, IdentifiedCell const& ic) { os << "{" << ic._id << "}"; return os; }
   protected:
     IdentifiedCell(SizeType id, GridCell const& cell) : _id(id), _cell(cell) { }
   private:
-    SizeType const _id;
-    GridCell const _cell;
+    SizeType _id;
+    GridCell _cell;
 };
 
 class IdentifiedCellFactory {
@@ -81,11 +87,18 @@ class DirectedHashedGraph {
 
     SizeType num_transitions() const;
 
+    IdentifiedCell vertex_icell(NCell const& cell) const;
+
+    IdentifiedCell edge_icell(NCell const& cell) const;
+
     SizeType vertex_id(NCell const& cell) const;
 
     SizeType edge_id(NCell const& cell) const;
 
     SPaving destinations_from(NCell const& source_cell) const;
+
+    //! \brief The transitions from a given \a cell
+    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& transitions(IdentifiedCell const& cell) const;
 
     //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
     void insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells);
@@ -93,6 +106,8 @@ class DirectedHashedGraph {
     //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
     //! hashing on the destination and transition
     void insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells);
+
+    Iterator find(IdentifiedCell const& source_icell);
 
     Iterator find(NCell const& source_cell);
 
@@ -113,7 +128,11 @@ class DirectedHashedGraph {
     //! \brief Remove the source cells of the graph from \a paving
     void apply_source_removal_to(SPaving& paving) const;
 
+    //! \brief Remove all sources
     void clear();
+
+    //! \brief Check if empty
+    bool is_empty() const;
 
     //! \brief Remove transitions for which the set of destinations is empty
     //! and remove sources for which the set of transitions is empty
@@ -139,6 +158,16 @@ class ReachabilityGraphInterface {
 
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) = 0;
     virtual void clear() = 0;
+
+    //! \brief Find the list of sets of cells having a given distance to the \a goal
+    //! \details The position in the list determines the distance (0: within goals)
+    virtual List<Set<IdentifiedCell>> sets_equidistant_to_goal(SPaving const& goal) const = 0;
+
+    //! \brief The transitions from a given \a source forward
+    virtual Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& forward_transitions(IdentifiedCell const& source) const = 0;
+
+    //! \brief The transitions from a given \a destination backward
+    virtual Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& backward_transitions(IdentifiedCell const& destination) const = 0;
 
     //! \brief Remove those sources that can reach the \a avoidance paving
     virtual void reduce_to_not_reaching(SPaving const& avoidance) = 0;
@@ -167,12 +196,17 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
     ForwardBackwardReachabilityGraph(ForwardBackwardReachabilityGraph const& other);
 
+    List<Set<IdentifiedCell>> sets_equidistant_to_goal(SPaving const& goal) const override;
+
     SizeType vertex_id(NCell const& cell) const override;
     SizeType edge_id(NCell const& cell) const override;
 
     SizeType num_transitions() const override;
     SizeType num_sources() const override;
     SizeType num_destinations() const override;
+
+    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& forward_transitions(IdentifiedCell const& source) const override;
+    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& backward_transitions(IdentifiedCell const& destination) const override;
 
     void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) override;
     void clear() override;
@@ -225,6 +259,7 @@ class AvoidingRAG {
     AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe);
   private:
     SharedPointer<ReachabilityGraphInterface> _internal;
+    SPaving const _unsafe;
 };
 
 //! \brief Graph with reach and avoid restrictions
@@ -234,6 +269,9 @@ class PossiblyReachingRAG {
     PossiblyReachingRAG() = default;
     PossiblyReachingRAG(PossiblyReachingRAG const& other);
     ReachabilityGraphInterface const& internal() const;
+
+    List<Set<IdentifiedCell>> sets_equidistant_to_goal() const;
+
     SizeType num_sources() const;
     SizeType num_destinations() const;
     void apply_source_removal_to(SPaving& paving) const;
@@ -242,6 +280,9 @@ class PossiblyReachingRAG {
     PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals);
   private:
     SharedPointer<ReachabilityGraphInterface> _internal;
+    SPaving _goals;
 };
 
 } // namespace Ariadne
+
+#endif

@@ -93,6 +93,14 @@ SizeType DirectedHashedGraph::num_transitions() const {
     return result;
 }
 
+IdentifiedCell DirectedHashedGraph::vertex_icell(NCell const& cell) const {
+    return _vertex_factory.create(cell);
+}
+
+IdentifiedCell DirectedHashedGraph::edge_icell(NCell const& cell) const {
+    return _edge_factory.create(cell);
+}
+
 SizeType DirectedHashedGraph::vertex_id(NCell const& cell) const {
     return _vertex_factory.create(cell).id();
 }
@@ -113,6 +121,10 @@ SPaving DirectedHashedGraph::destinations_from(NCell const& source_cell) const {
         }
     }
     return result;
+}
+
+Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& DirectedHashedGraph::transitions(IdentifiedCell const& cell) const {
+    return _map.at(cell);
 }
 
 void DirectedHashedGraph::insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
@@ -149,6 +161,10 @@ void DirectedHashedGraph::insert_backward(NCell const& source_cell, ECell const&
         auto idst = _vertex_factory.create(source_cell);
         trans_ref->second.insert(make_pair(idst, src.second));
     }
+}
+
+DirectedHashedGraph::Iterator DirectedHashedGraph::find(IdentifiedCell const& source_icell) {
+    return _map.find(source_icell);
 }
 
 DirectedHashedGraph::Iterator DirectedHashedGraph::find(NCell const& source_cell) {
@@ -208,7 +224,13 @@ void DirectedHashedGraph::apply_source_removal_to(SPaving& paving) const {
     }
 }
 
-void DirectedHashedGraph::clear() { _map.clear(); }
+void DirectedHashedGraph::clear() {
+    _map.clear();
+}
+
+bool DirectedHashedGraph::is_empty() const {
+    return _map.empty();
+}
 
 void DirectedHashedGraph::sweep() {
     auto src_it = _map.begin();
@@ -345,6 +367,51 @@ void ForwardBackwardReachabilityGraph::apply_source_removal_to(SPaving& paving) 
     _forward_graph.apply_source_removal_to(paving);
 }
 
+List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goal(SPaving const& goal) const {
+
+    List<Set<IdentifiedCell>> result;
+
+    auto backward_copy = _backward_graph;
+
+    Set<IdentifiedCell> goal_cells;
+    for (auto const& g : goal)
+        goal_cells.insert(_backward_graph.vertex_icell(g));
+    result.append(goal_cells);
+
+    Set<IdentifiedCell> currently_reached;
+    currently_reached.adjoin(goal_cells);
+
+    while (currently_reached.size() < _backward_graph.num_sources()) {
+
+        SizeType idx = result.size()-1;
+        Set<IdentifiedCell> sources;
+
+        for (auto const& g : result[idx]) {
+            auto it = backward_copy.find(g);
+            for (auto const& t : it->second) {
+                for (auto const& s : t.second) {
+                    if (not currently_reached.contains(s.first)) sources.insert(s.first);
+                }
+            }
+        }
+
+        for (auto const& s : result[idx])
+            backward_copy.erase(s.cell());
+        result.append(sources);
+        currently_reached.adjoin(sources);
+    }
+
+    return result;
+}
+
+Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& ForwardBackwardReachabilityGraph::forward_transitions(IdentifiedCell const& source) const {
+    return _forward_graph.transitions(source);
+}
+
+Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& ForwardBackwardReachabilityGraph::backward_transitions(IdentifiedCell const& destination) const {
+    return _backward_graph.transitions(destination);
+}
+
 ReachabilityGraphInterface* ForwardBackwardReachabilityGraph::clone() const {
     return new ForwardBackwardReachabilityGraph(*this);
 }
@@ -385,7 +452,7 @@ AvoidingRAG UnconstrainedRAG::reduce_to_not_reaching(SPaving const& unsafe) cons
     return AvoidingRAG(*this, unsafe);
 }
 
-AvoidingRAG::AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()) {
+AvoidingRAG::AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()), _unsafe(unsafe) {
     _internal->reduce_to_not_reaching(unsafe);
 }
 
@@ -414,17 +481,23 @@ PossiblyReachingRAG AvoidingRAG::reduce_to_possibly_reaching(SPaving const& goal
     return PossiblyReachingRAG(*this, goals);
 }
 
-PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : _internal(avoid_graph.internal().clone()) {
+PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : _internal(avoid_graph.internal().clone()), _goals(goals) {
     _internal->reduce_to_possibly_reaching(goals);
 }
 
 PossiblyReachingRAG::PossiblyReachingRAG(PossiblyReachingRAG const& other) {
     this->_internal = other._internal;
+    this->_goals = other._goals;
 }
 
 PossiblyReachingRAG& PossiblyReachingRAG::operator=(PossiblyReachingRAG const& other) {
     _internal = other._internal;
+    _goals = other._goals;
     return *this;
+}
+
+List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goal() const {
+    return _internal->sets_equidistant_to_goal(_goals);
 }
 
 ReachabilityGraphInterface const& PossiblyReachingRAG::internal() const {

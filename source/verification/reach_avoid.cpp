@@ -268,4 +268,8 @@ SizeType ReachAvoid::possibly_reaching_num_transitions() const {
     return _reach_avoid_graph.internal().num_transitions();
 }
 
+PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
+    return _reach_avoid_graph;
+}
+
 }

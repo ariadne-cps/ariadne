@@ -22,30 +22,44 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ARIADNE_REACH_AVOID_STRATEGY_HPP
+#define ARIADNE_REACH_AVOID_STRATEGY_HPP
+
 #include "reachability_graph.hpp"
 
 namespace Ariadne {
 
+typedef double ScoreType;
+
+struct AssignedControl {
+    AssignedControl(IdentifiedCell const& source, IdentifiedCell const& control);
+
+    IdentifiedCell const& source;
+    IdentifiedCell const& control;
+
+    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.source.id() << ":" << ac.control.id() << "}"; return os; }
+};
+
 class ReachAvoidStrategy;
 
 class ReachAvoidStrategyBuilder {
-  protected:
-    friend class ReachAvoidStrategy;
-  public:
-
-    ReachAvoidStrategyBuilder(ReachabilityGraphInterface const& graph);
-
+public:
+    ReachAvoidStrategyBuilder(PossiblyReachingRAG const& rag);
     ReachAvoidStrategy build();
-
-  private:
-
-    ReachabilityGraphInterface const& _graph;
+private:
+    PossiblyReachingRAG const& _rag;
 };
 
 class ReachAvoidStrategy {
+   friend class ReachAvoidStrategyBuilder;
   protected:
-
-    ReachAvoidStrategy();
+    explicit ReachAvoidStrategy(List<AssignedControl> const& assignments);
+  public:
+    List<AssignedControl> const& assignments() const;
+  private:
+    List<AssignedControl> const& _assignments;
 };
 
 } // namespace Ariadne
+
+#endif

@@ -202,36 +202,40 @@ void ReachAvoid::compute_free_graph() {
             destination_paving.mince(_depth);
             destination_paving.restrict(_state_paving);
             if (not destination_paving.is_empty()) {
-                List<Pair<NCell,ProbabilityType>> destination_cells;
+                List<Pair<NCell,DestinationProbability>> destination_data;
 
                 double total_volume = 0;
                 for (auto const& cell : destination_paving) {
                     auto intersection_box = intersection(cell.box(),destination_box);
-
+                    auto intersection_centre = intersection_box.centre();
+                    PointType current_centre(intersection_centre.dimension());
+                    for (SizeType i=0; i<intersection_centre.dimension(); ++i) {
+                        current_centre.at(i) = intersection_centre.at(i).get_d();
+                    }
                     auto current_volume = intersection_box.volume().get_d();
-                    destination_cells.append({cell,current_volume});
+                    destination_data.append({cell, {current_centre,current_volume}});
                     total_volume += current_volume;
                 }
 
                 double maximum_probability = 0;
-                for (auto& p : destination_cells) {
-                    maximum_probability = std::max(maximum_probability,p.second);
+                for (auto& p : destination_data) {
+                    maximum_probability = std::max(maximum_probability,p.second.probability());
                 }
 
-                List<Pair<NCell,ProbabilityType>> pruned_cells;
+                List<Pair<NCell,DestinationProbability>> pruned_cells;
 
                 double total_probability = 0;
-                for (auto& p : destination_cells) {
-                    p.second = p.second/total_volume;
-                    if (p.second >= _probability_threshold*maximum_probability) {
+                for (auto& p : destination_data) {
+                    p.second.divide_probability(total_volume);
+                    if (p.second.probability() >= _probability_threshold*maximum_probability) {
                         pruned_cells.append(p);
-                        total_probability += p.second;
+                        total_probability += p.second.probability();
                     }
                 }
 
                 CONCLOG_PRINTLN_AT(1,"Probabilities for state " << source_cell.box() << " and control " << controller_cell.box() << ":")
                 for (auto& p : pruned_cells) {
-                    p.second = p.second/total_probability;
+                    p.second.divide_probability(total_probability);
                     CONCLOG_PRINTLN_AT(1,p.first.box() << ": " << p.second)
                 }
 

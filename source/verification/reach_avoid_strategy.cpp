@@ -26,8 +26,8 @@
 
 namespace Ariadne {
 
-AssignedControl::AssignedControl(IdentifiedCell const& source_, IdentifiedCell const& control_) :
-    source(source_), control(control_) { }
+AssignedControl::AssignedControl(IdentifiedCell const& source_, IdentifiedCell const& control_, DirectionType const& direction_) :
+    source(source_), control(control_), direction(direction_) { }
 
 ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(PossiblyReachingRAG const& rag) :
     _rag(rag) { }
@@ -47,23 +47,44 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
             auto const& trans = _rag.internal().forward_transitions(src);
             IdentifiedCell best_control = trans.begin()->first;
             ScoreType best_score = -static_cast<ScoreType>(trans.size());
+            PointType best_midpoint(src.cell().dimension());
             for (auto const& ctrl : trans) {
                 ScoreType current_score = 0.0;
                 for (auto const& tgt : ctrl.second) {
                     if (sets_equidistant_to_goal.at(s_idx-1).contains(tgt.first))
-                        current_score += scores.at(tgt.first) * tgt.second;
+                        current_score += scores.at(tgt.first) * tgt.second.probability();
                 }
                 if (current_score > best_score) {
                     best_control = ctrl.first;
                     best_score = current_score;
+                    best_midpoint = PointType(src.cell().dimension());
+                    for (SizeType i=0; i<best_midpoint.size(); ++i) {
+                        for (auto const& tgt : ctrl.second) {
+                            best_midpoint.at(i) = best_midpoint.at(i) + tgt.second.probability()*tgt.second.point().at(i);
+                        }
+                    }
                 }
             }
             scores.insert(src,best_score);
-            assignments.append({src,best_control});
+
+            DirectionType direction(src.cell().dimension());
+            auto src_midpoint = src.cell().box().midpoint();
+            double direction_norm = 0.0;
+            for (SizeType i=0; i<direction.size(); ++i) {
+                auto current_midpoint_dimension = src_midpoint.at(i).get_d();
+                direction.at(i) = best_midpoint.at(i) - current_midpoint_dimension;
+                direction_norm += current_midpoint_dimension*current_midpoint_dimension;
+            }
+            direction_norm = std::sqrt(direction_norm);
+            for (SizeType i=0; i<direction.size(); ++i) {
+                direction.at(i) = direction.at(i)/direction_norm;
+            }
+
+            assignments.append({src,best_control,direction});
         }
     }
 
-    return ReachAvoidStrategy(assignments);
+    return {assignments};
 }
 
 ReachAvoidStrategy::ReachAvoidStrategy(List<AssignedControl> const& assignments) :

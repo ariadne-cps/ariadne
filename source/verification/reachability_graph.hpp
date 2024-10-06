@@ -30,6 +30,8 @@
 #include "algebra/vector.hpp"
 #include "geometry/paving_interface.hpp"
 #include "geometry/grid_paving.hpp"
+#include "geometry/point.hpp"
+#include "numeric/floatdp.hpp"
 
 namespace Ariadne {
 
@@ -38,22 +40,34 @@ typedef GridCell NCell;
 typedef GridCell ECell;
 typedef GridTreePaving SPaving;
 typedef GridTreePaving CPaving;
+typedef Vector<double> PointType;
 
 struct IdentifiedCell;
 
-typedef Map<IdentifiedCell,Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>> TransitionProbabilityMap;
-
 String word_to_id(BinaryWord const& w, SizeType length);
+
+struct DestinationProbability {
+    DestinationProbability(PointType const& point, ProbabilityType const& probability) : _point(point), _probability(probability) { }
+
+    PointType const& point() const { return _point; }
+    ProbabilityType const& probability() const { return _probability; }
+    void divide_probability(ProbabilityType const& factor) { ARIADNE_ASSERT(factor > 0) _probability = _probability/factor; }
+    friend OutputStream& operator<<(OutputStream& os, DestinationProbability const& dprob) { os << "{" << dprob.point() << ":" << dprob.probability() << "}"; return os; }
+  private:
+    PointType _point;
+    ProbabilityType _probability;
+};
+
+typedef Map<IdentifiedCell,Map<IdentifiedCell,Map<IdentifiedCell,DestinationProbability>>> TransitionProbabilityMap;
 
 class IdentifiedCellFactory;
 
 struct IdentifiedCell {
-    SizeType id() const { return _id; }
-    GridCell cell() const { return _cell; }
+    SizeType const& id() const { return _id; }
+    GridCell const& cell() const { return _cell; }
     friend class IdentifiedCellFactory;
     bool operator<(IdentifiedCell const& other) const { return this->_id < other._id; }
-    //friend OutputStream& operator<<(OutputStream& os, IdentifiedCell const& ic) { os << "{" << ic._id << ":" << ic._cell.box() << "}"; return os; }
-    friend OutputStream& operator<<(OutputStream& os, IdentifiedCell const& ic) { os << "{" << ic._id << "}"; return os; }
+    friend OutputStream& operator<<(OutputStream& os, IdentifiedCell const& ic) { os << "{" << ic._id << ":" << ic._cell.box() << "}"; return os; }
   protected:
     IdentifiedCell(SizeType id, GridCell const& cell) : _id(id), _cell(cell) { }
   private:
@@ -98,14 +112,14 @@ class DirectedHashedGraph {
     SPaving destinations_from(NCell const& source_cell) const;
 
     //! \brief The transitions from a given \a cell
-    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& transitions(IdentifiedCell const& cell) const;
+    Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& transitions(IdentifiedCell const& cell) const;
 
     //! \brief Insert a forward entry from \a source_cell using \a transition_cell with associated \a destination_cells
-    void insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells);
+    void insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells);
 
     //! \brief Insert backward entries from each of \a destination_cells to \a source_cell using \a transition_cell, hence
     //! hashing on the destination and transition
-    void insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells);
+    void insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells);
 
     Iterator find(IdentifiedCell const& source_icell);
 
@@ -156,7 +170,7 @@ class ReachabilityGraphInterface {
     virtual SizeType vertex_id(NCell const& cell) const = 0;
     virtual SizeType edge_id(NCell const& cell) const = 0;
 
-    virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) = 0;
+    virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells) = 0;
     virtual void clear() = 0;
 
     //! \brief Find the list of sets of cells having a given distance to the \a goal
@@ -164,10 +178,10 @@ class ReachabilityGraphInterface {
     virtual List<Set<IdentifiedCell>> sets_equidistant_to_goal(SPaving const& goal) const = 0;
 
     //! \brief The transitions from a given \a source forward
-    virtual Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& forward_transitions(IdentifiedCell const& source) const = 0;
+    virtual Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& forward_transitions(IdentifiedCell const& source) const = 0;
 
     //! \brief The transitions from a given \a destination backward
-    virtual Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& backward_transitions(IdentifiedCell const& destination) const = 0;
+    virtual Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& backward_transitions(IdentifiedCell const& destination) const = 0;
 
     //! \brief Remove those sources that can reach the \a avoidance paving
     virtual void reduce_to_not_reaching(SPaving const& avoidance) = 0;
@@ -205,10 +219,10 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     SizeType num_sources() const override;
     SizeType num_destinations() const override;
 
-    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& forward_transitions(IdentifiedCell const& source) const override;
-    Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& backward_transitions(IdentifiedCell const& destination) const override;
+    Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& forward_transitions(IdentifiedCell const& source) const override;
+    Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& backward_transitions(IdentifiedCell const& destination) const override;
 
-    void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) override;
+    void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells) override;
     void clear() override;
 
     void reduce_to_not_reaching(SPaving const& unsafe) override;

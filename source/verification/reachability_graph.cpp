@@ -69,10 +69,10 @@ DirectedHashedGraph::DirectedHashedGraph(DirectedHashedGraph const& other) :
 
     _map = TransitionProbabilityMap();
     for (auto const& s : other._map) {
-        _map.insert(s.first,Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>>());
+        _map.insert(s.first,Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>>());
         auto& s_it = _map[s.first];
         for (auto const& c : s.second) {
-            s_it.insert(c.first,Map<IdentifiedCell, ProbabilityType>());
+            s_it.insert(c.first,Map<IdentifiedCell, DestinationProbability>());
             auto& c_it = s_it[c.first];
             for (auto const& d : c.second) {
                 c_it.insert(d.first,d.second);
@@ -123,20 +123,20 @@ SPaving DirectedHashedGraph::destinations_from(NCell const& source_cell) const {
     return result;
 }
 
-Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& DirectedHashedGraph::transitions(IdentifiedCell const& cell) const {
+Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& DirectedHashedGraph::transitions(IdentifiedCell const& cell) const {
     return _map.at(cell);
 }
 
-void DirectedHashedGraph::insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+void DirectedHashedGraph::insert_forward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells) {
         auto itrans = _edge_factory.create(transition_cell);
         auto isrc = _vertex_factory.create(source_cell);
         auto src_ref = _map.find(isrc);
         if (src_ref == _map.end()) {
-            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,DestinationProbability>>()));
             src_ref = _map.find(isrc);
         }
 
-        src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+        src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,DestinationProbability>()));
         auto trans_ref = src_ref->second.find(itrans);
         for (auto const& dst : destination_cells) {
             auto idst = _vertex_factory.create(dst.first);
@@ -144,18 +144,18 @@ void DirectedHashedGraph::insert_forward(NCell const& source_cell, ECell const& 
         }
     }
 
-void DirectedHashedGraph::insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+void DirectedHashedGraph::insert_backward(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells) {
     auto itrans = _edge_factory.create(transition_cell);
     for (auto const& src : destination_cells) {
         auto isrc = _vertex_factory.create(src.first);
         auto src_ref = _map.find(isrc);
         if (src_ref == _map.end()) {
-            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,ProbabilityType>>()));
+            _map.insert(make_pair(isrc, Map<IdentifiedCell,Map<IdentifiedCell,DestinationProbability>>()));
             src_ref = _map.find(isrc);
         }
         auto trans_ref = src_ref->second.find(itrans);
         if (trans_ref == src_ref->second.end()) {
-            src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,ProbabilityType>()));
+            src_ref->second.insert(make_pair(itrans, Map<IdentifiedCell,DestinationProbability>()));
             trans_ref = src_ref->second.find(itrans);
         }
         auto idst = _vertex_factory.create(source_cell);
@@ -292,7 +292,7 @@ SizeType ForwardBackwardReachabilityGraph::num_destinations() const {
     return _backward_graph.num_sources();
 }
 
-void ForwardBackwardReachabilityGraph::insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,ProbabilityType>> const& destination_cells) {
+void ForwardBackwardReachabilityGraph::insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,DestinationProbability>> const& destination_cells) {
     _forward_graph.insert_forward(source_cell,transition_cell,destination_cells);
     _backward_graph.insert_backward(source_cell,transition_cell,destination_cells);
 }
@@ -404,11 +404,11 @@ List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_
     return result;
 }
 
-Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& ForwardBackwardReachabilityGraph::forward_transitions(IdentifiedCell const& source) const {
+Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& ForwardBackwardReachabilityGraph::forward_transitions(IdentifiedCell const& source) const {
     return _forward_graph.transitions(source);
 }
 
-Map<IdentifiedCell, Map<IdentifiedCell, ProbabilityType>> const& ForwardBackwardReachabilityGraph::backward_transitions(IdentifiedCell const& destination) const {
+Map<IdentifiedCell, Map<IdentifiedCell, DestinationProbability>> const& ForwardBackwardReachabilityGraph::backward_transitions(IdentifiedCell const& destination) const {
     return _backward_graph.transitions(destination);
 }
 

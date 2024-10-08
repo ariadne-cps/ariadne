@@ -26,8 +26,16 @@
 
 namespace Ariadne {
 
-AssignedControl::AssignedControl(IdentifiedCell const& source_, IdentifiedCell const& control_, PointType const& target_point_) :
-    source(source_), control(control_), target_point(target_point_) { }
+AssignedControl::AssignedControl(IdentifiedCell const& control, PointType const& target_point) :
+    _control(control), _target_point(target_point) { }
+
+IdentifiedCell const& AssignedControl::control() const {
+    return _control;
+}
+
+PointType const& AssignedControl::target_point() const {
+    return _target_point;
+}
 
 ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(EffectiveVectorMultivariateFunction const& dynamics, PossiblyReachingRAG const& rag) :
     _dynamics(dynamics), _rag(rag) { }
@@ -65,7 +73,7 @@ double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExa
 }
 
 ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
-    List<AssignedControl> assignments;
+    Map<IdentifiedCell,AssignedControl> assignments;
 
     auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goal();
 
@@ -109,17 +117,17 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
             for (SizeType i=0; i<target_point.size(); ++i)
                 target_point.at(i) = src_midpoint.at(i).get_d()+(image_point.at(i)-src_midpoint.at(i).get_d())*ratio;
 
-            assignments.append({src,best_control,target_point});
+            assignments.insert(src,{best_control,target_point});
         }
     }
 
     return {assignments};
 }
 
-ReachAvoidStrategy::ReachAvoidStrategy(List<AssignedControl> const& assignments) :
+ReachAvoidStrategy::ReachAvoidStrategy(Map<IdentifiedCell,AssignedControl> const& assignments) :
     _assignments(assignments) { }
 
-List<AssignedControl> const& ReachAvoidStrategy::assignments() const {
+Map<IdentifiedCell,AssignedControl> const& ReachAvoidStrategy::assignments() const {
     return _assignments;
 }
 

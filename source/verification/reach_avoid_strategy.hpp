@@ -33,13 +33,17 @@ namespace Ariadne {
 typedef double ScoreType;
 
 struct AssignedControl {
-    AssignedControl(IdentifiedCell const& source, IdentifiedCell const& control, PointType const& target_point);
+    AssignedControl(IdentifiedCell const& control, PointType const& target_point);
 
-    IdentifiedCell const& source;
-    IdentifiedCell const& control;
-    PointType const& target_point;
+    IdentifiedCell const& control() const;
+    PointType const& target_point() const;
 
-    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.source.id() << ":" << ac.control.id() << "@" << ac.target_point << "}"; return os; }
+    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.control().id() << "@" << ac.target_point() << "}"; return os; }
+
+  private:
+
+    IdentifiedCell const _control;
+    PointType const _target_point;
 };
 
 class ReachAvoidStrategy;
@@ -56,11 +60,11 @@ private:
 class ReachAvoidStrategy {
    friend class ReachAvoidStrategyBuilder;
   protected:
-    ReachAvoidStrategy(List<AssignedControl> const& assignments);
+    ReachAvoidStrategy(Map<IdentifiedCell,AssignedControl> const& assignments);
   public:
-    List<AssignedControl> const& assignments() const;
+    Map<IdentifiedCell,AssignedControl> const& assignments() const;
   private:
-    List<AssignedControl> const _assignments;
+    Map<IdentifiedCell,AssignedControl> const _assignments;
 };
 
 } // namespace Ariadne

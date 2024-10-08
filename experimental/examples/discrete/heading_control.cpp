@@ -185,5 +185,10 @@ void ariadne_main()
     ra.plot();
 
     ReachAvoidStrategyBuilder strategy_builder(ra.dynamics(),ra.possibly_reaching_graph());
-    strategy_builder.build();
+    auto assignments = strategy_builder.build().assignments();
+
+    for (auto const& a : assignments) {
+        CONCLOG_PRINTLN_AT(1,a)
+    }
+
 }

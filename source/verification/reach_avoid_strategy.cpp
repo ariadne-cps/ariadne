@@ -91,7 +91,7 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
                 ScoreType current_score = 0.0;
                 for (auto const& tgt : ctrl.second) {
                     if (sets_equidistant_to_goal.at(s_idx-1).contains(tgt.first))
-                        current_score += scores.at(tgt.first) * tgt.second.probability();
+                        current_score += tgt.second.probability();
                 }
                 if (current_score > best_score) {
                     best_control = ctrl.first;

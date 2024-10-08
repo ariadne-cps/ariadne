@@ -26,6 +26,7 @@
 #include "verification/reach_avoid.hpp"
 #include "verification/reach_avoid_strategy.hpp"
 #include "utility/stopwatch.hpp"
+#include "utility/randomiser.hpp"
 
 Tuple<IteratedMap,Grid,RealBox> u_control() {
     Real deltat=0.1_dec, v=3;
@@ -187,8 +188,72 @@ void ariadne_main()
     ReachAvoidStrategyBuilder strategy_builder(ra.dynamics(),ra.possibly_reaching_graph());
     auto assignments = strategy_builder.build().assignments();
 
-    for (auto const& a : assignments) {
-        CONCLOG_PRINTLN_AT(1,a)
+    Randomiser<DegreeType> random_uint;
+    Randomiser<ExactDouble> random_double;
+
+    SizeType idx = static_cast<SizeType>(random_uint.get(0,assignments.size()-1));
+    auto a_it = assignments.begin();
+    auto dim = a_it->first.cell().dimension();
+    for (SizeType i=0;i<idx;++i) ++a_it;
+    auto initial_box = a_it->first.cell().box();
+
+    CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control " << a_it->second.control().cell().box())
+
+    PointType current(dim);
+    for (SizeType i=0; i<dim; ++i) {
+        current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
     }
 
+    auto const& vertex_factory = ra.vertex_factory();
+
+    SizeType step = 0;
+
+    List<PointType> sequence;
+
+    while(true) {
+
+        sequence.append(current);
+
+        ExactBoxType boxed_current(dim);
+        for (SizeType i=0; i<dim; ++i) {
+            boxed_current[i] = ExactIntervalType(cast_exact(current[i]),cast_exact(current[i]+1e-10));
+        }
+
+        SPaving point_paving(ra.state_grid());
+        point_paving.adjoin_over_approximation(boxed_current,ra.grid_depth());
+
+        auto point_cell = *point_paving.begin();
+        auto icell = vertex_factory.create(point_cell);
+
+        auto target = assignments.get(icell).target_point();
+
+        double delta_modulus = 0;
+        for (SizeType i=0; i<dim; ++i) {
+            delta_modulus += (target.at(i)-current.at(i))*(target.at(i)-current.at(i));
+        }
+        delta_modulus = std::sqrt(delta_modulus);
+
+        PointType next(dim);
+        for (SizeType i=0; i<dim; ++i) {
+            next.at(i) = current.at(i) + (target.at(i)-current.at(i))/delta_modulus*0.3;
+        }
+
+        CONCLOG_PRINTLN_AT(1, step << ": from " << current << " (" << icell.id() << ") to " << next << " under control " << assignments.get(icell).control().cell().box())
+
+        current = next;
+
+        ++step;
+
+        if (step > 50) break;
+    }
+
+    /*
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    std::cout << "sequence = [";
+    for (auto const& p : sequence) {
+        std::cout << p.at(0) << " " << p.at(1) << " " << p.at(2) << ";" << std::endl;
+    }
+    std::cout << "];";
+    */
 }

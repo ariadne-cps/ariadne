@@ -86,6 +86,26 @@ EffectiveVectorMultivariateFunction const& ReachAvoid::dynamics() const {
     return _dynamics;
 }
 
+Grid const& ReachAvoid::state_grid() const {
+    return _state_paving.grid();
+}
+
+Grid const& ReachAvoid::control_grid() const {
+    return _control_paving.grid();
+}
+
+SizeType ReachAvoid::grid_depth() const {
+    return _depth;
+}
+
+IdentifiedCellFactory const& ReachAvoid::vertex_factory() const {
+    return *_vertex_factory;
+}
+
+IdentifiedCellFactory const& ReachAvoid::edge_factory() const {
+    return *_edge_factory;
+}
+
 ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     SPaving obstacle_paving(_state_paving.grid());
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);

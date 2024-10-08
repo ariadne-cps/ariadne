@@ -55,32 +55,36 @@ ExactBoxType shrink(RealBox const& bx, FloatDP const& eps) {
 ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold) :
             _name(name), _dynamics(dynamics), _state_bounds(state_bounds), _control_bounds(control_bounds), _depth(depth), _eps({eps,DoublePrecision()}), _probability_threshold(probability_threshold) {
 
-        _state_paving = SPaving(state_grid);
-        _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),depth);
-        _state_paving.mince(depth);
+    _state_paving = SPaving(state_grid);
+    _state_paving.adjoin_outer_approximation(shrink(state_bounds,_eps),depth);
+    _state_paving.mince(depth);
 
-        _control_paving = CPaving(control_grid);
-        _control_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),depth);
-        _control_paving.mince(depth);
+    _control_paving = CPaving(control_grid);
+    _control_paving.adjoin_outer_approximation(shrink(control_bounds,_eps),depth);
+    _control_paving.mince(depth);
 
-        SizeType default_vertex_extent = _state_paving.begin()->root_extent();
-        SizeType default_edge_extent = _control_paving.begin()->root_extent();
-        IdentifiedCellFactory::HashTableType vertex_ids;
-        IdentifiedCellFactory::HashTableType edge_ids;
+    SizeType default_vertex_extent = _state_paving.begin()->root_extent();
+    SizeType default_edge_extent = _control_paving.begin()->root_extent();
+    IdentifiedCellFactory::HashTableType vertex_ids;
+    IdentifiedCellFactory::HashTableType edge_ids;
 
-        _unverified = _state_paving;
-        _obstacles = SPaving(_state_paving.grid());
-        _goals = SPaving(_state_paving.grid());
+    _unverified = _state_paving;
+    _obstacles = SPaving(_state_paving.grid());
+    _goals = SPaving(_state_paving.grid());
 
-        for (auto const& c : _state_paving)
-            vertex_ids.insert(make_pair(word_to_id(c.word(),(default_vertex_extent+depth)*_state_paving.dimension()),vertex_ids.size()));
-        for (auto const& c : _control_paving) {
-            edge_ids.insert(make_pair(word_to_id(c.word(),(default_edge_extent+depth)*_control_paving.dimension()),edge_ids.size()));
-        }
-
-        _vertex_factory.reset(new IdentifiedCellFactory(default_vertex_extent,vertex_ids));
-        _edge_factory.reset(new IdentifiedCellFactory(default_edge_extent,edge_ids));
+    for (auto const& c : _state_paving)
+        vertex_ids.insert(make_pair(word_to_id(c.word(),(default_vertex_extent+depth)*_state_paving.dimension()),vertex_ids.size()));
+    for (auto const& c : _control_paving) {
+        edge_ids.insert(make_pair(word_to_id(c.word(),(default_edge_extent+depth)*_control_paving.dimension()),edge_ids.size()));
     }
+
+    _vertex_factory.reset(new IdentifiedCellFactory(default_vertex_extent,vertex_ids));
+    _edge_factory.reset(new IdentifiedCellFactory(default_edge_extent,edge_ids));
+}
+
+EffectiveVectorMultivariateFunction const& ReachAvoid::dynamics() const {
+    return _dynamics;
+}
 
 ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     SPaving obstacle_paving(_state_paving.grid());

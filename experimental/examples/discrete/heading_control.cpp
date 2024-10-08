@@ -184,6 +184,6 @@ void ariadne_main()
 
     ra.plot();
 
-    ReachAvoidStrategyBuilder strategy_builder(ra.possibly_reaching_graph());
+    ReachAvoidStrategyBuilder strategy_builder(ra.dynamics(),ra.possibly_reaching_graph());
     strategy_builder.build();
 }

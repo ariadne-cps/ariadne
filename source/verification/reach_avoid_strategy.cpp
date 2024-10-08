@@ -26,11 +26,43 @@
 
 namespace Ariadne {
 
-AssignedControl::AssignedControl(IdentifiedCell const& source_, IdentifiedCell const& control_, DirectionType const& direction_) :
-    source(source_), control(control_), direction(direction_) { }
+AssignedControl::AssignedControl(IdentifiedCell const& source_, IdentifiedCell const& control_, PointType const& target_point_) :
+    source(source_), control(control_), target_point(target_point_) { }
 
-ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(PossiblyReachingRAG const& rag) :
-    _rag(rag) { }
+ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(EffectiveVectorMultivariateFunction const& dynamics, PossiblyReachingRAG const& rag) :
+    _dynamics(dynamics), _rag(rag) { }
+
+double min_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExactInterval> const& image_box) {
+    double result = std::numeric_limits<double>::infinity();
+
+    auto src_midpoint = src_box.midpoint();
+    auto image_midpoint = image_box.midpoint();
+
+    for (SizeType i=0; i<image_box.size(); ++i) {
+        double delta = image_box[i].radius().get_d() + (src_box[i].radius().get_d() - (image_midpoint.at(i).get_d()-src_midpoint.at(i).get_d()));
+        double current_value = std::abs(1.0 + delta/(image_midpoint.at(i).get_d() - src_midpoint.at(i).get_d()));
+        if (current_value < result) {
+            result = current_value;
+        }
+    }
+    return result;
+}
+
+double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExactInterval> const& image_box) {
+    double result = 0.0;
+
+    auto src_midpoint = src_box.midpoint();
+    auto image_midpoint = image_box.midpoint();
+
+    for (SizeType i=0; i<image_box.size(); ++i) {
+        double delta = image_box[i].radius().get_d() + (src_box[i].radius().get_d() - (image_midpoint.at(i).get_d()-src_midpoint.at(i).get_d()));
+        double current_value = std::abs(1.0 + delta/(image_midpoint.at(i).get_d() - src_midpoint.at(i).get_d()));
+        if (current_value > result) {
+            result = current_value;
+        }
+    }
+    return result;
+}
 
 ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
     List<AssignedControl> assignments;
@@ -47,7 +79,6 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
             auto const& trans = _rag.internal().forward_transitions(src);
             IdentifiedCell best_control = trans.begin()->first;
             ScoreType best_score = -static_cast<ScoreType>(trans.size());
-            PointType best_midpoint(src.cell().dimension());
             for (auto const& ctrl : trans) {
                 ScoreType current_score = 0.0;
                 for (auto const& tgt : ctrl.second) {
@@ -57,30 +88,28 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
                 if (current_score > best_score) {
                     best_control = ctrl.first;
                     best_score = current_score;
-                    best_midpoint = PointType(src.cell().dimension());
-                    for (SizeType i=0; i<best_midpoint.size(); ++i) {
-                        for (auto const& tgt : ctrl.second) {
-                            best_midpoint.at(i) = best_midpoint.at(i) + tgt.second.probability()*tgt.second.point().at(i);
-                        }
-                    }
                 }
             }
             scores.insert(src,best_score);
 
-            DirectionType direction(src.cell().dimension());
-            auto src_midpoint = src.cell().box().midpoint();
-            double direction_norm = 0.0;
-            for (SizeType i=0; i<direction.size(); ++i) {
-                auto current_midpoint_dimension = src_midpoint.at(i).get_d();
-                direction.at(i) = best_midpoint.at(i) - current_midpoint_dimension;
-                direction_norm += current_midpoint_dimension*current_midpoint_dimension;
-            }
-            direction_norm = std::sqrt(direction_norm);
-            for (SizeType i=0; i<direction.size(); ++i) {
-                direction.at(i) = direction.at(i)/direction_norm;
+            auto combined_input = product(src.cell().box(), best_control.cell().box());
+            auto image_box = cast_exact_box(apply(_dynamics, combined_input).bounding_box());
+            auto image_midpoint = image_box.midpoint();
+            PointType image_point(image_midpoint.dimension());
+            for (SizeType i=0; i<image_point.size(); ++i) {
+                image_point.at(i) = image_midpoint.at(i).get_d();
             }
 
-            assignments.append({src,best_control,direction});
+            auto src_box = src.cell().box();
+            auto src_midpoint = src_box.midpoint();
+
+            auto ratio = max_target_ratio(src_box,image_box);
+
+            PointType target_point(image_point.size());
+            for (SizeType i=0; i<target_point.size(); ++i)
+                target_point.at(i) = src_midpoint.at(i).get_d()+(image_point.at(i)-src_midpoint.at(i).get_d())*ratio;
+
+            assignments.append({src,best_control,target_point});
         }
     }
 

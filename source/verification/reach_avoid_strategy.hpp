@@ -26,29 +26,30 @@
 #define ARIADNE_REACH_AVOID_STRATEGY_HPP
 
 #include "reachability_graph.hpp"
+#include "function/function.hpp"
 
 namespace Ariadne {
 
-typedef PointType DirectionType;
 typedef double ScoreType;
 
 struct AssignedControl {
-    AssignedControl(IdentifiedCell const& source, IdentifiedCell const& control, DirectionType const& direction);
+    AssignedControl(IdentifiedCell const& source, IdentifiedCell const& control, PointType const& target_point);
 
     IdentifiedCell const& source;
     IdentifiedCell const& control;
-    DirectionType const& direction;
+    PointType const& target_point;
 
-    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.source.id() << ":" << ac.control.id() << "@" << ac.direction << "}"; return os; }
+    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.source.id() << ":" << ac.control.id() << "@" << ac.target_point << "}"; return os; }
 };
 
 class ReachAvoidStrategy;
 
 class ReachAvoidStrategyBuilder {
 public:
-    ReachAvoidStrategyBuilder(PossiblyReachingRAG const& rag);
+    ReachAvoidStrategyBuilder(EffectiveVectorMultivariateFunction const& dynamics, PossiblyReachingRAG const& rag);
     ReachAvoidStrategy build();
 private:
+    EffectiveVectorMultivariateFunction const _dynamics;
     PossiblyReachingRAG const _rag;
 };
 

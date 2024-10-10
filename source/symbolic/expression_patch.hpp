@@ -29,12 +29,11 @@
 #ifndef ARIADNE_EXPRESSION_PATCH_HPP
 #define ARIADNE_EXPRESSION_PATCH_HPP
 
-#include <typeinfo>
-
 #include "symbolic/variable.hpp"
 #include "symbolic/expression.hpp"
 #include "symbolic/expression_set.hpp"
 
+#include "algebra/sweeper.hpp"
 #include "function/taylor_function.hpp"
 
 namespace Ariadne {
@@ -48,9 +47,14 @@ Vector<RealExpression> call(EffectiveVectorMultivariateFunction const& f, Vector
 
 
 template<class P, class T> class ExpressionPatch;
+using ValidatedScalarExpressionPatch = ExpressionPatch<ValidatedTag,RealScalar>;
+using ValidatedVectorExpressionPatch = ExpressionPatch<ValidatedTag,RealVector>;
+
 typedef VariableInterval<typename IntervalDomainType::UpperBoundType> VariableIntervalDomainType;
 typedef VariablesBox<IntervalDomainType> VariablesBoxDomainType;
 typedef VectorVariableBox<IntervalDomainType> VectorVariableBoxDomainType;
+
+
 
 template<class X, class F> decltype(auto) vapply(F const& f, Vector<X> const& v) {
     using Y = decltype(f(declval<X>()));
@@ -138,18 +142,18 @@ class AnyConstantOrVariablePatch
     AnyConstantOrVariablePatch(VectorVariableBoxDomainType vvbx) : Base(vvbx) { }
 };
 
-template<class... AS> List<ConstantOrVariablePatch<Real>> make_constant_or_variable_patch_list(InitializerList<AnyConstantOrVariablePatch> const& cvplst) {
-    auto _append = [](List<ConstantOrVariablePatch<Real>>& lst, auto const& t) {
-        using T = decltype(t);
-        if constexpr (OneOf<T,Constant<RealVector>,Variable<RealVector>,Vector<RealVariable>>) {
-            for (SizeType i=0; i!=t.size(); ++i) { lst.append(t[i]); }
-        } else {
-            lst.append(t);
-        }
-    };
+template<class T>
+Void _append(List<ConstantOrVariablePatch<Real>>& lst, T const& t) {
+    if constexpr (OneOf<T,Constant<RealVector>,Variable<RealVector>,Vector<RealVariable>>) {
+        for (SizeType i=0; i!=t.size(); ++i) { lst.append(t[i]); }
+    } else {
+        lst.append(t);
+    }
+}
 
+template<class... AS> List<ConstantOrVariablePatch<Real>> make_constant_or_variable_patch_list(InitializerList<AnyConstantOrVariablePatch> const& cvplst) {
     List<ConstantOrVariablePatch<Real>> lst;
-    for(auto cvp : cvplst) { std::visit(cvp,[&](AnyConstantOrVariablePatch const& cvp){_append(lst,cvp);}); }
+    for(auto cvp : cvplst) { std::visit(cvp,[&lst](AnyConstantOrVariablePatch const& cvp){_append(lst,cvp);}); }
     return lst;
 }
 
@@ -181,13 +185,14 @@ template<> class SpacePatch<Real> {
         : _spc(vars), _dom(dom) { }
     SpacePatch(List<RealVariable> vars, Map<RealVariable,IntervalDomainType> vivls)
         : _spc(vars), _dom(vars.size(),[&](SizeType i){return vivls[vars[i]];}) { }
-    //SpacePatch(VariablesBoxDomainType);
 
     DimensionType dimension() const { return this->_spc.dimension(); }
     Space<T> const& space() const { return this->_spc; }
     List<RealVariable> variables() const { return this->_spc.variables(); }
     explicit operator Space<T> const& () const { return this->_spc; }
     BoxDomainType domain() const { return this->_dom; }
+    friend OutputStream& operator<<(OutputStream& os, SpacePatch<T> const& spcdom) {
+        return os <<"SpacePatch(spc="<<spcdom._spc<<", dom="<<spcdom._dom<<")"; }
 };
 
 
@@ -201,6 +206,7 @@ template<class P> VectorMultivariateFunction<P> combine(VectorMultivariateFuncti
     return join(compose(f1,p1),compose(f2,p2));
 }
 
+
 template<> class ExpressionPatch<ValidatedTag, RealScalar> {
     using P=ValidatedTag;
     using T=RealScalar;
@@ -208,39 +214,111 @@ template<> class ExpressionPatch<ValidatedTag, RealScalar> {
   private: public:
     Vector<RealVariable> _vars;
     FunctionPatch<P,RealScalar(RealVector)> _fp;
+  private:
+    explicit ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, RealExpression expr, Void*);
   public:
     IntervalRangeType range();
     SizeOne size() const { return _fp.result_size(); }
 
-    ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, RealExpression expr);
+    ExpressionPatch(Vector<RealVariable> vars, BoxDomainType dom, Function<P,SIG> f);
+    ExpressionPatch(RealSpacePatch spcptch, RealExpression expr);
+    ExpressionPatch(Vector<RealVariable> vars, FunctionPatch<P,SIG> fp);
+    ExpressionPatch(RealSpace spc, FunctionPatch<P,SIG> fp);
+    ExpressionPatch(RealSpacePatch spcptch, Function<P,SIG> f);
 
-    ExpressionPatch(RealConstant);
-    ExpressionPatch(VariableIntervalDomainType);
+    friend auto operator+(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return add(ep1,ep2); }
+    friend auto operator-(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return sub(ep1,ep2); }
+    friend auto operator*(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return mul(ep1,ep2); }
+    friend auto operator/(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return div(ep1,ep2); }
+    friend auto operator+(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> { return add(ep1,c2); }
+    friend auto operator-(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> { return sub(ep1,c2); }
+    friend auto operator*(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> { return mul(ep1,c2); }
+    friend auto operator/(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> { return div(ep1,c2); }
+    friend auto operator+(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return add(c1,ep2); }
+    friend auto operator-(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return sub(c1,ep2); }
+    friend auto operator*(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return mul(c1,ep2); }
+    friend auto operator/(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> { return div(c1,ep2); }
+
+    friend auto operator*(ExpressionPatch<P,Scalar<Real>> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,Vector<Real>>;
+    friend auto operator*(Vector<Number<P>> c1, ExpressionPatch<P,Scalar<Real>> ep2) -> ExpressionPatch<P,Vector<Real>>;
+    friend auto operator/(Vector<Number<P>> c1, ExpressionPatch<P,Scalar<Real>> ep2) -> ExpressionPatch<P,Vector<Real>>;
 
     friend auto add(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
-        return ExpressionPatch<P,T>::_add(ep1,ep2); }
+        return ExpressionPatch<P,T>::_apply(Add(),ep1,ep2); }
+    friend auto sub(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sub(),ep1,ep2); }
+    friend auto mul(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,ep2); }
+    friend auto div(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Div(),ep1,ep2); }
+    friend auto add(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Add(),ep1,c2); }
+    friend auto sub(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sub(),ep1,c2); }
+    friend auto mul(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,c2); }
+    friend auto div(ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Div(),ep1,c2); }
+    friend auto add(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Add(),c1,ep2); }
+    friend auto sub(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sub(),c1,ep2); }
+    friend auto mul(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Mul(),c1,ep2); }
+    friend auto div(Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Div(),c1,ep2); }
+
+    friend auto nul(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Nul(),ep); }
+    friend auto pos(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Pos(),ep); }
+    friend auto neg(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Neg(),ep); }
+    friend auto sqr(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sqr(),ep); }
+    friend auto hlf(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Hlf(),ep); }
+    friend auto rec(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Rec(),ep); }
+    friend auto pow(ExpressionPatch<P,T> ep, Int n) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Pow(),ep,n); }
+    friend auto sqrt(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sqrt(),ep); }
+    friend auto exp(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Exp(),ep); }
+    friend auto log(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Log(),ep); }
+    friend auto sin(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Sin(),ep); }
+    friend auto cos(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Cos(),ep); }
+    friend auto tan(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Tan(),ep); }
+    friend auto atan(ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Atan(),ep); }
 
     friend OutputStream& operator<<(OutputStream& os, ExpressionPatch<P,T> const& ep) {
-        os << "ExpressionPatch({";
-        for (SizeType i=0; i!=ep._vars.size(); ++i) {
-            if (i!=0) { os << ","; } os << ep._vars[i]<<"|"<<ep._fp.domain()[i];
-        }
-        return os << "}, fn=" << cast_unchecked(ep._fp) << ")";
-    }
+        return ep._write(os); }
   private:
-    static ExpressionPatch<P,T> _add(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) {
-#warning
-        ARIADNE_NOT_IMPLEMENTED;
-    }
+    OutputStream& _write(OutputStream& os) const;
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, Number<P> c1, ExpressionPatch<P,T> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,T> ep1, Number<P> c2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,T> ep1, Int n2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,T> ep);
 };
 
 template<> class ExpressionPatch<ValidatedTag, RealVector> {
     using P=ValidatedTag;
     using T=RealVector;
     using SIG=T(RealVector);
+    using VT=RealVector;
+    using ST=RealScalar;
   private: public:
     Vector<RealVariable> _vars;
     FunctionPatch<P,RealVector(RealVector)> _fp;
+  private:
+    ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, Vector<RealExpression> expr, Void*);
   public:
     Map<RealVariable,IntervalDomainType> domains() const;
 
@@ -250,65 +328,154 @@ template<> class ExpressionPatch<ValidatedTag, RealVector> {
     ExpressionPatch(RealSpacePatch dom, Vector<RealExpression> expr);
     ExpressionPatch(RealSpacePatch dom, Function<P,SIG> f);
     ExpressionPatch(RealSpace spc, FunctionPatch<P,SIG> fp);
-    ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, Vector<RealExpression> expr);
     ExpressionPatch(Vector<RealVariable> vars, FunctionPatch<P,SIG> f);
     ExpressionPatch(Vector<RealVariable> vars, BoxDomainType fdom, Function<P,SIG> f);
 
     typedef Variant<ExpressionPatch<P,RealVector>,ExpressionPatch<P,RealScalar>,VariableIntervalDomainType,RealConstant,Dyadic> PreExpressionPatch;
 
-    ExpressionPatch(PreExpressionPatch var);
+    //ExpressionPatch(PreExpressionPatch var);
     ExpressionPatch(InitializerList<PreExpressionPatch> lst);
-    ExpressionPatch(InitializerList<ExpressionPatch<ValidatedTag,RealScalar>> lst);
+    //ExpressionPatch(List<Variant<RealConstant,VariableIntervalDomainType,ExpressionPatch<ValidatedTag,RealScalar>>> const& lst);
 
     friend auto call(FunctionPatch<P,RealVector(RealVector)>, ExpressionPatch<P,RealVector>) -> ExpressionPatch<P,RealVector>;
 
+    friend auto nul(ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Nul(),ep); }
+    friend auto pos(ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Pos(),ep); }
+    friend auto neg(ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Neg(),ep); }
+
+    friend auto add(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Add(),ep1,ep2); }
+    friend auto sub(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Sub(),ep1,ep2); }
+    friend auto mul(ExpressionPatch<P,ST> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,ep2); }
+    friend auto mul(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,ep2); }
+    friend auto div(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,T> {
+        return ExpressionPatch<P,T>::_apply(Div(),ep1,ep2); }
+    friend auto add(ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Add(),ep1,c2); }
+    friend auto sub(ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Sub(),ep1,c2); }
+    friend auto mul(ExpressionPatch<P,ST> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,c2); }
+    friend auto mul(ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),ep1,c2); }
+    friend auto div(ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Div(),ep1,c2); }
+    friend auto add(Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Add(),c1,ep2); }
+    friend auto sub(Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Sub(),c1,ep2); }
+    friend auto mul(Scalar<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),c1,ep2); }
+    friend auto mul(Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Mul(),c1,ep2); }
+    friend auto div(Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,VT> {
+        return ExpressionPatch<P,T>::_apply(Div(),c1,ep2); }
+
+    friend auto operator+(ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,T> { return pos(ep); }
+    friend auto operator-(ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,T> { return neg(ep); }
+    friend auto operator+(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return add(ep1,ep2); }
+    friend auto operator-(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return sub(ep1,ep2); }
+    friend auto operator*(ExpressionPatch<P,ST> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return mul(ep1,ep2); }
+    friend auto operator*(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,T> { return mul(ep1,ep2); }
+    friend auto operator/(ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,T> { return div(ep1,ep2); }
+    friend auto operator+(ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,T> { return add(ep1,c2); }
+    friend auto operator-(ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,T> { return sub(ep1,c2); }
+    friend auto operator*(ExpressionPatch<P,ST> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,T> { return _apply(Mul(),ep1,c2); }
+    friend auto operator*(ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2) -> ExpressionPatch<P,T> { return _apply(Mul(),ep1,c2); }
+    friend auto operator/(ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2) -> ExpressionPatch<P,T> { return _apply(Div(),ep1,c2); }
+    friend auto operator+(Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return add(c1,ep2); }
+    friend auto operator-(Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return sub(c1,ep2); }
+    friend auto operator*(Scalar<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,T> { return _apply(Mul(),c1,ep2); }
+    friend auto operator*(Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,T> { return _apply(Mul(),c1,ep2); }
+    friend auto operator/(Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,T> { return _apply(Div(),c1,ep2); }
+
     friend auto join(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
         return ExpressionPatch<P,T>::_join(ep1,ep2); }
-
-    friend auto add(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
-        return ExpressionPatch<P,T>::_add(ep1,ep2); }
 
     friend OutputStream& operator<<(OutputStream& os, ExpressionPatch<P,T> const& ep) {
         return ep._write(os); }
 
     friend ExpressionPatch<ValidatedTag,RealVector> FunctionPatch<ValidatedTag,RealVector(RealVector)>::operator() (ExpressionPatch<ValidatedTag,RealVector> const& ep) const;
-  private:
 
-    Void _adjoin(ExpressionPatch<P,RealScalar> const& sep);
+  private:
     static ExpressionPatch<P,T> _join(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2);
-    static ExpressionPatch<P,T> _add(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2);
+    template<class OP> static ExpressionPatch<P,VT> _apply(OP op, ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2);
+    template<class OP> static ExpressionPatch<P,VT> _apply(OP op, ExpressionPatch<P,ST> ep1, ExpressionPatch<P,VT> ep2);
+    template<class OP> static ExpressionPatch<P,VT> _apply(OP op, ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,ST> ep1, Vector<Number<P>> c2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, Scalar<Number<P>> c1, ExpressionPatch<P,VT> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2);
+    template<class OP> static ExpressionPatch<P,T> _apply(OP op, ExpressionPatch<P,T> ep);
 
     OutputStream& _write(OutputStream& os) const;
 };
 
-//typedef Variant<ExpressionPatch<P,RealVector>,ExpressionPatch<P,RealScalar>,VariableIntervalDomainType,RealConstant,Dyadic> PreExpressionPatch;
+template<class P, class T1, class T2>
+Tuple<RealSpace,MultivariateFunctionPatch<P,T1>,MultivariateFunctionPatch<P,T2>>
+make_common_variables(ExpressionPatch<P,T1> ep1, ExpressionPatch<P,T2> ep2);
 
-ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(RealConstant var)
-    : _vars(), _fp(BoxDomainType({}), Function<ValidatedTag,RealScalar(RealVector)>::constant(0u,var)) { }
 
-ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(VariableIntervalDomainType vardom)
-    : _vars(vardom.variable()), _fp(BoxDomainType({vardom.interval()}), Function<ValidatedTag,RealScalar(RealVector)>::coordinate(1u,0u)) { }
-
-ExpressionPatch<ValidatedTag,RealVector> make_expression_patch(ExpressionPatch<ValidatedTag,RealVector>::PreExpressionPatch var) {
-    auto maker = [](auto cve) {
-        using CVE=decltype(cve);
-        std::cerr<<"  cve="<<cve<<"\n";
-        if constexpr (Same<CVE, Dyadic>) {
-            auto sep=ExpressionPatch<ValidatedTag,RealScalar>(RealConstant(cve)); return ExpressionPatch<ValidatedTag,RealVector>({sep}); }
-        else if constexpr (OneOf<CVE, RealConstant,VariableIntervalDomainType>) {
-            ExpressionPatch<ValidatedTag,RealScalar> sep(cve); return ExpressionPatch<ValidatedTag,RealVector>({sep}); }
-        else if constexpr (Same<CVE,ExpressionPatch<ValidatedTag,RealScalar>>) {
-            return ExpressionPatch<ValidatedTag,RealVector>(cve._vars,VectorMultivariateFunctionPatch<ValidatedTag>(List<ScalarMultivariateFunctionPatch<ValidatedTag>>({cve._fp})));
-        } else {
-            return cve;
-        }
-    };
-
-    return std::visit( maker, var);
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(Vector<RealVariable> vars, FunctionPatch<P,SIG> fp)
+    : _vars(vars), _fp(fp)
+{
+    assert(fp.argument_size()==vars.size());
 }
 
-ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(PreExpressionPatch var)
-    : ExpressionPatch(make_expression_patch(var)) { }
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(RealSpacePatch spcdom, RealExpression expr)
+    : ExpressionPatch(spcdom,Function<P,SIG>(spcdom.variables(),expr)) {
+}
+
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(RealSpacePatch spcdom, Function<P,SIG> f)
+    : _vars(spcdom.variables()), _fp(spcdom.domain(),f)
+{
+    ARIADNE_PRECONDITION(spcdom.dimension()==f.argument_size());
+}
+
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(RealSpace spc, FunctionPatch<P,SIG> fp)
+    : _vars(spc.variables()), _fp(fp)
+{
+    ARIADNE_PRECONDITION(spc.dimension()==fp.argument_size());
+}
+
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, RealExpression expr, Void*)
+    : ExpressionPatch(RealSpacePatch(List<RealVariable>(dom.keys()),dom),expr) {
+}
+
+ExpressionPatch<ValidatedTag,RealScalar>::ExpressionPatch(Vector<RealVariable> vars, BoxDomainType fdom, Function<P,SIG> f)
+    : _vars(vars), _fp(fdom,f)
+{
+    assert(fdom.dimension()==f.argument_size());
+    assert(f.argument_size()==vars.size());
+}
+
+
+template<class OP> auto ExpressionPatch<ValidatedTag,RealScalar>::_apply(OP op, ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+    auto sff = make_common_variables(ep1,ep2);
+    return ExpressionPatch<P,T>(std::get<0>(sff), op(std::get<1>(sff),std::get<2>(sff)));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealScalar>::_apply(OP op, ExpressionPatch<P,T> ep1, Number<P> c2) -> ExpressionPatch<P,T> {
+    return ExpressionPatch<P,T>(ep1._vars,op(ep1._fp,c2));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealScalar>::_apply(OP op, Number<P> c1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
+    return ExpressionPatch<P,T>(ep2._vars,op(c1,ep2._fp));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealScalar>::_apply(OP op, ExpressionPatch<P,T> ep) -> ExpressionPatch<P,T> {
+    return ExpressionPatch<P,T>(ep._vars,op(ep._fp));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealScalar>::_apply(OP op, ExpressionPatch<P,T> ep, Int n) -> ExpressionPatch<P,T> {
+    return ExpressionPatch<P,T>(ep._vars,op(ep._fp,n));
+}
+
+
 
 
 ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(RealSpacePatch spcdom, Vector<RealExpression> expr)
@@ -327,7 +494,7 @@ ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(RealSpace spc, Functio
     ARIADNE_PRECONDITION(spc.dimension()==fp.argument_size());
 }
 
-ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, Vector<RealExpression> expr)
+ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(Map<RealVariable,IntervalDomainType> dom, Vector<RealExpression> expr, Void*)
     : ExpressionPatch(RealSpacePatch(List<RealVariable>(dom.keys()),dom),expr) {
 }
 
@@ -344,27 +511,128 @@ ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(Vector<RealVariable> v
     assert(fp.argument_size()==vars.size());
 }
 
-ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(InitializerList<ExpressionPatch<ValidatedTag,RealScalar>> lst)
-    : ExpressionPatch(*lst.begin())
-{
-    assert (lst.size()!=0);
-    bool first=true;
-    for (auto ep : lst) {
-        if (first) { first=false; }
-        else { this->_adjoin(ep); }
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,VT> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+    auto sff = make_common_variables(ep1,ep2);
+    return ExpressionPatch<P,VT>(std::get<0>(sff), op(std::get<1>(sff),std::get<2>(sff)));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,VT> ep1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,VT> {
+    auto sff = make_common_variables(ep1,ep2);
+    return ExpressionPatch<P,VT>(std::get<0>(sff), op(std::get<1>(sff),std::get<2>(sff)));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,ST> ep1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+    auto sff = make_common_variables(ep1,ep2);
+    return ExpressionPatch<P,VT>(std::get<0>(sff), op(std::get<1>(sff),std::get<2>(sff)));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,VT> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep1._vars, op(ep1._fp,c2));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,ST> ep1, Vector<Number<P>> c2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep1._vars, op(ep1._fp,c2));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,VT> ep1, Scalar<Number<P>> c2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep1._vars, op(ep1._fp,c2));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, Vector<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep2._vars, op(c1,ep2._fp));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, Scalar<Number<P>> c1, ExpressionPatch<P,VT> ep2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep2._vars, op(c1,ep2._fp));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, Vector<Number<P>> c1, ExpressionPatch<P,ST> ep2) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep2._vars, op(c1,ep2._fp));
+}
+template<class OP> auto ExpressionPatch<ValidatedTag,RealVector>::_apply(OP op, ExpressionPatch<P,VT> ep) -> ExpressionPatch<P,VT> {
+    return ExpressionPatch<P,VT>(ep._vars, op(ep._fp));
+}
+
+
+
+
+template<class CVE> Void
+append_scalars(List<Variant<RealConstant,VariableIntervalDomainType,ValidatedScalarExpressionPatch>>& lst, CVE const& cve) {
+    if constexpr (Same<CVE,VariablesBoxDomainType>) {
+        for (SizeType i=0; i!=cve.size(); ++i) { lst.append(cve[i]); }
+    } else if constexpr (Same<CVE,ValidatedVectorExpressionPatch>) {
+        for (SizeType i=0; i!=cve.size(); ++i) { lst.append(ValidatedScalarExpressionPatch(cve._vars,cve._fp[i])); }
+    } else if constexpr (Same<CVE,Dyadic>) {
+        lst.append(RealConstant(cve));
+    } else {
+        lst.append(cve);
     }
 }
 
-ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(InitializerList<PreExpressionPatch> lst)
-    : ExpressionPatch(*lst.begin())
-{
-    assert (lst.size()!=0);
-    bool first=true;
-    for (auto ep : lst) {
-        if (first) { first=false; }
-        else { *this=_join(*this,ep); }
-        std::cerr<<"*this="<<*this<<"\n";
+List<Variant<RealConstant,VariableIntervalDomainType,ValidatedScalarExpressionPatch>> make_scalar_list(InitializerList<ValidatedVectorExpressionPatch::PreExpressionPatch> lst) {
+    List<Variant<RealConstant,VariableIntervalDomainType,ValidatedScalarExpressionPatch>> res;
+    for (auto cve : lst) {
+        std::visit([&res](auto cve){append_scalars(res,cve);},cve);
     }
+    return res;
+}
+
+ExpressionPatch<ValidatedTag,RealVector>
+make_expression_patch(List<Variant<RealConstant,VariableIntervalDomainType,ValidatedScalarExpressionPatch>> const& lst) {
+    List<RealVariable> vars;
+    Map<RealVariable,SizeType> inds;
+    Map<RealVariable,IntervalDomainType> doms;
+    for (auto cve : lst) {
+        if (std::holds_alternative<VariableIntervalDomainType>(cve)) {
+            VariableIntervalDomainType const& vi = std::get<VariableIntervalDomainType>(cve);
+            RealVariable const& v=vi.variable();
+            IntervalDomainType dom=vi.interval();
+            if (doms.has_key(v)) {
+                doms[v]=intersection(doms[v],dom);
+            } else {
+                inds[v]=vars.size();
+                vars.append(v);
+                doms[v]=dom;
+            }
+        } else if (std::holds_alternative<ValidatedScalarExpressionPatch>(cve)) {
+            ValidatedScalarExpressionPatch const& ep = std::get<ValidatedScalarExpressionPatch>(cve);
+            Vector<RealVariable> const& argvars=ep._vars;
+            for (SizeType i=0; i!=argvars.size(); ++i) {
+                RealVariable var = argvars[i];
+                IntervalDomainType dom = ep._fp.domain()[i];
+                if (doms.has_key(var)) {
+                    doms[var]=intersection(doms[var],dom);
+                } else {
+                    inds[var]=vars.size();
+                    vars.append(var);
+                    doms[var]=dom;
+                }
+            }
+        }
+    }
+    BoxDomainType bxdom(vars.size(), [&](SizeType i){return doms[vars[i]]; });
+
+    ValidatedScalarMultivariateTaylorFunctionModelDP tfm(bxdom,ThresholdSweeper<FloatDP>(dp,1e-8));
+    auto fctry = factory(tfm);
+
+    List<ValidatedScalarMultivariateFunctionPatch> fps;
+    for (auto cve : lst) {
+        if (std::holds_alternative<RealConstant>(cve)) {
+            RealConstant const& rc = std::get<RealConstant>(cve);
+            fps.append(fctry.create_constant(rc));
+        } else if (std::holds_alternative<VariableIntervalDomainType>(cve)) {
+            VariableIntervalDomainType const& vi = std::get<VariableIntervalDomainType>(cve);
+            RealVariable const& v=vi.variable();
+            SizeType ind=inds[v];
+            fps.append(fctry.create_coordinate(ind));
+        } else if (std::holds_alternative<ValidatedScalarExpressionPatch>(cve)) {
+            ValidatedScalarExpressionPatch const& ep = std::get<ValidatedScalarExpressionPatch>(cve);
+            ValidatedVectorMultivariateFunctionPatch projection=fctry.create_zeros(ep._vars.size());
+            Vector<RealVariable> const& argvars=ep._vars;
+            for (SizeType k=0; k!=argvars.size(); ++k) {
+                projection[k]=static_cast<ValidatedScalarMultivariateFunctionPatch>(fctry.create_coordinate(inds[argvars[k]]));
+            }
+            fps.append(compose(ep._fp,projection));
+        }
+    }
+    return ValidatedVectorExpressionPatch(vars,fps);
+}
+
+ExpressionPatch<ValidatedTag,RealVector>::ExpressionPatch(InitializerList<PreExpressionPatch> lst)
+    : ExpressionPatch(make_expression_patch(make_scalar_list(lst)))
+{
 }
 
 
@@ -389,15 +657,9 @@ FunctionPatch(RealSpacePatch const& spc, ExpressionPatch<P,RES> const& ep) {
     *this = compose(ep._fp,proj);
 }
 
-#warning
-/*
-Vector<RealVariable> _vars;
-BoxDomainType _fdom;
-Function<P,RealVector(RealVector)> _f;
-*/
-
 template<class P, class RES, class... ARGS> auto
 make_expression_patch(FunctionPatch<P,RES(ARGS...)> const& fp, List<ConstantOrVariable<Real>> const& cvl) {
+
     ARIADNE_ASSERT(cvl.size()==fp.argument_size());
 
     List<RealVariable> variable_list;
@@ -423,7 +685,7 @@ make_expression_patch(FunctionPatch<P,RES(ARGS...)> const& fp, List<ConstantOrVa
 
     FunctionPatch<P,RealVector(ARGS...)> projection(domain, Function<P,RealVector(ARGS...)>::zeros(fp.argument_size(),domain.dimension()));
     for (SizeType i=0; i!=fp.argument_size(); ++i) {
-       if (std::holds_alternative<Variable<Real>>(cvl[i])) {
+        if (std::holds_alternative<Variable<Real>>(cvl[i])) {
             RealVariable v=std::get<RealVariable>(cvl[i]);
             projection[i]=Function<P,RealScalar(ARGS...)>::coordinate(domain.dimension(), indices[v]);
         } else {
@@ -431,13 +693,16 @@ make_expression_patch(FunctionPatch<P,RES(ARGS...)> const& fp, List<ConstantOrVa
             projection[i]=Function<P,RealScalar(ARGS...)>::constant(domain.dimension(),c);
         }
     }
-    FunctionPatch<P,RealVector(ARGS...)> function_patch=compose(fp,projection);
-    return ExpressionPatch<P,RealVector>(variables,function_patch);
+
+    return ExpressionPatch<P,RealVector>(variables,domain,compose(fp,projection));
 }
 
 template<class P,class T1, class T2>
 Tuple<RealSpace,MultivariateFunctionPatch<P,T1>,MultivariateFunctionPatch<P,T2>>
 make_common_variables(ExpressionPatch<P,T1> ep1, ExpressionPatch<P,T2> ep2) {
+
+    // For each variable used in ep1 or ep2, give it an index,
+    // and find its domain, which is the intersection of the two original domains for a common variable.
     List<RealVariable> variables;
     Map<RealVariable,SizeType> indices;
     Map<RealVariable,IntervalDomainType> domains;
@@ -462,127 +727,115 @@ make_common_variables(ExpressionPatch<P,T1> ep1, ExpressionPatch<P,T2> ep2) {
             domains.insert(v,d);
         }
     }
-    std::cerr<<"vars1="<<ep1._vars<<"\n";
-    std::cerr<<"vars2="<<ep2._vars<<"\n";
-    std::cerr<<"variables="<<variables<<"\n";
-    std::cerr<<"indices="<<indices<<"\n";
-    std::cerr<<"domains="<<domains<<"\n";
 
+    // Construct the ordered domain
     BoxDomainType domain(domains.size(),[&](SizeType i){return domains[variables[i]];});
-    std::cerr<<"domain="<<domain<<"\n";
+
+    // Make projection functions from the common variables onto those used by each individual expression
     VectorMultivariateFunctionPatch<P> p1=factory(ep1._fp).create_zeros(as1,domain);
     VectorMultivariateFunctionPatch<P> p2=factory(ep2._fp).create_zeros(as2,domain);
     for (SizeType i=0; i!=as1; ++i) {
-        p1[i]=ScalarMultivariateFunction<P>::coordinate(asr,i);
+        auto v=ep1._vars[i]; p1[i]=ScalarMultivariateFunction<P>::coordinate(asr,indices[v]);
     }
-    std::cerr<<"p1="<<p1<<"\n";
-    std::cerr<<"  p2="<<p2<<"\n";
     for (SizeType i=0; i!=as2; ++i) {
         auto v=ep2._vars[i]; p2[i]=ScalarMultivariateFunction<P>::coordinate(asr,indices[v]);
     }
-    std::cerr<<"p2="<<p2<<"\n";
 
+    // Make projection functions from the common variables onto those used by each individual expression
     RealSpace rspc(variables);
     auto pf1=compose(ep1._fp,p1);
-    std::cerr<<"pf1="<<pf1<<"\n";
     auto pf2=compose(ep2._fp,p2);
-    std::cerr<<"pf2="<<pf2<<"\n";
 
     return std::make_tuple(rspc,pf1,pf2);
 }
 
-Void ExpressionPatch<ValidatedTag,RealVector>::_adjoin(ExpressionPatch<P,RealScalar> const& ep) {
-    ExpressionPatch<P,RealVector> const& ep1=*this; ExpressionPatch<P,RealScalar> const& ep2=ep;
-    auto sff = make_common_variables(ep1,ep2); using std::get;
-    *this = ExpressionPatch<P,T>(get<0>(sff), join(get<1>(sff),get<2>(sff)));
-}
+template<> String class_name<Vector<Real>>() { return "RealVector"; }
+template<class P, class SIG> class RestrictedFunction;
+template<> String class_name<RestrictedFunction<ValidatedTag,RealVector(RealVector)>>() {
+    return "ValidatedVectorMultivariateRestrictedFunction"; }
 
 auto ExpressionPatch<ValidatedTag,RealVector>::_join(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
-    std::cerr<<"_join(ep1,ep2):\n  ep1="<<ep1<<"\n  ep2="<<ep2<<"\n";
     auto sff = make_common_variables(ep1,ep2); using std::get;
-    std::cerr<<"    sff="<<sff<<"\n";
-    return ExpressionPatch<P,T>(get<0>(sff), join(get<1>(sff),get<2>(sff)));
-}
-
-
-auto ExpressionPatch<ValidatedTag,RealVector>::_add(ExpressionPatch<P,T> ep1, ExpressionPatch<P,T> ep2) -> ExpressionPatch<P,T> {
-    auto sff = make_common_variables(ep1,ep2); using std::get;
-    return ExpressionPatch<P,T>(get<0>(sff), operator+(get<1>(sff),get<2>(sff)));
+    auto const& dom=std::get<0>(sff);
+    auto const& fp1=get<1>(sff);
+    auto const& fp2=get<2>(sff);
+    return ExpressionPatch<P,T>(dom,join(fp1,fp2));
 }
 
 
 
-auto ExpressionPatch<ValidatedTag,RealVector>::_write(OutputStream& os) const -> OutputStream& {
+
+auto ExpressionPatch<ValidatedTag,RealScalar>::_write(OutputStream& os) const -> OutputStream& {
     ExpressionPatch<P,T> const& ep=*this;
     os << "ExpressionPatch({";
     for (SizeType i=0; i!=ep._vars.size(); ++i) {
         if (i!=0) { os << ","; } os << ep._vars[i]<<"|"<<ep._fp.domain()[i];
-    }
+    } os << std::flush;
     return os <<"}, f=" << static_cast<Function<P,SIG>>(ep._fp) << ")";
 }
 
+auto ExpressionPatch<ValidatedTag,RealVector>::_write(OutputStream& os) const -> OutputStream& {
+    ExpressionPatch<P,T> const& ep=*this;
+    os << "ExpressionPatch(" << this->_vars << ", " << this->_fp << "\n";
+    os << "ExpressionPatch({";
+    for (SizeType i=0; i!=ep._vars.size(); ++i) {
+        if (i!=0) { os << ","; } os << ep._vars[i]<<"|"<<ep._fp.domain()[i];
+    }
+//    return os <<"}, f=" << static_cast<Function<P,SIG>>(ep._fp) << ")";
+    Function<P,SIG> f=cast_unrestricted(ep._fp);
+    return os <<"}," << f << ")";
+}
 
-
-template<class T0, class... TS> inline OutputStream& operator<<(OutputStream& os, Variant<T0,TS...> const& var) {
-    std::visit([&os](auto t){os<<t;},var); return os; }
 
 template<class P, class... ARGS> auto FunctionPatch<P,RealScalar(ARGS...)>::
-operator() (ConstantOrVariable<ARGS>... cvs) const -> ExpressionPatch<P,RealScalar> {
+operator() (ConstantOrVariable<ARGS> const& ... cvs) const -> ExpressionPatch<P,RealScalar> {
     List<ConstantOrVariable<Real>> cvl=make_constant_or_variable_list(cvs...);
     return make_expression_patch(*this,cvl);
 }
 
-template<class P, class... ARGS> auto FunctionPatch<P,RealVector(ARGS...)>::
-operator() (InitializerList<AnyConstantOrVariablePatch> const& cvs) const -> ExpressionPatch<P,RealVector> {
-    std::cerr<<"FunctionPatch(InitializerList<AnyConstantOrVariablePatch> cvs)\n";
+template<class P, class... ARGS> auto FunctionPatch<P,RealVector(ARGS...)>::operator() (InitializerList<AnyConstantOrVariablePatch> const& cvs) const -> ExpressionPatch<P,RealVector> {
     List<ConstantOrVariablePatch<Real>> cvl=make_constant_or_variable_patch_list(cvs);
     return make_expression_patch(*this,cvl);
 }
 
 template<class P, class... ARGS> auto FunctionPatch<P,RealVector(ARGS...)>::
-operator() (ConstantOrVariable<ARGS>... cvs) const -> ExpressionPatch<P,RealVector> {
-    std::cerr<<"FunctionPatch(ConstantOrVariable<ARGS>... cvs): ";
+operator() (ConstantOrVariable<ARGS> const& ... cvs) const -> ExpressionPatch<P,RealVector> {
     List<ConstantOrVariable<Real>> cvl=make_constant_or_variable_list(cvs...);
-    std::cerr<<"cvs="<<std::make_tuple(cvs...)<<", ";
-    std::cerr<<"cvl="<<cvl<<"\n";
     return make_expression_patch(*this,cvl);
 }
 
 template<class P, class... ARGS> auto FunctionPatch<P,RealVector(ARGS...)>::
 operator() (ExpressionPatch<P,ARGS...> const& ep) const -> ExpressionPatch<P,RealVector> {
-    std::cerr<<"FunctionPatch(ExpressionPatch<P,ARGS...> ep): ep="<<ep<<"\n";
     static_assert (Same<Tuple<ARGS...>,Tuple<RealVector>>);
     return ExpressionPatch<P,RealVector>(ep._vars,compose(*this,ep._fp));
 }
 
 } // namespace Ariadne
 
-#include "algebra/sweeper.hpp"
-#include "function/function_traits.hpp"
-#include "function/taylor_function.hpp"
+
+
+
+#include "function/restricted_function.hpp"
 
 namespace Ariadne {
-/*
-inline FunctionPatch<EffectiveTag,RealScalar(RealVector)> make_function_patch(const BoxDomainType& dom, const Function<EffectiveTag,RealScalar(RealVector)>& f) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-inline FunctionPatch<EffectiveTag,RealVector(RealVector)> make_function_patch(const BoxDomainType& dom, const Function<EffectiveTag,RealVector(RealVector)>& f) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-*/
 
-inline FunctionPatch<ValidatedTag,RealScalar(RealVector)> make_function_patch(const BoxDomainType& dom, const Function<ValidatedTag,RealScalar(RealVector)>& f) {
-    return ValidatedScalarMultivariateTaylorFunctionModel<FloatDP>(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8));
-}
-inline FunctionPatch<ValidatedTag,RealVector(RealVector)> make_function_patch(const BoxDomainType& dom, const Function<ValidatedTag,RealVector(RealVector)>& f) {
-    return ValidatedVectorMultivariateTaylorFunctionModel<FloatDP>(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8));
-}
+#warning Move to FunctionPatch
 
 template<class P, class... ARGS> FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
-    : FunctionPatch(make_function_patch(dom,f)) { }
+    : FunctionPatch(RestrictedFunction<P,SIG>(f,dom)) { }
 template<class P, class... ARGS> FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
-    : FunctionPatch(make_function_patch(dom,f)) { }
+    : FunctionPatch(RestrictedFunction<P,SIG>(f,dom)) { }
 
 } // namespace Ariadne
+
+/*
+#include "function/taylor_function.hpp"
+namespace Ariadne {
+template<class P, class... ARGS> FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
+    : FunctionPatch(ValidatedScalarMultivariateTaylorFunctionModelDP(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8))) { }
+template<class P, class... ARGS> FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
+    : FunctionPatch(ValidatedVectorMultivariateTaylorFunctionModelDP(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8))) { }
+} // namespace Ariadne
+*/
 
 #endif /* ARIADNE_EXPRESSION_PATCH_HPP */

@@ -56,22 +56,22 @@ namespace Ariadne {
 
 template<class P, class SIG> class RestrictedFunction;
 
+using ApproximateScalarUnivariateRestrictedFunction = RestrictedFunction<ApproximateTag,RealScalar(RealScalar)>;
+using ApproximateScalarMultivariateRestrictedFunction = RestrictedFunction<ApproximateTag,RealScalar(RealVector)>;
+using ApproximateVectorUnivariateRestrictedFunction = RestrictedFunction<ApproximateTag,RealVector(RealScalar)>;
+using ApproximateVectorMultivariateRestrictedFunction = RestrictedFunction<ApproximateTag,RealVector(RealVector)>;
+using ValidatedScalarUnivariateRestrictedFunction = RestrictedFunction<ValidatedTag,RealScalar(RealScalar)>;
+using ValidatedScalarMultivariateRestrictedFunction = RestrictedFunction<ValidatedTag,RealScalar(RealVector)>;
+using ValidatedVectorUnivariateRestrictedFunction = RestrictedFunction<ValidatedTag,RealVector(RealScalar)>;
+using ValidatedVectorMultivariateRestrictedFunction = RestrictedFunction<ValidatedTag,RealVector(RealVector)>;
+
+template<class P, class RES, class ARG> FunctionPatchCreator<FunctionPatchFactory<P>,ARG> factory(FunctionPatchMixin<RestrictedFunction<P,RES(ARG)>,P,RES(ARG)> const& rf) {
+    return factory(static_cast<RestrictedFunction<P,RES(ARG)>const&>(rf)); }
+
 template<class P, class... ARGS> struct Element<RestrictedFunction<P,RealVector(ARGS...)>> {
     typedef RestrictedFunction<P,RealScalar(ARGS...)> Type; };
 
-template<class P> class RestrictedFunctionFactory {
-    RestrictedFunction<P,RealScalar(RealScalar)> create_zero(IntervalDomainType) const;
-    RestrictedFunction<P,RealScalar(RealVector)> create_zero(BoxDomainType) const;
-};
-
-template<class P, class... ARGS> class RestrictedFunctionCreator {
-    typedef typename SignatureTraits<RealScalar(ARGS...)>::BoundedDomainType DomainType;
-    DomainType _dom;
-  public:
-    template<class RES> RestrictedFunctionCreator(RestrictedFunction<P,RES(ARGS...)> const& rf);
-    RestrictedFunction<P,RealScalar(ARGS...)> create_zero() const;
-    RestrictedFunction<P,RealScalar(ARGS...)> create_constant(Number<P>) const;
-};
+template<class P> class RestrictedFunctionFactory;
 
 template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
     : public FunctionPatchMixin<RestrictedFunction<P,RealScalar(ARGS...)>,P,RealScalar(ARGS...)>
@@ -104,9 +104,9 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
 
     explicit operator FunctionPatch<P,SIG> () const {
         return FunctionPatch<P,SIG>(new RestrictedFunction<P,SIG>(*this)); }
-
-    friend Function<P,SIG> cast_unrestricted(RestrictedFunction<P,SIG> rf) {
+    friend Function<P,SIG> const& cast_unrestricted(RestrictedFunction<P,SIG> const& rf) {
         return rf._f; }
+
     ArgumentSizeType argument_size() const override {
         return this->_f.argument_size(); }
     ResultSizeType result_size() const override {
@@ -115,9 +115,9 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
     const DomainType domain() const override {
         return this->_dom; }
     const CodomainType codomain() const override {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return cast_exact_interval(this->range()); }
     const RangeType range() const {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return apply(this->_f,BoxRangeType(this->_dom)); }
 
     Void clobber() const {
         ARIADNE_NOT_IMPLEMENTED; }
@@ -129,7 +129,7 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
         return rf.norm(); }
 
     template<class XX> Result<XX> operator() (Argument<XX> const& x) const {
-        this->_check_domain(x); return this->_f(x); }
+        check_domain(this->_dom,x); return this->_f(x); }
 
     friend RestrictedFunction<P,SIG> partial_evaluate(RestrictedFunction<P,SIG> const& rf, SizeType j, Number<P> x) {
         ARIADNE_NOT_IMPLEMENTED; }
@@ -183,9 +183,7 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
     friend RestrictedFunction<P,SIG> div(Number<P> c1, RestrictedFunction<P,SIG> rf2) {
         return RestrictedFunction<P,SIG>::_apply(Div(),c1,rf2); }
     friend RestrictedFunction<P,SIG> pow(RestrictedFunction<P,SIG> rf1, Int n2) {
-        ARIADNE_NOT_IMPLEMENTED; }
-//    friend RestrictedFunction<P,SIG> pow(RestrictedFunction<P,SIG> rf1, Int n2) {
-//        return RestrictedFunction<P,SIG>::_apply(Pow(),rf1,n2); }
+        return RestrictedFunction<P,SIG>::_apply(Pow(),rf1,n2); }
     friend RestrictedFunction<P,SIG> sqrt(RestrictedFunction<P,SIG> rf) {
         return RestrictedFunction<P,SIG>::_apply(Sqrt(),rf); }
     friend RestrictedFunction<P,SIG> exp(RestrictedFunction<P,SIG> rf) {
@@ -243,9 +241,10 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
     friend Bool refines(RestrictedFunction<ValidatedTag,SIG>, RestrictedFunction<ValidatedTag,SIG>) {
         ARIADNE_NOT_IMPLEMENTED; }
 
-    //    friend FunctionPatchFactory<P> factory(RestrictedFunction<P,SIG> const& rf);
-    friend RestrictedFunctionCreator<P,ARGS...> factory(RestrictedFunction<P,SIG> const& rf) {
-        return RestrictedFunctionCreator<P,ARGS...>(rf); }
+    friend FunctionPatchCreator<RestrictedFunctionFactory<P>,ARGS...> factory(RestrictedFunction<P,SIG> const& rf) {
+        return FunctionPatchCreator<RestrictedFunctionFactory<P>,ARGS...>(rf.domain(),RestrictedFunctionFactory<P>()); }
+    friend OutputStream& operator<<(OutputStream& os, RestrictedFunction<P,SIG> const& rf) {
+        return os << "RestrictedFunction(" << rf._f << ", " << rf._dom << ")"; }
   private:
     template<class OP> static RestrictedFunction<P,SIG> _apply(OP op, RestrictedFunction<P,SIG> rf) {
         return RestrictedFunction<P,SIG>(op(rf._f),rf._dom); }
@@ -253,6 +252,8 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
         return RestrictedFunction<P,SIG>(op(rf1._f,rf2._f),intersection(rf1._dom,rf2._dom)); }
     template<class OP> static RestrictedFunction<P,SIG> _apply(OP op, RestrictedFunction<P,SIG> rf1, Number<P> c2) {
         return RestrictedFunction<P,SIG>(op(rf1._f,c2),rf1._dom); }
+    template<class OP> static RestrictedFunction<P,SIG> _apply(OP op, RestrictedFunction<P,SIG> rf, Int n) {
+        return RestrictedFunction<P,SIG>(op(rf._f,n),rf._dom); }
     template<class OP> static RestrictedFunction<P,SIG> _apply(OP op, Number<P> c1, RestrictedFunction<P,SIG> rf2) {
         return RestrictedFunction<P,SIG>(op(c1,rf2._f),rf2._dom); }
 
@@ -260,7 +261,7 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealScalar(ARGS...)>
         return RestrictedFunction<P,R(ARGS...)>(compose(g,rf._f),rf._dom); }
 
     template<class XX> Void _check_domain(Argument<XX> const& x) const {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return check_domain(this->domain(),x); }
   private:
     virtual FunctionPatchInterface<P,SIG>* _create() const override {
         return new RestrictedFunction<P,SIG>(*this); }
@@ -313,6 +314,8 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealVector(ARGS...)>
 
     explicit operator FunctionPatch<P,SIG> () const {
         return FunctionPatch<P,SIG>(new RestrictedFunction<P,SIG>(*this)); }
+    friend Function<P,SIG> const& cast_unrestricted(RestrictedFunction<P,SIG> const& rf) {
+        return rf._f; }
 
     ArgumentSizeType argument_size() const {
         return this->_f.argument_size(); };
@@ -321,7 +324,7 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealVector(ARGS...)>
     const DomainType domain() const {
         return this->_dom; }
     const CodomainType codomain() const {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return cast_exact_box(this->range()); }
     const RangeType range() const {
         return apply(this->_f,BoxRangeType(this->_dom)); }
 
@@ -370,7 +373,7 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealVector(ARGS...)>
     RestrictedFunction<P,RealScalar(ARGS...)> get(ResultIndexType i) const {
         return RestrictedFunction<P,RealScalar(ARGS...)>(this->_f[i],this->_dom); }
     Void set(ResultIndexType i, Function<P,RealScalar(ARGS...)> sf) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        this -> _f[i]=sf; }
 
     friend RestrictedFunction<P,RealScalar(ARGS...)> compose(Function<P,RealScalar(RealVector)> g, RestrictedFunction<P,RealVector(ARGS...)> rf) {
         return RestrictedFunction<P,SIG>::_compose(g,rf); }
@@ -395,17 +398,19 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealVector(ARGS...)>
     friend RestrictedFunction<P,SIG> derivative(RestrictedFunction<P,SIG> const& f, ArgumentIndexType j) {
         return RestrictedFunction<P,SIG>(derivative(f._f,j),f._dom); }
 
-    friend RestrictedFunction<P,SIG> embed(BoxDomainType, RestrictedFunction<P,SIG>, BoxDomainType) {
+    friend RestrictedFunction<P,SIG> embed(BoxDomainType dom1, RestrictedFunction<P,SIG> rf2, BoxDomainType dom3) {
         ARIADNE_NOT_IMPLEMENTED; }
+        //return RestrictedFunction(product(dom1,rf2.domain(),dom3),embed(dom1.dimension(),rf2._f,dom3.dimension())); }
 
-    friend FunctionPatchCreator<P,ARGS...> factory(RestrictedFunction<P,SIG> const& rf) {
-        return FunctionPatchCreator<P,ARGS...>(rf); }
+    friend FunctionPatchCreator<RestrictedFunctionFactory<P>,ARGS...> factory(RestrictedFunction<P,SIG> const& rf);
+    friend OutputStream& operator<<(OutputStream& os, RestrictedFunction<P,SIG> const& rf) {
+        return os << "RestrictedFunction(" << rf._f << ", " << rf._dom << ")"; }
   private:
     template<class R> static RestrictedFunction<P,R(ARGS...)> _compose(Function<P,R(RealVector)> const& g, RestrictedFunction<P,RealVector(ARGS...)> rf) {
         return RestrictedFunction<P,R(ARGS...)>(compose(g,rf._f),rf._dom); }
 
     template<class XX> Void _check_domain(Argument<XX> const& x) const {
-        ARIADNE_NOT_IMPLEMENTED; }
+        return check_domain(this->domain(),x); }
   private:
     virtual ScalarFunctionPatchInterface<P,ARGS...>* _get(ResultIndexType i) const {
         return new RestrictedFunction<P,RealScalar(ARGS...)>(this->get(i)); }
@@ -413,17 +418,41 @@ template<class P, class... ARGS> class RestrictedFunction<P,RealVector(ARGS...)>
         return new RestrictedFunction<P,SIG>(*this); }
 };
 
-template<class P, class... ARGS> template<class RES>
-RestrictedFunctionCreator<P,ARGS...>::RestrictedFunctionCreator(RestrictedFunction<P,RES(ARGS...)> const& rf)
-    : _dom(rf.domain()) { }
 
-template<class P, class... ARGS> auto
-RestrictedFunctionCreator<P,ARGS...>::create_zero() const -> RestrictedFunction<P,RealScalar(ARGS...)> {
-    return RestrictedFunction<P,RealScalar(ARGS...)>(Function<P,RealScalar(ARGS...)>::zero(this->_dom.dimension()),this->_dom); }
 
-template<class P, class... ARGS> auto
-RestrictedFunctionCreator<P,ARGS...>::create_constant(Number<P> c) const -> RestrictedFunction<P,RealScalar(ARGS...)> {
-    return RestrictedFunction<P,RealScalar(ARGS...)>(Function<P,RealScalar(ARGS...)>::constant(this->_dom.dimension(),c),this->_dom); }
+template<class P> class RestrictedFunctionFactory
+    : public FunctionPatchFactoryMixin<RestrictedFunctionFactory<P>,P>
+{
+  public:
+    typedef P Paradigm;
+    operator FunctionPatchFactory<P> () const { return FunctionPatchFactory<P>(new RestrictedFunctionFactory<P>(*this)); }
+    RestrictedFunctionFactory() { }
+    template<class SIG> RestrictedFunctionFactory(RestrictedFunction<P,SIG> const&) { }
+    RestrictedFunction<P,RealScalar(RealVector)> create(BoxDomainType const& dom, Function<P,RealScalar(RealVector)> const& sf) const {
+        return RestrictedFunction<P,RealScalar(RealVector)>(sf,dom); }
+    RestrictedFunction<P,RealVector(RealVector)> create(BoxDomainType const& dom, Function<P,RealVector(RealVector)> const& vf) const {
+        return RestrictedFunction<P,RealVector(RealVector)>(vf,dom); }
+
+    RestrictedFunction<P,RealScalar(RealVector)> create_zero(BoxDomainType const& dom) const {
+        return this->create(dom,Function<P,RealScalar(RealVector)>::zero(dom.dimension())); }
+    RestrictedFunction<P,RealScalar(RealVector)> create_constant(BoxDomainType const& dom, Number<P> const& c) const {
+        return this->create(dom,Function<P,RealScalar(RealVector)>::constant(dom.dimension(),c)); }
+    RestrictedFunction<P,RealScalar(RealVector)> create_coordinate(BoxDomainType const& dom, SizeType i) const {
+        return this->create(dom,Function<P,RealScalar(RealVector)>::coordinate(dom.dimension(),i)); }
+
+    RestrictedFunction<P,RealVector(RealVector)> create_zeros(SizeType rs, BoxDomainType const& dom) const {
+        return this->create(dom,Function<P,RealVector(RealVector)>::zeros(rs,dom.dimension())); }
+    RestrictedFunction<P,RealVector(RealVector)> create_constants(BoxDomainType const& dom, Vector<Number<P>> c) const {
+        return this->create(dom,Function<P,RealVector(RealVector)>::constant(dom.dimension(),c)); }
+    RestrictedFunction<P,RealVector(RealVector)> create_projection(BoxDomainType const& dom, Range rng) const {
+        ARIADNE_NOT_IMPLEMENTED; }
+    RestrictedFunction<P,RealVector(RealVector)> create_identity(BoxDomainType const& dom) const {
+        return this->create(dom,Function<P,RealVector(RealVector)>::identity(dom.dimension())); }
+};
+
+FunctionPatchCreator<RestrictedFunctionFactory<ValidatedTag>,RealVector> factory(RestrictedFunction<ValidatedTag,RealVector(RealVector)> const& rf) {
+    return FunctionPatchCreator<RestrictedFunctionFactory<ValidatedTag>,RealVector>(rf.domain(),RestrictedFunctionFactory<ValidatedTag>()); }
+
 
 } // namespace Ariadne
 

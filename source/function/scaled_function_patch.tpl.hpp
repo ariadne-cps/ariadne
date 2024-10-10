@@ -63,7 +63,6 @@ inline decltype(auto) contains(IntervalDomainType const& bx, Scalar<FloatMPAppro
 inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPBounds> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
 inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximation> const& x) { return contains(convert_box(bx,x.zero_element().precision()),x); }
 
-
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl

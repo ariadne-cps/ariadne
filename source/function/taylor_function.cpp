@@ -55,6 +55,60 @@
 
 namespace Ariadne {
 
+//template<class S1, class S2> decltype(auto) superset(S1&& s1, S2&& s2) {
+//    return subset(std::forward<S2>(s2),std::forward<S1>(s1)); }
+
+#warning Move to FunctionPatch. Throw exception
+template<class X> Void check_domain(IntervalDomainType const& dom, X const& x);
+template<> Void check_domain(IntervalDomainType const& dom, ApproximateNumber const& x) {
+    ARIADNE_ASSERT(probably(contains(static_cast<DyadicInterval>(dom),x))); }
+template<> Void check_domain(IntervalDomainType const& dom, ValidatedNumber const& x) {
+    ARIADNE_ASSERT(definitely(contains(static_cast<DyadicInterval>(dom),x))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatDPApproximation const& x) {
+    ARIADNE_ASSERT(probably(contains(dom,x))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatMPApproximation const& x) {
+    ARIADNE_ASSERT(probably(contains(dom,x))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatDPBounds const& x) {
+    ARIADNE_ASSERT(definitely(contains(dom,x))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatMPBounds const& x) {
+    ARIADNE_ASSERT(definitely(contains(dom,x))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatDPApproximationDifferential const& x) {
+    ARIADNE_ASSERT(probably(contains(dom,x.value()))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatMPApproximationDifferential const& x) {
+    ARIADNE_ASSERT(probably(contains(dom,x.value()))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatDPBoundsDifferential const& x) {
+    ARIADNE_ASSERT(definitely(contains(dom,x.value()))); }
+template<> Void check_domain(IntervalDomainType const& dom, FloatMPBoundsDifferential const& x) {
+    ARIADNE_ASSERT(definitely(contains(dom,x.value()))); }
+template<> Void check_domain(IntervalDomainType const& dom, ApproximateTaylorModelDP const& x) {
+    ARIADNE_ASSERT(probably(subset(x.range(),dom))); }
+template<> Void check_domain(IntervalDomainType const& dom, ApproximateTaylorModelMP const& x) {
+    ARIADNE_ASSERT(probably(subset(Interval<FloatDPApproximation>(x.range()),dom))); }
+template<> Void check_domain(IntervalDomainType const& dom, ValidatedTaylorModelDP const& tm) {
+    if (not definitely(subset(tm.range(),dom))) {
+        ARIADNE_THROW(DomainException,"check_domain(dom,tm) with dom="<<dom<<", tm.range()="<<tm.range()<<", tm=-"<<tm,
+                      "tm.range() is not definitely a subset of dom"); } }
+template<> Void check_domain(IntervalDomainType const& dom, ValidatedTaylorModelMP const& x) {
+    ARIADNE_ASSERT(definitely(subset(Interval<FloatDPUpperBound>(x.range()),dom))); }
+template<> Void check_domain(IntervalDomainType const& dom, ValidatedTaylorModel<FloatDPUpperInterval> const& x) {
+    ARIADNE_ASSERT(definitely(subset(x.range(),dom))); }
+template<> Void check_domain(IntervalDomainType const& dom, ValidatedIntervalTaylorModelMP const& x) {
+    ARIADNE_ASSERT(definitely(subset(IntervalRangeType(x.range()),dom))); }
+template<> Void check_domain(IntervalDomainType const& dom, ElementaryAlgebra<ApproximateNumber> const& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<> Void check_domain(IntervalDomainType const& dom, ElementaryAlgebra<ValidatedNumber> const& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<> Void check_domain(IntervalDomainType const& dom, Formula<ApproximateNumber> const& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<> Void check_domain(IntervalDomainType const& dom, Formula<ValidatedNumber> const& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+
+#warning Should not need check_domain for an unbounded function
+template<> Void check_domain(IntervalDomainType const& ivl, ValidatedScalarMultivariateFunction const& sf) {
+    ARIADNE_THROW(std::runtime_error,"check_domain(IntervalDomainType ivl, ValidatedScalarMultivariateFunction const& sf)",
+                  "Domain of function (sf=" << sf <<") cannot be computed as a bounded set."); }
+
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,RealVector>;
 

@@ -79,8 +79,7 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
                     if (sets_equidistant_to_goal.at(s_idx-1).contains(tgt.first)) {
                         if (not target_scores.contains(tgt.first))
                             target_scores.insert(tgt.first,0.0);
-
-                        target_scores.at(tgt.first) = target_scores.at(tgt.first) + tgt.second.probability();
+                        target_scores.at(tgt.first) = target_scores.at(tgt.first) + tgt.second;
                     }
                 }
             }

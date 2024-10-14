@@ -58,7 +58,7 @@ ReachAvoid set_workspace_1(EffectiveVectorMultivariateFunction const& dynamics, 
     RealBox state_domain({{0,5},{0,5},theta_domain});
     SizeType depth = 0;
 
-    ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x, 1e-4);
+    ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
 
     ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
     ra.add_obstacle({{0,1},{2,3},theta_domain});
@@ -77,7 +77,7 @@ ReachAvoid set_workspace_2(EffectiveVectorMultivariateFunction const& dynamics, 
     RealBox state_domain({{0,5},{0,5},theta_domain});
     SizeType depth = 0;
 
-    ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x, 1e-4);
+    ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
 
     ra.add_obstacle({{0,0.5_x},{0,5},theta_domain});
     ra.add_obstacle({{1.5_x,2},{0,3},theta_domain});
@@ -112,7 +112,7 @@ void check_scalabilities(SizeType n) {
     Grid u_control_grid(1,1);
     RealBox u_control_domain(1,{0,2});
 
-    ReachAvoid u_ra("u_ra",u_dynamics,state_grid,state_domain,u_control_grid,u_control_domain,0,1e-10_x,1e-4);
+    ReachAvoid u_ra("u_ra",u_dynamics,state_grid,state_domain,u_control_grid,u_control_domain,0,1e-10_x);
 
     CONCLOG_PRINTLN_AT(1,"State size: " << u_ra.state_size())
     CONCLOG_PRINTLN_VAR_AT(1,u_ra.control_size())
@@ -125,7 +125,7 @@ void check_scalabilities(SizeType n) {
 
     Grid cpwa_control_grid(n+1,1);
     RealBox cpwa_control_domain(n+1,{0,2});
-    ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x,1e-4);
+    ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x);
     CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.control_size())
 
     cpwa_ra.compute_free_graph();

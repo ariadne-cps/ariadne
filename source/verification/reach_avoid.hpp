@@ -40,7 +40,7 @@ ExactBoxType shrink(RealBox const& bx, FloatDP const& eps);
 class ReachAvoid {
   public:
 
-    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps, ProbabilityType probability_threshold);
+    ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps);
 
     EffectiveVectorMultivariateFunction const& dynamics() const;
     Grid const& state_grid() const;
@@ -108,7 +108,6 @@ class ReachAvoid {
     SizeType const _depth;
 
     FloatDP const _eps;
-    ProbabilityType const _probability_threshold;
 
     SPaving _unverified;
 

@@ -33,17 +33,17 @@ namespace Ariadne {
 typedef double ScoreType;
 
 struct AssignedControl {
-    AssignedControl(IdentifiedCell const& control, PointType const& target_point);
+    AssignedControl(SPaving const& control_paving, IdentifiedCell const& target_cell);
 
-    IdentifiedCell const& control() const;
-    PointType const& target_point() const;
+    SPaving const& control_paving() const;
+    IdentifiedCell const& target_cell() const;
 
-    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.control().id() << "@" << ac.target_point() << "}"; return os; }
+    friend OutputStream& operator<<(OutputStream& os, AssignedControl const& ac) { os << "{" << ac.control_paving().bounding_box() << "@" << ac.target_cell() << "}"; return os; }
 
   private:
 
-    IdentifiedCell const _control;
-    PointType const _target_point;
+    SPaving const _control_paving;
+    IdentifiedCell const _target_cell;
 };
 
 class ReachAvoidStrategy;

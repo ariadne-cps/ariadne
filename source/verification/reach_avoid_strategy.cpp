@@ -26,35 +26,19 @@
 
 namespace Ariadne {
 
-AssignedControl::AssignedControl(IdentifiedCell const& control, PointType const& target_point) :
-    _control(control), _target_point(target_point) { }
+AssignedControl::AssignedControl(SPaving const& control_paving, IdentifiedCell const& target_cell) :
+    _control_paving(control_paving), _target_cell(target_cell) { }
 
-IdentifiedCell const& AssignedControl::control() const {
-    return _control;
+SPaving const& AssignedControl::control_paving() const {
+    return _control_paving;
 }
 
-PointType const& AssignedControl::target_point() const {
-    return _target_point;
+IdentifiedCell const& AssignedControl::target_cell() const {
+    return _target_cell;
 }
 
 ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(EffectiveVectorMultivariateFunction const& dynamics, PossiblyReachingRAG const& rag) :
     _dynamics(dynamics), _rag(rag) { }
-
-double min_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExactInterval> const& image_box) {
-    double result = std::numeric_limits<double>::infinity();
-
-    auto src_midpoint = src_box.midpoint();
-    auto image_midpoint = image_box.midpoint();
-
-    for (SizeType i=0; i<image_box.size(); ++i) {
-        double delta = image_box[i].radius().get_d() + (src_box[i].radius().get_d() - (image_midpoint.at(i).get_d()-src_midpoint.at(i).get_d()));
-        double current_value = std::abs(1.0 + delta/(image_midpoint.at(i).get_d() - src_midpoint.at(i).get_d()));
-        if (current_value < result) {
-            result = current_value;
-        }
-    }
-    return result;
-}
 
 double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExactInterval> const& image_box) {
     double result = 0.0;
@@ -85,39 +69,29 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
         auto const& s = sets_equidistant_to_goal.at(s_idx);
         for (auto const& src : s) {
             auto const& trans = _rag.internal().forward_transitions(src);
-            IdentifiedCell best_control = trans.begin()->first;
-            ScoreType best_score = -static_cast<ScoreType>(trans.size());
+
+            SPaving control_grid(trans.begin()->first.cell().grid());
+            Map<IdentifiedCell,ScoreType> target_scores;
+
             for (auto const& ctrl : trans) {
-                ScoreType current_score = 0.0;
+                control_grid.adjoin(ctrl.first.cell());
                 for (auto const& tgt : ctrl.second) {
-                    if (sets_equidistant_to_goal.at(s_idx-1).contains(tgt.first))
-                        current_score += tgt.second.probability();
-                }
-                if (current_score > best_score) {
-                    best_control = ctrl.first;
-                    best_score = current_score;
+                    if (sets_equidistant_to_goal.at(s_idx-1).contains(tgt.first)) {
+                        if (not target_scores.contains(tgt.first))
+                            target_scores.insert(tgt.first,0.0);
+
+                        target_scores.at(tgt.first) = target_scores.at(tgt.first) + tgt.second.probability();
+                    }
                 }
             }
-            scores.insert(src,best_score);
 
-            auto combined_input = product(src.cell().box(), best_control.cell().box());
-            auto image_box = cast_exact_box(apply(_dynamics, combined_input).bounding_box());
-            auto image_midpoint = image_box.midpoint();
-            PointType image_point(image_midpoint.dimension());
-            for (SizeType i=0; i<image_point.size(); ++i) {
-                image_point.at(i) = image_midpoint.at(i).get_d();
+            auto best = target_scores.begin();
+            for (auto it = target_scores.begin(); it != target_scores.end(); ++it) {
+                if (it->second > best->second)
+                    best = it;
             }
 
-            auto src_box = src.cell().box();
-            auto src_midpoint = src_box.midpoint();
-
-            auto ratio = max_target_ratio(src_box,image_box);
-
-            PointType target_point(image_point.size());
-            for (SizeType i=0; i<target_point.size(); ++i)
-                target_point.at(i) = src_midpoint.at(i).get_d()+(image_point.at(i)-src_midpoint.at(i).get_d())*ratio;
-
-            assignments.insert(src,{best_control,target_point});
+            assignments.insert(src,{control_grid,best->first});
         }
     }
 

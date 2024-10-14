@@ -133,6 +133,23 @@ void check_scalabilities(SizeType n) {
     CONCLOG_PRINTLN_AT(1,"(CPWA) Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
 }
 
+IdentifiedCell point_to_cell(PointType const& pt, Grid const& grid, SizeType grid_depth, IdentifiedCellFactory const& vertex_factory) {
+
+    auto dim = pt.size();
+
+    ExactBoxType boxed_current(dim);
+    for (SizeType i=0; i<dim; ++i) {
+        boxed_current[i] = ExactIntervalType(cast_exact(pt[i]),cast_exact(pt[i]+1e-10));
+    }
+
+    SPaving point_paving(grid);
+    point_paving.adjoin_over_approximation(boxed_current,grid_depth);
+
+    auto point_cell = *point_paving.begin();
+    return vertex_factory.create(point_cell);
+}
+
+
 void ariadne_main()
 {
     auto sys = u_control();
@@ -197,14 +214,12 @@ void ariadne_main()
     for (SizeType i=0;i<idx;++i) ++a_it;
     auto initial_box = a_it->first.cell().box();
 
-    CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control " << a_it->second.control().cell().box())
+    CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
 
     PointType current(dim);
     for (SizeType i=0; i<dim; ++i) {
         current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
     }
-
-    auto const& vertex_factory = ra.vertex_factory();
 
     SizeType step = 0;
 
@@ -214,31 +229,24 @@ void ariadne_main()
 
         sequence.append(current);
 
-        ExactBoxType boxed_current(dim);
-        for (SizeType i=0; i<dim; ++i) {
-            boxed_current[i] = ExactIntervalType(cast_exact(current[i]),cast_exact(current[i]+1e-10));
-        }
+        auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
-        SPaving point_paving(ra.state_grid());
-        point_paving.adjoin_over_approximation(boxed_current,ra.grid_depth());
-
-        auto point_cell = *point_paving.begin();
-        auto icell = vertex_factory.create(point_cell);
-
-        auto target = assignments.get(icell).target_point();
+        auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
 
         double delta_modulus = 0;
         for (SizeType i=0; i<dim; ++i) {
-            delta_modulus += (target.at(i)-current.at(i))*(target.at(i)-current.at(i));
+            delta_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
         }
         delta_modulus = std::sqrt(delta_modulus);
 
         PointType next(dim);
         for (SizeType i=0; i<dim; ++i) {
-            next.at(i) = current.at(i) + (target.at(i)-current.at(i))/delta_modulus*0.3;
+            next.at(i) = current.at(i) + (target.at(i).get_d()-current.at(i))/delta_modulus*0.3;
         }
 
-        CONCLOG_PRINTLN_AT(1, step << ": from " << current << " (" << icell.id() << ") to " << next << " under control " << assignments.get(icell).control().cell().box())
+        auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
+
+        CONCLOG_PRINTLN_AT(1, step << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
 
         current = next;
 

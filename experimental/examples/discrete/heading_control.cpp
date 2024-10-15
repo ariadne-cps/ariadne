@@ -208,12 +208,10 @@ void ariadne_main()
     Randomiser<DegreeType> random_uint;
     Randomiser<ExactDouble> random_double;
 
-    SizeType num_points = 10;
+    SizeType num_points = 1;
     SizeType max_steps = 100;
 
     for (SizeType p=0; p < num_points; ++p) {
-
-        CONCLOG_PRINTLN("Point " << p)
 
         SizeType idx = static_cast<SizeType>(random_uint.get(0,assignments.size()-1));
         auto a_it = assignments.begin();
@@ -221,12 +219,14 @@ void ariadne_main()
         for (SizeType i=0;i<idx;++i) ++a_it;
         auto initial_box = a_it->first.cell().box();
 
-        CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
-
         PointType current(dim);
         for (SizeType i=0; i<dim; ++i) {
             current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
         }
+
+        CONCLOG_PRINTLN("Point " << p << ": " << current)
+
+        CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
 
         List<PointType> sequence;
 
@@ -242,7 +242,7 @@ void ariadne_main()
             }
 
             if (ra.goals().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN_AT(1, "The current cell is a goal, terminating with success.")
+                CONCLOG_PRINTLN_AT(0, "The current cell is a goal, terminating with success in " << s+1 << " steps.")
                 break;
             }
 

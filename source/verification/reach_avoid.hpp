@@ -53,6 +53,12 @@ class ReachAvoid {
     ReachAvoid& add_obstacle(RealBox const& box);
     ReachAvoid& add_goal(RealBox const& box);
 
+    SPaving const& state_paving() const;
+    CPaving const& control_paving() const;
+
+    SPaving const& goals() const;
+    SPaving const& obstacles() const;
+
     RealBox const& state_bounds() const;
     RealBox const& control_bounds() const;
 

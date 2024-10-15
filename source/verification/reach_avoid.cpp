@@ -106,6 +106,22 @@ IdentifiedCellFactory const& ReachAvoid::edge_factory() const {
     return *_edge_factory;
 }
 
+SPaving const& ReachAvoid::state_paving() const {
+    return _state_paving;
+}
+
+SPaving const& ReachAvoid::control_paving() const {
+    return _control_paving;
+}
+
+SPaving const& ReachAvoid::goals() const {
+    return _goals;
+}
+
+SPaving const& ReachAvoid::obstacles() const {
+    return _obstacles;
+}
+
 ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     SPaving obstacle_paving(_state_paving.grid());
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);

@@ -60,10 +60,10 @@ ReachAvoid set_workspace_1(EffectiveVectorMultivariateFunction const& dynamics, 
 
     ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
 
-    ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
+    /*ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
     ra.add_obstacle({{0,1},{2,3},theta_domain});
     ra.add_obstacle({{2.5_x,5},{2,3},theta_domain});
-    ra.add_obstacle({{0,5},{0,0.5_x},theta_domain});
+    ra.add_obstacle({{0,5},{0,0.5_x},theta_domain});*/
 
     ra.add_goal({{4,5},{4.5_x,5},theta_domain});
 
@@ -230,6 +230,21 @@ void ariadne_main()
         sequence.append(current);
 
         auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
+
+        if (not ra.state_paving().superset(current_icell.cell())) {
+            CONCLOG_PRINTLN_AT(1, "The current cell is outside of the state paving, terminating with failure.")
+            break;
+        }
+
+        if (ra.goals().superset(current_icell.cell())) {
+            CONCLOG_PRINTLN_AT(1, "The current cell is a goal, terminating with success.")
+            break;
+        }
+
+        if (ra.obstacles().superset(current_icell.cell())) {
+            CONCLOG_PRINTLN_AT(1, "The current cell is an obstacle, terminating with failure.")
+            break;
+        }
 
         auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
 

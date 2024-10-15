@@ -375,16 +375,21 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("new_transition",overload_cast<DiscreteLocation,DiscreteEvent,DiscreteLocation,ContinuousPredicate const&,EventKind>(&HybridAutomaton::new_transition));
     hybrid_automaton_class.def("new_transition",overload_cast<DiscreteLocation,DiscreteEvent,DiscreteLocation,List<PrimedRealAssignment>const&>(&HybridAutomaton::new_transition));
 */
-    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate const& grd,EventKind knd){return ha.new_transition(s,e,t,grd,knd);});
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate grd,EventKind knd){return ha.new_transition(s,e,t,grd,knd);});
     hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,PrimedRealAssignmentMap res){return ha.new_transition(s,e,t,to_list(res));});
-    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,PrimedRealAssignmentMap res,ContinuousPredicate const& grd,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});
-    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate const& grd,PrimedRealAssignmentMap res,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});    hybrid_automaton_class.def("__str__ ", &__cstr__<HybridAutomaton>);
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,PrimedRealAssignmentMap res,ContinuousPredicate grd,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});
+    hybrid_automaton_class.def("new_transition",[](HybridAutomaton& ha, DiscreteLocation s,DiscreteEvent e,DiscreteLocation t,ContinuousPredicate grd,PrimedRealAssignmentMap res,EventKind knd){return ha.new_transition(s,e,t,to_list(res),grd,knd);});    hybrid_automaton_class.def("__str__ ", &__cstr__<HybridAutomaton>);
     hybrid_automaton_class.def("__repr__", &__crepr__<HybridAutomaton>);
+
+    hybrid_automaton_class.def("discrete_reachability",&HybridAutomaton::discrete_reachability);
+    hybrid_automaton_class.def("check_reachable_modes",&HybridAutomaton::check_reachable_modes);
 
     pybind11::class_<CompositeHybridAutomaton,pybind11::bases<HybridAutomatonInterface>>
         composite_hybrid_automaton_class(module,"CompositeHybridAutomaton");
     composite_hybrid_automaton_class.def(pybind11::init<const List<HybridAutomaton>&>());
     composite_hybrid_automaton_class.def(pybind11::init<Identifier,const List<HybridAutomaton>&>());
+    composite_hybrid_automaton_class.def("discrete_reachability",&CompositeHybridAutomaton::discrete_reachability);
+    composite_hybrid_automaton_class.def("check_reachable_modes",&CompositeHybridAutomaton::check_reachable_modes);
     composite_hybrid_automaton_class.def("__str__", &__cstr__<CompositeHybridAutomaton>);
     composite_hybrid_automaton_class.def("__repr__", &__crepr__<CompositeHybridAutomaton>);
     composite_hybrid_automaton_class.def("__iter__", [](CompositeHybridAutomaton const& c){return pybind11::make_iterator(c.begin(),c.end());});

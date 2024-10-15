@@ -391,8 +391,8 @@ TestHybridAutomaton::test_static_analysis()
     ARIADNE_TEST_PRINT(controller_automaton);
 
     ARIADNE_TEST_EXECUTE(_system.check_mode(valve_opening_controller_rising));
-    ARIADNE_TEST_EXECUTE(_system.discrete_reachability(valve_opening_controller_rising));
-    ARIADNE_TEST_EXECUTE(_system.check_reachable_modes(valve_opening_controller_rising));
+    ARIADNE_TEST_EXECUTE(_system.discrete_reachability({valve_opening_controller_rising}));
+    ARIADNE_TEST_EXECUTE(_system.check_reachable_modes({valve_opening_controller_rising}));
 }
 
 

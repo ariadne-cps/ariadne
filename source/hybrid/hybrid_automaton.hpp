@@ -223,11 +223,14 @@ inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 //! There can be at most one discrete transition in an automaton
 //! with the same event and source.
 //!
-//! A discrete transision can either be \em forced or \em unforced.
-//! A forced transition much occur as soon as it is activated.
-//! An unforced transition may occur at any time it is activated,
+//! A discrete transision can either be \em urgent or \em permissive.
+//! An urgent transition much occur as soon as it is activated.
+//! A permissive transition may occur at any time it is activated,
 //! but is only forced to occur if the continuous evolution is
 //! blocked by an invariant.
+//! An urgent transistion may not have an activation condition defined
+//! elsewhere, even if this is permissive.
+//!
 //!
 //! \sa \ref DiscreteMode, \ref DiscreteTransition, \ref CompositeHybridAutomaton
 class HybridAutomaton
@@ -259,8 +262,8 @@ public:
                    List<DottedRealAssignment> const& dynamic);
 
     Void _new_invariant(DiscreteLocation location,
-                         ContinuousPredicate invariant,
-                         DiscreteEvent event);
+                        ContinuousPredicate invariant,
+                        DiscreteEvent event);
 
     Void _new_guard(DiscreteLocation location,
                      DiscreteEvent event,
@@ -278,6 +281,12 @@ public:
                      DiscreteLocation target,
                      List<PrimedRealAssignment> const& reset);
 
+    Void _new_transition(DiscreteLocation source,
+                         DiscreteEvent event,
+                         DiscreteLocation target,
+                         List<PrimedRealAssignment> const& reset,
+                         ContinuousPredicate guard,
+                         EventKind kind);
   public:
     //!@{
     //! \name Constructors and destructors
@@ -304,6 +313,8 @@ public:
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
+    //! \details The \a location must be <em>distinguishable</em> from nodes already present in the automaton.
+    //! The dependent variables of the \a auxiliary and \a dynamic assignments must all be distinct, following the <em>one-definition rule</em>.
     Void new_mode(DiscreteLocation location,
                   List<RealAssignment> const& auxiliary,
                   List<DottedRealAssignment> const& dynamic) {
@@ -426,7 +437,7 @@ public:
     //! \brief Adds a reset to an automaton with a single mode.
     Void new_update(DiscreteEvent event,
                     List<PrimedRealAssignment> const& reset) {
-        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
+        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),reset);
     }
 
     //! \brief Adds a reset to the automaton. (Same as new_update.)
@@ -437,10 +448,17 @@ public:
         this->_new_update(source,event,target,reset);
     }
 
-    //! \brief Adds a reset to an automaton with a single mode.
+    //! \brief Adds a reset to an automaton with no continuous state variables.
+    Void new_reset(DiscreteLocation source,
+                    DiscreteEvent event,
+                    DiscreteLocation target) {
+        this->_new_update(source,event,target,List<PrimedRealAssignment>());
+    }
+
+    //! \brief Adds a reset to an automaton with a single mode. (Same as new_update.)
     Void new_reset(DiscreteEvent event,
                     List<PrimedRealAssignment> const& reset) {
-        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
+        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),reset);
     }
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -454,13 +472,10 @@ public:
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
-                        const List<PrimedRealAssignment>& reset,
-                        const ContinuousPredicate& guard,
+                        List<PrimedRealAssignment> const& reset,
+                        ContinuousPredicate guard,
                         EventKind kind) {
-        if(kind==EventKind::URGENT || kind==EventKind::IMPACT) { this->_new_action(source,!guard,event,guard,kind); }
-        else if(kind==EventKind::PERMISSIVE) { this->_new_guard(source,event,guard,kind); }
-        else { ARIADNE_FAIL_MSG("Unhandled event kind "<<kind); }
-        this->_new_update(source,event,target,reset);
+        this->_new_transition(source,event,target,reset,guard,kind);
     }
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -468,19 +483,19 @@ public:
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
-                        ContinuousPredicate const& guard,
+                        ContinuousPredicate guard,
                         EventKind kind) {
-        this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
+        this->_new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
     }
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
-                        ContinuousPredicate const& guard,
+                        ContinuousPredicate guard,
                         DiscreteLocation target,
                         EventKind kind) {
-        this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
+        this->_new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
     }
 
     //! \brief Adds an unguarded transition to the automaton.
@@ -488,7 +503,7 @@ public:
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
-                        List<PrimedRealAssignment> const & reset) {
+                        List<PrimedRealAssignment> const& reset) {
         this->_new_update(source,event,target,reset);
     }
 
@@ -533,6 +548,10 @@ public:
     //! \brief Checks validity of the mode for the given \a location.
     //! Only checks for underspecified dynamics; overspecification is determined at build-time.
     Void check_mode(DiscreteLocation location) const;
+    //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial locations.
+    Void check_reachable_modes(const Set<DiscreteLocation>&) const;
+    //! \brief Performs a discrete reachability analysis from the given initial locations.
+    Set<DiscreteLocation> discrete_reachability(const Set<DiscreteLocation>&) const;
     //!@}
 
     //!@{
@@ -583,7 +602,7 @@ public:
     virtual Bool has_partial_mode(DiscreteLocation location) const;
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
     virtual Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
-    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
+    //! \brief Tests if the automaton has a nontrivial guard (activation) predicate fot the given \a event in \a location.
     virtual Bool has_guard(DiscreteLocation, DiscreteEvent) const;
     //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
     virtual Bool has_transition(DiscreteLocation source, DiscreteEvent event) const;

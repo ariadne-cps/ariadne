@@ -90,6 +90,20 @@ class MultipleGuardError : public SystemSpecificationError {
     MultipleGuardError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief An event was declared urgent (or impact) twice in the same context.
+class MultipleUrgentDeclarationError : public SystemSpecificationError {
+  public:
+    MultipleUrgentDeclarationError(const StringType& what) : SystemSpecificationError(what) { }
+};
+
+//! \brief An event was declared urgent (or impact) but has another (permissive) guard restricting its activation.
+//! \details If an event has an urgent guard \f$g_1(x)\geq0\f$ in one component, and a permssive guard \f$g_2(x)\geq0\f$ in another,
+//! then compositionality requires that the event occurs
+class UrgentDeclarationWithMultipleGuardsException : public SystemSpecificationError {
+  public:
+    UrgentDeclarationWithMultipleGuardsException(const StringType& what) : SystemSpecificationError(what) { }
+};
+
 //! \brief Two transitions kinds were specified for for an event in some location.
 class MultipleTransitionError : public SystemSpecificationError {
   public:

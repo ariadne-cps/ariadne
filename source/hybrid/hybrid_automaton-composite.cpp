@@ -632,7 +632,7 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
     List<RealVariable> location_variables=catenate(state_variables,auxiliary_variables);
 
     if(!unique(location_variables)) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+        ARIADNE_THROW(OverspecifiedDynamicError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                       "Variables "<<duplicates(location_variables)<<" in location "<<location<<" with defining equations "<<equations<<" and "<<dynamics<<" have more than one defining equation.");
     }
 
@@ -640,36 +640,31 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
 
     Set<RealVariable> undefined_variables=difference(real_arguments(equations),result_variables);
     if(!undefined_variables.empty()) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+        ARIADNE_THROW(UnderspecifiedDynamicError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                       "Variables "<<undefined_variables<<" are used in the definition of the algebraic equations "<<equations<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
     }
 
     undefined_variables=difference(real_arguments(dynamics),result_variables);
     if(!undefined_variables.empty()) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+        ARIADNE_THROW(UnderspecifiedDynamicError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                       "Variables "<<undefined_variables<<" are used in the definition of the differential equations "<<dynamics<<" in location "<<location<<" with state variables "<<state_variables<<", but are not defined.");
     }
 
     List<RealAssignment> ordered_equations=Ariadne::order(equations,make_set(state_variables));
 
+    Set<DiscreteEvent> events=this->events(location);
 
-/*
-    Map<DiscreteEvent,ContinuousPredicate> const& invariants=this->invariant_predicates(location);
-    for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator invariant_iter=invariants.begin();
-        invariant_iter!=invariants.end(); ++invariant_iter)
-    {
-        DiscreteEvent action=invariant_iter->first;
-        const ContinuousPredicate& invariant=invariant_iter->second;
+    for(Set<DiscreteEvent>::Iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+        DiscreteEvent event=*event_iter;
+        const ContinuousPredicate& invariant=this->invariant_predicate(location,event);
         if(!subset(real_arguments(invariant),result_variables)) {
             undefined_variables=difference(real_arguments(invariant),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
-                          "Variables "<<undefined_variables<<" are used in the invariant "<<invariant<<" with label \""<<action<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
+            ARIADNE_THROW(UnderspecifiedConstraintError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+                          "Variables "<<undefined_variables<<" are used in the invariant "<<invariant<<" with label \""<<events<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
         }
     }
 
-    Set<DiscreteEvent> events=this->events(location);
     for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
-
         // Get transition information
         DiscreteEvent event=*event_iter;
         DiscreteLocation target=this->target(location,event);
@@ -679,23 +674,51 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
         Set<RealVariable> target_state_variables=make_set(this->state_variables(target));
         List<RealVariable> reset_variables=base(assigned(reset));
 
+        // Check kind of transitions of guard
+        Set<Identifier> urgent_in;
+        Set<Identifier> permissive_in;
+        for(List<HybridAutomaton>::ConstIterator component_iter=this->_components.begin();
+            component_iter!=this->_components.end(); ++component_iter)
+        {
+            HybridAutomaton const& component = *component_iter;
+            if(component.has_guard(location,event)) {
+                EventKind kind=component.event_kind(location,event);
+                if (kind == EventKind::URGENT or kind == EventKind::IMPACT) {
+                    urgent_in.insert(component.name());
+                } else {
+                    ContinuousPredicate local_guard=component.guard_predicate(location,event);
+                    if(!is_constant(local_guard,true)) {
+                        permissive_in.insert(component.name());
+                    }
+                }
+            }
+        }
+        if (urgent_in.size()>1) {
+            ARIADNE_THROW(MultipleUrgentDeclarationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+                          "Event "<<event<<" in location "<<location<<" is declared URGENT or IMPACT by multiple components "<<urgent_in<<".");
+        }
+        if (urgent_in.size()==1 && permissive_in.size()>0) {
+            ARIADNE_THROW(UrgentDeclarationWithMultipleGuardsException,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+                          "Event "<<event<<" in location "<<location<<" is declared URGENT or IMPACT by component "<<*urgent_in.begin()<<", but also has a nontrivial guard in components "<<permissive_in<<"; an urgent event may only have a guard declared in the restricting component.")
+        }
+
         // Check arguments of guard
         if(!subset(real_arguments(guard),result_variables)) {
             undefined_variables=difference(real_arguments(guard),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+            ARIADNE_THROW(UnderspecifiedConstraintError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                           "Variables "<<undefined_variables<<" are used in the guard "<<guard<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
         }
 
         // Check arguments of reset
         if(!subset(real_arguments(reset),result_variables)) {
             undefined_variables=difference(real_arguments(reset),result_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+            ARIADNE_THROW(UnderspecifiedResetError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                           "Variables "<<undefined_variables<<" are used in the reset "<<reset<<" for event \""<<event<<"\" in location "<<location<<" with variables "<<location_variables<<", but are not defined.");
         }
 
         // Check duplication of reset
         if(!unique(reset_variables)) {
-        ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+        ARIADNE_THROW(OverspecifiedResetError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                       "Variables "<<duplicates(reset_variables)<<" have more than one defining equation in resets "<<reset<<" for event \""<<event<<"\" in location "<<location<<".");
         }
 
@@ -709,22 +732,13 @@ CompositeHybridAutomaton::check_mode(DiscreteLocation location) const {
 
         if(!subset(target_state_variables,updated_variables)) {
             undefined_variables=difference(target_state_variables,updated_variables);
-            ARIADNE_THROW(SystemSpecificationError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
+            ARIADNE_THROW(UnderspecifiedResetError,"CompositeHybridAutomaton::check_mode(DiscreteLocation)",
                           "Variables "<<undefined_variables<<" are state variables in location "<<target<<", but are not defined in the reset "<<reset<<" for the transition \""<<event<<"\" from location "<<location<<".");
         }
 
     } // Finished checking transitions
-*/
+
     return;
-}
-
-
-Void
-CompositeHybridAutomaton::check_reachable_modes(DiscreteLocation initial_location) const
-{
-    Set<DiscreteLocation> initial_locations;
-    initial_locations.insert(initial_location);
-    this->check_reachable_modes(initial_locations);
 }
 
 
@@ -735,14 +749,6 @@ CompositeHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& ini
     for(Set<DiscreteLocation>::ConstIterator iter=reachable_locations.begin(); iter!=reachable_locations.end(); ++iter) {
         this->check_mode(*iter);
     }
-}
-
-Set<DiscreteLocation>
-CompositeHybridAutomaton::discrete_reachability(DiscreteLocation initial_location) const
-{
-    Set<DiscreteLocation> initial_locations;
-    initial_locations.insert(initial_location);
-    return this->discrete_reachability(initial_locations);
 }
 
 Set<DiscreteLocation>

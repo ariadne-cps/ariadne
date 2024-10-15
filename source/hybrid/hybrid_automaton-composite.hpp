@@ -216,8 +216,6 @@ class CompositeHybridAutomaton
     //! Includes a check for algebraic dependencies, over-defined variables, under-defined variables, and
     //! variables which should be defined in a reset but are not.
     Void check_mode(DiscreteLocation) const;
-    //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial location.
-    Void check_reachable_modes(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial locations.
     Void check_reachable_modes(const Set<DiscreteLocation>&) const;
     //!@}
@@ -225,8 +223,6 @@ class CompositeHybridAutomaton
     //!@{
     //! \name Discrete reachability analysis.
 
-    //! \brief Performs a discrete reachability analysis from the given initial location.
-    Set<DiscreteLocation> discrete_reachability(DiscreteLocation) const;
     //! \brief Performs a discrete reachability analysis from the given initial locations.
     Set<DiscreteLocation> discrete_reachability(const Set<DiscreteLocation>&) const;
     //!@}

@@ -326,7 +326,7 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
     for(SizeType i=0; i!=dynamic.size(); ++i) {
         if(defined_variables.contains(dynamic[i].lhs.base())) {
             ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_mode",
-                          "Variable "<<dynamic[i].lhs.base()<<" is defined by the differential equations "<<dynamic<<" for mode "<<location<<" is already defined");
+                          "Variable "<<dynamic[i].lhs.base()<<" defined by the differential equations "<<dynamic<<" for mode "<<location<<" is also defined in the algebraic equations "<<auxiliary);
         }
         defined_variables.insert(dynamic[i].lhs.base());
         argument_variables.adjoin(dynamic[i].rhs.arguments());
@@ -437,7 +437,23 @@ HybridAutomaton::_new_update(DiscreteLocation source,
 }
 
 
-
+Void
+HybridAutomaton::_new_transition(DiscreteLocation source,
+                                 DiscreteEvent event,
+                                 DiscreteLocation target,
+                                 List<PrimedRealAssignment> const& reset,
+                                 ContinuousPredicate guard,
+                                 EventKind kind)
+{
+    if(kind==EventKind::URGENT || kind==EventKind::IMPACT) {
+        this->_new_action(source,!guard,event,guard,kind);
+    } else if(kind==EventKind::PERMISSIVE) {
+        this->_new_guard(source,event,guard,kind);
+    } else {
+        ARIADNE_FAIL_MSG("Unhandled event kind "<<kind);
+    }
+    this->_new_update(source,event,target,reset);
+}
 
 
 Set<DiscreteLocation>
@@ -497,7 +513,7 @@ HybridAutomaton::has_invariant(DiscreteLocation source, DiscreteEvent event) con
 Bool
 HybridAutomaton::has_guard(DiscreteLocation source, DiscreteEvent event) const
 {
-   return this->has_invariant(source,event) || this->has_transition(source,event);
+   return this->has_partial_mode(source) && this->mode(source)._guards.has_key(event);
 }
 
 
@@ -834,6 +850,50 @@ Void HybridAutomaton::check_mode(DiscreteLocation location) const {
 
 }
 
+
+Void HybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& initial_locations) const {
+    Set<DiscreteLocation> reachable_locations=this->discrete_reachability(initial_locations);
+    for(Set<DiscreteLocation>::ConstIterator iter=reachable_locations.begin(); iter!=reachable_locations.end(); ++iter) {
+        this->check_mode(*iter);
+    }
+}
+
+Set<DiscreteLocation> HybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& initial_locations) const {
+    const HybridAutomaton& automaton=*this;
+
+    Set<DiscreteLocation> reached=initial_locations;
+    Set<DiscreteLocation> working=initial_locations;
+    Set<DiscreteLocation> found;
+
+    Map<DiscreteLocation,Natural> steps;
+    Natural step=0u;
+
+    for(Set<DiscreteLocation>::ConstIterator initial_iter=initial_locations.begin(); initial_iter!=initial_locations.end(); ++initial_iter) {
+        steps.insert(*initial_iter,step);
+    }
+
+    while(!working.empty()) {
+        ++step;
+        for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
+            DiscreteLocation location=*source_iter;
+            Set<DiscreteEvent> events=automaton.events(location);
+            for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+                DiscreteEvent event=*event_iter;
+                DiscreteLocation target=automaton.target(location,event);
+                if(!reached.contains(target)) {
+                    found.insert(target);
+                    reached.insert(target);
+                    steps.insert(target,step);
+                }
+           }
+
+        }
+        working.clear();
+        working.swap(found);
+    }
+
+    return reached;
+}
 
 
 } // namespace Ariadne

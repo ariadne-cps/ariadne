@@ -60,10 +60,10 @@ ReachAvoid set_workspace_1(EffectiveVectorMultivariateFunction const& dynamics, 
 
     ReachAvoid ra("heading", dynamics, state_grid, state_domain, control_grid, control_domain, depth, 1e-10_x);
 
-    /*ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
+    ra.add_obstacle({{1,3.5_x},{4.5_x,5},theta_domain});
     ra.add_obstacle({{0,1},{2,3},theta_domain});
     ra.add_obstacle({{2.5_x,5},{2,3},theta_domain});
-    ra.add_obstacle({{0,5},{0,0.5_x},theta_domain});*/
+    ra.add_obstacle({{0,5},{0,0.5_x},theta_domain});
 
     ra.add_goal({{4,5},{4.5_x,5},theta_domain});
 

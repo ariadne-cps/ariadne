@@ -208,7 +208,7 @@ void ariadne_main()
     Randomiser<DegreeType> random_uint;
     Randomiser<ExactDouble> random_double;
 
-    SizeType num_points = 1;
+    SizeType num_points = 5;
     SizeType max_steps = 100;
 
     for (SizeType p=0; p < num_points; ++p) {
@@ -230,24 +230,25 @@ void ariadne_main()
 
         List<PointType> sequence;
 
-        for(SizeType s = 0; s < max_steps; ++s) {
+        SizeType s = 0;
+        for(; s < max_steps; ++s) {
 
             sequence.append(current);
 
             auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
             if (not ra.state_paving().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN_AT(1, "The current cell is outside of the state paving, terminating with failure.")
+                CONCLOG_PRINTLN("The current cell is outside of the state paving, terminating with failure.")
                 break;
             }
 
             if (ra.goals().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN_AT(0, "The current cell is a goal, terminating with success in " << s+1 << " steps.")
+                CONCLOG_PRINTLN("The current cell is a goal, terminating with success in " << s+1 << " steps.")
                 break;
             }
 
             if (ra.obstacles().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN_AT(1, "The current cell is an obstacle, terminating with failure.")
+                CONCLOG_PRINTLN("The current cell is an obstacle, terminating with failure.")
                 break;
             }
 
@@ -269,6 +270,9 @@ void ariadne_main()
             CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
 
             current = next;
+        }
+        if (s == max_steps) {
+            CONCLOG_PRINTLN("Not terminated after maximum steps, failure.")
         }
     }
 }

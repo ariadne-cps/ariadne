@@ -208,75 +208,67 @@ void ariadne_main()
     Randomiser<DegreeType> random_uint;
     Randomiser<ExactDouble> random_double;
 
-    SizeType idx = static_cast<SizeType>(random_uint.get(0,assignments.size()-1));
-    auto a_it = assignments.begin();
-    auto dim = a_it->first.cell().dimension();
-    for (SizeType i=0;i<idx;++i) ++a_it;
-    auto initial_box = a_it->first.cell().box();
+    SizeType num_points = 10;
+    SizeType max_steps = 100;
 
-    CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
+    for (SizeType p=0; p < num_points; ++p) {
 
-    PointType current(dim);
-    for (SizeType i=0; i<dim; ++i) {
-        current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
-    }
+        CONCLOG_PRINTLN("Point " << p)
 
-    SizeType step = 0;
+        SizeType idx = static_cast<SizeType>(random_uint.get(0,assignments.size()-1));
+        auto a_it = assignments.begin();
+        auto dim = a_it->first.cell().dimension();
+        for (SizeType i=0;i<idx;++i) ++a_it;
+        auto initial_box = a_it->first.cell().box();
 
-    List<PointType> sequence;
+        CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
 
-    while(true) {
-
-        sequence.append(current);
-
-        auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
-
-        if (not ra.state_paving().superset(current_icell.cell())) {
-            CONCLOG_PRINTLN_AT(1, "The current cell is outside of the state paving, terminating with failure.")
-            break;
-        }
-
-        if (ra.goals().superset(current_icell.cell())) {
-            CONCLOG_PRINTLN_AT(1, "The current cell is a goal, terminating with success.")
-            break;
-        }
-
-        if (ra.obstacles().superset(current_icell.cell())) {
-            CONCLOG_PRINTLN_AT(1, "The current cell is an obstacle, terminating with failure.")
-            break;
-        }
-
-        auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
-
-        double delta_modulus = 0;
+        PointType current(dim);
         for (SizeType i=0; i<dim; ++i) {
-            delta_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
-        }
-        delta_modulus = std::sqrt(delta_modulus);
-
-        PointType next(dim);
-        for (SizeType i=0; i<dim; ++i) {
-            next.at(i) = current.at(i) + (target.at(i).get_d()-current.at(i))/delta_modulus*0.3;
+            current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
         }
 
-        auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
+        List<PointType> sequence;
 
-        CONCLOG_PRINTLN_AT(1, step << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
+        for(SizeType s = 0; s < max_steps; ++s) {
 
-        current = next;
+            sequence.append(current);
 
-        ++step;
+            auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
-        if (step > 50) break;
+            if (not ra.state_paving().superset(current_icell.cell())) {
+                CONCLOG_PRINTLN_AT(1, "The current cell is outside of the state paving, terminating with failure.")
+                break;
+            }
+
+            if (ra.goals().superset(current_icell.cell())) {
+                CONCLOG_PRINTLN_AT(1, "The current cell is a goal, terminating with success.")
+                break;
+            }
+
+            if (ra.obstacles().superset(current_icell.cell())) {
+                CONCLOG_PRINTLN_AT(1, "The current cell is an obstacle, terminating with failure.")
+                break;
+            }
+
+            auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
+
+            double delta_modulus = 0;
+            for (SizeType i=0; i<dim; ++i) {
+                delta_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
+            }
+            delta_modulus = std::sqrt(delta_modulus);
+
+            PointType next(dim);
+            for (SizeType i=0; i<dim; ++i) {
+                next.at(i) = current.at(i) + (target.at(i).get_d()-current.at(i))/delta_modulus*0.3;
+            }
+
+            auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
+
+            CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
+
+            current = next;
+        }
     }
-
-    /*
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-    std::cout << "sequence = [";
-    for (auto const& p : sequence) {
-        std::cout << p.at(0) << " " << p.at(1) << " " << p.at(2) << ";" << std::endl;
-    }
-    std::cout << "];";
-    */
 }

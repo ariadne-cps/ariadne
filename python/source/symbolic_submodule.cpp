@@ -55,9 +55,13 @@ template<> struct PythonClassName<Expression<Kleenean>> { static std::string get
 template<> struct PythonClassName<String> { static std::string get() { return "String"; } };
 template<> struct PythonClassName<Valuation<Real>> { static std::string get() { return python_class_name<Real>()+python_template_name<Valuation>(); } };
 
+template<> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<String>& repr) {
+    return os << python_class_name<String>() << "(\"" << repr.reference() << "\")";
+}
+
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Constant<T>>& repr) {
     Constant<T> const& cnst=repr.reference();
-    return os << python_class_name<Constant<T>>() << "(\"" << cnst.name() << "," << cnst.value() << "\")";
+    return os << python_class_name<Constant<T>>() << "(\"" << cnst.name() << "\"," << PythonRepresentation<T>(cnst.value()) << ")";
 }
 template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Variable<T>>& repr) {
     Variable<T> const& var=repr.reference();

@@ -48,6 +48,22 @@ template<class T> inline std::string python_template_class_name(std::string str)
 template<template<class...>class> struct PythonTemplateName;
 template<template<class...>class T> inline std::string python_template_name() { return PythonTemplateName<T>::get(); }
 
+template<class X1, class X2> concept HasMixedArithmeticOperations = requires(X1 x1, X2 x2) {
+    { add(x1,x2) };
+    { sub(x1,x2) };
+    { mul(x1,x2) };
+    { div(x1,x2) };
+};
+
+template<class X> concept HasArithmeticOperations = requires(X x) {
+    { pos(x) };
+    { neg(x) };
+    { add(x,x) };
+    { sub(x,x) };
+    { mul(x,x) };
+    { div(x,x) };
+};
+
 } // namespace Ariadne
 
 
@@ -444,7 +460,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind1
     return pyclass;
 }
 
-template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X> pybind11::class_<X>& define_arithmetic_operators(pybind11::module& module, pybind11::class_<X>& pyclass) {
     pyclass.def("__pos__", &__pos__<X>, pybind11::is_operator());
     pyclass.def("__neg__", &__neg__<X>, pybind11::is_operator());
     pyclass.def("__add__", &__add__<X,X>, pybind11::is_operator());
@@ -461,6 +477,31 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
         pyclass.def(__py_rdiv__, &__rdiv__<X,X>, pybind11::is_operator());
     }
 
+    return pyclass;
+}
+
+template<class X> pybind11::class_<X>& define_arithmetic_operations(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    module.def("pos", &_pos_<X>);
+    module.def("neg", &_neg_<X>);
+    module.def("sqr", &_sqr_<X>);
+    if constexpr(CanDivide<X,X>) {
+        module.def("hlf", &_hlf_<X>);
+        module.def("rec", &_rec_<X>);
+    }
+    module.def("add", &_add_<X,X>);
+    module.def("sub", &_sub_<X,X>);
+    module.def("mul", &_mul_<X,X>);
+    if constexpr(CanDivide<X,X>) {
+        module.def("div", &_div_<X,X>);
+    }
+    return pyclass;
+}
+
+template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    define_arithmetic_operators(module,pyclass);
+    if constexpr (HasArithmeticOperations<X>) {
+        define_arithmetic_operations(module,pyclass);
+    }
     return pyclass;
 }
 

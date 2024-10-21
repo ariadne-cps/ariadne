@@ -230,6 +230,10 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
     return r;
 }
 
+template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Sqr, const Polynomial<I,X>& p) {
+    return AlgebraOperations<Polynomial<I,X>>::apply(Mul(),p,p);
+}
+
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Add, Polynomial<I,X> p, const X& c) {
     p[IndexType(p.argument_size())]+=c;

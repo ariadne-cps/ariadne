@@ -303,6 +303,7 @@ template<class I, class X> struct AlgebraOperations<Polynomial<I,X>> {
     static Polynomial<I,X> apply(Nul, const Polynomial<I,X>& p);
     static Polynomial<I,X> apply(Pos, const Polynomial<I,X>& p);
     static Polynomial<I,X> apply(Neg, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Sqr, const Polynomial<I,X>& p);
     static Polynomial<I,X> apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
     static Polynomial<I,X> apply(Sub, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
     static Polynomial<I,X> apply(Mul, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);

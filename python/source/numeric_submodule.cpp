@@ -121,8 +121,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Decimal>& 
     return os << "Decimal(\""<<repr.reference()<<"\")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {
     return os << "Rational("<<repr.reference().numerator()<<","<<repr.reference().denominator()<<")"; }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr) {
-    return os << "Real("<<repr.reference()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr_) {
+    return repr(os,repr_.reference()); }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<DyadicBounds>& repr) {
     return os << "DyadicBounds({"<<python_literal(repr.reference().lower())<<":"<<python_literal(repr.reference().upper())<<"})"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<DecimalBounds>& repr) {
@@ -472,7 +472,7 @@ void export_decimal(pymodule& module)
     decimal_class.def("__hash__", [](Decimal const& dec){std::hash<const char*> hasher; return hasher(dec.literal().c_str());});
     decimal_class.def("__str__", &__cstr__<Decimal>);
     decimal_class.def("__repr__", &__repr__<Decimal>);
-    define_arithmetic(module,decimal_class);
+    define_arithmetic_operators(module,decimal_class);
     define_lattice(module,decimal_class);
     define_comparisons(module,decimal_class);
     module.def("sqr", &_sqr_<Decimal>);
@@ -540,6 +540,8 @@ void export_real(pymodule& module)
     real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
     real_class.def("compute_using", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::compute_using);
     real_class.def("compute_using", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::compute_using);
+
+    static_assert (HasArithmeticOperations<Real>);
 
     define_elementary(module,real_class);
     define_lattice(module,real_class);

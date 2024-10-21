@@ -187,7 +187,6 @@ template<class A1, class A2> concept CanSubtract = requires(A1 a1, A2 a2) { { a1
 template<class A1, class A2> concept CanMultiply = requires(A1 a1, A2 a2) { { a1*a2 }; };
 template<class A1, class A2> concept CanDivide = requires(A1 a1, A2 a2) { { a1/a2 }; };
 
-
 } // namespace Ariadne
 
 #endif

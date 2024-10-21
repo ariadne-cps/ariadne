@@ -59,6 +59,7 @@ class RealInterface {
     virtual FloatMPBounds _compute_get(Effort, MultiplePrecision) const = 0;
   public:
     virtual OutputStream& _write(OutputStream& os) const = 0;
+    virtual OutputStream& _repr(OutputStream& os) const = 0;
 };
 
 class ValidatedRealInterface {
@@ -69,6 +70,7 @@ class ValidatedRealInterface {
     virtual FloatMPBounds _get(MultiplePrecision) const = 0;
   public:
     virtual OutputStream& _write(OutputStream& os) const = 0;
+    virtual OutputStream& _repr(OutputStream& os) const = 0;
 };
 
 } // namespace Ariadne

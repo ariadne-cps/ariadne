@@ -58,8 +58,11 @@ template<class X1, class X2=X1> concept HasMinus = requires(X1 x1, X2 x2) { x1-x
 template<class X1, class X2=X1> concept HasTimes = requires(X1 x1, X2 x2) { x1*x2; };
 template<class X1, class X2=X1> concept HasDivides = requires(X1 x1, X2 x2) { x1/x2; };
 
+template<class X> concept HasNul = requires(X x) { nul(x); };
 template<class X> concept HasPos = requires(X x) { pos(x); };
 template<class X> concept HasNeg = requires(X x) { neg(x); };
+template<class X> concept HasHlf = requires(X x) { hlf(x); };
+template<class X> concept HasRec = requires(X x) { rec(x); };
 template<class X1, class X2=X1> concept HasAdd = requires(X1 x1, X2 x2) { add(x1,x2); };
 template<class X1, class X2=X1> concept HasSub = requires(X1 x1, X2 x2) { sub(x1,x2); };
 template<class X1, class X2=X1> concept HasMul = requires(X1 x1, X2 x2) { mul(x1,x2); };

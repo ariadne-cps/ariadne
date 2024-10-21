@@ -48,6 +48,9 @@
 
 #include "concepts.hpp"
 
+
+
+
 namespace Ariadne {
 
 OutputStream& operator<<(OutputStream& os, Bits const& bits) {
@@ -81,11 +84,13 @@ template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInter
     virtual FloatDPBounds _get(DoublePrecision pr) const override final { return FloatDPBounds(this->_get(),pr); }
     virtual FloatMPBounds _get(MultiplePrecision pr) const override final { return FloatMPBounds(this->_get(),pr); }
     virtual OutputStream& _write(OutputStream& os) const override final { return os << static_cast<DyadicBounds const&>(*this); }
+    virtual OutputStream& _repr(OutputStream& os) const override final { return os << "DyadicBounds(" << static_cast<DyadicBounds const&>(*this) << ")"; }
 };
 
 struct RealBase : RealInterface {
     virtual ValidatedReal _compute(Accuracy acc) const override;
     virtual ValidatedReal _compute(Effort eff) const override;
+    virtual OutputStream& _repr(OutputStream& os) const override { return this -> _write(os); }
 };
 
 ValidatedReal RealBase::_compute(Effort effort) const {
@@ -124,30 +129,114 @@ struct RealExpressionBase : RealBase {
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const override = 0;
 };
 
+struct RealOperatorExpressionBase : RealExpressionBase {
+    virtual OperatorCode _op_code() const = 0;
+};
+
+
+
+class RealSymbolicOperatorWriter {
+    template<class OP1, class OP2> static Bool _is_one_of(OperatorCode op) {
+        switch (op) { case OP1::code(): case OP2::code(): return true; default: return false; } }
+    template<class OP1, class OP2, class OP3> static Bool _is_one_of(OperatorCode op) {
+        switch (op) { case OP1::code(): case OP2::code(): case OP3::code(): return true; default: return false; } }
+    template<class OP1, class OP2, class OP3, class OP4> static Bool _is_one_of(OperatorCode op) {
+        switch (op) { case OP1::code(): case OP2::code(): case OP3::code(): case OP4::code(): return true; default: return false; } }
+    template<class... OPS> static Bool _operator_is_one_of(Real const& r) {
+        if (auto re = dynamic_cast<RealOperatorExpressionBase const*>(r.raw_pointer())) { return _is_one_of<OPS...>(re->_op_code()); }
+        else { return false; } }
+    template<class... OPS> static Void _write_parenthesised_if_operator_is_one_of(OutputStream& os, Real const& r) {
+        if (_operator_is_one_of<OPS...>(r)) { os << '(' << r << ')'; } else { os << r; } }
+  public:
+    Void _write_impl(OutputStream& os, Add op, Real const& r1, Real const& r2) {
+        os << r1;
+        os << '+';
+        _write_parenthesised_if_operator_is_one_of<Add,Sub>(os,r2);
+    }
+    Void _write_impl(OutputStream& os, Sub op, Real const& r1, Real const& r2) {
+        os << r1;
+        os << '-';
+        _write_parenthesised_if_operator_is_one_of<Add,Sub>(os,r2);
+    }
+    Void _write_impl(OutputStream& os, Mul op, Real const& r1, Real const& r2) {
+        _write_parenthesised_if_operator_is_one_of<Add,Sub>(os,r1);
+        os << "*";
+        _write_parenthesised_if_operator_is_one_of<Add,Sub,Mul,Div>(os,r2);
+    }
+    Void _write_impl(OutputStream& os, Div op, Real const& r1, Real const& r2) {
+        _write_parenthesised_if_operator_is_one_of<Add,Sub>(os,r1);
+        os << "/";
+        _write_parenthesised_if_operator_is_one_of<Add,Sub,Mul,Div>(os,r2);
+    }
+    template<class OP> Void _write_impl(OutputStream& os, OP op, Real const& r) {
+        os << op << "(" << r << ")";
+    }
+    template<class OP> Void _write_impl(OutputStream& os, OP op, Real const& r1, Real const& r2) {
+        os << op << "(" << r1 << "," << r2 << ")";
+    }
+    template<class OP> Void _write_impl(OutputStream& os, OP op, Real const& r1, Int n2) {
+        os << op << "(" << r1 << "," << n2 << ")";
+    }
+
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real> const& s) {
+        this->_write_impl(os,s._op,s._arg); }
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real,Real> const& s) {
+        this->_write_impl(os,s._op,s._arg1,s._arg2); }
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real,Int> const& s) {
+        this->_write_impl(os,s._op,s._arg,s._num); }
+};
+
+class RealSymbolicOperationWriter {
+    struct FormattedReal { Real const& r; friend OutputStream& operator<<(OutputStream& os, FormattedReal const& fr) { fr.r.raw_pointer()->_repr(os); return os; } };
+  public:
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real> const& s) {
+        os << s._op << "(" << FormattedReal{s._arg} << ")"; }
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real,Real> const& s) {
+        os << s._op << "(" << FormattedReal{s._arg1} << "," << FormattedReal{s._arg2} << ")"; }
+    template<class OP> Void _write(OutputStream& os, Symbolic<OP,Real,Int> const& s) {
+        os << s._op << "(" << FormattedReal{s._arg} << "," << s._num << ")"; }
+};
+
 template<class O, class... AS> struct RealWrapper;
 
-template<class O, class A> struct RealWrapper<O,A> : virtual RealExpressionBase, Symbolic<O,A>, FloatDPBounds {
+template<class O, class A> struct RealWrapper<O,A> : virtual RealOperatorExpressionBase, Symbolic<O,A>, FloatDPBounds {
     RealWrapper(O o, A a) : Symbolic<O,A>(o,a)
         , FloatDPBounds(this->_op(this->_arg.get(dp))) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A> const&>(*this); }
+    virtual OperatorCode _op_code() const override { return O::code(); }
+    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const override { return static_cast<FloatDPBounds>(*this); }
+    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const override { return this->_op(this->_arg.get(pr)); }
+//    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A> const&>(*this); }
+//    virtual OutputStream& _write(OutputStream& os) const { OperatorSymbolicWriter(*this)._write(os,static_cast<Symbolic<O,A> const&>(*this)); return os; }
+    virtual OutputStream& _write(OutputStream& os) const override { RealSymbolicOperatorWriter()._write(os,static_cast<Symbolic<O,A> const&>(*this)); return os; }
+    virtual OutputStream& _repr(OutputStream& os) const override {
+        os << "Real("; RealSymbolicOperationWriter()._write(os,static_cast<Symbolic<O,A> const&>(*this)); return os << ")"; }
 };
 
-template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealExpressionBase, Symbolic<O,A1,A2>, FloatDPBounds {
+template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealOperatorExpressionBase, Symbolic<O,A1,A2>, FloatDPBounds {
     RealWrapper(O o, A1 a1, A2 a2) : Symbolic<O,A1,A2>(o,a1,a2)
         , FloatDPBounds(this->_op(this->_arg1.get(dp),this->_arg2.get(dp))) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg1.compute_get(eff,pr),this->_arg2.compute_get(eff,pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A1,A2> const&>(*this); }
+    virtual OperatorCode _op_code() const override { return O::code(); }
+    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const override { return static_cast<FloatDPBounds>(*this); }
+    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const override { return this->_op(this->_arg1.compute_get(eff,pr),this->_arg2.compute_get(eff,pr)); }
+//    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A1,A2> const&>(*this); }
+//    virtual OutputStream& _write(OutputStream& os) const { OperatorSymbolicWriter(*this)._write(os,static_cast<Symbolic<O,A1,A2> const&>(*this)); return os; }
+    virtual OutputStream& _write(OutputStream& os) const override { RealSymbolicOperatorWriter()._write(os,static_cast<Symbolic<O,A1,A2> const&>(*this)); return os; }
+    virtual OutputStream& _repr(OutputStream& os) const override {
+        os << "Real("; RealSymbolicOperationWriter()._write(os,static_cast<Symbolic<O,A1,A2> const&>(*this)); return os << ")"; }
 };
 
-template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealExpressionBase, Symbolic<Pow,A,N>, FloatDPBounds {
-    RealWrapper(Pow o, A a, N n) : Symbolic<Pow,A,N>(o,a,n)
+template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealOperatorExpressionBase, Symbolic<Pow,A,N>, FloatDPBounds {
+    using O = Pow;
+    RealWrapper(O o, A a, N n) : Symbolic<Pow,A,N>(o,a,n)
         , FloatDPBounds(this->_op(this->_arg.get(dp),n)) { }
-    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
-    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const {  return this->_op(this->_arg.compute_get(eff,pr),this->_num); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<Pow,A,N> const&>(*this); }
+    virtual OperatorCode _op_code() const override { return O::code(); }
+    virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const override { return static_cast<FloatDPBounds>(*this); }
+    virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const override { return this->_op(this->_arg.compute_get(eff,pr),this->_num); }
+//    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A,N> const&>(*this); }
+//    virtual OutputStream& _write(OutputStream& os) const { OperatorSymbolicWriter(*this)._write(os,static_cast<Symbolic<O,A,N> const&>(*this)); return os; }
+    virtual OutputStream& _write(OutputStream& os) const override { RealSymbolicOperatorWriter()._write(os,static_cast<Symbolic<O,A,N> const&>(*this)); return os; }
+    virtual OutputStream& _repr(OutputStream& os) const override {
+        os << "Real("; RealSymbolicOperationWriter()._write(os,static_cast<Symbolic<O,A,N> const&>(*this)); return os << ")"; }
 };
 
 template<class X> struct RealWrapper<Cnst,X> : RealExpressionBase, FloatDPBounds {
@@ -157,6 +246,7 @@ template<class X> struct RealWrapper<Cnst,X> : RealExpressionBase, FloatDPBounds
     virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+    virtual OutputStream& _repr(OutputStream& os) const { return os << "Real(" << this->_c << ")"; }
 };
 
 template<> struct RealWrapper<Cnst,FloatDPBounds> : RealExpressionBase, FloatDPBounds {
@@ -167,6 +257,7 @@ template<> struct RealWrapper<Cnst,FloatDPBounds> : RealExpressionBase, FloatDPB
     virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(*this,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
+    virtual OutputStream& _repr(OutputStream& os) const { return os << "Real(" << static_cast<FloatDPBounds const&>(*this) << ")"; }
 };
 
 template<> struct RealWrapper<Cnst,EffectiveNumber> : RealExpressionBase, FloatDPBounds {
@@ -177,6 +268,7 @@ template<> struct RealWrapper<Cnst,EffectiveNumber> : RealExpressionBase, FloatD
     virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+    virtual OutputStream& _repr(OutputStream& os) const { return os << "Real(" << this->_c << ")"; }
 };
 
 
@@ -370,6 +462,7 @@ PositiveUpperReal mag(Real const& r) { return abs(r); }
 FloatDPError mag(Real const& r, DoublePrecision pr) { return mag(r.compute_get(Effort(53),pr)); }
 
 OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_write(os); }
+OutputStream& repr(OutputStream& os, Real const& x) { return x._ptr->_repr(os); }
 
 Bool same(Real const& r1, Real const& r2) {
     // FIXME: Use symbolic approach

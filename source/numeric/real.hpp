@@ -270,6 +270,7 @@ class Real
     //! \name Input/output operations
     //!@{
     friend OutputStream& operator<<(OutputStream& os, Real const& r); //!< Write to an output stream.
+    friend OutputStream& repr(OutputStream& os, Real const& r); //!< Write a full representation to an output stream.
     //!@}
     double get_d() const;
   private:

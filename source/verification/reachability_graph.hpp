@@ -256,6 +256,7 @@ class AvoidingRAG {
     PossiblyReachingRAG reduce_to_possibly_reaching(SPaving const& goals) const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
+    bool is_empty() const;
     AvoidingRAG& operator=(AvoidingRAG const& other);
   protected:
     AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe);
@@ -276,6 +277,7 @@ class PossiblyReachingRAG {
 
     SizeType num_sources() const;
     SizeType num_destinations() const;
+    bool is_empty() const;
     void apply_source_removal_to(SPaving& paving) const;
     PossiblyReachingRAG& operator=(PossiblyReachingRAG const& other);
   protected:

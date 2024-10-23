@@ -171,7 +171,12 @@ SizeType ReachAvoid::unverified_size() const {
 SizeType ReachAvoid::num_sources() const {
     if (_free_graph.is_empty())
         return state_size();
-    return _free_graph.num_sources();
+    else if (_avoid_graph.is_empty())
+        return _free_graph.num_sources();
+    else if (_reach_avoid_graph.is_empty())
+        return _avoid_graph.num_sources();
+    else
+        return _reach_avoid_graph.num_sources();
 }
 
 SizeType ReachAvoid::num_destinations() const {

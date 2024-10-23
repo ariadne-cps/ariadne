@@ -469,6 +469,10 @@ ReachabilityGraphInterface const& AvoidingRAG::internal() const {
     return *_internal;
 }
 
+bool AvoidingRAG::is_empty() const {
+    return _internal == nullptr;
+}
+
 SizeType AvoidingRAG::num_sources() const {
     return _internal->num_sources();
 }
@@ -502,6 +506,10 @@ List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goal() const 
 
 ReachabilityGraphInterface const& PossiblyReachingRAG::internal() const {
     return *_internal;
+}
+
+bool PossiblyReachingRAG::is_empty() const {
+    return _internal == nullptr;
 }
 
 SizeType PossiblyReachingRAG::num_sources() const {

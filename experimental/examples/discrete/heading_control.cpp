@@ -146,6 +146,7 @@ IdentifiedCell point_to_cell(PointType const& pt, Grid const& grid, SizeType gri
     point_paving.adjoin_over_approximation(boxed_current,grid_depth);
 
     auto point_cell = *point_paving.begin();
+
     return vertex_factory.create(point_cell);
 }
 
@@ -198,6 +199,7 @@ void ariadne_main()
     CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << ra.num_sources())
 
     ra.update_unverified();
+
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
     ra.plot();
@@ -266,7 +268,6 @@ void ariadne_main()
             }
 
             auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
-
             CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
 
             current = next;

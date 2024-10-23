@@ -122,6 +122,10 @@ SPaving const& ReachAvoid::obstacles() const {
     return _obstacles;
 }
 
+SPaving const& ReachAvoid::unverified() const {
+    return _unverified;
+}
+
 ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     SPaving obstacle_paving(_state_paving.grid());
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);

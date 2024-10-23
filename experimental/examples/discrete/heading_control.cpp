@@ -254,6 +254,11 @@ void ariadne_main()
                 break;
             }
 
+            if (ra.unverified().superset(current_icell.cell())) {
+                CONCLOG_PRINTLN("The current cell is an unverified (hence unsafe) cell, terminating with failure.")
+                break;
+            }
+
             auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
 
             double delta_modulus = 0;

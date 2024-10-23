@@ -59,6 +59,8 @@ class ReachAvoid {
     SPaving const& goals() const;
     SPaving const& obstacles() const;
 
+    SPaving const& unverified() const;
+
     RealBox const& state_bounds() const;
     RealBox const& control_bounds() const;
 

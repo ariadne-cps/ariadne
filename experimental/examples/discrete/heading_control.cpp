@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <fstream>
 #include "ariadne_main.hpp"
 #include "verification/reach_avoid.hpp"
 #include "verification/reach_avoid_strategy.hpp"
@@ -148,6 +150,41 @@ IdentifiedCell point_to_cell(PointType const& pt, Grid const& grid, SizeType gri
     auto point_cell = *point_paving.begin();
 
     return vertex_factory.create(point_cell);
+}
+
+void create_workspace_1_matlab_file(SizeType idx, List<PointType> const& sequence) {
+
+    std::stringstream strstr;
+    strstr << "scatter" << idx << ".m";
+    std::ofstream file(strstr.str());
+
+    file << "clear all; close all;" << std::endl;
+
+    file << "x = [";
+    for (auto pt : sequence) {
+        file << pt.at(0) << " ";
+    }
+    file << "];" << std::endl;
+
+    file << "y = [";
+    for (auto pt : sequence) {
+        file << pt.at(1) << " ";
+    }
+    file << "];" << std::endl;
+
+    file << "theta = [";
+    for (auto pt : sequence) {
+        file << pt.at(2) << " ";
+    }
+    file << "];" << std::endl;
+    file << "axis equal;" << std::endl;
+    file << "xlim([0 5]); ylim([0 5]); zlim([0 2*pi]);" << std::endl;
+    file << "xlabel('X'); ylabel('Y'); zlabel('Theta');" << std::endl;
+    file << "figure(1);" << std::endl;
+    file << "hold on;" << std::endl;
+    file << "plot3(x(1),y(1),theta(1),'o-');" << std::endl;
+    file << "plot3(x,y,theta,'r-');" << std::endl;
+    file.close();
 }
 
 
@@ -280,5 +317,7 @@ void ariadne_main()
         if (s == max_steps) {
             CONCLOG_PRINTLN("Not terminated after maximum steps, failure.")
         }
+
+        create_workspace_1_matlab_file(p,sequence);
     }
 }

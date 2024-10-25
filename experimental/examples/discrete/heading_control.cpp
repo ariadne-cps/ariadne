@@ -33,10 +33,10 @@
 Tuple<IteratedMap,Grid,RealBox> u_control() {
     Real deltat=0.1_dec, v=3;
     RealVariable x("x"), y("y"), theta("theta"), u("u");
-    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+u,next(u)=u});
+    IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*u,next(u)=u});
 
-    Grid control_grid({pi/4});
-    RealBox control_domain({{-pi-pi/4,pi+pi/4}});
+    Grid control_grid({pi/4*10});
+    RealBox control_domain({{(-pi-pi/4)*10,(pi+pi/4)*10}});
 
     return {heading,control_grid,control_domain};
 }
@@ -265,7 +265,7 @@ void ariadne_main()
 
         CONCLOG_PRINTLN("Point " << p << ": " << current)
 
-        CONCLOG_PRINTLN_AT(1,"Starting from box " << initial_box << " using control paving in " << a_it->second.control_paving().bounding_box())
+        SizeType last_state_id = 10000000;
 
         List<PointType> sequence;
 
@@ -276,41 +276,78 @@ void ariadne_main()
 
             auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
-            if (not ra.state_paving().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN("The current cell is outside of the state paving, terminating with failure.")
-                break;
-            }
-
-            if (ra.goals().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN("The current cell is a goal, terminating with success in " << s+1 << " steps.")
-                break;
-            }
-
-            if (ra.obstacles().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN("The current cell is an obstacle, terminating with failure.")
-                break;
-            }
-
-            if (ra.unverified().superset(current_icell.cell())) {
-                CONCLOG_PRINTLN("The current cell is an unverified (hence unsafe) cell, terminating with failure.")
-                break;
-            }
-
             auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
 
-            double delta_modulus = 0;
-            for (SizeType i=0; i<dim; ++i) {
-                delta_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
+            if (current_icell.id() != last_state_id) {
+                CONCLOG_PRINTLN_AT(1,"Now in " << initial_box << " targeting " << assignments.get(current_icell).target_cell() << " with control in " << a_it->second.control_paving().bounding_box())
+                last_state_id = current_icell.id();
             }
-            delta_modulus = std::sqrt(delta_modulus);
+
+            double target_xy_distance = 0;
+            for (SizeType i=0; i<2; ++i) {
+                target_xy_distance += pow(target.at(i).get_d()-current.at(i),2);
+            }
+            target_xy_distance = sqrt(target_xy_distance);
+
+            double divisive_factor = target_xy_distance/0.3;
+
+            double dir_modulus = 0;
+            for (SizeType i=0; i<dim; ++i) {
+                dir_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
+            }
+            dir_modulus = std::sqrt(dir_modulus);
+
+            Vector<double> direction(dim);
+            for (SizeType i=0; i<dim; ++i) {
+                direction.at(i) = (target.at(i).get_d()-current.at(i))/dir_modulus;
+            }
 
             PointType next(dim);
             for (SizeType i=0; i<dim; ++i) {
-                next.at(i) = current.at(i) + (target.at(i).get_d()-current.at(i))/delta_modulus*0.3;
+                next.at(i) = current.at(i)+dir_modulus*direction.at(i)/divisive_factor;
             }
+
+
+            double distance = 0;
+            for (SizeType i=0; i<2; ++i) {
+                distance += pow(next.at(i)-current.at(i),2);
+            }
+            distance = sqrt(distance);
+
+            CONCLOG_PRINTLN_AT(1,"Target: " << target << ", next: " << next << ", divisive_factor=" << divisive_factor << ", xy distance=" << distance)
+            
 
             auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
             CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
+
+            if (not ra.state_paving().superset(next_icell.cell())) {
+                CONCLOG_PRINTLN("The next cell is outside of the state paving, terminating with failure.")
+                break;
+            }
+
+            if (ra.goals().superset(next_icell.cell())) {
+                CONCLOG_PRINTLN("The next cell is a goal, terminating with success in " << s+1 << " steps.")
+                break;
+            }
+
+            if (ra.obstacles().superset(next_icell.cell())) {
+                CONCLOG_PRINTLN("The next cell is an obstacle, terminating with failure.")
+                break;
+            }
+
+            if (ra.unverified().superset(next_icell.cell())) {
+                CONCLOG_PRINTLN("The next cell is an unverified (hence unsafe) cell, terminating with failure.")
+                auto const& ts = ra.possibly_reaching_graph().internal().forward_transitions(current_icell);
+                CONCLOG_PRINTLN("Cell " << current_icell.id() << " of desired target " << target.bounding_box() << " ( " << assignments.get(current_icell).target_cell().id() << ") would reach:")
+                for (auto const& t : ts) {
+                    List<SizeType> target_ids;
+                    for (auto const& tgt : t.second) {
+                        target_ids.append(tgt.first.id());
+                    }
+                    CONCLOG_PRINTLN(t.first.id() << ": " << target_ids)
+                }
+                break;
+            }
 
             current = next;
         }

@@ -43,6 +43,7 @@ class ReachAvoid {
     ReachAvoid(String const& name, EffectiveVectorMultivariateFunction const& dynamics, Grid const& state_grid, RealBox const& state_bounds, Grid const& control_grid, RealBox const& control_bounds, SizeType depth, ExactDouble eps);
 
     EffectiveVectorMultivariateFunction const& dynamics() const;
+
     Grid const& state_grid() const;
     Grid const& control_grid() const;
     SizeType grid_depth() const;

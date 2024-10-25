@@ -162,19 +162,19 @@ void create_workspace_1_matlab_file(SizeType idx, List<PointType> const& sequenc
 
     file << "x = [";
     for (auto pt : sequence) {
-        file << pt.at(0) << " ";
+        file << pt[0] << " ";
     }
     file << "];" << std::endl;
 
     file << "y = [";
     for (auto pt : sequence) {
-        file << pt.at(1) << " ";
+        file << pt[1] << " ";
     }
     file << "];" << std::endl;
 
     file << "theta = [";
     for (auto pt : sequence) {
-        file << pt.at(2) << " ";
+        file << pt[2] << " ";
     }
     file << "];" << std::endl;
     file << "axis equal;" << std::endl;
@@ -256,11 +256,12 @@ void ariadne_main()
         auto a_it = assignments.begin();
         auto dim = a_it->first.cell().dimension();
         for (SizeType i=0;i<idx;++i) ++a_it;
-        auto initial_box = a_it->first.cell().box();
+        auto current_cell_box = a_it->first.cell().box();
 
         PointType current(dim);
         for (SizeType i=0; i<dim; ++i) {
-            current.at(i) = random_double.get(cast_exact(initial_box[i].lower_bound().get_d()),cast_exact(initial_box[i].upper_bound().get_d())).get_d();
+            auto rand_value = random_double.get(cast_exact(current_cell_box[i].lower_bound().get_d()),cast_exact(current_cell_box[i].upper_bound().get_d()));
+            current[i] = rand_value.get_d();
         }
 
         CONCLOG_PRINTLN("Point " << p << ": " << current)
@@ -276,49 +277,44 @@ void ariadne_main()
 
             auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
-            auto target = assignments.get(current_icell).target_cell().cell().box().midpoint();
+            auto target_icell = assignments.get(current_icell).target_cell();
+
+            auto const& transitions = ra.possibly_reaching_graph().internal().forward_transitions(current_icell);
+
+            double best_orientation = -1.0;
+            auto control_box = transitions.begin()->first.cell().box();
+            for (auto const& t : transitions) {
+                for (auto const& d : t.second) {
+                    if (d.first.id() == target_icell.id() and d.second > best_orientation) {
+                        best_orientation = d.second;
+                        control_box = t.first.cell().box();
+                    }
+                }
+            }
+
+            auto control = control_box;
+            auto control_midpoint = control_box.midpoint();
+            for (SizeType i=0; i<control_box.dimension(); ++i) {
+                control[i] = ExactIntervalType(control_midpoint[i], cast_exact(control_midpoint[i].get_d() + 1e-10));
+            }
+
 
             if (current_icell.id() != last_state_id) {
-                CONCLOG_PRINTLN_AT(1,"Now in " << initial_box << " targeting " << assignments.get(current_icell).target_cell() << " with control in " << a_it->second.control_paving().bounding_box())
+                CONCLOG_PRINTLN_AT(1,"Now in " << current_cell_box << " targeting " << assignments.get(current_icell).target_cell() << " with control " << control)
                 last_state_id = current_icell.id();
             }
 
-            double target_xy_distance = 0;
-            for (SizeType i=0; i<2; ++i) {
-                target_xy_distance += pow(target.at(i).get_d()-current.at(i),2);
-            }
-            target_xy_distance = sqrt(target_xy_distance);
+            auto combined = product(current_icell.cell().box(), control_box);
+            auto next_box = cast_exact_box(apply(ra.dynamics(), combined).bounding_box());
 
-            double divisive_factor = target_xy_distance/0.3;
-
-            double dir_modulus = 0;
-            for (SizeType i=0; i<dim; ++i) {
-                dir_modulus += (target.at(i).get_d()-current.at(i))*(target.at(i).get_d()-current.at(i));
-            }
-            dir_modulus = std::sqrt(dir_modulus);
-
-            Vector<double> direction(dim);
-            for (SizeType i=0; i<dim; ++i) {
-                direction.at(i) = (target.at(i).get_d()-current.at(i))/dir_modulus;
-            }
-
+            auto next_midpoint = next_box.midpoint();
             PointType next(dim);
             for (SizeType i=0; i<dim; ++i) {
-                next.at(i) = current.at(i)+dir_modulus*direction.at(i)/divisive_factor;
+                next[i] = next_midpoint.at(i).get_d();
             }
-
-
-            double distance = 0;
-            for (SizeType i=0; i<2; ++i) {
-                distance += pow(next.at(i)-current.at(i),2);
-            }
-            distance = sqrt(distance);
-
-            CONCLOG_PRINTLN_AT(1,"Target: " << target << ", next: " << next << ", divisive_factor=" << divisive_factor << ", xy distance=" << distance)
-            
 
             auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
-            CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ") under control paving in " << assignments.get(current_icell).control_paving().bounding_box())
+            CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ")")
 
             if (not ra.state_paving().superset(next_icell.cell())) {
                 CONCLOG_PRINTLN("The next cell is outside of the state paving, terminating with failure.")
@@ -338,7 +334,7 @@ void ariadne_main()
             if (ra.unverified().superset(next_icell.cell())) {
                 CONCLOG_PRINTLN("The next cell is an unverified (hence unsafe) cell, terminating with failure.")
                 auto const& ts = ra.possibly_reaching_graph().internal().forward_transitions(current_icell);
-                CONCLOG_PRINTLN("Cell " << current_icell.id() << " of desired target " << target.bounding_box() << " ( " << assignments.get(current_icell).target_cell().id() << ") would reach:")
+                CONCLOG_PRINTLN("Cell " << current_icell.id() << " of desired target " << target_icell.cell().box() << " ( " << assignments.get(current_icell).target_cell().id() << ") would reach:")
                 for (auto const& t : ts) {
                     List<SizeType> target_ids;
                     for (auto const& tgt : t.second) {

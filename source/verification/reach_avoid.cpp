@@ -270,8 +270,10 @@ void ReachAvoid::compute_free_graph() {
 
             destination_paving.adjoin_outer_approximation(image_box, _depth);
             destination_paving.mince(_depth);
+            SizeType original_size = destination_paving.size();
             destination_paving.restrict(_state_paving);
-            if (not destination_paving.is_empty()) {
+            SizeType restricted_size = destination_paving.size();
+            if (restricted_size == original_size and not destination_paving.is_empty()) {
                 List<Pair<NCell,TargetScore>> destination_data;
 
                 List<ProbabilityType> volumes;

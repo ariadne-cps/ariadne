@@ -36,7 +36,7 @@ Tuple<IteratedMap,Grid,RealBox> u_control() {
     IteratedMap heading({next(x)=x+deltat*v*cos(theta),next(y)=y+deltat*v*sin(theta),next(theta)= theta+deltat*u,next(u)=u});
 
     Grid control_grid({pi/4*10});
-    RealBox control_domain({{(-pi-pi/4)*10,(pi+pi/4)*10}});
+    RealBox control_domain({{-pi*10,pi*10}});
 
     return {heading,control_grid,control_domain};
 }
@@ -224,6 +224,7 @@ void ariadne_main()
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoid graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_num_transitions())
 
     sw.restart();

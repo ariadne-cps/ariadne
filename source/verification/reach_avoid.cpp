@@ -340,8 +340,15 @@ void ReachAvoid::compute_avoid_graph() {
     _avoid_graph = _free_graph.reduce_to_not_reaching(remaining_obstacles);
 }
 
+SPaving ReachAvoid::safe_goals() const {
+    SPaving result = _goals;
+    if (not _avoid_graph.is_empty())
+        _avoid_graph.apply_source_restriction_to(result);
+    return result;
+}
+
 void ReachAvoid::compute_possibly_reaching_graph() {
-    _reach_avoid_graph = _avoid_graph.reduce_to_possibly_reaching(_goals);
+    _reach_avoid_graph = _avoid_graph.reduce_to_possibly_reaching(safe_goals());
 }
 
 void ReachAvoid::update_unverified() {

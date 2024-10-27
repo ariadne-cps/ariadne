@@ -85,6 +85,10 @@ class ReachAvoid {
     void print_goals() const;
     void print_obstacles() const;
 
+    //! \brief Return the goals that are still safe
+    //! \return Returns the original goals if the avoid graph has not been computed yet
+    SPaving safe_goals() const;
+
     void compute_free_graph();
 
     void compute_avoid_graph();

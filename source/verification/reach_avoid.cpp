@@ -69,6 +69,7 @@ ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction c
     IdentifiedCellFactory::HashTableType edge_ids;
 
     _unverified = _state_paving;
+    _feasibles = _state_paving;
     _obstacles = SPaving(_state_paving.grid());
     _goals = SPaving(_state_paving.grid());
 
@@ -114,6 +115,10 @@ SPaving const& ReachAvoid::control_paving() const {
     return _control_paving;
 }
 
+SPaving const& ReachAvoid::feasibles() const {
+    return _feasibles;
+}
+
 SPaving const& ReachAvoid::goals() const {
     return _goals;
 }
@@ -131,6 +136,7 @@ ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     obstacle_paving.restrict(_state_paving);
     _unverified.remove(obstacle_paving);
+    _feasibles.remove(obstacle_paving);
     _obstacles.adjoin(obstacle_paving);
     return *this;
 }
@@ -140,6 +146,7 @@ ReachAvoid& ReachAvoid::add_goal(RealBox const& box) {
     goal_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     goal_paving.restrict(_state_paving);
     _unverified.remove(goal_paving);
+    _feasibles.remove(goal_paving);
     _goals.adjoin(goal_paving);
     return *this;
 }
@@ -166,6 +173,10 @@ SizeType ReachAvoid::obstacles_size() const {
 
 SizeType ReachAvoid::goals_size() const {
     return _goals.size();
+}
+
+SizeType ReachAvoid::feasibles_size() const {
+    return _feasibles.size();
 }
 
 SizeType ReachAvoid::unverified_size() const {
@@ -198,7 +209,7 @@ SizeType ReachAvoid::_edge_id(NCell const& cell) const {
 }
 
 double ReachAvoid::unverified_percentage() const {
-    return static_cast<double>(_unverified.size())*100/(_state_paving.size()-_goals.size()-_obstacles.size());
+    return static_cast<double>(_unverified.size()) * 100 / (_state_paving.size() - _goals.size() - _obstacles.size());
 }
 
 void ReachAvoid::plot(SizeType xaxis, SizeType yaxis) const {
@@ -256,10 +267,34 @@ void ReachAvoid::compute_free_graph() {
 
     SharedPointer<ReachabilityGraphInterface> result(new ForwardBackwardReachabilityGraph(*_vertex_factory,*_edge_factory));
 
-    ProgressIndicator indicator(static_cast<double>(_unverified.size()));
-    for (auto const& source_cell : _unverified) {
+    SPaving excluded_border_cells(state_grid());
+
+    for (auto const& source_cell : _feasibles) {
+        bool has_feasible_controls = false;
+        for (auto const& controller_cell : _control_paving) {
+            auto combined = product(source_cell.box(), controller_cell.box());
+            SPaving destination_paving(_state_paving.grid());
+            auto image_box = shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()), _eps);
+            destination_paving.adjoin_outer_approximation(image_box, _depth);
+            destination_paving.mince(_depth);
+            SizeType original_size = destination_paving.size();
+            destination_paving.restrict(_state_paving);
+            SizeType restricted_size = destination_paving.size();
+            if (restricted_size == original_size) {
+                has_feasible_controls = true;
+                break;
+            }
+        }
+        if (not has_feasible_controls)
+            excluded_border_cells.adjoin(source_cell);
+    }
+
+    _feasibles.remove(excluded_border_cells);
+
+    ProgressIndicator indicator(static_cast<double>(_feasibles.size()));
+    for (auto const& source_cell : _feasibles) {
         auto source_point = source_cell.box().midpoint();
-        CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+        CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ")
         for (auto const& controller_cell : _control_paving) {
             auto combined = product(source_cell.box(), controller_cell.box());
             SPaving destination_paving(_state_paving.grid());
@@ -273,7 +308,7 @@ void ReachAvoid::compute_free_graph() {
             SizeType original_size = destination_paving.size();
             destination_paving.restrict(_state_paving);
             SizeType restricted_size = destination_paving.size();
-            if (restricted_size == original_size and not destination_paving.is_empty()) {
+            if (restricted_size == original_size) {
                 List<Pair<NCell,TargetScore>> destination_data;
 
                 List<ProbabilityType> volumes;

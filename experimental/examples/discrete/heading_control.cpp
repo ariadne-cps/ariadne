@@ -277,30 +277,20 @@ void ariadne_main()
 
             auto current_icell = point_to_cell(current,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
 
-            auto target_icell = assignments.get(current_icell).target_cell();
+            auto const& assignment = assignments.get(current_icell);
 
-            auto const& transitions = ra.possibly_reaching_graph().internal().forward_transitions(current_icell);
+            auto control_icell = assignment.control_cell();
+            auto target_icell = assignment.target_cell();
 
-            double best_orientation = -1.0;
-            auto control_box = transitions.begin()->first.cell().box();
-            for (auto const& t : transitions) {
-                for (auto const& d : t.second) {
-                    if (d.first.id() == target_icell.id() and d.second > best_orientation) {
-                        best_orientation = d.second;
-                        control_box = t.first.cell().box();
-                    }
-                }
-            }
-
-            auto control = control_box;
+            auto control_box = control_icell.cell().box();
             auto control_midpoint = control_box.midpoint();
+            auto control = control_box;
             for (SizeType i=0; i<control_box.dimension(); ++i) {
                 control[i] = ExactIntervalType(control_midpoint[i], cast_exact(control_midpoint[i].get_d() + 1e-10));
             }
 
-
             if (current_icell.id() != last_state_id) {
-                CONCLOG_PRINTLN_AT(1,"Now in " << current_cell_box << " targeting " << assignments.get(current_icell).target_cell() << " with control " << control)
+                CONCLOG_PRINTLN_AT(1,"Now in " << current_cell_box << " targeting " << assignments.get(current_icell).target_cell() << " with control " << control.midpoint())
                 last_state_id = current_icell.id();
             }
 

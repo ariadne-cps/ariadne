@@ -118,8 +118,17 @@ class IntegratorBase
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              StepSizeType& suggested_time_step) const;
+              const Suggestion<StepSizeType>& suggested_time_step) const;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
@@ -151,14 +160,14 @@ class BoundedIntegratorBase : public IntegratorBase {
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const StepSizeType& maximum_time_step) const;
+                const Suggestion<StepSizeType>& maximum_time_step) const;
 
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const ExactBoxType& parameter_domain,
-                const StepSizeType& maximum_time_step) const;
+                const Suggestion<StepSizeType>& maximum_time_step) const;
 
 
     virtual Pair<StepSizeType,UpperBoxType>
@@ -166,12 +175,17 @@ class BoundedIntegratorBase : public IntegratorBase {
                 const ExactBoxType& state_domain,
                 const StepSizeType& starting_time,
                 const ExactBoxType& parameter_domain,
-                const StepSizeType& maximum_time_step) const;
+                const Suggestion<StepSizeType>& maximum_time_step) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              StepSizeType& suggested_time_step) const override;
+              const StepSizeType& time_step) const override;
+
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const Suggestion<StepSizeType>& suggested_time_step) const override;
 
     using IntegratorBase::flow_step;
 
@@ -242,7 +256,7 @@ class GradedTaylorPicardIntegrator
     GradedSweeper<FloatDP> _sweeper;
     ExactDouble _error_refinement_minimum_improvement_percentage;
     DegreeType _order;
-public:
+  public:
     //! \brief Default constructor.
     GradedTaylorPicardIntegrator(StepMaximumError err, Order order);
 
@@ -342,7 +356,7 @@ class TaylorSeriesBounderIntegrator
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              StepSizeType& suggested_time_step) const;
+              const Suggestion<StepSizeType>& suggested_time_step) const;
 
     using TaylorSeriesIntegrator::flow_step;
 

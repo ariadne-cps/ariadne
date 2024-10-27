@@ -548,12 +548,11 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     // We then restrict to the time domain [0,h] since this can make evaluation
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
-    StepSizeType step_size=maximum_step_size;
-    ValidatedVectorMultivariateFunctionPatch flow_model=integrator.flow_step(dynamic,initial_box,step_size);
-
+    ValidatedVectorMultivariateFunctionPatch flow_model=integrator.flow_step(dynamic,initial_box,suggest(maximum_step_size));
     CONCLOG_PRINTLN_AT(1,"twosided_flow_model="<<flow_model);
     ExactBoxType flow_domain=flow_model.domain();
-    ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper_bound());
+    StepSizeType step_size=static_cast<StepSizeType>(flow_domain[flow_domain.size()-1u].upper_bound());
+    ARIADNE_ASSERT(step_size<=maximum_step_size);
     flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
     flow_model=restriction(flow_model,flow_domain);
     CONCLOG_PRINTLN_AT(1,"flow_model="<<flow_model);

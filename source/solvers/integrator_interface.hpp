@@ -31,6 +31,7 @@
 
 #include <string>
 #include <iosfwd>
+#include <memory>
 
 #include "utility/declarations.hpp"
 
@@ -42,6 +43,17 @@ struct FlowBoundsException : public std::runtime_error {
 
 class FlowStepModelType;
 class FlowModelType;
+
+template<class T> class Suggestion;
+
+//! \ingroup DifferentialEquationSubModule
+//! \brief A solution to the differential equation could not be computed over the requested time interval.
+struct IncompleteFlowException : public std::runtime_error {
+    IncompleteFlowException(const StringType& what, FlowStepModelType const& model);
+    FlowStepModelType const& computed_model() const { return *this->_computed_model; }
+  private:
+    std::unique_ptr<FlowStepModelType> _computed_model;
+};
 
 //! \ingroup DifferentialEquationSubModule
 //! \brief A solution to a differential equation could not be computed within the requested tolerances.
@@ -67,15 +79,35 @@ class IntegratorInterface
     //! \brief Write to an output stream.
     virtual Void _write(OutputStream& os) const = 0;
 
-    //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, where \f$h\f$ is a time step which is taken to be equal to \f$h_\mathrm{sug}\f$ if possible. The value of \f$h_\mathrm{sug}\f$ is overwritten with \f$h\f$, the actual time step used.
+    //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$, using a time-step appropriate for the system.
     //! <br>
     //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain) const = 0;
+
+    //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$ where \f$h\f$ may differ (typically be smaller) than the suggested value \f$h_\mathrm{sug}\f$.
+    //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              StepSizeType& suggested_time_step) const = 0;
+              const Suggestion<StepSizeType>& suggested_time_step) const = 0;
+
+    //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$.
+    //! Throws: \c IncompleteFlowException if the flow cannot be computed over the requested time interval,
+    //! and a \c FlowTimeStepException if the flow cannot be computed over the requested time interval.
+     //! <br>
+    //! Returns: A validated version \f$\hat{\phi}\f$ of the flow up to the requested time, represented as a single function over a box.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h\f$ is the \a time_step.
+    virtual FlowStepModelType
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, assuming that the flow remains in \f$B\f$.
     //! If the flow does not remain in \f$B\f$, then \f$\hat{\phi}(x,t)\f$ may not be a bound for \f$\phi(x,t)\f$ if \f$\exists \tau\in[0,t],\ \phi(x,\tau)\not\in B\f$.

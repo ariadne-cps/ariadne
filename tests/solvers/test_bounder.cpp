@@ -73,7 +73,7 @@ class TestBounder
         ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x)};
         StepSizeType hsug(0.25_x);
 
-        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,hsug));
+        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,suggest(hsug)));
     }
 
     Void test_DA_mismatch() {
@@ -82,7 +82,7 @@ class TestBounder
         ExactBoxType A={ExactIntervalType(-0.25_x,0.25_x)};
         StepSizeType hsug(0.25_x);
 
-        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,A,hsug));
+        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,A,suggest(hsug)));
     }
 
     Void test_suggested_step_acceptable() {
@@ -92,7 +92,7 @@ class TestBounder
 
         StepSizeType h;
         UpperBoxType B;
-        std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
+        std::tie(h,B) = bounder_ptr->compute(f,dom,suggest(hsug));
 
         ARIADNE_TEST_PRINT(h);
         ARIADNE_TEST_PRINT(B);
@@ -107,7 +107,7 @@ class TestBounder
 
         StepSizeType h;
         UpperBoxType B;
-        std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
+        std::tie(h,B) = bounder_ptr->compute(f,dom,suggest(hsug));
 
         ARIADNE_TEST_PRINT(h);
         ARIADNE_TEST_PRINT(B);
@@ -120,7 +120,7 @@ class TestBounder
         ExactBoxType dom={ExactIntervalType(-20.0_x,20.0_x),ExactIntervalType(-20.0_x,20.0_x)};
         StepSizeType hsug(10.0_x);
 
-        ARIADNE_TEST_THROWS(bounder_ptr->compute(f,dom,hsug),BoundingNotFoundException);
+        ARIADNE_TEST_THROWS(bounder_ptr->compute(f,dom,suggest(hsug)),BoundingNotFoundException);
     }
 
     Void test_time_invariant_with_parameter() {
@@ -137,7 +137,7 @@ class TestBounder
         StepSizeType h;
         UpperBoxType B;
 
-        std::tie(h,B) = bounder_ptr->compute(f,D,A,hsug);
+        std::tie(h,B) = bounder_ptr->compute(f,D,A,suggest(hsug));
 
         ARIADNE_TEST_COMPARE(h,<=,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
@@ -156,7 +156,7 @@ class TestBounder
         StepSizeType h;
         UpperBoxType B;
 
-        std::tie(h,B) = bounder_ptr->compute(f,D,td,hsug);
+        std::tie(h,B) = bounder_ptr->compute(f,D,td,suggest(hsug));
 
         ARIADNE_TEST_COMPARE(h,<=,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
@@ -177,7 +177,7 @@ class TestBounder
         StepSizeType h;
         UpperBoxType B;
 
-        std::tie(h,B) = bounder_ptr->compute(f,D,td,A,hsug);
+        std::tie(h,B) = bounder_ptr->compute(f,D,td,A,suggest(hsug));
 
         ARIADNE_TEST_COMPARE(h,<=,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));

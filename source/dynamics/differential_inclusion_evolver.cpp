@@ -212,7 +212,7 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
     auto initial_box = initial_ranges_to_box(initial);
 
-    StepSizeType hsug(_configuration->maximum_step_size());
+    StepSizeType hsug=_configuration->maximum_step_size();
 
     EulerBounder bounder;
 
@@ -252,7 +252,7 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
         UpperBoxType B;
         StepSizeType h;
 
-        CONCLOG_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),hsug));
+        CONCLOG_RUN_AT(1,std::tie(h,B)=bounder.compute(_system.function(),domx,_system.inputs(),suggest(hsug)));
         CONCLOG_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
 
         TimeStepType new_t = lower_bound(t+h);

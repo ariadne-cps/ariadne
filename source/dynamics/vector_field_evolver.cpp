@@ -200,8 +200,8 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
 
     // Compute flow model
     IntegratorInterface const* integrator=this->_integrator.operator->();
-    StepSizeType step_size=maximum_step_size;
-    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
+    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,suggest(maximum_step_size));
+    StepSizeType step_size = static_cast<StepSizeType>(flow_model.domain()[flow_model.argument_size()-1u].upper_bound());
     CONCLOG_PRINTLN("step_size = "<<step_size)
     CONCLOG_PRINTLN_AT(1,"flow_model = "<<flow_model)
     FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);

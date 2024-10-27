@@ -138,8 +138,11 @@ class DirectedHashedGraph {
     //! \details Removes transitions/sources when empty
     void restrict_destinations_to(SPaving const& paving);
 
-    //! \brief Remove the source cells of the graph from \a paving
+    //! \brief Remove the source cells in the graph from \a paving
     void apply_source_removal_to(SPaving& paving) const;
+
+    //! \brief Remove the source cells not in the graph from \a paving
+    void apply_source_restriction_to(SPaving& paving) const;
 
     //! \brief Remove all sources
     void clear();
@@ -188,8 +191,11 @@ class ReachabilityGraphInterface {
     //! \brief Remove those sources that can not reach the \a goal paving
     virtual void reduce_to_possibly_reaching(SPaving const& goal) = 0;
 
-    //! \brief Remove from \a unverified all the sources of the graph
-    virtual void apply_source_removal_to(SPaving& unverified) const = 0;
+    //! \brief Remove from \a paving all the sources in the graph
+    virtual void apply_source_removal_to(SPaving& paving) const = 0;
+
+    //! \brief Remove from \a paving all the sources not in the graph
+    virtual void apply_source_restriction_to(SPaving& paving) const = 0;
 
     virtual ReachabilityGraphInterface* clone() const = 0;
     virtual void write(std::ostream& os) const = 0;
@@ -227,6 +233,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     void reduce_to_not_reaching(SPaving const& unsafe) override;
     void reduce_to_possibly_reaching(SPaving const& goals) override;
     void apply_source_removal_to(SPaving& paving) const override;
+    void apply_source_restriction_to(SPaving& paving) const override;
 
     ReachabilityGraphInterface* clone() const override;
 
@@ -247,6 +254,7 @@ class UnconstrainedRAG {
     bool is_empty() const;
     UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> graph);
     AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
+    void apply_source_restriction_to(SPaving& paving) const;
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
@@ -268,6 +276,7 @@ class AvoidingRAG {
     SizeType num_sources() const;
     SizeType num_destinations() const;
     bool is_empty() const;
+    void apply_source_restriction_to(SPaving& paving) const;
     AvoidingRAG& operator=(AvoidingRAG const& other);
   protected:
     AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe);

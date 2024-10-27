@@ -69,7 +69,7 @@ ReachAvoid::ReachAvoid(String const& name, EffectiveVectorMultivariateFunction c
     IdentifiedCellFactory::HashTableType edge_ids;
 
     _unverified = _state_paving;
-    _feasibles = _state_paving;
+
     _obstacles = SPaving(_state_paving.grid());
     _goals = SPaving(_state_paving.grid());
 
@@ -115,10 +115,6 @@ SPaving const& ReachAvoid::control_paving() const {
     return _control_paving;
 }
 
-SPaving const& ReachAvoid::feasibles() const {
-    return _feasibles;
-}
-
 SPaving const& ReachAvoid::goals() const {
     return _goals;
 }
@@ -136,7 +132,6 @@ ReachAvoid& ReachAvoid::add_obstacle(RealBox const& box) {
     obstacle_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     obstacle_paving.restrict(_state_paving);
     _unverified.remove(obstacle_paving);
-    _feasibles.remove(obstacle_paving);
     _obstacles.adjoin(obstacle_paving);
     return *this;
 }
@@ -146,7 +141,6 @@ ReachAvoid& ReachAvoid::add_goal(RealBox const& box) {
     goal_paving.adjoin_outer_approximation(shrink(box,_eps),_depth);
     goal_paving.restrict(_state_paving);
     _unverified.remove(goal_paving);
-    _feasibles.remove(goal_paving);
     _goals.adjoin(goal_paving);
     return *this;
 }
@@ -173,10 +167,6 @@ SizeType ReachAvoid::obstacles_size() const {
 
 SizeType ReachAvoid::goals_size() const {
     return _goals.size();
-}
-
-SizeType ReachAvoid::feasibles_size() const {
-    return _feasibles.size();
 }
 
 SizeType ReachAvoid::unverified_size() const {
@@ -269,7 +259,7 @@ void ReachAvoid::compute_free_graph() {
 
     SPaving excluded_border_cells(state_grid());
 
-    for (auto const& source_cell : _feasibles) {
+    for (auto const& source_cell : _state_paving) {
         bool has_feasible_controls = false;
         for (auto const& controller_cell : _control_paving) {
             auto combined = product(source_cell.box(), controller_cell.box());
@@ -289,15 +279,17 @@ void ReachAvoid::compute_free_graph() {
             excluded_border_cells.adjoin(source_cell);
     }
 
-    _feasibles.remove(excluded_border_cells);
+    SPaving feasibles = _state_paving;
+    feasibles.remove(excluded_border_cells);
 
-    ProgressIndicator indicator(static_cast<double>(_feasibles.size()));
-    for (auto const& source_cell : _feasibles) {
+    ProgressIndicator indicator(static_cast<double>(feasibles.size()));
+    for (auto const& source_cell : feasibles) {
         auto source_point = source_cell.box().midpoint();
         CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ")
+
         for (auto const& controller_cell : _control_paving) {
             auto combined = product(source_cell.box(), controller_cell.box());
-            SPaving destination_paving(_state_paving.grid());
+            SPaving destination_paving(state_grid());
             auto image_box = shrink(cast_exact_box(apply(_dynamics, combined).bounding_box()), _eps);
             auto image_point = image_box.midpoint();
 
@@ -305,10 +297,9 @@ void ReachAvoid::compute_free_graph() {
 
             destination_paving.adjoin_outer_approximation(image_box, _depth);
             destination_paving.mince(_depth);
-            SizeType original_size = destination_paving.size();
-            destination_paving.restrict(_state_paving);
-            SizeType restricted_size = destination_paving.size();
-            if (restricted_size == original_size) {
+            destination_paving.restrict(feasibles);
+
+            if (not destination_paving.is_empty()) {
                 List<Pair<NCell,TargetScore>> destination_data;
 
                 List<ProbabilityType> volumes;
@@ -336,6 +327,7 @@ void ReachAvoid::compute_free_graph() {
                 result->insert(source_cell, controller_cell, destination_data);
             }
         }
+
         indicator.update_current(indicator.current_value()+1.0);
     }
 
@@ -343,7 +335,9 @@ void ReachAvoid::compute_free_graph() {
 }
 
 void ReachAvoid::compute_avoid_graph() {
-    _avoid_graph = _free_graph.reduce_to_not_reaching(_obstacles);
+    SPaving remaining_obstacles = _obstacles;
+    _free_graph.apply_source_restriction_to(remaining_obstacles);
+    _avoid_graph = _free_graph.reduce_to_not_reaching(remaining_obstacles);
 }
 
 void ReachAvoid::compute_possibly_reaching_graph() {

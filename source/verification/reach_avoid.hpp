@@ -70,7 +70,6 @@ class ReachAvoid {
     SizeType control_size() const;
     SizeType obstacles_size() const;
     SizeType goals_size() const;
-    SizeType feasibles_size() const;
     SizeType unverified_size() const;
 
     SizeType num_sources() const;
@@ -120,7 +119,6 @@ class ReachAvoid {
     FloatDP const _eps;
 
     SPaving _unverified;
-    SPaving _feasibles;
 
     SPaving _obstacles;
     SPaving _goals;

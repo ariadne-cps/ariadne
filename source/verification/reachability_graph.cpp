@@ -176,6 +176,7 @@ bool DirectedHashedGraph::contains(Iterator const& iterator) const {
 }
 
 void DirectedHashedGraph::erase(NCell const& source_cell) {
+    auto icell = _vertex_factory.create(source_cell);
     _map.erase(_vertex_factory.create(source_cell));
 }
 
@@ -216,6 +217,15 @@ void DirectedHashedGraph::restrict_destinations_to(SPaving const& paving) {
         if (src_it->second.empty()) _map.erase(src_it++);
         else ++src_it;
     }
+}
+
+void DirectedHashedGraph::apply_source_restriction_to(SPaving& paving) const {
+    SPaving sources(paving.grid());
+    for (auto const& entry : _map) {
+        sources.adjoin(entry.first.cell());
+    }
+
+    paving.restrict(sources);
 }
 
 void DirectedHashedGraph::apply_source_removal_to(SPaving& paving) const {
@@ -367,6 +377,10 @@ void ForwardBackwardReachabilityGraph::apply_source_removal_to(SPaving& paving) 
     _forward_graph.apply_source_removal_to(paving);
 }
 
+void ForwardBackwardReachabilityGraph::apply_source_restriction_to(SPaving& paving) const {
+    _forward_graph.apply_source_restriction_to(paving);
+}
+
 List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goal(SPaving const& goal) const {
 
     List<Set<IdentifiedCell>> result;
@@ -390,7 +404,8 @@ List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_
             auto it = backward_copy.find(g);
             for (auto const& t : it->second) {
                 for (auto const& s : t.second) {
-                    if (not currently_reached.contains(s.first)) sources.insert(s.first);
+                    if (not currently_reached.contains(s.first))
+                        sources.insert(s.first);
                 }
             }
         }
@@ -426,6 +441,10 @@ UnconstrainedRAG::UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> gra
 UnconstrainedRAG& UnconstrainedRAG::operator=(UnconstrainedRAG const& other) {
     _internal = other._internal;
     return *this;
+}
+
+void UnconstrainedRAG::apply_source_restriction_to(SPaving& paving) const {
+    _internal->apply_source_restriction_to(paving);
 }
 
 UnconstrainedRAG::UnconstrainedRAG(UnconstrainedRAG const& other) {
@@ -483,6 +502,10 @@ SizeType AvoidingRAG::num_destinations() const {
 
 PossiblyReachingRAG AvoidingRAG::reduce_to_possibly_reaching(SPaving const& goals) const {
     return PossiblyReachingRAG(*this, goals);
+}
+
+void AvoidingRAG::apply_source_restriction_to(SPaving& paving) const {
+    _internal->apply_source_restriction_to(paving);
 }
 
 PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : _internal(avoid_graph.internal().clone()), _goals(goals) {

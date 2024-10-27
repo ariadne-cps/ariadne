@@ -256,7 +256,7 @@ void ReachAvoid::compute_free_graph() {
 
     SharedPointer<ReachabilityGraphInterface> result(new ForwardBackwardReachabilityGraph(*_vertex_factory,*_edge_factory));
 
-    ProgressIndicator indicator(_unverified.size());
+    ProgressIndicator indicator(static_cast<double>(_unverified.size()));
     for (auto const& source_cell : _unverified) {
         auto source_point = source_cell.box().midpoint();
         CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
@@ -272,14 +272,26 @@ void ReachAvoid::compute_free_graph() {
             destination_paving.mince(_depth);
             destination_paving.restrict(_state_paving);
             if (not destination_paving.is_empty()) {
-                List<Pair<NCell,AlignmentType>> destination_data;
+                List<Pair<NCell,TargetScore>> destination_data;
 
+                List<ProbabilityType> volumes;
+                List<AlignmentType> alignments;
+                ProbabilityType total_volume = 0.0;
                 for (auto const& destination_cell : destination_paving) {
                     auto destination_dir = normal_direction(source_point,destination_cell.box().midpoint());
-                    destination_data.append({destination_cell, scalar_product(image_dir,destination_dir)});
+                    alignments.append(scalar_product(image_dir,destination_dir));
+                    auto current_volume = intersection(image_box, destination_cell.box()).volume().get_d();
+                    volumes.append(current_volume);
+                    total_volume += current_volume;
                 }
 
-                CONCLOG_PRINTLN_AT(1,"Alignments for state " << source_cell.box() << " and control " << controller_cell.box() << ":")
+                SizeType i=0;
+                for (auto const& destination_cell : destination_paving) {
+                    destination_data.append({destination_cell, {volumes.at(i)/total_volume,alignments.at(i)}});
+                    ++i;
+                }
+
+                CONCLOG_PRINTLN_AT(1,"Probabilities & alignments for state " << source_cell.box() << " and control " << controller_cell.box() << ":")
                 for (auto& p : destination_data) {
                     CONCLOG_PRINTLN_AT(1,p.first.box() << ": " << p.second)
                 }

@@ -86,7 +86,7 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
                     if (tgt.first.id() != src.id()) {
                         if (not local_target_scores.contains(tgt.first))
                             local_target_scores.insert(tgt.first, 0.0);
-                        auto local_score = tgt.second*target_weights.at(tgt.first);
+                        auto local_score = tgt.second.probability()*target_weights.at(tgt.first);
                         local_target_scores.at(tgt.first) = local_target_scores.at(tgt.first) + local_score;
                         local_control_scores.at(ctrl.first) = local_control_scores.at(ctrl.first) + local_score;
                     }

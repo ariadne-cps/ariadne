@@ -264,6 +264,12 @@ void ariadne_main()
             current[i] = rand_value.get_d();
         }
 
+        /*
+        current[0] = 0.406792;
+        current[1] = 3.94616;
+        current[2] = 2.45582;
+        */
+
         CONCLOG_PRINTLN("Point " << p << ": " << current)
 
         SizeType last_state_id = 10000000;
@@ -302,6 +308,8 @@ void ariadne_main()
             for (SizeType i=0; i<dim; ++i) {
                 next[i] = next_midpoint.at(i).get_d();
             }
+
+            CONCLOG_PRINTLN_AT(1,"Next point: " << next)
 
             auto next_icell = point_to_cell(next,ra.state_grid(),ra.grid_depth(),ra.vertex_factory());
             CONCLOG_PRINTLN_AT(1, s << ": from " << current << " (" << current_icell.id() << ") to " << next << " (" << next_icell.id() << ")")

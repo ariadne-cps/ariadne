@@ -252,7 +252,7 @@ double scalar_product(PointType const& v1, PointType const& v2) {
     return result;
 }
 
-void ReachAvoid::compute_free_graph() {
+void ReachAvoid::compute_bounded_domain_graph() {
     CONCLOG_SCOPE_CREATE
 
     SharedPointer<ReachabilityGraphInterface> result(new ForwardBackwardReachabilityGraph(*_vertex_factory,*_edge_factory));
@@ -334,7 +334,7 @@ void ReachAvoid::compute_free_graph() {
     _bounded_domain_graph = BoundedDomainRAG(result);
 }
 
-void ReachAvoid::compute_avoid_graph() {
+void ReachAvoid::compute_avoiding_graph() {
     SPaving remaining_obstacles = _obstacles;
     _bounded_domain_graph.apply_source_restriction_to(remaining_obstacles);
     _avoiding_graph = _bounded_domain_graph.reduce_to_not_reaching(remaining_obstacles);
@@ -366,6 +366,19 @@ SizeType ReachAvoid::possibly_reaching_num_transitions() const {
 
 PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
     return _possibly_reaching_graph;
+}
+
+
+void ReachAvoid::print_bounded_domain_graph() const {
+    CONCLOG_PRINTLN(_bounded_domain_graph.internal())
+}
+
+void ReachAvoid::print_avoiding_graph() const {
+    CONCLOG_PRINTLN(_avoiding_graph.internal())
+}
+
+void ReachAvoid::print_possibly_reaching_graph() const {
+    CONCLOG_PRINTLN(_possibly_reaching_graph.internal())
 }
 
 }

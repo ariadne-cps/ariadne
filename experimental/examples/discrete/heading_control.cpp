@@ -120,7 +120,7 @@ void check_scalabilities(SizeType n) {
     CONCLOG_PRINTLN_VAR_AT(1,u_ra.control_size())
 
     Stopwatch<Milliseconds> sw;
-    u_ra.compute_free_graph();
+    u_ra.compute_bounded_domain_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"(u) Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
     sw.restart();
@@ -130,7 +130,7 @@ void check_scalabilities(SizeType n) {
     ReachAvoid cpwa_ra("cpwa_ra",cpwa_dynamics,state_grid,state_domain,cpwa_control_grid,cpwa_control_domain,0,1e-10_x);
     CONCLOG_PRINTLN_VAR_AT(1,cpwa_ra.control_size())
 
-    cpwa_ra.compute_free_graph();
+    cpwa_ra.compute_bounded_domain_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"(CPWA) Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
 }
@@ -211,21 +211,25 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
 
     Stopwatch<Milliseconds> sw;
-    ra.compute_free_graph();
+    ra.compute_bounded_domain_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.unconstrained_num_transitions())
 
+    ra.print_bounded_domain_graph();;
+
     sw.restart();
-    ra.compute_avoid_graph();
+    ra.compute_avoiding_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoid graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_num_transitions())
+
+    ra.print_avoiding_graph();
 
     sw.restart();
     ra.compute_possibly_reaching_graph();
@@ -237,6 +241,8 @@ void ariadne_main()
     CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << ra.num_sources())
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
+
+    ra.compute_possibly_reaching_graph();
 
     ra.plot();
 

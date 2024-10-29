@@ -85,13 +85,17 @@ class ReachAvoid {
     void print_goals() const;
     void print_obstacles() const;
 
+    void print_bounded_domain_graph() const;
+    void print_avoiding_graph() const;
+    void print_possibly_reaching_graph() const;
+
     //! \brief Return the goals that are still safe
     //! \return Returns the original goals if the avoid graph has not been computed yet
     SPaving safe_goals() const;
 
-    void compute_free_graph();
+    void compute_bounded_domain_graph();
 
-    void compute_avoid_graph();
+    void compute_avoiding_graph();
 
     void compute_possibly_reaching_graph();
 

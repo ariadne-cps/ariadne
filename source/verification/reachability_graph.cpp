@@ -250,7 +250,7 @@ void DirectedHashedGraph::sweep() {
 
 OutputStream& operator<<(OutputStream& os, DirectedHashedGraph const& g) {
     for (auto const& src : g._map) {
-        os << src.first.id() << src.first.cell() << ":[";
+        os << src.first.id() << src.first.cell().box() << ":[";
         for (auto const& trans : src.second) {
             os << trans.first.id() << "->";
             os << "(";

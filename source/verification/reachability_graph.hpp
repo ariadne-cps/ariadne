@@ -278,6 +278,7 @@ class ReducedGraphBase {
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
+    SizeType num_transitions() const;
 
     bool is_empty() const;
   protected:

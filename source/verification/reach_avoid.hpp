@@ -79,10 +79,6 @@ class ReachAvoid {
     SizeType num_sources() const;
     SizeType num_destinations() const;
 
-    SizeType unconstrained_num_transitions() const;
-    SizeType avoiding_num_transitions() const;
-    SizeType possibly_reaching_num_transitions() const;
-
     void plot(SizeType xaxis, SizeType yaxis) const;
     void plot() const;
 

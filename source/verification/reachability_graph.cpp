@@ -483,6 +483,10 @@ SizeType ReducedGraphBase::num_destinations() const {
     return _internal->num_destinations();
 }
 
+SizeType ReducedGraphBase::num_transitions() const {
+    return _internal->num_transitions();
+}
+
 ReachabilityGraphInterface const& ReducedGraphBase::internal() const {
     return *_internal;
 }

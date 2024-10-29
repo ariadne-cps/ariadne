@@ -335,6 +335,7 @@ void ReachAvoid::compute_bounded_domain_graph() {
 }
 
 void ReachAvoid::compute_avoiding_graph() {
+    ARIADNE_ASSERT(_bounded_domain_graph != nullptr)
     SPaving remaining_obstacles = _obstacles;
     _bounded_domain_graph->apply_source_restriction_to(remaining_obstacles);
     _avoiding_graph.reset(_bounded_domain_graph->reduce_to_not_reaching(remaining_obstacles).clone());
@@ -348,31 +349,23 @@ SPaving ReachAvoid::safe_goals() const {
 }
 
 void ReachAvoid::compute_possibly_reaching_graph() {
+    ARIADNE_ASSERT(_avoiding_graph != nullptr)
     _possibly_reaching_graph.reset(_avoiding_graph->reduce_to_possibly_reaching(safe_goals()).clone());
     _possibly_reaching_graph->apply_source_removal_to(_unverified);
 }
 
-SizeType ReachAvoid::unconstrained_num_transitions() const {
-    return _bounded_domain_graph->internal().num_transitions();
-}
-
-SizeType ReachAvoid::avoiding_num_transitions() const {
-    return _avoiding_graph->internal().num_transitions();
-}
-
-SizeType ReachAvoid::possibly_reaching_num_transitions() const {
-    return _possibly_reaching_graph->internal().num_transitions();
-}
-
 BoundedDomainRAG const& ReachAvoid::bounded_domain_graph() const {
+    ARIADNE_ASSERT(_bounded_domain_graph != nullptr)
     return *_bounded_domain_graph;
 }
 
 AvoidingRAG const& ReachAvoid::avoiding_graph() const {
+    ARIADNE_ASSERT(_avoiding_graph != nullptr)
     return *_avoiding_graph;
 }
 
 PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
+    ARIADNE_ASSERT(_possibly_reaching_graph != nullptr)
     return *_possibly_reaching_graph;
 }
 

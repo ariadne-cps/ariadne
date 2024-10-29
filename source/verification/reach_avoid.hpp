@@ -130,9 +130,9 @@ class ReachAvoid {
     SharedPointer<IdentifiedCellFactory> _vertex_factory;
     SharedPointer<IdentifiedCellFactory> _edge_factory;
 
-    BoundedDomainRAG _bounded_domain_graph;
-    AvoidingRAG _avoiding_graph;
-    PossiblyReachingRAG _possibly_reaching_graph;
+    SharedPointer<BoundedDomainRAG> _bounded_domain_graph;
+    SharedPointer<AvoidingRAG> _avoiding_graph;
+    SharedPointer<PossiblyReachingRAG> _possibly_reaching_graph;
 };
 
 } // namespace Ariadne

@@ -83,6 +83,10 @@ DirectedHashedGraph::DirectedHashedGraph(DirectedHashedGraph const& other) :
 
 SizeType DirectedHashedGraph::num_sources() const { return _map.size(); }
 
+Set<IdentifiedCell> DirectedHashedGraph::sources() const {
+    return _map.keys();
+}
+
 SizeType DirectedHashedGraph::num_transitions() const {
     SizeType result = 0;
     for (auto const& src : _map) {
@@ -453,6 +457,10 @@ Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& ForwardBackwardReac
     return _backward_graph.transitions(destination);
 }
 
+Set<IdentifiedCell> ForwardBackwardReachabilityGraph::unreachable_starting_states() const {
+    return _forward_graph.sources().remove(_backward_graph.sources());
+}
+
 ReachabilityGraphInterface* ForwardBackwardReachabilityGraph::clone() const {
     return new ForwardBackwardReachabilityGraph(*this);
 }
@@ -461,95 +469,79 @@ void ForwardBackwardReachabilityGraph::write(std::ostream& os) const {
     os << "Forward:\n" << _forward_graph << "\nBackward:\n" << _backward_graph;
 }
 
-BoundedDomainRAG::BoundedDomainRAG(SharedPointer<ReachabilityGraphInterface> graph) :
-    _internal(graph) { }
+ReducedGraphBase::ReducedGraphBase(ReachabilityGraphInterface const& graph) : _internal(SharedPointer<ReachabilityGraphInterface>(graph.clone())) { }
+
+bool ReducedGraphBase::is_empty() const {
+    return _internal == nullptr;
+}
+
+SizeType ReducedGraphBase::num_sources() const {
+    return _internal->num_sources();
+}
+
+SizeType ReducedGraphBase::num_destinations() const {
+    return _internal->num_destinations();
+}
+
+ReachabilityGraphInterface const& ReducedGraphBase::internal() const {
+    return *_internal;
+}
+
+void ReducedGraphBase::apply_source_removal_to(SPaving& paving) const {
+    _internal->apply_source_removal_to(paving);
+}
+
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> ReducedGraphBase::deadlock_transitions() const {
+    return _internal->deadlock_transitions();
+}
+
+void ReducedGraphBase::apply_source_restriction_to(SPaving& paving) const {
+    _internal->apply_source_restriction_to(paving);
+}
+
+BoundedDomainRAG::BoundedDomainRAG(ReachabilityGraphInterface const& graph) : ReducedGraphBase(graph) { }
 
 BoundedDomainRAG& BoundedDomainRAG::operator=(BoundedDomainRAG const& other) {
     _internal = other._internal;
     return *this;
 }
 
-void BoundedDomainRAG::apply_source_restriction_to(SPaving& paving) const {
-    _internal->apply_source_restriction_to(paving);
+BoundedDomainRAG* BoundedDomainRAG::clone() const {
+    return new BoundedDomainRAG(*this);
 }
 
-List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> BoundedDomainRAG::deadlock_transitions() const {
-    return _internal->deadlock_transitions();
-}
-
-BoundedDomainRAG::BoundedDomainRAG(BoundedDomainRAG const& other) {
-    this->_internal = other._internal;
-}
-
-ReachabilityGraphInterface const& BoundedDomainRAG::internal() const {
-    return *_internal;
-}
-
-bool BoundedDomainRAG::is_empty() const {
-    return _internal == nullptr;
-}
-
-SizeType BoundedDomainRAG::num_sources() const {
-    return _internal->num_sources();
-}
-
-SizeType BoundedDomainRAG::num_destinations() const {
-    return _internal->num_destinations();
-}
+BoundedDomainRAG::BoundedDomainRAG(BoundedDomainRAG const& other) : ReducedGraphBase(other.internal()) { }
 
 AvoidingRAG BoundedDomainRAG::reduce_to_not_reaching(SPaving const& unsafe) const {
     return AvoidingRAG(*this, unsafe);
 }
 
-AvoidingRAG::AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()), _unsafe(unsafe) {
+AvoidingRAG::AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe) : ReducedGraphBase(free_graph.internal()), _unsafe(unsafe) {
     _internal->reduce_to_avoiding(unsafe);
 }
 
 AvoidingRAG& AvoidingRAG::operator=(AvoidingRAG const& other) {
     _internal = other._internal;
+    _unsafe = other._unsafe;
     return *this;
 }
 
-AvoidingRAG::AvoidingRAG(AvoidingRAG const& other) {
-    this->_internal = other._internal;
+AvoidingRAG::AvoidingRAG(AvoidingRAG const& other) : ReducedGraphBase(other.internal()), _unsafe(other._unsafe) {
 }
 
-ReachabilityGraphInterface const& AvoidingRAG::internal() const {
-    return *_internal;
-}
-
-bool AvoidingRAG::is_empty() const {
-    return _internal == nullptr;
-}
-
-SizeType AvoidingRAG::num_sources() const {
-    return _internal->num_sources();
-}
-
-SizeType AvoidingRAG::num_destinations() const {
-    return _internal->num_destinations();
-}
-
-List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> AvoidingRAG::deadlock_transitions() const {
-    return _internal->deadlock_transitions();
+AvoidingRAG* AvoidingRAG::clone() const {
+    return new AvoidingRAG(*this);
 }
 
 PossiblyReachingRAG AvoidingRAG::reduce_to_possibly_reaching(SPaving const& goals) const {
     return PossiblyReachingRAG(*this, goals);
 }
 
-void AvoidingRAG::apply_source_restriction_to(SPaving& paving) const {
-    _internal->apply_source_restriction_to(paving);
-}
-
-PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : _internal(avoid_graph.internal().clone()), _goals(goals) {
+PossiblyReachingRAG::PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals) : ReducedGraphBase(avoid_graph.internal()), _goals(goals) {
     _internal->reduce_to_possibly_reaching(goals);
 }
 
-PossiblyReachingRAG::PossiblyReachingRAG(PossiblyReachingRAG const& other) {
-    this->_internal = other._internal;
-    this->_goals = other._goals;
-}
+PossiblyReachingRAG::PossiblyReachingRAG(PossiblyReachingRAG const& other) : ReducedGraphBase(other.internal()), _goals(other._goals) { }
 
 PossiblyReachingRAG& PossiblyReachingRAG::operator=(PossiblyReachingRAG const& other) {
     _internal = other._internal;
@@ -557,32 +549,12 @@ PossiblyReachingRAG& PossiblyReachingRAG::operator=(PossiblyReachingRAG const& o
     return *this;
 }
 
+PossiblyReachingRAG* PossiblyReachingRAG::clone() const {
+    return new PossiblyReachingRAG(*this);
+}
+
 List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goals() const {
     return _internal->sets_equidistant_to_goals(_goals);
-}
-
-ReachabilityGraphInterface const& PossiblyReachingRAG::internal() const {
-    return *_internal;
-}
-
-bool PossiblyReachingRAG::is_empty() const {
-    return _internal == nullptr;
-}
-
-SizeType PossiblyReachingRAG::num_sources() const {
-    return _internal->num_sources();
-}
-
-SizeType PossiblyReachingRAG::num_destinations() const {
-    return _internal->num_destinations();
-}
-
-void PossiblyReachingRAG::apply_source_removal_to(SPaving& paving) const {
-    _internal->apply_source_removal_to(paving);
-}
-
-List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> PossiblyReachingRAG::deadlock_transitions() const {
-    return _internal->deadlock_transitions();
 }
 
 } // namespace Ariadne

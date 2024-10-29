@@ -174,20 +174,20 @@ SizeType ReachAvoid::unverified_size() const {
 }
 
 SizeType ReachAvoid::num_sources() const {
-    if (_bounded_domain_graph.is_empty())
+    if (_bounded_domain_graph == nullptr)
         return state_size();
-    else if (_avoiding_graph.is_empty())
-        return _bounded_domain_graph.num_sources();
-    else if (_possibly_reaching_graph.is_empty())
-        return _avoiding_graph.num_sources();
+    else if (_avoiding_graph == nullptr)
+        return _bounded_domain_graph->num_sources();
+    else if (_possibly_reaching_graph == nullptr)
+        return _avoiding_graph->num_sources();
     else
-        return _possibly_reaching_graph.num_sources();
+        return _possibly_reaching_graph->num_sources();
 }
 
 SizeType ReachAvoid::num_destinations() const {
-    if (_bounded_domain_graph.is_empty())
+    if (_bounded_domain_graph == nullptr)
         return state_size();
-    return _bounded_domain_graph.num_destinations();
+    return _bounded_domain_graph->num_destinations();
 }
 
 SizeType ReachAvoid::_vertex_id(NCell const& cell) const {
@@ -255,7 +255,7 @@ double scalar_product(PointType const& v1, PointType const& v2) {
 void ReachAvoid::compute_bounded_domain_graph() {
     CONCLOG_SCOPE_CREATE
 
-    SharedPointer<ReachabilityGraphInterface> result(new ForwardBackwardReachabilityGraph(*_vertex_factory,*_edge_factory));
+    ForwardBackwardReachabilityGraph result(*_vertex_factory,*_edge_factory);
 
     SPaving excluded_border_cells(state_grid());
 
@@ -324,56 +324,56 @@ void ReachAvoid::compute_bounded_domain_graph() {
                     CONCLOG_PRINTLN_AT(1,p.first.box() << ": " << p.second)
                 }
 
-                result->insert(source_cell, controller_cell, destination_data);
+                result.insert(source_cell, controller_cell, destination_data);
             }
         }
 
         indicator.update_current(indicator.current_value()+1.0);
     }
 
-    _bounded_domain_graph = BoundedDomainRAG(result);
+    _bounded_domain_graph.reset(new BoundedDomainRAG(result));
 }
 
 void ReachAvoid::compute_avoiding_graph() {
     SPaving remaining_obstacles = _obstacles;
-    _bounded_domain_graph.apply_source_restriction_to(remaining_obstacles);
-    _avoiding_graph = _bounded_domain_graph.reduce_to_not_reaching(remaining_obstacles);
+    _bounded_domain_graph->apply_source_restriction_to(remaining_obstacles);
+    _avoiding_graph.reset(_bounded_domain_graph->reduce_to_not_reaching(remaining_obstacles).clone());
 }
 
 SPaving ReachAvoid::safe_goals() const {
     SPaving result = _goals;
-    if (not _avoiding_graph.is_empty())
-        _avoiding_graph.apply_source_restriction_to(result);
+    if (not _avoiding_graph->is_empty())
+        _avoiding_graph->apply_source_restriction_to(result);
     return result;
 }
 
 void ReachAvoid::compute_possibly_reaching_graph() {
-    _possibly_reaching_graph = _avoiding_graph.reduce_to_possibly_reaching(safe_goals());
-    _possibly_reaching_graph.apply_source_removal_to(_unverified);
+    _possibly_reaching_graph.reset(_avoiding_graph->reduce_to_possibly_reaching(safe_goals()).clone());
+    _possibly_reaching_graph->apply_source_removal_to(_unverified);
 }
 
 SizeType ReachAvoid::unconstrained_num_transitions() const {
-    return _bounded_domain_graph.internal().num_transitions();
+    return _bounded_domain_graph->internal().num_transitions();
 }
 
 SizeType ReachAvoid::avoiding_num_transitions() const {
-    return _avoiding_graph.internal().num_transitions();
+    return _avoiding_graph->internal().num_transitions();
 }
 
 SizeType ReachAvoid::possibly_reaching_num_transitions() const {
-    return _possibly_reaching_graph.internal().num_transitions();
+    return _possibly_reaching_graph->internal().num_transitions();
 }
 
 BoundedDomainRAG const& ReachAvoid::bounded_domain_graph() const {
-    return _bounded_domain_graph;
+    return *_bounded_domain_graph;
 }
 
 AvoidingRAG const& ReachAvoid::avoiding_graph() const {
-    return _avoiding_graph;
+    return *_avoiding_graph;
 }
 
 PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
-    return _possibly_reaching_graph;
+    return *_possibly_reaching_graph;
 }
 
 }

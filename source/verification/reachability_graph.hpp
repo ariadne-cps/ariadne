@@ -130,6 +130,9 @@ class DirectedHashedGraph {
 
     void erase(NCell const& source_cell);
 
+    //! \brief Return the sources of the graph
+    Set<IdentifiedCell> sources() const;
+
     //! \brief Erase for a given \a source and \a transition its \a destination
     void erase(NCell const& source, ECell const& transition, NCell const& destination);
 
@@ -207,6 +210,9 @@ class ReachabilityGraphInterface {
     //! \return The list of source-control-target for which the target is not in the sources
     virtual List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const = 0;
 
+    //! \brief The states that can be started from but can not be reached after leaving them
+    virtual Set<IdentifiedCell> unreachable_starting_states() const = 0;
+
     virtual ReachabilityGraphInterface* clone() const = 0;
     virtual void write(std::ostream& os) const = 0;
     virtual ~ReachabilityGraphInterface() = default;
@@ -246,6 +252,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     void apply_source_restriction_to(SPaving& paving) const override;
 
     List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const override;
+    Set<IdentifiedCell> unreachable_starting_states() const override;
 
     ReachabilityGraphInterface* clone() const override;
 
@@ -258,72 +265,71 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
 
 class AvoidingRAG;
 
-//! \brief Graph with no reach or avoid restrictions
-class BoundedDomainRAG {
+class ReducedGraphBase {
+  protected:
+    ReducedGraphBase(ReachabilityGraphInterface const& graph);
   public:
-    BoundedDomainRAG() = default;
-    BoundedDomainRAG(BoundedDomainRAG const& other);
-    bool is_empty() const;
-    BoundedDomainRAG(SharedPointer<ReachabilityGraphInterface> graph);
-    AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
-    void apply_source_restriction_to(SPaving& paving) const;
-
     List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
+    Set<IdentifiedCell> unreachable_starting_states() const;
+
+    void apply_source_removal_to(SPaving& paving) const;
+    void apply_source_restriction_to(SPaving& paving) const;
 
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
-    BoundedDomainRAG& operator=(BoundedDomainRAG const& other);
-  private:
+
+    bool is_empty() const;
+  protected:
     SharedPointer<ReachabilityGraphInterface> _internal;
+};
+
+//! \brief Graph with no reach or avoid restrictions
+class BoundedDomainRAG : public ReducedGraphBase {
+  public:
+    BoundedDomainRAG(BoundedDomainRAG const& other);
+    BoundedDomainRAG(ReachabilityGraphInterface const& graph);
+
+    BoundedDomainRAG* clone() const;
+
+    AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
+
+    BoundedDomainRAG& operator=(BoundedDomainRAG const& other);
 };
 
 class PossiblyReachingRAG;
 
 //! \brief Graph with avoid restrictions
-class AvoidingRAG {
+class AvoidingRAG : public ReducedGraphBase {
   public:
     friend class BoundedDomainRAG;
-    AvoidingRAG() = default;
     AvoidingRAG(AvoidingRAG const& other);
-    ReachabilityGraphInterface const& internal() const;
+
     PossiblyReachingRAG reduce_to_possibly_reaching(SPaving const& goals) const;
 
-    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
+    AvoidingRAG* clone() const;
 
-    SizeType num_sources() const;
-    SizeType num_destinations() const;
-    bool is_empty() const;
-    void apply_source_restriction_to(SPaving& paving) const;
     AvoidingRAG& operator=(AvoidingRAG const& other);
   protected:
     AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe);
   private:
-    SharedPointer<ReachabilityGraphInterface> _internal;
-    SPaving const _unsafe;
+    SPaving _unsafe;
 };
 
 //! \brief Graph with reach and avoid restrictions
-class PossiblyReachingRAG {
+class PossiblyReachingRAG : public ReducedGraphBase {
   public:
     friend class AvoidingRAG;
-    PossiblyReachingRAG() = default;
     PossiblyReachingRAG(PossiblyReachingRAG const& other);
-    ReachabilityGraphInterface const& internal() const;
+
+    PossiblyReachingRAG* clone() const;
 
     List<Set<IdentifiedCell>> sets_equidistant_to_goals() const;
 
-    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
-
-    SizeType num_sources() const;
-    SizeType num_destinations() const;
-    bool is_empty() const;
-    void apply_source_removal_to(SPaving& paving) const;
     PossiblyReachingRAG& operator=(PossiblyReachingRAG const& other);
   protected:
     PossiblyReachingRAG(AvoidingRAG const& avoid_graph, SPaving const& goals);
   private:
-    SharedPointer<ReachabilityGraphInterface> _internal;
     SPaving _goals;
 };
 

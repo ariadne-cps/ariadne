@@ -191,28 +191,21 @@ void DirectedHashedGraph::erase(NCell const& source, ECell const& transition, NC
 }
 
 void DirectedHashedGraph::restrict_sources_to(SPaving const& paving) {
-    auto it = _map.begin();
-    while (it != _map.end()) {
+    for (auto it = _map.cbegin(); it != _map.cend(); ) {
         if (not paving.superset(it->first.cell())) _map.erase(it++);
         else ++it;
     }
 }
 
 void DirectedHashedGraph::restrict_destinations_to(SPaving const& paving) {
-    auto src_it = _map.begin();
-    while (src_it != _map.end()) {
-        auto trans_it = src_it->second.begin();
-        while (trans_it != src_it->second.end()) {
-            for (auto const& dest : trans_it->second) {
-                if (not paving.superset(dest.first.cell()))
-                    trans_it->second.erase(dest.first);
-                if (trans_it->second.empty()) {
-                    src_it->second.erase(trans_it++);
-                    break;
-                }
+    for (auto src_it = _map.begin(); src_it != _map.end(); ) {
+        for (auto trans_it = src_it->second.begin(); trans_it != src_it->second.end(); ) {
+            for (auto dest_it = trans_it->second.begin(); dest_it != trans_it->second.end(); ) {
+                if (not paving.superset(dest_it->first.cell())) trans_it->second.erase(dest_it++);
+                else ++dest_it;
             }
-            if (not trans_it->second.empty())
-                ++trans_it;
+            if (trans_it->second.empty()) src_it->second.erase(trans_it++);
+            else ++trans_it;
         }
         if (src_it->second.empty()) _map.erase(src_it++);
         else ++src_it;

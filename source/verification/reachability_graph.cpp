@@ -171,6 +171,10 @@ DirectedHashedGraph::Iterator DirectedHashedGraph::find(NCell const& source_cell
     return _map.find(_vertex_factory.create(source_cell));
 }
 
+bool DirectedHashedGraph::contains(IdentifiedCell const& source_icell) const {
+    return _map.has_key(source_icell);
+}
+
 bool DirectedHashedGraph::contains(Iterator const& iterator) const {
     return iterator != _map.end();
 }
@@ -418,11 +422,13 @@ List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_
         Set<IdentifiedCell> sources;
 
         for (auto const& g : result[idx]) {
-            auto it = backward_copy.find(g);
-            for (auto const& t : it->second) {
-                for (auto const& s : t.second) {
-                    if (not currently_reached.contains(s.first) and not sources.contains(s.first)) {
-                        sources.insert(s.first);
+            if (backward_copy.contains(g)) {
+                auto it = backward_copy.find(g);
+                for (auto const& t : it->second) {
+                    for (auto const& s : t.second) {
+                        if (not currently_reached.contains(s.first) and not sources.contains(s.first)) {
+                            sources.insert(s.first);
+                        }
                     }
                 }
             }

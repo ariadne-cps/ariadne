@@ -122,6 +122,8 @@ class DirectedHashedGraph {
 
     Iterator find(IdentifiedCell const& source_icell);
 
+    bool contains(IdentifiedCell const& source_icell) const;
+
     Iterator find(NCell const& source_cell);
 
     bool contains(Iterator const& iterator) const;

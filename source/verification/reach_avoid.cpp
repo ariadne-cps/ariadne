@@ -205,7 +205,7 @@ double ReachAvoid::unverified_percentage() const {
 void ReachAvoid::plot(SizeType xaxis, SizeType yaxis) const {
     ExactBoxType graphics_box(_state_bounds.size());
     for (SizeType i=0; i<_state_bounds.size(); ++i)
-        graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[0].lower_bound().get_d()),DoublePrecision()},{ExactDouble(_state_bounds[0].upper_bound().get_d()),DoublePrecision()});
+        graphics_box[i] = FloatDPExactInterval({ExactDouble(_state_bounds[i].lower_bound().get_d()),DoublePrecision()},{ExactDouble(_state_bounds[i].upper_bound().get_d()),DoublePrecision()});
 
     Figure fig(graphics_box,xaxis,yaxis);
     SPaving safe = _state_paving;

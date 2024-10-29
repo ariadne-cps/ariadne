@@ -374,7 +374,7 @@ void ForwardBackwardReachabilityGraph::apply_source_restriction_to(SPaving& pavi
     _forward_graph.apply_source_restriction_to(paving);
 }
 
-List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goal(SPaving const& goal) const {
+List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goals(SPaving const& goal) const {
 
     List<Set<IdentifiedCell>> result;
 
@@ -516,8 +516,8 @@ PossiblyReachingRAG& PossiblyReachingRAG::operator=(PossiblyReachingRAG const& o
     return *this;
 }
 
-List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goal() const {
-    return _internal->sets_equidistant_to_goal(_goals);
+List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goals() const {
+    return _internal->sets_equidistant_to_goals(_goals);
 }
 
 ReachabilityGraphInterface const& PossiblyReachingRAG::internal() const {

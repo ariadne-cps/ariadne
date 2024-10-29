@@ -177,7 +177,7 @@ class ReachabilityGraphInterface {
 
     //! \brief Find the list of sets of cells having a given distance to the \a goal
     //! \details The position in the list determines the distance (0: within goals)
-    virtual List<Set<IdentifiedCell>> sets_equidistant_to_goal(SPaving const& goal) const = 0;
+    virtual List<Set<IdentifiedCell>> sets_equidistant_to_goals(SPaving const& goal) const = 0;
 
     //! \brief The transitions from a given \a source forward
     virtual Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& forward_transitions(IdentifiedCell const& source) const = 0;
@@ -215,7 +215,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
     ForwardBackwardReachabilityGraph(ForwardBackwardReachabilityGraph const& other);
 
-    List<Set<IdentifiedCell>> sets_equidistant_to_goal(SPaving const& goal) const override;
+    List<Set<IdentifiedCell>> sets_equidistant_to_goals(SPaving const& goal) const override;
 
     SizeType vertex_id(NCell const& cell) const override;
     SizeType edge_id(NCell const& cell) const override;
@@ -293,7 +293,7 @@ class PossiblyReachingRAG {
     PossiblyReachingRAG(PossiblyReachingRAG const& other);
     ReachabilityGraphInterface const& internal() const;
 
-    List<Set<IdentifiedCell>> sets_equidistant_to_goal() const;
+    List<Set<IdentifiedCell>> sets_equidistant_to_goals() const;
 
     SizeType num_sources() const;
     SizeType num_destinations() const;

@@ -63,7 +63,7 @@ double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExa
 ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
     Map<IdentifiedCell,AssignedControl> assignments;
 
-    auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goal();
+    auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goals();
 
     Map<IdentifiedCell,ScoreType> target_weights;
     for (SizeType i=0; i<sets_equidistant_to_goal.size(); ++i)

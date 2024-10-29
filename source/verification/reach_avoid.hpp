@@ -66,6 +66,10 @@ class ReachAvoid {
     RealBox const& state_bounds() const;
     RealBox const& control_bounds() const;
 
+    BoundedDomainRAG const& bounded_domain_graph() const;
+    AvoidingRAG const& avoiding_graph() const;
+    PossiblyReachingRAG const& possibly_reaching_graph() const;
+
     SizeType state_size() const;
     SizeType control_size() const;
     SizeType obstacles_size() const;
@@ -85,10 +89,6 @@ class ReachAvoid {
     void print_goals() const;
     void print_obstacles() const;
 
-    void print_bounded_domain_graph() const;
-    void print_avoiding_graph() const;
-    void print_possibly_reaching_graph() const;
-
     //! \brief Return the goals that are still safe
     //! \return Returns the original goals if the avoid graph has not been computed yet
     SPaving safe_goals() const;
@@ -101,8 +101,6 @@ class ReachAvoid {
 
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const;
-
-    PossiblyReachingRAG const& possibly_reaching_graph() const;
 
   private:
 

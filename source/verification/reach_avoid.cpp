@@ -364,21 +364,16 @@ SizeType ReachAvoid::possibly_reaching_num_transitions() const {
     return _possibly_reaching_graph.internal().num_transitions();
 }
 
+BoundedDomainRAG const& ReachAvoid::bounded_domain_graph() const {
+    return _bounded_domain_graph;
+}
+
+AvoidingRAG const& ReachAvoid::avoiding_graph() const {
+    return _avoiding_graph;
+}
+
 PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
     return _possibly_reaching_graph;
-}
-
-
-void ReachAvoid::print_bounded_domain_graph() const {
-    CONCLOG_PRINTLN(_bounded_domain_graph.internal())
-}
-
-void ReachAvoid::print_avoiding_graph() const {
-    CONCLOG_PRINTLN(_avoiding_graph.internal())
-}
-
-void ReachAvoid::print_possibly_reaching_graph() const {
-    CONCLOG_PRINTLN(_possibly_reaching_graph.internal())
 }
 
 }

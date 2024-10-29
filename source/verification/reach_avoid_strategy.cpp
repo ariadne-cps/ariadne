@@ -23,6 +23,9 @@
  */
 
 #include "reach_avoid_strategy.hpp"
+#include "conclog/logging.hpp"
+
+using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -42,7 +45,8 @@ IdentifiedCell const& AssignedControl::target_cell() const {
 }
 
 ReachAvoidStrategyBuilder::ReachAvoidStrategyBuilder(EffectiveVectorMultivariateFunction const& dynamics, PossiblyReachingRAG const& rag) :
-    _dynamics(dynamics), _rag(rag) { }
+    _dynamics(dynamics), _rag(rag) {
+}
 
 double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExactInterval> const& image_box) {
     double result = 0.0;
@@ -64,6 +68,8 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
     Map<IdentifiedCell,AssignedControl> assignments;
 
     auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goals();
+
+    CONCLOG_PRINTLN(sets_equidistant_to_goal)
 
     Map<IdentifiedCell,ScoreType> target_weights;
     for (SizeType i=0; i<sets_equidistant_to_goal.size(); ++i)

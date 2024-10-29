@@ -147,6 +147,10 @@ class DirectedHashedGraph {
     //! \brief Remove all sources
     void clear();
 
+    //! \brief Check that all destinations are also sources in the graph
+    //! \return The list of source-control-target for which the target is not in the sources
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
+
     //! \brief Check if empty
     bool is_empty() const;
 
@@ -186,7 +190,7 @@ class ReachabilityGraphInterface {
     virtual Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& backward_transitions(IdentifiedCell const& destination) const = 0;
 
     //! \brief Remove those sources that can reach the \a avoidance paving
-    virtual void reduce_to_not_reaching(SPaving const& avoidance) = 0;
+    virtual void reduce_to_avoiding(SPaving const& avoidance) = 0;
 
     //! \brief Remove those sources that can not reach the \a goal paving
     virtual void reduce_to_possibly_reaching(SPaving const& goal) = 0;
@@ -196,6 +200,10 @@ class ReachabilityGraphInterface {
 
     //! \brief Remove from \a paving all the sources not in the graph
     virtual void apply_source_restriction_to(SPaving& paving) const = 0;
+
+    //! \brief Check that all destinations are also sources in the graph
+    //! \return The list of source-control-target for which the target is not in the sources
+    virtual List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const = 0;
 
     virtual ReachabilityGraphInterface* clone() const = 0;
     virtual void write(std::ostream& os) const = 0;
@@ -230,10 +238,12 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,TargetScore>> const& destination_cells) override;
     void clear() override;
 
-    void reduce_to_not_reaching(SPaving const& unsafe) override;
+    void reduce_to_avoiding(SPaving const& unsafe) override;
     void reduce_to_possibly_reaching(SPaving const& goals) override;
     void apply_source_removal_to(SPaving& paving) const override;
     void apply_source_restriction_to(SPaving& paving) const override;
+
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const override;
 
     ReachabilityGraphInterface* clone() const override;
 
@@ -255,6 +265,9 @@ class BoundedDomainRAG {
     BoundedDomainRAG(SharedPointer<ReachabilityGraphInterface> graph);
     AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
     void apply_source_restriction_to(SPaving& paving) const;
+
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
+
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
@@ -273,6 +286,9 @@ class AvoidingRAG {
     AvoidingRAG(AvoidingRAG const& other);
     ReachabilityGraphInterface const& internal() const;
     PossiblyReachingRAG reduce_to_possibly_reaching(SPaving const& goals) const;
+
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
+
     SizeType num_sources() const;
     SizeType num_destinations() const;
     bool is_empty() const;
@@ -294,6 +310,8 @@ class PossiblyReachingRAG {
     ReachabilityGraphInterface const& internal() const;
 
     List<Set<IdentifiedCell>> sets_equidistant_to_goals() const;
+
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const;
 
     SizeType num_sources() const;
     SizeType num_destinations() const;

@@ -213,23 +213,19 @@ void ariadne_main()
     Stopwatch<Milliseconds> sw;
     ra.compute_bounded_domain_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing free graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing bounded domain graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.unconstrained_num_transitions())
 
-    ra.print_bounded_domain_graph();;
-
     sw.restart();
     ra.compute_avoiding_graph();
     sw.click();
-    CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoid graph: " << sw.elapsed_seconds() << " seconds")
+    CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoiding graph: " << sw.elapsed_seconds() << " seconds")
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_num_transitions())
-
-    ra.print_avoiding_graph();
 
     sw.restart();
     ra.compute_possibly_reaching_graph();
@@ -242,11 +238,10 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
-    ra.compute_possibly_reaching_graph();
-
     ra.plot();
 
     ReachAvoidStrategyBuilder strategy_builder(ra.dynamics(),ra.possibly_reaching_graph());
+
     auto assignments = strategy_builder.build().assignments();
 
     Randomiser<DegreeType> random_uint;
@@ -254,6 +249,8 @@ void ariadne_main()
 
     SizeType num_points = 5;
     SizeType max_steps = 100;
+
+    return;
 
     for (SizeType p=0; p < num_points; ++p) {
 

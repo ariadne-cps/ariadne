@@ -190,6 +190,20 @@ void DirectedHashedGraph::erase(NCell const& source, ECell const& transition, NC
     }
 }
 
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> DirectedHashedGraph::deadlock_transitions() const {
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> result;
+    for (auto const& src : _map) {
+        for (auto const& trans : src.second) {
+            for (auto const& dst : trans.second) {
+                if (not _map.contains(dst.first)) {
+                    result.push_back({src.first,trans.first,dst.first});
+                }
+            }
+        }
+    }
+    return result;
+}
+
 void DirectedHashedGraph::restrict_sources_to(SPaving const& paving) {
     for (auto it = _map.cbegin(); it != _map.cend(); ) {
         if (not paving.superset(it->first.cell())) _map.erase(it++);
@@ -305,7 +319,12 @@ void ForwardBackwardReachabilityGraph::clear() {
     _backward_graph.clear();
 }
 
-void ForwardBackwardReachabilityGraph::reduce_to_not_reaching(SPaving const& unsafe) {
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> ForwardBackwardReachabilityGraph::deadlock_transitions() const {
+    List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> result = _forward_graph.deadlock_transitions();
+    return result;
+}
+
+void ForwardBackwardReachabilityGraph::reduce_to_avoiding(SPaving const& unsafe) {
     CONCLOG_SCOPE_CREATE
 
     std::deque<NCell> unsafe_cells_queue;
@@ -350,6 +369,7 @@ void ForwardBackwardReachabilityGraph::reduce_to_not_reaching(SPaving const& uns
 }
 
 void ForwardBackwardReachabilityGraph::reduce_to_possibly_reaching(SPaving const& goals) {
+
     SPaving analysed(goals.grid());
     SPaving newly_reached = goals;
     while (not newly_reached.is_empty()) {
@@ -362,8 +382,10 @@ void ForwardBackwardReachabilityGraph::reduce_to_possibly_reaching(SPaving const
         newly_reached.remove(destination);
     }
 
+    _forward_graph.restrict_destinations_to(analysed);
     _forward_graph.restrict_sources_to(analysed);
     _backward_graph.restrict_destinations_to(analysed);
+    _backward_graph.restrict_sources_to(analysed);
 }
 
 void ForwardBackwardReachabilityGraph::apply_source_removal_to(SPaving& paving) const {
@@ -388,7 +410,9 @@ List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_
     Set<IdentifiedCell> currently_reached;
     currently_reached.adjoin(goal_cells);
 
-    while (currently_reached.size() < _backward_graph.num_sources()) {
+    auto num_sources = _backward_graph.num_sources();
+
+    while (currently_reached.size() < num_sources) {
 
         SizeType idx = result.size()-1;
         Set<IdentifiedCell> sources;
@@ -397,14 +421,17 @@ List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_
             auto it = backward_copy.find(g);
             for (auto const& t : it->second) {
                 for (auto const& s : t.second) {
-                    if (not currently_reached.contains(s.first))
+                    if (not currently_reached.contains(s.first) and not sources.contains(s.first)) {
                         sources.insert(s.first);
+                    }
                 }
             }
         }
 
-        for (auto const& s : result[idx])
+        for (auto const& s : result[idx]) {
             backward_copy.erase(s.cell());
+        }
+
         result.append(sources);
         currently_reached.adjoin(sources);
     }
@@ -440,6 +467,10 @@ void BoundedDomainRAG::apply_source_restriction_to(SPaving& paving) const {
     _internal->apply_source_restriction_to(paving);
 }
 
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> BoundedDomainRAG::deadlock_transitions() const {
+    return _internal->deadlock_transitions();
+}
+
 BoundedDomainRAG::BoundedDomainRAG(BoundedDomainRAG const& other) {
     this->_internal = other._internal;
 }
@@ -465,7 +496,7 @@ AvoidingRAG BoundedDomainRAG::reduce_to_not_reaching(SPaving const& unsafe) cons
 }
 
 AvoidingRAG::AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()), _unsafe(unsafe) {
-    _internal->reduce_to_not_reaching(unsafe);
+    _internal->reduce_to_avoiding(unsafe);
 }
 
 AvoidingRAG& AvoidingRAG::operator=(AvoidingRAG const& other) {
@@ -491,6 +522,10 @@ SizeType AvoidingRAG::num_sources() const {
 
 SizeType AvoidingRAG::num_destinations() const {
     return _internal->num_destinations();
+}
+
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> AvoidingRAG::deadlock_transitions() const {
+    return _internal->deadlock_transitions();
 }
 
 PossiblyReachingRAG AvoidingRAG::reduce_to_possibly_reaching(SPaving const& goals) const {
@@ -538,6 +573,10 @@ SizeType PossiblyReachingRAG::num_destinations() const {
 
 void PossiblyReachingRAG::apply_source_removal_to(SPaving& paving) const {
     _internal->apply_source_removal_to(paving);
+}
+
+List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> PossiblyReachingRAG::deadlock_transitions() const {
+    return _internal->deadlock_transitions();
 }
 
 } // namespace Ariadne

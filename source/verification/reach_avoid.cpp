@@ -174,20 +174,20 @@ SizeType ReachAvoid::unverified_size() const {
 }
 
 SizeType ReachAvoid::num_sources() const {
-    if (_free_graph.is_empty())
+    if (_bounded_domain_graph.is_empty())
         return state_size();
-    else if (_avoid_graph.is_empty())
-        return _free_graph.num_sources();
-    else if (_reach_avoid_graph.is_empty())
-        return _avoid_graph.num_sources();
+    else if (_avoiding_graph.is_empty())
+        return _bounded_domain_graph.num_sources();
+    else if (_possibly_reaching_graph.is_empty())
+        return _avoiding_graph.num_sources();
     else
-        return _reach_avoid_graph.num_sources();
+        return _possibly_reaching_graph.num_sources();
 }
 
 SizeType ReachAvoid::num_destinations() const {
-    if (_free_graph.is_empty())
+    if (_bounded_domain_graph.is_empty())
         return state_size();
-    return _free_graph.num_destinations();
+    return _bounded_domain_graph.num_destinations();
 }
 
 SizeType ReachAvoid::_vertex_id(NCell const& cell) const {
@@ -331,44 +331,41 @@ void ReachAvoid::compute_free_graph() {
         indicator.update_current(indicator.current_value()+1.0);
     }
 
-    _free_graph = UnconstrainedRAG(result);
+    _bounded_domain_graph = BoundedDomainRAG(result);
 }
 
 void ReachAvoid::compute_avoid_graph() {
     SPaving remaining_obstacles = _obstacles;
-    _free_graph.apply_source_restriction_to(remaining_obstacles);
-    _avoid_graph = _free_graph.reduce_to_not_reaching(remaining_obstacles);
+    _bounded_domain_graph.apply_source_restriction_to(remaining_obstacles);
+    _avoiding_graph = _bounded_domain_graph.reduce_to_not_reaching(remaining_obstacles);
 }
 
 SPaving ReachAvoid::safe_goals() const {
     SPaving result = _goals;
-    if (not _avoid_graph.is_empty())
-        _avoid_graph.apply_source_restriction_to(result);
+    if (not _avoiding_graph.is_empty())
+        _avoiding_graph.apply_source_restriction_to(result);
     return result;
 }
 
 void ReachAvoid::compute_possibly_reaching_graph() {
-    _reach_avoid_graph = _avoid_graph.reduce_to_possibly_reaching(safe_goals());
-}
-
-void ReachAvoid::update_unverified() {
-    _reach_avoid_graph.apply_source_removal_to(_unverified);
+    _possibly_reaching_graph = _avoiding_graph.reduce_to_possibly_reaching(safe_goals());
+    _possibly_reaching_graph.apply_source_removal_to(_unverified);
 }
 
 SizeType ReachAvoid::unconstrained_num_transitions() const {
-    return _free_graph.internal().num_transitions();
+    return _bounded_domain_graph.internal().num_transitions();
 }
 
 SizeType ReachAvoid::avoiding_num_transitions() const {
-    return _avoid_graph.internal().num_transitions();
+    return _avoiding_graph.internal().num_transitions();
 }
 
 SizeType ReachAvoid::possibly_reaching_num_transitions() const {
-    return _reach_avoid_graph.internal().num_transitions();
+    return _possibly_reaching_graph.internal().num_transitions();
 }
 
 PossiblyReachingRAG const& ReachAvoid::possibly_reaching_graph() const {
-    return _reach_avoid_graph;
+    return _possibly_reaching_graph;
 }
 
 }

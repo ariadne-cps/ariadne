@@ -247,18 +247,18 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
 class AvoidingRAG;
 
 //! \brief Graph with no reach or avoid restrictions
-class UnconstrainedRAG {
+class BoundedDomainRAG {
   public:
-    UnconstrainedRAG() = default;
-    UnconstrainedRAG(UnconstrainedRAG const& other);
+    BoundedDomainRAG() = default;
+    BoundedDomainRAG(BoundedDomainRAG const& other);
     bool is_empty() const;
-    UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> graph);
+    BoundedDomainRAG(SharedPointer<ReachabilityGraphInterface> graph);
     AvoidingRAG reduce_to_not_reaching(SPaving const& unsafe) const;
     void apply_source_restriction_to(SPaving& paving) const;
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
-    UnconstrainedRAG& operator=(UnconstrainedRAG const& other);
+    BoundedDomainRAG& operator=(BoundedDomainRAG const& other);
   private:
     SharedPointer<ReachabilityGraphInterface> _internal;
 };
@@ -268,7 +268,7 @@ class PossiblyReachingRAG;
 //! \brief Graph with avoid restrictions
 class AvoidingRAG {
   public:
-    friend class UnconstrainedRAG;
+    friend class BoundedDomainRAG;
     AvoidingRAG() = default;
     AvoidingRAG(AvoidingRAG const& other);
     ReachabilityGraphInterface const& internal() const;
@@ -279,7 +279,7 @@ class AvoidingRAG {
     void apply_source_restriction_to(SPaving& paving) const;
     AvoidingRAG& operator=(AvoidingRAG const& other);
   protected:
-    AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe);
+    AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe);
   private:
     SharedPointer<ReachabilityGraphInterface> _internal;
     SPaving const _unsafe;

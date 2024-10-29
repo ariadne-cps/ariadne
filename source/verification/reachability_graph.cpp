@@ -428,43 +428,43 @@ void ForwardBackwardReachabilityGraph::write(std::ostream& os) const {
     os << "Forward:\n" << _forward_graph << "\nBackward:\n" << _backward_graph;
 }
 
-UnconstrainedRAG::UnconstrainedRAG(SharedPointer<ReachabilityGraphInterface> graph) :
+BoundedDomainRAG::BoundedDomainRAG(SharedPointer<ReachabilityGraphInterface> graph) :
     _internal(graph) { }
 
-UnconstrainedRAG& UnconstrainedRAG::operator=(UnconstrainedRAG const& other) {
+BoundedDomainRAG& BoundedDomainRAG::operator=(BoundedDomainRAG const& other) {
     _internal = other._internal;
     return *this;
 }
 
-void UnconstrainedRAG::apply_source_restriction_to(SPaving& paving) const {
+void BoundedDomainRAG::apply_source_restriction_to(SPaving& paving) const {
     _internal->apply_source_restriction_to(paving);
 }
 
-UnconstrainedRAG::UnconstrainedRAG(UnconstrainedRAG const& other) {
+BoundedDomainRAG::BoundedDomainRAG(BoundedDomainRAG const& other) {
     this->_internal = other._internal;
 }
 
-ReachabilityGraphInterface const& UnconstrainedRAG::internal() const {
+ReachabilityGraphInterface const& BoundedDomainRAG::internal() const {
     return *_internal;
 }
 
-bool UnconstrainedRAG::is_empty() const {
+bool BoundedDomainRAG::is_empty() const {
     return _internal == nullptr;
 }
 
-SizeType UnconstrainedRAG::num_sources() const {
+SizeType BoundedDomainRAG::num_sources() const {
     return _internal->num_sources();
 }
 
-SizeType UnconstrainedRAG::num_destinations() const {
+SizeType BoundedDomainRAG::num_destinations() const {
     return _internal->num_destinations();
 }
 
-AvoidingRAG UnconstrainedRAG::reduce_to_not_reaching(SPaving const& unsafe) const {
+AvoidingRAG BoundedDomainRAG::reduce_to_not_reaching(SPaving const& unsafe) const {
     return AvoidingRAG(*this, unsafe);
 }
 
-AvoidingRAG::AvoidingRAG(UnconstrainedRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()), _unsafe(unsafe) {
+AvoidingRAG::AvoidingRAG(BoundedDomainRAG const& free_graph, SPaving const& unsafe) : _internal(free_graph.internal().clone()), _unsafe(unsafe) {
     _internal->reduce_to_not_reaching(unsafe);
 }
 

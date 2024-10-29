@@ -95,8 +95,6 @@ class ReachAvoid {
 
     void compute_possibly_reaching_graph();
 
-    void update_unverified();
-
     //! \brief The percentage (in the 0-100 scale) of still unverified states
     double unverified_percentage() const;
 
@@ -130,9 +128,9 @@ class ReachAvoid {
     SharedPointer<IdentifiedCellFactory> _vertex_factory;
     SharedPointer<IdentifiedCellFactory> _edge_factory;
 
-    UnconstrainedRAG _free_graph;
-    AvoidingRAG _avoid_graph;
-    PossiblyReachingRAG _reach_avoid_graph;
+    BoundedDomainRAG _bounded_domain_graph;
+    AvoidingRAG _avoiding_graph;
+    PossiblyReachingRAG _possibly_reaching_graph;
 };
 
 } // namespace Ariadne

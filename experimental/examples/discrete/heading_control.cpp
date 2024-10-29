@@ -236,8 +236,6 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << ra.num_sources())
 
-    ra.update_unverified();
-
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
     ra.plot();

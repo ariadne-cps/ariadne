@@ -269,6 +269,10 @@ void ariadne_main()
             current[i] = rand_value.get_d();
         }
 
+        //0.38082, 0.938582, 1.18625 UNSAFE
+        //1.78943, 2.25202, 2.55807 OUT OF BOUNDS
+        //2.37401, 1.38365, 4.30544 SUGGESTS GOING FROM DISTANCE 10 TO 11
+
         CONCLOG_PRINTLN("Point " << p << ": " << current)
 
         SizeType last_state_id = 10000000;
@@ -287,6 +291,11 @@ void ariadne_main()
             auto control_icell = assignment.control_cell();
             auto target_icell = assignment.target_cell();
 
+            auto state = current_icell.cell().box();
+            for (SizeType i=0; i<dim; ++i) {
+                state[i] = ExactIntervalType(cast_exact(current.at(i)), cast_exact(current.at(i) + 1e-10));
+            }
+
             auto control_box = control_icell.cell().box();
             auto control_midpoint = control_box.midpoint();
             auto control = control_box;
@@ -301,7 +310,7 @@ void ariadne_main()
                 last_state_id = current_icell.id();
             }
 
-            auto combined = product(current_icell.cell().box(), control);
+            auto combined = product(state, control);
             auto next_box = cast_exact_box(apply(ra.dynamics(), combined).bounding_box());
 
             auto next_midpoint = next_box.midpoint();

@@ -67,55 +67,51 @@ double max_target_ratio(Box<FloatDPExactInterval> const& src_box, Box<FloatDPExa
 ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
     Map<IdentifiedCell,AssignedControl> assignments;
 
-    auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goals();
+    auto distances_to_goals = _rag.discrete_distances_to_goals();
 
     Map<IdentifiedCell,ScoreType> target_weights;
-    for (SizeType i=0; i<sets_equidistant_to_goal.size(); ++i)
-        for (auto const& s : sets_equidistant_to_goal.at(i))
-            target_weights.insert(s, 1.0/(1.0+static_cast<double>(i)));
+    for (auto const& d : distances_to_goals)
+        target_weights.insert(d.first, 1.0/(1.0+static_cast<double>(d.second)));
 
-    for (SizeType s_idx = 1; s_idx<sets_equidistant_to_goal.size(); ++s_idx) {
-        auto const& set = sets_equidistant_to_goal.at(s_idx);
-        for (auto const& src : set) {
-            auto const& trans = _rag.internal().forward_transitions(src);
+    for (auto const& src : distances_to_goals.keys()) {
+        auto const& trans = _rag.internal().forward_transitions(src);
 
-            SPaving control_grid(trans.begin()->first.cell().grid());
-            Map<IdentifiedCell,ScoreType> local_target_scores;
-            Map<IdentifiedCell,ScoreType> local_control_scores;
+        SPaving control_grid(trans.begin()->first.cell().grid());
+        Map<IdentifiedCell,ScoreType> local_target_scores;
+        Map<IdentifiedCell,ScoreType> local_control_scores;
 
-            for (auto const& ctrl : trans) {
-                local_control_scores.insert(ctrl.first, 0.0);
-                control_grid.adjoin(ctrl.first.cell());
-                for (auto const& tgt : ctrl.second) {
-                    ARIADNE_ASSERT_MSG(target_weights.contains(tgt.first),src.id() << " is not in the target weights")
-                    if (tgt.first.id() != src.id()) {
-                        if (not local_target_scores.contains(tgt.first))
-                            local_target_scores.insert(tgt.first, 0.0);
-                        auto local_score = tgt.second.probability()*target_weights.at(tgt.first);
-                        local_target_scores.at(tgt.first) = local_target_scores.at(tgt.first) + local_score;
-                        local_control_scores.at(ctrl.first) = local_control_scores.at(ctrl.first) + local_score;
-                    }
+        for (auto const& ctrl : trans) {
+            local_control_scores.insert(ctrl.first, 0.0);
+            control_grid.adjoin(ctrl.first.cell());
+            for (auto const& tgt : ctrl.second) {
+                ARIADNE_ASSERT_MSG(target_weights.contains(tgt.first),src.id() << " is not in the target weights")
+                if (tgt.first.id() != src.id()) {
+                    if (not local_target_scores.contains(tgt.first))
+                        local_target_scores.insert(tgt.first, 0.0);
+                    auto local_score = tgt.second.probability()*target_weights.at(tgt.first);
+                    local_target_scores.at(tgt.first) = local_target_scores.at(tgt.first) + local_score;
+                    local_control_scores.at(ctrl.first) = local_control_scores.at(ctrl.first) + local_score;
                 }
             }
-
-            auto ctrl_it = local_control_scores.begin();
-            auto best_control = ctrl_it;
-            ++ctrl_it;
-            for (; ctrl_it != local_control_scores.end(); ++ctrl_it) {
-                if (ctrl_it->second > best_control->second)
-                    best_control = ctrl_it;
-            }
-
-            auto tgt_it = local_target_scores.begin();
-            auto best_target = tgt_it;
-            ++tgt_it;
-            for (; tgt_it != local_target_scores.end(); ++tgt_it) {
-                if (tgt_it->second > best_target->second)
-                    best_target = tgt_it;
-            }
-
-            assignments.insert(src,{best_control->first,control_grid,best_target->first});
         }
+
+        auto ctrl_it = local_control_scores.begin();
+        auto best_control = ctrl_it;
+        ++ctrl_it;
+        for (; ctrl_it != local_control_scores.end(); ++ctrl_it) {
+            if (ctrl_it->second > best_control->second)
+                best_control = ctrl_it;
+        }
+
+        auto tgt_it = local_target_scores.begin();
+        auto best_target = tgt_it;
+        ++tgt_it;
+        for (; tgt_it != local_target_scores.end(); ++tgt_it) {
+            if (tgt_it->second > best_target->second)
+                best_target = tgt_it;
+        }
+
+        assignments.insert(src,{best_control->first,control_grid,best_target->first});
     }
 
     return {assignments};

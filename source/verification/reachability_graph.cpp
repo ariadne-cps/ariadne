@@ -446,46 +446,26 @@ void ForwardBackwardReachabilityGraph::apply_source_restriction_to(SPaving& pavi
     _forward_graph.apply_source_restriction_to(paving);
 }
 
-List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goals(SPaving const& goals) const {
+Map<IdentifiedCell,SizeType> ForwardBackwardReachabilityGraph::discrete_distances_to(SPaving const& goals) const {
 
-    List<Set<IdentifiedCell>> result;
-
-    auto backward_copy = _backward_graph;
-
-    Set<IdentifiedCell> goal_cells;
+    Map<IdentifiedCell,SizeType> result;
     for (auto const& g : goals)
-        goal_cells.insert(_backward_graph.vertex_icell(g));
-    result.append(goal_cells);
+        result.insert(_backward_graph.vertex_icell(g),0);
 
-    Set<IdentifiedCell> currently_reached;
-    currently_reached.adjoin(goal_cells);
-
-    auto num_sources = _backward_graph.num_sources();
-
-    while (currently_reached.size() < num_sources) {
-
-        SizeType idx = result.size()-1;
-        Set<IdentifiedCell> sources;
-
-        for (auto const& g : result[idx]) {
-            if (backward_copy.contains(g)) {
-                auto it = backward_copy.find(g);
-                for (auto const& t : it->second) {
-                    for (auto const& s : t.second) {
-                        if (not currently_reached.contains(s.first) and not sources.contains(s.first)) {
-                            sources.insert(s.first);
-                        }
-                    }
-                }
-            }
+    SPaving analysed(goals.grid());
+    SPaving newly_reached = goals;
+    while (not newly_reached.is_empty()) {
+        auto dst = *newly_reached.begin();
+        auto idst = _backward_graph.vertex_icell(dst);
+        SizeType dst_distance = result.at(idst);
+        analysed.adjoin(dst);
+        auto sources = _backward_graph.destinations_from(dst);
+        sources.remove(analysed);
+        newly_reached.adjoin(sources);
+        newly_reached.remove(dst);
+        for (auto const& s : sources) {
+            result.insert(_backward_graph.vertex_icell(s),dst_distance+1);
         }
-
-        for (auto const& s : result[idx]) {
-            backward_copy.erase(s.cell());
-        }
-
-        result.append(sources);
-        currently_reached.adjoin(sources);
     }
 
     return result;
@@ -611,8 +591,8 @@ PossiblyReachingRAG* PossiblyReachingRAG::clone() const {
     return new PossiblyReachingRAG(*this);
 }
 
-List<Set<IdentifiedCell>> PossiblyReachingRAG::sets_equidistant_to_goals() const {
-    return _internal->sets_equidistant_to_goals(_goals);
+Map<IdentifiedCell,SizeType> PossiblyReachingRAG::discrete_distances_to_goals() const {
+    return _internal->discrete_distances_to(_goals);
 }
 
 } // namespace Ariadne

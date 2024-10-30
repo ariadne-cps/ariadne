@@ -185,9 +185,8 @@ class ReachabilityGraphInterface {
     virtual void insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,TargetScore>> const& destination_cells) = 0;
     virtual void clear() = 0;
 
-    //! \brief Find the list of sets of cells having a given distance to the \a goal
-    //! \details The position in the list determines the distance (0: within goals)
-    virtual List<Set<IdentifiedCell>> sets_equidistant_to_goals(SPaving const& goal) const = 0;
+    //! \brief Find the distances for all cells having a finite distance to one of the \a goals
+    virtual Map<IdentifiedCell,SizeType> discrete_distances_to(SPaving const& goals) const = 0;
 
     //! \brief The transitions from a given \a source forward
     virtual Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& forward_transitions(IdentifiedCell const& source) const = 0;
@@ -235,7 +234,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     ForwardBackwardReachabilityGraph(IdentifiedCellFactory const& vertex_factory, IdentifiedCellFactory const& edge_factory);
     ForwardBackwardReachabilityGraph(ForwardBackwardReachabilityGraph const& other);
 
-    List<Set<IdentifiedCell>> sets_equidistant_to_goals(SPaving const& goal) const override;
+    Map<IdentifiedCell,SizeType> discrete_distances_to(SPaving const& goals) const override;
 
     SizeType vertex_id(NCell const& cell) const override;
     SizeType edge_id(NCell const& cell) const override;
@@ -335,7 +334,7 @@ class PossiblyReachingRAG : public ReducedGraphBase {
 
     PossiblyReachingRAG* clone() const;
 
-    List<Set<IdentifiedCell>> sets_equidistant_to_goals() const;
+    Map<IdentifiedCell,SizeType> discrete_distances_to_goals() const;
 
     PossiblyReachingRAG& operator=(PossiblyReachingRAG const& other);
   protected:

@@ -217,6 +217,7 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().is_consistent())
 
     sw.restart();
     ra.compute_avoiding_graph();
@@ -226,15 +227,16 @@ void ariadne_main()
     CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().is_consistent())
 
     sw.restart();
     ra.compute_possibly_reaching_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing possibly reaching graph: " << sw.elapsed_seconds() << " seconds")
 
+    CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_transitions())
-
-    CONCLOG_PRINTLN_AT(1,"Safe goal-reachable abstract states: " << ra.num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().is_consistent())
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 

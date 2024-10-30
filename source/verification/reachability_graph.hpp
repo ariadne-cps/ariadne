@@ -213,6 +213,9 @@ class ReachabilityGraphInterface {
     //! \brief The states that can be started from but can not be reached after leaving them
     virtual Set<IdentifiedCell> unreachable_starting_states() const = 0;
 
+    //! \brief Whether the representation is consistent (e.g., forward and backward internal graphs having the same information)
+    virtual bool is_consistent() const = 0;
+
     virtual ReachabilityGraphInterface* clone() const = 0;
     virtual void write(std::ostream& os) const = 0;
     virtual ~ReachabilityGraphInterface() = default;
@@ -254,6 +257,8 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> deadlock_transitions() const override;
     Set<IdentifiedCell> unreachable_starting_states() const override;
 
+    bool is_consistent() const override;
+
     ReachabilityGraphInterface* clone() const override;
 
     void write(std::ostream& os) const override;
@@ -279,6 +284,8 @@ class ReducedGraphBase {
     SizeType num_sources() const;
     SizeType num_destinations() const;
     SizeType num_transitions() const;
+
+    bool is_consistent() const;
 
     bool is_empty() const;
   protected:

@@ -332,6 +332,10 @@ List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> ForwardBackwardReachab
     return result;
 }
 
+bool ForwardBackwardReachabilityGraph::is_consistent() const {
+    return _forward_graph.num_transitions() == _backward_graph.num_transitions();
+}
+
 void ForwardBackwardReachabilityGraph::reduce_to_avoiding(SPaving const& unsafe) {
     CONCLOG_SCOPE_CREATE
 
@@ -489,6 +493,10 @@ SizeType ReducedGraphBase::num_transitions() const {
 
 ReachabilityGraphInterface const& ReducedGraphBase::internal() const {
     return *_internal;
+}
+
+bool ReducedGraphBase::is_consistent() const {
+    return _internal->is_consistent();
 }
 
 void ReducedGraphBase::apply_source_removal_to(SPaving& paving) const {

@@ -460,12 +460,17 @@ Map<IdentifiedCell,SizeType> ForwardBackwardReachabilityGraph::discrete_distance
         SizeType dst_distance = result.at(idst);
         analysed.adjoin(dst);
         auto sources = _backward_graph.destinations_from(dst);
+        for (auto const& s : sources) {
+            auto src_icell = _backward_graph.vertex_icell(s);
+            if (not result.contains(src_icell)) {
+                result.insert(src_icell,dst_distance+1);
+            } else {
+                result.at(src_icell) = std::min(result.at(src_icell),dst_distance+1);
+            }
+        }
         sources.remove(analysed);
         newly_reached.adjoin(sources);
         newly_reached.remove(dst);
-        for (auto const& s : sources) {
-            result.insert(_backward_graph.vertex_icell(s),dst_distance+1);
-        }
     }
 
     return result;

@@ -215,10 +215,8 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_destinations())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().unreachable_starting_states().size())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().is_consistent())
 
     sw.restart();
     ra.compute_avoiding_graph();
@@ -227,11 +225,9 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_destinations())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().unreachable_starting_states().size())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().is_consistent())
 
     sw.restart();
     ra.compute_possibly_reaching_graph();
@@ -240,10 +236,8 @@ void ariadne_main()
 
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_sources())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_destinations())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_transitions())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().unreachable_starting_states().size())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().is_consistent())
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")
 
@@ -259,7 +253,7 @@ void ariadne_main()
     SizeType num_points = 5;
     SizeType max_steps = 100;
 
-    return;
+    auto discrete_distances = ra.possibly_reaching_graph().discrete_distances_to_goals();
 
     for (SizeType p=0; p < num_points; ++p) {
 
@@ -274,12 +268,6 @@ void ariadne_main()
             auto rand_value = random_double.get(cast_exact(current_cell_box[i].lower_bound().get_d()),cast_exact(current_cell_box[i].upper_bound().get_d()));
             current[i] = rand_value.get_d();
         }
-
-        /*
-        current[0] = 0.406792;
-        current[1] = 3.94616;
-        current[2] = 2.45582;
-        */
 
         CONCLOG_PRINTLN("Point " << p << ": " << current)
 
@@ -302,16 +290,18 @@ void ariadne_main()
             auto control_box = control_icell.cell().box();
             auto control_midpoint = control_box.midpoint();
             auto control = control_box;
-            for (SizeType i=0; i<control_box.dimension(); ++i) {
+            for (SizeType i=0; i<control.dimension(); ++i) {
                 control[i] = ExactIntervalType(control_midpoint[i], cast_exact(control_midpoint[i].get_d() + 1e-10));
             }
 
+            auto target_cell = assignments.get(current_icell).target_cell();
+
             if (current_icell.id() != last_state_id) {
-                CONCLOG_PRINTLN_AT(1,"Now in " << current_cell_box << " targeting " << assignments.get(current_icell).target_cell() << " with control " << control.midpoint())
+                CONCLOG_PRINTLN_AT(1,"Now in " << current_icell << "@" << discrete_distances.at(current_icell) << " targeting " << target_cell << "@" << discrete_distances.at(target_cell) << " with control " << control.midpoint())
                 last_state_id = current_icell.id();
             }
 
-            auto combined = product(current_icell.cell().box(), control_box);
+            auto combined = product(current_icell.cell().box(), control);
             auto next_box = cast_exact_box(apply(ra.dynamics(), combined).bounding_box());
 
             auto next_midpoint = next_box.midpoint();
@@ -343,7 +333,7 @@ void ariadne_main()
             if (ra.unverified().superset(next_icell.cell())) {
                 CONCLOG_PRINTLN("The next cell is an unverified (hence unsafe) cell, terminating with failure.")
                 auto const& ts = ra.possibly_reaching_graph().internal().forward_transitions(current_icell);
-                CONCLOG_PRINTLN("Cell " << current_icell.id() << " of desired target " << target_icell.cell().box() << " ( " << assignments.get(current_icell).target_cell().id() << ") would reach:")
+                CONCLOG_PRINTLN("Cell " << current_icell.id() << " of desired target " << target_icell.cell().box() << " ( " << target_cell.id() << ") would reach:")
                 for (auto const& t : ts) {
                     List<SizeType> target_ids;
                     for (auto const& tgt : t.second) {

@@ -177,6 +177,7 @@ class ReachabilityGraphInterface {
     virtual SizeType num_transitions() const = 0;
     virtual SizeType num_sources() const = 0;
     virtual SizeType num_destinations() const = 0;
+    virtual SizeType num_distinct_states() const = 0;
 
     virtual SizeType vertex_id(NCell const& cell) const = 0;
     virtual SizeType edge_id(NCell const& cell) const = 0;
@@ -242,6 +243,7 @@ class ForwardBackwardReachabilityGraph : public ReachabilityGraphInterface {
     SizeType num_transitions() const override;
     SizeType num_sources() const override;
     SizeType num_destinations() const override;
+    SizeType num_distinct_states() const override;
 
     Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& forward_transitions(IdentifiedCell const& source) const override;
     Map<IdentifiedCell, Map<IdentifiedCell, TargetScore>> const& backward_transitions(IdentifiedCell const& destination) const override;
@@ -283,6 +285,7 @@ class ReducedGraphBase {
     ReachabilityGraphInterface const& internal() const;
     SizeType num_sources() const;
     SizeType num_destinations() const;
+    SizeType num_distinct_states() const;
     SizeType num_transitions() const;
 
     bool is_consistent() const;

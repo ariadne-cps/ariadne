@@ -173,23 +173,6 @@ SizeType ReachAvoid::unverified_size() const {
     return _unverified.size();
 }
 
-SizeType ReachAvoid::num_sources() const {
-    if (_bounded_domain_graph == nullptr)
-        return state_size();
-    else if (_avoiding_graph == nullptr)
-        return _bounded_domain_graph->num_sources();
-    else if (_possibly_reaching_graph == nullptr)
-        return _avoiding_graph->num_sources();
-    else
-        return _possibly_reaching_graph->num_sources();
-}
-
-SizeType ReachAvoid::num_destinations() const {
-    if (_bounded_domain_graph == nullptr)
-        return state_size();
-    return _bounded_domain_graph->num_destinations();
-}
-
 SizeType ReachAvoid::_vertex_id(NCell const& cell) const {
     return _vertex_factory->create(cell).id();
 }

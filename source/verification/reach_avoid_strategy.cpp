@@ -69,8 +69,6 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
 
     auto sets_equidistant_to_goal = _rag.sets_equidistant_to_goals();
 
-    CONCLOG_PRINTLN(sets_equidistant_to_goal)
-
     Map<IdentifiedCell,ScoreType> target_weights;
     for (SizeType i=0; i<sets_equidistant_to_goal.size(); ++i)
         for (auto const& s : sets_equidistant_to_goal.at(i))
@@ -89,6 +87,7 @@ ReachAvoidStrategy ReachAvoidStrategyBuilder::build() {
                 local_control_scores.insert(ctrl.first, 0.0);
                 control_grid.adjoin(ctrl.first.cell());
                 for (auto const& tgt : ctrl.second) {
+                    ARIADNE_ASSERT_MSG(target_weights.contains(tgt.first),src.id() << " is not in the target weights")
                     if (tgt.first.id() != src.id()) {
                         if (not local_target_scores.contains(tgt.first))
                             local_target_scores.insert(tgt.first, 0.0);

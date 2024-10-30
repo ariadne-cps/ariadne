@@ -76,9 +76,6 @@ class ReachAvoid {
     SizeType goals_size() const;
     SizeType unverified_size() const;
 
-    SizeType num_sources() const;
-    SizeType num_destinations() const;
-
     void plot(SizeType xaxis, SizeType yaxis) const;
     void plot() const;
 

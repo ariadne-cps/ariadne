@@ -317,6 +317,10 @@ SizeType ForwardBackwardReachabilityGraph::num_destinations() const {
     return _backward_graph.num_sources();
 }
 
+SizeType ForwardBackwardReachabilityGraph::num_distinct_states() const {
+    return _forward_graph.sources().adjoin(_backward_graph.sources()).size();
+}
+
 void ForwardBackwardReachabilityGraph::insert(NCell const& source_cell, ECell const& transition_cell, List<Pair<NCell,TargetScore>> const& destination_cells) {
     _forward_graph.insert_forward(source_cell,transition_cell,destination_cells);
     _backward_graph.insert_backward(source_cell,transition_cell,destination_cells);
@@ -333,7 +337,41 @@ List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> ForwardBackwardReachab
 }
 
 bool ForwardBackwardReachabilityGraph::is_consistent() const {
-    return _forward_graph.num_transitions() == _backward_graph.num_transitions();
+    if (_forward_graph.num_transitions() != _backward_graph.num_transitions()) return false;
+
+    auto const& forward_sources = _forward_graph.sources();
+    Set<IdentifiedCell> forward_targets;
+    for (auto const& s : forward_sources) {
+        auto trans = _forward_graph.transitions(s);
+        for (auto const& t : trans) {
+            for (auto const& tgt : t.second) {
+                forward_targets.insert(tgt.first);
+            }
+        }
+    }
+
+    auto const& backward_targets = _backward_graph.sources();
+    if (backward_targets.size() != forward_targets.size()) return false;
+
+    Set<IdentifiedCell> backward_sources;
+    for (auto const& s : backward_targets) {
+        auto trans = _backward_graph.transitions(s);
+        for (auto const& t : trans) {
+            for (auto const& tgt : t.second) {
+                backward_sources.insert(tgt.first);
+            }
+        }
+    }
+
+    if (backward_sources.size() != forward_sources.size()) return false;
+
+    for (auto const& s : forward_sources)
+        if (not backward_sources.contains(s)) return false;
+
+    for (auto const& s : forward_targets)
+        if (not backward_targets.contains(s)) return false;
+
+    return true;
 }
 
 void ForwardBackwardReachabilityGraph::reduce_to_avoiding(SPaving const& unsafe) {
@@ -408,14 +446,14 @@ void ForwardBackwardReachabilityGraph::apply_source_restriction_to(SPaving& pavi
     _forward_graph.apply_source_restriction_to(paving);
 }
 
-List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goals(SPaving const& goal) const {
+List<Set<IdentifiedCell>> ForwardBackwardReachabilityGraph::sets_equidistant_to_goals(SPaving const& goals) const {
 
     List<Set<IdentifiedCell>> result;
 
     auto backward_copy = _backward_graph;
 
     Set<IdentifiedCell> goal_cells;
-    for (auto const& g : goal)
+    for (auto const& g : goals)
         goal_cells.insert(_backward_graph.vertex_icell(g));
     result.append(goal_cells);
 
@@ -487,6 +525,10 @@ SizeType ReducedGraphBase::num_destinations() const {
     return _internal->num_destinations();
 }
 
+SizeType ReducedGraphBase::num_distinct_states() const {
+    return _internal->num_distinct_states();
+}
+
 SizeType ReducedGraphBase::num_transitions() const {
     return _internal->num_transitions();
 }
@@ -505,6 +547,10 @@ void ReducedGraphBase::apply_source_removal_to(SPaving& paving) const {
 
 List<Tuple<IdentifiedCell,IdentifiedCell,IdentifiedCell>> ReducedGraphBase::deadlock_transitions() const {
     return _internal->deadlock_transitions();
+}
+
+Set<IdentifiedCell> ReducedGraphBase::unreachable_starting_states() const {
+    return _internal->unreachable_starting_states();
 }
 
 void ReducedGraphBase::apply_source_restriction_to(SPaving& paving) const {

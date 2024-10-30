@@ -208,15 +208,16 @@ void ariadne_main()
     CONCLOG_RUN_AT(2,ra.print_goals())
     CONCLOG_PRINTLN_VAR_AT(1,ra.goals_size())
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
-
     Stopwatch<Milliseconds> sw;
     ra.compute_bounded_domain_graph();
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing bounded domain graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_destinations())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().unreachable_starting_states().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.bounded_domain_graph().is_consistent())
 
     sw.restart();
@@ -224,9 +225,12 @@ void ariadne_main()
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing avoiding graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
-    CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_destinations())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.safe_goals().size())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().unreachable_starting_states().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.avoiding_graph().is_consistent())
 
     sw.restart();
@@ -234,8 +238,11 @@ void ariadne_main()
     sw.click();
     CONCLOG_PRINTLN_AT(1,"Time cost of constructing possibly reaching graph: " << sw.elapsed_seconds() << " seconds")
 
-    CONCLOG_PRINTLN_VAR_AT(1,ra.num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_sources())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_destinations())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_distinct_states())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().num_transitions())
+    CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().unreachable_starting_states().size())
     CONCLOG_PRINTLN_VAR_AT(1,ra.possibly_reaching_graph().is_consistent())
 
     CONCLOG_PRINTLN_AT(1,"Unverified abstract states: " << ra.unverified_size() << " (" << ra.unverified_percentage() << "% left)")

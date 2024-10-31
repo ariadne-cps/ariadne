@@ -70,7 +70,8 @@ void ariadne_main()
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.05;
     SizeType point_accuracy = 6;
-    bool use_preimage = false;
+    bool use_preimage = true;
+    SizeType preimage_iterations = 2;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
     List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4*10}});
@@ -133,10 +134,9 @@ void ariadne_main()
 
         GridTreePaving final_paving(state_grid);
         final_paving.adjoin_outer_approximation(final_box,0);
-        final_paving.restrict(state_paving);
         final_paving.mince(0);
 
-        if (not final_paving.is_empty()) {
+        if (final_paving.subset(state_paving)) {
 
             double total_volume = 0;
             for (auto const& cell : final_paving) {
@@ -197,7 +197,6 @@ void ariadne_main()
 
                     GridTreePaving target(state_grid);
                     target.adjoin_outer_approximation(final_box,0);
-                    target.restrict(state_paving);
                     target.mince(0);
 
                     for (auto const& tcell : target) {
@@ -278,7 +277,7 @@ void ariadne_main()
                 CONCLOG_SCOPE_PRINTHOLD("avg ratio: " << sum_xratio/num_processed << ", avg effective accuracy: " << sum_effective_accuracy/num_processed)
             }
         } else {
-            CONCLOG_PRINTLN_AT(1,"Targets are outside the domain, skipping")
+            CONCLOG_PRINTLN_AT(1,"Some targets are outside the domain, skipping")
         }
     });
     

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            probability_map.cpp
+ *            continuous_probability_map.cpp
  *
  *  Copyright  2023  Luca Geretti
  *
@@ -63,9 +63,9 @@ void ariadne_main()
     RealSpace state_spc({x,y,theta});
     RealSpace control_spc({u});
 
-    Real deltat = 0.1_dec;
+    Real step_size = 0.1_x;
 
-    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u}};
+    List<DottedRealAssignment> forward_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u,dot(u)=0}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.00;
@@ -76,7 +76,7 @@ void ariadne_main()
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
     List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4*10}});
 
-    UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps}, {0.0_dec+eps,2*pi-eps}});
+    UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps}, {-2*pi+eps,2*pi-eps}});
     UpperBoxType control_domain({{-10*pi+eps,10*pi-eps}});
 
     //! Processing
@@ -111,16 +111,9 @@ void ariadne_main()
     std::atomic<double> sum_effective_accuracy = 0;
     std::atomic<SizeType> num_processed = 0;
 
-
-    auto forward_dynamics = EffectiveVectorMultivariateFunction::zeros(state_spc.size(),full_spc.size());
-    auto backward_dynamics = EffectiveVectorMultivariateFunction::zeros(state_spc.size(),full_spc.size());
-    for(SizeType i=0; i!=state_spc.size(); ++i) {
-        forward_dynamics[i] = EffectiveScalarMultivariateFunction::coordinate(full_spc.size(),i) + deltat * make_function(full_spc,differential_dynamics.at(i).expression());
-        backward_dynamics[i] = EffectiveScalarMultivariateFunction::coordinate(full_spc.size(),i) - deltat * make_function(full_spc,differential_dynamics.at(i).expression());
-    }
-
-    CONCLOG_PRINTLN_VAR(forward_dynamics)
-    CONCLOG_PRINTLN_VAR(backward_dynamics)
+    TaylorPicardIntegrator integrator(0.0001);
+    VectorFieldEvolver forward_evolver(VectorField(forward_dynamics),integrator);
+    forward_evolver.configuration().set_maximum_step_size(step_size/10);
 
     BetterThreads::StaticWorkload<Pair<ExactBoxType,ExactBoxType>> workload([&](Pair<ExactBoxType,ExactBoxType> const& sc_boxes){
 
@@ -132,7 +125,14 @@ void ariadne_main()
 
         auto source_box = sc_boxes.first;
 
-        auto final_box = cast_exact_box(apply(forward_dynamics, product(source_box, sc_boxes.second)).bounding_box());
+        CONCLOG_RUN_MUTED(auto orbit = forward_evolver.orbit(forward_evolver.enclosure(product(source_box,sc_boxes.second)),step_size, Semantics::UPPER))
+
+        auto final_orbit_box = orbit.final()[0].euclidean_set().bounding_box();
+        auto final_box = source_box;
+        for (SizeType i=0; i<final_box.dimension(); ++i)
+            final_box[i] = cast_exact_interval(final_orbit_box[i]);
+
+        CONCLOG_PRINTLN_VAR_AT(2,final_box)
 
         GridTreePaving final_paving(state_grid);
         final_paving.adjoin_outer_approximation(final_box,0);
@@ -149,13 +149,13 @@ void ariadne_main()
 
                 double current_volume = 0;
                 if (use_preimage) {
-                    auto preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
+                    /*auto preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
                     for (SizeType i = 1; i < preimage_iterations; ++i) {
                         image_intersection_box = intersection(cast_exact_box(apply(forward_dynamics, product(cast_exact_box(preimage_intersection_box), sc_boxes.second)).bounding_box()),cell.box());
                         preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
                     }
 
-                    current_volume = (definitely(preimage_intersection_box.is_empty()) ? 0.0 : preimage_intersection_box.volume().get_d());
+                    current_volume = (definitely(preimage_intersection_box.is_empty()) ? 0.0 : preimage_intersection_box.volume().get_d());*/
                 } else {
                     current_volume = image_intersection_box.volume().get_d();
                 }
@@ -187,7 +187,7 @@ void ariadne_main()
 
             sw.click();
             CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds()*1000 << " ms.")
-
+/*
             SizeType ival_xtime = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
 
             Vector<Map<SizeType,double>> point_probabilities(point_accuracy+1,Map<SizeType,double>());
@@ -209,7 +209,7 @@ void ariadne_main()
                 for (auto const& c : sampling) {
                     auto input_box = product(ExactBoxType(c.box().midpoint()), sc_boxes.second);
 
-                    auto final_box = shrink(cast_exact_box(apply(forward_dynamics, input_box).bounding_box()),eps);
+                    auto final_box = cast_exact_box(apply(forward_dynamics, input_box).bounding_box());
 
                     GridTreePaving target(state_grid);
                     target.adjoin_outer_approximation(final_box,0);
@@ -291,7 +291,7 @@ void ariadne_main()
                 sum_xratio = sum_xratio + xratio;
                 sum_effective_accuracy = sum_effective_accuracy + effective_accuracy;
                 CONCLOG_SCOPE_PRINTHOLD("avg ratio: " << sum_xratio/num_processed << ", avg effective accuracy: " << sum_effective_accuracy/num_processed)
-            }
+            }*/
         } else {
             CONCLOG_PRINTLN_AT(1,"Some targets are outside the domain, skipping")
         }

@@ -58,37 +58,25 @@ void ariadne_main()
     //! Setup
 
     RealConstant v("v",3);
-    RealVariable x("x"), y("y"), z("z"), theta("theta"), u("u");
+    RealVariable x("x"), y("y"), theta("theta"), u("u");
 
-    RealSpace state_spc({x,y,z,theta});
+    RealSpace state_spc({x,y,theta});
     RealSpace control_spc({u});
 
     Real deltat = 0.1_dec;
 
-<<<<<<< Updated upstream
-    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+deltat*u}};
-=======
-    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(y)=v*tan(theta),dot(theta)=u/deltat}};
->>>>>>> Stashed changes
+    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.05;
     SizeType point_accuracy = 7;
     bool use_preimage = false;
 
-<<<<<<< Updated upstream
-    List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,pi/8}});
-    List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi}});
+    List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
+    List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4*10}});
 
     UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps}, {0.0_dec+eps,2*pi-eps}});
     UpperBoxType control_domain({{-10*pi+eps,10*pi-eps}});
-=======
-    List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{z,0.5_dec},{theta,pi/4}});
-    List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4}});
-
-    UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,2*pi-eps}});
-    UpperBoxType control_domain({{0.0_dec+eps,2*pi-eps}});
->>>>>>> Stashed changes
 
     //! Processing
 
@@ -203,7 +191,7 @@ void ariadne_main()
                 SizeType total_occurrencies = 0;
 
                 for (auto const& c : sampling) {
-                    auto input_box = product(ExactBoxType(c.box().centre()), sc_boxes.second);
+                    auto input_box = product(ExactBoxType(c.box().midpoint()), sc_boxes.second);
 
                     auto final_box = shrink(cast_exact_box(apply(forward_dynamics, input_box).bounding_box()),eps);
 

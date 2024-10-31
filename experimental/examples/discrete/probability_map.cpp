@@ -69,7 +69,7 @@ void ariadne_main()
 
     FloatDP eps(1e-8_x,DoublePrecision());
     double probability_threshold = 0.05;
-    SizeType point_accuracy = 7;
+    SizeType point_accuracy = 6;
     bool use_preimage = false;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
@@ -127,7 +127,7 @@ void ariadne_main()
 
         Map<SizeType,double> interval_probabilities;
 
-        CONCLOG_PRINTLN_AT(1,"Computing using Interval Arithmetic...")
+        CONCLOG_PRINTLN_AT(2,"Computing using Interval Arithmetic...")
 
         auto final_box = shrink(cast_exact_box(apply(forward_dynamics, product(sc_boxes.first, sc_boxes.second)).bounding_box()),eps);
 
@@ -163,14 +163,14 @@ void ariadne_main()
             }
 
             interval_probabilities.remove_keys(to_remove);
-            CONCLOG_PRINTLN_AT(1,"Interval probabilities:")
+            CONCLOG_PRINTLN_AT(2,"Interval probabilities:")
             for (auto& p : interval_probabilities) {
                 p.second = p.second/remaining_total_probability;
-                CONCLOG_PRINTLN_AT(1,p.first << ": " << p.second)
+                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second)
             }
 
             sw.click();
-            CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds()*1000 << " ms.")
+            CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds()*1000 << " ms.")
 
             SizeType ival_xtime = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
 
@@ -179,7 +179,7 @@ void ariadne_main()
             Vector<SizeType> pt_xtime(point_accuracy+1);
 
             for (SizeType acc=0; acc<=point_accuracy;++acc) {
-                CONCLOG_PRINTLN_VAR_AT(1,acc)
+                CONCLOG_PRINTLN_VAR_AT(2,acc)
                 sw.restart();
                 GridTreePaving sampling(state_grid);
                 sampling.adjoin_outer_approximation(shrink(sc_boxes.first,eps),acc);
@@ -215,11 +215,11 @@ void ariadne_main()
                 }
 
                 sw.click();
-                CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.")
+                CONCLOG_PRINTLN_AT(2,"Done in " << sw.elapsed_seconds() << " seconds.")
                 pt_xtime.at(acc) = static_cast<SizeType>(sw.elapsed_seconds()*1000000);
 
                 for (auto const& pp : point_probabilities.at(acc)) {
-                    CONCLOG_PRINTLN_AT(1,pp.first << ": " << pp.second)
+                    CONCLOG_PRINTLN_AT(2,pp.first << ": " << pp.second)
                 }
             }
 
@@ -233,7 +233,7 @@ void ariadne_main()
                         interval_deviation += pow(p.second-val->second,2);
                 }
                 interval_deviation = sqrt(interval_deviation/point_probabilities.at(point_accuracy).size());
-                CONCLOG_PRINTLN_AT(1,"Interval deviation: " << interval_deviation)
+                CONCLOG_PRINTLN_AT(2,"Interval deviation: " << interval_deviation)
             }
 
             SizeType reference_accuracy = 0;
@@ -241,7 +241,7 @@ void ariadne_main()
             Vector<double> point_deviations(point_accuracy,0.0);
             bool found_reference = false;
             for (SizeType acc=0;acc<point_accuracy;++acc) {
-                CONCLOG_PRINTLN_AT(1,"Accuracy " << acc)
+                CONCLOG_PRINTLN_AT(2,"Accuracy " << acc)
                 for (auto const& p : point_probabilities.at(point_accuracy)) {
                     auto val = point_probabilities.at(acc).find(p.first);
                     if (val == point_probabilities.at(acc).end())
@@ -250,7 +250,7 @@ void ariadne_main()
                         point_deviations.at(acc) += pow(p.second-val->second,2);
                 }
                 point_deviations.at(acc) = sqrt(point_deviations.at(acc)/point_probabilities.at(point_accuracy).size());
-                CONCLOG_PRINTLN_AT(1,"Deviation: " << point_deviations.at(acc))
+                CONCLOG_PRINTLN_AT(2,"Deviation: " << point_deviations.at(acc))
                 if ((not found_reference) and acc > 0 and point_deviations.at(acc) < interval_deviation) {
                     found_reference = true;
                     reference_accuracy = acc-1;

@@ -68,10 +68,10 @@ void ariadne_main()
     List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
-    double probability_threshold = 0.05;
+    double probability_threshold = 0.00;
     SizeType point_accuracy = 6;
-    bool use_preimage = true;
-    SizeType preimage_iterations = 2;
+    bool use_preimage = false;
+    SizeType preimage_iterations = 1;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
     List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4*10}});
@@ -130,7 +130,9 @@ void ariadne_main()
 
         CONCLOG_PRINTLN_AT(2,"Computing using Interval Arithmetic...")
 
-        auto final_box = shrink(cast_exact_box(apply(forward_dynamics, product(sc_boxes.first, sc_boxes.second)).bounding_box()),eps);
+        auto source_box = sc_boxes.first;
+
+        auto final_box = cast_exact_box(apply(forward_dynamics, product(source_box, sc_boxes.second)).bounding_box());
 
         GridTreePaving final_paving(state_grid);
         final_paving.adjoin_outer_approximation(final_box,0);
@@ -138,35 +140,49 @@ void ariadne_main()
 
         if (final_paving.subset(state_paving)) {
 
+            Map<SizeType,double> interval_volumes;
+
             double total_volume = 0;
             for (auto const& cell : final_paving) {
                 auto icell = identified_cell_factory.create(cell);
-                auto starting_box = intersection(cell.box(),final_box);
-                auto used_box = (use_preimage ? apply(backward_dynamics, product(starting_box, sc_boxes.second)).bounding_box() : starting_box);
+                auto image_intersection_box = intersection(cell.box(),final_box);
 
-                auto current_volume = used_box.volume().get_d();
-                interval_probabilities.insert(icell.id(),current_volume);
+                double current_volume = 0;
+                if (use_preimage) {
+                    auto preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
+                    for (SizeType i = 1; i < preimage_iterations; ++i) {
+                        image_intersection_box = intersection(cast_exact_box(apply(forward_dynamics, product(cast_exact_box(preimage_intersection_box), sc_boxes.second)).bounding_box()),cell.box());
+                        preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
+                    }
+
+                    current_volume = (definitely(preimage_intersection_box.is_empty()) ? 0.0 : preimage_intersection_box.volume().get_d());
+                } else {
+                    current_volume = image_intersection_box.volume().get_d();
+                }
+
+                if (current_volume > 1e-10)
+                    interval_volumes.insert(icell.id(),current_volume);
                 total_volume += current_volume;
             }
 
-            double maximum_interval_probability = 0;
-            for (auto& p : interval_probabilities) {
-                maximum_interval_probability = std::max(maximum_interval_probability,p.second);
+            double maximum_interval_volume = 0;
+            for (auto& p : interval_volumes) {
+                maximum_interval_volume = std::max(maximum_interval_volume,p.second);
             }
 
             Set<SizeType> to_remove;
-            double remaining_total_probability = 0;
-            for (auto& p : interval_probabilities) {
-                p.second = p.second/total_volume;
-                if (p.second < probability_threshold*maximum_interval_probability) to_remove.insert(p.first);
-                else remaining_total_probability += p.second;
+            double remaining_total_volume = 0;
+            for (auto& p : interval_volumes) {
+                auto probability = p.second/total_volume;
+                if (probability < probability_threshold) to_remove.insert(p.first);
+                else remaining_total_volume += p.second;
             }
 
-            interval_probabilities.remove_keys(to_remove);
+            interval_volumes.remove_keys(to_remove);
             CONCLOG_PRINTLN_AT(2,"Interval probabilities:")
-            for (auto& p : interval_probabilities) {
-                p.second = p.second/remaining_total_probability;
-                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second)
+            for (auto& p : interval_volumes) {
+                interval_probabilities.insert(p.first,p.second/remaining_total_volume);
+                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second/remaining_total_volume)
             }
 
             sw.click();

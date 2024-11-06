@@ -1192,6 +1192,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
     , public ProvideConcreteGenericArithmeticOperators<ScaledFunctionPatch<M>, ScalarMultivariateFunction<typename M::Paradigm>>
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
+    using P=typename M::Paradigm;
     typedef M ModelType;
     typedef typename M::NumericType NumericType;
     typedef typename M::ErrorType ErrorType;
@@ -1204,6 +1205,10 @@ template<class M> class VectorScaledFunctionPatchElementReference
     VectorScaledFunctionPatchElementReference(const VectorScaledFunctionPatchElementReference<M>& x) = default;
     Void operator=(const VectorScaledFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     Void operator=(const ScalarScaledFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
+    Void operator=(const ScalarMultivariateFunctionPatch<P> x) {
+        ScalarScaledFunctionPatch<M> sfp=factory(*this->_c).create(x); *this=sfp; }
+    Void operator=(const ScalarMultivariateFunction<P> x) {
+        ScalarScaledFunctionPatch<M> sfp=factory(*this->_c).create(x); *this=sfp; }
     ScalarScaledFunctionPatch<M> element() const { return this->_c->get(this->_i); }
     BoxDomainType const& domain() const { return this->_c->domain(); }
     const ModelType& model() const { return this->_c->_models[this->_i]; }

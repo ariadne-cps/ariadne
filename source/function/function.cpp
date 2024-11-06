@@ -396,8 +396,14 @@ template<class P, class SIG> auto Function<P,SIG>::get(SizeType i) const -> Scal
 template<class P, class SIG> Void Function<P,SIG>::set(SizeType i, ScalarFunction<P,ARG> sf) {
     ARIADNE_ASSERT(i<this->result_size());
     if constexpr (Same<ResultSizeType,SizeType>) {
-        const VectorOfScalarFunction<P,ARG>& cvf = dynamic_cast<const FunctionWrapper<VectorOfScalarFunction<P,ARG>,P,SIG>&>(this->_ptr.operator*());
-        VectorOfScalarFunction<P,ARG>& vf = const_cast<VectorOfScalarFunction<P,ARG>&>(cvf);
+        const VectorOfScalarFunction<P,ARG>* cvf =
+            dynamic_cast<const FunctionWrapper<VectorOfScalarFunction<P,ARG>,P,SIG>*>(this->_ptr.operator->());
+        if (cvf==nullptr) {
+            ARIADNE_THROW(std::runtime_error,
+                          "Function<P,RealVector(ARGS...)>::set(SizeType i, Function<P,RealScalar(ARGS...)>)",
+                          "Cannot assign to component of vector-valued function "<<(*this)<<" as it is not a VectorOfScalarFunction.");
+        }
+        VectorOfScalarFunction<P,ARG>& vf = const_cast<VectorOfScalarFunction<P,ARG>&>(*cvf);
         vf[i]=sf;
     } else {
         ARIADNE_ASSERT((Same<ResultSizeType,SizeType>));

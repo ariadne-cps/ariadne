@@ -65,12 +65,10 @@ void ariadne_main()
 
     Real step_size = 0.1_x;
 
-    List<DottedRealAssignment> forward_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u,dot(u)=0}};
+    List<DottedRealAssignment> forward_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=u,dot(u)=0}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
-    double probability_threshold = 0.00;
     SizeType point_accuracy = 6;
-    bool use_preimage = false;
     SizeType preimage_iterations = 1;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
@@ -91,98 +89,96 @@ void ariadne_main()
     GridTreePaving control_paving = make_paving(control_grid,control_domain);
 
     IdentifiedCellFactory::HashTableType state_cells_ids;
-    auto default_cell_extent = state_paving.begin()->root_extent();
-    CONCLOG_PRINTLN_VAR(default_cell_extent)
+    auto default_state_cell_extent = state_paving.begin()->root_extent();
+    CONCLOG_PRINTLN_VAR(default_state_cell_extent)
     CONCLOG_PRINTLN_VAR(state_paving.size())
-    CONCLOG_PRINTLN_VAR(control_paving.size())
     for (auto const& c : state_paving) {
-        state_cells_ids.insert(make_pair(word_to_id(c.word(),(default_cell_extent)*state_paving.dimension()),state_cells_ids.size()));
+        state_cells_ids.insert(make_pair(word_to_id(c.word(),(default_state_cell_extent)*state_paving.dimension()),state_cells_ids.size()));
     }
+    auto state_icell_factory = IdentifiedCellFactory(default_state_cell_extent,state_cells_ids);
 
-    auto identified_cell_factory = IdentifiedCellFactory(default_cell_extent,state_cells_ids);
 
-    List<Pair<ExactBoxType,ExactBoxType>> state_control_boxes;
+    IdentifiedCellFactory::HashTableType control_cells_ids;
+    auto default_control_cell_extent = control_paving.begin()->root_extent();
+    CONCLOG_PRINTLN_VAR(default_control_cell_extent)
+    CONCLOG_PRINTLN_VAR(control_paving.size())
+    for (auto const& c : control_paving) {
+        control_cells_ids.insert(make_pair(word_to_id(c.word(),(default_control_cell_extent)*control_paving.dimension()),control_cells_ids.size()));
+    }
+    auto control_icell_factory = IdentifiedCellFactory(default_control_cell_extent,control_cells_ids);
+
+    List<Pair<IdentifiedCell,IdentifiedCell>> state_control_icells;
 
     for (auto const& state_cell : state_paving)
         for (auto const& control_cell : control_paving)
-            state_control_boxes.push_back(make_pair(state_cell.box(), control_cell.box()));
+            state_control_icells.push_back(make_pair(state_icell_factory.create(state_cell), control_icell_factory.create(control_cell)));
 
     std::atomic<double> sum_xratio = 0;
     std::atomic<double> sum_effective_accuracy = 0;
     std::atomic<SizeType> num_processed = 0;
 
-    TaylorPicardIntegrator integrator(0.0001);
+    TaylorPicardIntegrator integrator(1e-4);
     VectorFieldEvolver forward_evolver(VectorField(forward_dynamics),integrator);
     forward_evolver.configuration().set_maximum_step_size(step_size/10);
 
-    BetterThreads::StaticWorkload<Pair<ExactBoxType,ExactBoxType>> workload([&](Pair<ExactBoxType,ExactBoxType> const& sc_boxes){
+    List<DottedRealAssignment> backward_dynamics;
+    for (auto const& d : forward_dynamics)
+        backward_dynamics.push_back({d.left_hand_side(),-d.right_hand_side()});
+    VectorFieldEvolver backward_evolver(VectorField(backward_dynamics),integrator);
+    backward_evolver.configuration().set_maximum_step_size(step_size/10);
+
+    BetterThreads::StaticWorkload<Pair<IdentifiedCell,IdentifiedCell>> workload([&](Pair<IdentifiedCell,IdentifiedCell> const& sc_icells){
 
         Stopwatch<Microseconds> sw;
 
         Map<SizeType,double> interval_probabilities;
 
-        CONCLOG_PRINTLN_AT(2,"Computing using Interval Arithmetic...")
+        auto source_icell = sc_icells.first;
+        auto source_box = source_icell.cell().box();
+        auto control_icell = sc_icells.second;
+        auto control_box = control_icell.cell().box();
 
-        auto source_box = sc_boxes.first;
+        auto source_volume = volume(source_box).get_d();
 
-        CONCLOG_RUN_MUTED(auto orbit = forward_evolver.orbit(forward_evolver.enclosure(product(source_box,sc_boxes.second)),step_size, Semantics::UPPER))
+        CONCLOG_PRINTLN_AT(2,"Computing for cell " << source_icell << " using Interval Arithmetic...")
 
-        auto final_orbit_box = orbit.final()[0].euclidean_set().bounding_box();
-        auto final_box = source_box;
-        for (SizeType i=0; i<final_box.dimension(); ++i)
-            final_box[i] = cast_exact_interval(final_orbit_box[i]);
+        CONCLOG_RUN_MUTED(auto forward_orbit = forward_evolver.orbit(forward_evolver.enclosure(product(source_box,control_box)),step_size, Semantics::UPPER))
 
-        CONCLOG_PRINTLN_VAR_AT(2,final_box)
+        auto final_forward_orbit_box = forward_orbit.final()[0].euclidean_set().bounding_box();
+        auto final_forward_box = source_box;
+        for (SizeType i=0; i<final_forward_box.dimension(); ++i)
+            final_forward_box[i] = cast_exact_interval(final_forward_orbit_box[i]);
+
+        CONCLOG_PRINTLN_VAR_AT(2,final_forward_box)
 
         GridTreePaving final_paving(state_grid);
-        final_paving.adjoin_outer_approximation(final_box,0);
+        final_paving.adjoin_outer_approximation(final_forward_box,0);
         final_paving.mince(0);
 
         if (final_paving.subset(state_paving)) {
 
-            Map<SizeType,double> interval_volumes;
-
-            double total_volume = 0;
             for (auto const& cell : final_paving) {
-                auto icell = identified_cell_factory.create(cell);
-                auto image_intersection_box = intersection(cell.box(),final_box);
+                auto icell = state_icell_factory.create(cell);
+                auto image_intersection_box = intersection(cell.box(),final_forward_box);
 
-                double current_volume = 0;
-                if (use_preimage) {
-                    /*auto preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
-                    for (SizeType i = 1; i < preimage_iterations; ++i) {
-                        image_intersection_box = intersection(cast_exact_box(apply(forward_dynamics, product(cast_exact_box(preimage_intersection_box), sc_boxes.second)).bounding_box()),cell.box());
-                        preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
-                    }
+                CONCLOG_RUN_MUTED(auto backward_orbit = backward_evolver.orbit(backward_evolver.enclosure(product(image_intersection_box,control_box)),step_size, Semantics::UPPER))
 
-                    current_volume = (definitely(preimage_intersection_box.is_empty()) ? 0.0 : preimage_intersection_box.volume().get_d());*/
-                } else {
-                    current_volume = image_intersection_box.volume().get_d();
-                }
+                auto final_backward_orbit_box = backward_orbit.final()[0].euclidean_set().bounding_box();
+                auto final_backward_box = source_box;
+                for (SizeType i=0; i<final_backward_box.dimension(); ++i)
+                    final_backward_box[i] = cast_exact_interval(final_backward_orbit_box[i]);
 
-                if (current_volume > 1e-10)
-                    interval_volumes.insert(icell.id(),current_volume);
-                total_volume += current_volume;
+                auto preimage_intersection_box = intersection(source_box,final_backward_box);
+
+                CONCLOG_PRINTLN_VAR_AT(2,preimage_intersection_box)
+
+                if (definitely(not preimage_intersection_box.is_empty()))
+                    interval_probabilities.insert(icell.id(),volume(preimage_intersection_box).get_d()/source_volume);
             }
 
-            double maximum_interval_volume = 0;
-            for (auto& p : interval_volumes) {
-                maximum_interval_volume = std::max(maximum_interval_volume,p.second);
-            }
-
-            Set<SizeType> to_remove;
-            double remaining_total_volume = 0;
-            for (auto& p : interval_volumes) {
-                auto probability = p.second/total_volume;
-                if (probability < probability_threshold) to_remove.insert(p.first);
-                else remaining_total_volume += p.second;
-            }
-
-            interval_volumes.remove_keys(to_remove);
             CONCLOG_PRINTLN_AT(2,"Interval probabilities:")
-            for (auto& p : interval_volumes) {
-                interval_probabilities.insert(p.first,p.second/remaining_total_volume);
-                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second/remaining_total_volume)
+            for (auto& p : interval_probabilities) {
+                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second)
             }
 
             sw.click();
@@ -297,7 +293,7 @@ void ariadne_main()
         }
     });
     
-    workload.append(state_control_boxes).process();
+    workload.append(state_control_icells).process();
 
     CONCLOG_PRINTLN("Avg ratio: " << sum_xratio/num_processed << ", avg effective accuracy: " << sum_effective_accuracy/num_processed)
 }

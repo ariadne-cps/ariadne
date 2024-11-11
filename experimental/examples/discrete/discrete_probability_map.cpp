@@ -65,18 +65,16 @@ void ariadne_main()
 
     Real deltat = 0.1_dec;
 
-    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=theta+u}};
+    List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=u}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
-    double probability_threshold = 0.00;
+    SizeType max_split_depth = 18;
     SizeType point_accuracy = 6;
-    bool use_preimage = false;
-    SizeType preimage_iterations = 1;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
     List<Pair<RealVariable,Real>> control_grid_lengths({{u,pi/4*10}});
 
-    UpperBoxType state_domain({{0.0_dec+eps,5_dec-eps},{0.0_dec+eps,5_dec-eps}, {0.0_dec+eps,2*pi-eps}});
+    UpperBoxType state_domain({{0.0_dec,5_dec},{0.0_dec,5_dec}, {0.0_dec,2*pi}});
     UpperBoxType control_domain({{-10*pi+eps,10*pi-eps}});
 
     //! Processing
@@ -111,16 +109,10 @@ void ariadne_main()
     std::atomic<double> sum_effective_accuracy = 0;
     std::atomic<SizeType> num_processed = 0;
 
-
     auto forward_dynamics = EffectiveVectorMultivariateFunction::zeros(state_spc.size(),full_spc.size());
-    auto backward_dynamics = EffectiveVectorMultivariateFunction::zeros(state_spc.size(),full_spc.size());
-    for(SizeType i=0; i!=state_spc.size(); ++i) {
+    for(SizeType i=0; i!=state_spc.size(); ++i)
         forward_dynamics[i] = EffectiveScalarMultivariateFunction::coordinate(full_spc.size(),i) + deltat * make_function(full_spc,differential_dynamics.at(i).expression());
-        backward_dynamics[i] = EffectiveScalarMultivariateFunction::coordinate(full_spc.size(),i) - deltat * make_function(full_spc,differential_dynamics.at(i).expression());
-    }
-
     CONCLOG_PRINTLN_VAR(forward_dynamics)
-    CONCLOG_PRINTLN_VAR(backward_dynamics)
 
     BetterThreads::StaticWorkload<Pair<ExactBoxType,ExactBoxType>> workload([&](Pair<ExactBoxType,ExactBoxType> const& sc_boxes){
 
@@ -131,8 +123,10 @@ void ariadne_main()
         CONCLOG_PRINTLN_AT(2,"Computing using Interval Arithmetic...")
 
         auto source_box = sc_boxes.first;
+        auto control_box = sc_boxes.second;
+        auto source_volume = source_box.volume();
 
-        auto final_box = cast_exact_box(apply(forward_dynamics, product(source_box, sc_boxes.second)).bounding_box());
+        auto final_box = cast_exact_box(apply(forward_dynamics, product(source_box, control_box)).bounding_box());
 
         GridTreePaving final_paving(state_grid);
         final_paving.adjoin_outer_approximation(final_box,0);
@@ -140,49 +134,36 @@ void ariadne_main()
 
         if (final_paving.subset(state_paving)) {
 
-            Map<SizeType,double> interval_volumes;
+            std::queue<Tuple<IdentifiedCell,ExactBoxType,SizeType>> splittings;
+            for (auto const& cell : final_paving)
+                splittings.push({identified_cell_factory.create(cell),source_box,0});
 
-            double total_volume = 0;
-            for (auto const& cell : final_paving) {
-                auto icell = identified_cell_factory.create(cell);
-                auto image_intersection_box = intersection(cell.box(),final_box);
+            while (not splittings.empty()) {
+                auto split = splittings.front();
+                splittings.pop();
 
-                double current_volume = 0;
-                if (use_preimage) {
-                    auto preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
-                    for (SizeType i = 1; i < preimage_iterations; ++i) {
-                        image_intersection_box = intersection(cast_exact_box(apply(forward_dynamics, product(cast_exact_box(preimage_intersection_box), sc_boxes.second)).bounding_box()),cell.box());
-                        preimage_intersection_box = intersection(apply(backward_dynamics, product(image_intersection_box, sc_boxes.second)).bounding_box(),source_box);
-                    }
+                auto const& target_icell = get<0>(split);
+                auto const& starting_box = get<1>(split);
+                auto split_depth = get<2>(split);
 
-                    current_volume = (definitely(preimage_intersection_box.is_empty()) ? 0.0 : preimage_intersection_box.volume().get_d());
-                } else {
-                    current_volume = image_intersection_box.volume().get_d();
+                CONCLOG_PRINTLN_AT(3,target_icell.id() << ":" << starting_box << "(" << split_depth << ")")
+
+                auto ending_box = cast_exact_box(apply(forward_dynamics, product(starting_box, control_box)).bounding_box());
+
+                if (target_icell.cell().box().superset(ending_box) or (target_icell.cell().box().intersects(ending_box) and split_depth == max_split_depth)) {
+                    if (not interval_probabilities.has_key(target_icell.id()))
+                        interval_probabilities.insert(target_icell.id(),0.0);
+                    interval_probabilities.at(target_icell.id()) += (starting_box.volume()/source_volume).get_d();
+                } else if (target_icell.cell().box().intersects(ending_box)) {
+                    auto splits = starting_box.split(split_depth % source_box.dimension());
+                    splittings.push({target_icell,splits.first,split_depth+1});
+                    splittings.push({target_icell,splits.second,split_depth+1});
                 }
-
-                if (current_volume > 1e-10)
-                    interval_volumes.insert(icell.id(),current_volume);
-                total_volume += current_volume;
             }
 
-            double maximum_interval_volume = 0;
-            for (auto& p : interval_volumes) {
-                maximum_interval_volume = std::max(maximum_interval_volume,p.second);
-            }
-
-            Set<SizeType> to_remove;
-            double remaining_total_volume = 0;
-            for (auto& p : interval_volumes) {
-                auto probability = p.second/total_volume;
-                if (probability < probability_threshold) to_remove.insert(p.first);
-                else remaining_total_volume += p.second;
-            }
-
-            interval_volumes.remove_keys(to_remove);
             CONCLOG_PRINTLN_AT(2,"Interval probabilities:")
-            for (auto& p : interval_volumes) {
-                interval_probabilities.insert(p.first,p.second/remaining_total_volume);
-                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second/remaining_total_volume)
+            for (auto& p : interval_probabilities) {
+                CONCLOG_PRINTLN_AT(2,p.first << ": " << p.second)
             }
 
             sw.click();
@@ -204,7 +185,6 @@ void ariadne_main()
                 intersected_sampling.mince(acc);
 
                 Map<SizeType,SizeType> occurrencies;
-                SizeType total_occurrencies = 0;
 
                 for (auto const& c : sampling) {
                     auto input_box = product(ExactBoxType(c.box().midpoint()), sc_boxes.second);
@@ -221,12 +201,11 @@ void ariadne_main()
                             occurrencies[itcell.id()]++;
                         else
                             occurrencies.insert(itcell.id(),1);
-                        ++total_occurrencies;
                     }
                 }
 
                 for (auto const& occ : occurrencies) {
-                    point_probabilities.at(acc).insert(occ.first,static_cast<double>(occ.second)/total_occurrencies);
+                    point_probabilities.at(acc).insert(occ.first,static_cast<double>(occ.second)/sampling.size());
                 }
 
                 sw.click();

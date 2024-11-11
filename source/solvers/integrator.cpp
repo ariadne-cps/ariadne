@@ -236,10 +236,15 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    FlowStepModelType fphi=compose(f,join(phi0,ta));
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool below_maximum_error=definitely(phi.error()<this->step_maximum_error());
-        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        try {
+            fphi=compose(f,join(std::move(phi),ta));
+            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        } catch(...) {
+            ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
+        }
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
@@ -319,15 +324,20 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    FlowStepModelType fphi=compose(f,join(phi0,ta));
     for (DegreeType k=0; k!=this->_order; ++k) {
-        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        try {
+            fphi=compose(f,join(std::move(phi),ta));
+            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        } catch (...) {
+            ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
+        }
         phi=antiderivative(fphi,nx)+phi0;
         CONCLOG_PRINTLN_AT(2,"phi="<<phi);
     }
     auto errors = phi.errors();
     CONCLOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
-    FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
+    fphi=compose(f,join(std::move(phi),ta));
     phi=antiderivative(fphi,nx)+phi0;
     auto new_errors = phi.errors();
     for (SizeType i=0; i<errors.size(); ++i) {

@@ -68,7 +68,7 @@ void ariadne_main()
     List<DottedRealAssignment> differential_dynamics = {{dot(x)=v*cos(theta),dot(y)=v*sin(theta),dot(theta)=u}};
 
     FloatDP eps(1e-8_x,DoublePrecision());
-    SizeType max_split_depth = 18;
+    SizeType max_split_depth = 15;
     SizeType point_accuracy = 6;
 
     List<Pair<RealVariable,Real>> state_grid_lengths({{x,0.5_dec},{y,0.5_dec},{theta,2*pi/8}});
@@ -89,21 +89,28 @@ void ariadne_main()
     GridTreePaving control_paving = make_paving(control_grid,control_domain);
 
     IdentifiedCellFactory::HashTableType state_cells_ids;
-    auto default_cell_extent = state_paving.begin()->root_extent();
-    CONCLOG_PRINTLN_VAR(default_cell_extent)
+    auto default_state_cell_extent = state_paving.begin()->root_extent();
+    CONCLOG_PRINTLN_VAR(default_state_cell_extent)
     CONCLOG_PRINTLN_VAR(state_paving.size())
-    CONCLOG_PRINTLN_VAR(control_paving.size())
     for (auto const& c : state_paving) {
-        state_cells_ids.insert(make_pair(word_to_id(c.word(),(default_cell_extent)*state_paving.dimension()),state_cells_ids.size()));
+        state_cells_ids.insert(make_pair(word_to_id(c.word(),(default_state_cell_extent)*state_paving.dimension()),state_cells_ids.size()));
     }
+    auto identified_state_cell_factory = IdentifiedCellFactory(default_state_cell_extent,state_cells_ids);
 
-    auto identified_cell_factory = IdentifiedCellFactory(default_cell_extent,state_cells_ids);
+    IdentifiedCellFactory::HashTableType control_cells_ids;
+    auto default_control_cell_extent = control_paving.begin()->root_extent();
+    CONCLOG_PRINTLN_VAR(default_control_cell_extent)
+    CONCLOG_PRINTLN_VAR(control_paving.size())
+    for (auto const& c : control_paving) {
+        control_cells_ids.insert(make_pair(word_to_id(c.word(),(default_control_cell_extent)*control_paving.dimension()),control_cells_ids.size()));
+    }
+    auto identified_control_cell_factory = IdentifiedCellFactory(default_control_cell_extent,control_cells_ids);
 
-    List<Pair<ExactBoxType,ExactBoxType>> state_control_boxes;
+    List<Pair<IdentifiedCell,IdentifiedCell>> state_control_icells;
 
     for (auto const& state_cell : state_paving)
         for (auto const& control_cell : control_paving)
-            state_control_boxes.push_back(make_pair(state_cell.box(), control_cell.box()));
+            state_control_icells.push_back(make_pair(identified_state_cell_factory.create(state_cell), identified_control_cell_factory.create(control_cell)));
 
     std::atomic<double> sum_xratio = 0;
     std::atomic<double> sum_effective_accuracy = 0;
@@ -114,17 +121,21 @@ void ariadne_main()
         forward_dynamics[i] = EffectiveScalarMultivariateFunction::coordinate(full_spc.size(),i) + deltat * make_function(full_spc,differential_dynamics.at(i).expression());
     CONCLOG_PRINTLN_VAR(forward_dynamics)
 
-    BetterThreads::StaticWorkload<Pair<ExactBoxType,ExactBoxType>> workload([&](Pair<ExactBoxType,ExactBoxType> const& sc_boxes){
+    BetterThreads::StaticWorkload<Pair<IdentifiedCell,IdentifiedCell>> workload([&](Pair<IdentifiedCell,IdentifiedCell> const& sc_cells){
 
         Stopwatch<Microseconds> sw;
 
         Map<SizeType,double> interval_probabilities;
 
-        CONCLOG_PRINTLN_AT(2,"Computing using Interval Arithmetic...")
+        auto source_icell = sc_cells.first;
+        auto control_icell = sc_cells.second;
 
-        auto source_box = sc_boxes.first;
-        auto control_box = sc_boxes.second;
-        auto source_volume = source_box.volume();
+        auto source_box = source_icell.cell().box();
+        auto control_box = control_icell.cell().box();
+        auto source_volume = source_box.volume().get_d();
+
+
+        CONCLOG_PRINTLN_AT(2,"Computing for state " << source_icell.id() << " and control " << control_icell.id() << " using Interval Arithmetic...")
 
         auto final_box = cast_exact_box(apply(forward_dynamics, product(source_box, control_box)).bounding_box());
 
@@ -136,7 +147,7 @@ void ariadne_main()
 
             std::queue<Tuple<IdentifiedCell,ExactBoxType,SizeType>> splittings;
             for (auto const& cell : final_paving)
-                splittings.push({identified_cell_factory.create(cell),source_box,0});
+                splittings.push({identified_state_cell_factory.create(cell),source_box,0});
 
             while (not splittings.empty()) {
                 auto split = splittings.front();
@@ -179,7 +190,7 @@ void ariadne_main()
                 CONCLOG_PRINTLN_VAR_AT(2,acc)
                 sw.restart();
                 GridTreePaving sampling(state_grid);
-                sampling.adjoin_outer_approximation(shrink(sc_boxes.first,eps),acc);
+                sampling.adjoin_outer_approximation(shrink(source_box,eps),acc);
 
                 GridTreePaving intersected_sampling = intersection(state_paving,sampling);
                 intersected_sampling.mince(acc);
@@ -187,7 +198,7 @@ void ariadne_main()
                 Map<SizeType,SizeType> occurrencies;
 
                 for (auto const& c : sampling) {
-                    auto input_box = product(ExactBoxType(c.box().midpoint()), sc_boxes.second);
+                    auto input_box = product(ExactBoxType(c.box().midpoint()), control_box);
 
                     auto final_box = shrink(cast_exact_box(apply(forward_dynamics, input_box).bounding_box()),eps);
 
@@ -196,7 +207,7 @@ void ariadne_main()
                     target.mince(0);
 
                     for (auto const& tcell : target) {
-                        auto itcell = identified_cell_factory.create(tcell);
+                        auto itcell = identified_state_cell_factory.create(tcell);
                         if (occurrencies.has_key(itcell.id()))
                             occurrencies[itcell.id()]++;
                         else
@@ -276,7 +287,7 @@ void ariadne_main()
         }
     });
     
-    workload.append(state_control_boxes).process();
+    workload.append(state_control_icells).process();
 
     CONCLOG_PRINTLN("Avg ratio: " << sum_xratio/num_processed << ", avg effective accuracy: " << sum_effective_accuracy/num_processed)
 }

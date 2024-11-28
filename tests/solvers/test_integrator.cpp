@@ -65,6 +65,7 @@ class TestIntegrator
         ARIADNE_TEST_CALL(test_logistic());
         ARIADNE_TEST_CALL(test_time_variant());
         ARIADNE_TEST_CALL(test_time_variant_with_parameters());
+        ARIADNE_TEST_CALL(test_step_size());
         return 0;
     }
 
@@ -160,8 +161,7 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_PRINT(flow-expected_flow);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3_pr);
-
-    };
+    }
 
     // Equation: dx/dt = x*(1-x)
     // Solution:  x = 1/(1+(1/x0-1)*exp(-t))
@@ -250,6 +250,72 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(flow.errors());
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4_pr);
     }
+
+    // Equation: dx/dt=x^2;
+    // Solution: x=1/(1/x0-t)=x0/(1-x0*t)
+    Void test_step_size() {
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(2,1);
+
+        EffectiveVectorMultivariateFunction f={sqr(x)};
+        EffectiveVectorMultivariateFunction phi={rec(rec(x0)-t)};
+        ExactBoxType domx={ExactIntervalType(0.875_x,1.125_x)};
+        StepSizeType h=0.0009765625_dy;
+
+        try {
+            ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch,flow,(integrator_ptr->flow_step(f,domx,h)));
+            ARIADNE_TEST_EQUALS(flow.domain()[0],domx[0]);
+            ARIADNE_TEST_EQUALS(flow.domain()[1].upper_bound(),h);
+            ARIADNE_TEST_PRINT(flow.domain());
+            ARIADNE_TEST_EQUALS(flow.domain()[1].lower_bound(),0);
+        } catch (IncompleteFlowException const& e) {
+            ARIADNE_TEST_WARN("Integrator "<<*integrator_ptr<<" cannot compute flow of dx/dt=x^2 starting in [1.0:1.5] up to time 1/1024.")
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") threw IncompleteFlowException.")
+            ARIADNE_TEST_COMPARE(e.computed_model().domain()[1].upper_bound(),<,h);
+        } catch (FlowBoundsException const& e) {
+            ARIADNE_TEST_WARN("Integrator "<<*integrator_ptr<<" cannot compute flow of dx/dt=x^2 starting in [1.0:1.5] up to time 1/1024.")
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") threw FlowBoundsException.")
+        }
+
+        h=1.0_dy;
+
+        try {
+            ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch,flow,(integrator_ptr->flow_step(f,domx,h)));
+            ARIADNE_TEST_EQUALS(flow.domain()[1].upper_bound(),h);
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") completed, which should be impossible.");
+        } catch (IncompleteFlowException const& e) {
+            ARIADNE_TEST_NOTIFY("Integrator::flow_step(f,d,"<<h<<") caught IncompleteFlowException as expected.")
+            ARIADNE_TEST_COMPARE(e.computed_model().domain()[1].upper_bound(),<,h);
+        } catch (FlowBoundsException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") threw FlowBoundsException.")
+        } catch (FlowTimeStepException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") threw FlowTimeStepException.")
+        } catch (DivideByZeroException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,"<<h<<") threw DivideByZeroException.")
+        }
+
+        try {
+            ARIADNE_TEST_ASSIGN_CONSTRUCT(StepSizeType,hsug,h);
+            ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch,flow,(integrator_ptr->flow_step(f,domx,suggest(hsug))));
+            ARIADNE_TEST_ASSIGN_CONSTRUCT(auto,hused,flow.domain()[1].upper_bound());
+            ARIADNE_TEST_COMPARE(flow.domain()[1].upper_bound(),<,h);
+            if (hsug==hused) { ARIADNE_TEST_NOTIFY("Integrator::flow_step(f,dom,suggest("<<h<<") used step-size "<<hused<<"; suggested step-size changed to actual step-size."); }
+            else if (hsug==h) { ARIADNE_TEST_NOTIFY("Integrator::flow_step(f,dom,suggest("<<h<<") used step-size "<<hused<<"; suggested step-size kept at requested step-size."); }
+            else { ARIADNE_TEST_ERROR("Integrator::flow_step(f,d,suggest("<<h<<") used step-size "<<hused<<"; suggested step-size changed to "<<hsug<<", which is neither equal to requested step-size nor actual step-size."); }
+        } catch (IncompleteFlowException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,suggest("<<h<<")) caught IncompleteFlowException.")
+            ARIADNE_TEST_COMPARE(e.computed_model().domain()[1].upper_bound(),<,h);
+        } catch (FlowBoundsException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,suggest("<<h<<")) threw FlowBoundsException, when a smaller step-size should be tried.")
+        } catch (FlowTimeStepException const& e) {
+            ARIADNE_TEST_WARN("Integrator::flow_step(f,d,suggest("<<h<<")) threw FlowTimeStepException, when a smaller step-size should be tried.")
+        } catch (DivideByZeroException const& e) {
+            ARIADNE_TEST_ERROR("Integrator::flow_step(f,d,suggest("<<h<<")) threw DivideByZeroException, when a smaller step-size should be tried.")
+        }
+
+    }
+
 };
 
 Int main(Int argc, const char* argv[]) {
@@ -274,7 +340,7 @@ Int main(Int argc, const char* argv[]) {
     ARIADNE_TEST_CLASS("TaylorSeriesBounderIntegrator",TestIntegrator(taylor_series_bounder_integrator));
 
     GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
-            step_maximum_error=1e-7, sweeper, lipschitz_tolerance=0.5_x,
+            step_maximum_error=1e-6, sweeper, lipschitz_tolerance=0.5_x,
             minimum_spacial_order=1, minimum_temporal_order=4,
             maximum_spacial_order=4, maximum_temporal_order=8);
     ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));

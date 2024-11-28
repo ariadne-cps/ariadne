@@ -3,6 +3,13 @@ MathJax.Hub.Config({
     Macros: {
 //      jot: "1ex",
 
+      D: "{\\mathrm{D}}",
+      Df: "{\\mathrm{D}f}",
+      Dy: "{\\mathrm{D}y}",
+      d: "{\\mathrm{d}}",
+      dt: "{\\mathrm{d}t}",
+      dx: "{\\mathrm{d}x}",
+      dy: "{\\mathrm{d}y}",
       B: "{\\mathbb{B}}",
       K: "{\\mathbb{K}}",
       S: "{\\mathbb{S}}",
@@ -20,7 +27,6 @@ MathJax.Hub.Config({
       fto: "{\\longrightarrow}",
       interval: ["{[#1]}",1],
       ivl: ["{[#1]}",1],
-      dt: ["{\\dot{#1}}",1],
       unl: ["{\\underline{#1}}",1],
       ovl: ["{\\overline{#1}}",1],
       der: ["{\\dot{#1}}",1],

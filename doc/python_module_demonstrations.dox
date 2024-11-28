@@ -314,7 +314,7 @@ If \f$f:D_1\times D_2\rightarrow \R^n\f$ with \f$D_2\subset\R^n\f$ then the oper
 \subsection python_differential_equation_solvers_demonstration Solving Differential Equations
 
 We can solve differential equations using the operator \c flow of an \a Integrator class, such as \ref TaylorPicardIntegrator or \ref GradedTaylorSeriesIntegrator.
-If \f$:\R^n\to\R^n\f$, \f$D\subset\R^n\f$ and \f$h>0\f$, then the operator \c flow(f,D,h) computes a function \f$\phi:D\times[0,h]\to\R^n\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ and \f$\phi(x,0)=x\f$.
+If \f$:\R^n\to\R^n\f$, \f$D\subset\R^n\f$ and \f$h>0\f$, then the operator \c flow(f,D,h) computes a function \f$\phi:D\times[0,h]\to\R^n\f$ satisfying \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ and \f$\phi(x,0)=x\f$.
 
 \skipline integrator=
 \skipline f=

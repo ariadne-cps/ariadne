@@ -42,7 +42,7 @@ A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,n_q,f_q,I_q,r_{q,e},G_{q
 
  - For each \f$q\in Q\f$,
    - \f$n_q\f$ defines the <em>dimension</em> of the continuous state space \f$\R^{n_q}\f$.
-   - \f$f_q:\R^{n_q}\rightarrow \R^{n_q}\f$ defines the <em>continuous dynamics</em> by \f$\dt{x}=f_q(x)\f$.
+   - \f$f_q:\R^{n_q}\rightarrow \R^{n_q}\f$ defines the <em>continuous dynamics</em> by \f$\dot{x}=f_q(x)\f$.
    - \f$I_q\subset \R^{n_q}\f$ is the <em>invariant</em> which must hold throughout the evolution in mode \f$q\f$.
 
  - For each \f$(q,e)\in\mathrm{dom}(\gamma)\subset Q\times E\f$,
@@ -51,7 +51,7 @@ A <em>hybrid automaton</em> is a tuple \f$H=(Q,E,\gamma,n_q,f_q,I_q,r_{q,e},G_{q
 
 The <em>standard operational semantics</em> of a hybrid automaton \f$H\f$ is as follows.
  - The <em>state</em> of the system is a pair \f$(q,x)\f$ with \f$q\in Q\f$ and \f$x\in\R^{n_q}\f$.
- - The state may evolve according to the differential equation \f$\dt{x}=f_q(x)\f$ as long as \f$x\in I_q\f$.
+ - The state may evolve according to the differential equation \f$\dot{x}=f_q(x)\f$ as long as \f$x\in I_q\f$.
  - The state may evolve according to the discrete transition \f$(q',x')=(\gamma(q,e),r_{q,e}(x))\f$ as long as \f$x\in R_{q,e}\f$.
 
 This definition has some disadvantages:
@@ -79,7 +79,7 @@ More generally, there are many different ways of specifying when continuous evol
 The hybrid automaton interface in %Ariadne is essentially equivalent to the enhanced mathematical definition given above. The dynamic and resets are defined using the VectorFunction class. The guards and invariants are defined using the class ScalarFunction class, with invariants \f$i(x)\leq0\f$ and guards \f$g(x)\geq0\f$.
 A <em>DiscreteMode</em> is a triple \f$(q,f_q,I_q)\f$ where
  - \f$q\f$ is a DiscreteState.
- - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dt{x}=f_q(x)\f$.
+ - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dot{x}=f_q(x)\f$.
  - \f$I_q\f$ is a List of ScalarFunction with each \f$i_j:\R^{n_q}\rightarrow \R\f$ giving the invariants \f$i_j(x)\lesssim 0\f$.
 
 A <em>DiscreteTransition</em> is a triple \f$(e,s,t,r,g,u)\f$ where
@@ -100,7 +100,7 @@ A <em>HybridAutomaton</em> is a pair \f$(M,T)\f$ where
 
 A <em>Mode</em> is a tuple \f$(q,f_q)\f$ where
  - \f$q\f$ is a DiscreteLocation.
- - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dt{x}=f_q(x)\f$.
+ - \f$f_q\f$ is a VectorFunction giving the dynamic \f$\dot{x}=f_q(x)\f$.
 
 A <em>Guard</em> is a tuple \f$(q,e,c,k)\f$ where
  - \f$q\f$ is a DiscreteLocation.

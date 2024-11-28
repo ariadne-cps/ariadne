@@ -31,29 +31,29 @@ namespace Ariadne {
 BounderBase::BounderBase(LipschitzTolerance lipschitz, MinimumStepSize minimum_step)
     : _lipschitz_tolerance(lipschitz), _minimum_step_size(minimum_step) { }
 
-Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, Suggestion<StepSizeType> const& hsug) const {
     return this->compute(f,D,BoxDomainType(0u),hsug);
 }
 
-Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, Suggestion<StepSizeType> const& hsug) const {
     return this->compute(f,D,t,BoxDomainType(0u),hsug);
 }
 
 EulerBounder::EulerBounder(LipschitzTolerance lipschitz, MinimumStepSize minimum_step) : BounderBase(lipschitz,minimum_step) { }
 
-Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, Suggestion<StepSizeType> const& hsug) const {
     ARIADNE_PRECONDITION(f.result_size()==D.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+A.dimension());
     return this->_compute(f,D,0,A,hsug);
 }
 
-Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, Suggestion<StepSizeType> const& hsug) const {
     ARIADNE_PRECONDITION(f.result_size()==D.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+1u+A.dimension());
     return this->_compute(f,D,t,A,hsug);
 }
 
-Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, Suggestion<StepSizeType> const& hsug) const {
     CONCLOG_SCOPE_CREATE;
     const PositiveFloatDP BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
@@ -63,7 +63,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     const CounterType EXPANSION_STEPS=4;
     const CounterType REFINEMENT_STEPS=4;
 
-    StepSizeType h=hsug;
+    StepSizeType h=hsug.suggestion();
 
     FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(product(D,to_time_bounds(t,t+h),A))))).upper();
     StepSizeType hlip = static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance.value()/lipschitz));

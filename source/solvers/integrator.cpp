@@ -91,6 +91,10 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 inline ExactDouble cast_exact_double(Attribute<ApproximateDouble> a) { return cast_exact(static_cast<ApproximateDouble>(a)); }
 
+IncompleteFlowException::IncompleteFlowException(const StringType& what, FlowStepModelType const& model)
+    : std::runtime_error(what), _computed_model(new FlowStepModelType(model)) {
+}
+
 IntegratorBase::IntegratorBase(Sweeper<FloatDP> s)
     : _function_factory(make_taylor_function_patch_factory(s)) { }
 
@@ -104,23 +108,6 @@ const ValidatedFunctionPatchFactory&
 IntegratorBase::function_factory() const
 {
     return this->_function_factory;
-}
-
-FlowStepModelType
-IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
-{
-    StepSizeType& h=hmax;
-    StepSizeType hprev=h*1.5_dy;
-    while(true) {
-        try {
-            return flow_step(vf,dx,h,dx);
-        } catch(const FlowTimeStepException& e) {
-            StepSizeType hnew=hlf(hprev);
-            hprev=h;
-            h=StepSizeType(hnew.get_d());
-            CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
-        }
-    }
 }
 
 BoundedIntegratorBase::BoundedIntegratorBase(Sweeper<FloatDP> sweeper, LipschitzTolerance lipschitz) :
@@ -142,26 +129,71 @@ BoundedIntegratorBase::set_bounder(const BounderInterface& bounder)
 }
 
 Pair<StepSizeType,UpperBoxType>
-BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Suggestion<StepSizeType>& hsug) const {
     return this->_bounder_ptr->compute(vf,D,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
-BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const Suggestion<StepSizeType>& hsug) const {
     return this->_bounder_ptr->compute(vf,D,A,hsug);
 }
 
 Pair<StepSizeType,UpperBoxType>
-BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
+BoundedIntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const Suggestion<StepSizeType>& hsug) const {
     return this->_bounder_ptr->compute(vf,D,t,A,hsug);
 }
 
+
 FlowStepModelType
-BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
+IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx) const
 {
-    StepSizeType& h=hmax;
+    StepSizeType hsug = 1.0_dy;
+    return this->flow_step(vf,dx,suggest(hsug));
+}
+
+FlowStepModelType
+IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const Suggestion<StepSizeType>& hsug) const
+{
+    StepSizeType h=static_cast<const StepSizeType&>(hsug);
+    StepSizeType hprev=h*1.5_dy;
+    while(true) {
+        try {
+            return flow_step(vf,dx,h,dx);
+        } catch(const FlowTimeStepException& e) {
+            StepSizeType hnew=hlf(hprev);
+            hprev=h;
+            h=StepSizeType(hnew.get_d());
+            CONCLOG_PRINTLN_AT(1,"Reduced h to "<<h);
+        }
+    }
+}
+
+FlowStepModelType
+IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h) const
+{
+    UpperBoxType bx = dx + 1.5_dy * (dx-dx.centre()) + (1.5_dy * h) * cast_singleton(image(dx,vf));
+    StepSizeType hred=h;
+    FlowStepModelType phi = this->flow_step(vf,dx,hred,bx);
+    while (not definitely(subset(phi.range(),cast_exact_box(bx)))) {
+        hred=hlf(h);
+        phi = this->flow_step(vf,dx,hred,bx);
+    }
+    if (hred==h) {
+        return phi;
+    } else {
+        std::stringstream msg;
+        msg << "BoundedIntegratorBase::flow_step(vf,dx,h): vf=" << vf << ", dx=" << dx << ", h=" << h << "; Could not bound flow of vf over state domain dx for time h";
+        throw IncompleteFlowException(msg.str(), phi);
+    }
+}
+
+
+FlowStepModelType
+BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const Suggestion<StepSizeType>& hsug) const
+{
+    StepSizeType h;
     UpperBoxType bx;
-    make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
+    make_lpair(h,bx)=this->flow_bounds(vf,dx,hsug);
     StepSizeType hprev=h*1.5_dy;
     while(true) {
         try {
@@ -174,6 +206,24 @@ BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, 
         }
     }
 }
+
+FlowStepModelType
+BoundedIntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h) const
+{
+    Suggestion<StepSizeType> hsug = suggest(h);
+    StepSizeType hbnd;
+    UpperBoxType bx;
+    make_lpair(hbnd,bx)=this->flow_bounds(vf,dx,hsug);
+    if (hbnd < h) {
+        std::stringstream msg;
+        msg << "BoundedIntegratorBase::flow_step(vf,dx,h): vf=" << vf << ", dx=" << dx << ", h=" << h << "; Could not bound flow of vf over state domain dx for time h";
+        FlowStepModelType phi = this->flow_step(vf,dx,hbnd,bx);
+        throw IncompleteFlowException(msg.str(), phi);
+    }
+    FlowStepModelType phi = this->flow_step(vf,dx,h,bx);
+    return phi;
+}
+
 
 inline ExactDouble operator*(ExactDouble, TwoExp);
 inline ExactDouble operator/(ExactDouble, TwoExp);
@@ -236,10 +286,15 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    FlowStepModelType fphi=compose(f,join(phi0,ta));
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool below_maximum_error=definitely(phi.error()<this->step_maximum_error());
-        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        try {
+            fphi=compose(f,join(std::move(phi),ta));
+            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        } catch(...) {
+            ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
+        }
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
@@ -251,7 +306,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error());
     }
 
-    return phi;
+    return restriction(phi,dom);
 }
 
 Void TaylorPicardIntegrator::_write(OutputStream& os) const {
@@ -319,15 +374,20 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
     CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+    FlowStepModelType fphi=compose(f,join(phi0,ta));
     for (DegreeType k=0; k!=this->_order; ++k) {
-        FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        try {
+            fphi=compose(f,join(std::move(phi),ta));
+            CONCLOG_PRINTLN_AT(2,"fphi="<<fphi);
+        } catch (...) {
+            ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Could not evaluate f="<<f<<" over model join(phi,t,a) with phi="<<phi);
+        }
         phi=antiderivative(fphi,nx)+phi0;
         CONCLOG_PRINTLN_AT(2,"phi="<<phi);
     }
     auto errors = phi.errors();
     CONCLOG_PRINTLN_AT(2,"initial errors to validate=" << errors);
-    FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
+    fphi=compose(f,join(std::move(phi),ta));
     phi=antiderivative(fphi,nx)+phi0;
     auto new_errors = phi.errors();
     for (SizeType i=0; i<errors.size(); ++i) {
@@ -360,7 +420,7 @@ GradedTaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFuncti
         ARIADNE_THROW(FlowTimeStepException,"GradedTaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<", which exceeds step maximum error "<<this->step_maximum_error());
     }
 
-    return phi;
+    return restriction(phi,dom);
 }
 
 Void GradedTaylorPicardIntegrator::_write(OutputStream& os) const {
@@ -940,13 +1000,13 @@ template<class... DS> inline decltype(auto) differential_flow(DS const& ... ds) 
 
 FlowStepModelType
 TaylorSeriesBounderIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f,
-                                          const ExactBoxType& domx, StepSizeType& hsug) const
+                                          const ExactBoxType& domx, const Suggestion<StepSizeType>& hsug) const
 {
     Dyadic max_err=Dyadic(this->_step_maximum_error);
     auto deg=this->order();
     auto swp=this->sweeper();
 
-    StepSizeType h=hsug;
+    StepSizeType h=hsug.suggestion();
     ExactIntervalType domt(0,h);
     ExactBoxType doma;
 
@@ -994,7 +1054,6 @@ TaylorSeriesBounderIntegrator::flow_step(const ValidatedVectorMultivariateFuncti
 
     while (not refined or not accurate) {
         phi=series_flow_step(f,domx,domt,doma,bndbx,cdphi, deg,swp);
-
         if (refines(xrng,bndbx)) {
             refined=true;
             bndbx=xrng;

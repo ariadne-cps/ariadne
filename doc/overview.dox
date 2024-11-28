@@ -36,7 +36,7 @@ namespace Ariadne {
 The main functionality of %Ariadne is to perform reachability analysis and verification of hybrid systems.
 A <em>hybrid system</em> is a dynamic system in which continuous evolution is interspersed with discrete jumps.
 The state space of a hybrid system is of the form \f$X=\bigcup_{q\in Q} \{q\}\times \R^{n_q}\f$ with \f$Q\f$ a finite set of <em>locations</em>.
-The evolution of a hybrid system proceeds via a differential equation \f$\dt{x}(t) = f_q(x(t))\f$ in location \f$q\f$
+The evolution of a hybrid system proceeds via a differential equation \f$\dot{x}(t) = f_q(x(t))\f$ in location \f$q\f$
 until a <em>guard condition</em> \f$g_e(x)\geq 0\f$ is satisfied, in which case the <em>event</em> \f$e\f$ occurs,
 the location jumps to a target location \f$q'=\tau(q,e)\f$ and the continuous state jumps to \f$x'=r_{q,e}(x)\f$.
 
@@ -94,8 +94,8 @@ which is a valid interval extension of \f$f\f$ on a box \f$D\subset U\f$.
 
 The main operations which %Ariadne can perform are
  - Solution of differential equations:
-   Given a differential equation of the form \f$\dt{x}=f(x)\f$,
-   computes the flow \f$\phi(x,t)\f$ satisfying \f$\phi(x,0)=x\f$ and \f$\dt{\phi}(x,t) = f(\phi(x,t))\f$.
+   Given a differential equation of the form \f$\dot{x}=f(x)\f$,
+   computes the flow \f$\phi(x,t)\f$ satisfying \f$\phi(x,0)=x\f$ and \f$\dot{\phi}(x,t) = f(\phi(x,t))\f$.
  - Solution of (parameterised) algebraic equations:
    Given an algebraic equation \f$f(a,x)=0\f$, find a
    function \f$h(a)\f$ satisfying \f$f(a,h(a))=0\f$.

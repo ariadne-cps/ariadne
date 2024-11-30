@@ -45,9 +45,12 @@ template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
 
 template<class X> class Vector;
+template<class X> class Matrix;
 template<class X> class Formula;
 template<class X> class Algebra;
 
+using RealVector = Vector<Real>;
+using RealMatrix = Matrix<Real>;
 
 typedef Expression<Boolean> DiscretePredicate;
 typedef Expression<Kleenean> ContinuousPredicate;
@@ -62,6 +65,76 @@ template<class X> struct ExpressionNode;
 //! \name Methods for building expressions
 //! \related Expression
 template<class T> struct DeclareExpressionOperations;
+
+template<class A> using NotType = decltype(!declval<A>());
+template<class A1, class A2> using AndType = decltype(declval<A1>()&&declval<A2>());
+template<class A1, class A2> using OrType = decltype(declval<A1>()||declval<A2>());
+
+template<class A> using UnaryPlusType = decltype(+declval<A>());
+template<class A> using UnaryMinusType = decltype(-declval<A>());
+template<class A1, class A2> using PlusType = decltype(declval<A1>()+declval<A2>());
+template<class A1, class A2> using MinusType = decltype(declval<A1>()-declval<A2>());
+template<class A1, class A2> using TimesType = decltype(declval<A1>()*declval<A2>());
+template<class A1, class A2> using DivideType = decltype(declval<A1>()/declval<A2>());
+
+template<class A> using SgnType = decltype(sgn(-declval<A>()));
+
+/*
+template<template<class> class T>
+struct DeclareOperations {
+    template<class A> friend T<NotType<A>> operator!(T<A> const& a);
+    template<class A1, class A2> friend T<OrType<A1,A2>> operator||(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<AndType<A1,A2>> operator&&(T<A1> const& a1, T<A2> const& a2);
+
+    template<class A1, class A2> friend T<EqType<A1,A2>> operator==(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<NeqType<A1,A2>> operator!=(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<LeqType<A1,A2>> operator<=(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<GeqType<A1,A2>> operator>=(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<LtType<A1,A2>> operator< (T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<GtType<A1,A2>> operator> (T<A1> const& a1, T<A2> const& a2);
+
+    template<class A> friend T<UnaryPlusType<A>> operator+(T<A> const& a);
+    template<class A> friend T<UnaryMinusType<A>> operator-(T<A> const& a);
+    template<class A1, class A2> friend T<PlusType<A1,A2>> operator+(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<MinusType<A1,A2>> operator-(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<TimesType<A1,A2>> operator*(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<DivideType<A1,A2>> operator/(T<A1> const& a1, T<A2> const& a2);
+
+    template<class A1, class A2> friend T<PlusType<A1,A2>> operator+(T<A1> const& a1, A2 const& a2);
+    template<class A1, class A2> friend T<MinusType<A1,A2>> operator-(T<A1> const& a1, A2 const& a2);
+    template<class A1, class A2> friend T<TimesType<A1,A2>> operator*(T<A1> const& a1, A2 const& a2);
+    template<class A1, class A2> friend T<DivideType<A1,A2>> operator/(T<A1> const& a1, A2 const& a2);
+    template<class A1, class A2> friend T<PlusType<A1,A2>> operator+(A1 const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<MinusType<A1,A2>> operator-(A1 const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<TimesType<A1,A2>> operator*(A1 const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<DivideType<A1,A2>> operator/(A1 const& a1, T<A2> const& a2);
+
+    template<class A> friend T<SgnType<A>> sgn(T<A> const& a);
+
+    template<class A> friend T<PosType<A>> pos(T<A> const& a);
+    template<class A> friend T<NegType<A>> neg(T<A> const& a);
+    template<class A> friend T<SqrType<A>> sqr(T<A> const& a);
+    template<class A> friend T<RecType<A>> rec(T<A> const& a);
+    template<class A1, class A2> friend T<AddType<A1,A2>> add(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<SubType<A1,A2>> sub(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<MulType<A1,A2>> mul(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<DivType<A1,A2>> div(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2, class A3> friend T<FmaType<A1,A2,A3>> fma(T<A1> const& a1, T<A2> const& a2, T<E3> const& a3);
+    template<class A1, class A2> friend T<PowType<A1,A2>> pow(T<A1> const& a1, T<A2> const& a2);
+
+    template<class A1, class A2> friend T<MinType<A1,A2>> min(T<A1> const& a1, T<A2> const& a2);
+    template<class A1, class A2> friend T<MaxType<A1,A2>> max(T<A1> const& a1, T<A2> const& a2);
+    template<class A> friend T<AbsType<A>> abs(T<A> const& a);
+
+    template<class A> friend T<SqrtType<A>> sqrt(T<A> const& a);
+    template<class A> friend T<ExpType<A>> exp(T<A> const& a);
+    template<class A> friend T<LogType<A>> log(T<A> const& a);
+    template<class A> friend T<SinType<A>> sin(T<A> const& a);
+    template<class A> friend T<CosType<A>> cos(T<A> const& a);
+    template<class A> friend T<TanType<A>> tan(T<A> const& a);
+    template<class A> friend T<AtanType<A>> atan(T<A> const& a);
+};
+*/
 
 template<> struct DeclareExpressionOperations<Boolean>  {
     //! \related Expression \brief Logical disjunction.
@@ -206,6 +279,36 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real> min(Expression<Real> const& e1, Expression<Real> const& e2);
     //! \related Expression \brief %Real absolute value expression.
     friend Expression<Real> abs(Expression<Real> const& e);
+};
+
+
+template<> struct DeclareExpressionOperations<RealVector> {
+    //friend Expression<Vector<Real>> expression(Vector<Expression<Real>>);
+    //friend Expression<Real> get(Expression<Vector<Real>> const&, SizeType);
+    friend Expression<RealVector> operator-(Expression<RealVector> const&);
+    friend Expression<RealVector> operator+(Expression<RealVector> const&, Expression<RealVector> const&);
+    friend Expression<RealVector> operator-(Expression<RealVector> const&, Expression<RealVector> const&);
+    friend Expression<RealVector> operator*(Expression<Real> const&, Expression<RealVector> const&);
+    friend Expression<RealVector> operator*(Expression<RealVector> const&, Expression<Real> const&);
+    friend Expression<RealVector> operator/(Expression<RealVector> const&, Expression<Real> const&);
+};
+
+
+template<> struct DeclareExpressionOperations<RealMatrix> {
+    friend Expression<Matrix<Real>> expression(Matrix<Expression<Real>>);
+    friend Expression<Real> get(Expression<Matrix<Real>> const&, SizeType, SizeType);
+    friend Expression<RealMatrix> operator-(Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> operator+(Expression<RealMatrix> const&, Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> operator-(Expression<RealMatrix> const&, Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> operator*(Expression<RealMatrix> const&, Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> operator*(Expression<Real> const&, Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> operator*(Expression<RealMatrix> const&, Expression<Real> const&);
+    friend Expression<RealMatrix> operator/(Expression<RealMatrix> const&, Expression<Real> const&);
+    friend Expression<RealVector> operator*(Expression<RealMatrix> const&, Expression<RealVector> const&);
+    friend Expression<RealMatrix> transpose(Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> inverse(Expression<RealMatrix> const&);
+    friend Expression<RealMatrix> solve(Expression<RealMatrix> const&);
+    friend Expression<RealVector> solve(Expression<RealVector> const&);
 };
 
 

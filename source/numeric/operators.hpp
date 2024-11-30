@@ -134,6 +134,8 @@ enum class Operator::Code : ComparableEnumerationType {
     XOR,   // Logical exclusive or
     IMPL,  // Logical implication
     ITOR,   // Conversion of Int to Real
+    GET,   // Subscript operator
+    VEC,   // Vectorisation operator
     PUSH,
     PULL,
     EQ=-6,    // Equal

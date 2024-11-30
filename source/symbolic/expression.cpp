@@ -49,7 +49,6 @@ template<> Expression<Real>::operator ElementaryAlgebra<Real>() const {
     return ElementaryAlgebra<Real>(new ElementaryAlgebraWrapper<Expression<Real>,Real>(*this));
 }
 
-
 template class Expression<Boolean>;
 template class Expression<Kleenean>;
 template class Expression<String>;
@@ -206,14 +205,78 @@ Expression<Real> min(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> abs(Expression<Real> const& e) {
     return make_expression<Real>(Abs(),e); }
 
+Expression<RealVector> operator+(Expression<RealVector> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Add(),e1,e2); }
+Expression<RealVector> operator-(Expression<RealVector> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Sub(),e1,e2); }
+Expression<RealVector> operator*(Expression<Real> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator*(Expression<RealVector> const& e1, Expression<Real> const& e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator/(Expression<RealVector> const& e1, Expression<Real> const& e2) {
+    return make_expression<RealVector>(Div(),e1,e2); }
+
+Expression<RealVector>::Expression(RealVector v)
+    : _root(new ExpressionNode<T>(Constant<T>(v))) { }
+Expression<RealVector>::Expression(Constant<RealVector> cnst)
+    : Expression(std::make_shared<ExpressionNode<T>>(cnst)) { }
+Expression<RealVector>::Expression(Variable<RealVector> var)
+    : Expression(std::make_shared<ExpressionNode<T>>(var)) { }
+Expression<RealVector>::Expression(Vector<Expression<Real>> ve)
+    : _root(std::make_shared<ExpressionNode<T>>(ve)) { }
+Expression<RealVector>::Expression(RealVariables vars)
+    : Expression(Vector<Expression<Real>>(vars)) { }
+Expression<RealVector>::Expression(InitializerList<Expression<Real>> vars)
+    : Expression(Vector<Expression<Real>>(vars)) { }
+Operator Expression<RealVector>::op() const {
+    return this->node_ptr()->op(); }
+SizeType Expression<RealVector>::size() const {
+    return this->node_ref().accept([](auto en){return _size_impl(en);}); }
+Expression<Real> Expression<RealVector>::get(SizeType i) const {
+    return make_expression<Real>(OperatorType<Real(RealVector,SizeType)>(Get()),*this,i); }
+Set<UntypedVariable> Expression<RealVector>::arguments() const {
+    return this->node_ref().accept([](auto s){return _arguments(s);}); }
+Expression<RealVector> nul(Expression<RealVector> e) {
+    return make_expression<RealVector>(Nul(),e); }
+Expression<RealVector> pos(Expression<RealVector> e) {
+    return make_expression<RealVector>(Pos(),e); }
+Expression<RealVector> neg(Expression<RealVector> e) {
+    return make_expression<RealVector>(Neg(),e); }
+Expression<RealVector> add(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Add(),e1,e2); }
+Expression<RealVector> sub(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Sub(),e1,e2); }
+Expression<RealVector> mul(Expression<Real> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> mul(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> div(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Div(),e1,e2); }
+Expression<RealVector> operator+(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Add(),e1,e2); }
+Expression<RealVector> operator-(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Sub(),e1,e2); }
+Expression<RealVector> operator*(Expression<Real> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator*(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator/(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Div(),e1,e2); }
+
+OutputStream& Expression<RealVector>::_write(OutputStream& os) const {
+    auto writer=OperationExpressionWriter(); return os << writer(*this); }
+
+
 template String evaluate(const Expression<String>& e, const Valuation<String>& x);
 template Integer evaluate(const Expression<Integer>& e, const Valuation<Integer>& x);
 template Real evaluate(const Expression<Real>& e, const Valuation<Real>& x);
 template Boolean evaluate(const Expression<Boolean>& e, const Valuation<String>& x);
 template Boolean evaluate(const Expression<Boolean>& e, const Valuation<Integer>& x);
 template Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& x);
+template RealVector evaluate(const Expression<RealVector>& e, const Valuation<Real>& x);
 
 template Real evaluate(Expression<Real> const&, Map<Identifier, Real> const&);
+template RealVector evaluate(Expression<RealVector> const&, Map<Identifier, Real> const&);
 
 
 template Set<Identifier> arguments(const Expression<Boolean>& e);
@@ -225,11 +288,13 @@ template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Va
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Expression<Real>& c);
+template Expression<Vector<Real>> substitute(const Expression<Vector<Real>>& e, const Variable<Real>& v, const Expression<Real>& c);
 template Expression<Real> substitute(const Expression<Real>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 template Vector<Expression<Real>> substitute(const Vector<Expression<Real>>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 
 template Expression<Real> simplify(const Expression<Real>& e);
+template Expression<RealVector> simplify(const Expression<RealVector>& e);
 template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
 
 template Void eliminate_common_subexpressions(Expression<Real>&);
@@ -290,6 +355,9 @@ template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
 template Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& spc);
+template Bool is_constant_in(const Expression<Vector<Real>>& e, const Set<Variable<Real>>& spc);
+template Bool is_constant_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& spc);
+template Bool component_is_constant_in(const Expression<Vector<Real>>& e, SizeType i, const Set<Variable<Real>>& spc);
 
 Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
     return e.node_ref().accept([&spc](auto en){return is_affine_in(en,spc);});
@@ -300,6 +368,9 @@ Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& 
         if (not is_affine_in(e[i],spc)) return false;
     }
     return true;
+}
+Bool is_affine_in(const Expression<Vector<Real>>& ve, const Set<Variable<Real>>& spc) {
+    return ve.node_ref().accept([&spc](auto en){return is_affine_in(en,spc);});
 }
 
 Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
@@ -319,23 +390,25 @@ namespace {
 typedef Expression<Real> RE; typedef Expression<Real> const& REcr;
 typedef Variable<Real> const& RVcr; typedef Constant<Real> const& RCcr;
 
-inline Bool _is_additive_in(Add, REcr e1, REcr e2, RVcr var) {
+inline Bool _is_additive_in_impl(Add, REcr e1, REcr e2, RVcr var) {
     return (is_additive_in(e1,var) && is_constant_in(e2,var)) || (is_constant_in(e1,var) && is_additive_in(e2,var)); }
-inline Bool _is_additive_in(Sub, REcr e1, REcr e2, RVcr var) {
+inline Bool _is_additive_in_impl(Sub, REcr e1, REcr e2, RVcr var) {
     return is_additive_in(e1,var) && is_constant_in(e2,var); }
-inline Bool _is_additive_in(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
-template<class... OPS> inline Bool _is_additive_in(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
-    return ops.accept([&](auto op){return _is_additive_in(op,e1,e2,var);}); }
+inline Bool _is_additive_in_impl(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
+template<class... OPS> inline Bool _is_additive_in_impl(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
+    return ops.accept([&](auto op){return _is_additive_in_impl(op,e1,e2,var);}); }
 
-inline Bool is_additive_in(RCcr c, RVcr var) { return true; }
-inline Bool is_additive_in(RVcr v, RVcr var) { return true; }
-template<class OP> inline Bool is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
-template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
-template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in(e._op,e._arg1,e._arg2,var); }
+inline Bool _is_additive_in(RCcr c, RVcr var) { return true; }
+inline Bool _is_additive_in(RVcr v, RVcr var) { return true; }
+template<class OP> inline Bool _is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
+template<class OP> inline Bool _is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in_impl(e._op,e._arg1,e._arg2,var); }
+template<class OP> requires AGraded<OP> inline Bool _is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
+template<class OP> requires AGetter<OP> inline Bool _is_additive_in(Symbolic<OP,Expression<RealVector>,SizeType> const&, RVcr var) {
+    ARIADNE_NOT_IMPLEMENTED; }
 }
 
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& var) {
-    return e.node_ref().accept([&](auto en){return is_additive_in(en,var);});
+    return e.node_ref().accept([&](auto en){return _is_additive_in(en,var);});
 }
 
 
@@ -436,6 +509,10 @@ template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Binar
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
 
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>& e, const SPC& spc, CACHE& cache) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
     const ExpressionNode<Real>* eptr=&e.node_ref();
@@ -531,5 +608,8 @@ template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expres
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<Integer> const& e) const;
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<String> const& e) const;
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<Boolean> const& e) const;
+
+template<> String class_name<RealVariables>() { return "RealVariables"; }
+template<> String class_name<Expression<RealVector>>() { return "Expression<Vector<Real>>"; }
 
 } // namespace Ariadne

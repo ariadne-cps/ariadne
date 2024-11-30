@@ -142,12 +142,64 @@ class Expression
     SharedPointer<const ExpressionNode<T>> _root;
 };
 
-//!@{
+template<class T> Bool same(Expression<T> const& e1, Expression<T> const& e2) { return identical(e1,e2); }
+
+template<>
+class Expression<Vector<Real>>
+    : public DeclareExpressionOperations<Real>
+    , public DeclareExpressionOperations<RealVector>
+{
+    typedef Vector<Real> T;
+  public:
+    // Use template formulation to avoid ambiguity treating Expression(0) as a pointer construction.
+    template<ConvertibleTo<SharedPointer<const ExpressionNode<T>>> P>
+        explicit Expression(P const& eptr) : _root(eptr) { }
+  public:
+    typedef Expression<Real> ScalarType;
+    Expression(InitializerList<Expression<Real>>);
+    Expression(Vector<Real>);
+    Expression(Variables<Real>);
+    Expression(Constant<Vector<Real>> c);
+    Expression(Variable<Vector<Real>>);
+    Expression(Vector<Expression<Real>>);
+    Operator op() const;
+    SizeType size() const;
+    Expression<Real> get(SizeType i) const;
+    Void set(SizeType i, Expression<Real>);
+    Expression<Real> operator[](SizeType i) const { return this->get(i); }
+    friend Expression<Vector<Real>> nul(Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> pos(Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> neg(Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> add(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> sub(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> mul(Expression<Real>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> mul(Expression<Vector<Real>>, Expression<Real>);
+    friend Expression<Vector<Real>> div(Expression<Vector<Real>>, Expression<Real>);
+    friend Expression<Vector<Real>> join(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, Expression<Vector<Real>> const& e) { return e._write(os); }
+  public:
+    //! \brief The variables needed to compute the expression.
+    Set<UntypedVariable> arguments() const;
+  public:
+    SharedPointer<const ExpressionNode<T>> node_ptr() const { return _root; }
+    const ExpressionNode<T>* node_raw_ptr() const { return _root.operator->(); }
+    const ExpressionNode<T>& node_ref() const { return _root.operator*(); }
+  private:
+    OutputStream& _write(OutputStream& os) const;
+  private:
+    SharedPointer<const ExpressionNode<Vector<Real>>> _root;
+};
+
+
+
+//@{
 //! \name Evaluation and related operations.
 //! \related Expression
 
 template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Valuation<T>& x);
 template<class T> T evaluate(const Expression<T>& e, const Valuation<T>& x);
+template<class T> Vector<T> evaluate(const Expression<Vector<T>>& e, const Valuation<T>& x);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Map<Identifier,T>& x);
@@ -196,10 +248,14 @@ template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v)
 
 //! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
 template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable<T>>& vs);
+template<class T> Bool is_constant_in(const Expression<Vector<T>>& e, const Set<Variable<T>>& vs);
+template<class T> Bool is_constant_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
 //! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
 Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
+//! \brief Returns \a true if the vector of expressions \a e is syntactically affine in the variables \a vs.
 Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
+Bool is_affine_in(const Expression<Vector<Real>>& e, const Set<Variable<Real>>& vs);
 //! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
 Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
@@ -279,7 +335,7 @@ class OperatorExpressionWriter {
   private: public:
     template<class T> OutputStream& _write(OutputStream& os, Expression<T> const& e) const;
   public:
-    template<class T> WritableTemporary<T,OperatorExpressionWriter> operator() (Expression<T> const& e) const {
+    template<class T> WritableTemporary<Expression<T>,OperatorExpressionWriter> operator() (Expression<T> const& e) const {
         return WritableTemporary(*this,e); }
 };
 
@@ -287,9 +343,12 @@ class OperatorExpressionWriter {
 class OperationExpressionWriter {
   private: public:
     template<class T> OutputStream& _write(OutputStream& os, Expression<T> const& e) const;
+    template<class T> OutputStream& _write(OutputStream& os, Expression<Vector<T>> const& ve) const;
   public:
     template<class T> WritableTemporary<T,OperationExpressionWriter> operator() (Expression<T> const& e) const {
         return WritableTemporary(*this,e); }
+    template<class T> WritableTemporary<Expression<Vector<T>>,OperationExpressionWriter> operator() (Expression<Vector<T>> const& ve) const {
+        return WritableTemporary(*this,ve); }
 };
 
 

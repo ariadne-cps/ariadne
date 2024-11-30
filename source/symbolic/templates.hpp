@@ -36,6 +36,22 @@
 
 namespace Ariadne {
 
+template<class T> class Expression;
+
+struct Get {
+    static constexpr OperatorCode code() { return OperatorCode::GET; }
+    static OperatorKind kind() { return OperatorKind::COORDINATE; }
+    template<class V, class I> decltype(auto) operator() (V const& v, I i) { return v.operator[](i); }
+    friend OutputStream& operator<<(OutputStream& os, Get const& op) { return os << "get"; }
+};
+
+struct Vec {
+    static constexpr OperatorCode code() { return OperatorCode::VEC; }
+    static OperatorKind kind() { return OperatorKind::NULLARY; }
+    template<class X> decltype(auto) operator() (Array<X> const& a) { return Vector<X>(a); }
+    friend OutputStream& operator<<(OutputStream& os, Vec const& op) { return os << "Vector"; }
+};
+
 /************ Symbolic ************************************************/
 
 template<class OP, class... AS> struct Symbolic;
@@ -81,27 +97,17 @@ template<class O, class A1, class A2> struct Symbolic<O,A1,A2> {
         return os << expr._op.code() << "(" << expr._arg1 << "," << expr._arg2 << ")"; }
 };
 
-template<class A, class N> struct Symbolic<Pow,A,N> {
-    typedef Pow O;
-    O _op; A _arg; N _num;
-    O op() const { return _op; } A arg() const { return _arg; } N num() const { return _num; }
-    Symbolic(O o, A a, N n) : _op(o), _arg(a), _num(n) { }
-//    template<class T> explicit operator T() const { return _op(static_cast<T>(_arg),_num); }
-    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...),_num)) {
-        return _op(_arg(vals...),_num); }
-    friend OutputStream& operator<<(OutputStream& os, Symbolic<Pow,A,N> const& expr) {
-        return os << expr._op.code() << "(" << expr._arg << "," << expr._num << ")"; }
-};
+template<class O> concept AGraded = Same<O,Pow> or Same<O,GradedElementaryOperator>;
 
-template<class A, class N> struct Symbolic<GradedElementaryOperator,A,N> {
-    typedef GradedElementaryOperator O;
+template<class O, class A, class N> requires AGraded<O> struct Symbolic<O,A,N> {
     O _op; A _arg; N _num;
-    O op() const { return _op; } A arg() const { return _arg; } N num() const { return _num; }
+    O op() const { return _op; } A arg1() const { return _arg; } N arg2() const { return _num; }
+    A arg() const { return _arg; } N num() const { return _num; }
     Symbolic(O o, A a, N n) : _op(o), _arg(a), _num(n) { }
-    template<class T> explicit operator T() const { return _op(static_cast<T>(_arg),_num); }
-    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...),_num)) {
+//    template<class T> explicit operator T() const { return _op(static_cast<T>(_arg),static_cast<T>(_num)); }
+    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg1(vals...),_arg2(vals...))) {
         return _op(_arg(vals...),_num); }
-    friend OutputStream& operator<<(OutputStream& os, Symbolic<GradedElementaryOperator,A,N> const& expr) {
+    friend OutputStream& operator<<(OutputStream& os, Symbolic<O,A,N> const& expr) {
         return os << expr._op.code() << "(" << expr._arg << "," << expr._num << ")"; }
 };
 
@@ -110,7 +116,7 @@ template<class O, class A1, class A2, class A3> struct Symbolic<O,A1,A2,A3> {
     Symbolic(O o, A1 a1, A2 a2, A3 a3) : _op(o), _arg1(a1), _arg3(a3) { }
     template<class T> explicit operator T() const { return _op(static_cast<T>(_arg1),static_cast<T>(_arg2),static_cast<T>(_arg3)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg1(vals...),_arg2(vals...),_arg3(vals...))) {
-        return _op(_arg1(vals...),_arg2(vals...)); }
+        return _op(_arg1(vals...),_arg2(vals...),_arg3(vals...)); }
     friend OutputStream& operator<<(OutputStream& os, Symbolic<O,A1,A2,A3> const& expr) {
         return os << expr._op.code() << "(" << expr._arg1 << "," << expr._arg2 << "," << expr._arg3 << ")"; }
 };
@@ -125,6 +131,20 @@ template<class... SS> class SymbolicVariant : public Variant<SS...> {
 struct While { };
 struct Iterate { };
 struct IfThnEls { };
+
+template<class O> concept AGetter = Same<O,Get> or Same<O,OperatorVariant<Get>>;
+
+template<class O, class V, class I> requires AGetter<O> struct Symbolic<O,V,I> {
+    O _op; V _vec; I _ind;
+    O op() const { return _op; } V arg() const { return _vec; } V arg1() const { return _vec; } I arg2() const { return _ind; }
+    V vec() const { return _vec; } I ind() const { return _ind; }
+    Symbolic(O o, V v, I i) : _op(o), _vec(v), _ind(i) { }
+//    template<class T> explicit operator T() const { return _op(static_cast<T>(_vec),_ind); }
+    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_vec(vals...),_ind)) {
+        return _op(_vec(vals...),_ind); }
+    friend OutputStream& operator<<(OutputStream& os, Symbolic<O,V,I> const& expr) {
+        return os << expr._op.code() << "(" << expr._vec << "," << expr._ind << ")"; }
+};
 
 template<class C, class A> struct Symbolic<IfThnEls,C,A> {
     IfThnEls _op; C _cnd; A _atru; A _afls;

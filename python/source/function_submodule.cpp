@@ -393,22 +393,15 @@ template<class P, class SIG> Void export_function(pybind11::module& module) {
     if constexpr (Same<SIG,RealScalar(RealScalar)>) {
         if constexpr (not Same<P,ApproximateTag>) {
             module.def("derivative", [](const F& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,1u).gradient()[0]);} );
+            module.def("derivative", [](const F& f, const FloatMPBounds& x){return static_cast<FloatMPBounds>(differential(f,x,1u).gradient()[0]);} );
             module.def("second_derivative", [](const F& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
+            module.def("second_derivative", [](const F& f, const FloatMPBounds& x){return static_cast<FloatMPBounds>(differential(f,x,2u).hessian()[0][0]);} );
         }
         module.def("derivative", [](const F& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
+        module.def("derivative", [](const F& f, const FloatMPApproximation& x){return static_cast<FloatMPApproximation>(differential(f,x,1u).gradient()[0]);} );
         module.def("second_derivative", [](const F& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
+        module.def("second_derivative", [](const F& f, const FloatMPApproximation& x){return static_cast<FloatMPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
     }
-    if constexpr (Same<SIG,RealScalar(RealVector)>) {
-        function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarMultivariateFunction<P>::gradient);
-        if constexpr (not Same<P,ApproximateTag>) {
-            function_class.def("gradient", (Covector<FloatDPBounds>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarMultivariateFunction<P>::gradient);
-        }
-    }
-
-    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
-        if constexpr (not Same<P,ApproximateTag>) {
-            module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
-        }
 
     if constexpr (Same<SIG,RealScalar(RealScalar)>) {
         function_class.def_static("constant", (F(*)(Number<P>)) &F::constant);

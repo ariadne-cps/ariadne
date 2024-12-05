@@ -300,6 +300,7 @@ template<class... AS> auto _split_(AS... as) -> decltype(split(as...)) { return 
 template<class... AS> auto _derivative_(AS... as) -> decltype(derivative(as...)) { return derivative(as...); }
 template<class... AS> auto _antiderivative_(AS... as) -> decltype(antiderivative(as...)) { return antiderivative(as...); }
 
+template<class... AS> auto _coarsening_(AS... as) -> decltype(coarsening(as...)) { return coarsening(as...); }
 template<class... AS> auto _refinement_(AS... as) -> decltype(refinement(as...)) { return refinement(as...); }
 template<class... AS> auto _refines_(AS... as) -> decltype(refines(as...)) { return refines(as...); }
 template<class... AS> auto _inconsistent_(AS... as) -> decltype(inconsistent(as...)) { return inconsistent(as...); }

@@ -199,6 +199,13 @@ template<class A> auto _is_inf_(A const& a) -> Bool { return is_inf(a); }
 template<class A> auto _is_finite_(A const& a) -> Bool { return is_finite(a); }
 template<class A> auto _is_zero_(A const& a) -> Bool { return is_zero(a); }
 
+template<class X> Void define_validated_operations(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    module.def("coarsening", &_coarsening_<X,X>);
+    module.def("refinement", &_refinement_<X,X>);
+    module.def("refines", &_refines_<X,X>);
+    module.def("inconsistent", &_inconsistent_<X,X>);
+}
+
 template<class X> Void define_infinitary_checks(pybind11::module& module, pybind11::class_<X>& pyclass) {
     module.def("is_nan", &_is_nan_<X>);
     module.def("is_inf", &_is_inf_<X>);
@@ -765,6 +772,8 @@ void export_dyadic_bounds(pymodule& module)
     define_lattice(module,dyadic_bounds_class);
     dyadic_bounds_class.def("hlf", &_hlf_<DyadicBounds>);
 
+    define_validated_operations<DyadicBounds>(module,dyadic_bounds_class);
+
     dyadic_bounds_class.def("__str__", &__cstr__<DyadicBounds>);
     dyadic_bounds_class.def("__repr__", &__repr__<DyadicBounds>);
 }
@@ -801,6 +810,8 @@ void export_rational_bounds(pymodule& module)
     define_lattice(module,rational_bounds_class);
     module.def("sqr", &_sqr_<RationalBounds>);
     module.def("rec", &_rec_<RationalBounds>);
+
+    define_validated_operations<RationalBounds>(module,rational_bounds_class);
 
     rational_bounds_class.def("__str__", &__cstr__<RationalBounds>);
     rational_bounds_class.def("__repr__", &__repr__<RationalBounds>);
@@ -1100,6 +1111,8 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     define_mixed_arithmetic<FloatBall<PR,PRE>,FloatBounds<PR>>(module,float_ball_class);
     define_mixed_lattice<FloatBall<PR,PRE>,FloatBounds<PR>>(module,float_ball_class);
 
+    define_validated_operations<FloatBall<PR,PRE>>(module,float_ball_class);
+
     float_ball_class.def("__str__", &__cstr__<FloatBall<PR,PRE>>);
     float_ball_class.def("__repr__", &__repr__<FloatBall<PR,PRE>>);
 }
@@ -1163,9 +1176,7 @@ template<class PR> void export_float_bounds(pymodule& module)
 //    float_bounds_class.define_mixed_arithmetic<UpperNumericType>();
 //    float_bounds_class.define_mixed_arithmetic<ValidatedNumericType>();
 
-    module.def("refinement", &_refinement_<FloatBounds<PR>,FloatBounds<PR>>);
-    module.def("refines", &_refines_<FloatBounds<PR>,FloatBounds<PR>>);
-    module.def("inconsistent", &_inconsistent_<FloatBounds<PR>,FloatBounds<PR>>);
+    define_validated_operations<FloatBounds<PR>>(module,float_bounds_class);
 
     implicitly_convertible<Float<PR>,FloatBounds<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();

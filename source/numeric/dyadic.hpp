@@ -332,6 +332,8 @@ template<> class Bounds<Dyadic> {
         if (w1._l> w2._u) { return true; } else if (w1._u<=w2._l) { return false; } else { return indeterminate; } }
     friend Bool consistent(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
         return w1._l<=w2._u && w1._u >= w2._l; }
+    friend Boolean inconsistent(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        return w1._l>w2._u || w1._u < w2._l; }
     friend Boolean refines(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
         return w1._l>=w2._l and w1._u<=w2._u; }
     friend Bounds<Dyadic> refinement(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
@@ -364,8 +366,10 @@ template<> class Ball<Dyadic,Dyadic> {
         if (abs(w._v)>=w._e) { return DyadicBall(abs(w._v),w._e); } else { Dyadic av=hlf(max(w._e-w._v,w._v+w._e)); return DyadicBall(av,av); } }
     friend ValidatedKleenean operator<(DyadicBall const& w1, DyadicBall const& w2) {
         if (w1._v+w1._e<w2._v-w2._e) { return true; } else if (w1._v-w1._e >= w2._v+w2._e) { return false; } else { return indeterminate; } }
+    friend Boolean inconsistent(DyadicBall const& w1, DyadicBall const& w2) { return abs(w1._v-w2._v) > w1._e+w2._e; }
     friend Boolean refines(DyadicBall const& w1, DyadicBall const& w2) { return abs(w1._v-w2._v)+w1._e <= w2._e; }
     friend DyadicBall refinement(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(refinement(DyadicBounds(w1),DyadicBounds(w2))); }
+    friend DyadicBall coarsening(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(coarsening(DyadicBounds(w1),DyadicBounds(w2))); }
     friend OutputStream& operator<<(OutputStream& os, DyadicBall y) { return os << "[" << y._v << ":" << y._e << "]"; }
 };
 

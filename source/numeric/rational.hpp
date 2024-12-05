@@ -256,8 +256,10 @@ template<> class Bounds<Rational> {
     friend ValidatedKleenean operator< (RationalBounds const& q1, RationalBounds const& q2);
     friend ValidatedKleenean operator> (RationalBounds const& q1, RationalBounds const& q2);
 
+    friend Boolean inconsistent(RationalBounds const& q1, RationalBounds const& q2) { return q1._l>q2._u || q1._u < q2._l; }
     friend Boolean refines(RationalBounds const& q1, RationalBounds const& q2) { return q1._l>=q2._l and q1._u<=q2._u; }
     friend RationalBounds refinement(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(max(q1._l,q2._l),min(q1._u,q2._u)); }
+    friend RationalBounds coarsening(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(min(q1._l,q2._l),max(q1._u,q2._u)); }
     friend OutputStream& operator<<(OutputStream& os, RationalBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
 };
 

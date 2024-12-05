@@ -379,16 +379,18 @@ public:
         return x1._l<=x2._v && x1._u >= x2._v; }
     //! Tests is \a x1 and \a x2 are consistent with being a model of the same value i.e. they intersect.
     friend Bool consistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return x1._l<=x2._u && x1._u >= x2._l; }
+        return (x1._v >= x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v)) <= add(down,x1._e,x2._e); }
     //! Tests is \a x1 and \a x2 are inconsistent with being a model of the same value i.e. they are disjoint.
     friend Bool inconsistent(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return x1._l>x2._u || x1._u < x2._l; }
+        return (x1._v >= x2._v ? sub(down,x1._v,x2._v) : sub(down,x2._v,x1._v)) > add(up,x1._e,x2._e); }
     //! Tests is \a x1 is a tighter representation than \a x2.
     friend Bool refines(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
-        return x1._l>=x2._l && x1._u <= x2._u; }
+        return add ( up, (x1._v >= x2._v ? sub(up,x1._v,x2._v) : sub(up,x2._v,x1._v) ), x1._e ) <= x2._e; }
     //! The common refinement of \a x1 and \x2. Requires \a x1 and \a x2 to be consistent.
     friend Ball<F,FE> refinement(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Ball<F,FE>(refinement(Bounds<F>(x1),Bounds<F>(x2)),x1.error_precision()); }
+    friend Ball<F,FE> coarsening(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
+        return Ball<F,FE>(coarsening(Bounds<F>(x1),Bounds<F>(x2)),x1.error_precision()); }
     //!@}
 
     //!@{

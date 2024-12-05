@@ -350,6 +350,9 @@ template<class F> class Bounds
     //! The common refinement of \a x1 and \x2. Requires \a x1 and \a x2 to be consistent.
     friend Bounds<F> refinement(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(max(x1._l,x2._l),min(x1._u,x2._u)); }
+    //! Bounds for a value which is in either \a x1 or \a x2.
+    friend Bounds<F> coarsening(Bounds<F> const& x1, Bounds<F> const& x2) {
+        return Bounds<F>(min(x1._l,x2._l),max(x1._u,x2._u)); }
     //!@}
 
         // FIXME: Added functionality

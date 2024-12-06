@@ -228,6 +228,8 @@ Expression<RealVector>::Expression(RealVariables vars)
     : Expression(Vector<Expression<Real>>(vars)) { }
 Expression<RealVector>::Expression(InitializerList<Expression<Real>> vars)
     : Expression(Vector<Expression<Real>>(vars)) { }
+Expression<RealVector>::operator Vector<Expression<Real>> () const {
+    return Vector<Expression<Real>>(this->size(),[&](SizeType i){return this->get(i);});  }
 Operator Expression<RealVector>::op() const {
     return this->node_ptr()->op(); }
 SizeType Expression<RealVector>::size() const {
@@ -510,7 +512,7 @@ template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Grade
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
 
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>& e, const SPC& spc, CACHE& cache) {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_FAIL_MSG("Construction of a function from an indexed expression not implemented.");
 }
 
 const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)

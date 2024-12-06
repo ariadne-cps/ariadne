@@ -151,6 +151,8 @@ template<class T> class Variables : public List<Variable<T>> {
     //! so that the \a i<sup>th</sup> variable is <tt>x</tt><i>i</i>.
     Variables(Identifier name, SizeType n) : List<Variable<T>>() {
         this->reserve(n); for(SizeType i=0; i!=n; ++i) { this->append(Variable<T>(name+'['+to_str(i)+']')); } }
+    inline operator Vector<Expression<T>>() const {
+        return Vector<Expression<T>>(this->size(),[this](SizeType i){return Expression<T>(this->operator[](i));}); }
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
     //! \brief The Construct \a n variables with name \a name.
     Variable<T> const& operator[] (SizeType i) const { return this->List<Variable<T>>::operator[](i); }
@@ -172,6 +174,7 @@ template<class T> class Variable<Vector<T>>
     typedef Variable<Vector<T>> BaseType;
     //! \brief Construct a variable with name \a name for a vector of size \a size.
     explicit Variable(const Identifier& name, SizeType size) : UntypedVariable(name,variable_type<Vector<T>>()), _size(size) { }
+    explicit operator Variables<T> () const { return Variables<T>(this->name(),this->size()); }
     Variable<Vector<T>> const& base() const { return *this; }
     SizeType size() const { return this->_size; }
     Variable<T> operator[] (SizeType i) const { assert(i<this->_size); return Variable<T>(this->name()+'['+to_str(i)+']'); }

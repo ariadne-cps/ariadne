@@ -31,7 +31,7 @@
 #include "numeric/builtin.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/decimal.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 
 #include <iomanip>
 

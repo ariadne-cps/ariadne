@@ -45,7 +45,7 @@ template<class T> class TensorRow {
     T& operator[] (SizeType j) { return _t[Array<SizeType>({_i,j})]; }
 };
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A rank-\a N tensor with elements of type \a X.
 template<SizeType N, class X> class Tensor :
                       public LabelledDrawable2d3dInterface,

@@ -155,7 +155,7 @@ and the \ref Approximation classes support approximate arithmetic.
 As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine for solving systems of linear equations:
 \skipline solve
 
-\sa \ref LinearAlgebraModule
+\sa \ref LinearAlgebraSubModule
 
 
 

@@ -29,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_APPROXIMATION_HPP
 #define ARIADNE_FLOAT_APPROXIMATION_HPP
 
-#include "logical.decl.hpp"
+#include "foundations/logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 

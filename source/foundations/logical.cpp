@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/logical.cpp
+ *            foundations/logical.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric/logical.cpp
+/*! \file foundations/logical.cpp
  *  \brief
  */
 
@@ -33,7 +33,7 @@
 #include "symbolic/templates.hpp"
 
 #include "logical.hpp"
-#include "integer.hpp"
+#include "numeric/integer.hpp"
 
 namespace Ariadne {
 

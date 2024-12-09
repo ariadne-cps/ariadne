@@ -36,7 +36,7 @@
 #include "utility/pointer.hpp"
 #include "utility/handle.hpp"
 
-#include "numeric/logical.decl.hpp"
+#include "foundations/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
 

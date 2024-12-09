@@ -28,7 +28,7 @@
 #include <iosfwd>
 
 #include "utility/metaprogramming.hpp"
-#include "numeric/logical.decl.hpp"
+#include "foundations/logical.decl.hpp"
 
 namespace Ariadne {
 

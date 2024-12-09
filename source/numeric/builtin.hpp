@@ -39,7 +39,7 @@
 #include "utility/macros.hpp"
 #include "numeric/number.decl.hpp"
 
-#include "logical.hpp"
+#include "foundations/logical.hpp"
 #include "twoexp.hpp"
 
 namespace Ariadne {

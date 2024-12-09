@@ -34,7 +34,7 @@
 #include "utility/standard.hpp"
 #include "utility/declarations.hpp"
 
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/builtin.hpp"
 #include "numeric/accuracy.hpp"
 #include "numeric/integer.hpp"

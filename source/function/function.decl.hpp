@@ -40,13 +40,13 @@ template<class X> class Matrix;
 
 class Real;
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A scalar real number. Defined as a synomym for Real.
 using RealScalar=Scalar<Real>;
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A vector of real numbers.
 using RealVector=Vector<Real>;
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A matrix of real numbers.
 using RealMatrix=Matrix<Real>;
 

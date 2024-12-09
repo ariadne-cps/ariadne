@@ -112,7 +112,7 @@ class SubPavingHandle;
 class PavingInterface;
 class SubPavingInterface;
 
-//! \ingroup StorageModule
+//! \ingroup DiscretisedSetSubModule
 //! \brief A prototype interface for subpavings.
 //! \details A sub-paving is a paving-type set which is the restriction of another paving to a cell, called the \em root_cell of the subpaving.
 //! In general, a sub-paving supports the non-modifying operations of a paving.
@@ -187,7 +187,7 @@ inline Bool operator==(const SubPavingInterface& p1, const SubPavingInterface& p
 inline Bool subset(const SubPavingInterface& p1, const SubPavingInterface& p2) { return p1.subset(p2); }
 inline Bool intersect(const SubPavingInterface& p1, const SubPavingInterface& p2) { return p1.intersects(p2); }
 
-//! \ingroup StorageModule
+//! \ingroup DiscretisedSetSubModule
 //! \brief A generic forward Iterator through constant data.
 //! \details Since the Iterator is through constant data, the data may be safely be returned by value rather than by reference,
 //! though this is not strictly standards-conforming, and means that operator->() cannot be provided.
@@ -231,7 +231,7 @@ inline SubPavingHandle SubPavingInterface::branch(Bool left_or_right) const { re
 
 
 
-//! \ingroup StorageModule
+//! \ingroup DiscretisedSetSubModule
 //! \brief A paving, which is a set constructed as a finite union of non-overlapping cells, where the possible cells are obtained by successive subdivision.
 class PavingInterface
     : public virtual SubPavingInterface
@@ -251,7 +251,7 @@ class PavingInterface
     virtual Void remove(const GridCell& cell) = 0; // Deprecated?
 };
 
-//! \ingroup StorageModule
+//! \ingroup DiscretisedSetSubModule
 class PavingHandle
 {
     PavingInterface* _ptr;

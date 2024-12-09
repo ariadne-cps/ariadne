@@ -1,7 +1,7 @@
 /***************************************************************************
  *            ariadne_module.cpp
  *
- *  Copyright  2007-20  Pieter Collins
+ *  Copyright  2007-24  Pieter Collins
  *
  ****************************************************************************/
 
@@ -24,6 +24,7 @@
 
 #include "pybind11.hpp"
 
+void foundations_submodule(pybind11::module& module);
 void numeric_submodule(pybind11::module& module);
 void linear_algebra_submodule(pybind11::module& module);
 void optimization_submodule(pybind11::module& module);
@@ -42,6 +43,7 @@ void graphics_submodule(pybind11::module& module);
 void hybrid_submodule(pybind11::module& module);
 
 PYBIND11_MODULE(pyariadne, module) {
+    foundations_submodule(module);
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);

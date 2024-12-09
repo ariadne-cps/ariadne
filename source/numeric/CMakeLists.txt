@@ -1,7 +1,6 @@
 set(LIBRARY_NAME ariadne-numeric)
 
 add_library(${LIBRARY_NAME} OBJECT
-    logical.cpp
     operators.cpp
     int.cpp
     double.cpp

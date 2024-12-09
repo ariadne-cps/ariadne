@@ -1,7 +1,7 @@
 /***************************************************************************
  *            modules.dox
  *
- *  Copyright  2006-20  Pieter Collins
+ *  Copyright  2006-24  Pieter Collins
  *
  ****************************************************************************/
 
@@ -81,9 +81,45 @@ namespace Ariadne {
 
 
 
-
-/*!\defgroup LogicalModule Logical Module
+/*! \defgroup FoundationsModule Foundations Module
  * \ingroup CoreModules
+ *
+ *  \brief Foundational classes for information, logic, and general topology.
+ */
+
+
+
+/*!\defgroup InformationSubModule Information
+ * \ingroup FoundationsModule
+ * \brief Tag classes describing the information provided by a type, notably \ref ExactTag, as \ref EffectiveTag, \ref ValidatedTag and \ref ApproximateTag.
+ * \details <em>For the mathematical theory of computable analysis and kinds of information, see the \ref computable_analysis_page Page.</em>
+ *
+ * \anchor information_section
+ *
+ * In order to indicate the kind of guarantees on the approximation provided by a concrete object,
+ *   every type in %Ariadne has an associated <em>Paradigm</em> tag, denoted by the tempate parameter \c P.
+ * The \ref ExactTag indicates that the object represents a value exactly, and with decidable equality.
+ * The \ref EffectiveTag indicates that an object allows approximations to be computed to arbitrary, known accuracy.
+ * The \ref ValidatedTag indicates that the objects provides an approximation with guarantees on the error, such as lower- and upper-bounds, or an error bound.
+ * The \ref ApproximateTag indicates that the object is an approximation with no guarantees on the accuracy.
+ *
+ * Whenever the paradigm tag <tt>P</tt> occurs as a template parameter, a type alias is given in which the type is prefixed by the tag name. For example, \ref Number "Number<ValidatedTag>" has alias \ref Number::ValidatedNumber "ValidatedNumber", and \ref Function "Function<EffectiveTag,SIG>" has alias \ref EffectiveFunction "EffectiveFunction<SIG>".
+ *
+ * \remark In a future version of %Ariadne, it may be the case that information tags are replaced by template prefixes, so \ref Number "Number<ValidatedTag>" becomes <tt>Validated<Number></tt>.
+ *
+ * \subsection builtin_type_tag_section Builtin type tag
+ *
+ * %Ariadne also needs to handle built-in C++ types, notably \c Bool, \c Int and \c double (floating-point) classes.
+ * Since C++ internally allows unsafe and inexact conversions e.g
+ *     \code  Int n=1.5; // n is set to 1! \endcode
+ * and
+ *     \code  double x=1.3; // x not exactly equal to 1.3! \endcode
+ * care must be taken when using these objects. The \ref BuiltinTag tag is used to describe these objects.
+ * %BuiltinTag objects should be immediately converted to %Ariadne objects in user code.
+ */
+
+ /*!\defgroup LogicalSubModule Logic
+ * \ingroup FoundationsModule
  * \brief Logical types, including \ref Boolean, \ref Sierpinskian and \ref Kleenean types.
  * \details <em>For the mathematical theory of non-Boolean and constructive logic, see the \ref logic_page Page.</em>
  *
@@ -150,8 +186,8 @@ namespace Ariadne {
  */
 
 
-/*!\defgroup TopologySubModule Topology Module
- * \ingroup CoreModules
+/*!\defgroup TopologySubModule Topology
+ * \ingroup FoundationsModule
  * \brief Topological constructs, including \ref Bounds "Bounds<Q>" and \ref Ball "Ball<Q,E>" types, and general constructions.
  * \details <em>For the mathematical theory of computable topology, see the \ref topology_page Page.</em>
  *
@@ -159,34 +195,6 @@ namespace Ariadne {
  * The main classes are \ref Ariadne::Bounds "Bounds<Q>", with subtypes \ref LowerBound "LowerBound<Q>" and \ref UpperBound "UpperBound<Q>", and \ref Ariadne::Ball "Ball<Q,R>".
  */
 
-/*!\defgroup InformationSubModule Information Module
- *   \ingroup CoreModules
- * \brief Tag classes describing the information provided by a type, notably \ref ExactTag, as \ref EffectiveTag, \ref ValidatedTag and \ref ApproximateTag.
- * \details <em>For the mathematical theory of computable analysis and kinds of information, see the \ref computable_analysis_page Page.</em>
- *
- * \anchor information_section
- *
- * In order to indicate the kind of guarantees on the approximation provided by a concrete object,
- *   every type in %Ariadne has an associated <em>Paradigm</em> tag, denoted by the tempate parameter \c P.
- * The \ref ExactTag indicates that the object represents a value exactly, and with decidable equality.
- * The \ref EffectiveTag indicates that an object allows approximations to be computed to arbitrary, known accuracy.
- * The \ref ValidatedTag indicates that the objects provides an approximation with guarantees on the error, such as lower- and upper-bounds, or an error bound.
- * The \ref ApproximateTag indicates that the object is an approximation with no guarantees on the accuracy.
- *
- * Whenever the paradigm tag <tt>P</tt> occurs as a template parameter, a type alias is given in which the type is prefixed by the tag name. For example, \ref Number "Number<ValidatedTag>" has alias \ref Number::ValidatedNumber "ValidatedNumber", and \ref Function "Function<EffectiveTag,SIG>" has alias \ref EffectiveFunction "EffectiveFunction<SIG>".
- *
- * \remark In a future version of %Ariadne, it may be the case that information tags are replaced by template prefixes, so \ref Number "Number<ValidatedTag>" becomes <tt>Validated<Number></tt>.
- *
- * \subsection builtin_type_tag_section Builtin type tag
- *
- * %Ariadne also needs to handle built-in C++ types, notably \c Bool, \c Int and \c double (floating-point) classes.
- * Since C++ internally allows unsafe and inexact conversions e.g
- *     \code  Int n=1.5; // n is set to 1! \endcode
- * and
- *     \code  double x=1.3; // x not exactly equal to 1.3! \endcode
- * care must be taken when using these objects. The \ref BuiltinTag tag is used to describe these objects.
- * %BuiltinTag objects should be immediately converted to %Ariadne objects in user code.
- */
 
 /*!
  * \defgroup NumericModule Numeric Module
@@ -314,9 +322,16 @@ namespace Ariadne {
  * \details In Python, the C++ operator is used as a function, e.g. \c 1.23_pr is replaced by \c pr_(1.23) .
  */
 
+
 /*!
- * \defgroup LinearAlgebraModule Linear Algebra Module
+ * \defgroup AlgebraModule Algebra Module
  * \ingroup CoreModules
+ * \brief Algebraic data types, notably for linear algebra and differential algebra.
+ */
+
+/*!
+ * \defgroup LinearAlgebraSubModule Linear Algebra Submodule
+ * \ingroup AlgebraModule
  * \brief \ref Vector "Vector<X>", \ref Matrix "Matrix<X>" and \ref Tensor "Tensor<N,X>" classes,
  * solution of linear equations, LU and QR factorisation and singular value decomposition.
  *
@@ -347,8 +362,8 @@ namespace Ariadne {
  *
  */
 
-/*!\defgroup DifferentiationModule  Differentiation Module
- * \ingroup CoreModules
+/*!\defgroup DifferentiationSubModule Differentiation Submodule
+ * \ingroup AlgebraModule
  * \brief Support for automatic differentiation using Taylor expansions, including the general \ref Differential "Differential<X>" class, fixed-order \ref FirstDifferential "FirstDifferential<X>" and \ref SecondDifferential "SecondDifferential<X>", and \ref UnivariateDifferential "UnivariateDifferential<X>" classes.
  *
  * \details <em>For the mathematical theory of automatic differentiation, see the \ref differential_algebra_page Page.</em>
@@ -463,19 +478,8 @@ namespace Ariadne {
  * \ingroup GeometryModule
  * \brief Denotable sets based on arbitrary lists of elements.
  *
- * \defgroup HybridSetSubModule Hybrid sets
+ * \defgroup DiscretisedSetSubModule Discretised sets
  * \ingroup GeometryModule
- * \ingroup HybridModules
- * \brief Sets in spaces with many components.
- *
- * The state space of a hybrid system consists of many disconnected components,
- * one for each discrete mode. Hybrid sets consist of a union of many different
- * sets, one for each component of the state space.
- */
-
-
-/*!\defgroup StorageModule Storage Module
- * \ingroup CoreModules
  * \brief Classes for representing discretised sets
  *
  * A <em>subdivision tree</em> is a binary tree describing a subdivision of
@@ -563,6 +567,15 @@ namespace Ariadne {
 /*! \defgroup HybridAutomataSubModule Hybrid automata
  *    \ingroup HybridModules
  *  \brief Hybrid system classes.
+ */
+
+/*! \defgroup HybridSetSubModule Hybrid sets
+ *    \ingroup HybridModules
+ *  \brief Sets in spaces with many components.
+ *
+ *  The state space of a hybrid system consists of many disconnected components,
+ *  one for each discrete mode. Hybrid sets consist of a union of many different
+ *  sets, one for each component of the state space.
  */
 
 /*! \defgroup HybridDynamicsSubModule Hybrid evolution

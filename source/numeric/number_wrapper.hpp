@@ -35,13 +35,13 @@
 
 #include "utility/module.hpp"
 #include "utility/dispatching.hpp"
-#include "numeric/paradigm.hpp"
+#include "foundations/paradigm.hpp"
 
 #include "number_interface.hpp"
 
 #include "number.hpp"
 
-#include "logical.hpp"
+#include "foundations/logical.hpp"
 #include "builtin.hpp"
 #include "floatdp.hpp"
 #include "floatmp.hpp"

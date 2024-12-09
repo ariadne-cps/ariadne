@@ -38,7 +38,7 @@
 #include "utility/typedefs.hpp"
 #include "utility/metaprogramming.hpp"
 #include "numeric/sign.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/arithmetic.hpp"
 #include "numeric/int.hpp"
 #include "numeric/number.decl.hpp"

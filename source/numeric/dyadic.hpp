@@ -40,7 +40,7 @@
 #include "utility/handle.hpp"
 #include "utility/writable.hpp"
 
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/twoexp.hpp"
 #include "numeric/arithmetic.hpp"

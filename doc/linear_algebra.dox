@@ -32,7 +32,7 @@
 \page linear_algebra_page Linear Algebra
 
 This page describes the basic data structures and mathematical algorithms of computational linear algebra.
-For details on how this is implemented in %Ariadne, see the \ref LinearAlgebraModule documentation.
+For details on how this is implemented in %Ariadne, see the \ref LinearAlgebraSubModule documentation.
 
 \b References
 - David C. Lay, <em>Linear Algebra and its Applicatons</em>, Addison-Wesley, 2002. ISBN 0-20170-970-8

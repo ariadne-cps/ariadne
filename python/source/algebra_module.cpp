@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra_module.cpp
  *
- *  Copyright  2007-20  Pieter Collins
+ *  Copyright  2007-24  Pieter Collins
  *
  ****************************************************************************/
 
@@ -24,11 +24,13 @@
 
 #include "pybind11.hpp"
 
+void foundations_submodule(pybind11::module&);
 void numeric_submodule(pybind11::module&);
 void linear_algebra_submodule(pybind11::module&);
 void differentiation_submodule(pybind11::module&);
 
 PYBIND11_MODULE(pyariadne_algebra, module) {
+    foundations_submodule(module);
     numeric_submodule(module);
     linear_algebra_submodule(module);
     differentiation_submodule(module);

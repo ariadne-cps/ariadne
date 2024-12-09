@@ -31,7 +31,7 @@
 #ifndef ARIADNE_FLOATMP_HPP
 #define ARIADNE_FLOATMP_HPP
 
-#include "paradigm.hpp"
+#include "foundations/paradigm.hpp"
 #include "number.hpp"
 #include "bits.hpp"
 #include "rounding.hpp"

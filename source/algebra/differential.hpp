@@ -76,7 +76,7 @@ template<class X> inline DifferentialFactory<X> factory(Differential<X> const& d
 
 
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!

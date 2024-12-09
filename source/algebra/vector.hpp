@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A scalar of type \a X; defined as an synonym (typedef) of \a X.
 template<class X> using Scalar = X;
 
@@ -153,7 +153,7 @@ template<class V> struct VectorContainer : public VectorExpression<V> { };
 
 struct DefaultTag { };
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
 //! May also be used if \a X is an \em algebra \a A over another field.
@@ -339,7 +339,7 @@ class Vector
 
 template<class X> struct IsVector<Vector<X>> : True { };
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! A view into a subvector of a vector of class \a V.
 //! \see Vector, Range
 template<class V> class VectorRange

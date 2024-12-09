@@ -29,7 +29,7 @@
 #include "../test.hpp"
 
 #include "numeric/numeric.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"

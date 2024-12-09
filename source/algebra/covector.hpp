@@ -61,7 +61,7 @@ template<class U> struct CovectorExpression : public DeclareCovectorOperations {
 template<class U> struct CovectorContainer : public CovectorExpression<U> { };
 
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A covector (dual to a vector, or a row vector) over some type \a X.
 template<class X> class Covector
     : public CovectorContainer<Covector<X>>

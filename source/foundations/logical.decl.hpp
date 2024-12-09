@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/logical.decl.hpp
+ *            foundations/logical.decl.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,16 +22,16 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric/logical.decl.hpp
+/*! \file foundations/logical.decl.hpp
  *  \brief
  */
 
 
 
-#ifndef CONCLOGICAL_DECL_HPP
-#define CONCLOGICAL_DECL_HPP
+#ifndef ARIADNE_LOGICAL_DECL_HPP
+#define ARIADNE_LOGICAL_DECL_HPP
 
-#include "numeric/paradigm.hpp"
+#include "foundations/paradigm.hpp"
 
 namespace Ariadne {
 

@@ -25,6 +25,7 @@ MathJax.Hub.Config({
       A: "{\\mathbb{A}}",
       seq: ["{\\vec{#1}}",1],
       fto: "{\\longrightarrow}",
+      pfto: "{\\dashrightarrow}",
       interval: ["{[#1]}",1],
       ivl: ["{[#1]}",1],
       unl: ["{\\underline{#1}}",1],

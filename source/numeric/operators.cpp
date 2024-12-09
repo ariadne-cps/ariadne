@@ -32,7 +32,7 @@ double div(double,double);
 #include "utility/standard.hpp"
 
 #include "utility/string.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/real.hpp"
 #include "numeric/operators.hpp"

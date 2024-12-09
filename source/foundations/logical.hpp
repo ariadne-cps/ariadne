@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/logical.hpp
+ *            foundations/logical.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,16 +22,16 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//! \file numeric/logical.hpp
+//! \file foundations/logical.hpp
 //! \brief Logical classes
 
-#ifndef CONCLOGICAL_HPP
-#define CONCLOGICAL_HPP
+#ifndef ARIADNE_LOGICAL_HPP
+#define ARIADNE_LOGICAL_HPP
 
 #include "utility/stdlib.hpp"
 #include "utility/typedefs.hpp"
 #include "utility/handle.hpp"
-#include "numeric/paradigm.hpp"
+#include "foundations/paradigm.hpp"
 
 #include "logical.decl.hpp"
 

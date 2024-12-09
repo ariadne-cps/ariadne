@@ -31,7 +31,7 @@
 
 #include "utility/module.hpp"
 
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/number.hpp"
 #include "numeric/upper_number.hpp"
 #include "numeric/lower_number.hpp"

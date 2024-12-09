@@ -39,7 +39,7 @@
 #include "utility/container.hpp"
 #include "utility/writable.hpp"
 
-#include "numeric/logical.decl.hpp"
+#include "foundations/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
 
 #include "numeric/operators.hpp"

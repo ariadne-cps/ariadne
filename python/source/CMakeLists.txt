@@ -4,6 +4,7 @@ include_directories(SYSTEM ${PYBIND11_INCLUDE_DIR})
 message(STATUS "Please note that you need to use the Python 3 interpreter to import pyariadne correctly.")
 
 add_library(pyariadne-numeric-submodule-obj OBJECT
+    foundations_submodule.cpp
     numeric_submodule.cpp
 )
 

@@ -23,8 +23,8 @@
  */
 
 #include "utility/metaprogramming.hpp"
-#include "numeric/paradigm.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/paradigm.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/sequence.hpp"
 

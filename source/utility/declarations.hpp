@@ -34,8 +34,8 @@
 #include "utility/metaprogramming.hpp"
 #include "utility/typedefs.hpp"
 
-#include "numeric/paradigm.hpp"
-#include "numeric/logical.decl.hpp"
+#include "foundations/paradigm.hpp"
+#include "foundations/logical.decl.hpp"
 #include "numeric/number.decl.hpp"
 #include "numeric/float.decl.hpp"
 

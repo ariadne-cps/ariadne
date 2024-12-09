@@ -29,7 +29,7 @@
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/decimal.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 
 #include <iomanip>
 

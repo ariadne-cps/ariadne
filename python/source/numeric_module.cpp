@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric_module.cpp
  *
- *  Copyright  2007-20  Pieter Collins
+ *  Copyright  2007-24  Pieter Collins
  *
  ****************************************************************************/
 
@@ -24,9 +24,10 @@
 
 #include "pybind11.hpp"
 
+void foundations_submodule(pybind11::module& module);
 void numeric_submodule(pybind11::module& module);
 
 PYBIND11_MODULE(pyariadne_numeric, module) {
-
+    foundations_submodule(module);
     numeric_submodule(module);
 }

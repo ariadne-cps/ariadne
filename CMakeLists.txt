@@ -180,6 +180,7 @@ add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>
+    $<TARGET_OBJECTS:ariadne-foundations>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:BETTERTHREADS_SRC>
@@ -189,6 +190,7 @@ add_library(ariadne-core SHARED
 
 add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-utility>
+    $<TARGET_OBJECTS:ariadne-foundations>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
@@ -202,6 +204,7 @@ add_library(ariadne-kernel SHARED
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-utility>
+    $<TARGET_OBJECTS:ariadne-foundations>
     $<TARGET_OBJECTS:ariadne-numeric>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>

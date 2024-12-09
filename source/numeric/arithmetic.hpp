@@ -30,10 +30,10 @@
 #define ARIADNE_ARITHMETIC_HPP
 
 #include "utility/metaprogramming.hpp"
-#include "logical.decl.hpp"
+#include "foundations/logical.decl.hpp"
 #include "number.decl.hpp"
 #include "sign.hpp"
-#include "logical.hpp" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
+#include "foundations/logical.hpp" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
 
 namespace Ariadne {
 

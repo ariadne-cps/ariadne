@@ -24,7 +24,7 @@
 
 #include "config.hpp"
 #include "numeric/integer.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "utility/string.hpp"
 
 #include <iostream>

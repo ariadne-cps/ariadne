@@ -33,7 +33,7 @@
 
 #include "utility/module.hpp"
 #include "utility/metaprogramming.hpp"
-#include "numeric/paradigm.hpp"
+#include "foundations/paradigm.hpp"
 #include "numeric/sign.hpp"
 
 namespace Ariadne {

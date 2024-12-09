@@ -34,7 +34,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 } // namespace Ariadne
 
 #include "config.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/number.hpp"
 #include "numeric/floats.hpp"
 #include "numeric/integer.hpp"

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric_submodule.cpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-24  Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,7 +32,7 @@
 #  pragma GCC diagnostic ignored "-Wattributes"
 #endif
 
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/accuracy.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
@@ -182,16 +182,6 @@ template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Erro
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation<Error<FloatMP>>&);
 
 
-const Boolean _true_ = Boolean(true);
-const Boolean _false_ = Boolean(false);
-
-template<class L> Bool _decide_(L l) { return decide(l); }
-template<class L> Bool _definitely_(L l) { return definitely(l); }
-template<class L> Bool _possibly_(L l) { return possibly(l); }
-template<class L> Bool _probably_(L l) { return probably(l); }
-
-template<class L, class E=Effort> auto _check_(L const& l, E const& e) -> decltype(l.check(e)) { return l.check(e); }
-
 template<class OP, class... TS> auto py_apply(TS const& ... ts) -> decltype(OP()(ts...)){ OP op; return op(ts...); }
 
 template<class A> auto _is_nan_(A const& a) -> Bool { return is_nan(a); }
@@ -287,78 +277,6 @@ using pybind11::detail::self;
 using pybind11::implicitly_convertible;
 
 
-Void export_effort(pymodule& module) {
-    pybind11::class_<Effort> effort_class(module,"Effort");
-    effort_class.def(init<Nat>());
-    effort_class.def("work",&Effort::work);
-    effort_class.def("__str__", &__cstr__<Effort>);
-}
-
-template<class L, class E=Effort> concept HasCheck = requires(L l, E e) { { l.check(e) }; };
-
-template<class L> void export_logical(pymodule& module, std::string name)
-{
-    pybind11::class_<L> logical_class(module,name.c_str());
-    logical_class.def(init<bool>());
-    logical_class.def(init<L>());
-    if constexpr (Constructible<L,Boolean>) { logical_class.def(init<Boolean>()); }
-    if constexpr (Constructible<L,Indeterminate>) { logical_class.def(init<Indeterminate>()); }
-    logical_class.def("__bool__", &__bool__<Boolean>);
-    define_logical(module,logical_class);
-    logical_class.def("__str__", &__cstr__<L>);
-    logical_class.def("__repr__", &__repr__<L>);
-    if constexpr (HasCheck<L>) {
-        typedef decltype(declval<L>().check(declval<Effort>())) CheckType;
-        logical_class.def("check", (CheckType(L::*)(Effort)) &L::check);
-        module.def("check", [](L l, Effort eff){return check(l,eff);});
-    } else {
-        module.def("decide", &_decide_<L>);
-        module.def("possibly", &_possibly_<L>);
-        module.def("definitely", &_definitely_<L>);
-    }
-
-    if constexpr (Convertible<Boolean,L>) { implicitly_convertible<Boolean,L>(); }
-    if constexpr (Convertible<Indeterminate,L>) { implicitly_convertible<Indeterminate,L>(); }
-}
-
-template<> void export_logical<Boolean>(pymodule& module, std::string name)
-{
-    typedef Boolean L;
-    OutputStream& operator<<(OutputStream& os, L l);
-    pybind11::class_<L> logical_class(module,name.c_str());
-    logical_class.def(init<bool>());
-    logical_class.def(init<L>());
-    logical_class.def("__bool__", &__bool__<Boolean>);
-    logical_class.def("__str__", &__cstr__<L>);
-    logical_class.def("__repr__", &__repr__<L>);
-    define_logical(module,logical_class);
-
-//    implicitly_convertible<LogicalType<ExactTag>,bool>();
-}
-
-
-
-Void export_logicals(pymodule& module) {
-    export_logical<Boolean>(module,"Boolean");
-    export_logical<Sierpinskian>(module,"Sierpinskian");
-    export_logical<NegatedSierpinskian>(module,"NegatedSierpinskian");
-    export_logical<Kleenean>(module,"Kleenean");
-    export_logical<LowerKleenean>(module,"LowerKleenean");
-    export_logical<UpperKleenean>(module,"UpperKleenean");
-    export_logical<ValidatedKleenean>(module,"ValidatedKleenean");
-    export_logical<ValidatedUpperKleenean>(module,"ValidatedUpperKleenean");
-    export_logical<ValidatedLowerKleenean>(module,"ValidatedLowerKleenean");
-    export_logical<ValidatedSierpinskian>(module,"ValidatedSierpinskian");
-    export_logical<ApproximateKleenean>(module,"ApproximateKleenean");
-
-    pybind11::class_<Indeterminate> indeterminate_class(module,"Indeterminate");
-    indeterminate_class.def("__str__", &__cstr__<Indeterminate>);
-
-    module.attr("true") = _true_;
-    module.attr("false") = _false_;
-    module.attr("indeterminate") = indeterminate;
-
-}
 
 
 Void export_accuracy(pymodule& module) {
@@ -1498,10 +1416,7 @@ template OutputStream& operator<<(OutputStream&, PythonRepresentation<Approximat
 
 Void numeric_submodule(pymodule& module) {
 
-    export_effort(module);
     export_accuracy(module);
-
-    export_logicals(module);
 
     export_builtins(module);
 

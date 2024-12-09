@@ -28,7 +28,7 @@
 
 #include "utility/macros.hpp"
 #include "utility/string.hpp"
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 
 #include "numeric/concepts.hpp"
 

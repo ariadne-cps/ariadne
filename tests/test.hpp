@@ -33,7 +33,7 @@
 #include <cstring>
 #include <iostream>
 #include <exception>
-#include "numeric/logical.hpp"
+#include "foundations/logical.hpp"
 
 int ARIADNE_TEST_FAILURES=0;
 int ARIADNE_TEST_SKIPPED=0;

@@ -117,7 +117,7 @@ class DispatchMatrixOperations {
 };
 */
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief Matrices over some type \a X.
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>
@@ -249,7 +249,7 @@ template<AMatrixExpression M> OutputStream& operator<<(OutputStream& os, M const
 
 /************ Combinatorial Matrices *********************************************************/
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief Permutation matrices defined as a sequence of transpositions.
 //! \details Pre-multiplying a matrix \f$A\f$ by the pivot matrix with pivots \f$[p_0,p_1,\ldots,p_{n-1}]\f$
 //!   first swaps row \f$0\f$ of \f$A\f$ with row \f$p_0\f$, then row \f$1\f$ of the new matrix with row \f$p_1\geq1\f$ of the new matrix,
@@ -390,7 +390,7 @@ template<class M1, class X2> struct MatrixScalarQuotient {
 };
 template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X2>> : True { };
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A view into a submatrix of a matrix of class \a M.
 //! \see Matrix, Range
 template<class M> struct MatrixRange

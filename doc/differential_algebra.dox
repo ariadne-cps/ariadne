@@ -31,7 +31,7 @@
 \page differential_algebra_page Differential Algebra and Automatic Differentiation
 
 This page describes the mathematical framework of differential algebra, and the algorithms of automatic differentiation.
-For details on how this is implemented in %Ariadne, see the \ref DifferentiationModule documentation.
+For details on how this is implemented in %Ariadne, see the \ref DifferentiationSubModule documentation.
 
 \b References
 - Andreas Griewank and Andrea Walther, <em>Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation</em> , SIAM, 2008. ISBN 0-89871-659-4

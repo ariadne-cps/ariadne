@@ -40,7 +40,7 @@ namespace Ariadne {
 template<class X> class Series;
 template<class X> class UnivariateDifferential;
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief Arbitrary-order derivatives with respect to a single argument.
 template<class X> class UnivariateDifferential
     : public DispatchTranscendentalAlgebraOperations<UnivariateDifferential<X>,X>

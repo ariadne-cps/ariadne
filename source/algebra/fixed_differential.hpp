@@ -130,7 +130,7 @@ template<class X> class FixedDifferentialCharacteristics {
     X zero_coefficient() const { return this->_zero_coefficient; }
 };
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!
@@ -409,7 +409,7 @@ class Vector< FirstDifferential<X> >
 
 
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!

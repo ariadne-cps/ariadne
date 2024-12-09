@@ -187,7 +187,7 @@ struct DiagonalMatrixOperations {
 };
 
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief Diagonal matrices over some type \a X.
 template<class X> class DiagonalMatrix
     : DiagonalMatrixOperations

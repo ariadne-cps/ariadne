@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-//! \ingroup LinearAlgebraModule
+//! \ingroup LinearAlgebraSubModule
 //! \brief A range of integer values from a \em start value up to, but not including, a \em stop value.
 class Range {
     SizeType _start; SizeType _stop;

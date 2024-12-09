@@ -199,7 +199,7 @@ class GridAbstractCell {
 };
 
 //! \ingroup BasicSetSubModule
-//! \ingroup StorageModule
+//! \ingroup DiscretisedSetSubModule
 //! \brief A cell of a grid paving. Note that this class represents the closed cell.
 //! It is uniquely defined by the path from the primary cell and is exactly on cell in a grid.
 //! This is different from the GridOpenCell which is open and the path from the root cell defines

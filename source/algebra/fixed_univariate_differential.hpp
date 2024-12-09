@@ -35,7 +35,7 @@ namespace Ariadne {
 
 template<class X> class DifferentialFactory;
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief A class representing the value and derivative of a scalar quantity
 //! depending on a single argument.
 template<class X>
@@ -222,7 +222,7 @@ template<class X> struct AlgebraOperations<UnivariateFirstDifferential<X>,X> {
 
 
 
-//! \ingroup DifferentiationModule
+//! \ingroup DifferentiationSubModule
 //! \brief A class representing the value, first and second derivatives of a scalar quantity
 //! depending on a single argument.
 template<class X>

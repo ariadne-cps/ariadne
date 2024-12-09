@@ -131,6 +131,7 @@ template<class FCTRY, class ARG> class FunctionModelCreator {
     decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
     decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
     decltype(auto) create_constants(Vector<Number<P>> const& c) const { return this->_factory.create_constants(this->_domain,c); }
+    decltype(auto) create_coordinate(SizeType i) const { return this->_factory.create_coordinate(this->_domain,i); }
     decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
 
     decltype(auto) create(DomainType const& dom, ScalarFunction<P,ARG> const& f) { return this->_factory.create(dom,f); }

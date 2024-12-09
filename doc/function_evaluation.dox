@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*!
 
 \file function_evaluation.dox
 \brief Documentation on evaluation of functions
@@ -35,48 +35,48 @@ For this reason, functions are best defined by their actions on sets.
 However, we sometimes also want to compute function values on points, and to evaluate real-valued functions.
 For this reason, we also allow definition of functions on points.
 
-We distinguish between computations on \em fixed-precision and \em multiple-precision types, 
+We distinguish between computations on \em fixed-precision and \em multiple-precision types,
 between computations on \em points and \em sets, and between \em exact and \em approximate computations.
 
 The basic computation on sets is to compute \em over-approximations to the image of <em>basic sets</em>
 From these computations, arbitrarily-accurate computations can be performed.
 The basic computation on points can be \em exact and \em approximate, as appropriate.
 
-\section set_functions  Computations on sets.
+\section set_functions  Computations on sets
 
 A valid arbitrary-precision computation on sets is defined as follows
 If \f$f\f$ is a mathematical function, and   BS is a basic set type,
-then a valid representation \c f of \f$f\f$ is a function which, 
+then a valid representation \c f of \f$f\f$ is a function which,
 for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$,
 and such that whenever \f$A_n\f$ is a decreasing sequence of sets with \f$\bigcap_{n=1}^{\infty} A_n=\{x\}\f$,
 then \f$\bigcap_{n=1}^{\infty} B_n=\{y\}\f$, where \f$y=f(x)\f$.
 
-A valid fixed-precision computation on sets is an over-approximation. 
+A valid fixed-precision computation on sets is an over-approximation.
 In other words, a valid representation \c f of \f$f\f$ is a function which,
 for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$.
 No guarentees on the accuracy are required.
-Note that it does not make sense to consider a sequence \f$A_n\f$ converging to a point for fixed-precision types. 
+Note that it does not make sense to consider a sequence \f$A_n\f$ converging to a point for fixed-precision types.
 
-\section point_functions Computations on points.
+\section point_functions Computations on points
 
 If a denotable state type is invariant under a class of functions (e.g. polynomial functions on a ring),
 then the image of a point is given exactly. Otherwise, a \a fuzzy \a point is given,
-which is a point defined using interval coefficients. A \c Point<Interval<R>> can be automatically 
+which is a point defined using interval coefficients. A \c Point<Interval<R>> can be automatically
 converted to a \c Rectangle<R>.
 
-Note that even if \c f is exact, it is impossible to compute 
+Note that even if \c f is exact, it is impossible to compute
 the action of \f$f\f$ on a set just from the action of \c f on points,
 unless a modulus of continuity for \f$f\f$ is known.
 However, it is possible to compute the action of \f$f\f$ on sets from the action on fuzzy points.
 
-\section real_functions Computations on real numbers.
+\section real_functions Computations on real numbers
 
 Most continuous functions used in science and engineering are built up from elementary real-valued functions,
-either arithmetical or defined using Taylor series expansions. 
+either arithmetical or defined using Taylor series expansions.
 For this reason, %Ariadne provides extended operations for computation on real-valued functions.
 
-Arbitrary-precision computations may be exact or approximate. 
-The function \c f(x) computes \f$f(x)\f$ exactly, if possible. 
+Arbitrary-precision computations may be exact or approximate.
+The function \c f(x) computes \f$f(x)\f$ exactly, if possible.
 If exact computation is not possible, then \c f(x) either returns an interval containing the exact result,
 or gives an error at compile time.
 If a floating-point (i.e. non-interval) result is required, then the type of error must be explicitly specified.
@@ -84,16 +84,40 @@ The function \c f_down(x) computes a lower-approximation to \f$f(x)\f$, and \c f
 The function \c f_approx(x) computes \f$f(x)\f$ approximately, with no control on the error bound.
 For some arithmetical operations, the error of \c f_approx(x,y) may be specified.
 
-Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$ 
+Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$
 using \c f_down and \c f_up. This allows an implementation of the standard set-based function \c f(I).
 It is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
-though in many cases such a computation can be extracted. 
+though in many cases such a computation can be extracted.
 In particular, we can construct interval computations from pointwise computations in the following cases, if error bounds on \f$f(x)\f$ are known.
 <ul>
    <li>The function is Lipschitz with a known Lipschitz constant e.g. \f$\sin,\ \cos\f$.</li>
    <li>The function is monotone e.g. \f$\exp\f$.</li>
    <li>The function is piecewise-monotone with known branches e.g. arithmetic.</li>
 </ul>
+
+\section lambda_calculus The lambda calculus and expressions
+
+The arguments of a function are defined by its <em>signature<em>, so \f$f:\R^2\times\R\to\R^2\f$ takes two arguments, one a vector in \f$\R^2\f$ and one a scalar in \f$\R\f$. The names of the arguments are insignificant, only the <em>position</em> matters.
+
+An <em>expression</em> is a formula in terms of named <em>variables</em>, such as \f$x \times \mathrm{e}^{t}\f$, where \f$x\in\mathcal{V}(\R^2)\f$ is a variable taking values in \f$\R^2\f$, and \f$t\in\mathcal{V}(\R)\f$ is a variable taking values in \f$\R\f$.
+
+Expressions can be used to define functions, such as \f$f(x,t):=x\times \mathrm{e}^{t}\f$.
+Note that the names of the variables are insignificant, so \f$f(y,s):=y\times\mathrm{e}^{s}\f$ defines the same function, but \f$f'(t,x)=x\times\mathrm{e}^{t}\f$ defines a different function with signature \f$f':\R\times\R^2\to\R^2\f$.
+This forms the basis of the <em>lambda calculus</em>, in which we write \f[f = \lambda x,t.x\times\mathrm{e}^{t} . \f]
+An alternative syntax is \f$(x,t)\mapsto x\times\mathrm{e}^{t}\f$.
+
+Similarly, expressions can be made from functions by calling them with variables as arguments \f$e=f(x,t)\f$ for variables \f$x\f$ and \f$t\f$. We can also substitute constants, as in \f$e=f(x,2)\f$ or expressions \f$e=f(x,t-2)\f$ or even \f$e=f(f(x,2),t-2)\f$. We can then construct new functions, such as \f$f_2 = \lambda x,t . f(f(x,2),t-2)\f$. This yields a powerful approach to manipulating functions.
+
+\subsection lambda_calculus_partial_function Partial functions
+
+The case of partial functions is complicated since properties of the domain of definition need not be preserved.
+For example, if \f$f:D \times E \to \R\f$ with \f$D,E\subset \R\f$, then \f$g = \lambda x,u. f(\sin(x),2)\f$ for real variables \f$x,u \in \mathcal{V}(\R)\f$ is defined on \f$\sin^{-1}(D)\times\R\f$.
+In general, if \f$f:\R^n \pfto \R^m\f$ is a partial function with domain \f$D\f$, and \f$e\f$ is an expression in a variable \f$x\f$, then \f$\lambda x.f(e)\f$ has domain \f$g^{-1}(D)\f$, where \f$g=\lambda x.e\f$.
+
+An important special case is that of \f$f:D\to\R^m\f$ where \f$D\subset\R^n\f$ is a bounded box. Considering (for illustrative purposes), the case \f$D=D_1\times D_2 \times D_3 \times D_4\f$ with each \f$D_i\subset \R\f$, we might define \f$g=\lambda x_1,x_2 . f(x_1,x_2,c,x_1)\f$ for some constant \f$c\in D_3\f$. The expression is valid for \f$x_1\in D_1\cap D_4\f$ and \f$x_2\in D_2\f$, yielding a bounded box \f$\dom(g)=(D_1\cap D_4)\times D_2\f$, which is empty if \f$D_1\cap D_4=\emptyset\f$.
+The domain is a bounded box whenever each argument of \f$g\f$ is used at least once (though may be empty).
+More generally, we can use an expression \f$a x+b\f$ which is affine in a single variable as the arguments to \f$f\f$.
+
 
 
 */

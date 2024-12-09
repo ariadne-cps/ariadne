@@ -118,6 +118,4 @@ An important special case is that of \f$f:D\to\R^m\f$ where \f$D\subset\R^n\f$ i
 The domain is a bounded box whenever each argument of \f$g\f$ is used at least once (though may be empty).
 More generally, we can use an expression \f$a x+b\f$ which is affine in a single variable as the arguments to \f$f\f$.
 
-
-
 */

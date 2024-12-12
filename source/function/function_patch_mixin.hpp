@@ -99,6 +99,9 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
         static_cast<FP&>(*this).clobber(); }
     inline virtual Bool _refines(FunctionPatchInterface<P,SIG> const& fp) const override {
         ARIADNE_ASSERT(dynamic_cast<const FP*>(&fp)); return refines(static_cast<const FP&>(*this),dynamic_cast<const FP&>(fp)); }
+    inline virtual FunctionPatchFactoryInterface<P>* _factory() const override {
+        return heap_move(factory(static_cast<const FP&>(*this))); }
+
     inline virtual ScalarFunctionPatchInterface<P,ARGS...>* _compose(ScalarFunction<P,RES> const& f) const override {
         return heap_move(compose(f,static_cast<const FP&>(*this))); }
     inline virtual VectorFunctionPatchInterface<P,ARGS...>* _compose(VectorFunction<P,RES> const& f) const override {
@@ -167,6 +170,9 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
         static_cast<FP&>(*this).clobber(); }
     inline virtual Bool _refines(FunctionPatchInterface<P,SIG> const& fp) const override {
         ARIADNE_ASSERT(dynamic_cast<const FP*>(&fp)); return refines(static_cast<const FP&>(*this),dynamic_cast<const FP&>(fp)); }
+    inline virtual FunctionPatchFactoryInterface<P>* _factory() const override {
+        return heap_move(factory(static_cast<const FP&>(*this))); }
+
     inline virtual ScalarFunctionPatchInterface<P,ARGS...>* _compose(ScalarFunction<P,RES> const& f) const override {
         return heap_move(compose(f,static_cast<const FP&>(*this))); }
     inline virtual VectorFunctionPatchInterface<P,ARGS...>* _compose(VectorFunction<P,RES> const& f) const override {
@@ -178,10 +184,9 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
         return this->_compose(f); }
 
     virtual VectorFunctionPatchInterface<P,ARGS...>* _clone() const override { return new FP(static_cast<const FP&>(*this)); }
-    virtual Void _set(SizeType i, const ScalarFunctionPatchInterface<P,ARGS...>& sf) override {
-        if(!dynamic_cast<const typename FP::ScalarMultivariateFunctionType*>(&sf)) {
-            ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionPatch "<<*this<<" to "<<sf<<"\n"); }
-        static_cast<FP&>(*this).FP::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
+    virtual Void _set(SizeType i, const ScalarFunctionInterface<P,ARGS...>& sf) override {
+        if(auto sfpp = dynamic_cast<const typename FP::ScalarMultivariateFunctionType*>(&sf)) { static_cast<FP&>(*this).FP::set(i,*sfpp); }
+        else { static_cast<FP&>(*this).FP::set(i,factory(*this).create(sf)); } }
     virtual VectorFunctionPatchInterface<P,ARGS...>* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual VectorFunctionPatchInterface<P,ARGS...>* _antiderivative(SizeType j) const override {
@@ -199,7 +204,13 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
     Void _adjoin(const ScalarFunctionPatchInterface<P,ARGS...>& f) override {
         static_cast<FP&>(*this).FP::adjoin(dynamic_cast<const ScalarMultivariateFunctionType&>(f)); }
     VectorFunctionPatchInterface<P,ARGS...>* _join(const VectorFunctionPatchInterface<P,ARGS...>& f) const override {
-        return heap_copy(join(static_cast<const FP&>(*this),dynamic_cast<const FP&>(f))); }
+        if (const FP* fptr = dynamic_cast<const FP*>(&f)) {
+            return heap_copy(join(static_cast<const FP&>(*this),dynamic_cast<const FP&>(f))); }
+        else {
+            const FP& fp1=static_cast<const FP&>(*this); VectorFunctionPatch<P,ARGS...> fp2(f._clone());
+            VectorFunctionPatch<P,ARGS...> res(intersection(fp1.domain(),fp2.domain()),join(cast_unrestricted(fp1),cast_unrestricted(fp2)));
+            return res._ptr->_clone(); }
+    }
     VectorFunctionPatchInterface<P,ARGS...>* _combine(const VectorFunctionPatchInterface<P,ARGS...>& f) const override {
         return heap_copy(combine(static_cast<const FP&>(*this),dynamic_cast<const FP&>(f))); }
     Vector<Number<P>> _unchecked_evaluate(const Vector<Number<P>>& x) const override {

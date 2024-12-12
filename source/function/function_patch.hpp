@@ -51,8 +51,20 @@
 
 namespace Ariadne {
 
+template<class T> class SpacePatch;
+using RealSpacePatch = SpacePatch<Real>;
+template<class P, class T> class ExpressionPatch;
+template<class T> class ConstantOrVariable;
+template<class T> class ConstantOrVariablePatch;
+class AnyConstantOrVariable;
+class AnyConstantOrVariablePatch;
+
 template<class P> class FunctionPatchFactory;
 using ValidatedFunctionPatchFactory = FunctionPatchFactory<ValidatedTag>;
+
+template<class X> Void check_domain(IntervalDomainType const& dom, X const& x);
+template<class V> Void check_domain(BoxDomainType const& dom, V const& v) {
+    for (SizeType i=0; i!=dom.dimension(); ++i) { check_domain(dom[i],v[i]); } }
 
 // FIXME: Extend with univariate case
 template<class P> class FunctionPatchFactory {
@@ -105,6 +117,8 @@ template<class P> class FunctionPatchFactory {
         return ScalarFunctionPatch<P,SARG>(this->_ptr->_create_constant(dom,c)); }
     VectorFunctionPatch<P,SARG> create_constants(ScalarDomainType const& dom, Vector<Number<P>> const& c) const {
         return VectorFunctionPatch<P,SARG>(this->_ptr->_create_constants(dom,c)); }
+    ScalarFunctionPatch<P,SARG> create_coordinate(ScalarDomainType const& dom, IndexZero i) const {
+        return ScalarFunctionPatch<P,SARG>(this->_ptr->_create_identity(dom)); }
     ScalarFunctionPatch<P,SARG> create_identity(ScalarDomainType const& dom) const {
         return ScalarFunctionPatch<P,SARG>(this->_ptr->_create_identity(dom)); }
 
@@ -115,23 +129,37 @@ template<class P> auto inline
 FunctionPatchFactoryInterface<P>::create_identity(IntervalDomainType const& dom) const -> ScalarFunctionPatch<P,VARG> {
     return ScalarFunctionPatch<P,VARG>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
-template<class FCTRY, class ARG> class FunctionPatchCreator {
+template<class FCTRY, class ARG> class FunctionPatchCreator
+    : public FCTRY
+{
     typedef typename FCTRY::Paradigm P;
   public:
     typedef FCTRY FactoryType;
     typedef typename DomainTraits<ARG>::BoundedDomainType DomainType;
+    typedef typename DomainTraits<ARG>::IndexType ArgumentIndexType;
     typedef P Paradigm;
 
-    explicit FunctionPatchCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
+    explicit FunctionPatchCreator(DomainType domain, FactoryType factory) : FactoryType(factory), _domain(domain) { }
+    operator FunctionPatchCreator<FunctionPatchFactory<P>,ARG>() const {
+        return FunctionPatchCreator<FunctionPatchFactory<P>,ARG>(this->_domain, static_cast<FactoryType const&>(*this)); }
 
-    decltype(auto) create(ScalarFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create(VectorFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
-    decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
-    decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
-    decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
+    using FactoryType::create;
+    using FactoryType::create_zero;
+    using FactoryType::create_zeros;
+    using FactoryType::create_constant;
+    using FactoryType::create_coordinate;
+    using FactoryType::create_constants;
+    using FactoryType::create_identity;
+
+    decltype(auto) create(ScalarFunction<P,ARG> const& f) { return this->create(this->_domain,f); }
+    decltype(auto) create(VectorFunction<P,ARG> const& f) { return this->create(this->_domain,f); }
+    decltype(auto) create_zero() { return this->create_zero(this->_domain); }
+    decltype(auto) create_zeros(SizeType n) { return this->create_zeros(n,this->_domain); }
+    decltype(auto) create_constant(Number<P> const& c) const { return this->create_constant(this->_domain,c); }
+    decltype(auto) create_coordinate(ArgumentIndexType i) const { return this->create_coordinate(this->_domain,i); }
+    decltype(auto) create_constants(Vector<Number<P>> const& c) const { return this->create_constants(this->_domain,c); }
+    decltype(auto) create_identity() { return this->create_identity(this->_domain); }
   protected:
-    FactoryType _factory;
     DomainType _domain;
 };
 
@@ -178,7 +206,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
     FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
-    FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
+    FunctionPatch(const DomainType& dom, const Function<P,SIG>& f);
+    //explicit FunctionPatch(const Function<P,SIG>& f) : _ptr(&dynamic_cast<FunctionPatchInterface<P,SIG>&>(*f.raw_pointer()->_clone())) { }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
     friend Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
@@ -212,7 +241,32 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(ScalarFunctionPatch<P,ARGS...> const& f) {
         FunctionPatchFactory<P> factory(f._ptr->_factory());
         return FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...>(f.domain(),factory); }
+
+    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
+    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS> const& ...) const;
+    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
   public:
+    friend ScalarFunctionPatch<P,ARGS...> add(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> sub(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> div(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> add(ScalarFunctionPatch<P,ARGS...>const& fp1, Number<P>const& c2);
+    friend ScalarFunctionPatch<P,ARGS...> sub(ScalarFunctionPatch<P,ARGS...>const& fp1, Number<P>const& c2);
+    friend ScalarFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, Number<P>const& c2);
+    friend ScalarFunctionPatch<P,ARGS...> div(ScalarFunctionPatch<P,ARGS...>const& fp1, Number<P>const& c2);
+    friend ScalarFunctionPatch<P,ARGS...> add(Number<P>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> sub(Number<P>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> mul(Number<P>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend ScalarFunctionPatch<P,ARGS...> div(Number<P>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+
+    friend VectorFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> mul(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> div(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> mul(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> div(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+
     friend ScalarFunctionPatch<P,ARGS...> operator+(ScalarFunctionPatch<P,ARGS...> const& fp1, ScalarFunction<P,ARGS...> const& f2) {
         return fp1+factory(fp1).create(f2); }
     friend ScalarFunctionPatch<P,ARGS...> operator+(ScalarFunction<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& fp2) {
@@ -346,9 +400,10 @@ template<class P, class... ARGS> class VectorFunctionPatchElement
   public:
     typedef typename ScalarFunctionPatch<P,ARGS...>::GenericType GenericType;
     operator const ScalarFunctionPatch<P,ARGS...> () const;
+    explicit operator const ScalarFunction<P,ARGS...> () const;
     VectorFunctionPatchElement(VectorFunctionPatch<P,ARGS...>* p, SizeType i) : _p(p), _i(i) { }
-    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunctionPatch<P,ARGS...>& sf) {
-        _p->set(_i,sf); return *this; }
+    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunction<P,ARGS...>& sf) { _p->set(_i,sf); return *this; }
+    VectorFunctionPatchElement<P,ARGS...>& operator=(const ScalarFunctionPatch<P,ARGS...>& sf) { _p->set(_i,sf); return *this; }
     VectorFunctionPatchElement<P,ARGS...>& operator=(const VectorFunctionPatchElement<P,ARGS...>& sf) {
         return this->operator=(static_cast<ScalarFunctionPatch<P,ARGS...>const>(sf)); }
     Void clobber() { ScalarFunctionPatch<P,ARGS...> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
@@ -391,17 +446,20 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline FunctionPatch() : _ptr() { }
     inline FunctionPatch(SharedPointer<const FunctionPatchInterface<P,SIG>> vfp)
         : _ptr(vfp->_clone()) { }
-    inline FunctionPatch(SizeType n, const ScalarFunctionPatchInterface<P,ARGS...>& sf) {
-        FunctionPatchFactory<P> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
+    inline FunctionPatch(SizeType n, const ScalarFunctionPatch<P,ARGS...>& sf) {
+        FunctionPatchFactory<P> factory(sf.reference()._factory()); *this=factory.create_zeros(n,sf.domain());
         for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline FunctionPatch(Array<ScalarFunctionPatch<P,ARGS...>> const& asf)
         : FunctionPatch(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
     inline FunctionPatch(List<ScalarFunctionPatch<P,ARGS...>> const& lsf)
         : FunctionPatch(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
     inline explicit FunctionPatch(FunctionPatchInterface<P,SIG>* p) : _ptr(p) { }
+    template<class G> requires InvocableReturning<ScalarFunctionPatch<P,ARGS...>,G,SizeType> FunctionPatch(SizeType n, G const& g)
+        : FunctionPatch(Array<ScalarFunctionPatch<P,ARGS...>>(n,g)) { }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     inline FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
     inline FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
+    FunctionPatch(const DomainType& dom, const Function<P,SIG>& f);
     inline FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
     inline operator const FunctionPatchInterface<P,SIG>& () const { return *_ptr; }
     inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); } // DEPRECATED
@@ -419,6 +477,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     template<class XX> inline Vector<XX> operator()(const Argument<XX>& v) const { return this->_ptr->_call(v); }
     template<class XX> inline Vector<XX> evaluate(const Argument<XX>& v) const { return this->_ptr->_call(v); }
     inline ScalarFunctionPatch<P,ARGS...> const get(SizeType i) const { return ScalarFunctionPatch<P,ARGS...>(this->_ptr->_get(i)); }
+    inline Void set(SizeType i, ScalarFunction<P,ARGS...> const& sf) { this->_ptr->_set(i,sf); }
     inline Void set(SizeType i, ScalarFunctionPatch<P,ARGS...> const& sf) { this->_ptr->_set(i,sf); }
     inline ScalarFunctionPatch<P,ARGS...> const operator[](SizeType i) const { return this->get(i); }
     inline VectorFunctionPatchElement<P,ARGS...> operator[](SizeType i) { return VectorFunctionPatchElement<P,ARGS...>(this,i); }
@@ -432,6 +491,10 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline Void clobber() { this->_ptr->_clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 
+    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
+    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS> const& ...) const;
+    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
   public:
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(VectorFunctionPatch<P,ARGS...> const& f) {
         FunctionPatchFactory<P> factory(f._ptr->_factory());
@@ -452,32 +515,75 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend inline VectorFunctionPatch<P,ARGS...> unchecked_compose(const VectorMultivariateFunctionPatch<P>& f, const VectorFunctionPatch<P,ARGS...>& g) {
         return VectorFunctionPatch<P,ARGS...>(g._ptr->_compose(cast_unchecked(f))); }
 
-    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f) {
-        return VectorFunctionPatch<P,ARGS...>(f._ptr->_clone()); }
-    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f) {
-        VectorFunctionPatch<P,ARGS...> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f1, const Vector<Number<P>>& c2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f1, const Vector<Number<P>>& c2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator*(const ScalarFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1*f2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator*(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*f2; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator/(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]/f2; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator+(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1[i]+f2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator-(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1[i]-f2[i]; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator*(const VectorFunctionPatch<P,ARGS...>& f1, const Number<P>& c2) {
-        VectorFunctionPatch<P,ARGS...> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
-    friend inline VectorFunctionPatch<P,ARGS...> operator*(const Number<P>& c1, const VectorFunctionPatch<P,ARGS...>& f2) {
-        VectorFunctionPatch<P,ARGS...> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
+    friend VectorFunctionPatch<P,ARGS...> nul(VectorFunctionPatch<P,ARGS...>const& fp) {
+        return VectorFunctionPatch<P,ARGS...>(fp.result_size(), [&fp](SizeType i){return nul(fp[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> pos(VectorFunctionPatch<P,ARGS...>const& fp) {
+        return VectorFunctionPatch<P,ARGS...>(fp.result_size(), [&fp](SizeType i){return pos(fp[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> neg(VectorFunctionPatch<P,ARGS...>const& fp) {
+        return VectorFunctionPatch<P,ARGS...>(fp.result_size(), [&fp](SizeType i){return neg(fp[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> add(VectorFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        ARIADNE_PRECONDITION(fp1.result_size()==fp2.result_size());
+        return VectorFunctionPatch<P,ARGS...>(fp1.result_size(), [&fp1,&fp2](SizeType i){return add(fp1[i],fp2[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> sub(VectorFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        ARIADNE_PRECONDITION(fp1.result_size()==fp2.result_size());
+        return VectorFunctionPatch<P,ARGS...>(fp1.result_size(), [&fp1,&fp2](SizeType i){return sub(fp1[i],fp2[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        return VectorFunctionPatch<P,ARGS...>(fp2.result_size(), [&fp1,&fp2](SizeType i){return mul(fp1,fp2[i]);}); }
+    friend VectorFunctionPatch<P,ARGS...> mul(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2) {
+        return VectorFunctionPatch<P,ARGS...>(fp2.result_size(), [&fp1,&fp2](SizeType i){return mul(fp1[i],fp2);}); }
+    friend VectorFunctionPatch<P,ARGS...> div(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2){
+        return VectorFunctionPatch<P,ARGS...>(fp2.result_size(), [&fp1,&fp2](SizeType i){return div(fp1[i],fp2);}); }
+    friend VectorFunctionPatch<P,ARGS...> add(VectorFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2) {
+        return fp1+factory(fp1).create_constants(c2); }
+    friend VectorFunctionPatch<P,ARGS...> sub(VectorFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2) {
+        return fp1-factory(fp1).create_constants(c2); }
+    friend VectorFunctionPatch<P,ARGS...> mul(ScalarFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2) {
+        return fp1*factory(fp1).create_constants(c2); }
+    friend VectorFunctionPatch<P,ARGS...> mul(VectorFunctionPatch<P,ARGS...>const& fp1, Scalar<Number<P>>const& c2) {
+        return fp1*factory(fp1).create_constant(c2); }
+    friend VectorFunctionPatch<P,ARGS...> div(VectorFunctionPatch<P,ARGS...>const& fp1, Scalar<Number<P>>const& c2) {
+        return fp1/factory(fp1).create_constant(c2); }
+    friend VectorFunctionPatch<P,ARGS...> add(Vector<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        return factory(fp2).create_constants(c1)+fp2; }
+    friend VectorFunctionPatch<P,ARGS...> sub(Vector<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        return factory(fp2).create_constants(c1)-fp2; }
+    friend VectorFunctionPatch<P,ARGS...> mul(Scalar<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2) {
+        return factory(fp2).create_constant(c1)*fp2; }
+    friend VectorFunctionPatch<P,ARGS...> mul(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2) {
+        return factory(fp2).create_constants(c1)*fp2; }
+    friend VectorFunctionPatch<P,ARGS...> div(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2) {
+        return factory(fp2).create_constants(c1)/fp2; }
+
+    friend VectorFunctionPatch<P,ARGS...> operator+(VectorFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator-(VectorFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(ScalarFunctionPatch<P,ARGS...>const& fp1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator/(VectorFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator+(VectorFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> operator-(VectorFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(ScalarFunctionPatch<P,ARGS...>const& fp1, Vector<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(VectorFunctionPatch<P,ARGS...>const& fp1, Scalar<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> operator/(VectorFunctionPatch<P,ARGS...>const& fp1, Scalar<Number<P>>const& c2);
+    friend VectorFunctionPatch<P,ARGS...> operator+(Vector<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator-(Vector<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(Scalar<Number<P>>const& c1, VectorFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator*(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+    friend VectorFunctionPatch<P,ARGS...> operator/(Vector<Number<P>>const& c1, ScalarFunctionPatch<P,ARGS...>const& fp2);
+
+    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f) { return pos(f); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f) { return neg(f); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) { return add(f1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2)  { return sub(f1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator*(const ScalarFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) { return mul(f1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator*(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) { return mul(f1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator/(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) { return div(f1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f1, const Vector<Number<P>>& c2) { return add(f1,c2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator-(const VectorFunctionPatch<P,ARGS...>& f1, const Vector<Number<P>>& c2) { return sub(f1,c2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator*(const VectorFunctionPatch<P,ARGS...>& f1, const Number<P>& c2) { return mul(f1,c2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator/(const VectorFunctionPatch<P,ARGS...>& f1, const Number<P>& c2) { return div(f1,c2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator+(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) { return add(c1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator-(const Vector<Number<P>>& c1, const VectorFunctionPatch<P,ARGS...>& f2) { return sub(c1,f2); }
+    friend inline VectorFunctionPatch<P,ARGS...> operator*(const Number<P>& c1, const VectorFunctionPatch<P,ARGS...>& f2) { return mul(c1,f2); }
 
     friend inline VectorFunctionPatch<P,ARGS...> operator+(const VectorFunctionPatch<P,ARGS...>& f1, const VectorMultivariateFunction<P>& f2) {
         return f1+factory(f1).create(f2); }
@@ -579,6 +685,9 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
 
 template<class P, class... ARGS> VectorFunctionPatchElement<P,ARGS...>::operator const ScalarFunctionPatch<P,ARGS...> () const {
     return ScalarFunctionPatch<P,ARGS...>(_p->get(_i)); }
+
+template<class P, class... ARGS> VectorFunctionPatchElement<P,ARGS...>::operator const ScalarFunction<P,ARGS...> () const {
+    return ScalarFunction<P,ARGS...>(ScalarFunctionPatch<P,ARGS...>(_p->get(_i))); }
 
 
 template<class P, class SIG> class UncheckedFunctionPatch {

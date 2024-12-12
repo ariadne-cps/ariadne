@@ -47,6 +47,39 @@ typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
 typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 typedef SymbolicAlgebra<EffectiveNumber> EffectiveSymbolicAlgebra;
 
+#warning
+
+namespace Ariadne {
+
+template<class X> Vector<X> _vectorise(Vector<X> r) {
+    return r; }
+template<class X, class... TS> Vector<X> _vectorise(Vector<X> r, SelfType<X> x, TS... ts) {
+    return _vectorise(join(r,x),ts...); }
+template<class X, class... TS> Vector<X> _vectorise(Vector<X> r, SelfType<Vector<X>> v, TS... ts) {
+    return _vectorise(join(r,v),ts...); }
+template<class X, class... TS> Vector<X> vectorise(Tuple<TS...> tup) {
+    return _vectorise(Vector<X>(),std::forward<Tuple<TS>>(tup)...); }
+template<class X, class... TS> Vector<X> vectorise(TS... ts) {
+    return _vectorise(Vector<X>(),ts...); }
+
+
+struct Arguments : public Vector<RealExpression> {
+  public:
+    template<class... TS> Arguments(TS... ts) : Vector<RealExpression>(vectorise<RealExpression>(ts...)) { }
+};
+
+template<class... TS> auto call(EffectiveScalarMultivariateFunction const& f, Arguments const& a) {
+    Vector<RealElementaryAlgebra>const& va=a;
+    RealElementaryAlgebra sr=f(va);
+    return sr.extract<RealExpression>();
+}
+template<class... TS> auto call(EffectiveVectorMultivariateFunction const& f, Arguments const& a) {
+    Vector<RealElementaryAlgebra>const& va=a;
+    Vector<RealElementaryAlgebra> vr=f(va);
+    return Vector<RealExpression>(vr.size(), [&vr](SizeType i){return vr[i].extract<RealExpression>();});
+}
+}
+
 class TestExpression {
     RealConstant o;
     RealVariable x,y,z;
@@ -433,7 +466,6 @@ class TestExpression {
         ARIADNE_TEST_SAME(simplify((y*(vex-vce))[0]),y*(xs[0]-cs[0]))
         ARIADNE_TEST_SAME(simplify(((vex-vce)*y)[0]),(xs[0]-cs[0])*y)
         ARIADNE_TEST_SAME(simplify(((vex-vce)/y)[0]),(xs[0]-cs[0])/y)
-
     }
 
     Void test_function()
@@ -483,7 +515,46 @@ class TestExpression {
         ARIADNE_TEST_PRINT(g3);
         ARIADNE_TEST_PRINT(5+va[0]+5*va[1]);
         ARIADNE_TEST_EQUALS(evaluate(g3,tw),evaluate(e3,tw));
+
+        // dy/dt=y+u; y=(x+u))*e^t-u
+
+        {
+            RealVariable x("x"), t("t"), u("u"), u0("u0"), u1("u1");
+            Scalar<RealExpression> ephi=(x+u)*exp(t)-u;
+            Real h=2;
+            auto fphi=Function(RealSpace({x,t,u}),ephi);
+            auto fpsi=Function({x,u},call(fphi,{x,h,u}));
+            EffectiveScalarMultivariateFunction fpsi2=Function({x,u0,u1},call(fpsi,{call(fpsi,{x,u0}),u1}));
+        }
+
+        {
+            RealVariables x("x",2);
+            RealVariable t("t"), u("u"), u0("u0"), u1("u1");
+            RealSpace spc(x,t,u);
+            RealConstant h(Real(3));
+
+            Arguments args={x,h,u};
+
+            Vector<RealExpression> ephi={(x[0]+u)*exp(t)-u,x[1]*exp(-2*t)};
+            auto fphi=EffectiveVectorMultivariateFunction({x,t,u},ephi);
+            auto ffphi=Function({x,t,u},call(fphi,{x,t,u}));
+            auto fpsi=Function({x,u},call(fphi,{x,h,u}));
+            EffectiveVectorMultivariateFunction fpsi2=Function({x,u0,u1},call(fpsi,{call(fpsi,{x,u0}),u1}));
+            auto epsi2=call(fpsi2,{x,u0,u1});
+            ARIADNE_TEST_PRINT(fpsi2);
+            ARIADNE_TEST_PRINT(epsi2);
+        }
+
     }
+
+    Void test_lambda_calculus() {
+        RealVariables x("x",3); RealVariable t("t"); RealVariables u("u",2);
+        EffectiveVectorMultivariateFunction phi(2,5);
+        Real h(2);
+        #warning
+        //auto psi=Function({x,u},phi(x,h,u));
+        auto psi=Function({x,u},call(phi,{x,h,u}));
+     }
 
     Void test() {
         ARIADNE_TEST_CALL(test_variables());
@@ -506,6 +577,7 @@ class TestExpression {
         ARIADNE_TEST_CALL(test_is_polynomial_in());
         ARIADNE_TEST_CALL(test_function());
         ARIADNE_TEST_CALL(test_vector_expression());
+        ARIADNE_TEST_CALL(test_lambda_calculus());
     }
 
 };

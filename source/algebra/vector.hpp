@@ -336,6 +336,7 @@ class Vector
     friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3);
     //! \brief Join a vector and a scalar.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2);
+    friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2, const X& s3);
     //! \brief Join a scalar and a vector.
     friend template<class X> Vector<X> join(const X& s1, const Vector<X>& v2);
     //! \brief Join two scalars. // FIXME: Removed due to poor detection of scalar types
@@ -650,6 +651,16 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
     Vector<X> r(v1.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
+    return r;
+}
+
+template<class X>
+Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2, const typename Vector<X>::ScalarType& x3)
+{
+    Vector<X> r(v1.size()+2u,v1.zero_element());
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    r[v1.size()]=x2;
+    r[v1.size()+1u]=x3;
     return r;
 }
 

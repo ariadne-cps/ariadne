@@ -181,10 +181,9 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     typedef typename Element<FM>::Type ScalarMultivariateFunctionType;
   public:
     virtual VectorFunctionModelInterface<P,ARG,PR,PRE>* _clone() const override { return new FM(static_cast<const FM&>(*this)); }
-    virtual Void _set(SizeType i, const ScalarFunctionPatchInterface<P,ARG>& sf) override {
-        if(!dynamic_cast<const typename FM::ScalarMultivariateFunctionType*>(&sf)) {
-            ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionModel "<<*this<<" to "<<sf); }
-        static_cast<FM&>(*this).FM::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
+    virtual Void _set(SizeType i, const ScalarFunctionInterface<P,ARG>& sf) override {
+        if(auto sfmp=dynamic_cast<const typename FM::ScalarMultivariateFunctionType*>(&sf)) { static_cast<FM&>(*this).FM::set(i,*sfmp); }
+        else { static_cast<FM&>(*this).FM::set(i,factory(static_cast<FM const&>(*this)).create(sf)); } }
     virtual Void _concrete_set(SizeType i, const ScalarFunctionModelInterface<P,ARG,PR,PRE>& sf) override {
         if(!dynamic_cast<const typename FM::ScalarMultivariateFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionModel "<<*this<<" to "<<sf); }

@@ -70,9 +70,9 @@ template<class P, class... ARGS> class FunctionPatchAlgebraInterface<P,RealVecto
 {
     using RES=RealVector; using SIG=RES(ARGS...);
   public:
-    typedef SizeType ResultIndexType;
+    typedef typename SignatureTraits<SIG>::ResultIndexType ResultIndexType;
     virtual ScalarFunctionPatchInterface<P,ARGS...>* _get(ResultIndexType) const = 0;
-    virtual Void _set(ResultIndexType, ScalarFunctionPatchInterface<P,ARGS...> const&) = 0;
+    virtual Void _set(ResultIndexType, ScalarFunctionInterface<P,ARGS...> const&) = 0;
     virtual Void _adjoin(const ScalarFunctionPatchInterface<P,ARGS...>& f2) = 0;
     virtual VectorFunctionPatchInterface<P,ARGS...>* _join(const VectorFunctionPatchInterface<P,ARGS...>& f2) const = 0;
     virtual VectorFunctionPatchInterface<P,ARGS...>* _combine(const VectorFunctionPatchInterface<P,ARGS...>& f2) const = 0;
@@ -95,6 +95,7 @@ template<class P, class SIG> class FunctionPatchInterface
     typedef ElementSizeType<DomainType> ArgumentSizeType;
     typedef ElementSizeType<CodomainType> ResultSizeType;
     typedef ElementIndexType<DomainType> ArgumentIndexType;
+    typedef ElementIndexType<CodomainType> ResultIndexType;
 
     template<class X> using Argument = typename SignatureTraits<SIG>::template Argument<X>;
     template<class X> using Result = typename SignatureTraits<SIG>::template Result<X>;
@@ -108,7 +109,7 @@ template<class P, class SIG> class FunctionPatchInterface
     virtual Void _clobber() = 0;
     virtual Bool _refines(const FunctionPatchInterface<P,SIG>& fp) const = 0;
 
-    virtual FunctionPatchFactoryInterface<P>* _factory() const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual FunctionPatchFactoryInterface<P>* _factory() const = 0;
 
     virtual DomainType const domain() const = 0;
     virtual CodomainType const codomain() const = 0;

@@ -95,10 +95,10 @@ template<class P,class RES> class FunctionExpression<P,RES(RealVariable)> {
 };
 
 template<class P> OutputStream& operator<<(OutputStream& os, ScalarMultivariateFunctionExpression<P> const& e) {
-    os << e._f;
+    os << "ScalarMultivariateFunctionExpression<P>(" << e._f;
     for(SizeType i=0; i!=e._vars.size(); ++i) {
         os << (i==0?'[':',') << "x[" << i << "]=" << e._vars[i];
-    } return os << "]";
+    } return os << "])";
 }
 
 template<class P> FunctionExpression<P,RealVector(RealVector)> FunctionFacade<P,RealVector(RealVector)>::operator() (Vector<RealVariable> const& vars) const {

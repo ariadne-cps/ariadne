@@ -119,7 +119,7 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     //    box = widen(box, eps);
     //}
 
-    FloatDP eps(0.000000001_q, Ariadne::ROUND_TO_NEAREST, dp);
+    //FloatDP eps(0.000000001_q, Ariadne::ROUND_TO_NEAREST, dp);
     //box = widen(box, eps);
 
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
@@ -129,7 +129,7 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
             divider = val;
         }
         lengths[i] = (box[i].width().raw() / divider).value();
-        lengths[i] = (lengths[i] + eps).value();
+        lengths[i] = /*(*/lengths[i] /*+ eps*//*).value()*/;
         origin[i] = tmpPointCenter[i];
 //        if (divider > 1) {
 

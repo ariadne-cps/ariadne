@@ -53,11 +53,14 @@ namespace Ariadne {
 
 template<class T> class SpacePatch;
 using RealSpacePatch = SpacePatch<Real>;
+template<class P, class T> class RestrictedExpression;
 template<class P, class T> class ExpressionPatch;
+template<class T> using ValidatedExpressionPatch = ExpressionPatch<ValidatedTag,T>;
 template<class T> class ConstantOrVariable;
 template<class T> class ConstantOrVariablePatch;
-class AnyConstantOrVariable;
-class AnyConstantOrVariablePatch;
+template<class T> class ScalarOrVector;
+template<template<class>class T, class R> class OfScalarOrVector;
+template<class R> class ScalarOrVectorConstantOrVariable;
 
 template<class P> class FunctionPatchFactory;
 using ValidatedFunctionPatchFactory = FunctionPatchFactory<ValidatedTag>;
@@ -242,10 +245,14 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
         FunctionPatchFactory<P> factory(f._ptr->_factory());
         return FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...>(f.domain(),factory); }
 
-    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
-    ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
-    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS> const& ...) const;
-    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
+    FunctionPatch(RealSpacePatch const&, Expression<RES> const&);
+    FunctionPatch(RealSpace const&, ExpressionPatch<P,RES> const&);
+//    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    FunctionPatch(RealSpacePatch const&, RestrictedExpression<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,RealVector> const&) const;
+    ExpressionPatch<P,RES> operator() (InitializerList<OfScalarOrVector<ValidatedExpressionPatch,Real>> const&) const;
+    ExpressionPatch<P,RES> operator() (InitializerList<ScalarOrVectorConstantOrVariable<Real>> const&) const;
+//    RestrictedExpression<P,RES> operator() (InitializerList<OfScalarOrVector<Expression,Real>> const&) const;
   public:
     friend ScalarFunctionPatch<P,ARGS...> add(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
     friend ScalarFunctionPatch<P,ARGS...> sub(ScalarFunctionPatch<P,ARGS...>const& fp1, ScalarFunctionPatch<P,ARGS...>const& fp2);
@@ -489,10 +496,14 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     inline Void clobber() { this->_ptr->_clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 
-    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
-    ExpressionPatch<P,RES> operator() (InitializerList<AnyConstantOrVariablePatch> const&) const;
-    ExpressionPatch<P,RES> operator() (ConstantOrVariable<ARGS> const& ...) const;
-    ExpressionPatch<P,RES> operator() (ExpressionPatch<P,ARGS...> const&) const;
+    FunctionPatch(RealSpacePatch const&, Expression<RES> const&);
+    FunctionPatch(RealSpace const&, ExpressionPatch<P,RES> const&);
+//    FunctionPatch(RealSpacePatch const&, ExpressionPatch<P,RES> const&);
+    FunctionPatch(RealSpacePatch const&, RestrictedExpression<P,RES> const&);
+    ExpressionPatch<P,RES> operator() (ValidatedExpressionPatch<RealVector> const&) const;
+//    ExpressionPatch<P,RES> operator() (InitializerList<OfScalarOrVector<ValidatedExpressionPatch,Real>> const&) const;
+    ExpressionPatch<P,RES> operator() (InitializerList<ScalarOrVectorConstantOrVariable<Real>> const&) const;
+//    RestrictedExpression<P,RES> operator() (InitializerList<OfScalarOrVector<Expression,Real>> const&) const;
   public:
     friend FunctionPatchCreator<FunctionPatchFactory<P>,ARGS...> factory(VectorFunctionPatch<P,ARGS...> const& f) {
         FunctionPatchFactory<P> factory(f._ptr->_factory());

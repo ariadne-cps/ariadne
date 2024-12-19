@@ -23,11 +23,15 @@
  */
 
 #include "config.hpp"
+#include "symbolic/expression_patch.hpp"
+
 #include "algebra/algebra.hpp"
+#include "function/function.decl.hpp"
+#include "function/restricted_function.hpp"
 #include "function/function_patch.hpp"
+#include "function/taylor_function.hpp"
 #include "function/domain.hpp"
 #include "symbolic/expression.hpp"
-#include "symbolic/expression_patch.hpp"
 #include "symbolic/expression_set.hpp"
 #include "symbolic/space.hpp"
 
@@ -54,6 +58,7 @@ class TestExpressionPatch {
     Void test_construct_expression_patch();
     Void test_evaluate_function_patch();
     Void test_construct_function_patch();
+    Void test_usage();
     Void test_operations();
 };
 
@@ -128,6 +133,10 @@ Void TestExpressionPatch::test_construct_expression_patch()
     ARIADNE_TEST_PRINT(xd);
     ARIADNE_TEST_PRINT(td);
 
+    RealVariableDomainMap doms = {xd0,xd1,td,ud};
+
+    auto x0x1tud=ValidatedVectorExpressionPatch({xd0,xd1,td,ud},{x[0],x[1],t,u});
+
     auto xtud=ValidatedVectorExpressionPatch({x|xdom,t|tdom,u|udom},{x[0],x[1],t,u});
     ARIADNE_TEST_PRINT(xtud);
     auto xhud=ValidatedVectorExpressionPatch({xd[0],xd[1],ud},{x[0],x[1],h,u});
@@ -149,7 +158,8 @@ Void TestExpressionPatch::test_evaluate_function_patch() {
     ARIADNE_TEST_PRINT(phifp);
     ValidatedVectorMultivariateFunctionPatch phi1fp = restriction(phifp,product(xrdom,tdom,udom));
 
-    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorExpressionPatch,phiep,phifp({x[0],x[1],t,u0}));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorExpressionPatch,phiep,phifp({x,t,u0}));
+    ARIADNE_TEST_ASSIGN(phiep,phifp({x[0],x[1],t,u0}));
     ARIADNE_TEST_ASSIGN(phiep,(phifp({x[0],x[1],t,u0})));
     ValidatedVectorExpressionPatch phi1ep = phi1fp({x[0],x[1],t,u});
     ARIADNE_TEST_PRINT(phi1ep);
@@ -160,7 +170,6 @@ Void TestExpressionPatch::test_evaluate_function_patch() {
 
     phi2ep = phifp({phi1fp({x,t,u0}),t|tdom,u|udom});
     ARIADNE_TEST_PRINT(phi2ep);
-
 
     ValidatedVectorExpressionPatch psi1ep = phi1fp({x,h,u0});
     ValidatedVectorExpressionPatch psi2ep = phifp({phi1fp({x,h,u0}),h,ud1});
@@ -191,7 +200,6 @@ Void TestExpressionPatch::test_construct_function_patch() {
     psiep = phifp({x[0],x[1],h,u});
     ARIADNE_TEST_PRINT(psiep);
 
-
     auto psifp = ValidatedVectorMultivariateFunctionPatch({xd,ud},psiep);
     psifp = ValidatedVectorMultivariateFunctionPatch({x|xdom,u|udom},psiep);
     ARIADNE_TEST_PRINT(psifp);
@@ -200,6 +208,39 @@ Void TestExpressionPatch::test_construct_function_patch() {
     auto psi2fp = ValidatedVectorMultivariateFunctionPatch({x|xdom,u0|udom,u1|udom},psifp({psi1fp({x,u0}),ud1}));
     //psi2fp = ValidatedVectorMultivariateFunctionPatch({x|xdom,u0|udom,u1|udom},psifp({psifp({xd,ud0}),ud1}));
     ARIADNE_TEST_PRINT(psi2fp);
+}
+
+
+Void TestExpressionPatch::test_usage()
+{
+    RealVectorVariable x("x",2);
+    RealVariable t("t");
+    RealVariable u("u");
+
+    BoxDomainType xd={{1,3},{2,5}};
+    IntervalDomainType td={0,2};
+    IntervalDomainType ud={-1,+1};
+    Real h=2;
+    RealConstant hc("h",2);
+
+    ValidatedVectorMultivariateFunction phif = Function({x,t,u},{x[0]*exp(t)+u, (x[1]-1)*exp(t)});
+
+    ValidatedVectorMultivariateFunctionPatch phifp = FunctionPatch({x|xd,t|td,u|ud},Expression<RealVector>({x[0]*exp(t)+u, (x[1]-1)*exp(t)}));
+
+    ValidatedVectorExpressionPatch phiep = phifp({x,t,u});
+    ValidatedVectorExpressionPatch psiep = phifp({x,h,u});
+    ValidatedVectorMultivariateFunctionPatch psifp = FunctionPatch({x,u},psiep);
+
+    RealVectorVariable x0("x0",2), x1("x1",2), x2("x2",2);
+    RealVariable u0("u0"), u1("u1");
+
+    ValidatedVectorExpressionPatch phi0ep = phifp({x0|xd,hc,u0|ud});
+    ValidatedVectorExpressionPatch phi01ep = phifp({phifp({x0|xd,h,u0|ud}),h,u1|ud});
+#warning Removing sub
+//    ValidatedVectorMultivariateFunctionPatch g0fp = FunctionPatch({x0|xd,x1|xd,x2|xd,u0|ud,u1|ud}, phifp({x0,hc,u0})-x1);
+//    ValidatedVectorMultivariateFunctionPatch g1fp = FunctionPatch({x0|xd,x1|xd,x2|xd,u0|ud,u1|ud}, phifp({x1,hc,u1})-x2);
+
+
 }
 
 Void TestExpressionPatch::test_syntax()
@@ -239,7 +280,7 @@ Void TestExpressionPatch::test_operations()
     ValidatedScalarExpressionPatch sep({x|xdom},x);
     ValidatedVectorExpressionPatch vep({x|xdom,t|tdom},{x,t});
 
-#warning Intermediate conversion from Vector<RealExpression> to FunctionPatch doesn't work
+#warning Intermediate conversion from Vector<RealExpression> to FunctionPatch does not work
     add(vep,vc);
 
     add(sep,sep); sub(sep,sep); mul(sep,sep); div(sep,sep);

@@ -46,6 +46,15 @@ template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc
 
 class Real;
 
+template<class... TS> struct AreAllVariableOrVariables;
+template<> struct AreAllVariableOrVariables<> : True { };
+template<class... TS> struct AreAllVariableOrVariables<Variable<Real>,TS...> : AreAllVariableOrVariables<TS...> { };
+template<class... TS> struct AreAllVariableOrVariables<Variables<Real>,TS...> : AreAllVariableOrVariables<TS...> { };
+template<class... TS> struct AreAllVariableOrVariables<Variable<RealVector>,TS...> : AreAllVariableOrVariables<TS...> { };
+template<class T0, class... TS> struct AreAllVariableOrVariables<T0,TS...> : False { };
+template<class... TS> concept AllVariableOrVariables = AreAllVariableOrVariables<TS...>::value;
+
+
 //! \brief A space defined as a list of real variables.
 //! \relates Space
 typedef Space<Real> RealSpace;
@@ -74,18 +83,20 @@ template<class T> class Space
   private:
 //    template<class... VS> Space(List<Variable<T>> s, Variable<T> v, VS... vs) : Space(catenate(s,v),vs...) { }
 //    template<class... VS> Space(List<Variable<T>> s, Variables<T> v, VS... vs) : Space(catenate(s,v),vs...) { }
-    static Space<T> make_space(const List<Variable<T>>& s) { return Space<T>(s); }
-    template<class... VS> static Space<T> make_space(List<Variable<T>> s, Variable<T> v, VS... vs) {
-        return make_space(catenate(s,v),vs...); }
-    template<class... VS> static Space<T> make_space(List<Variable<T>> s, Variables<T> v, VS... vs) {
-        return make_space(catenate(s,v),vs...); }
-    template<class... VS> static Space<T> make_space(List<Variable<T>> s, Variable<Vector<T>> v, VS... vs) {
-        return make_space(s,Variables<T>(v),vs...); }
+    static Space<T> _make_space(const List<Variable<T>>& s) { return Space<T>(s); }
+    template<class... VS> static Space<T> _make_space(List<Variable<T>> s, Variable<T> v, VS... vs) {
+        return _make_space(catenate(s,v),vs...); }
+    template<class... VS> static Space<T> _make_space(List<Variable<T>> s, Variables<T> v, VS... vs) {
+        return _make_space(catenate(s,v),vs...); }
+    template<class... VS> static Space<T> _make_space(List<Variable<T>> s, Variable<Vector<T>> v, VS... vs) {
+        return _make_space(s,Variables<T>(v),vs...); }
   public:
     //! \brief The trivial space \f$T^0\f$.
     Space();
     //! \brief Construct a space from a list of Variable<T> and Variables<T>.
-    template<class... VS> Space(VS... vs) : Space(make_space(List<Variable<T>>(),vs...)) { }
+    template<class... VS> requires AllVariableOrVariables<VS...> Space(VS... vs)
+        : Space(_make_space(List<Variable<T>>(),vs...)) { }
+    Space(const Vector<VariableType>& vv);
     Space(const List<VariableType>& vl);
     Space(const List<Identifier>& vl);
     Space(const InitializerList<VariableType>& vl);

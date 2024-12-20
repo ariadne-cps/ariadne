@@ -68,6 +68,8 @@ using ValidatedVectorMultivariateRestrictedFunction = RestrictedFunction<Validat
 template<class P, class RES, class ARG> FunctionPatchCreator<FunctionPatchFactory<P>,ARG> factory(FunctionPatchMixin<RestrictedFunction<P,RES(ARG)>,P,RES(ARG)> const& rf) {
     return factory(static_cast<RestrictedFunction<P,RES(ARG)>const&>(rf)); }
 
+
+template<class V> struct Element;
 template<class P, class... ARGS> struct Element<RestrictedFunction<P,RealVector(ARGS...)>> {
     typedef RestrictedFunction<P,RealScalar(ARGS...)> Type; };
 

@@ -294,6 +294,8 @@ template<class IVL> class VectorVariableBox {
     Box<IVL> box() const { return this->_bx; }
     decltype(auto) is_empty() const { return this->_bx.is_empty(); }
     decltype(auto) operator[](SizeType i) const { return VariableInterval(_v[i],_bx[i]); }
+    operator VariablesBox<IVL> () const {
+        return VariablesBox(RealVariables(this->_v),this->_bx); }
     friend OutputStream& operator<<(OutputStream& os, VectorVariableBox<IVL> const& vbx) {
         return os << vbx._v << "|" << vbx._bx; }
 };

@@ -36,11 +36,18 @@
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
 
+#include "algebra/vector.hpp"
 #include "symbolic/variable.hpp"
 
 namespace Ariadne {
 
 template<class T> Space<T>::Space() : _variables() { }
+
+template<class T> Space<T>::Space(const Vector<VariableType>& vv) {
+    for(SizeType i=0; i!=vv.size(); ++i) {
+        this->append(vv[i]);
+    }
+}
 
 template<class T> Space<T>::Space(const List<VariableType>& vl) {
     for(SizeType i=0; i!=vl.size(); ++i) {

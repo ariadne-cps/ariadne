@@ -62,6 +62,7 @@ template<class V,class E> class Assignment;
 using StringConstant = Constant<String>; //!< <p/>
 using IntegerConstant = Constant<Integer>; //!< <p/>
 using RealConstant = Constant<Real>; //!< <p/>
+using RealVectorConstant = Constant<Vector<Real>>; //!< <p/>
 //!@}
 
 //!@{

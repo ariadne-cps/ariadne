@@ -99,8 +99,12 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
         ARIADNE_ERROR("Too much dimension on subdivision of subspace");
     }
     Nat divider = 1;
+
+    FloatDP eps(0.5_q, Ariadne::ROUND_TO_NEAREST, dp);
+    box = widen(box, eps);
+
     //Point<FloatDP> tmpPointCenter = Point(box.centre());
-    Point<FloatDP> tmpPointCenter = Point(box.midpoint());
+    Point<FloatDP> tmpPointCenter = Point(box.lower_bounds());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
 
@@ -119,8 +123,6 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     //    box = widen(box, eps);
     //}
 
-    //FloatDP eps(0.000000001_q, Ariadne::ROUND_TO_NEAREST, dp);
-    //box = widen(box, eps);
 
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
         divider = 1;
@@ -131,6 +133,7 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
         lengths[i] = (box[i].width().raw() / divider).value();
         lengths[i] = /*(*/lengths[i] /*+ eps*//*).value()*/;
         origin[i] = tmpPointCenter[i];
+        //origin[i] = (origin[i] - eps).value();
 //        if (divider > 1) {
 
             //lengths[i] = lengths[i] + eps;

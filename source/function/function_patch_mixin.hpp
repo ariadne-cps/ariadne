@@ -40,7 +40,6 @@
 #include "../algebra/range.hpp"
 #include "../algebra/operations.hpp"
 #include "../algebra/algebra_interface.hpp"
-#include "../algebra/algebra_mixin.hpp"
 
 #include "../function/domain.hpp"
 #include "../function/function_interface.hpp"
@@ -61,7 +60,6 @@ template<class FP, class P> using VectorMultivariateFunctionPatchMixin = Functio
 template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealScalar(ARGS...)>
     : public virtual ScalarFunctionPatchInterface<P,ARGS...>
     , public ScalarFunctionMixin<FP,P,ARGS...>
-    , public ElementaryAlgebraMixin<FP,Number<P>>
 {
     using RES=RealScalar; using SIG=RES(ARGS...);
     using D=typename ScalarFunctionPatchInterface<P,ARGS...>::DomainType;
@@ -73,6 +71,12 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
     using typename FunctionPatchInterface<P,SIG>::NormType;
     typedef typename SignatureTraits<SIG>::BoundedRangeType RangeType;
     typedef Number<P> X;
+  private:
+    static FP const& _cast(FunctionPatchMixin<FP,P,RealScalar(ARGS...)> const& fpm) {
+        return static_cast<FP const&>(fpm); }
+    static FP const& _cast(ElementaryAlgebraInterface<X> const& ai) {
+        return static_cast<FP const&>(dynamic_cast<FunctionPatchMixin<FP,P,RealScalar(ARGS...)>const&>(ai)); }
+    static FP* _heap_move(FP&& fp) { return new FP(std::move(fp)); }
   public:
     DomainType const domain() const override { return static_cast<FP const&>(*this).domain(); }
     CodomainType const codomain() const override { return static_cast<FP const&>(*this).codomain(); }
@@ -107,6 +111,17 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
         return this->_compose(f); }
     inline virtual VectorFunctionPatchInterface<P,ARGS...>* _unchecked_compose(VectorFunction<P,RES> const& f) const override {
         return this->_compose(f); }
+
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<X> const& other) const override {
+        return _heap_move(op(_cast(*this),_cast(other))); }
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(UnaryElementaryOperator op) const override {
+        return _heap_move(op(_cast(*this))); }
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(_cast(*this),cnst)); }
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _rapply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(cnst,_cast(*this))); }
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(GradedElementaryOperator op, Int n) const override {
+        return _heap_move(op(_cast(*this),n)); }
 
     NormType const _norm() const override {
         return static_cast<NormType>(norm(static_cast<const FP&>(*this))); }

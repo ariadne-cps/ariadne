@@ -40,7 +40,6 @@
 #include "../algebra/range.hpp"
 #include "../algebra/operations.hpp"
 #include "../algebra/algebra_interface.hpp"
-#include "../algebra/algebra_mixin.hpp"
 
 #include "../function/domain.hpp"
 #include "../function/function_interface.hpp"

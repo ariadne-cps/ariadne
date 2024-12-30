@@ -77,4 +77,9 @@ template class GradedAlgebraOperations<Differential<FloatMPUpperInterval>>;
 template class Vector<Differential<FloatMPBounds>>;
 template class Vector<Differential<FloatMPApproximation>>;
 
+template<> String class_name<Differential<FloatDPApproximation>>() { return "Differential<FloatDPApproximation>"; }
+template<> String class_name<Differential<FloatMPApproximation>>() { return "Differential<FloatMPApproximation>"; }
+template<> String class_name<Differential<FloatDPBounds>>() { return "Differential<FloatDPBounds>"; }
+template<> String class_name<Differential<FloatMPBounds>>() { return "Differential<FloatMPBounds>"; }
+
 }

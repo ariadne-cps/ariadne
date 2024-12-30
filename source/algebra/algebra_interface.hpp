@@ -96,7 +96,6 @@ template<> struct AlgebraTraits<Real> {
     typedef Real NumericType;
 };
 
-
 //! \brief Interface for a unital algebra over a field \a X.
 template<class X> class AlgebraInterface
     : public virtual WritableInterface

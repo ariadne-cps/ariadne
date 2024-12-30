@@ -27,7 +27,6 @@
 
 #include "algebra.hpp"
 #include "algebra_concepts.hpp"
-#include "algebra_mixin.hpp"
 #include "algebra_operations.tpl.hpp"
 
 #include "algebra_wrapper.hpp"

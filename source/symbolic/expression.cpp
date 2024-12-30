@@ -609,7 +609,11 @@ template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expres
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<String> const& e) const;
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<Boolean> const& e) const;
 
+template<> String class_name<Constant<Real>>() { return "Constant<Real>"; }
+template<> String class_name<Variable<Real>>() { return "Variable<Real>"; }
+template<> String class_name<Expression<Real>>() { return "Expression<Real>"; }
 template<> String class_name<RealVariables>() { return "RealVariables"; }
+template<> String class_name<Variable<RealVector>>() { return "Variable<Vector<Real>>"; }
 template<> String class_name<Expression<RealVector>>() { return "Expression<Vector<Real>>"; }
 
 } // namespace Ariadne

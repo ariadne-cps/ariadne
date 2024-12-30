@@ -41,7 +41,6 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/operations.hpp"
-#include "algebra/algebra_mixin.hpp"
 
 #include "function/domain.hpp"
 
@@ -58,13 +57,14 @@ template<class FM, class P, class PR=DoublePrecision, class PRE=PR> using Vector
 template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE>
     : public virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>
     , public ScalarFunctionMixin<FM,P,ARG>
-    , public ElementaryAlgebraMixin<FM,CanonicalNumericType<P,PR,PRE>>
-    , public ElementaryAlgebraMixin<FM,Number<P>>
+//    , public ElementaryAlgebraMixin<FM,CanonicalNumericType<P,PR,PRE>>
+//    , public ElementaryAlgebraMixin<FM,Number<P>>
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
     using RES = RealScalar; using SIG=RES(ARG);
     using C=BoundedDomainType<RES>; using D=BoundedDomainType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
+    using Y = typename FunctionModelInterface<P,SIG,PR,PRE>::GenericNumericType;
   public:
     typedef FunctionPatchInterface<P,SIG> GenericInterface;
     typedef typename GenericInterface::ErrorType GenericErrorType;
@@ -76,6 +76,14 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     typedef typename Interface::ErrorType ErrorType;
     typedef typename Interface::NormType NormType;
     typedef typename Interface::RangeType RangeType;
+  private:
+    static FM const& _cast(FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE> const& fmm) {
+        return static_cast<FM const&>(fmm); }
+    static FM const& _cast(ElementaryAlgebraInterface<X> const& ai) {
+        return static_cast<FM const&>(dynamic_cast<FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE>const&>(ai)); }
+    static FM const& _cast(ElementaryAlgebraInterface<Y> const& ai) {
+        return static_cast<FM const&>(dynamic_cast<FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE>const&>(ai)); }
+    static FM* _heap_move(FM&& fm) { return new FM(std::move(fm)); }
   public:
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _clone() const override {
         return new FM(static_cast<const FM&>(*this)); }
@@ -106,6 +114,24 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
         return norm(static_cast<const FM&>(*this)); }
     Void _clobber() override {
         static_cast<FM&>(*this).clobber(); }
+
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<X> const& other) const override {
+        return _heap_move(op(_cast(*this),_cast(other))); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<Y> const& other) const override {
+        return _heap_move(op(_cast(*this),_cast(other))); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(UnaryElementaryOperator op) const override {
+        return _heap_move(op(_cast(*this))); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(_cast(*this),cnst)); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, Y const& cnst) const override {
+        return _heap_move(op(_cast(*this),cnst)); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _rapply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(cnst,_cast(*this))); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _rapply(BinaryElementaryOperator op, Y const& cnst) const override {
+        return _heap_move(op(cnst,_cast(*this))); }
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(GradedElementaryOperator op, Int n) const override {
+        return _heap_move(op(_cast(*this),n)); }
+
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _derivative(SizeType j) const override {
         return new FM(derivative(static_cast<const FM&>(*this),j)); }
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _antiderivative(SizeType j) const override {

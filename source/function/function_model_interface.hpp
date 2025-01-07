@@ -48,16 +48,26 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface;
 template<class P, class SIG, class PR, class PRE> class FunctionModelAlgebraInterface;
 
 template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInterface<P,RealScalar(ARG),PR,PRE>
-    : public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
+    : public virtual FunctionPatchAlgebraInterface<P,RealScalar(ARG)>
 {
     static_assert(Same<ARG,RealScalar> or Same<ARG,RealVector>);
-    typedef RealScalar RES; typedef RES SIG(ARG);
-    typedef BoundedDomainType<ARG> D; typedef BoundedDomainType<RES> C;
-    typedef RawFloat<PR> F;
+    using RES = RealScalar; using SIG = RES(ARG);
+    using D = BoundedDomainType<ARG>; using C = BoundedDomainType<RES>;
+    using F = RawFloat<PR>;
   public:
     typedef D DomainType;
     typedef C CodomainType;
     typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
+  public:
+    virtual FunctionModelInterface<P,SIG,PR,PRE>* _create_copy() const = 0;
+    virtual FunctionModelInterface<P,SIG,PR,PRE>* _create_zero() const = 0;
+    virtual FunctionModelInterface<P,SIG,PR,PRE>* _create_constant(Number<P> const& c) const = 0;
+    virtual FunctionModelInterface<P,SIG,PR,PRE>* _create_constant(CanonicalNumericType<P,PR,PRE> const& c) const = 0;
+
+    using FunctionPatchAlgebraInterface<P,RealScalar(ARG)>::_apply;
+    using FunctionPatchAlgebraInterface<P,RealScalar(ARG)>::_rapply;
+    virtual FunctionPatchAlgebraInterface<P,SIG>* _apply(BinaryElementaryOperator, CanonicalNumericType<P,PR,PRE> const&) const = 0;
+    virtual FunctionPatchAlgebraInterface<P,SIG>* _rapply(BinaryElementaryOperator, CanonicalNumericType<P,PR,PRE> const&) const = 0;
   public:
     virtual ValueType const _value() const = 0;
 };

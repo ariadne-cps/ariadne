@@ -34,9 +34,6 @@
 
 #include "../numeric/operators.hpp"
 #include "../numeric/numeric.hpp"
-
-#include "../algebra/algebra_interface.hpp"
-
 #include "../function/domain.hpp"
 #include "../function/function_interface.hpp"
 
@@ -62,9 +59,18 @@ using ValidatedFunctionPatchFactoryInterface = FunctionPatchFactoryInterface<Val
 
 template<class P, class SIG> class FunctionPatchAlgebraInterface;
 
+
 template<class P, class... ARGS> class FunctionPatchAlgebraInterface<P,RealScalar(ARGS...)>
-    : public virtual ElementaryAlgebraInterface<Number<P>>
-{ };
+    : public virtual WritableInterface
+{
+    using RES=RealScalar; using SIG=RES(ARGS...);
+  public:
+    virtual FunctionPatchInterface<P,SIG>* _apply(BinaryElementaryOperator, FunctionPatchAlgebraInterface<P,SIG> const&) const = 0;
+    virtual FunctionPatchInterface<P,SIG>* _apply(BinaryElementaryOperator, Number<P>const&) const = 0;
+    virtual FunctionPatchInterface<P,SIG>* _rapply(BinaryElementaryOperator, Number<P>const&) const = 0;
+    virtual FunctionPatchInterface<P,SIG>* _apply(UnaryElementaryOperator) const = 0;
+    virtual FunctionPatchInterface<P,SIG>* _apply(GradedElementaryOperator, Int) const = 0;
+};
 
 template<class P, class... ARGS> class FunctionPatchAlgebraInterface<P,RealVector(ARGS...)>
 {

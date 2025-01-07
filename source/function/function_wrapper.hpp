@@ -88,9 +88,11 @@ FunctionWrapper<F,P,SIG>* make_function_wrapper(F f) { return new Wrapper<F,Func
 
 template<class F, class P, class SIG> F const& extract(Function<P,SIG> const& f) {
     if constexpr(DerivedFrom<F,FunctionInterface<P,SIG>>) {
-        return dynamic_cast<F const&>(f.reference());
+        if (auto* fp = dynamic_cast<F const*>(f.raw_pointer())) { return *fp; }
+        else { ARIADNE_THROW(std::runtime_error,"extract<"<<class_name<F>()<<">("<<(class_name<Function<P,SIG>>())<<")","Cannot extract "<<f<<" as "<<class_name<F>()); }
     } else {
-        return dynamic_cast<FunctionWrapper<F,P,SIG> const&>(f.reference());
+        if (auto* fp = dynamic_cast<FunctionWrapper<F,P,SIG>const*>(f.raw_pointer())) { return *fp; }
+        else { ARIADNE_THROW(std::runtime_error,"extract<"<<class_name<F>()<<">("<<(class_name<Function<P,SIG>>())<<")","Cannot extract "<<f<<" as "<<class_name<F>()); }
     }
 }
 

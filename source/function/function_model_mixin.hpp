@@ -77,12 +77,11 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     typedef typename Interface::NormType NormType;
     typedef typename Interface::RangeType RangeType;
   private:
-    static FM const& _cast(FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE> const& fmm) {
+    static FM const& _cast(FunctionModelMixin<FM,P,SIG,PR,PRE> const& fmm) {
         return static_cast<FM const&>(fmm); }
-    static FM const& _cast(ElementaryAlgebraInterface<X> const& ai) {
-        return static_cast<FM const&>(dynamic_cast<FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE>const&>(ai)); }
-    static FM const& _cast(ElementaryAlgebraInterface<Y> const& ai) {
-        return static_cast<FM const&>(dynamic_cast<FunctionModelMixin<FM,P,RealScalar(ARG),PR,PRE>const&>(ai)); }
+    static FM const& _cast(FunctionPatchAlgebraInterface<P,SIG> const& ai, const char* caller = "") {
+        if (auto* fmp = dynamic_cast<FunctionModelMixin<FM,P,SIG,PR,PRE>const*>(&ai)) { return static_cast<FM const&>(*fmp); }
+        ARIADNE_THROW(std::runtime_error,caller,"Cannot dynamic cast "<<ai<<" to type "<<class_name<FM>()); }
     static FM* _heap_move(FM&& fm) { return new FM(std::move(fm)); }
   public:
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _clone() const override {
@@ -115,9 +114,7 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     Void _clobber() override {
         static_cast<FM&>(*this).clobber(); }
 
-    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<X> const& other) const override {
-        return _heap_move(op(_cast(*this),_cast(other))); }
-    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<Y> const& other) const override {
+    virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(BinaryElementaryOperator op, FunctionPatchAlgebraInterface<P,SIG> const& other) const override {
         return _heap_move(op(_cast(*this),_cast(other))); }
     virtual ScalarFunctionModelInterface<P,ARG,PR,PRE>* _apply(UnaryElementaryOperator op) const override {
         return _heap_move(op(_cast(*this))); }

@@ -71,6 +71,10 @@ template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorMo
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
+template<> String class_name<ScaledFunctionPatch<ValidatedTaylorModelDP>>() { return "ValidatedScalarMultivariateTaylorFunctionPatchDP"; }
+template<> String class_name<ScaledFunctionPatch<ValidatedTaylorModelMP>>() { return "ValidatedScalarMultivariateTaylorFunctionPatchMP"; }
+template<> String class_name<VectorScaledFunctionPatch<ValidatedTaylorModelDP>>() { return "ValidatedVectorMultivariateTaylorFunctionPatchDP"; }
+template<> String class_name<VectorScaledFunctionPatch<ValidatedTaylorModelMP>>() { return "ValidatedVectorMultivariateTaylorFunctionPatchMP"; }
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
     return new TaylorFunctionFactory(sweeper);

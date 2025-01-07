@@ -60,6 +60,7 @@ template<class FP, class P> using VectorMultivariateFunctionPatchMixin = Functio
 template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealScalar(ARGS...)>
     : public virtual ScalarFunctionPatchInterface<P,ARGS...>
     , public ScalarFunctionMixin<FP,P,ARGS...>
+    , public Aware<FP>
 {
     using RES=RealScalar; using SIG=RES(ARGS...);
     using D=typename ScalarFunctionPatchInterface<P,ARGS...>::DomainType;
@@ -74,8 +75,10 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
   private:
     static FP const& _cast(FunctionPatchMixin<FP,P,RealScalar(ARGS...)> const& fpm) {
         return static_cast<FP const&>(fpm); }
-    static FP const& _cast(ElementaryAlgebraInterface<X> const& ai) {
-        return static_cast<FP const&>(dynamic_cast<FunctionPatchMixin<FP,P,RealScalar(ARGS...)>const&>(ai)); }
+    static FP const& _cast(ElementaryAlgebraInterface<X> const& ai, const char* caller = "") {
+        auto fp = dynamic_cast<FunctionPatchMixin<FP,P,RealScalar(ARGS...)>const*>(&ai);
+        if (fp == nullptr) { ARIADNE_THROW(std::runtime_error,caller,"Cannot cast "<<ai<<" to FunctionPatchMixin<FP>"); }
+        return static_cast<FP const&>(*fp); }
     static FP* _heap_move(FP&& fp) { return new FP(std::move(fp)); }
   public:
     DomainType const domain() const override { return static_cast<FP const&>(*this).domain(); }
@@ -112,7 +115,7 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealSca
     inline virtual VectorFunctionPatchInterface<P,ARGS...>* _unchecked_compose(VectorFunction<P,RES> const& f) const override {
         return this->_compose(f); }
 
-    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<X> const& other) const override {
+    virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(BinaryElementaryOperator op, FunctionPatchAlgebraInterface<P,SIG> const& other) const override {
         return _heap_move(op(_cast(*this),_cast(other))); }
     virtual ScalarFunctionPatchInterface<P,ARGS...>* _apply(UnaryElementaryOperator op) const override {
         return _heap_move(op(_cast(*this))); }
@@ -212,11 +215,11 @@ template<class FP, class P, class... ARGS> class FunctionPatchMixin<FP,P,RealVec
     VectorFunctionPatchInterface<P,ARGS...>* _restriction(const BoxDomainType& d) const override {
         return new FP(restriction(static_cast<const FP&>(*this),d)); }
     Void _adjoin(const ScalarFunctionPatchInterface<P,ARGS...>& f) override {
-        static_cast<FP&>(*this).FP::adjoin(dynamic_cast<const ScalarMultivariateFunctionType&>(f)); }
+        static_cast<FP&>(*this).FP::adjoin(checked_dynamic_cast<const ScalarMultivariateFunctionType&>(f)); }
     VectorFunctionPatchInterface<P,ARGS...>* _join(const VectorFunctionPatchInterface<P,ARGS...>& f) const override {
-        return heap_copy(join(static_cast<const FP&>(*this),dynamic_cast<const FP&>(f))); }
+        return heap_copy(join(static_cast<const FP&>(*this),checked_dynamic_cast<const FP&>(f))); }
     VectorFunctionPatchInterface<P,ARGS...>* _combine(const VectorFunctionPatchInterface<P,ARGS...>& f) const override {
-        return heap_copy(combine(static_cast<const FP&>(*this),dynamic_cast<const FP&>(f))); }
+        return heap_copy(combine(static_cast<const FP&>(*this),checked_dynamic_cast<const FP&>(f))); }
     Vector<Number<P>> _unchecked_evaluate(const Vector<Number<P>>& x) const override {
         return unchecked_evaluate(static_cast<const FP&>(*this),x); }
     Vector<CanonicalNumericType<P,DP>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,DP>>& x) const override {

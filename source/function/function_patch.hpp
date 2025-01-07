@@ -177,7 +177,8 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     FunctionPatch(const FunctionPatch<P,SIG>& f) : _ptr(f._ptr) { }
     FunctionPatch& operator=(const FunctionPatch<P,SIG>& f) { this->_ptr=f._ptr; return *this; }
         FunctionPatch(const FunctionPatchInterface<P,SIG>& f) : _ptr(f._clone()) { }
-    FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) { }
+    FunctionPatch(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionPatchInterface<P,SIG>*>(f.raw_pointer()->_clone())) {
+        if (this->_ptr.operator->() == nullptr) { ARIADNE_THROW(std::runtime_error,"FunctionPatch<P,SIG>(Function<P,SIG>)","Cannot convert function "<<f<<" to FunctionPatch."); } }
     template<class PR, class PRE> FunctionPatch(FunctionModel<P,SIG,PR,PRE> fm);
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); } // DEPRECATED
     friend Function<P,SIG> cast_unchecked(FunctionPatch<P,SIG> const& fp) {
@@ -272,7 +273,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     friend ScalarFunctionPatch<P,ARGS...> restriction(const ScalarFunctionPatch<P,ARGS...>& f, const DomainType& d) {
         return ScalarFunctionPatch<P,ARGS...>(f._ptr->_restriction(d)); }
     friend inline ScalarFunction<P,ARGS...> cast_unrestricted(ScalarFunctionPatch<P,ARGS...> const& f) {
-        return ScalarFunction<P,ARGS...>(std::dynamic_pointer_cast<ScalarFunctionInterface<P,ARGS...>>>(f.managed_pointer())); }
+        return ScalarFunction<P,ARGS...>(std::static_pointer_cast<ScalarFunctionInterface<P,ARGS...>>>(f.managed_pointer())); }
 
     friend VectorFunctionPatch<P,ARGS...> join(const ScalarFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
         return join(VectorFunctionPatch<P,ARGS...>(1,f1),f2); }
@@ -304,19 +305,19 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
 
 template<class P, class... ARGS> struct AlgebraOperations<ScalarFunctionPatch<P,ARGS...>> {
 
-    typedef ScalarFunctionPatch<P,ARGS...> FM; typedef Number<P> X;
-    typedef ScalarFunctionPatchInterface<P,ARGS...> FMI;
+    typedef ScalarFunctionPatch<P,ARGS...> FP; typedef Number<P> X;
+    typedef ScalarFunctionPatchInterface<P,ARGS...> FPI;
 
-    static FM apply(BinaryElementaryOperator op, const FM& f1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,*f2._ptr))); }
-    static FM apply(BinaryElementaryOperator op, const FM& f1, const X& c2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,c2))); }
-    static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f2._ptr->_rapply(op,c1))); }
-    static FM apply(UnaryElementaryOperator op, const FM& f) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op))); }
-    static FM apply(GradedElementaryOperator op, const FM& f, Int n) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op,n))); }
+    static FP apply(BinaryElementaryOperator op, const FP& f1, const FP& f2) {
+        return FP(f1._ptr->_apply(op,*f2._ptr)); }
+    static FP apply(BinaryElementaryOperator op, const FP& f1, const X& c2) {
+        return FP(f1._ptr->_apply(op,c2)); }
+    static FP apply(BinaryElementaryOperator op, const X& c1, const FP& f2) {
+        return FP(f2._ptr->_rapply(op,c1)); }
+    static FP apply(UnaryElementaryOperator op, const FP& f) {
+        return FP(f._ptr->_apply(op)); }
+    static FP apply(GradedElementaryOperator op, const FP& f, Int n) {
+        return FP(f._ptr->_apply(op,n)); }
 };
 
 
@@ -508,7 +509,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend VectorFunctionPatch<P,ARGS...> restriction(const VectorFunctionPatch<P,ARGS...>& f, const DomainType& d) {
         return VectorFunctionPatch<P,ARGS...>(f._ptr->_restriction(d)); }
     friend inline VectorFunction<P,ARGS...> cast_unrestricted(VectorFunctionPatch<P,ARGS...> const& f) {
-        return VectorFunction<P,ARGS...>(std::dynamic_pointer_cast<VectorFunctionInterface<P,ARGS...>>(f.managed_pointer())); }
+        return VectorFunction<P,ARGS...>(std::static_pointer_cast<VectorFunctionInterface<P,ARGS...>>(f.managed_pointer())); }
 
     friend Vector<Number<P>> evaluate(const VectorFunctionPatch<P,ARGS...>& f, const Vector<Number<P>>& x) {
         return f._ptr->_call(x); }

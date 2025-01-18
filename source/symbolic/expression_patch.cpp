@@ -27,6 +27,7 @@
 #include "algebra/sweeper.hpp"
 #include "function/taylor_function.hpp"
 
+#include "symbolic/expression_patch.inl.hpp"
 #include "symbolic/expression_patch.tpl.hpp"
 
 
@@ -62,7 +63,7 @@ VariableDomainMap<Real>::VariableDomainMap(VectorVariableBoxDomainType vbx) {
     }
 }
 
-VariableDomainMap<Real>::VariableDomainMap<Real>::VariableDomainMap(InitializerList<VariableDomainMap<R>> lst) {
+VariableDomainMap<Real>::VariableDomainMap::VariableDomainMap(InitializerList<VariableDomainMap<R>> lst) {
     for (auto doms : lst) {
         for (auto vdom : doms) {
             RealVariable const& v = vdom.first;
@@ -87,6 +88,7 @@ ValidatedVectorMultivariateFunction combine(const ValidatedVectorMultivariateFun
 //    return join(compose(as1,p1),compose(as2,p2));
 }
 
+// Not needed due to explicit specialization
 //template class RestrictedExpression<ValidatedTag,Real>;
 //template class RestrictedExpression<ValidatedTag,Vector<Real>>;
 

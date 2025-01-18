@@ -86,10 +86,10 @@ template<class P, class R> class ScalarOrVectorRestrictedExpression
     using Base = Variant<RestrictedExpression<P,Scalar<R>>,RestrictedExpression<P,Vector<R>>>;
   public:
     template<class S> requires Convertible<S,Scalar<R>> ScalarOrVectorRestrictedExpression(S const& s)
-        : Base(RestrictedExpression<P,Scalar<R>>(Constant<Scalar<R>>(Scalar<R>(s)))) { }
+        : Base(Constant<Scalar<R>>(Scalar<R>(s))) { }
     template<class CS> requires Convertible<CS,Constant<Scalar<R>>> and (not Convertible<CS,Scalar<R>>)
     ScalarOrVectorRestrictedExpression(CS const& cs)
-        : Base(RestrictedExpression<P,Scalar<R>>(Constant<Scalar<R>>(cs))) { }
+        : Base(RestrictedExpression<P,Scalar<R>>(Constant<Scalar<R>>(cs))) { std::cerr<<"RE(CS cs): cs="<<cs<<", re="<<std::flush<<(*this)<<std::endl; }
     template<class CV> requires Convertible<CV,Constant<Vector<R>>> ScalarOrVectorRestrictedExpression(CV const& cv)
         : Base(Constant<Vector<R>>(cv)) { }
 /*
@@ -98,6 +98,10 @@ template<class P, class R> class ScalarOrVectorRestrictedExpression
     template<class VV> requires Convertible<VV,Variable<Vector<R>>> ScalarOrVectorRestrictedExpression(VV const& vv)
         : Base(RestrictedExpression<P,Vector<R>>(Variable<Vector<R>>(vv))) { }
 */
+    template<class VS> requires Convertible<VS,Variable<Scalar<R>>> ScalarOrVectorRestrictedExpression(VS const& vs)
+        : Base(RestrictedExpression<P,Scalar<R>>(Variable<Scalar<R>>(vs))) { }
+    template<class VV> requires Convertible<VV,Variable<Vector<R>>> ScalarOrVectorRestrictedExpression(VV const& vv)
+        : Base(RestrictedExpression<P,Vector<R>>(Variable<Vector<R>>(vv))) { }
     template<class VS> requires Convertible<VS,VariablePatch<Scalar<R>>> ScalarOrVectorRestrictedExpression(VS const& vs)
         : Base(RestrictedExpression<P,Scalar<R>>(VariablePatch<Scalar<R>>(vs))) { }
     template<class VV> requires Convertible<VV,VariablePatch<Vector<R>>> ScalarOrVectorRestrictedExpression(VV const& vv)
@@ -165,7 +169,7 @@ template<> class RestrictedExpression<ValidatedTag, RealScalar> {
     template<class C> requires Convertible<C,Real> RestrictedExpression(C const& c)
         : RestrictedExpression(Constant<Real>(Real(c))) { }
     RestrictedExpression(Constant<Real> const&);
-//    RestrictedExpression(Variable<Real> const&);
+    RestrictedExpression(Variable<Real> const&);
     RestrictedExpression(VariablePatchType<Real> const&);
 
     explicit RestrictedExpression(VariableDomainMap<Real> doms, RealExpression expr);
@@ -278,7 +282,7 @@ template<> class RestrictedExpression<ValidatedTag, RealVector> {
     template<class C> requires Convertible<C,Constant<RealVector>> RestrictedExpression(C const& c)
         : RestrictedExpression(Constant<RealVector>(c)) { }
     RestrictedExpression(Constant<RealVector> const& v);
-//    RestrictedExpression(Variable<RealVector> const&);
+    RestrictedExpression(Variable<RealVector> const&);
     RestrictedExpression(VariablePatchType<RealVector> const& v);
 
     RestrictedExpression(InitializerList<ScalarOrVectorRestrictedExpression<P,Real>> lst);

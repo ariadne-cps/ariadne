@@ -512,6 +512,9 @@ template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Grade
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
 
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>& e, const SPC& spc, CACHE& cache) {
+    RealExpression se = simplify(e.arg1()[e.arg2()]);
+    return _cached_make_formula(se,spc,cache);
+#warning
     ARIADNE_FAIL_MSG("Construction of a function from an indexed expression not implemented.");
 }
 

@@ -1138,6 +1138,9 @@ template<class P, class F> inline TaylorModel<P,F> _fma(const TaylorModel<P,F>& 
 }
 
 template<class P, class F> inline TaylorModel<P,F> _mul(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
+#warning
+    if (x.argument_size()!=y.argument_size()) { std::cerr<<"\nx="<<x<<"\ny="<<y<<"\n"; }
+
     ARIADNE_PRECONDITION(x.argument_size()==y.argument_size());
     //ARIADNE_PRECONDITION(x.sweeper()==y.sweeper());
     TaylorModel<P,F> r(x.argument_size(),x.sweeper());

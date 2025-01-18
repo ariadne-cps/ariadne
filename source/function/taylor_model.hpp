@@ -593,7 +593,7 @@ template<class F> Bool inconsistent(const Vector<TaylorModel<ValidatedTag,F>>& t
 
 template<class F> Bool refines(const Vector<TaylorModel<ValidatedTag,F>>& tm1, const Vector<TaylorModel<ValidatedTag,F>>& tm2) {
     ARIADNE_ASSERT(tm1.size()==tm2.size());
-    for(SizeType i=0; i!=tm1.size(); ++i) { if(not refines(tm1[i],tm2[i])) { return false; } }
+    for(SizeType i=0; i!=tm1.size(); ++if) { if(not refines(tm1[i],tm2[i])) { return false; } }
     return true;
 }
 

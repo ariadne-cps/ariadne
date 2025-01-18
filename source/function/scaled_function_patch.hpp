@@ -740,6 +740,8 @@ template<class M> class VectorScaledFunctionPatch
     BoxDomainType _domain;
     Vector< ModelType > _models;
   private:
+    static ScaledFunctionPatch<M> _compose(const ScalarMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f);
+    static VectorScaledFunctionPatch<M> _compose(const VectorMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f);
     static ScaledFunctionPatch<M> _unchecked_compose(const ScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f);
     static VectorScaledFunctionPatch<M> _unchecked_compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f);
   public:
@@ -927,7 +929,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend ScaledFunctionPatch<M> compose(const ScalarMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
-        return ScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+        return _compose(g,f);
     }
     friend ScaledFunctionPatch<M> compose(const ScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
         if(!subset(f.codomain(),g.domain())) {
@@ -940,7 +942,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
-        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+        return _compose(g,f);
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunctionModel<P,PR,PRE>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));

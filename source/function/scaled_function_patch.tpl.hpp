@@ -431,6 +431,18 @@ template<class M> ScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_unchecke
 template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_unchecked_compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
     return VectorScaledFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
 }
+template<class M> ScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_compose(const ScalarMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
+    if (f.result_size()==0) {
+        return ScaledFunctionPatch<M>::constant(f.domain(),g.evaluate(f.models()).range(),f.properties());
+    }
+    return ScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
+template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_compose(const VectorMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
+    if (f.result_size()==0) {
+        return ScaledFunctionPatch<M>::constant(f.domain(),g.evaluate(f.models()).range(),f.properties());
+    }
+    return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
 
 
 /*
@@ -456,12 +468,13 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
     typedef typename ScaledFunctionPatch<M>::PrecisionType PR;
 
     os << "{";
-    if constexpr (AnInterval<CoefficientType>) {
-        os << fp.polynomial();
-    } else {
-        os << MultivariatePolynomial<FloatApproximation<PR>>(fp.polynomial());
+    if (fp.argument_size()!=0) {
+        if constexpr (AnInterval<CoefficientType>) {
+            os << fp.polynomial();
+        } else {
+            os << MultivariatePolynomial<FloatApproximation<PR>>(fp.polynomial());
+        }
     }
-
     if(fp.error().raw()>0.0_x) { os << "+/-" << fp.error(); }
 
     os << "}";
@@ -471,6 +484,7 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
 template<class M> OutputStream& ScaledFunctionPatch<M>::_write(OutputStream& os) const {
     os << "ScaledFunctionPatch( dom=" << this->domain() << ", rng=" << this->range() << ", f=";
     write_polynomial(os,*this);
+    os << ", model().argument_size()="<<this->model().argument_size();
     return os << " )";
 }
 
@@ -546,6 +560,20 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
 
 
 
+
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch()
+    : _domain(), _models()
+{
+#warning
+    ARIADNE_WARN("VectorScaledFunctionPatch::VectorScaledFunctionPatch(): Default constructor of VectorScaledFunctionPatch is deprecated.");
+}
+
+template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType k)
+    : _domain(), _models(k)
+{
+#warning
+    ARIADNE_WARN("VectorScaledFunctionPatch::VectorScaledFunctionPatch(SizeType): Constructor of VectorScaledFunctionPatch without element properties deprecated.");
+}
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType m, const BoxDomainType& d, PropertiesType prp)
     : _domain(d), _models(m,ModelType(d.size(),prp))
@@ -841,7 +869,8 @@ template<class M> SizeType VectorScaledFunctionPatch<M>::size() const
 
 template<class M> ScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::zero_element() const
 {
-    return ScaledFunctionPatch<M>(this->_domain,this->_models.zero_element());
+    PropertiesType prp = this->_models.zero_element().properties();
+    return ScaledFunctionPatch<M>(this->_domain,prp);
 }
 
 template<class M> ScaledFunctionPatch<M> const VectorScaledFunctionPatch<M>::operator[](SizeType i) const
@@ -961,7 +990,7 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 
 template<class M> OutputStream& VectorScaledFunctionPatch<M>::_write(OutputStream& os) const
 {
-    os << "VectorFunctionPatch";
+    os << "VectorScaledFunctionPatch";
     os << "( result_size="<<this->result_size()<<", dom=" << this->domain() << ", rng=" << this->range() << ", f=";
     os << "[ ";
     for(SizeType i=0; i!=this->result_size(); ++i) {

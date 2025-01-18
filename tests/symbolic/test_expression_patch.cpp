@@ -58,8 +58,8 @@ class TestExpressionPatch {
     Void test_construct_expression_patch();
     Void test_evaluate_function_patch();
     Void test_construct_function_patch();
-    Void test_usage();
     Void test_operations();
+    Void test_usage();
 };
 
 TestExpressionPatch::TestExpressionPatch()
@@ -70,12 +70,15 @@ TestExpressionPatch::TestExpressionPatch()
 
 Void TestExpressionPatch::test()
 {
+#warning
+    ARIADNE_TEST_CALL(test_usage()); return;
     ARIADNE_TEST_CALL(test_space_patch());
     ARIADNE_TEST_CALL(test_syntax());
     ARIADNE_TEST_CALL(test_construct_expression_patch());
     ARIADNE_TEST_CALL(test_evaluate_function_patch());
     ARIADNE_TEST_CALL(test_construct_function_patch());
     ARIADNE_TEST_CALL(test_operations());
+    ARIADNE_TEST_CALL(test_usage());
 }
 
 
@@ -214,7 +217,6 @@ Void TestExpressionPatch::test_construct_function_patch() {
 
 Void TestExpressionPatch::test_usage()
 {
-/*
     RealVectorVariable x("x",2);
     RealVariable t("t");
     RealVariable u("u");
@@ -229,19 +231,45 @@ Void TestExpressionPatch::test_usage()
 
     ValidatedVectorMultivariateFunctionPatch phifp = FunctionPatch({x|xd,t|td,u|ud},Expression<RealVector>({x[0]*exp(t)+u, (x[1]-1)*exp(t)}));
 
-    ValidatedVectorRestrictedExpression phiep = phifp({x,t,u});
-    ValidatedVectorRestrictedExpression psiep = phifp({x,h,u});
-    ValidatedVectorMultivariateFunctionPatch psifp = FunctionPatch({x|xd,u|ud},psiep);
+#warning
+//    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorRestrictedExpression, phiep, phifp({x,t,u}));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorRestrictedExpression, phiep, phifp({x[0],x[1],t,u}));
+//    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorRestrictedExpression, psiep, phifp({x,h,u}));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorRestrictedExpression, psiep, phifp({x[0],x[1],h,u}));
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedVectorMultivariateFunctionPatch, psifp, FunctionPatch({x|xd,u|ud},psiep));
 
     RealVectorVariable x0("x0",2), x1("x1",2), x2("x2",2);
     RealVariable u0("u0"), u1("u1");
 
-    ValidatedVectorRestrictedExpression phi0ep = phifp({x0|xd,hc,u0|ud});
-    ValidatedVectorRestrictedExpression phi01ep = phifp({phifp({x0|xd,h,u0|ud}),h,u1|ud});
+
+
+//    ValidatedVectorRestrictedExpression phi0ep = phifp({x0|xd,hc,u0|ud});
+//    ValidatedVectorRestrictedExpression phi01ep = phifp({phifp({x0|xd,h,u0|ud}),h,u1|ud});
 #warning Removing sub
 //    ValidatedVectorMultivariateFunctionPatch g0fp = FunctionPatch({x0|xd,x1|xd,x2|xd,u0|ud,u1|ud}, phifp({x0,hc,u0})-x1);
 //    ValidatedVectorMultivariateFunctionPatch g1fp = FunctionPatch({x0|xd,x1|xd,x2|xd,u0|ud,u1|ud}, phifp({x1,hc,u1})-x2);
-*/
+
+
+    {
+        BoxDomainType xd({{-1,+1},{-1,+1}});
+        IntervalDomainType ud(-0.125_x,+0.125_x);
+        IntervalDomainType td(0.0_x,+0.0625_x);
+
+        ValidatedVectorMultivariateFunctionPatch phi0=ValidatedVectorMultivariateTaylorFunctionModelDP(
+            BoxDomainType({{-1,+1},{-1,+1},{-0.125_dy,+0.125_dy},{0.0_dy,0.0625_dy}}),
+            Function({x[0],x[1],u,t},{-x[1]*t+x[0],-u*t+x[1]}),
+            ThresholdSweeper<FloatDP>(dp,1e-8) );
+
+        ValidatedScalarRestrictedExpression zero({},u-u);
+        ARIADNE_TEST_PRINT(zero);
+
+        // Then phi0 is the function phi with domain x in x0Dom, u in uDom, t in t0Dom=[0,h]
+        ARIADNE_TEST_PRINT(phi0({x[0],x[1],u,Real(h)}));
+        ValidatedVectorMultivariateFunctionPatch psi0 = ValidatedVectorMultivariateFunctionPatch({x[0]|xd[0],x[1]|xd[1],u|ud}, phi0({x[0],x[1],u,Real(h)}));
+        ARIADNE_TEST_PRINT(psi0);
+
+        //( result_size=2, dom=[{-1.0000000000000000:1.0000000000000000},{-1.0000000000000000:1.0000000000000000},{-0.12500000000000000:0.12500000000000000},{0.:0.062500000000000000}], rng=[{-1.0627442:1.0627442},{-1.0078125:1.0078125}], f=[ { ~1.000~*x1*x3 +~1.000~*x0+/-0.000245}, { ~1.000~*x2*x3 +~1.000~*x1} ] )
+    }
 
 }
 
@@ -251,16 +279,47 @@ Void TestExpressionPatch::test_syntax()
 
 Void TestExpressionPatch::test_operations()
 {
-#warning  Add test constructing expression patch from constant vector expression.
+    // Test constructing expression patch from constant vector expression.
     {
         RealVector v({5,23});
         std::cerr<<"v="<<v<<"\n";
         Expression<RealVector> ve(v);
         std::cerr<<"ve="<<ve<<"\n";
         Vector<RealExpression> ev(ve);
-        Map<RealVariable,IntervalDomainType> doms;
         std::cerr<<"ev="<<ev<<"\n";
-        ValidatedVectorRestrictedExpression re(doms,ev);
+
+        Variable<RealVector> x("x",1);
+        ValidatedVectorMultivariateFunction f=Function(x,ev);
+        std::cerr<<"f="<<f<<"\n";
+
+        x=Variable<RealVector>("x",0);
+        ARIADNE_TEST_FAIL(f=Function(x,ev));
+
+        Map<RealVariable,IntervalDomainType> doms;
+        x=Variable<RealVector>("x",1);
+        doms[x[0]]=IntervalDomainType(-1,0);
+        auto re=ValidatedVectorRestrictedExpression(doms,ev);
+        std::cerr<<"re="<<re<<"\n";
+        doms.clear();
+        ARIADNE_TEST_FAIL(re=ValidatedVectorRestrictedExpression(doms,ev));
+    }
+
+    {
+        RealVector v({5,23});
+        std::cerr<<"v="<<v<<"\n";
+        Variable<RealVector> x("x",2);
+        Expression<RealVector> ve(v+x);
+        std::cerr<<"ve="<<ve<<"\n";
+        Vector<RealExpression> ev(ve);
+        std::cerr<<"ev="<<ev<<"\n";
+
+        ValidatedVectorMultivariateFunction f=Function(x,ev);
+        std::cerr<<"f="<<f<<"\n";
+
+        Map<RealVariable,IntervalDomainType> doms;
+        doms[x[0]]=IntervalDomainType(-1,0);
+        doms[x[1]]=IntervalDomainType(0,+1);
+        auto re=ValidatedVectorRestrictedExpression(doms,ev);
         std::cerr<<"re="<<re<<"\n";
     }
 

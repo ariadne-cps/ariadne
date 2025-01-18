@@ -135,15 +135,45 @@ BoxDomainType euclidean_set(Vector<RealVariablePatch> ptchs) {
     return BoxDomainType(ptchs.size(),[&ptchs](SizeType i){return ptchs[i].interval();});
 }
 RestrictedExpression<ValidatedTag,Real> make_restricted_expression(RealVariableDomainMap vdoms, RealExpression expr) {
-    Vector<RealVariable> vars(List<RealVariable>(vdoms.keys()));
+    std::cerr<<"make_restricted_expression(vdoms,expr): vdoms="<<vdoms<<", expr="<<expr<<std::endl;
+    Set<RealVariable> expr_args(arguments(expr));
+    Set<RealVariable> restr_args = vdoms.keys();
+    Vector<RealVariable> vars(List<RealVariable>(join(expr_args,restr_args)));
+/*
+    if (vars.size()==0) {
+        std::cerr<<expr_args<<" "<<restr_args<<"\n";
+        ARIADNE_THROW(std::runtime_error,"ValidatedRestrictedRealExpression(RealVariableDomainMap,RealExpression)",
+            "Cannot restrict expression "<<expr<<" to "<<vdoms<<" with no variables in domain"); }
+*/
     Function<ValidatedTag,Real(Vector<Real>)> f(vars,expr);
-    BoxDomainType dom(vars.size(),[&vars,&vdoms](SizeType i){return vdoms[vars[i]];});
+    BoxDomainType dom(vars.size(),[&vars,&vdoms](SizeType i){
+#warning
+        ExactDouble rec_eps=4503599627370496;
+        if (vdoms.contains(vars[i])) { return vdoms[vars[i]];} else { return IntervalDomainType(-rec_eps,+rec_eps); } } );
+    std::cerr<<"  vars="<<vars<<", dom="<<dom<<", f="<<f<<"\n";
     return RestrictedExpression<ValidatedTag,Real>(vars,dom,f);
 }
 RestrictedExpression<ValidatedTag,Vector<Real>> make_restricted_expression(RealVariableDomainMap vdoms, Vector<RealExpression> expr) {
+#warning
+/*
+    if (vdoms.empty()) { ARIADNE_THROW(std::runtime_error,"ValidatedRestrictedRealExpression(RealVariableDomainMap,RealExpression)",
+        "Cannot restrict expression "<<expr<<" with no variables in domain"); }
     Vector<RealVariable> vars(List<RealVariable>(vdoms.keys()));
     Function<ValidatedTag,Vector<Real>(Vector<Real>)> f(vars,expr);
     BoxDomainType dom(vars.size(),[&vars,&vdoms](SizeType i){return vdoms[vars[i]];});
+*/
+    Set<Identifier> expr_ids;
+    for (SizeType i=0; i!=expr.size(); ++i) { expr_ids.adjoin(arguments(expr[i])); }
+    Set<RealVariable> expr_args(expr_ids);
+    Set<RealVariable> restr_args = vdoms.keys();
+    Vector<RealVariable> vars(List<RealVariable>(join(expr_args,restr_args)));
+    if (vars.size()==0) { ARIADNE_THROW(std::runtime_error,"ValidatedRestrictedRealVectorExpression(RealVariableDomainMap,RealVectorExpression)",
+        "Cannot restrict expression "<<expr<<" to "<<vdoms<<" with no variables in domain"); }
+    Function<ValidatedTag,Vector<Real>(Vector<Real>)> f(vars,expr);
+    BoxDomainType dom(vars.size(),[&vars,&vdoms](SizeType i){
+#warning
+        ExactDouble rec_eps=4503599627370496;
+        if (vdoms.contains(vars[i])) { return vdoms[vars[i]];} else { return IntervalDomainType(-rec_eps,+rec_eps); } } );
     return RestrictedExpression<ValidatedTag,Vector<Real>>(vars,dom,f);
 }
 }// namespace
@@ -155,10 +185,10 @@ RestrictedExpression<ValidatedTag,RealScalar>::RestrictedExpression(Constant<Rea
 {
 }
 
-//RestrictedExpression<ValidatedTag,RealScalar>::RestrictedExpression(Variable<Real> const& v)
-//    : RestrictedExpression(RealVariableDomainMap(),Expression<Real>(v))
-//{
-//}
+RestrictedExpression<ValidatedTag,RealScalar>::RestrictedExpression(Variable<Real> const& v)
+    : RestrictedExpression(RealVariableDomainMap(),Expression<Real>(v))
+{
+}
 
 RestrictedExpression<ValidatedTag,RealScalar>::RestrictedExpression(VariablePatchType<Real> const& vptch)
     : RestrictedExpression(RealVariableDomainMap(vptch),Expression<Real>(vptch.variable()))
@@ -200,10 +230,10 @@ auto RestrictedExpression<ValidatedTag,RealScalar>::domains() const -> Map<RealV
 
 
 
-//RestrictedExpression<ValidatedTag,RealVector>::RestrictedExpression(Variable<RealVector> const& v)
-//{
-//    ARIADNE_NOT_IMPLEMENTED;
-//}
+RestrictedExpression<ValidatedTag,RealVector>::RestrictedExpression(Variable<RealVector> const& v)
+    : RestrictedExpression(VariablePatch<RealVector>(v,BoxDomainType(v.size(),IntervalDomainType(-1024,+1024))))
+{
+}
 
 RestrictedExpression<ValidatedTag,RealVector>::RestrictedExpression(VariablePatch<RealVector> const& vdoms)
     : _vars(List<RealVariable>(vdoms.variables()))
@@ -242,20 +272,25 @@ using ValidatedRealVectorRestrictedExpression = RestrictedExpression<ValidatedTa
 template<class T1, class T2> OutputStream& operator<<(OutputStream& os, Variant<T1,T2> const& var) {
     std::visit([&os](auto t){os<<t;},var); return os; }
 
-RestrictedExpression<ValidatedTag,RealVector> join(List<ScalarOrVectorRestrictedExpression<ValidatedTag,Real>> lst) {
-    std::cerr<<"join(List<ScalarOrVectorRestrictedExpression>)\n  lst="<<lst<<"\n";
+
+RestrictedExpression<ValidatedTag,RealVector> vector_from_scalar(ValidatedRealScalarRestrictedExpression const& expr) {
+    return ValidatedRealVectorRestrictedExpression(expr._vars, {expr._fp}); }
+
+RestrictedExpression<ValidatedTag,RealVector> join_list(List<ScalarOrVectorRestrictedExpression<ValidatedTag,Real>> lst) {
     ARIADNE_ASSERT(not empty(lst));
-    RestrictedExpression<ValidatedTag,RealVector> res = std::holds_alternative<ValidatedRealScalarRestrictedExpression>(lst.front()) ?
-        ValidatedRealVectorRestrictedExpression({std::get<ValidatedRealScalarRestrictedExpression>(lst.front())}) : std::get<ValidatedRealVectorRestrictedExpression>(lst.front());
-    std::cerr<<"res="<<res<<"\n";
-    for (SizeType i=1; i!=lst.size(); ++i) { res=std::visit([&res](auto e){return join(res,e);},lst[i]); }
-    std::cerr<<"res="<<res<<"\n";
+    std::cerr<<"join_list(lst): lst="<<lst<<"\n";
+    RestrictedExpression<ValidatedTag,RealVector> res = std::holds_alternative<ValidatedRealScalarRestrictedExpression>(lst.front())
+        ? vector_from_scalar(std::get<ValidatedRealScalarRestrictedExpression>(lst.front()))
+        : std::get<ValidatedRealVectorRestrictedExpression>(lst.front());
+    std::cerr<<"       res="<<res<<"\n";
+    for (SizeType i=1; i!=lst.size(); ++i) { res=std::visit([&res](auto e){return join(res,e);},lst[i]); std::cerr<<"       res="<<res<<"\n";
+}
     return res;
 }
 
 
 RestrictedExpression<ValidatedTag,RealVector>::RestrictedExpression(InitializerList<ScalarOrVectorRestrictedExpression<ValidatedTag,Real>> lst)
-    : RestrictedExpression(join(lst))
+    : RestrictedExpression(join_list(lst))
 {
 }
 
@@ -508,7 +543,8 @@ make_common_variables(RestrictedExpression<P,T1> ep1, RestrictedExpression<P,T2>
     Vector<RealVariable> vars(variables);
     MultivariateFunctionPatch<P,T1> pf1=compose(ep1._fp,p1);
     MultivariateFunctionPatch<P,T2> pf2=compose(ep2._fp,p2);
-
+    std::cerr<<"     ep2._fp="<<ep2._fp<<"\n    p2="<<p2<<",\n    pf2="<<pf2<<"\n";
+    std::cerr<<"     p2="<<p2<<",\n    pf2="<<pf2<<"\n";
     return std::make_tuple(vars,pf1,pf2);
 }
 
@@ -527,6 +563,7 @@ auto RestrictedExpression<ValidatedTag,RealVector>::_join(RestrictedExpression<P
     auto const& dom=std::get<0>(sff);
     auto const& fp1=get<1>(sff);
     auto const& fp2=get<2>(sff);
+    std::cerr<<"  dom="<<dom<<",\n  fp1="<<fp1<<",\n  fp2="<<fp2<<"\n";
     join(fp1,fp2);
     return RestrictedExpression<P,T>(dom,join(fp1,fp2));
 }
@@ -536,44 +573,83 @@ auto RestrictedExpression<ValidatedTag,RealVector>::_join(RestrictedExpression<P
 
 auto RestrictedExpression<ValidatedTag,RealScalar>::_write(OutputStream& os) const -> OutputStream& {
     RestrictedExpression<P,T> const& ep=*this;
-    os << "RestrictedExpression({";
+    os << "RealScalarRestrictedExpression({";
     for (SizeType i=0; i!=ep._vars.size(); ++i) {
         if (i!=0) { os << ","; } os << ep._vars[i]<<"|"<<ep._fp.domain()[i];
     } os << std::flush;
+#warning
+//    return os <<"}, f=???)";
+//    return os <<"}, f=" << cast_unrestricted(ep._fp) << ")";
     return os <<"}, f=" << static_cast<Function<P,SIG>>(ep._fp) << ")";
 }
 
 auto RestrictedExpression<ValidatedTag,RealVector>::_write(OutputStream& os) const -> OutputStream& {
     RestrictedExpression<P,T> const& ep=*this;
-    os << "RestrictedExpression(" << this->_vars << ", " << this->_fp << "\n";
-    os << "RestrictedExpression({";
+#warning
+    //    os << "RestrictedExpression(" << this->_vars << ", " << this->_fp << "\n";
+    os << "RealVectorRestrictedExpression({";
     for (SizeType i=0; i!=ep._vars.size(); ++i) {
         if (i!=0) { os << ","; } os << ep._vars[i]<<"|"<<ep._fp.domain()[i];
     }
-//    return os <<"}, f=" << static_cast<Function<P,SIG>>(ep._fp) << ")";
-    Function<P,SIG> f=cast_unrestricted(ep._fp);
-    return os <<"}," << f << ")";
-}
-
-
-
-
-template<class P, class... ARGS> auto
-FunctionPatch<P,RealScalar(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
-    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ep._fp));
-}
-
-template<class P, class... ARGS> auto
-FunctionPatch<P,RealVector(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
-    std::cerr<<"FunctionPatch::operator()\n";
-    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ep._fp));
+#warning
+//    return os <<"}, f=???)";
+//    return os <<"}, f=" << cast_unrestricted(ep._fp) << ")";
+    return os <<"}, f=" << static_cast<Function<P,SIG>>(ep._fp) << ")";
 }
 
 } // namespace Ariadne
 
 
 #include "function/taylor_function.hpp"
+
 namespace Ariadne {
+
+#warning
+
+
+template<class P, class... ARGS> auto
+FunctionPatch<P,RealScalar(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
+    std::cerr<<"ValidatedScalarMultivariateFunctionPatch::operator(ValidatedRealVectorRestrictedExpression)\n";
+    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ep._fp));
+}
+template<class P, class... ARGS> auto
+FunctionPatch<P,RealVector(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
+    std::cerr<<"\nValidatedVectorMultivariateFunctionPatch::operator(ValidatedRealVectorRestrictedExpression)\n";
+    auto const& fp=ep._fp;
+    std::cerr<<"fp.domain().dimension()="<<fp.domain().dimension()<<"\n";
+    std::cerr<<"fp[0].argument_size()="<<fp[0].argument_size()<<"\n";
+    std::cerr<<"fp[3].argument_size()="<<fp[3].argument_size()<<"\n";
+    std::cerr<<"fp[0]="<<fp[0]<<"\n";
+    std::cerr<<"fp[3]="<<fp[3]<<"\n";
+
+    std::cerr<<"compose(*this,ep._fp):" << std::endl << "    *this=" << *this << std::endl << "    fp[3]="<<ep._fp[3] << std::endl << "  compose(*this,ep._fp)=" << std::flush << compose(*this,ep._fp) << std::endl;
+    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ep._fp));
+}
+/*
+template<class P, class... ARGS> auto
+FunctionPatch<P,RealScalar(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
+    std::cerr<<"ValidatedScalarMultivariateFunctionPatch::operator(ValidatedRealVectorRestrictedExpression)\n";
+    ValidatedVectorMultivariateTaylorFunctionModelDP fm(ep._fp.domain(),cast_unrestricted(ep._fp),ThresholdSweeper<FloatDP>(dp,1e-8));
+    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ValidatedVectorMultivariateFunctionPatch(fm)));
+}
+template<class P, class... ARGS> auto
+FunctionPatch<P,RealVector(ARGS...)>::operator() (RestrictedExpression<P,RealVector> const& ep) const -> RestrictedExpression<P,RES> {
+    std::cerr<<"ValidatedVectorMultivariateFunctionPatch::operator(ValidatedRealVectorRestrictedExpression)\n";
+    ValidatedVectorMultivariateTaylorFunctionModelDP fm(ep._fp.domain(),cast_unrestricted(ep._fp),ThresholdSweeper<FloatDP>(dp,1e-8));
+    return RestrictedExpression<P,RES>(ep._vars, compose(*this,ValidatedVectorMultivariateFunctionPatch(fm)));
+}
+*/
+
+
+
+/*
+template<class P, class... ARGS>
+FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
+    : FunctionPatch(RestrictedFunction<P,SIG>(f,dom)) { }
+template<class P, class... ARGS>
+FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
+    : FunctionPatch(RestrictedFunction<P,SIG>(f,dom)) { }
+*/
 template<class P, class... ARGS>
 FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
     : FunctionPatch(ValidatedScalarMultivariateTaylorFunctionModelDP(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8))) { }
@@ -581,12 +657,24 @@ template<class P, class... ARGS>
 FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const DomainType& dom, const Function<P,SIG>& f)
     : FunctionPatch(ValidatedVectorMultivariateTaylorFunctionModelDP(dom,f,ThresholdSweeper<FloatDP>(dp,1e-8))) { }
 
+
+/*
 template<class P, class... ARGS>
 FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const RealSpacePatch& spcptch, const Expression<RealScalar>& e)
     : FunctionPatch(RestrictedFunction<P,SIG>(Function<P,SIG>(Vector<RealVariable>(spcptch.variables()),e),spcptch.domain())) { }
 template<class P, class... ARGS>
 FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const RealSpacePatch& spcptch, const Expression<RealVector>& e)
     : FunctionPatch(RestrictedFunction<P,SIG>(Function<P,SIG>(Vector<RealVariable>(spcptch.variables()),Vector<RealExpression>(e)),spcptch.domain())) { }
+*/
+template<class P, class... ARGS>
+FunctionPatch<P,RealScalar(ARGS...)>::FunctionPatch(const RealSpacePatch& spcptch, const Expression<RealScalar>& e)
+    : FunctionPatch(spcptch.domain(),Function<P,SIG>(Vector<RealVariable>(spcptch.variables()),e)) { }
+template<class P, class... ARGS>
+FunctionPatch<P,RealVector(ARGS...)>::FunctionPatch(const RealSpacePatch& spcptch, const Expression<RealVector>& e)
+    : FunctionPatch(spcptch.domain(),Function<P,SIG>(Vector<RealVariable>(spcptch.variables()),Vector<RealExpression>(e))) { }
+
+
+
 
 } // namespace Ariadne
 

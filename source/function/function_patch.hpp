@@ -273,7 +273,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealScalar(ARGS...)>
     friend ScalarFunctionPatch<P,ARGS...> restriction(const ScalarFunctionPatch<P,ARGS...>& f, const DomainType& d) {
         return ScalarFunctionPatch<P,ARGS...>(f._ptr->_restriction(d)); }
     friend inline ScalarFunction<P,ARGS...> cast_unrestricted(ScalarFunctionPatch<P,ARGS...> const& f) {
-        return ScalarFunction<P,ARGS...>(std::dynamic_pointer_cast<ScalarFunctionInterface<P,ARGS...>>>(f.managed_pointer())); }
+        return ScalarFunction<P,ARGS...>(std::dynamic_pointer_cast<ScalarFunctionInterface<P,ARGS...>>(f.managed_pointer())); }
 
     friend VectorFunctionPatch<P,ARGS...> join(const ScalarFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
         return join(VectorFunctionPatch<P,ARGS...>(1,f1),f2); }

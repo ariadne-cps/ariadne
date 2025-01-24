@@ -172,6 +172,11 @@
         std::cerr << "ERROR: " << msg << "" << std::endl;                \
     }
                                                                   \
+#define ARIADNE_PRINT(expr)          \
+    {                                                                \
+        std::cerr << #expr << ": " << (expr) << "" << std::endl;                \
+    }
+                                                                  \
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

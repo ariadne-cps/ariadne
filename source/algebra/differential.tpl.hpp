@@ -892,8 +892,8 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
     const SizeType deg=df.degree();
 
     Vector<X> t0a=join(t0,a);
-    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,x0[i],i);});
-    Vector<Differential<X>> dt0a=Vector<Differential<X>>(m+1,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,t0a[i],n+i);});
+    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,x0[i],i);}, n+1u+m,deg+1u,x0.element_characteristics());
+    Vector<Differential<X>> dt0a=Vector<Differential<X>>(m+1,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,t0a[i],n+i);}, n+1u+m,deg+1u,a.element_characteristics());
 
     return _flow(df,dx0, dt0a);
 }

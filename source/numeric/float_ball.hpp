@@ -73,7 +73,7 @@ template<class F, class FE> class Ball
     //! <p/>
     typedef PRE ErrorPrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef Pair<PR,PRE> CharacteristicsType;
   public:
     //! Construct a ball of radius \f$0\f$ about zero, using precision \a pr for the centre (value),
     //! and using either value \a pr for the precision of the radius (error), or the default value.
@@ -81,6 +81,7 @@ template<class F, class FE> class Ball
     //! Construct a ball of radius \f$0\f$ about zero,
     //! using precision \a pr for the centre (value), and \a pre for the radius (error).
     explicit Ball(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
+    explicit Ball(CharacteristicsType prs) : _v(0.0_x,std::get<0>(prs)), _e(0.0_x,std::get<1>(prs)) { }
     Ball(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
     explicit Ball(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     //! Construct a ball of radius \a e about \a v.
@@ -116,13 +117,13 @@ template<class F, class FE> class Ball
     //! The precision of the error is either that of \a F, or the default value.
     explicit Ball(Bounds<F> const& x);
 
-    //! Assign from generic validated bounds \a y, keeping the same properties.
+    //! Assign from generic validated bounds \a y, keeping the same characteristics.
     Ball<F,FE>& operator=(const ValidatedNumber& y) { return *this=Ball<F,FE>(y,this->precision(),this->error_precision()); }
 
     //! Downcast to a generic validated value.
     operator ValidatedNumber () const;
 
-    //! Create a ball from the generic validated number \a y with the same properties as \a this.
+    //! Create a ball from the generic validated number \a y with the same characteristics as \a this.
     Ball<F,FE> create(const ValidatedNumber& y) const { return Ball<F,FE>(y,this->precision(),this->error_precision()); }
 
     //! A lower bound.
@@ -148,8 +149,8 @@ template<class F, class FE> class Ball
     PrecisionType precision() const { return _v.precision(); }
     //! The precision of the floating-point type used for the error bound.
     ErrorPrecisionType error_precision() const { return _e.precision(); }
-    //! The compuational properties needed to create the ball; equivalent to the precision and error-precision.
-    PropertiesType properties() const { return _v.precision(); }
+    //! The compuational characteristics needed to create the ball; equivalent to the precision and error-precision.
+    CharacteristicsType characteristics() const { return std::make_pair(_v.precision(),_e.precision()); }
     //! Downcast to a generic validated ball.
     GenericType generic() const { return this->operator GenericType(); }
     //! Add \a e to error bound.

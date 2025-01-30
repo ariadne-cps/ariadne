@@ -64,6 +64,8 @@ template<class P> struct MidpointTrait<UpperNumber<P>> { typedef ExactNumber Typ
 template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
 template<class U> struct WidthTrait { using L=decltype(-declval<U>()); typedef decltype(cast_positive(declval<U>()-declval<L>())) Type; };
 
+template<class U> struct CharacteristicsTrait<Interval<U>> { typedef CharacteristicsType<U> Type; };
+
 class UnitInterval;
 class EmptyInterval;
 class EntireInterval;

@@ -44,6 +44,11 @@ template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as, X co
 {
 }
 
+template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as, CharacteristicsType pr)
+    : _expansion(as,X(std::get<1>(pr)))
+{
+}
+
 template<class I, class X>
 Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst)
     : _expansion(lst)
@@ -51,6 +56,10 @@ Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst)
     this->cleanup();
 }
 
+
+template<class I, class X> auto Polynomial<I,X>::characteristics() const -> CharacteristicsType {
+    return std::make_tuple(this->argument_size(),Ariadne::characteristics(this->zero_coefficient()));
+}
 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_zero() const {
     return Polynomial<I,X>(this->argument_size(),this->zero_coefficient());
@@ -479,6 +488,49 @@ OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>:
     return this->_expansion._write(os,argument_names);
 }
 
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_picard_iteration(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f.zero_element().argument_size();
+
+    Vector<Polynomial<I,X>> r(rs,[as](SizeType i){return Polynomial<I,X>::variable(as,i,dp);},f.zero_element().characteristics());
+    auto g = r;
+
+    for (DegreeType j=1; j!=d+1; ++j) {
+        r = truncate(g + antiderivative(compose(f,r),rs),j);
+    }
+
+    Vector<Polynomial<I,X>> ext(as,[as,rs](SizeType i){return Polynomial<I,X>::variable(as+rs,i,dp);},CharacteristicsType<Polynomial<I,X>>{as+rs,dp});
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
+    return r;
+}
+
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_lie_derivative(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f.zero_element().argument_size();
+
+    auto t = Polynomial<I,X>::variable(as,rs,dp);
+    auto ti = t;
+    Vector<Polynomial<I,X>> g(rs,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=rs; ++i) g[i] = Polynomial<I,X>::variable(as,i,dp);
+    Vector<Polynomial<I,X>> r = g;
+
+    for (DegreeType i=1; i!=d+1; ++i) {
+        g = truncate(lie_derivative(f,g),d-i);
+        r += g*ti*rec(Factorial(i));
+        ti *= t;
+    }
+
+    Vector<Polynomial<I,X>> ext(as,Polynomial<I,X>({{}},dp));
+    for (SizeType i=0; i!=as; ++i) ext[i] = Polynomial<I,X>::variable(as+rs,i,dp);
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,dp);
+    return r;
+}
+
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    return flow_polynomial_picard_iteration(f,d);
+}
 
 
 

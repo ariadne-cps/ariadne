@@ -168,6 +168,15 @@ template<class I, class X> SizeType Expansion<I,X>::size() const {
     return this->_indices.size();
 }
 
+template<class X> concept HasPrecision = requires(X const& x) { x.precision(); };
+
+template<class I, class X> auto Expansion<I,X>::characteristics() const -> Pair<ArgumentSizeType,CharacteristicsType<X>> {
+    if constexpr (HasPrecision<X>) { return std::make_pair(this->argument_size(),this->zero_coefficient().precision()); }
+    else if constexpr (HasCharacteristics<X>) { return std::make_pair(this->argument_size(),Ariadne::characteristics(this->zero_coefficient())); }
+    else if constexpr (DefaultConstructible<X>) { return std::make_pair(this->argument_size(),std::tuple<>()); }
+    else { return std::make_pair(this->argument_size(),std::tuple<>()); }
+}
+
 template<class I, class X> auto Expansion<I,X>::argument_size() const -> ArgumentSizeType {
     return argument_size_of(this->_indices);
 }

@@ -37,7 +37,6 @@
 #include "utility/iterator.hpp"
 #include "utility/macros.hpp"
 
-
 namespace Ariadne {
 
 /************ Expansion ******************************************************/
@@ -151,6 +150,7 @@ template<class I, class X> class Expansion {
 
     Bool empty() const;
 
+    Pair<ArgumentSizeType,CharacteristicsType<X>> characteristics() const;
     ArgumentSizeType argument_size() const;
     SizeType number_of_terms() const;
     SizeType number_of_nonzeros() const; // DEPRECATED

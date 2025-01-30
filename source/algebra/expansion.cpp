@@ -30,8 +30,11 @@
 #include "geometry/interval.hpp"
 
 #include <utility>
+#include <tuple>
 
 namespace Ariadne {
+    template<> struct CharacteristicsTrait<double> { typedef std::tuple<> Type; };
+//    inline std::tuple<> characteristics(double) { return std::tuple<>(); }
 
     template class Expansion<UniIndex,FloatDP>;
     template class Expansion<UniIndex,RoundedFloatDP>;

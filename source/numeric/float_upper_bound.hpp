@@ -62,7 +62,7 @@ template<class F> class UpperBound
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     //! A upper bound of zero with precision \a pr.
     explicit UpperBound(PrecisionType pr) : _u(0.0_x,pr) { }
@@ -103,8 +103,8 @@ template<class F> class UpperBound
 
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _u.precision(); }
-    //! The compuational properties needed to create the upper bound; equivalent to the precision.
-    PropertiesType properties() const { return _u.precision(); }
+    //! The compuational characteristics needed to create the upper bound; equivalent to the precision.
+    CharacteristicsType characteristics() const { return _u.precision(); }
     //! Downcast to a generic upper bound.
     GenericType generic() const;
     //! The raw data used to represent the upper bound.

@@ -64,7 +64,7 @@ class AffineModel<ApproximateTag,F>
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
-    typedef PR PropertiesType;
+    typedef Tuple<SizeType,PrecisionType> CharacteristicsType;
     typedef Approximation<F> NumericType;
     typedef Approximation<F> CoefficientType;
     typedef Interval<FloatApproximation<PR>> RangeType;
@@ -92,10 +92,9 @@ class AffineModel<ApproximateTag,F>
     static AffineModel<ApproximateTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
     static Vector<AffineModel<ApproximateTag,F>> scalings(const BoxDomainType& codom, PrecisionType precision);
 
-
     SizeType argument_size() const { return this->_g.size(); }
     PrecisionType precision() const { return this->_c.precision(); }
-    PropertiesType properties() const { return this->_c.precision(); }
+    CharacteristicsType characteristics() const { return std::make_pair(this->argument_size(),this->_c.precision()); }
     const Covector<CoefficientType>& a() const { return this->_g; }
     const CoefficientType& b() const { return this->_c; }
 
@@ -134,6 +133,7 @@ class AffineModel<ValidatedTag,F>
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
+    typedef Tuple<SizeType,PrecisionType> CharacteristicsType;
     typedef Float<PR> CoefficientType;
     typedef FloatError<PR> ErrorType;
     typedef FloatBounds<PR> NumericType;
@@ -153,6 +153,7 @@ class AffineModel<ValidatedTag,F>
     AffineModelType& operator=(const CoefficientType& c) {
         this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
 
+    CharacteristicsType characteristics() const { return std::make_pair(this->argument_size(),this->_c.precision()); }
     AffineModel<ValidatedTag,F> create_zero() const {
         return AffineModel<ValidatedTag,F>(this->argument_size(),this->precision()); }
     static AffineModel<ValidatedTag,F> constant(SizeType n, const CoefficientType& c) {

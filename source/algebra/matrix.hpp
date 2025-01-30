@@ -125,7 +125,7 @@ template<class X> class Matrix
     X _zero;
     SizeType _rs;
     SizeType _cs;
-    Array<X> _ary;
+    UniformArray<X> _ary;
   public:
     typedef X ScalarType;
     typedef X ValueType;
@@ -173,9 +173,9 @@ template<class X> class Matrix
     //! \brief The identity matrix with \a n rows and \a n columns.
     static Matrix<X> identity(SizeType n, X const& z);
 
-    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the properties \a prs.
+    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the characteristics \a prs.
     template<class... PRS> requires Constructible<X,Nat,PRS...> static Matrix<X> zero(SizeType m, SizeType n, PRS... prs);
-    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the properties \a prs.
+    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the characteristics \a prs.
     template<class... PRS> requires Constructible<X,Nat,PRS...> static Matrix<X> identity(SizeType n, PRS... prs);
     //!@}
 
@@ -532,7 +532,7 @@ template<class X> inline const X& Matrix<X>::at(SizeType i, SizeType j) const {
 }
 
 template<class X> inline X& Matrix<X>::at(SizeType i, SizeType j) {
-    this->_check_data_access(i,j); return this->_ary[i*this->_cs+j];
+    this->_check_data_access(i,j); return static_cast<X&>(this->_ary[i*this->_cs+j]);
 }
 
 template<class X> inline Void Matrix<X>::set(SizeType i, SizeType j, const X& c) {
@@ -904,8 +904,8 @@ Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
 
 template<class X> template<class G> requires InvocableReturning<X,G,SizeType,SizeType>
 Matrix<X>::Matrix(SizeType m, SizeType n, G const& g)
-    : _zero(nul(g(0,0))), _rs(m), _cs(n)
-    , _ary( m*n, [&](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);} )
+    : _zero((assert(m!=0 && n!=0),nul(g(0,0)))), _rs(m), _cs(n)
+    , _ary( m*n, [&](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);}, characteristics(_zero))
 {
 }
 

@@ -1271,8 +1271,8 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify() {
     return this->sweep();
 }
 
-template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify(const PropertiesType& properties) {
-    return this->sweep(properties);
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify(const SweeperType& sweeper) {
+    return this->sweep(sweeper);
 }
 
 template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::cleanup() {

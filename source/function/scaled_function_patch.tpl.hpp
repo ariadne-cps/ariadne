@@ -732,7 +732,7 @@ template<class M> auto VectorScaledFunctionPatch<M>::values() const -> Vector<Va
 
 template<class M> auto VectorScaledFunctionPatch<M>::errors() const -> Vector<ErrorType> const
 {
-    return Vector<FloatError<PR>>(this->result_size(),[&](SizeType i){return this->models()[i].error();});
+    return Vector<FloatError<PR>>(this->result_size(),[&](SizeType i){return this->models()[i].error();},this->zero_element().error().precision());
 }
 
 template<class M> auto VectorScaledFunctionPatch<M>::error() const -> ErrorType const

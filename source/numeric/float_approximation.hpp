@@ -64,7 +64,7 @@ template<class F> class Approximation
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
 
     //! <p/>
@@ -119,7 +119,7 @@ template<class F> class Approximation
     //! <p/>
     PrecisionType precision() const { return _a.precision(); }
     //! <p/>
-    PropertiesType properties() const { return _a.precision(); }
+    CharacteristicsType characteristics() const { return _a.precision(); }
     //! <p/>
     GenericType generic() const { return this->operator GenericType(); }
     //! <p/>

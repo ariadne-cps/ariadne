@@ -68,6 +68,7 @@ template<> class Rounded<FloatDP>
     typedef FloatDP FloatType;
     typedef Rounded<FloatDP> NumericType;
     typedef DoublePrecision PrecisionType;
+    typedef DoublePrecision CharacteristicsType;
     typedef BuiltinRoundingModeType RoundingModeType;
   public:
     static RoundingModeType get_rounding_mode() { return FloatDP::get_rounding_mode(); }

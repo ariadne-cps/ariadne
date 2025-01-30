@@ -62,7 +62,7 @@ template<class F> class LowerBound
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     //! A lower bound of zero with precision \a pr.
     explicit LowerBound(PrecisionType pr) : _l(0.0_x,pr) { }
@@ -90,11 +90,11 @@ template<class F> class LowerBound
     template<class FE> LowerBound(Ball<F,FE> const& x);
 
         LowerBound<F>& operator=(const F& x) { return *this=LowerBound<F>(x); }
-    //! Assign from the lower bound \a y, keeping the same properties.
+    //! Assign from the lower bound \a y, keeping the same characteristics.
     LowerBound<F>& operator=(const ValidatedLowerNumber& y) { return *this=LowerBound<F>(y,this->precision()); }
-    //! Create a lower bound from the generic lower bound \a y with the same properties as \a this.
+    //! Create a lower bound from the generic lower bound \a y with the same characteristics as \a this.
     LowerBound<F> create(const ValidatedLowerNumber& y) const { return LowerBound<F>(y,this->precision()); }
-    //! Create a upper bound from the generic upper bound \a y with the same properties as \a this.
+    //! Create a upper bound from the generic upper bound \a y with the same characteristics as \a this.
     UpperBound<F> create(const ValidatedUpperNumber& y) const { return UpperBound<F>(y,this->precision()); }
 
     //! Downcast to a generic lower bound.
@@ -102,8 +102,8 @@ template<class F> class LowerBound
 
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _l.precision(); }
-    //! The compuational properties needed to create the lower bound; equivalent to the precision.
-    PropertiesType properties() const { return _l.precision(); }
+    //! The compuational characteristics needed to create the lower bound; equivalent to the precision.
+    CharacteristicsType characteristics() const { return _l.precision(); }
     //! Downcast to a generic lower bound.
     GenericType generic() const;
     //! The raw data used to represent the lower bound.

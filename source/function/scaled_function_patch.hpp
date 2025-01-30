@@ -55,7 +55,6 @@ template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
-template<class T> using GenericType = typename T::GenericType;
 
 template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
 template<class M> using VectorFunctionType = typename M::VectorFunctionType;
@@ -175,7 +174,8 @@ template<class M> class ScaledFunctionPatch
     typedef ScalarMultivariateFunction<Paradigm> FunctionType;
     typedef ScalarMultivariateFunction<Paradigm> GenericType;
     typedef Number<Paradigm> GenericNumericType;
-    typedef typename M::PropertiesType PropertiesType;
+    typedef typename ModelType::PropertiesType PropertiesType;
+    typedef Pair<DomainType,PropertiesType> CharacteristicsType;
 
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
@@ -194,6 +194,7 @@ template<class M> class ScaledFunctionPatch
     //! \brief Construct a ScaledFunctionPatch<M> over the domain \a d.
     //explicit ScaledFunctionPatch(const DomainType& d);
     explicit ScaledFunctionPatch(const DomainType& d, PropertiesType prp);
+    explicit ScaledFunctionPatch(const CharacteristicsType& chrs);
     //! \brief Construct a ScaledFunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit ScaledFunctionPatch(const DomainType& d, const ModelType& m);
 
@@ -262,6 +263,8 @@ template<class M> class ScaledFunctionPatch
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.
     const ErrorType error() const { return this->_model.error(); }
+    //! \brief The arguments needed to crease a compatible zero function model.
+    CharacteristicsType characteristics() const { return CharacteristicsType(this->domain(),this->properties()); }
     //! \brief The accuracy parameter used to control approximation of the function model.
     PropertiesType properties() const { return this->_model.properties(); }
     //! \brief The precision of the numbers used.

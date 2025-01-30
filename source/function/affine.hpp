@@ -155,7 +155,7 @@ class Affine
             return Affine<X>(Covector<X>::unit(n,j,prs...),X(0u,prs...)); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         static Vector< Affine<X> > coordinates(SizeType n, PRS... prs) {
-            return Vector< Affine<X> >(n,[&](SizeType i){return Affine<X>::coordinate(n,i,prs...);}); }
+            return Vector< Affine<X> >(n,[&](SizeType i){return Affine<X>::coordinate(n,i,prs...);},Affine<X>(0,prs...)); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
     static Affine<X> variable(SizeType n, SizeType j, PRS... prs) { return coordinate(n,j,prs...); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>

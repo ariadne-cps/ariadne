@@ -27,6 +27,10 @@
 
 namespace Ariadne {
 
+#warning Avoid testing sweepers for equality
+
+
+
 template class Series<FloatDPBounds>;
 template class Series<FloatMPBounds>;
 

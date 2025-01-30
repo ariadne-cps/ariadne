@@ -686,23 +686,22 @@ OutputStream& Differential<X>::_write(OutputStream& os) const
 
 
 template<class X> Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, X const& z)
-    : _chars(as,d,z.precision()), _ary(rs,Differential<X>(as,d,z)) {
+    : _ary(rs,Differential<X>(as,d,z)) {
 }
 
 template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differential<X>& sd)
-    : _chars(sd), _ary(rs,sd) {
+    : _ary(rs,sd) {
 }
 
 template<class X> Vector<Differential<X>>::Vector(InitializerList<Differential<X>> const& lst)
-    : _chars((assert(lst.size()>0),*lst.begin())), _ary(lst)
+    : _ary(lst)
 {
-    ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }
 
 template<class X> Vector<Differential<X>>::Vector(Array<Differential<X>> ary)
-    : _chars((assert(ary.size()>0),*ary.begin())), _ary(std::move(ary))
+    : _ary(std::move(ary))
 {
-    ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
+    ARIADNE_ASSERT(_ary.size()>0);
 }
 
 

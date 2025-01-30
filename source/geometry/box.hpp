@@ -500,7 +500,7 @@ template<class I> inline const I& Box<I>::operator[](SizeType i) const {
 }
 
 template<class I> inline I& Box<I>::operator[](SizeType i) {
-    return this->_vec.operator[](i);
+    return static_cast<I&>(this->_vec.operator[](i));
 }
 
 template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {

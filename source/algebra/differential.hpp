@@ -80,18 +80,25 @@ template<class X> inline DifferentialFactory<X> factory(Differential<X> const& d
 //! \ingroup DifferentiationSubModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
-template<class X> class DifferentialCharacteristics {
-    SizeType _argument_size; DegreeType _degree; X _zero_coefficient;
+template<class X> class DifferentialCharacteristics
+    : public Tuple<SizeType,DegreeType,CharacteristicsType<X>>
+{
   public:
+    DifferentialCharacteristics(SizeType as, DegreeType deg, CharacteristicsType<X> prs)
+        : Tuple<SizeType,DegreeType,CharacteristicsType<X>>(as,deg,prs) { }
+    DifferentialCharacteristics(SizeType as, DegreeType deg, X const& z)
+        : DifferentialCharacteristics(as,deg,characteristics(z)) { }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
-        DifferentialCharacteristics(SizeType as, DegreeType deg, PRS... prs) : _argument_size(as), _degree(deg), _zero_coefficient(0u,prs...) { }
-    DifferentialCharacteristics(SizeType as, DegreeType deg, X const& z) : _argument_size(as), _degree(deg), _zero_coefficient(nul(z)) { }
-    DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { }
+    DifferentialCharacteristics(SizeType as, DegreeType deg, PRS... prs)
+        : DifferentialCharacteristics(as,deg,X(0,prs...)) { }
+    DifferentialCharacteristics(const Differential<X>& d)
+        : DifferentialCharacteristics(d.argument_size(),d.degree(),d.coefficient_characteristics()) { }
     template<class XX> DifferentialCharacteristics(DifferentialCharacteristics<XX> chrs)
-        : _argument_size(chrs.argument_size()), _degree(chrs.degree()), _zero_coefficient(precision(chrs.zero_coefficient())) { }
-    SizeType argument_size() const { return this->_argument_size; }
-    DegreeType degree() const { return this->_degree; }
-    X zero_coefficient() const { return this->_zero_coefficient; }
+        : DifferentialCharacteristics(chrs.argument_size(),chrs.degree(), precision(chrs.zero_coefficient())) { }
+    SizeType argument_size() const { return std::get<0>(*this); }
+    DegreeType degree() const { return std::get<1>(*this); }
+    CharacteristicsType<X> coefficient_characteristics() const { return std::get<2>(*this); }
+    X zero_coefficient() const { return X(std::get<2>(*this)); }
 };
 
 //!
@@ -399,7 +406,6 @@ class Vector< Differential<X> >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
   public:
-    DifferentialCharacteristics<X> _chars;
     UniformArray< Differential<X> > _ary;
   public:
     // The type of the class
@@ -439,7 +445,7 @@ class Vector< Differential<X> >
     VectorRange<const Vector<Differential<X>>> operator[](Range rng) const { return project(*this,rng); }
 
     const Differential<X> zero_element() const { return Differential<X>::constant(this->argument_size(),this->degree(),this->zero_coefficient()); }
-    const DifferentialCharacteristics<X> element_characteristics() const { return this->_chars; }
+    const DifferentialCharacteristics<X> element_characteristics() const { return this->_ary.element_characteristics(); }
 
     NonAssignableDifferential<X>& at(SizeType i) { return static_cast<NonAssignableDifferential<X>&>(static_cast<Differential<X>&>(_ary[i])); }
     const Differential<X>& at(SizeType i) const { return this->_ary[i]; }
@@ -449,9 +455,9 @@ class Vector< Differential<X> >
 
     SizeType size() const { return this->_ary.size(); }
     SizeType result_size() const { return this->size(); }
-    SizeType argument_size() const { return this->_chars.argument_size(); }
-    DegreeType degree() const { return this->_chars.degree(); }
-    X zero_coefficient() const { return this->_chars.zero_coefficient(); }
+    SizeType argument_size() const { return this->_ary.element_characteristics().argument_size(); }
+    DegreeType degree() const { return this->_ary.element_characteristics().degree(); }
+    X zero_coefficient() const { return this->_ary.element_characteristics().zero_coefficient(); }
     const UniformArray<Differential<X>>& array() const { return _ary; }
 
     Vector<X> value() const;
@@ -510,44 +516,44 @@ class Vector< Differential<X> >
 
 template<class X> template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
 Vector<Differential<X>>::Vector(const Vector<Differential<Y>>& dv, PRS... prs)
-    : _chars(dv.argument_size(),dv.degree(),X(dv.zero_element().zero_coefficient(),prs...)), _ary(dv._ary,prs...) {
+    : _ary(dv._ary,prs...) {
 }
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
-    : _chars(as,d,prs...), _ary(rs,Differential<X>(as,d)) {
+        : _ary(rs,DifferentialCharacteristics<X>(as,d,prs...)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs)
-    : _chars(as,d,prs...), _ary(rs,Differential<X>(as,d,prs...)) {
+        : _ary(rs,DifferentialCharacteristics<X>(as,d,prs...)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
 
 template<class X> template<class G> requires InvocableReturning<Differential<X>,G,SizeType>
 Vector<Differential<X>>::Vector(SizeType n, G const& g)
-    : _chars((assert(n>0),g(0))), _ary(n,g,(assert(n>0),g(0))) { }
+    : _ary(n,g,(assert(n>0),g(0))) { }
 
 template<class X> template<class G, class... PRS> requires InvocableReturning<Differential<X>,G,SizeType> and Constructible<Differential<X>,PRS...>
 Vector<Differential<X>>::Vector(SizeType n, G const& g, PRS... prs)
-    : _chars(prs...), _ary(n,g,prs...) {
+    : _ary(n,g,prs...) {
 }
 
 template<class X> template<class E>
 Vector<Differential<X>>::Vector(const VectorExpression<E>& ve)
-    : _chars((assert(ve().size()>0),ve()[0u])), _ary(ve().size(),_chars,Uninitialised())
+    : _ary(ve().size(), ((assert(ve().size()>0),characteristics(ve()[0u]))),Uninitialised())
 {
     for(SizeType i=0; i!=_ary.size(); ++i) { new (&static_cast<Differential<X>&>(_ary[i])) Differential<X>(ve()[i]); }
-    ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics<X>(_ary[0]);
+    ARIADNE_ASSERT(_ary.size()!=0);
 }
 
 template<class X> template<class E>
 Vector<Differential<X>>& Vector<Differential<X>>::operator=(const VectorExpression<E>& ve) {
     _ary.resize(ve().size()); for(SizeType i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
-    ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics<X>(_ary[0]); return *this;
+    ARIADNE_ASSERT(_ary.size()!=0); return *this;
 }
 
 

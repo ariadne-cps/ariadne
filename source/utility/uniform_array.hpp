@@ -67,6 +67,7 @@ template<class T, class PR> struct Element<UniformArray<T,PR>> {
     template<class X> Element<UniformArray<T,PR>>& operator+=(X const& x) { _ary._ptr[_i]+=x; return *this; }
     template<class X> Element<UniformArray<T,PR>>& operator-=(X const& x) { _ary._ptr[_i]-=x; return *this; }
 };
+template<class T, class PR=CharacteristicsType<T>> using UniformArrayElement = Element<UniformArray<T,PR>>;
 
 
 template<class T, class PR>

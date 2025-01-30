@@ -230,7 +230,7 @@ class Vector
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=X(ve()[i]); } }
 
 
-    //! \brief Copy constructor.
+    //! \b*rief Copy constructor.
     Vector(const Vector<X>& v) = default;
     //! \brief Move constructor.
     Vector(Vector<X>&& v) = default;
@@ -283,7 +283,7 @@ class Vector
     //! \brief Constant range subscripting operator.
     VectorRange<const Vector<X>> operator[](Range rng) const;
     //! \brief The class parameters of the ring containing the Vector's elements.
-    decltype(auto) element_characteristics() const {
+    Ariadne::CharacteristicsType<X> element_characteristics() const {
         return this->_ary.element_characteristics(); }
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
     const X zero_element() const {

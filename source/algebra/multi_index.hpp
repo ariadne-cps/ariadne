@@ -288,11 +288,36 @@ class MultiIndexBound {
     Array<SizeType> _max_degrees;
 };
 
+template<class T> class UniformList;
 
-template<class T> class UniformList
+template<class T> requires (not HasCharacteristics<T>) class UniformList<T>
     : public List<T>
 {
+  public:
     using List<T>::List;
+    UniformList(Tuple<>) : List<T>() { }
+    Tuple<> element_characteristics() const { return Tuple<>(); }
+};
+
+template<class T> requires HasCharacteristics<T> class UniformList<T>
+    : private CharacteristicsType<T>
+    , public List<T>
+{
+  public:
+    using Reference = typename List<T>::Reference;
+    using ConstReference = typename List<T>::ConstReference;
+    using Pointer = typename List<T>::Pointer;
+    using ConstPointer = typename List<T>::ConstPointer;
+    using Iterator = typename List<T>::Iterator;
+    using ConstIterator = typename List<T>::ConstIterator;
+
+    using List<T>::List;
+    UniformList(CharacteristicsType<T> prps) : CharacteristicsType<T>(prps) { }
+    UniformList<T> const& append(T const& t) {
+        assert(characteristics(t)==this->element_characteristics()); this->List<T>::append(t); }
+    CharacteristicsType<T> element_characteristics() const {
+        return static_cast<CharacteristicsType<T>const&>(*this); }
+
 };
 
 template<> class UniformList<MultiIndex>

@@ -109,7 +109,6 @@ template<class I, class X> class Expansion {
   public:
     UniformList<I> _indices;
     UniformList<X> _coefficients;
-    X _zero_coefficient;
   public:
     typedef S ArgumentSizeType;
     typedef V VariableIndexType;
@@ -255,8 +254,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>
     ARIADNE_PRECONDITION(lst.size()!=0);
 
     _indices = UniformList<I>(0u,I(lst.begin()->first)*0);
-    _coefficients = UniformList<X>(0,X(prs...));
-    _zero_coefficient = X(0,prs...);
+    _coefficients = UniformList<X>(X(prs...));
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);

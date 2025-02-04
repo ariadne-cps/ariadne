@@ -73,10 +73,13 @@ template<class P, class F> class TaylorModel;
 //! \name Template shorthands and type synonyms for Taylor models
 //!@{
 template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< <p/>
+template<class F> using ValidatedBoundsTaylorModel = TaylorModel<ValidatedTag,Bounds<F>>; //!< <p/>
 template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,UpperInterval<F>>; //!< <p/>
 template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< <p/>
 using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< <p/>
 using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< <p/>
+using ValidatedBoundsTaylorModelDP = TaylorModel<ValidatedTag,FloatDPBounds>; //!< <p/>
+using ValidatedBoundsTaylorModelMP = TaylorModel<ValidatedTag,FloatMPBounds>; //!< <p/>
 using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPUpperInterval>; //!< <p/>
 using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPUpperInterval>; //!< <p/>
 using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< <p/>

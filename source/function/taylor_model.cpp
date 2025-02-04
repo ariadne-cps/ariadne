@@ -39,6 +39,10 @@ template class TaylorModel<ValidatedTag,FloatDP>;
 template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 
+template class TaylorModel<ValidatedTag,FloatDPBounds>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDPBounds>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDPBounds>>;
+
 template class TaylorModel<ApproximateTag,FloatDP>;
 template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
@@ -48,10 +52,13 @@ template class TaylorModel<ValidatedTag,FloatMP>;
 template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatMP>>;
 
+template class TaylorModel<ValidatedTag,FloatMPBounds>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatMPBounds>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatMPBounds>>;
+
 template class TaylorModel<ApproximateTag,FloatMP>;
 template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
-
 
 
 template class TaylorModel<ValidatedTag,FloatDPUpperInterval>;

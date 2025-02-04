@@ -66,7 +66,18 @@ using ValidatedScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPat
 using ValidatedVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ValidatedTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
 using ApproximateScalarMultivariateTaylorFunctionModelMP = ScalarScaledFunctionPatch<ApproximateTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
 using ApproximateVectorMultivariateTaylorFunctionModelMP = VectorScaledFunctionPatch<ApproximateTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
-//!@}
+
+//! \ingroup FunctionModelSubModule
+template<class P, class F> using ScalarMultivariateBoundsTaylorFunctionModel = ScalarScaledFunctionPatch<TaylorModel<P,Bounds<F>>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class P, class F> using VectorMultivariateBoundsTaylorFunctionModel = VectorScaledFunctionPatch<TaylorModel<P,Bounds<F>>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ValidatedScalarMultivariateBoundsTaylorFunctionModel = ScalarScaledFunctionPatch<ValidatedBoundsTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
+template<class F> using ValidatedVectorMultivariateBoundsTaylorFunctionModel = VectorScaledFunctionPatch<ValidatedBoundsTaylorModel<F>>; //!< <p/> \ingroup FunctionModelSubModule
+
+using ValidatedScalarMultivariateBoundsTaylorFunctionModelDP = ScalarScaledFunctionPatch<ValidatedBoundsTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
+using ValidatedVectorMultivariateBoundsTaylorFunctionModelDP = VectorScaledFunctionPatch<ValidatedBoundsTaylorModelDP>; //!< <p/> \ingroup FunctionModelSubModule
+
+using ValidatedScalarMultivariateBoundsTaylorFunctionModelMP = ScalarScaledFunctionPatch<ValidatedBoundsTaylorModelMP>; //!< <p/> \ingroup FunctionModelSubModule
+using ValidatedVectorMultivariateBoundsTaylorFunctionModelMP = VectorScaledFunctionPatch<ValidatedBoundsTaylorModelMP>; //!< //!@}
 
 class TaylorFunctionFactory
     : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>

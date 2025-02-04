@@ -49,7 +49,7 @@ template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<M
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
     typedef ArithmeticType<X,Y> R;
     const SizeType n=e.argument_size();
-    const R z(x.zero_element()); // The zero element of the ring Y
+    const R z(e.zero_coefficient()*x.zero_element()); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
     Array< R > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])

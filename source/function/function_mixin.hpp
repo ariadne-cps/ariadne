@@ -139,6 +139,8 @@ class FunctionMixin<F,ValidatedTag,SIG>
     virtual Result<Differential<FloatMPBounds>> _call(const Argument<Differential<FloatMPBounds>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _call(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _call(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPBounds>> _call(const Argument<TaylorModel<ValidatedTag,FloatDPBounds>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPBounds>> _call(const Argument<TaylorModel<ValidatedTag,FloatMPBounds>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const override;
     virtual Result<Formula<ValidatedNumber>> _call(const Argument<Formula<ValidatedNumber>>& x) const override;

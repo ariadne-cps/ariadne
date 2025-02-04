@@ -90,6 +90,7 @@ template<class F> class LowerBound
     template<class FE> LowerBound(Ball<F,FE> const& x);
 
         LowerBound<F>& operator=(const F& x) { return *this=LowerBound<F>(x); }
+        LowerBound<F>& operator=(const Bounds<F>& x) { return *this=x.lower(); }
     //! Assign from the lower bound \a y, keeping the same properties.
     LowerBound<F>& operator=(const ValidatedLowerNumber& y) { return *this=LowerBound<F>(y,this->precision()); }
     //! Create a lower bound from the generic lower bound \a y with the same properties as \a this.

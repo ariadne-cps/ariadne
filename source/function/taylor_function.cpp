@@ -65,11 +65,31 @@ template class VectorScaledFunctionPatch<ValidatedTaylorModelDP>;
 template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealVector(RealVector)>;
 template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealVector(RealVector)>;
 
+
+template class ScaledFunctionPatchFactory<ValidatedBoundsTaylorModelDP>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedBoundsTaylorModelDP>,RealVector>;
+
+template class ScaledFunctionPatch<ValidatedBoundsTaylorModelDP>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedBoundsTaylorModelDP>,ApproximateTag,RealScalar(RealVector)>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedBoundsTaylorModelDP>,ValidatedTag,RealScalar(RealVector)>;
+template class VectorScaledFunctionPatch<ValidatedBoundsTaylorModelDP>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedBoundsTaylorModelDP>,ApproximateTag,RealVector(RealVector)>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedBoundsTaylorModelDP>,ValidatedTag,RealVector(RealVector)>;
+
+
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,RealVector>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
+
+
+template class ScaledFunctionPatchFactory<ValidatedBoundsTaylorModelMP>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedBoundsTaylorModelMP>,RealVector>;
+
+template class ScaledFunctionPatch<ValidatedBoundsTaylorModelMP>;
+template class VectorScaledFunctionPatch<ValidatedBoundsTaylorModelMP>;
+
 
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {

@@ -91,6 +91,7 @@ template<class F> class UpperBound
     UpperBound(Error<F> const& x); // FIXME: Remove
 
         UpperBound<F>& operator=(const F& x) { return *this=UpperBound<F>(x); }
+        UpperBound<F>& operator=(const Bounds<F>& x) { return *this=x.upper(); }
     //! Assign from the upper bound \a y, keeping the same precision.
     UpperBound<F>& operator=(const ValidatedUpperNumber& y) { return *this=UpperBound<F>(y,this->precision()); }
     //! Create a upper bound from the generic upper bound \a y with the same precision as \a this.

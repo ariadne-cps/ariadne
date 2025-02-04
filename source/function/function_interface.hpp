@@ -165,6 +165,8 @@ class FunctionInterface<ValidatedTag,SIG>
     virtual Result<Differential<FloatMPBounds>> _call(const Argument< Differential<FloatMPBounds> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _call(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _call(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPBounds>> _call(const Argument< TaylorModel<ValidatedTag,FloatDPBounds> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPBounds>> _call(const Argument< TaylorModel<ValidatedTag,FloatMPBounds> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _call(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const = 0;
 

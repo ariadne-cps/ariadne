@@ -103,6 +103,12 @@ template<class F,class SIG> auto
 FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMP>> {
     return this->_base_call(x); }
 template<class F,class SIG> auto
+FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<TaylorModel<ValidatedTag,FloatDPBounds>>& x) const -> Result<TaylorModel<ValidatedTag,FloatDPBounds>> {
+    return this->_base_call(x); }
+template<class F,class SIG> auto
+FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<TaylorModel<ValidatedTag,FloatMPBounds>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMPBounds>> {
+    return this->_base_call(x); }
+template<class F,class SIG> auto
 FunctionMixin<F,ValidatedTag,SIG>::_call(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const -> Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> {
     return this->_base_call(x); }
 template<class F,class SIG> auto

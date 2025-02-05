@@ -114,7 +114,7 @@ class Array {
     explicit Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         static_assert(ExplicitlyConvertible<TT,T>); this->_uninitialized_fill(a.begin()); }
 
-    //! \brief Explicit construction with properties parameter.
+    //! \brief Explicit construction with characteristics (properties) parameter.
     template<class TT, class PR> requires Constructible<T,TT,PR>
     Array(const Array<TT>& a, PR pr) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin(),pr); }

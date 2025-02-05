@@ -62,7 +62,7 @@ template<class F> class LowerBound
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     //! A lower bound of zero with precision \a pr.
     explicit LowerBound(PrecisionType pr) : _l(0.0_x,pr) { }
@@ -103,8 +103,8 @@ template<class F> class LowerBound
 
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _l.precision(); }
-    //! The compuational properties needed to create the lower bound; equivalent to the precision.
-    PropertiesType properties() const { return _l.precision(); }
+    //! The compuational characteristics needed to create the lower bound; equivalent to the precision.
+    CharacteristicsType characteristics() const { return _l.precision(); }
     //! Downcast to a generic lower bound.
     GenericType generic() const;
     //! The raw data used to represent the lower bound.

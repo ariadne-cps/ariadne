@@ -122,10 +122,9 @@ class DispatchMatrixOperations {
 template<class X> class Matrix
     : public MatrixContainer<Matrix<X>>
 {
-    X _zero;
     SizeType _rs;
     SizeType _cs;
-    Array<X> _ary;
+    UniformArray<X> _ary;
   public:
     typedef X ScalarType;
     typedef X ValueType;
@@ -142,10 +141,14 @@ template<class X> class Matrix
     Matrix(SizeType m, SizeType n, Uninitialised);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
+    Matrix(SizeType m, SizeType n, Ariadne::CharacteristicsType<X> prs);
+
+    //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
     Matrix(SizeType m, SizeType n, const X& z);
 
     //! Construct a matrix from parameters of \a X.
-    template<class... PRS> requires Constructible<X,Nat,PRS...> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(0u,prs...)) { }
+    template<class... PRS> requires Constructible<X,Nat,PRS...> explicit Matrix(SizeType m, SizeType n, PRS... prs)
+        : Matrix(m,n,X(prs...)) { }
 
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
@@ -169,13 +172,13 @@ template<class X> class Matrix
     //! \name Static constructors
 
     //! \brief The zero matrix with \a m rows and \a n columns.
-    static Matrix<X> zero(SizeType m, SizeType n, X const& z);
+    static Matrix<X> zero(SizeType m, SizeType n, CharacteristicsType<X> z);
     //! \brief The identity matrix with \a n rows and \a n columns.
-    static Matrix<X> identity(SizeType n, X const& z);
+    static Matrix<X> identity(SizeType n, CharacteristicsType<X> z);
 
-    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the properties \a prs.
+    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the characteristics \a prs.
     template<class... PRS> requires Constructible<X,Nat,PRS...> static Matrix<X> zero(SizeType m, SizeType n, PRS... prs);
-    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the properties \a prs.
+    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the characteristics \a prs.
     template<class... PRS> requires Constructible<X,Nat,PRS...> static Matrix<X> identity(SizeType n, PRS... prs);
     //!@}
 
@@ -200,7 +203,7 @@ template<class X> class Matrix
     //! \brief Resize to an \a m by \a n matrix.
     Void resize(SizeType m, SizeType n);
     //! \brief Get the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column.
-    X& at(SizeType i, SizeType j);
+    ElementReference<X>& at(SizeType i, SizeType j);
     const X& at(SizeType i, SizeType j) const;
     //! \brief Get the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column.
     const X& get(SizeType i, SizeType j) const ;
@@ -225,6 +228,8 @@ template<class X> class Matrix
     MatrixRows<const Matrix<X>> operator[](Range is) const;
     MatrixRows<Matrix<X>> operator[](Range is);
 #endif
+    //! \brief The characteristic properties needed to create a zero element of the field/algebra of the matrix.
+    Ariadne::CharacteristicsType<X> element_characteristics() const;
     //! \brief The zero element of the field/algebra of the matrix.
     X zero_element() const;
   public:
@@ -484,25 +489,40 @@ template<class X> inline Matrix<X>::~Matrix()
 }
 
 template<class X> inline Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
-    : _zero(create_zero(x)), _rs(m), _cs(n), _ary(m*n,x) {
+    : _rs(m), _cs(n), _ary(m*n,x) {
 }
 
-template<class X> inline Matrix<X> Matrix<X>::zero(SizeType m, SizeType n, X const& z) {
-    return Matrix<X>(n,n,nul(z));
+template<class X> inline Matrix<X>::Matrix(SizeType m, SizeType n, Ariadne::CharacteristicsType<X> prs)
+    : _rs(m), _cs(n), _ary(m*n,prs) {
 }
 
-template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n, X const& z) {
-    Matrix<X> A(n,n,nul(z));
+template<class X> inline Matrix<X> Matrix<X>::zero(SizeType m, SizeType n, Ariadne::CharacteristicsType<X> prs) {
+    if constexpr (Constructible<X,decltype(prs)>) {
+        auto z = X(prs);
+        return Matrix<X>(m,n,z);
+    } else {
+        auto z = std::make_from_tuple<X>(prs);
+        return Matrix<X>(n,n,z);
+    }
+}
+
+template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n, Ariadne::CharacteristicsType<X> prs) {
+    Matrix<X> A=Matrix<X>::zero(n,n,prs);
     for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }
     return A;
 }
 
 template<class X> inline Void Matrix<X>::resize(SizeType m, SizeType n) {
-    if(m*n != _rs*_cs) { _ary.resize(m*n,_zero); } _rs=m; _cs=n;
+    if(m*n != _rs*_cs) { _ary.resize(m*n); } _rs=m; _cs=n;
+}
+
+template<class X> inline Ariadne::CharacteristicsType<X> Matrix<X>::element_characteristics() const {
+    return _ary.element_characteristics();
 }
 
 template<class X> inline X Matrix<X>::zero_element() const {
-    return _zero;
+    if constexpr (DefaultConstructible<X>) { return X(); }
+    else { return X(_ary.element_characteristics()); }
 }
 
 
@@ -531,7 +551,7 @@ template<class X> inline const X& Matrix<X>::at(SizeType i, SizeType j) const {
     this->_check_data_access(i,j); return this->_ary[i*this->_cs+j];
 }
 
-template<class X> inline X& Matrix<X>::at(SizeType i, SizeType j) {
+template<class X> inline ElementReference<X>& Matrix<X>::at(SizeType i, SizeType j) {
     this->_check_data_access(i,j); return this->_ary[i*this->_cs+j];
 }
 
@@ -876,7 +896,7 @@ struct ProvideMatrixOperations {
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
-    : _zero(0.0_x,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+    : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,prs...)
 {
     typename InitializerList<InitializerList<ExactDouble>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
@@ -890,7 +910,7 @@ Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
 
 template<class X> template<class... PRS> requires Constructible<X,Dbl,PRS...>
 Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
-    : _zero(0.0,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+    : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,prs...)
 {
     typename InitializerList<InitializerList<Dbl>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
@@ -904,8 +924,7 @@ Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
 
 template<class X> template<class G> requires InvocableReturning<X,G,SizeType,SizeType>
 Matrix<X>::Matrix(SizeType m, SizeType n, G const& g)
-    : _zero(nul(g(0,0))), _rs(m), _cs(n)
-    , _ary( m*n, [&](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);} )
+    : _rs(m), _cs(n), _ary( m*n, [&](SizeType k){SizeType i=k/n; SizeType j=k-i*n; return g(i,j);}, characteristics((assert(m!=0 && n!=0),nul(g(0,0)))))
 {
 }
 

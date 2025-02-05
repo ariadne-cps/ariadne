@@ -40,7 +40,12 @@ inline DegreeType unit_index(SizeOne, IndexZero) { return 1u; }
 
 
 template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as, X const& z)
-    : _expansion(as,nul(z))
+    : _expansion(as,get_characteristics(z))
+{
+}
+
+template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as, CoefficientCharacteristicsType pr)
+    : _expansion(as,pr)
 {
 }
 
@@ -51,6 +56,10 @@ Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst)
     this->cleanup();
 }
 
+
+template<class I, class X> auto Polynomial<I,X>::characteristics() const -> CharacteristicsType {
+    return std::make_tuple(this->argument_size(),Ariadne::characteristics(this->zero_coefficient()));
+}
 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_zero() const {
     return Polynomial<I,X>(this->argument_size(),this->zero_coefficient());
@@ -264,6 +273,10 @@ template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
+    if (p1.argument_size()!=p2.argument_size()) {
+        std::cerr<<"p1=<"<<p1.argument_size()<<">"<<p1<<"\n";
+        std::cerr<<"p2=<"<<p2.argument_size()<<">"<<p2<<"\n";
+    }
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<I,X>::IndexComparisonType less;
     Polynomial<I,X> r(p1.argument_size(),(p1.zero_coefficient()+p2.zero_coefficient()));
@@ -359,7 +372,15 @@ template<class I, class X> Polynomial<UniIndex,X> Polynomial<I,X>::_compose(cons
 }
 
 template<class I, class X> Polynomial<MultiIndex,X> Polynomial<I,X>::_compose(const Polynomial<I,X>& p, const Argument<Polynomial<MultiIndex,X>>& q) {
-    return evaluate(p,q);
+
+    auto r = evaluate(p,q);
+
+    if constexpr (Same<I,MultiIndex>) {
+        std::cerr<<"p="<<p.argument_size()<<"\n";
+        std::cerr<<"q="<<q.zero_element().argument_size()<<q<<"\n";
+        std::cerr<<"r="<<r.argument_size()<<r<<"\n";
+    }
+    return r;
 }
 
 
@@ -479,6 +500,50 @@ OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>:
     return this->_expansion._write(os,argument_names);
 }
 
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_picard_iteration(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f.zero_element().argument_size();
+    auto pr = f.zero_element().zero_coefficient().precision();
+
+    Vector<Polynomial<I,X>> r(rs,[as,pr](SizeType i){return Polynomial<I,X>::variable(as,i,pr);},std::make_tuple(as,pr));
+
+    auto g = r;
+
+    for (DegreeType j=1; j!=d+1; ++j) {
+        r = truncate(g + antiderivative(compose(f,r),rs),j);
+    }
+
+    Vector<Polynomial<I,X>> ext(as, [as,rs,pr](SizeType i){return Polynomial<I,X>::variable(as+rs,i,pr);}, std::make_tuple(as+rs,pr));
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,pr);
+    return r;
+}
+
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial_lie_derivative(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    const SizeType rs = f.size();
+    const SizeType as = f.zero_element().argument_size();
+    auto pr = f.zero_element().zero_coefficient().precision();
+
+    auto t = Polynomial<I,X>::variable(as,rs,pr);
+    auto ti = t;
+    Vector<Polynomial<I,X>> g(rs, [as,pr](SizeType i){return Polynomial<I,X>::variable(as,i,pr);}, std::make_tuple(as,pr) );
+    Vector<Polynomial<I,X>> r = g;
+
+    for (DegreeType i=1; i!=d+1; ++i) {
+        g = truncate(lie_derivative(f,g),d-i);
+        r += g*ti*rec(Factorial(i));
+        ti *= t;
+    }
+
+    Vector<Polynomial<I,X>> ext(as, [rs,as,pr](SizeType i){return Polynomial<I,X>::variable(as+rs,i,pr);}, std::make_tuple(as+rs,pr));
+    r = compose(r,ext);
+    for (SizeType i=0; i!=rs; ++i) r[i] += Polynomial<I,X>::variable(as+rs,as+i,pr);
+    return r;
+}
+
+template<class I, class X> Vector<Polynomial<I,X>> flow_polynomial(Vector<Polynomial<I,X>> const& f, DegreeType d) {
+    return flow_polynomial_picard_iteration(f,d);
+}
 
 
 

@@ -359,6 +359,9 @@ class Function
     friend VectorFunction<P,ARG> operator*(ScalarFunction<P,ARG> const&, Vector<Y> const&);
 };
 
+template<class P, class... ARGS> decltype(auto) inline characteristics(Function<P,Real(ARGS...)> const& f) {
+    return f.domain(); }
+
 //! \relates Function
 //! \name Function template deduction guides
 //!@{
@@ -658,6 +661,7 @@ inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {
     factory._ptr->_write(os); return os; }
+
 
 } // namespace Ariadne
 

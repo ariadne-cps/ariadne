@@ -67,7 +67,7 @@ template<class X> class Covector
     : public CovectorContainer<Covector<X>>
 {
   private: public:
-    Array<X> _ary;
+    UniformArray<X> _ary;
   public:
     typedef X ScalarType;
     template<ConvertibleTo<X> XX>
@@ -88,16 +88,19 @@ template<class X> class Covector
     explicit Covector(Array<X> ary) : _ary(std::move(ary)) { }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         static Covector<X> unit(SizeType n, SizeType j, PRS... prs) { Covector<X> r(n,prs...); r[j]=1; return r; }
-    template<class G> requires InvocableReturning<X,G,SizeType>
-        Covector(SizeType n, G const& g) : _ary(n,g) { }
+    template<class G, class... PRS> requires InvocableReturning<X,G,SizeType> and Constructible<X,PRS...>
+        explicit Covector(SizeType n, G const& g, PRS... prs) : _ary(n,g,prs...) { }
+    template<class G, class... PRS> requires InvocableReturning<X,G,SizeType> and Constructible<X,PRS...>
+        explicit Covector(SizeType n, G const& g, Tuple<PRS...> prs) : _ary(n,g,prs) { }
+
     SizeType size() const { return _ary.size(); }
     Void resize(SizeType n) { _ary.resize(n); }
     const X& operator[](SizeType j) const { return _ary[j]; }
-    X& operator[](SizeType j) { return _ary[j]; }
+    ElementReference<X> operator[](SizeType j) { return _ary[j]; }
     const X& at(SizeType j) const { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]"); return _ary[j]; }
-    X& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]");  return _ary[j]; }
+    ElementReference<X>& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]"); return _ary[j]; }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
-    Array<X> const& array() const { return _ary; }
+    UniformArray<X> const& array() const { return _ary; }
 
     template<class CVE> requires Convertible<typename CVE::ScalarType,X>
     Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {

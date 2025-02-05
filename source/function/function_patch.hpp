@@ -354,6 +354,8 @@ template<class P, class... ARGS> class VectorFunctionPatchElement
     Void clobber() { ScalarFunctionPatch<P,ARGS...> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
     const ScalarFunctionPatch<P,ARGS...> model() const { ScalarFunctionPatch<P,ARGS...> sf=_p->get(_i); return sf.model(); }
     const PositiveValidatedUpperNumber error() const { ScalarFunctionPatch<P,ARGS...> sf=_p->get(_i); return sf.error(); }
+    decltype(auto) argument_size() const { return _p->get(_i).argument_size(); }
+    decltype(auto) domain() const { return _p->get(_i).domain(); }
     IntervalRangeType range() const { return _p->get(_i).range(); }
     friend Bool inconsistent(ScalarFunctionPatch<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& f2);
     friend Bool refines(ScalarFunctionPatch<P,ARGS...> const& f1, ScalarFunctionPatch<P,ARGS...> const& f2);
@@ -563,6 +565,7 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend VectorFunctionPatch<P,ARGS...> combine(const ScalarFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
         return VectorFunctionPatch<P,ARGS...>(1,f1)._ptr->_combine(f2); };
     friend VectorFunctionPatch<P,ARGS...> combine(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
+        std::cerr<<"f2="<<f2<<"\n{f2}="<<VectorFunctionPatch<P,ARGS...>(1,f2)<<"\n";
         return VectorFunctionPatch<P,ARGS...>(f1._ptr->_combine(VectorFunctionPatch<P,ARGS...>(1,f2))); };
     friend VectorFunctionPatch<P,ARGS...> combine(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
         return VectorFunctionPatch<P,ARGS...>(f1._ptr->_combine(f2)); }

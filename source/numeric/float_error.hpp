@@ -62,7 +62,7 @@ template<class F> class Error
   public:
     typedef PositiveValidatedUpperNumber GenericType;
     typedef PR PrecisionType;
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     Error(Positive<F> const& x);
     Error(PositiveBounds<F> const& x);
@@ -96,8 +96,8 @@ template<class F> class Error
     ValidatedErrorNumber generic() const;
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _e.precision(); }
-    //! The compuational properties needed to create the error bound; equivalent to the precision.
-    PropertiesType properties() const { return _e.precision(); }
+    //! The compuational characteristics needed to create the error bound; equivalent to the precision.
+    CharacteristicsType characteristics() const { return _e.precision(); }
     //! The raw data used to represent the error bound.
     F const& raw() const { return _e; }
     //! A mutable reference to the raw data used to represent the error bound.

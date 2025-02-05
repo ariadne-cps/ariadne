@@ -82,11 +82,23 @@ template<class X> pybind11::list matrix_to_python(Matrix<X> const& A) {
 namespace { // Don't export the following functions to prevent visibility inconsistency warnings with pybind11 names
 
 template<class X> Vector<X> vector_from_python(pybind11::list const& lst) {
-    return Vector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
+    assert (lst.size()!=0 || DefaultConstructible<X>);
+    if constexpr (DefaultConstructible<X>) {
+        return Vector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
+    } else {
+        auto prs = characteristics(from_python_object_or_literal<X>(lst[0]));
+        return Vector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);}, prs );
+    }
 }
 
 template<class X> Covector<X> covector_from_python(pybind11::list const& lst) {
-    return Covector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
+    assert (lst.size()!=0 || DefaultConstructible<X>);
+    if constexpr (DefaultConstructible<X>) {
+        return Covector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);} );
+    } else {
+        auto prs = characteristics(from_python_object_or_literal<X>(lst[0]));
+        return Covector<X>( lst.size(), [&lst](SizeType i){return from_python_object_or_literal<X>(lst[i]);}, prs );
+    }
 }
 
 template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {

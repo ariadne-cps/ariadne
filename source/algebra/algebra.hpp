@@ -297,6 +297,18 @@ template<class X> template<class A> A ElementaryAlgebra<X>::extract() const {
 
 
 
+template<class T> class PrototypeCharacteristics {
+    T _prototype;
+  public:
+    PrototypeCharacteristics(T prototype) : _prototype(prototype.create_zero()) { }
+    operator T const& () const { return _prototype; }
+    friend Bool operator==(PrototypeCharacteristics<T> const& prs1, PrototypeCharacteristics<T> const& prs2) {
+        ARIADNE_NOT_IMPLEMENTED; }
+};
+
+template<class X> PrototypeCharacteristics<ElementaryAlgebra<X>> characteristics(ElementaryAlgebra<X> const& a) { return PrototypeCharacteristics(a); }
+
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_ALGEBRA_HPP */

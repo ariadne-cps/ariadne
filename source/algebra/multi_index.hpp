@@ -36,6 +36,7 @@
 #include "utility/macros.hpp"
 #include "utility/array.hpp"
 #include "utility/container.hpp"
+#include "utility/uniform_list.hpp"
 #include "numeric/numeric.hpp"
 
 namespace Ariadne {
@@ -288,12 +289,6 @@ class MultiIndexBound {
     Array<SizeType> _max_degrees;
 };
 
-
-template<class T> class UniformList
-    : public List<T>
-{
-    using List<T>::List;
-};
 
 template<> class UniformList<MultiIndex>
     : public MultiIndexList

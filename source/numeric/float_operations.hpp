@@ -49,7 +49,7 @@ template<class X, class R=X> struct DeclareFloatOperations
 
 template<class X, class NX=OppositeTrait<X>> struct DeclareDirectedFloatOperations
     : DeclareDirectedNumericOperations<X,NX>
-    , DeclareMixedDirectedGroupOperators<X,NX,GenericTrait<X>,GenericTrait<NX>>
+    , DeclareMixedDirectedGroupOperators<X,NX,GenericType<X>,GenericType<NX>>
 {
     friend OutputStream& operator<<(OutputStream&, X const&);
     friend InputStream& operator>>(InputStream&, X&);

@@ -68,6 +68,7 @@ template<> class Rounded<FloatDP>
     typedef FloatDP FloatType;
     typedef Rounded<FloatDP> NumericType;
     typedef DoublePrecision PrecisionType;
+    typedef DoublePrecision CharacteristicsType;
     typedef BuiltinRoundingModeType RoundingModeType;
   public:
     static RoundingModeType get_rounding_mode() { return FloatDP::get_rounding_mode(); }
@@ -105,6 +106,7 @@ template<> class Rounded<FloatDP>
     FloatType const& raw() const { return this->_flt; }
     explicit operator FloatType() const { return this->_flt; }
     PrecisionType precision() const { return DoublePrecision(); }
+    CharacteristicsType characteristics() const { return DoublePrecision();  }
 
     // Non-finiteness tests
     friend Bool is_nan(Rounded<FloatType> x) { return std::isnan(x._flt.dbl); }
@@ -211,6 +213,7 @@ template<class FLT> class Rounded
     typedef FLT FloatType;
     typedef Rounded<FloatType> NumericType;
     typedef typename FloatType::PrecisionType PrecisionType;
+    typedef typename FloatType::PrecisionType CharacteristicsType;
     typedef typename FloatType::RoundingModeType RoundingModeType;
   public:
     static RoundingModeType get_rounding_mode() { return FloatType::get_rounding_mode(); }
@@ -222,6 +225,7 @@ template<class FLT> class Rounded
   public:
     FloatType data() const { return _flt; }
     PrecisionType precision() const { return this->_flt.precision(); }
+    CharacteristicsType characteristics() const { return this->_flt.precision(); }
 
     explicit Rounded(PrecisionType pr) : _flt(pr) { }
     Rounded(FloatType x) : _flt(x) { }

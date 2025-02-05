@@ -55,7 +55,6 @@ template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
-template<class T> using GenericType = typename T::GenericType;
 
 template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
 template<class M> using VectorFunctionType = typename M::VectorFunctionType;
@@ -175,7 +174,8 @@ template<class M> class ScaledFunctionPatch
     typedef ScalarMultivariateFunction<Paradigm> FunctionType;
     typedef ScalarMultivariateFunction<Paradigm> GenericType;
     typedef Number<Paradigm> GenericNumericType;
-    typedef typename M::PropertiesType PropertiesType;
+    typedef typename ModelType::PropertiesType PropertiesType;
+    typedef Tuple<DomainType,PropertiesType> CharacteristicsType;
 
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
@@ -189,11 +189,10 @@ template<class M> class ScaledFunctionPatch
     //! \name Constructors and destructors.
     virtual ~ScaledFunctionPatch() = default;
 
-    //! \brief Default constructor.
-    explicit ScaledFunctionPatch();
     //! \brief Construct a ScaledFunctionPatch<M> over the domain \a d.
     //explicit ScaledFunctionPatch(const DomainType& d);
     explicit ScaledFunctionPatch(const DomainType& d, PropertiesType prp);
+    explicit ScaledFunctionPatch(const CharacteristicsType& chrs);
     //! \brief Construct a ScaledFunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit ScaledFunctionPatch(const DomainType& d, const ModelType& m);
 
@@ -262,6 +261,8 @@ template<class M> class ScaledFunctionPatch
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.
     const ErrorType error() const { return this->_model.error(); }
+    //! \brief The arguments needed to crease a compatible zero function model.
+    CharacteristicsType characteristics() const { return CharacteristicsType(this->domain(),this->properties()); }
     //! \brief The accuracy parameter used to control approximation of the function model.
     PropertiesType properties() const { return this->_model.properties(); }
     //! \brief The precision of the numbers used.
@@ -569,12 +570,6 @@ template<class M> class VectorScaledFunctionPatch
 
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
     template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
-
-    //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables.
-    VectorScaledFunctionPatch();
-
-    //! \brief Construct the zero vector function over an unspecified domain.
-    explicit VectorScaledFunctionPatch(SizeType result_size);
 
     //! \brief Construct from a result size and a domain.
     VectorScaledFunctionPatch(SizeType result_size, const BoxDomainType& domain, PropertiesType properties);
@@ -1091,7 +1086,7 @@ template<class M> Bool inconsistent(const VectorScaledFunctionPatch<M>& f1, cons
 }
 template<class M> VectorScaledFunctionPatch<M> refinement(const VectorScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
-    VectorScaledFunctionPatch<M> r(f1.result_size());
+    VectorScaledFunctionPatch<M> r(f1.result_size(),f1.zero_element());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r[i]=refinement(f1[i],f2[i]);
     }

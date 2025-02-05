@@ -189,11 +189,13 @@ read_sequence(InputStream& is, Container& v,
 
 
 template<class TUP, std::size_t N> void write_tuple(std::ostream& os, TUP const& tup, std::integral_constant<std::size_t,N>) {
-    if constexpr (N!=1) {
+    if constexpr (N>1) {
         write_tuple(os,tup,std::integral_constant<std::size_t,N-1>());
         os << ',';
     }
-    os << std::get<N-1>(tup);
+    if constexpr (N>0) {
+        os << std::get<N-1>(tup);
+    }
 }
 
 } // namespace Ariadne
@@ -217,7 +219,7 @@ operator<<(std::ostream &os, const std::pair<S,T>& s)
 template<class... TS> inline
 std::ostream& operator<<(std::ostream& os, std::tuple<TS...> const& tup) {
     typename std::tuple_size<std::tuple<TS...>>::type sz;
-    os << "("; write_tuple(os,tup,sz); os << ")"; return os;
+    os << "("; Ariadne::write_tuple(os,tup,sz); os << ")"; return os;
 }
 
 /*

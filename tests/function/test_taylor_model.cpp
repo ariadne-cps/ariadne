@@ -378,7 +378,6 @@ template<class F> Void TestTaylorModel<F>::test_interval_arithmetic()
     typedef typename IntervalTaylorModelType::CoefficientType CoefficientType;
     typedef typename IntervalTaylorModelType::ErrorType ErrorType;
 
-
     CoefficientType c(-1,2,pr);
     CoefficientType d1(2,3,pr);
     CoefficientType d2(5,7,pr);
@@ -391,9 +390,10 @@ template<class F> Void TestTaylorModel<F>::test_interval_arithmetic()
     CoefficientType b0(4,pr), b1(-2,pr), b2(3,pr), b3(5,pr);
 
     ARIADNE_TEST_CONSTRUCT(ErrorType,e,(pr));
-
     IntervalTaylorModelType tm1({{i0,a0},{i1,a1},{i2,a2}},e,swp);
+    ARIADNE_TEST_PRINT(tm1);
     IntervalTaylorModelType tm1pc=tm1+c;
+    ARIADNE_TEST_PRINT(tm1pc);
 
     ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)+c, IntervalTaylorModelType({{i0,a0+c},{i1,a1},{i2,a2}},e,swp));
     ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)-c, IntervalTaylorModelType({{i0,a0-c},{i1,a1},{i2,a2}},e,swp));

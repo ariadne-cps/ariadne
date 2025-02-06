@@ -154,6 +154,7 @@ template<class T, class... US> concept Constructible = std::is_constructible<T,U
 template<class T> concept DefaultInitializable = std::is_default_constructible<T>::value;
 template<class T> concept DefaultConstructible = std::is_default_constructible<T>::value;
 template<class T> concept CopyConstructible = std::is_copy_constructible<T>::value;
+template<class T> concept CopyAssignable = std::is_copy_assignable<T>::value;
 //template<class F, class T> concept CastableTo = std::constructible_from<T,F>;
 //template<class F, class T> concept Castable = std::constructible_from<T,F>;
 template<class F, class T> concept CastableTo = std::is_constructible<T,F>::value;
@@ -180,6 +181,7 @@ template<class F, class T> concept SameAsOrConvertibleTo = SameAs<F,T> or Conver
 template<class T, class... US> concept OneOf = IsOneOf<T,US...>::value;
 template<class... TS> concept AllSame = AreAllSame<TS...>::value;
 
+template<class T> concept Clonable = requires (T const& t) { { t.clone() } -> ConvertibleTo<T*>; };
 
 template<class A1, class A2> concept HasEquality = requires(A1 a1, A2 a2) { { a1==a2 }; };
 template<class A1, class A2> concept CanAdd = requires(A1 a1, A2 a2) { { a1+a2 }; };

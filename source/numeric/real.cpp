@@ -629,7 +629,7 @@ static_assert(Constructible<FloatDP,Dyadic,FloatDP::RoundingModeType,FloatDP::Pr
 static_assert(Constructible<FloatMP,Dyadic,FloatMP::RoundingModeType,FloatMP::PrecisionType>);
 
 ValidatedReal::ValidatedReal(DyadicBounds const& y)
-    : Handle<Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y)) { }
+    : Handle<const Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y)) { }
 ValidatedReal::operator DyadicBounds () const { return this->get(); }
 DyadicBounds ValidatedReal::get() const { return this->_ptr->_get(); }
 FloatDPBounds ValidatedReal::get(DoublePrecision pr) const { return this->_ptr->_get(pr); }
@@ -638,8 +638,8 @@ FloatMPBounds ValidatedReal::get(MultiplePrecision pr) const { return this->_ptr
 OutputStream& operator<<(OutputStream& os, ValidatedReal const& vr) { return vr._ptr->_write(os); }
 
 ValidatedLowerReal::ValidatedLowerReal(DyadicLowerBound const& y)
-    : Handle<Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y.raw())) { }
-ValidatedLowerReal::ValidatedLowerReal(ValidatedReal const& r) : Handle<Interface>(r.managed_pointer()) { }
+    : Handle<const Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y.raw())) { }
+ValidatedLowerReal::ValidatedLowerReal(ValidatedReal const& r) : Handle<const Interface>(r.managed_pointer()) { }
 DyadicLowerBound ValidatedLowerReal::get() const { return this->_ptr->_get(); }
 FloatDPLowerBound ValidatedLowerReal::get(DoublePrecision pr) const { return FloatDPLowerBound(this->get().raw(),pr); }
 FloatMPLowerBound ValidatedLowerReal::get(MultiplePrecision pr) const { return FloatMPLowerBound(this->get().raw(),pr); }
@@ -647,8 +647,8 @@ OutputStream& operator<<(OutputStream& os, ValidatedLowerReal const& lr) { retur
 
 
 ValidatedUpperReal::ValidatedUpperReal(DyadicUpperBound const& y)
-    : Handle<Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y.raw())) { }
-ValidatedUpperReal::ValidatedUpperReal(ValidatedReal const& r) : Handle<Interface>(r.managed_pointer()) { }
+    : Handle<const Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y.raw())) { }
+ValidatedUpperReal::ValidatedUpperReal(ValidatedReal const& r) : Handle<const Interface>(r.managed_pointer()) { }
 DyadicUpperBound ValidatedUpperReal::get() const { return this->_ptr->_get(); }
 FloatDPUpperBound ValidatedUpperReal::get(DoublePrecision pr) const { return FloatDPUpperBound(this->get().raw(),pr); }
 FloatMPUpperBound ValidatedUpperReal::get(MultiplePrecision pr) const { return FloatMPUpperBound(this->get().raw(),pr); }

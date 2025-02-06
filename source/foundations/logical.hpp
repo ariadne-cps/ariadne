@@ -99,9 +99,9 @@ namespace Detail {
         virtual OutputStream& _write(OutputStream&) const = 0;
     };
 
-    class LogicalHandle : public Handle<LogicalInterface> {
+    class LogicalHandle : public Handle<const LogicalInterface> {
        public:
-        using Handle<LogicalInterface>::Handle;
+        using Handle<const LogicalInterface>::Handle;
         static LogicalHandle constant(LogicalValue v);
         LogicalValue check(Effort eff) const { return this->pointer()->_check(eff); }
         friend OutputStream& operator<<(OutputStream& os, LogicalHandle l) {

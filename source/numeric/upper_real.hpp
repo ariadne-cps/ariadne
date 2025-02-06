@@ -202,7 +202,7 @@ PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
 
 
 class ValidatedUpperReal
-    : public Handle<ValidatedRealInterface>
+    : public Handle<const ValidatedRealInterface>
 {
   public:
     ValidatedUpperReal(DyadicUpperBound const&);

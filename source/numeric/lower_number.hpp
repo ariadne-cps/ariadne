@@ -65,11 +65,11 @@ template<class P> class LowerNumber
     static_assert(Same<P,EffectiveTag> or Same<P,ValidatedTag>,"P must be a paradigm");
     friend class UpperNumber<P>;
   private: public:
-    Handle<NumberInterface> _handle;
+    Handle<const NumberInterface> _handle;
     explicit LowerNumber(NumberInterface* p) : _handle(p) { }
   private: public:
-    explicit LowerNumber(Handle<NumberInterface> h) : _handle(h) { }
-    Handle<NumberInterface> handle() const { return this->_handle; }
+    explicit LowerNumber(Handle<const NumberInterface> h) : _handle(h) { }
+    Handle<const NumberInterface> handle() const { return this->_handle; }
   private:
     NumberInterface const& ref() const { return this->_handle.reference(); }
     NumberInterface const* ptr() const { return this->_handle.pointer(); }

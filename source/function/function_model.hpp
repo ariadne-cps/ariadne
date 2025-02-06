@@ -218,12 +218,13 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
   public:
     explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
-    FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }
+    FunctionModel(UniquePointer<Interface> p) : Handle<Interface>(std::move(p)) { }
 
     FunctionModel() : FunctionModel(nullptr) { }
     FunctionModel(const SharedPointer<const Interface> p) : Handle<Interface>(p->_clone()) { }
-    FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : Handle<Interface>(f._ptr) { }
-    FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
+    FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : Handle<Interface>(f._ptr->_clone()) { }
+    FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) {
+        this->Handle<FunctionModelInterface<P,RealScalar(ARG),PR,PRE>>::operator=(f); return *this; }
     FunctionModel(const Interface& f) : Handle<Interface>(f._clone()) { }
     FunctionModel(const Function<P,SIG>& f) : FunctionModel(dynamic_cast<Interface*>(f.raw_pointer()->_clone())) { }
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); }
@@ -468,7 +469,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     template<class Y> using Result = typename SignatureTraits<SIG>::template Result<Y>;
   public:
     inline explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
-    inline FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }
+    inline FunctionModel(UniquePointer<Interface> p) : Handle<Interface>(p->_clone()) { }
 
     inline FunctionModel() : FunctionModel(nullptr) { }
     inline FunctionModel(SharedPointer<const Interface> vfp)

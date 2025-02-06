@@ -87,48 +87,48 @@ LogicalValue logical_value_from_pointer(LogicalInterface* ptr) {
 }
 
 LogicalHandle LogicalHandle::constant(LogicalValue l) {
-    return LogicalHandle(make_handle<LogicalConstant>(l));
+    return LogicalHandle(make_handle<const LogicalConstant>(l));
 }
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
 }
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
 }
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
 }
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
 }
 
 LogicalHandle operator!(LogicalHandle l) {
-    return LogicalHandle(make_handle<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<const LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 }
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
 }
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
 }
 
 LogicalHandle negation(LogicalHandle l) {
-    return LogicalHandle(make_handle<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
+    return LogicalHandle(make_handle<const LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
 }
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
 }
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
-    return LogicalHandle(make_handle<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
+    return LogicalHandle(make_handle<const LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
 }
 
 
@@ -198,10 +198,10 @@ template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public Logi
 
 
 LowerKleenean disjunction(Sequence<LowerKleenean> const& l) {
-    return LowerKleenean(LogicalHandle(make_handle<Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
+    return LowerKleenean(LogicalHandle(make_handle<const Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
 }
 UpperKleenean conjunction(Sequence<UpperKleenean> const& l) {
-    return UpperKleenean(LogicalHandle(make_handle<Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
+    return UpperKleenean(LogicalHandle(make_handle<const Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
 }
 
 Nat Effort::_default = 0u;

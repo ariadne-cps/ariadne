@@ -80,10 +80,10 @@ template<class T, AWriter<T> W> class WriterMixin : public WriterInterface<T> {
     virtual OutputStream& _write(OutputStream& os, T const& t) const override { return this->_w._write(os,t); }
 };
 
-template<class T> class Writer : public Handle<WriterInterface<T>> {
+template<class T> class Writer : public Handle<const WriterInterface<T>> {
   public:
-    using Handle<WriterInterface<T>>::Handle;
-    Writer(Handle<WriterInterface<T> > wh) : Handle<WriterInterface<T> >(wh) { }
+    using Handle<const WriterInterface<T>>::Handle;
+    Writer(Handle<const WriterInterface<T> > wh) : Handle<WriterInterface<T> >(wh) { }
     template<AWriter<T> W> Writer(W w) : Writer(new WriterMixin<T,W>(w)) { }
     inline WritableTemporary<T> operator() (T const& t) const;
 };

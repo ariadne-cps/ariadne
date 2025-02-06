@@ -50,7 +50,7 @@ class ValidatedRealInterface;
 //! \brief A generic class representing rigorous bounds on a real number.
 //! \see Real
 class ValidatedReal
-    : public Handle<ValidatedRealInterface>
+    : public Handle<const ValidatedRealInterface>
 {
   public:
     typedef ValidatedRealInterface Interface;

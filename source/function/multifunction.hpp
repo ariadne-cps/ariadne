@@ -114,7 +114,7 @@ template<class F, class P, class SIG, template<class,class>class SET> concept AM
 //! \ingroup Function
 //! \brief Functions \f$\X\mvto\Y\f$ returning a \ref LocatedSet at each point.
 template<class P, class SIG, template<class,class>class SET> class Multifunction
-    : public Handle<MultifunctionInterface<P,SIG,SET>>
+    : public Handle<const MultifunctionInterface<P,SIG,SET>>
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
@@ -123,7 +123,7 @@ template<class P, class SIG, template<class,class>class SET> class Multifunction
     typedef MultifunctionInterface<P,SIG,SET> Interface;
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
-    using Handle<Interface>::Handle;
+    using Handle<const Interface>::Handle;
     //! \brief <p/>
     template<AMultifunction<P,SIG,SET> MF> explicit Multifunction(MF const& mf);
     //! \brief <p/>
@@ -154,7 +154,7 @@ template<class MF, class P, class SIG, template<class,class>class SET> class Mul
 
 template<class P, class SIG,template<class,class>class SET> template<AMultifunction<P,SIG,SET> MF>
 Multifunction<P,SIG,SET>::Multifunction(MF const& mf)
-    : Multifunction<P,SIG,SET>(std::make_shared<MultifunctionWrapper<MF,P,SIG,SET>>(mf)) {
+    : Multifunction<P,SIG,SET>(std::make_shared<const MultifunctionWrapper<MF,P,SIG,SET>>(mf)) {
 }
 
 
@@ -279,7 +279,7 @@ template<class P, class SIG, template<class,class>class SET> class FunctionSetIn
 };
 
 template<class P, class SIG, template<class,class>class SET> class FunctionSet
-    : public Handle<FunctionSetInterface<P,SIG,SET>>
+    : public Handle<const FunctionSetInterface<P,SIG,SET>>
 {
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
     using RES=typename SignatureTraits<SIG>::ResultKind;
@@ -287,7 +287,7 @@ template<class P, class SIG, template<class,class>class SET> class FunctionSet
     typedef FunctionSetInterface<P,SIG,SET> Interface;
     template<class Y> using Argument = typename SignatureTraits<SIG>::template Argument<Y>;
 
-    using Handle<Interface>::Handle;
+    using Handle<const Interface>::Handle;
 
     //! \brief <p/>
     template<AFunctionSet<P,SIG,SET> FS> explicit FunctionSet(FS const& fs);
@@ -319,7 +319,7 @@ template<class FS, class P, class SIG, template<class,class>class SET> class Fun
 
 template<class P, class SIG,template<class,class>class SET> template<AFunctionSet<P,SIG,SET> FS>
 FunctionSet<P,SIG,SET>::FunctionSet(FS const& fs)
-    : Handle<Interface>(std::make_shared<FunctionSetWrapper<FS,P,SIG,SET>>(fs)) { }
+    : Handle<const Interface>(std::make_shared<const FunctionSetWrapper<FS,P,SIG,SET>>(fs)) { }
 
 template<class RES, class ARG> class CompactSet<ValidatedTag,RES(ARG)>
     : public FunctionSet<ValidatedTag,RES(ARG),CompactSet>

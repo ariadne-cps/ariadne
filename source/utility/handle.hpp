@@ -59,55 +59,58 @@ template<class T, class I> class Wrapper
 };
 
 template<class I> class Handle {
+    template<class II> struct PointerTrait { typedef UniquePointer<II> Type; };
+    template<class II> struct PointerTrait<const II> { typedef SharedPointer<const II> Type; };
+    using PointerType = typename PointerTrait<I>::Type;
   public:
     typedef I Interface;
   protected:
-    mutable SharedPointer<I> _ptr;
+    mutable PointerType _ptr;
   public:
     ~Handle() { }
     explicit Handle(I* p) : _ptr(p) { }
-    Handle(SharedPointer<I> p) : _ptr(p) { }
+    Handle(PointerType p) { this->_reset(p); }
     Handle(I&& r) : _ptr(r._move()) { }
     Handle(const I& r) : _ptr(r._copy()) { }
     template<DerivedFrom<I> T> Handle(T&& t) : _ptr(new T(std::move(t))) { }
     template<DerivedFrom<I> T> requires CopyConstructible<T> Handle(const T& t)
         : _ptr(new T(t)) { }
-    //Handle(const Handle<I>& h) : _ptr(h._ptr) { }
-    //Handle(Handle<I>&& h) : _ptr(h._ptr) { }
-    Handle(const Handle<I>& h) = default;
+    Handle(const Handle<I>& h) {  this->_reset(h._ptr); }
     Handle(Handle<I>&& h) = default;
-    Handle<I>& operator=(const Handle<I>& h) = default;
+    Handle<I>& operator=(const Handle<I>& h) { this->_reset(h._ptr); return *this; }
     Handle<I>& operator=(Handle<I>&& h) = default;
     template<class II> explicit Handle(const Handle<II>& h) : _ptr(h.managed_pointer()) { }
-    //explicit operator I const& () const { return *_ptr; }
     operator I const& () const { return *_ptr; }
   public:
     const I& const_reference() const { return _ptr.operator*(); }
     const I& reference() const { return _ptr.operator*(); }
-    I& reference() { make_unique(); return _ptr.operator*(); }
+    I& reference() { return _ptr.operator*(); }
   public:
     const I* const_pointer() const { return _ptr.operator->(); }
     const I* pointer() const { return _ptr.operator->(); }
-    I* pointer() { make_unique(); return _ptr.operator->(); }
+    I* pointer() { return _ptr.operator->(); }
   public:
     const I* raw_const_pointer() const { return _ptr.operator->(); }
     const I* raw_pointer() const { return _ptr.operator->(); }
-    I* raw_pointer() { make_unique(); return _ptr.operator->(); }
+    I* raw_pointer() { return _ptr.operator->(); }
   public:
     const I& ref() const { return _ptr.operator*(); }
-    I& ref() { make_unique(); return _ptr.operator*(); }
+    I& ref() { return _ptr.operator*(); }
   public:
     const I* ptr() const { return _ptr.operator->(); }
-    I* ptr() { make_unique(); return _ptr.operator->(); }
+    I* ptr() { return _ptr.operator->(); }
   public:
-    const SharedPointer<I> managed_const_pointer() const { return _ptr; }
-    const SharedPointer<I> managed_pointer() const { return _ptr; }
-    SharedPointer<I> managed_pointer() { make_unique(); return _ptr; }
+    const PointerType managed_const_pointer() const { return _ptr; }
+    const PointerType managed_pointer() const { return _ptr; }
+    PointerType managed_pointer() { return _ptr; }
   protected:
-    template<class II> static Void _make_unique(SharedPointer<II>& ptr) {
-        if(ptr.use_count()>1) { ptr=SharedPointer<I>(ptr->_copy()); } }
-    template<class II> static Void _make_unique(SharedPointer<const II>& ptr) { }
-    void make_unique() { _make_unique(_ptr); }
+    void _reset(PointerType const& ptr) {
+        if constexpr (CopyAssignable<PointerType>) { this->_ptr=ptr; }
+        else if constexpr (std::is_copy_constructible<I>::value) { this->_ptr.reset(new I(*ptr)); }
+        else if constexpr (Clonable<I>) { this->_ptr.reset(ptr->clone()); }
+        else { this->_ptr.reset(ptr->_clone()); }
+    }
+
   private:
     template<class T, class II> friend T& dynamic_handle_extract(Handle<II>& h);
     template<class T, class II> friend const T& dynamic_handle_extract(const Handle<II>& h);
@@ -116,7 +119,7 @@ template<class I> class Handle {
 };
 
 template<class T, class... AS> Handle<T> make_handle(AS&& ... as) {
-    return Handle<T>(std::make_shared<T>(as...));
+    return Handle<T>(std::make_unique<T>(as...));
 }
 
 inline void write_error(OutputStream& os, const char* f, const WritableInterface* w, const char* i, const char* c, const char* t) {

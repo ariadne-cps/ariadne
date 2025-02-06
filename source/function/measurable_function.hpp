@@ -158,7 +158,7 @@ FanModel<Real(Real),PR,PRE>::preimage(ValidatedOpenSet<Real> const& rng) const -
     Accuracy acc(exp2(-4));
 
     ValidatedOpenSet<Real> const prim=Ariadne::preimage(this->_function,rng,this->_domain,acc);
-    auto ivls_ptr=dynamic_pointer_cast<OpenSetWrapper<UnionOfIntervals<FloatDP>,ValidatedTag,Real>const>(prim.managed_pointer());
+    auto ivls_ptr=dynamic_pointer_cast<const OpenSetWrapper<UnionOfIntervals<FloatDP>,ValidatedTag,Real>>(prim.managed_pointer());
     assert(ivls_ptr);
     UnionOfIntervals<FloatDP> const& ivls=*ivls_ptr;
     return LowerMeasurableSetModel(ivls,this->_measure_error);

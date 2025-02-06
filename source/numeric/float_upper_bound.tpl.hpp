@@ -47,7 +47,7 @@ template<class F> UpperBound<F>::UpperBound(Error<F> const& x) : UpperBound<F>(x
 template<class F> UpperBound<F>::UpperBound(Real const& r, PR pr) : UpperBound(r.get(pr)) {}
 template<class F> UpperBound<F>::UpperBound(ValidatedUpperNumber const& y, PR pr) : UpperBound(y.get(pr)) {}
 template<class F> UpperBound<F>::operator ValidatedUpperNumber() const {
-    return ValidatedUpperNumber(Handle<NumberInterface>(new NumberWrapper<UpperBound<F>>(*this)));
+    return ValidatedUpperNumber(Handle<const NumberInterface>(new NumberWrapper<UpperBound<F>>(*this)));
 }
 template<class F> auto UpperBound<F>::generic() const -> GenericType { return this->operator GenericType(); }
 

@@ -201,7 +201,7 @@ PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2);
 PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2);
 
 class ValidatedLowerReal
-    : public Handle<ValidatedRealInterface>
+    : public Handle<const ValidatedRealInterface>
 {
   public:
     ValidatedLowerReal(DyadicLowerBound const&);

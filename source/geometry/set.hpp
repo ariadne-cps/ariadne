@@ -44,10 +44,10 @@ namespace Ariadne {
 //! \ingroup GeometryModule SetSubModule
 //! \brief Base handle class for sets.
 template<class T> class SetBase
-    : public Handle<SetInterfaceBase<T>>
+    : public Handle<const SetInterfaceBase<T>>
 {
   public:
-    using Handle<SetInterfaceBase<T>>::Handle;
+    using Handle<const SetInterfaceBase<T>>::Handle;
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
 };
@@ -56,13 +56,13 @@ template<class T> class SetBase
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded sets.
 template<class P, class T> class BoundedSet
-    : public Handle<BoundedSetInterface<P,T>>
+    : public Handle<const BoundedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    using Handle<BoundedSetInterface<P,T>>::Handle;
+    using Handle<const BoundedSetInterface<P,T>>::Handle;
     template<class S> requires ABoundedSet<S,P,T> BoundedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -79,12 +79,12 @@ template<class P, class T> class BoundedSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
 template<class P, class T> class OvertSet
-    : public Handle<OvertSetInterface<P,T>>
+    : public Handle<const OvertSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    using Handle<OvertSetInterface<P,T>>::Handle;
+    using Handle<const OvertSetInterface<P,T>>::Handle;
     template<class S> requires AnOvertSet<S,P,T> OvertSet(S const& s);
 
     //! \brief The dimension of the set.
@@ -96,12 +96,12 @@ template<class P, class T> class OvertSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for open sets.
 template<class P, class T> class OpenSet
-    : public Handle<OpenSetInterface<P,T>>
+    : public Handle<const OpenSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    using Handle<OpenSetInterface<P,T>>::Handle;
+    using Handle<const OpenSetInterface<P,T>>::Handle;
     template<class S> requires AnOpenSet<S,P,T> OpenSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -116,12 +116,12 @@ template<class P, class T> class OpenSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for closed sets.
 template<class P, class T> class ClosedSet
-    : public Handle<ClosedSetInterface<P,T>>
+    : public Handle<const ClosedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    using Handle<ClosedSetInterface<P,T>>::Handle;
+    using Handle<const ClosedSetInterface<P,T>>::Handle;
     template<class S> requires AClosedSet<S,P,T> ClosedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -134,13 +134,13 @@ template<class P, class T> class ClosedSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for compact (closed and bounded) sets.
 template<class P, class T> class CompactSet
-    : public Handle<CompactSetInterface<P,T>>
+    : public Handle<const CompactSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    using Handle<CompactSetInterface<P,T>>::Handle;
+    using Handle<const CompactSetInterface<P,T>>::Handle;
     template<class S> requires ACompactSet<S,P,T> CompactSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -155,12 +155,12 @@ template<class P, class T> class CompactSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
 template<class P, class T> class RegularSet
-    : public Handle<RegularSetInterface<P,T>>
+    : public Handle<const RegularSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
 
-    using Handle<RegularSetInterface<P,T>>::Handle;
+    using Handle<const RegularSetInterface<P,T>>::Handle;
     template<class S> requires ARegularSet<S,P,T> RegularSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -175,13 +175,13 @@ template<class P, class T> class RegularSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for located (overt and compact) sets.
 template<class P, class T> class LocatedSet
-    : public Handle<LocatedSetInterface<P,T>>
+    : public Handle<const LocatedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    using Handle<LocatedSetInterface<P,T>>::Handle;
+    using Handle<const LocatedSetInterface<P,T>>::Handle;
     template<class S> requires ALocatedSet<S,P,T> LocatedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
@@ -198,13 +198,13 @@ template<class P, class T> class LocatedSet
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded regular sets.
 template<class P, class T> class RegularLocatedSet
-    : public Handle<RegularLocatedSetInterface<P,T>>
+    : public Handle<const RegularLocatedSetInterface<P,T>>
 {
   public:
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     typedef typename SetTraits<T>::BoundingSetType BoundingSetType;
 
-    using Handle<RegularLocatedSetInterface<P,T>>::Handle;
+    using Handle<const RegularLocatedSetInterface<P,T>>::Handle;
     template<class S> requires ARegularLocatedSet<S,P,T> RegularLocatedSet(S const& s);
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }

@@ -118,7 +118,7 @@ template<class X, class P> concept ConvertibleViaNumberToNumber
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P,  which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 template<class P> class Number
-    : public Handle<NumberInterface>
+    : public Handle<const NumberInterface>
     , public DeclareNumberOperators
 {
     static_assert(IsParadigm<P>,"P must be a paradigm");
@@ -136,11 +136,11 @@ template<class P> class Number
     typedef P Paradigm;
     typedef Number<P> NumericType;
   public:
-    using Handle<Interface>::Handle;
-    explicit Number(NumberInterface* p) : Handle<NumberInterface>(p) { }
+    using Handle<const Interface>::Handle;
+    explicit Number(NumberInterface* p) : Handle<const NumberInterface>(p) { }
   private: public:
-    Handle<NumberInterface> handle() const { return *this; }
-    explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
+    Handle<const NumberInterface> handle() const { return *this; }
+    explicit Number(Handle<const NumberInterface> h) : Handle<const NumberInterface>(h) { }
   public:
     Number() : Number(Integer(0)) { }
 

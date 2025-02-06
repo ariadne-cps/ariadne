@@ -108,9 +108,9 @@ class ArgumentParserInterface {
 };
 
 //! \brief An argument parser
-class ArgumentParser : public Handle<ArgumentParserInterface> {
+class ArgumentParser : public Handle<const ArgumentParserInterface> {
   public:
-    using Handle<ArgumentParserInterface>::Handle;
+    using Handle<const ArgumentParserInterface>::Handle;
     Bool is_consumable(ArgumentStream const& stream) const { return this->_ptr->is_consumable(stream); }
     ArgumentPack consume(ArgumentStream& stream) const { return this->_ptr->consume(stream); }
     SizeType help_description_header_size() const { return this->_ptr->help_description_header_size(); }

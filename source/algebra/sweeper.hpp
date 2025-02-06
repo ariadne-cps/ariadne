@@ -76,7 +76,7 @@ template<class F> class SweeperInterface {
  *  This is a major efficiency improvement.
  */
 template<class F> class Sweeper
-    : public Handle<SweeperInterface<F>>
+    : public Handle<const SweeperInterface<F>>
 {
     typedef typename F::PrecisionType PR;
   public:
@@ -85,7 +85,7 @@ template<class F> class Sweeper
     typedef PR PrecisionType;
     typedef MultiIndex IndexType;
   public:
-    using Handle<Interface>::Handle;
+    using Handle<const Interface>::Handle;
 
     Sweeper();
 

@@ -89,6 +89,8 @@ class Int64;
 
 using std::declval;
 
+//! Internal alias for standard unique pointer.
+template<class T> using UniquePointer = std::unique_ptr<T>;
 //! Internal alias for standard shared pointer.
 template<class T> using SharedPointer = std::shared_ptr<T>;
 //! Internal alias for standard initializer list.

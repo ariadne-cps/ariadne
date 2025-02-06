@@ -40,6 +40,8 @@ void ariadne_main()
     StepMaximumError max_err=1e-6;
 
     TaylorPicardIntegrator integrator(max_err);
+    auto sweeper = ThresholdSweeper<FloatDP>(DP(),max_err.value()/8);
+    integrator.set_function_factory(ValidatedFunctionPatchFactory(make_validated_bounds_taylor_function_patch_factory(sweeper)));
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);

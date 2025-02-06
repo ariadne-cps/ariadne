@@ -92,10 +92,28 @@ class TaylorFunctionFactory
     friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
+class ValidatedBoundsTaylorFunctionFactory
+    : public ScaledFunctionPatchFactory<ValidatedBoundsTaylorModel<FloatDP>>
+{
+    typedef ValidatedBoundsTaylorModel<FloatDP> M;
+    typedef BoxDomainType D;
+public:
+    typedef typename M::SweeperType SweeperType;
+    using ScaledFunctionPatchFactory<M>::ScaledFunctionPatchFactory;
+    explicit ValidatedBoundsTaylorFunctionFactory(SweeperType sweeper) : ScaledFunctionPatchFactory<M>(sweeper) { }
+    SweeperType sweeper() const { return this->properties(); }
+    friend OutputStream& operator<<(OutputStream& os, ValidatedBoundsTaylorFunctionFactory const& factory) { return os << "ValidatedBoundsTaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
+};
+
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
 FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory();
 FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
+
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_validated_bounds_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_validated_bounds_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
+FunctionPatchFactoryInterface<ValidatedTag>* make_validated_bounds_taylor_function_patch_factory();
+FunctionPatchFactoryInterface<ValidatedTag>* make_validated_bounds_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper);
 
 } // namespace Ariadne
 

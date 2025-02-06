@@ -35,7 +35,7 @@
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 
-using namespace ConcLog;
+    using namespace ConcLog;
 
 namespace Ariadne {
 
@@ -71,7 +71,7 @@ class OptimiserInterface {
 
     //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
-    //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in ,D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
+    //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in D,\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
@@ -179,7 +179,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
     struct PrimalDualData;
     struct StepData;
 
-    //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \brief Compute a \em local optimum of linear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
@@ -188,8 +188,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                                                const PrimalDualData& wxy0) const;
+    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, const PrimalDualData& wxy0) const;
 
     Void setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
                            StepData& stp) const;
@@ -211,22 +210,22 @@ class NonlinearInteriorPointOptimiser
     using OptimiserBase::minimise;
     using OptimiserBase::feasible;
 
-    //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \brief Compute a \em local optimum of linear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C.\f$.
     //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
-    //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
+    //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
-    //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
-    //! hotstarting the method with the overall constraint violation, primal and dual variables.
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the primal \f$x_0\f$ and dual variables \f$y_0\f$ overall constraint violation \f$t_0\f$.
     Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& lambda0, const FloatDPApproximation& violation0) const;
+                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& y0, const FloatDPApproximation& t0) const;
 
-    //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
-    //! hotstarting the method with the primal and dual.
+    //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
+    //! hotstarting the method with the primal variables \f$x_0\f$ and dual variables \f$y_0\f$.
     Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& lambda0) const;
+                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& y0) const;
 
     Void minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C, const ApproximateVectorMultivariateFunction& h,
                            FloatDPApproximationVector& x, FloatDPApproximationVector& w, FloatDPApproximationVector& kappa, FloatDPApproximationVector& lambda, const FloatDPApproximation& mu) const;

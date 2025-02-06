@@ -105,7 +105,7 @@ template<class I> class Handle {
     SharedPointer<I> managed_pointer() { make_unique(); return _ptr; }
   protected:
     template<class II> static Void _make_unique(SharedPointer<II>& ptr) {
-        if(!ptr.unique()) { ptr=SharedPointer<I>(ptr->_copy()); } }
+        if(ptr.use_count()>1) { ptr=SharedPointer<I>(ptr->_copy()); } }
     template<class II> static Void _make_unique(SharedPointer<const II>& ptr) { }
     void make_unique() { _make_unique(_ptr); }
   private:

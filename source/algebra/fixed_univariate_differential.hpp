@@ -109,6 +109,8 @@ class UnivariateFirstDifferential
     //! \brief Set all coefficients to zero.
     Void clear() { this->_value=0; this->_gradient=0; }
   public:
+    friend CharacteristicsType<X> characteristics(UnivariateFirstDifferential<X> const& dx) {
+        return characteristics(dx._value); }
     friend DifferentialFactory<X> factory(UnivariateFirstDifferential<X> const& dx) {
         return DifferentialFactory<X>(dx.value().precision()); }
     friend OutputStream& operator<<(OutputStream& os, const UnivariateFirstDifferential<X>& x) {
@@ -308,6 +310,9 @@ class UnivariateSecondDifferential
     //! \brief Set all coefficients to zero.
     Void clear() { (*this)=nul(this->_value); }
   public:
+    friend CharacteristicsType<X> characteristics(UnivariateSecondDifferential<X> const& dx) {
+        return characteristics(dx._value); }
+
     friend DifferentialFactory<X> factory(UnivariateSecondDifferential<X> const& dx) {
         return DifferentialFactory<X>(dx.value().precision()); }
 

@@ -138,6 +138,8 @@ class Affine
 {
   public:
     typedef X NumericType;
+    typedef Ariadne::CharacteristicsType<X> CoefficientCharacteristicsType;
+    typedef Tuple<SizeType,CoefficientCharacteristicsType> CharacteristicsType;
   public:
     template<class... PRS> requires Constructible<X,PRS...>
         explicit Affine(SizeType n, PRS... prs) : _c(0,prs...), _g(n,prs...) { }
@@ -155,7 +157,7 @@ class Affine
             return Affine<X>(Covector<X>::unit(n,j,prs...),X(0u,prs...)); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         static Vector< Affine<X> > coordinates(SizeType n, PRS... prs) {
-            return Vector< Affine<X> >(n,[&](SizeType i){return Affine<X>::coordinate(n,i,prs...);}); }
+            return Vector< Affine<X> >(n,[&](SizeType i){return Affine<X>::coordinate(n,i,prs...);},Affine<X>(n,prs...)); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
     static Affine<X> variable(SizeType n, SizeType j, PRS... prs) { return coordinate(n,j,prs...); }
     template<class... PRS> requires Constructible<X,Nat,PRS...>
@@ -173,6 +175,10 @@ class Affine
     const X& value() const { return this->_c; }
 
     SizeType argument_size() const { return this->_g.size(); }
+    CoefficientCharacteristicsType coefficient_characteristics() const {
+        return get_characteristics(this->_c); }
+    CharacteristicsType characteristics() const {
+        return std::make_tuple(this->argument_size(),this->coefficient_characteristics()); }
 
     template<class Y> Y evaluate(const Vector<Y>& x) const;
 

@@ -65,6 +65,7 @@ Void TestPolynomial::test()
     ARIADNE_TEST_CALL(test_indexing())
     ARIADNE_TEST_CALL(test_arithmetic())
     ARIADNE_TEST_CALL(test_variables())
+
     ARIADNE_TEST_CALL(test_find())
     ARIADNE_TEST_CALL(test_flow())
 }
@@ -315,15 +316,21 @@ Void TestPolynomial::test_find()
 
 Void TestPolynomial::test_flow()
 {
+    static_assert(not DefaultConstructible<MultivariatePolynomial<FloatDPBounds>>);
     using PolynomialType = MultivariatePolynomial<FloatDPBounds>;
-    Vector<PolynomialType> f(2,PolynomialType({{}},dp));
-    f[0] = PolynomialType({ {{0,0,0},1.0_x}, {{0,1,0},1.0_x} },dp);
-    f[1] = PolynomialType({ {{2,0,0},-1.0_x}},dp);
+    PolynomialType f0({ {{0,0,0},1.0_x}, {{0,1,0},1.0_x} },dp);
+    PolynomialType f1({ {{2,0,0},-1.0_x}},dp);
+    Vector<PolynomialType> f={f0,f1};
+    ARIADNE_TEST_PRINT(f[0].argument_size())
+    ARIADNE_TEST_PRINT(characteristics(f[0]))
+    ARIADNE_TEST_PRINT(f.array().element_characteristics())
+    ARIADNE_TEST_PRINT(f)
 
     auto phi_picard = flow_polynomial_picard_iteration(f,4);
-    auto phi_lie = flow_polynomial_lie_derivative(f,4);
-    ARIADNE_TEST_ASSERT(possibly(phi_picard == phi_lie))
     ARIADNE_TEST_PRINT(phi_picard)
+    auto phi_lie = flow_polynomial_lie_derivative(f,4);
+    ARIADNE_TEST_PRINT(phi_lie)
+    ARIADNE_TEST_ASSERT(possibly(phi_picard == phi_lie))
 }
 
 Int main() {

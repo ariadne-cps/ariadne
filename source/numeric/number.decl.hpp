@@ -48,15 +48,13 @@ class DivideByZeroError : public std::runtime_error {
 
 template<class X> using NumericType = typename X::NumericType;
 
+template<class X> struct ConcreteTraits;
+
 template<class X> struct NumericTraits;
-template<class X> using GenericTrait = typename NumericTraits<X>::GenericType;
 template<class X> using PositiveTrait = typename NumericTraits<X>::PositiveType;
 template<class X> using OppositeTrait = typename NumericTraits<X>::OppositeType;
 template<class X> using LessTrait = typename NumericTraits<X>::LessType;
 template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
-
-template<class X> using PropertiesType = typename X::PropertiesType;
-template<class X> using GenericType = typename X::GenericType;
 
 template<class X> using GenericNumericType = GenericType<NumericType<X>>;
 
@@ -132,7 +130,9 @@ template<class P> struct IsGenericNumber<UpperNumber<P>> : True { };
 template<class P> struct IsGenericNumber<LowerNumber<P>> : True { };
 template<class Y> struct IsGenericNumber<Positive<Y>> : IsGenericNumber<Y> { };
 
-template<class T> concept HasGenericType = requires { typename T::GenericType; };
+template<class T> class CheckedAssignable;
+template<class Y> struct IsGenericNumber<CheckedAssignable<Y>> : IsGenericNumber<Y> { };
+
 template<class T> concept HasPrecisionType = requires { typename T::PrecisionType; };
 
 template<class X> concept Concrete = HasGenericType<X>;
@@ -141,6 +141,10 @@ template<class X> concept Generic = not Concrete<X>;
 template<class Y> concept GenericNumber = IsGenericNumber<Y>::value;
 template<class X> concept ConcreteNumber = Concrete<X> and Convertible<X,Real>;
 
+template<class T> struct CharacteristicsTrait;
+//template<class T> requires BuiltinArithmetic<T> decltype(auto) characteristics(T const& t) { return std::tuple<>(); }
+//template<class Y> requires GenericNumber<Y> struct CharacteristicsTrait<Y> { typedef Tuple<> Type; };
+template<class Y> requires GenericNumber<Y> inline decltype(auto) characteristics(Y const&) { return std::tuple<>(); }
 
 
 //! \relates Number

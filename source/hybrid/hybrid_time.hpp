@@ -63,6 +63,8 @@ class HybridTime
     //! \brief The number of discrete steps taken.
     DiscreteTimeType _discrete_time;
   public:
+    explicit HybridTime()
+      : _continuous_time(0), _discrete_time(-1) { }
     explicit HybridTime(Real t)
       : _continuous_time(t), _discrete_time(-1) { }
     //! \brief Create the hybrid time moment with continuous-time \a t and discrete-time steps \a n.

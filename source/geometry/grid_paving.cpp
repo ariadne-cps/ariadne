@@ -3069,7 +3069,7 @@ OutputStream& operator<<(OutputStream& os, const GridTreePaving& theGridTreeSet)
 }
 
 template<class X> Vector<X> project(Vector<X> const& v, const Array<SizeType>& prj) {
-    return Vector<X>(prj.size(),[&](SizeType i){return v[prj[i]];});
+    return Vector<X>(prj.size(),[&](SizeType i){return v[prj[i]];},v.element_characteristics());
 }
 
 Grid project(Grid const& grd, Array<SizeType> const& prj) {

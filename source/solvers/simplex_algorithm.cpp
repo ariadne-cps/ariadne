@@ -310,7 +310,7 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
     for(SizeType j=0; j!=n; ++j) { p[j]=j; }
 
     // Factorise into lower and upper triangular matrices L and U
-    Matrix<XX> L=Matrix<X>::identity(m,A.zero_element());
+    Matrix<XX> L=Matrix<X>::identity(m,A.element_characteristics());
     Matrix<XX> U=A;
 
     for(SizeType k=0; k!=m; ++k) {

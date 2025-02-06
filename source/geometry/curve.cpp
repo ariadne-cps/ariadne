@@ -47,6 +47,8 @@ namespace Ariadne {
 template<class F> inline const Point<F>& cast_exact(const Point<Approximation<F>>& t) {
     return reinterpret_cast<const Point<F>&>(t); }
 
+template<> double numeric_cast(const CheckedAssignable<Approximation<FloatDP>>& a) { return a.get_d(); }
+template<> double numeric_cast(const CheckedAssignable<Approximation<FloatMP>>& a) { return a.get_d(); }
 
 
 Curve::Curve(const EffectiveVectorUnivariateFunction& f)

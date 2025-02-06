@@ -107,7 +107,7 @@ template<class F> Void TestExpansion<F>::test_working()
 {
     ARIADNE_TEST_PRINT(zero);
     ARIADNE_TEST_CONSTRUCT(MultiIndexList,as,(3u));
-    ARIADNE_TEST_CONSTRUCT(ExpansionType,e,(3u,zero));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,e,(3u,prec));
     ARIADNE_TEST_EQUALS(e.size(),0u);
     ARIADNE_TEST_EQUALS(e.argument_size(),3u);
     // Append values
@@ -332,7 +332,7 @@ template<class F> Void TestExpansion<F>::test_equality()
 {
     MultiIndex a(2);
     MultiIndex b(2); ++b;
-    Expansion<MI,F> e1(2,zero),e2(2,zero);
+    Expansion<MI,F> e1(2,prec),e2(2,prec);
     e1.append(a,1.0_x); e1.append(b,2.0_x);
     e2.append(a,1.0_x); e2.append(b,3.0_x);
     ARIADNE_TEST_BINARY_PREDICATE(!same, e1,e2);
@@ -381,7 +381,7 @@ template<class F> Void TestExpansion<F>::test_cleanup()
     ARIADNE_TEST_PRINT(a);
     ARIADNE_TEST_PRINT(b);
 
-    Expansion<MI,F> e(3,zero);
+    Expansion<MI,F> e(3,prec);
     F c(1,prec);
     ARIADNE_TEST_PRINT(e);
     for(Nat i=0; i!=2; ++i) {

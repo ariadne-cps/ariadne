@@ -37,7 +37,6 @@
 #include "utility/iterator.hpp"
 #include "utility/macros.hpp"
 
-
 namespace Ariadne {
 
 /************ Expansion ******************************************************/
@@ -110,7 +109,6 @@ template<class I, class X> class Expansion {
   public:
     UniformList<I> _indices;
     UniformList<X> _coefficients;
-    X _zero_coefficient;
   public:
     typedef S ArgumentSizeType;
     typedef V VariableIndexType;
@@ -132,8 +130,8 @@ template<class I, class X> class Expansion {
 
     ~Expansion();
     template<class... PRS> requires Constructible<X,Nat,PRS...>
-        explicit Expansion(ArgumentSizeType as, PRS... prs) : Expansion(as,X(0u,prs...)) { } // DEPRECATED
-    explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
+        explicit Expansion(ArgumentSizeType as, PRS... prs) : Expansion(as,get_characteristics(X(0u,prs...))) { } // DEPRECATED
+    explicit Expansion(ArgumentSizeType as, CharacteristicsType<X> const& prs, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
     template<class... PRS> requires Constructible<X,Nat,PRS...>
         explicit Expansion(ArgumentSizeType as, PRS... prs, SizeType cap=DEFAULT_CAPACITY);
@@ -151,6 +149,8 @@ template<class I, class X> class Expansion {
 
     Bool empty() const;
 
+    Pair<ArgumentSizeType,CharacteristicsType<X>> characteristics() const;
+    CharacteristicsType<X> coefficient_characteristics() const;
     ArgumentSizeType argument_size() const;
     SizeType number_of_terms() const;
     SizeType number_of_nonzeros() const; // DEPRECATED
@@ -182,7 +182,7 @@ template<class I, class X> class Expansion {
     Void append_sum(const IndexType& a1, const IndexType& a2, const CoefficientType& x);
 
     template<class Y> requires Assignable<X,Y> Void append(const IndexType& a, const Y& y) {
-        X x=this->_zero_coefficient; x=y; this->append(a,x); }
+        X x=this->zero_coefficient(); x=y; this->append(a,x); }
 
     Iterator find(const IndexType& a);
     ConstIterator find(const IndexType& a) const;
@@ -250,13 +250,12 @@ Expansion<I,X>::Expansion(ArgumentSizeType as, PRS... prs, SizeType cap)
 
 template<class I, class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs)
-    : Expansion(ArgumentSizeType(),X(0.0_x,prs...))
+    : Expansion(ArgumentSizeType(),make_characteristics<X>(prs...))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
     _indices = UniformList<I>(0u,I(lst.begin()->first)*0);
-    _coefficients = UniformList<X>(0,X(prs...));
-    _zero_coefficient = X(0,prs...);
+    _coefficients = UniformList<X>(prs...);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);
@@ -274,7 +273,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>
 
 template<class I, class X> template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
 Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
-    : Expansion(other.argument_size(),X(other.zero_coefficient(),prs...))
+    : Expansion(other.argument_size(),get_characteristics(X(other.zero_coefficient(),prs...)))
 {
     this->_fill(other,prs...);
 }

@@ -41,7 +41,6 @@
 
 #include "../test.hpp"
 
-
 using namespace Ariadne;
 
 typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
@@ -474,6 +473,8 @@ class TestExpression {
         RealElementaryAlgebra ay=RealExpression(y);
         RealElementaryAlgebra az=RealExpression(z);
         Vector<RealElementaryAlgebra> va={ax,ay,az};
+        ARIADNE_TEST_PRINT(va.element_characteristics());
+        ARIADNE_TEST_PRINT(va.zero_element());
         ARIADNE_TEST_PRINT(va);
         ARIADNE_TEST_PRINT(f3(va));
         ARIADNE_TEST_CONSTRUCT(RealExpression,g3,(f3(va).extract<RealExpression>()));

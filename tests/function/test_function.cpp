@@ -136,8 +136,9 @@ Void TestFunction::test_vector_univariate_function()
 
     EffectiveVectorUnivariateFunction df;
     Vector<FloatDPApproximation> dfp;
-    //df=f.derivative();
-    df=derivative(f);
+    derivative(f);
+    std::cerr<<"Exectuted derivative(f)\n";
+    ARIADNE_TEST_EXECUTE(df=derivative(f));
     df=f.derivative(IndexZero());
     df=derivative(f,IndexZero());
     dfp=f.tangent(p);

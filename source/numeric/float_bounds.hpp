@@ -93,7 +93,7 @@ template<class F> class Bounds
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     //! Construct bounds of zero with precision \a pr.
     explicit Bounds(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
@@ -164,8 +164,8 @@ template<class F> class Bounds
 
     //! The precision of the floating-point type used.
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
-    //! The compuational properties needed to create the bounds; equivalent to the precision.
-    PropertiesType properties() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    //! The compuational characteristics needed to create the bounds; equivalent to the precision.
+    CharacteristicsType characteristics() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
     //! Downcast to generic validated bounds.
     GenericType generic() const { return this->operator GenericType(); }
 

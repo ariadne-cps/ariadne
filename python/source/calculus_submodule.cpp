@@ -546,8 +546,7 @@ template<class FLT> Void export_vector_taylor_function(pybind11::module& module)
     Tag<Vector<NumericType>> number_vector_tag;
 
     pybind11::class_<ValidatedVectorMultivariateTaylorFunctionModel<FLT>> vector_taylor_function_class(module,python_class_name<ValidatedVectorMultivariateTaylorFunctionModel<FLT>>().c_str());
-//    vector_taylor_function_class.def( pybind11::init<Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>>>());
-    vector_taylor_function_class.def( pybind11::init([](Array<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> ary){return ValidatedVectorMultivariateTaylorFunctionModel<FLT>(Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>>(ary));}));
+    vector_taylor_function_class.def( pybind11::init([](List<ValidatedScalarMultivariateTaylorFunctionModel<FLT>> lst){return ValidatedVectorMultivariateTaylorFunctionModel<FLT>(Vector<ValidatedScalarMultivariateTaylorFunctionModel<FLT>>(lst));}));
     vector_taylor_function_class.def( pybind11::init< SizeType, ExactBoxType, Sweeper<FLT> >());
     vector_taylor_function_class.def( pybind11::init< ExactBoxType,const EffectiveVectorMultivariateFunction&,Sweeper<FLT> >());
     vector_taylor_function_class.def(pybind11::init< ExactBoxType, Vector< Expansion<MultiIndex,FLT> >, Vector<Error<FLT>>, Sweeper<FLT> >());

@@ -35,6 +35,7 @@
 #include "utility/metaprogramming.hpp"
 #include "utility/container.hpp"
 #include "utility/declarations.hpp"
+#include "utility/uniform_array.hpp"
 #include "numeric/builtin.hpp"
 
 #include "range.hpp"
@@ -162,7 +163,7 @@ template<class X>
 class Vector
     : public VectorContainer<Vector<X>>
 {
-    Array<X> _ary;
+    UniformArray<X> _ary;
   public:
     //!@{
     //! \name Type definitions
@@ -188,6 +189,9 @@ class Vector
     //! \brief Construct from an array of the same type.
     explicit Vector(const Array<X>& ary) : _ary(ary) { }
     explicit Vector(Array<X>&& ary) : _ary(ary) { }
+    //! \brief Construct from an array of the same type.
+    explicit Vector(const UniformArray<X>& ary) : _ary(ary) { }
+    explicit Vector(UniformArray<X>&& ary) : _ary(ary) { }
     //! \brief Construct from a list of the same type.
     explicit Vector(const List<X>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Convert from an initializer list of the same type.
@@ -209,22 +213,27 @@ class Vector
     //! \brief Construct from an vector of generic type and a precision parameter.
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...>
         explicit Vector(Vector<Y> const& v, PRS... prs) : _ary(v.array(),prs...) { }
+    //! \brief Generate from a function (object) \a g of type \a G mapping an index to a value and precision parameters.
+    template<class G> requires InvocableReturning<X,G,SizeType>
+        explicit Vector(SizeType n, G const& g) : _ary((assert(n!=0),n),g) { }
+    //! \brief Generate from a function (object) \a g of type \a G mapping an index to a value and precision parameters.
+    template<class G, class... PRS> requires InvocableReturning<X,G,SizeType> and Constructible<X,PRS...>
+        explicit Vector(SizeType n, G const& g, PRS... prs) : _ary(n,g,prs...) { }
+    //! \brief Construct from an array of generic type and a tuple of precision parameters.
+    template<class G, class... PRS> requires InvocableReturning<X,G,SizeType> and Constructible<X,PRS...>
+        explicit Vector(SizeType n, G const& g, Tuple<PRS...> prs) : _ary(n,g,prs) { }
+
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE> requires Convertible<typename VE::ScalarType,X>
     Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
-
-    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
-    template<class G> requires InvocableReturning<X,G,SizeType>
-    Vector(SizeType n, G const& g) : _ary(n,g) { }
-
     //! \brief Construct from an %VectorExpression of a different type.
     template<class VE> requires ExplicitlyConvertible<typename VE::ScalarType,X>
     explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),X(ve().zero_element())) {
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=X(ve()[i]); } }
 
 
-    //! \brief Copy constructor.
+    //! \b*rief Copy constructor.
     Vector(const Vector<X>& v) = default;
     //! \brief Move constructor.
     Vector(Vector<X>&& v) = default;
@@ -261,27 +270,29 @@ class Vector
     //! \brief The number of elements of the vector.
     SizeType size() const { return this->_ary.size(); }
     //! \brief A reference to the value stored in the \a i<sup>th</sup> element.
-    X& at(SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    ElementReference<X> at(SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary.at(i); }
     //! \brief A constant reference to the value stored in the \a i<sup>th</sup> element.
-    const X& at(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    const X& at(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary.at(i); }
     //! \brief Get the value stored in the \a i<sup>th</sup> element.
     const X& get(SizeType i) const { return this->_ary[i]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
     Void set(SizeType i, const X& x) { this->_ary[i] = x; }
     //! \brief Subscripting operator. Unchecked access.
-    X& operator[](SizeType i) { return this->_ary[i]; }
+    ElementReference<X>& operator[](SizeType i) { return this->_ary[i]; }
     //! \brief Constant subscripting operator.
     const X& operator[](SizeType i) const { return this->_ary[i]; }
     //! \brief Range subscripting operator.
     VectorRange<Vector<X>> operator[](Range rng); // { ARIADNE_PRECONDITION_MSG(rng.stop()<this->size(),*this<<"["<<r<<"]"); return VectorRange<X>(*this,rng); }
     //! \brief Constant range subscripting operator.
     VectorRange<const Vector<X>> operator[](Range rng) const;
+    //! \brief The class parameters of the ring containing the Vector's elements.
+    Ariadne::CharacteristicsType<X> element_characteristics() const {
+        return this->_ary.element_characteristics(); }
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
     const X zero_element() const {
-        if(this->size()!=0) { return create_zero((*this)[0]); }
-        else { return make_zero<X>(); } }
+        return make_from_characteristics<X>(this->element_characteristics()); }
     //! \brief The raw data array.
-    Array<X> const& array() const { return _ary; }
+    UniformArray<X> const& array() const { return _ary; }
     //!@}
 
 #ifdef DOXYGEN
@@ -380,27 +391,27 @@ template<AVectorExpression V> OutputStream& operator<<(OutputStream& os, const V
 
 struct ProvideVectorOperations {
     template<class X> friend Vector<X> operator+(Vector<X> const& v) {
-        return Vector<X>( v.size(), [&v](SizeType i){return +v[i];} ); }
+        return Vector<X>( v.size(), [&v](SizeType i){return +v[i];}, +v.zero_element() ); }
 
     template<class X> friend Vector<NegationType<X>> operator-(Vector<X> const& v) {
-        return Vector<NegationType<X>>( v.size(), [&v](SizeType i){return -v[i];} ); }
+        return Vector<NegationType<X>>( v.size(), [&v](SizeType i){return -v[i];}, -v.zero_element() ); }
 
     template<class X1, class X2> friend Vector<SumType<X1,X2>> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        return Vector<SumType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]+v2[i];} ); }
+        return Vector<SumType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]+v2[i];}, v1.zero_element()+v2.zero_element() ); }
 
     template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        return Vector<DifferenceType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]-v2[i];} ); }
+        return Vector<DifferenceType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]-v2[i];}, v1.zero_element()-v2.zero_element() ); }
 
     template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2) {
-        return Vector<ProductType<Scalar<X1>,X2>>( v2.size(), [&x1,&v2](SizeType i){return x1*v2[i];} ); }
+        return Vector<ProductType<Scalar<X1>,X2>>( v2.size(), [&x1,&v2](SizeType i){return x1*v2[i];}, x1*v2.zero_element() ); }
 
     template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2) {
-        return Vector<ProductType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]*x2;} ); }
+        return Vector<ProductType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]*x2;}, v1.zero_element()*x2 ); }
 
     template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2) {
-        return Vector<QuotientType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]/x2;} ); }
+        return Vector<QuotientType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]/x2;}, v1.zero_element()/x2 ); }
 
     template<class X1,class X2> friend Vector<InplaceSumType<X1,X2>>& operator+=(Vector<X1>& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
@@ -733,7 +744,7 @@ template<class G> decltype(auto) generate_vector(SizeType n, G const& g) {
 
 template<class F, class X> Vector<ResultOf<F(X)>> elementwise(F const& f, Vector<X> const& v) {
     typedef ResultOf<F(X)> R;
-    return Vector<R>(v.size(),[&](SizeType i){return f(v[i]);});
+    return Vector<R>(v.size(),[&](SizeType i){return f(v[i]);},f(v.zero_element()));
 }
 
 template<class F, class X1, class X2> Vector<ResultOf<F(X1,X2)>> elementwise(F const& f, Vector<X1> const& v1, Vector<X2> const& v2) {
@@ -817,6 +828,14 @@ Vector<X>::Vector(InitializerList<Dbl> const& lst, PRS... prs)
 namespace Ariadne {
 inline Vector<FloatDP>const& cast_exact(Vector<FloatDPApproximation>const& v) {
     return reinterpret_cast<Vector<FloatDP>const&>(v); }
+//template<class T> concept HasMemberCharacteristics = requires (T const& t) { t.characteristics(); };
+
+inline decltype(auto) characteristics(Rational const& x) { return Tuple<>(); }
+template<class PR> decltype(auto) characteristics(Float<PR> const& x) { return x.precision(); }
+template<class FLT> decltype(auto) characteristics(Rounded<FLT> const& x) { return x.precision(); }
+template<class X> decltype(auto) characteristics(Covector<X> const& x) {
+    if constexpr (HasCharacteristics<X>) { return std::make_pair(x.size(), characteristics(x.zero_element())); }
+    else { return std::make_pair(x.size(), Tuple<>()); } }
 } // namespace Ariadne
 
 #endif

@@ -297,7 +297,7 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identit
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constant(VectorDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
     ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(dom);
-    VectorOfScalarFunction<P,RealVector>res = VectorOfScalarFunction<P,RealVector>(n,z);
+    VectorOfScalarFunction<P,RealVector> res = VectorOfScalarFunction<P,RealVector>(n,z);
     for(SizeType i=0; i!=n; ++i) {
         res._vec[i]=ScalarMultivariateFunction<P>::constant(dom,c[i]);
     }

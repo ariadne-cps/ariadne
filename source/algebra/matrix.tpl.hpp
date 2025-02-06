@@ -30,12 +30,12 @@ namespace Ariadne {
 template<class X> inline X create_zero();
 
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
-    : _zero(nul(p[0])), _rs(m), _cs(n), _ary(p,p+m*n) {
+    : _rs(m), _cs(n), _ary(p,p+m*n) {
 }
 
 
 template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst)
-    : _zero(nul(*lst.begin()->begin())), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+    : _rs(lst.size()), _cs((assert(_rs!=0),assert(lst.begin()->size()!=0),lst.begin()->size())), _ary(_rs*_cs,characteristics(*lst.begin()->begin()))
 {
     typename InitializerList<InitializerList<X>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
@@ -221,7 +221,7 @@ lu_inverse(const Matrix<X>& M)
     SizeType m=M.row_size();
     SizeType n=M.column_size();
     Matrix<RealType> A=M;
-    Matrix<RealType> B=Matrix<RealType>::identity(n,M.zero_element());
+    Matrix<RealType> B=Matrix<RealType>::identity(n,M.element_characteristics());
 
     // Array of row pivots. The value p[i] gives the row
     // swapped with the ith row in the ith stage.
@@ -583,7 +583,7 @@ triangular_decomposition(const Matrix<X>& A)
 
     SizeType m=A.row_size();
     SizeType n=A.column_size();
-    Matrix<X> L=Matrix<X>::identity(m,A.zero_element());
+    Matrix<X> L=Matrix<X>::identity(m,A.element_characteristics());
     Matrix<X> U=A;
 
     // Array of row pivots. The value P[i] gives the row
@@ -918,19 +918,19 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 
 namespace {
 // TODO: Move these operations to VectorExpression
-template<class X> inline decltype(auto) operator*(X const& s, MatrixColumn<Matrix<X>> v) {
+template<class X> inline decltype(auto) operator*(SelfType<X> const& s, MatrixColumn<Matrix<X>> v) {
     return s*Vector<X>(v); }
-template<class X> inline decltype(auto) operator*(MatrixColumn<Matrix<X>> v, X const& s) {
+template<class X> inline decltype(auto) operator*(MatrixColumn<Matrix<X>> v, SelfType<X> const& s) {
     return Vector<X>(v)*s; }
-template<class X> inline decltype(auto) operator/(MatrixColumn<Matrix<X>> v, X const& s) {
+template<class X> inline decltype(auto) operator/(MatrixColumn<Matrix<X>> v, SelfType<X> const& s) {
     return Vector<X>(v)/s; }
-template<class X> inline MatrixColumn<Matrix<X>> operator+=(MatrixColumn<Matrix<X>> c, Vector<X> const& v) {
+template<class X> inline MatrixColumn<Matrix<X>> operator+=(MatrixColumn<Matrix<X>> c, Vector<SelfType<X>> const& v) {
     for(SizeType i=0; i!=c.size(); ++i) { c[i]+=v[i]; } return c; }
-template<class X> inline MatrixColumn<Matrix<X>> operator-=(MatrixColumn<Matrix<X>> c, Vector<X> const& v) {
+template<class X> inline MatrixColumn<Matrix<X>> operator-=(MatrixColumn<Matrix<X>> c, Vector<SelfType<X>> const& v) {
     for(SizeType i=0; i!=c.size(); ++i) { c[i]-=v[i]; } return c; }
-template<class X> inline MatrixColumn<Matrix<X>> operator*=(MatrixColumn<Matrix<X>> c, X const& s) {
+template<class X> inline MatrixColumn<Matrix<X>> operator*=(MatrixColumn<Matrix<X>> c, SelfType<X> const& s) {
     for(SizeType i=0; i!=c.size(); ++i) { c[i]*=s; } return c; }
-template<class X> inline MatrixColumn<Matrix<X>> operator/=(MatrixColumn<Matrix<X>> c, X const& s) {
+template<class X> inline MatrixColumn<Matrix<X>> operator/=(MatrixColumn<Matrix<X>> c, SelfType<X> const& s) {
     for(SizeType i=0; i!=c.size(); ++i) { c[i]/=s; } return c; }
 template<class X> inline decltype(auto) dot(MatrixColumn<Matrix<X>> v1, MatrixColumn<Matrix<X>> v2) {
     return dot(Vector<X>(v1),Vector<X>(v2)); }
@@ -974,7 +974,7 @@ orthogonal_decomposition(const Matrix<X>& A)
     X z=A.zero_element();
 
     Matrix<X> O=A;
-    Matrix<X> R=Matrix<X>::identity(n,z);
+    Matrix<X> R=Matrix<X>::identity(n,A.element_characteristics());
 
     Array<X> p(n,z);
 

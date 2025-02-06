@@ -24,11 +24,6 @@ jobs:
             cxx: "clang++"
           }
           - {
-            name: "macOS 13 GCC 12 [Debug]",
-            os: macos-13,
-            cxx: "g++-12"
-          }
-          - {
             name: "Ubuntu 22.04 Clang 15 [Debug]",
             os: ubuntu-22.04,
             cxx: "clang++-15"

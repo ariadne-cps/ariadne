@@ -25,12 +25,6 @@ jobs:
             pyld: "DY"
           }
           - {
-            name: "macOS 13 GCC 12 [Release]",
-            os: macos-13,
-            cxx-pkg: "gcc@12",
-            cxx-cmd: "g++-12"
-          }
-          - {
             name: "Ubuntu 22.04 Clang 15 [Release]",
             os: ubuntu-22.04,
             cxx-pkg: "clang-15",

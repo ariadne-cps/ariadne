@@ -105,4 +105,18 @@ FunctionPatchFactoryInterface<ValidatedTag>* make_taylor_function_patch_factory(
     return make_taylor_function_patch_factory(Sweeper<FloatDP>());
 }
 
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_validated_bounds_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
+    return new ValidatedBoundsTaylorFunctionFactory(sweeper);
+}
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_validated_bounds_taylor_function_factory() {
+    return make_validated_bounds_taylor_function_factory(Sweeper<FloatDP>());
+}
+FunctionPatchFactoryInterface<ValidatedTag>* make_validated_bounds_taylor_function_patch_factory(Sweeper<FloatDP> const& sweeper) {
+    return new ValidatedBoundsTaylorFunctionFactory(sweeper);
+}
+FunctionPatchFactoryInterface<ValidatedTag>* make_validated_bounds_taylor_function_patch_factory() {
+    return make_validated_bounds_taylor_function_patch_factory(Sweeper<FloatDP>());
+}
+
+
 } // namespace Ariadne

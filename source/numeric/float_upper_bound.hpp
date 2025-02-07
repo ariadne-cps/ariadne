@@ -62,7 +62,7 @@ template<class F> class UpperBound
     //! <p/>
     typedef PR PrecisionType;
     //! <p/>
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
   public:
     //! A upper bound of zero with precision \a pr.
     explicit UpperBound(PrecisionType pr) : _u(0.0_x,pr) { }
@@ -92,11 +92,11 @@ template<class F> class UpperBound
 
         UpperBound<F>& operator=(const F& x) { return *this=UpperBound<F>(x); }
         UpperBound<F>& operator=(const Bounds<F>& x) { return *this=x.upper(); }
-    //! Assign from the upper bound \a y, keeping the same precision.
+    //! Assign from the upper bound \a y, keeping the same properties.
     UpperBound<F>& operator=(const ValidatedUpperNumber& y) { return *this=UpperBound<F>(y,this->precision()); }
-    //! Create a upper bound from the generic upper bound \a y with the same precision as \a this.
+    //! Create a upper bound from the generic upper bound \a y with the same properties as \a this.
     UpperBound<F> create(const ValidatedUpperNumber& y) const { return UpperBound<F>(y,this->precision()); }
-    //! Create a lower bound from the generic lower bound \a y with the same precision as \a this.
+    //! Create a lower bound from the generic lower bound \a y with the same properties as \a this.
     LowerBound<F> create(const ValidatedLowerNumber& y) const { return LowerBound<F>(y,this->precision()); }
 
     //! Downcast to a generic upper bound.
@@ -104,8 +104,8 @@ template<class F> class UpperBound
 
     //! The precision of the floating-point type used.
     PrecisionType precision() const { return _u.precision(); }
-    //! The compuational properties needed to create the upper bound; equivalent to the precision.
-    PropertiesType properties() const { return _u.precision(); }
+    //! The compuational characteristics needed to create the upper bound; equivalent to the precision.
+    CharacteristicsType characteristics() const { return _u.precision(); }
     //! Downcast to a generic upper bound.
     GenericType generic() const;
     //! The raw data used to represent the upper bound.

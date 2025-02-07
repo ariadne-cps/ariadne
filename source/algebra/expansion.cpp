@@ -22,16 +22,28 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "expansion.hpp"
-#include "expansion.tpl.hpp"
-
+#include "numeric/float.decl.hpp"
 #include "numeric/floats.hpp"
 #include "numeric/rounded_float.hpp"
 #include "geometry/interval.hpp"
 
+#include "expansion.hpp"
+#include "expansion.tpl.hpp"
+
 #include <utility>
+#include <tuple>
 
 namespace Ariadne {
+    template<> struct CharacteristicsTrait<double> { typedef std::tuple<> Type; };
+
+    DP characteristics(FloatDP flt) { return flt.precision(); }
+    MP characteristics(FloatMP flt) { return flt.precision(); }
+
+    static_assert(Same<CharacteristicsType<FloatDP>,DP>);
+    static_assert(Same<CharacteristicsType<RoundedFloatDP>,DP>);
+
+    static_assert(HasCharacteristics<RoundedFloatDP>);
+    static_assert(HasCharacteristics<RoundedFloatMP>);
 
     template class Expansion<UniIndex,FloatDP>;
     template class Expansion<UniIndex,RoundedFloatDP>;

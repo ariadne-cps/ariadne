@@ -94,7 +94,7 @@ template<class F, class T> struct MyConvertible {
 
 template<class X> inline
 Vector<X> unscale(const Vector<X>& v, const BoxDomainType& d) {
-    return Vector<X>(v.size(),[&](SizeType i){return unscale(v[i],d[i]);});
+    return Vector<X>(v.size(),[&](SizeType i){return unscale(v[i],d[i]);},v.element_characteristics());
 }
 
 

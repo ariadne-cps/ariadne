@@ -32,6 +32,7 @@
 #include "algebra/multi_index.hpp"
 #include "algebra/expansion.hpp"
 #include "algebra/algebra.hpp"
+#include "algebra/sweeper.hpp"
 #include "function/taylor_model.hpp"
 #include "function/taylor_function.hpp"
 #include "algebra/differential.hpp"
@@ -54,7 +55,7 @@ inline MultivariatePolynomial<FloatDP> p(Nat n, Nat j) { return MultivariatePoly
 inline ValidatedScalarMultivariateTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,j,swp); }
 
 template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
-    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size(),e.zero_coefficient()));
+    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size(),e.coefficient_characteristics()));
     for(Nat i=0; i!=r.size(); ++i) { ARIADNE_ASSERT(v[i]==0.0_x || v[i]==1.0_x); if(v[i]==1.0_x) { r[i]=e; } }
     return r;
 }
@@ -121,8 +122,10 @@ Void TestScalarTaylorFunction::test_concept()
     const Vector<FloatDP> vw;
     const Vector<FloatDPBounds> vx;
     const Vector<ValidatedNumber> vy;
-    ValidatedScalarMultivariateTaylorFunctionModelDP  stf;
-    ValidatedScalarMultivariateTaylorFunctionModelDP stfr;
+    const BoxDomainType dom;
+    const SweeperDP swp;
+    ValidatedScalarMultivariateTaylorFunctionModelDP stf(dom,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP stfr(dom,swp);
 
     stfr=stf+w; stfr=stf-w; stfr=stf*w; stfr=stf/w;
     stfr=w+stf; stfr=w-stf; stfr=w*stf; stfr=w/stf;
@@ -150,7 +153,7 @@ Void TestScalarTaylorFunction::test_concept()
     stf(vy); stf(vy); evaluate(stf,vy); unchecked_evaluate(stf,vy); partial_evaluate(stf,k,y);
     stf.domain(); stf.range(); stf.expansion(); stf.error();
 
-    ScaledFunctionPatch<ValidatedTaylorModelDP> vstfp;
+    ScaledFunctionPatch<ValidatedTaylorModelDP> vstfp(dom,swp);
 
 }
 

@@ -78,13 +78,13 @@ class TestGraded
         return r; }
 
     template<class OP> Graded<X> apply(OP op, Graded<X> const& a) {
-        Graded<X> r;
+        Graded<X> r(a.element_characteristics());
         while(r.size()!=a.size()) { compute(r,op,a); }
         return r;
     }
 
     template<class OP> Graded<X> apply(OP op, Graded<X> const& a, Int n) {
-        Graded<X> r;
+        Graded<X> r(a.element_characteristics());
         while(r.size()!=a.size()) { compute(r,op,a,n); }
         return r;
     }

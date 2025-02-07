@@ -200,6 +200,9 @@ class FirstDifferential
     friend decltype(auto) operator<=(const FirstDifferential<X>& dx1, const FirstDifferential<X>& dx2) {
         return dx1._value<=dx2._value; }
 
+    //! \brief Characteristics needed to construct a zero element.
+    friend Pair<SizeType,CharacteristicsType<X>> characteristics(FirstDifferential<X>const& dx) {
+        return std::make_pair(dx.argument_size(),characteristics(dx.zero_coefficient())); }
     //! \brief The number of independent variables.
     SizeType argument_size() const { return this->_gradient.size(); }
     //! \brief The maximum degree of the stored terms.
@@ -480,6 +483,9 @@ class SecondDifferential
     InequalityType<X> operator!=(const SecondDifferential<X>& other) const {
         return !(*this==other); }
 
+    //! \brief Characteristics needed to construct a zero element.
+    friend Pair<SizeType,CharacteristicsType<X>> characteristics(SecondDifferential<X>const& dx) {
+        return std::make_pair(dx.argument_size(),characteristics(dx.zero_coefficient())); }
     //! \brief The number of independent variables.
     SizeType argument_size() const { return this->_gradient.size(); }
     //! \brief The maximum degree of the stored terms.

@@ -91,7 +91,7 @@ typedef FloatDPUpperInterval IntervalValidatedRangeType;
 //! The type used for an approximation to the range of an approximate scalar function. \ingroup GeometryModule
 typedef FloatDPApproximateInterval IntervalApproximateRangeType;
 
-//! \brief The type used for testing properties of one-dimensional sets. \ingroup GeometryModule
+//! \brief The type used for testing characteristics of one-dimensional sets. \ingroup GeometryModule
 typedef FloatDPExactInterval ExactIntervalType;
 //! \brief The type used for the bounding interval of validated one-dimensional sets. \ingroup GeometryModule
 typedef FloatDPUpperInterval UpperIntervalType;

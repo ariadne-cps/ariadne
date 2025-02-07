@@ -27,6 +27,10 @@
 
 namespace Ariadne {
 
+template<> String class_name<UnknownError<FloatDP>>() { return "UnknownError<FloatDP>"; }
+template<> String class_name<UnknownError<FloatMP>>() { return "UnknownError<FloatMP>"; }
+
+
 template class Series<FloatDPBounds>;
 template class Series<FloatMPBounds>;
 

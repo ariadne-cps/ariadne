@@ -46,7 +46,7 @@
 
 namespace Ariadne {
 
-template<class F> requires Same<F,FloatDP> or Same<F,FloatMP> inline F const& cast_exact(F const& x) { return reinterpret_cast<F const&>(x); }
+template<class F> requires DerivedFrom<F,FloatDP> or DerivedFrom<F,FloatMP> inline F const& cast_exact(F const& x) { return reinterpret_cast<F const&>(x); }
 template<class F> inline F const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<F const&>(x); }
 template<class F> inline F const& cast_exact(LowerBound<F> const& x) { return reinterpret_cast<F const&>(x); }
 template<class F> inline F const& cast_exact(UpperBound<F> const& x) { return reinterpret_cast<F const&>(x); }

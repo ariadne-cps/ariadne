@@ -256,7 +256,7 @@ template<class I, class X> template<class Y, class... PRS> inline
 Void Expansion<I,X>::_fill(Expansion<I,Y> const& other, PRS... prs)
 {
     MultiIndex a(other.argument_size());
-    X x=_zero_coefficient;
+    X x=this->zero_coefficient();
     for(auto iter=other.begin();
         iter!=other.end(); ++iter)
     {

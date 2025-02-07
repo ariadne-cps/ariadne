@@ -33,9 +33,71 @@
 
 namespace Ariadne {
 
+template<> struct GenericTrait<FloatDP> { typedef ExactNumber Type; };
+template<> struct GenericTrait<FloatMP> { typedef ExactNumber Type; };
+template<class F> struct GenericTrait<Approximation<F>> { typedef ApproximateNumber Type; };
+template<class F> struct GenericTrait<LowerBound<F>> { typedef ValidatedLowerNumber Type; };
+template<class F> struct GenericTrait<UpperBound<F>> { typedef ValidatedUpperNumber Type; };
+template<class F> struct GenericTrait<Bounds<F>> { typedef ValidatedNumber Type; };
+template<class F, class FE> struct GenericTrait<Ball<F,FE>> { typedef ValidatedNumber Type; };
+template<class F> struct GenericTrait<Error<F>> { typedef PositiveValidatedUpperNumber Type; };
+
+template<> struct CharacteristicsTrait<FloatDP> { typedef DP Type; };
+template<> struct CharacteristicsTrait<FloatMP> { typedef MP Type; };
+template<class F> struct CharacteristicsTrait<Approximation<F>> { typedef CharacteristicsType<F> Type; };
+template<class F> struct CharacteristicsTrait<LowerBound<F>> { typedef CharacteristicsType<F> Type; };
+template<class F> struct CharacteristicsTrait<UpperBound<F>> { typedef CharacteristicsType<F> Type; };
+template<class F> struct CharacteristicsTrait<Bounds<F>> { typedef CharacteristicsType<F> Type; };
+template<class F, class FE> struct CharacteristicsTrait<Ball<F,FE>> { typedef Pair<CharacteristicsType<F>,CharacteristicsType<FE>> Type; };
+template<class F> struct CharacteristicsTrait<Error<F>> { typedef CharacteristicsType<F> Type; };
+template<class F> struct CharacteristicsTrait<Rounded<F>> { typedef CharacteristicsType<F> Type; };
+
+template<class F> struct ConcreteTraits<Rounded<F>> {
+    typedef DP CharacteristicsType;
+};
+
+template<> struct ConcreteTraits<FloatDP> {
+    typedef ExactNumber GenericType;
+    typedef DP CharacteristicsType;
+};
+
+template<> struct ConcreteTraits<FloatMP> {
+    typedef ExactNumber GenericType;
+    typedef MP CharacteristicsType;
+};
+
+template<class F> struct ConcreteTraits<Approximation<F>> {
+    typedef ApproximateNumber GenericType;
+    typedef Ariadne::CharacteristicsType<F> CharacteristicsType;
+};
+
+template<class F> struct ConcreteTraits<LowerBound<F>> {
+    typedef ValidatedLowerNumber GenericType;
+    typedef Ariadne::CharacteristicsType<F> CharacteristicsType;
+};
+
+template<class F> struct ConcreteTraits<UpperBound<F>> {
+    typedef ValidatedUpperNumber GenericType;
+    typedef Ariadne::CharacteristicsType<F> CharacteristicsType;
+};
+
+template<class F> struct ConcreteTraits<Bounds<F>> {
+    typedef ValidatedNumber GenericType;
+    typedef Ariadne::CharacteristicsType<F> CharacteristicsType;
+};
+
+template<class F, class FE> struct ConcreteTraits<Ball<F,FE>> {
+    typedef ValidatedNumber GenericType;
+    typedef Pair<Ariadne::CharacteristicsType<F>,Ariadne::CharacteristicsType<FE>> CharacteristicsType;
+};
+
+template<class F> struct ConcreteTraits<Error<F>> {
+    typedef PositiveValidatedUpperNumber GenericType;
+    typedef Ariadne::CharacteristicsType<F> CharacteristicsType;
+};
+
 template<> struct NumericTraits<FloatDP> {
     using F=FloatDP;
-    typedef ExactNumber GenericType;
     typedef F OppositeType;
     typedef Positive<F> PositiveType;
     typedef Boolean LessType;
@@ -44,7 +106,6 @@ template<> struct NumericTraits<FloatDP> {
 
 template<> struct NumericTraits<FloatMP> {
     using F=FloatMP;
-    typedef ExactNumber GenericType;
     typedef F OppositeType;
     typedef Positive<F> PositiveType;
     typedef Boolean LessType;
@@ -52,7 +113,6 @@ template<> struct NumericTraits<FloatMP> {
 };
 
 template<class F> struct NumericTraits<Approximation<F>> {
-    typedef ApproximateNumber GenericType;
     typedef Positive<Approximation<F>> PositiveType;
     typedef Approximation<F> OppositeType;
     typedef Fuzzy LessType;
@@ -60,7 +120,6 @@ template<class F> struct NumericTraits<Approximation<F>> {
 };
 
 template<class F> struct NumericTraits<LowerBound<F>> {
-    typedef ValidatedLowerNumber GenericType;
     typedef UpperBound<F> OppositeType;
     typedef Positive<LowerBound<F>> PositiveType;
     typedef ValidatedUpperKleenean LessType;
@@ -68,7 +127,6 @@ template<class F> struct NumericTraits<LowerBound<F>> {
 };
 
 template<class F> struct NumericTraits<UpperBound<F>> {
-    typedef ValidatedUpperNumber GenericType;
     typedef LowerBound<F> OppositeType;
     typedef Positive<UpperBound<F>> PositiveType;
     typedef ValidatedLowerKleenean LessType;
@@ -76,7 +134,6 @@ template<class F> struct NumericTraits<UpperBound<F>> {
 };
 
 template<class F> struct NumericTraits<Bounds<F>> {
-    typedef ValidatedNumber GenericType;
     typedef Bounds<F> OppositeType;
     typedef Positive<Bounds<F>> PositiveType;
     typedef ValidatedKleenean LessType;
@@ -84,7 +141,6 @@ template<class F> struct NumericTraits<Bounds<F>> {
 };
 
 template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
-    typedef ValidatedNumber GenericType;
     typedef Ball<F,FE> OppositeType;
     typedef Positive<Ball<F,FE>> PositiveType;
     typedef ValidatedKleenean LessType;
@@ -92,7 +148,6 @@ template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
 };
 
 template<class F> struct NumericTraits<Error<F>> {
-    typedef PositiveValidatedUpperNumber GenericType;
     typedef Error<F> PositiveType;
     typedef Positive<LowerBound<F>> OppositeType;
     typedef ValidatedLowerKleenean LessType;

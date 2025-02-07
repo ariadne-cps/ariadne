@@ -104,24 +104,24 @@ template<class I> Box<I> Box<I>::bounding_box() const {
 template<class I> typename Box<I>::MidpointType Box<I>::midpoint() const
 {
     const Box<I>& bx=*this;
-    return MidpointType(this->dimension(),[&](SizeType i){return (bx[i].midpoint());});
+    return MidpointType(this->dimension(),[&](SizeType i){return (bx[i].midpoint());}, bx.array().default_element().midpoint());
 }
 
 template<class I> typename Box<I>::CentreType Box<I>::centre() const {
     const Box<I>& bx=*this;
-    return CentreType(this->dimension(),[&](SizeType i){return (bx[i].centre());});
+    return CentreType(this->dimension(),[&](SizeType i){return (bx[i].centre());}, bx.array().default_element().centre());
 }
 
 template<class I> typename Box<I>::VertexType Box<I>::lower_bounds() const
 {
     const Box<I>& bx=*this;
-    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].lower_bound());});
+    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].lower_bound());}, bx.array().default_element().lower_bound());
 }
 
 template<class I> typename Box<I>::VertexType Box<I>::upper_bounds() const
 {
     const Box<I>& bx=*this;
-    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].upper_bound());});
+    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].upper_bound());}, bx.array().default_element().upper_bound());
 }
 
 template<class I> typename Box<I>::RadiusType Box<I>::radius() const

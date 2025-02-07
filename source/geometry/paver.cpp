@@ -643,24 +643,29 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
     const SizeType l=(d.size()+f.result_size()+g.result_size())*2;
     ExactPointType x(l,dp); for(SizeType k=0; k!=l; ++k) { x[k]=cast_exact(FloatDPApproximation(1.0/l,dp)); }
 
-    ValidatedVectorMultivariateTaylorFunctionModelDP fg;
-    const ValidatedVectorMultivariateTaylorFunctionModelDP* tfptr;
-    if( (tfptr=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer())) ) {
-        const ValidatedVectorMultivariateTaylorFunctionModelDP* tgptr;
-        if( ( tgptr = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(g.raw_pointer()) ) ) {
-            fg=join(*tfptr,*tgptr);
+    auto tfptr = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer());
+    auto tgptr = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(g.raw_pointer());
+
+    ValidatedVectorMultivariateTaylorFunctionModelDP* tfgptr;
+    if( tfptr ) {
+        if( tgptr ) {
+            tfgptr=new ValidatedVectorMultivariateTaylorFunctionModelDP(join(*tfptr,*tgptr));
         } else {
             if(g.result_size()>0) {
-                fg=join(*tfptr,ValidatedVectorMultivariateTaylorFunctionModelDP(tfptr->domain(),g,tfptr->properties()));
+                auto tg=ValidatedVectorMultivariateTaylorFunctionModelDP(tfptr->domain(),g,tfptr->properties());
+                tfgptr=new ValidatedVectorMultivariateTaylorFunctionModelDP(join(*tfptr,tg));
             } else {
-                fg=*tfptr;
+                tfgptr=new ValidatedVectorMultivariateTaylorFunctionModelDP(*tfptr);
             }
         }
     } else {
         ThresholdSweeper<FloatDP> swp(dp,1e-12);
-        fg=ValidatedVectorMultivariateTaylorFunctionModelDP(d,join(f,g),swp);
+        tfgptr=new ValidatedVectorMultivariateTaylorFunctionModelDP(d,join(f,g),swp);
     }
-    Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
+    ValidatedVectorMultivariateTaylorFunctionModelDP const& tfg=*tfgptr;
+    Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,tfg,rc,b,x,y,e);
+
+    delete tfgptr;
 }
 
 } // namespace

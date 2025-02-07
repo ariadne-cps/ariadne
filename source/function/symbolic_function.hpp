@@ -38,6 +38,7 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
+#include "utility/stlio.hpp"
 #include "utility/metaprogramming.hpp"
 
 #include "numeric/numeric.hpp"
@@ -438,7 +439,7 @@ template<class P> using GradedMultivariateFunction = GradedFunction<P,RealVector
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
 template<class P, class... ARGS>
-class NonResizableScalarFunction : public ScalarFunction<P,ARGS...> {
+class NonResizableScalarFunction : public CheckedAssignable<ScalarFunction<P,ARGS...>> {
   public:
     NonResizableScalarFunction<P,ARGS...>& operator=(const ScalarFunction<P,ARGS...>& f) {
         ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain()<<"\n\n*this="<<*this<<"\nf="<<f<<"\n");
@@ -494,7 +495,8 @@ class VectorOfScalarFunction
         return r; }
 
     friend VectorOfScalarFunction<P,ARGS...> derivative(VectorOfScalarFunction<P,ARGS...> const& f, ArgumentIndexType k) {
-        return VectorOfScalarFunction<P,ARGS...>(Vector<ScalarFunction<P,ARGS...>>(f._vec.size(),[&](SizeType i){return derivative(f._vec[i],k);})); }
+        auto chrs=get_characteristics(derivative(f._vec.zero_element(),k));
+        auto r=VectorOfScalarFunction<P,ARGS...>(Vector<ScalarFunction<P,ARGS...>>(f._vec.size(),[&](SizeType i){return derivative(f._vec[i],k);},chrs)); return r; }
 
     friend OutputStream& operator<<(OutputStream& os, VectorOfScalarFunction<P,ARGS...> const& f) {
         os << "[";

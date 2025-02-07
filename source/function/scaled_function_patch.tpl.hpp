@@ -188,10 +188,6 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Repres
 
 
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch()
-    : _domain(), _model()
-{ }
-
 template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, PropertiesType prp)
     : _domain(d), _model(d.size(),prp)
 {
@@ -230,9 +226,10 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
     }
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ScalarFunctionModelType<M>& f) {
-     ARIADNE_ASSERT_MSG(dynamic_cast<const ScaledFunctionPatch<M>*>(f.raw_pointer())," f="<<f);
-     *this=dynamic_cast<const ScaledFunctionPatch<M>&>(f.reference());
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ScalarFunctionModelType<M>& f)
+    : ScaledFunctionPatch(dynamic_cast<const ScaledFunctionPatch<M>&>(f.reference()))
+{
+    ARIADNE_ASSERT_MSG(dynamic_cast<const ScaledFunctionPatch<M>*>(f.raw_pointer())," f="<<f);
 }
 
 template<class M> ScaledFunctionPatch<M>& ScaledFunctionPatch<M>::operator=(const ScalarFunctionModelType<M>& f)
@@ -550,16 +547,6 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
 
 
 
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch()
-    : _domain(), _models()
-{
-}
-
-template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType k)
-    : _domain(), _models(k)
-{
-}
-
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(SizeType m, const BoxDomainType& d, PropertiesType prp)
     : _domain(d), _models(m,ModelType(d.size(),prp))
 {
@@ -592,7 +579,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
     : _domain(d), _models(f)
 {
     for(SizeType i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<", f="<<f);
+        ARIADNE_ASSERT_MSG(d.size()==f[i].argument_size(),"d="<<d<<", f="<<f<<", i="<<i<<", f[i]="<<f[i]<<", f[i].argument_size()="<<f[i].argument_size());
     }
 }
 
@@ -732,7 +719,7 @@ template<class M> auto VectorScaledFunctionPatch<M>::values() const -> Vector<Va
 
 template<class M> auto VectorScaledFunctionPatch<M>::errors() const -> Vector<ErrorType> const
 {
-    return Vector<FloatError<PR>>(this->result_size(),[&](SizeType i){return this->models()[i].error();});
+    return Vector<FloatError<PR>>(this->result_size(),[&](SizeType i){return this->models()[i].error();},this->zero_element().error().precision());
 }
 
 template<class M> auto VectorScaledFunctionPatch<M>::error() const -> ErrorType const

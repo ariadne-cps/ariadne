@@ -113,7 +113,7 @@ Grid::Grid(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
 }
 
 inline Vector<FloatDP> cast_raw_vector(Vector<ApproximateDouble> const& v, DoublePrecision pr) {
-    return Vector<FloatDP>(v.size(),[&v,pr](SizeType i){return FloatDP(cast_exact(v[i]),pr);}); }
+    return Vector<FloatDP>(v.size(),[&v,pr](SizeType i){return FloatDP(cast_exact(v[i]),pr);},pr); }
 
 Grid::Grid(const Vector<ApproximateDouble>& origin, const Vector<ApproximateDouble>& lengths)
     : Grid(cast_raw_vector(origin,dp),cast_raw_vector(lengths,dp))

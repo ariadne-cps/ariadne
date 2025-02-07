@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
+
 #include "function/function_patch.hpp"
 #include "function/taylor_function.hpp"
 #include "function/constraint.hpp"
@@ -205,6 +207,8 @@ Void DifferentialInclusionEvolver::_recondition_and_update(ValidatedVectorMultiv
     }
 }
 
+template<class T> using Optional=std::optional<T>;
+
 auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real const& tmax) -> OrbitType {
     CONCLOG_SCOPE_CREATE;
     CONCLOG_PRINTLN_AT(1,"System: "<<_system);
@@ -233,7 +237,6 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
     ProgressIndicator indicator(tmax.get_d());
 
     while (possibly(t<lower_bound(tmax))) {
-
         CONCLOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
 
         CONCLOG_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
@@ -257,12 +260,11 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
         TimeStepType new_t = lower_bound(t+h);
 
-        ValidatedVectorMultivariateFunctionPatch reach_function;
-        ValidatedVectorMultivariateFunctionPatch best_reach_function;
-        ValidatedVectorMultivariateFunctionPatch best_evolve_function;
+        Optional<ValidatedVectorMultivariateFunctionPatch> best_reach_function;
+        Optional<ValidatedVectorMultivariateFunctionPatch> best_evolve_function;
         InclusionIntegrator best = approximators_to_use.at(0);
         FloatDPApproximation best_volume(inf,dp);
-        ValidatedVectorMultivariateFunctionPatch best_reach_rigorous_function;
+        Optional<ValidatedVectorMultivariateFunctionPatch> best_reach_rigorous_function;
         FloatDPApproximation best_reach_rigorous_volume(inf,dp);
 
         for (auto const& approximator : approximators_to_use) {
@@ -296,8 +298,8 @@ auto DifferentialInclusionEvolver::orbit(RealVariablesBox const& initial, Real c
 
         state.update_with_best(best);
 
-        evolve_function = best_evolve_function;
-        reach_function = best_reach_function;
+        evolve_function = best_evolve_function.value();
+        ValidatedVectorMultivariateFunctionPatch reach_function = best_reach_function.value();
 
         CONCLOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 

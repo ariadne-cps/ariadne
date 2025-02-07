@@ -51,10 +51,6 @@
 
 namespace Ariadne {
 
-template<class X> using NumericType = typename X::NumericType;
-template<class X> using GenericType = typename X::GenericType;
-template<class X> using GenericNumericType = GenericType<NumericType<X>>;
-
 
 template<class A, class X >
 struct DispatchAlgebraOperations;

@@ -38,10 +38,10 @@ template<class PR> class FloatFactory {
     PR _pr; typedef RawFloatType<PR> F;
   public:
     typedef PR PrecisionType;
-    typedef PR PropertiesType;
+    typedef PR CharacteristicsType;
     FloatFactory(PR const& pr) : _pr(pr) { }
     PR precision() const { return this->_pr; }
-    PR properties() const { return this->_pr; }
+    PR characteristics() const { return this->_pr; }
   public:
     FloatApproximation<PR> create(ApproximateNumber const& y);
     FloatLowerBound<PR> create(ValidatedLowerNumber const& y);

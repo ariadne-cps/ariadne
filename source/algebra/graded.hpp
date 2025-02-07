@@ -29,6 +29,7 @@
 #ifndef ARIADNE_GRADED_HPP
 #define ARIADNE_GRADED_HPP
 
+#include "utility/uniform_list.hpp"
 #include "function/procedure.hpp"
 
 namespace Ariadne {
@@ -80,22 +81,29 @@ template<class X> inline Differential<X> create(const Differential<X>& x) { retu
 
 template<class X> inline X create(const X& x) { return nul(x); }
 
-template<class A> class Graded : public List<A>
+template<class A> class Graded : public UniformList<A>
 {
   public:
     typedef typename A::NumericType NumericType;
+    //typedef Tuple<DegreeType,Ariadne::CharacteristicsType<A>> CharacteristicsType;
+    typedef Ariadne::CharacteristicsType<A> CharacteristicsType;
     typedef Graded<A> SelfType;
-    Graded() : List<A>() { }
-    Graded(const A& a) : List<A>(1u,a) { }
-    Graded(const List<A>& lst) : List<A>(lst) { }
-    Graded(const InitializerList<A>& lst) : List<A>(lst) { }
-    template<class... PRS> requires Constructible<A,ExactDouble,PRS...> Graded(const InitializerList<ExactDouble>& lst, PRS... prs)
-        : List<A>() { for(auto x : lst) { this->List<A>::append(A(x,prs...)); } }
-    Graded(const Graded<A>& a) : List<A>(a) { }
-    Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
-    Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
-    template<AssignableTo<A> X> Graded<A>& operator=(const X& x) {
-        (*this)[0]=x; return *this; }
+
+    Graded(const A& a) : UniformList<A>(1u,a) { }
+    Graded(const List<A>& lst) : UniformList<A>(lst) { }
+    Graded(const UniformList<A>& lst) : UniformList<A>(lst) { }
+    Graded(const InitializerList<A>& lst) : Graded(List<A>(lst)) { }
+    template<class... PRS> requires Constructible<UniformList<A>,PRS...> and Constructible<A,ExactDouble,PRS...> Graded(const InitializerList<ExactDouble>& lst, PRS... prs)
+        : UniformList<A>(prs...) { for(auto x : lst) { this->UniformList<A>::append(A(x,prs...)); } }
+    Graded(DegreeType deg, Ariadne::CharacteristicsType<A> prs) : UniformList<A>(deg+1u, prs) { }
+    Graded(Ariadne::CharacteristicsType<A> prs) : UniformList<A>(prs) { }
+    Graded(const Graded<A>& a) : UniformList<A>(static_cast<UniformList<A>const&>(a)) { }
+    Graded<A>& operator=(const Graded<A>& a) { this->UniformList<A>::operator=(a); return *this; }
+    Graded<A>& operator=(Graded<A>&& a) { this->UniformList<A>::operator=(a); return *this; }
+    Graded<A>& operator=(const NumericType& x) {
+        this->append(this->zero_element()); if (this->size()==1) { (*this)[0]=x; } return *this; }
+    template<class Y> requires Assignable<Y,NumericType> Graded<A>& operator=(const Y& y) {
+        this->append(this->zero_element()); if (this->size()==1) { (*this)[0]=y; } return *this; }
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op, class N> Void operator=(const ClosureExpression<Op,SelfType,N>& expr);
@@ -105,9 +113,12 @@ template<class A> class Graded : public List<A>
     static Graded<A> variable(A const& a0, DegreeType deg) {
         assert(deg>=1); A z=nul(a0); Graded<A> r(a0); r.append(z+1);
         for(DegreeType d=2; d<=deg; ++d) { r.append(z); } return r; }
-    Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
+    Graded<A> create_zero() const { return Graded<A>(UniformList<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
+//    CharacteristicsType characteristics() const {
+//        return std::make_tuple(this->degree(),get_characteristics((*this)[0])); }
+    Ariadne::CharacteristicsType<A> characteristics() const { return this->UniformList<A>::element_characteristics(); }
     DegreeType degree() const { return this->size()-1u; }
-    Void extend(const A& a) { this->List<A>::append(a); }
+    Void extend(const A& a) { this->UniformList<A>::append(a); }
     OutputStream& _write(OutputStream& os) const;
     friend OutputStream& operator<<(OutputStream& os, Graded<A> const& g) { return g._write(os); }
 };
@@ -435,16 +446,16 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& a) {
 
 template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_ASSERT(r.size()+1u <= a.size());
-    Graded<A> s;
-    Graded<A> c;
+    Graded<A> s(a.characteristics());
+    Graded<A> c(a.characteristics());
     sincos(s,c,a);
     r=s;
 }
 
 template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_ASSERT(r.size()+1u <= a.size());
-    Graded<A> s;
-    Graded<A> c;
+    Graded<A> s(a.characteristics());
+    Graded<A> c(a.characteristics());
     sincos(s,c,a);
     r=c;
 }
@@ -524,9 +535,9 @@ template<class X> Graded<X> create_graded(const X&) {
     return Graded<X>(); }
 
 
-template<class X, class A> Void compute(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
+template<class X, class A> Void compute_procedure(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
     execute(t,p,a);
-    for(SizeType i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
+    r=Vector<Graded<A>>(p._results.size(), [&t,&p](SizeType i){return t[p._results[i]];},a.element_characteristics());
 }
 
 } // namespace Ariadne

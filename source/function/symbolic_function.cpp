@@ -30,6 +30,7 @@
 #include "algebra/differential.hpp"
 #include "numeric/operators.hpp"
 #include "algebra/algebra.hpp"
+#include "function/taylor_model.hpp"
 #include "function/formula.hpp"
 #include "function/formula.tpl.hpp"
 #include "function/function.hpp"
@@ -37,7 +38,6 @@
 #include "function/symbolic_function.hpp"
 
 #include "function/function_interface.hpp"
-#include "function/taylor_model.hpp"
 #include "function/function_mixin.tpl.hpp"
 #include "function/function_wrapper.hpp"
 

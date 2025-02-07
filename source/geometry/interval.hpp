@@ -64,6 +64,8 @@ template<class P> struct MidpointTrait<UpperNumber<P>> { typedef ExactNumber Typ
 template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
 template<class U> struct WidthTrait { using L=decltype(-declval<U>()); typedef decltype(cast_positive(declval<U>()-declval<L>())) Type; };
 
+template<class U> struct CharacteristicsTrait<Interval<U>> { typedef CharacteristicsType<U> Type; };
+
 class UnitInterval;
 class EmptyInterval;
 class EntireInterval;
@@ -321,6 +323,8 @@ template<class F> auto DeclareIntervalArithmeticOperations<UpperBound<F>>::preci
     Interval<UpperBound<F>>const& ivl=static_cast<Interval<UpperBound<F>>const&>(*this);
     return min(ivl.lower_bound().precision(),ivl.upper_bound().precision());
 }
+
+template<class UB> inline decltype(auto) characteristics(Interval<UB> const& x);
 
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);

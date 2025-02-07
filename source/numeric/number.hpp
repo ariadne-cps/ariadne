@@ -156,7 +156,7 @@ template<class P> class Number
     template<ConvertibleViaRealToNumber<P> X> Number(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
-    // TODO: Decide conversion properties from concrete type to Number<P>
+    // TODO: Decide conversion characteristics from concrete type to Number<P>
     template<ConvertibleViaNumberToNumber<P> X>
         explicit Number<P>(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
 

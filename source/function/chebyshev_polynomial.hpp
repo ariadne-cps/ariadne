@@ -63,7 +63,7 @@ template<class X> class UnivariateChebyshevPolynomial
     typedef X NumericType;
 
     UnivariateChebyshevPolynomial(PR pr) : _terms(SizeOne(),pr) { }
-    UnivariateChebyshevPolynomial(DegreeType d, std::function<X(DegreeType)> const& g) : _terms(SizeOne(),nul(g(0))) {
+    UnivariateChebyshevPolynomial(DegreeType d, std::function<X(DegreeType)> const& g) : _terms(SizeOne(),get_characteristics(g(0))) {
         for(SizeType i=0; i<=d; ++i) { _terms.append(i,g(i)); } }
 
     static ChebyshevPolynomial<X> constant(Number<P> y, PR pr);
@@ -167,7 +167,7 @@ template<class X> class MultivariateChebyshevPolynomial
     typedef X NumericType;
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
 
-    MultivariateChebyshevPolynomial(SizeType as, PR pr) : _terms(as,X(pr)) { }
+    MultivariateChebyshevPolynomial(SizeType as, PR pr) : _terms(as,pr) { }
 
     static ChebyshevPolynomial<X> constant(SizeType as, Number<P> y, PR pr);
     static ChebyshevPolynomial<X> constant(SizeType as, X const& c);

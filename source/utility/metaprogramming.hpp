@@ -1,7 +1,7 @@
 /***************************************************************************
  *            utility/metaprogramming.hpp
  *
- *  Copyright  2008-20  Pieter Collins
+ *  Copyright  2008-25  Pieter Collins
  *
  ****************************************************************************/
 
@@ -189,6 +189,21 @@ template<class A1, class A2> concept CanSubtract = requires(A1 a1, A2 a2) { { a1
 template<class A1, class A2> concept CanMultiply = requires(A1 a1, A2 a2) { { a1*a2 }; };
 template<class A1, class A2> concept CanDivide = requires(A1 a1, A2 a2) { { a1/a2 }; };
 
+template<class T> concept HasCharacteristicsType = requires { typename T::CharacteristicsType; };
+template<class T> concept HasMemberCharacteristics = requires (T const& t) { t.characteristics(); };
+template<class T> concept HasNonMemberCharacteristics = requires (T const& t) { characteristics(t); };
+template<class T> concept HasCharacteristics = HasMemberCharacteristics<T> or HasNonMemberCharacteristics<T>;
+
+template<class T> struct CharacteristicsTrait;
+template<class T> using CharacteristicsType = typename CharacteristicsTrait<T>::Type;
+template<class T> requires HasCharacteristicsType<T> struct CharacteristicsTrait<T> { typedef typename T::CharacteristicsType Type; };
+template<class T> requires (not HasCharacteristicsType<T>) and HasMemberCharacteristics<T> struct CharacteristicsTrait<T> { typedef decltype(declval<T>().characteristics()) Type; };
+template<class T> requires (not HasCharacteristicsType<T>) and (not HasMemberCharacteristics<T>) and HasNonMemberCharacteristics<T> struct CharacteristicsTrait<T> { typedef decltype(characteristics(declval<T>())) Type; };
+
+template<class T> concept HasGenericType = requires { typename T::GenericType; };
+template<class T> struct GenericTrait;
+template<class T> using GenericType = typename GenericTrait<T>::Type;
+template<class T> requires HasGenericType<T> struct GenericTrait<T> { typedef typename T::GenericType Type; };
 
 } // namespace Ariadne
 

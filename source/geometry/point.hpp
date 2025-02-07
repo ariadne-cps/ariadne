@@ -75,6 +75,7 @@ class Point
     : public Vector<X>
     , public Drawable2dInterface
 {
+    static X _make_default_coordinate();
   public:
     typedef X RealType;
     //! A point in zero dimensions
@@ -92,7 +93,10 @@ class Point
     explicit Point(InitializerList<X> lst);
     //! Construct from a size and an element generator
     template<class G> requires InvocableReturning<X,G,SizeType>
-        Point(SizeType n, G const& g) : Vector<X>(n,g) { }
+        Point(SizeType n, G const& g) : Vector<X>(n,g,_make_default_coordinate()) { }
+    //! Construct from a size, an element generator, and characteristics of the default element
+    template<class G, class... PRS> requires InvocableReturning<X,G,SizeType> and Constructible<X,PRS...>
+        Point(SizeType n, G const& g, PRS... prs) : Vector<X>(n,g,prs...) { }
     //! Construct from an initializer list of floating-point values.
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
     explicit Point(InitializerList<ExactDouble> lst, PRS... prs);
@@ -170,6 +174,13 @@ template<class X> inline LabelledPoint<X> project(LabelledPoint<X> const& pt, Va
 }
 
 template<class X> Point(Vector<X>) -> Point<X>;
+
+
+template<class X> X Point<X>::_make_default_coordinate() {
+    static_assert (DefaultConstructible<X> or Constructible<X,DP>);
+    if constexpr (DefaultConstructible<X>) { return X(); }
+    else if constexpr (Constructible<X,DP>) { return X(dp); }
+}
 
 template<class X> template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
 Point<X>::Point(InitializerList<ExactDouble> lst, PRS... prs) : Vector<X>(lst,prs...) { }

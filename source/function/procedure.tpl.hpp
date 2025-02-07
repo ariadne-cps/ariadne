@@ -220,7 +220,7 @@ template<class Y, class X> Void propagate(X& r, BinaryElementaryOperator eop, Y 
 template<class X, class Y> Void _execute_impl(SizeType r, List<X>& v, const ProcedureInstruction& pri, const List<Y>& c, const Vector<X>& x) {
     struct Visitor {
         SizeType r; List<X>& v; const List<Y>& c; const Vector<X>& x;
-        Void operator()(const ConstantProcedureInstruction& pri) { v[r]=make_constant(c[pri._val],x.zero_element()); }
+        Void operator()(const ConstantProcedureInstruction& pri) { v[r]=c[pri._val]; }
         Void operator()(const IndexProcedureInstruction& pri) { v[r]=x[pri._ind]; }
         Void operator()(const UnaryProcedureInstruction& pri) { propagate(v[r],pri._op,v[pri._arg]); }
         Void operator()(const BinaryProcedureInstruction& pri) { propagate(v[r],pri._op,v[pri._arg1],v[pri._arg2]); }

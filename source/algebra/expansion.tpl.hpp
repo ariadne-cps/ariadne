@@ -47,8 +47,8 @@ template<class I, class X> Expansion<I,X>::~Expansion()
 {
 }
 
-template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
-    : _indices(0u,I(as)), _coefficients(0,z), _zero_coefficient(z)
+template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, CharacteristicsType<X> const& prs, SizeType cap)
+    : _indices(0u,I(as)), _coefficients(prs)
 {
     _indices.reserve(cap); _coefficients.reserve(cap);
 }
@@ -70,26 +70,25 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 */
 
 namespace {
-template<class I, class X> X get_zero_coefficient(InitializerList<Pair<I,X>> const& lst) {
+template<class I, class X> CharacteristicsType<X> get_coefficient_characteristics(InitializerList<Pair<I,X>> const& lst) {
     ARIADNE_PRECONDITION(lst.size()!=0);
-    return nul(lst.begin()->second);
+    return get_characteristics(lst.begin()->second);
 }
 } // namespace
 
 template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
-    : Expansion(ArgumentSizeType(),get_zero_coefficient(lst))
+    : Expansion(ArgumentSizeType(),get_coefficient_characteristics(lst))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
     _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
-    _coefficients = UniformList<X>(0,_zero_coefficient);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);
     _coefficients.reserve(cap);
 
     I a(this->argument_size());
-    X x=_zero_coefficient;
+    X x=this->zero_coefficient();
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
@@ -112,7 +111,7 @@ namespace std {
 */
 
 template<class I, class X> Expansion<I,X>::Expansion(const Expansion<I,X>& e)
-    : _indices(e._indices), _coefficients(e._coefficients), _zero_coefficient(e._zero_coefficient)
+    : _indices(e._indices), _coefficients(e._coefficients)
 {
     this->_indices.reserve(e.capacity());
     this->_coefficients.reserve(e.capacity());
@@ -124,7 +123,6 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expan
         // Perform memory reallocation if necessary
         this->_indices = e._indices;
         this->_coefficients = e._coefficients;
-        this->_zero_coefficient=e._zero_coefficient;
         this->_indices.reserve(e.capacity());
         this->_coefficients.reserve(e.capacity());
     }
@@ -132,7 +130,7 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expan
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(Expansion<I,X>&& e)
-    : _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients)), _zero_coefficient(std::move(e._zero_coefficient))
+    : _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients))
 {
 }
 
@@ -141,7 +139,6 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(Expansion<I
     if(this!=&e) {
         _indices=std::move(e._indices);
         _coefficients=std::move(e._coefficients);
-        _zero_coefficient=std::move(e._zero_coefficient);
     }
     return *this;
 }
@@ -149,7 +146,6 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(Expansion<I
 template<class I, class X> Void Expansion<I,X>::swap(Expansion<I,X>& other) {
     std::swap(this->_indices,other._indices);
     std::swap(this->_coefficients,other._coefficients);
-    std::swap(this->_zero_coefficient,other._zero_coefficient);
 }
 
 template<class I, class X> SizeType Expansion<I,X>::number_of_terms() const {
@@ -168,12 +164,25 @@ template<class I, class X> SizeType Expansion<I,X>::size() const {
     return this->_indices.size();
 }
 
+template<class X> concept HasPrecision = requires(X const& x) { x.precision(); };
+
+template<class I, class X> auto Expansion<I,X>::coefficient_characteristics() const -> CharacteristicsType<X> {
+    if constexpr (HasPrecision<X>) { return this->zero_coefficient().precision(); }
+    else if constexpr (HasCharacteristics<X>) { return Ariadne::characteristics(this->zero_coefficient()); }
+    else if constexpr (DefaultConstructible<X>) { return std::tuple<>(); }
+    else { return std::tuple<>(); }
+}
+
+template<class I, class X> auto Expansion<I,X>::characteristics() const -> Pair<ArgumentSizeType,CharacteristicsType<X>> {
+    return std::make_pair(this->argument_size(),this->coefficient_characteristics());
+}
+
 template<class I, class X> auto Expansion<I,X>::argument_size() const -> ArgumentSizeType {
     return argument_size_of(this->_indices);
 }
 
 template<class I, class X> X const& Expansion<I,X>::zero_coefficient() const {
-    return this->_zero_coefficient;
+    return this->_coefficients.zero_element();
 }
 
 template<class I, class X> Void Expansion<I,X>::reserve(SizeType new_capacity) {
@@ -186,7 +195,7 @@ template<class I, class X> Void Expansion<I,X>::reserve(SizeType new_capacity) {
 template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
     if(new_size<this->size()) {
         this->_indices.resize(new_size);
-        this->_coefficients.resize(new_size,this->_zero_coefficient);
+        this->_coefficients.resize(new_size);
     } else {
         if(this->capacity() < new_size) {
             this->reserve(new_size);
@@ -253,7 +262,7 @@ template<class I, class X> const X& Expansion<I,X>::operator[](const I& a) const
 
 template<class I, class X> X& Expansion<I,X>::at(const I& a) {
     auto iter=this->find(a);
-    if(iter==this->end()) { this->append(a,this->_zero_coefficient); iter=this->end()-1; }
+    if(iter==this->end()) { this->append(a,this->zero_coefficient()); iter=this->end()-1; }
     return iter->coefficient();
 }
 
@@ -265,7 +274,7 @@ template<class I, class X> Void Expansion<I,X>::set(const I& a, const X& c) {
 
 template<class I, class X> const X& Expansion<I,X>::get(const I& a) const {
     auto iter=this->find(a);
-    if(iter==this->end()) { return this->_zero_coefficient; }
+    if(iter==this->end()) { return this->zero_coefficient(); }
     else { return iter->coefficient(); }
 }
 
@@ -467,7 +476,7 @@ template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeTy
 {
     ArgumentSizeType old_size=x.argument_size();
     SizeType new_size=before_size+old_size+after_size;
-    Expansion<MultiIndex,X> r(new_size, x.zero_coefficient(), x.capacity());
+    Expansion<MultiIndex,X> r(new_size, x.coefficient_characteristics(), x.capacity());
     IndexType old_index(old_size);
     MultiIndex new_index(new_size);
     for(typename Expansion<I,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
@@ -545,36 +554,36 @@ template<class I, class X, class CMP> SortedExpansion<I,X,CMP>::SortedExpansion(
 
 /*
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) -> Iterator {
-    ExpansionValue<I,X> term(a,this->_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->zero_coefficient());
     return  std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) const -> ConstIterator {
-    ExpansionValue<I,X> term(a,this->_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->zero_coefficient());
     return std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 */
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::get(const I& a) const -> CoefficientType const& {
-    ExpansionValue<I,X> term(a,this->_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->zero_coefficient());
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
-        return this->_zero_coefficient;
+        return this->zero_coefficient();
     } else {
         return iter->coefficient();
     }
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::at(const I& a) -> CoefficientType& {
-    ExpansionValue<I,X> term(a,this->_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->zero_coefficient());
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
-        iter=this->Expansion<I,X>::insert(iter,a,this->_zero_coefficient);
+        iter=this->Expansion<I,X>::insert(iter,a,this->zero_coefficient());
     }
     return iter->coefficient();
 }
 
 template<class I, class X, class CMP> Void SortedExpansion<I,X,CMP>::insert(const I& a, const X& c) {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->Expansion<I,X>::zero_coefficient());
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
         iter=this->Expansion<I,X>::insert(iter,a,c);

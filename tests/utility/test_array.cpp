@@ -80,7 +80,7 @@ class ConstantFunction {
   public:
     ConstantFunction(Size as) : _argument_size(as), _value(0.0) { }
     ConstantFunction(Size as, double v) : _argument_size(as), _value(v) { }
-    Size configuration() const { return this->_argument_size; }
+    Size characteristics() const { return this->_argument_size; }
     friend OutputStream& operator<<(OutputStream& os, ConstantFunction const& cf) {
         return os << "ConstantFunction(as="<<cf._argument_size<<", c="<<cf._value<<")"; }
 };
@@ -89,6 +89,12 @@ class TestUniformArray {
   public:
     Void test() {
         SizeType as=2u;
+        ConstantFunction cf(3);
+        cf.characteristics();
+        characteristics(cf);
+        static_assert(HasMemberCharacteristics<ConstantFunction>);
+        static_assert(HasCharacteristics<ConstantFunction>);
+        static_assert(Same<CharacteristicsType<ConstantFunction>,Size>);
         UniformArray<ConstantFunction> a(3, as);
         ConstantFunction cf0=ConstantFunction(as,3);
         a.set(0,cf0);

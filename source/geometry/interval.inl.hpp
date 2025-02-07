@@ -67,6 +67,11 @@ template<class U> inline OutputStream& operator<<(OutputStream& os, Interval<U> 
 
 template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDP> const& ivl);
 
+template<class UB> inline decltype(auto) characteristics(Interval<UB> const& x) {
+    if constexpr (HasCharacteristics<UB>) { return characteristics(x.upper_bound()); }
+    else { return Tuple<>(); }
+}
+
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower_bound()) { return ivl.lower_bound(); }
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper_bound()) { return ivl.upper_bound(); }
 template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre()) { return ivl.centre(); }

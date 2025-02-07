@@ -123,9 +123,9 @@ struct DiagonalMatrixOperations {
 
     template<class X> friend Matrix<X> operator-(DiagonalMatrix<X> const& D, Matrix<X> A) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
-        for(SizeType i=0; i!=A.row_size(); ++i) { 
+        for(SizeType i=0; i!=A.row_size(); ++i) {
             for(SizeType j=0; j!=A.column_size(); ++j) { A.at(i,j)=-A.at(i,j); }
-            A.at(i,i)+=D.at(i,i); 
+            A.at(i,i)+=D.at(i,i);
         }
         return A;
     }
@@ -193,10 +193,11 @@ template<class X> class DiagonalMatrix
     : DiagonalMatrixOperations
 {
     X _zero;
-    Array<X> _ary;
+    UniformArray<X> _ary;
   public:
     template<class... PRS> requires Constructible<X,Nat,PRS...> explicit DiagonalMatrix(SizeType n, PRS...);
     explicit DiagonalMatrix(Array<X>);
+    explicit DiagonalMatrix(UniformArray<X>);
     explicit DiagonalMatrix(Vector<X>);
     template<class Y, class... PRS> requires Constructible<X,Y,PRS...> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
     SizeType size() const;
@@ -206,7 +207,7 @@ template<class X> class DiagonalMatrix
     X const& operator[](SizeType i) const;
     X const& at(SizeType i, SizeType j) const;
     X const& get(SizeType i, SizeType j) const;
-    X& operator[](SizeType i);
+    ElementReference<X>& operator[](SizeType i);
     Void set(SizeType i, SizeType j, X const& x);
     Vector<X> diagonal() const;
     operator Matrix<X>() const;
@@ -222,6 +223,10 @@ DiagonalMatrix<X>::DiagonalMatrix(SizeType n, PRS... prs)
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
     : _zero(create_zero(ary[0])), _ary(ary)
+{ }
+
+template<class X> DiagonalMatrix<X>::DiagonalMatrix(UniformArray<X> ary)
+    : _zero(ary.default_element()), _ary(ary)
 { }
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Vector<X> vec)
@@ -253,7 +258,7 @@ template<class X> X const& DiagonalMatrix<X>::operator[](SizeType i) const {
     return this->_ary[i];
 }
 
-template<class X> X& DiagonalMatrix<X>::operator[](SizeType i) {
+template<class X> ElementReference<X>& DiagonalMatrix<X>::operator[](SizeType i) {
     return this->_ary[i];
 }
 
@@ -270,7 +275,7 @@ template<class X> Void DiagonalMatrix<X>::set(SizeType i, SizeType j, X const& x
     _ary[i]=x;
 }
 
-template<class X> Vector<X> DiagonalMatrix<X>::diagonal () const {
+template<class X> Vector<X> DiagonalMatrix<X>::diagonal() const {
     return Vector<X>(this->_ary);
 }
 

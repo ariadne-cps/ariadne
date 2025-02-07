@@ -533,10 +533,12 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
     ARIADNE_ASSERT(args==xs+1u+as or args==xs+as);
     const bool is_autonomous = (args==xs+as);
 
-    GradedValidatedDifferential null;
+    CharacteristicsType<ValidatedDifferential> prs(xs+as,so,x.element_characteristics());
+    GradedValidatedDifferential null(prs);
+    GradedValidatedDifferential zero(0u,prs);
     fy=Vector< GradedValidatedDifferential >(ress,null);
     tmp=List< GradedValidatedDifferential >(tmps,null);
-    yta=Vector< GradedValidatedDifferential >(args,null);
+    yta=Vector< GradedValidatedDifferential >(args,zero);
     for(SizeType i=0; i!=xs; ++i) {
         yta[i]=GradedValidatedDifferential(ValidatedDifferential::variable(xs+as,so,x[i],i));
     }
@@ -563,8 +565,7 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
     const SizeType n=p.result_size();
 
     ValidatedDifferential z=nul(yta[0][0]);
-
-    Ariadne::compute(p,fy,tmp,yta);
+    Ariadne::compute_procedure(p,fy,tmp,yta);
     for(SizeType i=0; i!=n; ++i) {
         yta[i]=antidifferential(fy[i]);
     }
@@ -724,7 +725,9 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     CONCLOG_PRINTLN_AT(2,"dx="<<dx<<", dt="<<dt<<", da="<<da<<", wdt="<<wdt<<", bx="<<bx);
 
-    Vector<GradedValidatedDifferential> dphic,fdphic,dphib,fdphib;
+    ValidatedDifferential dzero(domx.dimension()+doma.dimension(),so,dx.element_characteristics());
+    GradedValidatedDifferential null(0u,dzero);
+    Vector<GradedValidatedDifferential> dphic(0u,null),fdphic(0u,null),dphib(0u,null),fdphib(0u,null);
     List<GradedValidatedDifferential> tmpdphic,tmpdphib;
 
     Ariadne::graded_flow_init(f,fdphic,tmpdphic,dphic,mdx,mdt,mda,so,to);
@@ -1102,7 +1105,6 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     DegreeType max_to=this->maximum_temporal_order();
 
     Vector<ValidatedProcedure> p(f);
-
     FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
         max_err,this->sweeper(), init_so,init_to,max_so,max_to);
 

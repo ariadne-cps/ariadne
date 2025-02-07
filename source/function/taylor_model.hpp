@@ -48,6 +48,8 @@
 
 namespace Ariadne {
 
+template<class PR> Bool operator==(Sweeper<PR> const&, Sweeper<PR> const&) { return true; }
+
 template<class F> class ZeroError {
   public:
     template<class... PRS> requires Constructible<Error<F>,PRS...> ZeroError(PRS...) { }
@@ -196,6 +198,8 @@ class TaylorModel
     typedef ValidatedTag Paradigm;
     //! \brief The properties needed to define the TaylorModel calculus.
     typedef Sweeper<RawFloatType> PropertiesType;
+    //! \brief The characteristics of a zero TaylorModel.
+    typedef Tuple<SizeType,Sweeper<RawFloatType>> CharacteristicsType;
 
     //! \brief The type used for algebraic operations.
     typedef typename ModelNumericTraits<P,F>::NumericType NumericType;
@@ -226,8 +230,6 @@ class TaylorModel
     //! \name Constructors and destructors.
     //!@{
     //
-    //! \brief Default constructor.
-    TaylorModel();
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
     TaylorModel(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
@@ -497,7 +499,7 @@ class TaylorModel
 
     //! \brief Remove all terms based on the \a swp conditions.
     TaylorModel<P,F>& sweep(const SweeperType& swp);
-    TaylorModel<P,F>& simplify(const PropertiesType& prp);
+    TaylorModel<P,F>& simplify(const SweeperType& prp);
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
@@ -522,8 +524,11 @@ class TaylorModel
     Void set_properties(PropertiesType prp) { this->_sweeper=prp; }
     //! \brief A shared pointer to an object using for removing low-impact terms.
     SweeperType sweeper() const { return this->_sweeper; }
-    //! \brief The precision of the coefficients.
+    //! \brief The numerical properties of the calculus.
     PropertiesType properties() const { return this->sweeper(); }
+    //! \brief The characteristics of a zero value.
+    CharacteristicsType characteristics() const { return std::make_pair(this->argument_size(),this->sweeper()); }
+    //! \brief The properties of the zero element.
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
     //!@}
@@ -606,7 +611,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
 template<class P, class F, class X> decltype(auto) evaluate(const Vector<TaylorModel<P,F>>& tf, const Vector<X>& x)
 {
     typedef decltype(evaluate(tf[0],x)) R;
-    return Vector<R>(tf.size(),[&](SizeType i){return evaluate(tf[i],x);});
+    return Vector<R>(tf.size(),[&](SizeType i){return evaluate(tf[i],x);},characteristics(evaluate(tf.zero_element(),x)));
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
@@ -629,9 +634,7 @@ template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorM
 
 template<class P, class F> Vector<TaylorModel<P,F>> compose(const VectorUnscaling& u, const Vector<TaylorModel<P,F>>& g) {
     ARIADNE_ASSERT_MSG(u.size()==g.size(),"u="<<u.domain()<<", g="<<g);
-    Vector<TaylorModel<P,F>> r(u.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(u[i],g[i]); }
-    return r;
+    return Vector<TaylorModel<P,F>>(u.size(),[&u,&g](SizeType i){return compose(u[i],g[i]);});
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> compose(const Vector<TaylorModel<P,F>>& x,
@@ -657,9 +660,7 @@ template<class P, class F> Vector<TaylorModel<P,F>> combine(const Vector<TaylorM
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> embed(SizeType as1, const Vector<TaylorModel<ValidatedTag,F>>& x2, SizeType as3) {
-    Vector<TaylorModel<ValidatedTag,F>> r(x2.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
-    return r;
+    return Vector<TaylorModel<ValidatedTag,F>>(x2.size(),[as1,&x2,as3](SizeType i){return embed(as1,x2[i],as3);});
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> split(const Vector<TaylorModel<P,F>>& x, SizeType j, SplitPart h) {

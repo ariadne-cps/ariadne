@@ -281,6 +281,7 @@ InclusionIntegratorImpl<A>::operator<(const InclusionIntegratorInterface& rhs) c
 
 template<class A> List<ValidatedVectorMultivariateFunctionPatch>
 InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+    std::cerr<<"\nInclusionIntegratorImpl<A>::reach(D,e,B,t,H) ";
     CONCLOG_SCOPE_CREATE;
 
     TimeStepType new_t = lower_bound(t+h);
@@ -291,7 +292,9 @@ InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMult
     CONCLOG_PRINTLN("approximation errors:"<<e);
     auto doma = this->build_parameter_domain(_inputs);
 
+std::cerr<<" building_w_functions<"<<A()<<">... ";
     auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
+std::cerr<<"done! ";
     CONCLOG_PRINTLN("w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
     CONCLOG_PRINTLN("Fw:"<<Fw);
@@ -300,7 +303,7 @@ InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMult
 
     List<ValidatedVectorMultivariateFunctionPatch> result;
     result.append(this->build_reach_function(evolve_function, phi, t, new_t));
-
+std::cerr<<"done_reach!\n";
     return result;
 }
 
@@ -308,7 +311,7 @@ template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrato
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+2*m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
@@ -417,7 +420,7 @@ template<class A> BoxDomainType InclusionIntegratorImpl<A>::build_parameter_doma
 }
 
 template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::zero(n+1);
     return result;
@@ -425,7 +428,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApp
 
 
 template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ConstantApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+m);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
     return result;
@@ -440,7 +443,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<AffineA
     auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+2*m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
@@ -460,7 +463,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Sinusoi
     auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+2*m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
@@ -475,7 +478,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Piecewi
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
-    auto result = Vector<EffectiveScalarMultivariateFunction>(m);
+    auto result = Vector<EffectiveScalarMultivariateFunction>(m,n+1+2*m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
@@ -511,7 +514,6 @@ InclusionIntegratorImpl<PiecewiseApproximation>::reach(BoxDomainType const& domx
 
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
-
     auto intermediate_evolve=this->evolve(intermediate_reach,intermediate_t);
 
     auto domx_second = cast_exact_box(intermediate_evolve.range());

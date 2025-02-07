@@ -218,7 +218,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,Float<PR>>& p, FloatError<PR>& 
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
-    FloatError<PR> te(e.precision());
+    FloatError<PR> te(0.0_x,e.precision());
     while(adv!=end) {
         if(this->_discard(adv->index(),adv->coefficient())) {
             //te+=abs(adv->coefficient());
@@ -245,7 +245,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
-    FloatError<PR> te(e.precision());
+    FloatError<PR> te(0.0_x,e.precision());
     while(adv!=end) {
         if(this->_discard(adv->index(),mag(adv->coefficient()).raw())) {
             //te+=abs(adv->coefficient());
@@ -290,7 +290,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, Flo
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
-    FloatError<PR> te(e.precision());
+    FloatError<PR> te(0.0_x,e.precision());
     while(adv!=end) {
         if(this->_discard(adv->index(),mag(adv->coefficient()).raw())) {
             //te+=abs(adv->coefficient());
@@ -442,13 +442,8 @@ template<class F> F create_default() {
 }
 
 
-template<class P, class F> TaylorModel<P,F>::TaylorModel()
-    : _expansion(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
-{
-}
-
 template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
-    : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
+    : _expansion(as,swp.precision()), _error(swp.precision()), _sweeper(swp)
 {
 }
 
@@ -1257,7 +1252,6 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::unique()
 }
 
 template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::sweep() {
-//    this->_sweeper.sweep(reinterpret_cast<Expansion<MultiIndex,F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
     this->_sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
@@ -1271,8 +1265,8 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify() {
     return this->sweep();
 }
 
-template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify(const PropertiesType& properties) {
-    return this->sweep(properties);
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify(const SweeperType& sweeper) {
+    return this->sweep(sweeper);
 }
 
 template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::cleanup() {

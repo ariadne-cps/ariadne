@@ -141,6 +141,8 @@ class Box
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
     static Box<IntervalType> upper_orthant(SizeType n);
 
+    //! An array of the data values.
+    UniformArray<I> const& array() const;
     //! The dimension of the set. DEPRECATED
     SizeType size() const;
     //! The dimension of the set.
@@ -484,6 +486,9 @@ template<class I> inline Box<I> Box<I>::unit_box(SizeType n) {
     return Box<IntervalType>(n,IntervalType(-1,1));
 }
 
+template<class I> inline UniformArray<I> const& Box<I>::array() const {
+    return this->_vec.array();
+}
 template<class I> inline DimensionType Box<I>::dimension() const {
     return this->_vec.size();
 }
@@ -495,7 +500,7 @@ template<class I> inline const I& Box<I>::operator[](SizeType i) const {
 }
 
 template<class I> inline I& Box<I>::operator[](SizeType i) {
-    return this->_vec.operator[](i);
+    return static_cast<I&>(this->_vec.operator[](i));
 }
 
 template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
@@ -504,12 +509,12 @@ template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
 
 template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {
     typedef decltype(cast_singleton(declval<I>())) X;
-    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i]);});
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i]);},bx.array().element_characteristics());
 }
 
 template<class I, class PR> inline auto cast_singleton(Box<I> const& bx, PR pr) -> Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> {
     typedef decltype(cast_singleton(declval<I>(),declval<PR>())) X;
-    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i],pr);});
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i],pr);},pr);
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {

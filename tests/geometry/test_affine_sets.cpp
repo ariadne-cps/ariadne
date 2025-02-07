@@ -241,6 +241,7 @@ class TestAffineSet
         D = ExactBoxType::unit_box(2);
         x = Affine<FloatDPBounds>::variables(2,dp);
 
+        std::cerr<<get_characteristics(0.125_x*x[0]+1.0_x)<<"\n";
         set=ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x} );
         set.new_parameter_constraint(-1.0_x*x[1] <= -2.0_x);
 
@@ -272,9 +273,11 @@ class TestAffineSet
         D = ExactBoxType::unit_box(2);
         x = Affine<FloatDPBounds>::variables(2,dp);
         ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+E/2, 0.25_x*x[0]-0.25_x*x[1]+E} );
+        ARIADNE_TEST_PRINT(set1);
         D = ExactBoxType::unit_box(4);
         x = Affine<FloatDPBounds>::variables(4,dp);
         ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+e*x[2]/2, 0.25_x*x[0]-0.25_x*x[1]+e*x[3]} );
+        ARIADNE_TEST_PRINT(set2);
 
         figure.clear();
         figure.set_bounding_box(ExactBoxType{{-1.0_x,+1.0_x},{-1.0_x,+1.0_x}});

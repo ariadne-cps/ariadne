@@ -66,7 +66,8 @@ decltype(auto) make_space_rendezvous_problem() {
 
     HybridAutomaton space_rendezvous("space_rendezvous");
 
-    HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,vx==0,vy==0});
+//    HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,vx==0,vy==0});
+    HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-906.25_dy<=x<=-893.75_dy,-406.25_dy<=y<=-393.75_dy,vx==0,vy==0});
 
     HybridConstraintSet safe_set;
     safe_set.adjoin(spacecraft|rendezvous,{y>=x*tan(Ariadne::pi/6u),-y>=x*tan(Ariadne::pi/6u),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
@@ -97,7 +98,34 @@ decltype(auto) make_space_rendezvous_problem() {
     space_rendezvous.new_invariant(spacecraft|rendezvous, t<=150, must_timeout);
 
 
+
+    std::cerr<<space_rendezvous<<"\n";
+    std::cerr<<"alg_eqns:"<<space_rendezvous.auxiliary_function({spacecraft|approaching})<<"\n";
+    auto dif_eqns=space_rendezvous.dynamic_function({spacecraft|approaching});
+    std::cerr<<"dif_eqns: R"<<dif_eqns.argument_size()<<"->R"<<dif_eqns.result_size()<<":"<<dif_eqns<<"\n";
+    std::cerr<<"J="<<dif_eqns.jacobian(Vector<FloatDPApproximation>({10,100,1000,100000,1000000},dp))<<"\n";;
+    //J=[0.,0.,0.,0.,0.; 0.,0.,0.,1.000,0.; 0.,0.,0.,0.,1.000; 0.,-0.05766,0.0002010,-2.900,0.008760; 0.,-0.0001740,-0.06651,-0.008741,-2.903]
+    auto J=Matrix<FloatDPApproximation>({{0.,0.,0.,0.,0.},{ 0.,0.,0.,1.000,0.},{ 0.,0.,0.,0.,1.000},{ 0.,-0.05766,0.0002010,-2.900,0.008760},{ 0.,-0.0001740,-0.06651,-0.008741,-2.903}},dp);
+
+    auto loc=DiscreteLocation({spacecraft|approaching});
+    auto spc=space_rendezvous.continuous_state_space(loc);
+    //auto init=initial_set.euclidean_set(loc,spc);
+    std::cerr<<"init="<<initial_set.continuous_set(loc)<<"\n";
+    std::cerr<<"spc="<<spc<<"\n";
+    auto init=cast_exact_box(initial_set.euclidean_set(loc,spc).bounding_box());
+    init[0]=IntervalDomainType(0,0); init[3]=IntervalDomainType(0,0); init[4]=IntervalDomainType(0,0);
+    std::cerr<<"init="<<init<<"\n";
+    std::cerr<<"image(init,dif_eqns)="<<image(init,dif_eqns)<<"\n";
+    StepSizeType h=1.0_x;
+
+    EulerBounder bnd;
+    std::cerr<<"bounds="<<bnd.compute(dif_eqns,init,suggest(h))<<"\n";
+
+
+    {char c; std::cin>>c;}
     return make_problem(initial_set,space_rendezvous,safe_set);
+
+
 }
 
 void SPRE20()
@@ -105,9 +133,6 @@ void SPRE20()
     ArchBenchmark benchmark("SPRE20");
     auto instance = benchmark.create_instance();
     instance.write();
-
-    // Results can't be obtained in a reasonable time yet for this benchmark.
-    return;
 
     auto problem = make_space_rendezvous_problem();
 
@@ -122,6 +147,7 @@ void SPRE20()
     BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(initial_location,initial_space);
 
     StepMaximumError max_err=8e-6;
+    max_err=1e-4;
     TaylorSeriesIntegrator integrator(max_err,Order(3u));
 
     GeneralHybridEvolver evolver(system);
@@ -134,7 +160,7 @@ void SPRE20()
     Stopwatch<Milliseconds> sw;
 
     CONCLOG_PRINTLN("Computing orbit...");
-    HybridTime evolution_time(200,3);
+    HybridTime evolution_time(115,2);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
     StringVariable spacecraft("spacecraft");
@@ -142,6 +168,8 @@ void SPRE20()
     StringConstant rendezvous("rendezvous");
     StringConstant aborting("aborting");
 
+    std::cerr<<"\n\n\n\n\n"<<orbit.final().size()<<orbit.final().front().state_function().errors();
+/*
     CONCLOG_PRINTLN("Checking properties...");
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
@@ -159,11 +187,13 @@ void SPRE20()
 
     sw.click();
     CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.");
-
+*/
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
     CONCLOG_PRINTLN("Plotting...");
+CONCLOG_RUN_MUTED(
     plot("SPRE20",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
+)
     CONCLOG_PRINTLN("File SPRE20.png written.");
 }
 

@@ -42,6 +42,9 @@
 
 #include "hybrid/hybrid_evolver.hpp"
 
+#define MY_CONCLOG_PRINTLN(expr) { std::clog << expr << std::endl; }
+#define MY_CONCLOG_PRINTLN_AT(lvl,expr) { std::clog << expr << std::endl; }
+
 namespace {
 
 } // namespace
@@ -407,6 +410,8 @@ _log_summary(HybridEnclosure const& starting_set, SharedPointer<SynchronisedOrbi
             <<" se="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<sup_norm(starting_set.state_function().errors())<<std::fixed<<std::flush
             <<" l="<<std::left<<starting_set.location()
             <<" e="<<starting_set.previous_events()<<std::setprecision(old_precision));
+
+    {static uint num=0; if(num<2) {std::cerr<<"orbit="<<*result<<"\n"; ++num;}}
 }
 
 Map<DiscreteEvent,TransitionData>
@@ -1205,6 +1210,7 @@ _evolution_step(WorkloadType::Access& workload,
                 Semantics const& semantics,
                 SharedPointer<SynchronisedOrbit> result) const
 {
+    { static bool first=true; if(first) { std::cout<<"set="<<set<<"\n"; char c; std::cin>>c; first=false; } }
     HybridEnclosure starting_set=set;
 
     DiscreteLocation const& location=starting_set.location();
@@ -1266,6 +1272,7 @@ _evolution_step(WorkloadType::Access& workload,
 
     // Compute flow and actual time step size used
     const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->configuration().maximum_step_size());
+    { static bool first=true; if(first) { std::cout<<"flow_model="<<flow_model<<"\n"; char c; std::cin>>c; first=false; } }
     CONCLOG_PRINTLN_AT(1,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range());
 
     // Compute possibly active events
@@ -1521,7 +1528,16 @@ _apply_evolution_step(WorkloadType::Access& workload,
                 DiscreteLocation const& target=transitions[event].target;
                 CONCLOG_PRINTLN_AT(2,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target));
                 TransitionData const& transition=transitions[event];
+                MY_CONCLOG_PRINTLN_AT(2,"\nevent="<<event<<", target="<<target);
+                MY_CONCLOG_PRINTLN_AT(2,"pre_jump_set.state_errors()="<<_jump_set.state_function().errors());
+                MY_CONCLOG_PRINTLN_AT(2,"pre_jump_set.time_error()="<<_jump_set.time_function().error());
+                MY_CONCLOG_PRINTLN_AT(2,"pre_jump_set.bounding_box()="<<_jump_set.bounding_box());
+                MY_CONCLOG_PRINTLN_AT(2,"pre_jump_set.time_range()="<<_jump_set.time_function().range());
                 _jump_set.apply_reset(event,target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
+                MY_CONCLOG_PRINTLN_AT(2,"jump_set.state_errors()="<<_jump_set.state_function().errors());
+                MY_CONCLOG_PRINTLN_AT(2,"jump_set.time_error()="<<_jump_set.time_function().error());
+                MY_CONCLOG_PRINTLN_AT(2,"jump_set.bounding_box()="<<_jump_set.bounding_box());
+                MY_CONCLOG_PRINTLN_AT(2,"jump_set.time_range()="<<_jump_set.time_function().range());
                workload.append({_jump_set,true});
                 _step_data.events.insert(event);
                 CONCLOG_PRINTLN_AT(2,"jump_set="<<_jump_set);
@@ -1657,13 +1673,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     UpperIntervalType starting_time_range=initial_set.time_range();
     UpperIntervalType remaining_time_range=final_time_bounds-starting_time_range;
 
-    CONCLOG_PRINTLN(std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time);
+    MY_CONCLOG_PRINTLN(std::fixed<<"\nstarting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time);
 
 
     // The time-dependent part of the evolution time
     ValidatedScalarMultivariateFunctionPatch temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVectorType(1u,time_domain));
 
-    CONCLOG_PRINTLN(std::fixed<<"remaining_time_range="<<remaining_time_range);
+    MY_CONCLOG_PRINTLN(std::fixed<<"remaining_time_range="<<remaining_time_range);
     if(possibly(remaining_time_range.lower_bound()<zero)) {
         // Some of the points may already have reached the final time.
         // Don't try anything fancy, just do a simple constant time step.
@@ -1697,14 +1713,19 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     } else if(possibly(remaining_time_range.lower_bound()<=step_size) && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
-
         // Using the final_time as a guide, set the finishing time to closer to the final time.
         // This method ensures that points do not pass the final time after the transition.
         result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         PositiveFloatDP sf={1u,dp};
         while(possibly(remaining_time_range.upper_bound()*sf>step_size)) { sf = hlf(sf); }
+        MY_CONCLOG_PRINTLN_AT(1,"creep scale_factor="<<sf);
+        MY_CONCLOG_PRINTLN_AT(1,"final_time_bounds="<<final_time_bounds);
+        MY_CONCLOG_PRINTLN_AT(1,"time_identity="<<time_identity);
         temporal_evolution_time= FloatDPBounds(sf)*(final_time_bounds-time_identity);
+        MY_CONCLOG_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
+#warning
+            temporal_evolution_time=result.step_size;
     } else { // remaining_time_range.lower_bound()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1712,8 +1733,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         temporal_evolution_time=result.step_size;
     }
 
-    CONCLOG_PRINTLN_AT(1,"finishing_kind="<<result.finishing_kind);
-    CONCLOG_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
+    MY_CONCLOG_PRINTLN_AT(1,"temporal_evolution_time="<<temporal_evolution_time);
+    MY_CONCLOG_PRINTLN_AT(1,"finishing_kind="<<result.finishing_kind);
 
 
     ValidatedScalarMultivariateFunctionPatch spacial_evolution_time=this->function_factory().create_constant(state_domain,FloatDP(step_size));

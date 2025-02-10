@@ -967,6 +967,7 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::_write(OutputStrea
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
         write_polynomial(os,(*this)[i]);
+        os << ", " << this->models()[i];
     }
     os << " ] )";
     return os;

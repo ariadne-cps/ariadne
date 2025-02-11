@@ -392,8 +392,8 @@ class HybridListSet
     }
 
     const ListSet<ES>& operator[](const DiscreteLocation& q) const {
-        ARIADNE_ASSERT_MSG(this->find(q)!=this->locations_end(),(*this)<<" has no location "<<q);
-        return this->find(q)->second->second; }
+        ARIADNE_ASSERT_MSG(this->_locations.find(q)!=this->locations_end(),(*this)<<" has no location "<<q);
+        return this->_locations.find(q)->second->second; }
 
     Void insert(const DiscreteLocation& loc, const RealSpace& spc) {
         this->_locations.insert(loc, make_pair(spc,ListSet<ES>())); }

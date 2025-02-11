@@ -69,17 +69,17 @@ template<class I> class Handle {
   public:
     ~Handle() { }
     explicit Handle(I* p) : _ptr(p) { }
-    Handle(PointerType p) { this->_reset(p); }
+    Handle(PointerType p) { _reset(this->_ptr,p); }
     Handle(I&& r) : _ptr(r._move()) { }
     Handle(const I& r) : _ptr(r._copy()) { }
     template<DerivedFrom<I> T> Handle(T&& t) : _ptr(new T(std::move(t))) { }
     template<DerivedFrom<I> T> requires CopyConstructible<T> Handle(const T& t)
         : _ptr(new T(t)) { }
-    Handle(const Handle<I>& h) {  this->_reset(h._ptr); }
+    Handle(const Handle<I>& h) {  _reset(this->_ptr,h._ptr); }
     Handle(Handle<I>&& h) = default;
-    Handle<I>& operator=(const Handle<I>& h) { this->_reset(h._ptr); return *this; }
+    Handle<I>& operator=(const Handle<I>& h) { _reset(this->_ptr,h._ptr); return *this; }
     Handle<I>& operator=(Handle<I>&& h) = default;
-    template<class II> explicit Handle(const Handle<II>& h) : _ptr(h.managed_pointer()) { }
+    template<class II> explicit Handle(const Handle<II>& h) { _reset(this->_ptr,h.managed_pointer()); }
     operator I const& () const { return *_ptr; }
   public:
     const I& const_reference() const { return _ptr.operator*(); }
@@ -100,17 +100,35 @@ template<class I> class Handle {
     const I* ptr() const { return _ptr.operator->(); }
     I* ptr() { return _ptr.operator->(); }
   public:
-    const PointerType managed_const_pointer() const { return _ptr; }
-    const PointerType managed_pointer() const { return _ptr; }
-    PointerType managed_pointer() { return _ptr; }
+    const PointerType& managed_const_pointer() const { return _ptr; }
+    const PointerType& managed_pointer() const { return _ptr; }
+    PointerType& managed_pointer() { return _ptr; }
   protected:
-    void _reset(PointerType const& ptr) {
-        if constexpr (CopyAssignable<PointerType>) { this->_ptr=ptr; }
-        else if constexpr (std::is_copy_constructible<I>::value) { this->_ptr.reset(new I(*ptr)); }
-        else if constexpr (Clonable<I>) { this->_ptr.reset(ptr->clone()); }
-        else { this->_ptr.reset(ptr->_clone()); }
+/*
+    template<class II> static void _reset(SharedPointer<const I>& tptr, SharedPointer<const II> const& fptr) {
+        tptr=fptr; }
+    template<class II> static void _reset(SharedPointer<const I>& tptr, UniquePointer<II> const& fptr) {
+        _base_reset(tptr,fptr); }
+    template<class II> static void _reset(UniquePointer<I>& tptr, UniquePointer<II> const& fptr) {
+        _base_reset(tptr,fptr); }
+    template<class II> static void _reset(UniquePointer<I>& tptr, SharedPointer<const II> const& fptr) {
+        _base_reset(tptr,fptr); }
+    template<class TPTR, class FPTR> static void _base_reset(TPTR& tptr, FPTR const& fptr) {
+        using TI=typename TPTR::element_type; using FI=typename FPTR::element_type;
+        if constexpr (std::is_constructible<TI,FI>::value) { tptr.reset(new I(*fptr)); }
+        else if constexpr (Clonable<FI>) { tptr.reset(fptr->clone()); }
+        else { tptr.reset(fptr->_clone()); }
     }
-
+*/
+    template<class TI, class FI> static void _reset(SharedPointer<const TI>& tptr, SharedPointer<const FI> const& fptr) {
+        tptr=fptr; }
+    template<class TPTR, class FPTR> static void _reset(TPTR& tptr, FPTR const& fptr) {
+        using TI=typename TPTR::element_type; using FI=typename FPTR::element_type;
+        if constexpr (Constructible<TI,FI>) { tptr.reset(new I(*fptr)); }
+        else if constexpr (Clonable<FI>) { tptr.reset(fptr->clone()); }
+        else if constexpr (PrivateClonable<FI>) { tptr.reset(fptr->_clone()); }
+        else { static_assert(Constructible<TI,FI> or Clonable<FI>,"Cannot copy Handle: no suitble copy constructor or clone() member"); }
+    }
   private:
     template<class T, class II> friend T& dynamic_handle_extract(Handle<II>& h);
     template<class T, class II> friend const T& dynamic_handle_extract(const Handle<II>& h);

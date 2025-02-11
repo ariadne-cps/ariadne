@@ -113,10 +113,10 @@ template<class Y>
 class Procedure {
     typedef Paradigm<Y> P;
   public:
-    explicit Procedure<Y>(SizeType as);
-    explicit Procedure<Y>(ScalarMultivariateFunction<P> const& f);
-    explicit Procedure<Y>(SizeType as, const Formula<Y>& f);
-    template<ConvertibleTo<Y> X> explicit Procedure<Y>(const Expansion<MultiIndex,X>& e);
+    explicit Procedure(SizeType as);
+    explicit Procedure(ScalarMultivariateFunction<P> const& f);
+    explicit Procedure(SizeType as, const Formula<Y>& f);
+    template<ConvertibleTo<Y> X> explicit Procedure(const Expansion<MultiIndex,X>& e);
     friend OutputStream& operator<<(OutputStream& os, Procedure<Y> const& p) { return p._write(os); }
   public:
     SizeType argument_size() const { return this->_argument_size; }
@@ -149,9 +149,9 @@ template<class Y>
 class Vector<Procedure<Y>> {
     typedef Paradigm<Y> P;
   public:
-    explicit Vector<Procedure<Y>>(SizeType as, const Vector<Formula<Y>>& f);
-    explicit Vector<Procedure<Y>>(VectorMultivariateFunction<P> const& f);
-    explicit Vector<Procedure<Y>>(const Procedure<Y>& p);
+    explicit Vector(SizeType as, const Vector<Formula<Y>>& f);
+    explicit Vector(VectorMultivariateFunction<P> const& f);
+    explicit Vector(const Procedure<Y>& p);
     friend OutputStream& operator<<(OutputStream& os, Vector<Procedure<Y>> const& p) { return p._write(os); }
   public:
     SizeType result_size() const { return _results.size(); }

@@ -187,7 +187,7 @@ static const ExactDouble inf = ExactDouble(std::numeric_limits<double>::infinity
 template<class X> class Positive;
 template<> class Positive<ExactDouble> : public ExactDouble {
   public:
-    explicit Positive<ExactDouble>(ExactDouble x) : ExactDouble(x) { }
+    explicit Positive(ExactDouble x) : ExactDouble(x) { }
 };
 inline Positive<ExactDouble> cast_positive(ExactDouble x) { return Positive<ExactDouble>(x); }
 

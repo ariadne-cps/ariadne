@@ -158,7 +158,7 @@ template<class P> class Number
     // Construct from a type which is convertible to another Number type.
     // TODO: Decide conversion characteristics from concrete type to Number<P>
     template<ConvertibleViaNumberToNumber<P> X>
-        explicit Number<P>(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
+        explicit Number(X const & x) : Number(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type
     ResultFloatType<DoublePrecision> get(DoublePrecision const& prec) const { return this->ref()._get(P(),prec); }

@@ -321,14 +321,14 @@ template<class P, class... ARGS> struct AlgebraOperations<ScalarFunctionPatch<P,
 };
 
 
-template<class P, class... ARGS> inline
-ScalarFunctionPatch<P,ARGS...>& ScalarFunctionPatch<P,ARGS...>::operator=(const Number<P>& c) {
+template<class P, class... ARGS> inline auto
+FunctionPatch<P,RealScalar(ARGS...)>::operator=(const Number<P>& c) -> ScalarFunctionPatch<P,ARGS...>& {
     return (*this)=factory(*this).create_constant(c); }
-template<class P, class... ARGS> inline
-ScalarFunctionPatch<P,ARGS...>& ScalarFunctionPatch<P,ARGS...>::operator=(const ScalarFunction<P,ARGS...>& f) {
+template<class P, class... ARGS> inline auto
+FunctionPatch<P,RealScalar(ARGS...)>::operator=(const ScalarFunction<P,ARGS...>& f) -> ScalarFunctionPatch<P,ARGS...>& {
     return (*this)=factory(*this).create(f); }
-template<class P, class... ARGS> inline
-ScalarFunctionPatch<P,ARGS...>& ScalarFunctionPatch<P,ARGS...>::operator=(const ScalarFunctionPatchInterface<P,ARGS...>& f) {
+template<class P, class... ARGS> inline auto
+FunctionPatch<P,RealScalar(ARGS...)>::operator=(const ScalarFunctionPatchInterface<P,ARGS...>& f) -> ScalarFunctionPatch<P,ARGS...>& {
     return (*this)=ScalarFunctionPatch<P,ARGS...>(f._clone()); }
 
 

@@ -1254,7 +1254,7 @@ template<class M> class ScaledFunctionPatchFactory
     typedef typename M::CoefficientType CoefficientType;
     typedef BoxDomainType DomainType;
 
-    explicit ScaledFunctionPatchFactory<M>(PropertiesType properties) : _properties(properties) { }
+    explicit ScaledFunctionPatchFactory(PropertiesType properties) : _properties(properties) { }
     PropertiesType properties() const { return this->_properties; }
 
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
@@ -1286,7 +1286,7 @@ template<class M> class ScaledFunctionPatchCreator
   public:
     typedef BoxDomainType DomainType;
     typedef typename M::PropertiesType PropertiesType;
-    explicit ScaledFunctionPatchCreator<M>(DomainType domain, PropertiesType properties)
+    explicit ScaledFunctionPatchCreator(DomainType domain, PropertiesType properties)
         : FunctionModelCreator<ScaledFunctionPatchFactory<M>,RealVector>(domain,ScaledFunctionPatchFactory<M>(properties)) { }
     PropertiesType properties() const { return this->_factory.properties(); }
 };

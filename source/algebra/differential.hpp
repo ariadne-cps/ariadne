@@ -439,7 +439,7 @@ class Vector< Differential<X> >
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
         Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs);
     template<class... PRS> requires Constructible<X,ExactDouble,PRS...>
-        explicit Vector<Differential<X>>(SizeType rs, SizeType as, DegreeType deg, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
+        explicit Vector(SizeType rs, SizeType as, DegreeType deg, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
 
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](SizeType i) { return static_cast<NonAssignableDifferential<X>&>(static_cast<Differential<X>&>(_ary[i])); }

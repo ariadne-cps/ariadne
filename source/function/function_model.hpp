@@ -388,17 +388,17 @@ template<class P, class ARG, class PR, class PRE> struct AlgebraOperations<Scala
 };
 
 
-template<class P, class ARG, class PR, class PRE> inline
-ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
+template<class P, class ARG, class PR, class PRE> inline auto
+FunctionModel<P,RealScalar(ARG),PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) -> ScalarFunctionModel<P,ARG,PR,PRE>& {
     (*this)*=nul(c); (*this)+=c; return *this; }
-template<class P, class ARG, class PR, class PRE> inline
-ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const Number<P>& c) {
+template<class P, class ARG, class PR, class PRE> inline auto
+FunctionModel<P,RealScalar(ARG),PR,PRE>::operator=(const Number<P>& c) -> ScalarFunctionModel<P,ARG,PR,PRE>& {
     return (*this)=factory(*this).create(c); }
-template<class P, class ARG, class PR, class PRE> inline
-ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const ScalarFunction<P,ARG>& f) {
+template<class P, class ARG, class PR, class PRE> inline auto
+FunctionModel<P,RealScalar(ARG),PR,PRE>::operator=(const ScalarFunction<P,ARG>& f) -> ScalarFunctionModel<P,ARG,PR,PRE>& {
     return (*this)=factory(*this).create(f); }
-template<class P, class ARG, class PR, class PRE> inline
-ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const ScalarFunctionModelInterface<P,ARG,PR,PRE>& f) {
+template<class P, class ARG, class PR, class PRE> inline auto
+FunctionModel<P,RealScalar(ARG),PR,PRE>::operator=(const ScalarFunctionModelInterface<P,ARG,PR,PRE>& f) -> ScalarFunctionModel<P,ARG,PR,PRE>& {
     return (*this)=ScalarFunctionModel<P,ARG,PR,PRE>(f._clone()); }
 
 

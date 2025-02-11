@@ -182,6 +182,7 @@ template<class T, class... US> concept OneOf = IsOneOf<T,US...>::value;
 template<class... TS> concept AllSame = AreAllSame<TS...>::value;
 
 template<class T> concept Clonable = requires (T const& t) { { t.clone() } -> ConvertibleTo<T*>; };
+template<class T> concept PrivateClonable = requires (T const& t) { { t._clone() } -> ConvertibleTo<T*>; };
 
 template<class A1, class A2> concept HasEquality = requires(A1 a1, A2 a2) { { a1==a2 }; };
 template<class A1, class A2> concept CanAdd = requires(A1 a1, A2 a2) { { a1+a2 }; };

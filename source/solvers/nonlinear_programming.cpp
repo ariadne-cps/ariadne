@@ -786,6 +786,91 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 }
 
 
+//------- C0BranchAndBoundOptimiser -------------------------//
+
+C0BranchAndBoundOptimiser::C0BranchAndBoundOptimiser(ApproximateDouble tol)
+    : _tolerance(cast_exact(tol)) {
+}
+
+auto C0BranchAndBoundOptimiser::clone() const -> C0BranchAndBoundOptimiser* {
+    return new C0BranchAndBoundOptimiser(*this);
+}
+
+
+ValidatedVectorType C0BranchAndBoundOptimiser::
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN("f="<<f<<", D="<<D<<", g="<<g<<", C="<<C);
+
+    ExactDouble const& tol = this->_tolerance;
+
+    struct FirstUpperGreater {
+        bool operator() (Pair<UpperIntervalType,ExactBoxType> ivlbx1, Pair<UpperIntervalType,ExactBoxType> ivlbx2) const {
+            return refines(ivlbx2.first.upper_bound(),ivlbx1.first.upper_bound()); }
+    };
+
+    Set<Pair<UpperIntervalType,ExactBoxType>, FirstUpperGreater> candidates;
+    Set<Pair<UpperIntervalType,ExactBoxType>, FirstUpperGreater> best;
+
+    using UpperBoundType = UpperIntervalType::UpperBoundType;
+    UpperBoundType val(infty,dp);
+    candidates.insert(std::make_pair(image(D,f),D));
+    while (not candidates.empty()) {
+        Pair<UpperIntervalType,ExactBoxType> candidate = *(--candidates.end());
+        candidates.erase(--candidates.end());
+        CONCLOG_PRINTLN_AT(1,"f="<<f<<", D="<<D<<", g="<<g<<", C="<<C);
+        ExactBoxType const& subdomain=candidate.second;
+        if (definitely(radius(subdomain) < tol)) {
+            CONCLOG_PRINTLN_AT(2,"radius="<<radius(subdomain));
+            best.insert(candidate);
+            val=min(val,candidate.first.upper_bound());
+        } else {
+            auto split_subdomains=subdomain.split();
+            auto first_subdomain=split_subdomains.first;
+            CONCLOG_PRINTLN_AT(2,"first_subdomain="<<first_subdomain);
+            auto first_constraints = image(first_subdomain,g);
+            CONCLOG_PRINTLN_AT(2,"first_constraints="<<first_constraints);
+            if (possibly(intersect(image(first_subdomain,g),C))) {
+                auto first_range=image(first_subdomain,f);
+                CONCLOG_PRINTLN_AT(2,"first_range="<<first_range);
+                if (possibly(first_range.lower_bound()<val)) {
+                    candidates.insert(std::make_pair(first_range,first_subdomain));
+                }
+                if (definitely(subset(first_constraints,C))) {
+                    val=min(val,first_range.upper_bound());
+                }
+            }
+            auto second_subdomain=split_subdomains.second;
+            CONCLOG_PRINTLN_AT(2,"second_subdomain="<<second_subdomain);
+            auto second_constraints = image(second_subdomain,g);
+            CONCLOG_PRINTLN_AT(2,"second_constraints="<<second_constraints);
+            if (possibly(intersect(image(second_subdomain,g),C))) {
+                auto second_range=image(second_subdomain,f);
+                CONCLOG_PRINTLN_AT(2,"second_range="<<second_range);
+                if (possibly(second_range.lower_bound()<val)) {
+                    candidates.insert(std::make_pair(second_range,second_subdomain));
+                }
+                if (definitely(subset(second_constraints,C))) {
+                    val=min(val,second_range.upper_bound());
+                }
+            }
+        }
+    }
+    erase_if(best,[&val](auto ivlbx){return definitely(ivlbx.first.lower_bound()>val);});
+    assert(!best.empty());
+#warning "If best contains disconnected regions, result may be large."
+    BoxDomainType res=best.begin()->second;
+    for (auto ivlbx : best) { res=hull(res,ivlbx.second); }
+    return cast_singleton(res);
+}
+
+ValidatedKleenean C0BranchAndBoundOptimiser::
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 //------- NonlinearInfeasibleInteriorPointOptimiser -------------------------//
 
 struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {

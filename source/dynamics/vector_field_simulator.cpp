@@ -100,9 +100,10 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     }
     Nat divider = 1;
 
-    FloatDP eps(0.8_q, Ariadne::ROUND_TO_NEAREST, dp);
+    FloatDP eps_box(0.01_q, Ariadne::ROUND_TO_NEAREST, dp);
+    FloatDP eps_len(0.00_q, Ariadne::ROUND_TO_NEAREST, dp);
     //Widen Initial set
-    //box = widen(box, eps);
+    box = widen(box, eps_box);
 
     //Point<FloatDP> tmpPointCenter = Point(box.centre());
     Point<FloatDP> tmpPointCenter = Point(box.lower_bounds());
@@ -132,8 +133,8 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
             divider = val;
         }
         lengths[i] = (box[i].width().raw() / divider).value();
-        if (divider > 1) {
-            lengths[i] = (lengths[i] + eps/* /(divider)*/).value();
+        if (divider >= 1) {
+            lengths[i] = (lengths[i] + (eps_len /(divider))).value();
         }
         origin[i] = tmpPointCenter[i];
         //origin[i] = (origin[i] - eps).value();

@@ -73,8 +73,8 @@ class TestVectorFieldSimulator
         simulator.configuration().set_step_size(0.05);
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
-        simulator.configuration().insert_subspace(x, 1);
-        simulator.configuration().insert_subspace(y, 1);
+        simulator.configuration().insert_subspace(x, 10);
+        simulator.configuration().insert_subspace(y, 8);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 

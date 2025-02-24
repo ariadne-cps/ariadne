@@ -101,7 +101,8 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     Nat divider = 1;
 
     FloatDP eps_box(0.01_q, Ariadne::ROUND_TO_NEAREST, dp);
-    FloatDP eps_len(0.00_q, Ariadne::ROUND_TO_NEAREST, dp);
+    FloatDP eps_len(0.00_q, Ariadne::ROUND_TO_NEAREST, dp); //For Debug purposes
+
     //Widen Initial set
     box = widen(box, eps_box);
 
@@ -119,12 +120,7 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
     if(box_width_null == lengths_.size())
     {
         tmpPointCenter = box.midpoint();
-    }//else if (box_width_null > 0)
-    //{
-    //    FloatDPUpperBound eps(0.000000001_q,dp);
-    //    box = widen(box, eps);
-    //}
-
+    }
 
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
         divider = 1;
@@ -137,13 +133,6 @@ GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
             lengths[i] = (lengths[i] + (eps_len /(divider))).value();
         }
         origin[i] = tmpPointCenter[i];
-        //origin[i] = (origin[i] - eps).value();
-//        if (divider > 1) {
-
-            //lengths[i] = lengths[i] + eps;
-//        }else{
-//            lengths[i] = (box.widths().at(i).raw() / divider).value();
-//        }
     }
     Grid grid(origin, lengths);
     GridTreePaving gridPaving(grid);
@@ -199,25 +188,6 @@ auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationTy
 auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
 -> OrbitType
 {
-/*
-    auto lengths = initial_box.widths();
-    Nat box_width_null = 0;
-    for(SizeType i=0; i<lengths.size(); i++){
-        if(lengths[i].get_d() > 0) { continue; }
-        box_width_null++;
-    }
-    if(box_width_null == lengths.size())
-    {
-        auto midpoint = initial_box.midpoint();
-        ApproximateListPointType pointList(1, LabelledPoint(_system->state_space(), Point<FloatDPApproximation>(midpoint, dp)));
-        return orbit(pointList, termination);
-    }
-    else if (box_width_null > 0)
-    {
-        FloatDPUpperBound eps(0.0001_q,dp);
-        initial_box = widen(initial_box, eps);
-    }
-*/
     GridTreePaving gridPaving = create_paving(initial_box, _system->state_space(), _configuration->get_subspace());
     if(_configuration->is_using_subspace() == true) {
         _configuration->set_num_subdivisions(0);

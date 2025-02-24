@@ -148,6 +148,9 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     Nat const& num_subdivisions() const { return _num_subdivisions; }
 
     Void insert_subspace(RealVariable v, Nat n){
+        if (n <= 0) {
+            ARIADNE_ERROR("The number of subspace should be greater that zero");
+        }
         if(_subspace.has_key(v) == false){
             //If key doesn't exists, then create it one with its value
             _subspace.insert(v, n);

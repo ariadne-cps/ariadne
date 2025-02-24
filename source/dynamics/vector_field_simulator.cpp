@@ -150,7 +150,6 @@ List<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& pavi
     SizeType k(0);
     for( ; iter != paving.end(); ++iter){
         UpperBoxType cell = iter->box();
-        //auto midpoint = cell.midpoint();
         auto midpoint = cell.centre();
         LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
         result.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);

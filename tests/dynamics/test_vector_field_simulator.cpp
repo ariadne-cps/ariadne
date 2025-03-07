@@ -52,7 +52,46 @@ class TestVectorFieldSimulator
   public:
     Void test() const {
         ARIADNE_TEST_CALL(test_multiple_real_expr_vdp_cycle());
-        //ARIADNE_TEST_CALL(test_multiple_real_box_vdp_cycle());
+        ARIADNE_TEST_CALL(test_multiple_real_box_vdp_cycle());
+        ARIADNE_TEST_CALL(test_multiple_trajectories_x1d());
+        //ARIADNE_TEST_CALL(test_multiple_trajectories_2d());
+    }
+
+    Void test_multiple_trajectories_x1d() const {
+        typedef VectorFieldSimulator::ApproximateListPointType ListPointType;
+
+        Real mu=Dyadic(0.5_x);
+        RealVariable x("x"), y("y"), z("z");
+
+        VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
+        ARIADNE_TEST_PRINT(vanderpol);
+
+        RealExpressionBoundedConstraintSet initial_set({-2.0_dec<=x<=-1.5_dec,0.5_dec<=y<=1});
+
+        Real time = 2.0_dec;
+
+        VectorFieldSimulator simulator(vanderpol);
+        simulator.configuration().set_step_size(0.05);
+        simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+
+        SizeType trajectory_number = 4;
+
+        for (SizeType t=1; t<=trajectory_number; t++) {
+            simulator.configuration().insert_subspace(x, t);
+            ARIADNE_TEST_PRINT(simulator.configuration());
+
+            Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
+
+            List<LabelledInterpolatedCurve> curves = orbit.curves();
+
+            if (curves.size() == t) {
+                ARIADNE_PRINT("PASSED\n");
+            }else {
+                ARIADNE_PRINT("NOT PASSED\n")
+            }
+            simulator.configuration().remove_keys();
+        }
     }
 
     Void test_multiple_real_expr_vdp_cycle() const {
@@ -73,8 +112,8 @@ class TestVectorFieldSimulator
         simulator.configuration().set_step_size(0.05);
         simulator.configuration().set_num_subdivisions(0);
         simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
-        simulator.configuration().insert_subspace(x, 10);
-        simulator.configuration().insert_subspace(y, 8);
+        simulator.configuration().insert_subspace(x, 1);
+        simulator.configuration().insert_subspace(y, 1);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 
@@ -105,7 +144,10 @@ class TestVectorFieldSimulator
 
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
-        simulator.configuration().set_num_subdivisions(1);
+        simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+        simulator.configuration().insert_subspace(x, 1);
+        simulator.configuration().insert_subspace(y, 1);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 

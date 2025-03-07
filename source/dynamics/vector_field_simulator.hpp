@@ -156,9 +156,15 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
             _subspace.insert(v, n);
             _is_using_subspace = true;
         }else{
-            //if key already exists, error
+            //if key already exists,
             ARIADNE_ERROR("The key " <<v<< "already exists creating subspace");
+
+
         }
+    }
+
+    Void remove_keys() {
+        _subspace.remove_keys(_subspace.keys());
     }
 
     Void set_subspace(subspace _subspace_) {

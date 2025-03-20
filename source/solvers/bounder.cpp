@@ -56,9 +56,9 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariat
 Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, Suggestion<StepSizeType> const& hsug) const {
     CONCLOG_SCOPE_CREATE;
     const PositiveFloatDP BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
-    const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
-    const PositiveFloatDP INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
-    const PositiveFloatDP INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
+    const PositiveFloatDP NO_WIDENING=cast_positive(0.0_exact);
+    const PositiveFloatDP INITIAL_STARTING_WIDENING=cast_positive(1.0_exact);
+    const PositiveFloatDP INITIAL_REFINING_WIDENING=cast_positive(0.125_exact);
     const StepSizeType MINIMUM_STEP_SIZE(1,20u);
     const CounterType EXPANSION_STEPS=4;
     const CounterType REFINEMENT_STEPS=4;
@@ -118,7 +118,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
 }
 
 UpperBoxType EulerBounder::_refinement(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B) const {
-    const PositiveFloatDP NO_WIDENING=cast_positive(1.0_exact);
+    const PositiveFloatDP NO_WIDENING=cast_positive(0.0_exact);
     return _formula(f,D,T,A,B, NO_WIDENING,NO_WIDENING);
 }
 
@@ -130,9 +130,9 @@ UpperBoxType EulerBounder::_formula(ValidatedVectorMultivariateFunction const& f
     const bool is_autonomous = (f.argument_size() == D.dimension()+A.dimension());
     UpperBoxType dom = is_autonomous ? product(B,rA) : product(B,rT,rA);
 
-    UpperBoxType wD = (INITIAL_BOX_WIDENING!=1) ? D : D + INITIAL_BOX_WIDENING*(D-D.midpoint());
+    UpperBoxType wD = (INITIAL_BOX_WIDENING==0) ? D : D + INITIAL_BOX_WIDENING*(D-D.midpoint());
 
-    return wD+(VECTOR_WIDENING*rH)*cast_vector(apply(f,dom));
+    return wD+(rH+VECTOR_WIDENING*rH)*cast_vector(apply(f,dom));
 }
 
 } // namespace Ariadne;

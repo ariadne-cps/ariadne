@@ -159,6 +159,13 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
 
 template List<typename FloatDPExactBox::VertexType> Box<FloatDPExactInterval>::vertices() const;
 
+FloatDPUpperBox operator+(const FloatDPUpperBox& bx1, FloatDPUpperBox bx2) {
+    return FloatDPUpperBox(bx1.dimension(),[&bx1,bx2](SizeType i){return bx1[i]+bx2[i];});
+}
+FloatDPUpperBox operator*(const FloatDPUpperInterval& ivl1, FloatDPUpperBox bx2) {
+    return FloatDPUpperBox(bx2.dimension(),[&ivl1,bx2](SizeType i){return ivl1*bx2[i];});
+}
+
 /*
 FloatDPLowerBox under_approximation(const RealBox& rbx) {
     FloatDPLowerBox bx(rbx.size());

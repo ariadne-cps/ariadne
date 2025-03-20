@@ -86,12 +86,7 @@ class TestVectorFieldSimulator
             List<LabelledInterpolatedCurve> curves = orbit.curves();
 
             ARIADNE_TEST_EQUALS(curves.size(),t);
-            if (curves.size() == t) {
-                ARIADNE_NOTIFY("PASSED");
-            }else {
-                ARIADNE_NOTIFY("NOT PASSED")
-                return;
-            }
+
             simulator.configuration().remove_keys();
         }
     }
@@ -127,12 +122,7 @@ class TestVectorFieldSimulator
                 List<LabelledInterpolatedCurve> curves = orbit.curves();
 
                 ARIADNE_TEST_EQUALS(curves.size(), first*second);
-                if (curves.size() == first*second) {
-                    ARIADNE_NOTIFY("PASSED");
-                }else {
-                    ARIADNE_NOTIFY("NOT PASSED")
-                    return;
-                }
+
                 simulator.configuration().remove_keys();
             }
         }

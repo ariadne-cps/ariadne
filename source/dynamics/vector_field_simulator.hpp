@@ -45,6 +45,7 @@ namespace Ariadne {
 
 enum class DiscretisationType
 {
+  None,
   Mince,
   Recombine
 };
@@ -52,7 +53,8 @@ enum class DiscretisationType
 OutputStream& operator<<(OutputStream& os, const DiscretisationType& dtype) {
 
     if(dtype == DiscretisationType::Mince){ os << "Mince"; }
-    else{ os << "Recombine"; }
+    else if(dtype == DiscretisationType::Recombine){ os << "Recombine"; }
+    else { os << "None"; }
     return os;
 }
 
@@ -131,6 +133,8 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
     FloatDPApproximation _step_size;
     Nat _num_subdivisions;
     DiscretisationType _discretisation_type;
+    Bool _is_using_subspace;
+    subspace _subspace;
 
   public:
 
@@ -142,6 +146,35 @@ class VectorFieldSimulatorConfiguration : public ConfigurationInterface
 
     Void set_num_subdivisions(Nat num_subdivisions) { _num_subdivisions = num_subdivisions; }
     Nat const& num_subdivisions() const { return _num_subdivisions; }
+
+    Void insert_subspace(RealVariable v, Nat n){
+        if (n <= 0) {
+            ARIADNE_ERROR("The number of subspace should be greater that zero");
+        }
+        if(_subspace.has_key(v) == false){
+            //If key doesn't exists, then create it one with its value
+            _subspace.insert(v, n);
+            _is_using_subspace = true;
+        }else{
+            //if key already exists,
+            ARIADNE_ERROR("The key " <<v<< "already exists creating subspace");
+
+
+        }
+    }
+
+    Void remove_keys() {
+        _subspace.remove_keys(_subspace.keys());
+    }
+
+    Void set_subspace(subspace _subspace_) {
+        _is_using_subspace = true;
+        _subspace = _subspace_;
+    }
+
+    Bool is_using_subspace() { return _is_using_subspace; }
+
+    subspace const& get_subspace() const { return _subspace; }
 
     virtual OutputStream& _write(OutputStream& os) const;
 

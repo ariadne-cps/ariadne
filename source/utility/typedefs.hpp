@@ -39,9 +39,14 @@
 namespace Ariadne {
 
 
+class Real;
+
+template<class T> class Variable;
 
 using uchar = unsigned char;
 using uint = unsigned int;
+
+using RealVariable = Variable<Real>;
 
 //! \brief Internal name for standard output stream.
 using OutputStream = std::ostream;
@@ -121,6 +126,9 @@ struct IndexZero { operator SizeType() const { return 0u; } };
 typedef std::uint16_t DegreeType;
 //! The type used for the dimension of a geometric object.
 typedef SizeType DimensionType;
+
+//! The type used for the subspace grid
+typedef Map<RealVariable , Nat> subspace;
 
 #if (defined __arm || defined __aarch64__)
 typedef short ComparableEnumerationType;

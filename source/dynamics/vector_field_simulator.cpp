@@ -94,13 +94,45 @@ template<class X> List<LabelledPoint<X>> make_state_auxiliary_point(const List<L
     return pointLst;
 }
 
-GridTreePaving create_paving(UpperBoxType box) {
-    Point<FloatDP> tmpPointCenter = Point(box.centre());
+GridTreePaving create_paving(UpperBoxType box, Space<Real> spc, subspace sspc) {
+    if(sspc.size() > spc.size()) {
+        ARIADNE_ERROR("Too much dimension on subdivision of subspace");
+    }
+    Nat divider = 1;
+
+    FloatDP eps_box(0.01_q, Ariadne::ROUND_TO_NEAREST, dp);
+    FloatDP eps_len(0.00_q, Ariadne::ROUND_TO_NEAREST, dp); //For Debug purposes
+
+    //Widen Initial set
+    box = widen(box, eps_box);
+
+    //Point<FloatDP> tmpPointCenter = Point(box.centre());
+    Point<FloatDP> tmpPointCenter = Point(box.lower_bounds());
     Vector<FloatDP> origin(tmpPointCenter.dimension(), FloatDP(0, dp));
     Vector<FloatDP> lengths(box.widths().size(), FloatDP(0, dp));
+
+    auto lengths_ = box.widths();
+    Nat box_width_null = 0;
+    for(SizeType i=0; i<lengths_.size(); i++){
+        if(lengths_[i].get_d() > 0) { continue; }
+        box_width_null++;
+    }
+    if(box_width_null == lengths_.size())
+    {
+        tmpPointCenter = box.midpoint();
+    }
+
     for(SizeType i=0; i<tmpPointCenter.dimension(); i++){
+        divider = 1;
+        if(sspc.has_key(spc[i])) {
+            Nat val = sspc.get(spc[i]);
+            divider = val;
+        }
+        lengths[i] = (box[i].width().raw() / divider).value();
+        if (divider >= 1) {
+            lengths[i] = (lengths[i] + (eps_len /(divider))).value();
+        }
         origin[i] = tmpPointCenter[i];
-        lengths[i] = box.widths().at(i).raw();
     }
     Grid grid(origin, lengths);
     GridTreePaving gridPaving(grid);
@@ -111,14 +143,14 @@ GridTreePaving create_paving(UpperBoxType box) {
 List<LabelledPoint<FloatDPApproximation>> create_point_list(GridTreePaving& paving, RealSpace spc, DiscretisationType discretisation_type, Nat mince_dimension){
 
     if(discretisation_type == DiscretisationType::Mince) paving.mince(mince_dimension);
-    else paving.recombine();
+    else if(discretisation_type == DiscretisationType::Recombine) paving.recombine();
 
     GridTreePaving::ConstIterator iter = paving.begin();
     List<LabelledPoint<FloatDPApproximation>> result(paving.size(), LabelledPoint(spc, Point<FloatDPApproximation>()));
     SizeType k(0);
     for( ; iter != paving.end(); ++iter){
         UpperBoxType cell = iter->box();
-        auto midpoint = cell.midpoint();
+        auto midpoint = cell.centre();
         LabelledPoint<FloatDPApproximation> pt(spc, midpoint);
         result.at(k) = LabelledPoint<FloatDPApproximation>(spc, pt);
         k++;
@@ -155,24 +187,10 @@ auto VectorFieldSimulator::orbit(const RealBoxType& init_bx, const TerminationTy
 auto VectorFieldSimulator::orbit(UpperBoxType& initial_box, const TerminationType& termination) const
 -> OrbitType
 {
-    auto lengths = initial_box.widths();
-    Nat box_width_null = 0;
-    for(SizeType i=0; i<lengths.size(); i++){
-        if(lengths[i].get_d() > 0) { continue; }
-        box_width_null++;
+    GridTreePaving gridPaving = create_paving(initial_box, _system->state_space(), _configuration->get_subspace());
+    if(_configuration->is_using_subspace() == true) {
+        _configuration->set_num_subdivisions(0);
     }
-    if(box_width_null == lengths.size())
-    {
-        auto midpoint = initial_box.midpoint();
-        ApproximateListPointType pointList(1, LabelledPoint(_system->state_space(), Point<FloatDPApproximation>(midpoint, dp)));
-        return orbit(pointList, termination);
-    }
-    else if (box_width_null > 0)
-    {
-        FloatDPUpperBound eps(0.0001_q,dp);
-        initial_box = widen(initial_box, eps);
-    }
-    GridTreePaving gridPaving = create_paving(initial_box);
     gridPaving.adjoin_outer_approximation(initial_box, _configuration->num_subdivisions());
     ApproximateListPointType pointList = create_point_list(gridPaving, _system->state_space(),
                                                            _configuration->discretisation_type(), _configuration->num_subdivisions());
@@ -232,7 +250,8 @@ void VectorFieldSimulator::_simulate_from_point(Pair<SizeType,ApproximatePointTy
 }
 
 VectorFieldSimulatorConfiguration::VectorFieldSimulatorConfiguration() :
-        _step_size(0.125_x, dp), _num_subdivisions(0), _discretisation_type(DiscretisationType::Recombine) {
+        _step_size(0.125_x, dp), _num_subdivisions(2), _discretisation_type(DiscretisationType::Recombine), _is_using_subspace(false), _subspace()  {
+
 }
 
 OutputStream&
@@ -242,6 +261,7 @@ VectorFieldSimulatorConfiguration::_write(OutputStream& os) const
        << "\n  step_size=" << step_size()
        << "\n  discretisation_type=" << discretisation_type()
        << "\n  num_subdivisions=" << num_subdivisions()
+       << "\n  subspace=" << get_subspace()
        << ")\n";
     return os;
 }

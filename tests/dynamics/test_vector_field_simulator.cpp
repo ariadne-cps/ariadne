@@ -53,6 +53,79 @@ class TestVectorFieldSimulator
     Void test() const {
         ARIADNE_TEST_CALL(test_multiple_real_expr_vdp_cycle());
         ARIADNE_TEST_CALL(test_multiple_real_box_vdp_cycle());
+        ARIADNE_TEST_CALL(test_multiple_trajectories_x());
+        ARIADNE_TEST_CALL(test_multiple_trajectories_xy());
+    }
+
+    Void test_multiple_trajectories_x() const {
+        typedef VectorFieldSimulator::ApproximateListPointType ListPointType;
+
+        Real mu=Dyadic(0.5_x);
+        RealVariable x("x"), y("y"), z("z");
+
+        VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
+        ARIADNE_TEST_PRINT(vanderpol);
+
+        RealExpressionBoundedConstraintSet initial_set({-2.0_dec<=x<=-1.5_dec,0.5_dec<=y<=1});
+
+        Real time = 1.0_dec;
+
+        VectorFieldSimulator simulator(vanderpol);
+        simulator.configuration().set_step_size(0.05);
+        simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+
+        SizeType trajectory_number = 4;
+
+        for (SizeType t=1; t<=trajectory_number; t++) {
+            simulator.configuration().insert_subspace(x, t);
+            ARIADNE_TEST_PRINT(simulator.configuration());
+
+            Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
+
+            List<LabelledInterpolatedCurve> curves = orbit.curves();
+
+            ARIADNE_TEST_EQUALS(curves.size(),t);
+
+            simulator.configuration().remove_keys();
+        }
+    }
+
+    Void test_multiple_trajectories_xy() const {
+        typedef VectorFieldSimulator::ApproximateListPointType ListPointType;
+
+        Real mu=Dyadic(0.5_x);
+        RealVariable x("x"), y("y"), z("z");
+
+        VectorField vanderpol({dot(x)=y,dot(y)=mu*(1-x*x)*y-x},{let(z)=sqrt(sqr(x)+sqr(y))});
+        ARIADNE_TEST_PRINT(vanderpol);
+
+        RealExpressionBoundedConstraintSet initial_set({-2.0_dec<=x<=-1.5_dec,0.5_dec<=y<=1});
+
+        Real time = 1.0_dec;
+
+        VectorFieldSimulator simulator(vanderpol);
+        simulator.configuration().set_step_size(0.05);
+        simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+
+        SizeType trajectory_number = 4;
+
+        for (SizeType first=1; first<=trajectory_number; first++) {
+            for (SizeType second=1; second<=trajectory_number; second++){
+                simulator.configuration().insert_subspace(x, first);
+                simulator.configuration().insert_subspace(y, second);
+                ARIADNE_TEST_PRINT(simulator.configuration());
+
+                Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
+
+                List<LabelledInterpolatedCurve> curves = orbit.curves();
+
+                ARIADNE_TEST_EQUALS(curves.size(), first*second);
+
+                simulator.configuration().remove_keys();
+            }
+        }
     }
 
     Void test_multiple_real_expr_vdp_cycle() const {
@@ -71,20 +144,14 @@ class TestVectorFieldSimulator
 
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
-        simulator.configuration().set_num_subdivisions(1);
+        simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+        simulator.configuration().insert_subspace(x, 1);
+        simulator.configuration().insert_subspace(y, 1);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 
         Orbit<ListPointType> orbit = simulator.orbit(initial_set,time);
-
-        /*
-        auto final_pt_xy = project(orbit.curve()[orbit.num_curves()-1],Projection2d(3,0,1));
-        auto initial_pt_xy = Point<FloatDPApproximation>(initial_set.euclidean_set(vanderpol.state_space()).bounding_box().midpoint(),dp);
-        ARIADNE_TEST_ASSERT(distance(final_pt_xy,initial_pt_xy).raw() <= 0.02_dec);
-
-        auto orbit2 = simulator.orbit(RealVariablesBox({x==-1.5_dec,y==1}),time);
-        auto final_pt_xy_2 = project(orbit2.curve()[orbit.num_curves()-1],Projection2d(3,0,1));
-        ARIADNE_TEST_ASSERT(distance(final_pt_xy,final_pt_xy_2).raw() == 0);*/
 
         LabelledFigure fig({-2.5_dec<=x<=2.5_dec,-2.5_dec<=y<=2.5_dec});
         fig << orbit;
@@ -112,6 +179,9 @@ class TestVectorFieldSimulator
         VectorFieldSimulator simulator(vanderpol);
         simulator.configuration().set_step_size(0.05);
         simulator.configuration().set_num_subdivisions(0);
+        simulator.configuration().set_discretisation_type(DiscretisationType::Mince);
+        simulator.configuration().insert_subspace(x, 1);
+        simulator.configuration().insert_subspace(y, 1);
 
         ARIADNE_TEST_PRINT(simulator.configuration());
 

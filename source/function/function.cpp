@@ -180,6 +180,12 @@ template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordin
     return CoordinateFunction<P,RealVector>(dom, j);
 }
 
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::projection(VectorDomainType dom, Range rng) {
+    List<ScalarMultivariateFunction<P>> r; r.reserve(rng.size());
+    for(SizeType j=0; j!=rng.size(); ++j) { r.append(coordinate(dom,rng[j])); }
+    return r;
+}
+
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(VectorDomainType dom) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
@@ -284,6 +290,15 @@ template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::c
     for(SizeType j=0; j!=as; ++j) { r.append(coordinate(as,j)); }
     return r;
 }
+
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::projection(SizeType as, Range rng) {
+    #warning Since a list is used, need to handle size zero case separately; also for DomainType version
+    if (rng.size()==0) { return VectorMultivariateFunction<P>(0u,as); }
+    List<ScalarMultivariateFunction<P>> r; r.reserve(rng.size());
+    for(SizeType j=0; j!=rng.size(); ++j) { r.append(coordinate(as,rng[j])); }
+    return r;
+}
+
 
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(SizeType n) {
     ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(n);

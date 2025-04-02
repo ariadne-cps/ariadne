@@ -78,6 +78,7 @@ class FunctionConstructors {
     static ScalarMultivariateFunction<P> constant(SizeType as, NumericType c); //!< \brief %Constant scalar function \a c in \a as arguments.
     static ScalarMultivariateFunction<P> coordinate(SizeType as, SizeType j); //!< \brief %Coordinate function taking \a j -th index in \a as arguments.
     static List<ScalarMultivariateFunction<P>> coordinates(SizeType ns); //!< \brief All coordinates over \a ns variables.
+    static VectorMultivariateFunction<P> projection(SizeType ns, Range is); //!< \brief The projection of \a as variables onto the range of indices \a is.
     static VectorMultivariateFunction<P> zeros(SizeType rs, SizeType as); //!< \brief The zero function over \a as variables returning a result of size \a rs.
     static VectorMultivariateFunction<P> constant(SizeType as, Vector<NumericType> c); //!< \brief %Constant vector function \a c in \a as arguments.
     static VectorMultivariateFunction<P> identity(SizeType ns); //!< \brief The identity over \a ns variables.
@@ -86,6 +87,7 @@ class FunctionConstructors {
     static ScalarMultivariateFunction<P> constant(VectorDomainType dom, NumericType c); //!< \brief %Constant function \a c over domain \a dom.
     static ScalarMultivariateFunction<P> coordinate(VectorDomainType dom, SizeType j); //!< \brief %Coordinate function taking \a j -th index over domain \a dom.
     static List<ScalarMultivariateFunction<P>> coordinates(VectorDomainType dom); //!< \brief %List of all coordinate functions over domain \a dom.
+    static VectorMultivariateFunction<P> projection(VectorDomainType dom, Range is); //!< \brief The projection of \a dom onto the range of indices \a is.
     static VectorMultivariateFunction<P> zeros(SizeType rs, VectorDomainType dom); //!< \brief Zero function over domain \a dom returning a result of size \a rs.
     static VectorMultivariateFunction<P> constant(VectorDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
     static VectorMultivariateFunction<P> identity(VectorDomainType dom); //!< \brief Identity function over domain \a dom.

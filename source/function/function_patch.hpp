@@ -565,7 +565,6 @@ template<class P, class... ARGS> class FunctionPatch<P,RealVector(ARGS...)>
     friend VectorFunctionPatch<P,ARGS...> combine(const ScalarFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
         return VectorFunctionPatch<P,ARGS...>(1,f1)._ptr->_combine(f2); };
     friend VectorFunctionPatch<P,ARGS...> combine(const VectorFunctionPatch<P,ARGS...>& f1, const ScalarFunctionPatch<P,ARGS...>& f2) {
-        std::cerr<<"f2="<<f2<<"\n{f2}="<<VectorFunctionPatch<P,ARGS...>(1,f2)<<"\n";
         return VectorFunctionPatch<P,ARGS...>(f1._ptr->_combine(VectorFunctionPatch<P,ARGS...>(1,f2))); };
     friend VectorFunctionPatch<P,ARGS...> combine(const VectorFunctionPatch<P,ARGS...>& f1, const VectorFunctionPatch<P,ARGS...>& f2) {
         return VectorFunctionPatch<P,ARGS...>(f1._ptr->_combine(f2)); }

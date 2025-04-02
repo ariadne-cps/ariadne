@@ -383,8 +383,6 @@ EffectiveVectorMultivariateFunction const& Enclosure::auxiliary_mapping() const 
 }
 
 Void Enclosure::set_auxiliary_mapping(const EffectiveVectorMultivariateFunction& aux) {
-    if(this->_state_function.result_size()!=aux.argument_size()) {
-        std::cerr<<"rs="<<this->_state_function.result_size()<<", aux=[R"<<aux.argument_size()<<"]"<<aux<<"\n"; }
     ARIADNE_PRECONDITION(this->_state_function.result_size()==aux.argument_size());
     this->_auxiliary_mapping=aux;
 }
@@ -394,13 +392,9 @@ Void Enclosure::_unchecked_new_variable(ExactIntervalType ivl, EnclosureVariable
     ValidatedScalarMultivariateFunctionPatch variable_function = this->configuration().function_factory().create_coordinate({ivl},0);
     this->_domain=product(this->_domain,ivl);
     this->_reduced_domain=product(this->_reduced_domain,ivl);
-std::cerr<<"\nCombining... ";
     this->_state_function=combine(this->_state_function,variable_function);
-std::cerr<<"done!\n";
     this->_time_function=embed(this->_time_function,ivl);
-std::cerr<<"Embedding... ";
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-std::cerr<<"done!\n";
 
     for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
@@ -535,25 +529,17 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionPa
     ExactBoxType parameter_domain=this->parameter_domain();
     ExactIntervalType time_domain=ExactIntervalType(FloatDP(0,dp),h);
     ValidatedScalarMultivariateFunctionPatch time_function=this->configuration().function_factory().create_coordinate({time_domain},0u);
-    std::cerr<<"time_domain="<<time_domain<<"\n";
-    std::cerr<<"time_function="<<time_function<<"\n";
-std::cerr<<"Here 0\n";
     this->_unchecked_new_variable(time_domain,EnclosureVariableKind::TEMPORAL);
-std::cerr<<"Here 1\n";
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension());
-std::cerr<<"Here 2\n";
     this->apply_map(phi);
-std::cerr<<"Here 3\n";
     ExactBoxType new_domain=this->parameter_domain();
     ValidatedScalarMultivariateFunctionPatch time_step_function=this->configuration().function_factory().create_coordinate(new_domain,new_domain.size()-1u);
     this->_time_function=this->_time_function+time_step_function;
     this->_dwell_time_function=this->_dwell_time_function+time_step_function;
-std::cerr<<"Here 4\n";
     if(phi.domain()[phi.result_size()].lower_bound()<time_domain.upper_bound()) {
         auto restricted_elps=this->configuration().function_factory().create(parameter_domain,elps);
         this->new_negative_parameter_constraint(time_step_function-embed(restricted_elps,time_domain));
     }
-std::cerr<<"Here 5\n";
     this->_check();
 }
 

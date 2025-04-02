@@ -250,9 +250,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     CONCLOG_PRINTLN_AT(1,"initial_cells.size()="<<initial_cells.size());
     for (auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-std::cerr<<"Computing orbit... ";
         ListSet<EnclosureType> reach_enclosures=_evolver->orbit(initial_enclosure,time,Semantics::LOWER).reach();
-std::cerr<<"done!\n";
         for (auto enclosure : reach_enclosures) enclosure.adjoin_outer_approximation_to(reach_cells,grid_fineness);
     }
     return reach_cells;

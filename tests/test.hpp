@@ -376,6 +376,21 @@ int test_case_counter = 0;
     }
 
 
+/*! \brief Evaluates \a predicate(argument1,argument2,argument3) and checks if the result is \tt true. */
+#define ARIADNE_TEST_TERNARY_PREDICATE(predicate,argument1,argument2,argument3)    \
+    {                                                                   \
+        std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << "," << (#argument3) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ", " << #argument3 << "=" << (argument3) << ": " << std::flush; \
+        Bool ok = decide(predicate((argument1),(argument2),(argument3)));                  \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: false" << std::endl;                 \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument1 << "," << #argument2 << "," << #argument3 << ")' with\n  " << #argument1 << "=" << (argument1) << ";\n  " << #argument2 << "=" << (argument2) << ";\n  " << #argument3 << "=" << (argument3) << " is false." << std::endl; \
+        }                                                               \
+    }
+
+
 /*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
 #define ARIADNE_TEST_COMPARE(expression,comparison,expected)           \
     {                                                                   \

@@ -273,10 +273,6 @@ template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
-    if (p1.argument_size()!=p2.argument_size()) {
-        std::cerr<<"p1=<"<<p1.argument_size()<<">"<<p1<<"\n";
-        std::cerr<<"p2=<"<<p2.argument_size()<<">"<<p2<<"\n";
-    }
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<I,X>::IndexComparisonType less;
     Polynomial<I,X> r(p1.argument_size(),(p1.zero_coefficient()+p2.zero_coefficient()));
@@ -372,14 +368,7 @@ template<class I, class X> Polynomial<UniIndex,X> Polynomial<I,X>::_compose(cons
 }
 
 template<class I, class X> Polynomial<MultiIndex,X> Polynomial<I,X>::_compose(const Polynomial<I,X>& p, const Argument<Polynomial<MultiIndex,X>>& q) {
-
     auto r = evaluate(p,q);
-
-    if constexpr (Same<I,MultiIndex>) {
-        std::cerr<<"p="<<p.argument_size()<<"\n";
-        std::cerr<<"q="<<q.zero_element().argument_size()<<q<<"\n";
-        std::cerr<<"r="<<r.argument_size()<<r<<"\n";
-    }
     return r;
 }
 

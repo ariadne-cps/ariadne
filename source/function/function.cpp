@@ -385,7 +385,6 @@ template<class P, class SIG> auto Function<P,SIG>::get(SizeType i) const -> Scal
     ARIADNE_ASSERT(i<this->result_size());
     if constexpr (Same<ResultSizeType,SizeType>) {
         const VectorOfFunctionInterface<P,ARG>* vfp = dynamic_cast<const VectorOfFunctionInterface<P,ARG>*>(this->raw_pointer());
-        if(!vfp) { std::cerr<<"\nCannot get element of "<<*this<<"\n  of type "<<typeid(this->raw_pointer()).name()<<":"<<typeid(this->reference()).name()<<"\n\n"; }
         return ScalarFunction<P,ARG>(SharedPointer<ScalarFunctionInterface<P,ARG>>(vfp->_get(i)));
     } else {
         ARIADNE_ASSERT((Same<ResultSizeType,SizeType>));

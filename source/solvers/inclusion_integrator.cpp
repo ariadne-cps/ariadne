@@ -281,7 +281,6 @@ InclusionIntegratorImpl<A>::operator<(const InclusionIntegratorInterface& rhs) c
 
 template<class A> List<ValidatedVectorMultivariateFunctionPatch>
 InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionPatch const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
-    std::cerr<<"\nInclusionIntegratorImpl<A>::reach(D,e,B,t,H) ";
     CONCLOG_SCOPE_CREATE;
 
     TimeStepType new_t = lower_bound(t+h);
@@ -292,9 +291,7 @@ InclusionIntegratorImpl<A>::reach(BoxDomainType const& domx, ValidatedVectorMult
     CONCLOG_PRINTLN("approximation errors:"<<e);
     auto doma = this->build_parameter_domain(_inputs);
 
-std::cerr<<" building_w_functions<"<<A()<<">... ";
     auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
-std::cerr<<"done! ";
     CONCLOG_PRINTLN("w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
     CONCLOG_PRINTLN("Fw:"<<Fw);
@@ -303,7 +300,6 @@ std::cerr<<"done! ";
 
     List<ValidatedVectorMultivariateFunctionPatch> result;
     result.append(this->build_reach_function(evolve_function, phi, t, new_t));
-std::cerr<<"done_reach!\n";
     return result;
 }
 

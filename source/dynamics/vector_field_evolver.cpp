@@ -99,7 +99,7 @@ auto VectorFieldEvolver::orbit(EnclosureType const& initial_set, TimeType const&
 {
     CONCLOG_SCOPE_CREATE
     ARIADNE_PRECONDITION(this->system().state_auxiliary_space() == initial_set.state_auxiliary_space())
-std::cerr<<"Computing VectorFieldEvolver::orbit... ";
+
     auto result = std::make_shared<SynchronisedOrbit>(initial_set);
     WorkloadType workload([time](TimedEnclosureType const& timed_enclosure, SharedPointer<ProgressIndicator> indicator){
                                 indicator->update_current(timed_enclosure.first.get_d());
@@ -108,7 +108,6 @@ std::cerr<<"Computing VectorFieldEvolver::orbit... ";
                           std::bind_front(&VectorFieldEvolver::_process_timed_enclosure,this),time,semantics,result);
     _append_initial_set(workload,TimeStepType(0u),initial_set);
     workload.process();
-std::cerr<<" done VectorFieldEvolver::orbit!";
 
     return std::move(*result);
 }
@@ -214,21 +213,7 @@ _process_timed_enclosure_step(WorkloadType::Access& workload,
     CONCLOG_PRINTLN_AT(1,"next_time = "<<next_time)
     // Compute the flow tube (reachable set) model and the final set
     EnclosureType reach_set=current_set;
-std::cerr<<"Working... \n";
-    std::cerr<<"  flow_model="<<flow_model<<"\n";
-    std::cerr<<"  flow_model.argument_size()="<<flow_model.argument_size()<<"\n";
-    std::cerr<<"  flow_model[0].argument_size()="<<flow_model[0].argument_size()<<"\n";
-    std::cerr<<"  flow_model[1].argument_size()="<<flow_model[1].argument_size()<<"\n";
-    std::cerr<<"  reach_set="<<reach_set<<"\n";
-    std::cerr<<"  reach_set.state_function()="<<reach_set.state_function()<<"\n";
-    std::cerr<<"  reach_set.state_function().argument_size()="<<reach_set.state_function().argument_size()<<"\n";
-    std::cerr<<"  reach_set.state_function()[0].argument_size()="<<reach_set.state_function()[0].argument_size()<<"\n";
-    std::cerr<<"  reach_set.state_function()[1].argument_size()="<<reach_set.state_function()[1].argument_size()<<"\n";
-    std::cerr<<"  reach_set.time_function()="<<reach_set.time_function()<<"\n";
-    std::cerr<<"  reach_set.time_function().argument_size()="<<reach_set.time_function().argument_size()<<"\n";
-
     reach_set.apply_full_reach_step(flow_model);
-std::cerr<<"Done working!\n";
     CONCLOG_PRINTLN_AT(1,"reach_set = " << reach_set)
     EnclosureType next_set=current_set;
     next_set.apply_fixed_evolve_step(flow_model, step_size);

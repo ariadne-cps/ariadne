@@ -284,7 +284,6 @@ HybridEnclosure::bounding_box() const
 
 Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux)
 {
-    if(vars.size()!=aux.result_size()) { std::cerr<<vars<<" "<<aux<<"\n"; }
     ARIADNE_ASSERT(this->state_space().size()==aux.argument_size());
     ARIADNE_ASSERT(vars.size()==aux.result_size());
     this->_set.set_auxiliary(vars,aux);

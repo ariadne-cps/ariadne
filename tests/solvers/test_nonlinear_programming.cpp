@@ -42,6 +42,14 @@
 using namespace std;
 using namespace Ariadne;
 
+decltype(auto) operator<(FloatDPApproximation x, ApproximateDouble y) {
+    return x < FloatDPApproximation(y,dp);
+}
+
+template<class A, class X, class E> decltype(auto) within(A a, X x, E e) {
+    return decide(abs(a-x)<e);
+}
+
 class TestOptimiser
 {
   private:
@@ -119,6 +127,7 @@ class TestOptimiser
             ARIADNE_TEST_LESS(error(x_optimal),required_accuracy);
         }
     }
+
     Void test_equality_constrained_optimisation() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         EffectiveScalarMultivariateFunction f=(sqr(x[0])+sqr(x[1]));
@@ -236,13 +245,56 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 
+
 };
+
+class TestApproximateOptimiser
+{
+  private:
+    std::unique_ptr<ApproximateOptimiserInterface> optimiser;
+    DoublePrecision pr;
+  public:
+    TestApproximateOptimiser(const ApproximateOptimiserInterface& opt)
+        : optimiser(opt.clone()) { }
+
+    Void test_mixed_constrained_optimisation() {
+        EuclideanDomain dom(3);
+        List<ApproximateScalarMultivariateFunction> x=ApproximateScalarMultivariateFunction::coordinates(dom);
+        ApproximateScalarMultivariateFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
+        ARIADNE_TEST_PRINT(f);
+        ApproximateBoxType D = ApproximateBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{1.25_x,2.25_x}};
+        ARIADNE_TEST_PRINT(D);
+        ApproximateScalarMultivariateFunction g0 = x[0]*x[1]-x[0]*Real(1.25_x);
+        ApproximateScalarMultivariateFunction g1 = Real(1.5_x)+x[0]+2*x[1]+Real(0.25_x)*x[0]*x[1];
+        ApproximateVectorMultivariateFunction g = {g0,g1};
+        ARIADNE_TEST_PRINT(g);
+        ApproximateIntervalType C0 = {-1.0_x,-0.5_x};
+        ApproximateIntervalType C1 = {0.0_x,0.0_x};
+        auto c1 = C1.lower_bound();
+        ApproximateBoxType C = {C0,C1};
+        ARIADNE_TEST_PRINT(C);
+
+//        g = {g1};
+//        C = {C1};
+
+        FloatDPApproximationVector  x_optimal=optimiser->minimise(f,D,g,C).x;
+        ApproximateDouble required_accuracy=1e-3_pr;
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g0(x_optimal),C0);
+//        ARIADNE_TEST_BINARY_PREDICATE(element,g1(x_optimal),C1);
+        ARIADNE_TEST_TERNARY_PREDICATE(within,g1(x_optimal),c1,required_accuracy);
+    }
+};
+
 
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
-    //C0BranchAndBoundOptimiser bbo(1./1024);
-    //TestOptimiser(bbo).test();
+    // C0BranchAndBoundOptimiser bbo(1./1024);
+    // TestOptimiser(bbo).test();
+
+    PrimalSlackPenaltyBarrierFunctionApproximateOptimiser pbappo;
+    TestApproximateOptimiser(pbappo).test_mixed_constrained_optimisation();
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();

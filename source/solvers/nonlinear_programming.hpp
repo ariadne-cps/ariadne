@@ -135,6 +135,24 @@ class OptimiserBase
 };
 
 //! \ingroup OptimisationSubModule
+//! \brief Solver for optimisation problems using branch-and-bound based on interval evaluations.
+class C0BranchAndBoundOptimiser
+    : public OptimiserBase
+{
+    ExactDouble _tolerance;
+  public:
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
+  public:
+    C0BranchAndBoundOptimiser(ApproximateDouble tol);
+    virtual C0BranchAndBoundOptimiser* clone() const;
+    //    virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactVectorType x, ExactVectorType y) const;
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+    virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+};
+
+
+//! \ingroup OptimisationSubModule
 //! \brief Solver for feasibility problems based on a penalty-function approach
 //!
 //! For the feasibility problem \f$x\in D,\ g(x)\in C,\ h(x)=0\f$ where \f$D\f$ is bounded and \f$D,C\f$ have nonempty interiors.

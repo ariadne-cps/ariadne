@@ -786,6 +786,116 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 }
 
 
+//------- C0BranchAndBoundOptimiser -------------------------//
+
+C0BranchAndBoundOptimiser::C0BranchAndBoundOptimiser(ApproximateDouble tol)
+    : _tolerance(cast_exact(tol)) {
+}
+
+auto C0BranchAndBoundOptimiser::clone() const -> C0BranchAndBoundOptimiser* {
+    return new C0BranchAndBoundOptimiser(*this);
+}
+
+
+ValidatedVectorType C0BranchAndBoundOptimiser::
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
+    CONCLOG_SCOPE_CREATE;
+    CONCLOG_PRINTLN_AT(0,"f="<<f);
+    CONCLOG_PRINTLN_AT(0,"D="<<D);
+    CONCLOG_PRINTLN_AT(0,"g="<<g);
+    CONCLOG_PRINTLN_AT(0,"C="<<C);
+
+    {
+        auto subdomain = D;
+        auto constraints = image(subdomain,g);
+        CONCLOG_PRINTLN_AT(1,"constraints="<<constraints);
+        if (possibly(intersect(constraints,C))) {
+            auto range=image(subdomain,f);
+            CONCLOG_PRINTLN_AT(1,"range="<<range);
+        } else {
+            CONCLOG_PRINTLN_AT(2,"INFEASIBLE");
+        }
+    }
+    {char c; std::cin>>c;}
+    ExactDouble const& tol = this->_tolerance;
+
+    struct FirstUpperGreater {
+        bool operator() (Pair<UpperIntervalType,ExactBoxType> ivlbx1, Pair<UpperIntervalType,ExactBoxType> ivlbx2) const {
+            return refines(ivlbx2.first.upper_bound(),ivlbx1.first.upper_bound()); }
+    };
+
+    Set<Pair<UpperIntervalType,ExactBoxType>, FirstUpperGreater> candidates;
+    Set<Pair<UpperIntervalType,ExactBoxType>, FirstUpperGreater> best;
+
+    using UpperBoundType = UpperIntervalType::UpperBoundType;
+    UpperBoundType val(infty,dp);
+    candidates.insert(std::make_pair(image(D,f),D));
+    while (not candidates.empty()) {
+        Pair<UpperIntervalType,ExactBoxType> candidate = *(--candidates.end());
+        candidates.erase(--candidates.end());
+        CONCLOG_PRINTLN_AT(1,"candidate="<<candidate);
+        ExactBoxType const& subdomain=candidate.second;
+        CONCLOG_PRINTLN_AT(2,"radius="<<radius(subdomain));
+        if (definitely(radius(subdomain) < tol)) {
+            CONCLOG_PRINTLN_AT(2,"constraints="<<image(subdomain,g));
+            best.insert(candidate);
+            val=min(val,candidate.first.upper_bound());
+            //{char c; std::cin>>c;}
+        } else {
+            auto split_subdomains=subdomain.split();
+            auto first_subdomain=split_subdomains.first;
+            CONCLOG_PRINTLN_AT(2,"first_subdomain="<<first_subdomain);
+            auto first_constraints = image(first_subdomain,g);
+            CONCLOG_PRINTLN_AT(2,"first_constraints="<<first_constraints);
+            if (possibly(intersect(first_constraints,C))) {
+                auto first_range=image(first_subdomain,f);
+                CONCLOG_PRINTLN_AT(2,"first_range="<<first_range);
+                if (possibly(first_range.lower_bound()<val)) {
+                    candidates.insert(std::make_pair(first_range,first_subdomain));
+                }
+                if (definitely(subset(first_constraints,C))) {
+                    val=min(val,first_range.upper_bound());
+                }
+            } else {
+                CONCLOG_PRINTLN_AT(2,"first infeasible");
+            }
+            auto second_subdomain=split_subdomains.second;
+            CONCLOG_PRINTLN_AT(2,"second_subdomain="<<second_subdomain);
+            auto second_constraints = image(second_subdomain,g);
+            CONCLOG_PRINTLN_AT(2,"second_constraints="<<second_constraints);
+            if (possibly(intersect(second_constraints,C))) {
+                auto second_range=image(second_subdomain,f);
+                CONCLOG_PRINTLN_AT(2,"second_range="<<second_range);
+                if (possibly(second_range.lower_bound()<val)) {
+                    candidates.insert(std::make_pair(second_range,second_subdomain));
+                }
+                if (definitely(subset(second_constraints,C))) {
+                    val=min(val,second_range.upper_bound());
+                }
+            } else {
+                CONCLOG_PRINTLN_AT(2,"second infeasible");
+            }
+        }
+    }
+    ARIADNE_ASSERT(not best.empty());
+    CONCLOG_PRINTLN_AT(3,"maybe_best="<<best);
+    erase_if(best,[&val](auto ivlbx){return definitely(ivlbx.first.lower_bound()>val);});
+    CONCLOG_PRINTLN_AT(1,"best="<<best);
+    CONCLOG_PRINTLN_AT(1,"value="<<val);
+    ARIADNE_ASSERT(not best.empty());
+    BoxDomainType res=best.begin()->second;
+    for (auto ivlbx : best) { res=hull(res,ivlbx.second); }
+    CONCLOG_PRINTLN_AT(0,"optimum="<<res);
+    return cast_singleton(res);
+}
+
+ValidatedKleenean C0BranchAndBoundOptimiser::
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 //------- NonlinearInfeasibleInteriorPointOptimiser -------------------------//
 
 struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {

@@ -54,6 +54,7 @@ class TestOptimiser
     Void test() {
         ARIADNE_TEST_CALL(test_feasibility_check());
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
+        ARIADNE_TEST_CALL(test_nonconvex_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
         ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
         ARIADNE_TEST_CALL(test_linear_feasibility());
@@ -80,6 +81,44 @@ class TestOptimiser
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
+    Void test_nonconvex_optimisation() {
+        {
+            EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
+            EffectiveScalarMultivariateFunction f=x*(1-x);
+            ARIADNE_TEST_PRINT(f);
+            EffectiveVectorMultivariateFunction g(0,1);
+            ARIADNE_TEST_PRINT(g);
+            ExactBoxType C;
+            ExactBoxType D=ExactBoxType{{-1.0_x,3.0_x}};
+            ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
+            FloatDPBoundsVector expected_x_optimal(1,3,dp);
+
+            ExactDouble required_accuracy=1e-3_pr;
+            ARIADNE_TEST_CONSTRUCT(FloatDPBoundsVector,x_optimal,(optimiser->minimise(f,D,g,C)));
+            ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+            ARIADNE_TEST_BINARY_PREDICATE(consistent,x_optimal,expected_x_optimal);
+            ARIADNE_TEST_LESS(error(x_optimal),required_accuracy);
+        }
+
+        {
+            EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+            EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+            EffectiveScalarMultivariateFunction f=x*(1-x)+2*y*y+x*y+y/4;
+            ARIADNE_TEST_PRINT(f);
+            EffectiveVectorMultivariateFunction g(0,2);
+            ARIADNE_TEST_PRINT(g);
+            ExactBoxType C;
+            ExactBoxType D=ExactBoxType{{-1.0_x,3.0_x},{-1.0_x,1.0_x}};
+            ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
+            FloatDPBoundsVector expected_x_optimal({3,-0.8125_x},dp);
+
+            ExactDouble required_accuracy=1e-2_pr;
+            ARIADNE_TEST_CONSTRUCT(FloatDPBoundsVector,x_optimal,(optimiser->minimise(f,D,g,C)));
+            ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+            ARIADNE_TEST_BINARY_PREDICATE(consistent,x_optimal,expected_x_optimal);
+            ARIADNE_TEST_LESS(error(x_optimal),required_accuracy);
+        }
+    }
     Void test_equality_constrained_optimisation() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         EffectiveScalarMultivariateFunction f=(sqr(x[0])+sqr(x[1]));
@@ -202,9 +241,14 @@ class TestOptimiser
 Int main(Int argc, const char* argv[]) {
     if (not CommandLineInterface::instance().acquire(argc,argv)) return -1;
 
+    //C0BranchAndBoundOptimiser bbo(1./1024);
+    //TestOptimiser(bbo).test();
+
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
+
     return ARIADNE_TEST_FAILURES;
+
     NonlinearInteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();
 

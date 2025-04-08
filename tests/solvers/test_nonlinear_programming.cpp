@@ -338,8 +338,6 @@ Int main(Int argc, const char* argv[]) {
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
 
-    return ARIADNE_TEST_FAILURES;
-
     NonlinearInteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();
 
@@ -348,6 +346,10 @@ Int main(Int argc, const char* argv[]) {
 
     IntervalOptimiser ivlo;
     TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
+
+//    KrawczykOptimiser krwo;
+//    TestOptimiser(krwo).test_nonlinear_equality_feasibility();
+
     return ARIADNE_TEST_FAILURES;
 }
 

@@ -392,6 +392,19 @@ class ApproximateOptimiser
                           FloatDPApproximationVector& X, FloatDPApproximationVector& Lambda) const;
 };
 
+//! \brief Solver for the Karush-Kuhn-Tucker conditions \f$ t \nabla{f}(x) - \sum_{j} y_j \nabla{g_j}(x) = 0\f$;
+//! with equality constraints \f$g_j(x) = c_j\f$, inequality constraints \f$ y_j (\overline{c}_j-g_j(x))(g_j(x)-\underline{c}_j) \geq 0\f$ and \f$ z_i (\overline{d}_i-x_i)(x_i-\underline{d}_i) \geq 0\f$ and normalisation \f$t^2 + \sum y_j^2 = 1\f$.
+template<class FLT> class KarushKuhnTuckerIntervalOptimiser {
+    using ValidatedNumericType = Bounds<FLT>;
+
+    //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    Vector<DyadicBounds> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+
+    //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
+    Void minimisation_step(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& D,
+                           const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
+                           Vector<ValidatedNumericType>& x, Vector<ValidatedNumericType>& y, Vector<ValidatedNumericType>& z, ValidatedNumericType& t) const;
+};
 
 /*//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.

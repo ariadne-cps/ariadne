@@ -2797,6 +2797,67 @@ feasibility_step(const ExactFloatDPVectorType& xl, const ExactFloatDPVectorType&
     mu=refinement(mu,nmu);
 }
 
+//------- KarushKuhnTuckerIntervalOptimiser ------------------------------------------//
+
+template<class FLT> auto
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimise(
+    ValidatedScalarMultivariateFunction f, ExactBoxType D,
+    ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> Vector<DyadicBounds>
+{
+    auto kkt_function = [&](auto xyzt) {
+        using X = typename decltype(xyzt)::ScalarType;
+        SizeType n=g.argument_size(), m=g.result_size();
+        Vector<X> x=xyzt[range(0,n)];
+        Vector<X> y=xyzt[range(n,n+m)];
+        Vector<X> z=xyzt[range(n+m,n+m+n)];
+        X t=xyzt[n+m+n];
+
+
+        Covector<X> rx_tr=t*gradient(f,x);
+        for (SizeType j=0; j!=m; ++j) { rx_tr -= y[j] * gradient(g[j],x); }
+        for (SizeType i=0; i!=n; ++i) { rx_tr[i] -= z[i]; }
+        Vector<X> rx=transpose(rx_tr);
+
+        Vector<X> gx = g(x);
+
+        Vector<X> ry(m,nul(t));
+        for (SizeType j=0; j!=m; ++j) {
+            if (is_singleton(C[j])) {
+                ry[j]=gx[j]-cast_singleton(C[j]);
+            } else {
+                ry[j] = y[j]*(C[j].upper_bound()-gx[j])*(gx[j]*C[j].lower_bound());
+            }
+        }
+
+        Vector<X> rz(n,nul(t));
+        for (SizeType i=0; i!=n; ++i) {
+            if (is_singleton(D[i])) {
+                rz[i]=x[i]-cast_singleton(D[i]);
+            } else {
+                rz[i] = z[i]*(D[i].upper_bound()-x[i])*(x[i]*D[i].lower_bound());
+           }
+        }
+
+        Vector<X> rt = sqr(t) + dot(y,y) + dot(z,z) - 1;
+    };
+
+#warning
+
+    SizeType n=g.argument_size(), m=g.result_size();
+    Vector<ValidatedNumericType> xyzt(n+m+n+1,dp);
+    kkt_function(xyzt);
+
+    return xyzt[range(0,n)];
+}
+
+template<class FLT> Void
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimisation_step(
+    const ValidatedScalarMultivariateFunction& f, const ExactBoxType& D,
+    const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
+    Vector<ValidatedNumericType>& x, Vector<ValidatedNumericType>& y, Vector<ValidatedNumericType>& z, ValidatedNumericType& t) const
+{
+}
+
 /*
 
 struct KuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<KuhnTuckerFunctionBody,ExactIntervalType>

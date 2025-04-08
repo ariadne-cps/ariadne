@@ -35,8 +35,6 @@
 #include "numeric/numeric.hpp"
 #include "utility/tuple.hpp"
 
-    using namespace ConcLog;
-
 namespace Ariadne {
 
 template<class X, class R> class Constraint;
@@ -53,6 +51,108 @@ class DegenerateNonlinearFeasibilityProblemException : public std::runtime_error
 class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
   public: NearBoundaryOfFeasibleDomainException() : std::runtime_error("NearBoundaryOfFeasibleDomainException") { }
 };
+
+template<class P> struct PrimalData;
+template<> struct PrimalData<ApproximateTag> {
+    using FLT=FloatDP;
+    Vector<Approximation<FLT>> x;
+    PrimalData(Vector<Approximation<FLT>> x_) : x(x_) { }
+};
+using ApproximatePrimalData = PrimalData<ApproximateTag>;
+
+template<class P> struct PrimalSlackData;
+template<> struct PrimalSlackData<ApproximateTag>
+    : public PrimalData<ApproximateTag>
+{
+    using FLT=FloatDP;
+    Vector<Approximation<FLT>> w;
+    PrimalSlackData(Vector<Approximation<FLT>> x_, Vector<Approximation<FLT>> w_) : PrimalData<ApproximateTag>(x_), w(w_) { }
+};
+using ApproximatePrimalSlackData = PrimalSlackData<ApproximateTag>;
+
+template<class P> struct PrimalDualComplementaryData;
+template<> struct PrimalDualComplementaryData<ApproximateTag>
+    : public PrimalData<ApproximateTag>
+{
+    using FLT=FloatDP;
+    Vector<Approximation<FLT>> y;
+    Vector<Approximation<FLT>> z;
+};
+
+//! \ingroup OptimisationSubModule EvaluationModule
+//! Interface for nonlinear programming solvers.
+class ApproximateOptimiserInterface {
+  protected:
+      using P=ApproximateTag;
+    using FLT=FloatDP;
+  public:
+    typedef Approximation<FLT> ApproximateNumericType;
+    typedef Vector<Approximation<FLT>> ApproximateVectorType;
+  public:
+    //! \brief Virtual destructor.
+    virtual ~ApproximateOptimiserInterface() = default;
+    //! \brief Create a dynamically-allocated copy.
+    virtual ApproximateOptimiserInterface* clone() const = 0;
+
+    //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
+    virtual PrimalData<P> minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const = 0;
+/*
+    //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
+    virtual ApproximateKleenean feasible(ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const = 0;
+
+    //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
+    virtual Bool almost_feasible_point(ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C,
+                                       FloatDPApproximationVector x, FloatDPApproximation eps) const = 0;
+*/
+};
+
+class PenaltyBarrierFunctionApproximateOptimiser
+    : public ApproximateOptimiserInterface
+{
+    ApproximateNumericType _tol;
+  public:
+    PenaltyBarrierFunctionApproximateOptimiser(ApproximateDouble tol = 1e-6);
+
+    PenaltyBarrierFunctionApproximateOptimiser* clone() const override;
+
+    virtual PrimalData<P> minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
+
+    //! \brief Perform a minimisation step using gradient descent on the merit function
+    //! \f$ \phi(x) = f(x) + \sum_{i} \rho(x_i,D_i) + \sum_{i} \rho(g_j(x),C_j) \f$
+    //! where \f$\rho(x,[\underline{d}\!:\!\overline{d}]) = \mu\,\tfrac(1}{2} (x-d)^2\f$ if \f$d=[\underline{d}\!:\!\overline{d}]\f$ and \f$-\nu \log(x-\underline{d})(\overline{d}-x)\f$ if \f$-\infty < \underline{d} < \overline{d} < +\infty\f$, and $\f$\rho(x,[\underline{d}\!:\!+\infty]) = -\nu\log(x-\underline{d})\f$.
+    ApproximateVectorType gradient_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateVectorType x, ApproximateNumericType mu, ApproximateNumericType nu) const;
+
+    ApproximateVectorType newton_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateVectorType x, ApproximateNumericType mu, ApproximateNumericType nu) const;
+
+    ApproximateScalarMultivariateFunction merit_function(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateNumericType mu, ApproximateNumericType nu) const;
+};
+
+//! \brief Approximate optimiser based a primal-slack approach with variables \f$x\in D\f$ and \f$w\in C\f$.
+//! The objective function \f$\phi(x,w)\f$ contains a penalty term \f$\mu \tfrac{1}{2}(g_j(x)-w_j^2\f$for each constraint of the form \f$g_j(x)-w_j=0\f$,
+//! and a barrier term for each constraint of the form \f$\underline{d}_i\leq x_i \leq \overline{d}_i\f$ of the form \f$\nu(\log\bigl((x_i-\underline{d}_i)(\overline(d)_i-x_i)\big)\f$ or \f$\underline{c}_j\leq w_j \leq \overline{c}_j\f$.
+class PrimalSlackPenaltyBarrierFunctionApproximateOptimiser
+    : public ApproximateOptimiserInterface
+{
+    ApproximateNumericType _tol;
+  public:
+    PrimalSlackPenaltyBarrierFunctionApproximateOptimiser(ApproximateDouble tol = 1e-6);
+
+    PrimalSlackPenaltyBarrierFunctionApproximateOptimiser* clone() const override;
+
+    virtual PrimalData<P> minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const override;
+
+    //! \brief Perform a minimisation step using gradient descent on the merit function
+    //! \f$ \phi(x) = f(x) + \sum_{j} \mu\,\tfrac{1}{2}(g_j(x)-w_j)^2 + \rho(x_i,D_i)  \sum_{i} \rho(x_i,D_i) + \sum_{j} \rho(w_j,C_j) \f$
+    //! where \f$\rho(x,[\underline{d}\!:\!\overline{d}]) = -\nu \log(x-\underline{d})(\overline{d}-x)\f$ if \f$-\infty < \underline{d} < \overline{d} < +\infty\f$, and $\f$\rho(x,[\underline{d}\!:\!+\infty]) = -\nu\log(x-\underline{d})\f$.
+    ApproximatePrimalSlackData gradient_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximatePrimalSlackData xw, ApproximateNumericType mu, ApproximateNumericType nu) const;
+
+    ApproximatePrimalSlackData newton_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximatePrimalSlackData xw, ApproximateNumericType mu, ApproximateNumericType nu) const;
+
+    ApproximateScalarMultivariateFunction merit_function(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateNumericType mu, ApproximateNumericType nu) const;
+};
+
+
+
 
 //! \ingroup OptimisationSubModule EvaluationModule
 //! Interface for nonlinear programming solvers.

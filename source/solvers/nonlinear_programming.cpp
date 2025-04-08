@@ -22,6 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#warning "Remove CONCLOG_PRINTLN_AT"
+#define CONCLOG_PRINTLN_AT(level,expr) { \
+    if (level!=0) { for (int i=0; i!=level; ++i) { std::clog << "  "; } std::clog << expr << "\n"; } \
+}
+
 // See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
@@ -35,6 +40,7 @@
 #include "conclog/logging.hpp"
 #include "utility/tuple.hpp"
 #include "utility/tribool.hpp"
+#include "foundations/logical.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/linear_algebra.decl.hpp"
 #include "algebra/vector.hpp"
@@ -57,7 +63,22 @@
 
 using namespace ConcLog;
 
+#warning Remove ARIADNE_CONCLOG_PRINTLN_AT
+#define ARIADNE_CONCLOG_PRINTLN_AT(level,expr) { \
+    if (level>=0) { for (SizeType i=0; i!=level; ++i) { std::clog << "  ";} std::clog << expr << std::endl; } \
+}
+
 namespace Ariadne {
+
+#warning Remove or move functions below
+bool likely(ApproximateKleenean k) { return decide(k); }
+template<class P> OutputStream& operator<<(OutputStream& os, PrimalSlackData<P> const& xw) {
+    return os << "PrimalSlackData<" << class_name<P>() << ">{ x=" << xw.x << ", w=" << xw.w << "}";
+}
+
+template<class VE> OutputStream& operator<<(OutputStream& os, VectorExpression<VE> const& ve) {
+    return os << Vector<typename VE::ScalarType>(ve()); }
+
 
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
@@ -469,6 +490,467 @@ inline ExactBoxType cast_exact_widen(ExactBoxType const& bx, RawFloatDP e) {
     return bx;
 }
 
+
+
+//------- LineSearchers -------------------------//
+
+class LineSearcherInterface {
+  protected:
+    using FLT = FloatDP;
+  public:
+    using ApproximateNumericType = Approximation<FLT>;
+    using ApproximateVectorType = Vector<ApproximateNumericType>;
+    using ApproximateCovectorType = Covector<ApproximateNumericType>;
+  public:
+    virtual ApproximateNumericType line_search(ApproximateScalarMultivariateFunction f, ApproximateVectorType x, ApproximateCovectorType g,  ApproximateVectorType s) = 0;
+};
+
+class BacktrackingLineSearcher : public LineSearcherInterface {
+    ApproximateDouble _rho, _sf;
+  public:
+    BacktrackingLineSearcher() : _rho(0.25), _sf(0.5) { }
+    BacktrackingLineSearcher(ApproximateDouble rho, ApproximateDouble sf) : _rho(rho), _sf(sf) { }
+    Void set_rho(ApproximateDouble rho) { ARIADNE_PRECONDITION(decide(rho>0)); _rho=rho; }
+    Void set_scale_factor(ApproximateDouble sf) { ARIADNE_PRECONDITION(decide(0<sf&&sf<1)); _sf=sf; }
+  public:
+    virtual ApproximateNumericType line_search(ApproximateScalarMultivariateFunction f, ApproximateVectorType x, ApproximateCovectorType g,  ApproximateVectorType s);
+};
+
+#warning
+template<class FLT> Approximation<FLT> operator*(ApproximateDouble x1, Approximation<FLT> const& x2) {
+    return Approximation<FLT>(x1,x2.precision()) * x2; }
+template<class FLT> Approximation<FLT> operator*(Approximation<FLT> const& x1, ApproximateDouble x2) {
+    return x1 * Approximation<FLT>(x2,x1.precision()); }
+
+/*
+template<class X1, class X2> decltype(auto) operator*(Covector<X1> const& u1, Vector<X2> const& v2) {
+    auto r = u1.zero_element() * v2.zero_element();
+    for (SizeType i=0; i!=u1.size(); ++i) {
+        r += u1[i] *  v2[i];
+    }
+    return r;
+}
+*/
+auto
+BacktrackingLineSearcher::line_search(ApproximateScalarMultivariateFunction f, ApproximateVectorType x, ApproximateCovectorType g, ApproximateVectorType s) -> ApproximateNumericType
+{
+//    CONCLOG_PRINTLN_AT(1,"line_search(f,x,g,s): f="<<f<<", x="<<x<<", g="<<g<<", s="<<s);
+    ApproximateNumericType alpha (1, x.zero_element().precision());
+
+    auto f0 = f(x);
+    auto df0 = g*s;
+
+    CONCLOG_PRINTLN_AT(2,"f(0)="<<f0<<", f'(0)="<<df0<<", rho="<<_rho);
+
+    auto falpha = f0+infty;
+    try {
+        falpha = f(x+alpha*s);
+    }
+    catch (std::runtime_error const& e) {
+        CONCLOG_PRINTLN_AT(3,e.what());
+    }
+
+    while (likely(falpha > f0 + _rho * alpha * df0)) {
+        CONCLOG_PRINTLN_AT(4,"alpha="<<alpha<<"; f(alpha)="<<falpha<<"; f(0)+rho*alpha*f'(0)="<<(f0+_rho*alpha*df0));
+        alpha = alpha * _sf;
+        try {
+            falpha = f(x+alpha*s);
+        }
+        catch (std::runtime_error const& e) {
+            CONCLOG_PRINTLN_AT(3,e.what());
+            falpha = f0+infty;
+        }
+    }
+    CONCLOG_PRINTLN_AT(3,"alpha="<<alpha<<"; f(alpha)="<<falpha<<"; f(0)+rho*alpha*f'(0)="<<(f0+_rho*alpha*df0));
+//    CONCLOG_PRINTLN_AT(1,"  alpha="<<alpha<<", f(x+alpha*s)="<<f(x+alpha*s));
+    return alpha;
+}
+
+
+
+//------- PenaltyBarrierFunctionApproximateOptimiser -------------------------//
+
+PenaltyBarrierFunctionApproximateOptimiser::
+PenaltyBarrierFunctionApproximateOptimiser(ApproximateDouble tol)
+    : _tol(tol,dp)
+{
+}
+
+auto
+PenaltyBarrierFunctionApproximateOptimiser::clone() const -> PenaltyBarrierFunctionApproximateOptimiser*
+{
+    return new PenaltyBarrierFunctionApproximateOptimiser(*this);
+}
+
+auto
+PenaltyBarrierFunctionApproximateOptimiser::merit_function(
+    ApproximateScalarMultivariateFunction f, ApproximateBoxType D,
+    ApproximateVectorMultivariateFunction g, ApproximateBoxType C,
+    ApproximateNumericType mu, ApproximateNumericType nu) const
+        -> ApproximateScalarMultivariateFunction
+{
+    auto m = g.result_size();
+    auto n = g.argument_size();
+
+    auto x = ApproximateVectorMultivariateFunction::identity(n);
+
+    auto phi = f;
+    for (SizeType i=0; i!=n; ++i) {
+        if (likely(D[i].lower_bound() < D[i].upper_bound())) {
+           phi -= nu * ( log(D[i].upper_bound()-x[i]) + log(x[i]-D[i].lower_bound()) );
+        }
+    }
+    for (SizeType j=0; j!=m; ++j) {
+        if (likely(C[j].lower_bound() < C[j].upper_bound())) {
+            phi -= nu * ( log(C[j].upper_bound()-g[j]) + log(g[j]-C[j].lower_bound()) );
+        } else {
+            phi += mu/2 * sqr( g[j] - C[j].lower_bound() );
+       }
+    }
+    return phi;
+}
+
+
+auto
+PenaltyBarrierFunctionApproximateOptimiser::minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const -> ApproximatePrimalData
+{
+    DoublePrecision pr;
+    ApproximateNumericType tol(1e-6,pr);
+
+    ApproximateVectorType x=D.midpoint();
+
+    if (not probably(contains(C,g(x)))) {
+        ARIADNE_THROW(std::runtime_error,"PenaltyBarrierFunctionApproximateOptimiser::minimise(f,D,g,C)",
+                      "midpoint x="<<x<<" of D="<<D<<" has constraint value g(x)="<<g(x)<<", which does not satisfy inequality constrains in C="<<C);
+    }
+
+    ApproximateNumericType mu(1.0,pr), nu(1.0,pr);
+
+    ApproximateNumericType change(infty,pr);
+
+    std::cerr<<"\nD="<<D<<"\n";
+
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+
+    while (likely(max(mu,nu)>tol)) {
+        while (likely(change>tol) || likely(norm(transpose(gradient(phi,x)))>tol)) {
+            std::cerr<<"\nx="<<x<<"\n";
+            auto new_x = gradient_minimisation_step(f,D,g,C, x, mu,nu);
+            std::cerr<<"new_x="<<new_x<<"\n";
+            change = norm(new_x - x);
+            x = new_x;
+        }
+        mu/=16; nu/=16;
+        phi = this->merit_function(f,D,g,C, mu,nu);
+    }
+
+    return x;
+}
+
+auto
+PenaltyBarrierFunctionApproximateOptimiser::gradient_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateVectorType x, ApproximateNumericType mu, ApproximateNumericType nu) const -> ApproximateVectorType
+{
+    auto m = g.result_size();
+    auto n = g.argument_size();
+
+    auto grad = gradient(f,x);
+
+    for (SizeType i=0; i!=n; ++i) {
+        if (likely(D[i].lower_bound() < D[i].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(contains(D[i],x[i])));
+            grad[i] += nu * ( rec(D[i].upper_bound()-x[i]) - rec(x[i]-D[i].lower_bound()) );
+        }
+    }
+
+    auto w = g(x);
+    auto J = jacobian(g,x);
+
+    CONCLOG_PRINTLN_AT(3,"x="<<x<<", D="<<D<<", contains(D,x)="<<contains(D,x))
+    CONCLOG_PRINTLN_AT(3,"w=g(x)="<<w<<", C="<<C<<", contains(C,g(x))="<<contains(C,w))
+
+    // g[j](x)>=c[j]
+    // -log(g[j](x)-c[j])
+    // rec(g[j](x)-c[j]) * grad(g[j](x))
+
+    auto grad_w=transpose(nul(w));
+
+    for (SizeType j=0; j!=m; ++j) {
+        if (likely(C[j].lower_bound() < C[j].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(C[j].lower_bound()<w[j] && w[j]<C[j].upper_bound()));
+            grad_w[j]= nu * ( rec(C[j].upper_bound()-w[j]) -  rec(w[j]-C[j].lower_bound()) );
+        } else {
+            grad_w[j] = mu * ( w[j] - C[j].lower_bound() );
+       }
+    }
+
+    grad += grad_w * J;
+
+
+    auto s = -transpose(grad);
+
+    std::cerr<<"s="<<s<<"\n";
+    std::cerr<<"  grad="<<grad<<"\n";
+
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+    std::cerr<<"  phi="<<phi<<"\n";
+    std::cerr<<"  grad="<<gradient(phi,x)<<"\n";
+    auto alpha =  BacktrackingLineSearcher().line_search(phi,x,grad,s);
+    std::cerr<<"alpha="<<alpha<<"\n";
+
+    return x + alpha * s;
+}
+
+auto
+PenaltyBarrierFunctionApproximateOptimiser::newton_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximateVectorType x, ApproximateNumericType mu, ApproximateNumericType nu) const -> ApproximateVectorType
+{
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+
+    auto grad=gradient(phi,x);
+    auto hess=hessian(phi,x);
+
+    auto s=-solve(hess,transpose(grad));
+    assert (likely(grad*s<0.0));
+    auto alpha =  BacktrackingLineSearcher().line_search(phi,x,grad,s);
+    return x + alpha * s;
+}
+
+
+
+//------- PrimalSlackPenaltyBarrierFunctionApproximateOptimiser -------------------------//
+
+// Notes on singleton C component:
+// phi(x,w) = f(x) + (g(x)-w)^2/2mu + nu * sum(-log(x[i])) - nu * sum( log( (Cu[j]-w[j]) * (w[j]-Cl[j]) ) )
+// phi(x,w) = f(x) + (g(x)-w)^2/2mu + nu * sum(-log(x[i])) - nu * sum( log( -(w[j]-C[j])^2) )
+// Derivative nu * sum( 1/(Cu-w) - 1/(w-Cl) ) = nu * sum( (2w-Cl-Cu)/(Cu-w)*(w-Cl) ) = nu * sum(2*(w-C)/(C-w)/(w-C))=sum(2/(C-w))
+
+// Single equality constraint: min f(x) st g(x)=c
+// Extra variable min f(x) st g(w)-w=0, w=c
+// Fix w at c. min f(x)+(g(w)-c)^2/2
+
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser(ApproximateDouble tol)
+    : _tol(tol,dp)
+{
+}
+
+auto
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::clone() const -> PrimalSlackPenaltyBarrierFunctionApproximateOptimiser*
+{
+    return new PrimalSlackPenaltyBarrierFunctionApproximateOptimiser(*this);
+}
+
+auto
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::merit_function(
+    ApproximateScalarMultivariateFunction f, ApproximateBoxType D,
+    ApproximateVectorMultivariateFunction g, ApproximateBoxType C,
+    ApproximateNumericType mu, ApproximateNumericType nu) const
+        -> ApproximateScalarMultivariateFunction
+{
+    CONCLOG_PRINTLN_AT(1,"PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::merit_function(f,D,g,C, mu,nu): mu="<<mu<<", nu="<<nu);
+    auto m = g.result_size();
+    auto n = g.argument_size();
+
+    auto xw = ApproximateVectorMultivariateFunction::identity(n+m);
+    auto x = ApproximateVectorMultivariateFunction::projection(n+m,range(0,n));
+    auto w = ApproximateVectorMultivariateFunction::projection(n+m,range(n,n+m));
+
+    auto phi = compose(f,x);
+    auto gx = compose(g,x);
+    for (SizeType j=0; j!=m; ++j) {
+        if (likely(C[j].lower_bound() < C[j].upper_bound())) {
+            phi += sqr( gx[j] - w[j] ) / (2*mu);
+        } else {
+            phi += sqr( gx[j] - C[j].lower_bound() ) / (2*mu);
+        }
+    }
+
+    for (SizeType i=0; i!=n; ++i) {
+        if (likely(D[i].lower_bound() < D[i].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(D[i].lower_bound()<x[i] && x[i]<D[i].upper_bound()));
+            phi -= nu * ( log(D[i].upper_bound()-x[i]) + log(x[i]-D[i].lower_bound()) );
+        } else {
+            phi += sqr(x[i]-D[i].lower_bound())/(2*sqr(mu));
+        }
+    }
+
+    for (SizeType j=0; j!=m; ++j) {
+        if (likely(C[j].lower_bound() < C[j].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(C[j].lower_bound()<w[j] && w[j]<C[j].upper_bound()));
+            phi -= nu * ( log(C[j].upper_bound()-w[j]) + log(w[j]-C[j].lower_bound()) );
+        } else {
+            phi += sqr(w[j]-C[j].lower_bound())/(2*sqr(mu));
+        }
+    }
+
+    return phi;
+}
+
+
+Vector<FloatDPApproximation> join(PrimalSlackData<ApproximateTag> const& xw) {
+    return join(xw.x,xw.w);
+}
+
+FloatDPApproximation norm(PrimalSlackData<ApproximateTag> const& xw) {
+    return norm(xw.x)+norm(xw.w);
+}
+
+PrimalSlackData<ApproximateTag> operator-(PrimalSlackData<ApproximateTag> const& xw1, PrimalSlackData<ApproximateTag> const& xw2) {
+    return { xw1.x-xw2.x, xw1.w-xw2.w };
+}
+
+auto
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::minimise(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C) const -> ApproximatePrimalData
+{
+    CONCLOG_PRINTLN_AT(0,"PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::minimise(f,D,g,C)");
+    CONCLOG_PRINTLN_AT(1,"f="<<f);
+    CONCLOG_PRINTLN_AT(1,"D="<<D);
+    CONCLOG_PRINTLN_AT(1,"g="<<g);
+    CONCLOG_PRINTLN_AT(1,"C="<<C);
+
+    ARIADNE_PRECONDITION(f.argument_size()==D.dimension());
+    ARIADNE_PRECONDITION(g.argument_size()==D.dimension());
+    ARIADNE_PRECONDITION(g.result_size()==C.dimension());
+
+#warning
+    FloatDPApproximation::set_output_places(8);
+
+    DoublePrecision pr;
+    ApproximateNumericType tol=this->_tol;
+
+    ApproximatePrimalSlackData xw = { D.midpoint(), C.midpoint() };
+
+#warning Perturb initial iterate from midpoint
+    for (SizeType i=0; i!=D.dimension(); ++i) { xw.x[i] += 0.1*(D[i].upper_bound()-D[i].lower_bound()); }
+    for (SizeType j=0; j!=C.dimension(); ++j) { xw.w[j] += 0.1*(C[j].upper_bound()-C[j].lower_bound()); }
+
+    ApproximateNumericType mu(1.0,pr), nu(1.0,pr);
+
+    ApproximateNumericType change(infty,pr);
+
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+
+    CONCLOG_PRINTLN_AT(1,"phi="<<phi);
+
+    List<Nat> steps;
+    while (likely(max(mu,nu)>tol)) {
+        steps.append(0u);
+        CONCLOG_PRINTLN_AT(1,"steps="<<steps);
+        while (likely(change>tol) || likely(norm(transpose(gradient(phi,join(xw))))>tol)) {
+            ++steps.back();
+            auto& x=xw.x, w=xw.w;
+            CONCLOG_PRINTLN_AT(1,"steps="<<steps);
+            CONCLOG_PRINTLN_AT(1,"x="<<x);
+            CONCLOG_PRINTLN_AT(1,"f(x)="<<f(x));
+            CONCLOG_PRINTLN_AT(1,"g(x)="<<g(x));
+            CONCLOG_PRINTLN_AT(1,"w="<<xw.w);
+            auto new_xw = newton_minimisation_step(f,D,g,C, xw, mu,nu);
+            CONCLOG_PRINTLN_AT(1,"new_xw="<<new_xw);
+            change = norm(new_xw - xw);
+            xw = new_xw;
+
+            ARIADNE_ASSERT(steps.back()<16);
+        }
+        mu/=16; nu/=16;
+        phi = this->merit_function(f,D,g,C, mu,nu);
+    }
+    CONCLOG_PRINTLN_AT(0,"steps="<<steps);
+    return xw;
+}
+
+
+auto
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::gradient_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximatePrimalSlackData x_w, ApproximateNumericType mu, ApproximateNumericType nu) const -> ApproximatePrimalSlackData
+{
+    CONCLOG_PRINTLN_AT(0,"PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::gradient_minimisation_step(f,D,g,C, x_w, mu,nu)");
+    auto m = g.result_size();
+    auto n = g.argument_size();
+
+    auto& x=x_w.x; auto& w=x_w.w;
+    ARIADNE_DEBUG_ASSERT(likely(contains(D,x)));
+    ARIADNE_DEBUG_ASSERT(likely(contains(C,w)));
+    CONCLOG_PRINTLN_AT(3,"x="<<x)
+    CONCLOG_PRINTLN_AT(3,"w="<<w)
+
+    auto grad_x = gradient(f,x);
+    auto J = jacobian(g,x);
+    grad_x += (transpose(g(x)-w) * J) / mu;
+    for (SizeType i=0; i!=n; ++i) {
+        ARIADNE_ASSERT(likely(D[i].lower_bound() < D[i].upper_bound()));
+        if (likely(D[i].lower_bound() < D[i].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(contains(D[i],x[i])));
+            grad_x[i] += nu * ( rec(D[i].upper_bound()-x[i]) - rec(x[i]-D[i].lower_bound()) );
+        }
+    }
+
+    auto grad_w = transpose(g(x)-w)/(-mu);
+    for (SizeType j=0; j!=m; ++j) {
+        if (likely(C[j].lower_bound() < C[j].upper_bound())) {
+            ARIADNE_DEBUG_ASSERT(likely(C[j].lower_bound()<w[j] && w[j]<C[j].upper_bound()));
+            grad_w[j] += nu * ( rec(C[j].upper_bound()-w[j]) -  rec(w[j]-C[j].lower_bound()) );
+        } else {
+            ARIADNE_DEBUG_ASSERT(w[j]==C[j].lower_bound());
+            grad_w[j] = 0;
+        }
+    }
+
+    auto grad_xw = cojoin(grad_x,grad_w);
+
+    auto search_xw = -transpose(grad_xw);
+
+//    CONCLOG_PRINTLN_AT("grad_xw="<<grad_xw);
+//    CONCLOG_PRINTLN_AT("search_xw="<<search_xw);
+
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+    auto xw=join(x,w);
+/*
+    CONCLOG_PRINTLN_AT("  phi="<<phi);
+    CONCLOG_PRINTLN_AT("  phi(xw)="<<phi(xw));
+    CONCLOG_PRINTLN_AT("  gradient(phi,xw)="<<gradient(phi,xw));
+    CONCLOG_PRINTLN_AT("  grad_xw=         "<<grad_xw);
+*/
+    auto alpha =  BacktrackingLineSearcher().line_search(phi,xw,grad_xw,search_xw);
+/*
+    CONCLOG_PRINTLN_AT("alpha="<<alpha);
+*/
+    auto new_xw = xw + alpha * search_xw;
+
+    return { new_xw[range(0,n)], new_xw[range(n,n+m)] };
+}
+
+auto
+PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::newton_minimisation_step(ApproximateScalarMultivariateFunction f, ApproximateBoxType D, ApproximateVectorMultivariateFunction g, ApproximateBoxType C, ApproximatePrimalSlackData x_w, ApproximateNumericType mu, ApproximateNumericType nu) const -> ApproximatePrimalSlackData
+{
+    CONCLOG_PRINTLN_AT(0,"PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::newton_minimisation_step(f,D,g,C, x_w, mu,nu)");
+    auto phi = this->merit_function(f,D,g,C, mu,nu);
+    auto xw=join(x_w.x,x_w.w);
+
+
+    auto grad=gradient(phi,xw);
+    CONCLOG_PRINTLN_AT(2,"grad="<<grad);
+    auto hess=hessian(phi,xw);
+
+    auto search=solve(hess,transpose(-grad));
+    CONCLOG_PRINTLN_AT(2,"search="<<search);
+    CONCLOG_PRINTLN_AT(2,"ascent="<<grad*search);
+    if (not likely(grad*search<0.0)) {
+        search=transpose(-grad);
+    }
+
+    ARIADNE_DEBUG_ASSERT(likely(grad*search<0.0));
+    auto alpha =  BacktrackingLineSearcher().line_search(phi,xw,grad,search);
+    CONCLOG_PRINTLN_AT(2,"alpha="<<alpha);
+
+    auto new_xw = xw + alpha * search;
+
+    auto m=g.result_size(); auto n=g.argument_size();
+    CONCLOG_PRINTLN_AT(2,"new_x="<<new_xw[range(0,n)]);
+    CONCLOG_PRINTLN_AT(2,"new_w="<<new_xw[range(n,n+m)]);
+    return { new_xw[range(0,n)], new_xw[range(n,n+m)] };
+}
+
+
+
+//------- OptimiserBase -------------------------//
 
 const FloatDP OptimiserBase::zero = FloatDP(0,dp);
 const FloatDP OptimiserBase::one = FloatDP(1,dp);
@@ -898,6 +1380,9 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
 
 //------- NonlinearInfeasibleInteriorPointOptimiser -------------------------//
 
+// x: Primal variables in D
+// y: Dual variables to constraint g[j](x) in C[j], given by (g[j](x)-C[j].lower_bound())*(C[j].upper_bound()-g[j](x)) >= 0
+// UNSURE w: Dual variables to x[i] in D[i]?
 struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {
     PrimalDualData() : PrimalDualData(0u,0u,dp) { }
     PrimalDualData(SizeType m, SizeType n, DP pr) : w(m,pr), x(n,pr), y(m,pr) { }

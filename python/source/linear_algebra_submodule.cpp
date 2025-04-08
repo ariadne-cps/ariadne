@@ -355,7 +355,7 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     module.def("cojoin", &_cojoin_<Covector<X>,Scalar<X>>);
     module.def("cojoin", &_cojoin_<Scalar<X>,Covector<X>>);
 
-    covector_class.def(pybind11::init([](pybind11::list const& lst){return Covector<X>(pybind11::cast<Array<X>>(lst));}));
+    covector_class.def(pybind11::init([](pybind11::list const& lst){return covector_from_python<X>(lst);}));
 
     // Convert from a Python list and properties
     if constexpr (HasGenericType<X> and HasPrecisionType<X>) {

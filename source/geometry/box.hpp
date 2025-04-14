@@ -538,6 +538,10 @@ template<class I, class X> inline Vector<decltype(declval<I>()-declval<X>())> op
     return cast_vector(bx1)-v2; }
 
 
+
+FloatDPUpperBox operator+(const FloatDPUpperBox& bx1, FloatDPUpperBox bx2);
+FloatDPUpperBox operator*(const FloatDPUpperInterval& ivl1, FloatDPUpperBox bx2);
+
 inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPApproximation e) {
     FloatDPApproximation eps(e);
     FloatDPApproximateBox r(bx.dimension());

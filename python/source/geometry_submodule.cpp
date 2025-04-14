@@ -652,7 +652,8 @@ Void export_intervals(pybind11::module& module) {
     module.def("cast_singleton", (FloatDPBounds(*)(Interval<FloatDPUpperBound> const&)) &cast_singleton);
     module.def("cast_singleton", (FloatMPBounds(*)(Interval<FloatMPUpperBound> const&)) &cast_singleton);
 
-    module.def("image", (UpperIntervalType(*)(UpperIntervalType const&, ValidatedScalarUnivariateFunction const&)) &_image_);
+    module.def("widen", (FloatDPUpperInterval(*)(FloatDPUpperInterval const&, FloatDPUpperBound eps)) &widen);
+    module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperInterval const&, ValidatedScalarUnivariateFunction const&)) &_image_);
 
     template_<Interval> interval_template(module);
     interval_template.instantiate<Dyadic>();
@@ -768,6 +769,12 @@ template<class BX> Void export_box(pybind11::module& module, std::string name=py
     module.def("intersection", (BX(*)(const BX&,const BX&)) &intersection);
     module.def("split", (Pair<BX,BX>(*)(BX const&)) &split);
 
+    if constexpr (Same<BX,FloatDPUpperBox>) {
+        box_class.def("__add__", &__add__<BX,BX>);
+        box_class.def("__radd__", &__radd__<BX,BX>);
+        box_class.def("__rmul__", &__rmul__<BX,IVL>);
+    }
+
     if constexpr (Same<BX,BoxDomainType>) {
         module.attr("BoxDomainType")=box_class;
     } else if constexpr (Same<BX,BoxValidatedRangeType>) {
@@ -833,7 +840,6 @@ Void export_boxes(pybind11::module& module) {
     pybind11::implicitly_convertible<FloatDPUpperBox,FloatDPApproximateBox>();
     pybind11::implicitly_convertible<FloatDPLowerBox,FloatDPApproximateBox>();
 
-    module.def("widen", (FloatDPUpperBox(*)(FloatDPExactBox const&, FloatDP eps)) &widen);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperBox const&, ValidatedVectorMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperInterval(*)(FloatDPUpperBox const&, ValidatedScalarMultivariateFunction const&)) &_image_);
     module.def("image", (FloatDPUpperBox(*)(FloatDPUpperInterval const&, ValidatedVectorUnivariateFunction const&)) &_image_);

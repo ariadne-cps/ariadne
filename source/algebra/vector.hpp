@@ -149,8 +149,13 @@ struct DeclareVectorOperations { };
 
 #endif // SIMPLE_VECTOR_OPERATORS
 
-template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
-template<class V> struct VectorContainer : public VectorExpression<V> { };
+template<class V> struct VectorExpression : public DeclareVectorOperations {
+    const V& operator()() const { return static_cast<const V&>(*this); }
+};
+template<class V> struct VectorContainer : public VectorExpression<V> {
+    using VectorExpression<V>::operator();
+    V& operator()() { return static_cast<V&>(*this); };
+};
 
 struct DefaultTag { };
 
@@ -356,10 +361,10 @@ template<class X> struct IsVector<Vector<X>> : True { };
 template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >
 {
-    const V& _v; Range _rng;
+    V& _v; Range _rng;
   public:
     typedef typename V::ScalarType ScalarType;
-    VectorRange(const V& v, Range rng) : _v(v), _rng(rng) { }
+    VectorRange(V& v, Range rng) : _v(v), _rng(rng) { }
     SizeType size() const { return _rng.size(); }
     ScalarType zero_element() const { return _v.zero_element(); }
     ScalarType operator[](SizeType i) const { return _v[i+_rng.start()]; }
@@ -369,6 +374,17 @@ template<class V> class VectorRange
     template<class VE> VectorRange<V>& operator=(const VectorExpression<VE>& ve) {
         ARIADNE_PRECONDITION(this->size()==ve().size());
         for(SizeType i=0; i!=this->size(); ++i) { (*this)[i]=ve()[i]; } return *this; }
+};
+template<class V> class VectorRange<const V>
+    : public VectorExpression< VectorRange<const V> >
+{
+    const V& _v; Range _rng;
+  public:
+    typedef typename V::ScalarType ScalarType;
+    VectorRange(const V& v, Range rng) : _v(v), _rng(rng) { }
+    SizeType size() const { return _rng.size(); }
+    ScalarType zero_element() const { return _v.zero_element(); }
+    ScalarType operator[](SizeType i) const { return _v[i+_rng.start()]; }
 };
 
 template<class V> inline VectorRange<const V> project(const VectorExpression<V>& v, Range rng) {

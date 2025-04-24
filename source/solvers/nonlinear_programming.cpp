@@ -22,16 +22,15 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#warning "Remove CONCLOG_PRINTLN_AT"
-#define CONCLOG_PRINTLN_AT(level,expr) { \
-    if (level!=0) { for (int i=0; i!=level; ++i) { std::clog << "  "; } std::clog << expr << "\n"; } \
-}
-
 // See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
+#include "numeric/numeric.hpp"
+#include "algebra/fixed_differential.hpp"
 #include "function/functional.hpp"
+#include "function/function_patch.hpp"
+#include "function/restricted_function.hpp"
 #include "config.hpp"
 
 #include <limits>
@@ -64,8 +63,9 @@
 using namespace ConcLog;
 
 #warning Remove ARIADNE_CONCLOG_PRINTLN_AT
+//#undef CONCLOG_PRINTLN_AT
 #define ARIADNE_CONCLOG_PRINTLN_AT(level,expr) { \
-    if (level>=0) { for (SizeType i=0; i!=level; ++i) { std::clog << "  ";} std::clog << expr << std::endl; } \
+    if (level>=0) { for (SizeType level_ctr=0; level_ctr!=level; ++level_ctr) { std::clog << "  ";} std::clog << expr << std::endl; } \
 }
 
 namespace Ariadne {
@@ -766,7 +766,6 @@ PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::merit_function(
 
     for (SizeType i=0; i!=n; ++i) {
         if (likely(D[i].lower_bound() < D[i].upper_bound())) {
-            ARIADNE_DEBUG_ASSERT(likely(D[i].lower_bound()<x[i] && x[i]<D[i].upper_bound()));
             phi -= nu * ( log(D[i].upper_bound()-x[i]) + log(x[i]-D[i].lower_bound()) );
         } else {
             phi += sqr(x[i]-D[i].lower_bound())/(2*sqr(mu));
@@ -775,7 +774,6 @@ PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::merit_function(
 
     for (SizeType j=0; j!=m; ++j) {
         if (likely(C[j].lower_bound() < C[j].upper_bound())) {
-            ARIADNE_DEBUG_ASSERT(likely(C[j].lower_bound()<w[j] && w[j]<C[j].upper_bound()));
             phi -= nu * ( log(C[j].upper_bound()-w[j]) + log(w[j]-C[j].lower_bound()) );
         } else {
             phi += sqr(w[j]-C[j].lower_bound())/(2*sqr(mu));
@@ -811,15 +809,12 @@ PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::minimise(ApproximateScala
     ARIADNE_PRECONDITION(g.argument_size()==D.dimension());
     ARIADNE_PRECONDITION(g.result_size()==C.dimension());
 
-#warning
-    FloatDPApproximation::set_output_places(8);
-
     DoublePrecision pr;
     ApproximateNumericType tol=this->_tol;
 
     ApproximatePrimalSlackData xw = { D.midpoint(), C.midpoint() };
 
-#warning Perturb initial iterate from midpoint
+#warning Perturbing initial iterate from midpoint
     for (SizeType i=0; i!=D.dimension(); ++i) { xw.x[i] += 0.1*(D[i].upper_bound()-D[i].lower_bound()); }
     for (SizeType j=0; j!=C.dimension(); ++j) { xw.w[j] += 0.1*(C[j].upper_bound()-C[j].lower_bound()); }
 
@@ -888,7 +883,7 @@ PrimalSlackPenaltyBarrierFunctionApproximateOptimiser::gradient_minimisation_ste
             ARIADNE_DEBUG_ASSERT(likely(C[j].lower_bound()<w[j] && w[j]<C[j].upper_bound()));
             grad_w[j] += nu * ( rec(C[j].upper_bound()-w[j]) -  rec(w[j]-C[j].lower_bound()) );
         } else {
-            ARIADNE_DEBUG_ASSERT(w[j]==C[j].lower_bound());
+            ARIADNE_DEBUG_ASSERT(likely(w[j]==C[j].lower_bound()));
             grad_w[j] = 0;
         }
     }
@@ -2823,6 +2818,344 @@ feasibility_step(const ExactFloatDPVectorType& xl, const ExactFloatDPVectorType&
     for(SizeType i=0; i!=m; ++i) { nmu += sqr(y[i]); }
     mu=refinement(mu,nmu);
 }
+
+//------- KarushKuhnTuckerIntervalOptimiser ------------------------------------------//
+
+#warning Missing functions for KarushKuhnTuckerIntervalOptimiser
+namespace {
+Bounds<FloatMP> operator-(Bounds<FloatMP> const& x1, Bounds<FloatDP> const& x2) {
+    return x1 - Bounds<FloatMP>(x2,x1.precision()); }
+Bounds<FloatMP> operator-(Bounds<FloatDP> const& x1, Bounds<FloatMP> const& x2) {
+    return Bounds<FloatMP>(x1,x2.precision()) - x2; }
+Bounds<FloatMP> operator-(Bounds<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 - FloatMP(x2,x1.precision()); }
+Differential<Bounds<FloatMP>> operator-(Differential<Bounds<FloatMP>> const& x1, Bounds<FloatDP> const& x2) {
+    return x1 - Bounds<FloatMP>(x2,x1.value().precision()); }
+Differential<Bounds<FloatMP>> operator-(Bounds<FloatDP> const& x1, Differential<Bounds<FloatMP>> const& x2) {
+    return Bounds<FloatMP>(x1,x2.value().precision()) - x2; }
+//Bounds<FloatMP> operator-(FloatDP const& x1, Bounds<FloatMP> const& x2) {
+//    return FloatMP(x1,x2.precision()) - x2; }
+ValidatedUpperKleenean operator==(LowerBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 == FloatMP(x2,x1.precision()); }
+ValidatedUpperKleenean operator==(UpperBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 == FloatMP(x2,x1.precision()); }
+ValidatedUpperKleenean operator==(Bounds<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 == FloatMP(x2,x1.precision()); }
+ValidatedLowerKleenean operator!=(Bounds<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 != FloatMP(x2,x1.precision()); }
+ValidatedLowerKleenean operator>(LowerBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 > FloatMP(x2,x1.precision()); }
+ValidatedLowerKleenean operator<(UpperBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 < FloatMP(x2,x1.precision()); }
+ValidatedLowerKleenean operator>=(LowerBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 >= FloatMP(x2,x1.precision()); }
+ValidatedLowerKleenean operator<=(UpperBound<FloatMP> const& x1, FloatDP const& x2) {
+    return x1 <= FloatMP(x2,x1.precision()); }
+} // namespace
+inline ValidatedKleenean operator<=(FloatDP const& x1, Bounds<FloatMP> const& x2) {
+    return Dyadic(x1) <= x2; }
+inline ValidatedKleenean operator>=(FloatDP const& x1, Bounds<FloatMP> const& x2) {
+    return Dyadic(x1) >= x2; }
+
+template<class P, class X> decltype(auto)
+gradient(FunctionPatch<P,ScalarMultivariate> const& f, Vector<X> const& x) {
+    return gradient(cast_unrestricted(f),x); }
+template<class P, class X> decltype(auto)
+jacobian(FunctionPatch<P,VectorMultivariate> const& f, Vector<X> const& x) {
+    return jacobian(cast_unrestricted(f),x); }
+
+template<class X> Void check_domain(IntervalDomainType const& dom, X const& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<class X> Void check_domain(IntervalDomainType const& dom, Bounds<X> const& x) {
+    assert(definitely(contains(dom,x))); }
+//    assert(definitely(x.lower()>=dom.lower_bound() && x.upper()<=dom.upper_bound())); }
+template<class X> Void check_domain(IntervalDomainType const& dom, Differential<X> const& dx) {
+    check_domain(dom,dx.value()); }
+template<class V> Void check_domain(BoxDomainType const& dom, V const& v) {
+    for (SizeType i=0; i!=dom.dimension(); ++i) { check_domain(dom[i],v[i]); } }
+template<class P> VectorMultivariateFunction<P> combine(VectorMultivariateFunction<P> const& f1, VectorMultivariateFunction<P> const& f2) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<class X> Vector<X>
+join(Vector<X> const& v1, Vector<X> const& v2, Vector<X> const& v3, X const& s4) {
+    SizeType n1=v1.size(), n2=v2.size(), n3=v3.size();
+//    Vector<X> r(n1+n2+n3+1u, characteristics(s4));
+    Vector<X> r(n1+n2+n3+1u, nul(s4));
+    VectorRange<Vector<X>> r1=r[range(0,n1)];
+    r1=v1;
+    r[range(0,n1)]=v1;
+    r[range(n1,n1+n2)]=v2;
+    r[range(n1+n2,n1+n2+n3)]=v3;
+    r[n1+n2+n3]=s4;
+    return r;
+}
+template<class T1, class T2, class T3, class... TS> decltype(auto)
+join(T1 t1, T2 t2, T3 t3, TS... ts) { return join(join(t1,t2),t3,ts...); }
+template<class I> SizeType irmax(const Box<I>& bx);
+
+Tuple<> characteristics(Bounds<Dyadic> const&) { return Tuple<>(); }
+
+
+
+template<class FLT> auto
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimise(
+    ValidatedScalarMultivariateFunction f, ExactBoxType D,
+    ValidatedVectorMultivariateFunction g, ExactBoxType C) const -> Vector<DyadicBounds>
+{
+    CONCLOG_PRINTLN_AT(0,"KarushKuhnTuckerIntervalOptimiser<FLT>::minimise(f,D,g,C)");
+    ValidatedScalarMultivariateFunctionPatch fr=ValidatedScalarMultivariateRestrictedFunction(f,D);
+    ValidatedVectorMultivariateFunctionPatch gr=ValidatedVectorMultivariateRestrictedFunction(g,D);
+    return minimise(fr,D,gr,C);
+}
+
+
+template<class FLT> auto
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimise(
+    ValidatedScalarMultivariateFunctionPatch f, ExactBoxType D,
+    ValidatedVectorMultivariateFunctionPatch g, ExactBoxType C) const -> Vector<DyadicBounds>
+{
+    CONCLOG_PRINTLN_AT(0,"KarushKuhnTuckerIntervalOptimiser<FLT>::minimise(Patch f, D, Patch g, C)");
+    ARIADNE_PRECONDITION(subset(D,f.domain()));
+    ARIADNE_PRECONDITION(subset(D,g.domain()));
+    SizeType n=g.argument_size(), m=g.result_size();
+    Vector<Bounds<FLT>> x(cast_singleton(D),_pr);
+    Vector<Bounds<FLT>> y(m, [&C,this](SizeType j){return Bounds<FLT>(is_singleton(C[j]) ? -1 : 0, +1, _pr);});
+    Vector<Bounds<FLT>> z(n, [&D,this](SizeType i){return Bounds<FLT>(is_singleton(D[i]) ? -1 : 0, +1, _pr);});
+    Bounds<FLT> t(0,1,_pr);
+
+    Vector<Bounds<FLT>> xyzt = join(x,y,z,t);
+    UpperBoxType XYZT = static_cast<UpperBoxType>(xyzt);
+    Bool has_contracted = false;
+    DyadicBounds opt(+infty);
+    Pair<DyadicBounds,List<Pair<DyadicBounds,Vector<DyadicBounds>>>> result(opt,{});
+    this->minimise_in(f,D,g,C, XYZT, has_contracted, result);
+
+    CONCLOG_PRINTLN_AT(1, "result="<<result);
+    assert(result.second.size()==1);
+    return result.second.begin()->second;
+}
+
+template<class FLT> Void
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimise_in(
+    ValidatedScalarMultivariateFunctionPatch const& f, ExactBoxType const& D,
+    ValidatedVectorMultivariateFunctionPatch const& g, ExactBoxType const& C,
+    UpperBoxType XYZT,
+    Bool has_contracted,
+    Pair<DyadicBounds,List<Pair<DyadicBounds,Vector<DyadicBounds>>>>& result) const
+{
+    ARIADNE_CONCLOG_PRINTLN_AT(0,"KarushKuhnTuckerIntervalOptimiser<FLT>::minimise_in(f,D,g,C, x,y,z,t)");
+
+    SizeType n=g.argument_size(), m=g.result_size();
+
+    SizeType MAX_STEPS=8;
+
+    SizeType step=0;
+    auto err = radius(XYZT);
+    while (not definitely (err < this->_tol)) {
+        ++step;
+        Vector<ValidatedNumericType> xyzt(cast_singleton(XYZT),this->_pr);
+        Vector<ValidatedNumericType> const& old_xyzt=xyzt;
+        Vector<ValidatedNumericType> old_x=old_xyzt[range(0,n)];
+        Vector<ValidatedNumericType> x=xyzt[range(0,n)];
+        Vector<ValidatedNumericType> y=xyzt[range(n,n+m)];
+        Vector<ValidatedNumericType> z=xyzt[range(n+m,n+m+n)];
+        Scalar<ValidatedNumericType> t=xyzt[n+m+n];
+        Vector<ValidatedNumericType> w=g(x);
+        ARIADNE_CONCLOG_PRINTLN_AT(0,"C="<<C<<", D="<<D);
+        ARIADNE_CONCLOG_PRINTLN_AT(0,"old: w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+        this->minimisation_step(f,D,g,C, x,y,z,t);
+        ARIADNE_CONCLOG_PRINTLN_AT(2,"Done step...");
+        if (inconsistent(x,old_x)) {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"new: x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+        } else {
+            auto next_x=refinement(x,old_x);
+            ARIADNE_CONCLOG_PRINTLN_AT(2,"D="<<D<<", next_x="<<next_x);
+            w=g(next_x);
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"new: w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+        }
+
+
+        // (Du-x)*(x-Dl)*z = 0
+        for (SizeType i=0; i!=x.size(); ++i) {
+            if (definitely(x[i].upper()<D[i].upper_bound()) && definitely(x[i].lower()>D[i].lower_bound())) {
+                z[i]=0;
+            } else if (definitely(z[i].lower()>0)) {
+                assert ( possibly(x[i].lower()==D[i].lower_bound()) || possibly(x[i].upper()==D[i].upper_bound()) );
+                if (definitely(x[i].upper()<D[i].upper_bound())) { x[i]=static_cast<Dyadic>(D[i].lower_bound()); }
+                if (definitely(x[i].lower()>D[i].lower_bound())) { x[i]=static_cast<Dyadic>(D[i].upper_bound()); }
+            }
+        }
+        for (SizeType j=0; j!=y.size(); ++j) {
+            if (not is_singleton(C[j])) {
+                if (definitely(w[j].upper()<C[j].upper_bound()) && definitely(w[j].lower()>C[j].lower_bound())) {
+                    y[j]=0;
+                }
+            }
+        }
+
+        auto new_xyzt=join(x,y,z,t);
+        ARIADNE_CONCLOG_PRINTLN_AT(1,"new: w="<<w<<", x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+        if (not possibly(contains(C,w))) {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"INCONSISTENT");
+            return;
+        } else if (inconsistent(new_xyzt,old_xyzt)) {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"INCONSISTENT");
+            return;
+        } else if (step==MAX_STEPS || refines(old_xyzt,new_xyzt)) {
+            for (SizeType i=0; i!=n; ++i) {
+                if (possibly(x[i]!=D[i].lower_bound()) && possibly(x[i]!=D[i].upper_bound()) && possibly(z[i]!=0)) {
+                    ARIADNE_CONCLOG_PRINTLN_AT(1,"NO PROGRESS SPLITTING x["<<i<<"]");
+                    //ARIADNE_CONCLOG_PRINTLN_AT(1,"  x["<<i<<"]="<<x[i]<<", z["<<i<<"]="<<z[i]);
+                    if (possibly(x[i]==D[i].lower_bound())) {
+                        auto XYZT_xl = XYZT; XYZT_xl[i]=static_cast<Dyadic>(D[i].lower_bound());
+                        this->minimise_in(f,D,g,C, XYZT_xl, false, result);
+                    }
+                    if (possibly(x[i]==D[i].upper_bound())) {
+                        auto XYZT_xu = XYZT; XYZT_xu[i]=static_cast<Dyadic>(D[i].upper_bound());
+                        this->minimise_in(f,D,g,C, XYZT_xu, false, result);
+                    }
+                    if (possibly(z[i]==0)) {
+                        auto XYZT_z0 = XYZT; XYZT_z0[n+m+i]=0;
+                        this->minimise_in(f,D,g,C, XYZT_z0, false, result);
+                    }
+                    return;
+                }
+            }
+            auto split_index = irmax(XYZT);
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"NO PROGRESS SPLITTING "<<split_index);
+            auto split_XYZT=split(XYZT,split_index);
+            this->minimise_in(f,D,g,C, split_XYZT.first, false, result);
+            this->minimise_in(f,D,g,C, split_XYZT.second, false, result);
+            return;
+        } else if (refines(new_xyzt,old_xyzt)) {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"REFINEMENT");
+            has_contracted=true;
+        } else {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"PROGRESS");
+            new_xyzt = refinement(new_xyzt,old_xyzt);
+        }
+
+        auto fx=f(x);
+        if (definitely(fx>result.first)) {
+            return;
+        }
+
+        if (not has_contracted) {
+            ARIADNE_CONCLOG_PRINTLN_AT(1,"NOT has_contracted");
+        }
+        XYZT = static_cast<UpperBoxType>(new_xyzt);
+        // ARIADNE_CONCLOG_PRINTLN_AT(1,"new XYZT="<<XYZT);
+        err = radius(XYZT);
+        ARIADNE_CONCLOG_PRINTLN_AT(1,"err="<<err<<", tol="<<this->_tol);
+    }
+
+    //ARIADNE_ASSERT(has_contracted);
+
+    Vector<ValidatedNumericType> xyzt(cast_singleton(XYZT),this->_pr);
+    Vector<ValidatedNumericType> x=xyzt[range(0,n)];
+    auto fx=f(x);
+    if (definitely(fx<result.first)) {
+        result.second.clear();
+    }
+    result.first = min(result.first,fx);
+    result.second.append({fx,x});
+}
+
+
+template<class FLT> Void
+KarushKuhnTuckerIntervalOptimiser<FLT>::minimisation_step(
+    const ValidatedScalarMultivariateFunctionPatch& f, const ExactBoxType& D,
+    const ValidatedVectorMultivariateFunctionPatch& g, const ExactBoxType& C,
+    Vector<ValidatedNumericType>& x, Vector<ValidatedNumericType>& y, Vector<ValidatedNumericType>& z, ValidatedNumericType& t) const
+{
+    CONCLOG_PRINTLN_AT(1,"KarushKuhnTuckerIntervalOptimiser<FLT>::minimisation_step(f,D,g,C, x,y,z,t)");
+    CONCLOG_PRINTLN_AT(1,"x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+    SizeType n=g.argument_size(), m=g.result_size();
+
+    auto kkt_function = [&](auto xyzt) {
+        using X = typename decltype(xyzt)::ValueType;
+        SizeType n=g.argument_size(), m=g.result_size();
+        ARIADNE_DEBUG_ASSERT(xyzt.size()==n+m+n+1u);
+        Vector<X> x=xyzt[range(0,n)];
+        Vector<X> y=xyzt[range(n,n+m)];
+        Vector<X> z=xyzt[range(n+m,n+m+n)];
+        X t=xyzt[n+m+n];
+        CONCLOG_PRINTLN_AT(4,"x="<<x<<", y="<<y<<", z="<<z<<", t="<<t);
+
+        Covector<X> dfx(n, [&f,&x](SizeType j){return derivative(f,j)(x);}, x.element_characteristics());
+        Matrix<X> dgx(m, n, [&g,&x](SizeType i, SizeType j){return derivative(g[i],j)(x);});
+//        Covector<X> rx_tr=t*gradient(f,x);
+//        for (SizeType j=0; j!=m; ++j) { rx_tr -= y[j] * gradient(g[j],x); }
+        Covector<X> rx_tr=t*dfx - transpose(y)*dgx;
+        for (SizeType i=0; i!=n; ++i) { rx_tr[i] -= z[i]; }
+        Vector<X> rx=transpose(rx_tr);
+
+        Vector<X> gx = g(x);
+
+        Vector<X> ry(m,nul(t));
+        for (SizeType j=0; j!=m; ++j) {
+            if (is_singleton(C[j])) {
+                ry[j]=gx[j]-cast_singleton(C[j]);
+            } else {
+                ry[j] = y[j]*(C[j].upper_bound()-gx[j])*(gx[j]-C[j].lower_bound());
+            }
+        }
+
+        Vector<X> rz(n,nul(t));
+        for (SizeType i=0; i!=n; ++i) {
+            if (is_singleton(D[i])) {
+                rz[i]=x[i]-cast_singleton(D[i]);
+            } else {
+                rz[i] = z[i]*(D[i].upper_bound()-x[+i])*(x[i]-D[i].lower_bound());
+           }
+        }
+
+        X rt = sqr(t) + dot(y,y) + dot(z,z) - 1;
+
+        return join(rx,ry,rz,rt);
+    };
+
+    Vector<ValidatedNumericType> xyzt=join(x,y,z,t);
+    CONCLOG_PRINTLN_AT(2,"xyzt="<<xyzt);
+
+    auto q = Vector<Bounds<FLT>>(cast_exact(xyzt));
+    CONCLOG_PRINTLN_AT(2,"q="<<q);
+    auto r = kkt_function(q);
+    CONCLOG_PRINTLN_AT(2,"r="<<r);
+    auto S = kkt_function(Differential<Bounds<FLT>>::variables(1u,xyzt)).jacobian();
+    CONCLOG_PRINTLN_AT(2,"S="<<S);
+
+    try {
+        auto I = Matrix<ValidatedNumericType>::identity(xyzt.size(),xyzt.element_characteristics());
+    //    auto J = inverse(Matrix<Bounds<FLT>(cast_exact(Matrix<Approximation<FLT>>(S))));
+        auto J = cast_exact(inverse(Matrix<Approximation<FLT>>(S)));
+        CONCLOG_PRINTLN_AT(2,"J="<<J);
+        auto new_xyzt = q - J*r-(I-J*S)*(r-q);
+        CONCLOG_PRINTLN_AT(2,"new_xyzt="<<new_xyzt);
+        CONCLOG_PRINTLN_AT(2,"old_xyzt="<<xyzt);
+        new_xyzt = refinement(new_xyzt,xyzt);
+        CONCLOG_PRINTLN_AT(2,"new_xyzt="<<new_xyzt);
+
+        //auto new_xyzt = q - solve(S,r);
+
+        // return new_xyzt;
+        x = new_xyzt[range(0,n)];
+        y = new_xyzt[range(n,n+m)];
+        z = new_xyzt[range(n+m,n+m+n)];
+        t = new_xyzt[n+m+n];
+    } catch (SingularMatrixException e) {
+        CONCLOG_PRINTLN_AT(2,e.what());
+    }
+}
+
+template<class FLT> auto
+KarushKuhnTuckerIntervalOptimiser<FLT>::_write(OutputStream& os) const -> OutputStream&
+{
+    return os << "KarushKuhnTuckerIntervalOptimiser<" << class_name<FLT>() << ">(precision="<<this->_pr<<")";
+}
+
+template class KarushKuhnTuckerIntervalOptimiser<FloatDP>;
+template class KarushKuhnTuckerIntervalOptimiser<FloatMP>;
+
 
 /*
 

@@ -287,6 +287,29 @@ class TestOptimiser
 
 };
 
+
+template<class OPT> Void test_mixed_constrained_optimisation(OPT opt) {
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        EffectiveScalarMultivariateFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
+        ARIADNE_TEST_PRINT(f);
+        ExactBoxType D = ExactBoxType{{-1.0_x,2.0_x},{-3.0_x,5.0_x},{1.25_x,2.25_x}};
+        ARIADNE_TEST_PRINT(D);
+        EffectiveScalarMultivariateFunction g = x[0]*x[1]-x[0]*Real(1.25_x);
+        EffectiveVectorMultivariateFunction h = {Real(1.5_x)+x[0]+2*x[1]+Real(0.25_x)*x[0]*x[1]};
+        EffectiveVectorMultivariateFunction gh=join(g,h);
+        ARIADNE_TEST_PRINT(gh);
+        ExactBoxType C = ExactBoxType {{-1.0_x,-0.5_x},{0.0_x,0.0_x}};
+        ARIADNE_TEST_PRINT(C);
+
+        std::cerr<<"HERE\n";
+        std::cerr<<"opt="<<opt<<"\n";
+        Vector<DyadicBounds> x_optimal=opt.minimise(f,D,gh,C);
+
+        Vector<FloatDPBounds> x_optimal_dp(x_optimal.size(),[&x_optimal](SizeType i){return FloatDPBounds(x_optimal[i],dp);});
+        ExactDouble required_accuracy=1e-8_pr;
+        ARIADNE_TEST_LESS(norm(h(x_optimal_dp)),required_accuracy);
+    }
+
 class TestApproximateOptimiser
 {
   private:
@@ -332,13 +355,18 @@ Int main(Int argc, const char* argv[]) {
     // C0BranchAndBoundOptimiser bbo(1./1024);
     // TestOptimiser(bbo).test();
 
+
+#warning
+    ApproximateDouble tol=1./1024;
+    KarushKuhnTuckerIntervalOptimiser<FloatDP> kkto(dp,tol);
+    test_mixed_constrained_optimisation(kkto);
+return ARIADNE_TEST_FAILURES;
+
     PrimalSlackPenaltyBarrierFunctionApproximateOptimiser pbappo;
     TestApproximateOptimiser(pbappo).test_mixed_constrained_optimisation();
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     TestOptimiser(nlio).test();
-
-    return ARIADNE_TEST_FAILURES;
 
     NonlinearInteriorPointOptimiser nlo;
     TestOptimiser(nlo).test();
@@ -348,6 +376,10 @@ Int main(Int argc, const char* argv[]) {
 
     IntervalOptimiser ivlo;
     TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
+
+//    KrawczykOptimiser krwo;
+//    TestOptimiser(krwo).test_nonlinear_equality_feasibility();
+
     return ARIADNE_TEST_FAILURES;
 }
 

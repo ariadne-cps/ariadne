@@ -403,7 +403,7 @@ class NonAssignableDifferential
 //! \brief A class representing the derivatives of a vector quantity depending on multiple arguments.
 template<class X>
 class Vector< Differential<X> >
-    : public VectorExpression< Vector< Differential<X> > >
+    : public VectorContainer< Vector< Differential<X> > >
     , ProvideVectorOperations
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
@@ -444,6 +444,7 @@ class Vector< Differential<X> >
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](SizeType i) { return static_cast<NonAssignableDifferential<X>&>(static_cast<Differential<X>&>(_ary[i])); }
 
+    VectorRange<Vector<Differential<X>>> operator[](Range rng) { return project(*this,rng); }
     VectorRange<const Vector<Differential<X>>> operator[](Range rng) const { return project(*this,rng); }
 
     const Differential<X> zero_element() const { return Differential<X>::constant(this->argument_size(),this->degree(),this->zero_coefficient()); }

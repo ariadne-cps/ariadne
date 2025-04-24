@@ -57,6 +57,8 @@ template<> struct PrimalData<ApproximateTag> {
     using FLT=FloatDP;
     Vector<Approximation<FLT>> x;
     PrimalData(Vector<Approximation<FLT>> x_) : x(x_) { }
+    friend OutputStream& operator<<(OutputStream& os, PrimalData<ApproximateTag> const& data) {
+        return os << "ApproximatePrimalData(x=" << data.x << ")"; }
 };
 using ApproximatePrimalData = PrimalData<ApproximateTag>;
 
@@ -67,6 +69,8 @@ template<> struct PrimalSlackData<ApproximateTag>
     using FLT=FloatDP;
     Vector<Approximation<FLT>> w;
     PrimalSlackData(Vector<Approximation<FLT>> x_, Vector<Approximation<FLT>> w_) : PrimalData<ApproximateTag>(x_), w(w_) { }
+    friend OutputStream& operator<<(OutputStream& os, PrimalSlackData<ApproximateTag> const& data) {
+        return os << "ApproximatePrimalSlackData(w=" << data.w << ", x=" << data.x << ")"; }
 };
 using ApproximatePrimalSlackData = PrimalSlackData<ApproximateTag>;
 
@@ -77,6 +81,8 @@ template<> struct PrimalDualComplementaryData<ApproximateTag>
     using FLT=FloatDP;
     Vector<Approximation<FLT>> y;
     Vector<Approximation<FLT>> z;
+    friend OutputStream& operator<<(OutputStream& os, PrimalDualComplementaryData<ApproximateTag> const& data) {
+        return os << "ApproximatePrimalDualComplementaryData(x=" << data.x << ", y=" << data.y << ", z=" << data.z << ")"; }
 };
 
 //! \ingroup OptimisationSubModule EvaluationModule

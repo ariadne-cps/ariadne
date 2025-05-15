@@ -22,18 +22,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ROBE21.hpp"
+#include "ROBE25.hpp"
 #include "CVDP20.hpp"
 #include "LALO20.hpp"
-#include "LOVO21.hpp"
+#include "LOVO25.hpp"
 #include "SPRE20.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    ROBE21();
+    ROBE25();
     CVDP20();
     LALO20();
-    LOVO21();
+    LOVO25();
     SPRE20();
 }

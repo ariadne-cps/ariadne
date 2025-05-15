@@ -35,8 +35,10 @@ void ROBE25() {
 
     CONCLOG_PRINTLN("Robertson chemical reaction system:");
 
-    StepMaximumError max_err = 1e-9;
+    StepMaximumError max_err = 1e-10;
     GradedTaylorSeriesIntegrator integrator(max_err);
+    double maximum_step_size = 0.004;
+    double maximum_spacial_error = 1e-7;
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
@@ -57,13 +59,13 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.004);
-        evolver.configuration().set_maximum_spacial_error(1e-6);
+        evolver.configuration().set_maximum_step_size(maximum_step_size);
+        evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
         CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
-        auto width = bb[s].width();
+        auto width = bb[s].width().get_d();
         CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
         CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
 	
@@ -71,7 +73,8 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("1");
-        instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
+        if (width < 1e-5)
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width);
         instance.write();
     }
 
@@ -90,13 +93,13 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.004);
-        evolver.configuration().set_maximum_spacial_error(1e-6);
+        evolver.configuration().set_maximum_step_size(maximum_step_size);
+        evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
         CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
-        auto width = bb[s].width();
+        auto width = bb[s].width().get_d();
         CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
         CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
 
@@ -104,7 +107,8 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("2");
-        instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
+        if (width < 1e-5)
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width);
         instance.write();
     }
 
@@ -123,13 +127,13 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Computing orbit... ");
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
-        evolver.configuration().set_maximum_step_size(0.004);
-        evolver.configuration().set_maximum_spacial_error(1e-6);
+        evolver.configuration().set_maximum_step_size(maximum_step_size);
+        evolver.configuration().set_maximum_spacial_error(maximum_spacial_error);
         CONCLOG_RUN_AT(1,auto orbit = evolver.orbit(initial_set, evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
 
         auto bb = orbit.final().bounding_box();
-        auto width = bb[s].width();
+        auto width = bb[s].width().get_d();
         CONCLOG_PRINTLN_AT(1,"Reach size = " << orbit.reach().size());
         CONCLOG_PRINTLN_AT(1,"Final x+y+z width = " << width);
 
@@ -137,7 +141,8 @@ void ROBE25() {
         CONCLOG_PRINTLN_AT(1,"Done in " << sw.elapsed_seconds() << " seconds.");
 
         auto instance = benchmark.create_instance("3");
-        instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width.get_d());
+        if (width < 1e-5)
+            instance.set_verified(1).set_execution_time(sw.elapsed_seconds()).add_loss(orbit.reach().size()).add_loss(width);
         instance.write();
     }
 

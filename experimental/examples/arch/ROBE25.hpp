@@ -1,7 +1,7 @@
 /***************************************************************************
- *            ROBE21.hpp
+ *            ROBE25.hpp
  *
- *  Copyright  2021  Luca Geretti
+ *  Copyright  2025  Luca Geretti
  *
  ****************************************************************************/
 
@@ -26,9 +26,9 @@
 
 using namespace Ariadne;
 
-void ROBE21() {
+void ROBE25() {
 
-    ArchBenchmark benchmark("ROBE21");
+    ArchBenchmark benchmark("ROBE25");
 
     RealVariable x("x"), y("y"), z("z"), s("s");
     RealConstant alpha("alpha",0.4_dec);

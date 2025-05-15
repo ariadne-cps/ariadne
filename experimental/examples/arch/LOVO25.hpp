@@ -1,7 +1,7 @@
 /***************************************************************************
- *            LOVO21.hpp
+ *            LOVO25.hpp
  *
- *  Copyright  2021  Luca Geretti
+ *  Copyright  2025  Luca Geretti
  *
  ****************************************************************************/
 
@@ -25,9 +25,9 @@
 
 using namespace Ariadne;
 
-void LOVO21()
+void LOVO25()
 {
-    ArchBenchmark benchmark("LOVO21");
+    ArchBenchmark benchmark("LOVO25");
 
     CONCLOG_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
 

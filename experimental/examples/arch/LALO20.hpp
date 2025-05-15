@@ -56,13 +56,13 @@ void LALO20() {
     {
         CONCLOG_PRINTLN_AT(1,"Running for W=0.01...");
 
-        StepMaximumError max_err = 1e-6;
+        StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(0.09);
         evolver.configuration().set_maximum_step_size(0.2);
-        evolver.configuration().set_maximum_spacial_error(1e-3);
+        evolver.configuration().set_maximum_spacial_error(1e-4);
 
         Real eps = 1 / 100_q;
 
@@ -110,13 +110,13 @@ void LALO20() {
     {
         CONCLOG_PRINTLN_AT(1,"Running for W=0.05...");
 
-        StepMaximumError max_err = 1e-6;
+        StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(0.2);
-        evolver.configuration().set_maximum_spacial_error(1e-3);
+        evolver.configuration().set_maximum_spacial_error(1e-4);
 
         Real eps = 1 / 20_q;
 
@@ -164,13 +164,13 @@ void LALO20() {
     {
         CONCLOG_PRINTLN_AT(1,"Running for W=0.1...");
 
-        StepMaximumError max_err = 1e-6;
+        StepMaximumError max_err = 1e-7;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(1.0);
         evolver.configuration().set_maximum_step_size(0.2);
-        evolver.configuration().set_maximum_spacial_error(1e-3);
+        evolver.configuration().set_maximum_spacial_error(1e-4);
 
         Real eps = 1 / 10_q;
 

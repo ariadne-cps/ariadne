@@ -62,8 +62,8 @@ void LOVO25()
     GeneralHybridEvolver evolver(automaton);
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.07);
-    evolver.configuration().set_maximum_spacial_error(1e-5);
+    evolver.configuration().set_maximum_step_size(0.2);
+    evolver.configuration().set_maximum_spacial_error(1e-4);
 
     RealPoint ic({1.3_dec,1.0_dec});
     Real e(0.012_dec);
@@ -102,15 +102,17 @@ void LOVO25()
         CONCLOG_PRINTLN("All final sets have either 2 or 4 transitions.")
     } else { CONCLOG_PRINTLN("Final set with a different number of transitions have been found!") }
 
+    double final_set_area = (final_bounds[x].width()*final_bounds[y].width()).get_d();
+
     CONCLOG_PRINTLN("Done in " << sw.elapsed_seconds() << " seconds.")
     CONCLOG_PRINTLN("# of final sets: " << actual_final.size())
-    CONCLOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width())
+    CONCLOG_PRINTLN("Final set area: " << final_set_area)
 
     auto instance = benchmark.create_instance();
-    if (has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
+    if (final_set_area < 1e-2 and has_2_number_of_transitions and has_4_number_of_transitions and not has_different_number_of_transitions) {
         instance.set_verified(1)
                 .set_execution_time(sw.elapsed_seconds())
-                .add_loss((final_bounds[x].width()*final_bounds[y].width()).get_d());
+                .add_loss(final_set_area);
     }
     instance.write();
 

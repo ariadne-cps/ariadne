@@ -23,17 +23,17 @@
  */
 
 #include "ROBE25.hpp"
-#include "CVDP20.hpp"
+#include "CVDP23.hpp"
 #include "LALO20.hpp"
 #include "LOVO25.hpp"
-#include "SPRE20.hpp"
+#include "SPRE22.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
     ROBE25();
-    CVDP20();
+    CVDP23();
     LALO20();
     LOVO25();
-    SPRE20();
+    SPRE22();
 }

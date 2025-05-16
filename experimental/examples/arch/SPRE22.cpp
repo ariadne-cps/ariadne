@@ -1,7 +1,7 @@
 /***************************************************************************
- *            SPRE20.cpp
+ *            SPRE22.cpp
  *
- *  Copyright  2020  Luca Geretti
+ *  Copyright  2025  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,10 +22,10 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "SPRE20.hpp"
+#include "SPRE22.hpp"
 #include "ariadne_main.hpp"
 
 void ariadne_main()
 {
-    SPRE20();
+    SPRE22();
 }

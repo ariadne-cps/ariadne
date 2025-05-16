@@ -66,7 +66,7 @@ decltype(auto) make_space_rendezvous_problem() {
 
     HybridAutomaton space_rendezvous("space_rendezvous");
 
-    HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,vx==0,vy==0});
+    HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,0<=vx<=5,0<=vy<=5});
 
     HybridConstraintSet safe_set;
     safe_set.adjoin(spacecraft|rendezvous,{y>=x*tan(Ariadne::pi/6u),-y>=x*tan(Ariadne::pi/6u),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
@@ -100,7 +100,7 @@ decltype(auto) make_space_rendezvous_problem() {
     return make_problem(initial_set,space_rendezvous,safe_set);
 }
 
-void SPRE20()
+void SPRE22()
 {
     ArchBenchmark benchmark("SPRE20");
     auto instance = benchmark.create_instance();

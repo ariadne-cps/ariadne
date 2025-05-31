@@ -78,6 +78,19 @@ class SolverWrapper
 };
 
 
+class BounderWrapper
+  : public pybind11::wrapper<BounderInterface>
+{
+  public:
+    BounderInterface* clone() const {
+        return this->get_override("clone")(); }
+    Pair<StepSizeType,BoxDomainType> compute(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType h) const {
+        return this->get_override("compute")(vf,D,h); }
+    Void _write(OutputStream& os) const {
+        this->get_override("_write")(os); }
+};
+
+
 class IntegratorWrapper
   : public pybind11::wrapper<IntegratorInterface>
 {
@@ -119,6 +132,19 @@ Void export_solvers(pybind11::module& module)
 }
 
 
+
+Void export_bounders(pybind11::module& module)
+{
+    pybind11::class_<Suggestion<StepSizeType>> suggested_step_size_class(module,"SuggestedStepSize");
+    module.def("suggest", [](StepSizeType const& h){return static_cast<Suggestion<StepSizeType>>(suggest(h));});
+
+    pybind11::class_<BounderInterface,BounderWrapper> bounder_interface_class(module,"BounderInterface");
+    bounder_interface_class.def("compute",(Pair<StepSizeType,UpperBoxType>(BounderInterface::*)(const ValidatedVectorMultivariateFunction&, const BoxDomainType&, const Suggestion<StepSizeType>&)const) &BounderInterface::compute);
+
+    pybind11::class_<EulerBounder,BounderInterface> euler_bounder_class(module,"EulerBounder");
+    euler_bounder_class.def(pybind11::init<>());
+    euler_bounder_class.def("compute",(Pair<StepSizeType,UpperBoxType>(EulerBounder::*)(const ValidatedVectorMultivariateFunction&, const BoxDomainType&, const Suggestion<StepSizeType>&)const) &EulerBounder::compute);
+}
 
 Void export_integrators(pybind11::module& module)
 {
@@ -185,6 +211,8 @@ Void export_integrators(pybind11::module& module)
 Void solver_submodule(pybind11::module& module)
 {
     export_solvers(module);
+
+    export_bounders(module);
     export_integrators(module);
 }
 

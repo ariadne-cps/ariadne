@@ -10,18 +10,30 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
-### 2.5
+### 2.5.0
+
+*Date: 22/06/2025*
 
 - [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
+- [#328](https://github.com/ariadne-cps/ariadne/issues/328) (N) Add atan support for NormedAlgebra
+- [#796](https://github.com/ariadne-cps/ariadne/issues/796) (N) Add Foundations module for (topo)logical notions
 - [#569](https://github.com/ariadne-cps/ariadne/issues/569) (A) Adding multiple points simulator
 - [#685](https://github.com/ariadne-cps/ariadne/issues/685) (A) Support ARM by making it properly fall into C99 rounding
 - [#686](https://github.com/ariadne-cps/ariadne/issues/686) (A) Support GCC 12 on all platforms
+- [#334](https://github.com/ariadne-cps/ariadne/issues/334) (C) Clean-up function models, notably template parameters
+- [#337](https://github.com/ariadne-cps/ariadne/issues/337) (C) Rename partial functions to FunctionPatch
+- [#665](https://github.com/ariadne-cps/ariadne/issues/665) (C) Remove Value<FloatXX>, and use plain FloatXX as exact object
+- [#666](https://github.com/ariadne-cps/ariadne/issues/666) (C) Template Float classes
 - [#681](https://github.com/ariadne-cps/ariadne/issues/681) (C) Refactor the logger as a ConcLog logger submodule 
 - [#688](https://github.com/ariadne-cps/ariadne/issues/688) (C) Modify atan to avoid using long double, to support ARM architecture
 - [#702](https://github.com/ariadne-cps/ariadne/issues/702) (C) Refactor the concurrency modules as a BetterThreads concurrency submodule
+- [#788](https://github.com/ariadne-cps/ariadne/issues/788) (C) Add explicit suggest(...) for step-size suggestion to integrator classes
 - [#698](https://github.com/ariadne-cps/ariadne/issues/698) (C) Use snprintf instead of the deprecated sprintf
 - [#198](https://github.com/ariadne-cps/ariadne/issues/198) (C,F) Modify differential inclusion code to conform to other evolvers, fix reach set returned to be rigorous
 - [#678](https://github.com/ariadne-cps/ariadne/issues/678) (F) Address warnings using AppleClang, which is now usable on C++20 Concepts code
+- [#710](https://github.com/ariadne-cps/ariadne/issues/710) (F) Change use of char to short to address issue that ARM GCC char is unsigned
+- [#735](https://github.com/ariadne-cps/ariadne/issues/735) (F) Fix bug in multiplication of Taylor models causing under-approximation of error
+- [#741](https://github.com/ariadne-cps/ariadne/issues/741) (F) Fix fault in VectorFieldSimulator by using Approximation<FLT> instead of Real step size
 
 ### 2.4.1
 

@@ -1,5 +1,5 @@
-ariadne (2.4.1) focal; urgency=medium
+ariadne (2.5.0-1) jammy; urgency=medium
 
-  * Add new integrators, supplement Python interface, minor fixes
+  * Add support for multivalued functions, add multiple point dynamics simulators, minor changes and fixes
 
- -- Luca Geretti <luca.geretti@gmail.com>  Sat, 07 Aug 2021 12:08:00 +0100
+ -- Luca Geretti <luca.geretti@gmail.com>  Mon, 23 Jun 2025 10:00:00 +0100

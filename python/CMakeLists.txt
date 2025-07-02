@@ -1,4 +1,4 @@
-find_package(Python3 3.12 EXACT COMPONENTS Interpreter Development)
+find_package(Python3 3.12 COMPONENTS Interpreter Development)
 
 option(PYTHON_ENFORCE_TESTS "Enforce Python tests" OFF)
 

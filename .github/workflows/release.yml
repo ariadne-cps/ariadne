@@ -25,10 +25,10 @@ jobs:
             pyld: "DY"
           }
           - {
-            name: "Ubuntu 24.04 Clang 15 [Release]",
+            name: "Ubuntu 24.04 Clang 16 [Release]",
             os: ubuntu-24.04,
-            cxx-pkg: "clang-15",
-            cxx-cmd: "clang++-15"
+            cxx-pkg: "clang-16",
+            cxx-cmd: "clang++-16"
           }
           - {
             name: "Ubuntu 24.04 GCC 10 [Release]",

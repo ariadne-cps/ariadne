@@ -31,7 +31,7 @@
 
 #include "graphics_interface.hpp"
 #include "geometry2d.hpp"
-#include "betterthreads/typedefs.hpp"
+#include "betterthreads/using.hpp"
 
 namespace Ariadne {
 

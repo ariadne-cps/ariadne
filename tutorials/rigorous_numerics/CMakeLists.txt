@@ -1,5 +1,5 @@
 # Preferable to avoid warnings during execution
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.15)
 
 project(RigorousNumericsTutorial VERSION 2.5.0)
 

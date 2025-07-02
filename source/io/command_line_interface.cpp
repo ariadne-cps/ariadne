@@ -23,7 +23,7 @@
  */
 
 #include "config.hpp"
-#include "betterthreads/task_manager.hpp"
+#include "betterthreads/thread_manager.hpp"
 #include "utility/handle.hpp"
 #include "drawer.hpp"
 #include "graphics_manager.hpp"

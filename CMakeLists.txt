@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.15)
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(Ariadne VERSION 2.5.0)

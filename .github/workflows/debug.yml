@@ -29,9 +29,9 @@ jobs:
             cxx: "g++-12"
           }
           - {
-            name: "Ubuntu 24.04 Clang 15 [Debug]",
+            name: "Ubuntu 24.04 Clang 16 [Debug]",
             os: ubuntu-24.04,
-            cxx: "clang++-15"
+            cxx: "clang++-16"
           }
           - {
             name: "Ubuntu 24.04 GCC 12 [Debug]",
@@ -68,7 +68,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config clang-15 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3.12-dev
+        sudo apt install -y cmake ninja-build pkg-config clang-16 g++-12 libcairo2-dev gnuplot libmpfr-dev python3-pip python3.12-dev
         sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
         sudo pip3 install pytest
 

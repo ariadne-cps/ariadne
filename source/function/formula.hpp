@@ -38,7 +38,7 @@
 #include "utility/macros.hpp"
 #include "utility/pointer.hpp"
 #include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 
 #include "numeric/operators.hpp"
 #include "numeric/numeric.hpp"

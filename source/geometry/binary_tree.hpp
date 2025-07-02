@@ -33,7 +33,7 @@
 #include "function/functional.hpp"
 #include "utility/macros.hpp"
 #include "utility/exceptions.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "utility/binary_word.hpp"
 #include "geometry/list_set.hpp"
 

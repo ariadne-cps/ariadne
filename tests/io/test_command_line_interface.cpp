@@ -24,14 +24,14 @@
 
 #include "io/command_line_interface.hpp"
 #include "conclog/logging.hpp"
-#include "betterthreads/task_manager.hpp"
+#include "betterthreads/thread_manager.hpp"
 #include "../test.hpp"
 
 using namespace ConcLog;
 
 using namespace Ariadne;
 
-using BetterThreads::TaskManager;
+using BetterThreads::ThreadManager;
 
 class TestCommandLineInterface {
   public:
@@ -87,10 +87,10 @@ class TestCommandLineInterface {
     void test_concurrency_parsing() {
         Bool success1 = CommandLineInterface::instance().acquire({"", "-c", "2"});
         ARIADNE_TEST_ASSERT(success1)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
+        ARIADNE_TEST_EQUALS(ThreadManager::instance().concurrency(),2)
         Bool success2 = CommandLineInterface::instance().acquire({"", "--concurrency", "0"});
         ARIADNE_TEST_ASSERT(success2)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),0)
+        ARIADNE_TEST_EQUALS(ThreadManager::instance().concurrency(),0)
         Bool success3 = CommandLineInterface::instance().acquire({"", "-c", "-2"});
         ARIADNE_TEST_ASSERT(not success3)
         Bool success4 = CommandLineInterface::instance().acquire({"", "-c", "q"});
@@ -99,7 +99,7 @@ class TestCommandLineInterface {
         ARIADNE_TEST_ASSERT(not success5)
         Bool success6 = CommandLineInterface::instance().acquire({"", "-c", "max"});
         ARIADNE_TEST_ASSERT(success6)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),TaskManager::instance().maximum_concurrency())
+        ARIADNE_TEST_EQUALS(ThreadManager::instance().concurrency(),ThreadManager::instance().maximum_concurrency())
     }
 
     void test_drawer_parsing() {
@@ -145,7 +145,7 @@ class TestCommandLineInterface {
     }
 
     void test_scheduler_parsing() {
-        TaskManager::instance().set_concurrency(0);
+        ThreadManager::instance().set_concurrency(0);
         Bool success1 = CommandLineInterface::instance().acquire({"", "-s", "immediate"});
         ARIADNE_TEST_ASSERT(success1)
         Bool success2 = CommandLineInterface::instance().acquire({"", "--scheduler", "immediate"});
@@ -195,7 +195,7 @@ class TestCommandLineInterface {
     void test_multiple_argument_parsing() {
         Bool success = CommandLineInterface::instance().acquire({"", "-c", "2", "--verbosity", "4"});
         ARIADNE_TEST_ASSERT(success)
-        ARIADNE_TEST_EQUALS(TaskManager::instance().concurrency(),2)
+        ARIADNE_TEST_EQUALS(ThreadManager::instance().concurrency(),2)
         ARIADNE_TEST_EQUALS(Logger::instance().configuration().verbosity(),4)
     }
 

@@ -28,7 +28,7 @@
 #include "utility/macros.hpp"
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "algebra/vector.hpp"
 #include "function/function.hpp"
 #include "function/constraint.hpp"

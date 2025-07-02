@@ -26,7 +26,7 @@
 
 #include "config.hpp"
 #include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "symbolic/expression_set.hpp"
 #include "symbolic/assignment.hpp"

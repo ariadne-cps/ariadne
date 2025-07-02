@@ -27,7 +27,7 @@
 #include "config.hpp"
 
 #include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

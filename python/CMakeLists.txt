@@ -1,4 +1,4 @@
-find_package(Python3 3.11 EXACT COMPONENTS Interpreter Development)
+find_package(Python3 3.12 EXACT COMPONENTS Interpreter Development)
 
 if(PYTHON3_FOUND)
 

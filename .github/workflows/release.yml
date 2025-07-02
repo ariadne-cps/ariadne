@@ -47,7 +47,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.12'
 
     - name: Get macOS Concurrency
       if: runner.os == 'macOS'
@@ -69,8 +69,8 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake ninja-build pkg-config ${{matrix.config.cxx-pkg}} libcairo2-dev gnuplot libmpfr-dev python3-pip python3.11-dev
-        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+        sudo apt install -y cmake ninja-build pkg-config ${{matrix.config.cxx-pkg}} libcairo2-dev gnuplot libmpfr-dev python3-pip python3.12-dev
+        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
         sudo pip3 install pytest
 
     - name: Create Build Environment
@@ -116,12 +116,12 @@ jobs:
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
         export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
-        export PYTHONPATH=/usr/local/lib/python3.11/site-packages/:/usr/local/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/
+        export PYTHONPATH=/usr/local/lib/python3.12/site-packages/:/usr/local/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/
         python3 rigorous_numerics_tutorial.py
 
     - name: Check Python Hybrid Evolution Tutorial
       working-directory: ${{runner.workspace}}/tutorials/python
       run: |
         export ${{matrix.config.pyld}}LD_LIBRARY_PATH=/usr/local/lib
-        export PYTHONPATH=/usr/local/lib/python3.11/site-packages/:/usr/local/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/
+        export PYTHONPATH=/usr/local/lib/python3.12/site-packages/:/usr/local/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/
         python3 hybrid_evolution_tutorial.py

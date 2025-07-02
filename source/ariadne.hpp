@@ -83,5 +83,6 @@ namespace Ariadne {
 #include "hybrid/hybrid_graphics.hpp"
 
 #include "conclog/logging.hpp"
+#include "helper/stlio.hpp"
 
 #endif

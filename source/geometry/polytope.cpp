@@ -25,7 +25,7 @@
 #include "function/functional.hpp"
 #include "config.hpp"
 
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "geometry/point.hpp"

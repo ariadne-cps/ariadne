@@ -34,7 +34,7 @@
 #include "stdlib.hpp"
 
 #include "metaprogramming.hpp"
-#include "stlio.hpp"
+#include "helper/stlio.hpp"
 #include "array.hpp"
 #include "macros.hpp"
 #include "typedefs.hpp"
@@ -137,7 +137,7 @@ template<class T> class LinkedList
 };
 template<class T> inline OutputStream&
 operator<< (OutputStream &os, const std::list<T>& l) {
-    return Ariadne::write_sequence(os,l.begin(),l.end());
+    return Helper::write_sequence(os,l.begin(),l.end());
 }
 
 

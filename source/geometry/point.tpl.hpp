@@ -29,7 +29,7 @@
 
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/assignment.hpp"
 #include "io/figure.hpp"

@@ -76,7 +76,7 @@
 #include <stdexcept>
 
 #include "utility/macros.hpp"
-#include "utility/stlio.hpp"
+#include "helper/stlio.hpp"
 
 namespace Ariadne {
 

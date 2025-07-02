@@ -21,7 +21,7 @@ jobs:
 
     - name: Set Up Dependencies
       run: |
-        sudo apt install -y cmake ninja-build pkg-config lcov g++-13 libcairo2-dev gnuplot libmpfr-dev python3-pip python-dev gnuplot
+        sudo apt install -y cmake ninja-build pkg-config lcov g++-13 libcairo2-dev gnuplot libmpfr-dev python3-pip python3-dev gnuplot
         sudo pip3 install coverage pytest
 
     - name: Create Build Environment

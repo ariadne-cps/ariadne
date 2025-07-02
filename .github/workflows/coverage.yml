@@ -33,7 +33,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-13 -G "Ninja" -DCOVERAGE=ON -DPYTHON_TEST_FORCE=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-13 -G "Ninja" -DCOVERAGE=ON -DPYTHON_ENFORCE_TESTS=ON
 
     - name: Build Library, Bindings and Tests
       working-directory: ${{runner.workspace}}/build

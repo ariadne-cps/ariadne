@@ -1,5 +1,7 @@
 find_package(Python3 3.12 EXACT COMPONENTS Interpreter Development)
 
+option(PYTHON_ENFORCE_TESTS "Enforce Python tests" OFF)
+
 if(PYTHON3_FOUND)
 
     add_subdirectory(pybind11)

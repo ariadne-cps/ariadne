@@ -5,7 +5,7 @@ BUILDDIR = build_dir
 # secondly called by launchpad
 build:
 	mkdir $(BUILDDIR);
-	cd $(BUILDDIR); cmake -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_BUILD_TYPE=Release -DPYTHON_BINDINGS_INSTALL_DIR=lib/python3/dist-packages -DCMAKE_INSTALL_PREFIX=../debian/tmp/usr ..
+	cd $(BUILDDIR); cmake -DPACKAGED_SUBMODULES=ON -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_BUILD_TYPE=Release -DPYTHON_BINDINGS_INSTALL_DIR=lib/python3/dist-packages -DCMAKE_INSTALL_PREFIX=../debian/tmp/usr ..
 	make -C $(BUILDDIR)
 
 # thirdly called by launchpad

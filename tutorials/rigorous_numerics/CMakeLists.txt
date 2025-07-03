@@ -1,7 +1,7 @@
 # Preferable to avoid warnings during execution
 cmake_minimum_required(VERSION 3.15)
 
-project(RigorousNumericsTutorial VERSION 2.5.1)
+project(RigorousNumericsTutorial VERSION 2.5.3)
 
 # Set to search the root source directory for the FindAriadne.cmake module
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")

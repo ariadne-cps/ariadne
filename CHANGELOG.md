@@ -10,9 +10,9 @@ Legenda for the issue kind:
 - F: fixed feature
 - R: removed feature
 
-### 2.5.0
+### 2.5.3
 
-*Date: 22/06/2025*
+*Date: 03/07/2025*
 
 - [#34](https://github.com/ariadne-cps/ariadne/issues/34) (N) Support multivalued functions (for Interval Taylor models support)
 - [#328](https://github.com/ariadne-cps/ariadne/issues/328) (N) Add atan support for NormedAlgebra

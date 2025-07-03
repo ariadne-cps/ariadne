@@ -10,7 +10,7 @@ Ariadne is a tool for reachability analysis and model checking of hybrid systems
 
 The command-line installation instructions are presented for Debian Linux systems and derivatives (using apt) and macOS systems (using Homebrew). However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
 
-Official packages are available for Ubuntu LTS (currently 20.04) and derivatives and macOS 11, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 10.2) and clang (minimum required: 11.0).
+Official packages are available for Ubuntu LTS (currently 24.04) and derivatives and macOS 15, but if your architecture or particular setup necessarily requires compilation from sources, instructions are provided. The build system used is CMake. The library is tested for compilation using gcc (minimum required: 12) and clang (minimum required: 16) on Ubuntu, and AppleClang on macOS.
 
 ### Official packages
 
@@ -40,7 +40,7 @@ In order to install the Homebrew package, you just need to
 brew install ariadne-cps/tap/ariadne
 ```
 
-which in one line both sets up the "tap" for Ariadne and installs the package along with any missing dependencies. The package will be upgraded with any new versions after a `brew upgrade` is issued. The package currently supports x86-64 architectures on macOS Big Sur. Other configurations trigger an automatic build, therefore you should not need to deal with sources any time.
+which in one line both sets up the "tap" for Ariadne and installs the package along with any missing dependencies. The package will be upgraded with any new versions after a `brew upgrade` is issued. The package currently supports both x86-64 and arm64 architectures. Other configurations trigger an automatic build, therefore you should not need to deal with sources any time.
 
 ### Dependencies for installation from sources
 
@@ -54,7 +54,7 @@ Specific instructions for Ubuntu and macOS follow, starting from installation fr
 
 #### Ubuntu
 
-apt packages: `cmake pkg-config git libmpfr-dev libcairo2-dev gnuplot` and either `clang-11` or `g++-10` for the compiler toolchain.
+apt packages: `cmake pkg-config git libmpfr-dev libcairo2-dev gnuplot` and either `clang-16` or `g++-12` for the compiler toolchain.
 
 Additional package required for the Python interface: `python3-dev`.
 
@@ -62,7 +62,7 @@ Additional packages required for documentation: `doxygen doxygen-latex`
 
 #### macOS
 
-Homebrew packages: `cmake git mpfr cairo gnuplot` and `gcc@10` if using GCC.
+Homebrew packages: `cmake git mpfr cairo gnuplot`.
 
 For Cairo support, you may need to set up a permanent variable for the path of pkgconfig by adding the following line in your `~\.bash_profile`:
 
@@ -140,8 +140,6 @@ export LD_LIBRARY_PATH=/usr/local/lib
 ### Building executables using Ariadne
 
 The tutorials directory contains two CMake projects that rely on a correct installation of Ariadne, either by using a package or by building the sources. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
-
-Due to limitations of the C++ standard library on macOS since C++11, you won't be able to build an executable with GCC if the Ariadne library has been built using Clang, and viceversa. Hence on macOS you shall use the same compiler for both Ariadne and any projects that depend on it. If Ariadne comes from the Homebrew package, then it has been built using g++ 10.
 
 ## Contribution guidelines ##
 

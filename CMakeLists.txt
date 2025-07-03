@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
-project(Ariadne VERSION 2.5.0)
+project(Ariadne VERSION 2.5.1)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     message(WARNING "Intel compiler not supported.")

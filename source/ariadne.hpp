@@ -59,6 +59,11 @@ namespace Ariadne {
 #include "solvers/integrator.hpp"
 #include "solvers/solver.hpp"
 
+#include "symbolic/constant.hpp"
+#include "symbolic/variable.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
+
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/hybrid_set.hpp"

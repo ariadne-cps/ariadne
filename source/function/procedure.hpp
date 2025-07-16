@@ -182,9 +182,12 @@ template<class X, class Y> inline X evaluate(const Procedure<Y>& p, const Vector
 
 // \related Procedure \brief Evaluate a function \a p defined by an algorithmic procedure.
 template<class X, class Y> inline Vector<X> evaluate(const Vector<Procedure<Y>>& p, const Vector<X>& x) {
+    std::cerr<<"evaluate(Vector<Procedure<Y>>,Vector<X>)\n";
     List<X> t(p._instructions.size(),x.zero_element());
+    std::cerr<<"tz="<<t<<"\n";
     _execute(t,p._instructions,p._constants,x);
-    Vector<X> r(p.result_size());
+    std::cerr<<"tf="<<t<<"\n";
+    Vector<X> r(p.result_size(),x.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=std::move(t[p._results[i]]); }
     return r;
 }

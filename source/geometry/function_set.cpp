@@ -1203,6 +1203,11 @@ OutputStream& ValidatedConstrainedImageSet::_write(OutputStream& os) const
     return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
 }
 
+ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, const ValidatedVectorMultivariateFunction& function) {
+    set.apply(function); return set;
+}
+
+
 OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& set) {
     return set._write(os);
 }

@@ -28,9 +28,12 @@
 #include "LOVO25.hpp"
 #include "SPRE22.hpp"
 #include "ariadne_main.hpp"
+#include "arch.hpp"
 
 void ariadne_main()
 {
+    ArchSuite suite;
+
     ROBE25();
     CVDP23();
     LALO20();

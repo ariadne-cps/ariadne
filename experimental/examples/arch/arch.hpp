@@ -33,6 +33,18 @@ namespace Ariadne {
 
 class ArchBenchmark;
 
+class ArchSuite {
+  public:
+    ArchSuite() {
+        std::ofstream outfile;
+        outfile.open(filename, std::ios_base::app);
+        outfile << "benchmark,instance,result,time,accuracy,timesteps" << std::endl;
+        outfile.close();
+    }  
+
+    inline static const String filename = "results.csv";
+};
+
 class ArchBenchmarkInstance {
     friend class ArchBenchmark;
   protected:
@@ -44,9 +56,8 @@ class ArchBenchmarkInstance {
     ArchBenchmarkInstance& add_loss(double value) { _losses.push_back(value); return *this; }
     void write() const {
         std::ofstream outfile;
-        outfile.open(_filename, std::ios_base::app);
-        outfile << "Ariadne, " << _benchmark_name << ", " <<
-                   _instance_name << ", " <<
+        outfile.open(ArchSuite::filename, std::ios_base::app);
+        outfile << _benchmark_name << ", " << _instance_name << ", " <<
                    _verified << ", " <<
                    (_execution_time != 0 ? to_string(_execution_time) : "");
         for (SizeType i=0; i < _losses.size(); ++i)
@@ -60,11 +71,10 @@ class ArchBenchmarkInstance {
     int _verified;
     double _execution_time;
     List<double> _losses;
-  private:
-    inline static const String _filename = "results.csv";
 };
 
 class ArchBenchmark {
+    friend class ArchBenchmarkInstance;
   public:
     ArchBenchmark(String const& name) : _name(name) { }
     ArchBenchmarkInstance create_instance() const { return ArchBenchmarkInstance(_name); }
@@ -72,6 +82,8 @@ class ArchBenchmark {
     String name() const { return _name; }
   private:
     String _name;
+  protected:  
+    
 };
 
 } // namespace Ariadne

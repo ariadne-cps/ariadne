@@ -448,8 +448,8 @@ class TestSmtSolver {
                       << " theory_checks=" << solve_result.statistics().theory_checks
                       << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_checks>=1u);
-            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_conflicts>=1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,1u);
         }
 
         {

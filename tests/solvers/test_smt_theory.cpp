@@ -29,6 +29,8 @@ class TestSmtTheory {
     Void test() {
         ARIADNE_TEST_CALL(test_relations());
         ARIADNE_TEST_CALL(test_negations());
+        ARIADNE_TEST_CALL(test_normalization());
+        ARIADNE_TEST_CALL(test_weakening());
         ARIADNE_TEST_CALL(test_reject_non_atom());
     }
 
@@ -73,6 +75,67 @@ class TestSmtTheory {
         check_negation(ex>=ey,SmtTheoryRelation::LT,"!(x>=y) -> x<y");
         check_negation(ex<ey,SmtTheoryRelation::GEQ,"!(x<y) -> x>=y");
         check_negation(ex>ey,SmtTheoryRelation::LEQ,"!(x>y) -> x<=y");
+    }
+
+    Void test_normalization() {
+        RealVariable x("x"), y("y");
+        RealExpression ex=x;
+        RealExpression ey=y;
+
+        auto check_single = [&](ContinuousPredicate const& predicate,
+                                SmtTheoryPrimitiveRelation expected_relation,
+                                RealExpression const& expected_expression,
+                                String const& label) {
+            std::cout << "[smt-theory] normalize " << label << std::endl;
+            auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0][0].relation(),expected_relation);
+            ARIADNE_TEST_SAME(alternatives[0][0].expression(),expected_expression);
+        };
+
+        check_single(ex==ey,SmtTheoryPrimitiveRelation::EQ_ZERO,ex-ey,"x==y -> x-y=0");
+        check_single(ex>=ey,SmtTheoryPrimitiveRelation::GEQ_ZERO,ex-ey,"x>=y -> x-y>=0");
+        check_single(ex>ey,SmtTheoryPrimitiveRelation::GT_ZERO,ex-ey,"x>y -> x-y>0");
+        check_single(ex<=ey,SmtTheoryPrimitiveRelation::GEQ_ZERO,ey-ex,"x<=y -> y-x>=0");
+        check_single(ex<ey,SmtTheoryPrimitiveRelation::GT_ZERO,ey-ex,"x<y -> y-x>0");
+
+        std::cout << "[smt-theory] normalize x!=y -> (x-y>0) or (y-x>0)" << std::endl;
+        auto neq=normalize_smt_theory_literal(make_smt_theory_literal(ex!=ey));
+        ARIADNE_TEST_EQUAL(neq.size(),2u);
+        ARIADNE_TEST_EQUAL(neq[0].size(),1u);
+        ARIADNE_TEST_EQUAL(neq[1].size(),1u);
+        ARIADNE_TEST_EQUAL(neq[0][0].relation(),SmtTheoryPrimitiveRelation::GT_ZERO);
+        ARIADNE_TEST_EQUAL(neq[1][0].relation(),SmtTheoryPrimitiveRelation::GT_ZERO);
+        ARIADNE_TEST_SAME(neq[0][0].expression(),ex-ey);
+        ARIADNE_TEST_SAME(neq[1][0].expression(),ey-ex);
+    }
+
+    Void test_weakening() {
+        RealVariable x("x"), y("y");
+        RealExpression ex=x;
+        RealExpression ey=y;
+        ExactDouble epsilon=0.125_x;
+
+        auto check = [&](ContinuousPredicate const& predicate,
+                         SmtTheoryWeakRelation expected,
+                         String const& label) {
+            std::cout << "[smt-theory] weaken " << label << " epsilon=" << epsilon << std::endl;
+            auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+            ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+            ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+            auto weakened=weaken_smt_theory_literal(alternatives[0][0],epsilon);
+            ARIADNE_TEST_EQUAL(weakened.relation(),expected);
+            ARIADNE_TEST_EQUAL(weakened.epsilon(),epsilon);
+        };
+
+        check(ex==ey,SmtTheoryWeakRelation::ABS_LEQ_EPSILON,"x==y -> |x-y|<=epsilon");
+        check(ex>=ey,SmtTheoryWeakRelation::GEQ_MINUS_EPSILON,"x>=y -> x-y>=-epsilon");
+        check(ex>ey,SmtTheoryWeakRelation::GT_MINUS_EPSILON,"x>y -> x-y>-epsilon");
+
+        std::cout << "[smt-theory] weakening requires positive epsilon" << std::endl;
+        auto primitive=normalize_smt_theory_literal(make_smt_theory_literal(ex==ey))[0][0];
+        ARIADNE_TEST_THROWS(weaken_smt_theory_literal(primitive,0.0_x),std::runtime_error);
     }
 
     Void test_reject_non_atom() {

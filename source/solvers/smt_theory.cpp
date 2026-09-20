@@ -50,6 +50,52 @@ SmtTheoryLiteral make_smt_theory_literal(ContinuousPredicate const& predicate)
     return SmtTheoryLiteral(predicate.cmp1<Real>(),relation,predicate.cmp2<Real>());
 }
 
+SmtTheoryAlternatives normalize_smt_theory_literal(SmtTheoryLiteral const& literal)
+{
+    RealExpression difference=literal.lhs()-literal.rhs();
+    RealExpression opposite=literal.rhs()-literal.lhs();
+
+    switch(literal.relation()) {
+        case SmtTheoryRelation::EQ:
+            return {{{difference,SmtTheoryPrimitiveRelation::EQ_ZERO}}};
+        case SmtTheoryRelation::GEQ:
+            return {{{difference,SmtTheoryPrimitiveRelation::GEQ_ZERO}}};
+        case SmtTheoryRelation::GT:
+            return {{{difference,SmtTheoryPrimitiveRelation::GT_ZERO}}};
+        case SmtTheoryRelation::LEQ:
+            return {{{opposite,SmtTheoryPrimitiveRelation::GEQ_ZERO}}};
+        case SmtTheoryRelation::LT:
+            return {{{opposite,SmtTheoryPrimitiveRelation::GT_ZERO}}};
+        case SmtTheoryRelation::NEQ:
+            return {
+                {{difference,SmtTheoryPrimitiveRelation::GT_ZERO}},
+                {{opposite,SmtTheoryPrimitiveRelation::GT_ZERO}}
+            };
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+    }
+}
+
+SmtTheoryWeakLiteral weaken_smt_theory_literal(SmtTheoryPrimitiveLiteral const& literal,
+                                               ExactDouble epsilon)
+{
+    ARIADNE_PRECONDITION(epsilon>0.0_x);
+
+    switch(literal.relation()) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO:
+            return SmtTheoryWeakLiteral(
+                literal.expression(),SmtTheoryWeakRelation::ABS_LEQ_EPSILON,epsilon);
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO:
+            return SmtTheoryWeakLiteral(
+                literal.expression(),SmtTheoryWeakRelation::GEQ_MINUS_EPSILON,epsilon);
+        case SmtTheoryPrimitiveRelation::GT_ZERO:
+            return SmtTheoryWeakLiteral(
+                literal.expression(),SmtTheoryWeakRelation::GT_MINUS_EPSILON,epsilon);
+        default:
+            ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    }
+}
+
 OutputStream& operator<<(OutputStream& os, SmtTheoryRelation relation)
 {
     switch(relation) {
@@ -60,6 +106,26 @@ OutputStream& operator<<(OutputStream& os, SmtTheoryRelation relation)
         case SmtTheoryRelation::LT: return os << "<";
         case SmtTheoryRelation::GT: return os << ">";
         default: ARIADNE_FAIL_MSG("Unknown SMT theory relation");
+    }
+}
+
+OutputStream& operator<<(OutputStream& os, SmtTheoryPrimitiveRelation relation)
+{
+    switch(relation) {
+        case SmtTheoryPrimitiveRelation::EQ_ZERO: return os << "=0";
+        case SmtTheoryPrimitiveRelation::GEQ_ZERO: return os << ">=0";
+        case SmtTheoryPrimitiveRelation::GT_ZERO: return os << ">0";
+        default: ARIADNE_FAIL_MSG("Unknown SMT primitive theory relation");
+    }
+}
+
+OutputStream& operator<<(OutputStream& os, SmtTheoryWeakRelation relation)
+{
+    switch(relation) {
+        case SmtTheoryWeakRelation::ABS_LEQ_EPSILON: return os << "abs<=epsilon";
+        case SmtTheoryWeakRelation::GEQ_MINUS_EPSILON: return os << ">=-epsilon";
+        case SmtTheoryWeakRelation::GT_MINUS_EPSILON: return os << ">-epsilon";
+        default: ARIADNE_FAIL_MSG("Unknown SMT weak theory relation");
     }
 }
 

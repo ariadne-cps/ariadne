@@ -658,6 +658,51 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] prune aged low-activity learned clauses" << std::endl;
+            SmtSolver pruning_solver(SmtSolverConfiguration(
+                0.125_x,std::numeric_limits<SizeType>::max(),1u));
+            ContinuousPredicate a=(ex>=-0.75);
+            ContinuousPredicate b=(ex>=-0.25);
+            ContinuousPredicate c=(ex>=0.25);
+            ContinuousPredicate d=(ex>=0.75);
+            ContinuousPredicate formula=
+                ( a|| b|| c|| d)&&
+                ( a|| b|| c||(!d))&&
+                ( a|| b||(!c)|| d)&&
+                ( a|| b||(!c)||(!d))&&
+                ( a||(!b)|| c|| d)&&
+                ( a||(!b)|| c||(!d))&&
+                ( a||(!b)||(!c)|| d)&&
+                ( a||(!b)||(!c)||(!d))&&
+                ((!a)|| b|| c|| d)&&
+                ((!a)|| b|| c||(!d))&&
+                ((!a)|| b||(!c)|| d)&&
+                ((!a)|| b||(!c)||(!d))&&
+                ((!a)||(!b)|| c|| d)&&
+                ((!a)||(!b)|| c||(!d))&&
+                ((!a)||(!b)||(!c)|| d)&&
+                ((!a)||(!b)||(!c)||(!d));
+            SmtResult solve_result=pruning_solver.solve(
+                space,ExactBoxType({ExactIntervalType(-1,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] learned="
+                      << solve_result.statistics().learned_clauses
+                      << " activity_bumps="
+                      << solve_result.statistics().learned_clause_activity_bumps
+                      << " pruning_runs="
+                      << solve_result.statistics().learned_clause_pruning_runs
+                      << " pruned=" << solve_result.statistics().learned_clauses_pruned
+                      << " peak_active="
+                      << solve_result.statistics().peak_active_non_theory_learned_clauses
+                      << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses>=4u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_pruning_runs>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clauses_pruned>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().peak_active_non_theory_learned_clauses>=2u);
+        }
+
+        {
             std::cout << "[smt-dpll] conjunction UNSAT: x>=1 and x<=0 on [0,1]" << std::endl;
             ContinuousPredicate formula=(ex>=1)&&(ex<=0);
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0,1)}),formula);

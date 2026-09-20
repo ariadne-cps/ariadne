@@ -72,6 +72,27 @@ OutputStream& operator<<(OutputStream& os, SmtResultStatus status)
     }
 }
 
+ExactIntervalType SmtSolver::_epsilon_bounds(ValidatedConstraint const& constraint) const
+{
+    FloatDP epsilon(_configuration.epsilon(),dp);
+    ExactIntervalType bounds=constraint.bounds();
+    return ExactIntervalType(
+        sub(down,bounds.lower_bound(),epsilon),
+        add(up,bounds.upper_bound(),epsilon));
+}
+
+Bool SmtSolver::_epsilon_reduce(UpperBoxType& domain,
+                                List<ValidatedConstraint> const& constraints) const
+{
+    ConstraintSolver contractor;
+    for(SizeType i=0; i!=constraints.size(); ++i) {
+        if(contractor.hull_reduce(domain,constraints[i].function(),this->_epsilon_bounds(constraints[i]))) {
+            return true;
+        }
+    }
+    return definitely(domain.is_empty());
+}
+
 Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
                                    List<ValidatedConstraint> const& constraints) const
 {
@@ -80,15 +101,10 @@ Bool SmtSolver::_epsilon_satisfied(UpperBoxType const& domain,
         return UpperIntervalType(m,m);
     });
 
-    FloatDP epsilon(_configuration.epsilon(),dp);
     for(SizeType i=0; i!=constraints.size(); ++i) {
         auto const& constraint=constraints[i];
         UpperIntervalType image=apply(constraint.function(),point);
-        ExactIntervalType bounds=constraint.bounds();
-        ExactIntervalType weakened(
-            sub(down,bounds.lower_bound(),epsilon),
-            add(up,bounds.upper_bound(),epsilon));
-        if(not definitely(subset(image,weakened))) {
+        if(not definitely(subset(image,this->_epsilon_bounds(constraint)))) {
             return false;
         }
     }
@@ -107,7 +123,6 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         return SmtResult::unsat();
     }
 
-    ConstraintSolver contractor;
     std::vector<UpperBoxType> pending;
     pending.emplace_back(domain);
 
@@ -115,7 +130,7 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         UpperBoxType current=std::move(pending.back());
         pending.pop_back();
 
-        if(contractor.reduce(current,constraints)) {
+        if(this->_epsilon_reduce(current,constraints)) {
             continue;
         }
 

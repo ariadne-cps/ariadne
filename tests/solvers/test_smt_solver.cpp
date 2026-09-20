@@ -598,6 +598,7 @@ class TestSmtSolver {
 
             expect_edge_status("rec positive near zero",ExactIntervalType(0.5_x,0.5_x),rec(ex)==2,SmtResultStatus::EPSILON_SAT);
             expect_edge_status("rec negative",ExactIntervalType(-1,-1),rec(ex)==-1,SmtResultStatus::EPSILON_SAT);
+            expect_edge_status("rec singleton zero undefined",ExactIntervalType(0,0),rec(ex)==0,SmtResultStatus::UNSAT);
 
             expect_edge_status("tan regular branch",ExactIntervalType(0,0),tan(ex)==0,SmtResultStatus::EPSILON_SAT);
         }

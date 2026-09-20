@@ -527,6 +527,52 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-theory-solve] cover binary RealExpression operations" << std::endl;
+            RealVariable y("y");
+            RealExpression ey=y;
+            RealSpace xy_space({x,y});
+
+            auto xy_primitive = [&](ContinuousPredicate const& predicate) {
+                auto alternatives=normalize_smt_theory_literal(make_smt_theory_literal(predicate));
+                ARIADNE_TEST_EQUAL(alternatives.size(),1u);
+                ARIADNE_TEST_EQUAL(alternatives[0].size(),1u);
+                return alternatives[0][0];
+            };
+
+            auto expect_xy_status = [&](String const& label,
+                                        ExactIntervalType const& x_interval,
+                                        ExactIntervalType const& y_interval,
+                                        ContinuousPredicate const& predicate,
+                                        SmtResultStatus expected) {
+                std::cout << "[smt-real-binary-op] " << label << std::endl;
+                List<SmtTheoryPrimitiveLiteral> literals({xy_primitive(predicate)});
+                SmtResult solve_result=solver.solve(
+                    xy_space,ExactBoxType({x_interval,y_interval}),literals);
+                ARIADNE_TEST_EQUAL(solve_result.status(),expected);
+            };
+
+            expect_xy_status("add SAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex+ey==5,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("add UNSAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex+ey==6,SmtResultStatus::UNSAT);
+
+            expect_xy_status("sub SAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex-ey==-1,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("sub UNSAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex-ey==0,SmtResultStatus::UNSAT);
+
+            expect_xy_status("mul SAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex*ey==6,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("mul UNSAT",ExactIntervalType(2,2),ExactIntervalType(3,3),ex*ey==7,SmtResultStatus::UNSAT);
+
+            expect_xy_status("div SAT",ExactIntervalType(6,6),ExactIntervalType(3,3),ex/ey==2,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("div UNSAT",ExactIntervalType(6,6),ExactIntervalType(3,3),ex/ey==3,SmtResultStatus::UNSAT);
+
+            expect_xy_status("max left SAT",ExactIntervalType(3,3),ExactIntervalType(2,2),max(ex,ey)==3,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("max right SAT",ExactIntervalType(2,2),ExactIntervalType(3,3),max(ex,ey)==3,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("max UNSAT",ExactIntervalType(2,2),ExactIntervalType(3,3),max(ex,ey)==2,SmtResultStatus::UNSAT);
+
+            expect_xy_status("min left SAT",ExactIntervalType(2,2),ExactIntervalType(3,3),min(ex,ey)==2,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("min right SAT",ExactIntervalType(3,3),ExactIntervalType(2,2),min(ex,ey)==2,SmtResultStatus::EPSILON_SAT);
+            expect_xy_status("min UNSAT",ExactIntervalType(2,2),ExactIntervalType(3,3),min(ex,ey)==3,SmtResultStatus::UNSAT);
+        }
+
+        {
             std::cout << "[smt-theory-solve] parallel/sequential agreement for strict primitive" << std::endl;
             auto& thread_manager=BetterThreads::ThreadManager::instance();
             ConcurrencyGuard concurrency_guard(thread_manager);

@@ -1128,6 +1128,12 @@ class SmtDpllSearch {
 
     SearchOutcome _search_boolean()
     {
+        SizeType const box_limit=_solver.configuration().box_processing_limit();
+        if(_statistics.boxes_processed>=box_limit) {
+            _theory_unknown_seen=true;
+            return SearchOutcome::exhausted();
+        }
+
         if(not this->_unit_propagate()) {
             if(not _last_boolean_conflict_clause.has_value()) {
                 return SearchOutcome::exhausted();

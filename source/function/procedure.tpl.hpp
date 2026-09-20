@@ -286,17 +286,14 @@ template<class X> Void backpropagate(X const& r, Pos, X& a) { restrict(a,r); }
 template<class X> Void backpropagate(X const& r, Neg, X& a) { restrict(a,neg(r)); }
 template<class X> Void backpropagate(X const& r, Rec, X& a) { restrict(a,rec(r)); }
 template<class X> Void backpropagate(X const& r, Sqr, X& a) {
-    if(definitely(r.is_empty())) { restrict(a,r); return; }
-    auto s=sqrt(abs(r));
-    restrict(a,hull(s,-s));
+    // sqrt(UpperIntervalType) is defined as the hull of the inverse image
+    // {x : x^2 in r}, so it already preserves both square-root branches.
+    restrict(a,sqrt(r));
 }
-template<class X> Void backpropagate(X const& r, Pow, X& a, Int n) {
-    if(definitely(r.is_empty())) { restrict(a,r); return; }
-    if(n<=0) { return; }
-    // Compute the magnitude of an n-th root using the elementary operations
-    // supported by interval arithmetic, then retain both sign branches.
-    auto s=exp(log(abs(r))/n);
-    restrict(a,hull(s,-s));
+template<class X> Void backpropagate(X const& r, Pow, X& a, Int) {
+    if(definitely(r.is_empty())) { restrict(a,r); }
+    // Integer powers can have disconnected and sign-dependent inverse images.
+    // Defer pruning until a sound multi-branch contractor is available.
 }
 template<class X> Void backpropagate(X const& r, Sqrt, X& a) { restrict(a,sqr(r)); }
 template<class X> Void backpropagate(X const& r, Exp, X& a) { restrict(a,log(r)); }

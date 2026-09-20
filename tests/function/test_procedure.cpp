@@ -223,7 +223,7 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction(op,0u);
         UpperBoxType x=ExactBoxType({domain});
         simple_hull_reduce(x,p,ExactIntervalType(0,0));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     };
 
     // Each interval contains a non-principal zero of the corresponding
@@ -238,7 +238,7 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction(Sqr(),0u);
         UpperBoxType x=ExactBoxType({ExactIntervalType(-1,-1)});
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     }
 
     {
@@ -247,7 +247,7 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction(Pow(),0u,2);
         UpperBoxType x=ExactBoxType({ExactIntervalType(-1,-1)});
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     }
 
     {
@@ -257,8 +257,8 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction(Max(),0u,1u);
         UpperBoxType x=ExactBoxType({ExactIntervalType(0,0),ExactIntervalType(1,1)});
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
-        ARIADNE_TEST_ASSERT(!x[1].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
+        ARIADNE_TEST_ASSERT(!definitely(x[1].is_empty()));
     }
 
     {
@@ -268,8 +268,8 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction(Min(),0u,1u);
         UpperBoxType x=ExactBoxType({ExactIntervalType(1,1),ExactIntervalType(0,0)});
         simple_hull_reduce(x,p,ExactIntervalType(0,0));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
-        ARIADNE_TEST_ASSERT(!x[1].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
+        ARIADNE_TEST_ASSERT(!definitely(x[1].is_empty()));
     }
 
     {
@@ -279,7 +279,7 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction_scalar(Max(),0u,0u);
         UpperBoxType x=ExactBoxType({ExactIntervalType(0,0)});
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     }
 
     {
@@ -289,7 +289,7 @@ Void TestProcedure::test_backward_contractor_soundness()
         p.new_instruction_scalar(Min(),0u,0u);
         UpperBoxType x=ExactBoxType({ExactIntervalType(1,1)});
         simple_hull_reduce(x,p,ExactIntervalType(0,0));
-        ARIADNE_TEST_ASSERT(!x[0].is_empty());
+        ARIADNE_TEST_ASSERT(!definitely(x[0].is_empty()));
     }
 
     // Conservative periodic backward propagation must still propagate an
@@ -312,7 +312,7 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
     auto S = [](auto x) { return ExactIntervalType(x,x); };
 
     auto preserves = [](UpperIntervalType const& contracted, ExactIntervalType const& witness) {
-        return intersect(contracted,witness);
+        return !definitely(disjoint(contracted,witness));
     };
 
     auto check_unary = [&](auto op, ExactIntervalType domain, ExactIntervalType output, ExactIntervalType witness) {
@@ -493,7 +493,7 @@ Void TestProcedure::test_backward_contractor_generated_witnesses()
     auto S = [](auto x) { return ExactIntervalType(x,x); };
 
     auto preserves = [](UpperIntervalType const& contracted, ExactIntervalType const& witness) {
-        return intersect(contracted,witness);
+        return !definitely(disjoint(contracted,witness));
     };
 
     auto check_unary = [&](auto op, ExactIntervalType domain, ExactIntervalType witness) {

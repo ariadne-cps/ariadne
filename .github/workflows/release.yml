@@ -19,9 +19,9 @@ jobs:
       matrix:
         config:
           - {
-            name: "macOS 13 AppleClang 14 [Release]",
-            os: macos-13,
-            cxx-cmd: "clang++",
+            name: "macOS 26 AppleClang 21 [Release]",
+            os: macos-26,
+            cxx-cmd: "/usr/bin/clang++",
             pyld: "DY"
           }
           - {
@@ -55,7 +55,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install ninja gcc@12 mpfr cairo gnuplot pkg-config
+        brew install ninja mpfr cairo gnuplot pkg-config
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'

@@ -566,6 +566,31 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         ARIADNE_TEST_EQUAL(acos_plus_one.upper_raw(),RawFloatType(0,pr));
     }
 
+    // Inverse trigonometric interval evaluation intersects with the real domain [-1,1].
+    {
+        FloatBoundsType below(-2,-2,pr);
+        FloatBoundsType above(2,2,pr);
+        FloatBoundsType crossing_low(-2,0,pr);
+        FloatBoundsType crossing_high(0,2,pr);
+
+        FloatBoundsType asin_below=asin(below);
+        FloatBoundsType asin_above=asin(above);
+        FloatBoundsType acos_below=acos(below);
+        FloatBoundsType acos_above=acos(above);
+
+        ARIADNE_TEST_ASSERT(asin_below.lower_raw()>asin_below.upper_raw());
+        ARIADNE_TEST_ASSERT(asin_above.lower_raw()>asin_above.upper_raw());
+        ARIADNE_TEST_ASSERT(acos_below.lower_raw()>acos_below.upper_raw());
+        ARIADNE_TEST_ASSERT(acos_above.lower_raw()>acos_above.upper_raw());
+
+        FloatBoundsType asin_crossing_low=asin(crossing_low);
+        FloatBoundsType asin_crossing_high=asin(crossing_high);
+        ARIADNE_TEST_ASSERT(asin_crossing_low.lower_raw()<=asin_crossing_low.upper_raw());
+        ARIADNE_TEST_ASSERT(asin_crossing_high.lower_raw()<=asin_crossing_high.upper_raw());
+        ARIADNE_TEST_COMPARE(asin_crossing_low.upper_raw(),>=,RawFloatType(0,pr));
+        ARIADNE_TEST_COMPARE(asin_crossing_high.lower_raw(),<=,RawFloatType(0,pr));
+    }
+
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
     ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);

@@ -251,9 +251,19 @@ template<class F> class Bounds
     friend Bounds<F> tan(Bounds<F> const& x) {
         return Operations<Bounds<F>>::_tan(x); } //!< <p/>
     friend Bounds<F> asin(Bounds<F> const& x) {
-        return Bounds<F>(asin(down,x.lower_raw()),asin(up,x.upper_raw())); } //!< <p/>
+        F minus_one(-1,x.precision());
+        F plus_one(1,x.precision());
+        F lower=max(x.lower_raw(),minus_one);
+        F upper=min(x.upper_raw(),plus_one);
+        if(lower>upper) { return Bounds<F>(plus_one,minus_one); }
+        return Bounds<F>(asin(down,lower),asin(up,upper)); } //!< <p/>
     friend Bounds<F> acos(Bounds<F> const& x) {
-        return Bounds<F>(acos(down,x.upper_raw()),acos(up,x.lower_raw())); } //!< <p/>
+        F minus_one(-1,x.precision());
+        F plus_one(1,x.precision());
+        F lower=max(x.lower_raw(),minus_one);
+        F upper=min(x.upper_raw(),plus_one);
+        if(lower>upper) { return Bounds<F>(plus_one,minus_one); }
+        return Bounds<F>(acos(down,upper),acos(up,lower)); } //!< <p/>
     friend Bounds<F> atan(Bounds<F> const& x) {
         return Bounds<F>(atan(down,x._l),atan(up,x._u)); } //!< <p/>
     //!@}

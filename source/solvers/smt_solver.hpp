@@ -35,6 +35,8 @@
 #include "geometry/box.hpp"
 #include "numeric/numeric.hpp"
 #include "function/constraint.hpp"
+#include "solvers/smt_theory.hpp"
+#include "symbolic/space.hpp"
 
 namespace Ariadne {
 
@@ -118,6 +120,16 @@ class SmtSolver {
     SmtResult solve_parallel(ExactBoxType const& domain,
                              List<ValidatedConstraint> const& constraints) const;
 
+    //! \brief Solve a conjunction of normalized real theory primitives.
+    SmtResult solve(RealSpace const& space,
+                    ExactBoxType const& domain,
+                    List<SmtTheoryPrimitiveLiteral> const& literals) const;
+
+    //! \brief Solve normalized theory primitives using BetterThreads.
+    SmtResult solve_parallel(RealSpace const& space,
+                             ExactBoxType const& domain,
+                             List<SmtTheoryPrimitiveLiteral> const& literals) const;
+
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 
   private:
@@ -133,13 +145,30 @@ class SmtSolver {
         std::optional<Pair<UpperBoxType,UpperBoxType>> children;
     };
 
+    struct CompiledTheoryLiteral {
+        ValidatedScalarMultivariateFunction function;
+        SmtTheoryPrimitiveRelation relation;
+    };
+    using CompiledTheoryLiterals = std::vector<CompiledTheoryLiteral>;
+
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
+    ExactIntervalType _epsilon_bounds(SmtTheoryPrimitiveRelation relation) const;
     Bool _epsilon_reduce(UpperBoxType& domain,
                          List<ValidatedConstraint> const& constraints) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
     BoxProcessingResult _process_box(UpperBoxType domain,
                                      List<ValidatedConstraint> const& constraints) const;
+
+    CompiledTheoryLiterals _compile_theory_literals(
+        RealSpace const& space,
+        List<SmtTheoryPrimitiveLiteral> const& literals) const;
+    Bool _epsilon_reduce(UpperBoxType& domain,
+                         CompiledTheoryLiterals const& literals) const;
+    Bool _epsilon_satisfied(UpperBoxType const& domain,
+                            CompiledTheoryLiterals const& literals) const;
+    BoxProcessingResult _process_box(UpperBoxType domain,
+                                     CompiledTheoryLiterals const& literals) const;
 
     SmtSolverConfiguration _configuration;
 };

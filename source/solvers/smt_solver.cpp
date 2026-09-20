@@ -364,10 +364,7 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     SmtSearchStatistics statistics;
 
     if(domain.is_empty()) {
-        if(unknown_seen) {
-        return SmtResult::unknown(statistics);
-    }
-    return SmtResult::unsat(statistics);
+        return SmtResult::unsat(statistics);
     }
 
     SequentialSmtWorkQueue pending;
@@ -405,6 +402,9 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
         }
     }
 
+    if(unknown_seen) {
+        return SmtResult::unknown(statistics);
+    }
     return SmtResult::unsat(statistics);
 }
 
@@ -484,10 +484,7 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
 
     auto state=std::make_shared<ParallelSmtSearchState>();
     if(domain.is_empty()) {
-        if(state->unknown.load()) {
-        return SmtResult::unknown(state->statistics);
-    }
-    return SmtResult::unsat(state->statistics);
+        return SmtResult::unsat(state->statistics);
     }
 
     ParallelSmtWorkload workload(

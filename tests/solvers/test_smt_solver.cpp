@@ -546,11 +546,15 @@ class TestSmtSolver {
                       << solve_result.statistics().theory_nogood_literals_removed
                       << " budget_exhaustions="
                       << solve_result.statistics().theory_minimization_budget_exhaustions
+                      << " first_candidate_trail_rank="
+                      << solve_result.statistics().first_minimization_candidate_trail_rank
                       << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_minimization_checks,1u);
             ARIADNE_TEST_EQUAL(
                 solve_result.statistics().theory_minimization_budget_exhaustions,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_nogood_raw_literals,4u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().first_minimization_candidate_trail_rank>=1u);
             ARIADNE_TEST_ASSERT(
                 solve_result.statistics().theory_nogood_minimized_literals>=2u);
             ARIADNE_TEST_ASSERT(

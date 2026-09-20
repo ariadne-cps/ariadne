@@ -98,6 +98,7 @@ struct SmtSearchStatistics {
     SizeType theory_nogood_minimized_literals = 0u;
     SizeType theory_nogood_literals_removed = 0u;
     SizeType theory_minimization_budget_exhaustions = 0u;
+    SizeType first_minimization_candidate_trail_rank = 0u;
 };
 
 //! \ingroup Solvers

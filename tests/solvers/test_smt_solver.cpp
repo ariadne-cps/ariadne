@@ -50,6 +50,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_theory_solve());
+        ARIADNE_TEST_CALL(test_boolean_theory_solve());
         ARIADNE_TEST_CALL(test_parallel_solve());
     }
 
@@ -388,6 +389,83 @@ class TestSmtSolver {
                 SmtResult sequential=solver.solve(space,domain,literals);
                 thread_manager.set_concurrency(parallel_concurrency);
                 SmtResult parallel=solver.solve_parallel(space,domain,literals);
+                ARIADNE_TEST_EQUAL(sequential.status(),parallel.status());
+                ARIADNE_TEST_ASSERT(sequential.has_witness()==parallel.has_witness());
+            }
+        }
+    }
+
+    Void test_boolean_theory_solve() {
+        RealVariable x("x");
+        RealExpression ex=x;
+        RealSpace space({x});
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+        {
+            std::cout << "[smt-dpll] conjunction UNSAT: x>=1 and x<=0 on [0,1]" << std::endl;
+            ContinuousPredicate formula=(ex>=1)&&(ex<=0);
+            SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0,1)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-dpll] disjunction EPSILON_SAT: x<0 or x>1 on [0,0.1]" << std::endl;
+            ContinuousPredicate formula=(ex<0)||(ex>1);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0.0_x,0.1_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-dpll] disjunction UNSAT: x<0 or x>1 on [0.4,0.6]" << std::endl;
+            ContinuousPredicate formula=(ex<0)||(ex>1);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0.4_x,0.6_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-dpll] negated atom preserves strict boundary: !(x<=0) at x=-epsilon" << std::endl;
+            ContinuousPredicate formula=!(ex<=0);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(-0.125_x,-0.125_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-dpll] disequality expands to theory alternatives: x!=0 at x=0" << std::endl;
+            ContinuousPredicate formula=(ex!=0);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+        }
+
+        {
+            std::cout << "[smt-dpll] mixed transcendental Boolean formula" << std::endl;
+            ContinuousPredicate formula=((sin(ex)==0)||(cos(ex)==0))&&(ex>=3);
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(3,4)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-dpll] sequential/parallel theory agreement" << std::endl;
+            auto& thread_manager=BetterThreads::ThreadManager::instance();
+            ConcurrencyGuard concurrency_guard(thread_manager);
+            SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u
+                ? 2u : thread_manager.maximum_concurrency();
+            if(parallel_concurrency>0u) {
+                ContinuousPredicate formula=((sin(ex)==0)||(cos(ex)==0))&&(ex>=3);
+                ExactBoxType domain({ExactIntervalType(3,4)});
+
+                thread_manager.set_concurrency(0);
+                SmtResult sequential=solver.solve(space,domain,formula);
+
+                thread_manager.set_concurrency(parallel_concurrency);
+                SmtResult parallel=solver.solve_parallel(space,domain,formula);
+
                 ARIADNE_TEST_EQUAL(sequential.status(),parallel.status());
                 ARIADNE_TEST_ASSERT(sequential.has_witness()==parallel.has_witness());
             }

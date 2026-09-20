@@ -35,6 +35,7 @@ class TestSmtSolver {
     Void test() {
         ARIADNE_TEST_CALL(test_configuration());
         ARIADNE_TEST_CALL(test_result());
+        ARIADNE_TEST_CALL(test_solve());
     }
 
   private:
@@ -81,6 +82,64 @@ class TestSmtSolver {
         std::ostringstream oss;
         oss << unsat.status() << " " << epsilon_sat.status();
         ARIADNE_TEST_EQUAL(oss.str(),String("UNSAT EPSILON_SAT"));
+    }
+
+    Void test_solve() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+
+        {
+            std::cout << "[smt-solve] linear UNSAT: x in [0,1], x=2" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(2),x[0],ValidatedNumber(2))
+            });
+            SmtResult result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-solve] linear EPSILON_SAT: x in [0,1], 2*x=1" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(1),2*x[0],ValidatedNumber(1))
+            });
+            SmtResult result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] transcendental EPSILON_SAT: x in [3,4], sin(x)=0" << std::endl;
+            ExactBoxType domain({ExactIntervalType(3,4)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
+            });
+            SmtResult result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] transcendental UNSAT: x in [3,4], sin(x)=2" << std::endl;
+            ExactBoxType domain({ExactIntervalType(3,4)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(2),sin(x[0]),ValidatedNumber(2))
+            });
+            SmtResult result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-solve] even power EPSILON_SAT: x in [-2,0], x^2=1" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-2,0)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(1),sqr(x[0]),ValidatedNumber(1))
+            });
+            SmtResult result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(result.has_witness());
+        }
     }
 };
 

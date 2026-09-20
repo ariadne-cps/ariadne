@@ -3,6 +3,8 @@ message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(Ariadne VERSION 2.5.3)
 
+include(CMakePackageConfigHelpers)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     message(WARNING "Intel compiler not supported.")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -239,7 +241,12 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:HELPER_SRC>
 )
 
-target_link_libraries(ariadne dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(ariadne PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>
+    $<INSTALL_INTERFACE:include/ariadne>
+)
+target_link_libraries(ariadne PUBLIC GMP::GMP MPFR::MPFR)
+target_link_libraries(ariadne PRIVATE dl ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-kernel dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ariadne-core dl ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
@@ -249,11 +256,35 @@ if(COVERAGE)
 endif()
 
 if(CAIRO_FOUND)
-    target_link_libraries(ariadne ${CAIRO_LIBRARIES})
+    target_link_libraries(ariadne PUBLIC Cairo::Cairo)
     target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
 endif()
 
-install(TARGETS ariadne DESTINATION lib)
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/cmake/AriadneConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
+    INSTALL_DESTINATION lib/cmake/Ariadne
+)
+write_basic_package_version_file(
+    ${PROJECT_BINARY_DIR}/AriadneConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(TARGETS ariadne EXPORT AriadneTargets DESTINATION lib)
+install(EXPORT AriadneTargets
+    FILE AriadneTargets.cmake
+    NAMESPACE Ariadne::
+    DESTINATION lib/cmake/Ariadne
+)
+install(FILES
+    ${PROJECT_BINARY_DIR}/AriadneConfig.cmake
+    ${PROJECT_BINARY_DIR}/AriadneConfigVersion.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/FindGMP.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/FindMPFR.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/FindCairo.cmake
+    DESTINATION lib/cmake/Ariadne
+)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/helper DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY submodules/.symbolic/conclog DESTINATION include FILES_MATCHING PATTERN "*.hpp")

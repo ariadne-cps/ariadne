@@ -73,3 +73,11 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GMP DEFAULT_MSG
                                   GMP_INCLUDES GMP_LIBRARIES GMP_VERSION_OK)
 mark_as_advanced(GMP_INCLUDES GMP_LIBRARIES)
+
+if(GMP_FOUND AND NOT TARGET GMP::GMP)
+  add_library(GMP::GMP UNKNOWN IMPORTED)
+  set_target_properties(GMP::GMP PROPERTIES
+    IMPORTED_LOCATION "${GMP_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDES}"
+  )
+endif()

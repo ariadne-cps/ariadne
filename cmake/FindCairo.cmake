@@ -58,3 +58,12 @@ mark_as_advanced(
   CAIRO_INCLUDE_DIRS
   CAIRO_LIBRARIES
 )
+
+
+if(CAIRO_FOUND AND NOT TARGET Cairo::Cairo)
+  add_library(Cairo::Cairo UNKNOWN IMPORTED)
+  set_target_properties(Cairo::Cairo PROPERTIES
+    IMPORTED_LOCATION "${CAIRO_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES "${CAIRO_INCLUDE_DIRS}"
+  )
+endif()

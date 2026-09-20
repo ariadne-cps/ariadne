@@ -70,3 +70,11 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MPFR DEFAULT_MSG
                                   MPFR_INCLUDES MPFR_LIBRARIES MPFR_VERSION_OK)
 mark_as_advanced(MPFR_INCLUDES MPFR_LIBRARIES)
+
+if(MPFR_FOUND AND NOT TARGET MPFR::MPFR)
+  add_library(MPFR::MPFR UNKNOWN IMPORTED)
+  set_target_properties(MPFR::MPFR PROPERTIES
+    IMPORTED_LOCATION "${MPFR_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES "${MPFR_INCLUDES}"
+  )
+endif()

@@ -457,6 +457,27 @@ class TestSmtSolver {
         }
 
         {
+            std::cout << "[smt-dpll] analyze Boolean conflict with 1-UIP" << std::endl;
+            ContinuousPredicate a=(ex>=0);
+            ContinuousPredicate b=(ex<=0);
+            ContinuousPredicate formula=
+                (a||b)&&(a||(!b))&&((!a)||b)&&((!a)||(!b));
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0,0)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] analyzed="
+                      << solve_result.statistics().boolean_conflicts_analyzed
+                      << " learned_literals=" << solve_result.statistics().learned_clause_literals
+                      << " backjump_level=" << solve_result.statistics().last_backjump_level
+                      << " max_level=" << solve_result.statistics().max_decision_level << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().boolean_conflicts_analyzed>=1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().learned_clause_literals>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().last_backjump_level
+                < solve_result.statistics().max_decision_level);
+        }
+
+        {
             std::cout << "[smt-dpll] conjunction UNSAT: x>=1 and x<=0 on [0,1]" << std::endl;
             ContinuousPredicate formula=(ex>=1)&&(ex<=0);
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0,1)}),formula);

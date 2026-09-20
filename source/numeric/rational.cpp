@@ -470,11 +470,11 @@ Comparison cmp(Int const& n1, Rational const& q2) {
     return Comparison(-(int)cmp(q2,n1));
 }
 
-Rational operator"" _q(unsigned long long int n) {
+Rational operator""_q(unsigned long long int n) {
     return Rational(operator""_z(n));
 }
 
-Rational operator"" _q(long double x) {
+Rational operator""_q(long double x) {
     static const uint32_t max_cf_coef = std::numeric_limits<uint32_t>::max();
     static const std::size_t N=11;
 
@@ -498,7 +498,7 @@ Rational operator"" _q(long double x) {
         if(t>max_cf_coef) { break; }
     }
     if(i==N) {
-        ARIADNE_THROW(InvalidRationalLiteralException,"Rational operator"" _q(long double)",
+        ARIADNE_THROW(InvalidRationalLiteralException,"Rational operator""_q(long double)",
                       "x="<<x<<" is not a sufficiently close approximation to a simple rational number.");
     }
     // Compute the result from the continued fraction coefficients
@@ -514,7 +514,7 @@ Rational operator"" _q(long double x) {
     double ae=std::abs((q-xq).get_d());
     double re=ae/std::max(1.0,std::abs(xd));
     if(re>std::numeric_limits<double>::epsilon()) {
-        ARIADNE_THROW(InvalidRationalLiteralException,"Rational operator"" _q(long double)",
+        ARIADNE_THROW(InvalidRationalLiteralException,"Rational operator""_q(long double)",
                       "Rational approximation q="<<q<<" to x="<<x<<"="<<xd<<" has error "<<ae<<" and relative error "<<re<<" while is larger than machine epsilon");
     }
     mpq_canonicalize(q._mpq);

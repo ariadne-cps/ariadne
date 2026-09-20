@@ -183,7 +183,7 @@ class Rational
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, Rational const& q); //!< Write to an output stream.
     friend InputStream& operator>>(InputStream& os, Rational& q); //!< Read from an input stream.
-    friend Rational operator"" _q(long double x);
+    friend Rational operator""_q(long double x);
     //! \brief Alternative for operator""_q for use in Python interface.
     friend Rational q_(long double x);
     //!@}
@@ -194,8 +194,8 @@ class Rational
     friend class Dyadic;
 };
 template<> struct IsNumber<Rational> : True { };
-Rational operator"" _q(unsigned long long int n);
-Rational operator"" _q(long double x);
+Rational operator""_q(unsigned long long int n);
+Rational operator""_q(long double x);
 
 template<BuiltinIntegral N> inline Rational::Rational(N n) : Rational(Int64(n)) { }
 

@@ -67,34 +67,34 @@ Decimal::Decimal(Dyadic const& w)
     this->canonicalize();
 }
 
-Decimal operator"" _decimal(long double x)
+Decimal operator""_decimal(long double x)
 {
     return Decimal(static_cast<double>(x));
 }
 
-Decimal operator"" _dec(long double x)
+Decimal operator""_dec(long double x)
 {
-    return operator"" _decimal(x);
+    return operator""_decimal(x);
 }
 
-Decimal operator"" _decimal(unsigned long long int n)
+Decimal operator""_decimal(unsigned long long int n)
 {
     return Decimal(Integer(n));
 }
 
-Decimal operator"" _dec(unsigned long long int n)
+Decimal operator""_dec(unsigned long long int n)
 {
-    return operator"" _decimal(n);
+    return operator""_decimal(n);
 }
 
-Decimal operator"" _decimal(const char* s, std::size_t)
+Decimal operator""_decimal(const char* s, std::size_t)
 {
     return Decimal(String(s));
 }
 
-Decimal operator"" _dec(const char* s, std::size_t n)
+Decimal operator""_dec(const char* s, std::size_t n)
 {
-    return operator"" _decimal(s,n);
+    return operator""_decimal(s,n);
 }
 
 Decimal operator+(Decimal const& d)

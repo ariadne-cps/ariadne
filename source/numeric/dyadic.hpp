@@ -122,11 +122,11 @@ class Dyadic
     //! \brief A string literal, comprising the exact value in decimal format.
     String literal() const;
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
-    friend Dyadic operator"" _bin(long double x);
+    friend Dyadic operator""_bin(long double x);
     //! \brief Convert a floating-point literal to Dyadic.
-    friend Dyadic operator"" _dyadic(long double x);
+    friend Dyadic operator""_dyadic(long double x);
     //! \brief Shorthand for operator""_dyadic.
-    friend Dyadic operator"" _dy(long double x);
+    friend Dyadic operator""_dy(long double x);
     //! \brief Alternative for operator""_dyadic for use in Python interface.
     friend Dyadic dy_(long double x);
 
@@ -416,10 +416,10 @@ template<> class Positive<LowerBound<Dyadic>> : public LowerBound<Dyadic> { publ
 template<> class Positive<UpperBound<Dyadic>> : public UpperBound<Dyadic> { public: Positive(UpperBound<Dyadic> w) : UpperBound<Dyadic>(w) { } ; };
 template<> class Positive<Approximation<Dyadic>> : public Approximation<Dyadic> { public: Positive(Approximation<Dyadic> w) : Approximation<Dyadic>(w) { } };
 
-inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
-inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }
-inline Dyadic operator"" _q2(long double x) { return operator"" _dyadic(x); }
-inline Dyadic operator"" _bin(long double x) { return operator"" _dyadic(x); }
+inline Dyadic operator""_dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
+inline Dyadic operator""_dy(long double x) { return operator""_dyadic(x); }
+inline Dyadic operator""_q2(long double x) { return operator""_dyadic(x); }
+inline Dyadic operator""_bin(long double x) { return operator""_dyadic(x); }
 
 Comparison cmp(Dyadic const& x1, Dyadic const& x2);
 Dyadic make_dyadic(unsigned long long int n);

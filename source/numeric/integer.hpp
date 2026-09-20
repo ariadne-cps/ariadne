@@ -75,7 +75,7 @@ class Integer
     operator ExactNumber () const; //!< Convert to a generic exact number
     String literal() const; //!< A string literal
 
-    friend Integer operator"" _z(unsigned long long int n); //!< An integer literal
+    friend Integer operator""_z(unsigned long long int n); //!< An integer literal
 
     //!@{
     //! \name Arithmetic operators
@@ -169,8 +169,8 @@ class Integer
 
 template<BuiltinUnsignedIntegral M> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
 template<BuiltinSignedIntegral N> inline Integer::Integer(N n) : Integer(Int64(n)) { }
-Integer operator"" _z(unsigned long long int n);
-Integer operator"" _z(const char* str, std::size_t);
+Integer operator""_z(unsigned long long int n);
+Integer operator""_z(const char* str, std::size_t);
 
 template<BuiltinIntegral N> inline N Integer::get() const {
     N n=static_cast<N>(this->get_si()); ARIADNE_ASSERT(Integer(n)==*this); return n; }

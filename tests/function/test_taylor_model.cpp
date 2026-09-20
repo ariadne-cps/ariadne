@@ -42,7 +42,7 @@ using namespace Ariadne;
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 
-inline Dyadic operator"" _exd (long double x) { return Dyadic(x); }
+inline Dyadic operator""_exd (long double x) { return Dyadic(x); }
 
 template<class T> concept HasClobber = requires(T& t) { t.clobber(); };
 

@@ -140,6 +140,132 @@ class TestSmtSolver {
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
         }
+
+        {
+            std::cout << "[smt-solve] conjunction EPSILON_SAT: x in [0,1], x>=0.25 and x<=0.75" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0.25_x),x[0],ValidatedNumber(+infty)),
+                ValidatedConstraint(ValidatedNumber(-infty),x[0],ValidatedNumber(0.75_x))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] conjunction UNSAT: x in [0,1], x<=0.25 and x>=0.75" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(-infty),x[0],ValidatedNumber(0.25_x)),
+                ValidatedConstraint(ValidatedNumber(0.75_x),x[0],ValidatedNumber(+infty))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-solve] inequality EPSILON_SAT: x in [0,1], x<=0.25" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(-infty),x[0],ValidatedNumber(0.25_x))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] inequality EPSILON_SAT: x in [0,1], x>=0.75" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0.75_x),x[0],ValidatedNumber(+infty))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] epsilon boundary EPSILON_SAT: x in [0,1], x=1.125 with epsilon=0.125" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(1.125_x),x[0],ValidatedNumber(1.125_x))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] two-dimensional EPSILON_SAT: x+y=1, x-y=0" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({ExactIntervalType(0,1),ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(1),xy[0]+xy[1],ValidatedNumber(1)),
+                ValidatedConstraint(ValidatedNumber(0),xy[0]-xy[1],ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            ARIADNE_TEST_EQUAL(solve_result.witness().dimension(),2u);
+        }
+
+        {
+            std::cout << "[smt-solve] two-dimensional UNSAT: x+y=3 on [0,1]^2" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({ExactIntervalType(0,1),ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(3),xy[0]+xy[1],ValidatedNumber(3))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-solve] multiple transcendental branches EPSILON_SAT: sin(x)=0 on [0,7]" << std::endl;
+            ExactBoxType domain({ExactIntervalType(0,7)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] empty constraint list: bounded nonempty domain is EPSILON_SAT" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-1,1)});
+            List<ValidatedConstraint> constraints;
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-solve] empty domain is UNSAT" << std::endl;
+            ExactBoxType domain({ExactIntervalType(empty_interval)});
+            List<ValidatedConstraint> constraints;
+            SmtResult solve_result=solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+        }
+
+        {
+            std::cout << "[smt-solve] reject constraint dimension mismatch" << std::endl;
+            auto xy=ValidatedScalarMultivariateFunction::coordinates(2);
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),xy[0],ValidatedNumber(1))
+            });
+            ARIADNE_TEST_THROWS(solver.solve(domain,constraints),std::runtime_error);
+        }
+
+        {
+            std::cout << "[smt-solve] reject unbounded domain" << std::endl;
+            ExactBoxType domain({ExactIntervalType(-infty,+infty)});
+            List<ValidatedConstraint> constraints;
+            ARIADNE_TEST_THROWS(solver.solve(domain,constraints),std::runtime_error);
+        }
     }
 };
 

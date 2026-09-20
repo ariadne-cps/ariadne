@@ -82,6 +82,7 @@ class TestProcedure
     Void test_propagate();
     Void test_backward_contractor_soundness();
     Void test_backward_contractor_witness_preservation();
+    Void test_backward_contractor_generated_witnesses();
     Void test_leq_backpropagate_soundness();
     Void test_derivative();
 };
@@ -98,6 +99,7 @@ Void TestProcedure::test()
     ARIADNE_TEST_CALL(test_propagate());
     ARIADNE_TEST_CALL(test_backward_contractor_soundness());
     ARIADNE_TEST_CALL(test_backward_contractor_witness_preservation());
+    ARIADNE_TEST_CALL(test_backward_contractor_generated_witnesses());
     ARIADNE_TEST_CALL(test_leq_backpropagate_soundness());
     ARIADNE_TEST_CALL(test_derivative());
 }
@@ -481,6 +483,94 @@ Void TestProcedure::test_backward_contractor_witness_preservation()
         ARIADNE_TEST_ASSERT(preserves(a,S(1)));
     }
 }
+
+Void TestProcedure::test_backward_contractor_generated_witnesses()
+{
+    auto U = [](ExactIntervalType const& x) { return UpperIntervalType(x); };
+    auto E = [](auto l, auto u) { return ExactIntervalType(l,u); };
+    auto S = [](auto x) { return ExactIntervalType(x,x); };
+
+    auto preserves = [](UpperIntervalType const& contracted, ExactIntervalType const& witness) {
+        return intersect(contracted,witness);
+    };
+
+    auto check_unary = [&](auto op, ExactIntervalType domain, ExactIntervalType witness) {
+        UpperIntervalType contracted=U(domain);
+        UpperIntervalType witness_interval=U(witness);
+        UpperIntervalType output=op(witness_interval);
+        backpropagate(output,op,contracted);
+        ARIADNE_TEST_ASSERT(preserves(contracted,witness));
+    };
+
+    auto check_binary = [&](auto op,
+                            ExactIntervalType lhs_domain, ExactIntervalType rhs_domain,
+                            ExactIntervalType lhs_witness, ExactIntervalType rhs_witness) {
+        UpperIntervalType lhs=U(lhs_domain);
+        UpperIntervalType rhs=U(rhs_domain);
+        UpperIntervalType output=op(U(lhs_witness),U(rhs_witness));
+        backpropagate(output,op,lhs,rhs);
+        ARIADNE_TEST_ASSERT(preserves(lhs,lhs_witness));
+        ARIADNE_TEST_ASSERT(preserves(rhs,rhs_witness));
+    };
+
+    auto check_power = [&](ExactIntervalType domain, ExactIntervalType witness, Int exponent) {
+        UpperIntervalType contracted=U(domain);
+        UpperIntervalType output=pow(U(witness),exponent);
+        backpropagate(output,Pow(),contracted,exponent);
+        ARIADNE_TEST_ASSERT(preserves(contracted,witness));
+    };
+
+    // Generic unary grid over exactly representable witnesses.
+    for (auto witness : {S(-2),S(-1),S(-0.5_x),S(0),S(0.5_x),S(1),S(2)}) {
+        check_unary(Pos(),E(-3,3),witness);
+        check_unary(Neg(),E(-3,3),witness);
+        check_unary(Sqr(),E(-3,3),witness);
+        check_unary(Exp(),E(-3,3),witness);
+        check_unary(Sin(),E(-3,3),witness);
+        check_unary(Cos(),E(-3,3),witness);
+        check_unary(Tan(),E(-3,3),witness);
+        check_unary(Atan(),E(-3,3),witness);
+    }
+
+    for (auto witness : {S(-2),S(-1),S(-0.5_x),S(0.5_x),S(1),S(2)}) {
+        check_unary(Rec(),E(-3,3),witness);
+        for (Int exponent=-3; exponent<=4; ++exponent) {
+            check_power(E(-3,3),witness,exponent);
+        }
+    }
+
+    for (auto witness : {S(0),S(0.5_x),S(1),S(2),S(4)}) {
+        check_unary(Sqrt(),E(0,4),witness);
+    }
+
+    for (auto witness : {S(0.5_x),S(1),S(2)}) {
+        check_unary(Log(),E(0.5_x,2),witness);
+    }
+
+    for (auto witness : {S(-1),S(-0.5_x),S(0),S(0.5_x),S(1)}) {
+        check_unary(Asin(),E(-1,1),witness);
+        check_unary(Acos(),E(-1,1),witness);
+    }
+
+    // Exhaustive small binary grid. Every output is evaluated from the
+    // singleton witnesses, so each tested tuple is valid by construction.
+    for (auto lhs_witness : {S(-2),S(-1),S(0),S(1),S(2)}) {
+        for (auto rhs_witness : {S(-2),S(-1),S(0),S(1),S(2)}) {
+            check_binary(Add(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+            check_binary(Sub(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+            check_binary(Mul(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+            check_binary(Max(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+            check_binary(Min(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+        }
+    }
+
+    for (auto lhs_witness : {S(-2),S(-1),S(0),S(1),S(2)}) {
+        for (auto rhs_witness : {S(-2),S(-1),S(1),S(2)}) {
+            check_binary(Div(),E(-3,3),E(-3,3),lhs_witness,rhs_witness);
+        }
+    }
+}
+
 
 Void TestProcedure::test_leq_backpropagate_soundness()
 {

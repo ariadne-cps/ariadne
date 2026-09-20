@@ -549,6 +549,9 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.nonchronological_backjumps+=source.nonchronological_backjumps;
     target.theory_checks+=source.theory_checks;
     target.theory_conflicts+=source.theory_conflicts;
+    target.theory_learned_clauses+=source.theory_learned_clauses;
+    target.theory_learned_clause_literals+=source.theory_learned_clause_literals;
+    target.theory_learned_clause_propagations+=source.theory_learned_clause_propagations;
 }
 
 class SmtDpllSearch {
@@ -654,11 +657,24 @@ class SmtDpllSearch {
         return index>=this->_original_clause_count();
     }
 
-    SizeType _add_learned_clause(std::vector<Int> const& clause)
+    SizeType _add_learned_clause(std::vector<Int> const& clause, Bool theory_clause = false)
     {
         _learned_clauses.emplace_back(clause.begin(),clause.end());
+        _learned_clause_is_theory.push_back(theory_clause);
         ++_statistics.learned_clauses;
+        if(theory_clause) {
+            ++_statistics.theory_learned_clauses;
+            _statistics.theory_learned_clause_literals+=clause.size();
+        }
         return this->_original_clause_count()+_learned_clauses.size()-1u;
+    }
+
+    Bool _is_theory_learned_clause(SizeType index) const
+    {
+        if(not this->_is_learned_clause(index)) {
+            return false;
+        }
+        return _learned_clause_is_theory[index-this->_original_clause_count()];
     }
 
     Bool _unit_propagate()
@@ -706,6 +722,9 @@ class SmtDpllSearch {
                         ++_statistics.boolean_reasoned_propagations;
                         if(this->_is_learned_clause(clause_index)) {
                             ++_statistics.learned_clause_propagations;
+                            if(this->_is_theory_learned_clause(clause_index)) {
+                                ++_statistics.theory_learned_clause_propagations;
+                            }
                         }
                         changed=true;
                     } else if(not this->_literal_true(unit_literal)) {
@@ -887,7 +906,35 @@ class SmtDpllSearch {
         }
 
         if(not this->_check_partial_theory_consistency()) {
-            return SearchOutcome::exhausted();
+            if(not _last_theory_conflict_clause.has_value()) {
+                return SearchOutcome::exhausted();
+            }
+
+            if(this->_decision_level()==0u) {
+                _last_theory_conflict_clause.reset();
+                return SearchOutcome::exhausted();
+            }
+
+            SizeType conflict_level=this->_decision_level();
+            ConflictAnalysis analysis=this->_analyze_boolean_conflict(
+                *_last_theory_conflict_clause);
+            ++_statistics.boolean_conflicts_analyzed;
+            _statistics.learned_clause_literals+=analysis.learned_clause.size();
+            _statistics.last_learned_clause_literals=analysis.learned_clause.size();
+            _statistics.last_learned_current_level_literals=
+                this->_current_level_literal_count(analysis.learned_clause);
+            _statistics.last_backjump_level=analysis.backjump_level;
+
+            this->_add_learned_clause(analysis.learned_clause);
+            _last_theory_conflict_clause.reset();
+
+            ARIADNE_ASSERT(analysis.backjump_level<conflict_level);
+            if(analysis.backjump_level+1u<conflict_level) {
+                ++_statistics.nonchronological_backjumps;
+            }
+            this->_backtrack_to_level(analysis.backjump_level);
+            ++_statistics.boolean_backtracks;
+            return SearchOutcome::backjump(analysis.backjump_level);
         }
 
         ++_statistics.boolean_decisions;
@@ -935,8 +982,48 @@ class SmtDpllSearch {
         return SearchOutcome::exhausted();
     }
 
+    std::vector<Int> _current_theory_nogood() const
+    {
+        std::vector<Int> clause;
+        clause.reserve(_encoding.atom_count());
+
+        for(SizeType i=0u; i!=_encoding.atom_count(); ++i) {
+            SizeType variable=_encoding.atom_variable(i);
+            AssignmentInfo const& assignment=_assignment[variable];
+            if(assignment.value<0) {
+                continue;
+            }
+
+            Int literal=static_cast<Int>(variable);
+            if(assignment.value==1) {
+                literal=-literal;
+            }
+
+            Bool duplicate=false;
+            for(Int existing:clause) {
+                if(existing==literal) {
+                    duplicate=true;
+                    break;
+                }
+            }
+            if(not duplicate) {
+                clause.push_back(literal);
+            }
+        }
+
+        return clause;
+    }
+
+    SizeType _learn_current_theory_nogood()
+    {
+        std::vector<Int> clause=this->_current_theory_nogood();
+        ARIADNE_ASSERT(not clause.empty());
+        return this->_add_learned_clause(clause,true);
+    }
+
     Bool _check_partial_theory_consistency()
     {
+        _last_theory_conflict_clause.reset();
         std::vector<SmtTheoryAlternatives> alternatives;
         alternatives.reserve(_encoding.atom_count());
 
@@ -962,6 +1049,7 @@ class SmtDpllSearch {
         Bool consistent=this->_theory_alternatives_consistent(alternatives,0u,literals);
         if(not consistent) {
             ++_statistics.theory_conflicts;
+            _last_theory_conflict_clause=this->_learn_current_theory_nogood();
         }
         return consistent;
     }
@@ -1061,7 +1149,9 @@ class SmtDpllSearch {
     std::vector<SizeType> _trail;
     std::vector<SizeType> _decision_level_markers;
     std::vector<SmtBooleanEncoding::Clause> _learned_clauses;
+    std::vector<Bool> _learned_clause_is_theory;
     std::optional<SizeType> _last_boolean_conflict_clause;
+    std::optional<SizeType> _last_theory_conflict_clause;
     SmtSearchStatistics _statistics;
 };
 } // namespace

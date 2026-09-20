@@ -450,10 +450,15 @@ class TestSmtSolver {
                       << solve_result.statistics().boolean_decisions
                       << " propagations=" << solve_result.statistics().boolean_propagations
                       << " theory_checks=" << solve_result.statistics().theory_checks
-                      << " theory_conflicts=" << solve_result.statistics().theory_conflicts << std::endl;
+                      << " theory_conflicts=" << solve_result.statistics().theory_conflicts
+                      << " theory_learned=" << solve_result.statistics().theory_learned_clauses
+                      << " theory_learned_literals="
+                      << solve_result.statistics().theory_learned_clause_literals << std::endl;
             ARIADNE_TEST_EQUAL(solve_result.statistics().boolean_decisions,0u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_checks,1u);
             ARIADNE_TEST_EQUAL(solve_result.statistics().theory_conflicts,1u);
+            ARIADNE_TEST_EQUAL(solve_result.statistics().theory_learned_clauses,1u);
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_learned_clause_literals>=1u);
         }
 
         {
@@ -523,6 +528,27 @@ class TestSmtSolver {
                 space,ExactBoxType({ExactIntervalType(0.0_x,0.0625_x)}),formula);
             ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
             ARIADNE_TEST_ASSERT(solve_result.has_witness());
+        }
+
+        {
+            std::cout << "[smt-dpll] theory conflict clause reused by Boolean propagation" << std::endl;
+            ContinuousPredicate left=(ex<0);
+            ContinuousPredicate right=(ex>1);
+            ContinuousPredicate formula=left||right;
+            SmtResult solve_result=solver.solve(
+                space,ExactBoxType({ExactIntervalType(0.5_x,0.5_x)}),formula);
+            ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+            std::cout << "[smt-dpll-stats] theory_learned="
+                      << solve_result.statistics().theory_learned_clauses
+                      << " theory_learned_literals="
+                      << solve_result.statistics().theory_learned_clause_literals
+                      << " theory_learned_propagations="
+                      << solve_result.statistics().theory_learned_clause_propagations
+                      << " learned_propagations="
+                      << solve_result.statistics().learned_clause_propagations << std::endl;
+            ARIADNE_TEST_ASSERT(solve_result.statistics().theory_learned_clauses>=1u);
+            ARIADNE_TEST_ASSERT(
+                solve_result.statistics().theory_learned_clause_propagations>=1u);
         }
 
         {

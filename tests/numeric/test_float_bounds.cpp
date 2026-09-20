@@ -545,6 +545,27 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
         ARIADNE_TEST_ASSERT(cosx.lower_raw()<cosx.upper_raw());
     }
 
+    // Regression test for inverse trigonometric functions at the domain endpoints.
+    // These used to reach sqrt_rnd(-inf) through the asin transformation.
+    {
+        FloatBoundsType minus_one(-1,pr);
+        FloatBoundsType plus_one(1,pr);
+
+        FloatBoundsType asin_minus_one=asin(minus_one);
+        FloatBoundsType asin_plus_one=asin(plus_one);
+        FloatBoundsType acos_minus_one=acos(minus_one);
+        FloatBoundsType acos_plus_one=acos(plus_one);
+
+        ARIADNE_TEST_COMPARE(asin_minus_one.lower_raw(),<,-1.5_pr);
+        ARIADNE_TEST_COMPARE(asin_minus_one.upper_raw(),>,-1.6_pr);
+        ARIADNE_TEST_COMPARE(asin_plus_one.lower_raw(),<,1.6_pr);
+        ARIADNE_TEST_COMPARE(asin_plus_one.upper_raw(),>,1.5_pr);
+        ARIADNE_TEST_COMPARE(acos_minus_one.lower_raw(),<,3.2_pr);
+        ARIADNE_TEST_COMPARE(acos_minus_one.upper_raw(),>,3.1_pr);
+        ARIADNE_TEST_EQUAL(acos_plus_one.lower_raw(),RawFloatType(0,pr));
+        ARIADNE_TEST_EQUAL(acos_plus_one.upper_raw(),RawFloatType(0,pr));
+    }
+
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
     ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);

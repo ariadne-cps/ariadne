@@ -617,6 +617,10 @@ double atan_rnd(double x) {
 double asin_rnd(double x) {
     // WARNING: Correctness of rounding has not been properly checked
     // asin(x)=atan(x/sqrt(1-x*x))=atan(x*sqrt(1/(1-x*x)))
+    // Handle the endpoints explicitly to avoid division by zero in the
+    // transformation below.
+    if (x==1.0) { return pi_rnd()/2.0; }
+    if (x==-1.0) { return -pi_opp()/2.0; }
     if (x>=0) {
         // y=atan(x*sqrt(v)), w=sqrt(v), v=-1/u, u=x^2-1
         volatile double u=x*x-1.0;
@@ -636,6 +640,8 @@ double asin_rnd(double x) {
 }
 
 double acos_rnd(double x) {
+    if (x==1.0) { return 0.0; }
+    if (x==-1.0) { return pi_rnd(); }
     return pi_rnd()/2.0+asin_rnd(-x);
 }
 

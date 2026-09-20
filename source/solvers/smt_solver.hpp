@@ -57,7 +57,8 @@ class SmtSolverConfiguration {
     explicit SmtSolverConfiguration(
         ExactDouble epsilon,
         SizeType theory_minimization_budget=std::numeric_limits<SizeType>::max(),
-        SizeType learned_clause_limit=std::numeric_limits<SizeType>::max());
+        SizeType learned_clause_limit=std::numeric_limits<SizeType>::max(),
+        SizeType box_processing_limit=std::numeric_limits<SizeType>::max());
 
     //! \brief The logical epsilon used for weakening constraints.
     ExactDouble epsilon() const { return _epsilon; }
@@ -68,10 +69,15 @@ class SmtSolverConfiguration {
     //! \brief Maximum number of active non-theory learned clauses.
     SizeType learned_clause_limit() const { return _learned_clause_limit; }
 
+    //! \brief Maximum number of search boxes processed by one theory solve.
+    //! \details Reaching the limit yields UNKNOWN unless an epsilon witness was found first.
+    SizeType box_processing_limit() const { return _box_processing_limit; }
+
   private:
     ExactDouble _epsilon;
     SizeType _theory_minimization_budget;
     SizeType _learned_clause_limit;
+    SizeType _box_processing_limit;
 };
 
 //! \ingroup Solvers

@@ -75,6 +75,14 @@ class TestSmtSolver {
             0.125_x,std::numeric_limits<SizeType>::max(),1u);
         ARIADNE_TEST_EQUAL(pruning_configuration.learned_clause_limit(),1u);
 
+        std::cout << "[smt-config] box processing limit=0" << std::endl;
+        SmtSolverConfiguration bounded_search_configuration(
+            0.125_x,
+            std::numeric_limits<SizeType>::max(),
+            std::numeric_limits<SizeType>::max(),
+            0u);
+        ARIADNE_TEST_EQUAL(bounded_search_configuration.box_processing_limit(),0u);
+
         std::cout << "[smt-config] reject zero epsilon" << std::endl;
         ARIADNE_TEST_THROWS(SmtSolverConfiguration(0.0_x),std::runtime_error);
 
@@ -174,24 +182,21 @@ class TestSmtSolver {
         }
 
         {
-            std::cout << "[smt-solve] non-splittable uncertified singleton returns UNKNOWN" << std::endl;
-            SmtSolver tiny_solver(SmtSolverConfiguration(0.000000000000000001_x));
-            ExactBoxType domain({ExactIntervalType(2,2)});
+            std::cout << "[smt-solve] zero box budget returns UNKNOWN" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ExactBoxType domain({ExactIntervalType(0,1)});
             List<ValidatedConstraint> constraints({
-                ValidatedConstraint(
-                    ValidatedNumber(1.4142135623730951_x),
-                    sqrt(x[0]),
-                    ValidatedNumber(1.4142135623730951_x))
+                ValidatedConstraint(ValidatedNumber(0.5_x),x[0],ValidatedNumber(0.5_x))
             });
-            SmtResult solve_result=tiny_solver.solve(domain,constraints);
-            ARIADNE_TEST_ASSERT(
-                solve_result.is_unknown()
-                || solve_result.is_unsat()
-                || solve_result.is_epsilon_sat());
-            if(solve_result.is_unknown()) {
-                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
-            }
+            SmtResult solve_result=bounded_solver.solve(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
         }
+
 
         {
             std::cout << "[smt-solve] transcendental UNSAT: x in [3,4], sin(x)=2" << std::endl;
@@ -397,20 +402,21 @@ class TestSmtSolver {
         };
 
         {
-            std::cout << "[smt-theory-solve] non-splittable uncertified singleton propagates UNKNOWN" << std::endl;
-            SmtSolver tiny_solver(SmtSolverConfiguration(0.000000000000000001_x));
-            List<SmtTheoryPrimitiveLiteral> literals({primitive(sqrt(ex)==1.4142135623730951_x)});
-            SmtResult solve_result=tiny_solver.solve(
+            std::cout << "[smt-theory-solve] zero box budget propagates UNKNOWN" << std::endl;
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
+            SmtResult solve_result=bounded_solver.solve(
                 space,
-                ExactBoxType({ExactIntervalType(2,2)}),
+                ExactBoxType({ExactIntervalType(0,1)}),
                 literals);
-            if(solve_result.is_unknown()) {
-                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
-            } else {
-                ARIADNE_TEST_ASSERT(
-                    solve_result.is_unsat() || solve_result.is_epsilon_sat());
-            }
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
         }
+
 
         {
             std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;
@@ -1092,6 +1098,23 @@ class TestSmtSolver {
     }
 
     Void test_parallel_solve() {
+        {
+            std::cout << "[smt-parallel] zero box budget returns UNKNOWN" << std::endl;
+            auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+            SmtSolver bounded_solver(SmtSolverConfiguration(
+                0.125_x,
+                std::numeric_limits<SizeType>::max(),
+                std::numeric_limits<SizeType>::max(),
+                0u));
+            ExactBoxType domain({ExactIntervalType(0,1)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0.5_x),x[0],ValidatedNumber(0.5_x))
+            });
+            SmtResult result=bounded_solver.solve_parallel(domain,constraints);
+            ARIADNE_TEST_ASSERT(result.is_unknown());
+            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,0u);
+        }
+
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
         auto& thread_manager=BetterThreads::ThreadManager::instance();

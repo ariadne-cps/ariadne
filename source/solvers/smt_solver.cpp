@@ -73,10 +73,12 @@ Bool same_box(UpperBoxType const& first, UpperBoxType const& second)
 } // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(
-    ExactDouble epsilon, SizeType theory_minimization_budget, SizeType learned_clause_limit)
+    ExactDouble epsilon, SizeType theory_minimization_budget,
+    SizeType learned_clause_limit, SizeType box_processing_limit)
     : _epsilon(epsilon),
       _theory_minimization_budget(theory_minimization_budget),
-      _learned_clause_limit(learned_clause_limit)
+      _learned_clause_limit(learned_clause_limit),
+      _box_processing_limit(box_processing_limit)
 {
     ARIADNE_PRECONDITION(epsilon>ExactDouble(0));
 }
@@ -372,6 +374,10 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     Bool unknown_seen=false;
 
     while(not pending.empty()) {
+        if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
+            unknown_seen=true;
+            break;
+        }
         UpperBoxType current=pending.pop();
         ++statistics.boxes_processed;
 
@@ -427,6 +433,10 @@ SmtResult SmtSolver::solve(RealSpace const& space,
     Bool unknown_seen=false;
 
     while(not pending.empty()) {
+        if(statistics.boxes_processed>=_configuration.box_processing_limit()) {
+            unknown_seen=true;
+            break;
+        }
         UpperBoxType current=pending.pop();
         ++statistics.boxes_processed;
 
@@ -468,6 +478,7 @@ struct ParallelSmtSearchState {
     std::optional<UpperBoxType> witness;
     std::atomic<bool> found{false};
     std::atomic<bool> unknown{false};
+    std::atomic<bool> limit_reached{false};
 };
 
 using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
@@ -490,14 +501,23 @@ SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
     ParallelSmtWorkload workload(
         [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
         [this,&constraints,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
-            if(state->found.load()) {
+            if(state->found.load() || state->limit_reached.load()) {
                 return;
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(state->mutex);
+                if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
+                    state->unknown.store(true);
+                    state->limit_reached.store(true);
+                    return;
+                }
+                ++state->statistics.boxes_processed;
             }
 
             BoxProcessingResult processing=this->_process_box(box,constraints);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
-                ++state->statistics.boxes_processed;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {
@@ -570,14 +590,23 @@ SmtResult SmtSolver::solve_parallel(RealSpace const& space,
     ParallelSmtWorkload workload(
         [](UpperBoxType const&, std::shared_ptr<ConcLog::ProgressIndicator>) { },
         [this,&compiled,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
-            if(state->found.load()) {
+            if(state->found.load() || state->limit_reached.load()) {
                 return;
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(state->mutex);
+                if(state->statistics.boxes_processed>=_configuration.box_processing_limit()) {
+                    state->unknown.store(true);
+                    state->limit_reached.store(true);
+                    return;
+                }
+                ++state->statistics.boxes_processed;
             }
 
             BoxProcessingResult processing=this->_process_box(box,compiled);
             {
                 std::lock_guard<std::mutex> lock(state->mutex);
-                ++state->statistics.boxes_processed;
                 if(processing.status==BoxProcessingStatus::PRUNED) {
                     ++state->statistics.boxes_pruned;
                 } else if(processing.status==BoxProcessingStatus::SPLIT) {

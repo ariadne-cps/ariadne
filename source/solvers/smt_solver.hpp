@@ -58,14 +58,23 @@ class SmtSolverConfiguration {
 };
 
 //! \ingroup Solvers
+//! \brief Search statistics for a bounded real epsilon-SMT query.
+struct SmtSearchStatistics {
+    SizeType boxes_processed = 0u;
+    SizeType boxes_pruned = 0u;
+    SizeType boxes_split = 0u;
+};
+
+//! \ingroup Solvers
 //! \brief Result of a bounded real epsilon-SMT query.
 class SmtResult {
   public:
     //! \brief Construct an UNSAT result.
-    static SmtResult unsat();
+    static SmtResult unsat(SmtSearchStatistics statistics = {});
 
     //! \brief Construct an EPSILON_SAT result with a validated witness box.
-    static SmtResult epsilon_sat(UpperBoxType const& witness);
+    static SmtResult epsilon_sat(UpperBoxType const& witness,
+                                 SmtSearchStatistics statistics = {});
 
     SmtResultStatus status() const { return _status; }
     Bool is_unsat() const { return _status==SmtResultStatus::UNSAT; }
@@ -78,12 +87,16 @@ class SmtResult {
     //! \pre The result is EPSILON_SAT.
     UpperBoxType const& witness() const;
 
+    SmtSearchStatistics const& statistics() const { return _statistics; }
+
   private:
-    explicit SmtResult(SmtResultStatus status);
-    SmtResult(SmtResultStatus status, UpperBoxType const& witness);
+    SmtResult(SmtResultStatus status, SmtSearchStatistics statistics);
+    SmtResult(SmtResultStatus status, UpperBoxType const& witness,
+              SmtSearchStatistics statistics);
 
     SmtResultStatus _status;
     std::optional<UpperBoxType> _witness;
+    SmtSearchStatistics _statistics;
 };
 
 OutputStream& operator<<(OutputStream& os, SmtResultStatus status);
@@ -102,11 +115,25 @@ class SmtSolver {
     SmtSolverConfiguration const& configuration() const { return _configuration; }
 
   private:
+    enum class BoxProcessingStatus {
+        PRUNED,
+        EPSILON_SAT,
+        SPLIT
+    };
+
+    struct BoxProcessingResult {
+        BoxProcessingStatus status;
+        std::optional<UpperBoxType> witness;
+        std::optional<Pair<UpperBoxType,UpperBoxType>> children;
+    };
+
     ExactIntervalType _epsilon_bounds(ValidatedConstraint const& constraint) const;
     Bool _epsilon_reduce(UpperBoxType& domain,
                          List<ValidatedConstraint> const& constraints) const;
     Bool _epsilon_satisfied(UpperBoxType const& domain,
                             List<ValidatedConstraint> const& constraints) const;
+    BoxProcessingResult _process_box(UpperBoxType domain,
+                                     List<ValidatedConstraint> const& constraints) const;
 
     SmtSolverConfiguration _configuration;
 };

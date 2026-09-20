@@ -794,8 +794,10 @@ class SmtDpllSearch {
         std::vector<SizeType> candidates;
         for(SizeType i=0u; i<_learned_clauses.size(); ++i) {
             SizeType clause_index=this->_original_clause_count()+i;
+            Bool const short_clause=(_learned_clauses[i].size()<=2u);
             if(not _learned_clause_active[i]
                || _learned_clause_is_theory[i]
+               || short_clause
                || (protected_clause.has_value() && clause_index==*protected_clause)
                || this->_learned_clause_locked(clause_index)) {
                 continue;
@@ -820,12 +822,6 @@ class SmtDpllSearch {
             Bool const rhs_useful=(_learned_clause_activity[ri]>1u);
             if(lhs_useful!=rhs_useful) {
                 return not lhs_useful;
-            }
-
-            Bool const lhs_short=(_learned_clauses[li].size()<=2u);
-            Bool const rhs_short=(_learned_clauses[ri].size()<=2u);
-            if(lhs_short!=rhs_short) {
-                return not lhs_short;
             }
 
             if(_learned_clause_activity[li]!=_learned_clause_activity[ri]) {

@@ -69,6 +69,7 @@ struct SmtSearchStatistics {
     SizeType boxes_split = 0u;
     SizeType boolean_decisions = 0u;
     SizeType boolean_propagations = 0u;
+    SizeType boolean_reasoned_propagations = 0u;
     SizeType boolean_conflicts = 0u;
     SizeType boolean_backtracks = 0u;
     SizeType max_decision_level = 0u;

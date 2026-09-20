@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
     solver.cpp
     smt_solver.cpp
     smt_boolean.cpp
+    smt_theory.cpp
     integrator.cpp
     inclusion_integrator.cpp
     bounder.cpp

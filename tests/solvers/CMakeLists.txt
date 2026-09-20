@@ -7,6 +7,7 @@ set(UNIT_TESTS
     test_solvers
     test_smt_solver
     test_smt_boolean
+    test_smt_theory
 )
 
 foreach(TEST ${UNIT_TESTS})

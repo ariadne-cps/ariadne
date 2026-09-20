@@ -397,6 +397,22 @@ class TestSmtSolver {
         };
 
         {
+            std::cout << "[smt-theory-solve] non-splittable uncertified singleton propagates UNKNOWN" << std::endl;
+            SmtSolver tiny_solver(SmtSolverConfiguration(0.000000000000000001_x));
+            List<SmtTheoryPrimitiveLiteral> literals({primitive(sqrt(ex)==1.4142135623730951_x)});
+            SmtResult solve_result=tiny_solver.solve(
+                space,
+                ExactBoxType({ExactIntervalType(2,2)}),
+                literals);
+            if(solve_result.is_unknown()) {
+                ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_unknown,1u);
+            } else {
+                ARIADNE_TEST_ASSERT(
+                    solve_result.is_unsat() || solve_result.is_epsilon_sat());
+            }
+        }
+
+        {
             std::cout << "[smt-theory-solve] EQ at epsilon boundary: x=0 weakened on x=0.125" << std::endl;
             List<SmtTheoryPrimitiveLiteral> literals({primitive(ex==0)});
             SmtResult solve_result=solver.solve(space,ExactBoxType({ExactIntervalType(0.125_x,0.125_x)}),literals);

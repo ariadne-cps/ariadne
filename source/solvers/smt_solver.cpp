@@ -453,6 +453,9 @@ SmtResult SmtSolver::solve(RealSpace const& space,
         }
     }
 
+    if(unknown_seen) {
+        return SmtResult::unknown(statistics);
+    }
     return SmtResult::unsat(statistics);
 }
 

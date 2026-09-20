@@ -31,6 +31,18 @@
 
 using namespace Ariadne;
 
+class ConcurrencyGuard {
+  public:
+    explicit ConcurrencyGuard(BetterThreads::ThreadManager& thread_manager)
+        : _thread_manager(thread_manager), _original(thread_manager.concurrency()) { }
+
+    ~ConcurrencyGuard() { _thread_manager.set_concurrency(_original); }
+
+  private:
+    BetterThreads::ThreadManager& _thread_manager;
+    SizeType _original;
+};
+
 class TestSmtSolver {
   public:
     Void test() {
@@ -293,7 +305,7 @@ class TestSmtSolver {
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);
         SmtSolver solver(SmtSolverConfiguration(0.125_x));
         auto& thread_manager=BetterThreads::ThreadManager::instance();
-        SizeType original_concurrency=thread_manager.concurrency();
+        ConcurrencyGuard concurrency_guard(thread_manager);
 
         std::cout << "[smt-parallel] sequential BetterThreads mode concurrency=0" << std::endl;
         thread_manager.set_concurrency(0);
@@ -345,7 +357,53 @@ class TestSmtSolver {
             std::cout << "[smt-parallel] hardware reports no worker concurrency; concurrent case skipped" << std::endl;
         }
 
-        thread_manager.set_concurrency(original_concurrency);
+        std::cout << "[smt-parallel] compare sequential and parallel logical status" << std::endl;
+        auto compare_status = [&](String const& label,
+                                  ExactBoxType const& domain,
+                                  List<ValidatedConstraint> const& constraints) {
+            thread_manager.set_concurrency(0);
+            SmtResult sequential_result=solver.solve(domain,constraints);
+
+            if(parallel_concurrency>0u) {
+                thread_manager.set_concurrency(parallel_concurrency);
+                SmtResult parallel_result=solver.solve_parallel(domain,constraints);
+
+                std::cout << "[smt-parallel-compare] " << label
+                          << " sequential=" << sequential_result.status()
+                          << " parallel=" << parallel_result.status() << std::endl;
+
+                ARIADNE_TEST_EQUAL(sequential_result.status(),parallel_result.status());
+                ARIADNE_TEST_ASSERT(sequential_result.has_witness()==parallel_result.has_witness());
+            }
+        };
+
+        compare_status(
+            "linear epsilon-sat",
+            ExactBoxType({ExactIntervalType(0,1)}),
+            List<ValidatedConstraint>({
+                ValidatedConstraint(ValidatedNumber(1),2*x[0],ValidatedNumber(1))
+            }));
+
+        compare_status(
+            "linear unsat",
+            ExactBoxType({ExactIntervalType(0,1)}),
+            List<ValidatedConstraint>({
+                ValidatedConstraint(ValidatedNumber(2),x[0],ValidatedNumber(2))
+            }));
+
+        compare_status(
+            "transcendental epsilon-sat",
+            ExactBoxType({ExactIntervalType(3,4)}),
+            List<ValidatedConstraint>({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
+            }));
+
+        compare_status(
+            "transcendental unsat",
+            ExactBoxType({ExactIntervalType(3,4)}),
+            List<ValidatedConstraint>({
+                ValidatedConstraint(ValidatedNumber(2),sin(x[0]),ValidatedNumber(2))
+            }));
     }
 };
 

@@ -67,7 +67,7 @@ class ApproximateDouble {
     ApproximateDouble(Real const& r0);
     explicit operator double() const { return _d; }
     double get_d() const { return this->_d; }
-    friend ApproximateDouble operator"" _a (long double lx) { double x=lx; return ApproximateDouble(x); }
+    friend ApproximateDouble operator""_a (long double lx) { double x=lx; return ApproximateDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ApproximateDouble x) { return os << x._d; }
 
     friend ApproximateDouble nul(ApproximateDouble x) { return ApproximateDouble(0.0); }
@@ -107,7 +107,7 @@ class ApproximateDouble {
 
 //! \ingroup NumericModule
 //! \brief Indicate that a floating-point literal only represents an double-precision approximation to a number.
-inline ApproximateDouble operator"" _a (long double lx);
+inline ApproximateDouble operator""_a (long double lx);
 
 
 //! \ingroup NumericModule
@@ -144,8 +144,8 @@ class ExactDouble {
     friend Boolean operator<=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d<=x2._d; }
     friend Boolean operator> (ExactDouble const& x1, ExactDouble const& x2) { return x1._d> x2._d; }
     friend Boolean operator< (ExactDouble const& x1, ExactDouble const& x2) { return x1._d< x2._d; }
-    friend ExactDouble operator"" _x (long double lx) { double x=lx; ARIADNE_ASSERT_MSG(x==lx,"The value "<<lx<<" should be exactly representable as a double."); return ExactDouble(x); }
-    friend ExactDouble operator"" _pr (long double lx) { double x=lx; return ExactDouble(x); }
+    friend ExactDouble operator""_x (long double lx) { double x=lx; ARIADNE_ASSERT_MSG(x==lx,"The value "<<lx<<" should be exactly representable as a double."); return ExactDouble(x); }
+    friend ExactDouble operator""_pr (long double lx) { double x=lx; return ExactDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };
 
@@ -154,7 +154,7 @@ class ExactDouble {
 //! \details The input \a lx is converted first converted to a double-precision value \a x.
 //! If \a lx and \a x differ, then the decimal literal input to \a lx almost certainly does not represent a double-precision number exactly, and an assertion fails. <p/>
 //! For example, <c>0.625_x</c> yields the exact double-precision value \f$5/2^3\f$, but <c>0.6_x</c> fails, since \f$3/5\f$ is not exactly representable as a double-precision number.
-ExactDouble operator"" _x(long double lx);
+ExactDouble operator""_x(long double lx);
 
 //! \ingroup ExtendedLiteralsSubModule
 //! \brief Indicate that a floating-point literal is sufficiently precise that it can safely be taken to represent the closest double-precision floating-point number.
@@ -164,7 +164,7 @@ inline ExactDouble exact(long double lx) { return operator""_x(lx); }
 //! \ingroup ExtendedLiteralsSubModule
 //! \brief Indicate that a floating-point literal is sufficiently precise that it can safely be taken to represent the closest double-precision floating-point number.
 //! \details For example, writing <c>0.14285714285714285_pr</c> claims that the exact decimal "0.14285714285714285" should be interpreted as the closest double-precision floating-point number, which has exact value \f$0.142857142857142849212692681248881854116916656494140625\f$.
-inline ExactDouble operator"" _pr (long double lx);
+inline ExactDouble operator""_pr (long double lx);
 
 
 #ifdef DOXYGRN

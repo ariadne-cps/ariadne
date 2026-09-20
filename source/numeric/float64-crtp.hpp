@@ -57,11 +57,11 @@ class FloatDP;
 
 class Rational;
 
-FloatDP operator"" _x(long double);
-FloatDPError operator"" _e(long double);
-FloatDPLowerBound operator"" _l(long double);
-FloatDPUpperBound operator"" _u(long double);
-FloatDPApproximation operator"" _a(long double);
+FloatDP operator""_x(long double);
+FloatDPError operator""_e(long double);
+FloatDPLowerBound operator""_l(long double);
+FloatDPUpperBound operator""_u(long double);
+FloatDPApproximation operator""_a(long double);
 
 Void FloatDP::set_rounding_to_nearest();
 Void FloatDP::set_rounding_downward();

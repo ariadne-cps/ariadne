@@ -314,8 +314,8 @@ void export_builtins(pymodule& module)
     exact_double_class.def("__hash__", [](ExactDouble const& xd){std::hash<double> hasher; return hasher(xd.get_d());});
 
     module.def("exact", (ExactDouble(*)(double)) &cast_exact);
-    module.def("x_", (ExactDouble(*)(long double)) &operator"" _x);
-    module.def("pr_", (ExactDouble(*)(long double)) &operator"" _pr);
+    module.def("x_", (ExactDouble(*)(long double)) &operator""_x);
+    module.def("pr_", (ExactDouble(*)(long double)) &operator""_pr);
 }
 
 
@@ -333,7 +333,7 @@ void export_integer(pymodule& module)
     module.def("sqr", &_sqr_<Integer>);
     module.def("pow", &_pow_<Integer,Nat>);
 
-    module.def("z_", (Integer(*)(unsigned long long int)) &operator"" _z);
+    module.def("z_", (Integer(*)(unsigned long long int)) &operator""_z);
 
     implicitly_convertible<Int,Integer>();
 
@@ -403,7 +403,7 @@ void export_decimal(pymodule& module)
     module.def("sqr", &_sqr_<Decimal>);
     module.def("hlf", &_hlf_<Decimal>);
 
-    module.def("dec_", (Decimal(*)(long double)) &operator"" _dec);
+    module.def("dec_", (Decimal(*)(long double)) &operator""_dec);
 
     implicitly_convertible<Int,Decimal>();
     implicitly_convertible<Integer,Decimal>();
@@ -434,7 +434,7 @@ void export_rational(pymodule& module)
     module.def("sqr", &_sqr_<Rational>);
     module.def("rec", &_rec_<Rational>);
 
-    module.def("q_", (Rational(*)(long double)) &operator"" _q);
+    module.def("q_", (Rational(*)(long double)) &operator""_q);
 
     implicitly_convertible<Int,Rational>();
     implicitly_convertible<Integer,Rational>();

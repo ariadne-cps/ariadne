@@ -305,11 +305,11 @@ Integer make_integer(unsigned long long int n) {
     }
 }
 
-Integer operator"" _z(unsigned long long int n) {
+Integer operator""_z(unsigned long long int n) {
     return Integer(Nat64(n));
 }
 
-Integer operator"" _z(const char* str, std::size_t) {
+Integer operator""_z(const char* str, std::size_t) {
     return Integer(String(str));
 }
 

@@ -110,26 +110,26 @@ class Decimal
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
     //! \brief Construct from an integer literal.
-    friend Decimal operator"" _decimal (unsigned long long int n);
+    friend Decimal operator""_decimal (unsigned long long int n);
     //! \brief Construct from a floating-point literal.
-    friend Decimal operator"" _decimal (long double dbl);
+    friend Decimal operator""_decimal (long double dbl);
     //! \brief Construct from a string literal.
-    friend Decimal operator"" _decimal (const char* str, std::size_t);
+    friend Decimal operator""_decimal (const char* str, std::size_t);
 
     //! \brief Shorthand for operator""_decimal.
-    friend Decimal operator"" _dec (long double dbl);
+    friend Decimal operator""_dec (long double dbl);
 
     //! \brief Alternative for operator""_decimal for use in Python interface.
     friend Decimal dec_(long double dbl);
 
     void canonicalize();
 };
-Decimal operator"" _dec (unsigned long long int n);
-Decimal operator"" _dec (long double dbl);
-Decimal operator"" _dec (const char* str, std::size_t);
-Decimal operator"" _decimal (unsigned long long int n);
-Decimal operator"" _decimal (long double dbl);
-Decimal operator"" _decimal (const char* str, std::size_t);
+Decimal operator""_dec (unsigned long long int n);
+Decimal operator""_dec (long double dbl);
+Decimal operator""_dec (const char* str, std::size_t);
+Decimal operator""_decimal (unsigned long long int n);
+Decimal operator""_decimal (long double dbl);
+Decimal operator""_decimal (const char* str, std::size_t);
 
 template<BuiltinIntegral N> inline Decimal::Decimal(N n) : Decimal(n,0u) { }
 

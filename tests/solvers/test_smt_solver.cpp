@@ -244,7 +244,7 @@ class TestSmtSolver {
 
         {
             std::cout << "[smt-solve] empty domain is UNSAT" << std::endl;
-            ExactBoxType domain({ExactIntervalType(empty_interval)});
+            ExactBoxType domain({ExactIntervalType::empty_interval()});
             List<ValidatedConstraint> constraints;
             SmtResult solve_result=solver.solve(domain,constraints);
             ARIADNE_TEST_ASSERT(solve_result.is_unsat());

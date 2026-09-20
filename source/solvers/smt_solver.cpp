@@ -561,8 +561,11 @@ Void add_statistics(SmtSearchStatistics& target, SmtSearchStatistics const& sour
     target.theory_nogood_literals_removed+=source.theory_nogood_literals_removed;
     target.theory_minimization_budget_exhaustions+=
         source.theory_minimization_budget_exhaustions;
-    target.first_minimization_candidate_trail_rank=
-        source.first_minimization_candidate_trail_rank;
+    if(target.first_minimization_candidate_trail_rank==0u
+       && source.first_minimization_candidate_trail_rank!=0u) {
+        target.first_minimization_candidate_trail_rank=
+            source.first_minimization_candidate_trail_rank;
+    }
 }
 
 class SmtDpllSearch {
@@ -1086,7 +1089,8 @@ class SmtDpllSearch {
             return trail_rank[lhs_variable]>trail_rank[rhs_variable];
         });
 
-        if(not clause.empty()) {
+        if(not clause.empty()
+           && _statistics.first_minimization_candidate_trail_rank==0u) {
             SizeType first_variable=static_cast<SizeType>(
                 clause.front()>0 ? clause.front() : -clause.front());
             _statistics.first_minimization_candidate_trail_rank=

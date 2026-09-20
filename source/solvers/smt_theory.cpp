@@ -16,6 +16,7 @@
 
 #include "solvers/smt_theory.hpp"
 
+#include "symbolic/expression.tpl.hpp"
 #include "utility/exceptions.hpp"
 
 namespace Ariadne {

@@ -64,7 +64,9 @@ class SmtSolverConfiguration {
     //! \brief Maximum theory checks used to minimize one learned theory nogood.
     SizeType theory_minimization_budget() const { return _theory_minimization_budget; }
 
-    //! \brief Maximum number of active non-theory learned clauses.
+    //! \brief Target maximum number of active removable non-theory learned clauses.
+    //! \details Short clauses and clauses currently used as propagation reasons are retained
+    //! even when this target is exceeded, in order to preserve DPLL search progress.
     SizeType learned_clause_limit() const { return _learned_clause_limit; }
 
   private:

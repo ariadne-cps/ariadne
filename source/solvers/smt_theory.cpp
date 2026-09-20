@@ -33,21 +33,42 @@ SmtTheoryLiteral SmtTheoryLiteral::negated() const
     }
 }
 
+namespace {
+
+SmtTheoryRelation make_smt_theory_relation(OperatorCode code)
+{
+    switch(code) {
+        case OperatorCode::EQ: return SmtTheoryRelation::EQ;
+        case OperatorCode::NEQ: return SmtTheoryRelation::NEQ;
+        case OperatorCode::LEQ: return SmtTheoryRelation::LEQ;
+        case OperatorCode::GEQ: return SmtTheoryRelation::GEQ;
+        case OperatorCode::LT: return SmtTheoryRelation::LT;
+        case OperatorCode::GT: return SmtTheoryRelation::GT;
+        default:
+            ARIADNE_FAIL_MSG("Expected real comparison operator, got "<<code);
+    }
+}
+
+SmtTheoryLiteral make_smt_theory_literal_node(BinaryExpressionNode<Kleenean,Real,Real> const& node)
+{
+    return SmtTheoryLiteral(
+        node.arg1(),
+        make_smt_theory_relation(node.op().code()),
+        node.arg2());
+}
+
+template<class E>
+SmtTheoryLiteral make_smt_theory_literal_node(E const&)
+{
+    ARIADNE_FAIL_MSG("Expected binary real comparison node");
+}
+
+} // namespace
+
 SmtTheoryLiteral make_smt_theory_literal(ContinuousPredicate const& predicate)
 {
-    SmtTheoryRelation relation;
-    switch(predicate.code()) {
-        case OperatorCode::EQ: relation=SmtTheoryRelation::EQ; break;
-        case OperatorCode::NEQ: relation=SmtTheoryRelation::NEQ; break;
-        case OperatorCode::LEQ: relation=SmtTheoryRelation::LEQ; break;
-        case OperatorCode::GEQ: relation=SmtTheoryRelation::GEQ; break;
-        case OperatorCode::LT: relation=SmtTheoryRelation::LT; break;
-        case OperatorCode::GT: relation=SmtTheoryRelation::GT; break;
-        default:
-            ARIADNE_FAIL_MSG("Expected real comparison atom, got operator "<<predicate.code());
-    }
-
-    return SmtTheoryLiteral(predicate.cmp1<Real>(),relation,predicate.cmp2<Real>());
+    return predicate.node_ref().accept(
+        [](auto const& node) { return make_smt_theory_literal_node(node); });
 }
 
 OutputStream& operator<<(OutputStream& os, SmtTheoryRelation relation)

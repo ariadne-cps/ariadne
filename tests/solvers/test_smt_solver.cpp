@@ -1110,9 +1110,9 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints({
                 ValidatedConstraint(ValidatedNumber(0.5_x),x[0],ValidatedNumber(0.5_x))
             });
-            SmtResult result=bounded_solver.solve_parallel(domain,constraints);
-            ARIADNE_TEST_ASSERT(result.is_unknown());
-            ARIADNE_TEST_EQUAL(result.statistics().boxes_processed,0u);
+            SmtResult solve_result=bounded_solver.solve_parallel(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_unknown());
+            ARIADNE_TEST_EQUAL(solve_result.statistics().boxes_processed,0u);
         }
 
         auto x=ValidatedScalarMultivariateFunction::coordinates(1);

@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include "solvers/smt_solver.hpp"
+#include "betterthreads/thread_manager.hpp"
 
 #include "../test.hpp"
 
@@ -36,6 +37,7 @@ class TestSmtSolver {
         ARIADNE_TEST_CALL(test_configuration());
         ARIADNE_TEST_CALL(test_result());
         ARIADNE_TEST_CALL(test_solve());
+        ARIADNE_TEST_CALL(test_parallel_solve());
     }
 
   private:
@@ -285,6 +287,65 @@ class TestSmtSolver {
             List<ValidatedConstraint> constraints;
             ARIADNE_TEST_THROWS(solver.solve(domain,constraints),std::runtime_error);
         }
+    }
+
+    Void test_parallel_solve() {
+        auto x=ValidatedScalarMultivariateFunction::coordinates(1);
+        SmtSolver solver(SmtSolverConfiguration(0.125_x));
+        auto& thread_manager=BetterThreads::ThreadManager::instance();
+        SizeType original_concurrency=thread_manager.concurrency();
+
+        std::cout << "[smt-parallel] sequential BetterThreads mode concurrency=0" << std::endl;
+        thread_manager.set_concurrency(0);
+        {
+            ExactBoxType domain({ExactIntervalType(3,4)});
+            List<ValidatedConstraint> constraints({
+                ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
+            });
+            SmtResult solve_result=solver.solve_parallel(domain,constraints);
+            ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+            ARIADNE_TEST_ASSERT(solve_result.has_witness());
+            std::cout << "[smt-parallel] concurrency=0 processed="
+                      << solve_result.statistics().boxes_processed
+                      << " pruned=" << solve_result.statistics().boxes_pruned
+                      << " split=" << solve_result.statistics().boxes_split << std::endl;
+        }
+
+        SizeType parallel_concurrency=thread_manager.maximum_concurrency()>=2u ? 2u : thread_manager.maximum_concurrency();
+        if(parallel_concurrency>0u) {
+            std::cout << "[smt-parallel] concurrent BetterThreads mode concurrency="
+                      << parallel_concurrency << std::endl;
+            thread_manager.set_concurrency(parallel_concurrency);
+
+            {
+                ExactBoxType domain({ExactIntervalType(3,4)});
+                List<ValidatedConstraint> constraints({
+                    ValidatedConstraint(ValidatedNumber(0),sin(x[0]),ValidatedNumber(0))
+                });
+                SmtResult solve_result=solver.solve_parallel(domain,constraints);
+                ARIADNE_TEST_ASSERT(solve_result.is_epsilon_sat());
+                ARIADNE_TEST_ASSERT(solve_result.has_witness());
+                std::cout << "[smt-parallel] EPSILON_SAT processed="
+                          << solve_result.statistics().boxes_processed
+                          << " pruned=" << solve_result.statistics().boxes_pruned
+                          << " split=" << solve_result.statistics().boxes_split << std::endl;
+            }
+
+            {
+                std::cout << "[smt-parallel] concurrent UNSAT: sin(x)=2 on [3,4]" << std::endl;
+                ExactBoxType domain({ExactIntervalType(3,4)});
+                List<ValidatedConstraint> constraints({
+                    ValidatedConstraint(ValidatedNumber(2),sin(x[0]),ValidatedNumber(2))
+                });
+                SmtResult solve_result=solver.solve_parallel(domain,constraints);
+                ARIADNE_TEST_ASSERT(solve_result.is_unsat());
+                ARIADNE_TEST_ASSERT(solve_result.statistics().boxes_pruned>=1u);
+            }
+        } else {
+            std::cout << "[smt-parallel] hardware reports no worker concurrency; concurrent case skipped" << std::endl;
+        }
+
+        thread_manager.set_concurrency(original_concurrency);
     }
 };
 

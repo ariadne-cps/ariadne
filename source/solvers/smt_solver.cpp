@@ -26,6 +26,11 @@
 
 #include <vector>
 #include <utility>
+#include <atomic>
+#include <memory>
+#include <mutex>
+
+#include "betterthreads/workload.hpp"
 
 #include "solvers/constraint_solver.hpp"
 #include "utility/exceptions.hpp"
@@ -34,24 +39,7 @@ namespace Ariadne {
 
 namespace {
 
-class SequentialSmtWorkQueue {
-  public:
-    Void push(UpperBoxType box) { _boxes.push_back(std::move(box)); }
 
-    UpperBoxType pop() {
-        ARIADNE_PRECONDITION(not _boxes.empty());
-        UpperBoxType box=std::move(_boxes.back());
-        _boxes.pop_back();
-        return box;
-    }
-
-    Bool empty() const { return _boxes.empty(); }
-
-  private:
-    std::vector<UpperBoxType> _boxes;
-};
-
-} // namespace
 
 SmtSolverConfiguration::SmtSolverConfiguration(ExactDouble epsilon)
     : _epsilon(epsilon)
@@ -213,6 +201,88 @@ SmtResult SmtSolver::solve(ExactBoxType const& domain,
     }
 
     return SmtResult::unsat(statistics);
+}
+
+
+namespace {
+
+struct ParallelSmtSearchState {
+    std::mutex mutex;
+    SmtSearchStatistics statistics;
+    std::optional<UpperBoxType> witness;
+    std::atomic<bool> found{false};
+};
+
+using ParallelSmtWorkload = BetterThreads::DynamicWorkload<UpperBoxType>;
+
+} // namespace
+
+SmtResult SmtSolver::solve_parallel(ExactBoxType const& domain,
+                                    List<ValidatedConstraint> const& constraints) const
+{
+    ARIADNE_PRECONDITION(domain.is_bounded());
+    for(SizeType i=0; i!=constraints.size(); ++i) {
+        ARIADNE_PRECONDITION(constraints[i].argument_size()==domain.dimension());
+    }
+
+    auto state=std::make_shared<ParallelSmtSearchState>();
+    if(domain.is_empty()) {
+        return SmtResult::unsat(state->statistics);
+    }
+
+    ParallelSmtWorkload workload(
+        [this,&constraints,state](ParallelSmtWorkload::Access& access, UpperBoxType const& box) {
+            if(state->found.load()) {
+                return;
+            }
+
+            BoxProcessingResult processing=this->_process_box(box,constraints);
+            {
+                std::lock_guard<std::mutex> lock(state->mutex);
+                ++state->statistics.boxes_processed;
+                if(processing.status==BoxProcessingStatus::PRUNED) {
+                    ++state->statistics.boxes_pruned;
+                } else if(processing.status==BoxProcessingStatus::SPLIT) {
+                    ++state->statistics.boxes_split;
+                }
+            }
+
+            switch(processing.status) {
+                case BoxProcessingStatus::PRUNED:
+                    return;
+
+                case BoxProcessingStatus::EPSILON_SAT: {
+                    ARIADNE_ASSERT(processing.witness.has_value());
+                    bool expected=false;
+                    if(state->found.compare_exchange_strong(expected,true)) {
+                        std::lock_guard<std::mutex> lock(state->mutex);
+                        state->witness=*processing.witness;
+                    }
+                    return;
+                }
+
+                case BoxProcessingStatus::SPLIT:
+                    ARIADNE_ASSERT(processing.children.has_value());
+                    if(not state->found.load()) {
+                        access.append(processing.children->first);
+                        access.append(processing.children->second);
+                    }
+                    return;
+
+                default:
+                    ARIADNE_FAIL_MSG("Unknown BoxProcessingStatus");
+            }
+        });
+
+    workload.append(UpperBoxType(domain));
+    workload.process();
+
+    std::lock_guard<std::mutex> lock(state->mutex);
+    if(state->found.load()) {
+        ARIADNE_ASSERT(state->witness.has_value());
+        return SmtResult::epsilon_sat(*state->witness,state->statistics);
+    }
+    return SmtResult::unsat(state->statistics);
 }
 
 } // namespace Ariadne
